@@ -1,0 +1,177 @@
+\chapter{Simplicity of the reconstructed curve}
+\label{chap:simplicity}
+
+% archon:covers Gluck/Simplicity.lean
+
+The winding argument of \cref{chap:winding} produces a weight $\rho =
+1/(\kappa\circ h)$, continuous, $2\pi$-periodic and strictly positive, whose
+error vector vanishes, so the reconstruction $\alpha_\rho$ (\cref{def:reconstruct})
+closes up. This chapter supplies the last geometric input of
+\cref{thm:gluck_converse}: such a closed reconstruction is automatically
+\emph{simple} (injective on a period).
+
+\medskip
+
+\noindent\emph{An elementary argument, not the Umlaufsatz.} A curve
+parametrized by the angle of inclination of its tangent has unit tangent
+$\alpha_\rho'(\theta)/\lVert\alpha_\rho'(\theta)\rVert = e^{i\theta}$, so the
+tangent direction turns strictly monotonically through exactly $2\pi$ over one
+period. The classical route concludes simplicity from convexity (a closed curve
+of strictly positive curvature bounds a convex body, hence is embedded), which
+would require building the convex-curve/Umlaufsatz theory project-side. We avoid
+that: simplicity here follows from a short \emph{directional-integral positivity}
+argument that uses only the closure relation $E(\rho)=0$, the positivity
+$\rho>0$, and the inclination parametrization. There is \emph{no} Mathlib gap.
+
+% SOURCE: [DeTurck-Gluck], §6, p. 13, lines 245-246 (read from references/deturck-gluck-fourvertex.txt)
+% SOURCE QUOTE: "Hence there must also be a diffeomorphism h of the circle so that
+% the curve with curvature κ ◦ h1 ◦ h has error vector zero, and therefore closes
+% up to form a strictly convex simple closed curve."
+% SOURCE: [DeTurck-Gluck], §11, p. 17, lines 327-330 (read from references/deturck-gluck-fourvertex.txt)
+% SOURCE QUOTE: "(2) A smooth closed curve with strictly positive curvature whose
+% tangent line turns through an angle of 2π is automatically simple. This is false
+% in general, and part of Dahlberg's Key Idea is to force the curve to be C1 close
+% to a fixed convex curve in order to make it simple."
+\begin{theorem}
+
+\leanok
+[A closed inclination-parametrized curve with positive weight is simple]
+  \label{thm:reconstruct_injective}
+  \lean{Gluck.injOn_reconstruct_of_closed}
+  \uses{def:reconstruct, def:error_vector, lem:closes_iff}
+  \textit{Source: DeTurck--Gluck, §6 and §11(2) (positive curvature whose tangent
+  turns through $2\pi$ is simple).}
+  Let $\rho : \mathbb{R} \to \mathbb{R}$ be continuous, $2\pi$-periodic and
+  strictly positive, with vanishing error vector $E(\rho) = 0$. Then the
+  reconstruction $\alpha_\rho$ (\cref{def:reconstruct}) is injective on the period
+  $[0, 2\pi)$.
+\end{theorem}
+\begin{proof}
+  \uses{def:reconstruct, def:error_vector, lem:reconstruct_periodic, lem:chord_integral_ne_zero}
+  \leanok
+  Recall $\alpha_\rho(\theta) = \int_0^\theta e^{i\varphi}\rho(\varphi)\,d\varphi$,
+  so for any $\theta_1 \le \theta_2$,
+  \[
+    \alpha_\rho(\theta_2) - \alpha_\rho(\theta_1)
+      = \int_{\theta_1}^{\theta_2} e^{i\varphi}\rho(\varphi)\,d\varphi .
+  \]
+  Because $\rho$ is $2\pi$-periodic and $E(\rho) = \int_0^{2\pi}
+  e^{i\varphi}\rho\,d\varphi = 0$, the integral of $e^{i\varphi}\rho$ over
+  \emph{any} interval of length $2\pi$ vanishes; equivalently, $\alpha_\rho$ is
+  $2\pi$-periodic (this is \cref{lem:closes_iff} together with periodicity of the
+  integrand).
+
+  Suppose $\alpha_\rho(\theta_1) = \alpha_\rho(\theta_2)$ with $0 \le \theta_1 <
+  \theta_2 < 2\pi$. Set $L = \theta_2 - \theta_1 \in (0, 2\pi)$. The plane is cut
+  by these two parameters into two complementary arcs of the period: the arc
+  $A = [\theta_1, \theta_2]$ of angular length $L$, and the arc $B =
+  [\theta_2, \theta_1 + 2\pi]$ of angular length $2\pi - L$. The chord integrals
+  over the two arcs are
+  \[
+    \int_A e^{i\varphi}\rho\,d\varphi = \alpha_\rho(\theta_2) -
+      \alpha_\rho(\theta_1) = 0,
+    \qquad
+    \int_B e^{i\varphi}\rho\,d\varphi = \alpha_\rho(\theta_1 + 2\pi) -
+      \alpha_\rho(\theta_2) = 0,
+  \]
+  the second using $\alpha_\rho(\theta_1 + 2\pi) = \alpha_\rho(\theta_1) =
+  \alpha_\rho(\theta_2)$.
+
+  Since $L + (2\pi - L) = 2\pi$, at least one of the two arcs has angular length
+  $\le \pi$; call it $[c, d]$ with $d - c \le \pi$ and $\int_c^d
+  e^{i\varphi}\rho\,d\varphi = 0$. Let $\psi = (c + d)/2$ be its midpoint and test
+  the chord integral against the direction $e^{i\psi}$:
+  \[
+    0 = \operatorname{Re}\!\Bigl(e^{-i\psi}\int_c^d e^{i\varphi}\rho(\varphi)\,
+      d\varphi\Bigr)
+      = \int_c^d \cos(\varphi - \psi)\,\rho(\varphi)\,d\varphi .
+  \]
+  For $\varphi \in [c, d]$ we have $\varphi - \psi \in [-(d-c)/2, (d-c)/2]
+  \subseteq [-\pi/2, \pi/2]$, so $\cos(\varphi - \psi) \ge 0$, with strict
+  positivity on the open interval $(c, d)$ (the cosine vanishes only at the two
+  endpoints, a set of measure zero). As $\rho > 0$ is continuous, the integrand
+  $\cos(\varphi - \psi)\rho(\varphi)$ is $\ge 0$ everywhere and strictly positive
+  on $(c, d)$, forcing $\int_c^d \cos(\varphi - \psi)\rho\,d\varphi > 0$. This
+  contradicts the displayed equality $= 0$. Hence no such pair $\theta_1 \ne
+  \theta_2$ exists, i.e. $\alpha_\rho$ is injective on $[0, 2\pi)$.
+\end{proof}
+
+% --- Helper lemmas the injectivity proof factors through (Lean-side). ---
+\begin{lemma}
+
+\leanok
+[Reconstruction of a closed weight is periodic]
+  \label{lem:reconstruct_periodic}
+  \lean{Gluck.reconstruct_periodic}
+  \uses{def:reconstruct, def:error_vector}
+  Project-bespoke. If $\rho$ is continuous, $2\pi$-periodic and $E(\rho) = 0$,
+  then $\alpha_\rho$ is $2\pi$-periodic: $\alpha_\rho(\theta + 2\pi) =
+  \alpha_\rho(\theta)$ for all $\theta$.
+\end{lemma}
+\begin{proof}
+  \uses{def:reconstruct, def:error_vector}
+  \leanok
+  $\alpha_\rho(\theta + 2\pi) - \alpha_\rho(\theta) = \int_\theta^{\theta+2\pi}
+  e^{i\varphi}\rho\,d\varphi$, which equals $\int_0^{2\pi} e^{i\varphi}\rho =
+  E(\rho) = 0$ because the integrand $e^{i\varphi}\rho(\varphi)$ is $2\pi$-periodic
+  (generalizing the corresponding step of \cref{lem:closes_iff} off $\rho =
+  1/\kappa$ to an arbitrary continuous periodic weight).
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[A short chord integral of a positive weight is nonzero]
+  \label{lem:chord_integral_ne_zero}
+  \lean{Gluck.chord_integral_ne_zero}
+  \uses{def:error_vector}
+  Project-bespoke. If $\rho$ is continuous and strictly positive, and $c < d$ with
+  $d - c \le \pi$, then $\int_c^d e^{i\varphi}\rho(\varphi)\,d\varphi \ne 0$.
+\end{lemma}
+\begin{proof}
+  \uses{def:error_vector}
+  \leanok
+  Project the integral onto the midpoint direction $e^{i\psi}$, $\psi = (c+d)/2$:
+  $\operatorname{Re}\!\bigl(e^{-i\psi}\int_c^d e^{i\varphi}\rho\bigr) = \int_c^d
+  \cos(\varphi-\psi)\rho\,d\varphi$. For $\varphi \in (c,d)$ we have $\varphi-\psi
+  \in (-\pi/2, \pi/2)$, so $\cos(\varphi-\psi) > 0$ and, with $\rho > 0$, the
+  integrand is strictly positive on $(c,d)$; hence the integral is $> 0$, so the
+  original complex integral has nonzero real part after rotation and cannot be $0$.
+\end{proof}
+
+\begin{corollary}
+
+\leanok
+[Positive curvature reconstruction is a simple closed curve]
+  \label{cor:positive_curvature_implies_simple}
+  \lean{Gluck.isSimpleClosed_reconstruct}
+  \uses{thm:reconstruct_injective, lem:closes_iff, def:is_simple_closed,
+        def:reconstruct}
+  Let $\rho$ be continuous, $2\pi$-periodic and strictly positive with $E(\rho) =
+  0$. Then $\alpha_\rho$ is a simple closed curve (\cref{def:is_simple_closed}):
+  it is $2\pi$-periodic and injective on $[0, 2\pi)$.
+\end{corollary}
+\begin{proof}
+  \uses{thm:reconstruct_injective, lem:closes_iff}
+  \leanok
+  Closedness ($2\pi$-periodicity of $\alpha_\rho$) follows from $E(\rho) = 0$ and
+  the $2\pi$-periodicity of the integrand $e^{i\varphi}\rho$, as in the proof of
+  \cref{thm:reconstruct_injective}: for every $\theta$, $\alpha_\rho(\theta +
+  2\pi) - \alpha_\rho(\theta) = \int_\theta^{\theta + 2\pi} e^{i\varphi}\rho =
+  E(\rho) = 0$. Injectivity on $[0, 2\pi)$ is \cref{thm:reconstruct_injective}.
+  Together these are exactly \cref{def:is_simple_closed}.
+\end{proof}
+
+\begin{remark}
+  In \cref{thm:gluck_converse} the curve realizing $\kappa$ is obtained from
+  $\beta = \alpha_\rho$ with $\rho = 1/(\kappa\circ h)$ (continuous, positive,
+  periodic; $E(\rho)=0$ by \cref{cor:closing_configuration_exists}) by an
+  orientation-preserving reparametrization $\gamma = \beta\circ h^{-1}$. Since
+  $h^{-1}$ is a bijection of the period and $\beta$ is injective on it
+  (\cref{thm:reconstruct_injective}), $\gamma$ is injective as well; closedness is
+  preserved. Thus $\gamma$ is the required simple closed curve. The convexity
+  asserted by the source is the intrinsic statement $\varphi' = \kappa\lVert
+  \gamma'\rVert > 0$ already recorded in \cref{thm:gluck_converse}; it is not
+  needed separately for simplicity, which the directional-integral argument above
+  delivers directly.
+\end{remark}

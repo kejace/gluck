@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bicircle curves and their error vectors</title>
+<link rel="next" href="chap-winding.html" title="The winding-number argument" />
+<link rel="prev" href="chap-stepreduction.html" title="Reduction to a four-arc step function" />
+<link rel="up" href="index.html" title="gluck" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/showmore.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+<link rel="stylesheet" href="styles/extra_styles.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">gluck</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="chap-curve.html"><span class="toc_ref">1</span> <span class="toc_entry">Plane curves and signed curvature</span></a>
+ </li>
+<li class="">
+  <a href="chap-curvature.html"><span class="toc_ref">2</span> <span class="toc_entry">Curvature functions on the circle</span></a>
+ </li>
+<li class="">
+  <a href="chap-closure.html"><span class="toc_ref">3</span> <span class="toc_entry">Reconstruction and the closure condition</span></a>
+ </li>
+<li class="">
+  <a href="chap-stepreduction.html"><span class="toc_ref">4</span> <span class="toc_entry">Reduction to a four-arc step function</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chap-stepreduction.html#a0000000007"><span class="toc_ref">4.1</span> <span class="toc_entry">The preliminary reparametrization \(h_1\) (project-bespoke construction)</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class=" active current">
+  <a href="chap-bicircle.html"><span class="toc_ref">5</span> <span class="toc_entry">Bicircle curves and their error vectors</span></a>
+ </li>
+<li class="">
+  <a href="chap-winding.html"><span class="toc_ref">6</span> <span class="toc_entry">The winding-number argument</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chap-winding.html#a0000000008"><span class="toc_ref">6.1</span> <span class="toc_entry">Topological winding-number primitives</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chap-reduction.html"><span class="toc_ref">7</span> <span class="toc_entry">Closing the \(\kappa \)-curve: the reduction is justified</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chap-reduction.html#a0000000009"><span class="toc_ref">7.1</span> <span class="toc_entry">The breakpoint-aligning reparametrization family \(g_z\)</span></a>
+ </li>
+<li class="">
+  <a href="chap-reduction.html#a0000000010"><span class="toc_ref">7.2</span> <span class="toc_entry">The \(\kappa \)-error map over the disk</span></a>
+ </li>
+<li class="">
+  <a href="chap-reduction.html#a0000000011"><span class="toc_ref">7.3</span> <span class="toc_entry">Change-of-variables keystones for the \(L^1\) estimate</span></a>
+ </li>
+<li class="">
+  <a href="chap-reduction.html#a0000000012"><span class="toc_ref">7.4</span> <span class="toc_entry">Uniform closeness to the bicircle error map</span></a>
+ </li>
+<li class="">
+  <a href="chap-reduction.html#a0000000013"><span class="toc_ref">7.5</span> <span class="toc_entry">The reduction is justified</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chap-simplicity.html"><span class="toc_ref">8</span> <span class="toc_entry">Simplicity of the reconstructed curve</span></a>
+ </li>
+<li class="">
+  <a href="chap-fourvertex.html"><span class="toc_ref">9</span> <span class="toc_entry">Gluck’s converse to the four vertex theorem</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chap-fourvertex.html#a0000000014"><span class="toc_ref">9.1</span> <span class="toc_entry">Reparametrizing back: the realization lemmas</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="chap:bicircle">5 Bicircle curves and their error vectors</h1>
+
+<p>This chapter analyses the geometry of the curves reconstructed from a four-arc step curvature \(\kappa _0\) (<a href="chap-stepreduction.html#def:four_arc_step_function">definition 24</a>). Such a curve is a <em>bicircle</em>: four circular arcs, two cut from a circle of curvature \(a\) and two from a circle of curvature \(b\), joined so that the tangent line turns continuously through \(2\pi \). The main result is Dahlberg’s explicit formula (Proposition 9.1 of the source) for the error vector of a bicircle, which is the input to the winding argument of <a href="chap-winding.html">chapter 6</a>. </p>
+<div class="definition_thmwrapper theorem-style-definition" id="def:bicircle_error_vector">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">31</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-bicircle.html#def:bicircle_error_vector">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-stepreduction.html#def:four_arc_step_function">Definition 24</a></li>
+          
+          <li><a href="chap-closure.html#def:error_vector">Definition 19</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.bicircleErrorVector" class="lean_decl">Gluck.bicircleErrorVector</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>[Bicircle error vector]    <i class="itshape">Source: DeTurck–Gluck, Proposition 9.1 (§9).</i> Fix \(0 {\lt} a {\lt} b\) and breakpoints \(0 \le \theta _1 {\lt} \theta _2 {\lt} \theta _3 {\lt} \theta _4 {\lt} 2\pi \), and let \(\kappa _0\) be the four-arc step curvature (<a href="chap-stepreduction.html#def:four_arc_step_function">definition 24</a>) taking the value \(b\) on \([\theta _1,\theta _2)\cup [\theta _3,\theta _4)\) and \(a\) elsewhere. The <em>bicircle error vector</em> is \(E_{\mathrm{bi}}(a,b,\theta _1,\dots ,\theta _4) = E(1/\kappa _0) = \int _0^{2\pi } e^{i\theta }/\kappa _0(\theta )\, d\theta \in \mathbb {C}\). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:error_vector_of_bicircle">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">32</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-bicircle.html#lem:error_vector_of_bicircle">#</a>
+    
+    <a class="icon proof" href="chap-bicircle.html#a0000000048"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-bicircle.html#def:bicircle_error_vector">Definition 31</a></li>
+          
+          <li><a href="chap-bicircle.html#def:bicircle_error_vector">Definition 31</a></li>
+          
+          <li><a href="chap-bicircle.html#lem:bicircle_arc_integral">Lemma 35</a></li>
+          
+          <li><a href="chap-bicircle.html#lem:bicircle_arc_integrable">Lemma 36</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.bicircleErrorVector_eq" class="lean_decl">Gluck.bicircleErrorVector_eq</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[Explicit error vector of a bicircle]    <i class="itshape">Source: DeTurck–Gluck, Proposition 9.1 (§9), error-vector formula.</i> With the notation of <a href="chap-bicircle.html#def:bicircle_error_vector">definition 31</a>, </p>
+<div class="displaymath" id="a0000000049">
+  \[  E_{\mathrm{bi}}(a,b,\theta _1,\theta _2,\theta _3,\theta _4) \; =\;  \Bigl(\tfrac {1}{ib} - \tfrac {1}{ia}\Bigr) \Bigl(\bigl[e^{i\theta _2} - e^{i\theta _1}\bigr] + \bigl[e^{i\theta _4} - e^{i\theta _3}\bigr]\Bigr).  \]
+</div>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000048">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p> The weight \(\rho _0 = 1/\kappa _0\) is piecewise constant: it equals \(1/b\) on the two arcs \([\theta _1,\theta _2)\) and \([\theta _3,\theta _4)\) and \(1/a\) on the two complementary arcs. Split the integral \(E(\rho _0) = \int _0^{2\pi } e^{i\theta }\rho _0(\theta )\, d\theta \) into the four arcs. On each arc \(\rho _0\) is constant and \(\int _{c}^{d} e^{i\theta }\, d\theta = \frac{1}{i}\bigl(e^{id} - e^{ic}\bigr)\). Summing, </p>
+<div class="displaymath" id="a0000000050">
+  \[  E(\rho _0) = \tfrac {1}{ib}\bigl(e^{i\theta _2}-e^{i\theta _1}\bigr) + \tfrac {1}{ia}\bigl(e^{i\theta _3}-e^{i\theta _2}\bigr) + \tfrac {1}{ib}\bigl(e^{i\theta _4}-e^{i\theta _3}\bigr) + \tfrac {1}{ia}\bigl(e^{i(\theta _1+2\pi )}-e^{i\theta _4}\bigr).  \]
+</div>
+<p> Using \(e^{i(\theta _1+2\pi )} = e^{i\theta _1}\) and collecting the \(1/(ia)\) and \(1/(ib)\) terms, the four \(1/(ia)\) contributions sum to \(\tfrac {1}{ia}\bigl((e^{i\theta _3}-e^{i\theta _2}) + (e^{i\theta _1}-e^{i\theta _4})\bigr) = -\tfrac {1}{ia}\bigl((e^{i\theta _2} - e^{i\theta _1}) + (e^{i\theta _4} - e^{i\theta _3})\bigr)\), while the two \(1/(ib)\) contributions sum to \(\tfrac {1}{ib}\bigl((e^{i\theta _2} - e^{i\theta _1}) + (e^{i\theta _4} - e^{i\theta _3})\bigr)\). Hence the total is exactly \(\bigl(\tfrac {1}{ib} - \tfrac {1}{ia}\bigr)\bigl([e^{i\theta _2} - e^{i\theta _1}] + [e^{i\theta _4} - e^{i\theta _3}]\bigr)\), the stated form. (The source’s \(\bigl(\tfrac {1}{ia} - \tfrac {1}{ib}\bigr)\) is the same up to the overall sign, which only reflects the opposite labelling of the two curvature values on the arcs.) </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:integral_cexp_I">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">33</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-bicircle.html#lem:integral_cexp_I">#</a>
+    
+    <a class="icon proof" href="chap-bicircle.html#a0000000051"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.integral_cexp_I" class="lean_decl">Gluck.integral_cexp_I</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[Arc integral of \(e^{i\theta }\)]   Project-bespoke. For real \(c \le d\), \(\int _c^d e^{i\theta }\, d\theta = -i\bigl(e^{id} - e^{ic}\bigr)\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000051">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Fundamental theorem of calculus with antiderivative \(-i\, e^{i\theta }\) (whose derivative is \(e^{i\theta }\), using \(i\cdot i = -1\)). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:bicircle_arc_integrand_eq">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">34</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-bicircle.html#lem:bicircle_arc_integrand_eq">#</a>
+    
+    <a class="icon proof" href="chap-bicircle.html#a0000000052"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-stepreduction.html#def:four_arc_step_function">Definition 24</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.bicircle_arc_integrand_eq" class="lean_decl">Gluck.bicircle_arc_integrand_eq</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[Step integrand is a.e. constant on an arc]    Project-bespoke. On an arc \((c,d]\) on which \(\kappa _0 \equiv v\), the integrand \(e^{i\theta }\rho _0(\theta )\) agrees almost everywhere with \(e^{i\theta }(1/v)\) (the two single breakpoints are null). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000052">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>\(\rho _0 = 1/\kappa _0 = 1/v\) on the half-open arc; the endpoint where it may differ is a single point, of Lebesgue measure zero. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:bicircle_arc_integral">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">35</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-bicircle.html#lem:bicircle_arc_integral">#</a>
+    
+    <a class="icon proof" href="chap-bicircle.html#a0000000053"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-bicircle.html#lem:integral_cexp_I">Lemma 33</a></li>
+          
+          <li><a href="chap-bicircle.html#lem:bicircle_arc_integrand_eq">Lemma 34</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.bicircle_arc_integral" class="lean_decl">Gluck.bicircle_arc_integral</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[Per-arc integral value]    Project-bespoke. On an arc \([c,d]\) where \(\kappa _0 \equiv v\), \(\int _c^d e^{i\theta }\rho _0\, d\theta = (1/v)\, (-i)\, (e^{id}-e^{ic})\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000053">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Replace the integrand by its a.e. representative (<a href="chap-bicircle.html#lem:bicircle_arc_integrand_eq">lemma 34</a>), pull out the constant \(1/v\), and apply <a href="chap-bicircle.html#lem:integral_cexp_I">lemma 33</a>. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:bicircle_arc_integrable">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">36</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-bicircle.html#lem:bicircle_arc_integrable">#</a>
+    
+    <a class="icon proof" href="chap-bicircle.html#a0000000054"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-stepreduction.html#def:four_arc_step_function">Definition 24</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.bicircle_arc_integrable" class="lean_decl">Gluck.bicircle_arc_integrable</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[Per-arc integrability]    Project-bespoke. The integrand \(e^{i\theta }\rho _0\) is interval-integrable on each of the five constant arcs. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000054">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>On each arc the integrand agrees a.e. with a continuous function (the constant weight times \(e^{i\theta }\)), which is interval-integrable; integrability transfers along a.e. equality. </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:bicircle_closes_iff">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">37</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-bicircle.html#cor:bicircle_closes_iff">#</a>
+    
+    <a class="icon proof" href="chap-bicircle.html#a0000000055"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-bicircle.html#lem:error_vector_of_bicircle">Lemma 32</a></li>
+          
+          <li><a href="chap-closure.html#lem:closes_iff">Lemma 23</a></li>
+          
+          <li><a href="chap-bicircle.html#lem:error_vector_of_bicircle">Lemma 32</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.bicircleErrorVector_eq_zero_iff" class="lean_decl">Gluck.bicircleErrorVector_eq_zero_iff</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="corollary_thmcontent">
+  <p>[Bicircle closes iff opposite arcs equal]    <i class="itshape">Source: DeTurck–Gluck, Proposition 9.1 (closure criterion).</i> Since \(a \ne b\) the scalar \(\tfrac {1}{ia} - \tfrac {1}{ib} \ne 0\), so the bicircle closes up (\(E_{\mathrm{bi}} = 0\)) if and only if \(\bigl(e^{i\theta _2} - e^{i\theta _1}\bigr) + \bigl(e^{i\theta _4} - e^{i\theta _3}\bigr) = 0\), i.e. the two chords \(e^{i\theta _2} - e^{i\theta _1}\) and \(e^{i\theta _4} - e^{i\theta _3}\) are equal and opposite. Geometrically this is the source’s “opposite arcs are equal in length”: the arc-length of each arc is its angular extent divided by its curvature, and the condition equates the two pairs of opposite arcs. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000055">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p> Immediate from <a href="chap-bicircle.html#lem:error_vector_of_bicircle">lemma 32</a>: a nonzero complex scalar times a vector is zero iff the vector is zero. </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <svg  id="showmore-minus" class="icon icon-eye-minus showmore"><use xlink:href="symbol-defs.svg#icon-eye-minus"></use></svg>
+
+  <svg  id="showmore-plus" class="icon icon-eye-plus showmore"><use xlink:href="symbol-defs.svg#icon-eye-plus"></use></svg>
+
+  <a href="chap-stepreduction.html" title="Reduction to a four-arc step function"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="gluck"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="chap-winding.html" title="The winding-number argument"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+<script type="text/javascript" src="js/js.cookie.min.js"></script>
+<script type="text/javascript" src="js/showmore.js"></script>
+</body>
+</html>

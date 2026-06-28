@@ -1,0 +1,228 @@
+\chapter{Gluck's converse to the four vertex theorem}
+\label{chap:fourvertex}
+
+% archon:covers Gluck/FourVertex.lean
+
+We assemble the pieces into Gluck's converse for strictly positive curvature.
+
+% SOURCE: [DeTurck-Gluck], §III, p. 9, lines 150-153 (read from references/deturck-gluck-fourvertex.txt)
+% SOURCE QUOTE: "FULL CONVERSE TO THE FOUR VERTEX THEOREM. Let κ: S1 → R be a
+% continuous function which is either a nonzero constant or else has at least
+% two local maxima and two local minima. Then there is an embedding α: S1 → R2
+% whose curvature at the point α(t) is κ(t) for all t ∊ S1 ."
+\begin{theorem}[Gluck's converse, strictly positive case]
+  \label{thm:gluck_converse}
+  \lean{Gluck.gluck_converse}
+  \leanok
+  \uses{def:is_curvature_function, def:four_vertex_condition, def:is_simple_closed, def:realizes_curvature, lem:realizes_curvature_reconstruct, lem:realizes_curvature_comp, lem:is_simple_closed_comp, lem:exists_c1_circle_inverse}
+  \textit{Source: DeTurck--Gluck, Converse to the Four Vertex Theorem (positive case, §III–IV).}
+  Let $\kappa : \mathbb{R} \to \mathbb{R}$ be a curvature function
+  (\cref{def:is_curvature_function}: continuous, $2\pi$-periodic, strictly
+  positive) satisfying the four-vertex condition
+  (\cref{def:four_vertex_condition}). Then there is a simple closed curve
+  $\gamma : \mathbb{R} \to \mathbb{C}$ (\cref{def:is_simple_closed}) that
+  \emph{realizes} $\kappa$ as its curvature in the intrinsic sense
+  (\cref{def:realizes_curvature}: $\gamma$ is $C^1$, regular, and its tangent
+  angle $\varphi$ satisfies $\varphi' = \kappa\lVert\gamma'\rVert$).
+
+  \emph{Why the intrinsic conclusion.} For a merely continuous $\kappa$ the
+  realized curve is only $C^1$, so the deriv²-formula \cref{def:signed_curvature}
+  (and with it the $C^2$ predicates \cref{def:is_regular},
+  \cref{def:is_convex_curve}) returns junk; the realization must therefore be
+  stated through \cref{def:realizes_curvature}. Convexity is automatic and
+  intrinsic: $\kappa > 0$ forces $\varphi' = \kappa\lVert\gamma'\rVert > 0$, so
+  the tangent turns strictly monotonically (rotation index $1$), which is exactly
+  convexity of the simple closed curve. On $C^2$ data (e.g. $\kappa \in C^1$)
+  this conclusion specialises back to $\kappa_\gamma = \kappa > 0$ via the bridge
+  \cref{lem:realizes_curvature_signedCurvature}.
+\end{theorem}
+
+% SOURCE: [DeTurck-Gluck], §4-6, pp. 9-13 (read from references/deturck-gluck-fourvertex.txt)
+% SOURCE QUOTE PROOF: "We use a winding number argument in the group of
+% diffeomorphisms of the circle ... If the curvature function κ has at least two
+% local maxima and two local minima, we will show how to find a loop of
+% diffeomorphisms h of the circle so that when we construct ... curves αh ...
+% the corresponding error vectors E(h) will wind once around the origin.
+% Furthermore, we will do this so that the loop is contractible in the group
+% Diff(S 1) ... and conclude that for some h \"inside\" this loop, the curve αh
+% will have error vector E(h) = 0 , and hence close up to form a smooth simple
+% closed curve. ... Therefore α = αh ◦ h—1 is a reparametrization of the same
+% curve, whose curvature at the point α(t) is κ(t)."
+\begin{proof}
+  \uses{lem:closes_iff, lem:abab_values, def:realizes_curvature, lem:realizes_curvature_signedCurvature, def:reconstruct, def:error_vector, lem:reduction_justified, cor:closing_configuration_exists, cor:positive_curvature_implies_simple, lem:reconstruct_const, lem:realizes_curvature_reconstruct, lem:realizes_curvature_comp, lem:is_simple_closed_comp, lem:exists_c1_circle_inverse}
+  \leanok
+  \textit{Source: DeTurck--Gluck, §4–6 (winding number argument).}
+
+  \textbf{Constant case.} If $\kappa \equiv c > 0$ then $\rho = 1/c$ is constant,
+  and $C(\rho) = S(\rho) = 0$ since $\int_0^{2\pi}\cos = \int_0^{2\pi}\sin = 0$.
+  By \cref{lem:closes_iff} the reconstruction $\alpha_\rho$ closes up; it is the
+  circle of radius $1/c$, a simple closed curve, and it realizes $\kappa$
+  intrinsically (\cref{def:realizes_curvature}: tangent angle $\varphi(\theta) =
+  \theta$, $\lVert\alpha_\rho'\rVert = 1/c$, so $\varphi' = 1 = c \cdot (1/c) =
+  \kappa\lVert\alpha_\rho'\rVert$). Being $C^2$, the bridge
+  \cref{lem:realizes_curvature_signedCurvature} also gives signed curvature
+  $\kappa$.
+
+  \textbf{Non-constant case (winding number argument).} Parametrize curves by the
+  angle of inclination $\theta$ and reconstruct via $\alpha$
+  (\cref{def:reconstruct}); the failure to close is the error vector $E$
+  (\cref{def:error_vector}), a \emph{linear} functional of the weight
+  $\rho = 1/\kappa$. The entire winding/degree argument (Steps 1--4 of
+  DeTurck--Gluck §4--6: reduce to a four-arc step function, build a
+  finite-dimensional disk $D$ of breakpoint configurations, transfer the boundary
+  winding $\pm1$ from the bicircle error map to $E_\kappa$, and extract an interior
+  zero by the planar degree theorem) is packaged as
+  \cref{lem:reduction_justified}. It yields a circle reparametrization $h$ ---
+  strictly increasing, continuous, $h(\theta+2\pi)=h(\theta)+2\pi$, and (crucially)
+  $C^1$ with a continuous strictly positive derivative $h'=v>0$ --- such that the
+  reconstruction weight $\rho := \mathrm{radius}(\kappa\circ h) = 1/(\kappa\circ h)$
+  has error vector $E(\rho)=0$. The remaining four steps assemble the realizing
+  curve from $h$.
+  \begin{enumerate}
+    \item \emph{$\kappa\circ h$ is again a curvature function.} $\kappa\circ h$ is
+      continuous (composition), strictly positive, and $2\pi$-periodic
+      ($\kappa(h(\theta+2\pi))=\kappa(h(\theta)+2\pi)=\kappa(h(\theta))$). Hence
+      $\rho=1/(\kappa\circ h)$ is continuous, $2\pi$-periodic, strictly positive.
+    \item \emph{The inclination-parametrized curve closes, is simple, and realizes
+      $\kappa\circ h$.} Set $\Gamma := \alpha_\rho = \mathrm{reconstruct}(\rho)$.
+      Since $E(\rho)=0$, by \cref{cor:positive_curvature_implies_simple} $\Gamma$ is
+      a simple closed curve. By \cref{lem:realizes_curvature_reconstruct} $\Gamma$
+      realizes $\kappa\circ h$ intrinsically: its tangent angle is the inclination
+      parameter $\varphi(\theta)=\theta$, with $\lVert\Gamma'\rVert=\rho=
+      1/(\kappa\circ h)$, so $\varphi'=1=(\kappa\circ h)\lVert\Gamma'\rVert$.
+    \item \emph{The $C^1$ inverse $H=h^{-1}$.} Because $h$ is $C^1$ with $h'=v>0$
+      everywhere and $h(\theta+2\pi)=h(\theta)+2\pi$, it is a continuous strictly
+      increasing bijection of $\mathbb{R}$; by
+      \cref{lem:exists_c1_circle_inverse} its inverse $H$ is again a $C^1$
+      orientation-preserving circle reparametrization, with $\mathrm{HasDerivAt}\,
+      H\,(1/v(H(t)))\,t$ (so $H'>0$ continuous), $H(t+2\pi)=H(t)+2\pi$, and
+      $h\circ H=\mathrm{id}$, $H\circ h=\mathrm{id}$.
+    \item \emph{Reparametrize back: $\gamma:=\Gamma\circ H$ realizes $\kappa$ and is
+      simple.} Since $H$ is $C^1$ with $H'>0$ and $\Gamma$ realizes $\kappa\circ h$,
+      \cref{lem:realizes_curvature_comp} gives that $\gamma=\Gamma\circ H$ realizes
+      $(\kappa\circ h)\circ H$; and $(\kappa\circ h)\circ H = \kappa\circ(h\circ H)
+      = \kappa$ because $h\circ H=\mathrm{id}$. So $\mathrm{RealizesCurvature}\,
+      \gamma\,\kappa$. (This is the source's $\alpha=\alpha_h\circ h^{-1}$.) Since
+      $\Gamma$ is a simple closed curve and $H$ is a continuous strictly increasing
+      map with $H(t+2\pi)=H(t)+2\pi$, \cref{lem:is_simple_closed_comp} gives that
+      $\gamma=\Gamma\circ H$ is again a simple closed curve. Convexity is automatic
+      and intrinsic: $\kappa>0$ forces the tangent angle of $\gamma$ to turn
+      strictly monotonically (rotation index $1$). On $C^2$ data the bridge
+      \cref{lem:realizes_curvature_signedCurvature} recovers $\kappa_\gamma=\kappa$.
+  \end{enumerate}
+  Thus $\gamma$ is a simple closed curve realizing $\kappa$, completing the
+  strictly positive case.
+\end{proof}
+
+\section{Reparametrizing back: the realization lemmas}
+
+These four project-bespoke lemmas turn the closure result
+\cref{lem:reduction_justified} into the realization statement of
+\cref{thm:gluck_converse}. They live in \texttt{Gluck/FourVertex.lean}.
+
+\begin{lemma}\leanok
+[The reconstruction realizes its curvature]
+  \label{lem:realizes_curvature_reconstruct}
+  \lean{Gluck.realizesCurvature_reconstruct}
+  \uses{def:reconstruct, def:realizes_curvature, def:radius}
+  Let $\mu:\mathbb{R}\to\mathbb{R}$ be continuous and strictly positive. Then the
+  inclination-parametrized reconstruction $\mathrm{reconstruct}(\mathrm{radius}\,
+  \mu)$ realizes $\mu$ intrinsically (\cref{def:realizes_curvature}).
+\end{lemma}
+\begin{proof}
+  \uses{def:reconstruct, def:realizes_curvature, def:radius}
+  \leanok
+  Write $\rho=\mathrm{radius}\,\mu=1/\mu$ and $\Gamma=\mathrm{reconstruct}\,\rho$.
+  By the fundamental theorem of calculus (the defining property of
+  $\mathrm{reconstruct}$) $\Gamma'(\theta)=e^{i\theta}\rho(\theta)=
+  e^{i\theta}/\mu(\theta)$. This is continuous (and never $0$ since
+  $\mu>0$), so $\Gamma\in C^1$ and $\Gamma$ is regular; moreover
+  $\lVert\Gamma'(\theta)\rVert=1/\mu(\theta)$. Take the tangent angle
+  $\varphi(\theta)=\theta$ (differentiable, $\varphi'=1$). Then
+  $\Gamma'(\theta)=\lVert\Gamma'(\theta)\rVert\,e^{i\varphi(\theta)}$ and
+  $\varphi'(\theta)=1=\mu(\theta)\cdot(1/\mu(\theta))=
+  \mu(\theta)\lVert\Gamma'(\theta)\rVert$, which is exactly
+  \cref{def:realizes_curvature}.
+\end{proof}
+
+\begin{lemma}\leanok
+[Realization transfers under an orientation-preserving $C^1$ reparametrization]
+  \label{lem:realizes_curvature_comp}
+  \lean{Gluck.realizesCurvature_comp}
+  \uses{def:realizes_curvature}
+  Let $\Gamma:\mathbb{R}\to\mathbb{C}$ realize $\mu:\mathbb{R}\to\mathbb{R}$, and let
+  $\psi:\mathbb{R}\to\mathbb{R}$ be $C^1$ with $\psi'(t)>0$ for all $t$. Then
+  $\Gamma\circ\psi$ realizes $\mu\circ\psi$.
+\end{lemma}
+\begin{proof}
+  \uses{def:realizes_curvature}
+  \leanok
+  Let $\varphi$ be the differentiable tangent angle of $\Gamma$. By the chain rule
+  $(\Gamma\circ\psi)'(t)=\Gamma'(\psi(t))\,\psi'(t)$, which is continuous and
+  nonzero ($\Gamma'(\psi t)\ne0$, $\psi'(t)>0$); so $\Gamma\circ\psi\in C^1$ and is
+  regular, and since $\psi'>0$,
+  $\lVert(\Gamma\circ\psi)'(t)\rVert=\lVert\Gamma'(\psi t)\rVert\,\psi'(t)$. Take
+  $\varphi\circ\psi$ as the tangent angle of $\Gamma\circ\psi$ (differentiable).
+  From $\Gamma'(\psi t)=\lVert\Gamma'(\psi t)\rVert e^{i\varphi(\psi t)}$ and
+  $\psi'(t)>0$,
+  $(\Gamma\circ\psi)'(t)=\lVert(\Gamma\circ\psi)'(t)\rVert e^{i\varphi(\psi t)}$.
+  Finally $(\varphi\circ\psi)'(t)=\varphi'(\psi t)\psi'(t)=
+  \mu(\psi t)\lVert\Gamma'(\psi t)\rVert\psi'(t)=
+  (\mu\circ\psi)(t)\,\lVert(\Gamma\circ\psi)'(t)\rVert$, as required.
+\end{proof}
+
+\begin{lemma}[Simplicity transfers under an orientation-preserving circle reparametrization]
+  \label{lem:is_simple_closed_comp}
+  \lean{Gluck.isSimpleClosed_comp, Gluck.periodic_eq_imp_sub_zsmul, Gluck.psi_add_int_period, Gluck.eq_zero_of_window_sub_eq_zsmul}
+  \uses{def:is_simple_closed}
+  Let $\Gamma:\mathbb{R}\to\mathbb{C}$ be a simple closed curve
+  (\cref{def:is_simple_closed}) and let $\psi:\mathbb{R}\to\mathbb{R}$ be
+  continuous, strictly increasing, with $\psi(t+2\pi)=\psi(t)+2\pi$. Then
+  $\Gamma\circ\psi$ is a simple closed curve.
+\end{lemma}
+\begin{proof}
+  \uses{def:is_simple_closed}
+  \emph{Closed:} $(\Gamma\circ\psi)(t+2\pi)=\Gamma(\psi(t)+2\pi)=\Gamma(\psi(t))=
+  (\Gamma\circ\psi)(t)$ using $\Gamma$'s $2\pi$-periodicity.
+  \emph{Injective on $[0,2\pi)$:} a $2\pi$-periodic curve injective on $[0,2\pi)$ is
+  ``injective up to period'': $\Gamma(x)=\Gamma(y)\Rightarrow x\equiv y \pmod{2\pi}$
+  (reduce both into $[0,2\pi)$ and apply $\mathrm{InjOn}$). Now if
+  $(\Gamma\circ\psi)(x)=(\Gamma\circ\psi)(y)$ with $x,y\in[0,2\pi)$ then
+  $\psi(x)\equiv\psi(y)\pmod{2\pi}$, say $\psi(x)=\psi(y)+2\pi n$; since
+  $\psi(\,\cdot\,+2\pi)=\psi(\,\cdot\,)+2\pi$ this gives $\psi(x)=\psi(y+2\pi n)$, and
+  $\psi$ strictly increasing (injective) gives $x=y+2\pi n$; with $x,y\in[0,2\pi)$
+  this forces $n=0$, i.e. $x=y$.
+  (Three private helpers carry the bookkeeping: \texttt{periodic\_eq\_imp\_sub\_zsmul}
+  extracts the integer $n$ from $\Gamma(x)=\Gamma(y)$ via the $2\pi$-periodicity and
+  $\mathrm{InjOn}$; \texttt{psi\_add\_int\_period} iterates
+  $\psi(\,\cdot\,+2\pi)=\psi(\,\cdot\,)+2\pi$ to $\psi(t+2\pi n)=\psi(t)+2\pi n$; and
+  \texttt{eq\_zero\_of\_window\_sub\_eq\_zsmul} discharges the final
+  $n=0$ step, concluding from $0\le x,y<2\pi$ and $x=y+n\cdot 2\pi$ that $n=0$. The
+  last helper is shared with the constant-case $n=0$ step of \cref{thm:gluck_converse}.)
+\end{proof}
+
+\begin{lemma}\leanok
+[The $C^1$ inverse of a $C^1$ circle reparametrization]
+  \label{lem:exists_c1_circle_inverse}
+  \lean{Gluck.exists_C1_circle_inverse}
+  Let $h:\mathbb{R}\to\mathbb{R}$ admit a continuous strictly positive $v$ with
+  $\mathrm{HasDerivAt}\,h\,(v(\theta))\,\theta$ for all $\theta$, and satisfy
+  $h(\theta+2\pi)=h(\theta)+2\pi$. Then there is $H:\mathbb{R}\to\mathbb{R}$ that is
+  continuous, strictly increasing, two-sided inverse to $h$ ($h\circ H=\mathrm{id}$
+  and $H\circ h=\mathrm{id}$), with $H(t+2\pi)=H(t)+2\pi$, and $C^1$ with strictly
+  positive derivative: $\mathrm{HasDerivAt}\,H\,(1/v(H(t)))\,t$ for all $t$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Since $v>0$, $h$ is strictly increasing; being differentiable it is continuous.
+  From $h(\theta+2\pi)=h(\theta)+2\pi$, $h$ is unbounded above and below, so by the
+  intermediate value theorem it is a continuous strictly increasing bijection of
+  $\mathbb{R}$; let $H$ be its (continuous, strictly increasing) inverse. The
+  periodicity $H(t+2\pi)=H(t)+2\pi$ follows from $h(H(t)+2\pi)=h(H(t))+2\pi=t+2\pi$
+  and injectivity of $h$. For differentiability: at each $t$, $h$ has derivative
+  $v(H(t))\ne0$ at the point $H(t)$ and $H$ is a local left inverse continuous at
+  $t$, so by the inverse-function rule $\mathrm{HasDerivAt}\,H\,(1/v(H(t)))\,t$;
+  since $v\circ H$ is continuous and positive, $H'=1/(v\circ H)$ is continuous and
+  positive, so $H\in C^1$.
+\end{proof}

@@ -1,0 +1,196 @@
+\chapter{Curvature functions on the circle}
+\label{chap:curvature}
+
+% archon:covers Gluck/Curvature.lean
+
+The data of the converse theorem is a curvature function preassigned on the
+circle $S^1 = \mathbb{R}/2\pi\mathbb{Z}$, modelled as a $2\pi$-periodic function
+$\kappa : \mathbb{R} \to \mathbb{R}$.
+
+% SOURCE: [DeTurck-Gluck], §III / §4, p. 9, lines 150-159 (read from references/deturck-gluck-fourvertex.txt)
+% SOURCE QUOTE: "FULL CONVERSE TO THE FOUR VERTEX THEOREM. Let κ: S1 → R be a
+% continuous function which is either a nonzero constant or else has at least
+% two local maxima and two local minima. ... Let κ: S1 → R be any continuous
+% strictly positive curvature function"
+\begin{definition}\leanok
+[Curvature function]
+  \label{def:is_curvature_function}
+  \lean{Gluck.IsCurvatureFunction}
+  \textit{Source: DeTurck--Gluck, §III–4 (strictly positive curvature case).}
+  A \emph{curvature function} is a map $\kappa : \mathbb{R} \to \mathbb{R}$ that
+  is continuous, $2\pi$-periodic ($\kappa(\theta + 2\pi) = \kappa(\theta)$), and
+  strictly positive ($\kappa(\theta) > 0$ for all $\theta$). This is exactly the
+  class of preassigned curvatures treated in Gluck's positive case.
+\end{definition}
+
+% SOURCE: [DeTurck-Gluck], §4, p. 9, lines 158-174 (read from references/deturck-gluck-fourvertex.txt)
+% SOURCE QUOTE: "if s is arc length along this curve, then the equations
+% dα/ds = (cos θ, sin θ)  and  dθ/ds = κ(θ)  quickly lead to the explicit formula
+% α(θ) = ∫0^θ (cos θ, sin θ) dθ / κ(θ) ."
+\begin{definition}\leanok
+[Radius of curvature]
+  \label{def:radius}
+  \lean{Gluck.radius}
+  \uses{def:is_curvature_function}
+  \textit{Source: DeTurck--Gluck, §4 (the reconstruction integral has integrand $1/\kappa$).}
+  The \emph{radius of curvature} of a curvature function $\kappa$ is
+  $\rho = 1/\kappa$, i.e. $\rho(\theta) = 1/\kappa(\theta)$. It is the integrand
+  weight $1/\kappa(\theta)$ appearing in the source's reconstruction formula
+  $\alpha(\theta) = \int_0^\theta e^{i\theta}\,d\theta/\kappa(\theta)$.
+\end{definition}
+
+\begin{lemma}\leanok
+[Radius is a positive periodic continuous weight]
+  \label{lem:radius_props}
+  \lean{Gluck.radius_pos}
+  \uses{def:radius, def:is_curvature_function}
+  If $\kappa$ is a curvature function then $\rho = 1/\kappa$ is continuous,
+  $2\pi$-periodic and strictly positive.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Continuity of $\rho = 1/\kappa$ follows from continuity of $\kappa$ together
+  with $\kappa$ being everywhere nonzero (indeed positive). Periodicity is
+  inherited from $\kappa$. Positivity of $1/\kappa$ follows from positivity of
+  $\kappa$.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[Intermediate value on a closed interval, endpoints in either order]
+  \label{lem:ivt_hits}
+  \lean{Gluck.ivt_hits}
+  A continuous $f : \mathbb{R} \to \mathbb{R}$ on a closed interval $[p, q]$
+  (with $p \le q$) attains every value $v$ lying between $f(p)$ and $f(q)$ (in
+  either order): if $v \in [\min(f(p), f(q)),\ \max(f(p), f(q))]$ then there is
+  $x \in [p, q]$ with $f(x) = v$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Project-bespoke packaging of the intermediate value theorem. Split on whether
+  $f(p) \le f(q)$ or $f(q) \le f(p)$; in each case rewrite the $\min/\max$ and
+  apply the monotone, respectively anti-monotone, form of the intermediate value
+  theorem on $[p, q]$.
+\end{proof}
+
+% SOURCE: [DeTurck-Gluck], §III, p. 4, lines 13-14 and p. 9 lines 150-153 (read from references/deturck-gluck-fourvertex.txt)
+% SOURCE QUOTE: "any continuous realvalued function on the circle which has at
+% least two local maxima and two local minima is the curvature function of a
+% simple closed curve in the plane."
+\begin{definition}\leanok
+[Four-vertex condition]
+  \label{def:four_vertex_condition}
+  \lean{Gluck.FourVertexCondition}
+  \uses{def:is_curvature_function}
+  \textit{Source: DeTurck--Gluck, Converse statement (§III).}
+  A curvature function $\kappa$ satisfies the \emph{four-vertex condition} if
+  either
+  \begin{itemize}
+    \item $\kappa$ is constant; or
+    \item $\kappa$ has \emph{two value-separated, alternating local extrema}:
+      there are four points
+      \[
+        p_1 < q_1 < p_2 < q_2, \qquad q_2 < p_1 + 2\pi,
+      \]
+      lying in a single fundamental period, such that $p_1, p_2$ are local
+      maxima of $\kappa$, $q_1, q_2$ are local minima of $\kappa$, and the two
+      minimum values lie strictly below the two maximum values:
+      \[
+        \max\bigl(\kappa(q_1), \kappa(q_2)\bigr) \;<\; \min\bigl(\kappa(p_1), \kappa(p_2)\bigr).
+      \]
+  \end{itemize}
+
+  \emph{Why the strict value-separation (a project-level correctness refinement
+  of the source's phrasing).} The source says ``at least two local maxima and
+  two local minima.'' A naive formalization --- ``there exist two distinct points
+  that are each a local maximum, and two distinct points that are each a local
+  minimum'' using the topological (non-strict) notion of local extremum --- is
+  \emph{too weak} and makes the converse theorem false. Counterexample: a
+  trapezoidal wave that is constant $=1$ on a bottom plateau, rises to a top
+  plateau where it is constant $=2$, and falls back, is unimodal yet has
+  infinitely many points that are non-strict local maxima (the whole top
+  plateau) and minima (the bottom plateau). It satisfies the naive condition but
+  has no four points carrying values $a,b,a,b$ with $a<b$ in cyclic order
+  (each level is crossed exactly twice), and indeed is not realizable as a closed
+  curve. The genuine content of ``two local maxima and two local minima'' is that
+  $\kappa$ oscillates at least twice: two separated humps whose tops strictly
+  exceed the two intervening valleys. The condition above encodes exactly that
+  and is what the realizability proof consumes (it is precisely equivalent, for
+  positive curvature, to the existence of the $a,b,a,b$ interleaving of
+  \cref{lem:abab_values}).
+\end{definition}
+
+\begin{lemma}\leanok
+[Four values $a,b,a,b$ around the circle]
+  \label{lem:abab_values}
+  \lean{Gluck.exists_abab_of_fourVertex}
+  \uses{def:four_vertex_condition, def:is_curvature_function, lem:ivt_hits}
+  If a non-constant curvature function $\kappa$ satisfies the four-vertex
+  condition, then there exist $0 < a < b$ and four points $\theta_1 < \theta_2 <
+  \theta_3 < \theta_4$ lying in a single fundamental period
+  ($\theta_4 < \theta_1 + 2\pi$) at which $\kappa$ takes the values
+  $a, b, a, b$ in order around the circle.
+\end{lemma}
+\begin{proof}
+  \uses{lem:ivt_hits}
+  \leanok
+  % SOURCE QUOTE PROOF: "Using the hypothesis that κ has at least two local
+  % maxima and two local minima, we find positive numbers 0 < a < b such that
+  % κ takes the values a , b , a , b at four points in order around the circle."
+  \textit{Source: DeTurck--Gluck, §5, p. 11 (the source asserts this; we prove it
+  from the value-separated four-vertex condition).}
+
+  Since $\kappa$ is non-constant, the four-vertex condition gives its second
+  disjunct: four points $p_1 < q_1 < p_2 < q_2$ in one period, with $q_2 < p_1 +
+  2\pi$, where $p_1, p_2$ are local maxima, $q_1, q_2$ local minima, and
+  \[
+    \max\bigl(\kappa(q_1), \kappa(q_2)\bigr) \;<\; \min\bigl(\kappa(p_1), \kappa(p_2)\bigr).
+  \]
+
+  \emph{Step 1 (the two levels).} Put
+  \[
+    a := \max\bigl(\kappa(q_1), \kappa(q_2)\bigr), \qquad
+    b := \min\bigl(\kappa(p_1), \kappa(p_2)\bigr).
+  \]
+  The value-separation hypothesis is exactly $a < b$, and $a > 0$ because
+  $\kappa > 0$ (so $a \ge \kappa(q_1) > 0$).
+
+  \emph{Step 2 (four sub-arcs, each spanning $[a,b]$).} Consider the four closed
+  sub-arcs
+  \[
+    [p_1, q_1],\quad [q_1, p_2],\quad [p_2, q_2],\quad [q_2, p_1 + 2\pi].
+  \]
+  Each joins a maximum endpoint (value $\ge b$) to a minimum endpoint (value
+  $\le a$); for the last sub-arc the right endpoint value is
+  $\kappa(p_1 + 2\pi) = \kappa(p_1) \ge b$ by periodicity. Hence on each sub-arc
+  the interval $[a,b]$ lies between the two endpoint values, and by the
+  intermediate value theorem (\cref{lem:ivt_hits}) $\kappa$ attains \emph{every}
+  value of $[a,b]$ on each sub-arc.
+
+  \emph{Step 3 (select the four points).} Choose
+  \[
+    \theta_1 \in [p_1, q_1] \text{ with } \kappa(\theta_1) = a, \quad
+    \theta_2 \in [q_1, p_2] \text{ with } \kappa(\theta_2) = b,
+  \]
+  \[
+    \theta_3 \in [p_2, q_2] \text{ with } \kappa(\theta_3) = a, \quad
+    \theta_4 \in [q_2, p_1 + 2\pi] \text{ with } \kappa(\theta_4) = b,
+  \]
+  all possible by Step 2. The endpoint inclusions give the weak chain
+  \[
+    p_1 \le \theta_1 \le q_1 \le \theta_2 \le p_2 \le \theta_3 \le q_2 \le \theta_4 \le p_1 + 2\pi.
+  \]
+  The assigned values alternate $a, b, a, b$ with $a \ne b$, so consecutive
+  chosen points carry different $\kappa$-values, hence are distinct; combined
+  with the weak chain this upgrades it to the strict chain $\theta_1 < \theta_2 <
+  \theta_3 < \theta_4$.
+
+  \emph{Step 4 (the points lie in one period).} Since $\kappa(p_1) \ge b > a =
+  \kappa(\theta_1)$ we have $\theta_1 \ne p_1$, so $\theta_1 > p_1$; together with
+  $\theta_4 \le p_1 + 2\pi$ this gives $\theta_4 < \theta_1 + 2\pi$. Thus the four
+  points lie in a single fundamental period and $\kappa$ takes the values
+  $a, b, a, b$ on them in order around the circle, with $0 < a < b$, as required.
+\end{proof}

@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reconstruction and the closure condition</title>
+<link rel="next" href="chap-stepreduction.html" title="Reduction to a four-arc step function" />
+<link rel="prev" href="chap-curvature.html" title="Curvature functions on the circle" />
+<link rel="up" href="index.html" title="gluck" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/showmore.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+<link rel="stylesheet" href="styles/extra_styles.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">gluck</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="chap-curve.html"><span class="toc_ref">1</span> <span class="toc_entry">Plane curves and signed curvature</span></a>
+ </li>
+<li class="">
+  <a href="chap-curvature.html"><span class="toc_ref">2</span> <span class="toc_entry">Curvature functions on the circle</span></a>
+ </li>
+<li class=" active current">
+  <a href="chap-closure.html"><span class="toc_ref">3</span> <span class="toc_entry">Reconstruction and the closure condition</span></a>
+ </li>
+<li class="">
+  <a href="chap-stepreduction.html"><span class="toc_ref">4</span> <span class="toc_entry">Reduction to a four-arc step function</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chap-stepreduction.html#a0000000007"><span class="toc_ref">4.1</span> <span class="toc_entry">The preliminary reparametrization \(h_1\) (project-bespoke construction)</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chap-bicircle.html"><span class="toc_ref">5</span> <span class="toc_entry">Bicircle curves and their error vectors</span></a>
+ </li>
+<li class="">
+  <a href="chap-winding.html"><span class="toc_ref">6</span> <span class="toc_entry">The winding-number argument</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chap-winding.html#a0000000008"><span class="toc_ref">6.1</span> <span class="toc_entry">Topological winding-number primitives</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chap-reduction.html"><span class="toc_ref">7</span> <span class="toc_entry">Closing the \(\kappa \)-curve: the reduction is justified</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chap-reduction.html#a0000000009"><span class="toc_ref">7.1</span> <span class="toc_entry">The breakpoint-aligning reparametrization family \(g_z\)</span></a>
+ </li>
+<li class="">
+  <a href="chap-reduction.html#a0000000010"><span class="toc_ref">7.2</span> <span class="toc_entry">The \(\kappa \)-error map over the disk</span></a>
+ </li>
+<li class="">
+  <a href="chap-reduction.html#a0000000011"><span class="toc_ref">7.3</span> <span class="toc_entry">Change-of-variables keystones for the \(L^1\) estimate</span></a>
+ </li>
+<li class="">
+  <a href="chap-reduction.html#a0000000012"><span class="toc_ref">7.4</span> <span class="toc_entry">Uniform closeness to the bicircle error map</span></a>
+ </li>
+<li class="">
+  <a href="chap-reduction.html#a0000000013"><span class="toc_ref">7.5</span> <span class="toc_entry">The reduction is justified</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chap-simplicity.html"><span class="toc_ref">8</span> <span class="toc_entry">Simplicity of the reconstructed curve</span></a>
+ </li>
+<li class="">
+  <a href="chap-fourvertex.html"><span class="toc_ref">9</span> <span class="toc_entry">Gluck’s converse to the four vertex theorem</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chap-fourvertex.html#a0000000014"><span class="toc_ref">9.1</span> <span class="toc_entry">Reparametrizing back: the realization lemmas</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="chap:closure">3 Reconstruction and the closure condition</h1>
+
+<p>Given a positive radius-of-curvature weight \(\rho = 1/\kappa \), the source builds a curve by integrating the unit tangent \(e^{i\theta }\) against \(\rho \). This chapter records that reconstruction and the precise condition for the resulting curve to close up. </p>
+<div class="definition_thmwrapper theorem-style-definition" id="def:reconstruct">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">15</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-closure.html#def:reconstruct">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-curvature.html#def:radius">Definition 10</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.reconstruct" class="lean_decl">Gluck.reconstruct</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>[Reconstruction curve]    <i class="itshape">Source: DeTurck–Gluck, §4, explicit formula for \(\alpha (\theta )\).</i> For a weight \(\rho : \mathbb {R} \to \mathbb {R}\), the <em>reconstruction curve</em> is </p>
+<div class="displaymath" id="a0000000026">
+  \[  \alpha _\rho (\theta ) \; =\;  \int _0^\theta e^{i\varphi }\, \rho (\varphi )\, d\varphi \; \in \;  \mathbb {C},  \]
+</div>
+<p> the complex form of the source’s \(\alpha (\theta ) = \int _0^\theta (\cos \varphi , \sin \varphi )\, d\varphi /\kappa (\varphi )\) with \(\rho = 1/\kappa \). It begins at the origin and has velocity \(\alpha _\rho '(\theta ) = e^{i\theta }\rho (\theta )\). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:reconstruct_const">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">16</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-closure.html#lem:reconstruct_const">#</a>
+    
+    <a class="icon proof" href="chap-closure.html#a0000000027"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-closure.html#def:reconstruct">Definition 15</a></li>
+          
+          <li><a href="chap-closure.html#def:reconstruct">Definition 15</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.reconstruct_const" class="lean_decl">Gluck.reconstruct_const</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[Reconstruction of a constant weight is a circle]    For a constant weight \(\rho \equiv r\) the reconstruction curve has the closed form </p>
+<div class="displaymath" id="a0000000028">
+  \[  \alpha _{r}(\theta ) \; =\;  r\, i\, \bigl(1 - e^{i\theta }\bigr),  \]
+</div>
+<p> a parametrization (by inclination angle) of the circle of radius \(r\) centred at \(r\, i\). This is the explicit curve realizing the constant curvature \(\kappa \equiv 1/r\), used in the constant case of <a href="chap-fourvertex.html#thm:gluck_converse">theorem 87</a>. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000027">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p> The integrand is \(\varphi \mapsto e^{i\varphi }r\), with antiderivative \(F(\theta ) = r\, i\, (1 - e^{i\theta })\) (indeed \(F'(\theta ) = r\, i\cdot (-i e^{i\theta }) = r\, e^{i\theta }\) since \(-i\cdot i = 1\)). The fundamental theorem of calculus gives \(\alpha _r(\theta ) = F(\theta ) - F(0) = F(\theta )\), as \(F(0) = 0\). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:reconstruct_deriv">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">17</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-closure.html#lem:reconstruct_deriv">#</a>
+    
+    <a class="icon proof" href="chap-closure.html#a0000000029"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-closure.html#def:reconstruct">Definition 15</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.hasDerivAt_reconstruct" class="lean_decl">Gluck.hasDerivAt_reconstruct</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[Velocity of the reconstruction]    If \(\rho \) is continuous then \(\alpha _\rho \) is differentiable with \(\alpha _\rho '(\theta ) = e^{i\theta }\, \rho (\theta )\) for all \(\theta \). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000029">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>The integrand \(\varphi \mapsto e^{i\varphi }\rho (\varphi )\) is continuous, so the fundamental theorem of calculus for the interval integral gives the derivative of \(\theta \mapsto \int _0^\theta \) as the integrand evaluated at \(\theta \). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:signed_curvature_reconstruct">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">18</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-closure.html#lem:signed_curvature_reconstruct">#</a>
+    
+    <a class="icon proof" href="chap-closure.html#a0000000030"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-closure.html#lem:reconstruct_deriv">Lemma 17</a></li>
+          
+          <li><a href="chap-curve.html#def:signed_curvature">Definition 2</a></li>
+          
+          <li><a href="chap-curvature.html#def:radius">Definition 10</a></li>
+          
+          <li><a href="chap-curvature.html#def:is_curvature_function">Definition 9</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.signedCurvature_reconstruct" class="lean_decl">Gluck.signedCurvature_reconstruct</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[Inclination angle and induced curvature]    Let \(\kappa \) be a curvature function (<a href="chap-curvature.html#def:is_curvature_function">definition 9</a>) that is moreover continuously differentiable (\(\kappa \in C^1\)), and set \(\rho = 1/\kappa \). Then \(\rho \in C^1\), the reconstruction curve \(\alpha _\rho \) is \(C^2\) and regular, and it realizes \(\kappa \) as its signed curvature: \(\kappa _{\alpha _\rho }(\theta ) = \kappa (\theta )\) for all \(\theta \), with tangent line turning monotonically (angle of inclination exactly \(\theta \)). </p>
+<p><em>Regularity hypothesis is essential.</em> The signed-curvature formula (<a href="chap-curve.html#def:signed_curvature">definition 2</a>) reads off the second derivative \(\alpha _\rho ''\) (in Lean, <span class="ttfamily">deriv (deriv \(\alpha _\rho \))</span>); without \(\kappa \in C^1\) the weight \(\rho = 1/\kappa \) need not be differentiable, so \(\alpha _\rho ''\) does not exist (and the Lean <span class="ttfamily">deriv</span> returns junk \(0\)), making the conclusion false for a merely-continuous \(\kappa \). The Lean signature therefore carries an explicit <span class="ttfamily">ContDiff ℝ 1 κ</span> hypothesis. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000030">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>By <a href="chap-closure.html#lem:reconstruct_deriv">lemma 17</a>, \(\alpha _\rho '(\theta ) = e^{i\theta }\rho (\theta )\), so the unit tangent is \(e^{i\theta }\) (angle of inclination exactly \(\theta \)) and the speed is \(\lvert \alpha _\rho '(\theta )\rvert = \rho (\theta ) {\gt} 0\). Since \(\kappa \in C^1\) and \(\kappa {\gt} 0\), \(\rho = 1/\kappa \in C^1\), so \(\alpha _\rho '(\theta ) = e^{i\theta }\rho (\theta )\) is itself \(C^1\) and \(\alpha _\rho ''\) exists with \(\alpha _\rho ''(\theta ) = i e^{i\theta }\rho (\theta ) + e^{i\theta }\rho '(\theta )\). Write \(\gamma ' = e^{i\theta }\rho \) with \(\Re \gamma ' = \rho \cos \theta \), \(\Im \gamma ' = \rho \sin \theta \), and \(\Re \gamma '' = \rho '\cos \theta - \rho \sin \theta \), \(\Im \gamma '' = \rho '\sin \theta + \rho \cos \theta \). The signed-curvature numerator is </p>
+<div class="displaymath" id="a0000000031">
+  \[  \Re \gamma '\, \Im \gamma '' - \Im \gamma '\, \Re \gamma '' = \rho ^2(\cos ^2\theta + \sin ^2\theta ) = \rho ^2,  \]
+</div>
+<p> the \(\rho '\) contributions cancelling, while \(\lvert \gamma '\rvert ^3 = \rho ^3\). Hence \(\kappa _{\alpha _\rho }(\theta ) = \rho ^2/\rho ^3 = 1/\rho (\theta ) = \kappa (\theta )\). Equivalently, \(ds/d\theta = \rho \) gives \(d\theta /ds = \kappa \), the source’s defining relation. </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:error_vector">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">19</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-closure.html#def:error_vector">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-closure.html#def:reconstruct">Definition 15</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.errorVector" class="lean_decl">Gluck.errorVector</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>[Closure integrals and error vector]    The <em>error vector</em> of the weight \(\rho \) is </p>
+<div class="displaymath" id="a0000000032">
+  \[  E(\rho ) \; =\;  \alpha _\rho (2\pi ) \; =\;  \int _0^{2\pi } e^{i\theta }\, \rho (\theta )\, d\theta \; \in \;  \mathbb {C}.  \]
+</div>
+<p> Its real and imaginary parts are the <em>closure integrals</em> \(C(\rho )\) and \(S(\rho )\) of ?? below. </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:closure_integral_cos">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">20</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-closure.html#def:closure_integral_cos">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.closureIntegralCos" class="lean_decl">Gluck.closureIntegralCos</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>[Cosine closure integral]   The <em>cosine closure integral</em> of the weight \(\rho \) is the real number </p>
+<div class="displaymath" id="a0000000033">
+  \[  C(\rho ) = \int _0^{2\pi }\! \cos \theta \, \rho (\theta )\, d\theta ,  \]
+</div>
+<p> the real part of the error vector \(E(\rho )\). </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:closure_integral_sin">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">21</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-closure.html#def:closure_integral_sin">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.closureIntegralSin" class="lean_decl">Gluck.closureIntegralSin</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>[Sine closure integral]   The <em>sine closure integral</em> of the weight \(\rho \) is the real number </p>
+<div class="displaymath" id="a0000000034">
+  \[  S(\rho ) = \int _0^{2\pi }\! \sin \theta \, \rho (\theta )\, d\theta ,  \]
+</div>
+<p> the imaginary part of the error vector \(E(\rho )\). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:error_vector_eq">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">22</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-closure.html#lem:error_vector_eq">#</a>
+    
+    <a class="icon proof" href="chap-closure.html#a0000000035"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-closure.html#def:error_vector">Definition 19</a></li>
+          
+          <li><a href="chap-closure.html#def:closure_integral_cos">Definition 20</a></li>
+          
+          <li><a href="chap-closure.html#def:closure_integral_sin">Definition 21</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.errorVector_eq" class="lean_decl">Gluck.errorVector_eq</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[Error vector splits into closure integrals]    Suppose \(\rho \) is continuous. Then \(E(\rho ) = C(\rho ) + i\, S(\rho )\). </p>
+<p>The continuity hypothesis is <em>necessary</em>, not cosmetic: the split into real and imaginary parts uses linearity of the integral, which requires the pieces to be integrable. For a non-integrable \(\rho \) the identity is false (e.g. \(\rho (\theta ) = 1/(\theta - \pi /2)\) on \([0, 2\pi ]\): the \(\mathbb {C}\)-valued Bochner integral \(E(\rho )\) is \(0\) since \(|e^{i\theta }\rho | = |\rho |\) is non-integrable, while \(C(\rho ) = \int \cos \theta \, \rho \ne 0\)). Every call site supplies continuity via <a href="chap-curvature.html#lem:radius_props">lemma 11</a> (\(\rho = 1/\kappa \) continuous). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000035">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Expand \(e^{i\theta } = \cos \theta + i\sin \theta \) and split the integral of the \(\mathbb {C}\)-valued integrand into real and imaginary parts; linearity of the interval integral gives \(E(\rho ) = C(\rho ) + i\, S(\rho )\). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:closes_iff">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">23</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-closure.html#lem:closes_iff">#</a>
+    
+    <a class="icon proof" href="chap-closure.html#a0000000036"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-closure.html#lem:error_vector_eq">Lemma 22</a></li>
+          
+          <li><a href="chap-closure.html#def:reconstruct">Definition 15</a></li>
+          
+          <li><a href="chap-curve.html#def:is_closed_curve">Definition 5</a></li>
+          
+          <li><a href="chap-curvature.html#lem:radius_props">Lemma 11</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.reconstruct_closes_iff" class="lean_decl">Gluck.reconstruct_closes_iff</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[Closure criterion]    <i class="itshape">Source: DeTurck–Gluck, §4 (error vector zero \(\Leftrightarrow \) closes up).</i> Suppose \(\rho = 1/\kappa \) for a curvature function \(\kappa \). The reconstruction curve \(\alpha _\rho \) extends to a closed (\(2\pi \)-periodic) curve if and only if \(E(\rho ) = 0\), equivalently \(C(\rho ) = 0\) and \(S(\rho ) = 0\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000036">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Because \(\alpha _\rho '(\theta ) = e^{i\theta }\rho (\theta )\) is \(2\pi \)-periodic in \(\theta \) (both \(e^{i\theta }\) and \(\rho \) are), the increment of \(\alpha _\rho \) over any period equals \(\alpha _\rho (2\pi ) - \alpha _\rho (0) = E(\rho )\). Hence the \(2\pi \)-periodic extension is well defined (single-valued) precisely when \(E(\rho ) = 0\). By <a href="chap-closure.html#lem:error_vector_eq">lemma 22</a>, \(E(\rho ) = 0\) iff both \(C(\rho )\) and \(S(\rho )\) vanish. </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <svg  id="showmore-minus" class="icon icon-eye-minus showmore"><use xlink:href="symbol-defs.svg#icon-eye-minus"></use></svg>
+
+  <svg  id="showmore-plus" class="icon icon-eye-plus showmore"><use xlink:href="symbol-defs.svg#icon-eye-plus"></use></svg>
+
+  <a href="chap-curvature.html" title="Curvature functions on the circle"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="gluck"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="chap-stepreduction.html" title="Reduction to a four-arc step function"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+<script type="text/javascript" src="js/js.cookie.min.js"></script>
+<script type="text/javascript" src="js/showmore.js"></script>
+</body>
+</html>

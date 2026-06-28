@@ -1,0 +1,168 @@
+\chapter{Plane curves and signed curvature}
+\label{chap:curve}
+
+% archon:covers Gluck/Curve.lean
+
+This chapter sets up the elementary differential geometry of plane curves used
+throughout the project. We model a plane curve as a map $\gamma : \mathbb{R} \to
+\mathbb{C}$, identifying the Euclidean plane $\mathbb{R}^2$ with the complex
+plane $\mathbb{C}$; this matches the complex notation $e^{i\theta}$ used in the
+source for the reconstruction integral.
+
+\begin{definition}\leanok
+[Regular curve]
+  \label{def:is_regular}
+  \lean{Gluck.IsRegular}
+  A map $\gamma : \mathbb{R} \to \mathbb{C}$ is a \emph{regular curve} if it is
+  twice continuously differentiable ($C^2$, encoded \texttt{ContDiff ℝ 2}) and
+  its velocity never vanishes: $\gamma'(t) \neq 0$ for all $t$.
+\end{definition}
+
+% SOURCE: [DeTurck-Gluck], §4, p. 9, lines 163-174 (read from references/deturck-gluck-fourvertex.txt)
+% SOURCE QUOTE: "There is a unique map α: [0, 2π] → R2 which begins at the
+% origin and has unit tangent vector (cos θ, sin θ) and curvature κ(θ) at the
+% point α(θ) . In fact, if s is arc length along this curve, then the equations
+% dα/ds = (cos θ, sin θ)  and  dθ/ds = κ(θ)  quickly lead to the explicit formula
+% α(θ) = ∫0^θ (cos θ, sin θ) dθ / κ(θ) ."
+\begin{definition}\leanok
+[Signed curvature]
+  \label{def:signed_curvature}
+  \lean{Gluck.signedCurvature}
+  \uses{def:is_regular}
+  \textit{Source: DeTurck--Gluck, §4 (defining relations $d\alpha/ds = (\cos\theta,\sin\theta)$, $d\theta/ds = \kappa$).}
+  The \emph{signed curvature} of $\gamma : \mathbb{R} \to \mathbb{C}$ at $t$ is
+  \[
+    \kappa_\gamma(t) \;=\;
+      \frac{\operatorname{Re}\gamma'(t)\,\operatorname{Im}\gamma''(t)
+            - \operatorname{Im}\gamma'(t)\,\operatorname{Re}\gamma''(t)}
+           {\lvert \gamma'(t)\rvert^{3}} .
+  \]
+  This is the standard parametrization-invariant formula; for a curve
+  parametrized by its angle of inclination $\theta$ (so $\gamma'(\theta) =
+  e^{i\theta}/\kappa(\theta)$) it reduces to $\kappa_\gamma(\theta) =
+  \kappa(\theta)$, recovering the source's defining relation $d\theta/ds =
+  \kappa$.
+
+  \emph{This formula is a $C^2$ notion}: it reads off $\gamma''$, so it is only
+  meaningful when $\gamma \in C^2$ (\cref{def:is_regular} bakes in
+  \texttt{ContDiff ℝ 2}). The realized curve of a \emph{merely continuous}
+  curvature function is only $C^1$, so the final theorem expresses curvature
+  realization through the intrinsic notion \cref{def:realizes_curvature} below,
+  not through this formula.
+\end{definition}
+
+% The intrinsic, C¹-applicable curvature-realization predicate. Project-bespoke
+% (no external source beyond the defining relation dθ/ds=κ already quoted for
+% def:signed_curvature); introduced to make the final theorem sound for merely
+% continuous κ, where the deriv²-formula returns junk.
+\begin{definition}
+
+\leanok
+[Intrinsic curvature realization]
+  \label{def:realizes_curvature}
+  \lean{Gluck.RealizesCurvature}
+  \uses{def:is_curvature_function}
+  A curve $\gamma : \mathbb{R} \to \mathbb{C}$ \emph{realizes the curvature
+  function} $\kappa : \mathbb{R} \to \mathbb{R}$ if $\gamma$ is $C^1$, regular
+  ($\gamma'(t) \neq 0$ for all $t$), and there is a differentiable
+  \emph{tangent-angle} function $\varphi : \mathbb{R} \to \mathbb{R}$ such that,
+  for all $t$,
+  \[
+    \gamma'(t) \;=\; \lVert \gamma'(t)\rVert \, e^{i\varphi(t)},
+    \qquad
+    \varphi'(t) \;=\; \kappa(t)\,\lVert \gamma'(t)\rVert .
+  \]
+  The first equation says $\varphi(t)$ is the angle of inclination of the unit
+  tangent; the second is the source's defining relation $d\theta/ds = \kappa$
+  rewritten via the chain rule with arc length $s$, $ds/dt = \lVert\gamma'(t)
+  \rVert$: $\varphi'(t) = (d\varphi/ds)(ds/dt) = \kappa(t)\lVert\gamma'(t)\rVert$.
+
+  \emph{Why this is the right notion.} It needs only $\gamma \in C^1$ (no
+  $\gamma''$): the angle $\varphi$ — not $\gamma$ — is required to be
+  differentiable, and for the reconstruction curve $\alpha_\rho$ (whose velocity
+  is $e^{i\theta}\rho(\theta)$) the tangent angle is exactly the parameter,
+  $\varphi(\theta) = \theta$, which is smooth even when $\alpha_\rho$ is only
+  $C^1$. Thus $\alpha_\rho$ realizes a merely-continuous $\kappa$. When $\kappa >
+  0$, $\varphi' = \kappa\lVert\gamma'\rVert > 0$, so the tangent angle turns
+  strictly monotonically: this is the intrinsic form of \emph{convexity}
+  (rotation index $1$ over a period), replacing the $C^2$ predicate
+  \cref{def:is_convex_curve} in the final theorem.
+\end{definition}
+
+\begin{lemma}
+
+\leanok
+[Intrinsic realization agrees with the formula on $C^2$ curves]
+  \label{lem:realizes_curvature_signedCurvature}
+  \lean{Gluck.signedCurvature_of_realizesCurvature}
+  \uses{def:realizes_curvature, def:signed_curvature, def:is_regular}
+  If $\gamma$ is $C^2$ and regular and realizes $\kappa$
+  (\cref{def:realizes_curvature}), then its signed curvature equals $\kappa$:
+  $\kappa_\gamma(t) = \kappa(t)$ for all $t$. (Bridge between the intrinsic
+  notion and the deriv²-formula; lets the smooth lemma
+  \cref{lem:signed_curvature_reconstruct} and the intrinsic realization be used
+  interchangeably on $C^2$ data.)
+\end{lemma}
+\begin{proof}
+  \uses{def:realizes_curvature, def:signed_curvature}
+  \leanok
+  Write $v(t) = \lVert\gamma'(t)\rVert$, so $\gamma'(t) = v(t)e^{i\varphi(t)}$
+  with $\varphi$ the tangent angle. Since $\gamma \in C^2$ and $\gamma'$ is
+  nonvanishing, $v$ is $C^1$ and $\gamma''(t) = v'(t)e^{i\varphi(t)} + v(t)
+  i\varphi'(t)e^{i\varphi(t)}$. Decompose into real/imaginary parts:
+  $\Re\gamma' = v\cos\varphi$, $\Im\gamma' = v\sin\varphi$, and
+  $\Re\gamma'' = v'\cos\varphi - v\varphi'\sin\varphi$,
+  $\Im\gamma'' = v'\sin\varphi + v\varphi'\cos\varphi$. The signed-curvature
+  numerator is
+  \[
+    \Re\gamma'\,\Im\gamma'' - \Im\gamma'\,\Re\gamma''
+      = v^2\varphi'(\cos^2\varphi + \sin^2\varphi) = v^2\varphi',
+  \]
+  (the $v'$ terms cancel), while $\lVert\gamma'\rVert^3 = v^3$. Hence
+  $\kappa_\gamma = v^2\varphi'/v^3 = \varphi'/v = \kappa$ by the realization
+  relation $\varphi' = \kappa v$.
+\end{proof}
+
+\begin{definition}\leanok
+[Closed curve]
+  \label{def:is_closed_curve}
+  \lean{Gluck.IsClosedCurve}
+  A curve $\gamma : \mathbb{R} \to \mathbb{C}$ is \emph{closed} if it is
+  $2\pi$-periodic: $\gamma(t + 2\pi) = \gamma(t)$ for all $t$.
+\end{definition}
+
+\begin{definition}\leanok
+[Simple closed curve]
+  \label{def:is_simple_closed}
+  \lean{Gluck.IsSimpleClosed}
+  \uses{def:is_closed_curve}
+  A curve $\gamma$ is a \emph{simple closed curve} if it is closed and injective
+  on a fundamental period, i.e. $\gamma$ restricted to $[0, 2\pi)$ is injective.
+  Such a $\gamma$ is the embedding of the circle $S^1 = \mathbb{R}/2\pi\mathbb{Z}$
+  that the converse theorem produces.
+\end{definition}
+
+\begin{definition}\leanok
+[Convex curve]
+  \label{def:is_convex_curve}
+  \lean{Gluck.IsConvexCurve}
+  \uses{def:signed_curvature}
+  A regular curve $\gamma$ is \emph{convex} if its signed curvature is strictly
+  positive everywhere: $\kappa_\gamma(t) > 0$ for all $t$. For a simple closed
+  curve this is equivalent to convexity of the enclosed region.
+\end{definition}
+
+\begin{lemma}\leanok
+[Positive curvature forces convexity]
+  \label{lem:pos_curvature_convex}
+  \lean{Gluck.isConvexCurve_of_signedCurvature_pos}
+  \uses{def:is_convex_curve, def:signed_curvature}
+  If $\gamma$ is regular and $\kappa_\gamma(t) > 0$ for all $t$, then $\gamma$ is
+  convex.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Immediate from the definition of \cref{def:is_convex_curve}: convexity is
+  precisely the everywhere-positivity of the signed curvature.
+\end{proof}

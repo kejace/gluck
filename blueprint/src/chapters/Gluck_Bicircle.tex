@@ -1,0 +1,193 @@
+\chapter{Bicircle curves and their error vectors}
+\label{chap:bicircle}
+
+% archon:covers Gluck/Bicircle.lean
+
+This chapter analyses the geometry of the curves reconstructed from a four-arc
+step curvature $\kappa_0$ (\cref{def:four_arc_step_function}). Such a curve is a
+\emph{bicircle}: four circular arcs, two cut from a circle of curvature $a$ and
+two from a circle of curvature $b$, joined so that the tangent line turns
+continuously through $2\pi$. The main result is Dahlberg's explicit formula
+(Proposition 9.1 of the source) for the error vector of a bicircle, which is the
+input to the winding argument of \cref{chap:winding}.
+
+% SOURCE: [DeTurck-Gluck], §9, p. 15-16, lines 276-298 (read from references/deturck-gluck-fourvertex.txt)
+% SOURCE QUOTE: "PROPOSITION 9.1. A plane curve, built with four arcs cut in
+% alternation from two different size circles, and assembled so that the tangent
+% line turns continuously through an angle of 2π , will close up if and only if
+% opposite arcs are equal in length. ... Proof. We parametrize such a curve by
+% the angle of inclination θ of its tangent line, suppose that 0 < a < b are the
+% curvatures of the two circles to be used, and record the curvature function
+% κ(θ) in the figure below. ... If α(θ) is the resulting curve, then its error
+% vector is given by  E = α(2π) — α(0) = ∫02π eiθ ds = ∫02π eiθ ds/dθ dθ = ∫02π
+% eiθ / κ(θ) dθ . We evaluate this explicitly as a sum of four integrals, and get
+% E = (1/ia — 1/ib) ( [exp(iθ2) — exp(iθ1)] + [exp(iθ4) — exp(iθ3)] ) ."
+\begin{definition}
+
+\leanok
+[Bicircle error vector]
+  \label{def:bicircle_error_vector}
+  \lean{Gluck.bicircleErrorVector}
+  \uses{def:four_arc_step_function, def:error_vector}
+  \textit{Source: DeTurck--Gluck, Proposition 9.1 (§9).}
+  Fix $0 < a < b$ and breakpoints $0 \le \theta_1 < \theta_2 < \theta_3 <
+  \theta_4 < 2\pi$, and let $\kappa_0$ be the four-arc step curvature
+  (\cref{def:four_arc_step_function}) taking the value $b$ on
+  $[\theta_1,\theta_2)\cup[\theta_3,\theta_4)$ and $a$ elsewhere. The
+  \emph{bicircle error vector} is $E_{\mathrm{bi}}(a,b,\theta_1,\dots,\theta_4) =
+  E(1/\kappa_0) = \int_0^{2\pi} e^{i\theta}/\kappa_0(\theta)\,d\theta \in
+  \mathbb{C}$.
+\end{definition}
+
+% SOURCE QUOTE PROOF: see the §9 quote above — "We evaluate this explicitly as a
+% sum of four integrals, and get E = (1/ia — 1/ib) ( [exp(iθ2) — exp(iθ1)] +
+% [exp(iθ4) — exp(iθ3)] )."
+% SIGN CONVENTION: the source writes the scalar as $(1/(ia)-1/(ib))$ for its
+% arc convention. With our `stepCurvature` convention (value $b$ on
+% $[\theta_1,\theta_2)\cup[\theta_3,\theta_4)$, value $a$ on the complement) the
+% correct scalar is the negative, $(1/(ib)-1/(ia))$ — see the proof's term
+% collection below. We state the form our convention actually produces (the one
+% the Lean proof verifies); the two forms differ only by which curvature labels
+% the $b$-arcs, and the downstream winding argument needs only a nonzero scalar
+% multiple of the chord sum, so the sign is immaterial there.
+\begin{lemma}
+
+\leanok
+[Explicit error vector of a bicircle]
+  \label{lem:error_vector_of_bicircle}
+  \lean{Gluck.bicircleErrorVector_eq}
+  \uses{def:bicircle_error_vector}
+  \textit{Source: DeTurck--Gluck, Proposition 9.1 (§9), error-vector formula.}
+  With the notation of \cref{def:bicircle_error_vector},
+  \[
+    E_{\mathrm{bi}}(a,b,\theta_1,\theta_2,\theta_3,\theta_4)
+      \;=\; \Bigl(\tfrac{1}{ib} - \tfrac{1}{ia}\Bigr)
+            \Bigl(\bigl[e^{i\theta_2} - e^{i\theta_1}\bigr]
+                + \bigl[e^{i\theta_4} - e^{i\theta_3}\bigr]\Bigr).
+  \]
+\end{lemma}
+\begin{proof}
+  \uses{def:bicircle_error_vector, lem:bicircle_arc_integral, lem:bicircle_arc_integrable}
+  \leanok
+  The weight $\rho_0 = 1/\kappa_0$ is piecewise constant: it equals $1/b$ on the
+  two arcs $[\theta_1,\theta_2)$ and $[\theta_3,\theta_4)$ and $1/a$ on the two
+  complementary arcs. Split the integral $E(\rho_0) = \int_0^{2\pi}
+  e^{i\theta}\rho_0(\theta)\,d\theta$ into the four arcs. On each arc $\rho_0$ is
+  constant and $\int_{c}^{d} e^{i\theta}\,d\theta = \frac{1}{i}\bigl(e^{id} -
+  e^{ic}\bigr)$. Summing,
+  \[
+    E(\rho_0)
+      = \tfrac{1}{ib}\bigl(e^{i\theta_2}-e^{i\theta_1}\bigr)
+      + \tfrac{1}{ia}\bigl(e^{i\theta_3}-e^{i\theta_2}\bigr)
+      + \tfrac{1}{ib}\bigl(e^{i\theta_4}-e^{i\theta_3}\bigr)
+      + \tfrac{1}{ia}\bigl(e^{i(\theta_1+2\pi)}-e^{i\theta_4}\bigr).
+  \]
+  Using $e^{i(\theta_1+2\pi)} = e^{i\theta_1}$ and collecting the $1/(ia)$ and
+  $1/(ib)$ terms, the four $1/(ia)$ contributions sum to
+  $\tfrac{1}{ia}\bigl((e^{i\theta_3}-e^{i\theta_2}) +
+  (e^{i\theta_1}-e^{i\theta_4})\bigr) = -\tfrac{1}{ia}\bigl((e^{i\theta_2} -
+  e^{i\theta_1}) + (e^{i\theta_4} - e^{i\theta_3})\bigr)$, while the two $1/(ib)$
+  contributions sum to $\tfrac{1}{ib}\bigl((e^{i\theta_2} - e^{i\theta_1}) +
+  (e^{i\theta_4} - e^{i\theta_3})\bigr)$. Hence the total is exactly
+  $\bigl(\tfrac{1}{ib} - \tfrac{1}{ia}\bigr)\bigl([e^{i\theta_2} - e^{i\theta_1}]
+  + [e^{i\theta_4} - e^{i\theta_3}]\bigr)$, the stated form. (The source's
+  $\bigl(\tfrac{1}{ia} - \tfrac{1}{ib}\bigr)$ is the same up to the overall sign,
+  which only reflects the opposite labelling of the two curvature values on the
+  arcs.)
+\end{proof}
+
+% --- Computational helpers for the four-arc integral (Lean-side; small lemmas
+% that the proof of lem:error_vector_of_bicircle factors through). ---
+\begin{lemma}
+
+\leanok
+[Arc integral of $e^{i\theta}$]
+  \label{lem:integral_cexp_I}
+  \lean{Gluck.integral_cexp_I}
+  Project-bespoke. For real $c \le d$, $\int_c^d e^{i\theta}\,d\theta =
+  -i\bigl(e^{id} - e^{ic}\bigr)$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Fundamental theorem of calculus with antiderivative $-i\,e^{i\theta}$ (whose
+  derivative is $e^{i\theta}$, using $i\cdot i = -1$).
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[Step integrand is a.e.\ constant on an arc]
+  \label{lem:bicircle_arc_integrand_eq}
+  \lean{Gluck.bicircle_arc_integrand_eq}
+  \uses{def:four_arc_step_function}
+  Project-bespoke. On an arc $(c,d]$ on which $\kappa_0 \equiv v$, the integrand
+  $e^{i\theta}\rho_0(\theta)$ agrees almost everywhere with $e^{i\theta}(1/v)$
+  (the two single breakpoints are null).
+\end{lemma}
+\begin{proof}
+
+\leanok
+  $\rho_0 = 1/\kappa_0 = 1/v$ on the half-open arc; the endpoint where it may
+  differ is a single point, of Lebesgue measure zero.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[Per-arc integral value]
+  \label{lem:bicircle_arc_integral}
+  \lean{Gluck.bicircle_arc_integral}
+  \uses{lem:integral_cexp_I, lem:bicircle_arc_integrand_eq}
+  Project-bespoke. On an arc $[c,d]$ where $\kappa_0 \equiv v$,
+  $\int_c^d e^{i\theta}\rho_0\,d\theta = (1/v)\,(-i)\,(e^{id}-e^{ic})$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Replace the integrand by its a.e.\ representative
+  (\cref{lem:bicircle_arc_integrand_eq}), pull out the constant $1/v$, and apply
+  \cref{lem:integral_cexp_I}.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[Per-arc integrability]
+  \label{lem:bicircle_arc_integrable}
+  \lean{Gluck.bicircle_arc_integrable}
+  \uses{def:four_arc_step_function}
+  Project-bespoke. The integrand $e^{i\theta}\rho_0$ is interval-integrable on
+  each of the five constant arcs.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  On each arc the integrand agrees a.e.\ with a continuous function (the constant
+  weight times $e^{i\theta}$), which is interval-integrable; integrability
+  transfers along a.e.\ equality.
+\end{proof}
+
+\begin{corollary}
+
+\leanok
+[Bicircle closes iff opposite arcs equal]
+  \label{cor:bicircle_closes_iff}
+  \lean{Gluck.bicircleErrorVector_eq_zero_iff}
+  \uses{lem:error_vector_of_bicircle, lem:closes_iff}
+  \textit{Source: DeTurck--Gluck, Proposition 9.1 (closure criterion).}
+  Since $a \ne b$ the scalar $\tfrac{1}{ia} - \tfrac{1}{ib} \ne 0$, so the
+  bicircle closes up ($E_{\mathrm{bi}} = 0$) if and only if
+  $\bigl(e^{i\theta_2} - e^{i\theta_1}\bigr) + \bigl(e^{i\theta_4} -
+  e^{i\theta_3}\bigr) = 0$, i.e. the two chords $e^{i\theta_2} - e^{i\theta_1}$
+  and $e^{i\theta_4} - e^{i\theta_3}$ are equal and opposite. Geometrically this
+  is the source's ``opposite arcs are equal in length'': the arc-length of each
+  arc is its angular extent divided by its curvature, and the condition equates
+  the two pairs of opposite arcs.
+\end{corollary}
+\begin{proof}
+  \uses{lem:error_vector_of_bicircle}
+  \leanok
+  Immediate from \cref{lem:error_vector_of_bicircle}: a nonzero complex scalar
+  times a vector is zero iff the vector is zero.
+\end{proof}

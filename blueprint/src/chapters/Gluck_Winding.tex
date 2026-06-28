@@ -1,0 +1,605 @@
+\chapter{The winding-number argument}
+\label{chap:winding}
+
+% archon:covers Gluck/Winding.lean
+
+This is the analytic core of Gluck's proof. We vary the four breakpoints of the
+bicircle (\cref{chap:bicircle}) over a concrete convex $2$-disk $D$ of
+configurations, show that the error vector $E$ traces a loop winding once around
+the origin as the configuration runs over $\partial D$, and invoke a planar
+degree theorem: a continuous map on a disk whose boundary winds once around $0$
+has an interior zero. That interior zero is a configuration whose bicircle closes
+up.
+
+\medskip
+
+\noindent\emph{Mathlib gap.} Mathlib provides holomorphic winding (Cauchy
+integral formula) but \emph{no} topological planar winding number of a continuous
+loop, and no ``nonzero boundary winding $\Rightarrow$ interior zero'' theorem.
+Both are built project-side here; see \cref{thm:existence_of_zero}. We use a
+finite-dimensional $2$-disk of breakpoint configurations, \emph{not} loops in the
+diffeomorphism group $\mathrm{Diff}(S^1)$ (which has no Mathlib homotopy
+infrastructure): this is the strategic replacement for the source's
+``contractible loop of diffeomorphisms''.
+
+\section{Topological winding-number primitives}
+
+Mathlib has no topological winding number of a continuous loop $S^1 \to
+\mathbb{C}\setminus\{0\}$. We build one project-side from the exponential covering
+$\mathrm{Circle.exp} : \mathbb{R} \to S^1$ (Mathlib's
+\texttt{Circle.isCoveringMap\_exp}) by lifting and measuring the total angle
+increment. These are the supporting declarations that
+\cref{thm:existence_of_zero} and \cref{lem:error_map_winds_boundary} consume; each
+carries a \lean{} pin so the Lean file is in $1$-to-$1$ correspondence with the
+blueprint.
+
+\begin{definition}
+
+\leanok
+[Angle lift of a circle loop]
+  \label{def:angle_lift}
+  \lean{Gluck.angleLift}
+  Project-bespoke. The continuous \emph{angle lift} of a loop $g : [0,1] \to S^1$:
+  the path $\widetilde g : [0,1] \to \mathbb{R}$ obtained by lifting $g$ along the
+  covering $\mathrm{Circle.exp}$ (Mathlib \texttt{IsCoveringMap.liftPath}),
+  starting at a chosen real preimage of $g(0)$.
+\end{definition}
+
+\begin{lemma}
+
+\leanok
+[The angle lift lifts]
+  \label{lem:angle_lift_lifts}
+  \lean{Gluck.angleLift_lifts}
+  \uses{def:angle_lift}
+  Project-bespoke. $\mathrm{Circle.exp}(\widetilde g(t)) = g(t)$ for all $t$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Immediate from the lifting property \texttt{IsCoveringMap.liftPath\_lifts}.
+\end{proof}
+
+\begin{definition}
+
+\leanok
+[Winding number of a circle loop]
+  \label{def:winding_number}
+  \lean{Gluck.windingNumber}
+  \uses{def:angle_lift}
+  Project-bespoke. The \emph{winding number} of $g : [0,1] \to S^1$ is the
+  normalised total angle increment $W(g) = (\widetilde g(1) - \widetilde g(0))/(2\pi)$.
+\end{definition}
+
+\begin{lemma}
+
+\leanok
+[A constant loop does not wind]
+  \label{lem:winding_number_const}
+  \lean{Gluck.windingNumber_const}
+  \uses{def:winding_number}
+  Project-bespoke. $W$ of a constant loop is $0$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  The lift of a constant loop is constant (\texttt{liftPath\_const}), so the
+  increment is $0$.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[Integer-valued continuous functions on $[0,1]$ are constant]
+  \label{lem:int_valued_eq}
+  \lean{Gluck.int_valued_eq}
+  Project-bespoke. A continuous $q : [0,1] \to \mathbb{R}$ taking only integer
+  values is constant.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  If $q(a) \ne q(b)$, the intermediate value theorem (on the connected $[0,1]$)
+  forces $q$ to take the non-integer value halfway between two consecutive
+  integers, a contradiction.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[Any lift computes the winding number]
+  \label{lem:winding_number_eq_div_of_lift}
+  \lean{Gluck.windingNumber_eq_div_of_lift}
+  \uses{def:winding_number, lem:int_valued_eq, lem:angle_lift_lifts}
+  Project-bespoke. If $\varphi : [0,1] \to \mathbb{R}$ is \emph{any} continuous
+  lift of $g$ (i.e.\ $\mathrm{Circle.exp}\circ\varphi = g$), then $W(g) =
+  (\varphi(1) - \varphi(0))/(2\pi)$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:int_valued_eq}
+  \leanok
+  $\varphi - \widetilde g$ is continuous and $2\pi\mathbb{Z}$-valued (two lifts of
+  the same loop differ by a constant in the fibre, via \texttt{Circle.exp\_eq\_exp}),
+  hence constant by \cref{lem:int_valued_eq}; so the two increments agree.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[Winding number is a free-homotopy invariant]
+  \label{lem:winding_number_eq_of_homotopy}
+  \lean{Gluck.windingNumber_eq_of_homotopy}
+  \uses{def:winding_number, lem:winding_number_eq_div_of_lift, lem:int_valued_eq}
+  Project-bespoke. If $H : [0,1]\times[0,1] \to S^1$ is a continuous homotopy
+  \emph{through loops} (each slice $H(s,\cdot)$ is a loop), then $W(H(0,\cdot)) =
+  W(H(1,\cdot))$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:winding_number_eq_div_of_lift, lem:int_valued_eq}
+  \leanok
+  Lift $H$ along $\mathrm{Circle.exp}$ to $\widetilde H$ (Mathlib
+  \texttt{IsCoveringMap.liftHomotopy}). For each $s$, $(\widetilde H(s,1) -
+  \widetilde H(s,0))/2\pi$ equals $W(H(s,\cdot))$ (by
+  \cref{lem:winding_number_eq_div_of_lift}) and is integer-valued (loop condition
+  $H(s,0)=H(s,1)$), hence constant in $s$ by \cref{lem:int_valued_eq}.
+\end{proof}
+
+\begin{definition}
+
+\leanok
+[Standard once-around circle loop]
+  \label{def:standard_loop}
+  \lean{Gluck.standardLoop}
+  Project-bespoke. The loop $g_0 : [0,1] \to S^1$, $g_0(t) =
+  \mathrm{Circle.exp}(2\pi t)$.
+\end{definition}
+
+\begin{lemma}
+
+\leanok
+[Winding number is additive under pointwise product]
+  \label{lem:winding_number_mul}
+  \lean{Gluck.windingNumber_mul}
+  \uses{def:winding_number, lem:winding_number_eq_div_of_lift, lem:angle_lift_lifts}
+  Project-bespoke. For circle loops $g, h$, $W(g\cdot h) = W(g) + W(h)$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  $\widetilde g + \widetilde h$ is a continuous lift of $g\cdot h$ (since
+  $\mathrm{Circle.exp}(\widetilde g + \widetilde h) = \mathrm{Circle.exp}\,
+  \widetilde g \cdot \mathrm{Circle.exp}\,\widetilde h = g\cdot h$ by
+  \texttt{Circle.exp\_add} and \cref{lem:angle_lift_lifts}); apply
+  \cref{lem:winding_number_eq_div_of_lift} and split the increment.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[The standard once-around loop has winding number one]
+  \label{lem:winding_number_standard}
+  \lean{Gluck.windingNumber_standard}
+  \uses{def:winding_number, def:standard_loop, lem:winding_number_eq_div_of_lift}
+  Project-bespoke. The loop $g_0(t) = \mathrm{Circle.exp}(2\pi t)$ has winding
+  number $W(g_0) = 1$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:winding_number_eq_div_of_lift}
+  \leanok
+  The map $\varphi(t) = 2\pi t$ is a continuous lift of $g_0$, so by
+  \cref{lem:winding_number_eq_div_of_lift} $W(g_0) = (\varphi(1)-\varphi(0))/2\pi =
+  (2\pi - 0)/2\pi = 1$. This is the keystone nonzero-winding computation: every
+  ``winding $= \pm1 \ne 0$'' assertion downstream reduces to it via homotopy
+  invariance (\cref{lem:winding_number_eq_of_homotopy}).
+\end{proof}
+
+\begin{definition}
+
+\leanok
+[Radial projection to the circle]
+  \label{def:circle_proj}
+  \lean{Gluck.circleProj}
+  Project-bespoke. For $z \ne 0$, $\mathrm{circleProj}(z) = z/\lVert z\rVert \in
+  S^1$, the radial normalisation onto the unit circle.
+\end{definition}
+
+\begin{lemma}
+
+\leanok
+[Radial projection formula]
+  \label{lem:circle_proj_eq}
+  \lean{Gluck.circleProj_eq}
+  \uses{def:circle_proj}
+  Project-bespoke. As a complex number, $\mathrm{circleProj}(z) = z/\lVert z\rVert$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Unfolding the definition; membership in $S^1$ is $\lVert z/\lVert z\rVert\rVert = 1$.
+\end{proof}
+
+\begin{lemma}
+
+[Radial projection: congruence, coercion, multiplicativity]
+  \label{lem:circle_proj_helpers}
+  \lean{Gluck.circleProj_mul, Gluck.circleProj_coe, Gluck.circleProj_congr}
+  \uses{def:circle_proj, lem:circle_proj_eq}
+  Project-bespoke (private in-file helpers). (i) \emph{congruence}
+  ($\mathrm{circleProj\_congr}$): $a=b \Rightarrow \mathrm{circleProj}(a) =
+  \mathrm{circleProj}(b)$; (ii) \emph{coercion} ($\mathrm{circleProj\_coe}$): for
+  $z\in S^1$, $\mathrm{circleProj}(z) = z$; (iii) \emph{multiplicativity}
+  ($\mathrm{circleProj\_mul}$): $\mathrm{circleProj}(c\,z) =
+  \mathrm{circleProj}(c)\,\mathrm{circleProj}(z)$ for $c,z\ne 0$.
+\end{lemma}
+\begin{proof}
+
+  All three by unfolding \cref{lem:circle_proj_eq} ($\mathrm{circleProj}(z) =
+  z/\lVert z\rVert$): (i) is substitution; (ii) uses $\lVert z\rVert = 1$ on
+  $S^1$; (iii) uses $\lVert c z\rVert = \lVert c\rVert\,\lVert z\rVert$.
+\end{proof}
+
+\begin{definition}
+
+\leanok
+[Normalised loop of a $\mathbb{C}$-loop]
+  \label{def:norm_loop}
+  \lean{Gluck.normLoop}
+  \uses{def:circle_proj}
+  Project-bespoke. For a nonvanishing loop $\gamma : [0,1] \to \mathbb{C}$,
+  $\mathrm{normLoop}\,\gamma$ is the circle loop $t \mapsto
+  \mathrm{circleProj}(\gamma(t))$.
+\end{definition}
+
+\begin{definition}
+
+\leanok
+[Winding number of a $\mathbb{C}$-loop]
+  \label{def:winding_number_c}
+  \lean{Gluck.windingNumberC}
+  \uses{def:winding_number, def:norm_loop}
+  Project-bespoke. The winding number of a nonvanishing loop $\gamma : [0,1] \to
+  \mathbb{C}$ is $W_{\mathbb{C}}(\gamma) = W(\mathrm{normLoop}\,\gamma)$.
+\end{definition}
+
+\begin{lemma}
+
+\leanok
+[Scaling invariance of the $\mathbb{C}$-winding number]
+  \label{lem:winding_number_c_const_mul}
+  \lean{Gluck.windingNumberC_const_mul}
+  \uses{def:winding_number_c, def:norm_loop, lem:winding_number_mul,
+        lem:winding_number_const, lem:circle_proj_helpers}
+  Project-bespoke. For $c\ne 0$ and a nonvanishing loop $\gamma$,
+  $W_{\mathbb{C}}(c\cdot\gamma) = W_{\mathbb{C}}(\gamma)$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  By \cref{lem:circle_proj_helpers}(iii), $\mathrm{normLoop}(c\cdot\gamma) =
+  \mathrm{circleProj}(c)\cdot\mathrm{normLoop}\,\gamma$ as a product of circle
+  loops (the first factor constant); apply \cref{lem:winding_number_mul} and
+  \cref{lem:winding_number_const} ($W$ of the constant factor is $0$).
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[Winding is stable under small perturbations]
+  \label{lem:winding_number_c_perturb}
+  \lean{Gluck.windingNumberC_eq_of_perturb}
+  \uses{def:winding_number_c, def:norm_loop, lem:winding_number_eq_of_homotopy}
+  Project-bespoke. Let $\gamma,\gamma'$ be nowhere-zero loops with
+  $\lVert\gamma'(t)-\gamma(t)\rVert < \lVert\gamma(t)\rVert$ for all $t$. Then
+  $W_{\mathbb{C}}(\gamma') = W_{\mathbb{C}}(\gamma)$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  The straight-line homotopy $\gamma_\tau = \gamma + \tau(\gamma'-\gamma)$ stays
+  nowhere zero on $[0,1]^2$ by the reverse triangle inequality
+  ($\lVert\gamma_\tau\rVert \ge \lVert\gamma\rVert - \lVert\gamma'-\gamma\rVert >
+  0$); normalise it and apply \cref{lem:winding_number_eq_of_homotopy}.
+\end{proof}
+
+\begin{definition}
+
+[The unit-circle $\mathbb{C}$-loop]
+  \label{def:circle_exp_loop}
+  \lean{Gluck.circleExpLoop, Gluck.circleExpLoop_ne}
+  \uses{def:standard_loop}
+  Project-bespoke. $\mathbb{C}$-valued loop $t \mapsto e^{2\pi i t}$, the
+  coercion of $g_0$ (\cref{def:standard_loop}) into $\mathbb{C}$; it is
+  nowhere zero ($\mathrm{circleExpLoop\_ne}$, since its values lie on $S^1$).
+\end{definition}
+
+\begin{lemma}
+
+\leanok
+[The unit-circle $\mathbb{C}$-loop winds once]
+  \label{lem:winding_number_c_circle_exp}
+  \lean{Gluck.windingNumberC_circle_exp}
+  \uses{def:circle_exp_loop, def:winding_number_c, def:norm_loop,
+        lem:winding_number_standard, lem:circle_proj_helpers}
+  Project-bespoke. $W_{\mathbb{C}}(t\mapsto e^{2\pi i t}) = 1$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Its normalisation is $g_0$ (\cref{lem:circle_proj_helpers}(ii), values already
+  on $S^1$), so the claim is \cref{lem:winding_number_standard}. This is the
+  concrete nonzero $\mathbb{C}$-winding against which the linear model of the
+  error map is compared in \cref{lem:error_map_winds_boundary}.
+\end{proof}
+
+\begin{definition}
+
+\leanok
+[Boundary loop of the unit disk]
+  \label{def:disk_boundary_loop}
+  \lean{Gluck.diskBoundaryLoop}
+  Project-bespoke. For $F : \overline{\mathbb{D}} \to \mathbb{C}$, the
+  \emph{boundary loop} is $t \mapsto F(e^{2\pi i t})$.
+\end{definition}
+
+\begin{lemma}
+
+\leanok
+[Boundary loop is nonvanishing]
+  \label{lem:disk_boundary_loop_ne_zero}
+  \lean{Gluck.diskBoundaryLoop_ne_zero}
+  \uses{def:disk_boundary_loop}
+  Project-bespoke. If $F \ne 0$ on $\partial\mathbb{D}$, the boundary loop is
+  nowhere zero.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Each point $e^{2\pi i t}$ lies on $\partial\mathbb{D}$, where $F \ne 0$.
+\end{proof}
+
+% SOURCE: [DeTurck-Gluck], §6, p. 12-13, lines 218-237 (read from references/deturck-gluck-fourvertex.txt)
+% SOURCE QUOTE: "The picture has eight portions, located at the eight points of
+% the compass. Each contains a small circle which shows a curvature step function
+% κ0 ◦ h , and a larger curve which realizes it ... The figures are arranged so
+% that the one in the east has an error vector pointing east, the one in the
+% northeast has an error vector pointing northeast, and so on. The eight
+% diffeomorphisms h are samples from a loop of diffeomorphisms of the circle, and
+% the corresponding error vectors E(h) wind once around the origin. The loop is
+% contractible in Diff(S1) because each diffeomorphism leaves the bottom point of
+% the circle fixed."
+\begin{definition}
+
+\leanok
+[Configuration disk]
+  \label{def:configuration_space}
+  \lean{Gluck.configSpace}
+  \uses{def:four_arc_step_function}
+  \textit{Source: DeTurck--Gluck, §6 (the loop of diffeomorphisms, finitised).}
+  Fix $0 < a < b$ and a radius $0 < \delta \le \pi/8$. The \emph{configuration
+  disk} is the explicit two-parameter family parametrised by the closed unit disk
+  $\overline{\mathbb{D}} \subset \mathbb{R}^2$ (coordinates $(x,y)$, $x^2+y^2 \le
+  1$): the two leading breakpoints vary while the trailing two are pinned,
+  \[
+    \mathrm{configSpace}(x,y) \;=\;
+      \bigl(\theta_1,\theta_2,\theta_3,\theta_4\bigr)
+      \;=\;\Bigl(\tfrac{\pi}{4} + \delta x,\;
+                 \tfrac{3\pi}{4} + \delta y,\;
+                 \tfrac{5\pi}{4},\;\tfrac{7\pi}{4}\Bigr).
+  \]
+  The centre $(x,y)=(0,0)$ is the canonical equally-spaced bicircle (breakpoints
+  $\tfrac{\pi}{4},\tfrac{3\pi}{4},\tfrac{5\pi}{4},\tfrac{7\pi}{4}$, four arcs of
+  length $\pi/2$), which closes up: its chord sum is $V = (e^{3\pi i/4} - e^{\pi
+  i/4}) + (e^{7\pi i/4} - e^{5\pi i/4}) = -\sqrt2 + \sqrt2 = 0$, so by
+  \cref{cor:bicircle_closes_iff} the canonical bicircle has zero error vector. The
+  bound $\delta \le \pi/8$ keeps the order constraint $0 < \theta_1 < \theta_2 <
+  \theta_3 < \theta_4 < \theta_1 + 2\pi$ on all of $\overline{\mathbb{D}}$ (since
+  $|\delta x|, |\delta y| \le \delta \le \pi/8 < \pi/4$). $\mathrm{configSpace}$ is
+  affine, hence continuous, and is a homeomorphism onto its (convex) image.
+\end{definition}
+
+\begin{lemma}
+
+[Configuration disk: continuity and order]
+  \label{lem:config_space_props}
+  \lean{Gluck.configSpace_ordered, Gluck.continuous_configSpace}
+  \uses{def:configuration_space}
+  Project-bespoke. (i) $\mathrm{configSpace}(\delta)$ is continuous
+  ($\mathrm{continuous\_configSpace}$, being affine). (ii) For $0<\delta\le\pi/8$
+  and $\lvert x\rvert,\lvert y\rvert\le 1$, the order constraint $0<\theta_1<
+  \theta_2<\theta_3<\theta_4<\theta_1+2\pi$ holds ($\mathrm{configSpace\_ordered}$).
+\end{lemma}
+\begin{proof}
+
+  (i) by \texttt{fun\_prop} on the affine formula. (ii) substitute the formulas
+  $\theta_1=\pi/4+\delta x$, etc.; $\lvert\delta x\rvert,\lvert\delta y\rvert\le
+  \delta\le\pi/8<\pi/4$ keeps the four breakpoints strictly ordered within one
+  period (\texttt{nlinarith}/\texttt{linarith}).
+\end{proof}
+
+\begin{remark}
+  The source realises the family as samples from a contractible loop of
+  circle diffeomorphisms fixing the bottom point; the eight compass pictures are
+  eight samples whose error vectors point in the eight compass directions. The
+  finite-dimensional disk $D$ records exactly the data that the error vector
+  depends on (the four breakpoints), discarding the rest of the diffeomorphism.
+  Contractibility of the source's loop corresponds to $D$ being a disk (its
+  boundary $\partial D$ is the loop, contractible in $D$).
+\end{remark}
+
+\begin{definition}
+
+[The error map and its closed form]
+  \label{def:error_map}
+  \lean{Gluck.errorMap, Gluck.errorMap_eq, Gluck.continuousOn_errorMap}
+  \uses{def:configuration_space, def:bicircle_error_vector}
+  Project-bespoke. $\mathrm{errorMap}(a,b,\delta)(z) := E_{\mathrm{bi}}\bigl(a,b,
+  \mathrm{configSpace}(\delta)(z.\mathrm{re},z.\mathrm{im})\bigr)$ is the bicircle
+  error vector of the configuration parametrised by $z\in\overline{\mathbb{D}}$.
+  $\mathrm{errorMap\_eq}$ records its closed form $E = s\cdot(V+\sqrt2)$ on the
+  disk (from \cref{lem:error_vector_of_bicircle}), and
+  $\mathrm{continuousOn\_errorMap}$ its continuity there.
+\end{definition}
+
+\begin{definition}
+
+[Reverse once-around loop primitives]
+  \label{def:reverse_loop}
+  \lean{Gluck.negStandardLoop, Gluck.windingNumber_negStandard,
+        Gluck.negCircleExpLoop, Gluck.negCircleExpLoop_ne,
+        Gluck.windingNumberC_negCircleExp, Gluck.windingNumberC_congr}
+  \uses{def:standard_loop, def:circle_exp_loop, lem:winding_number_standard}
+  Project-bespoke mirrors of \cref{def:standard_loop}/\cref{def:circle_exp_loop}
+  with reversed orientation: $\mathrm{negStandardLoop}(t)=\exp(-2\pi i t)$ with
+  winding $-1$ (lift $\varphi(t)=-2\pi t$), its $\mathbb{C}$-valued form
+  $\mathrm{negCircleExpLoop}$ (nonvanishing) with $W_\mathbb{C}=-1$, and
+  $\mathrm{windingNumberC\_congr}$ (pointwise-equal $\mathbb{C}$-loops have equal
+  winding). These realise the linear model $L=\delta e^{-i\pi/4}e^{-2\pi i t}$ in
+  the proof of \cref{lem:error_map_winds_boundary}.
+\end{definition}
+
+% SOURCE: [DeTurck-Gluck], §4 and §6, lines 181-188, 227-237 (read from references/deturck-gluck-fourvertex.txt)
+% SOURCE QUOTE: "the corresponding error vectors E(h) will wind once around the
+% origin. Furthermore, we will do this so that the loop is contractible in the
+% group Diff(S 1) of diffeomorphisms of the circle, and conclude that for some h
+% \"inside\" this loop, the curve αh will have error vector E(h) = 0 ."
+\begin{lemma}
+
+[The error map winds nontrivially on the boundary]
+  \label{lem:error_map_winds_boundary}
+  \lean{Gluck.errorMap_winding_eq_one, Gluck.errorMap_order, Gluck.Vpart,
+        Gluck.Lpart, Gluck.Lpart_norm, Gluck.pert_lt, Gluck.Vpart_ne,
+        Gluck.remainder_identity, Gluck.remainder_norm_le,
+        Gluck.continuous_Vpart_boundary, Gluck.errVloop, Gluck.errSVloop,
+        Gluck.errLloop, Gluck.errLloop_eq_Lpart}
+  \uses{def:configuration_space, def:error_map, def:reverse_loop,
+        lem:error_vector_of_bicircle, def:winding_number_c,
+        lem:winding_number_standard}
+  \textit{Source: DeTurck--Gluck, §6 (error vectors wind once around the origin).}
+  Let $E : \overline{\mathbb{D}} \to \mathbb{C}$ send $(x,y)$ to the bicircle error
+  vector of $\mathrm{configSpace}(x,y)$ (\cref{def:configuration_space},
+  \cref{lem:error_vector_of_bicircle}). For all sufficiently small $\delta > 0$,
+  $E$ is continuous, $E \ne 0$ on the boundary circle $\partial\mathbb{D}$, and the
+  boundary loop $E|_{\partial\mathbb{D}}$ has \emph{nonzero} winding number
+  $W_{\mathbb{C}}(E|_{\partial\mathbb{D}}) = \pm 1 \ne 0$ about the origin.
+
+  \emph{(Only nonvanishing of the winding number is used downstream
+  (\cref{cor:closing_configuration_exists}, \cref{thm:existence_of_zero}); the sign
+  $-1$ here merely reflects the orientation of the chosen parametrisation.)}
+\end{lemma}
+\begin{proof}
+  \uses{lem:error_vector_of_bicircle, def:configuration_space, def:winding_number_c,
+        lem:winding_number_eq_of_homotopy, lem:winding_number_standard}
+  By \cref{lem:error_vector_of_bicircle}, $E(x,y) = s\cdot V(x,y)$ with the nonzero
+  constant scalar $s = \tfrac{1}{ib} - \tfrac{1}{ia}$ (nonzero since $a \ne b$) and
+  chord sum
+  \[
+    V(x,y) = \bigl(e^{i\theta_2} - e^{i\theta_1}\bigr) + \sqrt2,
+    \qquad \theta_1 = \tfrac{\pi}{4}+\delta x,\ \theta_2 = \tfrac{3\pi}{4}+\delta y,
+  \]
+  (using $e^{i\theta_4}-e^{i\theta_3} = e^{7\pi i/4}-e^{5\pi i/4} = \sqrt2$ for the
+  pinned trailing breakpoints). $E$ is a composition of continuous maps, hence
+  continuous. Multiplying a loop by the fixed nonzero scalar $s$ does not change its
+  winding number, so $W_{\mathbb{C}}(E|_{\partial\mathbb{D}}) =
+  W_{\mathbb{C}}(V|_{\partial\mathbb{D}})$; it remains to compute the winding of $V$.
+
+  \emph{Linear model.} The first-order Taylor expansion of $V$ at the centre is the
+  invertible $\mathbb{R}$-linear map
+  \[
+    L(x,y) = \tfrac{\delta}{\sqrt2}\bigl[(x-y) - i\,(x+y)\bigr],
+  \]
+  obtained from $\partial_x V = \delta(-i\,e^{i\pi/4}) = \tfrac{\delta}{\sqrt2}(1-i)$
+  and $\partial_y V = \delta(i\,e^{3\pi i/4}) = \tfrac{\delta}{\sqrt2}(-1-i)$. As a
+  matrix $L = \delta\,U$ with $U = \tfrac{1}{\sqrt2}\bigl(\begin{smallmatrix} 1 & -1
+  \\ -1 & -1\end{smallmatrix}\bigr)$ orthogonal ($\det U = -1$); hence $\lVert
+  L(x,y)\rVert =
+  \delta$ for every $(x,y)$ on the unit circle, and $V(0,0)=0$ so $V = L + R$ with
+  remainder $R$ vanishing to second order: $\lVert R(x,y)\rVert \le C\delta^2$ on
+  $\partial\mathbb{D}$ (the map $(x,y) \mapsto e^{i\theta_2}-e^{i\theta_1}$ is smooth
+  with second derivatives bounded by $\delta^2$, so the linear-Taylor error is
+  $O(\delta^2)$ with an absolute constant $C$).
+
+  \emph{Homotopy to the linear model.} Choose $\delta$ small enough that $C\delta^2
+  < \delta$, i.e.\ $\delta < 1/C$ (and $\delta \le \pi/8$ as in
+  \cref{def:configuration_space}). Then on $\partial\mathbb{D}$, $\lVert R\rVert \le
+  C\delta^2 < \delta = \lVert L\rVert$, so the straight-line homotopy $V_\tau = L +
+  \tau R$ ($\tau\in[0,1]$) is nowhere zero on $\partial\mathbb{D}$ (since $\lVert
+  V_\tau\rVert \ge \lVert L\rVert - \lVert R\rVert > 0$). By
+  \cref{lem:winding_number_eq_of_homotopy} (applied to the induced homotopy of
+  normalised circle loops), $W_{\mathbb{C}}(V|_{\partial\mathbb{D}}) =
+  W_{\mathbb{C}}(L|_{\partial\mathbb{D}})$.
+
+  \emph{Winding of the linear model.} $L = \delta U$ is an invertible
+  $\mathbb{R}$-linear map; the further straight-line homotopy of $U$ to the standard
+  reflection through invertible matrices (any invertible matrix is path-connected
+  within $\mathrm{GL}_2$ to $\pm$ a rotation, the path stays invertible so the loop
+  stays nonzero) carries $L|_{\partial\mathbb{D}}$ to the standard once-around loop
+  up to orientation; by \cref{lem:winding_number_standard} its winding is $\pm 1$,
+  with sign $\operatorname{sgn}(\det U) = -1$. In particular it is nonzero. This is
+  the planar analogue of ``a degree-one polynomial winds once''
+  (\cref{thm:existence_of_zero}'s FTA analogy).
+\end{proof}
+
+% SOURCE: [DeTurck-Gluck], §7, p. 13-14, lines 251-259 (read from references/deturck-gluck-fourvertex.txt)
+% SOURCE QUOTE: "Proving something that is obvious by using a robust argument
+% reminds us of the proof that the polynomial p0(z) = an zn has a zero by noting
+% that it takes any circle in the complex plane to a curve which winds n times
+% around the origin. After all, it is obvious that p0(z) has a zero at the
+% origin. But this argument is also robust, and applies equally well to the
+% polynomial p(z) = an zn + ... + a0 , when z moves around a suitably large
+% circle, giving us the usual topological proof of the Fundamental Theorem of
+% Algebra."
+\begin{theorem}
+
+\leanok
+[Nonzero boundary winding forces an interior zero]
+  \label{thm:existence_of_zero}
+  \lean{Gluck.exists_zero_of_boundary_winding}
+  \uses{lem:error_map_winds_boundary}
+  \textit{Source: DeTurck--Gluck, §7 (winding-number/FTA principle).}
+  Let $F : \overline{\mathbb{D}} \to \mathbb{C}$ be continuous on the closed unit
+  $2$-disk, with $F \ne 0$ on the boundary circle $\partial\mathbb{D}$ and the
+  boundary loop $F|_{\partial\mathbb{D}}$ having winding number $\ne 0$ about the
+  origin. Then $F$ has a zero in the interior of $\mathbb{D}$.
+\end{theorem}
+\begin{proof}
+  \uses{lem:error_map_winds_boundary}
+  \leanok
+  Suppose, for contradiction, that $F(z) \ne 0$ for all $z \in
+  \overline{\mathbb{D}}$. Then $G = F/\lvert F\rvert : \overline{\mathbb{D}} \to
+  S^1$ is continuous and extends $g = F|_{\partial\mathbb{D}}/\lvert
+  F|_{\partial\mathbb{D}}\rvert$ to the whole disk. The boundary circle
+  $\partial\mathbb{D}$ is contractible inside $\overline{\mathbb{D}}$ (shrink to
+  the centre), so $g$ is null-homotopic as a map into $S^1$; therefore its degree
+  --- which is the winding number of $F|_{\partial\mathbb{D}}$ about $0$ --- is
+  zero, contradicting the hypothesis. Hence $F$ vanishes somewhere in
+  $\overline{\mathbb{D}}$; the boundary hypothesis $F \ne 0$ on
+  $\partial\mathbb{D}$ forces the zero into the interior.
+
+  This is the planar degree principle the source invokes by analogy with the
+  topological proof of the Fundamental Theorem of Algebra (\S7): a loop with
+  nonzero winding cannot bound a non-vanishing map. Mathlib has no off-the-shelf
+  form, so the winding number of a continuous loop $S^1 \to \mathbb{C}\setminus
+  \{0\}$, its homotopy invariance, and this null-homotopy argument are built
+  project-side (see \cref{chap:winding}'s Lean file).
+\end{proof}
+
+\begin{corollary}
+
+\leanok
+[A closing configuration exists]
+  \label{cor:closing_configuration_exists}
+  \lean{Gluck.exists_closing_configuration}
+  \uses{thm:existence_of_zero, lem:error_map_winds_boundary, cor:bicircle_closes_iff}
+  There is a configuration in the interior of $D$ whose bicircle error vector is
+  $0$; by \cref{cor:bicircle_closes_iff} the corresponding bicircle closes up.
+\end{corollary}
+\begin{proof}
+  \uses{thm:existence_of_zero, lem:error_map_winds_boundary}
+  \leanok
+  Apply \cref{thm:existence_of_zero} to the error map $E : \overline{\mathbb{D}}
+  \to \mathbb{C}$, whose boundary winding is nonzero ($\pm1$) by
+  \cref{lem:error_map_winds_boundary}. The resulting interior zero is a
+  configuration $(x,y)$ in the open disk with $E(x,y) = 0$, i.e.\ a closing
+  bicircle configuration; by \cref{cor:bicircle_closes_iff} the corresponding
+  bicircle closes up.
+\end{proof}

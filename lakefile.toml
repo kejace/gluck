@@ -1,0 +1,31 @@
+name = "gluck"
+version = "0.1.0"
+keywords = ["math"]
+defaultTargets = ["Gluck"]
+
+[leanOptions]
+pp.unicode.fun = true # pretty-prints `fun a ↦ b`
+relaxedAutoImplicit = false
+weak.linter.mathlibStandardSet = true
+maxSynthPendingDepth = 3
+
+[[require]]
+name = "checkdecls"
+git = "https://github.com/PatrickMassot/checkdecls.git"
+
+[[require]]
+name = "«doc-gen4»"
+git = "https://github.com/leanprover/doc-gen4"
+rev = "main"
+
+# `mathlib` is required last so its pinned transitive dependency versions
+# (e.g. `Cli`) take precedence over `doc-gen4`/`checkdecls`. Otherwise the
+# resolved `Cli` commit diverges from Mathlib's and `lake exe cache get`
+# computes wrong hashes (cache miss on every module).
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.31.0"
+
+[[lean_lib]]
+name = "Gluck"
