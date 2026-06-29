@@ -1,0 +1,907 @@
+\chapter{Dahlberg Step 2: the closing parameter and the converse (Phase D-C)}
+\label{chap:dahlberg_step2}
+
+% archon:covers Gluck/DahlbergStep2.lean
+
+This chapter completes Dahlberg's proof of the plane case
+(\cref{thm:dahlberg_converse}). Phase D-B (\cref{chap:dahlberg_step1}) produced a
+preliminary diffeomorphism $\eta$ with $\kappa\circ\eta=a(1-f)+bf+e$, $0<a<b$,
+$\int_0^{2\pi}|e|<C\varepsilon$, and total curvature $I>0$. Step~2 finds a second
+adjustment --- a \emph{closing parameter} ranging over the in-tree configuration
+disk --- so that the fully reparametrised curvature becomes a non-normalised
+curvature function (satisfies (1.2) closure and (1.3) simplicity); the D-A
+reduction \cref{thm:realizes_of_non_normalised} then yields the curve.
+
+\medskip\noindent\textbf{Route note (no Möbius disk; Route A node-placing family).}
+Dahlberg parametrises the closing adjustment by a Möbius transformation
+$g_\beta(w)=(w-\beta)/(1-\bar\beta w)$ over the unit $\beta$-disk and proves the
+winding fact via his Propositions 2.2--2.3. We do \emph{not} formalise that family.
+Instead we run the existence argument over the in-tree affine configuration disk
+\cref{def:configuration_space}, reusing the in-tree winding/degree core
+(\cref{lem:error_map_winds_boundary}, \cref{lem:winding_number_c_perturb},
+\cref{thm:existence_of_zero}) in place of Dahlberg's Props 2.2--2.3. The bridge
+that makes this possible is the keystone
+\cref{lem:arclength_error_clean_eq_errorMap}:
+$F(z)=c(z)\cdot\mathrm{errorMap}\,a\,b\,\delta\,z$ with a positive scalar
+$c(z)=1/\lambda(z)>0$. \emph{Crucially}, the closing family
+\cref{def:closing_family} is the \textbf{node-placing arc-length}
+reparametrisation, \emph{not} the inclination-tuned \cref{def:align_reparam} of the
+positive-case reduction --- the latter does \emph{not} land the arc-length
+cumulative tangent angles on $\mathrm{configSpace}$ (this is why the earlier fixed
+prefactor keystone $F=\tfrac{a+b}{2}\,\mathrm{errorMap}$ was false). This is the
+standing project directive.
+
+\medskip\noindent\textbf{Why node-placing makes $F=c\cdot\mathrm{errorMap}$ true.}
+The in-tree error map is the \emph{inclination} closure defect
+$\mathrm{errorMap}\,a\,b\,\delta\,z=\int_0^{2\pi}e^{i\theta}/\kappa(\theta)\,d\theta$,
+where $\kappa(\theta)$ is the step curvature with jumps at the configuration nodes
+$(\theta_1,\theta_2,\theta_3,\theta_4)=\mathrm{configSpace}\,\delta\,(z.\mathrm{re},z.\mathrm{im})$
+and values $a,b,a,b,a$ on the five arcs $(0,\theta_1),\dots,(\theta_4,2\pi)$
+(\cref{lem:error_vector_of_bicircle}). The arc-length closure defect
+$F(z)=\int_0^{2\pi}e^{i\alpha_{K_z}(s)}\,ds$ becomes this same integral under the
+substitution $\theta=\alpha_{K_z}(s)$, $d\theta=K_z(s)\,ds$ --- \emph{provided the
+cumulative arc-length tangent angle $\alpha_{K_z}$ jumps the step-curvature value
+exactly at the nodes $\theta_j$}. Choosing the arc-length interval lengths $L_j$ so
+that $\alpha_{K_z}$ advances by exactly $\Delta_j=\theta_j-\theta_{j-1}$ across the
+$j$-th clean arc forces this landing, and the Jacobian $1/K_z$ contributes the
+constant scalar $c(z)=I_z/2\pi=1/\lambda(z)$.
+
+\medskip
+The genuinely new analytic content of this phase is then threefold and is isolated
+in \cref{lem:arclength_error_tendsto} (uniform limit
+$F^*(\cdot,\varepsilon)\to F$), \cref{lem:total_curvature_ne_zero}
+($I^*\neq 0$ for small $\varepsilon$), and \cref{lem:angle_dist_le} (the
+$|\alpha-\alpha^*|\le C\varepsilon$ estimate). The simplicity transport
+(\cref{lem:simplicity_transport}) and the final assembly
+(\cref{thm:dahlberg_converse}) are then short.
+
+\section{The node-placing closing family}
+
+% SOURCE: [Dahlberg], §3, p. 2135, Step 2 (read from references/dahlberg.pdf)
+% SOURCE QUOTE: "We now claim that if $\epsilon$ has been chosen small enough,
+% then there is a $\beta \in C$, $|\beta| \le \frac{1}{2}$ such that
+% $\kappa^* \circ g_\beta$ is a non-normalised curvature function. To see this set
+% $k^* = \kappa^* \circ g_\beta$, $k = a(1 - f \circ g_\beta) + b f \circ g_\beta$
+% and let $I = \int_0^{2\pi} k\,dt$, $I^* = \int_0^{2\pi} k^*\,dt$,
+% $K^* = \frac{2\pi}{I^*} k^*$ and $K = \frac{2\pi}{I} k$."
+% --- Route A: a project-bespoke replacement for Dahlberg's Möbius family. It is
+% NOT a lemma in Dahlberg; the strategy-auditor confirmed Route A is sound but
+% not source-faithful. The fixed-prefactor inclination family (alignReparam) is
+% replaced by the node-placing arc-length family below.
+\begin{definition}
+
+[Closing reparametrisation family --- node-placing arc-length reparam]
+  \label{def:closing_family}
+  \lean{Gluck.closingFamily, Gluck.closingDelta1, Gluck.closingDelta2, Gluck.closingDelta3, Gluck.closingDelta4, Gluck.closingDelta5, Gluck.closingLambda, Gluck.closingLambdaRaw, Gluck.closingLambdaFloor, Gluck.closingLen1, Gluck.closingLen2, Gluck.closingLen3, Gluck.closingLen4, Gluck.closingLen5, Gluck.closingS1, Gluck.closingS2, Gluck.closingS3, Gluck.closingS4, Gluck.closingMid1, Gluck.closingMid2, Gluck.closingMid3, Gluck.closingMid4, Gluck.closingMid5, Gluck.closingRamp, Gluck.closingBase, Gluck.closingHeight, Gluck.closingDensity}
+  \uses{def:configuration_space, def:clean_bicircle, def:align_reparam}
+  Fix $0<a<b$ and $0<\delta\le\pi/8$. For $z\in\overline{\mathbb{D}}$ write the
+  configuration nodes
+  \[
+    (\theta_1,\theta_2,\theta_3,\theta_4)=\mathrm{configSpace}\,\delta\,(z.\mathrm{re},z.\mathrm{im})
+    =\bigl(\tfrac{\pi}{4}+\delta z.\mathrm{re},\,\tfrac{3\pi}{4}+\delta z.\mathrm{im},\,\tfrac{5\pi}{4},\,\tfrac{7\pi}{4}\bigr),
+  \]
+  with $\theta_0=0$, $\theta_5=2\pi$, and let the five \emph{cumulative-angle}
+  increments and clean-curvature values be
+  \[
+    \Delta_j=\theta_j-\theta_{j-1}\quad(j=1,\dots,5),\qquad
+    (\hat\kappa_1,\dots,\hat\kappa_5)=(a,b,a,b,a),
+  \]
+  matching the five-arc value pattern of \cref{lem:error_vector_of_bicircle}
+  (and of $k_{a,b}=a(1-f)+bf$, \cref{lem:clean_bicircle_eq_step}). Put
+  \[
+    \lambda(z)=\frac1{2\pi}\sum_{j=1}^5\frac{\Delta_j}{\hat\kappa_j}
+      =\frac1{2\pi}\Bigl(\frac{\pi+\delta(z.\mathrm{re}-z.\mathrm{im})}{a}
+        +\frac{\pi+\delta(z.\mathrm{im}-z.\mathrm{re})}{b}\Bigr)>0,
+    \qquad L_j(z)=\frac{\Delta_j}{\lambda(z)\,\hat\kappa_j}>0,
+  \]
+  so that $\sum_{j=1}^5 L_j(z)=2\pi$ (the two value-$a$ end arcs
+  $\Delta_1,\Delta_5$ contribute to the same $1/a$ term). Let the canonical
+  clean-bicircle breakpoints be $c_0=0$, $c_1=\tfrac{\pi}{4}$, $c_2=\tfrac{3\pi}{4}$,
+  $c_3=\tfrac{5\pi}{4}$, $c_4=\tfrac{7\pi}{4}$, $c_5=2\pi$ (the FIXED jump points of
+  $k_{a,b}$, with arc widths $w_j=c_j-c_{j-1}$ equal to
+  $\tfrac{\pi}{4},\tfrac{\pi}{2},\tfrac{\pi}{2},\tfrac{\pi}{2},\tfrac{\pi}{4}$ and
+  values $a,b,a,b,a$). Define $g_z=\mathrm{closingFamily}\,a\,b\,\delta\,z:\mathbb{R}\to\mathbb{R}$
+  to be the $C^1$ orientation-preserving circle reparametrisation
+  ($g_z(s+2\pi)=g_z(s)+2\pi$, $g_z'>0$, jointly continuous in $(z,s)$, $g_z(0)=0$)
+  that maps the $j$-th \emph{arc-length} interval $[s_{j-1},s_j]$
+  ($s_j=\sum_{k\le j}L_k(z)$, so $s_0=0$, $s_5=2\pi$) onto the $j$-th canonical
+  clean-bicircle arc $[c_{j-1},c_j]$. Concretely $g_z(s)=\int_0^s w_z(u)\,du$ is the
+  running integral of a continuous positive $2\pi$-periodic density built as a
+  constant \emph{baseline} plus five \emph{calibrated clamped-tent pulses}, one
+  centred on each arc-length interval:
+  \[
+    w_z=m+\sum_{j=1}^5 h_j\,T_j,\qquad m=\mathrm{closingBase}=\tfrac{\lambda(z)\,a}{2},
+    \quad \eta=\mathrm{closingRamp}=\tfrac{\pi a}{20(a+b)},
+  \]
+  where $T_j=\mathrm{clampTent}\,\eta\,L_j\,C_j$ is the unit-height trapezoidal
+  clamped tent centred on the arc midpoint $C_j=s_{j-1}+L_j/2$, with one-period
+  support window $[s_{j-1},s_j]$ (the full arc, width $L_j$; value $0$ at the
+  endpoints), ramp intervals of width $\eta$ at each end, plateau
+  $[s_{j-1}+\eta,\,s_j-\eta]$ of width $L_j-2\eta$, and trapezoidal area
+  $\int T_j=L_j-\eta$, and
+  $h_j=\mathrm{closingHeight}=\dfrac{w_j-m\,L_j}{\max(\eta,\,L_j-\eta)}
+       =\dfrac{w_j-m\,L_j}{L_j-\eta}$
+  the calibrated pulse height (the $\max$-clamp is inactive on the disk, where
+  $2\eta\le L_j$). The ramp width $\eta$ is $a,b$-dependent and below the
+  compact-disk lower bound on the $L_j$ (the fixed $\pi/16$ ramp of
+  \cref{def:align_reparam} is NOT reusable, since $L_j(z)$ can be small when $b/a$
+  is large). The calibration makes the per-arc integral exactly the canonical
+  width, $\int_{s_{j-1}}^{s_j}w_z=m\,L_j+h_j(L_j-\eta)=w_j$ (so the per-arc
+  \emph{average} slope is $w_j/L_j(z)$, though the density is not flat on the arc);
+  this is the node-mapping \cref{lem:closing_family_nodes}. This is the arc-length
+  analogue of \cref{def:align_reparam}; it plays the role of Dahlberg's Möbius
+  $\{g_\beta\}$.
+
+  The point of the calibration $L_j=\Delta_j/(\lambda\hat\kappa_j)$ is the
+  node-landing \cref{lem:clean_arclength_nodes}: with the clean weight $k_{a,b}$,
+  the cumulative normalised arc-length tangent angle satisfies
+  $\alpha_{K_z}(s_j)=\theta_j$ --- the configuration nodes, \emph{not} the canonical
+  $c_j$.
+\end{definition}
+
+% --- New-family API package (the lemmas the prover creates for closingFamily) ---
+\begin{lemma}
+[The calibration scalar $\lambda(z)$ is positive and continuous]
+  \label{lem:closing_lambda_pos}
+  \lean{Gluck.closingLambda_pos, Gluck.continuous_closingLambda, Gluck.closingLambda_ne, Gluck.closingLambda_eq_raw, Gluck.continuous_closingLambdaRaw, Gluck.closingLambda_le}
+  \uses{def:closing_family, def:configuration_space}
+  For $0<a<b$, $0<\delta\le\pi/8$, the map $z\mapsto\lambda(z)$ is continuous and
+  strictly positive on $\overline{\mathbb{D}}$, with uniform bounds
+  $0<\lambda_{\min}\le\lambda(z)\le\lambda_{\max}$; consequently the prefactor
+  $c(z)=1/\lambda(z)$ is continuous with $0<c_{\min}\le c(z)\le c_{\max}$.
+\end{lemma}
+\begin{proof}
+  \uses{def:configuration_space}
+  $\lambda(z)$ is an explicit affine-over-$\{a,b\}$ combination of the configuration
+  nodes (\cref{def:configuration_space}), each of which is a continuous (affine)
+  function of $z.\mathrm{re},z.\mathrm{im}$; the increments $\Delta_j$ are continuous
+  and, for $\delta\le\pi/8$ and $\|z\|\le1$, strictly positive (the gaps of
+  $\mathrm{configSpace}$ stay in $[\pi/8,3\pi/8]$ etc.), so $\lambda(z)>0$. On the
+  compact disk continuity gives the uniform bounds; positivity of the bounds follows
+  since $\lambda$ is continuous and nowhere zero on a compact set. Reciprocation
+  gives the same for $c(z)$.
+\end{proof}
+
+\begin{lemma}
+[Arc-length interval bounds and total]
+  \label{lem:closing_len_bounds}
+  \lean{Gluck.closingLen_bounds, Gluck.closingLen_sum, Gluck.closingLen_bound_aux}
+  \uses{def:closing_family, lem:closing_lambda_pos}
+  For $0<a<b$, $0<\delta\le\pi/8$ and $z\in\overline{\mathbb{D}}$, the five
+  arc-length intervals $L_j(z)=\Delta\theta_j/(\lambda(z)\hat\kappa_j)$ satisfy
+  $0<L_j$, $2\eta\le L_j$, and $L_j\le 2\pi$ for each $j=1,\dots,5$, and
+  $\sum_{j=1}^5 L_j(z)=2\pi$.
+\end{lemma}
+\begin{proof}
+  \uses{def:closing_family, lem:closing_lambda_pos}
+  The total identity is the calibration $\lambda=\lambda_{\mathrm{raw}}=
+  \tfrac1{2\pi}\sum_j\Delta\theta_j/\hat\kappa_j$, whence
+  $\sum_j L_j=\tfrac1\lambda\sum_j\Delta\theta_j/\hat\kappa_j=2\pi$. Each
+  $\Delta\theta_j$ is a configuration increment bounded in $[\pi/8,3\pi/8]\cdot$const
+  and $\lambda\hat\kappa_j>0$ is uniformly bounded (\cref{lem:closing_lambda_pos}),
+  giving the per-interval bounds $0<L_j\le 2\pi$; the clamp-inactivity bound
+  $2\eta\le L_j$ holds for the fixed small ramp width $\eta$ since each $L_j$ is
+  bounded below by a positive constant on the disk. (A private auxiliary
+  $\mathrm{closingLen\_bound\_aux}$ packages the shared per-arc estimate; the
+  positivity needs an explicit-argument application to avoid a \texttt{whnf}
+  heartbeat blowup.)
+\end{proof}
+
+\begin{lemma}
+[Basic interface of the node-placing family]
+  \label{lem:closing_family_props}
+  \lean{Gluck.closingFamily_zero, Gluck.closingFamily_add_two_pi, Gluck.closingFamily_two_pi, Gluck.strictMono_closingFamily, Gluck.continuous_uncurry_closingFamily, Gluck.hasDerivAt_closingFamily, Gluck.closingDensity_pos, Gluck.closingFamily_slope_bounds, Gluck.closingRamp_pos, Gluck.closingDensity_periodic, Gluck.continuous_closingFamily, Gluck.continuous_closingBase, Gluck.continuous_closingDensity_s, Gluck.continuous_closingLen1, Gluck.continuous_closingLen2, Gluck.continuous_closingLen3, Gluck.continuous_closingLen4, Gluck.continuous_closingLen5, Gluck.continuous_closingMid1, Gluck.continuous_closingMid2, Gluck.continuous_closingMid3, Gluck.continuous_closingMid4, Gluck.continuous_closingMid5, Gluck.continuous_heightAux, Gluck.continuous_lenAux, Gluck.continuous_uncurry_closingDensity, Gluck.continuous_uncurry_term, Gluck.closingDensity_period_integral, Gluck.clampTent_period_integral, Gluck.comp_closingFamily_periodic}
+  \uses{def:closing_family, lem:closing_lambda_pos}
+  The family $g_z=\mathrm{closingFamily}\,a\,b\,\delta\,z$ satisfies: $g_z(0)=0$;
+  quasiperiodicity $g_z(s+2\pi)=g_z(s)+2\pi$ (hence $g_z(2\pi)=2\pi$); strict
+  monotonicity; everywhere-differentiability $\mathrm{HasDerivAt}\,g_z\,(w_z(s))\,s$
+  with $w_z>0$ continuous; joint continuity of $(z,s)\mapsto g_z(s)$; and uniform
+  slope/inverse-slope bounds $0<m_0\le w_z(s)\le M_0$ on $\overline{\mathbb{D}}$
+  (with $m_0,M_0$ depending only on $a,b,\delta$).
+\end{lemma}
+\begin{proof}
+  \uses{def:closing_family, lem:closing_lambda_pos}
+  All clauses follow from the running-integral construction
+  $g_z(s)=\int_0^s w_z$, exactly as the corresponding facts for
+  \cref{def:align_reparam} (\cref{lem:align_density_props},
+  \cref{lem:continuous_uncurry_align_reparam}): $g_z(0)=0$ is the empty integral;
+  $w_z$ continuous positive $2\pi$-periodic gives $\mathrm{HasDerivAt}$ (FTC,
+  \texttt{integral\_hasDerivAt\_right}), strict monotonicity, and
+  $g_z(s+2\pi)=g_z(s)+\int_0^{2\pi}w_z=g_z(s)+2\pi$ (the density integrates to
+  $\sum_j w_j=2\pi$). Joint continuity comes from continuity of the plateau slopes
+  $w_j/L_j(z)$ in $z$ (\cref{lem:closing_lambda_pos}) and of the ramp profile. The
+  slope bounds are the compact-disk extrema of the finitely many plateau slopes and
+  ramp slopes.
+\end{proof}
+
+\begin{lemma}
+
+[Node-mapping of the closing family onto the canonical clean arcs]
+  \label{lem:closing_family_nodes}
+  \lean{Gluck.closingFamily_node, Gluck.closingDensity_arcs, Gluck.closingDensity_integral_split, Gluck.closingHeight_mul, Gluck.half_le_arccos_cos_wide, Gluck.clampTent_integral_eq_zero_wide}
+  \uses{def:closing_family, lem:closing_family_props, lem:closing_lambda_pos, lem:closing_len_bounds, lem:clean_bicircle_eq_step}
+  For $0<a<b$, $0<\delta\le\pi/8$ and $z\in\overline{\mathbb{D}}$, the node-placing
+  family sends each arc-length breakpoint to the corresponding canonical
+  clean-bicircle breakpoint:
+  \[
+    \mathrm{closingFamily}\,a\,b\,\delta\,z\,(s_j)=c_j,\qquad j=0,\dots,5,
+  \]
+  where $s_j=\sum_{k\le j}L_k(z)$ ($s_0=0$, $s_5=2\pi$) and
+  $(c_0,\dots,c_5)=(0,\tfrac{\pi}{4},\tfrac{3\pi}{4},\tfrac{5\pi}{4},\tfrac{7\pi}{4},2\pi)$.
+  Equivalently the per-arc density integral is
+  $\int_{s_{j-1}}^{s_j}w_z=w_j$ (the canonical arc width
+  $w_j=c_j-c_{j-1}$). Consequently $g_z$ maps the open arc $(s_{j-1},s_j)$
+  strictly monotonically onto $(c_{j-1},c_j)$, so $k_{a,b}\circ g_z=\hat\kappa_j$
+  a.e.\ on $(s_{j-1},s_j)$.
+\end{lemma}
+\begin{proof}
+  \uses{def:closing_family, lem:closing_family_props, lem:clean_bicircle_eq_step}
+  By \cref{def:closing_family} the density is $w_z=m+\sum_{k=1}^5 h_k\,T_k$, where
+  $m=\mathrm{closingBase}=\tfrac{\lambda a}{2}$ is the baseline, $T_k=\mathrm{clampTent}$
+  is the unit-height trapezoidal clamped tent $\mathrm{clampTent}\,\eta\,L_k\,C_k$
+  centred on the $k$-th arc midpoint $C_k=s_{k-1}+L_k/2$, with one-period support
+  window $[s_{k-1},s_k]$ (the full $k$-th arc, value $0$ at the endpoints), ramps
+  of width $\eta$, plateau $[s_{k-1}+\eta,s_k-\eta]$ of width $L_k-2\eta$, and
+  trapezoidal area $\int T_k=L_k-\eta$; and
+  $h_k=\dfrac{w_k-m\,L_k}{\max(\eta,L_k-\eta)}=\dfrac{w_k-m\,L_k}{L_k-\eta}$ the
+  calibrated pulse height (the clamp is inactive: $2\eta\le L_k$ on the disk, so
+  $\max(\eta,L_k-\eta)=L_k-\eta$). The support windows of distinct $T_k$ meet only
+  at shared arc endpoints (where the pulse value is $0$), so on the \emph{open} arc
+  $(s_{j-1},s_j)$ only the $j$-th pulse is nonzero and
+  \[
+    \int_{s_{j-1}}^{s_j}w_z=m\,L_j+h_j\bigl(\textstyle\int_{s_{j-1}}^{s_j}T_j\bigr)
+      =m\,L_j+h_j\,(L_j-\eta)=m\,L_j+(w_j-m\,L_j)=w_j .
+  \]
+  Here the per-arc tent integral $\int_{s_{j-1}}^{s_j}T_j=L_j-\eta$ is the
+  trapezoidal \emph{area} (NOT the support width $L_j$): plateau of width
+  $L_j-2\eta$ at height $1$ plus two unit-height ramps of base $\eta$ contribute
+  $(L_j-2\eta)+2\cdot\tfrac{\eta}{2}=L_j-\eta$. The vanishing of the \emph{other}
+  pulses $T_k$ ($k\neq j$) on $(s_{j-1},s_j)$ is the in-tree periodic
+  off-support-zero fact; the existing helper assumes support half-width below
+  $\pi/2$ (i.e.\ $L<\pi$), but for the node-placing family $L_k$ can exceed $\pi$
+  (e.g.\ $L_3\le5\pi/3$ as $b/a\to\infty$), so the periodic copies must be excluded
+  for the full range $0<L<2\pi$. This generalised off-support zero is provable from
+  \texttt{Real.arccos\_cos} by the case split $y\le\pi$ / $y>\pi$ (a $\sim 30$-line
+  helper). Telescoping the running integral,
+  $g_z(s_j)=\int_0^{s_j}w_z=\sum_{k\le j}w_k=c_j$. Strict monotonicity
+  (\cref{lem:closing_family_props}) upgrades the endpoint equalities to the
+  open-arc bijection, and the a.e.\ value $k_{a,b}\circ g_z=\hat\kappa_j$ on
+  $(s_{j-1},s_j)$ then follows from \cref{lem:clean_bicircle_eq_step}.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[Node-landing: cumulative normalised arc-length angle hits $\mathrm{configSpace}$]
+  \label{lem:clean_arclength_nodes}
+  \lean{Gluck.cleanArcLength_node_values}
+  \uses{def:closing_family, def:arclength_norm, lem:clean_bicircle_eq_step, lem:clean_prefactor, lem:closing_family_nodes}
+  Let $K_z=\mathrm{arcLengthNorm}\,(k_{a,b})\,a\,b\,\delta\,z$ be the normalised clean
+  arc-length curvature and $\alpha_{K_z}(s)=\int_0^s K_z$ its cumulative tangent
+  angle (\cref{def:dahlberg_angle}). At the arc-length breakpoints
+  $s_j=\sum_{k\le j}L_k(z)$,
+  \[
+    \alpha_{K_z}(s_j)=\theta_j\quad(j=0,\dots,5),\qquad
+    (\theta_0,\dots,\theta_5)=(0,\theta_1,\theta_2,\theta_3,\theta_4,2\pi),
+  \]
+  with $(\theta_1,\dots,\theta_4)=\mathrm{configSpace}\,\delta\,(z.\mathrm{re},z.\mathrm{im})$.
+  Moreover $K_z$ is constant $=\lambda(z)\hat\kappa_j$ on each open arc
+  $(s_{j-1},s_j)$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:clean_bicircle_eq_step, lem:clean_prefactor, lem:closing_family_nodes}
+  \leanok
+  By \cref{lem:clean_bicircle_eq_step}, $k_{a,b}$ is a.e.\ the step function with
+  value $\hat\kappa_j$ on $(c_{j-1},c_j)$, and $g_z$ maps $(s_{j-1},s_j)$ onto
+  $(c_{j-1},c_j)$ (\cref{def:closing_family}), so $k_{a,b}(g_z(s))=\hat\kappa_j$ for
+  $s\in(s_{j-1},s_j)$. The clean total curvature is
+  $I_z=\int_0^{2\pi}k_{a,b}(g_z)=\sum_j\hat\kappa_j L_j(z)
+   =\sum_j\hat\kappa_j\frac{\Delta_j}{\lambda\hat\kappa_j}=\frac1\lambda\sum_j\Delta_j
+   =\frac{2\pi}{\lambda}$ (\cref{lem:clean_prefactor}), so the normalising factor is
+  $2\pi/I_z=\lambda$ and $K_z=\lambda\,\hat\kappa_j$ on $(s_{j-1},s_j)$. Hence
+  \[
+    \alpha_{K_z}(s_j)=\int_0^{s_j}K_z=\sum_{k\le j}\lambda\hat\kappa_k L_k(z)
+      =\sum_{k\le j}\lambda\hat\kappa_k\frac{\Delta_k}{\lambda\hat\kappa_k}
+      =\sum_{k\le j}\Delta_k=\theta_j. \qedhere
+  \]
+\end{proof}
+
+\begin{definition}
+
+[Normalised arc-length curvature weight]
+  \label{def:arclength_norm}
+  \lean{Gluck.arcLengthNorm, Gluck.dahlbergAngle_arcLengthNorm}
+  \uses{def:closing_family}
+  For a curvature weight $g:\mathbb{R}\to\mathbb{R}$, parameters $a,b,\delta$ and
+  configuration $z\in\overline{\mathbb{D}}$, the \emph{normalised arc-length weight}
+  is the $\tfrac{2\pi}{I_z}$-rescaled reparametrised weight
+  \[
+    K_z(s)=\frac{2\pi}{I_z}\,(g\circ g_z)(s),\qquad
+    I_z=\int_0^{2\pi}(g\circ g_z)(t)\,dt,
+  \]
+  where $g_z=\mathrm{closingFamily}\,a\,b\,\delta\,z$ (\cref{def:closing_family}).
+  This is the common encoding of Dahlberg's normalisations $K_z$ (clean,
+  $g=k_{a,b}$) and $K^*_z$ (perturbed, $g=\kappa\circ\eta$); both $F$ and $F^*$ are
+  built from it. When $I_z>0$ and $g\ge 0$ a.e., $K_z$ has unit total mass
+  $\int_0^{2\pi}K_z=2\pi$.
+\end{definition}
+
+\begin{definition}
+
+\leanok
+[Perturbed and clean arc-length error maps]
+  \label{def:arclength_error_map}
+  \lean{Gluck.arcLengthErrorMap}
+  \uses{def:arclength_norm, def:closing_family, def:dahlberg_angle, def:dahlberg_curve}
+  Fix $\kappa,\eta,a,b,e$ from \cref{thm:exists_preliminary_diffeo} at a parameter
+  $\varepsilon>0$. For $z\in\overline{\mathbb{D}}$ set
+  $k^*_z = (\kappa\circ\eta)\circ g_z$, $k_z = k_{a,b}\circ g_z$, with total
+  curvatures $I^*_z,I_z$ and normalisations $K^*_z,K_z$ as above. The
+  \emph{perturbed} and \emph{clean} arc-length error maps are the closure defects
+  \[
+    F^*(z,\varepsilon)=\int_0^{2\pi}e^{i\alpha_{K^*_z}(s)}\,ds=\gamma_{K^*_z}(2\pi),
+    \qquad
+    F(z)=\int_0^{2\pi}e^{i\alpha_{K_z}(s)}\,ds=\gamma_{K_z}(2\pi),
+  \]
+  where $\alpha_{K}$ and $\gamma_K$ are the arc-length tangent angle and curve of
+  \cref{def:dahlberg_angle,def:dahlberg_curve}. A zero $F^*(z^*,\varepsilon)=0$ is
+  exactly condition (1.2) for $K^*_{z^*}$.
+\end{definition}
+
+\begin{lemma}
+
+\leanok
+[Continuity of the error maps]
+  \label{lem:arclength_error_continuous}
+  \lean{Gluck.continuous_arcLengthErrorMap}
+  \uses{def:arclength_error_map, lem:closing_family_props}
+  For each fixed $\varepsilon$, $z\mapsto F^*(z,\varepsilon)$ is continuous on
+  $\overline{\mathbb{D}}$, and $z\mapsto F(z)$ is continuous.
+\end{lemma}
+\begin{proof}
+  \uses{def:arclength_error_map, lem:closing_family_props, lem:total_curvature_ne_zero}
+  \leanok
+  The family $g_z$ is jointly continuous in $(z,t)$
+  (\cref{lem:closing_family_props}); $k^*_z$ and $I^*_z$ are continuous in $z$
+  (composition and parametric integration of continuous functions, as in
+  \cref{lem:kappa_error_map_continuous}); $I^*_z>0$ stays away from $0$ by
+  \cref{lem:total_curvature_ne_zero}, so $K^*_z$ and then $\alpha_{K^*_z}$,
+  $e^{i\alpha_{K^*_z}}$ and the outer integral are continuous in $z$. Likewise for
+  $F$, using $I_z=2\pi/\lambda(z)>0$ (\cref{lem:clean_prefactor}).
+\end{proof}
+
+\section{The clean error map is a positive multiple of the in-tree \texttt{errorMap}}
+
+The keystone \cref{lem:arclength_error_clean_eq_errorMap} is proved
+\emph{arc-by-arc}: the node-landing \cref{lem:clean_arclength_nodes} fixes the
+cumulative-angle breakpoints at the configuration nodes $\theta_j$, the prefactor
+\cref{lem:clean_prefactor} supplies $c(z)=1/\lambda(z)$, and the general arc-length
+arc-integral tool \cref{lem:arclength_arc_integral} evaluates the closure integral
+on each of the five constant-curvature arcs. Because the normalised weight $K_z$ is
+a step function the global $C^1$ change of variables fails; the arc-by-arc route
+avoids it entirely (no $\alpha_{K_z}^{-1}$).
+
+\begin{lemma}
+[Clean total curvature and the positive prefactor $c(z)=1/\lambda(z)$]
+  \label{lem:clean_prefactor}
+  \lean{Gluck.cleanTotalCurvature_eq, Gluck.cleanPrefactor_pos, Gluck.cleanBicircle_arcs, Gluck.clean_arc_ae, Gluck.clean_arc_int}
+  \uses{def:closing_family, def:clean_bicircle, lem:clean_bicircle_eq_step, lem:closing_lambda_pos, lem:closing_len_bounds, lem:closing_family_nodes}
+  For $0<a<b$, $0<\delta\le\pi/8$ and $z\in\overline{\mathbb{D}}$,
+  \[
+    I_z=\int_0^{2\pi}k_{a,b}(g_z\,t)\,dt=\frac{2\pi}{\lambda(z)},
+    \qquad c(z):=\frac{I_z}{2\pi}=\frac1{\lambda(z)}>0 ,
+  \]
+  with $c$ continuous and bounded between positive constants on
+  $\overline{\mathbb{D}}$. (This \emph{replaces} the false fixed value $(a+b)\pi$:
+  the clean total curvature is $z$-dependent for the node-placing family.)
+\end{lemma}
+\begin{proof}
+  \uses{lem:clean_bicircle_eq_step, lem:closing_lambda_pos, lem:closing_family_nodes}
+  By \cref{lem:clean_bicircle_eq_step}, $k_{a,b}(g_z\,\cdot)$ is a.e.\ the step
+  function with value $\hat\kappa_j$ on $(s_{j-1},s_j)$ (since $g_z$ maps that
+  interval into the canonical arc $(c_{j-1},c_j)$ of value $\hat\kappa_j$,
+  \cref{def:closing_family}). Hence
+  $I_z=\sum_{j=1}^5\hat\kappa_j\,(s_j-s_{j-1})=\sum_j\hat\kappa_j L_j(z)
+   =\sum_j\hat\kappa_j\frac{\Delta_j}{\lambda(z)\hat\kappa_j}
+   =\frac1{\lambda(z)}\sum_j\Delta_j=\frac{2\pi}{\lambda(z)}$. Positivity,
+  continuity and the uniform bounds of $c(z)=1/\lambda(z)$ are
+  \cref{lem:closing_lambda_pos}.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[Arc-length arc integral on a constant-curvature arc]
+  \label{lem:arclength_arc_integral}
+  \lean{Gluck.arcLengthArcIntegral}
+  \uses{def:dahlberg_angle}
+  Let $K:\mathbb{R}\to\mathbb{R}$ be \emph{globally interval-integrable}
+  ($\forall p\,q,\ \mathrm{IntervalIntegrable}\,K\,\mathrm{volume}\,p\,q$) and
+  constant $K\equiv m$ on the open arc $(c,d)$ ($c\le d$) with $m\neq0$, and write
+  $\alpha_K(s)=\int_0^s K$ for the arc-length tangent angle (\cref{def:dahlberg_angle}).
+  Then
+  \[
+    \int_c^d e^{\,i\,\alpha_K(s)}\,ds
+      =\frac{1}{m}\,(-i)\,\bigl(e^{\,i\,\alpha_K(d)}-e^{\,i\,\alpha_K(c)}\bigr).
+  \]
+  This is the arc-length analogue of the inclination-variable building block
+  $\mathrm{bicircle\_arc\_integral}$ of \cref{lem:error_vector_of_bicircle}. The
+  global interval-integrability hypothesis (not merely integrability on $[c,d]$) is
+  needed because $\alpha_K$ integrates from $0$, so the split passes through $0$; it
+  is met at the use site ($K_z$ is globally interval-integrable).
+\end{lemma}
+\begin{proof}
+  \uses{def:dahlberg_angle}
+  \leanok
+  For $s\in[c,d]$, $\alpha_K(s)=\alpha_K(c)+\int_c^s K=\alpha_K(c)+m\,(s-c)$ because
+  $K=m$ a.e.\ on $(c,d)$ (the two endpoints are a null set). Hence on $[c,d]$ the
+  integrand is $e^{i\alpha_K(s)}=e^{i\alpha_K(c)}\,e^{\,i\,m\,(s-c)}$. The map
+  $s\mapsto \tfrac{1}{im}\,e^{i\alpha_K(c)}\,e^{\,i\,m\,(s-c)}$ has derivative
+  $e^{i\alpha_K(s)}$ on $[c,d]$, so by the fundamental theorem of calculus the
+  integral equals
+  $\tfrac{1}{im}\,e^{i\alpha_K(c)}\bigl(e^{\,i\,m\,(d-c)}-1\bigr)
+   =\tfrac{1}{m}(-i)\bigl(e^{i\alpha_K(d)}-e^{i\alpha_K(c)}\bigr)$
+  (using $1/i=-i$ and $\alpha_K(d)=\alpha_K(c)+m(d-c)$). No global $C^1$ structure
+  of $\alpha_K$ is used --- only constancy of $K$ on the single arc.
+\end{proof}
+
+% NOTE: The earlier statement F = ((a+b)/2)·errorMap was FALSE (the inclination-
+% tuned alignReparam does not land arc-length nodes on configSpace). Route A's
+% node-placing family (def:closing_family) makes the TRUE identity below hold.
+\begin{lemma}
+
+\leanok
+[Arc-length closure of the clean bicircle $=$ positive multiple of \texttt{errorMap}]
+  \label{lem:arclength_error_clean_eq_errorMap}
+  \lean{Gluck.arcLengthError_clean_eq_errorMap}
+  \uses{def:arclength_error_map, lem:clean_bicircle_eq_step, def:error_map, lem:error_vector_of_bicircle, lem:clean_prefactor, lem:arclength_arc_integral, lem:clean_arclength_nodes}
+  For $0<a<b$, $0<\delta\le\pi/8$ and $z\in\overline{\mathbb{D}}$, the clean
+  arc-length error map $F(z)=\mathrm{arcLengthErrorMap}\,(k_{a,b})\,a\,b\,\delta\,z$
+  is a \emph{positive} (configuration-dependent) real multiple of the in-tree error
+  map:
+  \[
+    F(z)=c(z)\cdot\mathrm{errorMap}\,a\,b\,\delta\,z,\qquad c(z)=\frac1{\lambda(z)}>0 .
+  \]
+  In particular $F(z)=0\iff\mathrm{errorMap}\,a\,b\,\delta\,z=0$, and for any loop in
+  $\overline{\mathbb{D}}\setminus\{F=0\}$ the two maps have the same winding number
+  around $0$ (positive-scalar-field invariance, \cref{lem:clean_error_winds}).
+\end{lemma}
+\begin{proof}
+  \uses{lem:clean_bicircle_eq_step, def:error_map, lem:error_vector_of_bicircle, lem:clean_prefactor, lem:arclength_arc_integral, lem:clean_arclength_nodes}
+  \leanok
+  Write $K_z=\mathrm{arcLengthNorm}\,(k_{a,b})\,a\,b\,\delta\,z$, so
+  $F(z)=\int_0^{2\pi}e^{i\alpha_{K_z}(s)}\,ds$.
+
+  \emph{Arc structure and node landing.} By \cref{lem:clean_arclength_nodes} there
+  are breakpoints $0=s_0<s_1<\dots<s_5=2\pi$ with $K_z$ constant $\hat\kappa_j\lambda(z)$
+  on each open arc $(s_{j-1},s_j)$ (values $a,b,a,b,a$ scaled by $\lambda$), and the
+  cumulative angle landing $\alpha_{K_z}(s_j)=\theta_j$, where $\theta_0=0$,
+  $\theta_5=2\pi$ and $(\theta_1,\theta_2,\theta_3,\theta_4)=\mathrm{configSpace}\,\delta\,(z.\mathrm{re},z.\mathrm{im})$.
+
+  \emph{Arc-length split.} Splitting $F(z)$ at $s_1,\dots,s_4$ and applying
+  \cref{lem:arclength_arc_integral} with $m=\hat\kappa_j\lambda(z)$ on each arc
+  (the global interval-integrability of $K_z$ holds since $K_z$ is a bounded a.e.-step
+  function),
+  \[
+    F(z)=\sum_{j=1}^{5}\frac{1}{\hat\kappa_j\lambda(z)}\,(-i)\,
+      \bigl(e^{\,i\,\theta_j}-e^{\,i\,\theta_{j-1}}\bigr)
+      =\frac1{\lambda(z)}\sum_{j=1}^{5}\frac{1}{\hat\kappa_j}\,(-i)\,
+      \bigl(e^{\,i\,\theta_j}-e^{\,i\,\theta_{j-1}}\bigr).
+  \]
+
+  \emph{Match.} By the arc-by-arc evaluation of \cref{lem:error_vector_of_bicircle}
+  ($\mathrm{bicircleErrorVector\_eq}$, whose $\mathrm{bicircle\_arc\_integral}$
+  building block contributes exactly $\tfrac1{\hat\kappa_j}(-i)(e^{i\theta_j}-e^{i\theta_{j-1}})$
+  on the arc $(\theta_{j-1},\theta_j)$ of value $\hat\kappa_j$), the sum
+  $\sum_{j}\tfrac{1}{\hat\kappa_j}(-i)(e^{i\theta_j}-e^{i\theta_{j-1}})$ with the same
+  nodes $\theta_j$ and the same arc values $a,b,a,b,a$ is precisely
+  $\mathrm{bicircleErrorVector}\,a\,b\,\theta_1\theta_2\theta_3\theta_4
+   =\mathrm{errorMap}\,a\,b\,\delta\,z$ (\cref{def:error_map}). Therefore
+  $F(z)=\tfrac1{\lambda(z)}\,\mathrm{errorMap}\,a\,b\,\delta\,z=c(z)\,\mathrm{errorMap}\,a\,b\,\delta\,z$
+  with $c(z)>0$ (\cref{lem:clean_prefactor}). The vanishing equivalence is immediate;
+  the equal-winding claim is \cref{lem:clean_error_winds}.
+\end{proof}
+
+\section{The three new analytic estimates}
+
+\begin{definition}
+
+\leanok
+[Bundled preliminary-diffeomorphism data]
+  \label{def:preliminary_diffeo_data}
+  \lean{Gluck.PreliminaryDiffeoData}
+  % DESIGN NOTE (iter-031): error $e$ is interval-integrable, NOT continuous (same
+  % reasoning as `thm:exists_preliminary_diffeo`); only the $L^1$ bound is consumed
+  % downstream. Lean carries `IntervalIntegrable e volume 0 (2π)`.
+  \uses{def:clean_bicircle, thm:exists_preliminary_diffeo}
+  At a fixed $\varepsilon>0$, $\mathrm{PreliminaryDiffeoData}\,\kappa\,a\,b\,C\,\varepsilon\,\eta\,e$
+  records the output of \cref{thm:exists_preliminary_diffeo}: a $C^1$
+  orientation-preserving $\eta$ (through a continuous positive derivative $v$, with
+  $\eta(t+2\pi)=\eta(t)+2\pi$); an interval-integrable $2\pi$-periodic error $e$; the
+  decomposition $\kappa\circ\eta=a(1-f)+bf+e$ (\cref{def:clean_bicircle}); the $L^1$
+  smallness $\int_0^{2\pi}|e|<C\varepsilon$; and the total-curvature estimate
+  $\bigl|\int_0^{2\pi}\kappa(\eta(t))\,dt-(a+b)\pi\bigr|<C\varepsilon$. The last
+  clause is retained so the consuming estimates obtain $I>0$ and the $I^*$-vs-$I$
+  comparison directly.
+\end{definition}
+
+% SOURCE: [Dahlberg], §3, p. 2135, "If $\epsilon$ has been chosen small enough, then clearly $I^* \neq 0$" (read from references/dahlberg.pdf)
+% SOURCE QUOTE: "If $\epsilon$ has been chosen small enough, then clearly
+% $I^* \neq 0$ whenever $|\beta| \le \frac{1}{2}$."
+\begin{lemma}
+
+[Total curvature stays nonzero]
+  \label{lem:total_curvature_ne_zero}
+  \lean{Gluck.totalCurvature_ne_zero, Gluck.closingFamily_changeOfVar, Gluck.closingFamily_comp_L1, Gluck.measurable_cleanBicircle, Gluck.intervalIntegrable_cleanBicircle_comp}
+  \uses{def:arclength_error_map, def:preliminary_diffeo_data, lem:closing_family_props}
+  There is $\varepsilon_1>0$ such that for all $\varepsilon\in(0,\varepsilon_1)$
+  and all $z\in\overline{\mathbb{D}}$, $I^*_z=\int_0^{2\pi}(\kappa\circ\eta)\circ
+  g_z>0$ (so in particular $I^*_z\neq 0$ and $K^*_z$ is well defined).
+\end{lemma}
+\begin{proof}
+  \uses{thm:exists_preliminary_diffeo, lem:closing_family_props, lem:clean_prefactor}
+  Change variables by the diffeomorphism $g_z$:
+  $I^*_z=\int_0^{2\pi}(\kappa\circ\eta)(g_z)\,$; since $g_z$ is an
+  orientation-preserving $2\pi$-translation-equivariant diffeomorphism with
+  $g_z'=w_z\in[m_0,M_0]$ (\cref{lem:closing_family_props}), $I^*_z=\int_0^{2\pi}(\kappa\circ\eta)(g_z)$.
+  Writing $\kappa\circ\eta=k_{a,b}+e$, the clean part contributes
+  $I_z=2\pi/\lambda(z)\ge 2\pi/\lambda_{\max}>0$ (\cref{lem:clean_prefactor}) and the
+  error contributes at most $\int_0^{2\pi}|e(g_z)|=\int_0^{2\pi}|e|\,(g_z^{-1})'\le
+  (\sup(g_z^{-1})')\,C\varepsilon\le \tfrac1{m_0}C\varepsilon$. Choosing
+  $\varepsilon_1$ so the error term is below the clean lower bound gives $I^*_z>0$
+  uniformly in $z$.
+\end{proof}
+
+% SOURCE: [Dahlberg], §3, p. 2135, "the fact that $\lim_{\epsilon \downarrow 0} F^*(\beta,\epsilon) = F(\beta)$" (read from references/dahlberg.pdf)
+% SOURCE QUOTE: "By a standard topology argument and the fact that
+% $\lim_{\epsilon \downarrow 0} F^*(\beta,\epsilon) = F(\beta)$ it follows that if
+% $\epsilon_0$ has been chosen sufficiently small, there is a $\beta$,
+% $|\beta| \le \frac{1}{2}$ such that $F^*(\beta,\epsilon) = 0$."
+\begin{lemma}
+
+[Angle estimate $|\alpha-\alpha^*|\le C\varepsilon$]
+  \label{lem:angle_dist_le}
+  \lean{Gluck.angle_dist_le, Gluck.dahlbergAngle_arcLengthNorm_add_two_pi, Gluck.intervalIntegrable_expI_arcLengthNorm, Gluck.angle_dist_arith}
+  \uses{def:arclength_error_map, def:preliminary_diffeo_data, lem:total_curvature_ne_zero, lem:clean_prefactor}
+  There is a constant $C'$ (independent of $\varepsilon$ and $z$) such that for
+  $\varepsilon$ small, for all $z\in\overline{\mathbb{D}}$ and all $s$,
+  $\bigl|\alpha_{K^*_z}(s)-\alpha_{K_z}(s)\bigr|\le C'\varepsilon$.
+\end{lemma}
+\begin{proof}
+  \uses{thm:exists_preliminary_diffeo, lem:total_curvature_ne_zero, lem:clean_prefactor}
+  $\alpha_{K^*_z}(s)-\alpha_{K_z}(s)=\int_0^s(K^*_z-K_z)$, with
+  $K^*_z=\tfrac{2\pi}{I^*_z}k^*_z$, $K_z=\tfrac{2\pi}{I_z}k_z$ and
+  $k^*_z-k_z=e\circ g_z$. Split
+  $K^*_z-K_z=\tfrac{2\pi}{I^*_z}(k^*_z-k_z)+\bigl(\tfrac{2\pi}{I^*_z}-\tfrac{2\pi}{I_z}\bigr)k_z$.
+  The first term integrates (in absolute value over $[0,2\pi]$) to at most
+  $\tfrac{2\pi}{I^*_z}\int|e\circ g_z|=\tfrac{2\pi}{I^*_z}\int|e|(g_z^{-1})'
+   \le\tfrac{2\pi}{I^*_z}\tfrac1{m_0}C\varepsilon\le C''\varepsilon$, since $I^*_z$ is
+  bounded below (\cref{lem:total_curvature_ne_zero}). For the second, $I_z=2\pi/\lambda(z)$
+  is bounded below (\cref{lem:clean_prefactor}), $|I^*_z-I_z|=|\int e\circ g_z|\le
+  C''\varepsilon$, so $|\tfrac{2\pi}{I^*_z}-\tfrac{2\pi}{I_z}|\le C'''\varepsilon$ and
+  $\int_0^{2\pi}|k_z|=I_z$ is bounded above. Summing over $\int_0^s$ gives
+  $\bigl|\alpha_{K^*_z}(s)-\alpha_{K_z}(s)\bigr|\le C'\varepsilon$ for all
+  $s\in[0,2\pi]$.
+
+  \emph{Extension to all real $s$ (periodicity reduction).} Both normalised angles
+  satisfy $\alpha_{K^*_z}(s+2\pi)=\alpha_{K^*_z}(s)+2\pi$ and
+  $\alpha_{K_z}(s+2\pi)=\alpha_{K_z}(s)+2\pi$ (each normalised curvature integrates to
+  $2\pi$ over one period, by \cref{lem:total_curvature_ne_zero} and
+  \cref{lem:clean_prefactor}). Hence the difference
+  $D(s)=\alpha_{K^*_z}(s)-\alpha_{K_z}(s)$ is exactly $2\pi$-periodic, $D(s+2\pi)=D(s)$,
+  so the bound $|D|\le C'\varepsilon$ on the fundamental window $[0,2\pi]$ extends to
+  every real $s$. (This all-$s$ form is what \cref{lem:simplicity_transport} needs for
+  the complement interval $[\tau,t+2\pi]$.)
+\end{proof}
+
+\begin{lemma}
+
+[Uniform limit $F^*(\cdot,\varepsilon)\to F$]
+  \label{lem:arclength_error_tendsto}
+  \lean{Gluck.arcLengthErrorMap_tendsto, Gluck.norm_expI_sub_le}
+  \uses{def:arclength_error_map, def:preliminary_diffeo_data, lem:angle_dist_le}
+  $\sup_{z\in\overline{\mathbb{D}}}\bigl\|F^*(z,\varepsilon)-F(z)\bigr\|\to 0$ as
+  $\varepsilon\downarrow 0$; quantitatively
+  $\|F^*(z,\varepsilon)-F(z)\|\le 2\pi\,C'\varepsilon$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:angle_dist_le}
+  $F^*(z,\varepsilon)-F(z)=\int_0^{2\pi}(e^{i\alpha_{K^*_z}(s)}-e^{i\alpha_{K_z}(s)})\,ds$.
+  Using $|e^{ix}-e^{iy}|\le|x-y|$ and \cref{lem:angle_dist_le},
+  $\|F^*(z,\varepsilon)-F(z)\|\le\int_0^{2\pi}|\alpha_{K^*_z}-\alpha_{K_z}|\le 2\pi C'\varepsilon$,
+  uniformly in $z$.
+\end{proof}
+
+\section{Existence of a closing parameter}
+
+% SOURCE: [Dahlberg], §3, p. 2135, winding argument (read from references/dahlberg.pdf)
+% SOURCE QUOTE: "It follows from Propositions 2.1 and 2.2 that $F(\beta) \neq 0$
+% whenever $\beta \neq 0, |\beta| < 1$. Noticing that $F(0) = 0$ we see from
+% Proposition 2.3 that the restriction of $F$ to a sufficiently small circle
+% centred at $0$ has non-vanishing winding number around $0$."
+\begin{lemma}
+
+\leanok
+[Clean error map: nonzero on the boundary with nonzero winding]
+  \label{lem:clean_error_winds}
+  \lean{Gluck.cleanError_winds_boundary}
+  \uses{lem:arclength_error_clean_eq_errorMap, lem:closing_lambda_pos, lem:error_map_winds_boundary, lem:winding_number_c_pos_scalar_field}
+  For $0<a<b$ and $0<\delta\le\pi/8$, the clean error map $F$ is nonzero on the unit
+  circle $\partial\mathbb{D}$ and its winding number around $0$ along
+  $\partial\mathbb{D}$ is nonzero.
+\end{lemma}
+\begin{proof}
+  \uses{lem:arclength_error_clean_eq_errorMap, lem:closing_lambda_pos, lem:error_map_winds_boundary, lem:winding_number_c_pos_scalar_field}
+  \leanok
+  By \cref{lem:arclength_error_clean_eq_errorMap}, $F(z)=c(z)\cdot\mathrm{errorMap}\,a\,b\,\delta\,z$
+  with $c(z)=1/\lambda(z)>0$ continuous on $\partial\mathbb{D}$
+  (\cref{lem:closing_lambda_pos}). The in-tree \cref{lem:error_map_winds_boundary}
+  ($\mathrm{errorMap\_winding\_eq\_one}$) states $\mathrm{errorMap}$ is nonvanishing
+  on $\partial\mathbb{D}$ with boundary winding $-1$. Multiplication by a
+  \emph{positive scalar field} $c(z)>0$ changes neither the nonvanishing nor the
+  winding number: the loops $t\mapsto\mathrm{errorMap}(t)$ and
+  $t\mapsto c(t)\,\mathrm{errorMap}(t)$ are homotopic through
+  $(u,t)\mapsto\bigl((1-u)+u\,c(t)\bigr)\,\mathrm{errorMap}(t)$, whose scalar factor
+  $(1-u)+u\,c(t)>0$ is positive throughout (so the homotopy avoids $0$), and a
+  positive-scalar reparametrisation of a loop preserves its winding number. Hence $F$
+  is nonvanishing on $\partial\mathbb{D}$ with winding $-1\neq0$. (This is the
+  in-tree breakpoint-disk version of Dahlberg's Prop 2.3, with the unit circle in
+  place of his "sufficiently small circle".)
+\end{proof}
+
+% SOURCE: [Dahlberg], §3, p. 2135, "By a standard topology argument" (read from references/dahlberg.pdf)
+% SOURCE QUOTE: "By a standard topology argument and the fact that
+% $\lim_{\epsilon \downarrow 0} F^*(\beta,\epsilon) = F(\beta)$ it follows that if
+% $\epsilon_0$ has been chosen sufficiently small, there is a $\beta$,
+% $|\beta| \le \frac{1}{2}$ such that $F^*(\beta,\epsilon) = 0$."
+\begin{theorem}
+
+\leanok
+[Existence of a closing parameter]
+  \label{thm:exists_closing_param}
+  \lean{Gluck.exists_closingParam}
+  \uses{def:preliminary_diffeo_data, lem:clean_error_winds, lem:arclength_error_tendsto, lem:arclength_error_continuous, lem:winding_number_c_perturb, thm:existence_of_zero}
+  Assume $\kappa$ is continuous (the hypothesis $\mathrm{Continuous}\,\kappa$ is
+  carried in the Lean signature, supplied at the use site by
+  \cref{def:mixed_sign_four_vertex}). There is $\varepsilon_0>0$ such that for every
+  $\varepsilon\in(0,\varepsilon_0)$ there is $z^*\in\mathbb{D}$ (interior) with
+  $F^*(z^*,\varepsilon)=0$. Hence
+  $K^*_{z^*}=\tfrac{2\pi}{I^*_{z^*}}(\kappa\circ\eta)\circ g_{z^*}$ satisfies the
+  closure condition (1.2).
+\end{theorem}
+\begin{proof}
+  \uses{lem:clean_error_winds, lem:arclength_error_tendsto, lem:winding_number_c_perturb, thm:existence_of_zero}
+  \leanok
+  Since $\kappa$ is continuous and $\eta$ is $C^1$ (hence continuous, from
+  \cref{def:preliminary_diffeo_data}), the perturbed weight $\kappa\circ\eta$ is
+  continuous, so \cref{lem:arclength_error_continuous} applies to both $F$ and
+  $F^*(\cdot,\varepsilon)$. By \cref{lem:clean_error_winds}, $F$ is nonvanishing on
+  $\partial\mathbb{D}$ with a positive margin $\mu=\min_{|z|=1}\|F(z)\|>0$
+  (continuity on the compact circle, \cref{lem:arclength_error_continuous}) and
+  nonzero boundary winding. By
+  \cref{lem:arclength_error_tendsto} choose $\varepsilon_0$ so that for
+  $\varepsilon<\varepsilon_0$, $\sup_z\|F^*(z,\varepsilon)-F(z)\|<\mu$. Then
+  $F^*(\cdot,\varepsilon)$ is also nonvanishing on $\partial\mathbb{D}$, and by the
+  perturbation invariance of the winding number
+  (\cref{lem:winding_number_c_perturb}, applied as in the positive-case
+  \cref{lem:reduction_justified}) its boundary winding equals that of $F$, hence is
+  nonzero. The planar degree principle \cref{thm:existence_of_zero}
+  ($\mathrm{exists\_zero\_of\_boundary\_winding}$) then produces an interior zero
+  $z^*\in\mathbb{D}$ with $F^*(z^*,\varepsilon)=0$. Finally
+  $F^*(z^*,\varepsilon)=\gamma_{K^*_{z^*}}(2\pi)=0$ is condition (1.2).
+\end{proof}
+
+\section{Simplicity transport and the converse}
+
+% SOURCE: [Dahlberg], §3, p. 2135, simplicity transport (read from references/dahlberg.pdf)
+% SOURCE QUOTE: "Since the curve $\gamma(t) = \int_0^t e^{i\alpha(u)} du$ is simple
+% and closed and $|\alpha - \alpha^*| \le C\epsilon$, it follows that
+% $\int_t^\tau e^{i\alpha^*(s)} ds \neq 0$ whenever $0 < t < \tau < 2\pi$, which
+% completes the proof of the theorem."
+\begin{lemma}
+
+\leanok
+[Clean chord integrals are bounded away from $0$ on inclination-span-$\le\pi$ arcs]
+  \label{lem:clean_chord_margin}
+  \lean{Gluck.clean_chord_margin}
+  % DESIGN NOTE (iter-035): the margin is keyed to the INCLINATION span
+  % Λ = α_{K_z}(τ) − α_{K_z}(t), NOT to arc-length (an arc-length-short arc can
+  % still sweep large inclination). It does NOT assume clean closure F(z)=0 (the
+  % clean curve is NOT closed at the perturbed zero z*). The margin is UNIFORM in
+  % z (z* depends on ε, so ε must be chosen below the margin before z* is fixed).
+  % DESIGN NOTE (iter-038): the endpoint range is 0 ≤ t < τ ≤ 4π (NOT 2π), so that
+  % lem:simplicity_transport can apply the margin on the COMPLEMENT interval
+  % [τ, t+2π] ⊆ [0,4π] in its Λ>π case (where 0 ≤ t < τ < 2π ⇒ t+2π < 4π). The
+  % compactness proof is unchanged — the set is just the larger compact box [0,4π].
+  \uses{def:closing_family, lem:closing_lambda_pos, lem:closing_len_bounds, lem:clean_bicircle_eq_step}
+  There is a margin $m>0$ (depending only on $a,b,\delta$) such that for every
+  $z\in\overline{\mathbb{D}}$, writing $\alpha=\alpha_{K_z}$ for the clean normalised
+  curvature $K_z=\mathrm{arcLengthNorm}\,(k_{a,b})\,a\,b\,\delta\,z$ (positive, since
+  $a,b>0$),
+  \[
+    m\,(\tau-t)\;\le\;\bigl\|\textstyle\int_t^\tau e^{i\alpha(s)}\,ds\bigr\|
+    \qquad\text{for all } 0\le t<\tau\le 4\pi \text{ with } \alpha(\tau)-\alpha(t)\le\pi .
+  \]
+\end{lemma}
+\begin{proof}
+  \uses{def:closing_family, lem:closing_lambda_pos, lem:closing_len_bounds, lem:clean_bicircle_eq_step}
+  \leanok
+  The landed proof is elementary and uses no compactness; it is keyed to a uniform
+  slope bound plus the cosine positivity of the \emph{middle angular half} of the arc.
+
+  \emph{Uniform slope bounds.} Write $K_z=\lambda(z)\,k_{a,b}(g_z\,\cdot)$ with
+  $\lambda(z)=2\pi/I_z$. Since $\lambda(z)$ is bounded above and below
+  (\cref{lem:closing_lambda_pos}, \cref{lem:closing_len_bounds}) and
+  $k_{a,b}\in[a,b]$ a.e.\ (\cref{lem:clean_bicircle_eq_step}), there are constants
+  $0<m_K\le M_K$, depending only on $a,b,\delta$, with $m_K\le K_z\le M_K$ for every
+  $z\in\overline{\mathbb D}$. Hence $\alpha(s)=\int_0^s K_z$ is continuous, strictly
+  increasing, with $m_K(y-x)\le\alpha(y)-\alpha(x)\le M_K(y-x)$.
+
+  \emph{Middle-half projection.} Project the chord onto the angular-midpoint direction
+  $e^{i\psi}$, $\psi=\tfrac12(\alpha(t)+\alpha(\tau))$:
+  $\|\int_t^\tau e^{i\alpha}\|\ge\mathrm{Re}\bigl(e^{-i\psi}\int_t^\tau e^{i\alpha}\bigr)
+  =\int_t^\tau\cos(\alpha(s)-\psi)\,ds$. Writing $\Lambda=\alpha(\tau)-\alpha(t)\le\pi$,
+  on all of $[t,\tau]$ we have $|\alpha(s)-\psi|\le\Lambda/2\le\pi/2$, so the integrand
+  is $\ge0$. By IVT pick $s_1,s_2\in[t,\tau]$ with $\alpha(s_1)=\alpha(t)+\Lambda/4$ and
+  $\alpha(s_2)=\alpha(t)+3\Lambda/4$; on $[s_1,s_2]$, $|\alpha(s)-\psi|\le\Lambda/4\le\pi/4$,
+  so $\cos(\alpha(s)-\psi)\ge\cos(\pi/4)$.
+
+  \emph{Length of the middle half.} From $\Lambda/2=\alpha(s_2)-\alpha(s_1)\le M_K(s_2-s_1)$
+  and $\Lambda\ge m_K(\tau-t)$ we get $s_2-s_1\ge\Lambda/(2M_K)\ge m_K(\tau-t)/(2M_K)$.
+  Dropping the nonnegative tails outside $[s_1,s_2]$,
+  \[
+    \Bigl\|\textstyle\int_t^\tau e^{i\alpha}\Bigr\|\ge\int_{s_1}^{s_2}\cos(\alpha-\psi)
+    \ge\cos(\tfrac\pi4)\,(s_2-s_1)\ge m\,(\tau-t),\qquad m=\frac{m_K\cos(\pi/4)}{2M_K}>0,
+  \]
+  uniform in $z$. This is exactly the half-circle limit ($\Lambda=\pi$, chord/arc $=2/\pi$)
+  that a naive whole-arc midpoint bound $(\tau-t)\cos(\Lambda/2)$ misses.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[Simplicity of the perturbed curve (condition (1.3))]
+  \label{lem:simplicity_transport}
+  \lean{Gluck.simplicity_transport}
+  \uses{def:preliminary_diffeo_data, lem:clean_chord_margin, lem:angle_dist_le, thm:exists_closing_param}
+  For $\varepsilon$ small enough, the closing parameter $z^*$ of
+  \cref{thm:exists_closing_param} ($F^*(z^*,\varepsilon)=0$) gives a $K^*_{z^*}$
+  satisfying condition (1.3):
+  $\int_t^\tau e^{i\alpha_{K^*_{z^*}}(s)}\,ds\neq 0$ for all $0\le t<\tau<2\pi$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:clean_chord_margin, lem:angle_dist_le, thm:exists_closing_param}
+  \leanok
+  Write $\alpha=\alpha_{K_{z^*}}$ (clean, at the same $z^*$) and $\alpha^*=\alpha_{K^*_{z^*}}$
+  (perturbed). Fix $\varepsilon$ with $C'\varepsilon<m$, where $m$ is the uniform clean
+  margin of \cref{lem:clean_chord_margin} and $C'$ the angle constant of
+  \cref{lem:angle_dist_le}; note the threshold is independent of $z^*$ (both $m$ and $C'$
+  are uniform in $z$), so it may be chosen before $z^*$ is produced. The transport
+  estimate over any arc $[u,v]$ is, by \cref{lem:angle_dist_le} and $|e^{ix}-e^{iy}|\le|x-y|$,
+  \[
+    \bigl\|\textstyle\int_u^v e^{i\alpha^*}-\int_u^v e^{i\alpha}\bigr\|
+    \le\int_u^v|\alpha^*-\alpha|\le(v-u)\,C'\varepsilon . \tag{$\dagger$}
+  \]
+  Let $\Lambda=\alpha(\tau)-\alpha(t)$ be the clean inclination span of $[t,\tau]$;
+  since $\alpha(2\pi)-\alpha(0)=2\pi$ exactly (normalisation), the complementary span is
+  $2\pi-\Lambda$, and exactly one of $\Lambda,2\pi-\Lambda$ is $\le\pi$.
+
+  \emph{Case $\Lambda\le\pi$.} By \cref{lem:clean_chord_margin},
+  $\|\int_t^\tau e^{i\alpha}\|\ge m(\tau-t)$, so by $(\dagger)$,
+  $\|\int_t^\tau e^{i\alpha^*}\|\ge(m-C'\varepsilon)(\tau-t)>0$.
+
+  \emph{Case $\Lambda>\pi$.} The complement arc $[\tau,t+2\pi]$ has clean span
+  $\alpha(t+2\pi)-\alpha(\tau)=2\pi-\Lambda<\pi$, so by \cref{lem:clean_chord_margin}
+  $\|\int_\tau^{t+2\pi}e^{i\alpha}\|\ge m(t+2\pi-\tau)>0$, and by $(\dagger)$
+  $\|\int_\tau^{t+2\pi}e^{i\alpha^*}\|\ge(m-C'\varepsilon)(t+2\pi-\tau)>0$. Finally, the
+  \emph{perturbed} curve is closed ($F^*(z^*,\varepsilon)=\int_0^{2\pi}e^{i\alpha^*}=0$),
+  and $e^{i\alpha^*}$ is $2\pi$-periodic ($\alpha^*(s+2\pi)=\alpha^*(s)+2\pi$), so
+  $\int_t^\tau e^{i\alpha^*}=-\int_\tau^{t+2\pi}e^{i\alpha^*}$; the two have equal norm,
+  hence $\|\int_t^\tau e^{i\alpha^*}\|>0$. In both cases the perturbed chord is nonzero,
+  which is (1.3).
+\end{proof}
+
+% Archon-original: a self-contained C¹ circle-inverse construction local to
+% DahlbergStep2.lean. The positive-case `exists_C1_circle_inverse` lives PRIVATE in
+% FourVertex.lean, which DahlbergStep2.lean does NOT import; rather than a cross-file
+% refactor during final assembly, the same IFT+IVT construction is rebuilt here.
+\begin{lemma}
+
+\leanok
+[$C^1$ circle inverse of an orientation-preserving quasiperiodic map]
+  \label{lem:dahlberg_c1_circle_inverse}
+  \lean{Gluck.exists_C1_inverse_circle, Gluck.intShift_qp}
+  Let $h:\mathbb{R}\to\mathbb{R}$ have a continuous strictly positive derivative
+  $v$ ($\forall\theta,\ \mathrm{HasDerivAt}\,h\,(v\theta)\,\theta$, $v>0$, $v$
+  continuous) and be quasiperiodic, $h(\theta+2\pi)=h(\theta)+2\pi$. Then there is
+  $H:\mathbb{R}\to\mathbb{R}$ with: $H$ continuous and strictly monotone; $h(H t)=t$
+  and $H(h t)=t$ for all $t$; $H(t+2\pi)=H(t)+2\pi$; and
+  $\mathrm{HasDerivAt}\,H\,(1/v(H t))\,t$ for all $t$ (so $H$ is $C^1$ with positive
+  derivative). This is the construction of the positive case
+  (\cref{thm:gluck_converse}'s reparam-back), rebuilt in this file.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  $h$ is strictly increasing (positive derivative) and continuous (differentiable);
+  the quasiperiodicity gives $h(n\cdot2\pi)=h(0)+n\cdot2\pi$, so $h$ is unbounded
+  above and below, hence surjective (IVT). A continuous strictly monotone bijection
+  has a continuous strictly monotone two-sided inverse $H$. Quasiperiodicity of $H$
+  follows from that of $h$ by applying $H$ to $h(H t+2\pi)=h(Ht)+2\pi=t+2\pi$. The
+  derivative of $H$ at $t$ is $1/v(Ht)$ by the inverse-function rule
+  (\texttt{HasDerivAt.of\_local\_left\_inverse}, with $v(Ht)\neq0$); continuity of
+  $t\mapsto1/v(Ht)$ makes $H$ a $C^1$ map. (Identical to the positive-case
+  \texttt{exists\_C1\_circle\_inverse}.)
+\end{proof}
+
+% SOURCE: [Dahlberg], §1, p. 2131, Theorem 1.1 (read from references/dahlberg.pdf)
+% SOURCE QUOTE: "Theorem 1.1. Suppose $\kappa : T \to R$ is not a constant and
+% assume that $\kappa$ has at least four critical points ordered counterclockwise
+% $p_i \in T$, $i = 1,\dots,4$, such that $p_1,p_3$ are local maxima and
+% $p_2,p_4$ are local minima with $\kappa(p_1) > 0, \kappa(p_3) > 0$ and
+% $\max(\kappa(p_2),\kappa(p_4)) < \min(\kappa(p_1),\kappa(p_3))$. If in addition
+% $\kappa$ is smooth, then $\kappa$ is the curvature function of a smooth, simple
+% and closed curve."
+\begin{theorem}
+
+\leanok
+[Dahlberg converse to the four vertex theorem (Theorem 1.1)]
+  \label{thm:dahlberg_converse}
+  \lean{Gluck.dahlbergConverse}
+  \uses{def:mixed_sign_four_vertex, thm:exists_preliminary_diffeo, def:preliminary_diffeo_data, thm:exists_closing_param, lem:total_curvature_ne_zero, lem:simplicity_transport, lem:dahlberg_c1_circle_inverse, lem:closing_family_props, thm:realizes_of_non_normalised, def:non_normalised_curvature}
+  \textit{Source: Dahlberg, §1, Theorem 1.1.}
+  Let $\kappa:\mathbb{R}\to\mathbb{R}$ be continuous, $2\pi$-periodic and
+  non-constant, satisfying the mixed-sign four-vertex condition
+  (\cref{def:mixed_sign_four_vertex}). Then there is a simple closed curve realizing
+  $\kappa$: $\exists\,\gamma,\ \mathrm{IsSimpleClosed}\,\gamma\,\wedge\,
+       \mathrm{RealizesCurvature}\,\gamma\,\kappa$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:exists_preliminary_diffeo, thm:exists_closing_param, lem:simplicity_transport, lem:total_curvature_ne_zero, lem:dahlberg_c1_circle_inverse, lem:closing_family_props, thm:realizes_of_non_normalised}
+  \leanok
+  From \cref{def:mixed_sign_four_vertex}, $\kappa$ is continuous and $2\pi$-periodic.
+  Fix $\delta=\pi/8$. Apply \cref{thm:exists_preliminary_diffeo} to obtain $0<a<b$
+  and, for a parameter $\varepsilon$ to be fixed below, the preliminary
+  diffeomorphism $\eta$ (with continuous positive derivative $v_\eta$ and
+  $\eta(t+2\pi)=\eta(t)+2\pi$, \cref{def:preliminary_diffeo_data}) with
+  $\kappa\circ\eta=a(1-f)+bf+e$, $\int_0^{2\pi}|e|<C\varepsilon$. Shrink $\varepsilon$
+  below $\min(\varepsilon_0,\varepsilon_1)$ and below the simplicity threshold of
+  \cref{lem:simplicity_transport}. By \cref{thm:exists_closing_param} (whose
+  $\mathrm{Continuous}\,\kappa$ hypothesis is supplied by
+  \cref{def:mixed_sign_four_vertex}) there is an interior $z^*$ with
+  $F^*(z^*,\varepsilon)=0$, i.e.\ $K^*_{z^*}$ satisfies (1.2); feeding that same zero
+  to \cref{lem:simplicity_transport} gives (1.3); and \cref{lem:total_curvature_ne_zero}
+  gives the total curvature $I^*_{z^*}=\int_0^{2\pi}(\kappa\circ\eta)\circ g_{z^*}>0$.
+
+  \emph{The composite reparametrisation and its inverse.} Set
+  $\varphi=\eta\circ g_{z^*}$. By the chain rule
+  $\mathrm{HasDerivAt}\,\varphi\,\bigl(v_\eta(g_{z^*}(s))\cdot w_{z^*}(s)\bigr)\,s$,
+  where $w_{z^*}=g_{z^*}'$ is continuous and strictly positive
+  (\cref{lem:closing_family_props}); the product $v_\varphi=
+  (v_\eta\circ g_{z^*})\cdot w_{z^*}$ is therefore continuous and strictly positive,
+  so $\varphi$ is $C^1$ with $\varphi'>0$. Quasiperiodicity composes:
+  $\varphi(s+2\pi)=\eta(g_{z^*}(s)+2\pi)=\eta(g_{z^*}(s))+2\pi=\varphi(s)+2\pi$. By
+  \cref{lem:dahlberg_c1_circle_inverse} applied to $\varphi$ (with derivative
+  $v_\varphi$) there is a $C^1$ orientation-preserving quasiperiodic two-sided
+  inverse $\psi$ with $\psi'=1/v_\varphi\circ\psi>0$.
+
+  \emph{Assembly.} We have $\kappa\circ\varphi=(\kappa\circ\eta)\circ g_{z^*}=k^*_{z^*}$,
+  and $K^*_{z^*}=\tfrac{2\pi}{I^*_{z^*}}\kappa\circ\varphi$ with $I^*_{z^*}>0$ satisfies
+  (1.2) and (1.3); thus $\kappa\circ\varphi$ is a non-normalised curvature function
+  (\cref{def:non_normalised_curvature}) with positive total curvature. Feeding
+  $\kappa$, $\varphi$, $\psi$ and all the $C^1$/positivity/quasiperiodicity/inverse
+  data to \cref{thm:realizes_of_non_normalised} yields a simple closed curve $\gamma$
+  with $\mathrm{RealizesCurvature}\,\gamma\,\kappa$, completing the proof. (This is the
+  mixed-sign analogue of \cref{thm:gluck_converse}, stated through the same
+  realization predicate per the unification directive.)
+\end{proof}
+
+\noindent\textbf{Phase status.} \cref{thm:dahlberg_converse} is the project's
+extended goal: the converse to the four vertex theorem \emph{without} global
+positivity (positivity only at the two maxima), stated through the same
+$\mathrm{IsSimpleClosed}\wedge\mathrm{RealizesCurvature}$ conclusion as the positive
+case. It consumes Phase D-A (\cref{chap:arclength}), Phase D-B
+(\cref{chap:dahlberg_step1}), and the in-tree winding/degree and chord-integral
+machinery, with the genuinely new analytic work confined to the node-placing family
+package (\cref{def:closing_family}, \cref{lem:clean_arclength_nodes}) and the
+estimates \cref{lem:total_curvature_ne_zero,lem:angle_dist_le,lem:arclength_error_tendsto}.

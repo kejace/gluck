@@ -104,7 +104,7 @@ private lemma realizesCurvature_reconstruct {μ : ℝ → ℝ} (hcont : Continuo
 /-- **Realization transfers under an orientation-preserving `C¹` reparametrization**
 (blueprint `lem:realizes_curvature_comp`). If `Γ` realizes `μ` and `ψ` is `C¹`
 with `ψ' > 0`, then `Γ ∘ ψ` realizes `μ ∘ ψ`. -/
-private lemma realizesCurvature_comp {Γ : ℝ → ℂ} {μ : ℝ → ℝ} {ψ : ℝ → ℝ}
+lemma realizesCurvature_comp {Γ : ℝ → ℂ} {μ : ℝ → ℝ} {ψ : ℝ → ℝ}
     (hΓ : RealizesCurvature Γ μ) (hψ : ContDiff ℝ 1 ψ) (hψpos : ∀ t, 0 < deriv ψ t) :
     RealizesCurvature (Γ ∘ ψ) (μ ∘ ψ) := by
   obtain ⟨hΓ1, hreg, φ, hφ, htan, hcurv⟩ := hΓ
@@ -211,7 +211,7 @@ private lemma eq_zero_of_window_sub_eq_zsmul {x y : ℝ} (n : ℤ)
 (blueprint `lem:is_simple_closed_comp`). If `Γ` is a simple closed curve and `ψ`
 is continuous, strictly increasing, with `ψ(t+2π)=ψ(t)+2π`, then `Γ ∘ ψ` is a
 simple closed curve. -/
-private lemma isSimpleClosed_comp {Γ : ℝ → ℂ} {ψ : ℝ → ℝ}
+lemma isSimpleClosed_comp {Γ : ℝ → ℂ} {ψ : ℝ → ℝ}
     (hΓ : IsSimpleClosed Γ) (_hcont : Continuous ψ) (hmono : StrictMono ψ)
     (hper : ∀ t, ψ (t + 2 * π) = ψ t + 2 * π) :
     IsSimpleClosed (Γ ∘ ψ) := by

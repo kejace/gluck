@@ -104,7 +104,7 @@
       <span class="corollary_thmcaption">
       Corollary
       </span>
-      <span class="corollary_thmlabel">65</span></div>
+      <span class="corollary_thmlabel">66</span></div>
     <div class="thm_thmcontent"><p>[A closing configuration exists]    There is a configuration in the interior of \(D\) whose bicircle error vector is \(0\); by <a href="chap-bicircle.html#cor:bicircle_closes_iff">corollary 37</a> the corresponding bicircle closes up. </p>
 </div>
 
@@ -134,7 +134,7 @@
       <span class="corollary_thmcaption">
       Corollary
       </span>
-      <span class="corollary_thmlabel">86</span></div>
+      <span class="corollary_thmlabel">87</span></div>
     <div class="thm_thmcontent"><p>[Positive curvature reconstruction is a simple closed curve]    Let \(\rho \) be continuous, \(2\pi \)-periodic and strictly positive with \(E(\rho ) = 0\). Then \(\alpha _\rho \) is a simple closed curve (<a href="chap-curve.html#def:is_simple_closed">definition 6</a>): it is \(2\pi \)-periodic and injective on \([0, 2\pi )\). </p>
 </div>
 
@@ -164,7 +164,7 @@
       <span class="definition_thmcaption">
       Definition
       </span>
-      <span class="definition_thmlabel">66</span><span class="definition_thmtitle">Calibrated speed density \(w_z\)</span></div>
+      <span class="definition_thmlabel">67</span><span class="definition_thmtitle">Calibrated speed density \(w_z\)</span></div>
     <div class="thm_thmcontent"><p>    Project-bespoke. Fix the ramp half-width \(\eta =\pi /16\) (so \(2\eta =\pi /8\) is strictly less than the minimal arc length \(\pi /4\), hence the four node windows \([\theta _k-\eta ,\theta _k+\eta ]\) are pairwise disjoint and each arc retains a non-empty central plateau of length \(L_k-2\eta \ge \pi /8\)). Let \(w_z:\mathbb R\to \mathbb R\) be the \(2\pi \)-periodic, continuous, piecewise-affine (<em>trapezoidal</em>) density determined by: </p>
 <ul class="itemize">
   <li><p>a common node value \(w_z(\theta _k)=V\) at all four nodes, where \(V:=2/3\) (a fixed positive constant); </p>
@@ -175,11 +175,11 @@
 </li>
 </ul>
 <p> The plateau height \(m_k(z)\) is solved so that the arc integral is exactly \(\pi /2\): with \(\int _{\theta _k}^{\theta _{k+1}}w_z = m_k(z)\, (L_k-2\eta ) + \tfrac {\eta }{2}(V+m_k(z)) + \tfrac {\eta }{2}(m_k(z)+V) = m_k(z)(L_k-\eta ) + \eta V\), setting this to \(\pi /2\) gives </p>
-<div class="displaymath" id="a0000000077">
+<div class="displaymath" id="a0000000090">
   \[  m_k(z) \; =\;  \frac{\pi /2-\eta V}{L_k-\eta }.  \]
 </div>
 <p> Since \(L_k\in [\tfrac \pi 4,\tfrac {3\pi }4]\), \(\eta =\pi /16\) and \(V=2/3\), the numerator \(\pi /2-\eta V = \pi /2-\pi /24{\gt}0\) and the denominator \(L_k-\eta \in [\tfrac {3\pi }{16},\tfrac {11\pi }{16}]\), so each \(m_k(z)\) is a continuous, strictly positive function of \(z\). Since \(w_z\) is a convex combination of the node value \(V\) and the plateau heights \(m_k(z)\) (it is affine between them on the ramps), \(w_z(\theta )\in [c_-,c_+]\subset (0,\infty )\) with \(c_-=\min (V,\min _k m_k)\) and \(c_+=\max (V,\max _k m_k)\). A direct computation over \(L_k\in [\tfrac \pi 4,\tfrac {3\pi }4]\) gives \(\min _k m_k=2/3\) (at \(L_k=3\pi /4\)) and \(\max _k m_k=22/9\) (at \(L_k=\pi /4\)), so \(c_-=2/3\) and \(c_+=22/9\); we set the uniform slope bound \(K:=\max (c_+,1/c_-)=22/9\) (so \(1/K\le w_z\le K\)). This is the same kind of explicit continuous trapezoidal-density construction already carried out (for a different calibration) in the preliminary reparametrization of <a href="chap-stepreduction.html">chapter 4</a>; the present density is self-contained and depends on none of that chapter’s lemmas. </p>
-<p><em>Lean realization.</em> Each ramp/plateau pulse is the periodic trapezoid \(\mathrm{clampTent}(\eta ,L,\tau )(\theta )=\min (1,\max (0,(L/2-\arccos \cos (\theta -\tau ))/\eta ))\) (height \(1\), centre \(\tau \), width \(L\), ramp \(\eta \)), built on the \(\arccos \cos \) idiom of <a href="chap-stepreduction.html">chapter 4</a> for free \(2\pi \)-periodicity and continuity; \(w_z=\mathrm{alignDensity}\) is the constant \(V\) plus a \(z\)-continuous combination of four such pulses with heights \(m_k(z)=\mathrm{alignHt}(L_k)\) at the four nodes \(\mathrm{alignN}_k(z)\) / arc lengths \(\mathrm{alignL}_k(z)\) / centres \(\mathrm{alignC}_k(z)\). These named pieces (and their continuity helpers) carry the dependency edges; their properties are collected in <a href="chap-reduction.html#lem:align_density_props">lemma 67</a> and <a href="chap-reduction.html#lem:align_density_arc_integral">lemma 68</a>. </p>
+<p><em>Lean realization.</em> Each ramp/plateau pulse is the periodic trapezoid \(\mathrm{clampTent}(\eta ,L,\tau )(\theta )=\min (1,\max (0,(L/2-\arccos \cos (\theta -\tau ))/\eta ))\) (height \(1\), centre \(\tau \), width \(L\), ramp \(\eta \)), built on the \(\arccos \cos \) idiom of <a href="chap-stepreduction.html">chapter 4</a> for free \(2\pi \)-periodicity and continuity; \(w_z=\mathrm{alignDensity}\) is the constant \(V\) plus a \(z\)-continuous combination of four such pulses with heights \(m_k(z)=\mathrm{alignHt}(L_k)\) at the four nodes \(\mathrm{alignN}_k(z)\) / arc lengths \(\mathrm{alignL}_k(z)\) / centres \(\mathrm{alignC}_k(z)\). These named pieces (and their continuity helpers) carry the dependency edges; their properties are collected in <a href="chap-reduction.html#lem:align_density_props">lemma 68</a> and <a href="chap-reduction.html#lem:align_density_arc_integral">lemma 69</a>. </p>
 </div>
 
     <a class="latex_link" href="chap-reduction.html#def:align_density">LaTeX</a>
@@ -247,16 +247,16 @@
       <span class="definition_thmcaption">
       Definition
       </span>
-      <span class="definition_thmlabel">69</span></div>
-    <div class="thm_thmcontent"><p>[Breakpoint-aligning reparametrization family]    Project-bespoke. For \(0{\lt}\delta \le \pi /8\) and \(z\in \overline{\mathbb {D}}\) define \(g_z := \mathrm{alignReparam}(\delta )(z) : \mathbb {R}\to \mathbb {R}\) as the running integral of the calibrated density \(w_z\) (<a href="chap-reduction.html#def:align_density">definition 66</a>) anchored so that \(g_z(\theta _1)=\pi /2\): </p>
-<div class="displaymath" id="a0000000080">
+      <span class="definition_thmlabel">70</span></div>
+    <div class="thm_thmcontent"><p>[Breakpoint-aligning reparametrization family]    Project-bespoke. For \(0{\lt}\delta \le \pi /8\) and \(z\in \overline{\mathbb {D}}\) define \(g_z := \mathrm{alignReparam}(\delta )(z) : \mathbb {R}\to \mathbb {R}\) as the running integral of the calibrated density \(w_z\) (<a href="chap-reduction.html#def:align_density">definition 67</a>) anchored so that \(g_z(\theta _1)=\pi /2\): </p>
+<div class="displaymath" id="a0000000093">
   \[  g_z(\theta ) \; :=\;  \tfrac {\pi }{2} + \int _{\theta _1}^{\theta } w_z(t)\, dt .  \]
 </div>
 <p> \(g_z\) is the orientation-preserving circle homeomorphism that sends the four breakpoints of the \(z\)-configuration </p>
-<div class="displaymath" id="a0000000081">
+<div class="displaymath" id="a0000000094">
   \[  \theta _1=\tfrac {\pi }{4}+\delta z.\mathrm{re},\quad \theta _2=\tfrac {3\pi }{4}+\delta z.\mathrm{im},\quad \theta _3=\tfrac {5\pi }{4},\quad \theta _4=\tfrac {7\pi }{4}  \]
 </div>
-<p> to the canonical breakpoints \(\tfrac {\pi }{2},\pi ,\tfrac {3\pi }{2},2\pi \) respectively (<a href="chap-reduction.html#lem:align_reparam_node_values">lemma 70</a>), is strictly increasing with slope \(g_z'=w_z\in [c_-,c_+]\subset (0,\infty )\), and is quasi-periodic (\(g_z(\theta +2\pi )=g_z(\theta )+2\pi \)) because the full-period integral of \(w_z\) is \(2\pi \) (<a href="chap-reduction.html#lem:align_density_arc_integral">lemma 68</a>). We write \(K=22/9\) for the uniform slope bound (\(1/K\le w_z\le K\); see <a href="chap-reduction.html#def:align_density">definition 66</a>). </p>
+<p> to the canonical breakpoints \(\tfrac {\pi }{2},\pi ,\tfrac {3\pi }{2},2\pi \) respectively (<a href="chap-reduction.html#lem:align_reparam_node_values">lemma 71</a>), is strictly increasing with slope \(g_z'=w_z\in [c_-,c_+]\subset (0,\infty )\), and is quasi-periodic (\(g_z(\theta +2\pi )=g_z(\theta )+2\pi \)) because the full-period integral of \(w_z\) is \(2\pi \) (<a href="chap-reduction.html#lem:align_density_arc_integral">lemma 69</a>). We write \(K=22/9\) for the uniform slope bound (\(1/K\le w_z\le K\); see <a href="chap-reduction.html#def:align_density">definition 67</a>). </p>
 </div>
 
     <a class="latex_link" href="chap-reduction.html#def:align_reparam">LaTeX</a>
@@ -293,6 +293,117 @@
     
     
   <a class="lean_link lean_decl" href="/find/#doc/Gluck.angleLift">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="def:arclength_curvature_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="def:arclength_curvature" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">100</span></div>
+    <div class="thm_thmcontent"><p>[Arc-length curvature conditions (1.1)–(1.3)]    <i class="itshape">Source: Dahlberg, §1, conditions (1.1)–(1.3).</i> A continuous, \(2\pi \)-periodic \(K : \mathbb {R}\to \mathbb {R}\) is an <em>arc-length curvature function</em> if </p>
+<div class="displaymath" id="a0000000131">
+  \begin{align}  \tag {1.1} &  \int _0^{2\pi } K(s)\, ds = 2\pi , \\ \tag {1.2} &  \int _0^{2\pi } e^{i\alpha _K(s)}\, ds = 0 \quad \bigl(\text{equivalently } \gamma _K(2\pi )=0\bigr), \\ \tag {1.3} &  \int _t^\tau e^{i\alpha _K(s)}\, ds \neq 0 \quad \text{whenever } 0 \le t {\lt} \tau {\lt} 2\pi \quad \bigl(\text{equivalently } \gamma _K(\tau )\neq \gamma _K(t)\bigr). \end{align}
+</div>
+<p> Geometrically: (1.1) fixes a well-determined tangent at \(s=0\) (it forces \(e^{i\alpha _K}\) to be \(2\pi \)-periodic), (1.2) closes the curve, (1.3) makes it simple. </p>
+</div>
+
+    <a class="latex_link" href="chap-arclength.html#def:arclength_curvature">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.ArcLengthCurvature">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="def:arclength_error_map_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="def:arclength_error_map" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">128</span></div>
+    <div class="thm_thmcontent"><p>[Perturbed and clean arc-length error maps]    Fix \(\kappa ,\eta ,a,b,e\) from <a href="chap-dahlberg_step1.html#thm:exists_preliminary_diffeo">theorem 119</a> at a parameter \(\varepsilon {\gt}0\). For \(z\in \overline{\mathbb {D}}\) set \(k^*_z = (\kappa \circ \eta )\circ g_z\), \(k_z = k_{a,b}\circ g_z\), with total curvatures \(I^*_z,I_z\) and normalisations \(K^*_z,K_z\) as above. The <em>perturbed</em> and <em>clean</em> arc-length error maps are the closure defects </p>
+<div class="displaymath" id="a0000000167">
+  \[  F^*(z,\varepsilon )=\int _0^{2\pi }e^{i\alpha _{K^*_z}(s)}\, ds=\gamma _{K^*_z}(2\pi ), \qquad F(z)=\int _0^{2\pi }e^{i\alpha _{K_z}(s)}\, ds=\gamma _{K_z}(2\pi ),  \]
+</div>
+<p> where \(\alpha _{K}\) and \(\gamma _K\) are the arc-length tangent angle and curve of ??. A zero \(F^*(z^*,\varepsilon )=0\) is exactly condition (1.2) for \(K^*_{z^*}\). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#def:arclength_error_map">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.arcLengthErrorMap">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="def:arclength_norm_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="def:arclength_norm" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">127</span></div>
+    <div class="thm_thmcontent"><p>[Normalised arc-length curvature weight]    For a curvature weight \(g:\mathbb {R}\to \mathbb {R}\), parameters \(a,b,\delta \) and configuration \(z\in \overline{\mathbb {D}}\), the <em>normalised arc-length weight</em> is the \(\tfrac {2\pi }{I_z}\)-rescaled reparametrised weight </p>
+<div class="displaymath" id="a0000000166">
+  \[  K_z(s)=\frac{2\pi }{I_z}\, (g\circ g_z)(s),\qquad I_z=\int _0^{2\pi }(g\circ g_z)(t)\, dt,  \]
+</div>
+<p> where \(g_z=\mathrm{closingFamily}\, a\, b\, \delta \, z\) (<a href="chap-dahlberg_step2.html#def:closing_family">definition 121</a>). This is the common encoding of Dahlberg’s normalisations \(K_z\) (clean, \(g=k_{a,b}\)) and \(K^*_z\) (perturbed, \(g=\kappa \circ \eta \)); both \(F\) and \(F^*\) are built from it. When \(I_z{\gt}0\) and \(g\ge 0\) a.e., \(K_z\) has unit total mass \(\int _0^{2\pi }K_z=2\pi \). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#def:arclength_norm">LaTeX</a>
+    
+    
+  <div class="tooltip">
+      <span class="lean_link">Lean</span>
+      <ul class="tooltip_list">
+        
+           <li><a href="/find/#doc/Gluck.arcLengthNorm" class="lean_decl">Gluck.arcLengthNorm</a></li>
+        
+           <li><a href="/find/#doc/Gluck.dahlbergAngle_arcLengthNorm" class="lean_decl">Gluck.dahlbergAngle_arcLengthNorm</a></li>
+        
+      </ul>
+  </div>
     
     
   
@@ -345,7 +456,7 @@
       <span class="definition_thmcaption">
       Definition
       </span>
-      <span class="definition_thmlabel">55</span></div>
+      <span class="definition_thmlabel">56</span></div>
     <div class="thm_thmcontent"><p>[The unit-circle \(\mathbb {C}\)-loop]    Project-bespoke. \(\mathbb {C}\)-valued loop \(t \mapsto e^{2\pi i t}\), the coercion of \(g_0\) (<a href="chap-winding.html#def:standard_loop">definition 45</a>) into \(\mathbb {C}\); it is nowhere zero (\(\mathrm{circleExpLoop\_ ne}\), since its values lie on \(S^1\)). </p>
 </div>
 
@@ -403,6 +514,145 @@
 
 
     
+    <div class="dep-modal-container" id="def:clean_bicircle_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="def:clean_bicircle" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">111</span></div>
+    <div class="thm_thmcontent"><p>[Clean bicircle \(a(1-f)+bf\)]    For reals \(a,b\) the <em>clean bicircle</em> is the \(2\pi \)-periodic step function </p>
+<div class="displaymath" id="a0000000142">
+  \[  k_{a,b}(\theta ) \; =\;  a\bigl(1-f(\theta )\bigr) + b\, f(\theta ) \; =\;  \begin{cases}  b, &  \theta \in (\tfrac {\pi }{4},\tfrac {3\pi }{4})\cup (\tfrac {5\pi }{4},\tfrac {7\pi }{4}),\\ a, &  \text{otherwise on }[0,2\pi ). \end{cases}  \]
+</div>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step1.html#def:clean_bicircle">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.cleanBicircle">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="def:closing_family_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="def:closing_family" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">121</span></div>
+    <div class="thm_thmcontent"><p>[Closing reparametrisation family — node-placing arc-length reparam]    Fix \(0{\lt}a{\lt}b\) and \(0{\lt}\delta \le \pi /8\). For \(z\in \overline{\mathbb {D}}\) write the configuration nodes </p>
+<div class="displaymath" id="a0000000153">
+  \[  (\theta _1,\theta _2,\theta _3,\theta _4)=\mathrm{configSpace}\, \delta \, (z.\mathrm{re},z.\mathrm{im}) =\bigl(\tfrac {\pi }{4}+\delta z.\mathrm{re},\, \tfrac {3\pi }{4}+\delta z.\mathrm{im},\, \tfrac {5\pi }{4},\, \tfrac {7\pi }{4}\bigr),  \]
+</div>
+<p> with \(\theta _0=0\), \(\theta _5=2\pi \), and let the five <em>cumulative-angle</em> increments and clean-curvature values be </p>
+<div class="displaymath" id="a0000000154">
+  \[  \Delta _j=\theta _j-\theta _{j-1}\quad (j=1,\dots ,5),\qquad (\hat\kappa _1,\dots ,\hat\kappa _5)=(a,b,a,b,a),  \]
+</div>
+<p> matching the five-arc value pattern of <a href="chap-bicircle.html#lem:error_vector_of_bicircle">lemma 32</a> (and of \(k_{a,b}=a(1-f)+bf\), <a href="chap-dahlberg_step1.html#lem:clean_bicircle_eq_step">lemma 115</a>). Put </p>
+<div class="displaymath" id="a0000000155">
+  \[  \lambda (z)=\frac1{2\pi }\sum _{j=1}^5\frac{\Delta _j}{\hat\kappa _j} =\frac1{2\pi }\Bigl(\frac{\pi +\delta (z.\mathrm{re}-z.\mathrm{im})}{a} +\frac{\pi +\delta (z.\mathrm{im}-z.\mathrm{re})}{b}\Bigr){\gt}0, \qquad L_j(z)=\frac{\Delta _j}{\lambda (z)\, \hat\kappa _j}{\gt}0,  \]
+</div>
+<p> so that \(\sum _{j=1}^5 L_j(z)=2\pi \) (the two value-\(a\) end arcs \(\Delta _1,\Delta _5\) contribute to the same \(1/a\) term). Let the canonical clean-bicircle breakpoints be \(c_0=0\), \(c_1=\tfrac {\pi }{4}\), \(c_2=\tfrac {3\pi }{4}\), \(c_3=\tfrac {5\pi }{4}\), \(c_4=\tfrac {7\pi }{4}\), \(c_5=2\pi \) (the FIXED jump points of \(k_{a,b}\), with arc widths \(w_j=c_j-c_{j-1}\) equal to \(\tfrac {\pi }{4},\tfrac {\pi }{2},\tfrac {\pi }{2},\tfrac {\pi }{2},\tfrac {\pi }{4}\) and values \(a,b,a,b,a\)). Define \(g_z=\mathrm{closingFamily}\, a\, b\, \delta \, z:\mathbb {R}\to \mathbb {R}\) to be the \(C^1\) orientation-preserving circle reparametrisation (\(g_z(s+2\pi )=g_z(s)+2\pi \), \(g_z'{\gt}0\), jointly continuous in \((z,s)\), \(g_z(0)=0\)) that maps the \(j\)-th <em>arc-length</em> interval \([s_{j-1},s_j]\) (\(s_j=\sum _{k\le j}L_k(z)\), so \(s_0=0\), \(s_5=2\pi \)) onto the \(j\)-th canonical clean-bicircle arc \([c_{j-1},c_j]\). Concretely \(g_z(s)=\int _0^s w_z(u)\, du\) is the running integral of a continuous positive \(2\pi \)-periodic density built as a constant <em>baseline</em> plus five <em>calibrated clamped-tent pulses</em>, one centred on each arc-length interval: </p>
+<div class="displaymath" id="a0000000156">
+  \[  w_z=m+\sum _{j=1}^5 h_j\, T_j,\qquad m=\mathrm{closingBase}=\tfrac {\lambda (z)\, a}{2}, \quad \eta =\mathrm{closingRamp}=\tfrac {\pi a}{20(a+b)},  \]
+</div>
+<p> where \(T_j=\mathrm{clampTent}\, \eta \, L_j\, C_j\) is the unit-height trapezoidal clamped tent centred on the arc midpoint \(C_j=s_{j-1}+L_j/2\), with one-period support window \([s_{j-1},s_j]\) (the full arc, width \(L_j\); value \(0\) at the endpoints), ramp intervals of width \(\eta \) at each end, plateau \([s_{j-1}+\eta ,\, s_j-\eta ]\) of width \(L_j-2\eta \), and trapezoidal area \(\int T_j=L_j-\eta \), and \(h_j=\mathrm{closingHeight}=\dfrac {w_j-m\, L_j}{\max (\eta ,\, L_j-\eta )} =\dfrac {w_j-m\, L_j}{L_j-\eta }\) the calibrated pulse height (the \(\max \)-clamp is inactive on the disk, where \(2\eta \le L_j\)). The ramp width \(\eta \) is \(a,b\)-dependent and below the compact-disk lower bound on the \(L_j\) (the fixed \(\pi /16\) ramp of <a href="chap-reduction.html#def:align_reparam">definition 70</a> is NOT reusable, since \(L_j(z)\) can be small when \(b/a\) is large). The calibration makes the per-arc integral exactly the canonical width, \(\int _{s_{j-1}}^{s_j}w_z=m\, L_j+h_j(L_j-\eta )=w_j\) (so the per-arc <em>average</em> slope is \(w_j/L_j(z)\), though the density is not flat on the arc); this is the node-mapping <a href="chap-dahlberg_step2.html#lem:closing_family_nodes">lemma 125</a>. This is the arc-length analogue of <a href="chap-reduction.html#def:align_reparam">definition 70</a>; it plays the role of Dahlberg’s Möbius \(\{ g_\beta \} \). </p>
+<p>The point of the calibration \(L_j=\Delta _j/(\lambda \hat\kappa _j)\) is the node-landing <a href="chap-dahlberg_step2.html#lem:clean_arclength_nodes">lemma 126</a>: with the clean weight \(k_{a,b}\), the cumulative normalised arc-length tangent angle satisfies \(\alpha _{K_z}(s_j)=\theta _j\) — the configuration nodes, <em>not</em> the canonical \(c_j\). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#def:closing_family">LaTeX</a>
+    
+    
+  <div class="tooltip">
+      <span class="lean_link">Lean</span>
+      <ul class="tooltip_list">
+        
+           <li><a href="/find/#doc/Gluck.closingFamily" class="lean_decl">Gluck.closingFamily</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingDelta1" class="lean_decl">Gluck.closingDelta1</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingDelta2" class="lean_decl">Gluck.closingDelta2</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingDelta3" class="lean_decl">Gluck.closingDelta3</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingDelta4" class="lean_decl">Gluck.closingDelta4</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingDelta5" class="lean_decl">Gluck.closingDelta5</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingLambda" class="lean_decl">Gluck.closingLambda</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingLambdaRaw" class="lean_decl">Gluck.closingLambdaRaw</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingLambdaFloor" class="lean_decl">Gluck.closingLambdaFloor</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingLen1" class="lean_decl">Gluck.closingLen1</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingLen2" class="lean_decl">Gluck.closingLen2</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingLen3" class="lean_decl">Gluck.closingLen3</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingLen4" class="lean_decl">Gluck.closingLen4</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingLen5" class="lean_decl">Gluck.closingLen5</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingS1" class="lean_decl">Gluck.closingS1</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingS2" class="lean_decl">Gluck.closingS2</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingS3" class="lean_decl">Gluck.closingS3</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingS4" class="lean_decl">Gluck.closingS4</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingMid1" class="lean_decl">Gluck.closingMid1</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingMid2" class="lean_decl">Gluck.closingMid2</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingMid3" class="lean_decl">Gluck.closingMid3</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingMid4" class="lean_decl">Gluck.closingMid4</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingMid5" class="lean_decl">Gluck.closingMid5</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingRamp" class="lean_decl">Gluck.closingRamp</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingBase" class="lean_decl">Gluck.closingBase</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingHeight" class="lean_decl">Gluck.closingHeight</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingDensity" class="lean_decl">Gluck.closingDensity</a></li>
+        
+      </ul>
+  </div>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="def:closure_integral_cos_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
@@ -416,7 +666,7 @@
       </span>
       <span class="definition_thmlabel">20</span></div>
     <div class="thm_thmcontent"><p>[Cosine closure integral]   The <em>cosine closure integral</em> of the weight \(\rho \) is the real number </p>
-<div class="displaymath" id="a0000000033">
+<div class="displaymath" id="a0000000045">
   \[  C(\rho ) = \int _0^{2\pi }\! \cos \theta \, \rho (\theta )\, d\theta ,  \]
 </div>
 <p> the real part of the error vector \(E(\rho )\). </p>
@@ -450,7 +700,7 @@
       </span>
       <span class="definition_thmlabel">21</span></div>
     <div class="thm_thmcontent"><p>[Sine closure integral]   The <em>sine closure integral</em> of the weight \(\rho \) is the real number </p>
-<div class="displaymath" id="a0000000034">
+<div class="displaymath" id="a0000000046">
   \[  S(\rho ) = \int _0^{2\pi }\! \sin \theta \, \rho (\theta )\, d\theta ,  \]
 </div>
 <p> the imaginary part of the error vector \(E(\rho )\). </p>
@@ -482,9 +732,9 @@
       <span class="definition_thmcaption">
       Definition
       </span>
-      <span class="definition_thmlabel">59</span></div>
+      <span class="definition_thmlabel">60</span></div>
     <div class="thm_thmcontent"><p>[Configuration disk]    <i class="itshape">Source: DeTurck–Gluck, §6 (the loop of diffeomorphisms, finitised).</i> Fix \(0 {\lt} a {\lt} b\) and a radius \(0 {\lt} \delta \le \pi /8\). The <em>configuration disk</em> is the explicit two-parameter family parametrised by the closed unit disk \(\overline{\mathbb {D}} \subset \mathbb {R}^2\) (coordinates \((x,y)\), \(x^2+y^2 \le 1\)): the two leading breakpoints vary while the trailing two are pinned, </p>
-<div class="displaymath" id="a0000000069">
+<div class="displaymath" id="a0000000082">
   \[  \mathrm{configSpace}(x,y) \; =\;  \bigl(\theta _1,\theta _2,\theta _3,\theta _4\bigr) \; =\; \Bigl(\tfrac {\pi }{4} + \delta x,\;  \tfrac {3\pi }{4} + \delta y,\;  \tfrac {5\pi }{4},\; \tfrac {7\pi }{4}\Bigr).  \]
 </div>
 <p> The centre \((x,y)=(0,0)\) is the canonical equally-spaced bicircle (breakpoints \(\tfrac {\pi }{4},\tfrac {3\pi }{4},\tfrac {5\pi }{4},\tfrac {7\pi }{4}\), four arcs of length \(\pi /2\)), which closes up: its chord sum is \(V = (e^{3\pi i/4} - e^{\pi i/4}) + (e^{7\pi i/4} - e^{5\pi i/4}) = -\sqrt2 + \sqrt2 = 0\), so by <a href="chap-bicircle.html#cor:bicircle_closes_iff">corollary 37</a> the canonical bicircle has zero error vector. The bound \(\delta \le \pi /8\) keeps the order constraint \(0 {\lt} \theta _1 {\lt} \theta _2 {\lt} \theta _3 {\lt} \theta _4 {\lt} \theta _1 + 2\pi \) on all of \(\overline{\mathbb {D}}\) (since \(|\delta x|, |\delta y| \le \delta \le \pi /8 {\lt} \pi /4\)). \(\mathrm{configSpace}\) is affine, hence continuous, and is a homeomorphism onto its (convex) image. </p>
@@ -494,6 +744,104 @@
     
     
   <a class="lean_link lean_decl" href="/find/#doc/Gluck.configSpace">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="def:dahlberg_angle_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="def:dahlberg_angle" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">93</span></div>
+    <div class="thm_thmcontent"><p>[Arc-length tangent angle]   <i class="itshape">Source: Dahlberg, §1, \(\alpha (s)=\int _0^s K\).</i> For \(K : \mathbb {R}\to \mathbb {R}\) the <em>arc-length tangent angle</em> is </p>
+<div class="displaymath" id="a0000000123">
+  \[  \alpha _K(s) \; =\;  \int _0^s K(t)\, dt \; \in \;  \mathbb {R}.  \]
+</div>
+<p> When \(K\) is continuous, \(\alpha _K\) is \(C^1\) with \(\alpha _K'(s)=K(s)\) (FTC). </p>
+</div>
+
+    <a class="latex_link" href="chap-arclength.html#def:dahlberg_angle">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.dahlbergAngle">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="def:dahlberg_curve_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="def:dahlberg_curve" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">94</span></div>
+    <div class="thm_thmcontent"><p>[Arc-length reconstruction curve]    <i class="itshape">Source: Dahlberg, §1, \(\gamma _K(t)=\int _0^t e^{i\alpha (s)}\, ds\).</i> For \(K : \mathbb {R}\to \mathbb {R}\) the <em>arc-length reconstruction curve</em> is </p>
+<div class="displaymath" id="a0000000124">
+  \[  \gamma _K(t) \; =\;  \int _0^t e^{i\alpha _K(s)}\, ds \; \in \;  \mathbb {C}.  \]
+</div>
+<p> Its velocity is the unit tangent \(\gamma _K'(t)=e^{i\alpha _K(t)}\) (norm \(1\)), so \(\gamma _K\) is parametrised by arc length and has tangent angle \(\alpha _K\). </p>
+</div>
+
+    <a class="latex_link" href="chap-arclength.html#def:dahlberg_curve">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.dahlbergCurve">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="def:dahlberg_f_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="def:dahlberg_f" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">110</span></div>
+    <div class="thm_thmcontent"><p>[Two-arc indicator \(f\)]   <i class="itshape">Source: Dahlberg, §3, definition of \(f\).</i> Let \(f : \mathbb {R}\to \mathbb {R}\) be the \(2\pi \)-periodic function with \(f(\theta )=1\) when \(|\theta -\tfrac {\pi }{2}|{\lt}\tfrac {\pi }{4}\) or \(|\theta -\tfrac {3\pi }{2}|{\lt}\tfrac {\pi }{4}\) (i.e. on the open arcs \((\tfrac {\pi }{4},\tfrac {3\pi }{4})\) and \((\tfrac {5\pi }{4},\tfrac {7\pi }{4})\)) and \(f(\theta )=0\) elsewhere on \([0,2\pi )\). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step1.html#def:dahlberg_f">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.dahlbergF">Lean</a>
     
     
   
@@ -516,7 +864,7 @@
       <span class="definition_thmcaption">
       Definition
       </span>
-      <span class="definition_thmlabel">57</span></div>
+      <span class="definition_thmlabel">58</span></div>
     <div class="thm_thmcontent"><p>[Boundary loop of the unit disk]   Project-bespoke. For \(F : \overline{\mathbb {D}} \to \mathbb {C}\), the <em>boundary loop</em> is \(t \mapsto F(e^{2\pi i t})\). </p>
 </div>
 
@@ -546,7 +894,7 @@
       <span class="definition_thmcaption">
       Definition
       </span>
-      <span class="definition_thmlabel">61</span></div>
+      <span class="definition_thmlabel">62</span></div>
     <div class="thm_thmcontent"><p>[The error map and its closed form]    Project-bespoke. \(\mathrm{errorMap}(a,b,\delta )(z) := E_{\mathrm{bi}}\bigl(a,b, \mathrm{configSpace}(\delta )(z.\mathrm{re},z.\mathrm{im})\bigr)\) is the bicircle error vector of the configuration parametrised by \(z\in \overline{\mathbb {D}}\). \(\mathrm{errorMap\_ eq}\) records its closed form \(E = s\cdot (V+\sqrt2)\) on the disk (from <a href="chap-bicircle.html#lem:error_vector_of_bicircle">lemma 32</a>), and \(\mathrm{continuousOn\_ errorMap}\) its continuity there. </p>
 </div>
 
@@ -589,7 +937,7 @@
       </span>
       <span class="definition_thmlabel">19</span></div>
     <div class="thm_thmcontent"><p>[Closure integrals and error vector]    The <em>error vector</em> of the weight \(\rho \) is </p>
-<div class="displaymath" id="a0000000032">
+<div class="displaymath" id="a0000000044">
   \[  E(\rho ) \; =\;  \alpha _\rho (2\pi ) \; =\;  \int _0^{2\pi } e^{i\theta }\, \rho (\theta )\, d\theta \; \in \;  \mathbb {C}.  \]
 </div>
 <p> Its real and imaginary parts are the <em>closure integrals</em> \(C(\rho )\) and \(S(\rho )\) of ?? below. </p>
@@ -658,11 +1006,11 @@
   <li><p>\(\kappa \) is constant; or </p>
 </li>
   <li><p>\(\kappa \) has <em>two value-separated, alternating local extrema</em>: there are four points </p>
-<div class="displaymath" id="a0000000017">
+<div class="displaymath" id="a0000000029">
   \[  p_1 {\lt} q_1 {\lt} p_2 {\lt} q_2, \qquad q_2 {\lt} p_1 + 2\pi ,  \]
 </div>
 <p> lying in a single fundamental period, such that \(p_1, p_2\) are local maxima of \(\kappa \), \(q_1, q_2\) are local minima of \(\kappa \), and the two minimum values lie strictly below the two maximum values: </p>
-<div class="displaymath" id="a0000000018">
+<div class="displaymath" id="a0000000030">
   \[  \max \bigl(\kappa (q_1), \kappa (q_2)\bigr) \; {\lt}\;  \min \bigl(\kappa (p_1), \kappa (p_2)\bigr).  \]
 </div>
 </li>
@@ -846,9 +1194,9 @@
       <span class="definition_thmcaption">
       Definition
       </span>
-      <span class="definition_thmlabel">76</span></div>
+      <span class="definition_thmlabel">77</span></div>
     <div class="thm_thmcontent"><p>[The \(\kappa \)-error map]    Project-bespoke. For a curvature function \(\kappa \), the reparametrization \(h_1\), and \(0{\lt}\delta \le \pi /8\), </p>
-<div class="displaymath" id="a0000000089">
+<div class="displaymath" id="a0000000102">
   \[  E_\kappa (z) \; :=\;  \mathrm{errorVector}\bigl(\mathrm{radius}(\kappa \circ h_1\circ g_z)\bigr) \; =\;  \int _0^{2\pi } e^{i\theta }\, \frac{d\theta }{\kappa \bigl(h_1(g_z(\theta ))\bigr)}, \qquad z\in \overline{\mathbb {D}} .  \]
 </div>
 <p> This is the error vector of the curve reconstructed from the curvature function \(\kappa \circ h_1\circ g_z\); \(E_\kappa (z)=0\) means precisely that this curve closes up. </p>
@@ -858,6 +1206,66 @@
     
     
   <a class="lean_link lean_decl" href="/find/#doc/Gluck.kappaErrorMap">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="def:mixed_sign_four_vertex_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="def:mixed_sign_four_vertex" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">117</span></div>
+    <div class="thm_thmcontent"><p>[Mixed-sign four-vertex condition]    <i class="itshape">Source: Dahlberg, §1, Theorem 1.1 hypothesis.</i> A continuous, \(2\pi \)-periodic, non-constant \(\kappa :\mathbb {R}\to \mathbb {R}\) satisfies the <em>mixed-sign four-vertex condition</em> if there are points \(p_1{\lt}q_1{\lt}p_2{\lt}q_2{\lt}p_1+2\pi \) in one fundamental period with \(p_1,p_2\) local maxima, \(q_1,q_2\) local minima, the value separation \(\max (\kappa (q_1),\kappa (q_2)){\lt}\min (\kappa (p_1),\kappa (p_2))\), <em>and</em> positivity at the maxima \(0{\lt}\min (\kappa (p_1),\kappa (p_2))\). This is the in-tree value-separated <a href="chap-curvature.html#def:four_vertex_condition">definition 13</a> strengthened only by the maxima-positivity clause; the minima \(\kappa (q_1),\kappa (q_2)\) may be \(\le 0\). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step1.html#def:mixed_sign_four_vertex">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.MixedSignFourVertex">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="def:non_normalised_curvature_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="def:non_normalised_curvature" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">106</span></div>
+    <div class="thm_thmcontent"><p>[Non-normalised curvature function (1.4)]    <i class="itshape">Source: Dahlberg, §1, (1.4).</i> A continuous, \(2\pi \)-periodic \(\kappa : \mathbb {R}\to \mathbb {R}\) is a <em>non-normalised curvature function</em> if \(I=\int _0^{2\pi }\kappa \, dt\neq 0\) and \(K=\frac{2\pi }{I}\kappa \) satisfies (1.2) and (1.3). (Note \(K\) then satisfies (1.1) automatically: \(\int _0^{2\pi }K=\frac{2\pi }{I}\cdot I=2\pi \).) </p>
+</div>
+
+    <a class="latex_link" href="chap-arclength.html#def:non_normalised_curvature">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.NonNormalisedCurvature">Lean</a>
     
     
   
@@ -888,6 +1296,36 @@
     
     
   <a class="lean_link lean_decl" href="/find/#doc/Gluck.normLoop">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="def:preliminary_diffeo_data_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="def:preliminary_diffeo_data" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">133</span></div>
+    <div class="thm_thmcontent"><p>[Bundled preliminary-diffeomorphism data]    At a fixed \(\varepsilon {\gt}0\), \(\mathrm{PreliminaryDiffeoData}\, \kappa \, a\, b\, C\, \varepsilon \, \eta \, e\) records the output of <a href="chap-dahlberg_step1.html#thm:exists_preliminary_diffeo">theorem 119</a>: a \(C^1\) orientation-preserving \(\eta \) (through a continuous positive derivative \(v\), with \(\eta (t+2\pi )=\eta (t)+2\pi \)); an interval-integrable \(2\pi \)-periodic error \(e\); the decomposition \(\kappa \circ \eta =a(1-f)+bf+e\) (<a href="chap-dahlberg_step1.html#def:clean_bicircle">definition 111</a>); the \(L^1\) smallness \(\int _0^{2\pi }|e|{\lt}C\varepsilon \); and the total-curvature estimate \(\bigl|\int _0^{2\pi }\kappa (\eta (t))\, dt-(a+b)\pi \bigr|{\lt}C\varepsilon \). The last clause is retained so the consuming estimates obtain \(I{\gt}0\) and the \(I^*\)-vs-\(I\) comparison directly. </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#def:preliminary_diffeo_data">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.PreliminaryDiffeoData">Lean</a>
     
     
   
@@ -977,7 +1415,7 @@
       </span>
       <span class="definition_thmlabel">15</span></div>
     <div class="thm_thmcontent"><p>[Reconstruction curve]    <i class="itshape">Source: DeTurck–Gluck, §4, explicit formula for \(\alpha (\theta )\).</i> For a weight \(\rho : \mathbb {R} \to \mathbb {R}\), the <em>reconstruction curve</em> is </p>
-<div class="displaymath" id="a0000000026">
+<div class="displaymath" id="a0000000038">
   \[  \alpha _\rho (\theta ) \; =\;  \int _0^\theta e^{i\varphi }\, \rho (\varphi )\, d\varphi \; \in \;  \mathbb {C},  \]
 </div>
 <p> the complex form of the source’s \(\alpha (\theta ) = \int _0^\theta (\cos \varphi , \sin \varphi )\, d\varphi /\kappa (\varphi )\) with \(\rho = 1/\kappa \). It begins at the origin and has velocity \(\alpha _\rho '(\theta ) = e^{i\theta }\rho (\theta )\). </p>
@@ -1009,8 +1447,8 @@
       <span class="definition_thmcaption">
       Definition
       </span>
-      <span class="definition_thmlabel">62</span></div>
-    <div class="thm_thmcontent"><p>[Reverse once-around loop primitives]    Project-bespoke mirrors of <a href="chap-winding.html#def:standard_loop">definition 45</a>/<a href="chap-winding.html#def:circle_exp_loop">definition 55</a> with reversed orientation: \(\mathrm{negStandardLoop}(t)=\exp (-2\pi i t)\) with winding \(-1\) (lift \(\varphi (t)=-2\pi t\)), its \(\mathbb {C}\)-valued form \(\mathrm{negCircleExpLoop}\) (nonvanishing) with \(W_\mathbb {C}=-1\), and \(\mathrm{windingNumberC\_ congr}\) (pointwise-equal \(\mathbb {C}\)-loops have equal winding). These realise the linear model \(L=\delta e^{-i\pi /4}e^{-2\pi i t}\) in the proof of <a href="chap-winding.html#lem:error_map_winds_boundary">lemma 63</a>. </p>
+      <span class="definition_thmlabel">63</span></div>
+    <div class="thm_thmcontent"><p>[Reverse once-around loop primitives]    Project-bespoke mirrors of <a href="chap-winding.html#def:standard_loop">definition 45</a>/<a href="chap-winding.html#def:circle_exp_loop">definition 56</a> with reversed orientation: \(\mathrm{negStandardLoop}(t)=\exp (-2\pi i t)\) with winding \(-1\) (lift \(\varphi (t)=-2\pi t\)), its \(\mathbb {C}\)-valued form \(\mathrm{negCircleExpLoop}\) (nonvanishing) with \(W_\mathbb {C}=-1\), and \(\mathrm{windingNumberC\_ congr}\) (pointwise-equal \(\mathbb {C}\)-loops have equal winding). These realise the linear model \(L=\delta e^{-i\pi /4}e^{-2\pi i t}\) in the proof of <a href="chap-winding.html#lem:error_map_winds_boundary">lemma 64</a>. </p>
 </div>
 
     <a class="latex_link" href="chap-winding.html#def:reverse_loop">LaTeX</a>
@@ -1211,7 +1649,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">68</span><span class="lemma_thmtitle">Exact arc integrals</span></div>
+      <span class="lemma_thmlabel">69</span><span class="lemma_thmtitle">Exact arc integrals</span></div>
     <div class="thm_thmcontent"><p>    For each arc \(k\in \{ 1,2,3,4\} \), \(\int _{\theta _k}^{\theta _{k+1}}w_z=\tfrac \pi 2\), and hence the full-period integral \(\int _{\theta _1}^{\theta _1+2\pi }w_z=2\pi \). </p>
 </div>
 
@@ -1268,7 +1706,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">67</span><span class="lemma_thmtitle">Density is well-behaved</span></div>
+      <span class="lemma_thmlabel">68</span><span class="lemma_thmtitle">Density is well-behaved</span></div>
     <div class="thm_thmcontent"><p>    For \(0{\lt}\delta \le \pi /8\) and \(z\in \overline{\mathbb D}\): \(w_z\) is continuous, \(2\pi \)-periodic, the joint map \((z,\theta )\mapsto w_z(\theta )\) is continuous on \(\overline{\mathbb D}\times \mathbb R\), and \(c_-\le w_z(\theta )\le c_+\) for absolute constants \(0{\lt}c_-\le c_+\). </p>
 </div>
 
@@ -1357,7 +1795,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">71</span></div>
+      <span class="lemma_thmlabel">72</span></div>
     <div class="thm_thmcontent"><p>[Quasi-periodicity of \(g_z\)]    \(g_z(\theta +2\pi )=g_z(\theta )+2\pi \) for all \(\theta \). </p>
 </div>
 
@@ -1387,7 +1825,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">79</span></div>
+      <span class="lemma_thmlabel">80</span></div>
     <div class="thm_thmcontent"><p>[Change of variables through \(g_z\)]    For any measurable \(G\), \(\int _{[g_z(0),\, g_z(2\pi )]} G = \int _{[0,2\pi ]} w_z(\theta )\, G(g_z(\theta ))\, d\theta \). </p>
 </div>
 
@@ -1417,9 +1855,9 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">75</span></div>
+      <span class="lemma_thmlabel">76</span></div>
     <div class="thm_thmcontent"><p>[\(g_z\) aligns the step functions]    Let \(\kappa _0=\mathrm{stepCurvature}\, b\, a\, 0\, \tfrac \pi 2\, \pi \, \tfrac {3\pi }2\) be the canonical four-arc step function of <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a>. Then for almost every \(\theta \), </p>
-<div class="displaymath" id="a0000000088">
+<div class="displaymath" id="a0000000101">
   \[  \kappa _0\bigl(g_z(\theta )\bigr) \; =\;  \mathrm{stepCurvature}\, a\, b\, (\mathrm{configSpace}(\delta )(z))\, (\theta ),  \]
 </div>
 <p> the step function of the \(z\)-configuration. Consequently \(\mathrm{errorMap}(a,b,\delta )(z)=\mathrm{errorVector}(\mathrm{radius}(\kappa _0\circ g_z))\). </p>
@@ -1451,7 +1889,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">70</span></div>
+      <span class="lemma_thmlabel">71</span></div>
     <div class="thm_thmcontent"><p>[Node values of \(g_z\)]    \(g_z(\theta _1)=\tfrac \pi 2\), \(g_z(\theta _2)=\pi \), \(g_z(\theta _3)=\tfrac {3\pi }2\), \(g_z(\theta _4)=2\pi \); i.e. \(g_z(\theta _k)=k\cdot \tfrac \pi 2\). </p>
 </div>
 
@@ -1459,6 +1897,47 @@
     
     
   <a class="lean_link lean_decl" href="/find/#doc/Gluck.alignReparam_node_values">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:angle_dist_le_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:angle_dist_le" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">135</span></div>
+    <div class="thm_thmcontent"><p>[Angle estimate \(|\alpha -\alpha ^*|\le C\varepsilon \)]    There is a constant \(C'\) (independent of \(\varepsilon \) and \(z\)) such that for \(\varepsilon \) small, for all \(z\in \overline{\mathbb {D}}\) and all \(s\), \(\bigl|\alpha _{K^*_z}(s)-\alpha _{K_z}(s)\bigr|\le C'\varepsilon \). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#lem:angle_dist_le">LaTeX</a>
+    
+    
+  <div class="tooltip">
+      <span class="lean_link">Lean</span>
+      <ul class="tooltip_list">
+        
+           <li><a href="/find/#doc/Gluck.angle_dist_le" class="lean_decl">Gluck.angle_dist_le</a></li>
+        
+           <li><a href="/find/#doc/Gluck.dahlbergAngle_arcLengthNorm_add_two_pi" class="lean_decl">Gluck.dahlbergAngle_arcLengthNorm_add_two_pi</a></li>
+        
+           <li><a href="/find/#doc/Gluck.intervalIntegrable_expI_arcLengthNorm" class="lean_decl">Gluck.intervalIntegrable_expI_arcLengthNorm</a></li>
+        
+      </ul>
+  </div>
     
     
   
@@ -1489,6 +1968,143 @@
     
     
   <a class="lean_link lean_decl" href="/find/#doc/Gluck.angleLift_lifts">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:arclength_arc_integral_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:arclength_arc_integral" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">131</span></div>
+    <div class="thm_thmcontent"><p>[Arc-length arc integral on a constant-curvature arc]    Let \(K:\mathbb {R}\to \mathbb {R}\) be <em>globally interval-integrable</em> (\(\forall p\, q,\  \mathrm{IntervalIntegrable}\, K\, \mathrm{volume}\, p\, q\)) and constant \(K\equiv m\) on the open arc \((c,d)\) (\(c\le d\)) with \(m\neq 0\), and write \(\alpha _K(s)=\int _0^s K\) for the arc-length tangent angle (<a href="chap-arclength.html#def:dahlberg_angle">definition 93</a>). Then </p>
+<div class="displaymath" id="a0000000172">
+  \[  \int _c^d e^{\, i\, \alpha _K(s)}\, ds =\frac{1}{m}\, (-i)\, \bigl(e^{\, i\, \alpha _K(d)}-e^{\, i\, \alpha _K(c)}\bigr).  \]
+</div>
+<p> This is the arc-length analogue of the inclination-variable building block \(\mathrm{bicircle\_ arc\_ integral}\) of <a href="chap-bicircle.html#lem:error_vector_of_bicircle">lemma 32</a>. The global interval-integrability hypothesis (not merely integrability on \([c,d]\)) is needed because \(\alpha _K\) integrates from \(0\), so the split passes through \(0\); it is met at the use site (\(K_z\) is globally interval-integrable). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#lem:arclength_arc_integral">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.arcLengthArcIntegral">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:arclength_error_clean_eq_errorMap_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:arclength_error_clean_eq_errorMap" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">132</span></div>
+    <div class="thm_thmcontent"><p>[Arc-length closure of the clean bicircle \(=\) positive multiple of <span class="ttfamily">errorMap</span>]    For \(0{\lt}a{\lt}b\), \(0{\lt}\delta \le \pi /8\) and \(z\in \overline{\mathbb {D}}\), the clean arc-length error map \(F(z)=\mathrm{arcLengthErrorMap}\, (k_{a,b})\, a\, b\, \delta \, z\) is a <em>positive</em> (configuration-dependent) real multiple of the in-tree error map: </p>
+<div class="displaymath" id="a0000000174">
+  \[  F(z)=c(z)\cdot \mathrm{errorMap}\, a\, b\, \delta \, z,\qquad c(z)=\frac1{\lambda (z)}{\gt}0 .  \]
+</div>
+<p> In particular \(F(z)=0\iff \mathrm{errorMap}\, a\, b\, \delta \, z=0\), and for any loop in \(\overline{\mathbb {D}}\setminus \{ F=0\} \) the two maps have the same winding number around \(0\) (positive-scalar-field invariance, <a href="chap-dahlberg_step2.html#lem:clean_error_winds">lemma 137</a>). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#lem:arclength_error_clean_eq_errorMap">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.arcLengthError_clean_eq_errorMap">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:arclength_error_continuous_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:arclength_error_continuous" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">129</span></div>
+    <div class="thm_thmcontent"><p>[Continuity of the error maps]    For each fixed \(\varepsilon \), \(z\mapsto F^*(z,\varepsilon )\) is continuous on \(\overline{\mathbb {D}}\), and \(z\mapsto F(z)\) is continuous. </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#lem:arclength_error_continuous">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.continuous_arcLengthErrorMap">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:arclength_error_tendsto_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:arclength_error_tendsto" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">136</span></div>
+    <div class="thm_thmcontent"><p>[Uniform limit \(F^*(\cdot ,\varepsilon )\to F\)]    \(\sup _{z\in \overline{\mathbb {D}}}\bigl\| F^*(z,\varepsilon )-F(z)\bigr\| \to 0\) as \(\varepsilon \downarrow 0\); quantitatively \(\| F^*(z,\varepsilon )-F(z)\| \le 2\pi \, C'\varepsilon \). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#lem:arclength_error_tendsto">LaTeX</a>
+    
+    
+  <div class="tooltip">
+      <span class="lean_link">Lean</span>
+      <ul class="tooltip_list">
+        
+           <li><a href="/find/#doc/Gluck.arcLengthErrorMap_tendsto" class="lean_decl">Gluck.arcLengthErrorMap_tendsto</a></li>
+        
+           <li><a href="/find/#doc/Gluck.norm_expI_sub_le" class="lean_decl">Gluck.norm_expI_sub_le</a></li>
+        
+      </ul>
+  </div>
     
     
   
@@ -1601,7 +2217,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">85</span></div>
+      <span class="lemma_thmlabel">86</span></div>
     <div class="thm_thmcontent"><p>[A short chord integral of a positive weight is nonzero]    Project-bespoke. If \(\rho \) is continuous and strictly positive, and \(c {\lt} d\) with \(d - c \le \pi \), then \(\int _c^d e^{i\varphi }\rho (\varphi )\, d\varphi \ne 0\). </p>
 </div>
 
@@ -1691,6 +2307,268 @@
 
 
     
+    <div class="dep-modal-container" id="lem:clean_arclength_nodes_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:clean_arclength_nodes" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">126</span></div>
+    <div class="thm_thmcontent"><p>[Node-landing: cumulative normalised arc-length angle hits \(\mathrm{configSpace}\)]    Let \(K_z=\mathrm{arcLengthNorm}\, (k_{a,b})\, a\, b\, \delta \, z\) be the normalised clean arc-length curvature and \(\alpha _{K_z}(s)=\int _0^s K_z\) its cumulative tangent angle (<a href="chap-arclength.html#def:dahlberg_angle">definition 93</a>). At the arc-length breakpoints \(s_j=\sum _{k\le j}L_k(z)\), </p>
+<div class="displaymath" id="a0000000164">
+  \[  \alpha _{K_z}(s_j)=\theta _j\quad (j=0,\dots ,5),\qquad (\theta _0,\dots ,\theta _5)=(0,\theta _1,\theta _2,\theta _3,\theta _4,2\pi ),  \]
+</div>
+<p> with \((\theta _1,\dots ,\theta _4)=\mathrm{configSpace}\, \delta \, (z.\mathrm{re},z.\mathrm{im})\). Moreover \(K_z\) is constant \(=\lambda (z)\hat\kappa _j\) on each open arc \((s_{j-1},s_j)\). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#lem:clean_arclength_nodes">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.cleanArcLength_node_values">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:clean_bicircle_basic_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:clean_bicircle_basic" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">112</span></div>
+    <div class="thm_thmcontent"><p>[Periodicity and integrability of \(f\) and \(k_{a,b}\)]    The indicator \(f\) is \(2\pi \)-periodic and interval-integrable on every \([c,d]\); consequently the clean bicircle \(k_{a,b}=a(1-f)+bf\) is \(2\pi \)-periodic and interval-integrable, and satisfies the two-sided bound \(a\le k_{a,b}\le b\) when \(a\le b\). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step1.html#lem:clean_bicircle_basic">LaTeX</a>
+    
+    
+  <div class="tooltip">
+      <span class="lean_link">Lean</span>
+      <ul class="tooltip_list">
+        
+           <li><a href="/find/#doc/Gluck.dahlbergF_periodic" class="lean_decl">Gluck.dahlbergF_periodic</a></li>
+        
+           <li><a href="/find/#doc/Gluck.dahlbergF_intervalIntegrable" class="lean_decl">Gluck.dahlbergF_intervalIntegrable</a></li>
+        
+           <li><a href="/find/#doc/Gluck.cleanBicircle_periodic" class="lean_decl">Gluck.cleanBicircle_periodic</a></li>
+        
+           <li><a href="/find/#doc/Gluck.cleanBicircle_intervalIntegrable" class="lean_decl">Gluck.cleanBicircle_intervalIntegrable</a></li>
+        
+           <li><a href="/find/#doc/Gluck.cleanBicircle_bounds" class="lean_decl">Gluck.cleanBicircle_bounds</a></li>
+        
+      </ul>
+  </div>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:clean_bicircle_eq_step_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:clean_bicircle_eq_step" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">115</span></div>
+    <div class="thm_thmcontent"><p>[The clean bicircle is the in-tree four-arc step function]    For \(0{\lt}a{\lt}b\), the clean bicircle \(k_{a,b}\) coincides almost everywhere with the project’s four-arc step curvature on the standard breakpoints \(\tfrac {\pi }{4},\tfrac {3\pi }{4},\tfrac {5\pi }{4},\tfrac {7\pi }{4}\) with the value pattern \(b,a,b,a\) on the four arcs \((\tfrac {\pi }{4},\tfrac {3\pi }{4})\), etc. Hence the bicircle closure error vector \(E(P)\) of \(k_{a,b}\) at a perturbed breakpoint configuration \(P\) is exactly the in-tree \(\mathrm{errorMap}\, a\, b\, \delta \, z\) (<a href="chap-winding.html#def:error_map">definition 62</a>). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step1.html#lem:clean_bicircle_eq_step">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.cleanBicircle_eq_stepCurvature">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:clean_bicircle_integral_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:clean_bicircle_integral" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">113</span></div>
+    <div class="thm_thmcontent"><p>[On-period value of \(f\) and the period integrals]    On \([0,2\pi ]\), \(f\) is the indicator of the two base arcs \((\tfrac {\pi }{4},\tfrac {3\pi }{4})\cup (\tfrac {5\pi }{4},\tfrac {7\pi }{4})\), so \(\int _0^{2\pi }f=\pi \) and \(\int _0^{2\pi }k_{a,b}=a\! \cdot \! \pi +b\! \cdot \! \pi =(a+b)\pi \). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step1.html#lem:clean_bicircle_integral">LaTeX</a>
+    
+    
+  <div class="tooltip">
+      <span class="lean_link">Lean</span>
+      <ul class="tooltip_list">
+        
+           <li><a href="/find/#doc/Gluck.integral_cleanBicircle" class="lean_decl">Gluck.integral_cleanBicircle</a></li>
+        
+           <li><a href="/find/#doc/Gluck.dahlbergF_on_period" class="lean_decl">Gluck.dahlbergF_on_period</a></li>
+        
+           <li><a href="/find/#doc/Gluck.integral_dahlbergF" class="lean_decl">Gluck.integral_dahlbergF</a></li>
+        
+      </ul>
+  </div>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:clean_chord_margin_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:clean_chord_margin" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">139</span></div>
+    <div class="thm_thmcontent"><p>[Clean chord integrals are bounded away from \(0\) on inclination-span-\(\le \pi \) arcs]    There is a margin \(m{\gt}0\) (depending only on \(a,b,\delta \)) such that for every \(z\in \overline{\mathbb {D}}\), writing \(\alpha =\alpha _{K_z}\) for the clean normalised curvature \(K_z=\mathrm{arcLengthNorm}\, (k_{a,b})\, a\, b\, \delta \, z\) (positive, since \(a,b{\gt}0\)), </p>
+<div class="displaymath" id="a0000000182">
+  \[  m\, (\tau -t)\; \le \; \bigl\| \textstyle \int _t^\tau e^{i\alpha (s)}\, ds\bigr\|  \qquad \text{for all } 0\le t{\lt}\tau \le 4\pi \text{ with } \alpha (\tau )-\alpha (t)\le \pi .  \]
+</div>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#lem:clean_chord_margin">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.clean_chord_margin">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:clean_error_winds_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:clean_error_winds" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">137</span></div>
+    <div class="thm_thmcontent"><p>[Clean error map: nonzero on the boundary with nonzero winding]    For \(0{\lt}a{\lt}b\) and \(0{\lt}\delta \le \pi /8\), the clean error map \(F\) is nonzero on the unit circle \(\partial \mathbb {D}\) and its winding number around \(0\) along \(\partial \mathbb {D}\) is nonzero. </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#lem:clean_error_winds">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.cleanError_winds_boundary">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:clean_prefactor_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:clean_prefactor" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">130</span><span class="lemma_thmtitle">Clean total curvature and the positive prefactor \(c(z)=1/\lambda (z)\)</span></div>
+    <div class="thm_thmcontent"><p>    For \(0{\lt}a{\lt}b\), \(0{\lt}\delta \le \pi /8\) and \(z\in \overline{\mathbb {D}}\), </p>
+<div class="displaymath" id="a0000000170">
+  \[  I_z=\int _0^{2\pi }k_{a,b}(g_z\, t)\, dt=\frac{2\pi }{\lambda (z)}, \qquad c(z):=\frac{I_z}{2\pi }=\frac1{\lambda (z)}{\gt}0 ,  \]
+</div>
+<p> with \(c\) continuous and bounded between positive constants on \(\overline{\mathbb {D}}\). (This <em>replaces</em> the false fixed value \((a+b)\pi \): the clean total curvature is \(z\)-dependent for the node-placing family.) </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#lem:clean_prefactor">LaTeX</a>
+    
+    
+  <div class="tooltip">
+      <span class="lean_link">Lean</span>
+      <ul class="tooltip_list">
+        
+           <li><a href="/find/#doc/Gluck.cleanTotalCurvature_eq" class="lean_decl">Gluck.cleanTotalCurvature_eq</a></li>
+        
+           <li><a href="/find/#doc/Gluck.cleanPrefactor_pos" class="lean_decl">Gluck.cleanPrefactor_pos</a></li>
+        
+           <li><a href="/find/#doc/Gluck.cleanBicircle_arcs" class="lean_decl">Gluck.cleanBicircle_arcs</a></li>
+        
+           <li><a href="/find/#doc/Gluck.clean_arc_ae" class="lean_decl">Gluck.clean_arc_ae</a></li>
+        
+           <li><a href="/find/#doc/Gluck.clean_arc_int" class="lean_decl">Gluck.clean_arc_int</a></li>
+        
+      </ul>
+  </div>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="lem:closes_iff_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
@@ -1721,6 +2599,240 @@
 
 
     
+    <div class="dep-modal-container" id="lem:closing_family_nodes_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:closing_family_nodes" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">125</span></div>
+    <div class="thm_thmcontent"><p>[Node-mapping of the closing family onto the canonical clean arcs]    For \(0{\lt}a{\lt}b\), \(0{\lt}\delta \le \pi /8\) and \(z\in \overline{\mathbb {D}}\), the node-placing family sends each arc-length breakpoint to the corresponding canonical clean-bicircle breakpoint: </p>
+<div class="displaymath" id="a0000000161">
+  \[  \mathrm{closingFamily}\, a\, b\, \delta \, z\, (s_j)=c_j,\qquad j=0,\dots ,5,  \]
+</div>
+<p> where \(s_j=\sum _{k\le j}L_k(z)\) (\(s_0=0\), \(s_5=2\pi \)) and \((c_0,\dots ,c_5)=(0,\tfrac {\pi }{4},\tfrac {3\pi }{4},\tfrac {5\pi }{4},\tfrac {7\pi }{4},2\pi )\). Equivalently the per-arc density integral is \(\int _{s_{j-1}}^{s_j}w_z=w_j\) (the canonical arc width \(w_j=c_j-c_{j-1}\)). Consequently \(g_z\) maps the open arc \((s_{j-1},s_j)\) strictly monotonically onto \((c_{j-1},c_j)\), so \(k_{a,b}\circ g_z=\hat\kappa _j\) a.e. on \((s_{j-1},s_j)\). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#lem:closing_family_nodes">LaTeX</a>
+    
+    
+  <div class="tooltip">
+      <span class="lean_link">Lean</span>
+      <ul class="tooltip_list">
+        
+           <li><a href="/find/#doc/Gluck.closingFamily_node" class="lean_decl">Gluck.closingFamily_node</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingDensity_arcs" class="lean_decl">Gluck.closingDensity_arcs</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingDensity_integral_split" class="lean_decl">Gluck.closingDensity_integral_split</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingHeight_mul" class="lean_decl">Gluck.closingHeight_mul</a></li>
+        
+           <li><a href="/find/#doc/Gluck.half_le_arccos_cos_wide" class="lean_decl">Gluck.half_le_arccos_cos_wide</a></li>
+        
+           <li><a href="/find/#doc/Gluck.clampTent_integral_eq_zero_wide" class="lean_decl">Gluck.clampTent_integral_eq_zero_wide</a></li>
+        
+      </ul>
+  </div>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:closing_family_props_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:closing_family_props" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">124</span><span class="lemma_thmtitle">Basic interface of the node-placing family</span></div>
+    <div class="thm_thmcontent"><p>    The family \(g_z=\mathrm{closingFamily}\, a\, b\, \delta \, z\) satisfies: \(g_z(0)=0\); quasiperiodicity \(g_z(s+2\pi )=g_z(s)+2\pi \) (hence \(g_z(2\pi )=2\pi \)); strict monotonicity; everywhere-differentiability \(\mathrm{HasDerivAt}\, g_z\, (w_z(s))\, s\) with \(w_z{\gt}0\) continuous; joint continuity of \((z,s)\mapsto g_z(s)\); and uniform slope/inverse-slope bounds \(0{\lt}m_0\le w_z(s)\le M_0\) on \(\overline{\mathbb {D}}\) (with \(m_0,M_0\) depending only on \(a,b,\delta \)). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#lem:closing_family_props">LaTeX</a>
+    
+    
+  <div class="tooltip">
+      <span class="lean_link">Lean</span>
+      <ul class="tooltip_list">
+        
+           <li><a href="/find/#doc/Gluck.closingFamily_zero" class="lean_decl">Gluck.closingFamily_zero</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingFamily_add_two_pi" class="lean_decl">Gluck.closingFamily_add_two_pi</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingFamily_two_pi" class="lean_decl">Gluck.closingFamily_two_pi</a></li>
+        
+           <li><a href="/find/#doc/Gluck.strictMono_closingFamily" class="lean_decl">Gluck.strictMono_closingFamily</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_uncurry_closingFamily" class="lean_decl">Gluck.continuous_uncurry_closingFamily</a></li>
+        
+           <li><a href="/find/#doc/Gluck.hasDerivAt_closingFamily" class="lean_decl">Gluck.hasDerivAt_closingFamily</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingDensity_pos" class="lean_decl">Gluck.closingDensity_pos</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingFamily_slope_bounds" class="lean_decl">Gluck.closingFamily_slope_bounds</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingRamp_pos" class="lean_decl">Gluck.closingRamp_pos</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingDensity_periodic" class="lean_decl">Gluck.closingDensity_periodic</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_closingFamily" class="lean_decl">Gluck.continuous_closingFamily</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_closingBase" class="lean_decl">Gluck.continuous_closingBase</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_closingDensity_s" class="lean_decl">Gluck.continuous_closingDensity_s</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_closingLen1" class="lean_decl">Gluck.continuous_closingLen1</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_closingLen2" class="lean_decl">Gluck.continuous_closingLen2</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_closingLen3" class="lean_decl">Gluck.continuous_closingLen3</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_closingLen4" class="lean_decl">Gluck.continuous_closingLen4</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_closingLen5" class="lean_decl">Gluck.continuous_closingLen5</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_closingMid1" class="lean_decl">Gluck.continuous_closingMid1</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_closingMid2" class="lean_decl">Gluck.continuous_closingMid2</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_closingMid3" class="lean_decl">Gluck.continuous_closingMid3</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_closingMid4" class="lean_decl">Gluck.continuous_closingMid4</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_closingMid5" class="lean_decl">Gluck.continuous_closingMid5</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_heightAux" class="lean_decl">Gluck.continuous_heightAux</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_lenAux" class="lean_decl">Gluck.continuous_lenAux</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_uncurry_closingDensity" class="lean_decl">Gluck.continuous_uncurry_closingDensity</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_uncurry_term" class="lean_decl">Gluck.continuous_uncurry_term</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingDensity_period_integral" class="lean_decl">Gluck.closingDensity_period_integral</a></li>
+        
+           <li><a href="/find/#doc/Gluck.clampTent_period_integral" class="lean_decl">Gluck.clampTent_period_integral</a></li>
+        
+           <li><a href="/find/#doc/Gluck.comp_closingFamily_periodic" class="lean_decl">Gluck.comp_closingFamily_periodic</a></li>
+        
+      </ul>
+  </div>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:closing_lambda_pos_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:closing_lambda_pos" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">122</span><span class="lemma_thmtitle">The calibration scalar \(\lambda (z)\) is positive and continuous</span></div>
+    <div class="thm_thmcontent"><p>    For \(0{\lt}a{\lt}b\), \(0{\lt}\delta \le \pi /8\), the map \(z\mapsto \lambda (z)\) is continuous and strictly positive on \(\overline{\mathbb {D}}\), with uniform bounds \(0{\lt}\lambda _{\min }\le \lambda (z)\le \lambda _{\max }\); consequently the prefactor \(c(z)=1/\lambda (z)\) is continuous with \(0{\lt}c_{\min }\le c(z)\le c_{\max }\). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#lem:closing_lambda_pos">LaTeX</a>
+    
+    
+  <div class="tooltip">
+      <span class="lean_link">Lean</span>
+      <ul class="tooltip_list">
+        
+           <li><a href="/find/#doc/Gluck.closingLambda_pos" class="lean_decl">Gluck.closingLambda_pos</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_closingLambda" class="lean_decl">Gluck.continuous_closingLambda</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingLambda_ne" class="lean_decl">Gluck.closingLambda_ne</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingLambda_eq_raw" class="lean_decl">Gluck.closingLambda_eq_raw</a></li>
+        
+           <li><a href="/find/#doc/Gluck.continuous_closingLambdaRaw" class="lean_decl">Gluck.continuous_closingLambdaRaw</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingLambda_le" class="lean_decl">Gluck.closingLambda_le</a></li>
+        
+      </ul>
+  </div>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:closing_len_bounds_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:closing_len_bounds" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">123</span><span class="lemma_thmtitle">Arc-length interval bounds and total</span></div>
+    <div class="thm_thmcontent"><p>    For \(0{\lt}a{\lt}b\), \(0{\lt}\delta \le \pi /8\) and \(z\in \overline{\mathbb {D}}\), the five arc-length intervals \(L_j(z)=\Delta \theta _j/(\lambda (z)\hat\kappa _j)\) satisfy \(0{\lt}L_j\), \(2\eta \le L_j\), and \(L_j\le 2\pi \) for each \(j=1,\dots ,5\), and \(\sum _{j=1}^5 L_j(z)=2\pi \). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#lem:closing_len_bounds">LaTeX</a>
+    
+    
+  <div class="tooltip">
+      <span class="lean_link">Lean</span>
+      <ul class="tooltip_list">
+        
+           <li><a href="/find/#doc/Gluck.closingLen_bounds" class="lean_decl">Gluck.closingLen_bounds</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingLen_sum" class="lean_decl">Gluck.closingLen_sum</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingLen_bound_aux" class="lean_decl">Gluck.closingLen_bound_aux</a></li>
+        
+      </ul>
+  </div>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="lem:config_space_props_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
@@ -1732,7 +2844,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">60</span></div>
+      <span class="lemma_thmlabel">61</span></div>
     <div class="thm_thmcontent"><p>[Configuration disk: continuity and order]    Project-bespoke. (i) \(\mathrm{configSpace}(\delta )\) is continuous (\(\mathrm{continuous\_ configSpace}\), being affine). (ii) For \(0{\lt}\delta \le \pi /8\) and \(\lvert x\rvert ,\lvert y\rvert \le 1\), the order constraint \(0{\lt}\theta _1{\lt} \theta _2{\lt}\theta _3{\lt}\theta _4{\lt}\theta _1+2\pi \) holds (\(\mathrm{configSpace\_ ordered}\)). </p>
 </div>
 
@@ -1771,7 +2883,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">72</span></div>
+      <span class="lemma_thmlabel">73</span></div>
     <div class="thm_thmcontent"><p>[Continuity of \(g_z\) in \(\theta \)]    \(g_z\) is continuous for each fixed \(\delta ,z\). </p>
 </div>
 
@@ -1779,6 +2891,66 @@
     
     
   <a class="lean_link lean_decl" href="/find/#doc/Gluck.continuous_alignReparam">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:continuous_dahlberg_angle_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:continuous_dahlberg_angle" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">96</span></div>
+    <div class="thm_thmcontent"><p>[Continuity of the tangent angle]    If \(K\) is continuous then \(\alpha _K\) is continuous. </p>
+</div>
+
+    <a class="latex_link" href="chap-arclength.html#lem:continuous_dahlberg_angle">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.continuous_dahlbergAngle">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:continuous_eiangle_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:continuous_eiangle" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">97</span></div>
+    <div class="thm_thmcontent"><p>[Continuity of the unit-tangent integrand]    If \(K\) is continuous then \(s\mapsto e^{i\alpha _K(s)}\) is continuous. </p>
+</div>
+
+    <a class="latex_link" href="chap-arclength.html#lem:continuous_eiangle">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.continuous_eiAngle">Lean</a>
     
     
   
@@ -1801,14 +2973,107 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">73</span></div>
-    <div class="thm_thmcontent"><p>[Joint continuity of \((z,\theta )\mapsto g_z(\theta )\)]    The map \((z,\theta )\mapsto g_z(\theta )\) is jointly continuous on \(\overline{\mathbb D}\times \mathbb R\). This is the load-bearing input to <a href="chap-reduction.html#lem:kappa_error_map_continuous">lemma 77</a>. </p>
+      <span class="lemma_thmlabel">74</span></div>
+    <div class="thm_thmcontent"><p>[Joint continuity of \((z,\theta )\mapsto g_z(\theta )\)]    The map \((z,\theta )\mapsto g_z(\theta )\) is jointly continuous on \(\overline{\mathbb D}\times \mathbb R\). This is the load-bearing input to <a href="chap-reduction.html#lem:kappa_error_map_continuous">lemma 78</a>. </p>
 </div>
 
     <a class="latex_link" href="chap-reduction.html#lem:continuous_uncurry_align_reparam">LaTeX</a>
     
     
   <a class="lean_link lean_decl" href="/find/#doc/Gluck.continuous_uncurry_alignReparam">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:dahlberg_alignment_data_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:dahlberg_alignment_data" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">118</span></div>
+    <div class="thm_thmcontent"><p>[Mixed-sign level extraction]    <i class="itshape">Source: Dahlberg, §3, “by continuity there are points \(r_j\)…”.</i> Let \(\kappa \) satisfy the mixed-sign four-vertex condition (<a href="chap-dahlberg_step1.html#def:mixed_sign_four_vertex">definition 117</a>). Then there exist constants \(0{\lt}a{\lt}b\) and four points \(r_1{\lt}r_2{\lt}r_3{\lt}r_4{\lt}r_1+2\pi \), ordered counterclockwise, with </p>
+<div class="displaymath" id="a0000000149">
+  \[  \kappa (r_1)=\kappa (r_3)=a,\qquad \kappa (r_2)=\kappa (r_4)=b.  \]
+</div>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step1.html#lem:dahlberg_alignment_data">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.exists_alignmentData">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:dahlberg_c1_circle_inverse_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:dahlberg_c1_circle_inverse" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">141</span></div>
+    <div class="thm_thmcontent"><p>[\(C^1\) circle inverse of an orientation-preserving quasiperiodic map]   Let \(h:\mathbb {R}\to \mathbb {R}\) have a continuous strictly positive derivative \(v\) (\(\forall \theta ,\  \mathrm{HasDerivAt}\, h\, (v\theta )\, \theta \), \(v{\gt}0\), \(v\) continuous) and be quasiperiodic, \(h(\theta +2\pi )=h(\theta )+2\pi \). Then there is \(H:\mathbb {R}\to \mathbb {R}\) with: \(H\) continuous and strictly monotone; \(h(H t)=t\) and \(H(h t)=t\) for all \(t\); \(H(t+2\pi )=H(t)+2\pi \); and \(\mathrm{HasDerivAt}\, H\, (1/v(H t))\, t\) for all \(t\) (so \(H\) is \(C^1\) with positive derivative). This is the construction of the positive case (<a href="chap-fourvertex.html#thm:gluck_converse">theorem 88</a>’s reparam-back), rebuilt in this file. </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#lem:dahlberg_c1_circle_inverse">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.exists_C1_inverse_circle">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:dahlberg_curve_periodic_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:dahlberg_curve_periodic" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">102</span></div>
+    <div class="thm_thmcontent"><p>[Closure: \(\gamma _K\) is \(2\pi \)-periodic]    If \(K\) is continuous, \(2\pi \)-periodic, and satisfies (1.1) and (1.2), then \(\gamma _K\) is \(2\pi \)-periodic (closed). </p>
+</div>
+
+    <a class="latex_link" href="chap-arclength.html#lem:dahlberg_curve_periodic">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.dahlbergCurve_periodic">Lean</a>
     
     
   
@@ -1831,7 +3096,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">58</span></div>
+      <span class="lemma_thmlabel">59</span></div>
     <div class="thm_thmcontent"><p>[Boundary loop is nonvanishing]    Project-bespoke. If \(F \ne 0\) on \(\partial \mathbb {D}\), the boundary loop is nowhere zero. </p>
 </div>
 
@@ -1839,6 +3104,36 @@
     
     
   <a class="lean_link lean_decl" href="/find/#doc/Gluck.diskBoundaryLoop_ne_zero">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:eiangle_periodic_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:eiangle_periodic" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">101</span></div>
+    <div class="thm_thmcontent"><p>[Periodicity of the unit tangent]    If \(K\) is continuous, \(2\pi \)-periodic, and satisfies (1.1) \(\int _0^{2\pi }K=2\pi \), then \(s\mapsto e^{i\alpha _K(s)}\) is \(2\pi \)-periodic. </p>
+</div>
+
+    <a class="latex_link" href="chap-arclength.html#lem:eiangle_periodic">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.eiAngle_periodic">Lean</a>
     
     
   
@@ -1861,9 +3156,9 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">63</span></div>
-    <div class="thm_thmcontent"><p>[The error map winds nontrivially on the boundary]    <i class="itshape">Source: DeTurck–Gluck, §6 (error vectors wind once around the origin).</i> Let \(E : \overline{\mathbb {D}} \to \mathbb {C}\) send \((x,y)\) to the bicircle error vector of \(\mathrm{configSpace}(x,y)\) (<a href="chap-winding.html#def:configuration_space">definition 59</a>, <a href="chap-bicircle.html#lem:error_vector_of_bicircle">lemma 32</a>). For all sufficiently small \(\delta {\gt} 0\), \(E\) is continuous, \(E \ne 0\) on the boundary circle \(\partial \mathbb {D}\), and the boundary loop \(E|_{\partial \mathbb {D}}\) has <em>nonzero</em> winding number \(W_{\mathbb {C}}(E|_{\partial \mathbb {D}}) = \pm 1 \ne 0\) about the origin. </p>
-<p><em>(Only nonvanishing of the winding number is used downstream (<a href="chap-winding.html#cor:closing_configuration_exists">corollary 65</a>, <a href="chap-winding.html#thm:existence_of_zero">theorem 64</a>); the sign \(-1\) here merely reflects the orientation of the chosen parametrisation.)</em> </p>
+      <span class="lemma_thmlabel">64</span></div>
+    <div class="thm_thmcontent"><p>[The error map winds nontrivially on the boundary]    <i class="itshape">Source: DeTurck–Gluck, §6 (error vectors wind once around the origin).</i> Let \(E : \overline{\mathbb {D}} \to \mathbb {C}\) send \((x,y)\) to the bicircle error vector of \(\mathrm{configSpace}(x,y)\) (<a href="chap-winding.html#def:configuration_space">definition 60</a>, <a href="chap-bicircle.html#lem:error_vector_of_bicircle">lemma 32</a>). For all sufficiently small \(\delta {\gt} 0\), \(E\) is continuous, \(E \ne 0\) on the boundary circle \(\partial \mathbb {D}\), and the boundary loop \(E|_{\partial \mathbb {D}}\) has <em>nonzero</em> winding number \(W_{\mathbb {C}}(E|_{\partial \mathbb {D}}) = \pm 1 \ne 0\) about the origin. </p>
+<p><em>(Only nonvanishing of the winding number is used downstream (<a href="chap-winding.html#cor:closing_configuration_exists">corollary 66</a>, <a href="chap-winding.html#thm:existence_of_zero">theorem 65</a>); the sign \(-1\) here merely reflects the orientation of the chosen parametrisation.)</em> </p>
 </div>
 
     <a class="latex_link" href="chap-winding.html#lem:error_map_winds_boundary">LaTeX</a>
@@ -1958,7 +3253,7 @@
       </span>
       <span class="lemma_thmlabel">27</span></div>
     <div class="thm_thmcontent"><p>[Error vector is \(L^1\)-Lipschitz in the weight]    For any two integrable weights \(\rho , \rho ' : \mathbb {R} \to \mathbb {R}\) on \([0,2\pi ]\), </p>
-<div class="displaymath" id="a0000000040">
+<div class="displaymath" id="a0000000052">
   \[  \bigl\lVert E(\rho ) - E(\rho ')\bigr\rVert \; \le \;  \int _0^{2\pi } \bigl\lvert \rho (\theta ) - \rho '(\theta )\bigr\rvert \,  d\theta \; =\;  \lVert \rho - \rho '\rVert _{L^1[0,2\pi ]} .  \]
 </div>
 <p> In particular \(E\) is continuous in the \(L^1\) (hence the close-in-measure, for uniformly bounded weights) topology: if \(\rho \) and \(\rho '\) agree to within \(\delta \) off a set of measure \({\lt}\varepsilon \) and are bounded by \(M\), then \(\lVert E(\rho ) - E(\rho ')\rVert \le 2\pi \delta + 2M\varepsilon \). </p>
@@ -1992,7 +3287,7 @@
       </span>
       <span class="lemma_thmlabel">32</span></div>
     <div class="thm_thmcontent"><p>[Explicit error vector of a bicircle]    <i class="itshape">Source: DeTurck–Gluck, Proposition 9.1 (§9), error-vector formula.</i> With the notation of <a href="chap-bicircle.html#def:bicircle_error_vector">definition 31</a>, </p>
-<div class="displaymath" id="a0000000049">
+<div class="displaymath" id="a0000000061">
   \[  E_{\mathrm{bi}}(a,b,\theta _1,\theta _2,\theta _3,\theta _4) \; =\;  \Bigl(\tfrac {1}{ib} - \tfrac {1}{ia}\Bigr) \Bigl(\bigl[e^{i\theta _2} - e^{i\theta _1}\bigr] + \bigl[e^{i\theta _4} - e^{i\theta _3}\bigr]\Bigr).  \]
 </div>
 </div>
@@ -2023,7 +3318,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">91</span></div>
+      <span class="lemma_thmlabel">92</span></div>
     <div class="thm_thmcontent"><p>[The \(C^1\) inverse of a \(C^1\) circle reparametrization]   Let \(h:\mathbb {R}\to \mathbb {R}\) admit a continuous strictly positive \(v\) with \(\mathrm{HasDerivAt}\, h\, (v(\theta ))\, \theta \) for all \(\theta \), and satisfy \(h(\theta +2\pi )=h(\theta )+2\pi \). Then there is \(H:\mathbb {R}\to \mathbb {R}\) that is continuous, strictly increasing, two-sided inverse to \(h\) (\(h\circ H=\mathrm{id}\) and \(H\circ h=\mathrm{id}\)), with \(H(t+2\pi )=H(t)+2\pi \), and \(C^1\) with strictly positive derivative: \(\mathrm{HasDerivAt}\, H\, (1/v(H(t)))\, t\) for all \(t\). </p>
 </div>
 
@@ -2031,6 +3326,66 @@
     
     
   <a class="lean_link lean_decl" href="/find/#doc/Gluck.exists_C1_circle_inverse">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:exists_eta_clean_L1_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:exists_eta_clean_L1" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">120</span></div>
+    <div class="thm_thmcontent"><p>[Analytic core: the \(L^1\) \(\eta \)-construction]    The genuinely-new analytic content of <a href="chap-dahlberg_step1.html#thm:exists_preliminary_diffeo">theorem 119</a>, isolated: for \(\kappa \) continuous \(2\pi \)-periodic and the levels/crossing points \(r_1{\lt}r_2{\lt}r_3{\lt}r_4\) of <a href="chap-dahlberg_step1.html#lem:dahlberg_alignment_data">lemma 118</a>, and every \(\varepsilon {\gt}0\), there is a \(C^1\) orientation-preserving quasiperiodic \(\eta \) (explicit continuous positive derivative) with \(\int _0^{2\pi }|\kappa (\eta \, t)-k_{a,b}(t)|\, dt{\lt}\varepsilon \). <a href="chap-dahlberg_step1.html#thm:exists_preliminary_diffeo">theorem 119</a> is a routine wrapper around this lemma. </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step1.html#lem:exists_eta_clean_L1">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.exists_eta_clean_L1">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:exists_kappa_bound_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:exists_kappa_bound" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">114</span></div>
+    <div class="thm_thmcontent"><p>[Uniform bound of a continuous periodic curvature]   A continuous \(2\pi \)-periodic \(\kappa :\mathbb {R}\to \mathbb {R}\) is uniformly bounded: there is \(N\) with \(|\kappa (\theta )|\le N\) for all \(\theta \). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step1.html#lem:exists_kappa_bound">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.exists_kappa_bound">Lean</a>
     
     
   
@@ -2055,10 +3410,10 @@
       </span>
       <span class="lemma_thmlabel">30</span></div>
     <div class="thm_thmcontent"><p>[Existence of a step-approximating reparametrization]    Let \(\kappa \) be a curvature function (continuous, \(2\pi \)-periodic, strictly positive) satisfying the four-vertex condition, with crossing data \(0{\lt}a{\lt}b\), \(c_1{\lt}c_2{\lt}c_3{\lt}c_4{\lt}c_1+2\pi \), \(\kappa (c_1,c_2,c_3,c_4)=(a,b,a,b)\) from <a href="chap-curvature.html#lem:abab_values">lemma 14</a>. For every \(\varepsilon {\gt}0\) there is an orientation-preserving circle reparametrization \(h_1\) (a strictly increasing continuous \(h_1:\mathbb {R}\to \mathbb {R}\) with \(h_1(\theta +2\pi )=h_1(\theta )+2\pi \)) such that, with \(\kappa _0\) the canonical four-arc step curvature (<a href="chap-stepreduction.html#def:four_arc_step_function">definition 24</a>, breakpoints \((k-1)\pi /2\), values \(a,b,a,b\)), </p>
-<div class="displaymath" id="a0000000046">
+<div class="displaymath" id="a0000000058">
   \[  \mathrm{vol}\bigl(\{ \theta \in [0,2\pi ): \lvert \kappa (h_1(\theta )) - \kappa _0(\theta )\rvert {\gt} \varepsilon \} \bigr) {\lt} \varepsilon .  \]
 </div>
-<p> Moreover \(h_1\) is <em>continuously differentiable with strictly positive derivative</em>: there is a continuous \(v_1:\mathbb {R}\to \mathbb {R}\) with \(v_1(\theta ){\gt}0\) for all \(\theta \) and \(h_1'(\theta )=v_1(\theta )\) for all \(\theta \) (so \(h_1\in C^1\) and \(h_1\) is a \(C^1\) diffeomorphism of the circle). This extra regularity is what later lets the curve be reparametrized back to realize \(\kappa \) intrinsically (<a href="chap-fourvertex.html#thm:gluck_converse">theorem 87</a>). </p>
+<p> Moreover \(h_1\) is <em>continuously differentiable with strictly positive derivative</em>: there is a continuous \(v_1:\mathbb {R}\to \mathbb {R}\) with \(v_1(\theta ){\gt}0\) for all \(\theta \) and \(h_1'(\theta )=v_1(\theta )\) for all \(\theta \) (so \(h_1\in C^1\) and \(h_1\) is a \(C^1\) diffeomorphism of the circle). This extra regularity is what later lets the curve be reparametrized back to realize \(\kappa \) intrinsically (<a href="chap-fourvertex.html#thm:gluck_converse">theorem 88</a>). </p>
 </div>
 
     <a class="latex_link" href="chap-stepreduction.html#lem:exists_preliminary_reparam">LaTeX</a>
@@ -2087,8 +3442,8 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">81</span></div>
-    <div class="thm_thmcontent"><p>[Existence of a preconditioning reparametrization]    Project-bespoke (the existence form of <a href="chap-reduction.html#lem:kappa_error_map_close">lemma 80</a> that bundles the \(\varepsilon \)-choice). For any target margin \(\mu {\gt}0\) there is an orientation-preserving circle reparametrization \(h_1\) (<span class="ttfamily">StrictMono</span>, <span class="ttfamily">Continuous</span>, quasi-periodic) such that \(\lVert E_\kappa (z)-\mathrm{errorMap}(a,b,\delta )(z)\rVert {\lt}\mu \) for every \(z\in \overline{\mathbb D}\). The same \(h_1\) is the one of <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a>, so it additionally carries the \(C^1\) regularity there: there is a continuous \(v_1{\gt}0\) with \(h_1'(\theta )=v_1(\theta )\) for all \(\theta \) (forwarded verbatim). </p>
+      <span class="lemma_thmlabel">82</span></div>
+    <div class="thm_thmcontent"><p>[Existence of a preconditioning reparametrization]    Project-bespoke (the existence form of <a href="chap-reduction.html#lem:kappa_error_map_close">lemma 81</a> that bundles the \(\varepsilon \)-choice). For any target margin \(\mu {\gt}0\) there is an orientation-preserving circle reparametrization \(h_1\) (<span class="ttfamily">StrictMono</span>, <span class="ttfamily">Continuous</span>, quasi-periodic) such that \(\lVert E_\kappa (z)-\mathrm{errorMap}(a,b,\delta )(z)\rVert {\lt}\mu \) for every \(z\in \overline{\mathbb D}\). The same \(h_1\) is the one of <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a>, so it additionally carries the \(C^1\) regularity there: there is a continuous \(v_1{\gt}0\) with \(h_1'(\theta )=v_1(\theta )\) for all \(\theta \) (forwarded verbatim). </p>
 </div>
 
     <a class="latex_link" href="chap-reduction.html#lem:exists_reparam_close">LaTeX</a>
@@ -2132,7 +3487,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">78</span></div>
+      <span class="lemma_thmlabel">79</span></div>
     <div class="thm_thmcontent"><p>[FTC derivative of \(g_z\)]    \(g_z\) is differentiable with \(g_z'(\theta )=w_z(\theta )\) for every \(\theta \). </p>
 </div>
 
@@ -2140,6 +3495,96 @@
     
     
   <a class="lean_link lean_decl" href="/find/#doc/Gluck.hasDerivAt_alignReparam">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:hasderivat_dahlberg_angle_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:hasderivat_dahlberg_angle" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">95</span></div>
+    <div class="thm_thmcontent"><p>[Derivative of the tangent angle]    If \(K\) is continuous then \(\alpha _K\) is differentiable with \(\alpha _K'(s)=K(s)\) at every \(s\). </p>
+</div>
+
+    <a class="latex_link" href="chap-arclength.html#lem:hasderivat_dahlberg_angle">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.hasDerivAt_dahlbergAngle">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:hasderivat_dahlberg_curve_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:hasderivat_dahlberg_curve" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">98</span></div>
+    <div class="thm_thmcontent"><p>[Velocity of the arc-length curve]    If \(K\) is continuous then for every \(t\), \(\gamma _K\) is differentiable at \(t\) with \(\gamma _K'(t)=e^{i\alpha _K(t)}\); moreover \(\gamma _K\in C^1\). </p>
+</div>
+
+    <a class="latex_link" href="chap-arclength.html#lem:hasderivat_dahlberg_curve">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.hasDerivAt_dahlbergCurve">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:injon_dahlberg_curve_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:injon_dahlberg_curve" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">103</span></div>
+    <div class="thm_thmcontent"><p>[Simplicity: \(\gamma _K\) is injective on \([0,2\pi )\)]    If \(K\) satisfies (1.3) then \(\gamma _K\) is injective on \([0,2\pi )\). </p>
+</div>
+
+    <a class="latex_link" href="chap-arclength.html#lem:injon_dahlberg_curve">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.injOn_dahlbergCurve">Lean</a>
     
     
   
@@ -2222,7 +3667,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">90</span><span class="lemma_thmtitle">Simplicity transfers under an orientation-preserving circle reparametrization</span></div>
+      <span class="lemma_thmlabel">91</span><span class="lemma_thmtitle">Simplicity transfers under an orientation-preserving circle reparametrization</span></div>
     <div class="thm_thmcontent"><p>    Let \(\Gamma :\mathbb {R}\to \mathbb {C}\) be a simple closed curve (<a href="chap-curve.html#def:is_simple_closed">definition 6</a>) and let \(\psi :\mathbb {R}\to \mathbb {R}\) be continuous, strictly increasing, with \(\psi (t+2\pi )=\psi (t)+2\pi \). Then \(\Gamma \circ \psi \) is a simple closed curve. </p>
 </div>
 
@@ -2239,8 +3684,70 @@
         
            <li><a href="/find/#doc/Gluck.psi_add_int_period" class="lean_decl">Gluck.psi_add_int_period</a></li>
         
+           <li><a href="/find/#doc/Gluck.eq_zero_of_window_sub_eq_zsmul" class="lean_decl">Gluck.eq_zero_of_window_sub_eq_zsmul</a></li>
+        
       </ul>
   </div>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:issimpleclosed_dahlberg_curve_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:issimpleclosed_dahlberg_curve" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">104</span></div>
+    <div class="thm_thmcontent"><p>[\(\gamma _K\) is a simple closed curve]    If \(K\) is continuous, \(2\pi \)-periodic, and satisfies (1.1)–(1.3), then \(\gamma _K\) is a simple closed curve. </p>
+</div>
+
+    <a class="latex_link" href="chap-arclength.html#lem:issimpleclosed_dahlberg_curve">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.isSimpleClosed_dahlbergCurve">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:issimpleclosed_smul_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:issimpleclosed_smul" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">108</span></div>
+    <div class="thm_thmcontent"><p>[Simplicity scales]    If \(\gamma \) is a simple closed curve and \(c\neq 0\) is a real (or complex nonzero) constant, then \(c\, \gamma \) is a simple closed curve. </p>
+</div>
+
+    <a class="latex_link" href="chap-arclength.html#lem:issimpleclosed_smul">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.isSimpleClosed_smul">Lean</a>
     
     
   
@@ -2293,9 +3800,9 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">80</span></div>
+      <span class="lemma_thmlabel">81</span></div>
     <div class="thm_thmcontent"><p>[\(E_\kappa \) is uniformly close to \(E_{\mathrm{bi}}\)]    Let \(M = 1/\min \kappa \) and let \(h_1\) be chosen for a tolerance \(\varepsilon {\gt}0\) as in <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a>. There is an absolute constant \(K\) (the slope bound of \(g_z\)) such that, for every \(z\in \overline{\mathbb {D}}\), </p>
-<div class="displaymath" id="a0000000094">
+<div class="displaymath" id="a0000000107">
   \[  \bigl\lVert E_\kappa (z) - \mathrm{errorMap}(a,b,\delta )(z)\bigr\rVert \; \le \;  K\, M^2\, \varepsilon .  \]
 </div>
 </div>
@@ -2326,7 +3833,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">77</span></div>
+      <span class="lemma_thmlabel">78</span></div>
     <div class="thm_thmcontent"><p>[\(E_\kappa \) is continuous on the disk]    \(E_\kappa : \overline{\mathbb {D}}\to \mathbb {C}\) is continuous. </p>
 </div>
 
@@ -2388,7 +3895,7 @@
       </span>
       <span class="lemma_thmlabel">29</span></div>
     <div class="thm_thmcontent"><p>[Calibrated continuous plateau density]   Project-bespoke. The explicit density is built from a base level plus four periodic unit triangular “tent” bumps \(\mathrm{tentBump}\) (realised as \(\arccos (\cos (\theta -\tau ))\), giving \(2\pi \)-periodicity and continuity for free); the listed satellites compute their support- and cumulative integrals (\(\mathrm{tentBump\_ integral\_ \ast }\)) and off-support vanishing (\(\mathrm{cos\_ le\_ cos\_ half\ast }\), \(\mathrm{tentBump\_ eq\_ zero\_ of\_ cos\_ le}\)), with \(\mathrm{integral\_ affine}\) for the affine pieces. Given crossing points \(c_1{\lt}c_2{\lt}c_3{\lt}c_4{\lt}c_1+2\pi \), the offset \(m_0=(c_1+c_4)/2-\pi \), a plateau radius \(\eta {\gt}0\) small enough that \(\eta {\lt}(c_{k+1}-c_k)/2\) for each \(k\) (cyclically), and a race width \(0{\lt}\delta {\lt}\pi /2\), there is a <em>continuous, strictly positive, \(2\pi \)-periodic</em> speed density \(w:\mathbb {R}\to \mathbb {R}\) with period integral \(\int _0^{2\pi } w = 2\pi \) such that the cumulative map \(h_1(\theta )=m_0+\int _0^\theta w\) satisfies, on the central sub-arc (“plateau”) of each target arc \(I_k=[(k-1)\pi /2,\, k\pi /2)\), </p>
-<div class="displaymath" id="a0000000044">
+<div class="displaymath" id="a0000000056">
   \[  \tfrac {\delta }{2}\le \theta -(k-1)\tfrac {\pi }{2}\le \tfrac {\pi }{2}-\tfrac {\delta }{2} \; \Longrightarrow \;  \bigl\lvert h_1(\theta )-c_k\bigr\rvert \le \eta .  \]
 </div>
 </div>
@@ -2524,7 +4031,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">89</span></div>
+      <span class="lemma_thmlabel">90</span></div>
     <div class="thm_thmcontent"><p>[Realization transfers under an orientation-preserving \(C^1\) reparametrization]    Let \(\Gamma :\mathbb {R}\to \mathbb {C}\) realize \(\mu :\mathbb {R}\to \mathbb {R}\), and let \(\psi :\mathbb {R}\to \mathbb {R}\) be \(C^1\) with \(\psi '(t){\gt}0\) for all \(t\). Then \(\Gamma \circ \psi \) realizes \(\mu \circ \psi \). </p>
 </div>
 
@@ -2532,6 +4039,40 @@
     
     
   <a class="lean_link lean_decl" href="/find/#doc/Gluck.realizesCurvature_comp">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:realizes_curvature_dahlberg_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:realizes_curvature_dahlberg" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">99</span></div>
+    <div class="thm_thmcontent"><p>[The arc-length curve realizes \(K\) — unification with <a href="chap-curve.html#def:realizes_curvature">definition 3</a>]    For <em>any</em> continuous \(K : \mathbb {R}\to \mathbb {R}\) (no positivity required), the arc-length curve realizes \(K\) in the intrinsic sense: </p>
+<div class="displaymath" id="a0000000130">
+  \[  \mathrm{RealizesCurvature}\, (\gamma _K)\, (K).  \]
+</div>
+<p> This is the structural unification: the arc-length representation and the positive-case inclination reconstruction (<a href="chap-fourvertex.html#lem:realizes_curvature_reconstruct">lemma 89</a>) satisfy the <em>same</em> predicate <a href="chap-curve.html#def:realizes_curvature">definition 3</a>; there are not two parallel curvature notions. </p>
+</div>
+
+    <a class="latex_link" href="chap-arclength.html#lem:realizes_curvature_dahlberg">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.realizesCurvature_dahlbergCurve">Lean</a>
     
     
   
@@ -2554,7 +4095,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">88</span></div>
+      <span class="lemma_thmlabel">89</span></div>
     <div class="thm_thmcontent"><p>[The reconstruction realizes its curvature]    Let \(\mu :\mathbb {R}\to \mathbb {R}\) be continuous and strictly positive. Then the inclination-parametrized reconstruction \(\mathrm{reconstruct}(\mathrm{radius}\,  \mu )\) realizes \(\mu \) intrinsically (<a href="chap-curve.html#def:realizes_curvature">definition 3</a>). </p>
 </div>
 
@@ -2603,6 +4144,36 @@
 
 
     
+    <div class="dep-modal-container" id="lem:realizes_curvature_smul_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:realizes_curvature_smul" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">107</span></div>
+    <div class="thm_thmcontent"><p>[Realization scales]    If \(\mathrm{RealizesCurvature}\, \gamma \, \mu \) and \(c{\gt}0\) is a real constant, then \(\mathrm{RealizesCurvature}\, (c\, \gamma )\, (\mu /c)\). </p>
+</div>
+
+    <a class="latex_link" href="chap-arclength.html#lem:realizes_curvature_smul">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.realizesCurvature_smul">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="lem:reconstruct_const_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
@@ -2616,10 +4187,10 @@
       </span>
       <span class="lemma_thmlabel">16</span></div>
     <div class="thm_thmcontent"><p>[Reconstruction of a constant weight is a circle]    For a constant weight \(\rho \equiv r\) the reconstruction curve has the closed form </p>
-<div class="displaymath" id="a0000000028">
+<div class="displaymath" id="a0000000040">
   \[  \alpha _{r}(\theta ) \; =\;  r\, i\, \bigl(1 - e^{i\theta }\bigr),  \]
 </div>
-<p> a parametrization (by inclination angle) of the circle of radius \(r\) centred at \(r\, i\). This is the explicit curve realizing the constant curvature \(\kappa \equiv 1/r\), used in the constant case of <a href="chap-fourvertex.html#thm:gluck_converse">theorem 87</a>. </p>
+<p> a parametrization (by inclination angle) of the circle of radius \(r\) centred at \(r\, i\). This is the explicit curve realizing the constant curvature \(\kappa \equiv 1/r\), used in the constant case of <a href="chap-fourvertex.html#thm:gluck_converse">theorem 88</a>. </p>
 </div>
 
     <a class="latex_link" href="chap-closure.html#lem:reconstruct_const">LaTeX</a>
@@ -2678,7 +4249,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">84</span></div>
+      <span class="lemma_thmlabel">85</span></div>
     <div class="thm_thmcontent"><p>[Reconstruction of a closed weight is periodic]    Project-bespoke. If \(\rho \) is continuous, \(2\pi \)-periodic and \(E(\rho ) = 0\), then \(\alpha _\rho \) is \(2\pi \)-periodic: \(\alpha _\rho (\theta + 2\pi ) = \alpha _\rho (\theta )\) for all \(\theta \). </p>
 </div>
 
@@ -2708,8 +4279,8 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">82</span></div>
-    <div class="thm_thmcontent"><p>[Reduction is justified]    <i class="itshape">Source: DeTurck–Gluck, §6 (robustness of the winding argument).</i> Let \(\kappa \) be a curvature function satisfying the four-vertex condition. Then there is a reparametrization \(h\) of the circle (<span class="ttfamily">StrictMono</span>, <span class="ttfamily">Continuous</span>, \(h(\theta +2\pi )=h(\theta )+2\pi \)) such that \(\kappa \circ h\) is again a curvature function whose reconstruction weight \(\rho = 1/(\kappa \circ h)\) has \(E(\rho )=0\); so by <a href="chap-closure.html#lem:closes_iff">lemma 23</a> the reconstruction curve \(\alpha _\rho \) closes up. Moreover \(h\) is a \(C^1\) circle diffeomorphism with strictly positive derivative: there is a continuous \(v{\gt}0\) with \(h'(\theta )=v(\theta )\) for all \(\theta \). This \(C^1\) regularity is what lets the closed curve be reparametrized back by \(h^{-1}\) to realize the original \(\kappa \) in <a href="chap-fourvertex.html#thm:gluck_converse">theorem 87</a>. </p>
+      <span class="lemma_thmlabel">83</span></div>
+    <div class="thm_thmcontent"><p>[Reduction is justified]    <i class="itshape">Source: DeTurck–Gluck, §6 (robustness of the winding argument).</i> Let \(\kappa \) be a curvature function satisfying the four-vertex condition. Then there is a reparametrization \(h\) of the circle (<span class="ttfamily">StrictMono</span>, <span class="ttfamily">Continuous</span>, \(h(\theta +2\pi )=h(\theta )+2\pi \)) such that \(\kappa \circ h\) is again a curvature function whose reconstruction weight \(\rho = 1/(\kappa \circ h)\) has \(E(\rho )=0\); so by <a href="chap-closure.html#lem:closes_iff">lemma 23</a> the reconstruction curve \(\alpha _\rho \) closes up. Moreover \(h\) is a \(C^1\) circle diffeomorphism with strictly positive derivative: there is a continuous \(v{\gt}0\) with \(h'(\theta )=v(\theta )\) for all \(\theta \). This \(C^1\) regularity is what lets the closed curve be reparametrized back by \(h^{-1}\) to realize the original \(\kappa \) in <a href="chap-fourvertex.html#thm:gluck_converse">theorem 88</a>. </p>
 </div>
 
     <a class="latex_link" href="chap-reduction.html#lem:reduction_justified">LaTeX</a>
@@ -2747,6 +4318,36 @@
     
     
   <a class="lean_link lean_decl" href="/find/#doc/Gluck.signedCurvature_reconstruct">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:simplicity_transport_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:simplicity_transport" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">140</span></div>
+    <div class="thm_thmcontent"><p>[Simplicity of the perturbed curve (condition (1.3))]    For \(\varepsilon \) small enough, the closing parameter \(z^*\) of <a href="chap-dahlberg_step2.html#thm:exists_closing_param">theorem 138</a> (\(F^*(z^*,\varepsilon )=0\)) gives a \(K^*_{z^*}\) satisfying condition (1.3): \(\int _t^\tau e^{i\alpha _{K^*_{z^*}}(s)}\, ds\neq 0\) for all \(0\le t{\lt}\tau {\lt}2\pi \). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#lem:simplicity_transport">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.simplicity_transport">Lean</a>
     
     
   
@@ -2829,7 +4430,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">74</span></div>
+      <span class="lemma_thmlabel">75</span></div>
     <div class="thm_thmcontent"><p>[Strict monotonicity of \(g_z\) on the disk]    For \(0{\lt}\delta \le \pi /8\) and \(\| z\| \le 1\), \(g_z\) is strictly increasing. </p>
 </div>
 
@@ -2837,6 +4438,81 @@
     
     
   <a class="lean_link lean_decl" href="/find/#doc/Gluck.strictMono_alignReparam">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:toIcoMod_pi4_mem_Ioo_iff_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:toIcoMod_pi4_mem_Ioo_iff" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">116</span></div>
+    <div class="thm_thmcontent"><p>[Representative-arc membership for the standard breakpoints]   Internal helper of <a href="chap-dahlberg_step1.html#lem:clean_bicircle_eq_step">lemma 115</a>. For a base arc \((\mathrm{lo},\mathrm{hi})\) inside one period \([\tfrac {\pi }{4},\tfrac {\pi }{4}+2\pi )\), a point \(\theta \) lies in some \(2\pi \)-translate \((\mathrm{lo}+2\pi k,\mathrm{hi}+2\pi k)\) iff its canonical representative \(\mathrm{toIcoMod}\, (2\pi )\, \tfrac {\pi }{4}\, \theta \) lies in \((\mathrm{lo},\mathrm{hi})\). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step1.html#lem:toIcoMod_pi4_mem_Ioo_iff">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.toIcoMod_pi4_mem_Ioo_iff">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:total_curvature_ne_zero_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:total_curvature_ne_zero" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">134</span></div>
+    <div class="thm_thmcontent"><p>[Total curvature stays nonzero]    There is \(\varepsilon _1{\gt}0\) such that for all \(\varepsilon \in (0,\varepsilon _1)\) and all \(z\in \overline{\mathbb {D}}\), \(I^*_z=\int _0^{2\pi }(\kappa \circ \eta )\circ g_z{\gt}0\) (so in particular \(I^*_z\neq 0\) and \(K^*_z\) is well defined). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#lem:total_curvature_ne_zero">LaTeX</a>
+    
+    
+  <div class="tooltip">
+      <span class="lean_link">Lean</span>
+      <ul class="tooltip_list">
+        
+           <li><a href="/find/#doc/Gluck.totalCurvature_ne_zero" class="lean_decl">Gluck.totalCurvature_ne_zero</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingFamily_changeOfVar" class="lean_decl">Gluck.closingFamily_changeOfVar</a></li>
+        
+           <li><a href="/find/#doc/Gluck.closingFamily_comp_L1" class="lean_decl">Gluck.closingFamily_comp_L1</a></li>
+        
+           <li><a href="/find/#doc/Gluck.measurable_cleanBicircle" class="lean_decl">Gluck.measurable_cleanBicircle</a></li>
+        
+           <li><a href="/find/#doc/Gluck.intervalIntegrable_cleanBicircle_comp" class="lean_decl">Gluck.intervalIntegrable_cleanBicircle_comp</a></li>
+        
+      </ul>
+  </div>
     
     
   
@@ -2859,7 +4535,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">56</span></div>
+      <span class="lemma_thmlabel">57</span></div>
     <div class="thm_thmcontent"><p>[The unit-circle \(\mathbb {C}\)-loop winds once]    Project-bespoke. \(W_{\mathbb {C}}(t\mapsto e^{2\pi i t}) = 1\). </p>
 </div>
 
@@ -2919,7 +4595,7 @@
       <span class="lemma_thmcaption">
       Lemma
       </span>
-      <span class="lemma_thmlabel">54</span></div>
+      <span class="lemma_thmlabel">55</span></div>
     <div class="thm_thmcontent"><p>[Winding is stable under small perturbations]    Project-bespoke. Let \(\gamma ,\gamma '\) be nowhere-zero loops with \(\lVert \gamma '(t)-\gamma (t)\rVert {\lt} \lVert \gamma (t)\rVert \) for all \(t\). Then \(W_{\mathbb {C}}(\gamma ') = W_{\mathbb {C}}(\gamma )\). </p>
 </div>
 
@@ -2927,6 +4603,36 @@
     
     
   <a class="lean_link lean_decl" href="/find/#doc/Gluck.windingNumberC_eq_of_perturb">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:winding_number_c_pos_scalar_field_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:winding_number_c_pos_scalar_field" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">54</span></div>
+    <div class="thm_thmcontent"><p>[Positive-scalar-field invariance of the \(\mathbb {C}\)-winding number]    Project-bespoke. Let \(\gamma :[0,1]\to \mathbb {C}\) be a nowhere-zero loop and \(c:[0,1]\to \mathbb {R}\) continuous with \(c(t){\gt}0\) for all \(t\) (and \(c\) a loop, \(c(0)=c(1)\)). Then the scaled loop \(t\mapsto c(t)\, \gamma (t)\) is nowhere zero and \(W_{\mathbb {C}}(c\cdot \gamma )=W_{\mathbb {C}}(\gamma )\). This generalises <a href="chap-winding.html#lem:winding_number_c_const_mul">lemma 53</a> from a constant scalar to a positive scalar <em>field</em>; it is what lets a positive configuration-dependent prefactor \(c(z)=1/\lambda (z)\) be stripped from the clean arc-length error map (<a href="chap-dahlberg_step2.html#lem:clean_error_winds">lemma 137</a>). </p>
+</div>
+
+    <a class="latex_link" href="chap-winding.html#lem:winding_number_c_pos_scalar_field">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.windingNumberC_posScalarField">Lean</a>
     
     
   
@@ -3088,6 +4794,70 @@
 
 
     
+    <div class="dep-modal-container" id="thm:arclength_converse_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:arclength_converse" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">105</span></div>
+    <div class="thm_thmcontent"><p>[Arc-length converse: (1.1)–(1.3) realize \(K\) by a simple closed curve]    If \(K\) is continuous, \(2\pi \)-periodic, and an arc-length curvature function (satisfies (1.1)–(1.3)), then </p>
+<div class="displaymath" id="a0000000137">
+  \[  \exists \, \gamma ,\  \mathrm{IsSimpleClosed}\, \gamma \, \wedge \,  \mathrm{RealizesCurvature}\, \gamma \, K.  \]
+</div>
+<p> Witness: \(\gamma =\gamma _K\). </p>
+</div>
+
+    <a class="latex_link" href="chap-arclength.html#thm:arclength_converse">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.arcLengthConverse">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:dahlberg_converse_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:dahlberg_converse" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">142</span></div>
+    <div class="thm_thmcontent"><p>[Dahlberg converse to the four vertex theorem (Theorem 1.1)]    <i class="itshape">Source: Dahlberg, §1, Theorem 1.1.</i> Let \(\kappa :\mathbb {R}\to \mathbb {R}\) be continuous, \(2\pi \)-periodic and non-constant, satisfying the mixed-sign four-vertex condition (<a href="chap-dahlberg_step1.html#def:mixed_sign_four_vertex">definition 117</a>). Then there is a simple closed curve realizing \(\kappa \): \(\exists \, \gamma ,\  \mathrm{IsSimpleClosed}\, \gamma \, \wedge \,  \mathrm{RealizesCurvature}\, \gamma \, \kappa \). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#thm:dahlberg_converse">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.dahlbergConverse">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="thm:existence_of_zero_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
@@ -3099,7 +4869,7 @@
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">64</span></div>
+      <span class="theorem_thmlabel">65</span></div>
     <div class="thm_thmcontent"><p>[Nonzero boundary winding forces an interior zero]    <i class="itshape">Source: DeTurck–Gluck, §7 (winding-number/FTA principle).</i> Let \(F : \overline{\mathbb {D}} \to \mathbb {C}\) be continuous on the closed unit \(2\)-disk, with \(F \ne 0\) on the boundary circle \(\partial \mathbb {D}\) and the boundary loop \(F|_{\partial \mathbb {D}}\) having winding number \(\ne 0\) about the origin. Then \(F\) has a zero in the interior of \(\mathbb {D}\). </p>
 </div>
 
@@ -3107,6 +4877,70 @@
     
     
   <a class="lean_link lean_decl" href="/find/#doc/Gluck.exists_zero_of_boundary_winding">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:exists_closing_param_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:exists_closing_param" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">138</span></div>
+    <div class="thm_thmcontent"><p>[Existence of a closing parameter]    Assume \(\kappa \) is continuous (the hypothesis \(\mathrm{Continuous}\, \kappa \) is carried in the Lean signature, supplied at the use site by <a href="chap-dahlberg_step1.html#def:mixed_sign_four_vertex">definition 117</a>). There is \(\varepsilon _0{\gt}0\) such that for every \(\varepsilon \in (0,\varepsilon _0)\) there is \(z^*\in \mathbb {D}\) (interior) with \(F^*(z^*,\varepsilon )=0\). Hence \(K^*_{z^*}=\tfrac {2\pi }{I^*_{z^*}}(\kappa \circ \eta )\circ g_{z^*}\) satisfies the closure condition (1.2). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step2.html#thm:exists_closing_param">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.exists_closingParam">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:exists_preliminary_diffeo_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:exists_preliminary_diffeo" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">119</span></div>
+    <div class="thm_thmcontent"><p>[Step 1: preliminary diffeomorphism]    <i class="itshape">Source: Dahlberg, §3, Step 1.</i> Let \(\kappa \) be continuous, \(2\pi \)-periodic, non-constant and satisfy the mixed-sign four-vertex condition (<a href="chap-dahlberg_step1.html#def:mixed_sign_four_vertex">definition 117</a>). There are constants \(0{\lt}a{\lt}b\) (the levels of <a href="chap-dahlberg_step1.html#lem:dahlberg_alignment_data">lemma 118</a>) and, for every \(\varepsilon {\gt}0\), a \(C^1\) (in fact \(C^\infty \)) orientation-preserving circle diffeomorphism \(\eta \) (\(\eta (t+2\pi )=\eta (t)+2\pi \), \(\eta '{\gt}0\)) and an interval-integrable, \(2\pi \)-periodic error \(e\) with </p>
+<div class="displaymath" id="a0000000151">
+  \[  \kappa \circ \eta \; =\;  a(1-f) + b\, f + e, \qquad \int _0^{2\pi } |e(t)|\, dt \; {\lt}\;  C\, \varepsilon ,  \]
+</div>
+<p> where the constant \(C\) does not depend on \(\varepsilon \). Consequently the total curvature \(I=\int _0^{2\pi }\kappa \circ \eta \) satisfies \(I = (a+b)\pi + \int _0^{2\pi }e\), so \(|I-(a+b)\pi |{\lt}C\varepsilon \) and in particular \(I{\gt}0\) once \(\varepsilon \) is small (since \(a,b{\gt}0\)). </p>
+</div>
+
+    <a class="latex_link" href="chap-dahlberg_step1.html#thm:exists_preliminary_diffeo">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.exists_preliminaryDiffeo">Lean</a>
     
     
   
@@ -3129,7 +4963,7 @@
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">87</span><span class="theorem_thmtitle">Gluck’s converse, strictly positive case</span></div>
+      <span class="theorem_thmlabel">88</span><span class="theorem_thmtitle">Gluck’s converse, strictly positive case</span></div>
     <div class="thm_thmcontent"><p>    <i class="itshape">Source: DeTurck–Gluck, Converse to the Four Vertex Theorem (positive case, §III–IV).</i> Let \(\kappa : \mathbb {R} \to \mathbb {R}\) be a curvature function (<a href="chap-curvature.html#def:is_curvature_function">definition 9</a>: continuous, \(2\pi \)-periodic, strictly positive) satisfying the four-vertex condition (<a href="chap-curvature.html#def:four_vertex_condition">definition 13</a>). Then there is a simple closed curve \(\gamma : \mathbb {R} \to \mathbb {C}\) (<a href="chap-curve.html#def:is_simple_closed">definition 6</a>) that <em>realizes</em> \(\kappa \) as its curvature in the intrinsic sense (<a href="chap-curve.html#def:realizes_curvature">definition 3</a>: \(\gamma \) is \(C^1\), regular, and its tangent angle \(\varphi \) satisfies \(\varphi ' = \kappa \lVert \gamma '\rVert \)). </p>
 <p><em>Why the intrinsic conclusion.</em> For a merely continuous \(\kappa \) the realized curve is only \(C^1\), so the deriv²-formula <a href="chap-curve.html#def:signed_curvature">definition 2</a> (and with it the \(C^2\) predicates <a href="chap-curve.html#def:is_regular">definition 1</a>, <a href="chap-curve.html#def:is_convex_curve">definition 7</a>) returns junk; the realization must therefore be stated through <a href="chap-curve.html#def:realizes_curvature">definition 3</a>. Convexity is automatic and intrinsic: \(\kappa {\gt} 0\) forces \(\varphi ' = \kappa \lVert \gamma '\rVert {\gt} 0\), so the tangent turns strictly monotonically (rotation index \(1\)), which is exactly convexity of the simple closed curve. On \(C^2\) data (e.g. \(\kappa \in C^1\)) this conclusion specialises back to \(\kappa _\gamma = \kappa {\gt} 0\) via the bridge <a href="chap-curve.html#lem:realizes_curvature_signedCurvature">lemma 4</a>. </p>
 </div>
@@ -3138,6 +4972,40 @@
     
     
   <a class="lean_link lean_decl" href="/find/#doc/Gluck.gluck_converse">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:realizes_of_non_normalised_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:realizes_of_non_normalised" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">109</span></div>
+    <div class="thm_thmcontent"><p>[Reduction: a non-normalised reparametrisation realizes \(\kappa \)]    <i class="itshape">Source: Dahlberg, §1, reduction paragraph after (1.4).</i> Let \(\kappa : \mathbb {R}\to \mathbb {R}\) be continuous and \(2\pi \)-periodic. Suppose there is a \(C^1\) orientation-preserving circle diffeomorphism \(\varphi \) (with \(C^1\) inverse \(\psi \), \(\varphi (t+2\pi )=\varphi (t)+2\pi \)) such that \(\kappa \circ \varphi \) is a non-normalised curvature function <em>with positive total curvature</em> \(I=\int _0^{2\pi }\kappa \circ \varphi \, dt{\gt}0\). Then </p>
+<div class="displaymath" id="a0000000141">
+  \[  \exists \, \gamma ,\  \mathrm{IsSimpleClosed}\, \gamma \, \wedge \,  \mathrm{RealizesCurvature}\, \gamma \, \kappa .  \]
+</div>
+<p> (The hypothesis \(I{\gt}0\) is exactly what Phase D-B delivers: there \(\kappa \circ \varphi =a(1-f)+bf+e\) with \(a,b{\gt}0\) and \(e\) of small integral, so \(I\approx \int (a(1-f)+bf){\gt}0\). The bare \(I\neq 0\) of (1.4) suffices for \(K=\frac{2\pi }{I}\kappa \circ \varphi \) to satisfy (1.1); the sign is pinned by the construction.) </p>
+</div>
+
+    <a class="latex_link" href="chap-arclength.html#thm:realizes_of_non_normalised">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="/find/#doc/Gluck.realizesCurvature_of_nonNormalised">Lean</a>
     
     
   
@@ -3160,7 +5028,7 @@
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">83</span></div>
+      <span class="theorem_thmlabel">84</span></div>
     <div class="thm_thmcontent"><p>[A closed inclination-parametrized curve with positive weight is simple]    <i class="itshape">Source: DeTurck–Gluck, §6 and §11(2) (positive curvature whose tangent turns through \(2\pi \) is simple).</i> Let \(\rho : \mathbb {R} \to \mathbb {R}\) be continuous, \(2\pi \)-periodic and strictly positive, with vanishing error vector \(E(\rho ) = 0\). Then the reconstruction \(\alpha _\rho \) (<a href="chap-closure.html#def:reconstruct">definition 15</a>) is injective on the period \([0, 2\pi )\). </p>
 </div>
 
@@ -3195,7 +5063,7 @@ graphContainer.graphviz({useWorker: true})
     .width(width)
     .height(height)
     .fit(true)
-    .renderDot(`strict digraph "" {	graph [bgcolor=transparent];	node [label="\N",		penwidth=1.8	];	edge [arrowhead=vee];	"def:reverse_loop"	[label=reverse_loop,		shape=box];	"lem:error_map_winds_boundary"	[label=error_map_winds_boundary,		shape=ellipse];	"def:reverse_loop" -> "lem:error_map_winds_boundary"	[style=dashed];	"thm:existence_of_zero"	[color=green,		fillcolor="#9CEC8B",		label=existence_of_zero,		shape=ellipse,		style=filled];	"lem:error_map_winds_boundary" -> "thm:existence_of_zero"	[style=dashed];	"lem:reduction_justified"	[color=green,		fillcolor="#9CEC8B",		label=reduction_justified,		shape=ellipse,		style=filled];	"thm:existence_of_zero" -> "lem:reduction_justified"	[style=dashed];	"cor:closing_configuration_exists"	[color=green,		fillcolor="#9CEC8B",		label=closing_configuration_exists,		shape=ellipse,		style=filled];	"thm:existence_of_zero" -> "cor:closing_configuration_exists"	[style=dashed];	"lem:winding_number_c_perturb"	[color=green,		fillcolor="#1CAC78",		label=winding_number_c_perturb,		shape=ellipse,		style=filled];	"lem:exists_reparam_close"	[label=exists_reparam_close,		shape=ellipse];	"lem:exists_reparam_close" -> "lem:reduction_justified"	[style=dashed];	"thm:gluck_converse"	[color=green,		fillcolor="#9CEC8B",		label=gluck_converse,		shape=ellipse,		style=filled];	"lem:reduction_justified" -> "thm:gluck_converse";	"lem:bicircle_arc_integrable"	[color=green,		fillcolor="#1CAC78",		label=bicircle_arc_integrable,		shape=ellipse,		style=filled];	"lem:error_vector_of_bicircle"	[color=green,		fillcolor="#1CAC78",		label=error_vector_of_bicircle,		shape=ellipse,		style=filled];	"lem:bicircle_arc_integrable" -> "lem:error_vector_of_bicircle";	"lem:error_vector_of_bicircle" -> "lem:error_map_winds_boundary"	[style=dashed];	"cor:bicircle_closes_iff"	[color=green,		fillcolor="#1CAC78",		label=bicircle_closes_iff,		shape=ellipse,		style=filled];	"lem:error_vector_of_bicircle" -> "cor:bicircle_closes_iff"	[style=dashed];	"cor:bicircle_closes_iff" -> "cor:closing_configuration_exists"	[style=dashed];	"lem:angle_lift_lifts"	[color=green,		fillcolor="#1CAC78",		label=angle_lift_lifts,		shape=ellipse,		style=filled];	"lem:winding_number_eq_div_of_lift"	[color=green,		fillcolor="#1CAC78",		label=winding_number_eq_div_of_lift,		shape=ellipse,		style=filled];	"lem:angle_lift_lifts" -> "lem:winding_number_eq_div_of_lift"	[style=dashed];	"lem:winding_number_mul"	[color=green,		fillcolor="#1CAC78",		label=winding_number_mul,		shape=ellipse,		style=filled];	"lem:winding_number_eq_div_of_lift" -> "lem:winding_number_mul"	[style=dashed];	"lem:winding_number_eq_of_homotopy"	[color=green,		fillcolor="#1CAC78",		label=winding_number_eq_of_homotopy,		shape=ellipse,		style=filled];	"lem:winding_number_eq_div_of_lift" -> "lem:winding_number_eq_of_homotopy"	[style=dashed];	"lem:winding_number_standard"	[color=green,		fillcolor="#1CAC78",		label=winding_number_standard,		shape=ellipse,		style=filled];	"lem:winding_number_eq_div_of_lift" -> "lem:winding_number_standard"	[style=dashed];	"lem:winding_number_c_const_mul"	[color=green,		fillcolor="#9CEC8B",		label=winding_number_c_const_mul,		shape=ellipse,		style=filled];	"lem:winding_number_mul" -> "lem:winding_number_c_const_mul"	[style=dashed];	"lem:winding_number_eq_of_homotopy" -> "lem:error_map_winds_boundary";	"lem:winding_number_eq_of_homotopy" -> "lem:winding_number_c_perturb"	[style=dashed];	"lem:winding_number_standard" -> "def:reverse_loop"	[style=dashed];	"lem:winding_number_c_circle_exp"	[color=green,		fillcolor="#9CEC8B",		label=winding_number_c_circle_exp,		shape=ellipse,		style=filled];	"lem:winding_number_standard" -> "lem:winding_number_c_circle_exp"	[style=dashed];	"lem:step_curvature_ge"	[color=green,		fillcolor="#1CAC78",		label=step_curvature_ge,		shape=ellipse,		style=filled];	"lem:align_density_props"	[label=align_density_props,		shape=ellipse];	"lem:continuous_align_reparam"	[color=green,		fillcolor="#9CEC8B",		label=continuous_align_reparam,		shape=ellipse,		style=filled];	"lem:align_density_props" -> "lem:continuous_align_reparam"	[style=dashed];	"lem:continuous_uncurry_align_reparam"	[color=green,		fillcolor="#9CEC8B",		label=continuous_uncurry_align_reparam,		shape=ellipse,		style=filled];	"lem:align_density_props" -> "lem:continuous_uncurry_align_reparam"	[style=dashed];	"lem:strict_mono_align_reparam"	[color=green,		fillcolor="#9CEC8B",		label=strict_mono_align_reparam,		shape=ellipse,		style=filled];	"lem:align_density_props" -> "lem:strict_mono_align_reparam"	[style=dashed];	"lem:has_deriv_align_reparam"	[color=green,		fillcolor="#9CEC8B",		label=has_deriv_align_reparam,		shape=ellipse,		style=filled];	"lem:align_density_props" -> "lem:has_deriv_align_reparam"	[style=dashed];	"lem:align_reparam_matches"	[color=green,		fillcolor="#9CEC8B",		label=align_reparam_matches,		shape=ellipse,		style=filled];	"lem:strict_mono_align_reparam" -> "lem:align_reparam_matches"	[style=dashed];	"lem:align_reparam_change_of_var"	[color=green,		fillcolor="#9CEC8B",		label=align_reparam_change_of_var,		shape=ellipse,		style=filled];	"lem:strict_mono_align_reparam" -> "lem:align_reparam_change_of_var"	[style=dashed];	"lem:has_deriv_align_reparam" -> "lem:align_reparam_change_of_var"	[style=dashed];	"lem:kappa_error_map_close"	[color=green,		fillcolor="#9CEC8B",		label=kappa_error_map_close,		shape=ellipse,		style=filled];	"lem:align_reparam_matches" -> "lem:kappa_error_map_close"	[style=dashed];	"lem:align_reparam_change_of_var" -> "lem:kappa_error_map_close"	[style=dashed];	"def:error_map"	[color=blue,		fillcolor="#A3D6FF",		label=error_map,		shape=box,		style=filled];	"def:error_map" -> "lem:error_map_winds_boundary"	[style=dashed];	"def:error_map" -> "lem:kappa_error_map_close"	[style=dashed];	"lem:kappa_error_map_close" -> "lem:exists_reparam_close"	[style=dashed];	"def:winding_number_c"	[color=green,		fillcolor="#B0ECA3",		label=winding_number_c,		shape=box,		style=filled];	"def:winding_number_c" -> "lem:error_map_winds_boundary"	[style=dashed];	"def:winding_number_c" -> "lem:winding_number_c_perturb"	[style=dashed];	"def:winding_number_c" -> "lem:winding_number_c_const_mul"	[style=dashed];	"def:winding_number_c" -> "lem:winding_number_c_circle_exp"	[style=dashed];	"lem:closes_iff"	[color=green,		fillcolor="#1CAC78",		label=closes_iff,		shape=ellipse,		style=filled];	"lem:closes_iff" -> "lem:reduction_justified"	[style=dashed];	"lem:closes_iff" -> "cor:bicircle_closes_iff"	[style=dashed];	"thm:reconstruct_injective"	[color=green,		fillcolor="#1CAC78",		label=reconstruct_injective,		shape=ellipse,		style=filled];	"lem:closes_iff" -> "thm:reconstruct_injective"	[style=dashed];	"cor:positive_curvature_implies_simple"	[color=green,		fillcolor="#1CAC78",		label=positive_curvature_implies_simple,		shape=ellipse,		style=filled];	"thm:reconstruct_injective" -> "cor:positive_curvature_implies_simple"	[style=dashed];	"cor:closing_configuration_exists" -> "thm:gluck_converse";	"cor:positive_curvature_implies_simple" -> "thm:gluck_converse";	"lem:bicircle_arc_integral"	[color=green,		fillcolor="#1CAC78",		label=bicircle_arc_integral,		shape=ellipse,		style=filled];	"lem:bicircle_arc_integral" -> "lem:error_vector_of_bicircle";	"def:is_simple_closed"	[color=green,		fillcolor="#B0ECA3",		label=is_simple_closed,		shape=box,		style=filled];	"def:is_simple_closed" -> "cor:positive_curvature_implies_simple"	[style=dashed];	"lem:is_simple_closed_comp"	[color=blue,		fillcolor="#A3D6FF",		label=is_simple_closed_comp,		shape=ellipse,		style=filled];	"def:is_simple_closed" -> "lem:is_simple_closed_comp"	[style=dashed];	"lem:is_simple_closed_comp" -> "thm:gluck_converse";	"def:four_arc_step_function"	[color=green,		fillcolor="#B0ECA3",		label=four_arc_step_function,		shape=box,		style=filled];	"def:four_arc_step_function" -> "lem:bicircle_arc_integrable"	[style=dashed];	"def:four_arc_step_function" -> "lem:step_curvature_ge"	[style=dashed];	"lem:exists_preliminary_reparam"	[color=green,		fillcolor="#9CEC8B",		label=exists_preliminary_reparam,		shape=ellipse,		style=filled];	"def:four_arc_step_function" -> "lem:exists_preliminary_reparam"	[style=dashed];	"def:configuration_space"	[color=green,		fillcolor="#B0ECA3",		label=configuration_space,		shape=box,		style=filled];	"def:four_arc_step_function" -> "def:configuration_space"	[style=dashed];	"def:bicircle_error_vector"	[color=green,		fillcolor="#B0ECA3",		label=bicircle_error_vector,		shape=box,		style=filled];	"def:four_arc_step_function" -> "def:bicircle_error_vector"	[style=dashed];	"lem:bicircle_arc_integrand_eq"	[color=green,		fillcolor="#1CAC78",		label=bicircle_arc_integrand_eq,		shape=ellipse,		style=filled];	"def:four_arc_step_function" -> "lem:bicircle_arc_integrand_eq"	[style=dashed];	"lem:step_curvature_periodic"	[color=green,		fillcolor="#1CAC78",		label=step_curvature_periodic,		shape=ellipse,		style=filled];	"def:four_arc_step_function" -> "lem:step_curvature_periodic"	[style=dashed];	"lem:exists_preliminary_reparam" -> "lem:kappa_error_map_close"	[style=dashed];	"def:configuration_space" -> "def:error_map"	[style=dashed];	"def:align_density"	[color=blue,		fillcolor="#A3D6FF",		label=align_density,		shape=box,		style=filled];	"def:configuration_space" -> "def:align_density"	[style=dashed];	"lem:config_space_props"	[color=blue,		fillcolor="#A3D6FF",		label=config_space_props,		shape=ellipse,		style=filled];	"def:configuration_space" -> "lem:config_space_props"	[style=dashed];	"def:bicircle_error_vector" -> "lem:error_vector_of_bicircle"	[style=dashed];	"def:bicircle_error_vector" -> "def:error_map"	[style=dashed];	"lem:bicircle_arc_integrand_eq" -> "lem:bicircle_arc_integral"	[style=dashed];	"def:align_density" -> "lem:align_density_props"	[style=dashed];	"def:align_reparam"	[color=green,		fillcolor="#B0ECA3",		label=align_reparam,		shape=box,		style=filled];	"def:align_density" -> "def:align_reparam"	[style=dashed];	"lem:align_density_arc_integral"	[label=align_density_arc_integral,		shape=ellipse];	"def:align_density" -> "lem:align_density_arc_integral"	[style=dashed];	"def:align_reparam" -> "lem:continuous_align_reparam"	[style=dashed];	"def:align_reparam" -> "lem:continuous_uncurry_align_reparam"	[style=dashed];	"def:align_reparam" -> "lem:strict_mono_align_reparam"	[style=dashed];	"def:align_reparam" -> "lem:has_deriv_align_reparam"	[style=dashed];	"def:kappa_error_map"	[color=green,		fillcolor="#B0ECA3",		label=kappa_error_map,		shape=box,		style=filled];	"def:align_reparam" -> "def:kappa_error_map"	[style=dashed];	"lem:align_reparam_node_values"	[color=green,		fillcolor="#9CEC8B",		label=align_reparam_node_values,		shape=ellipse,		style=filled];	"def:align_reparam" -> "lem:align_reparam_node_values"	[style=dashed];	"lem:align_reparam_add_two_pi"	[color=green,		fillcolor="#9CEC8B",		label=align_reparam_add_two_pi,		shape=ellipse,		style=filled];	"def:align_reparam" -> "lem:align_reparam_add_two_pi"	[style=dashed];	"def:kappa_error_map" -> "lem:kappa_error_map_close"	[style=dashed];	"lem:kappa_error_map_continuous"	[color=green,		fillcolor="#1CAC78",		label=kappa_error_map_continuous,		shape=ellipse,		style=filled];	"def:kappa_error_map" -> "lem:kappa_error_map_continuous"	[style=dashed];	"lem:align_reparam_node_values" -> "lem:align_reparam_matches"	[style=dashed];	"lem:realizes_curvature_signedCurvature"	[color=green,		fillcolor="#1CAC78",		label=realizes_curvature_signedCurvature,		shape=ellipse,		style=filled];	"lem:realizes_curvature_signedCurvature" -> "thm:gluck_converse";	"lem:pos_curvature_convex"	[color=green,		fillcolor="#1CAC78",		label=pos_curvature_convex,		shape=ellipse,		style=filled];	"lem:abab_values"	[color=green,		fillcolor="#1CAC78",		label=abab_values,		shape=ellipse,		style=filled];	"lem:abab_values" -> "lem:exists_preliminary_reparam"	[style=dashed];	"lem:chord_integral_ne_zero"	[color=green,		fillcolor="#1CAC78",		label=chord_integral_ne_zero,		shape=ellipse,		style=filled];	"lem:chord_integral_ne_zero" -> "thm:reconstruct_injective";	"def:angle_lift"	[color=green,		fillcolor="#B0ECA3",		label=angle_lift,		shape=box,		style=filled];	"def:angle_lift" -> "lem:angle_lift_lifts"	[style=dashed];	"def:winding_number"	[color=green,		fillcolor="#B0ECA3",		label=winding_number,		shape=box,		style=filled];	"def:angle_lift" -> "def:winding_number"	[style=dashed];	"def:winding_number" -> "lem:winding_number_eq_div_of_lift"	[style=dashed];	"def:winding_number" -> "def:winding_number_c"	[style=dashed];	"lem:winding_number_const"	[color=green,		fillcolor="#1CAC78",		label=winding_number_const,		shape=ellipse,		style=filled];	"def:winding_number" -> "lem:winding_number_const"	[style=dashed];	"lem:winding_number_const" -> "lem:winding_number_c_const_mul"	[style=dashed];	"def:is_curvature_function"	[color=green,		fillcolor="#B0ECA3",		label=is_curvature_function,		shape=box,		style=filled];	"def:is_curvature_function" -> "def:four_arc_step_function"	[style=dashed];	"def:four_vertex_condition"	[color=green,		fillcolor="#B0ECA3",		label=four_vertex_condition,		shape=box,		style=filled];	"def:is_curvature_function" -> "def:four_vertex_condition"	[style=dashed];	"def:radius"	[color=green,		fillcolor="#B0ECA3",		label=radius,		shape=box,		style=filled];	"def:is_curvature_function" -> "def:radius"	[style=dashed];	"def:realizes_curvature"	[color=green,		fillcolor="#B0ECA3",		label=realizes_curvature,		shape=box,		style=filled];	"def:is_curvature_function" -> "def:realizes_curvature"	[style=dashed];	"lem:kappa_modulus_at"	[color=green,		fillcolor="#1CAC78",		label=kappa_modulus_at,		shape=ellipse,		style=filled];	"def:is_curvature_function" -> "lem:kappa_modulus_at"	[style=dashed];	"def:four_vertex_condition" -> "lem:abab_values"	[style=dashed];	"lem:radius_props"	[color=green,		fillcolor="#1CAC78",		label=radius_props,		shape=ellipse,		style=filled];	"def:radius" -> "lem:radius_props"	[style=dashed];	"def:reconstruct"	[color=green,		fillcolor="#B0ECA3",		label=reconstruct,		shape=box,		style=filled];	"def:radius" -> "def:reconstruct"	[style=dashed];	"def:realizes_curvature" -> "lem:realizes_curvature_signedCurvature"	[style=dashed];	"lem:realizes_curvature_comp"	[color=green,		fillcolor="#1CAC78",		label=realizes_curvature_comp,		shape=ellipse,		style=filled];	"def:realizes_curvature" -> "lem:realizes_curvature_comp"	[style=dashed];	"lem:realizes_curvature_reconstruct"	[color=green,		fillcolor="#1CAC78",		label=realizes_curvature_reconstruct,		shape=ellipse,		style=filled];	"def:realizes_curvature" -> "lem:realizes_curvature_reconstruct"	[style=dashed];	"lem:plateau_density"	[color=blue,		fillcolor="#A3D6FF",		label=plateau_density,		shape=ellipse,		style=filled];	"lem:kappa_modulus_at" -> "lem:plateau_density";	"lem:radius_props" -> "lem:closes_iff"	[style=dashed];	"def:reconstruct" -> "lem:realizes_curvature_reconstruct"	[style=dashed];	"lem:reconstruct_const"	[color=green,		fillcolor="#1CAC78",		label=reconstruct_const,		shape=ellipse,		style=filled];	"def:reconstruct" -> "lem:reconstruct_const"	[style=dashed];	"lem:reconstruct_deriv"	[color=green,		fillcolor="#1CAC78",		label=reconstruct_deriv,		shape=ellipse,		style=filled];	"def:reconstruct" -> "lem:reconstruct_deriv"	[style=dashed];	"def:error_vector"	[color=green,		fillcolor="#B0ECA3",		label=error_vector,		shape=box,		style=filled];	"def:reconstruct" -> "def:error_vector"	[style=dashed];	"lem:realizes_curvature_comp" -> "thm:gluck_converse";	"lem:realizes_curvature_reconstruct" -> "thm:gluck_converse";	"lem:plateau_density" -> "lem:exists_preliminary_reparam"	[style=dashed];	"lem:signed_curvature_reconstruct"	[color=green,		fillcolor="#1CAC78",		label=signed_curvature_reconstruct,		shape=ellipse,		style=filled];	"lem:exists_c1_circle_inverse"	[color=green,		fillcolor="#1CAC78",		label=exists_c1_circle_inverse,		shape=ellipse,		style=filled];	"lem:exists_c1_circle_inverse" -> "thm:gluck_converse";	"def:closure_integral_sin"	[color=green,		fillcolor="#B0ECA3",		label=closure_integral_sin,		shape=box,		style=filled];	"lem:error_vector_eq"	[color=green,		fillcolor="#1CAC78",		label=error_vector_eq,		shape=ellipse,		style=filled];	"def:closure_integral_sin" -> "lem:error_vector_eq"	[style=dashed];	"lem:error_vector_eq" -> "lem:closes_iff"	[style=dashed];	"lem:circle_proj_helpers"	[color=blue,		fillcolor="#A3D6FF",		label=circle_proj_helpers,		shape=ellipse,		style=filled];	"lem:circle_proj_helpers" -> "lem:winding_number_c_const_mul"	[style=dashed];	"lem:circle_proj_helpers" -> "lem:winding_number_c_circle_exp"	[style=dashed];	"lem:reconstruct_const" -> "thm:gluck_converse";	"def:norm_loop"	[color=green,		fillcolor="#B0ECA3",		label=norm_loop,		shape=box,		style=filled];	"def:norm_loop" -> "def:winding_number_c"	[style=dashed];	"lem:align_density_arc_integral" -> "lem:align_reparam_node_values"	[style=dashed];	"lem:align_density_arc_integral" -> "lem:align_reparam_add_two_pi"	[style=dashed];	"lem:kappa_error_map_continuous" -> "lem:reduction_justified"	[style=dashed];	"lem:reconstruct_periodic"	[color=green,		fillcolor="#1CAC78",		label=reconstruct_periodic,		shape=ellipse,		style=filled];	"lem:reconstruct_periodic" -> "thm:reconstruct_injective";	"lem:reconstruct_deriv" -> "lem:signed_curvature_reconstruct"	[style=dashed];	"def:circle_proj"	[color=green,		fillcolor="#B0ECA3",		label=circle_proj,		shape=box,		style=filled];	"def:circle_proj" -> "def:norm_loop"	[style=dashed];	"lem:circle_proj_eq"	[color=green,		fillcolor="#1CAC78",		label=circle_proj_eq,		shape=ellipse,		style=filled];	"def:circle_proj" -> "lem:circle_proj_eq"	[style=dashed];	"lem:circle_proj_eq" -> "lem:circle_proj_helpers"	[style=dashed];	"def:is_convex_curve"	[color=green,		fillcolor="#B0ECA3",		label=is_convex_curve,		shape=box,		style=filled];	"def:is_convex_curve" -> "lem:pos_curvature_convex"	[style=dashed];	"def:signed_curvature"	[color=green,		fillcolor="#B0ECA3",		label=signed_curvature,		shape=box,		style=filled];	"def:signed_curvature" -> "lem:realizes_curvature_signedCurvature"	[style=dashed];	"def:signed_curvature" -> "lem:signed_curvature_reconstruct"	[style=dashed];	"def:signed_curvature" -> "def:is_convex_curve"	[style=dashed];	"def:error_vector" -> "def:bicircle_error_vector"	[style=dashed];	"def:error_vector" -> "def:kappa_error_map"	[style=dashed];	"def:error_vector" -> "lem:chord_integral_ne_zero"	[style=dashed];	"def:error_vector" -> "lem:error_vector_eq"	[style=dashed];	"def:error_vector" -> "lem:reconstruct_periodic"	[style=dashed];	"lem:error_vector_lipschitz"	[color=green,		fillcolor="#1CAC78",		label=error_vector_lipschitz,		shape=ellipse,		style=filled];	"def:error_vector" -> "lem:error_vector_lipschitz"	[style=dashed];	"def:circle_exp_loop"	[color=blue,		fillcolor="#A3D6FF",		label=circle_exp_loop,		shape=box,		style=filled];	"def:circle_exp_loop" -> "def:reverse_loop"	[style=dashed];	"def:circle_exp_loop" -> "lem:winding_number_c_circle_exp"	[style=dashed];	"lem:integral_cexp_I"	[color=green,		fillcolor="#1CAC78",		label=integral_cexp_I,		shape=ellipse,		style=filled];	"lem:integral_cexp_I" -> "lem:bicircle_arc_integral"	[style=dashed];	"def:closure_integral_cos"	[color=green,		fillcolor="#B0ECA3",		label=closure_integral_cos,		shape=box,		style=filled];	"def:closure_integral_cos" -> "lem:error_vector_eq"	[style=dashed];	"def:standard_loop"	[color=green,		fillcolor="#B0ECA3",		label=standard_loop,		shape=box,		style=filled];	"def:standard_loop" -> "lem:winding_number_standard"	[style=dashed];	"def:standard_loop" -> "def:circle_exp_loop"	[style=dashed];	"lem:error_vector_lipschitz" -> "lem:kappa_error_map_close"	[style=dashed];	"lem:disk_boundary_loop_ne_zero"	[color=green,		fillcolor="#1CAC78",		label=disk_boundary_loop_ne_zero,		shape=ellipse,		style=filled];	"def:is_regular"	[color=green,		fillcolor="#B0ECA3",		label=is_regular,		shape=box,		style=filled];	"def:is_regular" -> "def:signed_curvature"	[style=dashed];	"lem:ivt_hits"	[color=green,		fillcolor="#1CAC78",		label=ivt_hits,		shape=ellipse,		style=filled];	"lem:ivt_hits" -> "lem:abab_values"	[style=dashed];	"def:is_closed_curve"	[color=green,		fillcolor="#B0ECA3",		label=is_closed_curve,		shape=box,		style=filled];	"def:is_closed_curve" -> "lem:closes_iff"	[style=dashed];	"def:is_closed_curve" -> "def:is_simple_closed"	[style=dashed];	"def:disk_boundary_loop"	[color=green,		fillcolor="#B0ECA3",		label=disk_boundary_loop,		shape=box,		style=filled];	"def:disk_boundary_loop" -> "lem:disk_boundary_loop_ne_zero"	[style=dashed];	"lem:int_valued_eq"	[color=green,		fillcolor="#1CAC78",		label=int_valued_eq,		shape=ellipse,		style=filled];	"lem:int_valued_eq" -> "lem:winding_number_eq_div_of_lift"	[style=dashed];}`)
+    .renderDot(`strict digraph "" {	graph [bgcolor=transparent];	node [label="\N",		penwidth=1.8	];	edge [arrowhead=vee];	"lem:winding_number_c_pos_scalar_field"	[color=green,		fillcolor="#1CAC78",		label=winding_number_c_pos_scalar_field,		shape=ellipse,		style=filled];	"lem:clean_error_winds"	[color=green,		fillcolor="#9CEC8B",		label=clean_error_winds,		shape=ellipse,		style=filled];	"lem:winding_number_c_pos_scalar_field" -> "lem:clean_error_winds"	[style=dashed];	"thm:exists_closing_param"	[color=green,		fillcolor="#9CEC8B",		label=exists_closing_param,		shape=ellipse,		style=filled];	"lem:clean_error_winds" -> "thm:exists_closing_param"	[style=dashed];	"lem:simplicity_transport"	[color=green,		fillcolor="#9CEC8B",		label=simplicity_transport,		shape=ellipse,		style=filled];	"thm:exists_closing_param" -> "lem:simplicity_transport"	[style=dashed];	"lem:winding_number_c_circle_exp"	[color=green,		fillcolor="#9CEC8B",		label=winding_number_c_circle_exp,		shape=ellipse,		style=filled];	"lem:exists_c1_circle_inverse"	[color=green,		fillcolor="#1CAC78",		label=exists_c1_circle_inverse,		shape=ellipse,		style=filled];	"thm:gluck_converse"	[color=green,		fillcolor="#9CEC8B",		label=gluck_converse,		shape=ellipse,		style=filled];	"lem:exists_c1_circle_inverse" -> "thm:gluck_converse"	[style=dashed];	"lem:bicircle_arc_integrable"	[color=green,		fillcolor="#1CAC78",		label=bicircle_arc_integrable,		shape=ellipse,		style=filled];	"lem:error_vector_of_bicircle"	[color=green,		fillcolor="#1CAC78",		label=error_vector_of_bicircle,		shape=ellipse,		style=filled];	"lem:bicircle_arc_integrable" -> "lem:error_vector_of_bicircle";	"lem:arclength_error_clean_eq_errorMap"	[color=green,		fillcolor="#9CEC8B",		label=arclength_error_clean_eq_errorMap,		shape=ellipse,		style=filled];	"lem:error_vector_of_bicircle" -> "lem:arclength_error_clean_eq_errorMap"	[style=dashed];	"lem:error_map_winds_boundary"	[label=error_map_winds_boundary,		shape=ellipse];	"lem:error_vector_of_bicircle" -> "lem:error_map_winds_boundary"	[style=dashed];	"cor:bicircle_closes_iff"	[color=green,		fillcolor="#1CAC78",		label=bicircle_closes_iff,		shape=ellipse,		style=filled];	"lem:error_vector_of_bicircle" -> "cor:bicircle_closes_iff"	[style=dashed];	"lem:arclength_error_clean_eq_errorMap" -> "lem:clean_error_winds"	[style=dashed];	"lem:error_map_winds_boundary" -> "lem:clean_error_winds"	[style=dashed];	"thm:existence_of_zero"	[color=green,		fillcolor="#9CEC8B",		label=existence_of_zero,		shape=ellipse,		style=filled];	"lem:error_map_winds_boundary" -> "thm:existence_of_zero"	[style=dashed];	"cor:closing_configuration_exists"	[color=green,		fillcolor="#9CEC8B",		label=closing_configuration_exists,		shape=ellipse,		style=filled];	"cor:bicircle_closes_iff" -> "cor:closing_configuration_exists"	[style=dashed];	"lem:angle_lift_lifts"	[color=green,		fillcolor="#1CAC78",		label=angle_lift_lifts,		shape=ellipse,		style=filled];	"lem:winding_number_eq_div_of_lift"	[color=green,		fillcolor="#1CAC78",		label=winding_number_eq_div_of_lift,		shape=ellipse,		style=filled];	"lem:angle_lift_lifts" -> "lem:winding_number_eq_div_of_lift"	[style=dashed];	"lem:winding_number_mul"	[color=green,		fillcolor="#1CAC78",		label=winding_number_mul,		shape=ellipse,		style=filled];	"lem:winding_number_eq_div_of_lift" -> "lem:winding_number_mul"	[style=dashed];	"lem:winding_number_eq_of_homotopy"	[color=green,		fillcolor="#1CAC78",		label=winding_number_eq_of_homotopy,		shape=ellipse,		style=filled];	"lem:winding_number_eq_div_of_lift" -> "lem:winding_number_eq_of_homotopy"	[style=dashed];	"lem:winding_number_standard"	[color=green,		fillcolor="#1CAC78",		label=winding_number_standard,		shape=ellipse,		style=filled];	"lem:winding_number_eq_div_of_lift" -> "lem:winding_number_standard"	[style=dashed];	"lem:winding_number_c_const_mul"	[color=green,		fillcolor="#9CEC8B",		label=winding_number_c_const_mul,		shape=ellipse,		style=filled];	"lem:winding_number_mul" -> "lem:winding_number_c_const_mul"	[style=dashed];	"lem:winding_number_eq_of_homotopy" -> "lem:winding_number_c_pos_scalar_field"	[style=dashed];	"lem:winding_number_eq_of_homotopy" -> "lem:error_map_winds_boundary";	"lem:winding_number_c_perturb"	[color=green,		fillcolor="#1CAC78",		label=winding_number_c_perturb,		shape=ellipse,		style=filled];	"lem:winding_number_eq_of_homotopy" -> "lem:winding_number_c_perturb"	[style=dashed];	"lem:winding_number_standard" -> "lem:winding_number_c_circle_exp"	[style=dashed];	"def:reverse_loop"	[label=reverse_loop,		shape=box];	"lem:winding_number_standard" -> "def:reverse_loop"	[style=dashed];	"lem:exists_kappa_bound"	[color=green,		fillcolor="#1CAC78",		label=exists_kappa_bound,		shape=ellipse,		style=filled];	"lem:exists_eta_clean_L1"	[color=green,		fillcolor="#9CEC8B",		label=exists_eta_clean_L1,		shape=ellipse,		style=filled];	"lem:exists_kappa_bound" -> "lem:exists_eta_clean_L1"	[style=dashed];	"thm:exists_preliminary_diffeo"	[color=green,		fillcolor="#9CEC8B",		label=exists_preliminary_diffeo,		shape=ellipse,		style=filled];	"lem:exists_eta_clean_L1" -> "thm:exists_preliminary_diffeo";	"def:preliminary_diffeo_data"	[color=green,		fillcolor="#B0ECA3",		label=preliminary_diffeo_data,		shape=box,		style=filled];	"thm:exists_preliminary_diffeo" -> "def:preliminary_diffeo_data"	[style=dashed];	"def:non_normalised_curvature"	[color=green,		fillcolor="#B0ECA3",		label=non_normalised_curvature,		shape=box,		style=filled];	"thm:realizes_of_non_normalised"	[color=green,		fillcolor="#9CEC8B",		label=realizes_of_non_normalised,		shape=ellipse,		style=filled];	"def:non_normalised_curvature" -> "thm:realizes_of_non_normalised"	[style=dashed];	"thm:dahlberg_converse"	[color=green,		fillcolor="#9CEC8B",		label=dahlberg_converse,		shape=ellipse,		style=filled];	"thm:realizes_of_non_normalised" -> "thm:dahlberg_converse"	[style=dashed];	"lem:step_curvature_ge"	[color=green,		fillcolor="#1CAC78",		label=step_curvature_ge,		shape=ellipse,		style=filled];	"lem:align_density_props"	[label=align_density_props,		shape=ellipse];	"lem:continuous_uncurry_align_reparam"	[color=green,		fillcolor="#9CEC8B",		label=continuous_uncurry_align_reparam,		shape=ellipse,		style=filled];	"lem:align_density_props" -> "lem:continuous_uncurry_align_reparam"	[style=dashed];	"lem:strict_mono_align_reparam"	[color=green,		fillcolor="#9CEC8B",		label=strict_mono_align_reparam,		shape=ellipse,		style=filled];	"lem:align_density_props" -> "lem:strict_mono_align_reparam"	[style=dashed];	"lem:continuous_align_reparam"	[color=green,		fillcolor="#9CEC8B",		label=continuous_align_reparam,		shape=ellipse,		style=filled];	"lem:align_density_props" -> "lem:continuous_align_reparam"	[style=dashed];	"lem:has_deriv_align_reparam"	[color=green,		fillcolor="#9CEC8B",		label=has_deriv_align_reparam,		shape=ellipse,		style=filled];	"lem:align_density_props" -> "lem:has_deriv_align_reparam"	[style=dashed];	"lem:align_reparam_matches"	[color=green,		fillcolor="#9CEC8B",		label=align_reparam_matches,		shape=ellipse,		style=filled];	"lem:strict_mono_align_reparam" -> "lem:align_reparam_matches"	[style=dashed];	"lem:align_reparam_change_of_var"	[color=green,		fillcolor="#9CEC8B",		label=align_reparam_change_of_var,		shape=ellipse,		style=filled];	"lem:strict_mono_align_reparam" -> "lem:align_reparam_change_of_var"	[style=dashed];	"lem:has_deriv_align_reparam" -> "lem:align_reparam_change_of_var"	[style=dashed];	"lem:kappa_error_map_close"	[color=green,		fillcolor="#9CEC8B",		label=kappa_error_map_close,		shape=ellipse,		style=filled];	"lem:align_reparam_matches" -> "lem:kappa_error_map_close"	[style=dashed];	"lem:align_reparam_change_of_var" -> "lem:kappa_error_map_close"	[style=dashed];	"lem:reduction_justified"	[color=green,		fillcolor="#9CEC8B",		label=reduction_justified,		shape=ellipse,		style=filled];	"lem:reduction_justified" -> "thm:gluck_converse";	"lem:exists_reparam_close"	[label=exists_reparam_close,		shape=ellipse];	"lem:exists_reparam_close" -> "lem:reduction_justified"	[style=dashed];	"lem:closing_len_bounds"	[label=closing_len_bounds,		shape=ellipse];	"lem:closing_family_nodes"	[label=closing_family_nodes,		shape=ellipse];	"lem:closing_len_bounds" -> "lem:closing_family_nodes"	[style=dashed];	"lem:clean_prefactor"	[label=clean_prefactor,		shape=ellipse];	"lem:closing_family_nodes" -> "lem:clean_prefactor"	[style=dashed];	"lem:total_curvature_ne_zero"	[label=total_curvature_ne_zero,		shape=ellipse];	"lem:clean_prefactor" -> "lem:total_curvature_ne_zero";	"lem:clean_arclength_nodes"	[color=green,		fillcolor="#9CEC8B",		label=clean_arclength_nodes,		shape=ellipse,		style=filled];	"lem:clean_prefactor" -> "lem:clean_arclength_nodes"	[style=dashed];	"lem:arclength_error_continuous"	[color=green,		fillcolor="#9CEC8B",		label=arclength_error_continuous,		shape=ellipse,		style=filled];	"lem:total_curvature_ne_zero" -> "lem:arclength_error_continuous";	"lem:angle_dist_le"	[label=angle_dist_le,		shape=ellipse];	"lem:total_curvature_ne_zero" -> "lem:angle_dist_le"	[style=dashed];	"lem:clean_arclength_nodes" -> "lem:arclength_error_clean_eq_errorMap"	[style=dashed];	"def:error_map"	[color=blue,		fillcolor="#A3D6FF",		label=error_map,		shape=box,		style=filled];	"def:error_map" -> "lem:error_map_winds_boundary"	[style=dashed];	"def:error_map" -> "lem:kappa_error_map_close"	[style=dashed];	"lem:clean_bicircle_eq_step"	[color=green,		fillcolor="#1CAC78",		label=clean_bicircle_eq_step,		shape=ellipse,		style=filled];	"def:error_map" -> "lem:clean_bicircle_eq_step";	"lem:kappa_error_map_close" -> "lem:exists_reparam_close"	[style=dashed];	"lem:clean_bicircle_eq_step" -> "lem:closing_family_nodes"	[style=dashed];	"thm:existence_of_zero" -> "thm:exists_closing_param"	[style=dashed];	"thm:existence_of_zero" -> "lem:reduction_justified"	[style=dashed];	"thm:existence_of_zero" -> "cor:closing_configuration_exists"	[style=dashed];	"def:kappa_error_map"	[color=green,		fillcolor="#B0ECA3",		label=kappa_error_map,		shape=box,		style=filled];	"def:kappa_error_map" -> "lem:kappa_error_map_close"	[style=dashed];	"lem:kappa_error_map_continuous"	[color=green,		fillcolor="#1CAC78",		label=kappa_error_map_continuous,		shape=ellipse,		style=filled];	"def:kappa_error_map" -> "lem:kappa_error_map_continuous"	[style=dashed];	"lem:kappa_error_map_continuous" -> "lem:reduction_justified"	[style=dashed];	"lem:arclength_error_continuous" -> "thm:exists_closing_param"	[style=dashed];	"lem:simplicity_transport" -> "thm:dahlberg_converse"	[style=dashed];	"lem:bicircle_arc_integral"	[color=green,		fillcolor="#1CAC78",		label=bicircle_arc_integral,		shape=ellipse,		style=filled];	"lem:bicircle_arc_integral" -> "lem:error_vector_of_bicircle";	"def:winding_number_c"	[color=green,		fillcolor="#B0ECA3",		label=winding_number_c,		shape=box,		style=filled];	"def:winding_number_c" -> "lem:winding_number_c_pos_scalar_field"	[style=dashed];	"def:winding_number_c" -> "lem:winding_number_c_circle_exp"	[style=dashed];	"def:winding_number_c" -> "lem:error_map_winds_boundary"	[style=dashed];	"def:winding_number_c" -> "lem:winding_number_c_const_mul"	[style=dashed];	"def:winding_number_c" -> "lem:winding_number_c_perturb"	[style=dashed];	"lem:winding_number_c_perturb" -> "thm:exists_closing_param"	[style=dashed];	"lem:closes_iff"	[color=green,		fillcolor="#1CAC78",		label=closes_iff,		shape=ellipse,		style=filled];	"lem:closes_iff" -> "cor:bicircle_closes_iff"	[style=dashed];	"lem:closes_iff" -> "lem:reduction_justified"	[style=dashed];	"thm:reconstruct_injective"	[color=green,		fillcolor="#1CAC78",		label=reconstruct_injective,		shape=ellipse,		style=filled];	"lem:closes_iff" -> "thm:reconstruct_injective"	[style=dashed];	"cor:positive_curvature_implies_simple"	[color=green,		fillcolor="#1CAC78",		label=positive_curvature_implies_simple,		shape=ellipse,		style=filled];	"thm:reconstruct_injective" -> "cor:positive_curvature_implies_simple"	[style=dashed];	"cor:closing_configuration_exists" -> "thm:gluck_converse";	"cor:positive_curvature_implies_simple" -> "thm:gluck_converse";	"lem:hasderivat_dahlberg_angle"	[color=green,		fillcolor="#1CAC78",		label=hasderivat_dahlberg_angle,		shape=ellipse,		style=filled];	"lem:continuous_dahlberg_angle"	[color=green,		fillcolor="#1CAC78",		label=continuous_dahlberg_angle,		shape=ellipse,		style=filled];	"lem:hasderivat_dahlberg_angle" -> "lem:continuous_dahlberg_angle"	[style=dashed];	"lem:continuous_eiangle"	[color=green,		fillcolor="#1CAC78",		label=continuous_eiangle,		shape=ellipse,		style=filled];	"lem:continuous_dahlberg_angle" -> "lem:continuous_eiangle"	[style=dashed];	"lem:hasderivat_dahlberg_curve"	[color=green,		fillcolor="#1CAC78",		label=hasderivat_dahlberg_curve,		shape=ellipse,		style=filled];	"lem:continuous_eiangle" -> "lem:hasderivat_dahlberg_curve"	[style=dashed];	"lem:realizes_curvature_dahlberg"	[color=green,		fillcolor="#1CAC78",		label=realizes_curvature_dahlberg,		shape=ellipse,		style=filled];	"thm:arclength_converse"	[color=green,		fillcolor="#1CAC78",		label=arclength_converse,		shape=ellipse,		style=filled];	"lem:realizes_curvature_dahlberg" -> "thm:arclength_converse"	[style=dashed];	"thm:arclength_converse" -> "thm:realizes_of_non_normalised"	[style=dashed];	"lem:dahlberg_c1_circle_inverse"	[color=green,		fillcolor="#1CAC78",		label=dahlberg_c1_circle_inverse,		shape=ellipse,		style=filled];	"lem:dahlberg_c1_circle_inverse" -> "thm:dahlberg_converse"	[style=dashed];	"def:is_simple_closed"	[color=green,		fillcolor="#B0ECA3",		label=is_simple_closed,		shape=box,		style=filled];	"def:is_simple_closed" -> "cor:positive_curvature_implies_simple"	[style=dashed];	"lem:issimpleclosed_dahlberg_curve"	[color=green,		fillcolor="#1CAC78",		label=issimpleclosed_dahlberg_curve,		shape=ellipse,		style=filled];	"def:is_simple_closed" -> "lem:issimpleclosed_dahlberg_curve"	[style=dashed];	"lem:is_simple_closed_comp"	[color=blue,		fillcolor="#A3D6FF",		label=is_simple_closed_comp,		shape=ellipse,		style=filled];	"def:is_simple_closed" -> "lem:is_simple_closed_comp"	[style=dashed];	"lem:issimpleclosed_smul"	[color=green,		fillcolor="#1CAC78",		label=issimpleclosed_smul,		shape=ellipse,		style=filled];	"def:is_simple_closed" -> "lem:issimpleclosed_smul"	[style=dashed];	"lem:issimpleclosed_dahlberg_curve" -> "thm:arclength_converse"	[style=dashed];	"lem:is_simple_closed_comp" -> "thm:gluck_converse"	[style=dashed];	"lem:is_simple_closed_comp" -> "thm:realizes_of_non_normalised"	[style=dashed];	"lem:issimpleclosed_smul" -> "thm:realizes_of_non_normalised"	[style=dashed];	"def:four_arc_step_function"	[color=green,		fillcolor="#B0ECA3",		label=four_arc_step_function,		shape=box,		style=filled];	"def:four_arc_step_function" -> "lem:bicircle_arc_integrable"	[style=dashed];	"def:four_arc_step_function" -> "lem:step_curvature_ge"	[style=dashed];	"lem:exists_preliminary_reparam"	[color=green,		fillcolor="#9CEC8B",		label=exists_preliminary_reparam,		shape=ellipse,		style=filled];	"def:four_arc_step_function" -> "lem:exists_preliminary_reparam"	[style=dashed];	"def:bicircle_error_vector"	[color=green,		fillcolor="#B0ECA3",		label=bicircle_error_vector,		shape=box,		style=filled];	"def:four_arc_step_function" -> "def:bicircle_error_vector"	[style=dashed];	"lem:bicircle_arc_integrand_eq"	[color=green,		fillcolor="#1CAC78",		label=bicircle_arc_integrand_eq,		shape=ellipse,		style=filled];	"def:four_arc_step_function" -> "lem:bicircle_arc_integrand_eq"	[style=dashed];	"def:configuration_space"	[color=green,		fillcolor="#B0ECA3",		label=configuration_space,		shape=box,		style=filled];	"def:four_arc_step_function" -> "def:configuration_space"	[style=dashed];	"lem:step_curvature_periodic"	[color=green,		fillcolor="#1CAC78",		label=step_curvature_periodic,		shape=ellipse,		style=filled];	"def:four_arc_step_function" -> "lem:step_curvature_periodic"	[style=dashed];	"lem:exists_preliminary_reparam" -> "lem:kappa_error_map_close"	[style=dashed];	"def:bicircle_error_vector" -> "lem:error_vector_of_bicircle"	[style=dashed];	"def:bicircle_error_vector" -> "def:error_map"	[style=dashed];	"lem:bicircle_arc_integrand_eq" -> "lem:bicircle_arc_integral"	[style=dashed];	"def:configuration_space" -> "def:error_map"	[style=dashed];	"def:align_density"	[color=blue,		fillcolor="#A3D6FF",		label=align_density,		shape=box,		style=filled];	"def:configuration_space" -> "def:align_density"	[style=dashed];	"lem:config_space_props"	[color=blue,		fillcolor="#A3D6FF",		label=config_space_props,		shape=ellipse,		style=filled];	"def:configuration_space" -> "lem:config_space_props"	[style=dashed];	"lem:step_curvature_periodic" -> "thm:exists_preliminary_diffeo";	"def:align_reparam"	[color=green,		fillcolor="#B0ECA3",		label=align_reparam,		shape=box,		style=filled];	"def:align_reparam" -> "lem:continuous_uncurry_align_reparam"	[style=dashed];	"def:align_reparam" -> "lem:strict_mono_align_reparam"	[style=dashed];	"def:align_reparam" -> "lem:continuous_align_reparam"	[style=dashed];	"def:align_reparam" -> "lem:has_deriv_align_reparam"	[style=dashed];	"def:align_reparam" -> "def:kappa_error_map"	[style=dashed];	"def:closing_family"	[color=blue,		fillcolor="#A3D6FF",		label=closing_family,		shape=box,		style=filled];	"def:align_reparam" -> "def:closing_family"	[style=dashed];	"lem:align_reparam_add_two_pi"	[color=green,		fillcolor="#9CEC8B",		label=align_reparam_add_two_pi,		shape=ellipse,		style=filled];	"def:align_reparam" -> "lem:align_reparam_add_two_pi"	[style=dashed];	"lem:align_reparam_node_values"	[color=green,		fillcolor="#9CEC8B",		label=align_reparam_node_values,		shape=ellipse,		style=filled];	"def:align_reparam" -> "lem:align_reparam_node_values"	[style=dashed];	"def:arclength_norm"	[label=arclength_norm,		shape=box];	"def:closing_family" -> "def:arclength_norm"	[style=dashed];	"lem:closing_lambda_pos"	[label=closing_lambda_pos,		shape=ellipse];	"def:closing_family" -> "lem:closing_lambda_pos"	[style=dashed];	"lem:align_reparam_node_values" -> "lem:align_reparam_matches"	[style=dashed];	"def:align_density" -> "lem:align_density_props"	[style=dashed];	"def:align_density" -> "def:align_reparam"	[style=dashed];	"lem:align_density_arc_integral"	[label=align_density_arc_integral,		shape=ellipse];	"def:align_density" -> "lem:align_density_arc_integral"	[style=dashed];	"lem:realizes_curvature_signedCurvature"	[color=green,		fillcolor="#1CAC78",		label=realizes_curvature_signedCurvature,		shape=ellipse,		style=filled];	"lem:realizes_curvature_signedCurvature" -> "thm:gluck_converse";	"lem:pos_curvature_convex"	[color=green,		fillcolor="#1CAC78",		label=pos_curvature_convex,		shape=ellipse,		style=filled];	"lem:abab_values"	[color=green,		fillcolor="#1CAC78",		label=abab_values,		shape=ellipse,		style=filled];	"lem:abab_values" -> "lem:exists_preliminary_reparam"	[style=dashed];	"lem:reconstruct_periodic"	[color=green,		fillcolor="#1CAC78",		label=reconstruct_periodic,		shape=ellipse,		style=filled];	"lem:reconstruct_periodic" -> "thm:reconstruct_injective";	"lem:clean_bicircle_basic"	[color=blue,		fillcolor="#A3D6FF",		label=clean_bicircle_basic,		shape=ellipse,		style=filled];	"lem:clean_bicircle_basic" -> "thm:exists_preliminary_diffeo";	"def:preliminary_diffeo_data" -> "lem:total_curvature_ne_zero"	[style=dashed];	"def:angle_lift"	[color=green,		fillcolor="#B0ECA3",		label=angle_lift,		shape=box,		style=filled];	"def:angle_lift" -> "lem:angle_lift_lifts"	[style=dashed];	"def:winding_number"	[color=green,		fillcolor="#B0ECA3",		label=winding_number,		shape=box,		style=filled];	"def:angle_lift" -> "def:winding_number"	[style=dashed];	"def:winding_number" -> "lem:winding_number_eq_div_of_lift"	[style=dashed];	"def:winding_number" -> "def:winding_number_c"	[style=dashed];	"lem:winding_number_const"	[color=green,		fillcolor="#1CAC78",		label=winding_number_const,		shape=ellipse,		style=filled];	"def:winding_number" -> "lem:winding_number_const"	[style=dashed];	"lem:winding_number_const" -> "lem:winding_number_c_const_mul"	[style=dashed];	"def:reverse_loop" -> "lem:error_map_winds_boundary"	[style=dashed];	"def:clean_bicircle"	[color=green,		fillcolor="#B0ECA3",		label=clean_bicircle,		shape=box,		style=filled];	"def:clean_bicircle" -> "lem:clean_bicircle_eq_step"	[style=dashed];	"def:clean_bicircle" -> "def:closing_family"	[style=dashed];	"def:clean_bicircle" -> "lem:clean_bicircle_basic"	[style=dashed];	"lem:clean_bicircle_integral"	[color=blue,		fillcolor="#A3D6FF",		label=clean_bicircle_integral,		shape=ellipse,		style=filled];	"def:clean_bicircle" -> "lem:clean_bicircle_integral"	[style=dashed];	"lem:clean_bicircle_integral" -> "lem:exists_eta_clean_L1"	[style=dashed];	"def:arclength_norm" -> "lem:clean_arclength_nodes"	[style=dashed];	"def:arclength_error_map"	[color=green,		fillcolor="#B0ECA3",		label=arclength_error_map,		shape=box,		style=filled];	"def:arclength_norm" -> "def:arclength_error_map"	[style=dashed];	"lem:closing_lambda_pos" -> "lem:closing_len_bounds"	[style=dashed];	"lem:closing_family_props"	[label=closing_family_props,		shape=ellipse];	"lem:closing_lambda_pos" -> "lem:closing_family_props"	[style=dashed];	"lem:dahlberg_alignment_data"	[color=green,		fillcolor="#1CAC78",		label=dahlberg_alignment_data,		shape=ellipse,		style=filled];	"lem:dahlberg_alignment_data" -> "lem:exists_eta_clean_L1"	[style=dashed];	"lem:closing_family_props" -> "lem:closing_family_nodes"	[style=dashed];	"lem:clean_chord_margin"	[color=green,		fillcolor="#9CEC8B",		label=clean_chord_margin,		shape=ellipse,		style=filled];	"lem:closing_family_props" -> "lem:clean_chord_margin"	[style=dashed];	"lem:clean_chord_margin" -> "lem:simplicity_transport"	[style=dashed];	"lem:arclength_error_tendsto"	[label=arclength_error_tendsto,		shape=ellipse];	"lem:angle_dist_le" -> "lem:arclength_error_tendsto"	[style=dashed];	"def:is_curvature_function"	[color=green,		fillcolor="#B0ECA3",		label=is_curvature_function,		shape=box,		style=filled];	"def:is_curvature_function" -> "def:four_arc_step_function"	[style=dashed];	"def:four_vertex_condition"	[color=green,		fillcolor="#B0ECA3",		label=four_vertex_condition,		shape=box,		style=filled];	"def:is_curvature_function" -> "def:four_vertex_condition"	[style=dashed];	"def:radius"	[color=green,		fillcolor="#B0ECA3",		label=radius,		shape=box,		style=filled];	"def:is_curvature_function" -> "def:radius"	[style=dashed];	"def:realizes_curvature"	[color=green,		fillcolor="#B0ECA3",		label=realizes_curvature,		shape=box,		style=filled];	"def:is_curvature_function" -> "def:realizes_curvature"	[style=dashed];	"lem:kappa_modulus_at"	[color=green,		fillcolor="#1CAC78",		label=kappa_modulus_at,		shape=ellipse,		style=filled];	"def:is_curvature_function" -> "lem:kappa_modulus_at"	[style=dashed];	"def:four_vertex_condition" -> "lem:abab_values"	[style=dashed];	"def:mixed_sign_four_vertex"	[color=green,		fillcolor="#B0ECA3",		label=mixed_sign_four_vertex,		shape=box,		style=filled];	"def:four_vertex_condition" -> "def:mixed_sign_four_vertex"	[style=dashed];	"lem:radius_props"	[color=green,		fillcolor="#1CAC78",		label=radius_props,		shape=ellipse,		style=filled];	"def:radius" -> "lem:radius_props"	[style=dashed];	"def:reconstruct"	[color=green,		fillcolor="#B0ECA3",		label=reconstruct,		shape=box,		style=filled];	"def:radius" -> "def:reconstruct"	[style=dashed];	"def:realizes_curvature" -> "lem:realizes_curvature_dahlberg"	[style=dashed];	"def:realizes_curvature" -> "lem:realizes_curvature_signedCurvature"	[style=dashed];	"lem:realizes_curvature_smul"	[color=green,		fillcolor="#1CAC78",		label=realizes_curvature_smul,		shape=ellipse,		style=filled];	"def:realizes_curvature" -> "lem:realizes_curvature_smul"	[style=dashed];	"lem:realizes_curvature_reconstruct"	[color=green,		fillcolor="#1CAC78",		label=realizes_curvature_reconstruct,		shape=ellipse,		style=filled];	"def:realizes_curvature" -> "lem:realizes_curvature_reconstruct"	[style=dashed];	"lem:realizes_curvature_comp"	[color=green,		fillcolor="#1CAC78",		label=realizes_curvature_comp,		shape=ellipse,		style=filled];	"def:realizes_curvature" -> "lem:realizes_curvature_comp"	[style=dashed];	"lem:plateau_density"	[color=blue,		fillcolor="#A3D6FF",		label=plateau_density,		shape=ellipse,		style=filled];	"lem:kappa_modulus_at" -> "lem:plateau_density";	"def:mixed_sign_four_vertex" -> "lem:dahlberg_alignment_data"	[style=dashed];	"lem:radius_props" -> "lem:closes_iff"	[style=dashed];	"def:reconstruct" -> "lem:realizes_curvature_reconstruct"	[style=dashed];	"lem:reconstruct_const"	[color=green,		fillcolor="#1CAC78",		label=reconstruct_const,		shape=ellipse,		style=filled];	"def:reconstruct" -> "lem:reconstruct_const"	[style=dashed];	"lem:reconstruct_deriv"	[color=green,		fillcolor="#1CAC78",		label=reconstruct_deriv,		shape=ellipse,		style=filled];	"def:reconstruct" -> "lem:reconstruct_deriv"	[style=dashed];	"def:error_vector"	[color=green,		fillcolor="#B0ECA3",		label=error_vector,		shape=box,		style=filled];	"def:reconstruct" -> "def:error_vector"	[style=dashed];	"lem:realizes_curvature_smul" -> "thm:realizes_of_non_normalised"	[style=dashed];	"lem:realizes_curvature_reconstruct" -> "thm:gluck_converse"	[style=dashed];	"lem:realizes_curvature_comp" -> "thm:gluck_converse"	[style=dashed];	"lem:realizes_curvature_comp" -> "thm:realizes_of_non_normalised"	[style=dashed];	"lem:plateau_density" -> "lem:exists_preliminary_reparam"	[style=dashed];	"lem:signed_curvature_reconstruct"	[color=green,		fillcolor="#1CAC78",		label=signed_curvature_reconstruct,		shape=ellipse,		style=filled];	"lem:hasderivat_dahlberg_curve" -> "lem:realizes_curvature_dahlberg"	[style=dashed];	"lem:dahlberg_curve_periodic"	[color=green,		fillcolor="#1CAC78",		label=dahlberg_curve_periodic,		shape=ellipse,		style=filled];	"lem:dahlberg_curve_periodic" -> "lem:issimpleclosed_dahlberg_curve"	[style=dashed];	"def:closure_integral_sin"	[color=green,		fillcolor="#B0ECA3",		label=closure_integral_sin,		shape=box,		style=filled];	"lem:error_vector_eq"	[color=green,		fillcolor="#1CAC78",		label=error_vector_eq,		shape=ellipse,		style=filled];	"def:closure_integral_sin" -> "lem:error_vector_eq"	[style=dashed];	"lem:error_vector_eq" -> "lem:closes_iff"	[style=dashed];	"lem:circle_proj_helpers"	[color=blue,		fillcolor="#A3D6FF",		label=circle_proj_helpers,		shape=ellipse,		style=filled];	"lem:circle_proj_helpers" -> "lem:winding_number_c_circle_exp"	[style=dashed];	"lem:circle_proj_helpers" -> "lem:winding_number_c_const_mul"	[style=dashed];	"lem:injon_dahlberg_curve"	[color=green,		fillcolor="#1CAC78",		label=injon_dahlberg_curve,		shape=ellipse,		style=filled];	"lem:injon_dahlberg_curve" -> "lem:issimpleclosed_dahlberg_curve"	[style=dashed];	"def:arclength_error_map" -> "lem:arclength_error_clean_eq_errorMap"	[style=dashed];	"def:arclength_error_map" -> "lem:total_curvature_ne_zero"	[style=dashed];	"lem:reconstruct_const" -> "thm:gluck_converse";	"lem:disk_boundary_loop_ne_zero"	[color=green,		fillcolor="#1CAC78",		label=disk_boundary_loop_ne_zero,		shape=ellipse,		style=filled];	"def:norm_loop"	[color=green,		fillcolor="#B0ECA3",		label=norm_loop,		shape=box,		style=filled];	"def:norm_loop" -> "def:winding_number_c"	[style=dashed];	"lem:reconstruct_deriv" -> "lem:signed_curvature_reconstruct"	[style=dashed];	"def:circle_proj"	[color=green,		fillcolor="#B0ECA3",		label=circle_proj,		shape=box,		style=filled];	"def:circle_proj" -> "def:norm_loop"	[style=dashed];	"lem:circle_proj_eq"	[color=green,		fillcolor="#1CAC78",		label=circle_proj_eq,		shape=ellipse,		style=filled];	"def:circle_proj" -> "lem:circle_proj_eq"	[style=dashed];	"lem:circle_proj_eq" -> "lem:circle_proj_helpers"	[style=dashed];	"def:disk_boundary_loop"	[color=green,		fillcolor="#B0ECA3",		label=disk_boundary_loop,		shape=box,		style=filled];	"def:disk_boundary_loop" -> "lem:disk_boundary_loop_ne_zero"	[style=dashed];	"def:dahlberg_curve"	[color=green,		fillcolor="#B0ECA3",		label=dahlberg_curve,		shape=box,		style=filled];	"def:dahlberg_curve" -> "lem:hasderivat_dahlberg_curve"	[style=dashed];	"def:dahlberg_curve" -> "def:arclength_error_map"	[style=dashed];	"def:arclength_curvature"	[color=green,		fillcolor="#B0ECA3",		label=arclength_curvature,		shape=box,		style=filled];	"def:dahlberg_curve" -> "def:arclength_curvature"	[style=dashed];	"def:arclength_curvature" -> "def:non_normalised_curvature"	[style=dashed];	"def:arclength_curvature" -> "lem:injon_dahlberg_curve"	[style=dashed];	"lem:eiangle_periodic"	[color=green,		fillcolor="#1CAC78",		label=eiangle_periodic,		shape=ellipse,		style=filled];	"def:arclength_curvature" -> "lem:eiangle_periodic"	[style=dashed];	"lem:eiangle_periodic" -> "lem:dahlberg_curve_periodic"	[style=dashed];	"def:dahlberg_angle"	[color=green,		fillcolor="#B0ECA3",		label=dahlberg_angle,		shape=box,		style=filled];	"def:dahlberg_angle" -> "lem:hasderivat_dahlberg_angle"	[style=dashed];	"def:dahlberg_angle" -> "def:dahlberg_curve"	[style=dashed];	"lem:arclength_arc_integral"	[color=green,		fillcolor="#1CAC78",		label=arclength_arc_integral,		shape=ellipse,		style=filled];	"def:dahlberg_angle" -> "lem:arclength_arc_integral"	[style=dashed];	"lem:arclength_arc_integral" -> "lem:arclength_error_clean_eq_errorMap"	[style=dashed];	"def:is_convex_curve"	[color=green,		fillcolor="#B0ECA3",		label=is_convex_curve,		shape=box,		style=filled];	"def:is_convex_curve" -> "lem:pos_curvature_convex"	[style=dashed];	"def:dahlberg_f"	[color=green,		fillcolor="#B0ECA3",		label=dahlberg_f,		shape=box,		style=filled];	"def:dahlberg_f" -> "def:clean_bicircle"	[style=dashed];	"def:signed_curvature"	[color=green,		fillcolor="#B0ECA3",		label=signed_curvature,		shape=box,		style=filled];	"def:signed_curvature" -> "lem:realizes_curvature_signedCurvature"	[style=dashed];	"def:signed_curvature" -> "lem:signed_curvature_reconstruct"	[style=dashed];	"def:signed_curvature" -> "def:is_convex_curve"	[style=dashed];	"lem:chord_integral_ne_zero"	[color=green,		fillcolor="#1CAC78",		label=chord_integral_ne_zero,		shape=ellipse,		style=filled];	"lem:chord_integral_ne_zero" -> "thm:reconstruct_injective";	"lem:chord_integral_ne_zero" -> "lem:clean_chord_margin"	[style=dashed];	"lem:arclength_error_tendsto" -> "thm:exists_closing_param"	[style=dashed];	"def:error_vector" -> "def:kappa_error_map"	[style=dashed];	"def:error_vector" -> "def:bicircle_error_vector"	[style=dashed];	"def:error_vector" -> "lem:reconstruct_periodic"	[style=dashed];	"def:error_vector" -> "lem:error_vector_eq"	[style=dashed];	"def:error_vector" -> "lem:chord_integral_ne_zero"	[style=dashed];	"lem:error_vector_lipschitz"	[color=green,		fillcolor="#1CAC78",		label=error_vector_lipschitz,		shape=ellipse,		style=filled];	"def:error_vector" -> "lem:error_vector_lipschitz"	[style=dashed];	"lem:integral_cexp_I"	[color=green,		fillcolor="#1CAC78",		label=integral_cexp_I,		shape=ellipse,		style=filled];	"lem:integral_cexp_I" -> "lem:bicircle_arc_integral"	[style=dashed];	"def:closure_integral_cos"	[color=green,		fillcolor="#B0ECA3",		label=closure_integral_cos,		shape=box,		style=filled];	"def:closure_integral_cos" -> "lem:error_vector_eq"	[style=dashed];	"def:standard_loop"	[color=green,		fillcolor="#B0ECA3",		label=standard_loop,		shape=box,		style=filled];	"def:standard_loop" -> "lem:winding_number_standard"	[style=dashed];	"def:circle_exp_loop"	[color=blue,		fillcolor="#A3D6FF",		label=circle_exp_loop,		shape=box,		style=filled];	"def:standard_loop" -> "def:circle_exp_loop"	[style=dashed];	"def:circle_exp_loop" -> "lem:winding_number_c_circle_exp"	[style=dashed];	"def:circle_exp_loop" -> "def:reverse_loop"	[style=dashed];	"lem:error_vector_lipschitz" -> "lem:kappa_error_map_close"	[style=dashed];	"lem:align_density_arc_integral" -> "lem:align_reparam_add_two_pi"	[style=dashed];	"lem:align_density_arc_integral" -> "lem:align_reparam_node_values"	[style=dashed];	"def:is_regular"	[color=green,		fillcolor="#B0ECA3",		label=is_regular,		shape=box,		style=filled];	"def:is_regular" -> "def:signed_curvature"	[style=dashed];	"lem:ivt_hits"	[color=green,		fillcolor="#1CAC78",		label=ivt_hits,		shape=ellipse,		style=filled];	"lem:ivt_hits" -> "lem:abab_values"	[style=dashed];	"lem:ivt_hits" -> "lem:dahlberg_alignment_data"	[style=dashed];	"def:is_closed_curve"	[color=green,		fillcolor="#B0ECA3",		label=is_closed_curve,		shape=box,		style=filled];	"def:is_closed_curve" -> "lem:closes_iff"	[style=dashed];	"def:is_closed_curve" -> "def:is_simple_closed"	[style=dashed];	"lem:toIcoMod_pi4_mem_Ioo_iff"	[color=green,		fillcolor="#1CAC78",		label=toIcoMod_pi4_mem_Ioo_iff,		shape=ellipse,		style=filled];	"lem:toIcoMod_pi4_mem_Ioo_iff" -> "lem:clean_bicircle_eq_step";	"lem:int_valued_eq"	[color=green,		fillcolor="#1CAC78",		label=int_valued_eq,		shape=ellipse,		style=filled];	"lem:int_valued_eq" -> "lem:winding_number_eq_div_of_lift"	[style=dashed];}`)
     .on("end", interactive);
 
 latexLabelEscaper = function(label) {

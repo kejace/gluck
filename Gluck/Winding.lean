@@ -20,11 +20,11 @@ total angle increment `(φ 1 − φ 0) / 2π`.
 
 The configuration disk (`configSpace`) and the foundational winding-number
 lemmas it consumes (`windingNumber_standard`, `windingNumber_mul`,
-`windingNumberC_const_mul`, `windingNumberC_eq_of_perturb`,
-`windingNumberC_circle_exp`) are built here on top of `Gluck.Bicircle`.  The final
-error-map assembly (`errorMap_winding_eq_one`, `exists_closing_configuration`),
-which needs the invertible-linear-map winding computation and the second-order
-Taylor bound, is deferred to a later iteration.
+`windingNumberC_const_mul`, `windingNumberC_posScalarField`,
+`windingNumberC_eq_of_perturb`, `windingNumberC_circle_exp`) are built here on top
+of `Gluck.Bicircle`.  The final error-map assembly (`errorMap_winding_eq_one`,
+`exists_closing_configuration`), which needs the invertible-linear-map winding
+computation and the second-order Taylor bound, is complete.
 
 Blueprint: `blueprint/src/chapters/Gluck_Winding.tex` (`thm:existence_of_zero`).
 -/
@@ -529,6 +529,81 @@ theorem windingNumberC_eq_of_perturb (γ γ' : C(I, ℂ))
     rw [hloopγ, hloopγ']
   have hinv := windingNumber_eq_of_homotopy H h0 h1 hloop
   rw [windingNumberC, windingNumberC, hinv]
+
+/-- **Positive-scalar-field invariance of the `ℂ`-winding number.**  Let `γ` be a
+nowhere-zero loop and `c` a continuous loop of *strictly positive* reals.  Then
+the scaled loop `t ↦ c t · γ t` is nowhere zero and has the same winding number as
+`γ`.  This generalises `windingNumberC_const_mul` from a constant scalar to a
+positive scalar *field*: the straight-line scalar homotopy
+`H(u,t) = ((1−u) + u·c t)·γ t` has a strictly positive scalar factor throughout (a
+convex combination of `1 > 0` and `c t > 0`), so it stays nowhere zero, and
+`windingNumber_eq_of_homotopy` applies to the induced homotopy of normalised circle
+loops.  It is what lets a positive configuration-dependent prefactor `c(z)=1/λ(z)`
+be stripped from the clean arc-length error map (blueprint
+`lem:winding_number_c_pos_scalar_field`). -/
+theorem windingNumberC_posScalarField (c : C(I, ℝ)) (hc : ∀ t, 0 < c t)
+    (γ : C(I, ℂ)) (hγ : ∀ t, γ t ≠ 0)
+    (hloopγ : γ 0 = γ 1) (hloopc : c 0 = c 1) :
+    windingNumberC ⟨fun t => (c t : ℂ) * γ t,
+        (Complex.continuous_ofReal.comp c.continuous).mul γ.continuous⟩
+      (fun t => mul_ne_zero (by exact_mod_cast (hc t).ne') (hγ t)) = windingNumberC γ hγ := by
+  -- Scalar factor `f(s,t) = (1−s) + s·c t`, strictly positive on `I × I`.
+  set f : I × I → ℝ := fun st => (1 - (st.1 : ℝ)) + (st.1 : ℝ) * c st.2 with hfdef
+  have hfpos : ∀ st : I × I, 0 < f st := by
+    intro st
+    have hs0 : (0 : ℝ) ≤ (st.1 : ℝ) := st.1.2.1
+    have hs1 : (st.1 : ℝ) ≤ 1 := st.1.2.2
+    have hct := hc st.2
+    rw [hfdef]
+    nlinarith [mul_nonneg hs0 hct.le, mul_nonneg (sub_nonneg.2 hs1) hct.le]
+  -- Straight-line scalar homotopy in `ℂ`.
+  set Hc : I × I → ℂ := fun st => (f st : ℂ) * γ st.2 with hHcdef
+  have hHccont : Continuous Hc := by
+    rw [hHcdef]
+    refine (Complex.continuous_ofReal.comp ?_).mul (γ.continuous.comp continuous_snd)
+    rw [hfdef]
+    exact (continuous_const.sub (continuous_subtype_val.comp continuous_fst)).add
+      ((continuous_subtype_val.comp continuous_fst).mul (c.continuous.comp continuous_snd))
+  have hHcne : ∀ st : I × I, Hc st ≠ 0 := by
+    intro st
+    rw [hHcdef]
+    exact mul_ne_zero (by exact_mod_cast (hfpos st).ne') (hγ st.2)
+  -- Normalise onto `S¹`.
+  set H : C(I × I, Circle) :=
+    ⟨fun st => circleProj (Hc st) (hHcne st), by
+      apply Continuous.subtype_mk
+      exact hHccont.div (Complex.continuous_ofReal.comp (continuous_norm.comp hHccont))
+        (fun st => Complex.ofReal_ne_zero.2 (norm_ne_zero_iff.2 (hHcne st)))⟩ with hHdef
+  -- At `s = 0` the scalar factor is `1`, so `H` is the normalised `γ`.
+  have h0 : ∀ t : I, H (0, t) = normLoop γ hγ t := by
+    intro t
+    change circleProj (Hc (0, t)) (hHcne (0, t)) = circleProj (γ t) (hγ t)
+    apply circleProj_congr
+    simp only [hHcdef, hfdef]
+    push_cast [Set.Icc.coe_zero]
+    ring
+  -- At `s = 1` the scalar factor is `c t`, so `H` is the normalised `c·γ`.
+  have h1 : ∀ t : I, H (1, t) =
+      normLoop ⟨fun t => (c t : ℂ) * γ t,
+        (Complex.continuous_ofReal.comp c.continuous).mul γ.continuous⟩
+        (fun t => mul_ne_zero (by exact_mod_cast (hc t).ne') (hγ t)) t := by
+    intro t
+    change circleProj (Hc (1, t)) (hHcne (1, t)) =
+      circleProj ((c t : ℂ) * γ t) (mul_ne_zero (by exact_mod_cast (hc t).ne') (hγ t))
+    apply circleProj_congr
+    simp only [hHcdef, hfdef]
+    push_cast [Set.Icc.coe_one]
+    ring
+  -- Each slice is a loop, from the loop hypotheses on `γ` and `c`.
+  have hloop : ∀ s : I, H (s, 0) = H (s, 1) := by
+    intro s
+    change circleProj (Hc (s, 0)) (hHcne (s, 0)) = circleProj (Hc (s, 1)) (hHcne (s, 1))
+    apply circleProj_congr
+    simp only [hHcdef, hfdef]
+    rw [hloopγ, hloopc]
+  have hinv := windingNumber_eq_of_homotopy H h0 h1 hloop
+  rw [windingNumberC, windingNumberC]
+  exact hinv.symm
 
 /-! ## The configuration disk -/
 

@@ -99,6 +99,63 @@
 
   </ul>
  </li>
+<li class="">
+  <a href="chap-arclength.html"><span class="toc_ref">10</span> <span class="toc_entry">Arc-length curvature representation (Dahlberg)</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chap-arclength.html#a0000000015"><span class="toc_ref">10.1</span> <span class="toc_entry">The arc-length representation</span></a>
+ </li>
+<li class="">
+  <a href="chap-arclength.html#a0000000016"><span class="toc_ref">10.2</span> <span class="toc_entry">Closure and simplicity conditions</span></a>
+ </li>
+<li class="">
+  <a href="chap-arclength.html#a0000000017"><span class="toc_ref">10.3</span> <span class="toc_entry">The arc-length converse</span></a>
+ </li>
+<li class="">
+  <a href="chap-arclength.html#a0000000018"><span class="toc_ref">10.4</span> <span class="toc_entry">Reduction to a non-normalised curvature function</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chap-dahlberg_step1.html"><span class="toc_ref">11</span> <span class="toc_entry">Dahlberg Step 1: the preliminary diffeomorphism (Phase D-B)</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chap-dahlberg_step1.html#a0000000019"><span class="toc_ref">11.1</span> <span class="toc_entry">The fixed two-arc indicator and the clean bicircle</span></a>
+ </li>
+<li class="">
+  <a href="chap-dahlberg_step1.html#a0000000020"><span class="toc_ref">11.2</span> <span class="toc_entry">Level extraction from the four-vertex condition</span></a>
+ </li>
+<li class="">
+  <a href="chap-dahlberg_step1.html#a0000000021"><span class="toc_ref">11.3</span> <span class="toc_entry">The preliminary diffeomorphism and the error decomposition</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chap-dahlberg_step2.html"><span class="toc_ref">12</span> <span class="toc_entry">Dahlberg Step 2: the closing parameter and the converse (Phase D-C)</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chap-dahlberg_step2.html#a0000000022"><span class="toc_ref">12.1</span> <span class="toc_entry">The node-placing closing family</span></a>
+ </li>
+<li class="">
+  <a href="chap-dahlberg_step2.html#a0000000023"><span class="toc_ref">12.2</span> <span class="toc_entry">The clean error map is a positive multiple of the in-tree <span class="ttfamily">errorMap</span></span></a>
+ </li>
+<li class="">
+  <a href="chap-dahlberg_step2.html#a0000000024"><span class="toc_ref">12.3</span> <span class="toc_entry">The three new analytic estimates</span></a>
+ </li>
+<li class="">
+  <a href="chap-dahlberg_step2.html#a0000000025"><span class="toc_ref">12.4</span> <span class="toc_entry">Existence of a closing parameter</span></a>
+ </li>
+<li class="">
+  <a href="chap-dahlberg_step2.html#a0000000026"><span class="toc_ref">12.5</span> <span class="toc_entry">Simplicity transport and the converse</span></a>
+ </li>
+
+  </ul>
+ </li>
 <li ><a href="dep_graph_document.html">Dependency graph</a></li>
 </ul>
 </nav>
@@ -110,15 +167,15 @@
 <div class="main-text">
 <h1 id="chap:reduction">7 Closing the \(\kappa \)-curve: the reduction is justified</h1>
 
-<p>This chapter assembles the winding-number argument (<a href="chap-winding.html">chapter 6</a>) and the preliminary reparametrization (<a href="chap-stepreduction.html">chapter 4</a>) into the load-bearing analytic statement <a href="chap-reduction.html#lem:reduction_justified">lemma 82</a>: every four-vertex curvature function \(\kappa \) admits a circle reparametrization \(h\) for which the reconstruction weight \(1/(\kappa \circ h)\) has vanishing error vector, so the reconstruction curve closes up. </p>
+<p>This chapter assembles the winding-number argument (<a href="chap-winding.html">chapter 6</a>) and the preliminary reparametrization (<a href="chap-stepreduction.html">chapter 4</a>) into the load-bearing analytic statement <a href="chap-reduction.html#lem:reduction_justified">lemma 83</a>: every four-vertex curvature function \(\kappa \) admits a circle reparametrization \(h\) for which the reconstruction weight \(1/(\kappa \circ h)\) has vanishing error vector, so the reconstruction curve closes up. </p>
 
-<p><em>Why a new chapter / file.</em> The conclusion consumes <a href="chap-winding.html#cor:closing_configuration_exists">corollary 65</a> from <a href="chap-winding.html">chapter 6</a>, which imports <a href="chap-bicircle.html">chapter 5</a> and hence <a href="chap-stepreduction.html">chapter 4</a>; so the statement cannot live in <span class="ttfamily">StepReduction.lean</span> (that would be an import cycle). It is placed in a new file <span class="ttfamily">Reduction.lean</span> that <span class="ttfamily">import</span>s <span class="ttfamily">Gluck.Winding</span> (transitively pulling in everything else). </p>
+<p><em>Why a new chapter / file.</em> The conclusion consumes <a href="chap-winding.html#cor:closing_configuration_exists">corollary 66</a> from <a href="chap-winding.html">chapter 6</a>, which imports <a href="chap-bicircle.html">chapter 5</a> and hence <a href="chap-stepreduction.html">chapter 4</a>; so the statement cannot live in <span class="ttfamily">StepReduction.lean</span> (that would be an import cycle). It is placed in a new file <span class="ttfamily">Reduction.lean</span> that <span class="ttfamily">import</span>s <span class="ttfamily">Gluck.Winding</span> (transitively pulling in everything else). </p>
 
-<p><em>The genuine remaining construction.</em> <a href="chap-winding.html#cor:closing_configuration_exists">corollary 65</a> produces a zero of the <em>bicircle</em> (step-function) error map \(\mathrm{errorMap} = E_{\mathrm{bi}}\) — a closing configuration of the two-valued step family — but <em>not</em> a curve realising the original continuous \(\kappa \). To transfer the closure to \(\kappa \) we re-run the planar degree principle on a <em>\(\kappa \)-error map</em> \(E_\kappa \) over the same disk, obtained by feeding \(\kappa \circ h_1\) through a family of breakpoint-aligning reparametrizations \(g_z\), and showing \(E_\kappa \) is uniformly close to \(E_{\mathrm{bi}}\) on \(\partial \mathbb {D}\) (so it inherits the nonzero boundary winding). The robustness is exactly the \(L^1\)/measure continuity of the error vector (<a href="chap-stepreduction.html#lem:error_vector_lipschitz">lemma 27</a>), <em>not</em> the false “\(C^1\)-close curves” claim the survey uses (see <a href="chap-stepreduction.html">chapter 4</a>’s departure note). </p>
+<p><em>The genuine remaining construction.</em> <a href="chap-winding.html#cor:closing_configuration_exists">corollary 66</a> produces a zero of the <em>bicircle</em> (step-function) error map \(\mathrm{errorMap} = E_{\mathrm{bi}}\) — a closing configuration of the two-valued step family — but <em>not</em> a curve realising the original continuous \(\kappa \). To transfer the closure to \(\kappa \) we re-run the planar degree principle on a <em>\(\kappa \)-error map</em> \(E_\kappa \) over the same disk, obtained by feeding \(\kappa \circ h_1\) through a family of breakpoint-aligning reparametrizations \(g_z\), and showing \(E_\kappa \) is uniformly close to \(E_{\mathrm{bi}}\) on \(\partial \mathbb {D}\) (so it inherits the nonzero boundary winding). The robustness is exactly the \(L^1\)/measure continuity of the error vector (<a href="chap-stepreduction.html#lem:error_vector_lipschitz">lemma 27</a>), <em>not</em> the false “\(C^1\)-close curves” claim the survey uses (see <a href="chap-stepreduction.html">chapter 4</a>’s departure note). </p>
 <h1 id="a0000000009">7.1 The breakpoint-aligning reparametrization family \(g_z\)</h1>
-<p>Recall the centred bicircle configuration \(\mathrm{configSpace}(\delta )(z) = (\tfrac {\pi }{4}+\delta \, z.\mathrm{re},\  \tfrac {3\pi }{4}+\delta \, z.\mathrm{im}, \tfrac {5\pi }{4},\  \tfrac {7\pi }{4})\) (<a href="chap-winding.html#def:configuration_space">definition 59</a>): only the two leading breakpoints move with \(z\in \overline{\mathbb {D}}\), the trailing two are pinned. The preliminary reparametrization \(h_1\) of <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a> makes \(\kappa \circ h_1\) \(\varepsilon \)-close in measure to the canonical four-arc step function \(\kappa _0 = \mathrm{stepCurvature}\,  b\, a\, 0\, \tfrac {\pi }{2}\, \pi \, \tfrac {3\pi }{2}\) (breakpoints \(0,\tfrac {\pi }{2}, \pi ,\tfrac {3\pi }{2}\), values \(a,b,a,b\)). </p>
+<p>Recall the centred bicircle configuration \(\mathrm{configSpace}(\delta )(z) = (\tfrac {\pi }{4}+\delta \, z.\mathrm{re},\  \tfrac {3\pi }{4}+\delta \, z.\mathrm{im}, \tfrac {5\pi }{4},\  \tfrac {7\pi }{4})\) (<a href="chap-winding.html#def:configuration_space">definition 60</a>): only the two leading breakpoints move with \(z\in \overline{\mathbb {D}}\), the trailing two are pinned. The preliminary reparametrization \(h_1\) of <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a> makes \(\kappa \circ h_1\) \(\varepsilon \)-close in measure to the canonical four-arc step function \(\kappa _0 = \mathrm{stepCurvature}\,  b\, a\, 0\, \tfrac {\pi }{2}\, \pi \, \tfrac {3\pi }{2}\) (breakpoints \(0,\tfrac {\pi }{2}, \pi ,\tfrac {3\pi }{2}\), values \(a,b,a,b\)). </p>
 <p>The four arcs \([\theta _1,\theta _2),[\theta _2,\theta _3),[\theta _3,\theta _4),[\theta _4,\theta _1+2\pi )\) have lengths </p>
-<div class="displaymath" id="a0000000076">
+<div class="displaymath" id="a0000000089">
   \[  L_1=\tfrac {\pi }{2}+\delta (z.\mathrm{im}-z.\mathrm{re}),\quad L_2=\tfrac {\pi }{2}-\delta z.\mathrm{im},\quad L_3=\tfrac {\pi }{2},\quad L_4=\tfrac {\pi }{2}+\delta z.\mathrm{re};  \]
 </div>
 <p> for \(\delta \le \pi /8\) and \(z\in \overline{\mathbb D}\) each \(L_k\) lies in \([\tfrac {\pi }{4},\tfrac {3\pi }{4}]\) and depends continuously on \(z\). </p>
@@ -129,7 +186,7 @@
     <span class="definition_thmcaption">
     Definition
     </span>
-    <span class="definition_thmlabel">66</span>
+    <span class="definition_thmlabel">67</span>
     <span class="definition_thmtitle">Calibrated speed density \(w_z\)</span>
     <div class="thm_header_extras">
 
@@ -151,7 +208,7 @@
         
         <ul class="uses">
           
-          <li><a href="chap-winding.html#def:configuration_space">Definition 59</a></li>
+          <li><a href="chap-winding.html#def:configuration_space">Definition 60</a></li>
           
         </ul>
     
@@ -224,11 +281,11 @@
 </li>
 </ul>
 <p> The plateau height \(m_k(z)\) is solved so that the arc integral is exactly \(\pi /2\): with \(\int _{\theta _k}^{\theta _{k+1}}w_z = m_k(z)\, (L_k-2\eta ) + \tfrac {\eta }{2}(V+m_k(z)) + \tfrac {\eta }{2}(m_k(z)+V) = m_k(z)(L_k-\eta ) + \eta V\), setting this to \(\pi /2\) gives </p>
-<div class="displaymath" id="a0000000077">
+<div class="displaymath" id="a0000000090">
   \[  m_k(z) \; =\;  \frac{\pi /2-\eta V}{L_k-\eta }.  \]
 </div>
 <p> Since \(L_k\in [\tfrac \pi 4,\tfrac {3\pi }4]\), \(\eta =\pi /16\) and \(V=2/3\), the numerator \(\pi /2-\eta V = \pi /2-\pi /24{\gt}0\) and the denominator \(L_k-\eta \in [\tfrac {3\pi }{16},\tfrac {11\pi }{16}]\), so each \(m_k(z)\) is a continuous, strictly positive function of \(z\). Since \(w_z\) is a convex combination of the node value \(V\) and the plateau heights \(m_k(z)\) (it is affine between them on the ramps), \(w_z(\theta )\in [c_-,c_+]\subset (0,\infty )\) with \(c_-=\min (V,\min _k m_k)\) and \(c_+=\max (V,\max _k m_k)\). A direct computation over \(L_k\in [\tfrac \pi 4,\tfrac {3\pi }4]\) gives \(\min _k m_k=2/3\) (at \(L_k=3\pi /4\)) and \(\max _k m_k=22/9\) (at \(L_k=\pi /4\)), so \(c_-=2/3\) and \(c_+=22/9\); we set the uniform slope bound \(K:=\max (c_+,1/c_-)=22/9\) (so \(1/K\le w_z\le K\)). This is the same kind of explicit continuous trapezoidal-density construction already carried out (for a different calibration) in the preliminary reparametrization of <a href="chap-stepreduction.html">chapter 4</a>; the present density is self-contained and depends on none of that chapter’s lemmas. </p>
-<p><em>Lean realization.</em> Each ramp/plateau pulse is the periodic trapezoid \(\mathrm{clampTent}(\eta ,L,\tau )(\theta )=\min (1,\max (0,(L/2-\arccos \cos (\theta -\tau ))/\eta ))\) (height \(1\), centre \(\tau \), width \(L\), ramp \(\eta \)), built on the \(\arccos \cos \) idiom of <a href="chap-stepreduction.html">chapter 4</a> for free \(2\pi \)-periodicity and continuity; \(w_z=\mathrm{alignDensity}\) is the constant \(V\) plus a \(z\)-continuous combination of four such pulses with heights \(m_k(z)=\mathrm{alignHt}(L_k)\) at the four nodes \(\mathrm{alignN}_k(z)\) / arc lengths \(\mathrm{alignL}_k(z)\) / centres \(\mathrm{alignC}_k(z)\). These named pieces (and their continuity helpers) carry the dependency edges; their properties are collected in <a href="chap-reduction.html#lem:align_density_props">lemma 67</a> and <a href="chap-reduction.html#lem:align_density_arc_integral">lemma 68</a>. </p>
+<p><em>Lean realization.</em> Each ramp/plateau pulse is the periodic trapezoid \(\mathrm{clampTent}(\eta ,L,\tau )(\theta )=\min (1,\max (0,(L/2-\arccos \cos (\theta -\tau ))/\eta ))\) (height \(1\), centre \(\tau \), width \(L\), ramp \(\eta \)), built on the \(\arccos \cos \) idiom of <a href="chap-stepreduction.html">chapter 4</a> for free \(2\pi \)-periodicity and continuity; \(w_z=\mathrm{alignDensity}\) is the constant \(V\) plus a \(z\)-continuous combination of four such pulses with heights \(m_k(z)=\mathrm{alignHt}(L_k)\) at the four nodes \(\mathrm{alignN}_k(z)\) / arc lengths \(\mathrm{alignL}_k(z)\) / centres \(\mathrm{alignC}_k(z)\). These named pieces (and their continuity helpers) carry the dependency edges; their properties are collected in <a href="chap-reduction.html#lem:align_density_props">lemma 68</a> and <a href="chap-reduction.html#lem:align_density_arc_integral">lemma 69</a>. </p>
 
   </div>
 </div>
@@ -237,7 +294,7 @@
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">67</span>
+    <span class="lemma_thmlabel">68</span>
     <span class="lemma_thmtitle">Density is well-behaved</span>
     <div class="thm_header_extras">
 
@@ -246,7 +303,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:align_density_props">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000078"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000091"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -262,9 +319,9 @@
         
         <ul class="uses">
           
-          <li><a href="chap-reduction.html#def:align_density">Definition 66</a></li>
+          <li><a href="chap-reduction.html#def:align_density">Definition 67</a></li>
           
-          <li><a href="chap-reduction.html#def:align_density">Definition 66</a></li>
+          <li><a href="chap-reduction.html#def:align_density">Definition 67</a></li>
           
         </ul>
     
@@ -351,7 +408,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000078">
+<div class="proof_wrapper" id="a0000000091">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -359,7 +416,7 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p> Continuity and periodicity are immediate from the trapezoidal piecewise-affine shape (the pieces agree at the breakpoints by the common node value \(V\) and the shared plateau values). Joint continuity holds because the node positions \(\theta _k(z)\) and the plateau heights \(m_k(z)\) are continuous in \(z\) (the arc lengths \(L_k\) stay in \([\tfrac \pi 4,\tfrac {3\pi }4]\), bounded away from the \(L_k=\eta \) singularity), and an affine interpolation with continuously varying knots and node values is jointly continuous. The bound is the height estimate of <a href="chap-reduction.html#def:align_density">definition 66</a>. </p>
+  <p> Continuity and periodicity are immediate from the trapezoidal piecewise-affine shape (the pieces agree at the breakpoints by the common node value \(V\) and the shared plateau values). Joint continuity holds because the node positions \(\theta _k(z)\) and the plateau heights \(m_k(z)\) are continuous in \(z\) (the arc lengths \(L_k\) stay in \([\tfrac \pi 4,\tfrac {3\pi }4]\), bounded away from the \(L_k=\eta \) singularity), and an affine interpolation with continuously varying knots and node values is jointly continuous. The bound is the height estimate of <a href="chap-reduction.html#def:align_density">definition 67</a>. </p>
 
   </div>
 </div>
@@ -368,7 +425,7 @@
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">68</span>
+    <span class="lemma_thmlabel">69</span>
     <span class="lemma_thmtitle">Exact arc integrals</span>
     <div class="thm_header_extras">
 
@@ -377,7 +434,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:align_density_arc_integral">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000079"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000092"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -393,9 +450,9 @@
         
         <ul class="uses">
           
-          <li><a href="chap-reduction.html#def:align_density">Definition 66</a></li>
+          <li><a href="chap-reduction.html#def:align_density">Definition 67</a></li>
           
-          <li><a href="chap-reduction.html#def:align_density">Definition 66</a></li>
+          <li><a href="chap-reduction.html#def:align_density">Definition 67</a></li>
           
         </ul>
     
@@ -450,7 +507,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000079">
+<div class="proof_wrapper" id="a0000000092">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -458,7 +515,7 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p> The arc integral splits into the right half of the node-\(\theta _k\) ramp (\(\int =\tfrac \eta 2(V+m_k)\)), the central plateau (\(\int =(L_k-2\eta )m_k\)), and the left half of the node-\(\theta _{k+1}\) ramp (\(\int =\tfrac \eta 2(m_k+V)\)); the sum is \(m_k(L_k-\eta )+\eta V\), which equals \(\pi /2\) by the choice of \(m_k\) in <a href="chap-reduction.html#def:align_density">definition 66</a>. Summing the four arcs gives \(4\cdot \tfrac \pi 2=2\pi \). </p>
+  <p> The arc integral splits into the right half of the node-\(\theta _k\) ramp (\(\int =\tfrac \eta 2(V+m_k)\)), the central plateau (\(\int =(L_k-2\eta )m_k\)), and the left half of the node-\(\theta _{k+1}\) ramp (\(\int =\tfrac \eta 2(m_k+V)\)); the sum is \(m_k(L_k-\eta )+\eta V\), which equals \(\pi /2\) by the choice of \(m_k\) in <a href="chap-reduction.html#def:align_density">definition 67</a>. Summing the four arcs gives \(4\cdot \tfrac \pi 2=2\pi \). </p>
 
   </div>
 </div>
@@ -467,7 +524,7 @@
     <span class="definition_thmcaption">
     Definition
     </span>
-    <span class="definition_thmlabel">69</span>
+    <span class="definition_thmlabel">70</span>
     <div class="thm_header_extras">
 
     
@@ -490,9 +547,9 @@
         
         <ul class="uses">
           
-          <li><a href="chap-reduction.html#def:align_density">Definition 66</a></li>
+          <li><a href="chap-reduction.html#def:align_density">Definition 67</a></li>
           
-          <li><a href="chap-winding.html#def:configuration_space">Definition 59</a></li>
+          <li><a href="chap-winding.html#def:configuration_space">Definition 60</a></li>
           
           <li><a href="chap-stepreduction.html#def:four_arc_step_function">Definition 24</a></li>
           
@@ -525,25 +582,25 @@
         </div>
   </div>
   <div class="definition_thmcontent">
-  <p>[Breakpoint-aligning reparametrization family]    Project-bespoke. For \(0{\lt}\delta \le \pi /8\) and \(z\in \overline{\mathbb {D}}\) define \(g_z := \mathrm{alignReparam}(\delta )(z) : \mathbb {R}\to \mathbb {R}\) as the running integral of the calibrated density \(w_z\) (<a href="chap-reduction.html#def:align_density">definition 66</a>) anchored so that \(g_z(\theta _1)=\pi /2\): </p>
-<div class="displaymath" id="a0000000080">
+  <p>[Breakpoint-aligning reparametrization family]    Project-bespoke. For \(0{\lt}\delta \le \pi /8\) and \(z\in \overline{\mathbb {D}}\) define \(g_z := \mathrm{alignReparam}(\delta )(z) : \mathbb {R}\to \mathbb {R}\) as the running integral of the calibrated density \(w_z\) (<a href="chap-reduction.html#def:align_density">definition 67</a>) anchored so that \(g_z(\theta _1)=\pi /2\): </p>
+<div class="displaymath" id="a0000000093">
   \[  g_z(\theta ) \; :=\;  \tfrac {\pi }{2} + \int _{\theta _1}^{\theta } w_z(t)\, dt .  \]
 </div>
 <p> \(g_z\) is the orientation-preserving circle homeomorphism that sends the four breakpoints of the \(z\)-configuration </p>
-<div class="displaymath" id="a0000000081">
+<div class="displaymath" id="a0000000094">
   \[  \theta _1=\tfrac {\pi }{4}+\delta z.\mathrm{re},\quad \theta _2=\tfrac {3\pi }{4}+\delta z.\mathrm{im},\quad \theta _3=\tfrac {5\pi }{4},\quad \theta _4=\tfrac {7\pi }{4}  \]
 </div>
-<p> to the canonical breakpoints \(\tfrac {\pi }{2},\pi ,\tfrac {3\pi }{2},2\pi \) respectively (<a href="chap-reduction.html#lem:align_reparam_node_values">lemma 70</a>), is strictly increasing with slope \(g_z'=w_z\in [c_-,c_+]\subset (0,\infty )\), and is quasi-periodic (\(g_z(\theta +2\pi )=g_z(\theta )+2\pi \)) because the full-period integral of \(w_z\) is \(2\pi \) (<a href="chap-reduction.html#lem:align_density_arc_integral">lemma 68</a>). We write \(K=22/9\) for the uniform slope bound (\(1/K\le w_z\le K\); see <a href="chap-reduction.html#def:align_density">definition 66</a>). </p>
+<p> to the canonical breakpoints \(\tfrac {\pi }{2},\pi ,\tfrac {3\pi }{2},2\pi \) respectively (<a href="chap-reduction.html#lem:align_reparam_node_values">lemma 71</a>), is strictly increasing with slope \(g_z'=w_z\in [c_-,c_+]\subset (0,\infty )\), and is quasi-periodic (\(g_z(\theta +2\pi )=g_z(\theta )+2\pi \)) because the full-period integral of \(w_z\) is \(2\pi \) (<a href="chap-reduction.html#lem:align_density_arc_integral">lemma 69</a>). We write \(K=22/9\) for the uniform slope bound (\(1/K\le w_z\le K\); see <a href="chap-reduction.html#def:align_density">definition 67</a>). </p>
 
   </div>
 </div>
-<p>These structural properties are recorded as separate Lean lemmas (used by <a href="chap-reduction.html#lem:kappa_error_map_continuous">lemma 77</a> and <a href="chap-reduction.html#lem:kappa_error_map_close">lemma 80</a>): </p>
+<p>These structural properties are recorded as separate Lean lemmas (used by <a href="chap-reduction.html#lem:kappa_error_map_continuous">lemma 78</a> and <a href="chap-reduction.html#lem:kappa_error_map_close">lemma 81</a>): </p>
 <div class="lemma_thmwrapper theorem-style-plain" id="lem:align_reparam_node_values">
   <div class="lemma_thmheading">
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">70</span>
+    <span class="lemma_thmlabel">71</span>
     <div class="thm_header_extras">
 
     
@@ -553,7 +610,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:align_reparam_node_values">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000082"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000095"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -569,13 +626,13 @@
         
         <ul class="uses">
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
-          <li><a href="chap-reduction.html#lem:align_density_arc_integral">Lemma 68</a></li>
+          <li><a href="chap-reduction.html#lem:align_density_arc_integral">Lemma 69</a></li>
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
-          <li><a href="chap-reduction.html#lem:align_density_arc_integral">Lemma 68</a></li>
+          <li><a href="chap-reduction.html#lem:align_density_arc_integral">Lemma 69</a></li>
           
         </ul>
     
@@ -610,7 +667,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000082">
+<div class="proof_wrapper" id="a0000000095">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -618,7 +675,7 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p> \(g_z(\theta _1)=\pi /2\) by definition. By <a href="chap-reduction.html#lem:align_density_arc_integral">lemma 68</a>, \(g_z(\theta _{k+1})-g_z(\theta _k)= \int _{\theta _k}^{\theta _{k+1}}w_z=\pi /2\), so \(g_z(\theta _k)=\pi /2+(k-1)\pi /2=k\pi /2\) by induction. </p>
+  <p> \(g_z(\theta _1)=\pi /2\) by definition. By <a href="chap-reduction.html#lem:align_density_arc_integral">lemma 69</a>, \(g_z(\theta _{k+1})-g_z(\theta _k)= \int _{\theta _k}^{\theta _{k+1}}w_z=\pi /2\), so \(g_z(\theta _k)=\pi /2+(k-1)\pi /2=k\pi /2\) by induction. </p>
 
   </div>
 </div>
@@ -627,7 +684,7 @@
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">71</span>
+    <span class="lemma_thmlabel">72</span>
     <div class="thm_header_extras">
 
     
@@ -637,7 +694,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:align_reparam_add_two_pi">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000083"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000096"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -653,13 +710,13 @@
         
         <ul class="uses">
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
-          <li><a href="chap-reduction.html#lem:align_density_arc_integral">Lemma 68</a></li>
+          <li><a href="chap-reduction.html#lem:align_density_arc_integral">Lemma 69</a></li>
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
-          <li><a href="chap-reduction.html#lem:align_density_arc_integral">Lemma 68</a></li>
+          <li><a href="chap-reduction.html#lem:align_density_arc_integral">Lemma 69</a></li>
           
         </ul>
     
@@ -694,7 +751,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000083">
+<div class="proof_wrapper" id="a0000000096">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -702,7 +759,7 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p> \(g_z(\theta +2\pi )-g_z(\theta )=\int _{\theta }^{\theta +2\pi }w_z= \int _{\theta _1}^{\theta _1+2\pi }w_z=2\pi \) by the \(2\pi \)-periodicity of \(w_z\) (the integral of a periodic function over any window of length one period is the full-period integral) and <a href="chap-reduction.html#lem:align_density_arc_integral">lemma 68</a>. </p>
+  <p> \(g_z(\theta +2\pi )-g_z(\theta )=\int _{\theta }^{\theta +2\pi }w_z= \int _{\theta _1}^{\theta _1+2\pi }w_z=2\pi \) by the \(2\pi \)-periodicity of \(w_z\) (the integral of a periodic function over any window of length one period is the full-period integral) and <a href="chap-reduction.html#lem:align_density_arc_integral">lemma 69</a>. </p>
 
   </div>
 </div>
@@ -711,7 +768,7 @@
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">72</span>
+    <span class="lemma_thmlabel">73</span>
     <div class="thm_header_extras">
 
     
@@ -721,7 +778,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:continuous_align_reparam">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000084"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000097"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -737,13 +794,13 @@
         
         <ul class="uses">
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
-          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 67</a></li>
+          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 68</a></li>
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
-          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 67</a></li>
+          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 68</a></li>
           
         </ul>
     
@@ -778,7 +835,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000084">
+<div class="proof_wrapper" id="a0000000097">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -795,7 +852,7 @@
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">73</span>
+    <span class="lemma_thmlabel">74</span>
     <div class="thm_header_extras">
 
     
@@ -805,7 +862,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:continuous_uncurry_align_reparam">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000085"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000098"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -821,13 +878,13 @@
         
         <ul class="uses">
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
-          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 67</a></li>
+          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 68</a></li>
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
-          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 67</a></li>
+          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 68</a></li>
           
         </ul>
     
@@ -858,11 +915,11 @@
         </div>
   </div>
   <div class="lemma_thmcontent">
-  <p>[Joint continuity of \((z,\theta )\mapsto g_z(\theta )\)]    The map \((z,\theta )\mapsto g_z(\theta )\) is jointly continuous on \(\overline{\mathbb D}\times \mathbb R\). This is the load-bearing input to <a href="chap-reduction.html#lem:kappa_error_map_continuous">lemma 77</a>. </p>
+  <p>[Joint continuity of \((z,\theta )\mapsto g_z(\theta )\)]    The map \((z,\theta )\mapsto g_z(\theta )\) is jointly continuous on \(\overline{\mathbb D}\times \mathbb R\). This is the load-bearing input to <a href="chap-reduction.html#lem:kappa_error_map_continuous">lemma 78</a>. </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000085">
+<div class="proof_wrapper" id="a0000000098">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -870,7 +927,7 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p> The integrand \((z,t)\mapsto w_z(t)\) is jointly continuous (<a href="chap-reduction.html#lem:align_density_props">lemma 67</a>) and the lower limit \(\theta _1(z)\) is continuous in \(z\), so continuity of the parametrised integral with a jointly continuous integrand over a varying interval (the same parametric-integral continuity used for <a href="chap-reduction.html#lem:kappa_error_map_continuous">lemma 77</a>) gives joint continuity of \((z,\theta )\mapsto g_z(\theta )\). </p>
+  <p> The integrand \((z,t)\mapsto w_z(t)\) is jointly continuous (<a href="chap-reduction.html#lem:align_density_props">lemma 68</a>) and the lower limit \(\theta _1(z)\) is continuous in \(z\), so continuity of the parametrised integral with a jointly continuous integrand over a varying interval (the same parametric-integral continuity used for <a href="chap-reduction.html#lem:kappa_error_map_continuous">lemma 78</a>) gives joint continuity of \((z,\theta )\mapsto g_z(\theta )\). </p>
 
   </div>
 </div>
@@ -879,7 +936,7 @@
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">74</span>
+    <span class="lemma_thmlabel">75</span>
     <div class="thm_header_extras">
 
     
@@ -889,7 +946,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:strict_mono_align_reparam">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000086"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000099"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -905,13 +962,13 @@
         
         <ul class="uses">
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
-          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 67</a></li>
+          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 68</a></li>
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
-          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 67</a></li>
+          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 68</a></li>
           
         </ul>
     
@@ -946,7 +1003,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000086">
+<div class="proof_wrapper" id="a0000000099">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -954,7 +1011,7 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p> \(g_z(y)-g_z(x)=\int _x^y w_z\ge c_-\, (y-x){\gt}0\) for \(x{\lt}y\), since the integrand \(w_z\ge c_-{\gt}0\) (<a href="chap-reduction.html#lem:align_density_props">lemma 67</a>). </p>
+  <p> \(g_z(y)-g_z(x)=\int _x^y w_z\ge c_-\, (y-x){\gt}0\) for \(x{\lt}y\), since the integrand \(w_z\ge c_-{\gt}0\) (<a href="chap-reduction.html#lem:align_density_props">lemma 68</a>). </p>
 
   </div>
 </div>
@@ -963,7 +1020,7 @@
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">75</span>
+    <span class="lemma_thmlabel">76</span>
     <div class="thm_header_extras">
 
     
@@ -973,7 +1030,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:align_reparam_matches">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000087"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000100"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -989,21 +1046,21 @@
         
         <ul class="uses">
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
-          <li><a href="chap-reduction.html#lem:align_reparam_node_values">Lemma 70</a></li>
+          <li><a href="chap-reduction.html#lem:align_reparam_node_values">Lemma 71</a></li>
           
-          <li><a href="chap-reduction.html#lem:strict_mono_align_reparam">Lemma 74</a></li>
+          <li><a href="chap-reduction.html#lem:strict_mono_align_reparam">Lemma 75</a></li>
           
           <li><a href="chap-stepreduction.html#def:four_arc_step_function">Definition 24</a></li>
           
-          <li><a href="chap-winding.html#def:configuration_space">Definition 59</a></li>
+          <li><a href="chap-winding.html#def:configuration_space">Definition 60</a></li>
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
-          <li><a href="chap-reduction.html#lem:align_reparam_node_values">Lemma 70</a></li>
+          <li><a href="chap-reduction.html#lem:align_reparam_node_values">Lemma 71</a></li>
           
-          <li><a href="chap-reduction.html#lem:strict_mono_align_reparam">Lemma 74</a></li>
+          <li><a href="chap-reduction.html#lem:strict_mono_align_reparam">Lemma 75</a></li>
           
         </ul>
     
@@ -1035,14 +1092,14 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[\(g_z\) aligns the step functions]    Let \(\kappa _0=\mathrm{stepCurvature}\, b\, a\, 0\, \tfrac \pi 2\, \pi \, \tfrac {3\pi }2\) be the canonical four-arc step function of <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a>. Then for almost every \(\theta \), </p>
-<div class="displaymath" id="a0000000088">
+<div class="displaymath" id="a0000000101">
   \[  \kappa _0\bigl(g_z(\theta )\bigr) \; =\;  \mathrm{stepCurvature}\, a\, b\, (\mathrm{configSpace}(\delta )(z))\, (\theta ),  \]
 </div>
 <p> the step function of the \(z\)-configuration. Consequently \(\mathrm{errorMap}(a,b,\delta )(z)=\mathrm{errorVector}(\mathrm{radius}(\kappa _0\circ g_z))\). </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000087">
+<div class="proof_wrapper" id="a0000000100">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1050,7 +1107,7 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p> By <a href="chap-reduction.html#lem:align_reparam_node_values">lemma 70</a> and strict monotonicity (<a href="chap-reduction.html#lem:strict_mono_align_reparam">lemma 74</a>), \(g_z\) carries arc&#160;1 \([\theta _1,\theta _2)\to [\tfrac \pi 2,\pi )\), arc&#160;2 \(\to [\pi ,\tfrac {3\pi }2)\), arc&#160;3 \(\to [\tfrac {3\pi }2,2\pi )\), arc&#160;4 \(\to [2\pi ,\tfrac \pi 2+2\pi )\equiv [0,\tfrac \pi 2)\) (mod \(2\pi \)). On these target arcs \(\kappa _0\) takes the values \(b,a,b,a\) respectively, which match the values \(b,a,b,a\) of \(\mathrm{stepCurvature}\, a\, b\, (\mathrm{configSpace})\) on arcs \(1,2,3,4\). The two sides therefore agree off the finite breakpoint set (a null set). Since \(\mathrm{errorMap}(a,b,\delta )(z)= \mathrm{bicircleErrorVector}\, a\, b\, (\mathrm{configSpace})= \mathrm{errorVector}(\mathrm{radius}(\mathrm{stepCurvature}\, a\, b\, (\mathrm{configSpace})))\) and \(\mathrm{errorVector}\) depends only on the a.e. class of the weight, the stated identity of error vectors follows. </p>
+  <p> By <a href="chap-reduction.html#lem:align_reparam_node_values">lemma 71</a> and strict monotonicity (<a href="chap-reduction.html#lem:strict_mono_align_reparam">lemma 75</a>), \(g_z\) carries arc&#160;1 \([\theta _1,\theta _2)\to [\tfrac \pi 2,\pi )\), arc&#160;2 \(\to [\pi ,\tfrac {3\pi }2)\), arc&#160;3 \(\to [\tfrac {3\pi }2,2\pi )\), arc&#160;4 \(\to [2\pi ,\tfrac \pi 2+2\pi )\equiv [0,\tfrac \pi 2)\) (mod \(2\pi \)). On these target arcs \(\kappa _0\) takes the values \(b,a,b,a\) respectively, which match the values \(b,a,b,a\) of \(\mathrm{stepCurvature}\, a\, b\, (\mathrm{configSpace})\) on arcs \(1,2,3,4\). The two sides therefore agree off the finite breakpoint set (a null set). Since \(\mathrm{errorMap}(a,b,\delta )(z)= \mathrm{bicircleErrorVector}\, a\, b\, (\mathrm{configSpace})= \mathrm{errorVector}(\mathrm{radius}(\mathrm{stepCurvature}\, a\, b\, (\mathrm{configSpace})))\) and \(\mathrm{errorVector}\) depends only on the a.e. class of the weight, the stated identity of error vectors follows. </p>
 
   </div>
 </div>
@@ -1060,7 +1117,7 @@
     <span class="definition_thmcaption">
     Definition
     </span>
-    <span class="definition_thmlabel">76</span>
+    <span class="definition_thmlabel">77</span>
     <div class="thm_header_extras">
 
     
@@ -1083,7 +1140,7 @@
         
         <ul class="uses">
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
           <li><a href="chap-closure.html#def:error_vector">Definition 19</a></li>
           
@@ -1119,7 +1176,7 @@
   </div>
   <div class="definition_thmcontent">
   <p>[The \(\kappa \)-error map]    Project-bespoke. For a curvature function \(\kappa \), the reparametrization \(h_1\), and \(0{\lt}\delta \le \pi /8\), </p>
-<div class="displaymath" id="a0000000089">
+<div class="displaymath" id="a0000000102">
   \[  E_\kappa (z) \; :=\;  \mathrm{errorVector}\bigl(\mathrm{radius}(\kappa \circ h_1\circ g_z)\bigr) \; =\;  \int _0^{2\pi } e^{i\theta }\, \frac{d\theta }{\kappa \bigl(h_1(g_z(\theta ))\bigr)}, \qquad z\in \overline{\mathbb {D}} .  \]
 </div>
 <p> This is the error vector of the curve reconstructed from the curvature function \(\kappa \circ h_1\circ g_z\); \(E_\kappa (z)=0\) means precisely that this curve closes up. </p>
@@ -1131,7 +1188,7 @@
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">77</span>
+    <span class="lemma_thmlabel">78</span>
     <div class="thm_header_extras">
 
     
@@ -1141,7 +1198,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:kappa_error_map_continuous">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000090"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000103"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1157,13 +1214,13 @@
         
         <ul class="uses">
           
-          <li><a href="chap-reduction.html#def:kappa_error_map">Definition 76</a></li>
+          <li><a href="chap-reduction.html#def:kappa_error_map">Definition 77</a></li>
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
-          <li><a href="chap-reduction.html#def:kappa_error_map">Definition 76</a></li>
+          <li><a href="chap-reduction.html#def:kappa_error_map">Definition 77</a></li>
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
         </ul>
     
@@ -1198,7 +1255,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000090">
+<div class="proof_wrapper" id="a0000000103">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1206,18 +1263,18 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p> The integrand \((z,\theta )\mapsto e^{i\theta }/\kappa (h_1(g_z(\theta )))\) is jointly continuous on \(\overline{\mathbb {D}}\times [0,2\pi ]\): \(\kappa ,h_1\) are continuous, \((z,\theta )\mapsto g_z(\theta )\) is jointly continuous (<a href="chap-reduction.html#def:align_reparam">definition 69</a>), and \(\kappa {\gt}0\) keeps the denominator bounded away from \(0\) on the compact domain. Continuity of a parametrised interval integral with jointly continuous integrand over a fixed compact interval gives continuity of \(z\mapsto E_\kappa (z)\). </p>
+  <p> The integrand \((z,\theta )\mapsto e^{i\theta }/\kappa (h_1(g_z(\theta )))\) is jointly continuous on \(\overline{\mathbb {D}}\times [0,2\pi ]\): \(\kappa ,h_1\) are continuous, \((z,\theta )\mapsto g_z(\theta )\) is jointly continuous (<a href="chap-reduction.html#def:align_reparam">definition 70</a>), and \(\kappa {\gt}0\) keeps the denominator bounded away from \(0\) on the compact domain. Continuity of a parametrised interval integral with jointly continuous integrand over a fixed compact interval gives continuity of \(z\mapsto E_\kappa (z)\). </p>
 
   </div>
 </div>
 <h1 id="a0000000011">7.3 Change-of-variables keystones for the \(L^1\) estimate</h1>
-<p>The closeness estimate <a href="chap-reduction.html#lem:kappa_error_map_close">lemma 80</a> and its existence form <a href="chap-reduction.html#lem:exists_reparam_close">lemma 81</a> both pull an integral over \(\theta \) back to the \(\phi =g_z(\theta )\) line through the slope-bounded reparametrization \(g_z\). Two analytic facts about \(g_z\) carry this; both are proved. </p>
+<p>The closeness estimate <a href="chap-reduction.html#lem:kappa_error_map_close">lemma 81</a> and its existence form <a href="chap-reduction.html#lem:exists_reparam_close">lemma 82</a> both pull an integral over \(\theta \) back to the \(\phi =g_z(\theta )\) line through the slope-bounded reparametrization \(g_z\). Two analytic facts about \(g_z\) carry this; both are proved. </p>
 <div class="lemma_thmwrapper theorem-style-plain" id="lem:has_deriv_align_reparam">
   <div class="lemma_thmheading">
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">78</span>
+    <span class="lemma_thmlabel">79</span>
     <div class="thm_header_extras">
 
     
@@ -1227,7 +1284,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:has_deriv_align_reparam">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000091"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000104"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1243,13 +1300,13 @@
         
         <ul class="uses">
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
-          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 67</a></li>
+          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 68</a></li>
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
-          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 67</a></li>
+          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 68</a></li>
           
         </ul>
     
@@ -1284,7 +1341,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000091">
+<div class="proof_wrapper" id="a0000000104">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1301,7 +1358,7 @@
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">79</span>
+    <span class="lemma_thmlabel">80</span>
     <div class="thm_header_extras">
 
     
@@ -1311,7 +1368,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:align_reparam_change_of_var">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000092"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000105"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1327,13 +1384,13 @@
         
         <ul class="uses">
           
-          <li><a href="chap-reduction.html#lem:has_deriv_align_reparam">Lemma 78</a></li>
+          <li><a href="chap-reduction.html#lem:has_deriv_align_reparam">Lemma 79</a></li>
           
-          <li><a href="chap-reduction.html#lem:strict_mono_align_reparam">Lemma 74</a></li>
+          <li><a href="chap-reduction.html#lem:strict_mono_align_reparam">Lemma 75</a></li>
           
-          <li><a href="chap-reduction.html#lem:has_deriv_align_reparam">Lemma 78</a></li>
+          <li><a href="chap-reduction.html#lem:has_deriv_align_reparam">Lemma 79</a></li>
           
-          <li><a href="chap-reduction.html#lem:strict_mono_align_reparam">Lemma 74</a></li>
+          <li><a href="chap-reduction.html#lem:strict_mono_align_reparam">Lemma 75</a></li>
           
         </ul>
     
@@ -1368,7 +1425,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000092">
+<div class="proof_wrapper" id="a0000000105">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1376,7 +1433,7 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p> \(g_z\) is strictly monotone (<a href="chap-reduction.html#lem:strict_mono_align_reparam">lemma 74</a>), hence injective, and \(C^1\) with derivative \(w_z\ge 0\) (<a href="chap-reduction.html#lem:has_deriv_align_reparam">lemma 78</a>). The image of \([0,2\pi ]\) is \([g_z(0),g_z(2\pi )]\) (continuous monotone image of an interval), so the one-dimensional change-of-variables formula \(\int _{g(S)}G=\int _S |g'|\, (G\circ g)\) applies with \(|g'|=w_z\). </p>
+  <p> \(g_z\) is strictly monotone (<a href="chap-reduction.html#lem:strict_mono_align_reparam">lemma 75</a>), hence injective, and \(C^1\) with derivative \(w_z\ge 0\) (<a href="chap-reduction.html#lem:has_deriv_align_reparam">lemma 79</a>). The image of \([0,2\pi ]\) is \([g_z(0),g_z(2\pi )]\) (continuous monotone image of an interval), so the one-dimensional change-of-variables formula \(\int _{g(S)}G=\int _S |g'|\, (G\circ g)\) applies with \(|g'|=w_z\). </p>
 
   </div>
 </div>
@@ -1386,7 +1443,7 @@
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">80</span>
+    <span class="lemma_thmlabel">81</span>
     <div class="thm_header_extras">
 
     
@@ -1396,7 +1453,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:kappa_error_map_close">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000093"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000106"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1412,33 +1469,33 @@
         
         <ul class="uses">
           
-          <li><a href="chap-reduction.html#def:kappa_error_map">Definition 76</a></li>
+          <li><a href="chap-reduction.html#def:kappa_error_map">Definition 77</a></li>
           
-          <li><a href="chap-winding.html#def:error_map">Definition 61</a></li>
-          
-          <li><a href="chap-stepreduction.html#lem:error_vector_lipschitz">Lemma 27</a></li>
-          
-          <li><a href="chap-stepreduction.html#lem:exists_preliminary_reparam">Lemma 30</a></li>
-          
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
-          
-          <li><a href="chap-reduction.html#lem:align_reparam_matches">Lemma 75</a></li>
-          
-          <li><a href="chap-reduction.html#lem:strict_mono_align_reparam">Lemma 74</a></li>
-          
-          <li><a href="chap-reduction.html#lem:has_deriv_align_reparam">Lemma 78</a></li>
-          
-          <li><a href="chap-reduction.html#lem:align_reparam_change_of_var">Lemma 79</a></li>
+          <li><a href="chap-winding.html#def:error_map">Definition 62</a></li>
           
           <li><a href="chap-stepreduction.html#lem:error_vector_lipschitz">Lemma 27</a></li>
           
           <li><a href="chap-stepreduction.html#lem:exists_preliminary_reparam">Lemma 30</a></li>
           
-          <li><a href="chap-reduction.html#def:align_reparam">Definition 69</a></li>
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
           
-          <li><a href="chap-reduction.html#lem:align_reparam_matches">Lemma 75</a></li>
+          <li><a href="chap-reduction.html#lem:align_reparam_matches">Lemma 76</a></li>
           
-          <li><a href="chap-reduction.html#lem:strict_mono_align_reparam">Lemma 74</a></li>
+          <li><a href="chap-reduction.html#lem:strict_mono_align_reparam">Lemma 75</a></li>
+          
+          <li><a href="chap-reduction.html#lem:has_deriv_align_reparam">Lemma 79</a></li>
+          
+          <li><a href="chap-reduction.html#lem:align_reparam_change_of_var">Lemma 80</a></li>
+          
+          <li><a href="chap-stepreduction.html#lem:error_vector_lipschitz">Lemma 27</a></li>
+          
+          <li><a href="chap-stepreduction.html#lem:exists_preliminary_reparam">Lemma 30</a></li>
+          
+          <li><a href="chap-reduction.html#def:align_reparam">Definition 70</a></li>
+          
+          <li><a href="chap-reduction.html#lem:align_reparam_matches">Lemma 76</a></li>
+          
+          <li><a href="chap-reduction.html#lem:strict_mono_align_reparam">Lemma 75</a></li>
           
         </ul>
     
@@ -1470,13 +1527,13 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[\(E_\kappa \) is uniformly close to \(E_{\mathrm{bi}}\)]    Let \(M = 1/\min \kappa \) and let \(h_1\) be chosen for a tolerance \(\varepsilon {\gt}0\) as in <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a>. There is an absolute constant \(K\) (the slope bound of \(g_z\)) such that, for every \(z\in \overline{\mathbb {D}}\), </p>
-<div class="displaymath" id="a0000000094">
+<div class="displaymath" id="a0000000107">
   \[  \bigl\lVert E_\kappa (z) - \mathrm{errorMap}(a,b,\delta )(z)\bigr\rVert \; \le \;  K\, M^2\, \varepsilon .  \]
 </div>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000093">
+<div class="proof_wrapper" id="a0000000106">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1484,8 +1541,8 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p> Fix \(z\). By <a href="chap-reduction.html#lem:align_reparam_matches">lemma 75</a>, \(\mathrm{errorMap}(a,b,\delta )(z) = \mathrm{errorVector}(\mathrm{radius}(\kappa _0\circ g_z))\), since \(\kappa _0\circ g_z\) equals the \(z\)-configuration step function a.e. By <a href="chap-stepreduction.html#lem:error_vector_lipschitz">lemma 27</a> applied to the weights \(\rho = \mathrm{radius}(\kappa \circ h_1\circ g_z)\) and \(\rho _0 = \mathrm{radius}(\kappa _0\circ g_z)\), </p>
-<div class="displaymath" id="a0000000095">
+  <p> Fix \(z\). By <a href="chap-reduction.html#lem:align_reparam_matches">lemma 76</a>, \(\mathrm{errorMap}(a,b,\delta )(z) = \mathrm{errorVector}(\mathrm{radius}(\kappa _0\circ g_z))\), since \(\kappa _0\circ g_z\) equals the \(z\)-configuration step function a.e. By <a href="chap-stepreduction.html#lem:error_vector_lipschitz">lemma 27</a> applied to the weights \(\rho = \mathrm{radius}(\kappa \circ h_1\circ g_z)\) and \(\rho _0 = \mathrm{radius}(\kappa _0\circ g_z)\), </p>
+<div class="displaymath" id="a0000000108">
   \[  \lVert E_\kappa (z) - \mathrm{errorMap}(z)\rVert \le \int _0^{2\pi }\Bigl\lvert \tfrac {1}{\kappa (h_1(g_z\theta ))} - \tfrac {1}{\kappa _0(g_z\theta )}\Bigr\rvert \, d\theta .  \]
 </div>
 <p> Both weights lie in \([0,M]\), and \(\lvert 1/u-1/v\rvert \le M^2\lvert u-v\rvert \) for \(u,v\ge 1/M\), so the integrand is \(\le M^2\lvert \kappa \circ h_1 - \kappa _0\rvert \circ g_z\). Substituting \(\phi = g_z(\theta )\) (a piecewise-affine change of variables with \(g_z'\ge 1/K\)) pulls the bound back to the \(\phi \)-line: the set where \(\lvert \kappa (h_1\phi )-\kappa _0(\phi )\rvert {\gt}\varepsilon \) has measure \({\lt}\varepsilon \) (<a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a>), and its \(g_z\)-preimage has measure \({\lt}K\varepsilon \); off it the integrand is \(\le M^2\varepsilon \), and on it the integrand is \(\le 2M\cdot M = 2M^2\). Hence the integral is \(\le M^2\varepsilon \cdot 2\pi + 2M^2\cdot K\varepsilon \le K' M^2\varepsilon \) for an absolute constant \(K'\). Absorb \(2\pi \) and the factor into \(K\). </p>
@@ -1497,7 +1554,7 @@
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">81</span>
+    <span class="lemma_thmlabel">82</span>
     <div class="thm_header_extras">
 
         </div>
@@ -1505,7 +1562,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:exists_reparam_close">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000096"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000109"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1521,25 +1578,25 @@
         
         <ul class="uses">
           
-          <li><a href="chap-reduction.html#def:kappa_error_map">Definition 76</a></li>
+          <li><a href="chap-reduction.html#def:kappa_error_map">Definition 77</a></li>
           
-          <li><a href="chap-winding.html#def:error_map">Definition 61</a></li>
+          <li><a href="chap-winding.html#def:error_map">Definition 62</a></li>
           
-          <li><a href="chap-reduction.html#lem:kappa_error_map_close">Lemma 80</a></li>
-          
-          <li><a href="chap-stepreduction.html#lem:exists_preliminary_reparam">Lemma 30</a></li>
-          
-          <li><a href="chap-reduction.html#lem:align_reparam_matches">Lemma 75</a></li>
-          
-          <li><a href="chap-reduction.html#lem:has_deriv_align_reparam">Lemma 78</a></li>
-          
-          <li><a href="chap-reduction.html#lem:align_reparam_change_of_var">Lemma 79</a></li>
-          
-          <li><a href="chap-reduction.html#lem:kappa_error_map_close">Lemma 80</a></li>
+          <li><a href="chap-reduction.html#lem:kappa_error_map_close">Lemma 81</a></li>
           
           <li><a href="chap-stepreduction.html#lem:exists_preliminary_reparam">Lemma 30</a></li>
           
-          <li><a href="chap-reduction.html#lem:align_reparam_matches">Lemma 75</a></li>
+          <li><a href="chap-reduction.html#lem:align_reparam_matches">Lemma 76</a></li>
+          
+          <li><a href="chap-reduction.html#lem:has_deriv_align_reparam">Lemma 79</a></li>
+          
+          <li><a href="chap-reduction.html#lem:align_reparam_change_of_var">Lemma 80</a></li>
+          
+          <li><a href="chap-reduction.html#lem:kappa_error_map_close">Lemma 81</a></li>
+          
+          <li><a href="chap-stepreduction.html#lem:exists_preliminary_reparam">Lemma 30</a></li>
+          
+          <li><a href="chap-reduction.html#lem:align_reparam_matches">Lemma 76</a></li>
           
         </ul>
     
@@ -1578,11 +1635,11 @@
         </div>
   </div>
   <div class="lemma_thmcontent">
-  <p>[Existence of a preconditioning reparametrization]    Project-bespoke (the existence form of <a href="chap-reduction.html#lem:kappa_error_map_close">lemma 80</a> that bundles the \(\varepsilon \)-choice). For any target margin \(\mu {\gt}0\) there is an orientation-preserving circle reparametrization \(h_1\) (<span class="ttfamily">StrictMono</span>, <span class="ttfamily">Continuous</span>, quasi-periodic) such that \(\lVert E_\kappa (z)-\mathrm{errorMap}(a,b,\delta )(z)\rVert {\lt}\mu \) for every \(z\in \overline{\mathbb D}\). The same \(h_1\) is the one of <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a>, so it additionally carries the \(C^1\) regularity there: there is a continuous \(v_1{\gt}0\) with \(h_1'(\theta )=v_1(\theta )\) for all \(\theta \) (forwarded verbatim). </p>
+  <p>[Existence of a preconditioning reparametrization]    Project-bespoke (the existence form of <a href="chap-reduction.html#lem:kappa_error_map_close">lemma 81</a> that bundles the \(\varepsilon \)-choice). For any target margin \(\mu {\gt}0\) there is an orientation-preserving circle reparametrization \(h_1\) (<span class="ttfamily">StrictMono</span>, <span class="ttfamily">Continuous</span>, quasi-periodic) such that \(\lVert E_\kappa (z)-\mathrm{errorMap}(a,b,\delta )(z)\rVert {\lt}\mu \) for every \(z\in \overline{\mathbb D}\). The same \(h_1\) is the one of <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a>, so it additionally carries the \(C^1\) regularity there: there is a continuous \(v_1{\gt}0\) with \(h_1'(\theta )=v_1(\theta )\) for all \(\theta \) (forwarded verbatim). </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000096">
+<div class="proof_wrapper" id="a0000000109">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1590,7 +1647,7 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p> By <a href="chap-reduction.html#lem:kappa_error_map_close">lemma 80</a> the error-vector gap is bounded by the \(L^1\) weight difference, so it suffices to make that integral \({\lt}\mu \) uniformly in \(z\). Choose the tolerance \(\varepsilon \) of <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a> with \(K M^2\varepsilon {\lt}\mu \) (\(M=1/\min \kappa \), \(K\) the slope bound of \(g_z\)), apply <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a> to obtain \(h_1\), and conclude by the change-of-variables / bad-set pullback through the slope-bounded \(g_z\) (the \({\lt}\varepsilon \)-measure bad set has \(g_z\)-preimage of measure \({\lt}K\varepsilon \); off it the integrand is \(\le M^2\varepsilon \)). </p>
+  <p> By <a href="chap-reduction.html#lem:kappa_error_map_close">lemma 81</a> the error-vector gap is bounded by the \(L^1\) weight difference, so it suffices to make that integral \({\lt}\mu \) uniformly in \(z\). Choose the tolerance \(\varepsilon \) of <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a> with \(K M^2\varepsilon {\lt}\mu \) (\(M=1/\min \kappa \), \(K\) the slope bound of \(g_z\)), apply <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a> to obtain \(h_1\), and conclude by the change-of-variables / bad-set pullback through the slope-bounded \(g_z\) (the \({\lt}\varepsilon \)-measure bad set has \(g_z\)-preimage of measure \({\lt}K\varepsilon \); off it the integrand is \(\le M^2\varepsilon \)). </p>
 
   </div>
 </div>
@@ -1600,7 +1657,7 @@
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">82</span>
+    <span class="lemma_thmlabel">83</span>
     <div class="thm_header_extras">
 
     
@@ -1610,7 +1667,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:reduction_justified">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000097"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000110"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1630,17 +1687,17 @@
           
           <li><a href="chap-stepreduction.html#lem:exists_preliminary_reparam">Lemma 30</a></li>
           
-          <li><a href="chap-reduction.html#def:kappa_error_map">Definition 76</a></li>
+          <li><a href="chap-reduction.html#def:kappa_error_map">Definition 77</a></li>
           
-          <li><a href="chap-reduction.html#lem:kappa_error_map_continuous">Lemma 77</a></li>
+          <li><a href="chap-reduction.html#lem:kappa_error_map_continuous">Lemma 78</a></li>
           
-          <li><a href="chap-reduction.html#lem:kappa_error_map_close">Lemma 80</a></li>
+          <li><a href="chap-reduction.html#lem:kappa_error_map_close">Lemma 81</a></li>
           
-          <li><a href="chap-reduction.html#lem:exists_reparam_close">Lemma 81</a></li>
+          <li><a href="chap-reduction.html#lem:exists_reparam_close">Lemma 82</a></li>
           
-          <li><a href="chap-winding.html#lem:error_map_winds_boundary">Lemma 63</a></li>
+          <li><a href="chap-winding.html#lem:error_map_winds_boundary">Lemma 64</a></li>
           
-          <li><a href="chap-winding.html#thm:existence_of_zero">Theorem 64</a></li>
+          <li><a href="chap-winding.html#thm:existence_of_zero">Theorem 65</a></li>
           
           <li><a href="chap-closure.html#lem:closes_iff">Lemma 23</a></li>
           
@@ -1648,21 +1705,21 @@
           
           <li><a href="chap-stepreduction.html#lem:exists_preliminary_reparam">Lemma 30</a></li>
           
-          <li><a href="chap-reduction.html#lem:exists_reparam_close">Lemma 81</a></li>
+          <li><a href="chap-reduction.html#lem:exists_reparam_close">Lemma 82</a></li>
           
-          <li><a href="chap-reduction.html#lem:kappa_error_map_continuous">Lemma 77</a></li>
+          <li><a href="chap-reduction.html#lem:kappa_error_map_continuous">Lemma 78</a></li>
           
-          <li><a href="chap-reduction.html#lem:kappa_error_map_close">Lemma 80</a></li>
+          <li><a href="chap-reduction.html#lem:kappa_error_map_close">Lemma 81</a></li>
           
-          <li><a href="chap-winding.html#lem:error_map_winds_boundary">Lemma 63</a></li>
+          <li><a href="chap-winding.html#lem:error_map_winds_boundary">Lemma 64</a></li>
           
-          <li><a href="chap-winding.html#thm:existence_of_zero">Theorem 64</a></li>
+          <li><a href="chap-winding.html#thm:existence_of_zero">Theorem 65</a></li>
           
           <li><a href="chap-closure.html#lem:closes_iff">Lemma 23</a></li>
           
-          <li><a href="chap-reduction.html#lem:has_deriv_align_reparam">Lemma 78</a></li>
+          <li><a href="chap-reduction.html#lem:has_deriv_align_reparam">Lemma 79</a></li>
           
-          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 67</a></li>
+          <li><a href="chap-reduction.html#lem:align_density_props">Lemma 68</a></li>
           
         </ul>
     
@@ -1693,11 +1750,11 @@
         </div>
   </div>
   <div class="lemma_thmcontent">
-  <p>[Reduction is justified]    <i class="itshape">Source: DeTurck–Gluck, §6 (robustness of the winding argument).</i> Let \(\kappa \) be a curvature function satisfying the four-vertex condition. Then there is a reparametrization \(h\) of the circle (<span class="ttfamily">StrictMono</span>, <span class="ttfamily">Continuous</span>, \(h(\theta +2\pi )=h(\theta )+2\pi \)) such that \(\kappa \circ h\) is again a curvature function whose reconstruction weight \(\rho = 1/(\kappa \circ h)\) has \(E(\rho )=0\); so by <a href="chap-closure.html#lem:closes_iff">lemma 23</a> the reconstruction curve \(\alpha _\rho \) closes up. Moreover \(h\) is a \(C^1\) circle diffeomorphism with strictly positive derivative: there is a continuous \(v{\gt}0\) with \(h'(\theta )=v(\theta )\) for all \(\theta \). This \(C^1\) regularity is what lets the closed curve be reparametrized back by \(h^{-1}\) to realize the original \(\kappa \) in <a href="chap-fourvertex.html#thm:gluck_converse">theorem 87</a>. </p>
+  <p>[Reduction is justified]    <i class="itshape">Source: DeTurck–Gluck, §6 (robustness of the winding argument).</i> Let \(\kappa \) be a curvature function satisfying the four-vertex condition. Then there is a reparametrization \(h\) of the circle (<span class="ttfamily">StrictMono</span>, <span class="ttfamily">Continuous</span>, \(h(\theta +2\pi )=h(\theta )+2\pi \)) such that \(\kappa \circ h\) is again a curvature function whose reconstruction weight \(\rho = 1/(\kappa \circ h)\) has \(E(\rho )=0\); so by <a href="chap-closure.html#lem:closes_iff">lemma 23</a> the reconstruction curve \(\alpha _\rho \) closes up. Moreover \(h\) is a \(C^1\) circle diffeomorphism with strictly positive derivative: there is a continuous \(v{\gt}0\) with \(h'(\theta )=v(\theta )\) for all \(\theta \). This \(C^1\) regularity is what lets the closed curve be reparametrized back by \(h^{-1}\) to realize the original \(\kappa \) in <a href="chap-fourvertex.html#thm:gluck_converse">theorem 88</a>. </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000097">
+<div class="proof_wrapper" id="a0000000110">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1705,11 +1762,11 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p> <em>Step 1 (fix the winding margin).</em> Fix the configuration-disk radius \(0{\lt}\delta \le \pi /8\) so that <a href="chap-winding.html#lem:error_map_winds_boundary">lemma 63</a> holds: the bicircle error map \(E_{\mathrm{bi}} = \mathrm{errorMap}(a,b,\delta )\) is continuous, nonvanishing on \(\partial \mathbb {D}\) with winding \(\pm 1\), and (from the explicit linear model, \(\lVert V\rVert \approx \delta \)) there is a margin \(\mu := \tfrac 12\min _{\partial \mathbb {D}}\lVert E_{\mathrm{bi}}\rVert {\gt} 0\). </p>
-<p><em>Step 2 (precondition \(\kappa \)).</em> Let \(M=1/\min \kappa \) (finite, \(\kappa {\gt}0\) continuous on the compact circle). With \(K\) the constant of <a href="chap-reduction.html#lem:kappa_error_map_close">lemma 80</a>, choose \(\varepsilon {\gt}0\) with \(K M^2\varepsilon {\lt}\mu \) and apply <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a> (with the crossing data \(0{\lt}a{\lt}b\), \(c_1{\lt}\dots {\lt}c_4\) from <a href="chap-curvature.html#lem:abab_values">lemma 14</a>) to obtain \(h_1\). </p>
-<p><em>Step 3 (transfer the winding).</em> Form \(E_\kappa \) (<a href="chap-reduction.html#def:kappa_error_map">definition 76</a>), continuous on \(\overline{\mathbb {D}}\) (<a href="chap-reduction.html#lem:kappa_error_map_continuous">lemma 77</a>). By <a href="chap-reduction.html#lem:kappa_error_map_close">lemma 80</a>, \(\lVert E_\kappa (z)-E_{\mathrm{bi}}(z)\rVert \le K M^2\varepsilon {\lt}\mu \) for all \(z\), in particular on \(\partial \mathbb {D}\). Hence on \(\partial \mathbb {D}\), \(\lVert E_\kappa \rVert \ge \lVert E_{\mathrm{bi}}\rVert -\mu \ge \mu {\gt}0\), so \(E_\kappa \ne 0\) there and the straight-line homotopy \(E_{\mathrm{bi}}+\tau (E_\kappa -E_{\mathrm{bi}})\) is nonvanishing on \(\partial \mathbb {D}\) for \(\tau \in [0,1]\); winding is a homotopy invariant, so \(E_\kappa \) also winds \(\pm 1\ne 0\) on \(\partial \mathbb {D}\). </p>
-<p><em>Step 4 (extract the zero).</em> By the planar degree theorem <a href="chap-winding.html#thm:existence_of_zero">theorem 64</a>, \(E_\kappa \) has an interior zero \(z_0\): \(\mathrm{errorVector}(\mathrm{radius}(\kappa \circ h_1\circ g_{z_0}))=0\). Set \(h = h_1\circ g_{z_0}\); then \(\kappa \circ h\) is a curvature function (composition of a curvature function with orientation-preserving circle homeomorphisms) with \(E(\mathrm{radius}(\kappa \circ h))=0\), which is the claim. (By <a href="chap-closure.html#lem:closes_iff">lemma 23</a> the reconstruction \(\alpha _{1/(\kappa \circ h)}\) then closes up; reparametrizing back as in <a href="chap-fourvertex.html#thm:gluck_converse">theorem 87</a> realizes \(\kappa \).) </p>
-<p><em>\(C^1\) regularity of \(h\).</em> Both factors are \(C^1\) with strictly positive derivative: \(h_1'=v_1{\gt}0\) by <a href="chap-reduction.html#lem:exists_reparam_close">lemma 81</a> (forwarding <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a>), and \(g_{z_0}'=w_{z_0}\ge 2/3{\gt}0\) by <a href="chap-reduction.html#lem:has_deriv_align_reparam">lemma 78</a> with the density bounds of <a href="chap-reduction.html#lem:align_density_props">lemma 67</a>. By the chain rule \(h'(\theta )=v_1(g_{z_0}(\theta ))\, w_{z_0}(\theta )=:v(\theta )\), a product of two continuous strictly positive functions, so \(v\) is continuous and \(v{\gt}0\) and \(h\in C^1\) as claimed. </p>
+  <p> <em>Step 1 (fix the winding margin).</em> Fix the configuration-disk radius \(0{\lt}\delta \le \pi /8\) so that <a href="chap-winding.html#lem:error_map_winds_boundary">lemma 64</a> holds: the bicircle error map \(E_{\mathrm{bi}} = \mathrm{errorMap}(a,b,\delta )\) is continuous, nonvanishing on \(\partial \mathbb {D}\) with winding \(\pm 1\), and (from the explicit linear model, \(\lVert V\rVert \approx \delta \)) there is a margin \(\mu := \tfrac 12\min _{\partial \mathbb {D}}\lVert E_{\mathrm{bi}}\rVert {\gt} 0\). </p>
+<p><em>Step 2 (precondition \(\kappa \)).</em> Let \(M=1/\min \kappa \) (finite, \(\kappa {\gt}0\) continuous on the compact circle). With \(K\) the constant of <a href="chap-reduction.html#lem:kappa_error_map_close">lemma 81</a>, choose \(\varepsilon {\gt}0\) with \(K M^2\varepsilon {\lt}\mu \) and apply <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a> (with the crossing data \(0{\lt}a{\lt}b\), \(c_1{\lt}\dots {\lt}c_4\) from <a href="chap-curvature.html#lem:abab_values">lemma 14</a>) to obtain \(h_1\). </p>
+<p><em>Step 3 (transfer the winding).</em> Form \(E_\kappa \) (<a href="chap-reduction.html#def:kappa_error_map">definition 77</a>), continuous on \(\overline{\mathbb {D}}\) (<a href="chap-reduction.html#lem:kappa_error_map_continuous">lemma 78</a>). By <a href="chap-reduction.html#lem:kappa_error_map_close">lemma 81</a>, \(\lVert E_\kappa (z)-E_{\mathrm{bi}}(z)\rVert \le K M^2\varepsilon {\lt}\mu \) for all \(z\), in particular on \(\partial \mathbb {D}\). Hence on \(\partial \mathbb {D}\), \(\lVert E_\kappa \rVert \ge \lVert E_{\mathrm{bi}}\rVert -\mu \ge \mu {\gt}0\), so \(E_\kappa \ne 0\) there and the straight-line homotopy \(E_{\mathrm{bi}}+\tau (E_\kappa -E_{\mathrm{bi}})\) is nonvanishing on \(\partial \mathbb {D}\) for \(\tau \in [0,1]\); winding is a homotopy invariant, so \(E_\kappa \) also winds \(\pm 1\ne 0\) on \(\partial \mathbb {D}\). </p>
+<p><em>Step 4 (extract the zero).</em> By the planar degree theorem <a href="chap-winding.html#thm:existence_of_zero">theorem 65</a>, \(E_\kappa \) has an interior zero \(z_0\): \(\mathrm{errorVector}(\mathrm{radius}(\kappa \circ h_1\circ g_{z_0}))=0\). Set \(h = h_1\circ g_{z_0}\); then \(\kappa \circ h\) is a curvature function (composition of a curvature function with orientation-preserving circle homeomorphisms) with \(E(\mathrm{radius}(\kappa \circ h))=0\), which is the claim. (By <a href="chap-closure.html#lem:closes_iff">lemma 23</a> the reconstruction \(\alpha _{1/(\kappa \circ h)}\) then closes up; reparametrizing back as in <a href="chap-fourvertex.html#thm:gluck_converse">theorem 88</a> realizes \(\kappa \).) </p>
+<p><em>\(C^1\) regularity of \(h\).</em> Both factors are \(C^1\) with strictly positive derivative: \(h_1'=v_1{\gt}0\) by <a href="chap-reduction.html#lem:exists_reparam_close">lemma 82</a> (forwarding <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 30</a>), and \(g_{z_0}'=w_{z_0}\ge 2/3{\gt}0\) by <a href="chap-reduction.html#lem:has_deriv_align_reparam">lemma 79</a> with the density bounds of <a href="chap-reduction.html#lem:align_density_props">lemma 68</a>. By the chain rule \(h'(\theta )=v_1(g_{z_0}(\theta ))\, w_{z_0}(\theta )=:v(\theta )\), a product of two continuous strictly positive functions, so \(v\) is continuous and \(v{\gt}0\) and \(h\in C^1\) as claimed. </p>
 <p><em>The robustness is exactly \(L^1\)/measure continuity of \(E\) (<a href="chap-stepreduction.html#lem:error_vector_lipschitz">lemma 27</a>), not \(C^1\)-closeness of curves.</em> </p>
 
   </div>

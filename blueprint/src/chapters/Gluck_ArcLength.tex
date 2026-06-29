@@ -1,0 +1,436 @@
+\chapter{Arc-length curvature representation (Dahlberg)}
+\label{chap:arclength}
+
+% archon:covers Gluck/ArcLength.lean
+
+This chapter opens the extension of the converse to the four-vertex theorem from
+the strictly positive case (Gluck 1971, \cref{thm:gluck_converse}) to Dahlberg's
+\emph{mixed-sign} full converse, where positivity is assumed only at the two
+maxima. The primary source is Dahlberg, \emph{The Converse of the Four Vertex
+Theorem}, Proc.\ AMS 133 (2005), 2131--2135.
+
+Dahlberg parametrises the reconstructed curve by \emph{arc length} $s$ rather
+than by the inclination angle $\theta$ used in the positive case
+(\cref{chap:closure}). The arc-length representation is the natural setting for
+mixed-sign curvature: where the inclination parametrisation needs $\kappa>0$ to
+make $\theta$ a coordinate, the arc-length curve $\gamma_K(t)=\int_0^t
+e^{i\alpha}$ is well defined for any continuous $K$.
+
+The key design decision (per the project's unification directive) is that we do
+\emph{not} introduce a second curvature-realization predicate. We prove that the
+arc-length curve realizes $K$ through the \emph{same} intrinsic predicate
+\cref{def:realizes_curvature} already used by \cref{thm:gluck_converse}, and we
+state the mixed-sign theorem with the same conclusion $\exists\gamma,\
+\mathrm{IsSimpleClosed}\,\gamma \wedge \mathrm{RealizesCurvature}\,\gamma\,\kappa$.
+
+Throughout, $K,\kappa : \mathbb{R}\to\mathbb{R}$ are continuous and $2\pi$-periodic
+(the project's encoding of a function on the circle $\mathbf{T}$).
+
+% SOURCE: [Dahlberg], §1, p. 2131, Theorem 1.1 (read from references/dahlberg.pdf)
+% SOURCE QUOTE: "Theorem 1.1. Suppose $\kappa : T \to R$ is not a constant and
+% assume that $\kappa$ has at least four critical points ordered counterclockwise
+% $p_i \in T$, $i = 1,\dots,4$, such that $p_1,p_3$ are local maxima and
+% $p_2,p_4$ are local minima with $\kappa(p_1) > 0, \kappa(p_3) > 0$ and
+% $\max(\kappa(p_2),\kappa(p_4)) < \min(\kappa(p_1),\kappa(p_3))$. If in addition
+% $\kappa$ is smooth, then $\kappa$ is the curvature function of a smooth, simple
+% and closed curve."
+
+\section{The arc-length representation}
+
+% SOURCE: [Dahlberg], §1, p. 2132, eq. above (1.1) (read from references/dahlberg.pdf)
+% SOURCE QUOTE: "Here $\alpha(s) = \int_0^s K(t)\,dt$ and the parametrisation of
+% the associated curve $\gamma$ is given by $\gamma_K(t) = \int_0^t e^{i\alpha(s)}\,ds$."
+\begin{definition}
+
+
+\leanok
+[Arc-length tangent angle]
+  \label{def:dahlberg_angle}
+  \lean{Gluck.dahlbergAngle}
+  \textit{Source: Dahlberg, §1, $\alpha(s)=\int_0^s K$.}
+  For $K : \mathbb{R}\to\mathbb{R}$ the \emph{arc-length tangent angle} is
+  \[
+    \alpha_K(s) \;=\; \int_0^s K(t)\,dt \;\in\; \mathbb{R}.
+  \]
+  When $K$ is continuous, $\alpha_K$ is $C^1$ with $\alpha_K'(s)=K(s)$ (FTC).
+\end{definition}
+
+\begin{definition}
+
+
+\leanok
+[Arc-length reconstruction curve]
+  \label{def:dahlberg_curve}
+  \lean{Gluck.dahlbergCurve}
+  \uses{def:dahlberg_angle}
+  \textit{Source: Dahlberg, §1, $\gamma_K(t)=\int_0^t e^{i\alpha(s)}\,ds$.}
+  For $K : \mathbb{R}\to\mathbb{R}$ the \emph{arc-length reconstruction curve} is
+  \[
+    \gamma_K(t) \;=\; \int_0^t e^{i\alpha_K(s)}\,ds \;\in\; \mathbb{C}.
+  \]
+  Its velocity is the unit tangent $\gamma_K'(t)=e^{i\alpha_K(t)}$ (norm $1$), so
+  $\gamma_K$ is parametrised by arc length and has tangent angle $\alpha_K$.
+\end{definition}
+
+\begin{lemma}
+
+
+\leanok
+[Derivative of the tangent angle]
+  \label{lem:hasderivat_dahlberg_angle}
+  \lean{Gluck.hasDerivAt_dahlbergAngle}
+  \uses{def:dahlberg_angle}
+  If $K$ is continuous then $\alpha_K$ is differentiable with
+  $\alpha_K'(s)=K(s)$ at every $s$.
+\end{lemma}
+\begin{proof}
+  \uses{def:dahlberg_angle}
+  \leanok
+  The fundamental theorem of calculus for the interval integral
+  $\alpha_K(s)=\int_0^s K$ applied to the continuous integrand $K$.
+\end{proof}
+
+\begin{lemma}
+
+
+\leanok
+[Continuity of the tangent angle]
+  \label{lem:continuous_dahlberg_angle}
+  \lean{Gluck.continuous_dahlbergAngle}
+  \uses{def:dahlberg_angle, lem:hasderivat_dahlberg_angle}
+  If $K$ is continuous then $\alpha_K$ is continuous.
+\end{lemma}
+\begin{proof}
+  \uses{lem:hasderivat_dahlberg_angle}
+  \leanok
+  $\alpha_K$ is differentiable (\cref{lem:hasderivat_dahlberg_angle}), hence
+  continuous.
+\end{proof}
+
+\begin{lemma}
+
+
+\leanok
+[Continuity of the unit-tangent integrand]
+  \label{lem:continuous_eiangle}
+  \lean{Gluck.continuous_eiAngle}
+  \uses{def:dahlberg_angle, lem:continuous_dahlberg_angle}
+  If $K$ is continuous then $s\mapsto e^{i\alpha_K(s)}$ is continuous.
+\end{lemma}
+\begin{proof}
+  \uses{lem:continuous_dahlberg_angle}
+  \leanok
+  Composition of the continuous $\alpha_K$ (\cref{lem:continuous_dahlberg_angle})
+  with the continuous complex exponential.
+\end{proof}
+
+\begin{lemma}
+
+
+\leanok
+[Velocity of the arc-length curve]
+  \label{lem:hasderivat_dahlberg_curve}
+  \lean{Gluck.hasDerivAt_dahlbergCurve}
+  \uses{def:dahlberg_curve, def:dahlberg_angle, lem:continuous_dahlberg_angle, lem:continuous_eiangle}
+  If $K$ is continuous then for every $t$, $\gamma_K$ is differentiable at $t$
+  with $\gamma_K'(t)=e^{i\alpha_K(t)}$; moreover $\gamma_K\in C^1$.
+\end{lemma}
+\begin{proof}
+  \uses{def:dahlberg_curve, lem:continuous_dahlberg_angle, lem:continuous_eiangle}
+  \leanok
+  $\alpha_K$ is continuous (\cref{lem:continuous_dahlberg_angle}), hence
+  $s\mapsto e^{i\alpha_K(s)}$ is continuous (\cref{lem:continuous_eiangle}).
+  By the fundamental theorem of calculus for the interval integral
+  $\gamma_K(t)=\int_0^t e^{i\alpha_K(s)}\,ds$, $\gamma_K$ has derivative
+  $e^{i\alpha_K(t)}$ at every $t$, and since this derivative is continuous in $t$,
+  $\gamma_K\in C^1$.
+\end{proof}
+
+\begin{lemma}
+
+
+\leanok
+[The arc-length curve realizes $K$ --- unification with \cref{def:realizes_curvature}]
+  \label{lem:realizes_curvature_dahlberg}
+  \lean{Gluck.realizesCurvature_dahlbergCurve}
+  \uses{def:dahlberg_curve, def:realizes_curvature, lem:hasderivat_dahlberg_curve}
+  For \emph{any} continuous $K : \mathbb{R}\to\mathbb{R}$ (no positivity required),
+  the arc-length curve realizes $K$ in the intrinsic sense:
+  \[
+    \mathrm{RealizesCurvature}\,(\gamma_K)\,(K).
+  \]
+  This is the structural unification: the arc-length representation and the
+  positive-case inclination reconstruction (\cref{lem:realizes_curvature_reconstruct})
+  satisfy the \emph{same} predicate \cref{def:realizes_curvature}; there are not
+  two parallel curvature notions.
+\end{lemma}
+\begin{proof}
+  \uses{lem:hasderivat_dahlberg_curve, def:realizes_curvature}
+  \leanok
+  By \cref{lem:hasderivat_dahlberg_curve} $\gamma_K\in C^1$ with
+  $\gamma_K'(t)=e^{i\alpha_K(t)}\neq 0$, so $\gamma_K$ is regular. Take the
+  tangent-angle function $\varphi=\alpha_K$, which is differentiable with
+  $\varphi'(t)=\alpha_K'(t)=K(t)$. Then $\lVert\gamma_K'(t)\rVert=
+  \lVert e^{i\alpha_K(t)}\rVert=1$, so the tangent equation
+  $\gamma_K'(t)=\lVert\gamma_K'(t)\rVert\,e^{i\varphi(t)}=e^{i\alpha_K(t)}$ holds,
+  and the curvature equation $\varphi'(t)=K(t)=K(t)\cdot 1=K(t)\,
+  \lVert\gamma_K'(t)\rVert$ holds. Thus $\mathrm{RealizesCurvature}\,(\gamma_K)\,(K)$.
+\end{proof}
+
+\section{Closure and simplicity conditions}
+
+% SOURCE: [Dahlberg], §1, p. 2132, (1.1)-(1.3) (read from references/dahlberg.pdf)
+% SOURCE QUOTE: "We remark that a smooth function $K : T \to R$ represents the
+% curvature of a smooth, simple and closed curve parametrised by the arc length
+% if and only if the following three conditions are satisfied:
+% (1.1) $\int_0^{2\pi} K\,ds = 2\pi$,
+% (1.2) $\int_0^{2\pi} e^{i\alpha(s)}\,ds = 0$,
+% (1.3) $\int_t^\tau e^{i\alpha(s)}\,ds \neq 0$ if $0 \le t < \tau < 2\pi$."
+\begin{definition}
+
+
+\leanok
+[Arc-length curvature conditions (1.1)--(1.3)]
+  \label{def:arclength_curvature}
+  \lean{Gluck.ArcLengthCurvature}
+  \uses{def:dahlberg_angle, def:dahlberg_curve}
+  \textit{Source: Dahlberg, §1, conditions (1.1)--(1.3).}
+  A continuous, $2\pi$-periodic $K : \mathbb{R}\to\mathbb{R}$ is an
+  \emph{arc-length curvature function} if
+  \begin{align}
+    \tag{1.1} & \int_0^{2\pi} K(s)\,ds = 2\pi, \\
+    \tag{1.2} & \int_0^{2\pi} e^{i\alpha_K(s)}\,ds = 0
+       \quad\bigl(\text{equivalently } \gamma_K(2\pi)=0\bigr), \\
+    \tag{1.3} & \int_t^\tau e^{i\alpha_K(s)}\,ds \neq 0
+       \quad\text{whenever } 0 \le t < \tau < 2\pi
+       \quad\bigl(\text{equivalently } \gamma_K(\tau)\neq\gamma_K(t)\bigr).
+  \end{align}
+  Geometrically: (1.1) fixes a well-determined tangent at $s=0$ (it forces
+  $e^{i\alpha_K}$ to be $2\pi$-periodic), (1.2) closes the curve, (1.3) makes it
+  simple.
+\end{definition}
+
+\begin{lemma}
+
+
+\leanok
+[Periodicity of the unit tangent]
+  \label{lem:eiangle_periodic}
+  \lean{Gluck.eiAngle_periodic}
+  \uses{def:dahlberg_angle, def:arclength_curvature}
+  If $K$ is continuous, $2\pi$-periodic, and satisfies (1.1)
+  $\int_0^{2\pi}K=2\pi$, then $s\mapsto e^{i\alpha_K(s)}$ is $2\pi$-periodic.
+\end{lemma}
+\begin{proof}
+  \uses{def:dahlberg_angle}
+  \leanok
+  For any $s$, $\alpha_K(s+2\pi)-\alpha_K(s)=\int_s^{s+2\pi}K$. Since $K$ is
+  $2\pi$-periodic this period integral equals $\int_0^{2\pi}K=2\pi$ by (1.1).
+  Hence $\alpha_K(s+2\pi)=\alpha_K(s)+2\pi$ and $e^{i\alpha_K(s+2\pi)}=
+  e^{i\alpha_K(s)}\,e^{2\pi i}=e^{i\alpha_K(s)}$.
+\end{proof}
+
+\begin{lemma}
+
+
+\leanok
+[Closure: $\gamma_K$ is $2\pi$-periodic]
+  \label{lem:dahlberg_curve_periodic}
+  \lean{Gluck.dahlbergCurve_periodic}
+  \uses{def:dahlberg_curve, def:arclength_curvature, lem:eiangle_periodic}
+  If $K$ is continuous, $2\pi$-periodic, and satisfies (1.1) and (1.2), then
+  $\gamma_K$ is $2\pi$-periodic (closed).
+\end{lemma}
+\begin{proof}
+  \uses{lem:eiangle_periodic, def:dahlberg_curve}
+  \leanok
+  $\gamma_K(t+2\pi)-\gamma_K(t)=\int_t^{t+2\pi}e^{i\alpha_K(s)}\,ds$. By
+  \cref{lem:eiangle_periodic} the integrand is $2\pi$-periodic, so the integral
+  over any period equals $\int_0^{2\pi}e^{i\alpha_K(s)}\,ds=0$ by (1.2). Hence
+  $\gamma_K(t+2\pi)=\gamma_K(t)$.
+\end{proof}
+
+\begin{lemma}
+
+
+\leanok
+[Simplicity: $\gamma_K$ is injective on $[0,2\pi)$]
+  \label{lem:injon_dahlberg_curve}
+  \lean{Gluck.injOn_dahlbergCurve}
+  \uses{def:dahlberg_curve, def:arclength_curvature}
+  If $K$ satisfies (1.3) then $\gamma_K$ is injective on $[0,2\pi)$.
+\end{lemma}
+\begin{proof}
+  \uses{def:dahlberg_curve}
+  \leanok
+  Let $t,\tau\in[0,2\pi)$ with $\gamma_K(t)=\gamma_K(\tau)$ and suppose $t\neq\tau$;
+  WLOG $t<\tau$. Then $\gamma_K(\tau)-\gamma_K(t)=\int_t^\tau e^{i\alpha_K(s)}\,ds
+  =0$, contradicting (1.3) (which applies since $0\le t<\tau<2\pi$). Hence
+  $t=\tau$.
+\end{proof}
+
+\begin{lemma}
+
+
+\leanok
+[$\gamma_K$ is a simple closed curve]
+  \label{lem:issimpleclosed_dahlberg_curve}
+  \lean{Gluck.isSimpleClosed_dahlbergCurve}
+  \uses{lem:dahlberg_curve_periodic, lem:injon_dahlberg_curve, def:is_simple_closed}
+  If $K$ is continuous, $2\pi$-periodic, and satisfies (1.1)--(1.3), then
+  $\gamma_K$ is a simple closed curve.
+\end{lemma}
+\begin{proof}
+  \uses{lem:dahlberg_curve_periodic, lem:injon_dahlberg_curve}
+  \leanok
+  Combine closure (\cref{lem:dahlberg_curve_periodic}) and injectivity on
+  $[0,2\pi)$ (\cref{lem:injon_dahlberg_curve}); this is exactly
+  \cref{def:is_simple_closed}.
+\end{proof}
+
+\section{The arc-length converse}
+
+\begin{theorem}
+
+
+\leanok
+[Arc-length converse: (1.1)--(1.3) realize $K$ by a simple closed curve]
+  \label{thm:arclength_converse}
+  \lean{Gluck.arcLengthConverse}
+  \uses{def:arclength_curvature, lem:realizes_curvature_dahlberg, lem:issimpleclosed_dahlberg_curve}
+  If $K$ is continuous, $2\pi$-periodic, and an arc-length curvature function
+  (satisfies (1.1)--(1.3)), then
+  \[
+    \exists\,\gamma,\ \mathrm{IsSimpleClosed}\,\gamma \,\wedge\,
+       \mathrm{RealizesCurvature}\,\gamma\,K.
+  \]
+  Witness: $\gamma=\gamma_K$.
+\end{theorem}
+\begin{proof}
+  \uses{lem:realizes_curvature_dahlberg, lem:issimpleclosed_dahlberg_curve}
+  \leanok
+  Take $\gamma=\gamma_K$. Simplicity and closure are
+  \cref{lem:issimpleclosed_dahlberg_curve}; realization is
+  \cref{lem:realizes_curvature_dahlberg}. Note this uses the \emph{same}
+  conclusion predicate as \cref{thm:gluck_converse}, so positive and mixed-sign
+  cases share one curvature notion.
+\end{proof}
+
+\section{Reduction to a non-normalised curvature function}
+
+The previous theorem applies to $K$ already satisfying the normalisation (1.1).
+The mixed-sign construction (Phases D-B, D-C) instead produces, after a
+reparametrisation, a function $\kappa\circ\varphi$ that is a \emph{non-normalised}
+curvature function: a rescaling and reparametrisation recover the theorem. This
+section records that reduction, which is what D-B/D-C must establish.
+
+% SOURCE: [Dahlberg], §1, p. 2132, (1.4) (read from references/dahlberg.pdf)
+% SOURCE QUOTE: "We will say that $\kappa$ is a non-normalised curvature function
+% if (1.4) $\{ I = \int_0^{2\pi} \kappa\,dt \neq 0$ and $K = \frac{2\pi}{I}\kappa$
+% satisfies (1.2) and (1.3)."
+\begin{definition}
+
+
+\leanok
+[Non-normalised curvature function (1.4)]
+  \label{def:non_normalised_curvature}
+  \lean{Gluck.NonNormalisedCurvature}
+  \uses{def:arclength_curvature}
+  \textit{Source: Dahlberg, §1, (1.4).}
+  A continuous, $2\pi$-periodic $\kappa : \mathbb{R}\to\mathbb{R}$ is a
+  \emph{non-normalised curvature function} if $I=\int_0^{2\pi}\kappa\,dt\neq 0$ and
+  $K=\frac{2\pi}{I}\kappa$ satisfies (1.2) and (1.3). (Note $K$ then satisfies
+  (1.1) automatically: $\int_0^{2\pi}K=\frac{2\pi}{I}\cdot I=2\pi$.)
+\end{definition}
+
+\begin{lemma}
+
+
+\leanok
+[Realization scales]
+  \label{lem:realizes_curvature_smul}
+  \lean{Gluck.realizesCurvature_smul}
+  \uses{def:realizes_curvature}
+  If $\mathrm{RealizesCurvature}\,\gamma\,\mu$ and $c>0$ is a real constant, then
+  $\mathrm{RealizesCurvature}\,(c\,\gamma)\,(\mu/c)$.
+\end{lemma}
+\begin{proof}
+  \uses{def:realizes_curvature}
+  \leanok
+  $(c\gamma)'=c\,\gamma'$, so $\lVert(c\gamma)'\rVert=c\lVert\gamma'\rVert$ and the
+  tangent angle $\varphi$ is unchanged; the tangent equation rescales by $c>0$.
+  For curvature, $\varphi'=\mu\lVert\gamma'\rVert=(\mu/c)\,(c\lVert\gamma'\rVert)
+  =(\mu/c)\,\lVert(c\gamma)'\rVert$. Regularity and $C^1$ are preserved by the
+  nonzero scalar.
+\end{proof}
+
+\begin{lemma}
+
+
+\leanok
+[Simplicity scales]
+  \label{lem:issimpleclosed_smul}
+  \lean{Gluck.isSimpleClosed_smul}
+  \uses{def:is_simple_closed}
+  If $\gamma$ is a simple closed curve and $c\neq 0$ is a real (or complex
+  nonzero) constant, then $c\,\gamma$ is a simple closed curve.
+\end{lemma}
+\begin{proof}
+  \uses{def:is_simple_closed}
+  \leanok
+  Periodicity passes through the linear map $z\mapsto cz$; injectivity on
+  $[0,2\pi)$ is preserved because $z\mapsto cz$ is injective ($c\neq 0$).
+\end{proof}
+
+\begin{theorem}
+
+
+\leanok
+[Reduction: a non-normalised reparametrisation realizes $\kappa$]
+  \label{thm:realizes_of_non_normalised}
+  \lean{Gluck.realizesCurvature_of_nonNormalised}
+  \uses{def:non_normalised_curvature, thm:arclength_converse, lem:realizes_curvature_smul, lem:issimpleclosed_smul, lem:realizes_curvature_comp, lem:is_simple_closed_comp}
+  \textit{Source: Dahlberg, §1, reduction paragraph after (1.4).}
+  Let $\kappa : \mathbb{R}\to\mathbb{R}$ be continuous and $2\pi$-periodic. Suppose
+  there is a $C^1$ orientation-preserving circle diffeomorphism $\varphi$ (with
+  $C^1$ inverse $\psi$, $\varphi(t+2\pi)=\varphi(t)+2\pi$) such that
+  $\kappa\circ\varphi$ is a non-normalised curvature function \emph{with positive
+  total curvature} $I=\int_0^{2\pi}\kappa\circ\varphi\,dt>0$. Then
+  \[
+    \exists\,\gamma,\ \mathrm{IsSimpleClosed}\,\gamma \,\wedge\,
+       \mathrm{RealizesCurvature}\,\gamma\,\kappa.
+  \]
+  (The hypothesis $I>0$ is exactly what Phase D-B delivers: there
+  $\kappa\circ\varphi=a(1-f)+bf+e$ with $a,b>0$ and $e$ of small integral, so
+  $I\approx\int(a(1-f)+bf)>0$. The bare $I\neq 0$ of (1.4) suffices for
+  $K=\frac{2\pi}{I}\kappa\circ\varphi$ to satisfy (1.1); the sign is pinned by the
+  construction.)
+\end{theorem}
+\begin{proof}
+  \uses{thm:arclength_converse, lem:realizes_curvature_smul, lem:issimpleclosed_smul, lem:realizes_curvature_comp, lem:is_simple_closed_comp}
+  \leanok
+  Set $I=\int_0^{2\pi}\kappa\circ\varphi\,dt$ ($\neq 0$) and $K=\frac{2\pi}{I}
+  \kappa\circ\varphi$, an arc-length curvature function by hypothesis and
+  \cref{def:non_normalised_curvature}. By \cref{thm:arclength_converse} the curve
+  $\gamma_K$ is simple closed and realizes $K$. Since $I>0$ the constant
+  $c=\tfrac{2\pi}{I}>0$, so \cref{lem:realizes_curvature_smul} (which needs $c>0$)
+  applies: $c\,\gamma_K$ realizes
+  $K/c=\tfrac{I}{2\pi}K=\tfrac{I}{2\pi}\cdot\tfrac{2\pi}{I}\,\kappa\circ\varphi
+  =\kappa\circ\varphi$, and by
+  \cref{lem:issimpleclosed_smul} $c\,\gamma_K$ is simple closed. Finally
+  reparametrise by $\psi=\varphi^{-1}$: by
+  \cref{lem:realizes_curvature_comp} (realization transfers under an
+  orientation-preserving $C^1$ reparametrisation), $(c\,\gamma_K)\circ\psi$
+  realizes $(\kappa\circ\varphi)\circ\psi=\kappa\circ(\varphi\circ\psi)=\kappa$,
+  and by \cref{lem:is_simple_closed_comp} $(c\,\gamma_K)\circ\psi$ is simple
+  closed. Take $\gamma=(c\,\gamma_K)\circ\psi$. This is Dahlberg's
+  $\Gamma(t)=\frac{2\pi}{I}\gamma_K(\psi(t))$.
+\end{proof}
+
+\noindent\textbf{Phase status.} \cref{thm:realizes_of_non_normalised} reduces the
+mixed-sign converse to the existence of a single circle diffeomorphism $\varphi$
+with $\kappa\circ\varphi$ non-normalised. Phase D-B (planned chapter)
+constructs the preliminary diffeomorphism $\eta$ giving $\kappa\circ\eta=a(1-f)+bf
++e$ with $\int_0^{2\pi}|e|<C\varepsilon$; Phase D-C (planned) finds the closing
+fractional-transformation parameter via the in-tree winding/degree core and the
+$|\alpha-\alpha^*|\le C\varepsilon$ transport of conditions (1.2)/(1.3).

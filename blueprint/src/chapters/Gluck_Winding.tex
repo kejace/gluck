@@ -284,6 +284,36 @@ blueprint.
 \begin{lemma}
 
 \leanok
+[Positive-scalar-field invariance of the $\mathbb{C}$-winding number]
+  \label{lem:winding_number_c_pos_scalar_field}
+  \lean{Gluck.windingNumberC_posScalarField}
+  \uses{def:winding_number_c, def:norm_loop, lem:winding_number_eq_of_homotopy}
+  Project-bespoke. Let $\gamma:[0,1]\to\mathbb{C}$ be a nowhere-zero loop and
+  $c:[0,1]\to\mathbb{R}$ continuous with $c(t)>0$ for all $t$ (and $c$ a loop,
+  $c(0)=c(1)$). Then the scaled loop $t\mapsto c(t)\,\gamma(t)$ is nowhere zero and
+  $W_{\mathbb{C}}(c\cdot\gamma)=W_{\mathbb{C}}(\gamma)$. This generalises
+  \cref{lem:winding_number_c_const_mul} from a constant scalar to a positive scalar
+  \emph{field}; it is what lets a positive configuration-dependent prefactor
+  $c(z)=1/\lambda(z)$ be stripped from the clean arc-length error map
+  (\cref{lem:clean_error_winds}).
+\end{lemma}
+\begin{proof}
+  \uses{def:winding_number_c, lem:winding_number_eq_of_homotopy}
+  \leanok
+  The straight-line scalar homotopy
+  $H(u,t)=\bigl((1-u)+u\,c(t)\bigr)\,\gamma(t)$ connects $\gamma$ ($u=0$) to
+  $c\cdot\gamma$ ($u=1$). Its scalar factor $(1-u)+u\,c(t)$ is a convex combination
+  of $1>0$ and $c(t)>0$, hence $>0$ for all $(u,t)\in[0,1]^2$; since
+  $\gamma(t)\neq0$, $H$ is nowhere zero. $H$ is continuous and, being a real-scalar
+  multiple of the loop $\gamma$, a loop in $t$ at each $u$. Normalising and applying
+  \cref{lem:winding_number_eq_of_homotopy} gives
+  $W_{\mathbb{C}}(c\cdot\gamma)=W_{\mathbb{C}}(\gamma)$. Nowhere-vanishing of
+  $c\cdot\gamma$ is the $u=1$ slice.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
 [Winding is stable under small perturbations]
   \label{lem:winding_number_c_perturb}
   \lean{Gluck.windingNumberC_eq_of_perturb}
