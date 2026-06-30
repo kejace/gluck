@@ -194,18 +194,8 @@ if there are points `p₁ < q₁ < p₂ < q₂ < p₁ + 2π` in one fundamental 
 `FourVertexCondition` strengthened only by the maxima-positivity clause; the
 minima `κ q₁, κ q₂` may be `≤ 0`.
 (Blueprint `def:mixed_sign_four_vertex`.) -/
-/- USER: The `(¬ ∃ c, ∀ θ, κ θ = c)` conjunct below is REDUNDANT — it is only
-destructured as the unused `_hnc` (see `exists_alignmentData`) and never
-referenced, and it is derivable from the value-separation clause
-`max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂)`. Refactor: remove this conjunct here,
-update the `obtain` in `exists_alignmentData` (and any other destructuring of
-`MixedSignFourVertex`), and derive non-constancy where needed via a shared lemma
-`not_constant_of_separation` to be added in `Curvature.lean` (imported by both
-this file and `FourVertex.lean`). Gluck's inline `hncc` (FourVertex.lean:397-401)
-should call the same shared lemma. Re-verify both `gluck_converse` and
-`dahlbergConverse` stay axiom-clean. -/
 def MixedSignFourVertex (κ : ℝ → ℝ) : Prop :=
-  Continuous κ ∧ Function.Periodic κ (2 * π) ∧ (¬ ∃ c, ∀ θ, κ θ = c) ∧
+  Continuous κ ∧ Function.Periodic κ (2 * π) ∧
     ∃ p₁ q₁ p₂ q₂, p₁ < q₁ ∧ q₁ < p₂ ∧ p₂ < q₂ ∧ q₂ < p₁ + 2 * π ∧
       IsLocalMax κ p₁ ∧ IsLocalMax κ p₂ ∧ IsLocalMin κ q₁ ∧ IsLocalMin κ q₂ ∧
       max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂) ∧ 0 < min (κ p₁) (κ p₂)
@@ -223,7 +213,7 @@ lemma exists_alignmentData {κ : ℝ → ℝ} (h : MixedSignFourVertex κ) :
     ∃ a b, 0 < a ∧ a < b ∧ ∃ r₁ r₂ r₃ r₄,
       r₁ < r₂ ∧ r₂ < r₃ ∧ r₃ < r₄ ∧ r₄ < r₁ + 2 * π ∧
       κ r₁ = a ∧ κ r₂ = b ∧ κ r₃ = a ∧ κ r₄ = b := by
-  obtain ⟨hcont, hper, _hnc, p₁, q₁, p₂, q₂, hp1q1, hq1p2, hp2q2, hq2p1,
+  obtain ⟨hcont, hper, p₁, q₁, p₂, q₂, hp1q1, hq1p2, hp2q2, hq2p1,
     _hmax1, _hmax2, _hmin1, _hmin2, hsep, hMpos⟩ := h
   -- The two value-levels: `m` = larger minimum value, `M` = smaller maximum value.
   set m := max (κ q₁) (κ q₂) with hm

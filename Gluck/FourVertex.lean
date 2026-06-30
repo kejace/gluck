@@ -395,10 +395,8 @@ theorem gluck_converse (κ : ℝ → ℝ) (hκ : IsCurvatureFunction κ)
     -- reconstruct, then reparametrize back by `g⁻¹` to realize `κ`.
     -- `κ` is genuinely non-constant: the value-separated extrema rule it out.
     have hncc : ¬ ∃ c, ∀ θ, κ θ = c := by
-      rintro ⟨c, hc⟩
-      obtain ⟨p₁, q₁, p₂, q₂, _, _, _, _, _, _, _, _, hsep⟩ := hnc
-      rw [hc q₁, hc q₂, hc p₁, hc p₂] at hsep
-      simp at hsep
+      obtain ⟨_, _, _, _, _, _, _, _, _, _, _, _, hsep⟩ := hnc
+      exact not_constant_of_separation hsep
     -- The reduction: a `C¹` circle reparametrization `g` closing the reconstruction.
     obtain ⟨g, hgmono, hgcont, hgper, hgE, v, hvc, hvp, hvd⟩ :=
       reduction_justified ⟨hcont, hper, hpos⟩ hncc (Or.inr hnc)

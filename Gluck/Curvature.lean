@@ -58,6 +58,17 @@ def FourVertexCondition (κ : ℝ → ℝ) : Prop :=
       IsLocalMax κ p₁ ∧ IsLocalMax κ p₂ ∧ IsLocalMin κ q₁ ∧ IsLocalMin κ q₂ ∧
       max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂))
 
+/-- A curvature function whose extrema satisfy the strict value-separation
+`max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂)` cannot be constant: a constant `κ`
+would force `c < c`. Shared by the positive (`gluck_converse`) and mixed-sign
+(`dahlbergConverse`) converses. -/
+lemma not_constant_of_separation {κ : ℝ → ℝ} {p₁ q₁ p₂ q₂ : ℝ}
+    (hsep : max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂)) :
+    ¬ ∃ c, ∀ θ, κ θ = c := by
+  rintro ⟨c, hc⟩
+  rw [hc q₁, hc q₂, hc p₁, hc p₂] at hsep
+  simp at hsep
+
 /-- Intermediate value theorem packaged for a closed real interval and a value
 lying between the two endpoint values (in either order): a continuous `f` on
 `[p, q]` (with `p ≤ q`) attains every value `v` between `f p` and `f q` at some
