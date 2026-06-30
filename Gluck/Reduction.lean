@@ -318,6 +318,22 @@ private lemma continuous_alignC3 (δ : ℝ) : Continuous (alignC3 δ) :=
 private lemma continuous_alignC4 (δ : ℝ) : Continuous (alignC4 δ) :=
   (continuous_alignN4 δ).add ((continuous_alignL4 δ).div_const 2)
 
+/-- On the closed unit disk (`‖z‖ ≤ 1`) with `0 < δ ≤ π/8`, the two varying
+breakpoint shifts `δ·z.re`, `δ·z.im` lie in `[-(π/8), π/8]`. Shared preamble for
+the four arc-integral lemmas. -/
+private lemma align_delta_bounds (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
+    δ * z.re ≤ π / 8 ∧ -(π / 8) ≤ δ * z.re ∧ δ * z.im ≤ π / 8 ∧ -(π / 8) ≤ δ * z.im := by
+  have hx : |z.re| ≤ 1 := le_trans (Complex.abs_re_le_norm z) hz
+  have hy : |z.im| ≤ 1 := le_trans (Complex.abs_im_le_norm z) hz
+  obtain ⟨hx1, hx2⟩ := abs_le.mp hx
+  obtain ⟨hy1, hy2⟩ := abs_le.mp hy
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.re)]
+  · nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.re + 1)]
+  · nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.im)]
+  · nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.im + 1)]
+
+
 /-- Arc-length bounds: for `‖z‖ ≤ 1` and `0 < δ ≤ π/8`, each `L_k ∈ [π/4, 3π/4]`. -/
 private lemma alignL_bounds (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     (π / 4 ≤ alignL1 δ z ∧ alignL1 δ z ≤ 3 * π / 4) ∧
@@ -325,14 +341,7 @@ private lemma alignL_bounds (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z 
     (π / 4 ≤ alignL3 δ z ∧ alignL3 δ z ≤ 3 * π / 4) ∧
     (π / 4 ≤ alignL4 δ z ∧ alignL4 δ z ≤ 3 * π / 4) := by
   have hpi : 0 < π := Real.pi_pos
-  have hx : |z.re| ≤ 1 := le_trans (Complex.abs_re_le_norm z) hz
-  have hy : |z.im| ≤ 1 := le_trans (Complex.abs_im_le_norm z) hz
-  obtain ⟨hx1, hx2⟩ := abs_le.mp hx
-  obtain ⟨hy1, hy2⟩ := abs_le.mp hy
-  have hdx2 : δ * z.re ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.re)]
-  have hdx1 : -(π / 8) ≤ δ * z.re := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.re + 1)]
-  have hdy2 : δ * z.im ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.im)]
-  have hdy1 : -(π / 8) ≤ δ * z.im := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.im + 1)]
+  obtain ⟨hdx2, hdx1, hdy2, hdy1⟩ := align_delta_bounds δ hδ hδ' hz
   refine ⟨⟨?_, ?_⟩, ⟨?_, ?_⟩, ⟨?_, ?_⟩, ⟨?_, ?_⟩⟩ <;>
     simp only [alignL1, alignL2, alignL3, alignL4, alignN1, alignN2, alignN3, alignN4] <;>
     linarith
@@ -434,20 +443,12 @@ private lemma alignDensity_integral_split (δ : ℝ) (z : ℂ) (lo hi : ℝ) :
   simp only [smul_eq_mul]
   ring
 
-/-- **Arc 1 integral** `∫_{θ₁}^{θ₂} w_z = π/2`. -/
 private lemma alignDensity_arc1 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     (∫ θ in (alignN1 δ z)..(alignN2 δ z), alignDensity δ z θ) = π / 2 := by
   have hpi : 0 < π := Real.pi_pos
   obtain ⟨⟨hL1a, hL1b⟩, ⟨hL2a, hL2b⟩, ⟨hL3a, hL3b⟩, ⟨hL4a, hL4b⟩⟩ :=
     alignL_bounds δ hδ hδ' hz
-  have hx : |z.re| ≤ 1 := le_trans (Complex.abs_re_le_norm z) hz
-  have hy : |z.im| ≤ 1 := le_trans (Complex.abs_im_le_norm z) hz
-  obtain ⟨hx1, hx2⟩ := abs_le.mp hx
-  obtain ⟨hy1, hy2⟩ := abs_le.mp hy
-  have hdx2 : δ * z.re ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.re)]
-  have hdx1 : -(π / 8) ≤ δ * z.re := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.re + 1)]
-  have hdy2 : δ * z.im ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.im)]
-  have hdy1 : -(π / 8) ≤ δ * z.im := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.im + 1)]
+  obtain ⟨hdx2, hdx1, hdy2, hdy1⟩ := align_delta_bounds δ hδ hδ' hz
   -- support pulse 1
   have hs1 : (∫ θ in (alignN1 δ z)..(alignN2 δ z),
       clampTent (π / 16) (alignL1 δ z) (alignC1 δ z) θ) = alignL1 δ z - π / 16 := by
@@ -486,14 +487,7 @@ private lemma alignDensity_arc2 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
   have hpi : 0 < π := Real.pi_pos
   obtain ⟨⟨hL1a, hL1b⟩, ⟨hL2a, hL2b⟩, ⟨hL3a, hL3b⟩, ⟨hL4a, hL4b⟩⟩ :=
     alignL_bounds δ hδ hδ' hz
-  have hx : |z.re| ≤ 1 := le_trans (Complex.abs_re_le_norm z) hz
-  have hy : |z.im| ≤ 1 := le_trans (Complex.abs_im_le_norm z) hz
-  obtain ⟨hx1, hx2⟩ := abs_le.mp hx
-  obtain ⟨hy1, hy2⟩ := abs_le.mp hy
-  have hdx2 : δ * z.re ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.re)]
-  have hdx1 : -(π / 8) ≤ δ * z.re := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.re + 1)]
-  have hdy2 : δ * z.im ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.im)]
-  have hdy1 : -(π / 8) ≤ δ * z.im := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.im + 1)]
+  obtain ⟨hdx2, hdx1, hdy2, hdy1⟩ := align_delta_bounds δ hδ hδ' hz
   have hle23 : alignN2 δ z ≤ alignN3 δ z := by simp only [alignN2, alignN3]; linarith
   have hs2 : (∫ θ in (alignN2 δ z)..(alignN3 δ z),
       clampTent (π / 16) (alignL2 δ z) (alignC2 δ z) θ) = alignL2 δ z - π / 16 := by
@@ -529,14 +523,7 @@ private lemma alignDensity_arc3 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
   have hpi : 0 < π := Real.pi_pos
   obtain ⟨⟨hL1a, hL1b⟩, ⟨hL2a, hL2b⟩, ⟨hL3a, hL3b⟩, ⟨hL4a, hL4b⟩⟩ :=
     alignL_bounds δ hδ hδ' hz
-  have hx : |z.re| ≤ 1 := le_trans (Complex.abs_re_le_norm z) hz
-  have hy : |z.im| ≤ 1 := le_trans (Complex.abs_im_le_norm z) hz
-  obtain ⟨hx1, hx2⟩ := abs_le.mp hx
-  obtain ⟨hy1, hy2⟩ := abs_le.mp hy
-  have hdx2 : δ * z.re ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.re)]
-  have hdx1 : -(π / 8) ≤ δ * z.re := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.re + 1)]
-  have hdy2 : δ * z.im ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.im)]
-  have hdy1 : -(π / 8) ≤ δ * z.im := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.im + 1)]
+  obtain ⟨hdx2, hdx1, hdy2, hdy1⟩ := align_delta_bounds δ hδ hδ' hz
   have hle34 : alignN3 δ z ≤ alignN4 δ z := by simp only [alignN3, alignN4]; linarith
   have hs3 : (∫ θ in (alignN3 δ z)..(alignN4 δ z),
       clampTent (π / 16) (alignL3 δ z) (alignC3 δ z) θ) = alignL3 δ z - π / 16 := by
@@ -572,14 +559,7 @@ private lemma alignDensity_arc4 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
   have hpi : 0 < π := Real.pi_pos
   obtain ⟨⟨hL1a, hL1b⟩, ⟨hL2a, hL2b⟩, ⟨hL3a, hL3b⟩, ⟨hL4a, hL4b⟩⟩ :=
     alignL_bounds δ hδ hδ' hz
-  have hx : |z.re| ≤ 1 := le_trans (Complex.abs_re_le_norm z) hz
-  have hy : |z.im| ≤ 1 := le_trans (Complex.abs_im_le_norm z) hz
-  obtain ⟨hx1, hx2⟩ := abs_le.mp hx
-  obtain ⟨hy1, hy2⟩ := abs_le.mp hy
-  have hdx2 : δ * z.re ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.re)]
-  have hdx1 : -(π / 8) ≤ δ * z.re := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.re + 1)]
-  have hdy2 : δ * z.im ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.im)]
-  have hdy1 : -(π / 8) ≤ δ * z.im := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.im + 1)]
+  obtain ⟨hdx2, hdx1, hdy2, hdy1⟩ := align_delta_bounds δ hδ hδ' hz
   have hle41 : alignN4 δ z ≤ alignN1 δ z + 2 * π := by simp only [alignN4, alignN1]; linarith
   have hs4 : (∫ θ in (alignN4 δ z)..(alignN1 δ z + 2 * π),
       clampTent (π / 16) (alignL4 δ z) (alignC4 δ z) θ) = alignL4 δ z - π / 16 := by
@@ -842,14 +822,7 @@ private theorem kappaZero_comp_alignReparam (a b δ : ℝ) (hδ : 0 < δ) (hδ' 
   obtain ⟨hn1, hn2, hn3, hn4⟩ := alignReparam_node_values δ hδ hδ' hz
   have hmono := strictMono_alignReparam δ hδ hδ' hz
   -- breakpoint values / ordering
-  have hx : |z.re| ≤ 1 := le_trans (Complex.abs_re_le_norm z) hz
-  have hy : |z.im| ≤ 1 := le_trans (Complex.abs_im_le_norm z) hz
-  obtain ⟨hx1, hx2⟩ := abs_le.mp hx
-  obtain ⟨hy1, hy2⟩ := abs_le.mp hy
-  have hdx2 : δ * z.re ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.re)]
-  have hdx1 : -(π / 8) ≤ δ * z.re := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.re + 1)]
-  have hdy2 : δ * z.im ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.im)]
-  have hdy1 : -(π / 8) ≤ δ * z.im := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.im + 1)]
+  obtain ⟨hdx2, hdx1, hdy2, hdy1⟩ := align_delta_bounds δ hδ hδ' hz
   -- `κ₀ ∘ g` is `2π`-periodic.
   have hper : Function.Periodic
       (fun θ => stepCurvature b a 0 (π / 2) π (3 * π / 2) (alignReparam δ z θ)) (2 * π) := by
