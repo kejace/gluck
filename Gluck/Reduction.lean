@@ -592,6 +592,57 @@ private lemma alignDensity_arc4 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
 
 /-! ## The breakpoint-aligning reparametrization family `g_z` -/
 
+/-! ## Generic running-integral reparametrisation
+
+Both the turning-angle family `alignReparam` and the arc-length family
+`closingFamily` (in `Gluck/DahlbergStep2.lean`) are running integrals of a
+continuous, strictly-positive, `2π`-periodic density with period-integral `2π`.
+The shared FTC / continuity / strict-monotonicity / quasi-periodicity facts are
+proved once here. -/
+
+/-- The running-integral reparametrisation `s ↦ c + ∫₀ˢ w`. -/
+noncomputable def integralReparam (w : ℝ → ℝ) (c : ℝ) : ℝ → ℝ :=
+  fun s => c + ∫ t in (0 : ℝ)..s, w t
+
+/-- FTC: `(integralReparam w c)' = w`. -/
+lemma hasDerivAt_integralReparam {w : ℝ → ℝ} (hw : Continuous w) (c s : ℝ) :
+    HasDerivAt (integralReparam w c) (w s) s :=
+  (intervalIntegral.integral_hasDerivAt_right (hw.intervalIntegrable 0 s)
+    (hw.stronglyMeasurableAtFilter _ _) hw.continuousAt).const_add c
+
+/-- `integralReparam w c` is continuous. -/
+lemma continuous_integralReparam {w : ℝ → ℝ} (hw : Continuous w) (c : ℝ) :
+    Continuous (integralReparam w c) :=
+  continuous_const.add
+    (intervalIntegral.continuous_primitive (fun p q => hw.intervalIntegrable p q) 0)
+
+/-- A strictly positive density gives a strictly monotone running integral. -/
+lemma strictMono_integralReparam {w : ℝ → ℝ} (hw : Continuous w) (hpos : ∀ s, 0 < w s)
+    (c : ℝ) : StrictMono (integralReparam w c) := by
+  intro x y hxy
+  have hsub : integralReparam w c y - integralReparam w c x = ∫ t in x..y, w t := by
+    simp only [integralReparam]
+    rw [← intervalIntegral.integral_add_adjacent_intervals
+      (hw.intervalIntegrable 0 x) (hw.intervalIntegrable x y)]; ring
+  rw [← sub_pos, hsub]
+  exact intervalIntegral.intervalIntegral_pos_of_pos_on (hw.intervalIntegrable x y)
+    (fun t _ => hpos t) hxy
+
+/-- Quasi-periodicity: if `w` is `2π`-periodic with period-integral `2π`, then
+`integralReparam w c (s + 2π) = integralReparam w c s + 2π`. -/
+lemma integralReparam_add_two_pi {w : ℝ → ℝ} (hw : Continuous w)
+    (hper : Function.Periodic w (2 * π)) (hint : (∫ t in (0 : ℝ)..(2 * π), w t) = 2 * π)
+    (c s : ℝ) : integralReparam w c (s + 2 * π) = integralReparam w c s + 2 * π := by
+  simp only [integralReparam]
+  have hadd : (∫ t in (0 : ℝ)..s, w t) + (∫ t in s..(s + 2 * π), w t)
+      = ∫ t in (0 : ℝ)..(s + 2 * π), w t :=
+    intervalIntegral.integral_add_adjacent_intervals (hw.intervalIntegrable _ _)
+      (hw.intervalIntegrable _ _)
+  have hshift : (∫ t in s..(s + 2 * π), w t) = ∫ t in (0 : ℝ)..(0 + 2 * π), w t :=
+    hper.intervalIntegral_add_eq s 0
+  rw [zero_add] at hshift
+  rw [← hadd, hshift, hint]; ring
+
 /-- **The breakpoint-aligning reparametrization family** (blueprint
 `def:align_reparam`).  For `0 < δ ≤ π/8` and `z` in the closed unit disk,
 `alignReparam δ z : ℝ → ℝ` is the running integral of the calibrated density
@@ -603,6 +654,18 @@ strictly increasing (slope `w_z ≥ 2/3 > 0`), continuous, jointly continuous in
 `(z,θ)`, and quasi-periodic (the full-period integral of `w_z` is `2π`). -/
 private noncomputable def alignReparam (δ : ℝ) (z : ℂ) : ℝ → ℝ :=
   fun θ => π / 2 + ∫ t in (alignN1 δ z)..θ, alignDensity δ z t
+
+/-- `alignReparam` is an instance of the generic `integralReparam`: the anchor
+`alignN1` folds into the additive constant `π/2 - ∫₀^{θ₁} w_z`. -/
+private lemma alignReparam_eq (δ : ℝ) (z : ℂ) :
+    alignReparam δ z = integralReparam (alignDensity δ z)
+      (π / 2 - ∫ t in (0 : ℝ)..(alignN1 δ z), alignDensity δ z t) := by
+  have i : ∀ p q : ℝ, IntervalIntegrable (alignDensity δ z) volume p q :=
+    fun p q => (continuous_alignDensity_theta δ z).intervalIntegrable p q
+  funext θ
+  simp only [alignReparam, integralReparam]
+  have h := intervalIntegral.integral_add_adjacent_intervals (i 0 (alignN1 δ z)) (i (alignN1 δ z) θ)
+  linarith [h]
 
 /-- Full-period integral of the density is `2π` (sum of the four arc integrals),
 on the disk. -/
@@ -628,17 +691,13 @@ full-period integral of `w_z` is `2π`).  (Blueprint `lem:align_reparam_add_two_
 private lemma alignReparam_add_two_pi (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
     {z : ℂ} (hz : ‖z‖ ≤ 1) (θ : ℝ) :
     alignReparam δ z (θ + 2 * π) = alignReparam δ z θ + 2 * π := by
-  simp only [alignReparam]
-  have i : ∀ a b : ℝ, IntervalIntegrable (alignDensity δ z) volume a b :=
-    fun a b => (continuous_alignDensity_theta δ z).intervalIntegrable a b
-  -- `∫_{θ₁}^{θ+2π} = ∫_{θ₁}^{θ} + ∫_{θ}^{θ+2π}` and the last window is one period.
-  have hadd := intervalIntegral.integral_add_adjacent_intervals
-    (i (alignN1 δ z) θ) (i θ (θ + 2 * π))
-  have hper : (∫ t in θ..(θ + 2 * π), alignDensity δ z t) = 2 * π := by
-    rw [(alignDensity_periodic δ z).intervalIntegral_add_eq θ (alignN1 δ z)]
-    exact alignDensity_period_integral δ hδ hδ' hz
-  rw [hper] at hadd
-  linarith [hadd]
+  have hint : (∫ t in (0 : ℝ)..(2 * π), alignDensity δ z t) = 2 * π := by
+    have h := (alignDensity_periodic δ z).intervalIntegral_add_eq 0 (alignN1 δ z)
+    rw [zero_add] at h
+    rw [h]; exact alignDensity_period_integral δ hδ hδ' hz
+  rw [alignReparam_eq]
+  exact integralReparam_add_two_pi (continuous_alignDensity_theta δ z)
+    (alignDensity_periodic δ z) hint _ θ
 
 /-- **Joint continuity** of `(z, θ) ↦ g_z(θ)` (blueprint
 `lem:continuous_uncurry_align_reparam`).  Load-bearing input to
@@ -668,42 +727,21 @@ private lemma continuous_uncurry_alignReparam (δ : ℝ) :
 
 /-- `g_z` is continuous in `θ` (for fixed `δ`, `z`). -/
 private lemma continuous_alignReparam (δ : ℝ) (z : ℂ) : Continuous (alignReparam δ z) := by
-  unfold alignReparam
-  exact continuous_const.add (intervalIntegral.continuous_primitive
-    (fun a b => (continuous_alignDensity_theta δ z).intervalIntegrable a b) (alignN1 δ z))
+  rw [alignReparam_eq]; exact continuous_integralReparam (continuous_alignDensity_theta δ z) _
 
 /-- **FTC for `g_z`**: `g_z' = w_z` (the calibrated density).  Keystone for the
 change-of-variables bound in the `L¹` estimate. -/
 private lemma hasDerivAt_alignReparam (δ : ℝ) (z : ℂ) (θ : ℝ) :
     HasDerivAt (alignReparam δ z) (alignDensity δ z θ) θ := by
-  have h := intervalIntegral.integral_hasDerivAt_right
-    ((continuous_alignDensity_theta δ z).intervalIntegrable (alignN1 δ z) θ)
-    ((continuous_alignDensity_theta δ z).stronglyMeasurableAtFilter _ _)
-    (continuous_alignDensity_theta δ z).continuousAt
-  exact h.const_add (π / 2)
+  rw [alignReparam_eq]; exact hasDerivAt_integralReparam (continuous_alignDensity_theta δ z) _ θ
 
 /-- **Strict monotonicity** of `g_z` on the closed unit disk (blueprint
 `lem:strict_mono_align_reparam`).  The slope `g_z' = w_z ≥ 2/3 > 0`. -/
 private lemma strictMono_alignReparam (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
     {z : ℂ} (hz : ‖z‖ ≤ 1) : StrictMono (alignReparam δ z) := by
-  intro x y hxy
-  rw [← sub_pos]
-  have hsub : alignReparam δ z y - alignReparam δ z x = ∫ t in x..y, alignDensity δ z t := by
-    simp only [alignReparam]
-    have hadd : (∫ t in (alignN1 δ z)..x, alignDensity δ z t)
-        + (∫ t in x..y, alignDensity δ z t) = ∫ t in (alignN1 δ z)..y, alignDensity δ z t :=
-      intervalIntegral.integral_add_adjacent_intervals
-        ((continuous_alignDensity_theta δ z).intervalIntegrable (alignN1 δ z) x)
-        ((continuous_alignDensity_theta δ z).intervalIntegrable x y)
-    linarith [hadd]
-  rw [hsub]
-  have hpos : (0 : ℝ) < ∫ t in x..y, (2 / 3 : ℝ) := by
-    rw [intervalIntegral.integral_const, smul_eq_mul]; nlinarith
-  calc (0 : ℝ) < ∫ t in x..y, (2 / 3 : ℝ) := hpos
-    _ ≤ ∫ t in x..y, alignDensity δ z t :=
-        intervalIntegral.integral_mono_on hxy.le intervalIntegrable_const
-          ((continuous_alignDensity_theta δ z).intervalIntegrable x y)
-          (fun t _ => alignDensity_ge δ hδ hδ' hz t)
+  rw [alignReparam_eq]
+  exact strictMono_integralReparam (continuous_alignDensity_theta δ z)
+    (fun s => lt_of_lt_of_le (by norm_num) (alignDensity_ge δ hδ hδ' hz s)) _
 
 /-- **Node values** of `g_z` (blueprint `lem:align_reparam_node_values`):
 `g_z(θ_k) = k·π/2`. -/

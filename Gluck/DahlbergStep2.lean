@@ -161,6 +161,12 @@ the role of Dahlberg's Möbius `{g_β}`.
 private noncomputable def closingFamily (a b δ : ℝ) (z : ℂ) : ℝ → ℝ :=
   fun s => ∫ t in (0 : ℝ)..s, closingDensity a b δ z t
 
+/-- `closingFamily` is the running integral of the density (anchor `c = 0`), i.e. an
+instance of the generic `integralReparam`. -/
+private lemma closingFamily_eq (a b δ : ℝ) (z : ℂ) :
+    closingFamily a b δ z = integralReparam (closingDensity a b δ z) 0 := by
+  funext s; simp [closingFamily, integralReparam]
+
 /-- **The normalised arc-length curvature weight.** For a curvature weight
 `g : ℝ → ℝ`, alignment levels `a, b`, breakpoint scale `δ` and configuration `z`,
 this is the `(2π/I)`-rescaled reparametrised weight
@@ -373,16 +379,11 @@ private lemma closingFamily_zero (a b δ : ℝ) (z : ℂ) : closingFamily a b δ
 /-- **FTC for `g_z`**: `g_z' = w_z`. -/
 private lemma hasDerivAt_closingFamily (a b δ : ℝ) (z : ℂ) (s : ℝ) :
     HasDerivAt (closingFamily a b δ z) (closingDensity a b δ z s) s := by
-  apply intervalIntegral.integral_hasDerivAt_right
-    ((continuous_closingDensity_s a b δ z).intervalIntegrable 0 s)
-    ((continuous_closingDensity_s a b δ z).stronglyMeasurableAtFilter _ _)
-    (continuous_closingDensity_s a b δ z).continuousAt
+  rw [closingFamily_eq]; exact hasDerivAt_integralReparam (continuous_closingDensity_s a b δ z) 0 s
 
 /-- **`g_z` is continuous** in `s` (for fixed `z`). -/
 private lemma continuous_closingFamily (a b δ : ℝ) (z : ℂ) : Continuous (closingFamily a b δ z) := by
-  unfold closingFamily
-  exact intervalIntegral.continuous_primitive
-    (fun p q => (continuous_closingDensity_s a b δ z).intervalIntegrable p q) 0
+  rw [closingFamily_eq]; exact continuous_integralReparam (continuous_closingDensity_s a b δ z) 0
 
 /-- **Joint continuity of `(z, s) ↦ g_z(s)`** (`lem:closing_family_props`).
 Load-bearing input to `continuous_arcLengthErrorMap`. -/
@@ -587,19 +588,9 @@ private lemma closingFamily_slope_bounds (a b δ : ℝ) (ha : 0 < a) (hab : a < 
 The slope `g_z' = w_z > 0`. -/
 private lemma strictMono_closingFamily (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) : StrictMono (closingFamily a b δ z) := by
-  intro x y hxy
-  rw [← sub_pos]
-  have hsub : closingFamily a b δ z y - closingFamily a b δ z x
-      = ∫ t in x..y, closingDensity a b δ z t := by
-    simp only [closingFamily]
-    rw [← intervalIntegral.integral_add_adjacent_intervals
-      ((continuous_closingDensity_s a b δ z).intervalIntegrable 0 x)
-      ((continuous_closingDensity_s a b δ z).intervalIntegrable x y)]
-    ring
-  rw [hsub]
-  apply intervalIntegral.intervalIntegral_pos_of_pos_on
-    ((continuous_closingDensity_s a b δ z).intervalIntegrable x y)
-    (fun t _ => closingDensity_pos a b δ ha hab hδ hδ' hz t) hxy
+  rw [closingFamily_eq]
+  exact strictMono_integralReparam (continuous_closingDensity_s a b δ z)
+    (fun s => closingDensity_pos a b δ ha hab hδ hδ' hz s) 0
 
 /-- **The five arc-length interval lengths sum to `2π`** on the disk:
 `Σ L_j = (1/λ)·Σ Δ_j/κ̂_j = (1/λ)·(2π λ) = 2π`.  The key calibration identity. -/
@@ -820,15 +811,9 @@ private lemma closingDensity_period_integral (a b δ : ℝ) (ha : 0 < a) (hab : 
 private lemma closingFamily_add_two_pi (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) (s : ℝ) :
     closingFamily a b δ z (s + 2 * π) = closingFamily a b δ z s + 2 * π := by
-  simp only [closingFamily]
-  have i : ∀ p q : ℝ, IntervalIntegrable (closingDensity a b δ z) volume p q :=
-    fun p q => (continuous_closingDensity_s a b δ z).intervalIntegrable p q
-  have hadd := intervalIntegral.integral_add_adjacent_intervals (i 0 s) (i s (s + 2 * π))
-  have hper : (∫ t in s..(s + 2 * π), closingDensity a b δ z t) = 2 * π := by
-    rw [(closingDensity_periodic a b δ z).intervalIntegral_add_eq s 0, zero_add]
-    exact closingDensity_period_integral a b δ ha hab hδ hδ' hz
-  rw [hper] at hadd
-  linarith [hadd]
+  rw [closingFamily_eq]
+  exact integralReparam_add_two_pi (continuous_closingDensity_s a b δ z)
+    (closingDensity_periodic a b δ z) (closingDensity_period_integral a b δ ha hab hδ hδ' hz) 0 s
 
 /-- **`g_z(2π) = 2π`** on the disk (`lem:closing_family_props`). -/
 private lemma closingFamily_two_pi (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
