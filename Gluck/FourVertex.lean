@@ -152,20 +152,6 @@ lemma realizesCurvature_comp {Γ : ℝ → ℂ} {μ : ℝ → ℝ} {ψ : ℝ →
     simp only [Function.comp_apply]
     ring
 
-/-- A circle reparametrization `ψ` (with `ψ(t+2π)=ψ(t)+2π`) commutes with adding
-an integer multiple of the period: `ψ(t + n·2π) = ψ(t) + n·2π`. Proof: `ψ - id`
-is `2π`-periodic. -/
-private lemma psi_add_int_period {ψ : ℝ → ℝ}
-    (hper : ∀ t, ψ (t + 2 * π) = ψ t + 2 * π) (n : ℤ) (t : ℝ) :
-    ψ (t + n • (2 * π)) = ψ t + n • (2 * π) := by
-  have hg : Function.Periodic (fun s => ψ s - s) (2 * π) := by
-    intro s; simp only; rw [hper s]; ring
-  have h2 : (fun s => ψ s - s) t = (fun s => ψ s - s) (t + n • (2 * π)) := by
-    have := hg.sub_zsmul_eq (x := t + n • (2 * π)) n
-    simpa using this
-  simp only at h2
-  linarith [h2]
-
 /-- A `2π`-periodic curve `f` that is injective on `[0, 2π)` is "injective up to
 period": `f u = f w` forces `u ≡ w (mod 2π)`, i.e. `u - w = n·2π` for some
 integer `n`. Proof: reduce `u, w` into `[0, 2π)` with `toIcoMod`; periodicity
@@ -234,65 +220,6 @@ lemma isSimpleClosed_comp {Γ : ℝ → ℂ} {ψ : ℝ → ℝ}
     have hn0 : n = 0 := eq_zero_of_window_sub_eq_zsmul n hx.1 hx.2 hy.1 hy.2 hxe
     rw [hn0] at hxe
     simpa using hxe
-
-/-- **The `C¹` inverse of a `C¹` circle reparametrization** (blueprint
-`lem:exists_c1_circle_inverse`). If `h` has a continuous strictly positive
-derivative `v` (`HasDerivAt h (v θ) θ`) and `h(θ+2π)=h(θ)+2π`, then `h` has a
-`C¹` two-sided inverse `H` which is again an orientation-preserving circle
-reparametrization, with `HasDerivAt H (1/v(H t)) t`. -/
-private lemma exists_C1_circle_inverse {h : ℝ → ℝ} {v : ℝ → ℝ}
-    (_hvc : Continuous v) (hvp : ∀ θ, 0 < v θ) (hvd : ∀ θ, HasDerivAt h (v θ) θ)
-    (hper : ∀ θ, h (θ + 2 * π) = h θ + 2 * π) :
-    ∃ H : ℝ → ℝ, Continuous H ∧ StrictMono H ∧ (∀ t, h (H t) = t) ∧
-      (∀ t, H (h t) = t) ∧ (∀ t, H (t + 2 * π) = H t + 2 * π) ∧
-      (∀ t, HasDerivAt H (1 / v (H t)) t) := by
-  have hpi : 0 < (2 : ℝ) * π := by positivity
-  -- `h` strictly increasing (positive derivative) and continuous (differentiable).
-  have hmono : StrictMono h := strictMono_of_hasDerivAt_pos hvd hvp
-  have hhdiff : Differentiable ℝ h := fun θ => (hvd θ).differentiableAt
-  have hhcont : Continuous h := hhdiff.continuous
-  -- `h(n·2π) = h 0 + n·2π`.
-  have hshift : ∀ n : ℤ, h (n • (2 * π)) = h 0 + n • (2 * π) := by
-    intro n
-    have := psi_add_int_period hper n 0
-    rwa [zero_add] at this
-  -- `h` is surjective: unbounded above and below by the shift relation.
-  have hsurj : Function.Surjective h := by
-    refine hhcont.surjective ?_ ?_
-    · apply hmono.monotone.tendsto_atTop_atTop
-      intro b
-      obtain ⟨n, hn⟩ := exists_int_gt ((b - h 0) / (2 * π))
-      refine ⟨n • (2 * π), ?_⟩
-      rw [hshift n, zsmul_eq_mul]
-      rw [div_lt_iff₀ hpi] at hn
-      linarith [hn]
-    · apply hmono.monotone.tendsto_atBot_atBot
-      intro b
-      obtain ⟨n, hn⟩ := exists_int_lt ((b - h 0) / (2 * π))
-      refine ⟨n • (2 * π), ?_⟩
-      rw [hshift n, zsmul_eq_mul]
-      rw [lt_div_iff₀ hpi] at hn
-      linarith [hn]
-  -- The order isomorphism induced by `h`; `H := e.symm`.
-  obtain ⟨e, hecoe⟩ : ∃ e : ℝ ≃o ℝ, ⇑e = h :=
-    ⟨StrictMono.orderIsoOfSurjective h hmono hsurj,
-      StrictMono.coe_orderIsoOfSurjective h hmono hsurj⟩
-  have hHh : ∀ s, h (e.symm s) = s := fun s => by rw [← hecoe]; exact e.apply_symm_apply s
-  have hhH : ∀ s, e.symm (h s) = s := fun s => by rw [← hecoe]; exact e.symm_apply_apply s
-  refine ⟨e.symm, e.symm.continuous, e.symm.strictMono, hHh, hhH, ?_, ?_⟩
-  · -- *Periodicity of `H`:* `h(H t + 2π) = t + 2π = h(H(t+2π))`, then injectivity.
-    intro t
-    have h1 : h (e.symm t + 2 * π) = t + 2 * π := by rw [hper (e.symm t), hHh t]
-    have h2 : h (e.symm (t + 2 * π)) = t + 2 * π := hHh (t + 2 * π)
-    have := hmono.injective (h1.trans h2.symm)
-    linarith [this]
-  · -- *Derivative:* inverse-function rule, `H'(t) = (v(H t))⁻¹ = 1/v(H t)`.
-    intro t
-    have hHcont : ContinuousAt e.symm t := e.symm.continuous.continuousAt
-    have hf : HasDerivAt h (v (e.symm t)) (e.symm t) := hvd (e.symm t)
-    have hfg : ∀ᶠ y in nhds t, h (e.symm y) = y := Filter.Eventually.of_forall hHh
-    have hres := HasDerivAt.of_local_left_inverse hHcont hf (hvp (e.symm t)).ne' hfg
-    rwa [← one_div] at hres
 
 /-- **Gluck's converse to the Four Vertex Theorem (strictly positive case).**
 Let `κ : ℝ → ℝ` be a curvature function (continuous, `2π`-periodic, strictly

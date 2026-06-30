@@ -2817,85 +2817,6 @@ private lemma simplicity_transport {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a)
     have hτt : (0 : ℝ) < (t + 2 * π) - τ := by linarith
     linarith [hmar, htr, mul_lt_mul_of_pos_right hC'εlt hτt]
 
-/-- Integer-shift quasiperiodicity: from `h(θ+2π)=h(θ)+2π`,
-`h(θ + n·2π) = h(θ) + n·2π` for every `n : ℤ`.  Local helper for
-`exists_C1_inverse_circle` (rebuilds the `psi_add_int_period` step of the
-positive case, which lives `private` in `FourVertex.lean`). -/
-private lemma intShift_qp {h : ℝ → ℝ} (hper : ∀ θ, h (θ + 2 * π) = h θ + 2 * π)
-    (n : ℤ) (θ : ℝ) : h (θ + (n : ℝ) * (2 * π)) = h θ + (n : ℝ) * (2 * π) := by
-  induction n using Int.induction_on with
-  | zero => simp
-  | succ k ih =>
-      push_cast at ih ⊢
-      have hp1 : θ + ((k : ℝ) + 1) * (2 * π) = (θ + (k : ℝ) * (2 * π)) + 2 * π := by ring
-      rw [hp1, hper, ih]; ring
-  | pred k ih =>
-      push_cast at ih ⊢
-      have hn1 : θ + (-(k : ℝ) - 1) * (2 * π) + 2 * π = θ + (-(k : ℝ)) * (2 * π) := by ring
-      have key : h (θ + (-(k : ℝ) - 1) * (2 * π)) + 2 * π = h (θ + (-(k : ℝ)) * (2 * π)) := by
-        rw [← hper, hn1]
-      rw [ih] at key
-      have harith : (-(k : ℝ) - 1) * (2 * π) = (-(k : ℝ)) * (2 * π) - 2 * π := by ring
-      linarith [key, harith]
-
-/-- **`C¹` circle inverse of an orientation-preserving quasiperiodic map**
-(local rebuild of the positive case's `exists_C1_circle_inverse`, which is
-`private` in `FourVertex.lean` — a file this module does not import).  Given a
-continuous strictly positive derivative `v` (`HasDerivAt h (v θ) θ`, `v > 0`) and
-quasiperiodicity `h(θ+2π)=h(θ)+2π`, there is a continuous strictly-monotone
-two-sided inverse `H` that is quasiperiodic and `C¹` with `H'(t)=1/v(H t)`.
-(Blueprint `lem:dahlberg_c1_circle_inverse`.) -/
-private lemma exists_C1_inverse_circle {h : ℝ → ℝ} {v : ℝ → ℝ}
-    (_hvc : Continuous v) (hvp : ∀ θ, 0 < v θ) (hvd : ∀ θ, HasDerivAt h (v θ) θ)
-    (hper : ∀ θ, h (θ + 2 * π) = h θ + 2 * π) :
-    ∃ H : ℝ → ℝ, Continuous H ∧ StrictMono H ∧ (∀ t, h (H t) = t) ∧
-      (∀ t, H (h t) = t) ∧ (∀ t, H (t + 2 * π) = H t + 2 * π) ∧
-      (∀ t, HasDerivAt H (1 / v (H t)) t) := by
-  have hpi : 0 < (2 : ℝ) * π := by positivity
-  have hmono : StrictMono h := strictMono_of_hasDerivAt_pos hvd hvp
-  have hhdiff : Differentiable ℝ h := fun θ => (hvd θ).differentiableAt
-  have hhcont : Continuous h := hhdiff.continuous
-  -- `h(n·2π) = h 0 + n·2π`.
-  have hshift : ∀ n : ℤ, h ((n : ℝ) * (2 * π)) = h 0 + (n : ℝ) * (2 * π) := by
-    intro n
-    have := intShift_qp hper n 0
-    rwa [zero_add] at this
-  -- `h` is surjective: unbounded above and below by the shift relation.
-  have hsurj : Function.Surjective h := by
-    refine hhcont.surjective ?_ ?_
-    · apply hmono.monotone.tendsto_atTop_atTop
-      intro c
-      obtain ⟨n, hn⟩ := exists_int_gt ((c - h 0) / (2 * π))
-      refine ⟨(n : ℝ) * (2 * π), ?_⟩
-      rw [hshift n]
-      rw [div_lt_iff₀ hpi] at hn
-      linarith [hn]
-    · apply hmono.monotone.tendsto_atBot_atBot
-      intro c
-      obtain ⟨n, hn⟩ := exists_int_lt ((c - h 0) / (2 * π))
-      refine ⟨(n : ℝ) * (2 * π), ?_⟩
-      rw [hshift n]
-      rw [lt_div_iff₀ hpi] at hn
-      linarith [hn]
-  -- The order isomorphism induced by `h`; `H := e.symm`.
-  obtain ⟨e, hecoe⟩ : ∃ e : ℝ ≃o ℝ, ⇑e = h :=
-    ⟨StrictMono.orderIsoOfSurjective h hmono hsurj,
-      StrictMono.coe_orderIsoOfSurjective h hmono hsurj⟩
-  have hHh : ∀ s, h (e.symm s) = s := fun s => by rw [← hecoe]; exact e.apply_symm_apply s
-  have hhH : ∀ s, e.symm (h s) = s := fun s => by rw [← hecoe]; exact e.symm_apply_apply s
-  refine ⟨e.symm, e.symm.continuous, e.symm.strictMono, hHh, hhH, ?_, ?_⟩
-  · intro t
-    have h1 : h (e.symm t + 2 * π) = t + 2 * π := by rw [hper (e.symm t), hHh t]
-    have h2 : h (e.symm (t + 2 * π)) = t + 2 * π := hHh (t + 2 * π)
-    have := hmono.injective (h1.trans h2.symm)
-    linarith [this]
-  · intro t
-    have hHcont : ContinuousAt e.symm t := e.symm.continuous.continuousAt
-    have hf : HasDerivAt h (v (e.symm t)) (e.symm t) := hvd (e.symm t)
-    have hfg : ∀ᶠ y in nhds t, h (e.symm y) = y := Filter.Eventually.of_forall hHh
-    have hres := HasDerivAt.of_local_left_inverse hHcont hf (hvp (e.symm t)).ne' hfg
-    rwa [← one_div] at hres
-
 /-- **Dahlberg converse to the four vertex theorem (Theorem 1.1).** Let
 `κ : ℝ → ℝ` be continuous, `2π`-periodic and non-constant, satisfying the
 mixed-sign four-vertex condition (`MixedSignFourVertex`).  Then there is a simple
@@ -2965,7 +2886,7 @@ theorem dahlbergConverse {κ : ℝ → ℝ} (h : MixedSignFourVertex κ) :
     rw [closingFamily_add_two_pi a b δ ha hab hδ hδ' hzsle t, hηper]
   -- The `C¹` inverse `ψ`.
   obtain ⟨ψ, hψcont, hψmono, hφψ, hψφ, hψper, hψderivH⟩ :=
-    exists_C1_inverse_circle hvφcont hvφpos hφderiv hφper
+    exists_C1_circle_inverse hvφcont hvφpos hφderiv hφper
   have hψderivval : ∀ t, deriv ψ t = 1 / vφ (ψ t) := fun t => (hψderivH t).deriv
   have hψ : ContDiff ℝ 1 ψ := by
     rw [contDiff_one_iff_deriv]

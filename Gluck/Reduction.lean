@@ -75,6 +75,7 @@ lemma clampTent_nonneg (η L τ θ : ℝ) : 0 ≤ clampTent η L τ θ :=
 lemma clampTent_le_one (η L τ θ : ℝ) : clampTent η L τ θ ≤ 1 := min_le_left _ _
 
 /-- `clampTent η L τ` is continuous in `θ`. -/
+@[fun_prop]
 lemma continuous_clampTent_theta (η L τ : ℝ) : Continuous (clampTent η L τ) := by
   unfold clampTent
   exact continuous_const.min (continuous_const.max
@@ -1552,4 +1553,83 @@ theorem reduction_justified {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
     · intro θ
       exact (hv1deriv (alignReparam δ z₀ θ)).comp θ (hasDerivAt_alignReparam δ z₀ θ)
 
+
+/-! ## Shared circle-reparametrisation lemmas
+
+Generic one-dimensional reparametrisation facts (no curvature content), shared by
+the turning-angle (`FourVertex`) and arc-length (`DahlbergStep2`) closing
+arguments, both of which import this file. -/
+
+/-- A circle reparametrization `ψ` (with `ψ(t+2π)=ψ(t)+2π`) commutes with adding
+an integer multiple of the period: `ψ(t + n·2π) = ψ(t) + n·2π`. Proof: `ψ - id`
+is `2π`-periodic. -/
+lemma psi_add_int_period {ψ : ℝ → ℝ}
+    (hper : ∀ t, ψ (t + 2 * π) = ψ t + 2 * π) (n : ℤ) (t : ℝ) :
+    ψ (t + n • (2 * π)) = ψ t + n • (2 * π) := by
+  have hg : Function.Periodic (fun s => ψ s - s) (2 * π) := by
+    intro s; simp only; rw [hper s]; ring
+  have h2 : (fun s => ψ s - s) t = (fun s => ψ s - s) (t + n • (2 * π)) := by
+    have := hg.sub_zsmul_eq (x := t + n • (2 * π)) n
+    simpa using this
+  simp only at h2
+  linarith [h2]
+
+/-- **The `C¹` inverse of a `C¹` circle reparametrization** (blueprint
+`lem:exists_c1_circle_inverse`). If `h` has a continuous strictly positive
+derivative `v` (`HasDerivAt h (v θ) θ`) and `h(θ+2π)=h(θ)+2π`, then `h` has a
+`C¹` two-sided inverse `H` which is again an orientation-preserving circle
+reparametrization, with `HasDerivAt H (1/v(H t)) t`. -/
+lemma exists_C1_circle_inverse {h : ℝ → ℝ} {v : ℝ → ℝ}
+    (_hvc : Continuous v) (hvp : ∀ θ, 0 < v θ) (hvd : ∀ θ, HasDerivAt h (v θ) θ)
+    (hper : ∀ θ, h (θ + 2 * π) = h θ + 2 * π) :
+    ∃ H : ℝ → ℝ, Continuous H ∧ StrictMono H ∧ (∀ t, h (H t) = t) ∧
+      (∀ t, H (h t) = t) ∧ (∀ t, H (t + 2 * π) = H t + 2 * π) ∧
+      (∀ t, HasDerivAt H (1 / v (H t)) t) := by
+  have hpi : 0 < (2 : ℝ) * π := by positivity
+  -- `h` strictly increasing (positive derivative) and continuous (differentiable).
+  have hmono : StrictMono h := strictMono_of_hasDerivAt_pos hvd hvp
+  have hhdiff : Differentiable ℝ h := fun θ => (hvd θ).differentiableAt
+  have hhcont : Continuous h := hhdiff.continuous
+  -- `h(n·2π) = h 0 + n·2π`.
+  have hshift : ∀ n : ℤ, h (n • (2 * π)) = h 0 + n • (2 * π) := by
+    intro n
+    have := psi_add_int_period hper n 0
+    rwa [zero_add] at this
+  -- `h` is surjective: unbounded above and below by the shift relation.
+  have hsurj : Function.Surjective h := by
+    refine hhcont.surjective ?_ ?_
+    · apply hmono.monotone.tendsto_atTop_atTop
+      intro b
+      obtain ⟨n, hn⟩ := exists_int_gt ((b - h 0) / (2 * π))
+      refine ⟨n • (2 * π), ?_⟩
+      rw [hshift n, zsmul_eq_mul]
+      rw [div_lt_iff₀ hpi] at hn
+      linarith [hn]
+    · apply hmono.monotone.tendsto_atBot_atBot
+      intro b
+      obtain ⟨n, hn⟩ := exists_int_lt ((b - h 0) / (2 * π))
+      refine ⟨n • (2 * π), ?_⟩
+      rw [hshift n, zsmul_eq_mul]
+      rw [lt_div_iff₀ hpi] at hn
+      linarith [hn]
+  -- The order isomorphism induced by `h`; `H := e.symm`.
+  obtain ⟨e, hecoe⟩ : ∃ e : ℝ ≃o ℝ, ⇑e = h :=
+    ⟨StrictMono.orderIsoOfSurjective h hmono hsurj,
+      StrictMono.coe_orderIsoOfSurjective h hmono hsurj⟩
+  have hHh : ∀ s, h (e.symm s) = s := fun s => by rw [← hecoe]; exact e.apply_symm_apply s
+  have hhH : ∀ s, e.symm (h s) = s := fun s => by rw [← hecoe]; exact e.symm_apply_apply s
+  refine ⟨e.symm, e.symm.continuous, e.symm.strictMono, hHh, hhH, ?_, ?_⟩
+  · -- *Periodicity of `H`:* `h(H t + 2π) = t + 2π = h(H(t+2π))`, then injectivity.
+    intro t
+    have h1 : h (e.symm t + 2 * π) = t + 2 * π := by rw [hper (e.symm t), hHh t]
+    have h2 : h (e.symm (t + 2 * π)) = t + 2 * π := hHh (t + 2 * π)
+    have := hmono.injective (h1.trans h2.symm)
+    linarith [this]
+  · -- *Derivative:* inverse-function rule, `H'(t) = (v(H t))⁻¹ = 1/v(H t)`.
+    intro t
+    have hHcont : ContinuousAt e.symm t := e.symm.continuous.continuousAt
+    have hf : HasDerivAt h (v (e.symm t)) (e.symm t) := hvd (e.symm t)
+    have hfg : ∀ᶠ y in nhds t, h (e.symm y) = y := Filter.Eventually.of_forall hHh
+    have hres := HasDerivAt.of_local_left_inverse hHcont hf (hvp (e.symm t)).ne' hfg
+    rwa [← one_div] at hres
 end Gluck

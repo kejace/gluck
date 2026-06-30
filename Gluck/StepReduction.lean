@@ -122,6 +122,7 @@ noncomputable def tentBump (δ τ θ : ℝ) : ℝ :=
 
 private lemma tentBump_nonneg (δ τ θ : ℝ) : 0 ≤ tentBump δ τ θ := le_max_left _ _
 
+@[fun_prop]
 private lemma tentBump_continuous (δ τ : ℝ) : Continuous (fun θ => tentBump δ τ θ) :=
   continuous_const.max (continuous_const.sub (continuous_const.mul
     (Real.continuous_arccos.comp (Real.continuous_cos.comp

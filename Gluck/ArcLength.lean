@@ -80,6 +80,7 @@ theorem hasDerivAt_dahlbergAngle {K : ℝ → ℝ} (hK : Continuous K) (s : ℝ)
     hK.continuousAt
 
 /-- The arc-length tangent angle `α_K` is continuous when `K` is. -/
+@[fun_prop]
 theorem continuous_dahlbergAngle {K : ℝ → ℝ} (hK : Continuous K) :
     Continuous (dahlbergAngle K) :=
   Differentiable.continuous (fun s => (hasDerivAt_dahlbergAngle hK s).differentiableAt)
