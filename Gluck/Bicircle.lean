@@ -167,23 +167,4 @@ theorem bicircleErrorVector_eq (a b θ₁ θ₂ θ₃ θ₄ : ℝ)
     rw [one_div, one_div, mul_inv, mul_inv, Complex.inv_I]; ring
   rw [hkey]; ring
 
-theorem bicircleErrorVector_eq_zero_iff (a b θ₁ θ₂ θ₃ θ₄ : ℝ)
-    (hab : a ≠ b)
-    (h1 : 0 ≤ θ₁) (h12 : θ₁ < θ₂) (h23 : θ₂ < θ₃) (h34 : θ₃ < θ₄) (h4 : θ₄ < 2 * π) :
-    bicircleErrorVector a b θ₁ θ₂ θ₃ θ₄ = 0
-      ↔ (Complex.exp ((θ₂ : ℂ) * Complex.I) - Complex.exp ((θ₁ : ℂ) * Complex.I))
-          + (Complex.exp ((θ₄ : ℂ) * Complex.I) - Complex.exp ((θ₃ : ℂ) * Complex.I)) = 0 := by
-  -- The scalar `1/(ib) - 1/(ia) = -i(1/b - 1/a)` is nonzero since `a ≠ b` and `a, b ≠ 0`.
-  have hscalar : (1 : ℂ) / (Complex.I * (b : ℂ)) - 1 / (Complex.I * (a : ℂ)) ≠ 0 := by
-    have hkey : (1 : ℂ) / (Complex.I * (b : ℂ)) - 1 / (Complex.I * (a : ℂ))
-        = -Complex.I * (1 / (b : ℂ) - 1 / (a : ℂ)) := by
-      rw [one_div, one_div, mul_inv, mul_inv, Complex.inv_I]; ring
-    rw [hkey]
-    apply mul_ne_zero (neg_ne_zero.mpr Complex.I_ne_zero)
-    rw [sub_ne_zero, one_div, one_div, ne_eq, inv_inj]
-    intro h
-    exact hab (by exact_mod_cast h.symm)
-  rw [bicircleErrorVector_eq a b θ₁ θ₂ θ₃ θ₄ h1 h12 h23 h34 h4, mul_eq_zero,
-    or_iff_right hscalar]
-
 end Gluck

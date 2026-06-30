@@ -42,15 +42,6 @@ lemma stepCurvature_periodic (a b θ₁ θ₂ θ₃ θ₄ : ℝ) :
   simp only [stepCurvature]
   rw [toIcoMod_add_right]
 
-/-- `stepCurvature` is bounded below by `a`, hence strictly positive when
-`0 < a < b`. -/
-lemma stepCurvature_ge (a b θ₁ θ₂ θ₃ θ₄ : ℝ) (hab : a ≤ b) (θ : ℝ) :
-    a ≤ stepCurvature a b θ₁ θ₂ θ₃ θ₄ θ := by
-  simp only [stepCurvature]
-  split
-  · exact hab
-  · exact le_refl a
-
 /-- **Error vector is `L¹`-Lipschitz in the weight.** For integrable weights
 `ρ, ρ'` on `[0, 2π]`,
 `‖E(ρ) - E(ρ')‖ ≤ ∫₀^{2π} |ρ θ - ρ' θ| dθ`. This is the rigorous replacement for
@@ -129,14 +120,14 @@ lemma integral_affine (c s a b : ℝ) :
 noncomputable def tentBump (δ τ θ : ℝ) : ℝ :=
   max 0 (1 - (2 / δ) * Real.arccos (Real.cos (θ - τ)))
 
-lemma tentBump_nonneg (δ τ θ : ℝ) : 0 ≤ tentBump δ τ θ := le_max_left _ _
+private lemma tentBump_nonneg (δ τ θ : ℝ) : 0 ≤ tentBump δ τ θ := le_max_left _ _
 
-lemma tentBump_continuous (δ τ : ℝ) : Continuous (fun θ => tentBump δ τ θ) :=
+private lemma tentBump_continuous (δ τ : ℝ) : Continuous (fun θ => tentBump δ τ θ) :=
   continuous_const.max (continuous_const.sub (continuous_const.mul
     (Real.continuous_arccos.comp (Real.continuous_cos.comp
       (continuous_id.sub continuous_const)))))
 
-lemma tentBump_periodic (δ τ : ℝ) :
+private lemma tentBump_periodic (δ τ : ℝ) :
     Function.Periodic (fun θ => tentBump δ τ θ) (2 * π) := by
   intro θ
   simp only [tentBump]
@@ -144,7 +135,7 @@ lemma tentBump_periodic (δ τ : ℝ) :
 
 /-- For `y` at angular distance `≥ δ/2` from `0` (within one period),
 `cos y ≤ cos (δ/2)`. -/
-lemma cos_le_cos_half {δ y : ℝ} (hδ : 0 < δ) (hδ' : δ < π)
+private lemma cos_le_cos_half {δ y : ℝ} (hδ : 0 < δ) (hδ' : δ < π)
     (h1 : δ / 2 ≤ y) (h2 : y ≤ 2 * π - δ / 2) : Real.cos y ≤ Real.cos (δ / 2) := by
   have hδ2 : δ / 2 ≤ π := by linarith
   rcases le_total y π with hy | hy
@@ -173,7 +164,7 @@ lemma tentBump_eq_zero_of_cos_le {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {τ 
   linarith
 
 /-- On the support of the centred bump it equals the affine tent `1 - (2/δ)|u|`. -/
-lemma tentBump_affine_zero {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {u : ℝ}
+private lemma tentBump_affine_zero {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {u : ℝ}
     (h1 : -(δ / 2) ≤ u) (h2 : u ≤ δ / 2) : tentBump δ 0 u = 1 - (2 / δ) * |u| := by
   have habs : |u| ≤ δ / 2 := abs_le.mpr ⟨by linarith, h2⟩
   have hπ := Real.pi_pos
@@ -188,7 +179,7 @@ lemma tentBump_affine_zero {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {u : ℝ}
   linarith
 
 /-- `∫` of the centred bump over `[0, δ/2]` (its right half) is `δ/4`. -/
-lemma tentBump_integral_right {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
+private lemma tentBump_integral_right {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
     (∫ u in (0 : ℝ)..(δ / 2), tentBump δ 0 u) = δ / 4 := by
   have hδne : δ ≠ 0 := hδ.ne'
   have hcong : (∫ u in (0 : ℝ)..(δ / 2), tentBump δ 0 u)
@@ -200,7 +191,7 @@ lemma tentBump_integral_right {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
   rw [hcong, integral_affine]; field_simp; ring
 
 /-- `∫` of the centred bump over `[-δ/2, 0]` (its left half) is `δ/4`. -/
-lemma tentBump_integral_left {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
+private lemma tentBump_integral_left {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
     (∫ u in (-(δ / 2))..(0 : ℝ), tentBump δ 0 u) = δ / 4 := by
   have hδne : δ ≠ 0 := hδ.ne'
   have hcong : (∫ u in (-(δ / 2))..(0 : ℝ), tentBump δ 0 u)
@@ -212,7 +203,7 @@ lemma tentBump_integral_left {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
   rw [hcong, integral_affine]; field_simp; ring
 
 /-- The centred bump integrates to `δ/2` over its full support `[-δ/2, δ/2]`. -/
-lemma tentBump_integral_center {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
+private lemma tentBump_integral_center {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
     (∫ u in (-(δ / 2))..(δ / 2), tentBump δ 0 u) = δ / 2 := by
   rw [← intervalIntegral.integral_add_adjacent_intervals (b := (0 : ℝ))
         ((tentBump_continuous δ 0).intervalIntegrable _ _)
@@ -221,7 +212,7 @@ lemma tentBump_integral_center {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
   ring
 
 /-- A bump centred at `τ` integrates to `δ/2` over its support `[τ-δ/2, τ+δ/2]`. -/
-lemma tentBump_integral_support {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) (τ : ℝ) :
+private lemma tentBump_integral_support {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) (τ : ℝ) :
     (∫ θ in (τ - δ / 2)..(τ + δ / 2), tentBump δ τ θ) = δ / 2 := by
   have hshift : ∀ θ, tentBump δ τ θ = tentBump δ 0 (θ - τ) := by
     intro θ; simp [tentBump, sub_zero]
@@ -231,13 +222,13 @@ lemma tentBump_integral_support {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) (τ :
   exact tentBump_integral_center hδ hδ'
 
 /-- Integral over an interval on which the bump is identically zero. -/
-lemma tentBump_integral_zero_of_forall {δ τ a b : ℝ}
+private lemma tentBump_integral_zero_of_forall {δ τ a b : ℝ}
     (h : ∀ θ ∈ Set.uIcc a b, tentBump δ τ θ = 0) :
     (∫ θ in a..b, tentBump δ τ θ) = 0 := by
   rw [intervalIntegral.integral_congr h, intervalIntegral.integral_zero]
 
 /-- Cumulative integral from `0` past the full support: `δ/2`. -/
-lemma tentBump_integral_full {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {τ θ : ℝ}
+private lemma tentBump_integral_full {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {τ θ : ℝ}
     (hτ : δ / 2 ≤ τ) (hθ1 : τ + δ / 2 ≤ θ) (hθ2 : θ ≤ 2 * π - δ / 2)
     (hτ2 : τ ≤ 2 * π - δ / 2) :
     (∫ s in (0 : ℝ)..θ, tentBump δ τ s) = δ / 2 := by
@@ -264,7 +255,7 @@ lemma tentBump_integral_full {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {τ θ :
   ring
 
 /-- Cumulative integral from `0` not yet reaching the support: `0`. -/
-lemma tentBump_integral_none {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {τ θ : ℝ}
+private lemma tentBump_integral_none {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {τ θ : ℝ}
     (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ τ - δ / 2) (hτ2 : τ ≤ 2 * π - δ / 2) :
     (∫ s in (0 : ℝ)..θ, tentBump δ τ s) = 0 := by
   apply tentBump_integral_zero_of_forall
@@ -276,7 +267,7 @@ lemma tentBump_integral_none {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {τ θ :
 
 /-- Cumulative integral from `0` of the boundary bump (centred at `0`): its right
 half `δ/4`. -/
-lemma tentBump_integral_boundary {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {θ : ℝ}
+private lemma tentBump_integral_boundary {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {θ : ℝ}
     (hθ1 : δ / 2 ≤ θ) (hθ2 : θ ≤ 2 * π - δ / 2) :
     (∫ s in (0 : ℝ)..θ, tentBump δ 0 s) = δ / 4 := by
   have hz : (∫ s in (δ / 2)..θ, tentBump δ 0 s) = 0 := by
@@ -293,7 +284,7 @@ lemma tentBump_integral_boundary {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {θ 
   ring
 
 /-- A bump integrates to `δ/2` over a full period centred at its centre. -/
-lemma tentBump_integral_period {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) (τ : ℝ) :
+private lemma tentBump_integral_period {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) (τ : ℝ) :
     (∫ θ in (τ - π)..(τ + π), tentBump δ τ θ) = δ / 2 := by
   have hz1 : (∫ θ in (τ - π)..(τ - δ / 2), tentBump δ τ θ) = 0 := by
     apply tentBump_integral_zero_of_forall
@@ -322,7 +313,7 @@ lemma tentBump_integral_period {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) (τ : 
   ring
 
 /-- A bump integrates to `δ/2` over the standard period `[0, 2π]`. -/
-lemma tentBump_integral_two_pi {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) (τ : ℝ) :
+private lemma tentBump_integral_two_pi {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) (τ : ℝ) :
     (∫ θ in (0 : ℝ)..(2 * π), tentBump δ τ θ) = δ / 2 := by
   have hper := (tentBump_periodic δ τ).intervalIntegral_add_eq 0 (τ - π)
   rw [zero_add] at hper

@@ -19,12 +19,12 @@ continuous loop `g : [0,1] → S¹` lifts to a continuous real *angle path*
 total angle increment `(φ 1 − φ 0) / 2π`.
 
 The configuration disk (`configSpace`) and the foundational winding-number
-lemmas it consumes (`windingNumber_standard`, `windingNumber_mul`,
+lemmas it consumes (`windingNumber_negStandard`, `windingNumber_mul`,
 `windingNumberC_const_mul`, `windingNumberC_posScalarField`,
-`windingNumberC_eq_of_perturb`, `windingNumberC_circle_exp`) are built here on top
+`windingNumberC_eq_of_perturb`) are built here on top
 of `Gluck.Bicircle`.  The final error-map assembly (`errorMap_winding_eq_one`,
-`exists_closing_configuration`), which needs the invertible-linear-map winding
-computation and the second-order Taylor bound, is complete.
+which exhibits the boundary winding `-1 ≠ 0`) needs the invertible-linear-map
+winding computation and the second-order Taylor bound.
 
 Blueprint: `blueprint/src/chapters/Gluck_Winding.tex` (`thm:existence_of_zero`).
 -/
@@ -40,11 +40,11 @@ open Complex
 by lifting `g` along the exponential covering `Circle.exp` starting at a chosen
 real preimage of `g 0`.  It satisfies `Circle.exp (angleLift g t) = g t`
 (`angleLift_lifts`) and `angleLift g 0` is the chosen base preimage. -/
-noncomputable def angleLift (g : C(I, Circle)) : C(I, ℝ) :=
+private noncomputable def angleLift (g : C(I, Circle)) : C(I, ℝ) :=
   Circle.isCoveringMap_exp.liftPath g (Circle.exp_surjective (g 0)).choose
     (Circle.exp_surjective (g 0)).choose_spec.symm
 
-theorem angleLift_lifts (g : C(I, Circle)) (t : I) :
+private theorem angleLift_lifts (g : C(I, Circle)) (t : I) :
     Circle.exp (angleLift g t) = g t := by
   have h := Circle.isCoveringMap_exp.liftPath_lifts g (Circle.exp_surjective (g 0)).choose
     (Circle.exp_surjective (g 0)).choose_spec.symm
@@ -53,11 +53,11 @@ theorem angleLift_lifts (g : C(I, Circle)) (t : I) :
 
 /-- The **winding number** of a continuous loop `g : [0,1] → S¹` about the
 origin: the total angle increment of its lift, normalised by `2π`. -/
-noncomputable def windingNumber (g : C(I, Circle)) : ℝ :=
+private noncomputable def windingNumber (g : C(I, Circle)) : ℝ :=
   (angleLift g 1 - angleLift g 0) / (2 * π)
 
 /-- A constant loop has winding number `0`. -/
-theorem windingNumber_const (c : Circle) :
+private theorem windingNumber_const (c : Circle) :
     windingNumber (ContinuousMap.const I c) = 0 := by
   have hpe : (ContinuousMap.const I c) 0 =
       Circle.exp (Circle.exp_surjective ((ContinuousMap.const I c) 0)).choose :=
@@ -113,7 +113,7 @@ the loop, not just the canonical one: if `Circle.exp (φ t) = g t` for all `t`,
 then `windingNumber g = (φ 1 − φ 0) / 2π`.  Two lifts of the same loop differ by
 a continuous integer multiple of `2π`, hence by a constant, so the increment is
 independent of the choice. -/
-theorem windingNumber_eq_div_of_lift (g : C(I, Circle)) (φ : C(I, ℝ))
+private theorem windingNumber_eq_div_of_lift (g : C(I, Circle)) (φ : C(I, ℝ))
     (hφ : ∀ t, Circle.exp (φ t) = g t) :
     windingNumber g = (φ 1 - φ 0) / (2 * π) := by
   have hψ : ∀ t, Circle.exp (angleLift g t) = g t := angleLift_lifts g
@@ -148,7 +148,7 @@ winding number.  Proof: lift `H` along `Circle.exp` (covering-space homotopy
 lifting); for each `s` the slice increment `(H̃(s,1) − H̃(s,0))/2π` is the winding
 number of that slice and is integer-valued (since `H(s,0) = H(s,1)`), hence
 constant in the connected parameter `s`. -/
-theorem windingNumber_eq_of_homotopy {g₀ g₁ : C(I, Circle)} (H : C(I × I, Circle))
+private theorem windingNumber_eq_of_homotopy {g₀ g₁ : C(I, Circle)} (H : C(I × I, Circle))
     (h0 : ∀ t, H (0, t) = g₀ t) (h1 : ∀ t, H (1, t) = g₁ t)
     (hloop : ∀ s, H (s, 0) = H (s, 1)) :
     windingNumber g₀ = windingNumber g₁ := by
@@ -191,7 +191,7 @@ theorem windingNumber_eq_of_homotopy {g₀ g₁ : C(I, Circle)} (H : C(I × I, C
 
 /-- Radial projection of a nonzero complex number onto the unit circle,
 `z ↦ z / ‖z‖`. -/
-noncomputable def circleProj (z : ℂ) (hz : z ≠ 0) : Circle :=
+private noncomputable def circleProj (z : ℂ) (hz : z ≠ 0) : Circle :=
   ⟨z / (‖z‖ : ℂ), by
     rw [← SetLike.mem_coe, Submonoid.coe_unitSphere, mem_sphere_zero_iff_norm, norm_div,
       Complex.norm_real, Real.norm_eq_abs, abs_of_pos (norm_pos_iff.2 hz),
@@ -203,10 +203,10 @@ private theorem circleProj_congr {a b : ℂ} (ha : a ≠ 0) (hb : b ≠ 0) (h : 
 
 /-- As a complex number, the radial projection of `z` is `z / ‖z‖`
 (blueprint `lem:circle_proj_eq`). -/
-theorem circleProj_eq (z : ℂ) (hz : z ≠ 0) : (circleProj z hz : ℂ) = z / (‖z‖ : ℂ) := rfl
+private theorem circleProj_eq (z : ℂ) (hz : z ≠ 0) : (circleProj z hz : ℂ) = z / (‖z‖ : ℂ) := rfl
 
 /-- The normalised loop of a nonvanishing continuous loop `γ : [0,1] → ℂ`. -/
-noncomputable def normLoop (γ : C(I, ℂ)) (h : ∀ t, γ t ≠ 0) : C(I, Circle) :=
+private noncomputable def normLoop (γ : C(I, ℂ)) (h : ∀ t, γ t ≠ 0) : C(I, Circle) :=
   ⟨fun t => circleProj (γ t) (h t), by
     apply Continuous.subtype_mk
     exact γ.continuous.div
@@ -321,67 +321,23 @@ theorem exists_zero_of_boundary_winding (F : ℂ → ℂ)
   rw [windingNumber_const] at hinv
   exact hw hinv.symm
 
-/-! ## The standard once-around loop -/
-
-/-- The **standard once-around loop** `g₀ t = Circle.exp (2π t)`. -/
-noncomputable def standardLoop : C(I, Circle) :=
-  ⟨fun t => Circle.exp (2 * π * (t : ℝ)),
-    Circle.exp.continuous.comp (continuous_const.mul continuous_subtype_val)⟩
-
-/-- The standard once-around loop has winding number `1` (blueprint
-`lem:winding_number_standard`).  This is the keystone nonzero-winding
-computation: every downstream "winds `±1 ≠ 0`" assertion reduces to it via
-homotopy invariance (`windingNumber_eq_of_homotopy`). -/
-theorem windingNumber_standard : windingNumber standardLoop = 1 := by
-  have hlift : ∀ t : I, Circle.exp ((fun t : I => 2 * π * (t : ℝ)) t) = standardLoop t :=
-    fun _ => rfl
-  rw [windingNumber_eq_div_of_lift standardLoop
-    ⟨fun t : I => 2 * π * (t : ℝ), continuous_const.mul continuous_subtype_val⟩ hlift]
-  have h2pi : (2 * π : ℝ) ≠ 0 := by positivity
-  simp only [ContinuousMap.coe_mk, Set.Icc.coe_one, Set.Icc.coe_zero, mul_one, mul_zero,
-    sub_zero]
-  field_simp
-
 /-- Radial projection of a point already on the unit circle is the point itself. -/
 private theorem circleProj_coe (z : Circle) (hz : (z : ℂ) ≠ 0) : circleProj (z : ℂ) hz = z := by
   apply Subtype.ext
   rw [circleProj_eq, Circle.norm_coe]
   norm_num
 
-/-- The standard unit-circle parametrization `t ↦ e^{2π i t}`, as a nonvanishing
-`ℂ`-loop. -/
-noncomputable def circleExpLoop : C(I, ℂ) :=
-  ⟨fun t : I => ((standardLoop t : Circle) : ℂ),
-    continuous_subtype_val.comp standardLoop.continuous⟩
-
-/-- `circleExpLoop` is nowhere zero (it lands on the unit circle). -/
-theorem circleExpLoop_ne (t : I) : circleExpLoop t ≠ 0 := by
-  change ((standardLoop t : Circle) : ℂ) ≠ 0
-  exact norm_pos_iff.1 (by rw [Circle.norm_coe]; norm_num)
-
-/-- The standard unit-circle parametrization, viewed as a nonvanishing `ℂ`-loop,
-has winding number `1`.  Its radial normalisation is exactly `standardLoop`
-(radial projection fixes points already on the circle), so its winding number is
-that of `standardLoop`.  This is the concrete nonzero `ℂ`-winding the linear
-model of the error map is compared against. -/
-theorem windingNumberC_circle_exp : windingNumberC circleExpLoop circleExpLoop_ne = 1 := by
-  have hnl : normLoop circleExpLoop circleExpLoop_ne = standardLoop := by
-    apply ContinuousMap.ext
-    intro t
-    exact circleProj_coe (standardLoop t) (circleExpLoop_ne t)
-  rw [windingNumberC, hnl, windingNumber_standard]
-
 /-! ## The reverse once-around loop (winding number `-1`) -/
 
 /-- The **reverse once-around loop** `g₀⁻ t = Circle.exp (-2π t)`. -/
-noncomputable def negStandardLoop : C(I, Circle) :=
+private noncomputable def negStandardLoop : C(I, Circle) :=
   ⟨fun t => Circle.exp (-(2 * π * (t : ℝ))),
     Circle.exp.continuous.comp (continuous_const.mul continuous_subtype_val).neg⟩
 
-/-- The reverse once-around loop has winding number `-1` (mirror of
-`windingNumber_standard`, via the lift `φ t = -2π t`).  This is the concrete
-`-1` winding the linear model of the error map is compared against. -/
-theorem windingNumber_negStandard : windingNumber negStandardLoop = -1 := by
+/-- The reverse once-around loop has winding number `-1` (computed directly from
+the lift `φ t = -2π t`).  This is the concrete `-1` winding the linear model of
+the error map is compared against. -/
+private theorem windingNumber_negStandard : windingNumber negStandardLoop = -1 := by
   have hlift : ∀ t : I, Circle.exp ((fun t : I => -(2 * π * (t : ℝ))) t) = negStandardLoop t :=
     fun _ => rfl
   rw [windingNumber_eq_div_of_lift negStandardLoop
@@ -393,18 +349,18 @@ theorem windingNumber_negStandard : windingNumber negStandardLoop = -1 := by
 
 /-- The reverse unit-circle parametrization `t ↦ e^{-2π i t}`, as a nonvanishing
 `ℂ`-loop. -/
-noncomputable def negCircleExpLoop : C(I, ℂ) :=
+private noncomputable def negCircleExpLoop : C(I, ℂ) :=
   ⟨fun t : I => ((negStandardLoop t : Circle) : ℂ),
     continuous_subtype_val.comp negStandardLoop.continuous⟩
 
 /-- `negCircleExpLoop` is nowhere zero (it lands on the unit circle). -/
-theorem negCircleExpLoop_ne (t : I) : negCircleExpLoop t ≠ 0 := by
+private theorem negCircleExpLoop_ne (t : I) : negCircleExpLoop t ≠ 0 := by
   change ((negStandardLoop t : Circle) : ℂ) ≠ 0
   exact norm_pos_iff.1 (by rw [Circle.norm_coe]; norm_num)
 
 /-- The reverse unit-circle parametrization, viewed as a nonvanishing `ℂ`-loop,
 has winding number `-1`. -/
-theorem windingNumberC_negCircleExp : windingNumberC negCircleExpLoop negCircleExpLoop_ne = -1 := by
+private theorem windingNumberC_negCircleExp : windingNumberC negCircleExpLoop negCircleExpLoop_ne = -1 := by
   have hnl : normLoop negCircleExpLoop negCircleExpLoop_ne = negStandardLoop := by
     apply ContinuousMap.ext
     intro t
@@ -425,7 +381,7 @@ theorem windingNumberC_congr {γ γ' : C(I, ℂ)} {h : ∀ t, γ t ≠ 0} {h' : 
 
 /-- **Additivity of the winding number under pointwise multiplication.**  Since
 `angleLift g + angleLift h` is a continuous lift of `g * h`, the increments add. -/
-theorem windingNumber_mul (g h : C(I, Circle)) :
+private theorem windingNumber_mul (g h : C(I, Circle)) :
     windingNumber (g * h) = windingNumber g + windingNumber h := by
   have hlift : ∀ t : I, Circle.exp ((angleLift g + angleLift h) t) = (g * h) t := by
     intro t
@@ -450,7 +406,7 @@ private theorem circleProj_mul (c z : ℂ) (hc : c ≠ 0) (hz : z ≠ 0) :
 loop by a fixed nonzero constant `c` does not change its winding number, because
 its normalisation factors as a constant loop times the original normalisation,
 and a constant loop has winding number `0`. -/
-theorem windingNumberC_const_mul (c : ℂ) (hc : c ≠ 0) (γ : C(I, ℂ)) (h : ∀ t, γ t ≠ 0) :
+private theorem windingNumberC_const_mul (c : ℂ) (hc : c ≠ 0) (γ : C(I, ℂ)) (h : ∀ t, γ t ≠ 0) :
     windingNumberC ⟨fun t => c * γ t, continuous_const.mul γ.continuous⟩
         (fun t => mul_ne_zero hc (h t)) = windingNumberC γ h := by
   have heq : normLoop ⟨fun t => c * γ t, continuous_const.mul γ.continuous⟩
@@ -615,15 +571,10 @@ equally-spaced bicircle `(π/4, 3π/4, 5π/4, 7π/4)`. -/
 noncomputable def configSpace (δ : ℝ) (p : ℝ × ℝ) : ℝ × ℝ × ℝ × ℝ :=
   (π / 4 + δ * p.1, 3 * π / 4 + δ * p.2, 5 * π / 4, 7 * π / 4)
 
-/-- `configSpace δ` is continuous (it is affine in `(x,y)`). -/
-theorem continuous_configSpace (δ : ℝ) : Continuous (configSpace δ) := by
-  unfold configSpace
-  fun_prop
-
 /-- On the closed unit disk (recorded here through `|x| ≤ 1`, `|y| ≤ 1`, which
 follow from `x²+y² ≤ 1`), with `0 < δ ≤ π/8`, the four breakpoints satisfy the
 strict order constraint `0 < θ₁ < θ₂ < θ₃ < θ₄ < θ₁ + 2π`. -/
-theorem configSpace_ordered (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
+private theorem configSpace_ordered (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
     (p : ℝ × ℝ) (hx : |p.1| ≤ 1) (hy : |p.2| ≤ 1) :
     0 < (configSpace δ p).1 ∧ (configSpace δ p).1 < (configSpace δ p).2.1 ∧
     (configSpace δ p).2.1 < (configSpace δ p).2.2.1 ∧
@@ -665,7 +616,7 @@ private theorem errorMap_order (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) 
 with the nonzero scalar `s = 1/(ib) − 1/(ia)` and chord sum
 `V(z) = (e^{iθ₂} − e^{iθ₁}) + (e^{iθ₄} − e^{iθ₃})`, where the trailing
 exponential difference `e^{i·7π/4} − e^{i·5π/4} = √2`. -/
-theorem errorMap_eq (a b δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
+private theorem errorMap_eq (a b δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     errorMap a b δ z
       = (1 / (Complex.I * (b : ℂ)) - 1 / (Complex.I * (a : ℂ)))
         * ((Complex.exp (((3 * π / 4 + δ * z.im : ℝ) : ℂ) * Complex.I)
@@ -692,7 +643,7 @@ theorem errorMap_eq (a b δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : �
 
 /-- `errorMap` is continuous on the closed unit disk (it agrees there with the
 manifestly continuous closed form `errorMap_eq`). -/
-theorem continuousOn_errorMap (a b δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) :
+private theorem continuousOn_errorMap (a b δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) :
     ContinuousOn (errorMap a b δ) (Metric.closedBall 0 1) := by
   apply ContinuousOn.congr
     (f := fun z : ℂ => (1 / (Complex.I * (b : ℂ)) - 1 / (Complex.I * (a : ℂ)))
@@ -966,20 +917,5 @@ theorem errorMap_winding_eq_one (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (hab : 
     _ = -1 :=
         (windingNumberC_const_mul _ hcc negCircleExpLoop negCircleExpLoop_ne).trans
           windingNumberC_negCircleExp
-
-/-- **A closing configuration exists** (blueprint `cor:closing_configuration_exists`).
-For `0 < a`, `0 < b`, `a ≠ b` and `0 < δ ≤ π/8`, there is a configuration `z` in
-the interior of the disk with `errorMap a b δ z = 0`, i.e. a bicircle
-configuration whose error vector vanishes (the corresponding bicircle closes up,
-by `bicircleErrorVector_eq_zero_iff`).  Apply the planar degree principle
-`exists_zero_of_boundary_winding` to the error map, whose boundary winding is
-`-1 ≠ 0` by `errorMap_winding_eq_one`. -/
-theorem exists_closing_configuration (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (hab : a ≠ b)
-    (hδ : 0 < δ) (hδ' : δ ≤ π / 8) :
-    ∃ z ∈ Metric.ball (0 : ℂ) 1, errorMap a b δ z = 0 := by
-  obtain ⟨hF, hbd, hw⟩ := errorMap_winding_eq_one a b δ ha hb hab hδ hδ'
-  have hwne : windingNumberC (diskBoundaryLoop (errorMap a b δ) hF)
-      (diskBoundaryLoop_ne_zero (errorMap a b δ) hF hbd) ≠ 0 := by rw [hw]; norm_num
-  exact exists_zero_of_boundary_winding (errorMap a b δ) hF hbd hwne
 
 end Gluck

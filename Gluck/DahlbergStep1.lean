@@ -19,8 +19,7 @@ conclusion to `κ ∘ η` through the `L¹` smallness of `e`.
 
 Blueprint chapter: `blueprint/src/chapters/Gluck_DahlbergStep1.tex`.
 
-This is a SCAFFOLD: every theorem/lemma below is stated and left with a `sorry`
-proof body. Definitions are complete.
+All declarations in this file are fully proved and axiom-clean.
 -/
 
 namespace Gluck
@@ -46,145 +45,6 @@ the `2π`-periodic step function equal to `b` on
 noncomputable def cleanBicircle (a b : ℝ) : ℝ → ℝ :=
   fun θ => a * (1 - dahlbergF θ) + b * dahlbergF θ
 
-/-- Membership of `θ` in a `2π`-periodic union of translated open arcs
-`⋃ k, (lo + 2πk, hi + 2πk)` is equivalent to membership of the `toIcoMod`
-representative (base `π/4`) in the single base arc `(lo, hi)`, provided the base
-arc lies inside one fundamental period `[π/4, π/4 + 2π)`. (Helper for
-`cleanBicircle_eq_stepCurvature`; no separate blueprint entry.) -/
-private lemma toIcoMod_pi4_mem_Ioo_iff (lo hi θ : ℝ)
-    (hlo : π / 4 ≤ lo) (hhi : hi ≤ π / 4 + 2 * π) :
-    (∃ k : ℤ, θ ∈ Set.Ioo (lo + 2 * π * (k : ℝ)) (hi + 2 * π * (k : ℝ))) ↔
-      toIcoMod Real.two_pi_pos (π / 4) θ ∈ Set.Ioo lo hi := by
-  constructor
-  · rintro ⟨k, hk⟩
-    rw [Set.mem_Ioo] at hk
-    have hcompute : toIcoMod Real.two_pi_pos (π / 4) θ = θ - 2 * π * (k : ℝ) := by
-      conv_lhs => rw [show θ = (θ - 2 * π * (k : ℝ)) + k • (2 * π) by
-        rw [zsmul_eq_mul]; ring]
-      rw [toIcoMod_add_zsmul]
-      exact (toIcoMod_eq_self Real.two_pi_pos).mpr
-        ⟨by linarith [hk.1], by linarith [hk.2]⟩
-    rw [hcompute, Set.mem_Ioo]
-    exact ⟨by linarith [hk.1], by linarith [hk.2]⟩
-  · intro ht
-    rw [Set.mem_Ioo] at ht
-    refine ⟨toIcoDiv Real.two_pi_pos (π / 4) θ, ?_⟩
-    have hexp := toIcoMod_add_toIcoDiv_zsmul Real.two_pi_pos (π / 4) θ
-    rw [zsmul_eq_mul] at hexp
-    rw [Set.mem_Ioo]
-    refine ⟨by nlinarith [ht.1, hexp], by nlinarith [ht.2, hexp]⟩
-
-/-- **The clean bicircle is the in-tree four-arc step function.** For `0 < a < b`,
-the clean bicircle `cleanBicircle a b` coincides almost everywhere with the
-project's four-arc step curvature `stepCurvature a b (π/4) (3π/4) (5π/4) (7π/4)`
-(the `2π`-periodic step function with value `b` on `[π/4,3π/4) ∪ [5π/4,7π/4)` and
-`a` on the complementary two arcs; the four breakpoints form a measure-zero set).
-Consequently the bicircle closure error vector of `cleanBicircle a b` at the
-perturbed breakpoint configuration `configSpace δ (z.re, z.im)` is exactly the
-in-tree `errorMap a b δ z`.
-(Blueprint `lem:clean_bicircle_eq_step`.) -/
-lemma cleanBicircle_eq_stepCurvature (a b δ : ℝ) (z : ℂ) :
-    cleanBicircle a b =ᵐ[volume]
-        stepCurvature a b (π / 4) (3 * π / 4) (5 * π / 4) (7 * π / 4) ∧
-      bicircleErrorVector a b (π / 4 + δ * z.re) (3 * π / 4 + δ * z.im)
-          (5 * π / 4) (7 * π / 4)
-        = errorMap a b δ z := by
-  refine ⟨?_, rfl⟩
-  -- The second conjunct is `errorMap` unfolded (`rfl`). For the a.e. equality, we
-  -- show the difference set is contained in the (countable, hence null) set of
-  -- breakpoint translates.
-  rw [Filter.EventuallyEq, MeasureTheory.ae_iff]
-  have hnull : volume (⋃ k : ℤ,
-      ({π / 4 + 2 * π * (k : ℝ), 5 * π / 4 + 2 * π * (k : ℝ)} : Set ℝ)) = 0 := by
-    refine Set.Countable.measure_zero ?_ _
-    exact Set.countable_iUnion
-      (fun k => ((Set.finite_singleton _).insert _).countable)
-  refine measure_mono_null ?_ hnull
-  intro θ hθ
-  rw [Set.mem_setOf_eq] at hθ
-  -- Representative `t = toIcoMod (π/4) θ ∈ [π/4, π/4 + 2π)` and `θ = t + 2π·k`.
-  have htmem := toIcoMod_mem_Ico Real.two_pi_pos (π / 4) θ
-  rw [Set.mem_Ico] at htmem
-  have hexp : θ = toIcoMod Real.two_pi_pos (π / 4) θ
-      + 2 * π * (toIcoDiv Real.two_pi_pos (π / 4) θ : ℝ) := by
-    have hh := toIcoMod_add_toIcoDiv_zsmul Real.two_pi_pos (π / 4) θ
-    rw [zsmul_eq_mul] at hh; linarith
-  -- Value of `cleanBicircle` in terms of the representative.
-  have hSiff : (θ ∈ ⋃ k : ℤ,
-        Set.Ioo (π / 4 + 2 * π * (k : ℝ)) (3 * π / 4 + 2 * π * (k : ℝ)) ∪
-        Set.Ioo (5 * π / 4 + 2 * π * (k : ℝ)) (7 * π / 4 + 2 * π * (k : ℝ))) ↔
-      (toIcoMod Real.two_pi_pos (π / 4) θ ∈ Set.Ioo (π / 4) (3 * π / 4) ∨
-       toIcoMod Real.two_pi_pos (π / 4) θ ∈ Set.Ioo (5 * π / 4) (7 * π / 4)) := by
-    rw [Set.mem_iUnion]
-    simp only [Set.mem_union]
-    rw [exists_or, toIcoMod_pi4_mem_Ioo_iff (π / 4) (3 * π / 4) θ (le_refl _)
-          (by linarith [Real.pi_pos]),
-        toIcoMod_pi4_mem_Ioo_iff (5 * π / 4) (7 * π / 4) θ
-          (by linarith [Real.pi_pos]) (by linarith [Real.pi_pos])]
-  have hdval : dahlbergF θ =
-      if (toIcoMod Real.two_pi_pos (π / 4) θ ∈ Set.Ioo (π / 4) (3 * π / 4) ∨
-          toIcoMod Real.two_pi_pos (π / 4) θ ∈ Set.Ioo (5 * π / 4) (7 * π / 4))
-        then (1 : ℝ) else 0 := by
-    unfold dahlbergF
-    by_cases hmem : (toIcoMod Real.two_pi_pos (π / 4) θ ∈ Set.Ioo (π / 4) (3 * π / 4) ∨
-        toIcoMod Real.two_pi_pos (π / 4) θ ∈ Set.Ioo (5 * π / 4) (7 * π / 4))
-    · rw [Set.indicator_of_mem (hSiff.mpr hmem), if_pos hmem]
-    · rw [Set.indicator_of_notMem (fun hc => hmem (hSiff.mp hc)), if_neg hmem]
-  have hclean : cleanBicircle a b θ =
-      if (toIcoMod Real.two_pi_pos (π / 4) θ ∈ Set.Ioo (π / 4) (3 * π / 4) ∨
-          toIcoMod Real.two_pi_pos (π / 4) θ ∈ Set.Ioo (5 * π / 4) (7 * π / 4))
-        then b else a := by
-    simp only [cleanBicircle, hdval]
-    by_cases hc : (toIcoMod Real.two_pi_pos (π / 4) θ ∈ Set.Ioo (π / 4) (3 * π / 4) ∨
-        toIcoMod Real.two_pi_pos (π / 4) θ ∈ Set.Ioo (5 * π / 4) (7 * π / 4))
-    · simp only [if_pos hc]; ring
-    · simp only [if_neg hc]; ring
-  -- Value of `stepCurvature` in terms of the representative (definitional).
-  have hstep : stepCurvature a b (π / 4) (3 * π / 4) (5 * π / 4) (7 * π / 4) θ =
-      if (toIcoMod Real.two_pi_pos (π / 4) θ < 3 * π / 4 ∨
-          (5 * π / 4 ≤ toIcoMod Real.two_pi_pos (π / 4) θ ∧
-           toIcoMod Real.two_pi_pos (π / 4) θ < 7 * π / 4))
-        then b else a := rfl
-  -- Off the two left-endpoints `t = π/4` and `t = 5π/4`, the two conditions agree,
-  -- so `clean = step`; hence the difference forces `t ∈ {π/4, 5π/4}`.
-  have ht_bp : toIcoMod Real.two_pi_pos (π / 4) θ = π / 4 ∨
-      toIcoMod Real.two_pi_pos (π / 4) θ = 5 * π / 4 := by
-    by_contra hcon
-    rw [not_or] at hcon
-    obtain ⟨hne1, hne2⟩ := hcon
-    apply hθ
-    rw [hclean, hstep]
-    have hpi := Real.pi_pos
-    have htgt : π / 4 < toIcoMod Real.two_pi_pos (π / 4) θ :=
-      lt_of_le_of_ne htmem.1 (Ne.symm hne1)
-    have hPQ : (toIcoMod Real.two_pi_pos (π / 4) θ ∈ Set.Ioo (π / 4) (3 * π / 4) ∨
-          toIcoMod Real.two_pi_pos (π / 4) θ ∈ Set.Ioo (5 * π / 4) (7 * π / 4)) ↔
-        (toIcoMod Real.two_pi_pos (π / 4) θ < 3 * π / 4 ∨
-          (5 * π / 4 ≤ toIcoMod Real.two_pi_pos (π / 4) θ ∧
-           toIcoMod Real.two_pi_pos (π / 4) θ < 7 * π / 4)) := by
-      simp only [Set.mem_Ioo]
-      constructor
-      · rintro (⟨_, h⟩ | ⟨h1, h2⟩)
-        · exact Or.inl h
-        · exact Or.inr ⟨h1.le, h2⟩
-      · rintro (h | ⟨h1, h2⟩)
-        · exact Or.inl ⟨htgt, h⟩
-        · exact Or.inr ⟨lt_of_le_of_ne h1 (Ne.symm hne2), h2⟩
-    by_cases hP : (toIcoMod Real.two_pi_pos (π / 4) θ ∈ Set.Ioo (π / 4) (3 * π / 4) ∨
-        toIcoMod Real.two_pi_pos (π / 4) θ ∈ Set.Ioo (5 * π / 4) (7 * π / 4))
-    · rw [if_pos hP, if_pos (hPQ.mp hP)]
-    · rw [if_neg hP, if_neg (fun hq => hP (hPQ.mpr hq))]
-  -- Conclude `θ` lies in the breakpoint set.
-  simp only [Set.mem_iUnion, Set.mem_insert_iff, Set.mem_singleton_iff]
-  refine ⟨toIcoDiv Real.two_pi_pos (π / 4) θ, ?_⟩
-  rcases ht_bp with h | h
-  · refine Or.inl ?_
-    conv_lhs => rw [hexp]
-    rw [h]
-  · refine Or.inr ?_
-    conv_lhs => rw [hexp]
-    rw [h]
-
 /-- **The mixed-sign four-vertex condition** (Dahlberg, §1, Theorem 1.1
 hypothesis). A continuous, `2π`-periodic, non-constant `κ : ℝ → ℝ` satisfies it
 if there are points `p₁ < q₁ < p₂ < q₂ < p₁ + 2π` in one fundamental period with
@@ -209,7 +69,7 @@ chosen *interior* to the gap `(max (0, max (κ q₁) (κ q₂)), min (κ p₁) (
 flanks by the intermediate value theorem (`ivt_hits`). This is the only place the
 positivity-at-the-maxima hypothesis is used.
 (Blueprint `lem:dahlberg_alignment_data`.) -/
-lemma exists_alignmentData {κ : ℝ → ℝ} (h : MixedSignFourVertex κ) :
+private lemma exists_alignmentData {κ : ℝ → ℝ} (h : MixedSignFourVertex κ) :
     ∃ a b, 0 < a ∧ a < b ∧ ∃ r₁ r₂ r₃ r₄,
       r₁ < r₂ ∧ r₂ < r₃ ∧ r₃ < r₄ ∧ r₄ < r₁ + 2 * π ∧
       κ r₁ = a ∧ κ r₂ = b ∧ κ r₃ = a ∧ κ r₄ = b := by
@@ -280,7 +140,7 @@ lemma exists_alignmentData {κ : ℝ → ℝ} (h : MixedSignFourVertex κ) :
 
 /-- The two-arc indicator `dahlbergF` is `2π`-periodic. (Helper for
 `cleanBicircle_periodic`; no separate blueprint entry.) -/
-lemma dahlbergF_periodic : Function.Periodic dahlbergF (2 * π) := by
+private lemma dahlbergF_periodic : Function.Periodic dahlbergF (2 * π) := by
   intro θ
   unfold dahlbergF
   have hmem : ∀ x : ℝ,
@@ -314,7 +174,7 @@ lemma dahlbergF_periodic : Function.Periodic dahlbergF (2 * π) := by
 /-- The two-arc indicator `dahlbergF` is interval-integrable (it is the indicator
 of a measurable set, hence bounded measurable). (Helper for
 `cleanBicircle_intervalIntegrable`; no separate blueprint entry.) -/
-lemma dahlbergF_intervalIntegrable (p q : ℝ) :
+private lemma dahlbergF_intervalIntegrable (p q : ℝ) :
     IntervalIntegrable dahlbergF volume p q := by
   have hSmeas : MeasurableSet (⋃ k : ℤ,
       Set.Ioo (π / 4 + 2 * π * (k : ℝ)) (3 * π / 4 + 2 * π * (k : ℝ)) ∪
@@ -334,7 +194,7 @@ lemma cleanBicircle_periodic (a b : ℝ) :
 
 /-- The clean bicircle is interval-integrable. (Helper; no separate blueprint
 entry.) -/
-lemma cleanBicircle_intervalIntegrable (a b p q : ℝ) :
+private lemma cleanBicircle_intervalIntegrable (a b p q : ℝ) :
     IntervalIntegrable (cleanBicircle a b) volume p q := by
   unfold cleanBicircle
   have h1 : IntervalIntegrable (fun θ => a * (1 - dahlbergF θ)) volume p q :=
@@ -345,7 +205,7 @@ lemma cleanBicircle_intervalIntegrable (a b p q : ℝ) :
 
 /-- `∫₀²π f = π`: the two value-`1` arcs of the indicator each have length `π/2`.
 (Helper for `integral_cleanBicircle`; no separate blueprint entry.) -/
-lemma integral_dahlbergF : (∫ t in (0 : ℝ)..(2 * π), dahlbergF t) = π := by
+private lemma integral_dahlbergF : (∫ t in (0 : ℝ)..(2 * π), dahlbergF t) = π := by
   have hpi := Real.pi_pos
   set S : Set ℝ := ⋃ k : ℤ,
       Set.Ioo (π / 4 + 2 * π * (k : ℝ)) (3 * π / 4 + 2 * π * (k : ℝ)) ∪
@@ -392,7 +252,7 @@ lemma integral_dahlbergF : (∫ t in (0 : ℝ)..(2 * π), dahlbergF t) = π := b
 
 /-- The period integral of the clean bicircle is `(a+b)π`. (Helper; no separate
 blueprint entry.) -/
-lemma integral_cleanBicircle (a b : ℝ) :
+private lemma integral_cleanBicircle (a b : ℝ) :
     (∫ t in (0 : ℝ)..(2 * π), cleanBicircle a b t) = (a + b) * π := by
   have hpi := Real.pi_pos
   unfold cleanBicircle
@@ -412,7 +272,7 @@ lemma integral_cleanBicircle (a b : ℝ) :
 period is bounded by compactness, and periodicity extends the bound globally).
 Used in the `L¹` estimate of `exists_eta_clean_L1`. (Helper; no separate blueprint
 entry.) -/
-lemma exists_kappa_bound {κ : ℝ → ℝ} (hcont : Continuous κ)
+private lemma exists_kappa_bound {κ : ℝ → ℝ} (hcont : Continuous κ)
     (hper : Function.Periodic κ (2 * π)) : ∃ N, ∀ x, |κ x| ≤ N := by
   obtain ⟨N, hN⟩ :=
     (isCompact_Icc (a := (0 : ℝ)) (b := 2 * π)).exists_bound_of_continuousOn hcont.continuousOn
@@ -449,7 +309,7 @@ that meet `[0, 2π]`). This is the pointwise form of the `S ∩ Ioc` computation
 `integral_dahlbergF`, used in the `L¹` estimate of `exists_eta_clean_L1` to read
 off the clean-bicircle value on each plateau arc. (Helper; no separate blueprint
 entry.) -/
-lemma dahlbergF_on_period {t : ℝ} (h0 : 0 ≤ t) (h2 : t ≤ 2 * π) :
+private lemma dahlbergF_on_period {t : ℝ} (h0 : 0 ≤ t) (h2 : t ≤ 2 * π) :
     dahlbergF t =
       (Set.Ioo (π / 4) (3 * π / 4) ∪ Set.Ioo (5 * π / 4) (7 * π / 4)).indicator
         (fun _ => (1 : ℝ)) t := by
@@ -509,7 +369,7 @@ cumulative integral of the calibrated continuous plateau density `w` of
 (measure `2π - 4δ`) the integrand is `≤ ε`; on the four transition gaps (measure
 `4δ`) it is bounded by a fixed `2M`; choosing `δ, ε` small gives the bound.
 (Blueprint `thm:exists_preliminary_diffeo`, analytic core.) -/
-lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ) :
+private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ) :
     ∃ a b, 0 < a ∧ a < b ∧ ∀ ε > 0, ∃ η : ℝ → ℝ,
       (∃ v, Continuous v ∧ (∀ θ, 0 < v θ) ∧ ∀ θ, HasDerivAt η (v θ) θ) ∧
       (∀ t, η (t + 2 * π) = η t + 2 * π) ∧

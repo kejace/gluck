@@ -27,7 +27,7 @@ theorem reconstruct_const (r : ℝ) (θ : ℝ) :
       = (r : ℂ) * Complex.I * (1 - Complex.exp (θ * Complex.I)) := by
   -- The antiderivative `F` of the integrand `φ ↦ e^{iφ}·r`.
   set F : ℝ → ℂ := fun x => (r : ℂ) * Complex.I * (1 - Complex.exp (x * Complex.I)) with hF
-  -- Derivative of `x ↦ e^{ixI}` (cf. `signedCurvature_reconstruct`).
+  -- Derivative of `x ↦ e^{ixI}`.
   have hExp : ∀ x : ℝ, HasDerivAt (fun y : ℝ => Complex.exp (↑y * Complex.I))
       (Complex.exp (↑x * Complex.I) * Complex.I) x := by
     intro x

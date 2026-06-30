@@ -48,24 +48,24 @@ arc-length interval is the slope `w_j/L_j(z)` (`w_j` = canonical clean-arc width
 -/
 
 /-- Cumulative-angle increment `Δ_1 = θ_1 - θ_0 = π/4 + δ·re`. -/
-noncomputable def closingDelta1 (δ : ℝ) (z : ℂ) : ℝ := π / 4 + δ * z.re
+private noncomputable def closingDelta1 (δ : ℝ) (z : ℂ) : ℝ := π / 4 + δ * z.re
 /-- Cumulative-angle increment `Δ_2 = θ_2 - θ_1 = π/2 + δ(im - re)`. -/
-noncomputable def closingDelta2 (δ : ℝ) (z : ℂ) : ℝ := π / 2 + δ * (z.im - z.re)
+private noncomputable def closingDelta2 (δ : ℝ) (z : ℂ) : ℝ := π / 2 + δ * (z.im - z.re)
 /-- Cumulative-angle increment `Δ_3 = θ_3 - θ_2 = π/2 - δ·im`. -/
-noncomputable def closingDelta3 (δ : ℝ) (z : ℂ) : ℝ := π / 2 - δ * z.im
+private noncomputable def closingDelta3 (δ : ℝ) (z : ℂ) : ℝ := π / 2 - δ * z.im
 /-- Cumulative-angle increment `Δ_4 = θ_4 - θ_3 = π/2`. -/
-noncomputable def closingDelta4 (_δ : ℝ) (_z : ℂ) : ℝ := π / 2
+private noncomputable def closingDelta4 (_δ : ℝ) (_z : ℂ) : ℝ := π / 2
 /-- Cumulative-angle increment `Δ_5 = θ_5 - θ_4 = π/4`. -/
-noncomputable def closingDelta5 (_δ : ℝ) (_z : ℂ) : ℝ := π / 4
+private noncomputable def closingDelta5 (_δ : ℝ) (_z : ℂ) : ℝ := π / 4
 
 /-- A positive constant floor for the calibration scalar `λ`, below the disk
 minimum `(3/8)(1/a+1/b)` so that on the disk `closingLambda = λ_raw` while the
 clamped definition stays globally continuous and positive. -/
-noncomputable def closingLambdaFloor (a b : ℝ) : ℝ := (1 / 4) * (1 / a + 1 / b)
+private noncomputable def closingLambdaFloor (a b : ℝ) : ℝ := (1 / 4) * (1 / a + 1 / b)
 
 /-- The (unclamped) calibration scalar
 `λ_raw(z) = (1/2π)·((π+δ(re-im))/a + (π+δ(im-re))/b) = (1/2π)·Σ Δ_j/κ̂_j`. -/
-noncomputable def closingLambdaRaw (a b δ : ℝ) (z : ℂ) : ℝ :=
+private noncomputable def closingLambdaRaw (a b δ : ℝ) (z : ℂ) : ℝ :=
   (1 / (2 * π)) * ((π + δ * (z.re - z.im)) / a + (π + δ * (z.im - z.re)) / b)
 
 /-- **The calibration scalar `λ(z)`** (Dahlberg, Route A): the clamp
@@ -73,62 +73,62 @@ noncomputable def closingLambdaRaw (a b δ : ℝ) (z : ℂ) : ℝ :=
 configuration nodes.  On the closed disk it equals `λ_raw`; the clamp only
 matters off the disk where it keeps `λ` globally continuous and positive.
 (Blueprint `def:closing_family`, `lem:closing_lambda_pos`.) -/
-noncomputable def closingLambda (a b δ : ℝ) (z : ℂ) : ℝ :=
+private noncomputable def closingLambda (a b δ : ℝ) (z : ℂ) : ℝ :=
   max (closingLambdaFloor a b) (closingLambdaRaw a b δ z)
 
 /-- Arc-length interval length `L_1 = Δ_1/(λ·a)`. -/
-noncomputable def closingLen1 (a b δ : ℝ) (z : ℂ) : ℝ :=
+private noncomputable def closingLen1 (a b δ : ℝ) (z : ℂ) : ℝ :=
   closingDelta1 δ z / (closingLambda a b δ z * a)
 /-- Arc-length interval length `L_2 = Δ_2/(λ·b)`. -/
-noncomputable def closingLen2 (a b δ : ℝ) (z : ℂ) : ℝ :=
+private noncomputable def closingLen2 (a b δ : ℝ) (z : ℂ) : ℝ :=
   closingDelta2 δ z / (closingLambda a b δ z * b)
 /-- Arc-length interval length `L_3 = Δ_3/(λ·a)`. -/
-noncomputable def closingLen3 (a b δ : ℝ) (z : ℂ) : ℝ :=
+private noncomputable def closingLen3 (a b δ : ℝ) (z : ℂ) : ℝ :=
   closingDelta3 δ z / (closingLambda a b δ z * a)
 /-- Arc-length interval length `L_4 = Δ_4/(λ·b)`. -/
-noncomputable def closingLen4 (a b δ : ℝ) (z : ℂ) : ℝ :=
+private noncomputable def closingLen4 (a b δ : ℝ) (z : ℂ) : ℝ :=
   closingDelta4 δ z / (closingLambda a b δ z * b)
 /-- Arc-length interval length `L_5 = Δ_5/(λ·a)`. -/
-noncomputable def closingLen5 (a b δ : ℝ) (z : ℂ) : ℝ :=
+private noncomputable def closingLen5 (a b δ : ℝ) (z : ℂ) : ℝ :=
   closingDelta5 δ z / (closingLambda a b δ z * a)
 
 /-- Cumulative arc-length breakpoint `s_1 = L_1`. -/
-noncomputable def closingS1 (a b δ : ℝ) (z : ℂ) : ℝ := closingLen1 a b δ z
+private noncomputable def closingS1 (a b δ : ℝ) (z : ℂ) : ℝ := closingLen1 a b δ z
 /-- Cumulative arc-length breakpoint `s_2 = L_1 + L_2`. -/
-noncomputable def closingS2 (a b δ : ℝ) (z : ℂ) : ℝ := closingLen1 a b δ z + closingLen2 a b δ z
+private noncomputable def closingS2 (a b δ : ℝ) (z : ℂ) : ℝ := closingLen1 a b δ z + closingLen2 a b δ z
 /-- Cumulative arc-length breakpoint `s_3 = L_1 + L_2 + L_3`. -/
-noncomputable def closingS3 (a b δ : ℝ) (z : ℂ) : ℝ :=
+private noncomputable def closingS3 (a b δ : ℝ) (z : ℂ) : ℝ :=
   closingLen1 a b δ z + closingLen2 a b δ z + closingLen3 a b δ z
 /-- Cumulative arc-length breakpoint `s_4 = L_1 + L_2 + L_3 + L_4`. -/
-noncomputable def closingS4 (a b δ : ℝ) (z : ℂ) : ℝ :=
+private noncomputable def closingS4 (a b δ : ℝ) (z : ℂ) : ℝ :=
   closingLen1 a b δ z + closingLen2 a b δ z + closingLen3 a b δ z + closingLen4 a b δ z
 
 /-- Arc-length midpoint of interval 1, `C_1 = L_1/2`. -/
-noncomputable def closingMid1 (a b δ : ℝ) (z : ℂ) : ℝ := closingLen1 a b δ z / 2
+private noncomputable def closingMid1 (a b δ : ℝ) (z : ℂ) : ℝ := closingLen1 a b δ z / 2
 /-- Arc-length midpoint of interval 2, `C_2 = s_1 + L_2/2`. -/
-noncomputable def closingMid2 (a b δ : ℝ) (z : ℂ) : ℝ := closingS1 a b δ z + closingLen2 a b δ z / 2
+private noncomputable def closingMid2 (a b δ : ℝ) (z : ℂ) : ℝ := closingS1 a b δ z + closingLen2 a b δ z / 2
 /-- Arc-length midpoint of interval 3, `C_3 = s_2 + L_3/2`. -/
-noncomputable def closingMid3 (a b δ : ℝ) (z : ℂ) : ℝ := closingS2 a b δ z + closingLen3 a b δ z / 2
+private noncomputable def closingMid3 (a b δ : ℝ) (z : ℂ) : ℝ := closingS2 a b δ z + closingLen3 a b δ z / 2
 /-- Arc-length midpoint of interval 4, `C_4 = s_3 + L_4/2`. -/
-noncomputable def closingMid4 (a b δ : ℝ) (z : ℂ) : ℝ := closingS3 a b δ z + closingLen4 a b δ z / 2
+private noncomputable def closingMid4 (a b δ : ℝ) (z : ℂ) : ℝ := closingS3 a b δ z + closingLen4 a b δ z / 2
 /-- Arc-length midpoint of interval 5, `C_5 = s_4 + L_5/2`. -/
-noncomputable def closingMid5 (a b δ : ℝ) (z : ℂ) : ℝ := closingS4 a b δ z + closingLen5 a b δ z / 2
+private noncomputable def closingMid5 (a b δ : ℝ) (z : ℂ) : ℝ := closingS4 a b δ z + closingLen5 a b δ z / 2
 
 /-- The uniform ramp half-width `η = π·a/(20(a+b))`, chosen below the compact-disk
 lower bound on the interval half-lengths `L_j/2` (so the trapezoidal pulses fit
 without overlapping their neighbours, for every `z` in the disk). -/
-noncomputable def closingRamp (a b : ℝ) : ℝ := π * a / (20 * (a + b))
+private noncomputable def closingRamp (a b : ℝ) : ℝ := π * a / (20 * (a + b))
 
 /-- The plateau baseline `m = λ·a/2`, a positive lower bound below every plateau
 slope `w_j/L_j` (so the trapezoidal pulse heights stay nonnegative on the disk). -/
-noncomputable def closingBase (a b δ : ℝ) (z : ℂ) : ℝ := closingLambda a b δ z * a / 2
+private noncomputable def closingBase (a b δ : ℝ) (z : ℂ) : ℝ := closingLambda a b δ z * a / 2
 
 /-- The calibrated trapezoidal pulse height for an arc of target rise `w`, length
 `L`, over the baseline `m` with ramp `η`: `(w - m·L)/(L - η)`, with the
 denominator clamped at `η` to stay globally continuous.  On the disk
 `L - η ≥ η`, so the clamp is inactive and the arc integral
 `m·L + height·(L - η) = w` is exact. -/
-noncomputable def closingHeight (m w L η : ℝ) : ℝ := (w - m * L) / max η (L - η)
+private noncomputable def closingHeight (m w L η : ℝ) : ℝ := (w - m * L) / max η (L - η)
 
 /-- **The node-placing density** `w_z = closingDensity a b δ z`: the plateau
 baseline plus the five calibrated trapezoidal pulses (`clampTent`), one per
@@ -136,7 +136,7 @@ arc-length interval, centred at the arc midpoints `C_j` with widths `L_j` and th
 uniform ramp `η`.  It is manifestly continuous and `2π`-periodic in `s`; on the
 disk it is positive and integrates to `2π` over a period.
 (Blueprint `def:closing_family`.) -/
-noncomputable def closingDensity (a b δ : ℝ) (z : ℂ) (s : ℝ) : ℝ :=
+private noncomputable def closingDensity (a b δ : ℝ) (z : ℂ) (s : ℝ) : ℝ :=
   closingBase a b δ z
   + closingHeight (closingBase a b δ z) (π / 4) (closingLen1 a b δ z) (closingRamp a b)
       * clampTent (closingRamp a b) (closingLen1 a b δ z) (closingMid1 a b δ z) s
@@ -158,7 +158,7 @@ mapping the `j`-th arc-length interval `[s_{j-1}, s_j]` onto the `j`-th canonica
 clean-bicircle arc.  This is the arc-length analogue of `alignReparam`; it plays
 the role of Dahlberg's Möbius `{g_β}`.
 (Blueprint `def:closing_family`.) -/
-noncomputable def closingFamily (a b δ : ℝ) (z : ℂ) : ℝ → ℝ :=
+private noncomputable def closingFamily (a b δ : ℝ) (z : ℂ) : ℝ → ℝ :=
   fun s => ∫ t in (0 : ℝ)..s, closingDensity a b δ z t
 
 /-- **The normalised arc-length curvature weight.** For a curvature weight
@@ -167,7 +167,7 @@ this is the `(2π/I)`-rescaled reparametrised weight
 `K_z(s) = (2π/I_z)·(g ∘ g_z)(s)` where `I_z = ∫₀²π g ∘ g_z` is the total
 curvature and `g_z = closingFamily a b δ z`.
 (Blueprint `def:arclength_norm`.) -/
-noncomputable def arcLengthNorm (g : ℝ → ℝ) (a b δ : ℝ) (z : ℂ) (s : ℝ) : ℝ :=
+private noncomputable def arcLengthNorm (g : ℝ → ℝ) (a b δ : ℝ) (z : ℂ) (s : ℝ) : ℝ :=
   (2 * π / (∫ t in (0 : ℝ)..(2 * π), g (closingFamily a b δ z t))) * g (closingFamily a b δ z s)
 
 /-- **The arc-length error map** (Dahlberg, §3, Step 2). For a curvature weight
@@ -177,43 +177,43 @@ The *perturbed* map is `F*(z,ε) = arcLengthErrorMap (κ ∘ η) a b δ z` and t
 *clean* map is `F(z) = arcLengthErrorMap (cleanBicircle a b) a b δ z`. A zero
 `F*(z*,ε) = 0` is exactly condition (1.2) for `K*_{z*}`.
 (Blueprint `def:arclength_error_map`.) -/
-noncomputable def arcLengthErrorMap (g : ℝ → ℝ) (a b δ : ℝ) (z : ℂ) : ℂ :=
+private noncomputable def arcLengthErrorMap (g : ℝ → ℝ) (a b δ : ℝ) (z : ℂ) : ℂ :=
   dahlbergCurve (arcLengthNorm g a b δ z) (2 * π)
 
 /-! ## The calibration scalar `λ(z)` -/
 
 /-- `λ_raw` is continuous on `ℂ` (affine-over-`{a,b}` in `(re, im)`). -/
-lemma continuous_closingLambdaRaw (a b δ : ℝ) : Continuous (closingLambdaRaw a b δ) := by
+private lemma continuous_closingLambdaRaw (a b δ : ℝ) : Continuous (closingLambdaRaw a b δ) := by
   unfold closingLambdaRaw
   fun_prop
 
 /-- **`λ(z)` is continuous** (`lem:closing_lambda_pos`, continuity clause). -/
-lemma continuous_closingLambda (a b δ : ℝ) : Continuous (closingLambda a b δ) := by
+private lemma continuous_closingLambda (a b δ : ℝ) : Continuous (closingLambda a b δ) := by
   unfold closingLambda
   exact continuous_const.max (continuous_closingLambdaRaw a b δ)
 
 /-- **`λ(z) > 0`** globally (`lem:closing_lambda_pos`).  The clamp floor
 `(1/4)(1/a+1/b)` is positive for `a, b > 0`. -/
-lemma closingLambda_pos (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (z : ℂ) :
+private lemma closingLambda_pos (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (z : ℂ) :
     0 < closingLambda a b δ z := by
   refine lt_of_lt_of_le ?_ (le_max_left _ _)
   unfold closingLambdaFloor
   positivity
 
 /-- `λ(z) ≠ 0`. -/
-lemma closingLambda_ne (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (z : ℂ) :
+private lemma closingLambda_ne (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (z : ℂ) :
     closingLambda a b δ z ≠ 0 := (closingLambda_pos a b δ ha hb z).ne'
 
 /-- **The positive prefactor `c(z) = 1/λ(z) > 0`** (`lem:clean_prefactor`,
 positivity clause). -/
-lemma cleanPrefactor_pos (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (z : ℂ) :
+private lemma cleanPrefactor_pos (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (z : ℂ) :
     0 < 1 / closingLambda a b δ z :=
   one_div_pos.mpr (closingLambda_pos a b δ ha hb z)
 
 /-- On the closed disk `λ(z) = λ_raw(z)` (the clamp is inactive): the raw scalar
 dominates the floor.  The disk minimum of `λ_raw` is `(3/8)(1/a+1/b)`, above the
 floor `(1/4)(1/a+1/b)`. -/
-lemma closingLambda_eq_raw (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (hδ : 0 < δ)
+private lemma closingLambda_eq_raw (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     closingLambda a b δ z = closingLambdaRaw a b δ z := by
   have hpi : 0 < π := Real.pi_pos
@@ -255,44 +255,44 @@ private lemma continuous_lenAux (a b δ k : ℝ) (ha : 0 < a) (hb : 0 < b) (hk :
   intro z
   exact mul_ne_zero (closingLambda_ne a b δ ha hb z) hk
 
-lemma continuous_closingLen1 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
+private lemma continuous_closingLen1 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
     Continuous (fun z => closingLen1 a b δ z) :=
   continuous_lenAux a b δ a ha hb ha.ne' (closingDelta1 δ) (by unfold closingDelta1; fun_prop)
-lemma continuous_closingLen2 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
+private lemma continuous_closingLen2 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
     Continuous (fun z => closingLen2 a b δ z) :=
   continuous_lenAux a b δ b ha hb hb.ne' (closingDelta2 δ) (by unfold closingDelta2; fun_prop)
-lemma continuous_closingLen3 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
+private lemma continuous_closingLen3 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
     Continuous (fun z => closingLen3 a b δ z) :=
   continuous_lenAux a b δ a ha hb ha.ne' (closingDelta3 δ) (by unfold closingDelta3; fun_prop)
-lemma continuous_closingLen4 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
+private lemma continuous_closingLen4 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
     Continuous (fun z => closingLen4 a b δ z) :=
   continuous_lenAux a b δ b ha hb hb.ne' (closingDelta4 δ) (by unfold closingDelta4; fun_prop)
-lemma continuous_closingLen5 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
+private lemma continuous_closingLen5 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
     Continuous (fun z => closingLen5 a b δ z) :=
   continuous_lenAux a b δ a ha hb ha.ne' (closingDelta5 δ) (by unfold closingDelta5; fun_prop)
 
-lemma continuous_closingBase (a b δ : ℝ) : Continuous (fun z => closingBase a b δ z) := by
+private lemma continuous_closingBase (a b δ : ℝ) : Continuous (fun z => closingBase a b δ z) := by
   unfold closingBase
   exact ((continuous_closingLambda a b δ).mul continuous_const).div_const 2
 
-lemma continuous_closingMid1 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
+private lemma continuous_closingMid1 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
     Continuous (fun z => closingMid1 a b δ z) := by
   unfold closingMid1; exact (continuous_closingLen1 a b δ ha hb).div_const 2
-lemma continuous_closingMid2 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
+private lemma continuous_closingMid2 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
     Continuous (fun z => closingMid2 a b δ z) := by
   unfold closingMid2 closingS1
   exact (continuous_closingLen1 a b δ ha hb).add ((continuous_closingLen2 a b δ ha hb).div_const 2)
-lemma continuous_closingMid3 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
+private lemma continuous_closingMid3 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
     Continuous (fun z => closingMid3 a b δ z) := by
   unfold closingMid3 closingS2
   exact ((continuous_closingLen1 a b δ ha hb).add (continuous_closingLen2 a b δ ha hb)).add
     ((continuous_closingLen3 a b δ ha hb).div_const 2)
-lemma continuous_closingMid4 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
+private lemma continuous_closingMid4 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
     Continuous (fun z => closingMid4 a b δ z) := by
   unfold closingMid4 closingS3
   exact (((continuous_closingLen1 a b δ ha hb).add (continuous_closingLen2 a b δ ha hb)).add
     (continuous_closingLen3 a b δ ha hb)).add ((continuous_closingLen4 a b δ ha hb).div_const 2)
-lemma continuous_closingMid5 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
+private lemma continuous_closingMid5 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
     Continuous (fun z => closingMid5 a b δ z) := by
   unfold closingMid5 closingS4
   exact ((((continuous_closingLen1 a b δ ha hb).add (continuous_closingLen2 a b δ ha hb)).add
@@ -300,7 +300,7 @@ lemma continuous_closingMid5 (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
     ((continuous_closingLen5 a b δ ha hb).div_const 2)
 
 /-- `closingRamp a b > 0` for `a, b > 0`. -/
-lemma closingRamp_pos (a b : ℝ) (ha : 0 < a) (hb : 0 < b) : 0 < closingRamp a b := by
+private lemma closingRamp_pos (a b : ℝ) (ha : 0 < a) (hb : 0 < b) : 0 < closingRamp a b := by
   unfold closingRamp; positivity
 
 /-- Continuity of a calibrated pulse height `closingHeight (m z) w (L z) η` in `z`
@@ -325,7 +325,7 @@ private lemma continuous_uncurry_term (a b w : ℝ) (ha : 0 < a) (hb : 0 < b)
     ((hL.comp continuous_fst).prodMk ((hC.comp continuous_fst).prodMk continuous_snd))
 
 /-- **Joint continuity of the density** `(z, s) ↦ w_z(s)`. -/
-lemma continuous_uncurry_closingDensity (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
+private lemma continuous_uncurry_closingDensity (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
     Continuous (fun p : ℂ × ℝ => closingDensity a b δ p.1 p.2) := by
   unfold closingDensity
   have hbase : Continuous (fun p : ℂ × ℝ => closingBase a b δ p.1) :=
@@ -343,7 +343,7 @@ lemma continuous_uncurry_closingDensity (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b)
       (continuous_closingLen5 a b δ ha hb) (continuous_closingMid5 a b δ ha hb))
 
 /-- **Continuity of the density** in `s` (for fixed `z`). -/
-lemma continuous_closingDensity_s (a b δ : ℝ) (z : ℂ) :
+private lemma continuous_closingDensity_s (a b δ : ℝ) (z : ℂ) :
     Continuous (closingDensity a b δ z) := by
   unfold closingDensity
   exact ((((continuous_const.add
@@ -354,7 +354,7 @@ lemma continuous_closingDensity_s (a b δ : ℝ) (z : ℂ) :
     (continuous_const.mul (continuous_clampTent_theta _ _ _))
 
 /-- **The density is `2π`-periodic** in `s` (`lem:closing_family_props`). -/
-lemma closingDensity_periodic (a b δ : ℝ) (z : ℂ) :
+private lemma closingDensity_periodic (a b δ : ℝ) (z : ℂ) :
     Function.Periodic (closingDensity a b δ z) (2 * π) := by
   intro s
   unfold closingDensity
@@ -367,11 +367,11 @@ lemma closingDensity_periodic (a b δ : ℝ) (z : ℂ) :
 /-! ## Elementary interface of the node-placing family (`lem:closing_family_props`) -/
 
 /-- **`g_z(0) = 0`** (the empty integral). -/
-lemma closingFamily_zero (a b δ : ℝ) (z : ℂ) : closingFamily a b δ z 0 = 0 := by
+private lemma closingFamily_zero (a b δ : ℝ) (z : ℂ) : closingFamily a b δ z 0 = 0 := by
   simp [closingFamily]
 
 /-- **FTC for `g_z`**: `g_z' = w_z`. -/
-lemma hasDerivAt_closingFamily (a b δ : ℝ) (z : ℂ) (s : ℝ) :
+private lemma hasDerivAt_closingFamily (a b δ : ℝ) (z : ℂ) (s : ℝ) :
     HasDerivAt (closingFamily a b δ z) (closingDensity a b δ z s) s := by
   apply intervalIntegral.integral_hasDerivAt_right
     ((continuous_closingDensity_s a b δ z).intervalIntegrable 0 s)
@@ -379,14 +379,14 @@ lemma hasDerivAt_closingFamily (a b δ : ℝ) (z : ℂ) (s : ℝ) :
     (continuous_closingDensity_s a b δ z).continuousAt
 
 /-- **`g_z` is continuous** in `s` (for fixed `z`). -/
-lemma continuous_closingFamily (a b δ : ℝ) (z : ℂ) : Continuous (closingFamily a b δ z) := by
+private lemma continuous_closingFamily (a b δ : ℝ) (z : ℂ) : Continuous (closingFamily a b δ z) := by
   unfold closingFamily
   exact intervalIntegral.continuous_primitive
     (fun p q => (continuous_closingDensity_s a b δ z).intervalIntegrable p q) 0
 
 /-- **Joint continuity of `(z, s) ↦ g_z(s)`** (`lem:closing_family_props`).
 Load-bearing input to `continuous_arcLengthErrorMap`. -/
-lemma continuous_uncurry_closingFamily (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
+private lemma continuous_uncurry_closingFamily (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) :
     Continuous (fun p : ℂ × ℝ => closingFamily a b δ p.1 p.2) := by
   unfold closingFamily
   exact intervalIntegral.continuous_parametric_primitive_of_continuous
@@ -396,7 +396,7 @@ lemma continuous_uncurry_closingFamily (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) 
 `closingDensity_pos`).  The baseline `m = λa/2 > 0` and the calibrated pulse
 heights are nonnegative (every plateau slope `w_j/L_j ≥ (2/3)λa > m`), so
 `w_z ≥ m > 0`. -/
-lemma closingDensity_pos (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
+private lemma closingDensity_pos (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) (s : ℝ) : 0 < closingDensity a b δ z s := by
   have hb : 0 < b := lt_trans ha hab
   have hpi : 0 < π := Real.pi_pos
@@ -483,7 +483,7 @@ if some `2π`-translate of `y` lands in `[L/2, 2π - L/2]` then
 `arccos (cos y) ≥ L/2`.  Generalizes `half_le_arccos_cos` (which assumes `L < π`)
 to the node-placing family, where `L_j` can exceed `π` (up to `5π/3`).  The proof
 is the `w ≤ π` / `w > π` case split of `Real.arccos_cos`. -/
-lemma half_le_arccos_cos_wide {L y : ℝ} (hL0 : 0 < L) (hLπ : L ≤ 2 * π) (n : ℤ)
+private lemma half_le_arccos_cos_wide {L y : ℝ} (hL0 : 0 < L) (hLπ : L ≤ 2 * π) (n : ℤ)
     (h1 : L / 2 ≤ y + n * (2 * π)) (h2 : y + n * (2 * π) ≤ 2 * π - L / 2) :
     L / 2 ≤ Real.arccos (Real.cos y) := by
   have hcos : Real.cos y = Real.cos (y + n * (2 * π)) :=
@@ -500,7 +500,7 @@ lemma half_le_arccos_cos_wide {L y : ℝ} (hL0 : 0 < L) (hLπ : L ≤ 2 * π) (n
 interval is (periodically, via the shift `n`) outside the pulse support window,
 for the full range `0 < L ≤ 2π`.  Generalizes `clampTent_integral_eq_zero`
 (which assumes `L < π`) via `half_le_arccos_cos_wide`. -/
-lemma clampTent_integral_eq_zero_wide {η L τ lo hi : ℝ} (hη : 0 < η) (hL0 : 0 < L)
+private lemma clampTent_integral_eq_zero_wide {η L τ lo hi : ℝ} (hη : 0 < η) (hL0 : 0 < L)
     (hLπ : L ≤ 2 * π) (hle : lo ≤ hi) (n : ℤ)
     (h1 : L / 2 ≤ (lo - τ) + n * (2 * π))
     (h2 : (hi - τ) + n * (2 * π) ≤ 2 * π - L / 2) :
@@ -518,7 +518,7 @@ lemma clampTent_integral_eq_zero_wide {η L τ lo hi : ℝ} (hη : 0 < η) (hL0 
 `0 < 2η ≤ L ≤ 2π`, the pulse mass over any full period equals the trapezoidal
 area `L - η`, regardless of where the centre `C` sits.  Used for the period
 integral of the density. -/
-lemma clampTent_period_integral {η L C : ℝ} (hη : 0 < η) (hLη : 2 * η ≤ L)
+private lemma clampTent_period_integral {η L C : ℝ} (hη : 0 < η) (hLη : 2 * η ≤ L)
     (hLπ : L ≤ 2 * π) :
     (∫ θ in (0 : ℝ)..(2 * π), clampTent η L C θ) = L - η := by
   have hpi : 0 < π := Real.pi_pos
@@ -545,7 +545,7 @@ lemma clampTent_period_integral {η L C : ℝ} (hη : 0 < η) (hLη : 2 * η ≤
 /-- **Slope (inverse-slope) bounds** `0 < m₀ ≤ w_z(s) ≤ M₀` on the disk
 (`lem:closing_family_props`, `closingFamily_slope_bounds`).  The finitely many
 plateau slopes and ramp slopes attain uniform extrema over the compact disk. -/
-lemma closingFamily_slope_bounds (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
+private lemma closingFamily_slope_bounds (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) :
     ∃ m₀ M₀ : ℝ, 0 < m₀ ∧ ∀ z : ℂ, ‖z‖ ≤ 1 → ∀ s : ℝ,
       m₀ ≤ closingDensity a b δ z s ∧ closingDensity a b δ z s ≤ M₀ := by
@@ -585,7 +585,7 @@ lemma closingFamily_slope_bounds (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ 
 
 /-- **Strict monotonicity of `g_z`** on the disk (`lem:closing_family_props`).
 The slope `g_z' = w_z > 0`. -/
-lemma strictMono_closingFamily (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
+private lemma strictMono_closingFamily (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) : StrictMono (closingFamily a b δ z) := by
   intro x y hxy
   rw [← sub_pos]
@@ -603,7 +603,7 @@ lemma strictMono_closingFamily (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 
 
 /-- **The five arc-length interval lengths sum to `2π`** on the disk:
 `Σ L_j = (1/λ)·Σ Δ_j/κ̂_j = (1/λ)·(2π λ) = 2π`.  The key calibration identity. -/
-lemma closingLen_sum (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
+private lemma closingLen_sum (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     closingLen1 a b δ z + closingLen2 a b δ z + closingLen3 a b δ z
       + closingLen4 a b δ z + closingLen5 a b δ z = 2 * π := by
@@ -645,7 +645,7 @@ set_option maxHeartbeats 1000000 in
 `0 < δ ≤ π/8`, each `L_j` is strictly positive, at least `2η` (so the clamped
 denominator in `closingHeight` is inactive and the trapezoidal pulses fit without
 overlap), and at most `2π` (so the generalized off-support helper applies). -/
-lemma closingLen_bounds (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
+private lemma closingLen_bounds (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     (0 < closingLen1 a b δ z ∧ 2 * closingRamp a b ≤ closingLen1 a b δ z
         ∧ closingLen1 a b δ z ≤ 2 * π) ∧
@@ -736,7 +736,7 @@ lemma closingLen_bounds (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
 
 /-- **Linearity split of the density integral** into baseline + five calibrated
 trapezoidal pulses (analogue of `alignDensity_integral_split`). -/
-lemma closingDensity_integral_split (a b δ : ℝ) (z : ℂ) (lo hi : ℝ) :
+private lemma closingDensity_integral_split (a b δ : ℝ) (z : ℂ) (lo hi : ℝ) :
     (∫ θ in lo..hi, closingDensity a b δ z θ)
       = closingBase a b δ z * (hi - lo)
         + closingHeight (closingBase a b δ z) (π / 4) (closingLen1 a b δ z) (closingRamp a b)
@@ -784,7 +784,7 @@ lemma closingDensity_integral_split (a b δ : ℝ) (z : ℂ) (lo hi : ℝ) :
 
 /-- The calibrated pulse contributes exactly `w - m·L` to the running integral
 (clamp inactive: `2η ≤ L`), so `m·L + h·(L-η) = w`. -/
-lemma closingHeight_mul (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) {z : ℂ} (w L : ℝ)
+private lemma closingHeight_mul (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) {z : ℂ} (w L : ℝ)
     (hL : 2 * closingRamp a b ≤ L) :
     closingHeight (closingBase a b δ z) w L (closingRamp a b) * (L - closingRamp a b)
       = w - closingBase a b δ z * L := by
@@ -797,7 +797,7 @@ lemma closingHeight_mul (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) {z : ℂ} (w L 
 /-- **Period integral of the density is `2π`** on the disk: the five arc integrals
 sum to `Σ w_j = 2π`.  (`lem:closing_family_props`; uses the calibrated arc
 integrals `m·L_j + height_j·(L_j-η) = w_j` and `Σ L_j = 2π`.) -/
-lemma closingDensity_period_integral (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
+private lemma closingDensity_period_integral (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     (∫ t in (0 : ℝ)..(2 * π), closingDensity a b δ z t) = 2 * π := by
   have hb : 0 < b := lt_trans ha hab
@@ -817,7 +817,7 @@ lemma closingDensity_period_integral (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (
 
 /-- **`g_z` is quasi-periodic** on the disk: `g_z(s + 2π) = g_z(s) + 2π`
 (`lem:closing_family_props`).  Follows from the period integral being `2π`. -/
-lemma closingFamily_add_two_pi (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
+private lemma closingFamily_add_two_pi (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) (s : ℝ) :
     closingFamily a b δ z (s + 2 * π) = closingFamily a b δ z s + 2 * π := by
   simp only [closingFamily]
@@ -831,7 +831,7 @@ lemma closingFamily_add_two_pi (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 
   linarith [hadd]
 
 /-- **`g_z(2π) = 2π`** on the disk (`lem:closing_family_props`). -/
-lemma closingFamily_two_pi (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
+private lemma closingFamily_two_pi (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     closingFamily a b δ z (2 * π) = 2 * π := by
   have h := closingFamily_add_two_pi a b δ ha hab hδ hδ' hz 0
@@ -844,7 +844,7 @@ lemma closingFamily_two_pi (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < 
 whose total curvature `I_z = ∫₀²π g ∘ g_z` stays away from `0` on the closed
 disk, the error map `z ↦ arcLengthErrorMap g a b δ z` is continuous on `𝔻`.
 (Blueprint `lem:arclength_error_continuous`.) -/
-lemma continuous_arcLengthErrorMap (g : ℝ → ℝ) (hg : Continuous g) (a b δ : ℝ)
+private lemma continuous_arcLengthErrorMap (g : ℝ → ℝ) (hg : Continuous g) (a b δ : ℝ)
     (ha : 0 < a) (hb : 0 < b)
     (hI : ∀ z : ℂ, ‖z‖ ≤ 1 → (∫ t in (0 : ℝ)..(2 * π), g (closingFamily a b δ z t)) ≠ 0) :
     ContinuousOn (fun z => arcLengthErrorMap g a b δ z) (Metric.closedBall 0 1) := by
@@ -904,7 +904,7 @@ integrates to the canonical clean-bicircle width: `∫_{s_{j-1}}^{s_j} w_z = w_j
 (with `w = π/4, π/2, π/2, π/2, π/4`).  Only the `j`-th pulse is in support; the
 other four vanish (generalized off-support zero).  This is the engine of the
 node-mapping `closingFamily_node`. -/
-lemma closingDensity_arcs (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
+private lemma closingDensity_arcs (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     (∫ θ in (0 : ℝ)..(closingS1 a b δ z), closingDensity a b δ z θ) = π / 4 ∧
     (∫ θ in (closingS1 a b δ z)..(closingS2 a b δ z), closingDensity a b δ z θ) = π / 2 ∧
@@ -1087,7 +1087,7 @@ lemma closingDensity_arcs (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < �
 node-placing family sends each arc-length breakpoint `s_j` to the canonical
 clean-bicircle breakpoint `c_j`, `g_z(s_j) = c_j`.  Proved by telescoping the
 per-arc integrals `closingDensity_arcs`. -/
-lemma closingFamily_node (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
+private lemma closingFamily_node (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     closingFamily a b δ z (closingS1 a b δ z) = π / 4 ∧
     closingFamily a b δ z (closingS2 a b δ z) = 3 * π / 4 ∧
@@ -1122,7 +1122,7 @@ lemma closingFamily_node (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ
 /-- **Pointwise value of `cleanBicircle` on the five canonical open arcs.**
 `cleanBicircle a b = a` on `(0,π/4) ∪ (3π/4,5π/4) ∪ (7π/4,2π)` and `= b` on
 `(π/4,3π/4) ∪ (5π/4,7π/4)`, by evaluating the periodic indicator `dahlbergF`. -/
-lemma cleanBicircle_arcs (a b : ℝ) :
+private lemma cleanBicircle_arcs (a b : ℝ) :
     (∀ θ ∈ Set.Ioo (0 : ℝ) (π / 4), cleanBicircle a b θ = a) ∧
     (∀ θ ∈ Set.Ioo (π / 4) (3 * π / 4), cleanBicircle a b θ = b) ∧
     (∀ θ ∈ Set.Ioo (3 * π / 4) (5 * π / 4), cleanBicircle a b θ = a) ∧
@@ -1187,7 +1187,7 @@ lemma cleanBicircle_arcs (a b : ℝ) :
 `(clo, chi)` of clean value `v`, the composite `cleanBicircle ∘ g_z` equals `v`
 a.e. (everywhere on the open interval; the right endpoint is a null set).  Bridges
 the node mapping and `cleanBicircle_arcs` to integration. -/
-lemma clean_arc_ae (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
+private lemma clean_arc_ae (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
     {z : ℂ} (hz : ‖z‖ ≤ 1) (lo hi clo chi v : ℝ) (hlohi : lo < hi)
     (hglo : closingFamily a b δ z lo = clo) (hghi : closingFamily a b δ z hi = chi)
     (hval : ∀ θ ∈ Set.Ioo clo chi, cleanBicircle a b θ = v) :
@@ -1206,7 +1206,7 @@ lemma clean_arc_ae (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ) (hδ
 (`lem:clean_prefactor`).  For the node-placing family the clean total curvature
 is `I_z = 2π/λ(z)` (NOT the false `(a+b)π`), so `c(z) = I_z/2π = 1/λ(z) > 0`.
 (Blueprint `lem:clean_prefactor`.) -/
-lemma cleanTotalCurvature_eq (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
+private lemma cleanTotalCurvature_eq (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     (∫ t in (0 : ℝ)..(2 * π), cleanBicircle a b (closingFamily a b δ z t))
       = 2 * π / closingLambda a b δ z := by
@@ -1306,7 +1306,7 @@ lemma cleanTotalCurvature_eq (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 
 /-- Per-arc integral of `cleanBicircle ∘ g_z`: interval-integrability plus the
 value `(hi - lo)·v` (the arc is a.e. constant `v`).  Engine for both
 `cleanTotalCurvature_eq` and `cleanArcLength_node_values`. -/
-lemma clean_arc_int (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
+private lemma clean_arc_int (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
     {z : ℂ} (hz : ‖z‖ ≤ 1) (lo hi clo chi v : ℝ) (hlohi : lo < hi)
     (hglo : closingFamily a b δ z lo = clo) (hghi : closingFamily a b δ z hi = chi)
     (hval : ∀ θ ∈ Set.Ioo clo chi, cleanBicircle a b θ = v) :
@@ -1325,7 +1325,7 @@ arc-length tangent angle of the clean weight lands the configuration nodes
 `θ_j = configSpace δ (z.re, z.im)` at the arc-length breakpoints `s_j`.  Since
 `K_z = (2π/I_z)·(k∘g_z) = λ·(k∘g_z)` (`I_z = 2π/λ`), the cumulative angle is
 `λ·∫₀^{s_j} k∘g_z = λ·Σ_{k≤j} κ̂_k L_k = Σ_{k≤j} Δ_k = θ_j`. -/
-lemma cleanArcLength_node_values (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
+private lemma cleanArcLength_node_values (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     dahlbergAngle (arcLengthNorm (cleanBicircle a b) a b δ z) (closingS1 a b δ z)
         = π / 4 + δ * z.re ∧
@@ -1403,7 +1403,7 @@ integrand `e^{i α_K(s)}` (with `α_K = dahlbergAngle K`) integrates over `[c,d]
 to `(1/m)·(-i)·(e^{i α_K(d)} - e^{i α_K(c)})`. No global `C¹` structure of `α_K`
 is used — only constancy of `K` on the single arc.
 (Blueprint `lem:arclength_arc_integral`.) -/
-lemma arcLengthArcIntegral (K : ℝ → ℝ) (m c d : ℝ) (hcd : c ≤ d)
+private lemma arcLengthArcIntegral (K : ℝ → ℝ) (m c d : ℝ) (hcd : c ≤ d)
     (hKint : ∀ p q : ℝ, IntervalIntegrable K volume p q) (hm : m ≠ 0)
     (hK : ∀ s ∈ Set.Ioo c d, K s = m) :
     (∫ s in c..d, Complex.exp ((dahlbergAngle K s : ℂ) * Complex.I))
@@ -1478,7 +1478,7 @@ goes through `cleanArcLength_node_values` (the cumulative angle lands the config
 nodes), `cleanTotalCurvature_eq` (the prefactor `1/λ`) and `arcLengthArcIntegral`
 (arc-by-arc evaluation), matched against `bicircleErrorVector_eq`.
 (Blueprint `lem:arclength_error_clean_eq_errorMap`.) -/
-lemma arcLengthError_clean_eq_errorMap (a b δ : ℝ) (ha : 0 < a) (hab : a < b)
+private lemma arcLengthError_clean_eq_errorMap (a b δ : ℝ) (ha : 0 < a) (hab : a < b)
     (hδ : 0 < δ) (hδ' : δ ≤ π / 8) (z : ℂ) (hz : ‖z‖ ≤ 1) :
     arcLengthErrorMap (cleanBicircle a b) a b δ z
       = ((1 / closingLambda a b δ z : ℝ) : ℂ) * errorMap a b δ z := by
@@ -1633,7 +1633,7 @@ lemma arcLengthError_clean_eq_errorMap (a b δ : ℝ) (ha : 0 < a) (hab : a < b)
 `G`, the set integral of `G` over the image interval equals the integral of
 `w_z · (G ∘ g_z)` over `[0, 2π]`.  The arc-length analogue of
 `Reduction.alignReparam_changeOfVar`. -/
-lemma closingFamily_changeOfVar (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
+private lemma closingFamily_changeOfVar (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) (G : ℝ → ℝ) :
     (∫ x in Set.Icc (closingFamily a b δ z 0) (closingFamily a b δ z (2 * π)), G x)
       = ∫ x in Set.Icc (0 : ℝ) (2 * π),
@@ -1659,7 +1659,7 @@ interval-integrable on `[0,2π]` and `m₀ ≤ w_z` is a uniform positive slope 
 then `e ∘ g_z` is interval-integrable on `[0,2π]` and
 `∫₀²π |e ∘ g_z| ≤ (1/m₀)·∫₀²π |e|`.  (Change of variables `θ = g_z(t)`,
 `dθ = w_z dt`, with `g_z(2π) = 2π`.) -/
-lemma closingFamily_comp_L1 (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
+private lemma closingFamily_comp_L1 (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) {m₀ : ℝ} (hm₀ : 0 < m₀)
     (hbound : ∀ z : ℂ, ‖z‖ ≤ 1 → ∀ s : ℝ, m₀ ≤ closingDensity a b δ z s)
     {z : ℂ} (hz : ‖z‖ ≤ 1) {e : ℝ → ℝ}
@@ -1753,7 +1753,7 @@ lemma closingFamily_comp_L1 (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 <
 /-! ## The three new analytic estimates -/
 
 /-- **Bundled output of `exists_preliminaryDiffeo` at a fixed `ε`.** -/
-def PreliminaryDiffeoData (κ : ℝ → ℝ) (a b C ε : ℝ) (η e : ℝ → ℝ) : Prop :=
+private def PreliminaryDiffeoData (κ : ℝ → ℝ) (a b C ε : ℝ) (η e : ℝ → ℝ) : Prop :=
   (∃ v, Continuous v ∧ (∀ θ, 0 < v θ) ∧ ∀ θ, HasDerivAt η (v θ) θ) ∧
     (∀ t, η (t + 2 * π) = η t + 2 * π) ∧
     IntervalIntegrable e volume 0 (2 * π) ∧ Function.Periodic e (2 * π) ∧
@@ -1765,7 +1765,7 @@ def PreliminaryDiffeoData (κ : ℝ → ℝ) (a b C ε : ℝ) (η e : ℝ → �
 `λ(z) ≤ (5/8)(1/a + 1/b)`.  (Each configuration increment `Δ_j ≤ 5π/4` on the
 disk for `δ ≤ π/8`.)  Together with `cleanTotalCurvature_eq` this gives the
 uniform clean lower bound `I_z = 2π/λ ≥ 2π·(8/5)/(1/a+1/b)`. -/
-lemma closingLambda_le (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (hδ : 0 < δ)
+private lemma closingLambda_le (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     closingLambda a b δ z ≤ (5 / 8) * (1 / a + 1 / b) := by
   have hpi : 0 < π := Real.pi_pos
@@ -1789,7 +1789,7 @@ lemma closingLambda_le (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (hδ : 0 < δ)
     _ = (5 / 8) * (1 / a + 1 / b) := hcollect
 
 /-- `cleanBicircle a b` is measurable (an indicator combination). -/
-lemma measurable_cleanBicircle (a b : ℝ) : Measurable (cleanBicircle a b) := by
+private lemma measurable_cleanBicircle (a b : ℝ) : Measurable (cleanBicircle a b) := by
   have hSmeas : MeasurableSet (⋃ k : ℤ,
       Set.Ioo (π / 4 + 2 * π * (k : ℝ)) (3 * π / 4 + 2 * π * (k : ℝ)) ∪
       Set.Ioo (5 * π / 4 + 2 * π * (k : ℝ)) (7 * π / 4 + 2 * π * (k : ℝ))) :=
@@ -1802,7 +1802,7 @@ lemma measurable_cleanBicircle (a b : ℝ) : Measurable (cleanBicircle a b) := b
 
 /-- **Interval-integrability of `cleanBicircle ∘ g_z`** on any `[p,q]`: the
 composition is measurable (continuous `g_z`) and bounded in `[a,b]`. -/
-lemma intervalIntegrable_cleanBicircle_comp (a b δ : ℝ) (ha : 0 < a) (hab : a < b)
+private lemma intervalIntegrable_cleanBicircle_comp (a b δ : ℝ) (ha : 0 < a) (hab : a < b)
     (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) (p q : ℝ) :
     IntervalIntegrable (fun t => cleanBicircle a b (closingFamily a b δ z t)) volume p q := by
   have hb : 0 < b := lt_trans ha hab
@@ -1819,7 +1819,7 @@ lemma intervalIntegrable_cleanBicircle_comp (a b δ : ℝ) (ha : 0 < a) (hab : a
 
 /-- **Total curvature stays nonzero** (Dahlberg, §3, "clearly `I* ≠ 0`").
 (Blueprint `lem:total_curvature_ne_zero`.) -/
-lemma totalCurvature_ne_zero {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a) (hab : a < b)
+private lemma totalCurvature_ne_zero {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a) (hab : a < b)
     (hC : 0 < C) (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) :
     ∃ ε₁ > 0, ∀ ε : ℝ, 0 < ε → ε < ε₁ → ∀ η e : ℝ → ℝ,
       PreliminaryDiffeoData κ a b C ε η e →
@@ -1870,7 +1870,7 @@ lemma totalCurvature_ne_zero {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a) (hab 
 
 /-- **Unit-tangent Lipschitz bound** `‖e^{ix} − e^{iy}‖ ≤ |x − y|`.  Used to pass
 from the angle estimate to the curve estimate. -/
-lemma norm_expI_sub_le (x y : ℝ) :
+private lemma norm_expI_sub_le (x y : ℝ) :
     ‖Complex.exp ((x : ℂ) * Complex.I) - Complex.exp ((y : ℂ) * Complex.I)‖ ≤ |x - y| := by
   have hderiv : ∀ t : ℝ, HasDerivAt (fun t : ℝ => Complex.exp ((t : ℂ) * Complex.I))
       (Complex.exp ((t : ℂ) * Complex.I) * Complex.I) t := by
@@ -1894,7 +1894,7 @@ lemma norm_expI_sub_le (x y : ℝ) :
 
 /-- **The cumulative arc-length angle pulls out the normalising constant:**
 `α_{K_z}(s) = (2π/I_z)·∫₀ˢ g(g_z u) du`. -/
-lemma dahlbergAngle_arcLengthNorm (g : ℝ → ℝ) (a b δ : ℝ) (z : ℂ) (s : ℝ) :
+private lemma dahlbergAngle_arcLengthNorm (g : ℝ → ℝ) (a b δ : ℝ) (z : ℂ) (s : ℝ) :
     dahlbergAngle (arcLengthNorm g a b δ z) s
       = (2 * π / (∫ t in (0 : ℝ)..(2 * π), g (closingFamily a b δ z t)))
           * ∫ u in (0 : ℝ)..s, g (closingFamily a b δ z u) := by
@@ -1905,7 +1905,7 @@ lemma dahlbergAngle_arcLengthNorm (g : ℝ → ℝ) (a b δ : ℝ) (z : ℂ) (s 
 `g` whose reparametrisation `g ∘ g_z` is interval-integrable: the cumulative angle
 is a continuous primitive, so its complex exponential is continuous, hence
 interval-integrable. -/
-lemma intervalIntegrable_expI_arcLengthNorm (g : ℝ → ℝ) (a b δ : ℝ) (z : ℂ)
+private lemma intervalIntegrable_expI_arcLengthNorm (g : ℝ → ℝ) (a b δ : ℝ) (z : ℂ)
     (hg : IntervalIntegrable (fun u => g (closingFamily a b δ z u)) volume 0 (2 * π)) :
     IntervalIntegrable
       (fun s => Complex.exp ((dahlbergAngle (arcLengthNorm g a b δ z) s : ℂ) * Complex.I))
@@ -1924,7 +1924,7 @@ lemma intervalIntegrable_expI_arcLengthNorm (g : ℝ → ℝ) (a b δ : ℝ) (z 
 
 /-- **`2π`-periodicity of the reparametrised weight** `g ∘ g_z`, for any
 `2π`-periodic `g` (the reparametrisation is `2π`-translation-equivariant). -/
-lemma comp_closingFamily_periodic (g : ℝ → ℝ) (a b δ : ℝ) (ha : 0 < a) (hab : a < b)
+private lemma comp_closingFamily_periodic (g : ℝ → ℝ) (a b δ : ℝ) (ha : 0 < a) (hab : a < b)
     (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) (hg : Function.Periodic g (2 * π)) :
     Function.Periodic (fun u => g (closingFamily a b δ z u)) (2 * π) := by
   intro u
@@ -1936,7 +1936,7 @@ lemma comp_closingFamily_periodic (g : ℝ → ℝ) (a b δ : ℝ) (ha : 0 < a) 
 `α_{K_z}(s + 2π) = α_{K_z}(s) + 2π` whenever the reparametrised weight is
 `2π`-periodic and integrates to a nonzero total `I_z` (the normalisation makes the
 per-period angle advance exactly `2π`). -/
-lemma dahlbergAngle_arcLengthNorm_add_two_pi (g : ℝ → ℝ) (a b δ : ℝ)
+private lemma dahlbergAngle_arcLengthNorm_add_two_pi (g : ℝ → ℝ) (a b δ : ℝ)
     (hgper : Function.Periodic (fun u => g (closingFamily a b δ z u)) (2 * π))
     (hgii : ∀ p q, IntervalIntegrable (fun u => g (closingFamily a b δ z u)) volume p q)
     (hI : (∫ t in (0 : ℝ)..(2 * π), g (closingFamily a b δ z t)) ≠ 0) (s : ℝ) :
@@ -2013,7 +2013,7 @@ private lemma angle_dist_arith {b cLB Ecoef ε Is Ic As Es : ℝ}
 
 /-- **The angle estimate `|α − α*| ≤ C'·ε`** (Dahlberg, §3).
 (Blueprint `lem:angle_dist_le`.) -/
-lemma angle_dist_le {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a) (hab : a < b) (hC : 0 < C)
+private lemma angle_dist_le {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a) (hab : a < b) (hC : 0 < C)
     (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) :
     ∃ C' > 0, ∃ ε₁ > 0, ∀ ε : ℝ, 0 < ε → ε < ε₁ → ∀ η e : ℝ → ℝ,
       PreliminaryDiffeoData κ a b C ε η e →
@@ -2165,7 +2165,7 @@ lemma angle_dist_le {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a) (hab : a < b) 
 
 /-- **Uniform limit `F*(·,ε) → F`** (Dahlberg, §3).
 (Blueprint `lem:arclength_error_tendsto`.) -/
-lemma arcLengthErrorMap_tendsto {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a) (hab : a < b)
+private lemma arcLengthErrorMap_tendsto {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a) (hab : a < b)
     (hC : 0 < C) (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) :
     ∃ C' > 0, ∃ ε₁ > 0, ∀ ε : ℝ, 0 < ε → ε < ε₁ → ∀ η e : ℝ → ℝ,
       PreliminaryDiffeoData κ a b C ε η e →
@@ -2217,7 +2217,7 @@ lemma arcLengthErrorMap_tendsto {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a) (h
 field* bridge `arcLengthError_clean_eq_errorMap` (`F = (1/λ)·errorMap`,
 `1/λ > 0`).
 (Blueprint `lem:clean_error_winds`.) -/
-lemma cleanError_winds_boundary (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (hab : a < b)
+private lemma cleanError_winds_boundary (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (hab : a < b)
     (hδ : 0 < δ) (hδ' : δ ≤ π / 8) :
     ∃ (hF : ContinuousOn (arcLengthErrorMap (cleanBicircle a b) a b δ)
         (Metric.closedBall 0 1))
@@ -2301,7 +2301,7 @@ lemma cleanError_winds_boundary (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (hab : 
 
 /-- **Existence of a closing parameter** (Dahlberg, §3).
 (Blueprint `thm:exists_closing_param`.) -/
-theorem exists_closingParam {κ : ℝ → ℝ} (hκ : Continuous κ) (a b C : ℝ) (ha : 0 < a)
+private theorem exists_closingParam {κ : ℝ → ℝ} (hκ : Continuous κ) (a b C : ℝ) (ha : 0 < a)
     (hab : a < b) (hC : 0 < C) (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) :
     ∃ ε₀ > 0, ∀ ε : ℝ, 0 < ε → ε < ε₀ → ∀ η e : ℝ → ℝ,
       PreliminaryDiffeoData κ a b C ε η e →
@@ -2417,7 +2417,7 @@ arcs** (Dahlberg, §3; Route A).  The margin is keyed to the INCLINATION span
 `Λ = α_{K_z}(τ) − α_{K_z}(t) ≤ π` (NOT arc-length) and is uniform in `z`; it does
 not assume clean closure.
 (Blueprint `lem:clean_chord_margin`.) -/
-lemma clean_chord_margin (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
+private lemma clean_chord_margin (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ)
     (hδ' : δ ≤ π / 8) :
     ∃ m > 0, ∀ z : ℂ, ‖z‖ ≤ 1 → ∀ t τ : ℝ, 0 ≤ t → t < τ → τ ≤ 4 * π →
       dahlbergAngle (arcLengthNorm (cleanBicircle a b) a b δ z) τ
@@ -2630,7 +2630,7 @@ lemma clean_chord_margin (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ : 0 < δ
 /-- **Simplicity of the perturbed curve (condition (1.3))** (Dahlberg, §3,
 simplicity transport).
 (Blueprint `lem:simplicity_transport`.) -/
-lemma simplicity_transport {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a) (hab : a < b)
+private lemma simplicity_transport {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a) (hab : a < b)
     (hC : 0 < C) (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) :
     ∃ ε₂ > 0, ∀ ε : ℝ, 0 < ε → ε < ε₂ → ∀ η e : ℝ → ℝ,
       PreliminaryDiffeoData κ a b C ε η e →
@@ -2845,7 +2845,7 @@ continuous strictly positive derivative `v` (`HasDerivAt h (v θ) θ`, `v > 0`) 
 quasiperiodicity `h(θ+2π)=h(θ)+2π`, there is a continuous strictly-monotone
 two-sided inverse `H` that is quasiperiodic and `C¹` with `H'(t)=1/v(H t)`.
 (Blueprint `lem:dahlberg_c1_circle_inverse`.) -/
-lemma exists_C1_inverse_circle {h : ℝ → ℝ} {v : ℝ → ℝ}
+private lemma exists_C1_inverse_circle {h : ℝ → ℝ} {v : ℝ → ℝ}
     (_hvc : Continuous v) (hvp : ∀ θ, 0 < v θ) (hvd : ∀ θ, HasDerivAt h (v θ) θ)
     (hper : ∀ θ, h (θ + 2 * π) = h θ + 2 * π) :
     ∃ H : ℝ → ℝ, Continuous H ∧ StrictMono H ∧ (∀ t, h (H t) = t) ∧

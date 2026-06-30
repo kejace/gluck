@@ -9,14 +9,14 @@ analytic statement that every four-vertex curvature function `κ` admits a circl
 reparametrization `h` for which the reconstruction weight `1/(κ∘h)` has vanishing
 error vector, so the reconstruction curve closes up.
 
-The conclusion consumes `exists_closing_configuration` from `Gluck.Winding`,
-which imports `Gluck.Bicircle` and hence `Gluck.StepReduction`; so the statement
-cannot live in `StepReduction.lean` (that would be an import cycle). It is placed
-here, in a new file that `import`s `Gluck.Winding` (transitively pulling in
-everything else).
+The conclusion consumes the planar degree principle from `Gluck.Winding`
+(`errorMap_winding_eq_one` together with `exists_zero_of_boundary_winding`), which
+imports `Gluck.Bicircle` and hence `Gluck.StepReduction`; so the statement cannot
+live in `StepReduction.lean` (that would be an import cycle). It is placed here, in
+a file that `import`s `Gluck.Winding` (transitively pulling in everything else).
 
-`exists_closing_configuration` produces a zero of the *bicircle* (step-function)
-error map `errorMap = E_bi`, not a curve realising the original continuous `κ`.
+That degree principle produces a zero of the *bicircle* (step-function) error map
+`errorMap = E_bi`, not a curve realising the original continuous `κ`.
 To transfer the closure to `κ` we re-run the planar degree principle on a
 *κ-error map* `E_κ` over the same disk, obtained by feeding `κ∘h₁` through a
 family of breakpoint-aligning reparametrizations `g_z`, and showing `E_κ` is
@@ -28,7 +28,7 @@ Blueprint chapter: `blueprint/src/chapters/Gluck_Reduction.tex`.
 
 ## Status
 
-Landed, axiom-clean, no `sorry`:
+Landed, axiom-clean and fully proved:
 * `alignReparam` (`def:align_reparam`) — the breakpoint-aligning reparametrization
   family `g_z`, built as the running integral of the calibrated speed density
   `w_z` (`alignDensity`): `g_z(θ) = π/2 + ∫_{θ₁}^θ w_z`.  This cumulative-density
@@ -101,7 +101,7 @@ lemma clampTent_periodic (η L τ : ℝ) :
   rw [show θ + 2 * π - τ = (θ - τ) + 2 * π by ring, Real.cos_add_two_pi]
 
 /-- `arccos (cos u) = |u|` whenever `|u| ≤ π`. -/
-lemma arccos_cos_abs {u : ℝ} (h : |u| ≤ π) : Real.arccos (Real.cos u) = |u| := by
+private lemma arccos_cos_abs {u : ℝ} (h : |u| ≤ π) : Real.arccos (Real.cos u) = |u| := by
   rw [← Real.cos_abs]; exact Real.arccos_cos (abs_nonneg u) h
 
 /-- The pulse vanishes wherever the periodic distance to the centre is `≥ L/2`. -/
@@ -114,7 +114,7 @@ lemma clampTent_eq_zero {η L τ θ : ℝ} (hη : 0 < η)
 
 /-- Centred integral of the trapezoidal pulse over its support `[-(L/2), L/2]`:
 the plateau (width `L - 2η`) plus two half-ramps (area `η/2` each), total `L-η`. -/
-lemma clampTent_centered_integral {η L : ℝ} (hη : 0 < η) (hLη : 2 * η ≤ L)
+private lemma clampTent_centered_integral {η L : ℝ} (hη : 0 < η) (hLη : 2 * η ≤ L)
     (hLπ : L ≤ 2 * π) :
     (∫ u in (-(L / 2))..(L / 2),
         min 1 (max 0 ((L / 2 - Real.arccos (Real.cos u)) / η))) = L - η := by
@@ -220,7 +220,7 @@ lemma half_le_arccos_cos {L y : ℝ} (hL0 : 0 < L) (hLπ : L < π) (n : ℤ)
 
 /-- The pulse `clampTent η L τ` integrates to `0` over `[lo, hi]` when that
 interval is (periodically, via the shift `n`) outside the pulse support. -/
-lemma clampTent_integral_eq_zero {η L τ lo hi : ℝ} (hη : 0 < η) (hL0 : 0 < L)
+private lemma clampTent_integral_eq_zero {η L τ lo hi : ℝ} (hη : 0 < η) (hL0 : 0 < L)
     (hLπ : L < π) (hle : lo ≤ hi) (n : ℤ)
     (h1 : L / 2 ≤ (lo - τ) + n * (2 * π))
     (h2 : (hi - τ) + n * (2 * π) ≤ 2 * π - L / 2) :
@@ -243,38 +243,38 @@ density `alignDensity` is manifestly jointly continuous and its arc integrals ar
 clean to compute. -/
 
 /-- Configuration breakpoints `θ₁,…,θ₄`. -/
-noncomputable def alignN1 (δ : ℝ) (z : ℂ) : ℝ := π / 4 + δ * z.re
-noncomputable def alignN2 (δ : ℝ) (z : ℂ) : ℝ := 3 * π / 4 + δ * z.im
-noncomputable def alignN3 (_δ : ℝ) (_z : ℂ) : ℝ := 5 * π / 4
-noncomputable def alignN4 (_δ : ℝ) (_z : ℂ) : ℝ := 7 * π / 4
+private noncomputable def alignN1 (δ : ℝ) (z : ℂ) : ℝ := π / 4 + δ * z.re
+private noncomputable def alignN2 (δ : ℝ) (z : ℂ) : ℝ := 3 * π / 4 + δ * z.im
+private noncomputable def alignN3 (_δ : ℝ) (_z : ℂ) : ℝ := 5 * π / 4
+private noncomputable def alignN4 (_δ : ℝ) (_z : ℂ) : ℝ := 7 * π / 4
 
 /-- Arc lengths `L_k = θ_{k+1} - θ_k` (with `θ₅ = θ₁ + 2π`). -/
-noncomputable def alignL1 (δ : ℝ) (z : ℂ) : ℝ := alignN2 δ z - alignN1 δ z
-noncomputable def alignL2 (δ : ℝ) (z : ℂ) : ℝ := alignN3 δ z - alignN2 δ z
-noncomputable def alignL3 (δ : ℝ) (z : ℂ) : ℝ := alignN4 δ z - alignN3 δ z
-noncomputable def alignL4 (δ : ℝ) (z : ℂ) : ℝ := (alignN1 δ z + 2 * π) - alignN4 δ z
+private noncomputable def alignL1 (δ : ℝ) (z : ℂ) : ℝ := alignN2 δ z - alignN1 δ z
+private noncomputable def alignL2 (δ : ℝ) (z : ℂ) : ℝ := alignN3 δ z - alignN2 δ z
+private noncomputable def alignL3 (δ : ℝ) (z : ℂ) : ℝ := alignN4 δ z - alignN3 δ z
+private noncomputable def alignL4 (δ : ℝ) (z : ℂ) : ℝ := (alignN1 δ z + 2 * π) - alignN4 δ z
 
 /-- Arc centres `τ_k = θ_k + L_k/2`. -/
-noncomputable def alignC1 (δ : ℝ) (z : ℂ) : ℝ := alignN1 δ z + alignL1 δ z / 2
-noncomputable def alignC2 (δ : ℝ) (z : ℂ) : ℝ := alignN2 δ z + alignL2 δ z / 2
-noncomputable def alignC3 (δ : ℝ) (z : ℂ) : ℝ := alignN3 δ z + alignL3 δ z / 2
-noncomputable def alignC4 (δ : ℝ) (z : ℂ) : ℝ := alignN4 δ z + alignL4 δ z / 2
+private noncomputable def alignC1 (δ : ℝ) (z : ℂ) : ℝ := alignN1 δ z + alignL1 δ z / 2
+private noncomputable def alignC2 (δ : ℝ) (z : ℂ) : ℝ := alignN2 δ z + alignL2 δ z / 2
+private noncomputable def alignC3 (δ : ℝ) (z : ℂ) : ℝ := alignN3 δ z + alignL3 δ z / 2
+private noncomputable def alignC4 (δ : ℝ) (z : ℂ) : ℝ := alignN4 δ z + alignL4 δ z / 2
 
 /-- Plateau height `m(L) = (π/2 - ηV)/(L - η)` solved so the arc integral is `π/2`
 (`η = π/16`, `V = 2/3`).  The denominator is clamped from below by `π/8` so that
 `alignHt` is globally continuous (the structural lemmas are stated over all `z`);
 on the disk `L ∈ [π/4, 3π/4]` we have `L - π/16 ≥ 3π/16 > π/8`, so the clamp is
 inactive and the value is exactly `(π/2 - ηV)/(L - η)`. -/
-noncomputable def alignHt (L : ℝ) : ℝ :=
+private noncomputable def alignHt (L : ℝ) : ℝ :=
   (π / 2 - π / 16 * (2 / 3)) / max (π / 8) (L - π / 16)
 
 /-- On the disk range `L - π/16 ≥ π/8` the clamp is inactive. -/
-lemma alignHt_eq {L : ℝ} (h : π / 8 ≤ L - π / 16) :
+private lemma alignHt_eq {L : ℝ} (h : π / 8 ≤ L - π / 16) :
     alignHt L = (π / 2 - π / 16 * (2 / 3)) / (L - π / 16) := by
   rw [alignHt, max_eq_right h]
 
 /-- `alignHt` is continuous (the clamped denominator stays `≥ π/8 > 0`). -/
-lemma continuous_alignHt : Continuous alignHt := by
+private lemma continuous_alignHt : Continuous alignHt := by
   have hpi : 0 < π := Real.pi_pos
   refine continuous_const.div (continuous_const.max (continuous_id.sub continuous_const))
     (fun L => ?_)
@@ -284,7 +284,7 @@ lemma continuous_alignHt : Continuous alignHt := by
 /-- **The calibrated speed density** `w_z` (blueprint `def:align_density`):
 constant node value `V = 2/3` plus four trapezoidal plateau pulses, one per arc,
 of height `m_k - V`, supported on `[θ_k, θ_{k+1}]` with ramp width `η = π/16`. -/
-noncomputable def alignDensity (δ : ℝ) (z : ℂ) (θ : ℝ) : ℝ :=
+private noncomputable def alignDensity (δ : ℝ) (z : ℂ) (θ : ℝ) : ℝ :=
   2 / 3
   + (alignHt (alignL1 δ z) - 2 / 3) * clampTent (π / 16) (alignL1 δ z) (alignC1 δ z) θ
   + (alignHt (alignL2 δ z) - 2 / 3) * clampTent (π / 16) (alignL2 δ z) (alignC2 δ z) θ
@@ -292,33 +292,33 @@ noncomputable def alignDensity (δ : ℝ) (z : ℂ) (θ : ℝ) : ℝ :=
   + (alignHt (alignL4 δ z) - 2 / 3) * clampTent (π / 16) (alignL4 δ z) (alignC4 δ z) θ
 
 /-- Continuity of all the configuration helpers in `z`. -/
-lemma continuous_alignN1 (δ : ℝ) : Continuous (alignN1 δ) := by
+private lemma continuous_alignN1 (δ : ℝ) : Continuous (alignN1 δ) := by
   unfold alignN1; exact continuous_const.add (continuous_const.mul Complex.continuous_re)
-lemma continuous_alignN2 (δ : ℝ) : Continuous (alignN2 δ) := by
+private lemma continuous_alignN2 (δ : ℝ) : Continuous (alignN2 δ) := by
   unfold alignN2; exact continuous_const.add (continuous_const.mul Complex.continuous_im)
-lemma continuous_alignN3 (δ : ℝ) : Continuous (alignN3 δ) := by
+private lemma continuous_alignN3 (δ : ℝ) : Continuous (alignN3 δ) := by
   unfold alignN3; exact continuous_const
-lemma continuous_alignN4 (δ : ℝ) : Continuous (alignN4 δ) := by
+private lemma continuous_alignN4 (δ : ℝ) : Continuous (alignN4 δ) := by
   unfold alignN4; exact continuous_const
-lemma continuous_alignL1 (δ : ℝ) : Continuous (alignL1 δ) :=
+private lemma continuous_alignL1 (δ : ℝ) : Continuous (alignL1 δ) :=
   (continuous_alignN2 δ).sub (continuous_alignN1 δ)
-lemma continuous_alignL2 (δ : ℝ) : Continuous (alignL2 δ) :=
+private lemma continuous_alignL2 (δ : ℝ) : Continuous (alignL2 δ) :=
   (continuous_alignN3 δ).sub (continuous_alignN2 δ)
-lemma continuous_alignL3 (δ : ℝ) : Continuous (alignL3 δ) :=
+private lemma continuous_alignL3 (δ : ℝ) : Continuous (alignL3 δ) :=
   (continuous_alignN4 δ).sub (continuous_alignN3 δ)
-lemma continuous_alignL4 (δ : ℝ) : Continuous (alignL4 δ) :=
+private lemma continuous_alignL4 (δ : ℝ) : Continuous (alignL4 δ) :=
   ((continuous_alignN1 δ).add continuous_const).sub (continuous_alignN4 δ)
-lemma continuous_alignC1 (δ : ℝ) : Continuous (alignC1 δ) :=
+private lemma continuous_alignC1 (δ : ℝ) : Continuous (alignC1 δ) :=
   (continuous_alignN1 δ).add ((continuous_alignL1 δ).div_const 2)
-lemma continuous_alignC2 (δ : ℝ) : Continuous (alignC2 δ) :=
+private lemma continuous_alignC2 (δ : ℝ) : Continuous (alignC2 δ) :=
   (continuous_alignN2 δ).add ((continuous_alignL2 δ).div_const 2)
-lemma continuous_alignC3 (δ : ℝ) : Continuous (alignC3 δ) :=
+private lemma continuous_alignC3 (δ : ℝ) : Continuous (alignC3 δ) :=
   (continuous_alignN3 δ).add ((continuous_alignL3 δ).div_const 2)
-lemma continuous_alignC4 (δ : ℝ) : Continuous (alignC4 δ) :=
+private lemma continuous_alignC4 (δ : ℝ) : Continuous (alignC4 δ) :=
   (continuous_alignN4 δ).add ((continuous_alignL4 δ).div_const 2)
 
 /-- Arc-length bounds: for `‖z‖ ≤ 1` and `0 < δ ≤ π/8`, each `L_k ∈ [π/4, 3π/4]`. -/
-lemma alignL_bounds (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
+private lemma alignL_bounds (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     (π / 4 ≤ alignL1 δ z ∧ alignL1 δ z ≤ 3 * π / 4) ∧
     (π / 4 ≤ alignL2 δ z ∧ alignL2 δ z ≤ 3 * π / 4) ∧
     (π / 4 ≤ alignL3 δ z ∧ alignL3 δ z ≤ 3 * π / 4) ∧
@@ -337,7 +337,7 @@ lemma alignL_bounds (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (
     linarith
 
 /-- For `π/4 ≤ L ≤ 3π/4`, the plateau height satisfies `2/3 ≤ m(L) ≤ 22/9`. -/
-lemma alignHt_bounds {L : ℝ} (h1 : π / 4 ≤ L) (h2 : L ≤ 3 * π / 4) :
+private lemma alignHt_bounds {L : ℝ} (h1 : π / 4 ≤ L) (h2 : L ≤ 3 * π / 4) :
     2 / 3 ≤ alignHt L ∧ alignHt L ≤ 22 / 9 := by
   have hpi : 0 < π := Real.pi_pos
   have hclamp : π / 8 ≤ L - π / 16 := by linarith
@@ -348,7 +348,7 @@ lemma alignHt_bounds {L : ℝ} (h1 : π / 4 ≤ L) (h2 : L ≤ 3 * π / 4) :
   · rw [div_le_iff₀ hd]; nlinarith
 
 /-- `w_z` is continuous in `θ`. -/
-lemma continuous_alignDensity_theta (δ : ℝ) (z : ℂ) :
+private lemma continuous_alignDensity_theta (δ : ℝ) (z : ℂ) :
     Continuous (alignDensity δ z) := by
   unfold alignDensity
   exact ((((continuous_const.add (continuous_const.mul (continuous_clampTent_theta _ _ _))).add
@@ -358,7 +358,7 @@ lemma continuous_alignDensity_theta (δ : ℝ) (z : ℂ) :
 
 /-- **Joint continuity** `(z, θ) ↦ w_z(θ)` (blueprint `lem:align_density_props`),
 the load-bearing input for the joint continuity of `g_z`. -/
-lemma continuous_uncurry_alignDensity (δ : ℝ) :
+private lemma continuous_uncurry_alignDensity (δ : ℝ) :
     Continuous (fun p : ℂ × ℝ => alignDensity δ p.1 p.2) := by
   have hterm : ∀ cL cC : ℂ → ℝ, Continuous cL → Continuous cC →
       Continuous (fun p : ℂ × ℝ =>
@@ -375,7 +375,7 @@ lemma continuous_uncurry_alignDensity (δ : ℝ) :
     (hterm _ _ (continuous_alignL4 δ) (continuous_alignC4 δ)))
 
 /-- `w_z` is `2π`-periodic in `θ`. -/
-lemma alignDensity_periodic (δ : ℝ) (z : ℂ) :
+private lemma alignDensity_periodic (δ : ℝ) (z : ℂ) :
     Function.Periodic (alignDensity δ z) (2 * π) := by
   intro θ
   simp only [alignDensity]
@@ -386,7 +386,7 @@ lemma alignDensity_periodic (δ : ℝ) (z : ℂ) :
 
 /-- **Lower bound** `2/3 ≤ w_z` (blueprint `lem:align_density_props`).  Each
 plateau pulse contributes a nonnegative amount since `m_k ≥ V = 2/3`. -/
-lemma alignDensity_ge (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1)
+private lemma alignDensity_ge (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1)
     (θ : ℝ) : 2 / 3 ≤ alignDensity δ z θ := by
   obtain ⟨⟨hL1a, hL1b⟩, ⟨hL2a, hL2b⟩, ⟨hL3a, hL3b⟩, ⟨hL4a, hL4b⟩⟩ :=
     alignL_bounds δ hδ hδ' hz
@@ -403,7 +403,7 @@ lemma alignDensity_ge (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ}
 
 /-- Split the density integral into the constant part plus the four pulse
 integrals. -/
-lemma alignDensity_integral_split (δ : ℝ) (z : ℂ) (lo hi : ℝ) :
+private lemma alignDensity_integral_split (δ : ℝ) (z : ℂ) (lo hi : ℝ) :
     (∫ θ in lo..hi, alignDensity δ z θ)
       = 2 / 3 * (hi - lo)
         + (alignHt (alignL1 δ z) - 2 / 3)
@@ -434,7 +434,7 @@ lemma alignDensity_integral_split (δ : ℝ) (z : ℂ) (lo hi : ℝ) :
   ring
 
 /-- **Arc 1 integral** `∫_{θ₁}^{θ₂} w_z = π/2`. -/
-lemma alignDensity_arc1 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
+private lemma alignDensity_arc1 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     (∫ θ in (alignN1 δ z)..(alignN2 δ z), alignDensity δ z θ) = π / 2 := by
   have hpi : 0 < π := Real.pi_pos
   obtain ⟨⟨hL1a, hL1b⟩, ⟨hL2a, hL2b⟩, ⟨hL3a, hL3b⟩, ⟨hL4a, hL4b⟩⟩ :=
@@ -480,7 +480,7 @@ lemma alignDensity_arc1 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : �
   ring
 
 /-- **Arc 2 integral** `∫_{θ₂}^{θ₃} w_z = π/2`. -/
-lemma alignDensity_arc2 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
+private lemma alignDensity_arc2 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     (∫ θ in (alignN2 δ z)..(alignN3 δ z), alignDensity δ z θ) = π / 2 := by
   have hpi : 0 < π := Real.pi_pos
   obtain ⟨⟨hL1a, hL1b⟩, ⟨hL2a, hL2b⟩, ⟨hL3a, hL3b⟩, ⟨hL4a, hL4b⟩⟩ :=
@@ -523,7 +523,7 @@ lemma alignDensity_arc2 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : �
   ring
 
 /-- **Arc 3 integral** `∫_{θ₃}^{θ₄} w_z = π/2`. -/
-lemma alignDensity_arc3 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
+private lemma alignDensity_arc3 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     (∫ θ in (alignN3 δ z)..(alignN4 δ z), alignDensity δ z θ) = π / 2 := by
   have hpi : 0 < π := Real.pi_pos
   obtain ⟨⟨hL1a, hL1b⟩, ⟨hL2a, hL2b⟩, ⟨hL3a, hL3b⟩, ⟨hL4a, hL4b⟩⟩ :=
@@ -566,7 +566,7 @@ lemma alignDensity_arc3 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : �
   ring
 
 /-- **Arc 4 integral** `∫_{θ₄}^{θ₁+2π} w_z = π/2`. -/
-lemma alignDensity_arc4 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
+private lemma alignDensity_arc4 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     (∫ θ in (alignN4 δ z)..(alignN1 δ z + 2 * π), alignDensity δ z θ) = π / 2 := by
   have hpi : 0 < π := Real.pi_pos
   obtain ⟨⟨hL1a, hL1b⟩, ⟨hL2a, hL2b⟩, ⟨hL3a, hL3b⟩, ⟨hL4a, hL4b⟩⟩ :=
@@ -620,12 +620,12 @@ circle homeomorphism sending the four configuration breakpoints
 `θ_k` to the canonical step breakpoints `k·π/2` (`alignReparam_node_values`),
 strictly increasing (slope `w_z ≥ 2/3 > 0`), continuous, jointly continuous in
 `(z,θ)`, and quasi-periodic (the full-period integral of `w_z` is `2π`). -/
-noncomputable def alignReparam (δ : ℝ) (z : ℂ) : ℝ → ℝ :=
+private noncomputable def alignReparam (δ : ℝ) (z : ℂ) : ℝ → ℝ :=
   fun θ => π / 2 + ∫ t in (alignN1 δ z)..θ, alignDensity δ z t
 
 /-- Full-period integral of the density is `2π` (sum of the four arc integrals),
 on the disk. -/
-lemma alignDensity_period_integral (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
+private lemma alignDensity_period_integral (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
     {z : ℂ} (hz : ‖z‖ ≤ 1) :
     (∫ t in (alignN1 δ z)..(alignN1 δ z + 2 * π), alignDensity δ z t) = 2 * π := by
   have i : ∀ a b : ℝ, IntervalIntegrable (alignDensity δ z) volume a b :=
@@ -644,7 +644,7 @@ lemma alignDensity_period_integral (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π /
 
 /-- `g_z` is quasi-periodic on the disk: `g_z(θ + 2π) = g_z(θ) + 2π` (the
 full-period integral of `w_z` is `2π`).  (Blueprint `lem:align_reparam_add_two_pi`.) -/
-lemma alignReparam_add_two_pi (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
+private lemma alignReparam_add_two_pi (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
     {z : ℂ} (hz : ‖z‖ ≤ 1) (θ : ℝ) :
     alignReparam δ z (θ + 2 * π) = alignReparam δ z θ + 2 * π := by
   simp only [alignReparam]
@@ -662,7 +662,7 @@ lemma alignReparam_add_two_pi (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
 /-- **Joint continuity** of `(z, θ) ↦ g_z(θ)` (blueprint
 `lem:continuous_uncurry_align_reparam`).  Load-bearing input to
 `continuous_kappaErrorMap`. -/
-lemma continuous_uncurry_alignReparam (δ : ℝ) :
+private lemma continuous_uncurry_alignReparam (δ : ℝ) :
     Continuous (fun p : ℂ × ℝ => alignReparam δ p.1 p.2) := by
   simp only [alignReparam]
   apply Continuous.add continuous_const
@@ -686,14 +686,14 @@ lemma continuous_uncurry_alignReparam (δ : ℝ) :
   exact hcont.congr (fun p => (key p).symm)
 
 /-- `g_z` is continuous in `θ` (for fixed `δ`, `z`). -/
-lemma continuous_alignReparam (δ : ℝ) (z : ℂ) : Continuous (alignReparam δ z) := by
+private lemma continuous_alignReparam (δ : ℝ) (z : ℂ) : Continuous (alignReparam δ z) := by
   unfold alignReparam
   exact continuous_const.add (intervalIntegral.continuous_primitive
     (fun a b => (continuous_alignDensity_theta δ z).intervalIntegrable a b) (alignN1 δ z))
 
 /-- **FTC for `g_z`**: `g_z' = w_z` (the calibrated density).  Keystone for the
 change-of-variables bound in the `L¹` estimate. -/
-lemma hasDerivAt_alignReparam (δ : ℝ) (z : ℂ) (θ : ℝ) :
+private lemma hasDerivAt_alignReparam (δ : ℝ) (z : ℂ) (θ : ℝ) :
     HasDerivAt (alignReparam δ z) (alignDensity δ z θ) θ := by
   have h := intervalIntegral.integral_hasDerivAt_right
     ((continuous_alignDensity_theta δ z).intervalIntegrable (alignN1 δ z) θ)
@@ -703,7 +703,7 @@ lemma hasDerivAt_alignReparam (δ : ℝ) (z : ℂ) (θ : ℝ) :
 
 /-- **Strict monotonicity** of `g_z` on the closed unit disk (blueprint
 `lem:strict_mono_align_reparam`).  The slope `g_z' = w_z ≥ 2/3 > 0`. -/
-lemma strictMono_alignReparam (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
+private lemma strictMono_alignReparam (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
     {z : ℂ} (hz : ‖z‖ ≤ 1) : StrictMono (alignReparam δ z) := by
   intro x y hxy
   rw [← sub_pos]
@@ -726,7 +726,7 @@ lemma strictMono_alignReparam (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
 
 /-- **Node values** of `g_z` (blueprint `lem:align_reparam_node_values`):
 `g_z(θ_k) = k·π/2`. -/
-lemma alignReparam_node_values (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
+private lemma alignReparam_node_values (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
     {z : ℂ} (hz : ‖z‖ ≤ 1) :
     alignReparam δ z (alignN1 δ z) = π / 2 ∧
     alignReparam δ z (alignN2 δ z) = π ∧
@@ -780,7 +780,7 @@ function `κ`, the preliminary reparametrization `h₁`, and `0 < δ ≤ π/8`,
 `E_κ(z) := errorVector (radius (κ ∘ h₁ ∘ g_z))`, the error vector of the curve
 reconstructed from the curvature function `κ ∘ h₁ ∘ g_z`.  `E_κ(z) = 0` means
 exactly that this curve closes up. -/
-noncomputable def kappaErrorMap (κ h₁ : ℝ → ℝ) (δ : ℝ) (z : ℂ) : ℂ :=
+private noncomputable def kappaErrorMap (κ h₁ : ℝ → ℝ) (δ : ℝ) (z : ℂ) : ℂ :=
   errorVector (radius (κ ∘ h₁ ∘ alignReparam δ z))
 
 /-- **`E_κ` is continuous on the disk** (blueprint `lem:kappa_error_map_continuous`).
@@ -788,7 +788,7 @@ The integrand `(z, θ) ↦ e^{iθ}/κ(h₁(g_z θ))` is jointly continuous on
 `ℂ × [0, 2π]` (`κ, h₁` continuous, `(z,θ) ↦ g_z θ` jointly continuous, `κ > 0`
 keeping the denominator bounded away from `0`), so continuity of the
 parametrised interval integral gives continuity of `z ↦ E_κ(z)`. -/
-theorem continuous_kappaErrorMap {κ h₁ : ℝ → ℝ} (hκ : Continuous κ)
+private theorem continuous_kappaErrorMap {κ h₁ : ℝ → ℝ} (hκ : Continuous κ)
     (hpos : ∀ θ, 0 < κ θ) (hh₁ : Continuous h₁) (δ : ℝ) :
     Continuous (kappaErrorMap κ h₁ δ) := by
   -- Joint continuity of the reparametrization family.
@@ -832,7 +832,7 @@ a.e. class of its weight.
 The exact node-mapping `g_z(θ_k) = kπ/2` is supplied by `alignReparam_node_values`
 (the cumulative-density `alignReparam` realises it exactly, via the exact arc
 integrals of `alignDensity`). -/
-theorem kappaZero_comp_alignReparam (a b δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
+private theorem kappaZero_comp_alignReparam (a b δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
     {z : ℂ} (hz : ‖z‖ ≤ 1) :
     errorMap a b δ z
       = errorVector (radius ((stepCurvature b a 0 (π / 2) π (3 * π / 2))
@@ -957,7 +957,7 @@ theorem kappaZero_comp_alignReparam (a b δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤
 the bicircle error map is `errorVector (radius (κ₀ ∘ g_z))`, and by the
 `L¹`-Lipschitz bound `dist_errorVector_le` the κ-error map differs from it by at
 most the integral of the pointwise weight difference. -/
-theorem kappaErrorMap_sub_errorMap_le {κ h₁ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
+private theorem kappaErrorMap_sub_errorMap_le {κ h₁ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
     {a b : ℝ} (ha : 0 < a) (hab : a < b) (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
     (_hmono : StrictMono h₁) (hcont : Continuous h₁)
     (_hper : ∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π)
@@ -1046,7 +1046,7 @@ theorem kappaErrorMap_sub_errorMap_le {κ h₁ : ℝ → ℝ} (hκ : IsCurvature
 /-- A continuous `2π`-periodic positive curvature function attains positive lower
 and upper bounds on the whole line (compactness over one period).  Helper for the
 `L¹` estimate. -/
-lemma curvature_bounds {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ) :
+private lemma curvature_bounds {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ) :
     ∃ cmin cmax : ℝ, 0 < cmin ∧ ∀ θ, cmin ≤ κ θ ∧ κ θ ≤ cmax := by
   obtain ⟨hcont, hper, hpos⟩ := hκ
   have hcpt : IsCompact (Set.Icc (0:ℝ) (2 * π)) := isCompact_Icc
@@ -1072,7 +1072,7 @@ lemma curvature_bounds {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ) :
 /-- Reciprocal-difference bound: for `u, v ≥ m > 0`, `|1/u - 1/v| ≤ |u - v|/m²`.
 Helper for the `L¹` estimate (the two reconstruction weights are reciprocals of
 curvatures bounded below by `m`). -/
-lemma recip_diff_abs_le {m u v : ℝ} (hm : 0 < m) (hu : m ≤ u) (hv : m ≤ v) :
+private lemma recip_diff_abs_le {m u v : ℝ} (hm : 0 < m) (hu : m ≤ u) (hv : m ≤ v) :
     |1 / u - 1 / v| ≤ |u - v| / m ^ 2 := by
   have hupos : 0 < u := lt_of_lt_of_le hm hu
   have hvpos : 0 < v := lt_of_lt_of_le hm hv
@@ -1085,7 +1085,7 @@ lemma recip_diff_abs_le {m u v : ℝ} (hm : 0 < m) (hu : m ≤ u) (hv : m ≤ v)
 
 /-- The canonical four-arc step curvature is measurable (a `2π`-periodic two-valued
 step over a measurable set).  Helper for the `L¹` estimate. -/
-lemma measurable_stepCurvature_canonical (b a : ℝ) :
+private lemma measurable_stepCurvature_canonical (b a : ℝ) :
     Measurable (stepCurvature b a 0 (π / 2) π (3 * π / 2)) := by
   have hmtic : Measurable (toIcoMod Real.two_pi_pos (0 : ℝ)) := by
     have heq : (toIcoMod Real.two_pi_pos (0 : ℝ))
@@ -1112,14 +1112,14 @@ lemma measurable_stepCurvature_canonical (b a : ℝ) :
       (measurableSet_lt hmtic measurable_const))
 
 /-- `alignHt ≥ 0` globally (positive numerator, positive clamped denominator). -/
-lemma alignHt_nonneg (L : ℝ) : 0 ≤ alignHt L := by
+private lemma alignHt_nonneg (L : ℝ) : 0 ≤ alignHt L := by
   have hpi : 0 < π := Real.pi_pos
   apply div_nonneg
   · nlinarith
   · positivity
 
 /-- `alignHt ≤ 11/3` globally (the clamped denominator is `≥ π/8`). -/
-lemma alignHt_le (L : ℝ) : alignHt L ≤ 11 / 3 := by
+private lemma alignHt_le (L : ℝ) : alignHt L ≤ 11 / 3 := by
   have hpi : 0 < π := Real.pi_pos
   rw [alignHt]
   rw [div_le_iff₀ (by positivity)]
@@ -1128,7 +1128,7 @@ lemma alignHt_le (L : ℝ) : alignHt L ≤ 11 / 3 := by
 
 /-- Global upper bound on the calibrated density `w_z ≤ 13`.  Helper for the
 integrability of the `w_z·(F∘g)` integrand in the change-of-variables step. -/
-lemma alignDensity_le (δ : ℝ) (z : ℂ) (θ : ℝ) : alignDensity δ z θ ≤ 13 := by
+private lemma alignDensity_le (δ : ℝ) (z : ℂ) (θ : ℝ) : alignDensity δ z θ ≤ 13 := by
   have hterm : ∀ L C : ℝ, (alignHt L - 2 / 3) * clampTent (π / 16) L C θ ≤ 3 := by
     intro L C
     have h0 := alignHt_nonneg L
@@ -1145,7 +1145,7 @@ lemma alignDensity_le (δ : ℝ) (z : ℂ) (θ : ℝ) : alignDensity δ z θ ≤
 
 /-- A measurable function bounded by a constant is integrable on any finite-measure
 set.  Helper for the `L¹` estimate. -/
-lemma integrableOn_of_measurable_bounded {f : ℝ → ℝ} {s : Set ℝ} {C : ℝ}
+private lemma integrableOn_of_measurable_bounded {f : ℝ → ℝ} {s : Set ℝ} {C : ℝ}
     (hmeas : Measurable f) (hfin : MeasureTheory.volume s ≠ ⊤)
     (hb : ∀ x, |f x| ≤ C) : MeasureTheory.IntegrableOn f s MeasureTheory.volume := by
   apply MeasureTheory.Integrable.mono' (g := fun _ => C)
@@ -1164,7 +1164,7 @@ that `K·M²·ε < μ` (with `M = 1/min κ` the radius bound and `K` the slope b
 `g_z`), then estimates the `L¹` weight difference of `kappaErrorMap_sub_errorMap_le`
 by splitting `[0,2π]` over the `< ε`-measure bad set (pulled back through the
 slope-bounded `g_z`). -/
-theorem exists_reparam_kappaErrorMap_close {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
+private theorem exists_reparam_kappaErrorMap_close {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
     {a b θ₁ θ₂ θ₃ θ₄ : ℝ} (ha : 0 < a) (hab : a < b)
     (h12 : θ₁ < θ₂) (h23 : θ₂ < θ₃) (h34 : θ₃ < θ₄) (h41 : θ₄ < θ₁ + 2 * π)
     (hc₁ : κ θ₁ = a) (hc₂ : κ θ₂ = b) (hc₃ : κ θ₃ = a) (hc₄ : κ θ₄ = b)
@@ -1428,7 +1428,7 @@ non-constant curvature function `κ` satisfying the four-vertex condition there 
 a circle reparametrization `h` (orientation-preserving: `StrictMono`,
 `Continuous`, quasi-periodic) such that the reconstruction weight
 `radius (κ ∘ h) = 1/(κ ∘ h)` has vanishing error vector — so the reconstruction
-curve closes up (`reconstruct_closes_iff`).
+curve closes up.
 
 The argument (DeTurck–Gluck §6, robustness of the winding principle): the bicircle
 error map `E_bi = errorMap a b δ` is continuous, nonzero on `∂D` with boundary
