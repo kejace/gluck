@@ -506,6 +506,50 @@ lemma exists_plateau_density {c₁ c₂ c₃ c₄ m₀ η δ : ℝ}
     rw [hval, add_sub_cancel_left]
     exact hfinal _ (by rw [abs_le]; constructor <;> linarith)
 
+/-- The four flanking plateau intervals (each of length `π/2 - δ`, separated by the
+four `δ`-wide "race" sub-arcs) have total Lebesgue measure `2π - 4δ`, for `0 < δ < π/2`. -/
+private lemma plateau_union_measure {δ : ℝ} (hδpos : 0 < δ) (hδlt : δ < π / 2) :
+    MeasureTheory.volume
+        (Set.Icc (δ / 2) (π / 2 - δ / 2) ∪ Set.Icc (π / 2 + δ / 2) (π - δ / 2) ∪
+          Set.Icc (π + δ / 2) (3 * π / 2 - δ / 2) ∪
+          Set.Icc (3 * π / 2 + δ / 2) (2 * π - δ / 2))
+      = ENNReal.ofReal (2 * π - 4 * δ) := by
+  have hπ : 0 < π := Real.pi_pos
+  have hxpos : 0 ≤ π / 2 - δ := by linarith
+  have hvP1 : MeasureTheory.volume (Set.Icc (δ / 2) (π / 2 - δ / 2))
+      = ENNReal.ofReal (π / 2 - δ) := by rw [Real.volume_Icc]; congr 1; ring
+  have hvP2 : MeasureTheory.volume (Set.Icc (π / 2 + δ / 2) (π - δ / 2))
+      = ENNReal.ofReal (π / 2 - δ) := by rw [Real.volume_Icc]; congr 1; ring
+  have hvP3 : MeasureTheory.volume (Set.Icc (π + δ / 2) (3 * π / 2 - δ / 2))
+      = ENNReal.ofReal (π / 2 - δ) := by rw [Real.volume_Icc]; congr 1; ring
+  have hvP4 : MeasureTheory.volume (Set.Icc (3 * π / 2 + δ / 2) (2 * π - δ / 2))
+      = ENNReal.ofReal (π / 2 - δ) := by rw [Real.volume_Icc]; congr 1; ring
+  have hd12 : Disjoint (Set.Icc (δ / 2) (π / 2 - δ / 2))
+      (Set.Icc (π / 2 + δ / 2) (π - δ / 2)) := by
+    rw [Set.disjoint_left]; intro x hx hy
+    simp only [Set.mem_Icc] at hx hy; linarith
+  have hd123 : Disjoint (Set.Icc (δ / 2) (π / 2 - δ / 2) ∪ Set.Icc (π / 2 + δ / 2) (π - δ / 2))
+      (Set.Icc (π + δ / 2) (3 * π / 2 - δ / 2)) := by
+    rw [Set.disjoint_left]; intro x hx hy
+    rw [Set.mem_Icc] at hy
+    simp only [Set.mem_union, Set.mem_Icc] at hx
+    rcases hx with h | h <;> linarith [h.1, h.2]
+  have hd1234 : Disjoint (Set.Icc (δ / 2) (π / 2 - δ / 2) ∪
+      Set.Icc (π / 2 + δ / 2) (π - δ / 2) ∪ Set.Icc (π + δ / 2) (3 * π / 2 - δ / 2))
+      (Set.Icc (3 * π / 2 + δ / 2) (2 * π - δ / 2)) := by
+    rw [Set.disjoint_left]; intro x hx hy
+    rw [Set.mem_Icc] at hy
+    simp only [Set.mem_union, Set.mem_Icc] at hx
+    rcases hx with (h | h) | h <;> linarith [h.1, h.2]
+  rw [MeasureTheory.measure_union hd1234 measurableSet_Icc,
+      MeasureTheory.measure_union hd123 measurableSet_Icc,
+      MeasureTheory.measure_union hd12 measurableSet_Icc,
+      hvP1, hvP2, hvP3, hvP4,
+      ← ENNReal.ofReal_add hxpos hxpos,
+      ← ENNReal.ofReal_add (by linarith) hxpos,
+      ← ENNReal.ofReal_add (by linarith) hxpos]
+  congr 1; ring
+
 set_option maxHeartbeats 1000000 in
 -- The measure-bound branch reasons over a large local hypothesis context
 -- (four moduli, plateau radii, plateau intervals and their disjointness), so
@@ -695,41 +739,13 @@ theorem exists_preliminary_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
     have hδle : δ ≤ π / 4 := by rw [hδdef]; exact min_le_right _ _
     have h4δlt : 4 * δ < ε := by
       rw [hδdef]; have := min_le_left (ε / 8) (π / 4); linarith
-    have hxpos : 0 ≤ π / 2 - δ := by linarith
     have hmeasP : MeasurableSet (P₁ ∪ P₂ ∪ P₃ ∪ P₄) :=
       ((measurableSet_Icc.union measurableSet_Icc).union measurableSet_Icc).union
         measurableSet_Icc
-    have hvP1 : MeasureTheory.volume P₁ = ENNReal.ofReal (π / 2 - δ) := by
-      rw [hP1def, Real.volume_Icc]; congr 1; ring
-    have hvP2 : MeasureTheory.volume P₂ = ENNReal.ofReal (π / 2 - δ) := by
-      rw [hP2def, Real.volume_Icc]; congr 1; ring
-    have hvP3 : MeasureTheory.volume P₃ = ENNReal.ofReal (π / 2 - δ) := by
-      rw [hP3def, Real.volume_Icc]; congr 1; ring
-    have hvP4 : MeasureTheory.volume P₄ = ENNReal.ofReal (π / 2 - δ) := by
-      rw [hP4def, Real.volume_Icc]; congr 1; ring
-    have hd12 : Disjoint P₁ P₂ := by
-      rw [hP1def, hP2def, Set.disjoint_left]; intro x hx hy
-      simp only [Set.mem_Icc] at hx hy; linarith
-    have hd123 : Disjoint (P₁ ∪ P₂) P₃ := by
-      rw [Set.disjoint_left]; intro x hx hy
-      rw [hP3def, Set.mem_Icc] at hy
-      simp only [hP1def, hP2def, Set.mem_union, Set.mem_Icc] at hx
-      rcases hx with h | h <;> linarith [h.1, h.2]
-    have hd1234 : Disjoint (P₁ ∪ P₂ ∪ P₃) P₄ := by
-      rw [Set.disjoint_left]; intro x hx hy
-      rw [hP4def, Set.mem_Icc] at hy
-      simp only [hP1def, hP2def, hP3def, Set.mem_union, Set.mem_Icc] at hx
-      rcases hx with (h | h) | h <;> linarith [h.1, h.2]
     have hvP : MeasureTheory.volume (P₁ ∪ P₂ ∪ P₃ ∪ P₄)
         = ENNReal.ofReal (2 * π - 4 * δ) := by
-      rw [MeasureTheory.measure_union hd1234 measurableSet_Icc,
-          MeasureTheory.measure_union hd123 measurableSet_Icc,
-          MeasureTheory.measure_union hd12 measurableSet_Icc,
-          hvP1, hvP2, hvP3, hvP4,
-          ← ENNReal.ofReal_add hxpos hxpos,
-          ← ENNReal.ofReal_add (by linarith) hxpos,
-          ← ENNReal.ofReal_add (by linarith) hxpos]
-      congr 1; ring
+      rw [hP1def, hP2def, hP3def, hP4def]
+      exact plateau_union_measure hδpos hδlt
     have hvU : MeasureTheory.volume U = ENNReal.ofReal (2 * π) := by
       rw [hUdef, Real.volume_Ico]; congr 1; ring
     have hPU : (P₁ ∪ P₂ ∪ P₃ ∪ P₄) ⊆ U := by
