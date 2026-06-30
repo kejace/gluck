@@ -2385,6 +2385,17 @@ private theorem exists_closingParam {κ : ℝ → ℝ} (hκ : Continuous κ) (a 
 
 /-! ## Simplicity transport and the converse -/
 
+/-- The chord of the reconstructed curve is the integral of its unit tangent:
+`dahlbergCurve K w - dahlbergCurve K u = ∫_u^w e^{i·α_K}`. -/
+private lemma dahlbergCurve_sub {K : ℝ → ℝ}
+    (hii : ∀ p q, IntervalIntegrable
+      (fun s => Complex.exp ((dahlbergAngle K s : ℂ) * Complex.I)) volume p q) (u w : ℝ) :
+    dahlbergCurve K w - dahlbergCurve K u
+      = ∫ s in u..w, Complex.exp ((dahlbergAngle K s : ℂ) * Complex.I) := by
+  rw [dahlbergCurve, dahlbergCurve,
+    ← intervalIntegral.integral_add_adjacent_intervals (hii 0 u) (hii u w)]
+  ring
+
 /-- Pointwise bounds on the normalised clean-bicircle curvature: for `‖z‖ ≤ 1`,
 `(1/4)(1/a+1/b)·a ≤ arcLengthNorm (cleanBicircle a b) a b δ z ≤ (5/8)(1/a+1/b)·b`.
 The normalised curvature is `λ(z)·(a(1-f)+b·f)`, bounded by the `closingLambda`
@@ -2496,11 +2507,7 @@ private lemma clean_chord_margin (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ 
   -- The unit tangent integrand is continuous; the chord is its integral.
   have hEcont : Continuous (fun s => Complex.exp ((dahlbergAngle Kz s : ℂ) * Complex.I)) :=
     Complex.continuous_exp.comp ((Complex.continuous_ofReal.comp hαcont).mul continuous_const)
-  have hγdiff : dahlbergCurve Kz τ - dahlbergCurve Kz t
-      = ∫ s in t..τ, Complex.exp ((dahlbergAngle Kz s : ℂ) * Complex.I) := by
-    rw [dahlbergCurve, dahlbergCurve,
-      ← intervalIntegral.integral_add_adjacent_intervals
-        (hEcont.intervalIntegrable 0 t) (hEcont.intervalIntegrable t τ)]; ring
+  have hγdiff := dahlbergCurve_sub (K := Kz) (fun p q => hEcont.intervalIntegrable p q) t τ
   -- Project onto the angular-midpoint direction `e^{iψ}`.
   set ψ : ℝ := (dahlbergAngle Kz t + dahlbergAngle Kz τ) / 2 with hψdef
   have hcos_int : ∀ p q, IntervalIntegrable
@@ -2731,24 +2738,10 @@ private lemma simplicity_transport {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a)
     fun p q => hEs_per.intervalIntegrable₀ h2πne
       (intervalIntegrable_expI_arcLengthNorm (fun t => κ (η t)) a b δ z hg_star_ii_0) p q
   -- Chord = curve difference.
-  have hchordK : ∀ u w,
-      dahlbergCurve (arcLengthNorm (cleanBicircle a b) a b δ z) w
-        - dahlbergCurve (arcLengthNorm (cleanBicircle a b) a b δ z) u
-      = ∫ s in u..w, Complex.exp ((dahlbergAngle (arcLengthNorm (cleanBicircle a b) a b δ z) s : ℂ)
-          * Complex.I) := by
-    intro u w
-    rw [dahlbergCurve, dahlbergCurve,
-      ← intervalIntegral.integral_add_adjacent_intervals (hEcii_pq 0 u) (hEcii_pq u w)]
-    ring
-  have hchordKs : ∀ u w,
-      dahlbergCurve (arcLengthNorm (fun t => κ (η t)) a b δ z) w
-        - dahlbergCurve (arcLengthNorm (fun t => κ (η t)) a b δ z) u
-      = ∫ s in u..w, Complex.exp ((dahlbergAngle (arcLengthNorm (fun t => κ (η t)) a b δ z) s : ℂ)
-          * Complex.I) := by
-    intro u w
-    rw [dahlbergCurve, dahlbergCurve,
-      ← intervalIntegral.integral_add_adjacent_intervals (hEsii_pq 0 u) (hEsii_pq u w)]
-    ring
+  have hchordK := fun u w =>
+    dahlbergCurve_sub (K := arcLengthNorm (cleanBicircle a b) a b δ z) hEcii_pq u w
+  have hchordKs := fun u w =>
+    dahlbergCurve_sub (K := arcLengthNorm (fun t => κ (η t)) a b δ z) hEsii_pq u w
   -- The transport estimate `(†)`.
   have htransport : ∀ u w, u ≤ w →
       ‖(∫ s in u..w, Complex.exp ((dahlbergAngle (arcLengthNorm (fun t => κ (η t)) a b δ z) s : ℂ)
