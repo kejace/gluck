@@ -2916,4 +2916,13 @@ theorem dahlbergConverse {κ : ℝ → ℝ} (h : MixedSignFourVertex κ) :
   exact realizesCurvature_of_nonNormalised hκcont hκper hφ hφpos hφper hψ hψpos hψper
     hψφ hφψ hNN hIpos
 
+/-- The non-constant positive case of Gluck's converse, as a corollary of the
+mixed-sign theorem (`dahlbergConverse`): a strictly positive curvature function
+satisfying the non-constant four-vertex condition admits a simple closed curve
+realizing it. The constant case (a round circle) is handled in `gluck_converse`. -/
+theorem gluck_converse_nonconstant {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
+    (hfv : FourVertexCondition κ) (hnc : ¬ ∃ c, ∀ θ, κ θ = c) :
+    ∃ γ : ℝ → ℂ, IsSimpleClosed γ ∧ RealizesCurvature γ κ :=
+  dahlbergConverse (mixedSignFourVertex_of_isCurvatureFunction hκ hfv hnc)
+
 end Gluck

@@ -60,6 +60,20 @@ def MixedSignFourVertex (κ : ℝ → ℝ) : Prop :=
       IsLocalMax κ p₁ ∧ IsLocalMax κ p₂ ∧ IsLocalMin κ q₁ ∧ IsLocalMin κ q₂ ∧
       max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂) ∧ 0 < min (κ p₁) (κ p₂)
 
+/-- A strictly positive curvature function (`IsCurvatureFunction`) satisfying the
+non-constant branch of `FourVertexCondition` satisfies the mixed-sign hypothesis:
+the four extrema are inherited directly, and positivity at the maxima is automatic
+from `κ > 0`. Hence `dahlbergConverse` subsumes the non-constant positive case of
+`gluck_converse`. -/
+theorem mixedSignFourVertex_of_isCurvatureFunction {κ : ℝ → ℝ}
+    (hκ : IsCurvatureFunction κ) (hfv : FourVertexCondition κ)
+    (hnc : ¬ ∃ c, ∀ θ, κ θ = c) : MixedSignFourVertex κ := by
+  obtain ⟨hcont, hper, hpos⟩ := hκ
+  rcases hfv with hconst | ⟨p₁, q₁, p₂, q₂, h1, h2, h3, h4, h5, h6, h7, h8, h9⟩
+  · exact absurd hconst hnc
+  · exact ⟨hcont, hper, p₁, q₁, p₂, q₂, h1, h2, h3, h4, h5, h6, h7, h8, h9,
+      lt_min (hpos p₁) (hpos p₂)⟩
+
 /-- **Mixed-sign level extraction** (Dahlberg, §3, "by continuity there are
 points `r_j`…"). Under the mixed-sign four-vertex condition there exist constants
 `0 < a < b` and four points `r₁ < r₂ < r₃ < r₄ < r₁ + 2π`, ordered
