@@ -1984,6 +1984,20 @@ private lemma angle_dist_arith {b cLB Ecoef ε Is Ic As Es : ℝ}
     _ ≤ 4 * π / cLB * Ecoef * ε + 8 * π ^ 2 * b * Ecoef / cLB ^ 2 * ε := add_le_add hT1 hT2
     _ = (4 * π / cLB * Ecoef + 8 * π ^ 2 * b * Ecoef / cLB ^ 2) * ε := by ring
 
+/-- A `2π`-periodic real function bounded by `B` on `[0, 2π]` is bounded by `B`
+everywhere (reduce `s` to its representative in `[0, 2π)`). -/
+private lemma abs_le_of_periodic_two_pi {D : ℝ → ℝ} {B : ℝ}
+    (hper : Function.Periodic D (2 * π))
+    (hcore : ∀ s, 0 ≤ s → s ≤ 2 * π → |D s| ≤ B) (s : ℝ) : |D s| ≤ B := by
+  have h2pi : (0 : ℝ) < 2 * π := by positivity
+  set s₀ := toIcoMod h2pi 0 s with hs₀def
+  have hs₀mem : s₀ ∈ Set.Ico 0 (2 * π) := by
+    have := toIcoMod_mem_Ico h2pi 0 s; rwa [zero_add] at this
+  have hDeq : D s = D s₀ := by
+    rw [hs₀def, show toIcoMod h2pi 0 s = s - toIcoDiv h2pi 0 s • (2 * π) from
+      eq_sub_of_add_eq (toIcoMod_add_toIcoDiv_zsmul h2pi 0 s), hper.sub_zsmul_eq]
+  rw [hDeq]; exact hcore s₀ hs₀mem.1 hs₀mem.2.le
+
 /-- **The angle estimate `|α − α*| ≤ C'·ε`** (Dahlberg, §3).
 (Blueprint `lem:angle_dist_le`.) -/
 private lemma angle_dist_le {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a) (hab : a < b) (hC : 0 < C)
@@ -2125,16 +2139,7 @@ private lemma angle_dist_le {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a) (hab :
         dahlbergAngle_arcLengthNorm_add_two_pi (cleanBicircle a b) a b δ hclean_per hclean_all
           hIc_pos.ne' x]
     ring
-  have h2pi : (0 : ℝ) < 2 * π := by positivity
-  set s₀ := toIcoMod h2pi 0 s with hs₀def
-  have hs₀mem : s₀ ∈ Set.Ico 0 (2 * π) := by
-    have := toIcoMod_mem_Ico h2pi 0 s; rwa [zero_add] at this
-  have hDeq : D s = D s₀ := by
-    rw [hs₀def, show toIcoMod h2pi 0 s = s - toIcoDiv h2pi 0 s • (2 * π) from
-      eq_sub_of_add_eq (toIcoMod_add_toIcoDiv_zsmul h2pi 0 s), hDper.sub_zsmul_eq]
-  change |D s| ≤ C' * ε
-  rw [hDeq]
-  exact hcore s₀ hs₀mem.1 hs₀mem.2.le
+  exact abs_le_of_periodic_two_pi hDper hcore s
 
 /-- **Uniform limit `F*(·,ε) → F`** (Dahlberg, §3).
 (Blueprint `lem:arclength_error_tendsto`.) -/
