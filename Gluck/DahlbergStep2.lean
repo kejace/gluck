@@ -2412,6 +2412,44 @@ private theorem exists_closingParam {κ : ℝ → ℝ} (hκ : Continuous κ) (a 
 
 /-! ## Simplicity transport and the converse -/
 
+/-- Pointwise bounds on the normalised clean-bicircle curvature: for `‖z‖ ≤ 1`,
+`(1/4)(1/a+1/b)·a ≤ arcLengthNorm (cleanBicircle a b) a b δ z ≤ (5/8)(1/a+1/b)·b`.
+The normalised curvature is `λ(z)·(a(1-f)+b·f)`, bounded by the `closingLambda`
+bounds times the bicircle's `[a,b]` range. -/
+private lemma cleanBicircle_arcLengthNorm_bounds (a b δ : ℝ) (ha : 0 < a) (hab : a < b)
+    (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) :
+    (∀ s, (1 / 4) * (1 / a + 1 / b) * a
+        ≤ arcLengthNorm (cleanBicircle a b) a b δ z s) ∧
+    (∀ s, arcLengthNorm (cleanBicircle a b) a b δ z s
+        ≤ (5 / 8) * (1 / a + 1 / b) * b) := by
+  have hb : 0 < b := lt_trans ha hab
+  have hlampos : 0 < closingLambda a b δ z := closingLambda_pos a b δ ha hb z
+  have hKz_eq : ∀ s, arcLengthNorm (cleanBicircle a b) a b δ z s
+      = closingLambda a b δ z * cleanBicircle a b (closingFamily a b δ z s) := by
+    intro s
+    have hI : (∫ u in (0 : ℝ)..(2 * π), cleanBicircle a b (closingFamily a b δ z u))
+        = 2 * π / closingLambda a b δ z := cleanTotalCurvature_eq a b δ ha hab hδ hδ' hz
+    unfold arcLengthNorm; rw [hI]
+    rw [show (2 * π) / (2 * π / closingLambda a b δ z) = closingLambda a b δ z from by field_simp]
+  have hlamlb : (1 / 4) * (1 / a + 1 / b) ≤ closingLambda a b δ z := by
+    have h := le_max_left (closingLambdaFloor a b) (closingLambdaRaw a b δ z)
+    rwa [show max (closingLambdaFloor a b) (closingLambdaRaw a b δ z)
+      = closingLambda a b δ z from rfl, closingLambdaFloor] at h
+  have hlamub : closingLambda a b δ z ≤ (5 / 8) * (1 / a + 1 / b) :=
+    closingLambda_le a b δ ha hb hδ hδ' hz
+  refine ⟨fun s => ?_, fun s => ?_⟩
+  · rw [hKz_eq s]
+    have hcb := cleanBicircle_bounds a b (closingFamily a b δ z s) hab.le
+    nlinarith [hcb.1, hlamlb, ha.le, hlampos.le,
+      mul_le_mul_of_nonneg_right hlamlb ha.le,
+      mul_le_mul_of_nonneg_left hcb.1 hlampos.le]
+  · rw [hKz_eq s]
+    have hcb := cleanBicircle_bounds a b (closingFamily a b δ z s) hab.le
+    have hcbnn : 0 ≤ cleanBicircle a b (closingFamily a b δ z s) := le_trans ha.le hcb.1
+    nlinarith [hcb.2, hlamub, hb.le, hlampos.le,
+      mul_le_mul_of_nonneg_right hlamub hb.le,
+      mul_le_mul_of_nonneg_left hcb.2 hlampos.le]
+
 /-- **Clean chord integrals are bounded away from `0` on inclination-span-`≤ π`
 arcs** (Dahlberg, §3; Route A).  The margin is keyed to the INCLINATION span
 `Λ = α_{K_z}(τ) − α_{K_z}(t) ≤ π` (NOT arc-length) and is uniform in `z`; it does
@@ -2448,27 +2486,8 @@ private lemma clean_chord_margin (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ 
     rw [hKzdef]; unfold arcLengthNorm; rw [hI]
     rw [show (2 * π) / (2 * π / closingLambda a b δ z) = closingLambda a b δ z from by field_simp]
   -- Pointwise bounds `0 < mK ≤ K_z ≤ MK`.
-  have hlamlb : (1 / 4) * (1 / a + 1 / b) ≤ closingLambda a b δ z := by
-    have h := le_max_left (closingLambdaFloor a b) (closingLambdaRaw a b δ z)
-    rwa [show max (closingLambdaFloor a b) (closingLambdaRaw a b δ z) = closingLambda a b δ z from rfl,
-      closingLambdaFloor] at h
-  have hlamub : closingLambda a b δ z ≤ (5 / 8) * (1 / a + 1 / b) :=
-    closingLambda_le a b δ ha hb hδ hδ' hz
-  have hKz_lb : ∀ s, mK ≤ Kz s := by
-    intro s
-    rw [hKz_eq s, hmKdef]
-    have hcb := cleanBicircle_bounds a b (closingFamily a b δ z s) hab.le
-    nlinarith [hcb.1, hlamlb, ha.le, hlampos.le,
-      mul_le_mul_of_nonneg_right hlamlb ha.le,
-      mul_le_mul_of_nonneg_left hcb.1 hlampos.le]
-  have hKz_ub : ∀ s, Kz s ≤ MK := by
-    intro s
-    rw [hKz_eq s, hMKdef]
-    have hcb := cleanBicircle_bounds a b (closingFamily a b δ z s) hab.le
-    have hcbnn : 0 ≤ cleanBicircle a b (closingFamily a b δ z s) := le_trans ha.le hcb.1
-    nlinarith [hcb.2, hlamub, hb.le, hlampos.le,
-      mul_le_mul_of_nonneg_right hlamub hb.le,
-      mul_le_mul_of_nonneg_left hcb.2 hlampos.le]
+  obtain ⟨hKz_lb, hKz_ub⟩ : (∀ s, mK ≤ Kz s) ∧ (∀ s, Kz s ≤ MK) :=
+    cleanBicircle_arcLengthNorm_bounds a b δ ha hab hδ hδ' hz
   -- `K_z` is interval-integrable everywhere.
   have hKzfun : Kz = fun s => closingLambda a b δ z * cleanBicircle a b (closingFamily a b δ z s) :=
     funext hKz_eq
