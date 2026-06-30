@@ -1,6 +1,9 @@
 # Lake build artifacts
 .lake/
 
+# mathlib-quality artificats
+.mathlib-quality/
+
 # Archon state directory
 .archon/
 /.lake

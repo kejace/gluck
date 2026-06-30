@@ -579,6 +579,30 @@ private lemma stepCurvature_canonical_values (a b : ℝ) :
     simp only [stepCurvature, ht]; rw [if_neg]
     simp only [not_or, not_and, not_lt]; exact ⟨by linarith, fun h => by linarith⟩
 
+/-- Given four positive moduli and four positive gaps, there is a single positive
+radius `η` below all four moduli and strictly below all four gaps (take half their
+common minimum). -/
+private lemma exists_plateau_radius {η₁ η₂ η₃ η₄ g₁ g₂ g₃ g₄ : ℝ}
+    (hη₁ : 0 < η₁) (hη₂ : 0 < η₂) (hη₃ : 0 < η₃) (hη₄ : 0 < η₄)
+    (hg₁ : 0 < g₁) (hg₂ : 0 < g₂) (hg₃ : 0 < g₃) (hg₄ : 0 < g₄) :
+    ∃ η : ℝ, 0 < η ∧ η ≤ η₁ ∧ η ≤ η₂ ∧ η ≤ η₃ ∧ η ≤ η₄ ∧
+      η < g₁ ∧ η < g₂ ∧ η < g₃ ∧ η < g₄ := by
+  set M : ℝ := min (min (min η₁ η₂) (min η₃ η₄)) (min (min g₁ g₂) (min g₃ g₄)) with hMdef
+  have hMle₁ : M ≤ η₁ := le_trans (min_le_left _ _) (le_trans (min_le_left _ _) (min_le_left _ _))
+  have hMle₂ : M ≤ η₂ := le_trans (min_le_left _ _) (le_trans (min_le_left _ _) (min_le_right _ _))
+  have hMle₃ : M ≤ η₃ := le_trans (min_le_left _ _) (le_trans (min_le_right _ _) (min_le_left _ _))
+  have hMle₄ : M ≤ η₄ := le_trans (min_le_left _ _) (le_trans (min_le_right _ _) (min_le_right _ _))
+  have hMg₁ : M ≤ g₁ := le_trans (min_le_right _ _) (le_trans (min_le_left _ _) (min_le_left _ _))
+  have hMg₂ : M ≤ g₂ := le_trans (min_le_right _ _) (le_trans (min_le_left _ _) (min_le_right _ _))
+  have hMg₃ : M ≤ g₃ := le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_left _ _))
+  have hMg₄ : M ≤ g₄ := le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_right _ _))
+  have hMpos : 0 < M := by
+    rw [hMdef]
+    exact lt_min (lt_min (lt_min hη₁ hη₂) (lt_min hη₃ hη₄))
+      (lt_min (lt_min hg₁ hg₂) (lt_min hg₃ hg₄))
+  exact ⟨M / 2, by linarith, by linarith, by linarith, by linarith, by linarith,
+    by linarith, by linarith, by linarith, by linarith⟩
+
 set_option maxHeartbeats 1000000 in
 -- The measure-bound branch reasons over a large local hypothesis context
 -- (four moduli, plateau radii, plateau intervals and their disjointness), so
@@ -623,42 +647,12 @@ theorem exists_preliminary_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
   have hgap₂ : 0 < (c₃ - c₂) / 2 := by linarith
   have hgap₃ : 0 < (c₄ - c₃) / 2 := by linarith
   have hgap₄ : 0 < (c₁ + 2 * π - c₄) / 2 := by linarith
-  -- A single positive lower bound `M` for all four moduli and half-gaps.
-  set M : ℝ := min (min (min η₁ η₂) (min η₃ η₄))
-      (min (min ((c₂ - c₁) / 2) ((c₃ - c₂) / 2))
-           (min ((c₄ - c₃) / 2) ((c₁ + 2 * π - c₄) / 2))) with hMdef
-  have hMle₁ : M ≤ η₁ := le_trans (min_le_left _ _) (le_trans (min_le_left _ _) (min_le_left _ _))
-  have hMle₂ : M ≤ η₂ := le_trans (min_le_left _ _) (le_trans (min_le_left _ _) (min_le_right _ _))
-  have hMle₃ : M ≤ η₃ := le_trans (min_le_left _ _) (le_trans (min_le_right _ _) (min_le_left _ _))
-  have hMle₄ : M ≤ η₄ := le_trans (min_le_left _ _) (le_trans (min_le_right _ _) (min_le_right _ _))
-  have hMg₁ : M ≤ (c₂ - c₁) / 2 :=
-    le_trans (min_le_right _ _) (le_trans (min_le_left _ _) (min_le_left _ _))
-  have hMg₂ : M ≤ (c₃ - c₂) / 2 :=
-    le_trans (min_le_right _ _) (le_trans (min_le_left _ _) (min_le_right _ _))
-  have hMg₃ : M ≤ (c₄ - c₃) / 2 :=
-    le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_left _ _))
-  have hMg₄ : M ≤ (c₁ + 2 * π - c₄) / 2 :=
-    le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_right _ _))
-  have hMpos : 0 < M := by
-    rw [hMdef]
-    exact lt_min (lt_min (lt_min hη₁ hη₂) (lt_min hη₃ hη₄))
-      (lt_min (lt_min hgap₁ hgap₂) (lt_min hgap₃ hgap₄))
-  -- Plateau radius: half of `M`, so strictly below every half-gap.
-  set η : ℝ := M / 2 with hηdef
-  -- Flank width parameter `δ`: small enough that `4δ < ε` and `δ < π/2`.
+  obtain ⟨η, hηpos, hηle₁, hηle₂, hηle₃, hηle₄, hfit₁, hfit₂, hfit₃, hfit₄⟩ :=
+    exists_plateau_radius hη₁ hη₂ hη₃ hη₄ hgap₁ hgap₂ hgap₃ hgap₄
   set δ : ℝ := min (ε / 8) (π / 4) with hδdef
-  have hηpos : 0 < η := by rw [hηdef]; linarith
   have hδpos : 0 < δ := by rw [hδdef]; exact lt_min (by linarith) (by linarith)
   have hδlt : δ < π / 2 := by
     rw [hδdef]; exact lt_of_le_of_lt (min_le_right _ _) (by linarith)
-  have hηle₁ : η ≤ η₁ := by rw [hηdef]; linarith
-  have hηle₂ : η ≤ η₂ := by rw [hηdef]; linarith
-  have hηle₃ : η ≤ η₃ := by rw [hηdef]; linarith
-  have hηle₄ : η ≤ η₄ := by rw [hηdef]; linarith
-  have hfit₁ : η < (c₂ - c₁) / 2 := by rw [hηdef]; linarith
-  have hfit₂ : η < (c₃ - c₂) / 2 := by rw [hηdef]; linarith
-  have hfit₃ : η < (c₄ - c₃) / 2 := by rw [hηdef]; linarith
-  have hfit₄ : η < (c₁ + 2 * π - c₄) / 2 := by rw [hηdef]; linarith
   -- The calibrated continuous plateau density.
   obtain ⟨w, hw, hwpos, hwper, hwint, hpl1, hpl2, hpl3, hpl4⟩ :=
     exists_plateau_density (m₀ := (c₁ + c₄) / 2 - π) h12 h23 h34 h41 rfl
