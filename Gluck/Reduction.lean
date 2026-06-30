@@ -643,6 +643,29 @@ lemma integralReparam_add_two_pi {w : ℝ → ℝ} (hw : Continuous w)
   rw [zero_add] at hshift
   rw [← hadd, hshift, hint]; ring
 
+/-- Change of variables `θ = integralReparam w c (x)` over one period: for a
+continuous strictly-positive density `w`,
+`∫_{g 0}^{g 2π} G = ∫₀²π w·(G ∘ g)` where `g = integralReparam w c`. -/
+lemma integralReparam_changeOfVar {w : ℝ → ℝ} (hw : Continuous w) (hpos : ∀ s, 0 < w s)
+    (c : ℝ) (G : ℝ → ℝ) :
+    (∫ x in Set.Icc (integralReparam w c 0) (integralReparam w c (2 * π)), G x)
+      = ∫ x in Set.Icc (0 : ℝ) (2 * π), w x * G (integralReparam w c x) := by
+  have hmono := strictMono_integralReparam hw hpos c
+  have himg : integralReparam w c '' Set.Icc 0 (2 * π)
+      = Set.Icc (integralReparam w c 0) (integralReparam w c (2 * π)) :=
+    ContinuousOn.image_Icc_of_monotoneOn (by positivity)
+      (continuous_integralReparam hw c).continuousOn (hmono.monotone.monotoneOn _)
+  have hcov := MeasureTheory.integral_image_eq_integral_abs_deriv_smul
+    (s := Set.Icc (0 : ℝ) (2 * π)) measurableSet_Icc
+    (fun x _ => (hasDerivAt_integralReparam hw c x).hasDerivWithinAt)
+    (hmono.injective.injOn) G
+  rw [himg] at hcov
+  rw [hcov]
+  apply MeasureTheory.setIntegral_congr_fun measurableSet_Icc
+  intro x _
+  dsimp only
+  rw [abs_of_nonneg (hpos x).le, smul_eq_mul]
+
 /-- **The breakpoint-aligning reparametrization family** (blueprint
 `def:align_reparam`).  For `0 < δ ≤ π/8` and `z` in the closed unit disk,
 `alignReparam δ z : ℝ → ℝ` is the running integral of the calibrated density
@@ -776,21 +799,9 @@ lemma alignReparam_changeOfVar (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) 
     (hz : ‖z‖ ≤ 1) (G : ℝ → ℝ) :
     (∫ x in Set.Icc (alignReparam δ z 0) (alignReparam δ z (2 * π)), G x)
       = ∫ x in Set.Icc (0 : ℝ) (2 * π), alignDensity δ z x * G (alignReparam δ z x) := by
-  have hmono := strictMono_alignReparam δ hδ hδ' hz
-  have himg : alignReparam δ z '' Set.Icc 0 (2 * π)
-      = Set.Icc (alignReparam δ z 0) (alignReparam δ z (2 * π)) :=
-    ContinuousOn.image_Icc_of_monotoneOn (by positivity)
-      (continuous_alignReparam δ z).continuousOn (hmono.monotone.monotoneOn _)
-  have hcov := MeasureTheory.integral_image_eq_integral_abs_deriv_smul
-    (s := Set.Icc (0 : ℝ) (2 * π)) measurableSet_Icc
-    (fun x _ => (hasDerivAt_alignReparam δ z x).hasDerivWithinAt)
-    (hmono.injective.injOn) G
-  rw [himg] at hcov
-  rw [hcov]
-  apply MeasureTheory.setIntegral_congr_fun measurableSet_Icc
-  intro x hx
-  dsimp only
-  rw [abs_of_nonneg (by linarith [alignDensity_ge δ hδ hδ' hz x]), smul_eq_mul]
+  rw [alignReparam_eq]
+  exact integralReparam_changeOfVar (continuous_alignDensity_theta δ z)
+    (fun s => lt_of_lt_of_le (by norm_num) (alignDensity_ge δ hδ hδ' hz s)) _ G
 
 /-! ## The κ-error map over the disk -/
 

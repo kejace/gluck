@@ -1623,21 +1623,9 @@ private lemma closingFamily_changeOfVar (a b δ : ℝ) (ha : 0 < a) (hab : a < b
     (∫ x in Set.Icc (closingFamily a b δ z 0) (closingFamily a b δ z (2 * π)), G x)
       = ∫ x in Set.Icc (0 : ℝ) (2 * π),
           closingDensity a b δ z x * G (closingFamily a b δ z x) := by
-  have hmono := strictMono_closingFamily a b δ ha hab hδ hδ' hz
-  have himg : closingFamily a b δ z '' Set.Icc 0 (2 * π)
-      = Set.Icc (closingFamily a b δ z 0) (closingFamily a b δ z (2 * π)) :=
-    ContinuousOn.image_Icc_of_monotoneOn (by positivity)
-      (continuous_closingFamily a b δ z).continuousOn (hmono.monotone.monotoneOn _)
-  have hcov := MeasureTheory.integral_image_eq_integral_abs_deriv_smul
-    (s := Set.Icc (0 : ℝ) (2 * π)) measurableSet_Icc
-    (fun x _ => (hasDerivAt_closingFamily a b δ z x).hasDerivWithinAt)
-    (hmono.injective.injOn) G
-  rw [himg] at hcov
-  rw [hcov]
-  apply MeasureTheory.setIntegral_congr_fun measurableSet_Icc
-  intro x hx
-  dsimp only
-  rw [abs_of_nonneg (closingDensity_pos a b δ ha hab hδ hδ' hz x).le, smul_eq_mul]
+  rw [closingFamily_eq]
+  exact integralReparam_changeOfVar (continuous_closingDensity_s a b δ z)
+    (fun s => closingDensity_pos a b δ ha hab hδ hδ' hz s) 0 G
 
 /-- **Integrability transfer + `L¹` bound for `e ∘ g_z`.**  If `e` is
 interval-integrable on `[0,2π]` and `m₀ ≤ w_z` is a uniform positive slope floor,
