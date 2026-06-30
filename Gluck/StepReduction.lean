@@ -550,6 +550,35 @@ private lemma plateau_union_measure {δ : ℝ} (hδpos : 0 < δ) (hδlt : δ < �
       ← ENNReal.ofReal_add (by linarith) hxpos]
   congr 1; ring
 
+/-- Values of the canonical four-arc step curvature `stepCurvature b a 0 (π/2) π (3π/2)`
+on the four arcs of `[0, 2π)`: `a` on `[0,π/2)` and `[π,3π/2)`, `b` on `[π/2,π)` and
+`[3π/2,2π)`. -/
+private lemma stepCurvature_canonical_values (a b : ℝ) :
+    (∀ θ, 0 ≤ θ → θ < π / 2 → stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = a) ∧
+    (∀ θ, π / 2 ≤ θ → θ < π → stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = b) ∧
+    (∀ θ, π ≤ θ → θ < 3 * π / 2 → stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = a) ∧
+    (∀ θ, 3 * π / 2 ≤ θ → θ < 2 * π → stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = b) := by
+  have hπ : 0 < π := Real.pi_pos
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro θ h0 h2
+    have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
+      rw [toIcoMod_eq_self]; refine ⟨h0, ?_⟩; simp; linarith
+    simp only [stepCurvature, ht]; rw [if_pos]; left; linarith
+  · intro θ h0 h2
+    have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
+      rw [toIcoMod_eq_self]; refine ⟨by linarith, ?_⟩; simp; linarith
+    simp only [stepCurvature, ht]; rw [if_neg]
+    simp only [not_or, not_and, not_lt]; exact ⟨by linarith, fun h => by linarith⟩
+  · intro θ h0 h2
+    have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
+      rw [toIcoMod_eq_self]; refine ⟨by linarith, ?_⟩; simp; linarith
+    simp only [stepCurvature, ht]; rw [if_pos]; right; exact ⟨h0, h2⟩
+  · intro θ h0 h2
+    have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
+      rw [toIcoMod_eq_self]; refine ⟨by linarith, ?_⟩; simp; linarith
+    simp only [stepCurvature, ht]; rw [if_neg]
+    simp only [not_or, not_and, not_lt]; exact ⟨by linarith, fun h => by linarith⟩
+
 set_option maxHeartbeats 1000000 in
 -- The measure-bound branch reasons over a large local hypothesis context
 -- (four moduli, plateau radii, plateau intervals and their disjointness), so
@@ -673,32 +702,7 @@ theorem exists_preliminary_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
   · -- Measure bound: the bad set avoids all four plateaus, hence sits in the
     -- complement of the plateaus inside one period, of measure `4δ < ε`.
     -- Value of the canonical step curvature on the four arcs.
-    have hstep1 : ∀ θ, 0 ≤ θ → θ < π / 2 →
-        stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = a := by
-      intro θ h0 h2
-      have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
-        rw [toIcoMod_eq_self]; refine ⟨h0, ?_⟩; simp; linarith
-      simp only [stepCurvature, ht]; rw [if_pos]; left; linarith
-    have hstep2 : ∀ θ, π / 2 ≤ θ → θ < π →
-        stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = b := by
-      intro θ h0 h2
-      have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
-        rw [toIcoMod_eq_self]; refine ⟨by linarith, ?_⟩; simp; linarith
-      simp only [stepCurvature, ht]; rw [if_neg]
-      simp only [not_or, not_and, not_lt]; exact ⟨by linarith, fun h => by linarith⟩
-    have hstep3 : ∀ θ, π ≤ θ → θ < 3 * π / 2 →
-        stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = a := by
-      intro θ h0 h2
-      have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
-        rw [toIcoMod_eq_self]; refine ⟨by linarith, ?_⟩; simp; linarith
-      simp only [stepCurvature, ht]; rw [if_pos]; right; exact ⟨h0, h2⟩
-    have hstep4 : ∀ θ, 3 * π / 2 ≤ θ → θ < 2 * π →
-        stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = b := by
-      intro θ h0 h2
-      have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
-        rw [toIcoMod_eq_self]; refine ⟨by linarith, ?_⟩; simp; linarith
-      simp only [stepCurvature, ht]; rw [if_neg]
-      simp only [not_or, not_and, not_lt]; exact ⟨by linarith, fun h => by linarith⟩
+    obtain ⟨hstep1, hstep2, hstep3, hstep4⟩ := stepCurvature_canonical_values a b
     -- The four plateaus and the ambient period.
     set U := Set.Ico (0 : ℝ) (2 * π) with hUdef
     set P₁ := Set.Icc (δ / 2) (π / 2 - δ / 2) with hP1def
