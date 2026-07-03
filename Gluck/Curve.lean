@@ -43,13 +43,6 @@ everywhere. (Blueprint `def:is_convex_curve`.) -/
 def IsConvexCurve (γ : ℝ → ℂ) : Prop :=
   IsRegular γ ∧ ∀ t, 0 < signedCurvature γ t
 
-/-- If `γ` is regular and its signed curvature is everywhere positive, then `γ`
-is convex. (Blueprint `lem:pos_curvature_convex`.) -/
-theorem isConvexCurve_of_signedCurvature_pos {γ : ℝ → ℂ}
-    (hreg : IsRegular γ) (hpos : ∀ t, 0 < signedCurvature γ t) :
-    IsConvexCurve γ :=
-  ⟨hreg, hpos⟩
-
 /-- A curve `γ : ℝ → ℂ` *realizes the curvature function* `κ : ℝ → ℝ` if it is
 `C¹`, regular (its velocity never vanishes), and there is a *differentiable*
 tangent-angle function `φ : ℝ → ℝ` such that, for all `t`,

@@ -123,6 +123,26 @@ $\kappa : \mathbb{R} \to \mathbb{R}$.
   \cref{lem:abab_values}).
 \end{definition}
 
+\begin{lemma}
+[Value-separation precludes constancy]
+  \label{lem:not_constant_of_separation}
+  \lean{Gluck.not_constant_of_separation}
+  Let $\kappa : \mathbb{R} \to \mathbb{R}$ be any function and let
+  $p_1, q_1, p_2, q_2$ be points whose extremal values satisfy the strict
+  value-separation
+  \[
+    \max\bigl(\kappa(q_1), \kappa(q_2)\bigr) \;<\; \min\bigl(\kappa(p_1), \kappa(p_2)\bigr).
+  \]
+  Then $\kappa$ is not constant, i.e.\ there is no $c$ with $\kappa(\theta) = c$
+  for all $\theta$.
+\end{lemma}
+\begin{proof}
+  Suppose, for contradiction, that $\kappa \equiv c$ for some constant $c$. Then
+  the four values $\kappa(p_1), \kappa(q_1), \kappa(p_2), \kappa(q_2)$ are all
+  equal to $c$, so $\max(\kappa(q_1), \kappa(q_2)) = c = \min(\kappa(p_1), \kappa(p_2))$
+  and the separation inequality reads $c < c$, a contradiction.
+\end{proof}
+
 \begin{lemma}\leanok
 [Four values $a,b,a,b$ around the circle]
   \label{lem:abab_values}

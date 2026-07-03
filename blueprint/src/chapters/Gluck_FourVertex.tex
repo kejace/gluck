@@ -14,7 +14,7 @@ We assemble the pieces into Gluck's converse for strictly positive curvature.
   \label{thm:gluck_converse}
   \lean{Gluck.gluck_converse}
   \leanok
-  \uses{def:is_curvature_function, def:four_vertex_condition, def:is_simple_closed, def:realizes_curvature, lem:realizes_curvature_reconstruct, lem:realizes_curvature_comp, lem:is_simple_closed_comp, lem:exists_c1_circle_inverse}
+  \uses{def:is_curvature_function, def:four_vertex_condition, def:is_simple_closed, def:realizes_curvature, lem:realizes_curvature_reconstruct, lem:realizes_curvature_comp, lem:is_simple_closed_comp, lem:exists_c1_circle_inverse, lem:not_constant_of_separation}
   \textit{Source: DeTurck--Gluck, Converse to the Four Vertex Theorem (positive case, §III–IV).}
   Let $\kappa : \mathbb{R} \to \mathbb{R}$ be a curvature function
   (\cref{def:is_curvature_function}: continuous, $2\pi$-periodic, strictly
@@ -49,13 +49,13 @@ We assemble the pieces into Gluck's converse for strictly positive curvature.
 % closed curve. ... Therefore α = αh ◦ h—1 is a reparametrization of the same
 % curve, whose curvature at the point α(t) is κ(t)."
 \begin{proof}
-  \uses{lem:closes_iff, lem:abab_values, def:realizes_curvature, lem:realizes_curvature_signedCurvature, def:reconstruct, def:error_vector, lem:reduction_justified, cor:closing_configuration_exists, cor:positive_curvature_implies_simple, lem:reconstruct_const, lem:realizes_curvature_reconstruct, lem:realizes_curvature_comp, lem:is_simple_closed_comp, lem:exists_c1_circle_inverse}
+  \uses{lem:abab_values, def:realizes_curvature, lem:realizes_curvature_signedCurvature, def:reconstruct, def:error_vector, lem:reduction_justified, cor:positive_curvature_implies_simple, lem:reconstruct_const, lem:realizes_curvature_reconstruct, lem:realizes_curvature_comp, lem:is_simple_closed_comp, lem:exists_c1_circle_inverse}
   \leanok
   \textit{Source: DeTurck--Gluck, §4–6 (winding number argument).}
 
   \textbf{Constant case.} If $\kappa \equiv c > 0$ then $\rho = 1/c$ is constant,
   and $C(\rho) = S(\rho) = 0$ since $\int_0^{2\pi}\cos = \int_0^{2\pi}\sin = 0$.
-  By \cref{lem:closes_iff} the reconstruction $\alpha_\rho$ closes up; it is the
+  By \cref{lem:reconstruct_periodic} the reconstruction $\alpha_\rho$ closes up; it is the
   circle of radius $1/c$, a simple closed curve, and it realizes $\kappa$
   intrinsically (\cref{def:realizes_curvature}: tangent angle $\varphi(\theta) =
   \theta$, $\lVert\alpha_\rho'\rVert = 1/c$, so $\varphi' = 1 = c \cdot (1/c) =

@@ -144,16 +144,6 @@ blueprint.
   $H(s,0)=H(s,1)$), hence constant in $s$ by \cref{lem:int_valued_eq}.
 \end{proof}
 
-\begin{definition}
-
-\leanok
-[Standard once-around circle loop]
-  \label{def:standard_loop}
-  \lean{Gluck.standardLoop}
-  Project-bespoke. The loop $g_0 : [0,1] \to S^1$, $g_0(t) =
-  \mathrm{Circle.exp}(2\pi t)$.
-\end{definition}
-
 \begin{lemma}
 
 \leanok
@@ -171,26 +161,6 @@ blueprint.
   \widetilde g \cdot \mathrm{Circle.exp}\,\widetilde h = g\cdot h$ by
   \texttt{Circle.exp\_add} and \cref{lem:angle_lift_lifts}); apply
   \cref{lem:winding_number_eq_div_of_lift} and split the increment.
-\end{proof}
-
-\begin{lemma}
-
-\leanok
-[The standard once-around loop has winding number one]
-  \label{lem:winding_number_standard}
-  \lean{Gluck.windingNumber_standard}
-  \uses{def:winding_number, def:standard_loop, lem:winding_number_eq_div_of_lift}
-  Project-bespoke. The loop $g_0(t) = \mathrm{Circle.exp}(2\pi t)$ has winding
-  number $W(g_0) = 1$.
-\end{lemma}
-\begin{proof}
-  \uses{lem:winding_number_eq_div_of_lift}
-  \leanok
-  The map $\varphi(t) = 2\pi t$ is a continuous lift of $g_0$, so by
-  \cref{lem:winding_number_eq_div_of_lift} $W(g_0) = (\varphi(1)-\varphi(0))/2\pi =
-  (2\pi - 0)/2\pi = 1$. This is the keystone nonzero-winding computation: every
-  ``winding $= \pm1 \ne 0$'' assertion downstream reduces to it via homotopy
-  invariance (\cref{lem:winding_number_eq_of_homotopy}).
 \end{proof}
 
 \begin{definition}
@@ -333,36 +303,6 @@ blueprint.
 
 \begin{definition}
 
-[The unit-circle $\mathbb{C}$-loop]
-  \label{def:circle_exp_loop}
-  \lean{Gluck.circleExpLoop, Gluck.circleExpLoop_ne}
-  \uses{def:standard_loop}
-  Project-bespoke. $\mathbb{C}$-valued loop $t \mapsto e^{2\pi i t}$, the
-  coercion of $g_0$ (\cref{def:standard_loop}) into $\mathbb{C}$; it is
-  nowhere zero ($\mathrm{circleExpLoop\_ne}$, since its values lie on $S^1$).
-\end{definition}
-
-\begin{lemma}
-
-\leanok
-[The unit-circle $\mathbb{C}$-loop winds once]
-  \label{lem:winding_number_c_circle_exp}
-  \lean{Gluck.windingNumberC_circle_exp}
-  \uses{def:circle_exp_loop, def:winding_number_c, def:norm_loop,
-        lem:winding_number_standard, lem:circle_proj_helpers}
-  Project-bespoke. $W_{\mathbb{C}}(t\mapsto e^{2\pi i t}) = 1$.
-\end{lemma}
-\begin{proof}
-
-\leanok
-  Its normalisation is $g_0$ (\cref{lem:circle_proj_helpers}(ii), values already
-  on $S^1$), so the claim is \cref{lem:winding_number_standard}. This is the
-  concrete nonzero $\mathbb{C}$-winding against which the linear model of the
-  error map is compared in \cref{lem:error_map_winds_boundary}.
-\end{proof}
-
-\begin{definition}
-
 \leanok
 [Boundary loop of the unit disk]
   \label{def:disk_boundary_loop}
@@ -419,8 +359,10 @@ blueprint.
   The centre $(x,y)=(0,0)$ is the canonical equally-spaced bicircle (breakpoints
   $\tfrac{\pi}{4},\tfrac{3\pi}{4},\tfrac{5\pi}{4},\tfrac{7\pi}{4}$, four arcs of
   length $\pi/2$), which closes up: its chord sum is $V = (e^{3\pi i/4} - e^{\pi
-  i/4}) + (e^{7\pi i/4} - e^{5\pi i/4}) = -\sqrt2 + \sqrt2 = 0$, so by
-  \cref{cor:bicircle_closes_iff} the canonical bicircle has zero error vector. The
+  i/4}) + (e^{7\pi i/4} - e^{5\pi i/4}) = -\sqrt2 + \sqrt2 = 0$; since the bicircle
+  error vector is a nonzero scalar multiple of this chord sum
+  (\cref{lem:error_vector_of_bicircle}), the canonical bicircle has zero error
+  vector. The
   bound $\delta \le \pi/8$ keeps the order constraint $0 < \theta_1 < \theta_2 <
   \theta_3 < \theta_4 < \theta_1 + 2\pi$ on all of $\overline{\mathbb{D}}$ (since
   $|\delta x|, |\delta y| \le \delta \le \pi/8 < \pi/4$). $\mathrm{configSpace}$ is
@@ -429,21 +371,19 @@ blueprint.
 
 \begin{lemma}
 
-[Configuration disk: continuity and order]
+[Configuration disk: order]
   \label{lem:config_space_props}
-  \lean{Gluck.configSpace_ordered, Gluck.continuous_configSpace}
+  \lean{Gluck.configSpace_ordered}
   \uses{def:configuration_space}
-  Project-bespoke. (i) $\mathrm{configSpace}(\delta)$ is continuous
-  ($\mathrm{continuous\_configSpace}$, being affine). (ii) For $0<\delta\le\pi/8$
-  and $\lvert x\rvert,\lvert y\rvert\le 1$, the order constraint $0<\theta_1<
-  \theta_2<\theta_3<\theta_4<\theta_1+2\pi$ holds ($\mathrm{configSpace\_ordered}$).
+  Project-bespoke. For $0<\delta\le\pi/8$ and $\lvert x\rvert,\lvert y\rvert\le 1$,
+  the order constraint $0<\theta_1<\theta_2<\theta_3<\theta_4<\theta_1+2\pi$ holds
+  ($\mathrm{configSpace\_ordered}$).
 \end{lemma}
 \begin{proof}
 
-  (i) by \texttt{fun\_prop} on the affine formula. (ii) substitute the formulas
-  $\theta_1=\pi/4+\delta x$, etc.; $\lvert\delta x\rvert,\lvert\delta y\rvert\le
-  \delta\le\pi/8<\pi/4$ keeps the four breakpoints strictly ordered within one
-  period (\texttt{nlinarith}/\texttt{linarith}).
+  Substitute the formulas $\theta_1=\pi/4+\delta x$, etc.; $\lvert\delta
+  x\rvert,\lvert\delta y\rvert\le\delta\le\pi/8<\pi/4$ keeps the four breakpoints
+  strictly ordered within one period (\texttt{nlinarith}/\texttt{linarith}).
 \end{proof}
 
 \begin{remark}
@@ -477,10 +417,13 @@ blueprint.
   \lean{Gluck.negStandardLoop, Gluck.windingNumber_negStandard,
         Gluck.negCircleExpLoop, Gluck.negCircleExpLoop_ne,
         Gluck.windingNumberC_negCircleExp, Gluck.windingNumberC_congr}
-  \uses{def:standard_loop, def:circle_exp_loop, lem:winding_number_standard}
-  Project-bespoke mirrors of \cref{def:standard_loop}/\cref{def:circle_exp_loop}
-  with reversed orientation: $\mathrm{negStandardLoop}(t)=\exp(-2\pi i t)$ with
-  winding $-1$ (lift $\varphi(t)=-2\pi t$), its $\mathbb{C}$-valued form
+  \uses{def:winding_number, def:winding_number_c, def:norm_loop,
+        lem:winding_number_eq_div_of_lift, lem:circle_proj_helpers}
+  Project-bespoke reverse-orientation once-around loops:
+  $\mathrm{negStandardLoop}(t)=\mathrm{Circle.exp}(-2\pi t)$, the circle loop
+  $t\mapsto e^{-2\pi i t}$, with winding $-1$ (computed directly from the lift
+  $\varphi(t)=-2\pi t$ via \cref{lem:winding_number_eq_div_of_lift}); its
+  $\mathbb{C}$-valued form
   $\mathrm{negCircleExpLoop}$ (nonvanishing) with $W_\mathbb{C}=-1$, and
   $\mathrm{windingNumberC\_congr}$ (pointwise-equal $\mathbb{C}$-loops have equal
   winding). These realise the linear model $L=\delta e^{-i\pi/4}e^{-2\pi i t}$ in
@@ -502,8 +445,7 @@ blueprint.
         Gluck.continuous_Vpart_boundary, Gluck.errVloop, Gluck.errSVloop,
         Gluck.errLloop, Gluck.errLloop_eq_Lpart}
   \uses{def:configuration_space, def:error_map, def:reverse_loop,
-        lem:error_vector_of_bicircle, def:winding_number_c,
-        lem:winding_number_standard}
+        lem:error_vector_of_bicircle, def:winding_number_c}
   \textit{Source: DeTurck--Gluck, §6 (error vectors wind once around the origin).}
   Let $E : \overline{\mathbb{D}} \to \mathbb{C}$ send $(x,y)$ to the bicircle error
   vector of $\mathrm{configSpace}(x,y)$ (\cref{def:configuration_space},
@@ -513,12 +455,12 @@ blueprint.
   $W_{\mathbb{C}}(E|_{\partial\mathbb{D}}) = \pm 1 \ne 0$ about the origin.
 
   \emph{(Only nonvanishing of the winding number is used downstream
-  (\cref{cor:closing_configuration_exists}, \cref{thm:existence_of_zero}); the sign
-  $-1$ here merely reflects the orientation of the chosen parametrisation.)}
+  (\cref{thm:existence_of_zero}); the sign $-1$ here merely reflects the
+  orientation of the chosen parametrisation.)}
 \end{lemma}
 \begin{proof}
   \uses{lem:error_vector_of_bicircle, def:configuration_space, def:winding_number_c,
-        lem:winding_number_eq_of_homotopy, lem:winding_number_standard}
+        lem:winding_number_eq_of_homotopy, def:reverse_loop}
   By \cref{lem:error_vector_of_bicircle}, $E(x,y) = s\cdot V(x,y)$ with the nonzero
   constant scalar $s = \tfrac{1}{ib} - \tfrac{1}{ia}$ (nonzero since $a \ne b$) and
   chord sum
@@ -562,9 +504,10 @@ blueprint.
   $\mathbb{R}$-linear map; the further straight-line homotopy of $U$ to the standard
   reflection through invertible matrices (any invertible matrix is path-connected
   within $\mathrm{GL}_2$ to $\pm$ a rotation, the path stays invertible so the loop
-  stays nonzero) carries $L|_{\partial\mathbb{D}}$ to the standard once-around loop
-  up to orientation; by \cref{lem:winding_number_standard} its winding is $\pm 1$,
-  with sign $\operatorname{sgn}(\det U) = -1$. In particular it is nonzero. This is
+  stays nonzero) carries $L|_{\partial\mathbb{D}}$ to a once-around loop, with the
+  reflection $\det U = -1$ fixing the reverse orientation; by \cref{def:reverse_loop}
+  (the reverse once-around loop $t\mapsto e^{-2\pi i t}$ has winding $-1$) its winding
+  is $-1$. In particular it is nonzero. This is
   the planar analogue of ``a degree-one polynomial winds once''
   (\cref{thm:existence_of_zero}'s FTA analogy).
 \end{proof}
@@ -611,25 +554,4 @@ blueprint.
   form, so the winding number of a continuous loop $S^1 \to \mathbb{C}\setminus
   \{0\}$, its homotopy invariance, and this null-homotopy argument are built
   project-side (see \cref{chap:winding}'s Lean file).
-\end{proof}
-
-\begin{corollary}
-
-\leanok
-[A closing configuration exists]
-  \label{cor:closing_configuration_exists}
-  \lean{Gluck.exists_closing_configuration}
-  \uses{thm:existence_of_zero, lem:error_map_winds_boundary, cor:bicircle_closes_iff}
-  There is a configuration in the interior of $D$ whose bicircle error vector is
-  $0$; by \cref{cor:bicircle_closes_iff} the corresponding bicircle closes up.
-\end{corollary}
-\begin{proof}
-  \uses{thm:existence_of_zero, lem:error_map_winds_boundary}
-  \leanok
-  Apply \cref{thm:existence_of_zero} to the error map $E : \overline{\mathbb{D}}
-  \to \mathbb{C}$, whose boundary winding is nonzero ($\pm1$) by
-  \cref{lem:error_map_winds_boundary}. The resulting interior zero is a
-  configuration $(x,y)$ in the open disk with $E(x,y) = 0$, i.e.\ a closing
-  bicircle configuration; by \cref{cor:bicircle_closes_iff} the corresponding
-  bicircle closes up.
 \end{proof}

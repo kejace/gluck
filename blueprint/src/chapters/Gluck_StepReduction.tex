@@ -77,21 +77,27 @@ robust winding argument transfer from $\kappa_0$ to $\kappa$.
   value is unchanged.
 \end{proof}
 
-\begin{lemma}
-
-\leanok
-[Step curvature is bounded below by $a$]
-  \label{lem:step_curvature_ge}
-  \lean{Gluck.stepCurvature_ge}
+% Project-bespoke: elementary unfolding of the step function at the canonical
+% breakpoints; no external source.
+\begin{lemma}[Canonical step-curvature values on the four arcs]
+  \label{lem:step_curvature_canonical_values}
+  \lean{Gluck.stepCurvature_canonical_values}
   \uses{def:four_arc_step_function}
-  If $a \le b$ then $a \le \kappa_0(\theta)$ for all $\theta$; in particular for
-  $0 < a < b$ the step curvature is strictly positive.
+  Project-bespoke. The canonical four-arc step curvature with breakpoints
+  $0 < \pi/2 < \pi < 3\pi/2$ and values arranged so that it reads $a, b, a, b$
+  cyclically takes its constant values on the four half-open arcs of $[0,2\pi)$:
+  it equals $a$ on $[0,\pi/2)$ and on $[\pi,3\pi/2)$, and $b$ on $[\pi/2,\pi)$ and
+  on $[3\pi/2,2\pi)$.
 \end{lemma}
 \begin{proof}
   \uses{def:four_arc_step_function}
-  \leanok
-  $\kappa_0$ takes only the two values $a$ and $b$, and $a \le b$, so every value
-  is $\ge a$.
+  Fix $\theta$ in one of the four arcs. Since $0\le\theta<2\pi$, reducing $\theta$
+  to its representative in $[0,2\pi)$ leaves it unchanged, so evaluating
+  $\kappa_0$ at $\theta$ amounts to deciding which of the two indicator branches
+  of \cref{def:four_arc_step_function} contains $\theta$. On $[0,\pi/2)$ and on
+  $[\pi,3\pi/2)$ the selection picks the constant $a$; on $[\pi/2,\pi)$ and on
+  $[3\pi/2,2\pi)$ it picks the constant $b$. Each case is a direct comparison of
+  $\theta$ against the breakpoints $0,\pi/2,\pi,3\pi/2$.
 \end{proof}
 
 \begin{remark}
@@ -243,6 +249,45 @@ $<4\delta$. Choosing $\eta,\delta$ small makes this $\varepsilon$-close in measu
   be proved unconditionally.
 \end{proof}
 
+% Project-bespoke: elementary choice of a common small radius; no external source.
+\begin{lemma}[Existence of a common plateau radius]
+  \label{lem:exists_plateau_radius}
+  \lean{Gluck.exists_plateau_radius}
+  Project-bespoke. Given four positive moduli $\eta_1,\eta_2,\eta_3,\eta_4>0$ and
+  four positive gaps $g_1,g_2,g_3,g_4>0$, there is a single positive radius
+  $\eta>0$ with $\eta\le\eta_i$ for every $i$ and $\eta<g_j$ for every $j$.
+\end{lemma}
+\begin{proof}
+  Take $\eta=\tfrac12\min(\eta_1,\eta_2,\eta_3,\eta_4,g_1,g_2,g_3,g_4)$. The
+  minimum of finitely many positive numbers is positive, so $\eta>0$. As $\eta$
+  is half that minimum it satisfies $\eta\le\min\le\eta_i$ for each $i$ and
+  $\eta<\min\le g_j$ for each $j$ (the inequality against each $g_j$ is strict
+  because halving a positive number drops it strictly below itself).
+\end{proof}
+
+% Project-bespoke: elementary Lebesgue-measure computation; no external source.
+\begin{lemma}[Total measure of the four plateau intervals]
+  \label{lem:plateau_union_measure}
+  \lean{Gluck.plateau_union_measure}
+  Project-bespoke. For $0<\delta<\pi/2$ the four flanking plateau intervals
+  \[
+    \Bigl[\tfrac{\delta}{2},\,\tfrac{\pi}{2}-\tfrac{\delta}{2}\Bigr],\quad
+    \Bigl[\tfrac{\pi}{2}+\tfrac{\delta}{2},\,\pi-\tfrac{\delta}{2}\Bigr],\quad
+    \Bigl[\pi+\tfrac{\delta}{2},\,\tfrac{3\pi}{2}-\tfrac{\delta}{2}\Bigr],\quad
+    \Bigl[\tfrac{3\pi}{2}+\tfrac{\delta}{2},\,2\pi-\tfrac{\delta}{2}\Bigr],
+  \]
+  each of length $\pi/2-\delta$ and separated by the four $\delta$-wide ``race''
+  sub-arcs, have total Lebesgue measure $2\pi-4\delta$.
+\end{lemma}
+\begin{proof}
+  Since $0<\delta<\pi/2$, the right endpoint of each interval lies strictly below
+  the left endpoint of the next (the gap between consecutive intervals is exactly
+  $\delta>0$), so the four intervals are pairwise disjoint. Each has length
+  $(\tfrac{\pi}{2}-\tfrac{\delta}{2})-\tfrac{\delta}{2}=\tfrac{\pi}{2}-\delta\ge0$,
+  hence by additivity of Lebesgue measure on disjoint sets the union has measure
+  $4\bigl(\tfrac{\pi}{2}-\delta\bigr)=2\pi-4\delta$.
+\end{proof}
+
 % Project-bespoke: not in the available survey (which defers to Gluck 1971).
 % Stands on the construction below.
 \begin{lemma}
@@ -252,7 +297,8 @@ $<4\delta$. Choosing $\eta,\delta$ small makes this $\varepsilon$-close in measu
   \label{lem:exists_preliminary_reparam}
   \lean{Gluck.exists_preliminary_reparam}
   \uses{def:four_arc_step_function, lem:abab_values, lem:plateau_density,
-        lem:kappa_modulus_at}
+        lem:kappa_modulus_at, lem:exists_plateau_radius, lem:plateau_union_measure,
+        lem:step_curvature_canonical_values}
   Let $\kappa$ be a curvature function (continuous, $2\pi$-periodic, strictly
   positive) satisfying the four-vertex condition, with crossing data
   $0<a<b$, $c_1<c_2<c_3<c_4<c_1+2\pi$, $\kappa(c_1,c_2,c_3,c_4)=(a,b,a,b)$ from

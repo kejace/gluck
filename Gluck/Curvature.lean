@@ -76,15 +76,9 @@ point of `[p, q]`. -/
 lemma ivt_hits {f : ℝ → ℝ} (hf : Continuous f) {p q v : ℝ} (hpq : p ≤ q)
     (hv : v ∈ Set.Icc (min (f p) (f q)) (max (f p) (f q))) :
     ∃ x ∈ Set.Icc p q, f x = v := by
-  rcases le_total (f p) (f q) with hfpq | hfpq
-  · have hv' : v ∈ Set.Icc (f p) (f q) := by
-      rwa [min_eq_left hfpq, max_eq_right hfpq] at hv
-    obtain ⟨x, hx, hfx⟩ := intermediate_value_Icc hpq hf.continuousOn hv'
-    exact ⟨x, hx, hfx⟩
-  · have hv' : v ∈ Set.Icc (f q) (f p) := by
-      rwa [min_eq_right hfpq, max_eq_left hfpq] at hv
-    obtain ⟨x, hx, hfx⟩ := intermediate_value_Icc' hpq hf.continuousOn hv'
-    exact ⟨x, hx, hfx⟩
+  obtain ⟨x, hx, hfx⟩ := intermediate_value_uIcc (f := f) (a := p) (b := q) hf.continuousOn hv
+  rw [Set.uIcc_of_le hpq] at hx
+  exact ⟨x, hx, hfx⟩
 
 /-- If a non-constant curvature function `κ` satisfies the four-vertex
 condition, then there exist `0 < a < b` and four points

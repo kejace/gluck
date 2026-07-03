@@ -71,50 +71,6 @@ curve to close up.
   of $\theta \mapsto \int_0^\theta$ as the integrand evaluated at $\theta$.
 \end{proof}
 
-\begin{lemma}\leanok
-[Inclination angle and induced curvature]
-  \label{lem:signed_curvature_reconstruct}
-  \lean{Gluck.signedCurvature_reconstruct}
-  \uses{lem:reconstruct_deriv, def:signed_curvature, def:radius, def:is_curvature_function}
-  Let $\kappa$ be a curvature function (\cref{def:is_curvature_function}) that is
-  moreover continuously differentiable ($\kappa \in C^1$), and set $\rho = 1/\kappa$.
-  Then $\rho \in C^1$, the reconstruction curve $\alpha_\rho$ is $C^2$ and regular,
-  and it realizes $\kappa$ as its signed curvature: $\kappa_{\alpha_\rho}(\theta)
-  = \kappa(\theta)$ for all $\theta$, with tangent line turning monotonically
-  (angle of inclination exactly $\theta$).
-
-  \emph{Regularity hypothesis is essential.} The signed-curvature formula
-  (\cref{def:signed_curvature}) reads off the second derivative $\alpha_\rho''$
-  (in Lean, \texttt{deriv (deriv $\alpha_\rho$)});
-  without $\kappa \in C^1$ the weight $\rho = 1/\kappa$ need not be differentiable,
-  so $\alpha_\rho''$ does not exist (and the Lean \texttt{deriv} returns junk $0$),
-  making the conclusion false for a merely-continuous $\kappa$. The Lean signature
-  therefore carries an explicit \texttt{ContDiff ℝ 1 κ} hypothesis.
-\end{lemma}
-\begin{proof}
-
-\leanok
-  By \cref{lem:reconstruct_deriv}, $\alpha_\rho'(\theta) = e^{i\theta}\rho(\theta)$,
-  so the unit tangent is $e^{i\theta}$ (angle of inclination exactly $\theta$)
-  and the speed is $\lvert\alpha_\rho'(\theta)\rvert = \rho(\theta) > 0$. Since
-  $\kappa \in C^1$ and $\kappa > 0$, $\rho = 1/\kappa \in C^1$, so
-  $\alpha_\rho'(\theta) = e^{i\theta}\rho(\theta)$ is itself $C^1$ and
-  $\alpha_\rho''$ exists with $\alpha_\rho''(\theta) = i e^{i\theta}\rho(\theta) +
-  e^{i\theta}\rho'(\theta)$. Write $\gamma' = e^{i\theta}\rho$ with
-  $\Re\gamma' = \rho\cos\theta$, $\Im\gamma' = \rho\sin\theta$, and
-  $\Re\gamma'' = \rho'\cos\theta - \rho\sin\theta$,
-  $\Im\gamma'' = \rho'\sin\theta + \rho\cos\theta$. The signed-curvature
-  numerator is
-  \[
-    \Re\gamma'\,\Im\gamma'' - \Im\gamma'\,\Re\gamma''
-      = \rho^2(\cos^2\theta + \sin^2\theta) = \rho^2,
-  \]
-  the $\rho'$ contributions cancelling, while $\lvert\gamma'\rvert^3 = \rho^3$.
-  Hence $\kappa_{\alpha_\rho}(\theta) = \rho^2/\rho^3 = 1/\rho(\theta) =
-  \kappa(\theta)$. Equivalently, $ds/d\theta = \rho$ gives $d\theta/ds = \kappa$,
-  the source's defining relation.
-\end{proof}
-
 \begin{definition}\leanok
 [Closure integrals and error vector]
   \label{def:error_vector}
@@ -126,77 +82,8 @@ curve to close up.
       \;=\; \int_0^{2\pi} e^{i\theta}\,\rho(\theta)\,d\theta
       \;\in\; \mathbb{C}.
   \]
-  Its real and imaginary parts are the \emph{closure integrals} $C(\rho)$ and
-  $S(\rho)$ of \cref{def:closure_integral_cos,def:closure_integral_sin} below.
+  The curve $\alpha_\rho$ closes up into a $2\pi$-periodic curve exactly when this
+  complex closure defect vanishes, $E(\rho) = 0$; equivalently both the cosine and
+  sine moments $\int_0^{2\pi}\cos\theta\,\rho$ and $\int_0^{2\pi}\sin\theta\,\rho$
+  vanish.
 \end{definition}
-
-\begin{definition}\leanok
-[Cosine closure integral]
-  \label{def:closure_integral_cos}
-  \lean{Gluck.closureIntegralCos}
-  The \emph{cosine closure integral} of the weight $\rho$ is the real number
-  \[
-    C(\rho) = \int_0^{2\pi}\!\cos\theta\,\rho(\theta)\,d\theta ,
-  \]
-  the real part of the error vector $E(\rho)$.
-\end{definition}
-
-\begin{definition}\leanok
-[Sine closure integral]
-  \label{def:closure_integral_sin}
-  \lean{Gluck.closureIntegralSin}
-  The \emph{sine closure integral} of the weight $\rho$ is the real number
-  \[
-    S(\rho) = \int_0^{2\pi}\!\sin\theta\,\rho(\theta)\,d\theta ,
-  \]
-  the imaginary part of the error vector $E(\rho)$.
-\end{definition}
-
-% SOURCE: [DeTurck-Gluck], §4, p. 9-10, lines 178-188 (read from references/deturck-gluck-fourvertex.txt)
-% SOURCE QUOTE: "The error vector E = α(2π) — α(0) measures the failure of our
-% curve to close up. ... we conclude that for some h \"inside\" this loop, the
-% curve αh will have error vector E(h) = 0 , and hence close up to form a smooth
-% simple closed curve."
-\begin{lemma}\leanok
-[Error vector splits into closure integrals]
-  \label{lem:error_vector_eq}
-  \lean{Gluck.errorVector_eq}
-  \uses{def:error_vector, def:closure_integral_cos, def:closure_integral_sin}
-  Suppose $\rho$ is continuous. Then $E(\rho) = C(\rho) + i\,S(\rho)$.
-
-  The continuity hypothesis is \emph{necessary}, not cosmetic: the split into
-  real and imaginary parts uses linearity of the integral, which requires the
-  pieces to be integrable. For a non-integrable $\rho$ the identity is false
-  (e.g. $\rho(\theta) = 1/(\theta - \pi/2)$ on $[0, 2\pi]$: the $\mathbb{C}$-valued
-  Bochner integral $E(\rho)$ is $0$ since $|e^{i\theta}\rho| = |\rho|$ is
-  non-integrable, while $C(\rho) = \int \cos\theta\,\rho \ne 0$). Every call site
-  supplies continuity via \cref{lem:radius_props} ($\rho = 1/\kappa$ continuous).
-\end{lemma}
-\begin{proof}
-
-\leanok
-  Expand $e^{i\theta} = \cos\theta + i\sin\theta$ and split the integral of the
-  $\mathbb{C}$-valued integrand into real and imaginary parts; linearity of the
-  interval integral gives $E(\rho) = C(\rho) + i\,S(\rho)$.
-\end{proof}
-
-\begin{lemma}\leanok
-[Closure criterion]
-  \label{lem:closes_iff}
-  \lean{Gluck.reconstruct_closes_iff}
-  \uses{lem:error_vector_eq, def:reconstruct, def:is_closed_curve, lem:radius_props}
-  \textit{Source: DeTurck--Gluck, §4 (error vector zero $\Leftrightarrow$ closes up).}
-  Suppose $\rho = 1/\kappa$ for a curvature function $\kappa$. The reconstruction
-  curve $\alpha_\rho$ extends to a closed ($2\pi$-periodic) curve if and only if
-  $E(\rho) = 0$, equivalently $C(\rho) = 0$ and $S(\rho) = 0$.
-\end{lemma}
-\begin{proof}
-
-\leanok
-  Because $\alpha_\rho'(\theta) = e^{i\theta}\rho(\theta)$ is $2\pi$-periodic in
-  $\theta$ (both $e^{i\theta}$ and $\rho$ are), the increment of $\alpha_\rho$
-  over any period equals $\alpha_\rho(2\pi) - \alpha_\rho(0) = E(\rho)$. Hence the
-  $2\pi$-periodic extension is well defined (single-valued) precisely when
-  $E(\rho) = 0$. By \cref{lem:error_vector_eq}, $E(\rho) = 0$ iff both $C(\rho)$
-  and $S(\rho)$ vanish.
-\end{proof}

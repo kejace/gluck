@@ -80,6 +80,7 @@ theorem hasDerivAt_dahlbergAngle {K : ℝ → ℝ} (hK : Continuous K) (s : ℝ)
     hK.continuousAt
 
 /-- The arc-length tangent angle `α_K` is continuous when `K` is. -/
+@[fun_prop]
 theorem continuous_dahlbergAngle {K : ℝ → ℝ} (hK : Continuous K) :
     Continuous (dahlbergAngle K) :=
   Differentiable.continuous (fun s => (hasDerivAt_dahlbergAngle hK s).differentiableAt)
@@ -123,7 +124,7 @@ theorem realizesCurvature_dahlbergCurve {K : ℝ → ℝ} (hK : Continuous K) :
   have hval : ∀ t, deriv (dahlbergCurve K) t
       = Complex.exp ((dahlbergAngle K t : ℂ) * Complex.I) := fun t => (hderiv t).deriv
   have hnorm : ∀ t, ‖deriv (dahlbergCurve K) t‖ = 1 := by
-    intro t; rw [hval, Complex.norm_exp]; simp
+    intro t; rw [hval]; exact Complex.norm_exp_ofReal_mul_I _
   refine ⟨hcd, ?_, dahlbergAngle K, ?_, ?_, ?_⟩
   · intro t; rw [hval]; exact Complex.exp_ne_zero _
   · exact fun s => (hasDerivAt_dahlbergAngle hK s).differentiableAt
