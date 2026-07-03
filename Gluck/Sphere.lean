@@ -923,6 +923,308 @@ lemma invariant_admissible_domain {κ κ' : ℝ → ℝ} {κ₀ R δ μ : ℝ} {
       ⟪z θ - zs θ, Complex.I * Complex.exp ((θ:ℂ) * Complex.I)⟫_ℝ
     linarith
 
+/-! ## Endpoint winding frontier (S2-D) -/
+
+/-- Derivative of the unit tangent field `θ ↦ e^{iθ}` as a map `ℝ → ℂ`.
+Project-local convenience wrapper around `Complex.hasDerivAt_exp`. -/
+private lemma hasDerivAt_expI (θ : ℝ) :
+    HasDerivAt (fun t : ℝ => Complex.exp ((t : ℂ) * Complex.I))
+      (Complex.exp ((θ : ℂ) * Complex.I) * Complex.I) θ := by
+  have h0 : HasDerivAt (fun t : ℝ => ((t : ℝ) : ℂ)) 1 θ := (hasDerivAt_id θ).ofReal_comp
+  have h1 : HasDerivAt (fun t : ℝ => (t : ℂ) * Complex.I) Complex.I θ := by
+    simpa using h0.mul_const Complex.I
+  exact (Complex.hasDerivAt_exp ((θ : ℂ) * Complex.I)).comp θ h1
+
+/-- **Bracket identity along a circular arc**: for the arc
+`z(θ) = w − i·r·e^{iθ}` one has `⟪z(θ), i·e^{iθ}⟫ = ⟪w, i·e^{iθ}⟫ − r`.
+Support lemma for `constantCurvature_arc`; S2-D uses it to read off arc
+margins. (Blueprint `lem:constant_curvature_arc`, part (i).) -/
+lemma constantArc_inner (r : ℝ) (w : ℂ) (θ : ℝ) :
+    ⟪w - Complex.I * (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I),
+      Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ
+    = ⟪w, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ - r := by
+  have hvnorm : ‖Complex.I * Complex.exp ((θ : ℂ) * Complex.I)‖ = 1 := by
+    rw [norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul]
+  have hsm : Complex.I * (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)
+      = r • (Complex.I * Complex.exp ((θ : ℂ) * Complex.I)) := by
+    rw [Complex.real_smul]; ring
+  rw [hsm, inner_sub_left, real_inner_smul_left, real_inner_self_eq_norm_sq, hvnorm]
+  ring
+
+/-- **Norm expansion along a circular arc**:
+`‖w − i·r·e^{iθ}‖² = ‖w‖² − 2r·⟪w, i·e^{iθ}⟫ + r²`. Support lemma for
+`constantCurvature_arc`. (Blueprint `lem:constant_curvature_arc`, part (i).) -/
+lemma constantArc_norm_sq (r : ℝ) (w : ℂ) (θ : ℝ) :
+    ‖w - Complex.I * (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)‖ ^ 2
+    = ‖w‖ ^ 2 - 2 * r * ⟪w, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ
+      + r ^ 2 := by
+  have hvnorm : ‖Complex.I * Complex.exp ((θ : ℂ) * Complex.I)‖ = 1 := by
+    rw [norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul]
+  have hsm : Complex.I * (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)
+      = r • (Complex.I * Complex.exp ((θ : ℂ) * Complex.I)) := by
+    rw [Complex.real_smul]; ring
+  rw [hsm, norm_sub_sq_real, real_inner_smul_right, norm_smul, hvnorm, mul_one,
+    Real.norm_eq_abs, sq_abs]
+  ring
+
+/-- **Consistency identity at the start configuration**: with
+`r = q_K(θ₀, z₀)` and `w = z₀ + i·r·e^{iθ₀}` the Euclidean data satisfy
+`1 + ‖w‖² = 2rK + r²` (equivalently `K = (1 + ‖w‖² − r²)/(2r)`). Support
+lemma for `constantCurvature_arc`.
+(Blueprint `lem:constant_curvature_arc`, part (ii).) -/
+lemma constantArc_consistency {K θ₀ : ℝ} {z₀ : ℂ}
+    (hpos : 0 < K - ⟪z₀, Complex.I * Complex.exp ((θ₀ : ℂ) * Complex.I)⟫_ℝ) :
+    1 + ‖z₀ + Complex.I * ((sphericalSpeed (fun _ => K) θ₀ z₀ : ℝ) : ℂ)
+        * Complex.exp ((θ₀ : ℂ) * Complex.I)‖ ^ 2
+      = 2 * sphericalSpeed (fun _ => K) θ₀ z₀ * K
+        + sphericalSpeed (fun _ => K) θ₀ z₀ ^ 2 := by
+  set r : ℝ := sphericalSpeed (fun _ => K) θ₀ z₀ with hrdef
+  set β : ℝ := ⟪z₀, Complex.I * Complex.exp ((θ₀ : ℂ) * Complex.I)⟫_ℝ with hβ
+  have hvnorm : ‖Complex.I * Complex.exp ((θ₀ : ℂ) * Complex.I)‖ = 1 := by
+    rw [norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul]
+  have hden : (2 : ℝ) * (K - β) ≠ 0 := mul_ne_zero two_ne_zero (ne_of_gt hpos)
+  have hr : r * (2 * (K - β)) = 1 + ‖z₀‖ ^ 2 := by
+    rw [hrdef, sphericalSpeed, ← hβ, div_mul_cancel₀ _ hden]
+  have hsm : Complex.I * (r : ℂ) * Complex.exp ((θ₀ : ℂ) * Complex.I)
+      = r • (Complex.I * Complex.exp ((θ₀ : ℂ) * Complex.I)) := by
+    rw [Complex.real_smul]; ring
+  have hnorm : ‖z₀ + Complex.I * (r : ℂ) * Complex.exp ((θ₀ : ℂ) * Complex.I)‖ ^ 2
+      = ‖z₀‖ ^ 2 + 2 * r * β + r ^ 2 := by
+    rw [hsm, norm_add_sq_real, real_inner_smul_right, norm_smul, hvnorm, mul_one,
+      Real.norm_eq_abs, sq_abs, ← hβ]
+    ring
+  rw [hnorm]
+  linarith [hr]
+
+/-- **Constant-curvature arcs are explicit circular arcs.** Under the
+consistency identity `1 + ‖w‖² = 2rK + r²`, at every angle `θ` where the
+bracket `K − ⟪z(θ), i·e^{iθ}⟫` stays positive, the circular arc
+`z(θ) = w − i·r·e^{iθ}` has gauge speed exactly `r` and solves the *true*
+reconstruction ODE `z' = q_K(θ, z)·e^{iθ}` for the constant curvature `K`.
+Entry data: `constantArc_consistency` supplies the consistency identity for
+the arc through a start `(θ₀, z₀)`. (Blueprint `lem:constant_curvature_arc`.) -/
+lemma constantCurvature_arc {K r : ℝ} {w : ℂ}
+    (hcons : 1 + ‖w‖ ^ 2 = 2 * r * K + r ^ 2) {θ : ℝ}
+    (hpos : 0 < K - ⟪w - Complex.I * (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I),
+      Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ) :
+    sphericalSpeed (fun _ => K) θ
+        (w - Complex.I * (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)) = r ∧
+      HasDerivAt
+        (fun t : ℝ => w - Complex.I * (r : ℂ) * Complex.exp ((t : ℂ) * Complex.I))
+        (sphericalSpeed (fun _ => K) θ
+            (w - Complex.I * (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I))
+          • Complex.exp ((θ : ℂ) * Complex.I)) θ := by
+  have hin := constantArc_inner r w θ
+  have hnq := constantArc_norm_sq r w θ
+  have hpos' : 0 < K - (⟪w, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ - r) := by
+    rw [← hin]; exact hpos
+  have hq : sphericalSpeed (fun _ => K) θ
+      (w - Complex.I * (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)) = r := by
+    rw [sphericalSpeed, hin, hnq]
+    rw [div_eq_iff (mul_ne_zero two_ne_zero (ne_of_gt hpos'))]
+    linear_combination hcons
+  refine ⟨hq, ?_⟩
+  rw [hq]
+  have h := ((hasDerivAt_expI θ).const_mul (Complex.I * (r : ℂ))).const_sub w
+  have hval : -(Complex.I * (r : ℂ)
+        * (Complex.exp ((θ : ℂ) * Complex.I) * Complex.I))
+      = (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I) := by
+    linear_combination (-(r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)) * Complex.I_mul_I
+  rw [hval] at h
+  rw [Complex.real_smul]
+  exact h
+
+/-- Half-turn of the unit tangent: `e^{i(θ+π)} = −e^{iθ}`. -/
+private lemma expI_add_pi (θ : ℝ) :
+    Complex.exp (((θ + π : ℝ) : ℂ) * Complex.I)
+      = -Complex.exp ((θ : ℂ) * Complex.I) := by
+  push_cast
+  rw [add_mul, Complex.exp_add, Complex.exp_pi_mul_I, mul_neg_one]
+
+/-- **Half-turn invariance of the truncated speed** for `π`-periodic `κ`:
+`q̂(θ+π, −z) = q̂(θ, z)`. Every ingredient is unchanged: `‖−z‖ = ‖z‖`,
+`⟪−z, i·e^{i(θ+π)}⟫ = ⟪z, i·e^{iθ}⟫`, and `κ(θ+π) = κ(θ)`.
+(Blueprint `lem:flow_half_turn_equivariance`, field part.) -/
+lemma truncatedSpeed_half_turn {κ : ℝ → ℝ} {R δ : ℝ}
+    (hπ : ∀ θ, κ (θ + π) = κ θ) (θ : ℝ) (z : ℂ) :
+    truncatedSpeed κ R δ (θ + π) (-z) = truncatedSpeed κ R δ θ z := by
+  unfold truncatedSpeed
+  rw [norm_neg, hπ θ, expI_add_pi θ, mul_neg, inner_neg_neg]
+
+/-- **Half-turn equivariance of the truncated field** for `π`-periodic `κ`:
+`F(θ+π, −z) = −F(θ, z)` — the speed is invariant and the tangent flips sign.
+(Blueprint `lem:flow_half_turn_equivariance`, field part.) -/
+lemma truncatedField_half_turn {κ : ℝ → ℝ} {R δ : ℝ}
+    (hπ : ∀ θ, κ (θ + π) = κ θ) (θ : ℝ) (z : ℂ) :
+    truncatedField κ R δ (θ + π) (-z) = -truncatedField κ R δ θ z := by
+  unfold truncatedField
+  rw [truncatedSpeed_half_turn hπ, expI_add_pi, smul_neg]
+
+/-- **Half-turn equivariance of trajectories.** For `π`-periodic `κ`, if `z`
+solves the truncated ODE on `[0, 2π]` and satisfies the anti-periodic seed
+`z(π) = −z(0)`, then the central symmetry propagates: `z(θ+π) = −z(θ)` on
+`[0, π]`, and in particular the trajectory closes: `z(2π) = z(0)`. Proof:
+`y(θ) = −z(θ+π)` solves the same ODE on `[0, π]` (field equivariance), agrees
+with `z` at `0`, so equals `z` by `truncatedField_solution_unique`.
+(Blueprint `lem:flow_half_turn_equivariance`.) -/
+lemma flow_half_turn_equivariance {κ : ℝ → ℝ} {R δ : ℝ} (hR : 0 ≤ R)
+    (hδ : 0 < δ) (hπ : ∀ θ, κ (θ + π) = κ θ) {z : ℝ → ℂ}
+    (hz : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
+      HasDerivWithinAt z (truncatedField κ R δ θ (z θ)) (Set.Icc 0 (2 * π)) θ)
+    (hhalf : z π = -z 0) :
+    (∀ θ ∈ Set.Icc (0 : ℝ) π, z (θ + π) = -z θ) ∧ z (2 * π) = z 0 := by
+  have hπpos := Real.pi_pos
+  -- `y θ = −z(θ+π)` solves the truncated ODE on `[0, π]`
+  have hy : ∀ θ ∈ Set.Icc (0 : ℝ) π,
+      HasDerivWithinAt (fun t => -z (t + π))
+        (truncatedField κ R δ θ (-z (θ + π))) (Set.Icc 0 π) θ := by
+    intro θ hθ
+    have hθ2 : θ + π ∈ Set.Icc (0 : ℝ) (2 * π) :=
+      ⟨by linarith [hθ.1], by linarith [hθ.2]⟩
+    have hshift : HasDerivWithinAt (fun t : ℝ => t + π) 1 (Set.Icc 0 π) θ :=
+      ((hasDerivAt_id θ).add_const π).hasDerivWithinAt
+    have hmaps : Set.MapsTo (fun t : ℝ => t + π) (Set.Icc (0 : ℝ) π)
+        (Set.Icc (0 : ℝ) (2 * π)) :=
+      fun t ht => ⟨by linarith [ht.1], by linarith [ht.2]⟩
+    have hcomp := HasDerivWithinAt.scomp θ (hz (θ + π) hθ2) hshift hmaps
+    have hneg := hcomp.neg
+    have hval : -((1 : ℝ) • truncatedField κ R δ (θ + π) (z (θ + π)))
+        = truncatedField κ R δ θ (-z (θ + π)) := by
+      have h := truncatedField_half_turn (R := R) (δ := δ) hπ θ (-z (θ + π))
+      rw [neg_neg] at h
+      rw [one_smul, h, neg_neg]
+    rw [hval] at hneg
+    exact hneg
+  -- `z` itself solves on the subinterval `[0, π]`
+  have hzres : ∀ θ ∈ Set.Icc (0 : ℝ) π,
+      HasDerivWithinAt z (truncatedField κ R δ θ (z θ)) (Set.Icc 0 π) θ :=
+    fun θ hθ => (hz θ ⟨hθ.1, by linarith [hθ.2]⟩).mono
+      (Set.Icc_subset_Icc_right (by linarith))
+  have h0 : (fun t => -z (t + π)) 0 = z 0 := by simp [hhalf]
+  have heq := truncatedField_solution_unique hR hδ hy hzres h0
+  refine ⟨fun θ hθ => ?_, ?_⟩
+  · exact neg_eq_iff_eq_neg.mp (heq hθ)
+  · have h1 := heq (Set.right_mem_Icc.mpr hπpos.le)
+    simp only at h1
+    rw [show π + π = 2 * π by ring, hhalf] at h1
+    exact neg_injective h1
+
+/-! ## Simplicity and capstone frontier (S2-E) -/
+
+/-- **Constant-curvature branch: the centered circle realizes constant `κ ≡ c`.**
+For `c > 0` the circle `z(θ) = −r*·(i·e^{iθ})` with `r* = √(1+c²) − c ∈ (0,1)`
+is a simple closed curve realizing the constant curvature function `fun _ => c`:
+the circle identity `1 + r*² = 2r*(c + r*)` is exactly the speed relation in the
+gauge `φ(θ) = θ`. Discharges the constant disjunct of the four-vertex condition
+in the capstone with no flow machinery.
+(Blueprint `lem:spherical_circle_realizes`.) -/
+lemma sphericalCircle_realizes {c : ℝ} (hc : 0 < c) :
+    IsSimpleClosed
+      (fun θ : ℝ => (-(Real.sqrt (1 + c ^ 2) - c)) •
+        (Complex.I * Complex.exp ((θ : ℂ) * Complex.I))) ∧
+    RealizesSphericalCurvature
+      (fun θ : ℝ => (-(Real.sqrt (1 + c ^ 2) - c)) •
+        (Complex.I * Complex.exp ((θ : ℂ) * Complex.I)))
+      (fun _ => c) := by
+  have h1c : (0:ℝ) < 1 + c ^ 2 := by positivity
+  have hs2 : Real.sqrt (1 + c ^ 2) ^ 2 = 1 + c ^ 2 := Real.sq_sqrt h1c.le
+  have hs0 : 0 < Real.sqrt (1 + c ^ 2) := Real.sqrt_pos.mpr h1c
+  have hr0 : 0 < Real.sqrt (1 + c ^ 2) - c := by nlinarith [hs2, hs0, hc]
+  have hr1 : Real.sqrt (1 + c ^ 2) - c < 1 := by nlinarith [hs2, hs0, hc]
+  have hcirc : 1 + (Real.sqrt (1 + c ^ 2) - c) ^ 2
+      = 2 * (Real.sqrt (1 + c ^ 2) - c) * (c + (Real.sqrt (1 + c ^ 2) - c)) := by
+    nlinarith [hs2]
+  set r : ℝ := Real.sqrt (1 + c ^ 2) - c with hrdef
+  -- shared pointwise facts
+  have hvnorm : ∀ θ : ℝ, ‖Complex.I * Complex.exp ((θ : ℂ) * Complex.I)‖ = 1 := by
+    intro θ
+    rw [norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul]
+  have hznorm : ∀ θ : ℝ,
+      ‖(-r) • (Complex.I * Complex.exp ((θ : ℂ) * Complex.I))‖ = r := by
+    intro θ
+    rw [norm_smul, hvnorm, mul_one, Real.norm_eq_abs, abs_neg, abs_of_pos hr0]
+  have hfun : (fun t : ℝ => (-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I)))
+      = fun t : ℝ => ((-r : ℝ) : ℂ) * (Complex.I * Complex.exp ((t : ℂ) * Complex.I)) := by
+    funext t
+    rw [Complex.real_smul]
+  have hz' : ∀ θ : ℝ, HasDerivAt
+      (fun t : ℝ => (-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I)))
+      ((r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)) θ := by
+    intro θ
+    rw [hfun]
+    have h := ((hasDerivAt_expI θ).const_mul Complex.I).const_mul ((-r : ℝ) : ℂ)
+    have hval : ((-r : ℝ) : ℂ)
+          * (Complex.I * (Complex.exp ((θ : ℂ) * Complex.I) * Complex.I))
+        = (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I) := by
+      push_cast
+      linear_combination (-(r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)) * Complex.I_mul_I
+    rw [hval] at h
+    exact h
+  have hdnorm : ∀ θ : ℝ, ‖(r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)‖ = r := by
+    intro θ
+    rw [norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one, Complex.norm_real,
+      Real.norm_eq_abs, abs_of_pos hr0]
+  have hinner : ∀ θ : ℝ,
+      ⟪(-r) • (Complex.I * Complex.exp ((θ : ℂ) * Complex.I)),
+        Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ = -r := by
+    intro θ
+    rw [real_inner_smul_left, real_inner_self_eq_norm_sq, hvnorm]
+    ring
+  have hexp_per : ∀ x : ℝ, Complex.exp (((x + 2 * π : ℝ) : ℂ) * Complex.I)
+      = Complex.exp ((x : ℂ) * Complex.I) := by
+    intro x
+    push_cast
+    rw [add_mul, Complex.exp_add, Complex.exp_two_pi_mul_I, mul_one]
+  refine ⟨⟨fun x => by simp only [hexp_per x], ?_⟩, ?_, fun t => ?_, fun t => ?_,
+    id, differentiable_id, fun t => ?_, fun t => ?_⟩
+  · -- injectivity on `[0, 2π)`
+    intro a ha b hb hab
+    simp only at hab
+    have hrne : -r ≠ 0 := neg_ne_zero.mpr hr0.ne'
+    have h1 : Complex.I * Complex.exp ((a : ℂ) * Complex.I)
+        = Complex.I * Complex.exp ((b : ℂ) * Complex.I) :=
+      smul_right_injective ℂ hrne hab
+    have h2 : Complex.exp ((a : ℂ) * Complex.I) = Complex.exp ((b : ℂ) * Complex.I) :=
+      mul_left_cancel₀ Complex.I_ne_zero h1
+    rw [Complex.exp_eq_exp_iff_exists_int] at h2
+    obtain ⟨n, hn⟩ := h2
+    have h3 : (a : ℂ) * Complex.I = ((b : ℝ) + (n : ℝ) * (2 * π)) * Complex.I := by
+      rw [hn]; push_cast; ring
+    have h4 : (a : ℂ) = ((b : ℝ) + (n : ℝ) * (2 * π) : ℝ) :=
+      mul_right_cancel₀ Complex.I_ne_zero (by rw [h3]; push_cast; ring)
+    have hreal : a = b + (n : ℝ) * (2 * π) := by exact_mod_cast h4
+    have hpi : 0 < π := Real.pi_pos
+    have hn1 : (n : ℝ) < 1 := by nlinarith [ha.1, ha.2, hb.1, hb.2]
+    have hn2 : (-1 : ℝ) < (n : ℝ) := by nlinarith [ha.1, ha.2, hb.1, hb.2]
+    have ha' : n < 1 := by exact_mod_cast hn1
+    have hb' : -1 < n := by exact_mod_cast hn2
+    have hn0 : n = 0 := by omega
+    rw [hn0] at hreal
+    simpa using hreal
+  · -- `C¹`
+    refine contDiff_one_iff_deriv.mpr ⟨fun t => (hz' t).differentiableAt, ?_⟩
+    have heq : deriv (fun t : ℝ => (-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I)))
+        = fun θ : ℝ => (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I) :=
+      funext fun θ => (hz' θ).deriv
+    rw [heq]
+    exact continuous_const.mul (Complex.continuous_exp.comp
+      (Complex.continuous_ofReal.mul continuous_const))
+  · -- regular
+    rw [(hz' t).deriv]
+    exact mul_ne_zero (by exact_mod_cast hr0.ne') (Complex.exp_ne_zero _)
+  · -- confined to the open disk
+    simp only
+    rw [hznorm t]
+    exact hr1
+  · -- tangent-angle equation with `φ = id`
+    rw [(hz' t).deriv, hdnorm t]
+    simp only [id_eq]
+  · -- speed relation: the circle identity
+    have hid : deriv (id : ℝ → ℝ) t = 1 := by simp
+    simp only [id_eq]
+    rw [(hz' t).deriv, hid, hznorm t, hinner t, hdnorm t]
+    nlinarith [hcirc]
+
 /-- **Spherical converse, positive stage.** If `κ` satisfies the positive-stage
 spherical four-vertex condition, then there is a simple closed curve `z` confined
 to the open disk that realizes `κ` as its spherical geodesic curvature. This is
