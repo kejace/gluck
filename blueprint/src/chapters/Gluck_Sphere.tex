@@ -678,6 +678,26 @@ large ball covers $[0,2\pi]$.
   with the flow.
 \end{proof}
 
+\begin{lemma}[two-solution uniqueness on a subinterval]
+  \label{lem:truncated_field_solution_unique}
+  \lean{Gluck.truncatedField_solution_unique}
+  \uses{def:truncated_field, lem:truncated_field_lipschitz}
+  Let $0\le R$, $0<\delta$ and $0\le T$. If $g_1,g_2:[0,T]\to\mathbb C$ both solve
+  $g'=F_{\kappa,R,\delta}(\theta,g(\theta))$ on $[0,T]$ and $g_1(0)=g_2(0)$, then
+  $g_1=g_2$ on $[0,T]$. (Unlike \cref{lem:spherical_flow_unique} this compares two
+  arbitrary solutions, on an arbitrary compact interval $[0,T]$ — not necessarily
+  $[0,2\pi]$ — and makes no reference to the chosen flow $\Phi$; the field is defined
+  and Lipschitz for all times, so no time restriction is needed.)
+\end{lemma}
+
+\begin{proof}
+  The field is Lipschitz in the space variable uniformly in time
+  (\cref{lem:truncated_field_lipschitz}) and each $g_i$ is continuous on $[0,T]$ (it has
+  a derivative there), so the standard two-solution uniqueness theorem applies on
+  $[0,T]$ with initial time at the left endpoint — the same Gr\"onwall-type argument as
+  \cref{lem:spherical_flow_unique}, with $2\pi$ replaced by $T$.
+\end{proof}
+
 \begin{definition}
 
 \leanok
@@ -926,23 +946,29 @@ large ball covers $[0,2\pi]$.
 [half-turn equivariance]
   \label{lem:flow_half_turn_equivariance}
   \lean{Gluck.flow_half_turn_equivariance}
-  \uses{def:truncated_speed, lem:spherical_flow_unique}
+  \uses{def:truncated_speed, lem:truncated_field_solution_unique, lem:spherical_flow_spec}
   If $\kappa(\theta+\pi)=\kappa(\theta)$ for all $\theta$, then the truncated field is
   invariant under the half turn: $\hat q(\theta+\pi,-z)=\hat q(\theta,z)$, hence if
-  $z(\cdot)$ is a trajectory then so is $y(\theta)=-z(\theta+\pi)$. Consequently, writing
-  $H$ for the half-period map $z_0\mapsto\Phi(z_0,\pi)$ of a $\pi$-periodic curvature: if
-  $H(z_0)=-z_0$ then the trajectory through $z_0$ closes at $2\pi$ with the central
-  symmetry $z(\theta+\pi)=-z(\theta)$.
+  $z(\cdot)$ solves the truncated ODE on $[0,2\pi]$ then $y(\theta)=-z(\theta+\pi)$
+  solves it on $[0,\pi]$. Consequently, writing $H$ for the half-period map
+  $z_0\mapsto\Phi(z_0,\pi)$ of a $\pi$-periodic curvature: if $H(z_0)=-z_0$ then the
+  trajectory through $z_0$ satisfies the central symmetry $z(\theta+\pi)=-z(\theta)$ for
+  $\theta\in[0,\pi]$; in particular it closes at $2\pi$: $z(2\pi)=-z(\pi)=z_0$.
 \end{lemma}
 
 \begin{proof}
   $\|{-z}\|=\|z\|$ and $\langle -z,\,ie^{i(\theta+\pi)}\rangle=\langle -z,\,-ie^{i\theta}
   \rangle=\langle z,ie^{i\theta}\rangle$, and $\kappa(\theta+\pi)=\kappa(\theta)$; so
-  every ingredient of $\hat q$ is unchanged. Then
-  $y'(\theta)=-z'(\theta+\pi)=-\hat q\,e^{i(\theta+\pi)}=\hat q(\theta,y(\theta))e^{i\theta}$,
-  a trajectory. If $H(z_0)=-z_0$, then $y(0)=-z(\pi)=z_0=z(0)$, so $y=z$ by uniqueness
-  (\cref{lem:spherical_flow_unique}), i.e.\ $z(\theta+\pi)=-z(\theta)$; at $\theta=\pi$
-  this gives $z(2\pi)=-z(\pi)=z_0$.
+  every ingredient of $\hat q$ is unchanged. For $\theta\in[0,\pi]$ one has
+  $\theta+\pi\in[\pi,2\pi]\subseteq[0,2\pi]$, so
+  $y'(\theta)=-z'(\theta+\pi)=-\hat q\,e^{i(\theta+\pi)}=\hat q(\theta,y(\theta))e^{i\theta}$
+  holds on $[0,\pi]$ — $y$ solves the truncated ODE there (only there: this is why the
+  comparison below happens on the half interval). If $H(z_0)=-z_0$, then
+  $y(0)=-z(\pi)=z_0=z(0)$, and $z$ restricted to $[0,\pi]$ solves the same ODE
+  (\cref{lem:spherical_flow_spec}), so $y=z$ on $[0,\pi]$ by the two-solution
+  uniqueness on $[0,\pi]$ (\cref{lem:truncated_field_solution_unique} with $T=\pi$),
+  i.e.\ $z(\theta+\pi)=-z(\theta)$ for $\theta\in[0,\pi]$; at $\theta=\pi$ this gives
+  $z(2\pi)=-z(\pi)=z_0$.
 \end{proof}
 
 \begin{lemma}
@@ -1002,7 +1028,12 @@ large ball covers $[0,2\pi]$.
   $\kappa$-homotopy (flow $L^1$-continuity, the estimate of
   \cref{lem:invariant_admissible_domain}) keeps $E\ne0$ on the boundary circle
   throughout. The Euclidean \texttt{errorMap\_winding\_eq\_one} \emph{value} is not
-  reusable; only \cref{thm:existence_of_zero} is.
+  reusable; only \cref{thm:existence_of_zero} is. \emph{Caveat for the formalization:}
+  \cref{lem:invariant_admissible_domain} takes $\kappa^\ast$ \emph{continuous}, while the
+  step model is piecewise constant — compare through continuous approximants of the step,
+  or restate the transport with $z^\ast$ merely continuous piecewise-$C^1$ satisfying the
+  integral identity $z^\ast(\theta)=z^\ast(0)+\int_0^\theta F_{\kappa^\ast}(s,z^\ast(s))ds$
+  (which concatenated arcs satisfy); decide when S2-D is dispatched.
 \end{proof}
 
 \section{Simplicity and capstone (S2-E)}

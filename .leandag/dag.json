@@ -4073,7 +4073,7 @@
       "lean_file": "Gluck/Sphere.lean",
       "dep_count": 0,
       "rdep_count": 2,
-      "descendant_count": 29,
+      "descendant_count": 35,
       "proof_size_tex": 344,
       "effort_local": 0,
       "proof_size_tex_total": 344,
@@ -4192,7 +4192,7 @@
       "effort_local": 1288,
       "proof_size_tex_total": null,
       "proof_size_lean_total": null,
-      "effort_total": 15070
+      "effort_total": 13561
     },
     {
       "id": "def:spherical_speed",
@@ -4214,7 +4214,7 @@
       "lean_file": "Gluck/Sphere.lean",
       "dep_count": 1,
       "rdep_count": 7,
-      "descendant_count": 27,
+      "descendant_count": 33,
       "proof_size_tex": null,
       "effort_local": 0,
       "proof_size_tex_total": null,
@@ -4335,16 +4335,16 @@
     {
       "id": "lem:spherical_speed_circle",
       "type": "lemma",
-      "title": "geodesic-circle sanity anchor",
+      "title": "",
       "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "For $r>0$ let $\\kappa\\equiv(1-r^2)/(2r)$ be the constant geodesic curvature of the\n  spherical circle of stereographic radius $r$, and let $z=-r\\,i\\,e^{i\\theta}$ be the point\n  of that circle at tangent angle $\\theta$ (counterclockwise gauge). Then\n  $q_\\kappa(\\theta,z)=r$: the gauge speed reproduces the Euclidean radius. This is the\n  decisive machine-checked \\emph{sign certificate} of \\cref{sec:sphere_conformal} — with\n  the opposite sign convention the value would be $\\ne r$ and the build would fail.",
+      "statement": "ok\n[geodesic-circle sanity anchor]\n  \n  \n  \n  For $r>0$ let $\\kappa\\equiv(1-r^2)/(2r)$ be the constant geodesic curvature of the\n  spherical circle of stereographic radius $r$, and let $z=-r\\,i\\,e^{i\\theta}$ be the point\n  of that circle at tangent angle $\\theta$ (counterclockwise gauge). Then\n  $q_\\kappa(\\theta,z)=r$: the gauge speed reproduces the Euclidean radius. This is the\n  decisive machine-checked \\emph{sign certificate} of \\cref{sec:sphere_conformal} — with\n  the opposite sign convention the value would be $\\ne r$ and the build would fail.",
       "uses": [
         "def:spherical_speed"
       ],
       "lean_name": "Gluck.sphericalSpeed_circle",
-      "proved": false,
+      "proved": true,
       "mathlib_ok": false,
-      "proof_tex": "\n  $\\|z\\|=r$ and $\\langle z,\\,i e^{i\\theta}\\rangle=-r\\,\\|i e^{i\\theta}\\|^2=-r$, so the\n  denominator is $2(\\kappa+r)=2\\bigl(\\tfrac{1-r^2}{2r}+r\\bigr)=\\tfrac{1+r^2}{r}$ and\n  $q=\\dfrac{1+r^2}{(1+r^2)/r}=r$.\n",
+      "proof_tex": "\n\n\\leanok\n  $\\|z\\|=r$ and $\\langle z,\\,i e^{i\\theta}\\rangle=-r\\,\\|i e^{i\\theta}\\|^2=-r$, so the\n  denominator is $2(\\kappa+r)=2\\bigl(\\tfrac{1-r^2}{2r}+r\\bigr)=\\tfrac{1+r^2}{r}$ and\n  $q=\\dfrac{1+r^2}{(1+r^2)/r}=r$.\n",
       "lean_source": "lemma sphericalSpeed_circle {r : ℝ} (hr : 0 < r) (θ : ℝ) :\n    sphericalSpeed (fun _ => (1 - r ^ 2) / (2 * r)) θ\n      ((-r) • (Complex.I * Complex.exp ((θ : ℂ) * Complex.I))) = r := by\n  set v := Complex.I * Complex.exp ((θ : ℂ) * Complex.I) with hv\n  have hvnorm : ‖v‖ = 1 := by\n    rw [hv, norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul]\n  have hinner : ⟪(-r) • v, v⟫_ℝ = -r := by\n    rw [real_inner_smul_left, real_inner_self_eq_norm_sq, hvnorm]\n    ring\n  have hznorm : ‖(-r) • v‖ = r := by\n    rw [norm_smul, hvnorm, mul_one, Real.norm_eq_abs, abs_neg, abs_of_pos hr]\n  unfold sphericalSpeed\n  rw [hinner, hznorm]\n  have h1 : (1 : ℝ) + r ^ 2 ≠ 0 := by positivity\n  have hden : 2 * ((1 - r ^ 2) / (2 * r) - -r) = (1 + r ^ 2) / r := by\n    field_simp\n    ring\n  rw [hden, div_div_eq_mul_div, mul_comm (1 + r ^ 2) r, mul_div_assoc,\n    div_self h1, mul_one]",
       "proof_size_lean": 878,
       "has_sorry": false,
@@ -4353,7 +4353,7 @@
       "dep_count": 1,
       "rdep_count": 1,
       "descendant_count": 2,
-      "proof_size_tex": 202,
+      "proof_size_tex": 212,
       "effort_local": 0,
       "proof_size_tex_total": null,
       "proof_size_lean_total": 1315,
@@ -4362,401 +4362,461 @@
     {
       "id": "def:truncated_speed",
       "type": "definition",
-      "title": "truncated gauge speed",
+      "title": "",
       "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "For parameters $R,\\delta$ set\n  \\[\n    \\hat q_{\\kappa,R,\\delta}(\\theta,z)\\;=\\;\n      \\frac{1+\\min(\\|z\\|,R)^2}\n        {2\\,\\max\\bigl(\\kappa(\\theta)-\\langle z,\\,i\\,e^{i\\theta}\\rangle_{\\mathbb R},\\ \\delta\\bigr)}.\n  \\]\n  On the \\emph{admissible set}\n  $\\{(\\theta,z):\\|z\\|\\le R\\ \\wedge\\ \\kappa(\\theta)-\\langle z,i e^{i\\theta}\\rangle\\ge\\delta\\}$\n  both clamps are inactive and $\\hat q=q_\\kappa$; off it, $\\hat q$ is a globally tame\n  surrogate.",
+      "statement": "ok\n[truncated gauge speed]\n  \n  \n  \n  For parameters $R,\\delta$ set\n  \\[\n    \\hat q_{\\kappa,R,\\delta}(\\theta,z)\\;=\\;\n      \\frac{1+\\min(\\|z\\|,R)^2}\n        {2\\,\\max\\bigl(\\kappa(\\theta)-\\langle z,\\,i\\,e^{i\\theta}\\rangle_{\\mathbb R},\\ \\delta\\bigr)}.\n  \\]\n  On the \\emph{admissible set}\n  $\\{(\\theta,z):\\|z\\|\\le R\\ \\wedge\\ \\kappa(\\theta)-\\langle z,i e^{i\\theta}\\rangle\\ge\\delta\\}$\n  both clamps are inactive and $\\hat q=q_\\kappa$; off it, $\\hat q$ is a globally tame\n  surrogate.",
       "uses": [
         "def:spherical_speed"
       ],
       "lean_name": "Gluck.truncatedSpeed",
-      "proved": false,
+      "proved": true,
       "mathlib_ok": false,
       "proof_tex": "",
-      "lean_source": "",
-      "proof_size_lean": null,
+      "lean_source": "noncomputable def truncatedSpeed (κ : ℝ → ℝ) (R δ θ : ℝ) (z : ℂ) : ℝ :=\n  (1 + (min ‖z‖ R) ^ 2) /\n    (2 * max (κ θ - ⟪z, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ) δ)",
+      "proof_size_lean": 174,
       "has_sorry": false,
       "tex_file": "chapters/Gluck_Sphere.tex",
-      "lean_file": "",
+      "lean_file": "Gluck/Sphere.lean",
       "dep_count": 1,
-      "rdep_count": 8,
-      "descendant_count": 21,
+      "rdep_count": 9,
+      "descendant_count": 27,
       "proof_size_tex": null,
-      "effort_local": 438,
+      "effort_local": 0,
       "proof_size_tex_total": null,
-      "proof_size_lean_total": null,
-      "effort_total": 438
+      "proof_size_lean_total": 611,
+      "effort_total": 0
     },
     {
       "id": "lem:truncated_speed_eq",
       "type": "lemma",
-      "title": "truncated speed agrees on the admissible set",
+      "title": "",
       "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "If $\\|z\\|\\le R$ and $\\kappa(\\theta)-\\langle z,i e^{i\\theta}\\rangle_{\\mathbb R}\\ge\\delta$,\n  then $\\hat q_{\\kappa,R,\\delta}(\\theta,z)=q_\\kappa(\\theta,z)$.",
+      "statement": "ok\n[truncated speed agrees on the admissible set]\n  \n  \n  \n  If $\\|z\\|\\le R$ and $\\kappa(\\theta)-\\langle z,i e^{i\\theta}\\rangle_{\\mathbb R}\\ge\\delta$,\n  then $\\hat q_{\\kappa,R,\\delta}(\\theta,z)=q_\\kappa(\\theta,z)$.",
       "uses": [
         "def:truncated_speed",
         "def:spherical_speed"
       ],
       "lean_name": "Gluck.truncatedSpeed_eq",
-      "proved": false,
+      "proved": true,
       "mathlib_ok": false,
-      "proof_tex": "\n  $\\min(\\|z\\|,R)=\\|z\\|$ by the first hypothesis and\n  $\\max(\\kappa(\\theta)-\\langle z,i e^{i\\theta}\\rangle,\\delta)\n   =\\kappa(\\theta)-\\langle z,i e^{i\\theta}\\rangle$ by the second; the two formulas\n  coincide.\n",
-      "lean_source": "",
-      "proof_size_lean": null,
+      "proof_tex": "\n\n\\leanok\n  $\\min(\\|z\\|,R)=\\|z\\|$ by the first hypothesis and\n  $\\max(\\kappa(\\theta)-\\langle z,i e^{i\\theta}\\rangle,\\delta)\n   =\\kappa(\\theta)-\\langle z,i e^{i\\theta}\\rangle$ by the second; the two formulas\n  coincide.\n",
+      "lean_source": "lemma truncatedSpeed_eq {κ : ℝ → ℝ} {R δ θ : ℝ} {z : ℂ} (hz : ‖z‖ ≤ R)\n    (hδ : δ ≤ κ θ - ⟪z, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ) :\n    truncatedSpeed κ R δ θ z = sphericalSpeed κ θ z := by\n  unfold truncatedSpeed sphericalSpeed\n  rw [min_eq_left hz, max_eq_left hδ]",
+      "proof_size_lean": 281,
       "has_sorry": false,
       "tex_file": "chapters/Gluck_Sphere.tex",
-      "lean_file": "",
+      "lean_file": "Gluck/Sphere.lean",
       "dep_count": 2,
       "rdep_count": 1,
       "descendant_count": 3,
-      "proof_size_tex": 206,
-      "effort_local": 206,
+      "proof_size_tex": 216,
+      "effort_local": 0,
       "proof_size_tex_total": null,
-      "proof_size_lean_total": null,
-      "effort_total": 644
+      "proof_size_lean_total": 892,
+      "effort_total": 0
     },
     {
       "id": "lem:truncated_speed_pos",
       "type": "lemma",
-      "title": "truncated speed is positive",
+      "title": "",
       "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "If $\\delta>0$ then $\\hat q_{\\kappa,R,\\delta}(\\theta,z)>0$ for all $\\theta,z$.",
+      "statement": "ok\n[truncated speed is positive]\n  \n  \n  \n  If $\\delta>0$ then $\\hat q_{\\kappa,R,\\delta}(\\theta,z)>0$ for all $\\theta,z$.",
       "uses": [
         "def:truncated_speed"
       ],
       "lean_name": "Gluck.truncatedSpeed_pos",
-      "proved": false,
+      "proved": true,
       "mathlib_ok": false,
-      "proof_tex": "\n  The numerator is $\\ge 1>0$ (a square plus one) and the denominator is\n  $\\ge 2\\delta>0$; a quotient of positives is positive.\n",
-      "lean_source": "",
-      "proof_size_lean": null,
+      "proof_tex": "\n\n\\leanok\n  The numerator is $\\ge 1>0$ (a square plus one) and the denominator is\n  $\\ge 2\\delta>0$; a quotient of positives is positive.\n",
+      "lean_source": "lemma truncatedSpeed_pos {κ : ℝ → ℝ} {R δ θ : ℝ} {z : ℂ} (hδ : 0 < δ) :\n    0 < truncatedSpeed κ R δ θ z := by\n  have hnum : (0 : ℝ) < 1 + (min ‖z‖ R) ^ 2 := by positivity\n  have hden : (0 : ℝ) <\n      2 * max (κ θ - ⟪z, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ) δ :=\n    mul_pos two_pos (hδ.trans_le (le_max_right _ _))\n  exact div_pos hnum hden",
+      "proof_size_lean": 354,
       "has_sorry": false,
       "tex_file": "chapters/Gluck_Sphere.tex",
-      "lean_file": "",
+      "lean_file": "Gluck/Sphere.lean",
       "dep_count": 1,
-      "rdep_count": 1,
-      "descendant_count": 3,
-      "proof_size_tex": 125,
-      "effort_local": 125,
+      "rdep_count": 2,
+      "descendant_count": 16,
+      "proof_size_tex": 135,
+      "effort_local": 0,
       "proof_size_tex_total": null,
-      "proof_size_lean_total": null,
-      "effort_total": 563
+      "proof_size_lean_total": 965,
+      "effort_total": 0
     },
     {
       "id": "lem:truncated_speed_le",
       "type": "lemma",
-      "title": "truncated speed is bounded",
+      "title": "",
       "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "If $0\\le R$ and $0<\\delta$ then\n  $\\hat q_{\\kappa,R,\\delta}(\\theta,z)\\le B:=\\dfrac{1+R^2}{2\\delta}$ for all $\\theta,z$.",
+      "statement": "ok\n[truncated speed is bounded]\n  \n  \n  \n  If $0\\le R$ and $0<\\delta$ then\n  $\\hat q_{\\kappa,R,\\delta}(\\theta,z)\\le B:=\\dfrac{1+R^2}{2\\delta}$ for all $\\theta,z$.",
       "uses": [
         "def:truncated_speed"
       ],
       "lean_name": "Gluck.truncatedSpeed_le",
-      "proved": false,
+      "proved": true,
       "mathlib_ok": false,
-      "proof_tex": "\n  $\\min(\\|z\\|,R)\\le R$ bounds the numerator by $1+R^2$, and the denominator is\n  $\\ge 2\\delta$; divide.\n",
-      "lean_source": "",
-      "proof_size_lean": null,
+      "proof_tex": "\n\n\\leanok\n  $\\min(\\|z\\|,R)\\le R$ bounds the numerator by $1+R^2$, and the denominator is\n  $\\ge 2\\delta$; divide.\n",
+      "lean_source": "lemma truncatedSpeed_le {κ : ℝ → ℝ} {R δ θ : ℝ} {z : ℂ} (hR : 0 ≤ R)\n    (hδ : 0 < δ) : truncatedSpeed κ R δ θ z ≤ (1 + R ^ 2) / (2 * δ) := by\n  have hmin0 : (0 : ℝ) ≤ min ‖z‖ R := le_min (norm_nonneg _) hR\n  have hminR : min ‖z‖ R ≤ R := min_le_right _ _\n  have hnum : 1 + (min ‖z‖ R) ^ 2 ≤ 1 + R ^ 2 := by nlinarith\n  have hden : 2 * δ ≤\n      2 * max (κ θ - ⟪z, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ) δ := by\n    have := le_max_right (κ θ - ⟪z, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ) δ\n    linarith\n  exact div_le_div₀ (by positivity) hnum (by positivity) hden",
+      "proof_size_lean": 585,
       "has_sorry": false,
       "tex_file": "chapters/Gluck_Sphere.tex",
-      "lean_file": "",
+      "lean_file": "Gluck/Sphere.lean",
       "dep_count": 1,
       "rdep_count": 1,
       "descendant_count": 15,
-      "proof_size_tex": 101,
-      "effort_local": 101,
+      "proof_size_tex": 111,
+      "effort_local": 0,
       "proof_size_tex_total": null,
-      "proof_size_lean_total": null,
-      "effort_total": 539
+      "proof_size_lean_total": 1196,
+      "effort_total": 0
     },
     {
       "id": "lem:truncated_speed_lipschitz",
       "type": "lemma",
-      "title": "truncated speed is Lipschitz in $z$, uniformly in $\\theta$",
+      "title": "",
       "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "If $0\\le R$ and $0<\\delta$ there is $L\\ge 0$ (explicitly\n  $L=\\tfrac{R}{\\delta}+\\tfrac{1+R^2}{2\\delta^2}$ works) such that for every $\\theta$ the\n  map $z\\mapsto\\hat q_{\\kappa,R,\\delta}(\\theta,z)$ is $L$-Lipschitz on all of $\\mathbb C$.",
+      "statement": "ok\n[truncated speed is Lipschitz in $z$, uniformly in $\\theta$]\n  \n  \n  \n  If $0\\le R$ and $0<\\delta$ there is $L\\ge 0$ (explicitly\n  $L=\\tfrac{R}{\\delta}+\\tfrac{1+R^2}{2\\delta^2}$ works) such that for every $\\theta$ the\n  map $z\\mapsto\\hat q_{\\kappa,R,\\delta}(\\theta,z)$ is $L$-Lipschitz on all of $\\mathbb C$.",
       "uses": [
         "def:truncated_speed"
       ],
       "lean_name": "Gluck.truncatedSpeed_lipschitz",
-      "proved": false,
+      "proved": true,
       "mathlib_ok": false,
-      "proof_tex": "\n  Write $\\hat q=N/D$ with $N(z)=1+\\min(\\|z\\|,R)^2$ and\n  $D(z)=2\\max(\\kappa(\\theta)-\\langle z,i e^{i\\theta}\\rangle,\\delta)$. The norm is\n  $1$-Lipschitz, the clamp $x\\mapsto\\min(x,R)$ is $1$-Lipschitz and bounded by $R$ (for\n  $x\\ge0$), so $N$ is $2R$-Lipschitz (difference of squares of clamped values, both\n  $\\le R$) and $1\\le N\\le 1+R^2$. The linear functional\n  $z\\mapsto\\langle z,i e^{i\\theta}\\rangle$ is $1$-Lipschitz (Cauchy--Schwarz against a unit\n  vector) and $x\\mapsto\\max(x,\\delta)$ is $1$-Lipschitz, so $D$ is $2$-Lipschitz and\n  $D\\ge 2\\delta$. Then\n  \\[\n    \\Bigl|\\frac{N(z)}{D(z)}-\\frac{N(w)}{D(w)}\\Bigr|\n    \\le\\frac{|N(z)-N(w)|}{D(w)}+N(z)\\,\\frac{|D(z)-D(w)|}{D(z)D(w)}\n    \\le\\Bigl(\\frac{2R}{2\\delta}+\\frac{(1+R^2)\\cdot2}{4\\delta^2}\\Bigr)|z-w| .\n  \\]\n  (Formalization route: reciprocal is $\\tfrac1{(2\\delta)^2}$-Lipschitz on\n  $[2\\delta,\\infty)$ by the mean value inequality; compose and multiply\n  bounded-Lipschitz factors.)\n",
-      "lean_source": "",
-      "proof_size_lean": null,
+      "proof_tex": "\n\n\\leanok\n  Write $\\hat q=N/D$ with $N(z)=1+\\min(\\|z\\|,R)^2$ and\n  $D(z)=2\\max(\\kappa(\\theta)-\\langle z,i e^{i\\theta}\\rangle,\\delta)$. The norm is\n  $1$-Lipschitz, the clamp $x\\mapsto\\min(x,R)$ is $1$-Lipschitz and bounded by $R$ (for\n  $x\\ge0$), so $N$ is $2R$-Lipschitz (difference of squares of clamped values, both\n  $\\le R$) and $1\\le N\\le 1+R^2$. The linear functional\n  $z\\mapsto\\langle z,i e^{i\\theta}\\rangle$ is $1$-Lipschitz (Cauchy--Schwarz against a unit\n  vector) and $x\\mapsto\\max(x,\\delta)$ is $1$-Lipschitz, so $D$ is $2$-Lipschitz and\n  $D\\ge 2\\delta$. Then\n  \\[\n    \\Bigl|\\frac{N(z)}{D(z)}-\\frac{N(w)}{D(w)}\\Bigr|\n    \\le\\frac{|N(z)-N(w)|}{D(w)}+N(z)\\,\\frac{|D(z)-D(w)|}{D(z)D(w)}\n    \\le\\Bigl(\\frac{2R}{2\\delta}+\\frac{(1+R^2)\\cdot2}{4\\delta^2}\\Bigr)|z-w| .\n  \\]\n  (Formalization route: reciprocal is $\\tfrac1{(2\\delta)^2}$-Lipschitz on\n  $[2\\delta,\\infty)$ by the mean value inequality; compose and multiply\n  bounded-Lipschitz factors.)\n",
+      "lean_source": "lemma truncatedSpeed_lipschitz {κ : ℝ → ℝ} {R δ : ℝ} (hR : 0 ≤ R) (hδ : 0 < δ) :\n    ∃ L : ℝ≥0, ∀ θ, LipschitzWith L (fun z => truncatedSpeed κ R δ θ z) := by\n  refine ⟨(2 * R / (2 * δ) + (1 + R ^ 2) * 2 / (2 * δ) ^ 2).toNNReal,\n    fun θ => LipschitzWith.of_dist_le_mul fun z w => ?_⟩\n  rw [Real.dist_eq, dist_eq_norm]\n  simp only [truncatedSpeed]\n  set v : ℂ := Complex.I * Complex.exp ((θ : ℂ) * Complex.I) with hv\n  have hvnorm : ‖v‖ = 1 := by\n    rw [hv, norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul]\n  have hminz : (0 : ℝ) ≤ min ‖z‖ R := le_min (norm_nonneg _) hR\n  have hminw : (0 : ℝ) ≤ min ‖w‖ R := le_min (norm_nonneg _) hR\n  have hminzR : min ‖z‖ R ≤ R := min_le_right _ _\n  have hminwR : min ‖w‖ R ≤ R := min_le_right _ _\n\n  have hmin_diff : |min ‖z‖ R - min ‖w‖ R| ≤ ‖z - w‖ := by\n    refine (abs_min_sub_min_le_max _ _ _ _).trans ?_\n    rw [sub_self, abs_zero, max_eq_left (abs_nonneg _)]\n    exact abs_norm_sub_norm_le z w\n\n  have hnum_diff : |(1 + (min ‖z‖ R) ^ 2) - (1 + (min ‖w‖ R) ^ 2)|\n      ≤ 2 * R * ‖z - w‖ := by\n    have expand : (1 + (min ‖z‖ R) ^ 2) - (1 + (min ‖w‖ R) ^ 2)\n        = (min ‖z‖ R + min ‖w‖ R) * (min ‖z‖ R - min ‖w‖ R) := by ring\n    rw [expand, abs_mul]\n    have h1 : |min ‖z‖ R + min ‖w‖ R| ≤ 2 * R := by\n      rw [abs_of_nonneg (by linarith)]\n      linarith\n    exact mul_le_mul h1 hmin_diff (abs_nonneg _) (by linarith)\n\n  have hinner : |⟪z, v⟫_ℝ - ⟪w, v⟫_ℝ| ≤ ‖z - w‖ := by\n    rw [← inner_sub_left]\n    have h := abs_real_inner_le_norm (z - w) v\n    rwa [hvnorm, mul_one] at h\n\n  have hden_diff : |2 * max (κ θ - ⟪z, v⟫_ℝ) δ - 2 * max (κ θ - ⟪w, v⟫_ℝ) δ|\n      ≤ 2 * ‖z - w‖ := by\n    have hmax : |max (κ θ - ⟪z, v⟫_ℝ) δ - max (κ θ - ⟪w, v⟫_ℝ) δ|\n        ≤ |⟪z, v⟫_ℝ - ⟪w, v⟫_ℝ| := by\n      refine (abs_max_sub_max_le_max _ _ _ _).trans ?_\n      rw [sub_self, abs_zero, max_eq_left (abs_nonneg _)]\n      have : (κ θ - ⟪z, v⟫_ℝ) - (κ θ - ⟪w, v⟫_ℝ) = -(⟪z, v⟫_ℝ - ⟪w, v⟫_ℝ) := by\n        ring\n      rw [this, abs_neg]\n    calc |2 * max (κ θ - ⟪z, v⟫_ℝ) δ - 2 * max (κ θ - ⟪w, v⟫_ℝ) δ|\n        = 2 * |max (κ θ - ⟪z, v⟫_ℝ) δ - max (κ θ - ⟪w, v⟫_ℝ) δ| := by\n          rw [← mul_sub, abs_mul, abs_two]\n      _ ≤ 2 * ‖z - w‖ := by\n          have := hmax.trans hinner\n          linarith\n\n  have hdenz : 2 * δ ≤ 2 * max (κ θ - ⟪z, v⟫_ℝ) δ := by\n    have := le_max_right (κ θ - ⟪z, v⟫_ℝ) δ\n    linarith\n  have hdenw : 2 * δ ≤ 2 * max (κ θ - ⟪w, v⟫_ℝ) δ := by\n    have := le_max_right (κ θ - ⟪w, v⟫_ℝ) δ\n    linarith\n\n  have hkey := abs_div_sub_div_le (by positivity : (0 : ℝ) < 2 * δ) hdenz hdenw\n    (by positivity : (0 : ℝ) ≤ 1 + (min ‖z‖ R) ^ 2)\n    (by nlinarith : 1 + (min ‖z‖ R) ^ 2 ≤ 1 + R ^ 2) hnum_diff hden_diff\n  refine hkey.trans (le_of_eq ?_)\n  rw [Real.coe_toNNReal _ (by positivity)]\n  ring",
+      "proof_size_lean": 2762,
       "has_sorry": false,
       "tex_file": "chapters/Gluck_Sphere.tex",
-      "lean_file": "",
+      "lean_file": "Gluck/Sphere.lean",
       "dep_count": 1,
       "rdep_count": 3,
-      "descendant_count": 15,
-      "proof_size_tex": 944,
-      "effort_local": 944,
+      "descendant_count": 18,
+      "proof_size_tex": 954,
+      "effort_local": 0,
       "proof_size_tex_total": null,
-      "proof_size_lean_total": null,
-      "effort_total": 1382
+      "proof_size_lean_total": 3373,
+      "effort_total": 0
     },
     {
       "id": "lem:truncated_speed_continuous",
       "type": "lemma",
-      "title": "truncated speed is jointly continuous",
+      "title": "",
       "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "If $\\kappa$ is continuous and $0<\\delta$, then\n  $(\\theta,z)\\mapsto\\hat q_{\\kappa,R,\\delta}(\\theta,z)$ is continuous on\n  $\\mathbb R\\times\\mathbb C$.",
+      "statement": "ok\n[truncated speed is jointly continuous]\n  \n  \n  \n  If $\\kappa$ is continuous and $0<\\delta$, then\n  $(\\theta,z)\\mapsto\\hat q_{\\kappa,R,\\delta}(\\theta,z)$ is continuous on\n  $\\mathbb R\\times\\mathbb C$.",
       "uses": [
         "def:truncated_speed"
       ],
       "lean_name": "Gluck.truncatedSpeed_continuous",
-      "proved": false,
+      "proved": true,
       "mathlib_ok": false,
-      "proof_tex": "\n  Numerator and denominator are continuous ($\\min$, $\\max$, the norm, $\\kappa$, the inner\n  product against the continuous unit field $\\theta\\mapsto i e^{i\\theta}$), and the\n  denominator never vanishes (it is $\\ge 2\\delta>0$), so the quotient is continuous\n  everywhere — no slab restriction, unlike \\cref{lem:spherical_speed_continuous}.\n",
-      "lean_source": "",
-      "proof_size_lean": null,
+      "proof_tex": "\n\n\\leanok\n  Numerator and denominator are continuous ($\\min$, $\\max$, the norm, $\\kappa$, the inner\n  product against the continuous unit field $\\theta\\mapsto i e^{i\\theta}$), and the\n  denominator never vanishes (it is $\\ge 2\\delta>0$), so the quotient is continuous\n  everywhere — no slab restriction, unlike \\cref{lem:spherical_speed_continuous}.\n",
+      "lean_source": "lemma truncatedSpeed_continuous {κ : ℝ → ℝ} {R δ : ℝ} (hκ : Continuous κ)\n    (hδ : 0 < δ) :\n    Continuous fun p : ℝ × ℂ => truncatedSpeed κ R δ p.1 p.2 := by\n  have hexp : Continuous fun p : ℝ × ℂ =>\n      Complex.I * Complex.exp ((p.1 : ℂ) * Complex.I) :=\n    continuous_const.mul (Complex.continuous_exp.comp\n      ((Complex.continuous_ofReal.comp continuous_fst).mul continuous_const))\n  have hnum : Continuous fun p : ℝ × ℂ => 1 + (min ‖p.2‖ R) ^ 2 :=\n    continuous_const.add ((continuous_snd.norm.min continuous_const).pow 2)\n  have hden : Continuous fun p : ℝ × ℂ =>\n      2 * max (κ p.1 - ⟪p.2, Complex.I * Complex.exp ((p.1 : ℂ) * Complex.I)⟫_ℝ) δ :=\n    continuous_const.mul\n      (((hκ.comp continuous_fst).sub (continuous_snd.inner hexp)).max continuous_const)\n  exact hnum.div hden fun p =>\n    ne_of_gt (mul_pos two_pos (hδ.trans_le (le_max_right _ _)))",
+      "proof_size_lean": 869,
       "has_sorry": false,
       "tex_file": "chapters/Gluck_Sphere.tex",
-      "lean_file": "",
+      "lean_file": "Gluck/Sphere.lean",
       "dep_count": 1,
-      "rdep_count": 1,
-      "descendant_count": 15,
-      "proof_size_tex": 337,
-      "effort_local": 337,
+      "rdep_count": 2,
+      "descendant_count": 16,
+      "proof_size_tex": 347,
+      "effort_local": 0,
       "proof_size_tex_total": null,
-      "proof_size_lean_total": null,
-      "effort_total": 775
+      "proof_size_lean_total": 1480,
+      "effort_total": 0
     },
     {
       "id": "def:truncated_field",
       "type": "definition",
-      "title": "truncated reconstruction field",
+      "title": "",
       "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "$F_{\\kappa,R,\\delta}(\\theta,z)=\\hat q_{\\kappa,R,\\delta}(\\theta,z)\\,e^{i\\theta}\n   \\in\\mathbb C$. Since $\\|e^{i\\theta}\\|=1$, the field inherits the bound\n  $\\|F\\|\\le B$ of \\cref{lem:truncated_speed_le} and the Lipschitz constant $L$ of\n  \\cref{lem:truncated_speed_lipschitz} (the difference at fixed $\\theta$ is\n  $(\\hat q(z)-\\hat q(w))\\,e^{i\\theta}$).",
+      "statement": "ok\n[truncated reconstruction field]\n  \n  \n  \n  $F_{\\kappa,R,\\delta}(\\theta,z)=\\hat q_{\\kappa,R,\\delta}(\\theta,z)\\,e^{i\\theta}\n   \\in\\mathbb C$. Since $\\|e^{i\\theta}\\|=1$, the field inherits the bound\n  $\\|F\\|\\le B$ of \\cref{lem:truncated_speed_le} and the Lipschitz constant $L$ of\n  \\cref{lem:truncated_speed_lipschitz} (the difference at fixed $\\theta$ is\n  $(\\hat q(z)-\\hat q(w))\\,e^{i\\theta}$).",
       "uses": [
         "def:truncated_speed"
       ],
       "lean_name": "Gluck.truncatedField",
-      "proved": false,
+      "proved": true,
       "mathlib_ok": false,
       "proof_tex": "",
-      "lean_source": "",
-      "proof_size_lean": null,
+      "lean_source": "noncomputable def truncatedField (κ : ℝ → ℝ) (R δ θ : ℝ) (z : ℂ) : ℂ :=\n  truncatedSpeed κ R δ θ z • Complex.exp ((θ : ℂ) * Complex.I)",
+      "proof_size_lean": 134,
       "has_sorry": false,
       "tex_file": "chapters/Gluck_Sphere.tex",
-      "lean_file": "",
+      "lean_file": "Gluck/Sphere.lean",
       "dep_count": 1,
+      "rdep_count": 6,
+      "descendant_count": 20,
+      "proof_size_tex": null,
+      "effort_local": 0,
+      "proof_size_tex_total": null,
+      "proof_size_lean_total": 745,
+      "effort_total": 0
+    },
+    {
+      "id": "lem:norm_truncated_field",
+      "type": "lemma",
+      "title": "field norm equals speed",
+      "chapter": "The spherical converse (S², positive curvature)",
+      "statement": "For $0<\\delta$,\n  $\\|F_{\\kappa,R,\\delta}(\\theta,z)\\|=\\hat q_{\\kappa,R,\\delta}(\\theta,z)$ for all\n  $\\theta,z$.",
+      "uses": [
+        "def:truncated_field",
+        "lem:truncated_speed_pos"
+      ],
+      "lean_name": "Gluck.norm_truncatedField",
+      "proved": false,
+      "mathlib_ok": false,
+      "proof_tex": "\n  $\\|\\hat q\\,e^{i\\theta}\\|=|\\hat q|\\,\\|e^{i\\theta}\\|=|\\hat q|=\\hat q$, since the unit\n  field has norm one and $\\hat q>0$ by \\cref{lem:truncated_speed_pos}.\n",
+      "lean_source": "lemma norm_truncatedField {κ : ℝ → ℝ} {R δ : ℝ} (hδ : 0 < δ) (θ : ℝ) (z : ℂ) :\n    ‖truncatedField κ R δ θ z‖ = truncatedSpeed κ R δ θ z := by\n  rw [truncatedField, norm_smul, Real.norm_eq_abs, Complex.norm_exp_ofReal_mul_I,\n    mul_one, abs_of_pos (truncatedSpeed_pos hδ)]",
+      "proof_size_lean": 273,
+      "has_sorry": false,
+      "tex_file": "chapters/Gluck_Sphere.tex",
+      "lean_file": "Gluck/Sphere.lean",
+      "dep_count": 2,
       "rdep_count": 1,
       "descendant_count": 15,
-      "proof_size_tex": null,
-      "effort_local": 351,
+      "proof_size_tex": 154,
+      "effort_local": 0,
       "proof_size_tex_total": null,
-      "proof_size_lean_total": null,
-      "effort_total": 789
+      "proof_size_lean_total": 1372,
+      "effort_total": 0
+    },
+    {
+      "id": "lem:truncated_field_lipschitz",
+      "type": "lemma",
+      "title": "field Lipschitz bound",
+      "chapter": "The spherical converse (S², positive curvature)",
+      "statement": "For $0\\le R$, $0<\\delta$ there is a constant $L$ (the one of\n  \\cref{lem:truncated_speed_lipschitz}) such that for every $\\theta$ the map\n  $z\\mapsto F_{\\kappa,R,\\delta}(\\theta,z)$ is $L$-Lipschitz.",
+      "uses": [
+        "def:truncated_field",
+        "lem:truncated_speed_lipschitz"
+      ],
+      "lean_name": "Gluck.truncatedField_lipschitz",
+      "proved": false,
+      "mathlib_ok": false,
+      "proof_tex": "\n  At fixed $\\theta$,\n  $F(\\theta,z)-F(\\theta,w)=(\\hat q(\\theta,z)-\\hat q(\\theta,w))\\,e^{i\\theta}$, whose norm\n  is $|\\hat q(\\theta,z)-\\hat q(\\theta,w)|\\le L\\|z-w\\|$ by\n  \\cref{lem:truncated_speed_lipschitz}.\n",
+      "lean_source": "lemma truncatedField_lipschitz {κ : ℝ → ℝ} {R δ : ℝ} (hR : 0 ≤ R) (hδ : 0 < δ) :\n    ∃ L : ℝ≥0, ∀ θ, LipschitzWith L (fun z => truncatedField κ R δ θ z) := by\n  obtain ⟨L, hL⟩ := truncatedSpeed_lipschitz (κ := κ) hR hδ\n  refine ⟨L, fun θ => LipschitzWith.of_dist_le_mul fun z w => ?_⟩\n  have h := (hL θ).dist_le_mul z w\n  rw [Real.dist_eq, dist_eq_norm] at h\n  rw [dist_eq_norm, dist_eq_norm]\n  unfold truncatedField\n  rw [← sub_smul, norm_smul, Real.norm_eq_abs, Complex.norm_exp_ofReal_mul_I,\n    mul_one]\n  exact h",
+      "proof_size_lean": 517,
+      "has_sorry": false,
+      "tex_file": "chapters/Gluck_Sphere.tex",
+      "lean_file": "Gluck/Sphere.lean",
+      "dep_count": 2,
+      "rdep_count": 3,
+      "descendant_count": 17,
+      "proof_size_tex": 205,
+      "effort_local": 0,
+      "proof_size_tex_total": null,
+      "proof_size_lean_total": 4024,
+      "effort_total": 0
+    },
+    {
+      "id": "lem:truncated_field_continuous",
+      "type": "lemma",
+      "title": "field joint continuity",
+      "chapter": "The spherical converse (S², positive curvature)",
+      "statement": "If $\\kappa$ is continuous and $0<\\delta$, then\n  $(\\theta,z)\\mapsto F_{\\kappa,R,\\delta}(\\theta,z)$ is continuous on\n  $\\mathbb R\\times\\mathbb C$.",
+      "uses": [
+        "def:truncated_field",
+        "lem:truncated_speed_continuous"
+      ],
+      "lean_name": "Gluck.truncatedField_continuous",
+      "proved": false,
+      "mathlib_ok": false,
+      "proof_tex": "\n  Scalar multiplication of the jointly continuous truncated speed\n  (\\cref{lem:truncated_speed_continuous}) by the continuous unit field\n  $\\theta\\mapsto e^{i\\theta}$.\n",
+      "lean_source": "lemma truncatedField_continuous {κ : ℝ → ℝ} {R δ : ℝ} (hκ : Continuous κ)\n    (hδ : 0 < δ) :\n    Continuous fun p : ℝ × ℂ => truncatedField κ R δ p.1 p.2 := by\n  unfold truncatedField\n  exact (truncatedSpeed_continuous hκ hδ).smul (Complex.continuous_exp.comp\n    ((Complex.continuous_ofReal.comp continuous_fst).mul continuous_const))",
+      "proof_size_lean": 335,
+      "has_sorry": false,
+      "tex_file": "chapters/Gluck_Sphere.tex",
+      "lean_file": "Gluck/Sphere.lean",
+      "dep_count": 2,
+      "rdep_count": 1,
+      "descendant_count": 15,
+      "proof_size_tex": 165,
+      "effort_local": 0,
+      "proof_size_tex_total": null,
+      "proof_size_lean_total": 1949,
+      "effort_total": 0
     },
     {
       "id": "lem:truncated_field_picard",
       "type": "lemma",
-      "title": "Picard--Lindel\\\"of package for the truncated field",
+      "title": "",
       "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "Let $\\kappa$ be continuous, $0\\le R$, $0<\\delta$, and fix an initial-disk radius\n  $r_0\\ge0$. With $a=r_0+2\\pi B+1$, the field $F_{\\kappa,R,\\delta}$ satisfies the\n  Picard--Lindel\\\"of hypothesis package on the time interval $[0,2\\pi]$ with initial time\n  $t_0=0$, center $x_0=0$, inner radius $r_0$ and outer radius $a$: it is Lipschitz in the\n  space variable with a constant uniform in $\\theta$, jointly continuous, norm-bounded by\n  $B$, and satisfies the budget condition $B\\cdot 2\\pi\\le a-r_0$.",
+      "statement": "ok\n[Picard--Lindel\\\"of package for the truncated field]\n  \n  \n  \n  Let $\\kappa$ be continuous, $0\\le R$, $0<\\delta$, and fix an initial-disk radius\n  $r_0\\ge0$. With $a=r_0+2\\pi B+1$, the field $F_{\\kappa,R,\\delta}$ satisfies the\n  Picard--Lindel\\\"of hypothesis package on the time interval $[0,2\\pi]$ with initial time\n  $t_0=0$, center $x_0=0$, inner radius $r_0$ and outer radius $a$: it is Lipschitz in the\n  space variable with a constant uniform in $\\theta$, jointly continuous, norm-bounded by\n  $B$, and satisfies the budget condition $B\\cdot 2\\pi\\le a-r_0$.",
       "uses": [
         "def:truncated_field",
         "lem:truncated_speed_le",
         "lem:truncated_speed_lipschitz",
-        "lem:truncated_speed_continuous"
+        "lem:truncated_speed_continuous",
+        "lem:norm_truncated_field",
+        "lem:truncated_field_lipschitz",
+        "lem:truncated_field_continuous"
       ],
       "lean_name": "Gluck.truncatedField_isPicardLindelof",
-      "proved": false,
+      "proved": true,
       "mathlib_ok": false,
-      "proof_tex": "\n  All four items are \\cref{lem:truncated_speed_lipschitz},\n  \\cref{lem:truncated_speed_continuous}, \\cref{lem:truncated_speed_le}, and the arithmetic\n  choice of $a$ respectively. Because the truncated field is bounded and Lipschitz on all\n  of $\\mathbb C$, restriction to the working ball loses nothing and the budget can always\n  be met by enlarging $a$ — this is the payoff of truncation: one application covers\n  $[0,2\\pi]$ with no continuation argument.\n",
-      "lean_source": "",
-      "proof_size_lean": null,
+      "proof_tex": "\n\n\\leanok\n  All four items are \\cref{lem:truncated_speed_lipschitz},\n  \\cref{lem:truncated_speed_continuous}, \\cref{lem:truncated_speed_le}, and the arithmetic\n  choice of $a$ respectively. Because the truncated field is bounded and Lipschitz on all\n  of $\\mathbb C$, restriction to the working ball loses nothing and the budget can always\n  be met by enlarging $a$ — this is the payoff of truncation: one application covers\n  $[0,2\\pi]$ with no continuation argument.\n",
+      "lean_source": "lemma truncatedField_isPicardLindelof {κ : ℝ → ℝ} {R δ : ℝ} (hκ : Continuous κ)\n    (hR : 0 ≤ R) (hδ : 0 < δ) (r₀ : ℝ≥0) :\n    ∃ a L K : ℝ≥0, IsPicardLindelof (truncatedField κ R δ)\n      (⟨0, Set.left_mem_Icc.mpr (by positivity)⟩ : Set.Icc (0 : ℝ) (2 * π))\n      0 a r₀ L K := by\n  obtain ⟨K, hK⟩ := truncatedField_lipschitz (κ := κ) hR hδ\n  set B : ℝ := (1 + R ^ 2) / (2 * δ) with hB\n  have hB0 : (0 : ℝ) ≤ B := by positivity\n  have ha0 : (0 : ℝ) ≤ 2 * π * B + 1 := by positivity\n  refine ⟨r₀ + (2 * π * B + 1).toNNReal, B.toNNReal, K, ?_, ?_, ?_, ?_⟩\n  · exact fun t _ => (hK t).lipschitzOnWith\n  · intro x _\n    exact ((truncatedField_continuous hκ hδ).comp\n      (continuous_id.prodMk continuous_const)).continuousOn\n  · intro t _ x _\n    rw [norm_truncatedField hδ, Real.coe_toNNReal _ hB0, hB]\n    exact truncatedSpeed_le hR hδ\n  · have hcoe : ((⟨0, Set.left_mem_Icc.mpr (by positivity)⟩ :\n        Set.Icc (0 : ℝ) (2 * π)) : ℝ) = 0 := rfl\n    rw [hcoe, NNReal.coe_add, Real.coe_toNNReal _ ha0, Real.coe_toNNReal _ hB0]\n    simp only [sub_zero]\n    rw [max_eq_left (by positivity : (0 : ℝ) ≤ 2 * π)]\n    ring_nf\n    linarith",
+      "proof_size_lean": 1130,
       "has_sorry": false,
       "tex_file": "chapters/Gluck_Sphere.tex",
-      "lean_file": "",
-      "dep_count": 4,
+      "lean_file": "Gluck/Sphere.lean",
+      "dep_count": 7,
       "rdep_count": 1,
       "descendant_count": 14,
-      "proof_size_tex": 456,
-      "effort_local": 456,
+      "proof_size_tex": 466,
+      "effort_local": 0,
       "proof_size_tex_total": null,
-      "proof_size_lean_total": null,
-      "effort_total": 2627
+      "proof_size_lean_total": 7570,
+      "effort_total": 0
     },
     {
       "id": "lem:spherical_flow_exists",
       "type": "lemma",
-      "title": "global flow with continuous dependence",
+      "title": "",
       "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "Under the hypotheses of \\cref{lem:truncated_field_picard} there is a map\n  $\\alpha:\\mathbb C\\times\\mathbb R\\to\\mathbb C$ such that for every $z_0$ in the closed\n  disk $\\|z_0\\|\\le r_0$: $\\alpha(z_0,0)=z_0$; $\\theta\\mapsto\\alpha(z_0,\\theta)$ has on\n  $[0,2\\pi]$ the derivative $F_{\\kappa,R,\\delta}(\\theta,\\alpha(z_0,\\theta))$ (within the\n  interval); and $\\alpha$ is continuous on\n  $\\{\\|z_0\\|\\le r_0\\}\\times[0,2\\pi]$.",
+      "statement": "ok\n[global flow with continuous dependence]\n  \n  \n  \n  Under the hypotheses of \\cref{lem:truncated_field_picard} there is a map\n  $\\alpha:\\mathbb C\\times\\mathbb R\\to\\mathbb C$ such that for every $z_0$ in the closed\n  disk $\\|z_0\\|\\le r_0$: $\\alpha(z_0,0)=z_0$; $\\theta\\mapsto\\alpha(z_0,\\theta)$ has on\n  $[0,2\\pi]$ the derivative $F_{\\kappa,R,\\delta}(\\theta,\\alpha(z_0,\\theta))$ (within the\n  interval); and $\\alpha$ is continuous on\n  $\\{\\|z_0\\|\\le r_0\\}\\times[0,2\\pi]$.",
       "uses": [
         "lem:truncated_field_picard"
       ],
       "lean_name": "Gluck.exists_sphericalFlow",
-      "proved": false,
+      "proved": true,
       "mathlib_ok": false,
-      "proof_tex": "\n  This is the flow form of the Picard--Lindel\\\"of theorem\n  (in Mathlib:\n  \\texttt{IsPicardLindelof.exists\\_forall\\_mem\\_closedBall\\_eq\\_hasDerivWithinAt\\_continuousOn}),\n  applied to the package of \\cref{lem:truncated_field_picard}. It returns a single\n  $\\alpha$ defined on the product with exactly the three listed properties.\n",
-      "lean_source": "",
-      "proof_size_lean": null,
+      "proof_tex": "\n\n\\leanok\n  This is the flow form of the Picard--Lindel\\\"of theorem\n  (in Mathlib:\n  \\texttt{IsPicardLindelof.exists\\_forall\\_mem\\_closedBall\\_eq\\_hasDerivWithinAt\\_continuousOn}),\n  applied to the package of \\cref{lem:truncated_field_picard}. It returns a single\n  $\\alpha$ defined on the product with exactly the three listed properties.\n",
+      "lean_source": "lemma exists_sphericalFlow {κ : ℝ → ℝ} {R δ : ℝ} (hκ : Continuous κ)\n    (hR : 0 ≤ R) (hδ : 0 < δ) (r₀ : ℝ≥0) :\n    ∃ α : ℂ × ℝ → ℂ,\n      (∀ z₀ ∈ Metric.closedBall (0 : ℂ) r₀,\n        α (z₀, 0) = z₀ ∧\n        ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),\n          HasDerivWithinAt (fun t => α (z₀, t))\n            (truncatedField κ R δ θ (α (z₀, θ))) (Set.Icc 0 (2 * π)) θ) ∧\n      ContinuousOn α (Metric.closedBall 0 r₀ ×ˢ Set.Icc 0 (2 * π)) := by\n  obtain ⟨a, L, K, hPL⟩ := truncatedField_isPicardLindelof hκ hR hδ r₀\n  obtain ⟨α, hα1, hα2⟩ :=\n    hPL.exists_forall_mem_closedBall_eq_hasDerivWithinAt_continuousOn\n  exact ⟨α, fun z₀ hz₀ => hα1 z₀ hz₀, hα2⟩",
+      "proof_size_lean": 645,
       "has_sorry": false,
       "tex_file": "chapters/Gluck_Sphere.tex",
-      "lean_file": "",
+      "lean_file": "Gluck/Sphere.lean",
       "dep_count": 1,
       "rdep_count": 1,
       "descendant_count": 13,
-      "proof_size_tex": 327,
-      "effort_local": 327,
+      "proof_size_tex": 337,
+      "effort_local": 0,
       "proof_size_tex_total": null,
-      "proof_size_lean_total": null,
-      "effort_total": 2954
+      "proof_size_lean_total": 8215,
+      "effort_total": 0
     },
     {
       "id": "def:spherical_flow",
       "type": "definition",
-      "title": "spherical flow",
+      "title": "",
       "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "Fix, once per parameter tuple $(\\kappa,R,\\delta,r_0)$, a choice\n  $\\Phi=\\Phi_{\\kappa,R,\\delta,r_0}:\\mathbb C\\times\\mathbb R\\to\\mathbb C$ of the map\n  supplied by \\cref{lem:spherical_flow_exists}. (The whole flow is chosen at once — not a\n  separate choice per initial point — so downstream continuity statements can consume it.)",
+      "statement": "ok\n[spherical flow]\n  \n  \n  \n  Fix, once per parameter tuple $(\\kappa,R,\\delta,r_0)$, a choice\n  $\\Phi=\\Phi_{\\kappa,R,\\delta,r_0}:\\mathbb C\\times\\mathbb R\\to\\mathbb C$ of the map\n  supplied by \\cref{lem:spherical_flow_exists}. (The whole flow is chosen at once — not a\n  separate choice per initial point — so downstream continuity statements can consume it.)",
       "uses": [
         "lem:spherical_flow_exists"
       ],
       "lean_name": "Gluck.sphericalFlow",
-      "proved": false,
+      "proved": true,
       "mathlib_ok": false,
       "proof_tex": "",
-      "lean_source": "",
-      "proof_size_lean": null,
+      "lean_source": "noncomputable def sphericalFlow (κ : ℝ → ℝ) (R δ : ℝ) (r₀ : ℝ≥0) : ℂ × ℝ → ℂ :=\n  if h : Continuous κ ∧ 0 ≤ R ∧ 0 < δ then\n    Classical.choose (exists_sphericalFlow h.1 h.2.1 h.2.2 r₀)\n  else Prod.fst",
+      "proof_size_lean": 201,
       "has_sorry": false,
       "tex_file": "chapters/Gluck_Sphere.tex",
-      "lean_file": "",
+      "lean_file": "Gluck/Sphere.lean",
       "dep_count": 1,
       "rdep_count": 5,
       "descendant_count": 12,
       "proof_size_tex": null,
-      "effort_local": 328,
+      "effort_local": 0,
       "proof_size_tex_total": null,
-      "proof_size_lean_total": null,
-      "effort_total": 3282
+      "proof_size_lean_total": 8416,
+      "effort_total": 0
     },
     {
       "id": "lem:spherical_flow_spec",
       "type": "lemma",
-      "title": "flow specification",
+      "title": "",
       "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "For $\\|z_0\\|\\le r_0$: $\\Phi(z_0,0)=z_0$ and $\\theta\\mapsto\\Phi(z_0,\\theta)$ solves\n  $z'=F_{\\kappa,R,\\delta}(\\theta,z)$ on $[0,2\\pi]$ (derivative within the interval).",
+      "statement": "ok\n[flow specification]\n  \n  \n  \n  For $\\|z_0\\|\\le r_0$: $\\Phi(z_0,0)=z_0$ and $\\theta\\mapsto\\Phi(z_0,\\theta)$ solves\n  $z'=F_{\\kappa,R,\\delta}(\\theta,z)$ on $[0,2\\pi]$ (derivative within the interval).",
       "uses": [
         "def:spherical_flow"
       ],
       "lean_name": "Gluck.sphericalFlow_spec",
-      "proved": false,
+      "proved": true,
       "mathlib_ok": false,
-      "proof_tex": "\n  Unfold the choice of \\cref{def:spherical_flow}.\n",
-      "lean_source": "",
-      "proof_size_lean": null,
+      "proof_tex": "\n\n\\leanok\n  Unfold the choice of \\cref{def:spherical_flow}.\n",
+      "lean_source": "lemma sphericalFlow_spec {κ : ℝ → ℝ} {R δ : ℝ} (hκ : Continuous κ)\n    (hR : 0 ≤ R) (hδ : 0 < δ) (r₀ : ℝ≥0) {z₀ : ℂ}\n    (hz₀ : z₀ ∈ Metric.closedBall (0 : ℂ) r₀) :\n    sphericalFlow κ R δ r₀ (z₀, 0) = z₀ ∧\n      ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),\n        HasDerivWithinAt (fun t => sphericalFlow κ R δ r₀ (z₀, t))\n          (truncatedField κ R δ θ (sphericalFlow κ R δ r₀ (z₀, θ)))\n          (Set.Icc 0 (2 * π)) θ := by\n  have h : Continuous κ ∧ 0 ≤ R ∧ 0 < δ := ⟨hκ, hR, hδ⟩\n  simp only [sphericalFlow, dif_pos h]\n  exact (Classical.choose_spec (exists_sphericalFlow h.1 h.2.1 h.2.2 r₀)).1 z₀ hz₀",
+      "proof_size_lean": 594,
       "has_sorry": false,
       "tex_file": "chapters/Gluck_Sphere.tex",
-      "lean_file": "",
+      "lean_file": "Gluck/Sphere.lean",
       "dep_count": 1,
-      "rdep_count": 2,
-      "descendant_count": 7,
-      "proof_size_tex": 47,
-      "effort_local": 47,
+      "rdep_count": 4,
+      "descendant_count": 8,
+      "proof_size_tex": 57,
+      "effort_local": 0,
       "proof_size_tex_total": null,
-      "proof_size_lean_total": null,
-      "effort_total": 3329
+      "proof_size_lean_total": 9010,
+      "effort_total": 0
     },
     {
       "id": "lem:spherical_flow_continuousOn",
       "type": "lemma",
-      "title": "flow continuity",
+      "title": "",
       "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "$\\Phi$ is continuous on $\\{\\|z_0\\|\\le r_0\\}\\times[0,2\\pi]$.",
+      "statement": "ok\n[flow continuity]\n  \n  \n  \n  $\\Phi$ is continuous on $\\{\\|z_0\\|\\le r_0\\}\\times[0,2\\pi]$.",
       "uses": [
         "def:spherical_flow"
       ],
       "lean_name": "Gluck.sphericalFlow_continuousOn",
-      "proved": false,
+      "proved": true,
       "mathlib_ok": false,
-      "proof_tex": "\n  Unfold the choice of \\cref{def:spherical_flow}.\n",
-      "lean_source": "",
-      "proof_size_lean": null,
+      "proof_tex": "\n\n\\leanok\n  Unfold the choice of \\cref{def:spherical_flow}.\n",
+      "lean_source": "lemma sphericalFlow_continuousOn {κ : ℝ → ℝ} {R δ : ℝ} (hκ : Continuous κ)\n    (hR : 0 ≤ R) (hδ : 0 < δ) (r₀ : ℝ≥0) :\n    ContinuousOn (sphericalFlow κ R δ r₀)\n      (Metric.closedBall 0 r₀ ×ˢ Set.Icc 0 (2 * π)) := by\n  have h : Continuous κ ∧ 0 ≤ R ∧ 0 < δ := ⟨hκ, hR, hδ⟩\n  simp only [sphericalFlow, dif_pos h]\n  exact (Classical.choose_spec (exists_sphericalFlow h.1 h.2.1 h.2.2 r₀)).2",
+      "proof_size_lean": 388,
       "has_sorry": false,
       "tex_file": "chapters/Gluck_Sphere.tex",
-      "lean_file": "",
+      "lean_file": "Gluck/Sphere.lean",
       "dep_count": 1,
       "rdep_count": 1,
       "descendant_count": 4,
-      "proof_size_tex": 47,
-      "effort_local": 47,
+      "proof_size_tex": 57,
+      "effort_local": 0,
       "proof_size_tex_total": null,
-      "proof_size_lean_total": null,
-      "effort_total": 3329
+      "proof_size_lean_total": 8804,
+      "effort_total": 0
     },
     {
       "id": "lem:spherical_flow_unique",
       "type": "lemma",
-      "title": "flow uniqueness",
+      "title": "",
       "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "If $g:[0,2\\pi]\\to\\mathbb C$ solves $g'=F_{\\kappa,R,\\delta}(\\theta,g(\\theta))$ on\n  $[0,2\\pi]$ with $g(0)=z_0$, $\\|z_0\\|\\le r_0$, then $g=\\Phi(z_0,\\cdot)$ on $[0,2\\pi]$.",
+      "statement": "ok\n[flow uniqueness]\n  \n  \n  \n  If $g:[0,2\\pi]\\to\\mathbb C$ solves $g'=F_{\\kappa,R,\\delta}(\\theta,g(\\theta))$ on\n  $[0,2\\pi]$ with $g(0)=z_0$, $\\|z_0\\|\\le r_0$, then $g=\\Phi(z_0,\\cdot)$ on $[0,2\\pi]$.",
       "uses": [
         "def:spherical_flow",
         "lem:truncated_speed_lipschitz",
         "lem:spherical_flow_spec"
       ],
       "lean_name": "Gluck.sphericalFlow_unique",
-      "proved": false,
+      "proved": true,
       "mathlib_ok": false,
-      "proof_tex": "\n  Both solve the same ODE with the same initial value; the field is Lipschitz in the space\n  variable uniformly in time (\\cref{lem:truncated_speed_lipschitz}), so the standard\n  uniqueness theorem for ODEs (Gr\\\"onwall; in Mathlib\n  \\texttt{ODE\\_solution\\_unique\\_of\\_mem\\_Icc}) applies. Uniqueness is what later\n  identifies explicitly constructed trajectories — circular arcs, reflected trajectories —\n  with the flow.\n",
-      "lean_source": "",
-      "proof_size_lean": null,
+      "proof_tex": "\n\n\\leanok\n  Both solve the same ODE with the same initial value; the field is Lipschitz in the space\n  variable uniformly in time (\\cref{lem:truncated_speed_lipschitz}), so the standard\n  uniqueness theorem for ODEs (Gr\\\"onwall; in Mathlib\n  \\texttt{ODE\\_solution\\_unique\\_of\\_mem\\_Icc}) applies. Uniqueness is what later\n  identifies explicitly constructed trajectories — circular arcs, reflected trajectories —\n  with the flow.\n",
+      "lean_source": "lemma sphericalFlow_unique {κ : ℝ → ℝ} {R δ : ℝ} (hκ : Continuous κ)\n    (hR : 0 ≤ R) (hδ : 0 < δ) (r₀ : ℝ≥0) {z₀ : ℂ}\n    (hz₀ : z₀ ∈ Metric.closedBall (0 : ℂ) r₀) {g : ℝ → ℂ}\n    (hg : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),\n      HasDerivWithinAt g (truncatedField κ R δ θ (g θ)) (Set.Icc 0 (2 * π)) θ)\n    (hg0 : g 0 = z₀) :\n    Set.EqOn g (fun θ => sphericalFlow κ R δ r₀ (z₀, θ))\n      (Set.Icc 0 (2 * π)) := by\n  obtain ⟨K, hK⟩ := truncatedField_lipschitz (κ := κ) hR hδ\n  obtain ⟨hf0, hfderiv⟩ := sphericalFlow_spec hκ hR hδ r₀ hz₀\n\n  have upgrade : ∀ {u : ℝ → ℂ},\n      (∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), HasDerivWithinAt u\n        (truncatedField κ R δ θ (u θ)) (Set.Icc 0 (2 * π)) θ) →\n      ∀ θ ∈ Set.Ico (0 : ℝ) (2 * π), HasDerivWithinAt u\n        (truncatedField κ R δ θ (u θ)) (Set.Ici θ) θ := by\n    intro u hu θ hθ\n    refine (hu θ ⟨hθ.1, hθ.2.le⟩).mono_of_mem_nhdsWithin ?_\n    exact mem_nhdsGE_iff_exists_Icc_subset.mpr\n      ⟨2 * π, hθ.2, Set.Icc_subset_Icc_left hθ.1⟩\n  exact ODE_solution_unique_of_mem_Icc_right\n    (fun t _ => (hK t).lipschitzOnWith)\n    (HasDerivWithinAt.continuousOn hg) (upgrade hg)\n    (fun t _ => Set.mem_univ (g t))\n    (HasDerivWithinAt.continuousOn hfderiv) (upgrade hfderiv)\n    (fun t _ => Set.mem_univ _)\n    (by rw [hg0, hf0])",
+      "proof_size_lean": 1266,
       "has_sorry": false,
       "tex_file": "chapters/Gluck_Sphere.tex",
-      "lean_file": "",
+      "lean_file": "Gluck/Sphere.lean",
       "dep_count": 3,
-      "rdep_count": 2,
-      "descendant_count": 5,
-      "proof_size_tex": 417,
-      "effort_local": 417,
-      "proof_size_tex_total": null,
-      "proof_size_lean_total": null,
-      "effort_total": 3746
-    },
-    {
-      "id": "def:spherical_endpoint",
-      "type": "definition",
-      "title": "spherical endpoint map",
-      "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "$E(z_0)=\\Phi(z_0,2\\pi)-z_0$. A zero of $E$ is a closed trajectory of the truncated\n  flow.",
-      "uses": [
-        "def:spherical_flow"
-      ],
-      "lean_name": "Gluck.sphericalEndpoint",
-      "proved": false,
-      "mathlib_ok": false,
-      "proof_tex": "",
-      "lean_source": "",
-      "proof_size_lean": null,
-      "has_sorry": false,
-      "tex_file": "chapters/Gluck_Sphere.tex",
-      "lean_file": "",
-      "dep_count": 1,
-      "rdep_count": 2,
+      "rdep_count": 1,
       "descendant_count": 4,
-      "proof_size_tex": null,
-      "effort_local": 90,
+      "proof_size_tex": 427,
+      "effort_local": 0,
       "proof_size_tex_total": null,
-      "proof_size_lean_total": null,
-      "effort_total": 3372
+      "proof_size_lean_total": 10276,
+      "effort_total": 0
     },
     {
-      "id": "lem:spherical_endpoint_continuousOn",
+      "id": "lem:truncated_field_solution_unique",
       "type": "lemma",
-      "title": "endpoint map continuity",
+      "title": "two-solution uniqueness on a subinterval",
       "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "$E$ is continuous on the closed disk $\\{\\|z_0\\|\\le r_0\\}$.",
+      "statement": "Let $0\\le R$, $0<\\delta$ and $0\\le T$. If $g_1,g_2:[0,T]\\to\\mathbb C$ both solve\n  $g'=F_{\\kappa,R,\\delta}(\\theta,g(\\theta))$ on $[0,T]$ and $g_1(0)=g_2(0)$, then\n  $g_1=g_2$ on $[0,T]$. (Unlike \\cref{lem:spherical_flow_unique} this compares two\n  arbitrary solutions, on an arbitrary compact interval $[0,T]$ — not necessarily\n  $[0,2\\pi]$ — and makes no reference to the chosen flow $\\Phi$; the field is defined\n  and Lipschitz for all times, so no time restriction is needed.)",
       "uses": [
-        "def:spherical_endpoint",
-        "lem:spherical_flow_continuousOn"
+        "def:truncated_field",
+        "lem:truncated_field_lipschitz"
       ],
-      "lean_name": "Gluck.sphericalEndpoint_continuousOn",
+      "lean_name": "Gluck.truncatedField_solution_unique",
       "proved": false,
       "mathlib_ok": false,
-      "proof_tex": "\n  $z_0\\mapsto\\Phi(z_0,2\\pi)$ is continuous by \\cref{lem:spherical_flow_continuousOn}\n  (restriction of a jointly continuous map to a time slice), and subtracting the identity\n  preserves continuity.\n",
+      "proof_tex": "\n  The field is Lipschitz in the space variable uniformly in time\n  (\\cref{lem:truncated_field_lipschitz}) and each $g_i$ is continuous on $[0,T]$ (it has\n  a derivative there), so the standard two-solution uniqueness theorem applies on\n  $[0,T]$ with initial time at the left endpoint — the same Gr\\\"onwall-type argument as\n  \\cref{lem:spherical_flow_unique}, with $2\\pi$ replaced by $T$.\n",
       "lean_source": "",
       "proof_size_lean": null,
       "has_sorry": false,
@@ -4764,12 +4824,148 @@
       "lean_file": "",
       "dep_count": 2,
       "rdep_count": 1,
-      "descendant_count": 3,
-      "proof_size_tex": 196,
-      "effort_local": 196,
+      "descendant_count": 4,
+      "proof_size_tex": 386,
+      "effort_local": 386,
       "proof_size_tex_total": null,
       "proof_size_lean_total": null,
-      "effort_total": 3615
+      "effort_total": 386
+    },
+    {
+      "id": "def:spherical_endpoint",
+      "type": "definition",
+      "title": "",
+      "chapter": "The spherical converse (S², positive curvature)",
+      "statement": "ok\n[spherical endpoint map]\n  \n  \n  \n  $E(z_0)=\\Phi(z_0,2\\pi)-z_0$. A zero of $E$ is a closed trajectory of the truncated\n  flow.",
+      "uses": [
+        "def:spherical_flow"
+      ],
+      "lean_name": "Gluck.sphericalEndpoint",
+      "proved": true,
+      "mathlib_ok": false,
+      "proof_tex": "",
+      "lean_source": "noncomputable def sphericalEndpoint (κ : ℝ → ℝ) (R δ : ℝ) (r₀ : ℝ≥0)\n    (z₀ : ℂ) : ℂ :=\n  sphericalFlow κ R δ r₀ (z₀, 2 * π) - z₀",
+      "proof_size_lean": 130,
+      "has_sorry": false,
+      "tex_file": "chapters/Gluck_Sphere.tex",
+      "lean_file": "Gluck/Sphere.lean",
+      "dep_count": 1,
+      "rdep_count": 2,
+      "descendant_count": 4,
+      "proof_size_tex": null,
+      "effort_local": 0,
+      "proof_size_tex_total": null,
+      "proof_size_lean_total": 8546,
+      "effort_total": 0
+    },
+    {
+      "id": "lem:spherical_endpoint_continuousOn",
+      "type": "lemma",
+      "title": "",
+      "chapter": "The spherical converse (S², positive curvature)",
+      "statement": "ok\n[endpoint map continuity]\n  \n  \n  \n  $E$ is continuous on the closed disk $\\{\\|z_0\\|\\le r_0\\}$.",
+      "uses": [
+        "def:spherical_endpoint",
+        "lem:spherical_flow_continuousOn"
+      ],
+      "lean_name": "Gluck.sphericalEndpoint_continuousOn",
+      "proved": true,
+      "mathlib_ok": false,
+      "proof_tex": "\n\n\\leanok\n  $z_0\\mapsto\\Phi(z_0,2\\pi)$ is continuous by \\cref{lem:spherical_flow_continuousOn}\n  (restriction of a jointly continuous map to a time slice), and subtracting the identity\n  preserves continuity.\n",
+      "lean_source": "lemma sphericalEndpoint_continuousOn {κ : ℝ → ℝ} {R δ : ℝ} (hκ : Continuous κ)\n    (hR : 0 ≤ R) (hδ : 0 < δ) (r₀ : ℝ≥0) :\n    ContinuousOn (sphericalEndpoint κ R δ r₀) (Metric.closedBall 0 r₀) := by\n  have hmap : Set.MapsTo (fun z₀ : ℂ => (z₀, 2 * π))\n      (Metric.closedBall (0 : ℂ) r₀)\n      (Metric.closedBall (0 : ℂ) r₀ ×ˢ Set.Icc (0 : ℝ) (2 * π)) :=\n    fun z hz => Set.mem_prod.mpr ⟨hz, ⟨by positivity, le_rfl⟩⟩\n  exact (((sphericalFlow_continuousOn hκ hR hδ r₀).comp\n    (continuous_id.prodMk continuous_const).continuousOn hmap).sub\n    continuousOn_id)",
+      "proof_size_lean": 562,
+      "has_sorry": false,
+      "tex_file": "chapters/Gluck_Sphere.tex",
+      "lean_file": "Gluck/Sphere.lean",
+      "dep_count": 2,
+      "rdep_count": 1,
+      "descendant_count": 3,
+      "proof_size_tex": 206,
+      "effort_local": 0,
+      "proof_size_tex_total": null,
+      "proof_size_lean_total": 9496,
+      "effort_total": 0
+    },
+    {
+      "id": "lem:truncated_speed_sub_le",
+      "type": "lemma",
+      "title": "curvature sensitivity of the truncated speed",
+      "chapter": "The spherical converse (S², positive curvature)",
+      "statement": "Let $0\\le R$, $0<\\delta$ and set $M=\\tfrac{1+R^2}{2\\delta^2}$. Then for all\n  $\\kappa,\\kappa^\\ast:\\mathbb R\\to\\mathbb R$, $\\theta$ and $z$,\n  \\[\n    \\bigl|\\hat q_{\\kappa,R,\\delta}(\\theta,z)-\\hat q_{\\kappa^\\ast,R,\\delta}(\\theta,z)\\bigr|\n    \\le M\\,\\bigl|\\kappa(\\theta)-\\kappa^\\ast(\\theta)\\bigr| .\n  \\]",
+      "uses": [
+        "def:truncated_speed"
+      ],
+      "lean_name": "Gluck.truncatedSpeed_sub_le",
+      "proved": false,
+      "mathlib_ok": false,
+      "proof_tex": "\n  The two speeds share the numerator $n=1+(\\min(\\|z\\|,R))^2\\in[1,1+R^2]$ and have\n  denominators $D=2\\max(\\kappa(\\theta)-c,\\delta)$, $D^\\ast=2\\max(\\kappa^\\ast(\\theta)-c,\n  \\delta)$ with $c=\\langle z,ie^{i\\theta}\\rangle$; both are $\\ge2\\delta$, and since\n  $x\\mapsto\\max(x,\\delta)$ is $1$-Lipschitz, $|D-D^\\ast|\\le2|\\kappa(\\theta)-\n  \\kappa^\\ast(\\theta)|$. Hence\n  \\[\n    \\Bigl|\\frac nD-\\frac n{D^\\ast}\\Bigr|\n    =\\frac{n\\,|D-D^\\ast|}{D\\,D^\\ast}\n    \\le\\frac{(1+R^2)\\cdot2|\\kappa(\\theta)-\\kappa^\\ast(\\theta)|}{4\\delta^2}\n    =M\\,|\\kappa(\\theta)-\\kappa^\\ast(\\theta)| .\n  \\]\n  (The quotient-difference bound already extracted for\n  \\cref{lem:truncated_speed_lipschitz} applies verbatim with the numerator difference\n  set to zero.)\n",
+      "lean_source": "",
+      "proof_size_lean": null,
+      "has_sorry": false,
+      "tex_file": "chapters/Gluck_Sphere.tex",
+      "lean_file": "",
+      "dep_count": 1,
+      "rdep_count": 1,
+      "descendant_count": 5,
+      "proof_size_tex": 726,
+      "effort_local": 726,
+      "proof_size_tex_total": null,
+      "proof_size_lean_total": null,
+      "effort_total": 726
+    },
+    {
+      "id": "lem:truncated_field_sub_le",
+      "type": "lemma",
+      "title": "combined field sensitivity",
+      "chapter": "The spherical converse (S², positive curvature)",
+      "statement": "Let $0\\le R$, $0<\\delta$, $M=\\tfrac{1+R^2}{2\\delta^2}$, and let $L$ be the Lipschitz\n  constant of \\cref{lem:truncated_field_lipschitz}. Then for all $\\kappa,\\kappa^\\ast$,\n  $\\theta$, $z$, $\\tilde z$,\n  \\[\n    \\|F_{\\kappa,R,\\delta}(\\theta,z)-F_{\\kappa^\\ast,R,\\delta}(\\theta,\\tilde z)\\|\n    \\le L\\,\\|z-\\tilde z\\|+M\\,|\\kappa(\\theta)-\\kappa^\\ast(\\theta)| .\n  \\]",
+      "uses": [
+        "def:truncated_field",
+        "lem:truncated_field_lipschitz",
+        "lem:truncated_speed_sub_le"
+      ],
+      "lean_name": "Gluck.truncatedField_sub_le",
+      "proved": false,
+      "mathlib_ok": false,
+      "proof_tex": "\n  Insert the mixed term $F_{\\kappa,R,\\delta}(\\theta,\\tilde z)$ and use the triangle\n  inequality: the first difference is controlled by\n  \\cref{lem:truncated_field_lipschitz}; the second is\n  $(\\hat q_{\\kappa}(\\theta,\\tilde z)-\\hat q_{\\kappa^\\ast}(\\theta,\\tilde z))\\,e^{i\\theta}$,\n  of norm $\\le M|\\kappa(\\theta)-\\kappa^\\ast(\\theta)|$ by\n  \\cref{lem:truncated_speed_sub_le}.\n",
+      "lean_source": "",
+      "proof_size_lean": null,
+      "has_sorry": false,
+      "tex_file": "chapters/Gluck_Sphere.tex",
+      "lean_file": "",
+      "dep_count": 3,
+      "rdep_count": 1,
+      "descendant_count": 4,
+      "proof_size_tex": 372,
+      "effort_local": 372,
+      "proof_size_tex_total": null,
+      "proof_size_lean_total": null,
+      "effort_total": 1098
+    },
+    {
+      "id": "lem:gronwall_L1_drive",
+      "type": "lemma",
+      "title": "Gr\\\"onwall with $L^1$ drive",
+      "chapter": "The spherical converse (S², positive curvature)",
+      "statement": "Let $T\\ge0$, $L\\ge0$, $d_0\\ge0$, and let $d,g:[0,T]\\to\\mathbb R$ be continuous with\n  $d\\ge0$ and $g\\ge0$ pointwise. If\n  \\[\n    d(t)\\;\\le\\;d_0+\\int_0^t\\bigl(L\\,d(s)+g(s)\\bigr)\\,ds\n    \\qquad\\text{for all }t\\in[0,T],\n  \\]\n  then\n  \\[\n    \\sup_{t\\in[0,T]}d(t)\\;\\le\\;e^{LT}\\Bigl(d_0+\\int_0^T g\\Bigr) .\n  \\]\n  (Project-side infrastructure: Mathlib's Gr\\\"onwall lemmas bound the derivative by\n  $K\\|f\\|+\\varepsilon$ with a \\emph{constant} $\\varepsilon$; here the drive $g$ is only\n  small in $L^1$, which is exactly the regime of the Dahlberg-style reparametrization.)",
+      "uses": [],
+      "lean_name": "Gluck.gronwall_L1_drive",
+      "proved": false,
+      "mathlib_ok": false,
+      "proof_tex": "\n  Set $u(t)=d_0+\\int_0^t(L\\,d+g)$. The integrand is continuous, so by the fundamental\n  theorem of calculus $u$ is differentiable with $u'(t)=L\\,d(t)+g(t)$, and $d\\le u$ by\n  hypothesis, so $u'(t)\\le L\\,u(t)+g(t)$ ($L\\ge0$, and $u\\ge d\\ge0$). Consider\n  $v(t)=e^{-Lt}u(t)-\\int_0^t g$: it is differentiable with\n  \\[\n    v'(t)=e^{-Lt}\\bigl(u'(t)-L\\,u(t)\\bigr)-g(t)\\le e^{-Lt}g(t)-g(t)\\le0,\n  \\]\n  using $0<e^{-Lt}\\le1$ and $g\\ge0$. A differentiable function with nonpositive\n  derivative on an interval is antitone, so $v(t)\\le v(0)=d_0$, i.e.\n  $e^{-Lt}u(t)\\le d_0+\\int_0^t g\\le d_0+\\int_0^T g$ ($g\\ge0$ again). Hence\n  $d(t)\\le u(t)\\le e^{Lt}\\bigl(d_0+\\int_0^T g\\bigr)\\le e^{LT}\\bigl(d_0+\\int_0^T g\\bigr)$.\n",
+      "lean_source": "",
+      "proof_size_lean": null,
+      "has_sorry": false,
+      "tex_file": "chapters/Gluck_Sphere.tex",
+      "lean_file": "",
+      "dep_count": 0,
+      "rdep_count": 1,
+      "descendant_count": 4,
+      "proof_size_tex": 705,
+      "effort_local": 705,
+      "proof_size_tex_total": 705,
+      "proof_size_lean_total": null,
+      "effort_total": 705
     },
     {
       "id": "lem:invariant_admissible_domain",
@@ -4780,26 +4976,28 @@
       "uses": [
         "def:truncated_speed",
         "def:spherical_flow",
-        "lem:truncated_speed_lipschitz",
+        "lem:spherical_flow_spec",
+        "lem:truncated_field_sub_le",
+        "lem:gronwall_L1_drive",
         "lem:sphere_curvature_lower_bound"
       ],
       "lean_name": "Gluck.invariant_admissible_domain",
       "proved": false,
       "mathlib_ok": false,
-      "proof_tex": "\n  \\emph{Field sensitivity.} At fixed $(\\theta,z)$ the truncated speed depends on $\\kappa$\n  only through $\\max(\\kappa(\\theta)-c,\\delta)$ with denominator $\\ge2\\delta$; the mean\n  value inequality for the reciprocal on $[2\\delta,\\infty)$ gives\n  $|\\hat q_{\\kappa}-\\hat q_{\\kappa^\\ast}|\\le M\\,|\\kappa(\\theta)-\\kappa^\\ast(\\theta)|$.\n  Combining with \\cref{lem:truncated_speed_lipschitz},\n  \\[\n    \\|F_{\\kappa}(\\theta,z)-F_{\\kappa^\\ast}(\\theta,\\tilde z)\\|\n    \\le L\\|z-\\tilde z\\|+M\\,|\\kappa(\\theta)-\\kappa^\\ast(\\theta)| .\n  \\]\n  \\emph{Gr\\\"onwall with $L^1$ drive.} Setting $d(\\theta)=\\|z(\\theta)-z^\\ast(\\theta)\\|$,\n  the integral form\n  $d(\\theta)\\le d(0)+\\int_0^\\theta\\bigl(L\\,d+M|\\kappa-\\kappa^\\ast|\\bigr)$ and\n  Gr\\\"onwall--Bellman give\n  $\\sup_{[0,2\\pi]}d\\le e^{2\\pi L}\\bigl(d(0)+M\\|\\kappa-\\kappa^\\ast\\|_{L^1[0,2\\pi]}\\bigr)\n   \\le\\mu$.\n  (The drive is $L^1$ in $\\theta$, not uniform — the integral Gr\\\"onwall form is needed;\n  if Mathlib's Gr\\\"onwall lemmas only take a pointwise bound, a small project-side\n  integral variant is the one genuine infrastructure piece of this block.)\n  \\emph{Margin propagation.} Then\n  $\\|z(\\theta)\\|\\le\\|z^\\ast(\\theta)\\|+\\mu\\le R$, and since\n  $|\\langle z-z^\\ast,\\,i e^{i\\theta}\\rangle|\\le d(\\theta)\\le\\mu$,\n  \\[\n    \\kappa(\\theta)-\\langle z,i e^{i\\theta}\\rangle\n    \\ge\\kappa_0-\\langle z^\\ast,i e^{i\\theta}\\rangle-\\mu\\ge\\delta .\n  \\]\n  \\emph{Why perturbative is the right shape.} No direct confinement estimate uniform in\n  $\\kappa_0$ exists: the radial velocity $d\\|z\\|^2/d\\theta=2q\\langle z,e^{i\\theta}\\rangle$\n  changes sign, no disk is flow-invariant (at a radial critical point with\n  $c=\\langle z,ie^{i\\theta}\\rangle=-\\|z\\|$ one computes that a local maximum of $\\|z\\|$ is\n  allowed exactly when $\\kappa(\\theta)\\ge(1-\\|z\\|^2)/(2\\|z\\|)$), and for\n  $\\kappa_0<1/\\sqrt3$ the disk of the model radius already contains denominator-vanishing\n  states — admissibility is irreducibly a condition on the pair\n  $(\\|z\\|,\\langle z,ie^{i\\theta}\\rangle)$. The margins are instead supplied by an\n  \\emph{explicit} model (the symmetric step bicircle of \\cref{sec:sphere_winding}, whose\n  arcs give $\\langle z^\\ast,ie^{i\\theta}\\rangle=\\langle w_j,ie^{i\\theta}\\rangle-r_j\n  \\le\\|w_j\\|-r_j$ on the $j$-th arc), and the $L^1$ distance is made arbitrarily small by\n  the Dahlberg-style reparametrization of \\cref{chap:dahlberg_step1}.\n",
+      "proof_tex": "\n  \\emph{Field sensitivity.} By \\cref{lem:truncated_field_sub_le},\n  \\[\n    \\|F_{\\kappa}(\\theta,z)-F_{\\kappa^\\ast}(\\theta,\\tilde z)\\|\n    \\le L\\|z-\\tilde z\\|+M\\,|\\kappa(\\theta)-\\kappa^\\ast(\\theta)| .\n  \\]\n  \\emph{Integral inequality.} Both trajectories are $C^1$ on $[0,2\\pi]$ with derivatives\n  given by their fields (\\cref{lem:spherical_flow_spec}), so by the fundamental theorem\n  of calculus $z(\\theta)-z^\\ast(\\theta)=z(0)-z^\\ast(0)+\\int_0^\\theta\\bigl(F_\\kappa(s,\n  z(s))-F_{\\kappa^\\ast}(s,z^\\ast(s))\\bigr)ds$; taking norms and using the field\n  sensitivity, $d(\\theta)=\\|z(\\theta)-z^\\ast(\\theta)\\|$ satisfies\n  $d(\\theta)\\le d(0)+\\int_0^\\theta\\bigl(L\\,d+M|\\kappa-\\kappa^\\ast|\\bigr)$, with $d$\n  continuous and the drive $g=M|\\kappa-\\kappa^\\ast|$ continuous and nonnegative.\n  \\emph{Gr\\\"onwall with $L^1$ drive.} \\cref{lem:gronwall_L1_drive} gives\n  $\\sup_{[0,2\\pi]}d\\le e^{2\\pi L}\\bigl(d(0)+M\\|\\kappa-\\kappa^\\ast\\|_{L^1[0,2\\pi]}\\bigr)\n   \\le\\mu$.\n  \\emph{Margin propagation.} Then\n  $\\|z(\\theta)\\|\\le\\|z^\\ast(\\theta)\\|+\\mu\\le R$, and since\n  $|\\langle z-z^\\ast,\\,i e^{i\\theta}\\rangle|\\le d(\\theta)\\le\\mu$,\n  \\[\n    \\kappa(\\theta)-\\langle z,i e^{i\\theta}\\rangle\n    \\ge\\kappa_0-\\langle z^\\ast,i e^{i\\theta}\\rangle-\\mu\\ge\\delta .\n  \\]\n  \\emph{Why perturbative is the right shape.} No direct confinement estimate uniform in\n  $\\kappa_0$ exists: the radial velocity $d\\|z\\|^2/d\\theta=2q\\langle z,e^{i\\theta}\\rangle$\n  changes sign, no disk is flow-invariant (at a radial critical point with\n  $c=\\langle z,ie^{i\\theta}\\rangle=-\\|z\\|$ one computes that a local maximum of $\\|z\\|$ is\n  allowed exactly when $\\kappa(\\theta)\\ge(1-\\|z\\|^2)/(2\\|z\\|)$), and for\n  $\\kappa_0<1/\\sqrt3$ the disk of the model radius already contains denominator-vanishing\n  states — admissibility is irreducibly a condition on the pair\n  $(\\|z\\|,\\langle z,ie^{i\\theta}\\rangle)$. The margins are instead supplied by an\n  \\emph{explicit} model (the symmetric step bicircle of \\cref{sec:sphere_winding}, whose\n  arcs give $\\langle z^\\ast,ie^{i\\theta}\\rangle=\\langle w_j,ie^{i\\theta}\\rangle-r_j\n  \\le\\|w_j\\|-r_j$ on the $j$-th arc), and the $L^1$ distance is made arbitrarily small by\n  the Dahlberg-style reparametrization of \\cref{chap:dahlberg_step1}.\n",
       "lean_source": "",
       "proof_size_lean": null,
       "has_sorry": false,
       "tex_file": "chapters/Gluck_Sphere.tex",
       "lean_file": "",
-      "dep_count": 4,
+      "dep_count": 6,
       "rdep_count": 2,
       "descendant_count": 3,
-      "proof_size_tex": 2353,
-      "effort_local": 2353,
+      "proof_size_tex": 2221,
+      "effort_local": 2221,
       "proof_size_tex_total": null,
       "proof_size_lean_total": null,
-      "effort_total": 5635
+      "effort_total": 4024
     },
     {
       "id": "lem:reconstruction_ode",
@@ -4831,14 +5029,14 @@
       "effort_local": 862,
       "proof_size_tex_total": null,
       "proof_size_lean_total": null,
-      "effort_total": 4522
+      "effort_total": 862
     },
     {
       "id": "lem:constant_curvature_arc",
       "type": "lemma",
       "title": "constant-curvature arcs are explicit circular arcs",
       "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "Fix $K>0$, a start $(\\theta_0,z_0)$ with $K-\\langle z_0,ie^{i\\theta_0}\\rangle>0$, and set\n  \\[\n    r=\\frac{1+\\|z_0\\|^2}{2\\bigl(K-\\langle z_0,ie^{i\\theta_0}\\rangle\\bigr)}=q_K(\\theta_0,z_0),\n    \\qquad w=z_0+i\\,r\\,e^{i\\theta_0}.\n  \\]\n  Then $z(\\theta)=w-i\\,r\\,e^{i\\theta}$ solves the true reconstruction ODE\n  $z'=q_K(\\theta,z)e^{i\\theta}$ with constant curvature $K$ for all $\\theta$ in any\n  interval around $\\theta_0$ on which it stays admissible, and along it\n  $\\langle z(\\theta),ie^{i\\theta}\\rangle=\\langle w,ie^{i\\theta}\\rangle-r$. Moreover the\n  Euclidean data satisfy the \\emph{consistency identity} $K=(1+\\|w\\|^2-r^2)/(2r)$\n  (generalizing the centered case $w=0$ of \\cref{lem:spherical_speed_circle}).",
+      "statement": "Fix $K>0$, a start $(\\theta_0,z_0)$ with $K-\\langle z_0,ie^{i\\theta_0}\\rangle>0$, and set\n  \\[\n    r=\\frac{1+\\|z_0\\|^2}{2\\bigl(K-\\langle z_0,ie^{i\\theta_0}\\rangle\\bigr)}=q_K(\\theta_0,z_0),\n    \\qquad w=z_0+i\\,r\\,e^{i\\theta_0}.\n  \\]\n  Then $z(\\theta)=w-i\\,r\\,e^{i\\theta}$ solves the true reconstruction ODE\n  $z'=q_K(\\theta,z)e^{i\\theta}$ with constant curvature $K$, pointwise at every $\\theta$\n  where the bracket stays positive ($K-\\langle z(\\theta),ie^{i\\theta}\\rangle>0$): at each\n  such $\\theta$ one has $q_K(\\theta,z(\\theta))=r$ and hence\n  $z'(\\theta)=q_K(\\theta,z(\\theta))\\,e^{i\\theta}$. Along the arc\n  $\\langle z(\\theta),ie^{i\\theta}\\rangle=\\langle w,ie^{i\\theta}\\rangle-r$. Moreover the\n  Euclidean data satisfy the \\emph{consistency identity} $K=(1+\\|w\\|^2-r^2)/(2r)$\n  (generalizing the centered case $w=0$ of \\cref{lem:spherical_speed_circle}).",
       "uses": [
         "def:spherical_speed",
         "lem:spherical_flow_unique"
@@ -4859,35 +5057,36 @@
       "effort_local": 792,
       "proof_size_tex_total": null,
       "proof_size_lean_total": null,
-      "effort_total": 4538
+      "effort_total": 792
     },
     {
       "id": "lem:flow_half_turn_equivariance",
       "type": "lemma",
       "title": "half-turn equivariance",
       "chapter": "The spherical converse (S², positive curvature)",
-      "statement": "If $\\kappa(\\theta+\\pi)=\\kappa(\\theta)$ for all $\\theta$, then the truncated field is\n  invariant under the half turn: $\\hat q(\\theta+\\pi,-z)=\\hat q(\\theta,z)$, hence if\n  $z(\\cdot)$ is a trajectory then so is $y(\\theta)=-z(\\theta+\\pi)$. Consequently, writing\n  $H$ for the half-period map $z_0\\mapsto\\Phi(z_0,\\pi)$ of a $\\pi$-periodic curvature: if\n  $H(z_0)=-z_0$ then the trajectory through $z_0$ closes at $2\\pi$ with the central\n  symmetry $z(\\theta+\\pi)=-z(\\theta)$.",
+      "statement": "If $\\kappa(\\theta+\\pi)=\\kappa(\\theta)$ for all $\\theta$, then the truncated field is\n  invariant under the half turn: $\\hat q(\\theta+\\pi,-z)=\\hat q(\\theta,z)$, hence if\n  $z(\\cdot)$ solves the truncated ODE on $[0,2\\pi]$ then $y(\\theta)=-z(\\theta+\\pi)$\n  solves it on $[0,\\pi]$. Consequently, writing $H$ for the half-period map\n  $z_0\\mapsto\\Phi(z_0,\\pi)$ of a $\\pi$-periodic curvature: if $H(z_0)=-z_0$ then the\n  trajectory through $z_0$ satisfies the central symmetry $z(\\theta+\\pi)=-z(\\theta)$ for\n  $\\theta\\in[0,\\pi]$; in particular it closes at $2\\pi$: $z(2\\pi)=-z(\\pi)=z_0$.",
       "uses": [
         "def:truncated_speed",
-        "lem:spherical_flow_unique"
+        "lem:truncated_field_solution_unique",
+        "lem:spherical_flow_spec"
       ],
       "lean_name": "Gluck.flow_half_turn_equivariance",
       "proved": false,
       "mathlib_ok": false,
-      "proof_tex": "\n  $\\|{-z}\\|=\\|z\\|$ and $\\langle -z,\\,ie^{i(\\theta+\\pi)}\\rangle=\\langle -z,\\,-ie^{i\\theta}\n  \\rangle=\\langle z,ie^{i\\theta}\\rangle$, and $\\kappa(\\theta+\\pi)=\\kappa(\\theta)$; so\n  every ingredient of $\\hat q$ is unchanged. Then\n  $y'(\\theta)=-z'(\\theta+\\pi)=-\\hat q\\,e^{i(\\theta+\\pi)}=\\hat q(\\theta,y(\\theta))e^{i\\theta}$,\n  a trajectory. If $H(z_0)=-z_0$, then $y(0)=-z(\\pi)=z_0=z(0)$, so $y=z$ by uniqueness\n  (\\cref{lem:spherical_flow_unique}), i.e.\\ $z(\\theta+\\pi)=-z(\\theta)$; at $\\theta=\\pi$\n  this gives $z(2\\pi)=-z(\\pi)=z_0$.\n",
+      "proof_tex": "\n  $\\|{-z}\\|=\\|z\\|$ and $\\langle -z,\\,ie^{i(\\theta+\\pi)}\\rangle=\\langle -z,\\,-ie^{i\\theta}\n  \\rangle=\\langle z,ie^{i\\theta}\\rangle$, and $\\kappa(\\theta+\\pi)=\\kappa(\\theta)$; so\n  every ingredient of $\\hat q$ is unchanged. For $\\theta\\in[0,\\pi]$ one has\n  $\\theta+\\pi\\in[\\pi,2\\pi]\\subseteq[0,2\\pi]$, so\n  $y'(\\theta)=-z'(\\theta+\\pi)=-\\hat q\\,e^{i(\\theta+\\pi)}=\\hat q(\\theta,y(\\theta))e^{i\\theta}$\n  holds on $[0,\\pi]$ — $y$ solves the truncated ODE there (only there: this is why the\n  comparison below happens on the half interval). If $H(z_0)=-z_0$, then\n  $y(0)=-z(\\pi)=z_0=z(0)$, and $z$ restricted to $[0,\\pi]$ solves the same ODE\n  (\\cref{lem:spherical_flow_spec}), so $y=z$ on $[0,\\pi]$ by the two-solution\n  uniqueness on $[0,\\pi]$ (\\cref{lem:truncated_field_solution_unique} with $T=\\pi$),\n  i.e.\\ $z(\\theta+\\pi)=-z(\\theta)$ for $\\theta\\in[0,\\pi]$; at $\\theta=\\pi$ this gives\n  $z(2\\pi)=-z(\\pi)=z_0$.\n",
       "lean_source": "",
       "proof_size_lean": null,
       "has_sorry": false,
       "tex_file": "chapters/Gluck_Sphere.tex",
       "lean_file": "",
-      "dep_count": 2,
+      "dep_count": 3,
       "rdep_count": 1,
       "descendant_count": 3,
-      "proof_size_tex": 529,
-      "effort_local": 529,
+      "proof_size_tex": 905,
+      "effort_local": 905,
       "proof_size_tex_total": null,
       "proof_size_lean_total": null,
-      "effort_total": 4275
+      "effort_total": 1291
     },
     {
       "id": "lem:spherical_endpoint_winding",
@@ -4906,7 +5105,7 @@
       "lean_name": "Gluck.spherical_endpoint_winding",
       "proved": false,
       "mathlib_ok": false,
-      "proof_tex": "\n  \\emph{(Pinned design, two sub-questions still open — S2-D is the remaining hard phase.)}\n  \\textbf{DO-NOT (degeneracy of the constant model).} For \\emph{constant} $\\kappa=K$\n  every admissible initial point lies on a spherical circle of curvature $K$\n  (\\cref{lem:constant_curvature_arc}), so every trajectory closes and $E\\equiv0$ on an\n  open set: the constant-curvature family carries no degree and must NOT be used as the\n  homotopy target. Equivalently, the $z$-gradient of $q$ vanishes identically along\n  circle solutions (a consequence of the consistency identity), so the linearized\n  monodromy is the identity.\n  \\textbf{Model.} Use instead the \\emph{symmetric step bicircle}: the two-value\n  $\\pi$-periodic step curvature (values $a,b$, the in-tree canonical breakpoint pattern),\n  whose trajectories obey the half-turn equivariance\n  (\\cref{lem:flow_half_turn_equivariance}). Closure reduces to the 2-D fixed-point\n  equation $G(z_0):=H(z_0)+z_0=0$ for the half-period map $H$. At $a=b=K$ the map $G$\n  has the explicit zero $z_0=-i\\,r^\\ast$, $r^\\ast=\\sqrt{1+K^2}-K$ (the centered circle),\n  and — because the linearization along circle arcs is the identity — $DG=2\\,\\mathrm{Id}$\n  there: an isolated nondegenerate zero with local winding $+1$. This is where the\n  linearization degeneracy becomes a \\emph{feature}.\n  \\textbf{Quantitative scheme (strategy-critic refinement, accepted).} The two step\n  levels $a>b$ are \\emph{free} inside the four-vertex overlap interval\n  $(\\max(\\kappa(q_1),\\kappa(q_2)),\\,\\min(\\kappa(p_1),\\kappa(p_2)))$, so they may be\n  chosen with \\emph{small contrast} $h=a-b$ around a midpoint $c$. Then the step model\n  is an $O(h)$ perturbation of the constant $c$, the continuation from the explicit\n  $a=b$ zero is \\emph{local} (boundary nonvanishing on a fixed small disk from\n  $DG=2\\,\\mathrm{Id}+O(h)$), and — crucially — $H$ for the step model is an\n  \\emph{explicit closed-form} composition of two arc maps\n  $z_0\\mapsto z_0+i\\,q_K(\\theta_0,z_0)\\,e^{i\\theta_0}(1-e^{i\\Delta})$\n  (\\cref{lem:constant_curvature_arc}), so $DH$ and all isolation radii are finite\n  symbolic computations, with no variational-equation formalization.\n  \\textbf{Open sub-question (a) — sharpened.} Compute $DG=DH+\\mathrm{Id}$ for the\n  explicit two-arc composition and verify invertibility (hence local winding $+1$) for\n  small $h>0$ at the symmetric configuration.\n  \\textbf{Open sub-question (b) — sharpened.} Transfer the winding from $G$ to the\n  full-period $E$. Note $E(z_0)=-H_2(-H_1(z_0))-z_0$ with $H_1=H_2=H$ in the\n  $\\pi$-periodic case, so $DE=DH^2-\\mathrm{Id}=O(h)$: the model zero of $E$ is isolated\n  only at scale $h$ (for $h=0$, $E\\equiv0$ — the DO-NOT above). The order of quantifiers\n  works: first fix the contrast $h$, extract the $O(h)$ isolation radius and boundary\n  margin of $E$ from the explicit $DE$, THEN choose the reparametrization quality\n  $\\varepsilon\\ll h$ (the $L^1$ distance of \\cref{chap:dahlberg_step1} is free) so the\n  $\\kappa$-homotopy (flow $L^1$-continuity, the estimate of\n  \\cref{lem:invariant_admissible_domain}) keeps $E\\ne0$ on the boundary circle\n  throughout. The Euclidean \\texttt{errorMap\\_winding\\_eq\\_one} \\emph{value} is not\n  reusable; only \\cref{thm:existence_of_zero} is.\n",
+      "proof_tex": "\n  \\emph{(Pinned design, two sub-questions still open — S2-D is the remaining hard phase.)}\n  \\textbf{DO-NOT (degeneracy of the constant model).} For \\emph{constant} $\\kappa=K$\n  every admissible initial point lies on a spherical circle of curvature $K$\n  (\\cref{lem:constant_curvature_arc}), so every trajectory closes and $E\\equiv0$ on an\n  open set: the constant-curvature family carries no degree and must NOT be used as the\n  homotopy target. Equivalently, the $z$-gradient of $q$ vanishes identically along\n  circle solutions (a consequence of the consistency identity), so the linearized\n  monodromy is the identity.\n  \\textbf{Model.} Use instead the \\emph{symmetric step bicircle}: the two-value\n  $\\pi$-periodic step curvature (values $a,b$, the in-tree canonical breakpoint pattern),\n  whose trajectories obey the half-turn equivariance\n  (\\cref{lem:flow_half_turn_equivariance}). Closure reduces to the 2-D fixed-point\n  equation $G(z_0):=H(z_0)+z_0=0$ for the half-period map $H$. At $a=b=K$ the map $G$\n  has the explicit zero $z_0=-i\\,r^\\ast$, $r^\\ast=\\sqrt{1+K^2}-K$ (the centered circle),\n  and — because the linearization along circle arcs is the identity — $DG=2\\,\\mathrm{Id}$\n  there: an isolated nondegenerate zero with local winding $+1$. This is where the\n  linearization degeneracy becomes a \\emph{feature}.\n  \\textbf{Quantitative scheme (strategy-critic refinement, accepted).} The two step\n  levels $a>b$ are \\emph{free} inside the four-vertex overlap interval\n  $(\\max(\\kappa(q_1),\\kappa(q_2)),\\,\\min(\\kappa(p_1),\\kappa(p_2)))$, so they may be\n  chosen with \\emph{small contrast} $h=a-b$ around a midpoint $c$. Then the step model\n  is an $O(h)$ perturbation of the constant $c$, the continuation from the explicit\n  $a=b$ zero is \\emph{local} (boundary nonvanishing on a fixed small disk from\n  $DG=2\\,\\mathrm{Id}+O(h)$), and — crucially — $H$ for the step model is an\n  \\emph{explicit closed-form} composition of two arc maps\n  $z_0\\mapsto z_0+i\\,q_K(\\theta_0,z_0)\\,e^{i\\theta_0}(1-e^{i\\Delta})$\n  (\\cref{lem:constant_curvature_arc}), so $DH$ and all isolation radii are finite\n  symbolic computations, with no variational-equation formalization.\n  \\textbf{Open sub-question (a) — sharpened.} Compute $DG=DH+\\mathrm{Id}$ for the\n  explicit two-arc composition and verify invertibility (hence local winding $+1$) for\n  small $h>0$ at the symmetric configuration.\n  \\textbf{Open sub-question (b) — sharpened.} Transfer the winding from $G$ to the\n  full-period $E$. Note $E(z_0)=-H_2(-H_1(z_0))-z_0$ with $H_1=H_2=H$ in the\n  $\\pi$-periodic case, so $DE=DH^2-\\mathrm{Id}=O(h)$: the model zero of $E$ is isolated\n  only at scale $h$ (for $h=0$, $E\\equiv0$ — the DO-NOT above). The order of quantifiers\n  works: first fix the contrast $h$, extract the $O(h)$ isolation radius and boundary\n  margin of $E$ from the explicit $DE$, THEN choose the reparametrization quality\n  $\\varepsilon\\ll h$ (the $L^1$ distance of \\cref{chap:dahlberg_step1} is free) so the\n  $\\kappa$-homotopy (flow $L^1$-continuity, the estimate of\n  \\cref{lem:invariant_admissible_domain}) keeps $E\\ne0$ on the boundary circle\n  throughout. The Euclidean \\texttt{errorMap\\_winding\\_eq\\_one} \\emph{value} is not\n  reusable; only \\cref{thm:existence_of_zero} is. \\emph{Caveat for the formalization:}\n  \\cref{lem:invariant_admissible_domain} takes $\\kappa^\\ast$ \\emph{continuous}, while the\n  step model is piecewise constant — compare through continuous approximants of the step,\n  or restate the transport with $z^\\ast$ merely continuous piecewise-$C^1$ satisfying the\n  integral identity $z^\\ast(\\theta)=z^\\ast(0)+\\int_0^\\theta F_{\\kappa^\\ast}(s,z^\\ast(s))ds$\n  (which concatenated arcs satisfy); decide when S2-D is dispatched.\n",
       "lean_source": "",
       "proof_size_lean": null,
       "has_sorry": false,
@@ -4915,11 +5114,11 @@
       "dep_count": 6,
       "rdep_count": 2,
       "descendant_count": 2,
-      "proof_size_tex": 3251,
-      "effort_local": 3251,
+      "proof_size_tex": 3719,
+      "effort_local": 3719,
       "proof_size_tex_total": null,
       "proof_size_lean_total": null,
-      "effort_total": 11004
+      "effort_total": 9826
     },
     {
       "id": "lem:spherical_circle_realizes",
@@ -4975,7 +5174,32 @@
       "effort_local": 775,
       "proof_size_tex_total": null,
       "proof_size_lean_total": null,
-      "effort_total": 12972
+      "effort_total": 11463
+    },
+    {
+      "id": "lean:Gluck.abs_div_sub_div_le",
+      "type": "lean_aux",
+      "title": "Gluck.abs_div_sub_div_le",
+      "chapter": "",
+      "statement": "",
+      "uses": [],
+      "lean_name": "Gluck.abs_div_sub_div_le",
+      "proved": true,
+      "mathlib_ok": false,
+      "proof_tex": "",
+      "lean_source": "private lemma abs_div_sub_div_le {n₁ n₂ d₁ d₂ δ B dn dd : ℝ} (hδ : 0 < δ)\n    (hd₁ : δ ≤ d₁) (hd₂ : δ ≤ d₂) (hn₁0 : 0 ≤ n₁) (hn₁B : n₁ ≤ B)\n    (hn : |n₁ - n₂| ≤ dn) (hd : |d₁ - d₂| ≤ dd) :\n    |n₁ / d₁ - n₂ / d₂| ≤ dn / δ + B * dd / δ ^ 2 := by\n  have h₁ : 0 < d₁ := hδ.trans_le hd₁\n  have h₂ : 0 < d₂ := hδ.trans_le hd₂\n  have hdn0 : 0 ≤ dn := (abs_nonneg _).trans hn\n  have hdd0 : 0 ≤ dd := (abs_nonneg _).trans hd\n  have hB0 : 0 ≤ B := hn₁0.trans hn₁B\n  have key : n₁ / d₁ - n₂ / d₂ = (n₁ - n₂) / d₂ + n₁ * (d₂ - d₁) / (d₁ * d₂) := by\n    field_simp\n    ring\n  rw [key]\n  refine (abs_add_le _ _).trans (add_le_add ?_ ?_)\n  · rw [abs_div, abs_of_pos h₂]\n    exact div_le_div₀ hdn0 hn hδ hd₂\n  · rw [abs_div, abs_mul, abs_of_nonneg hn₁0, abs_of_pos (mul_pos h₁ h₂)]\n    refine div_le_div₀ (mul_nonneg hB0 hdd0) ?_ (by positivity) ?_\n    · exact mul_le_mul hn₁B (by rw [abs_sub_comm]; exact hd) (abs_nonneg _) hB0\n    · rw [sq]\n      exact mul_le_mul hd₁ hd₂ hδ.le h₁.le",
+      "proof_size_lean": 971,
+      "has_sorry": false,
+      "tex_file": "",
+      "lean_file": "Gluck/Sphere.lean",
+      "dep_count": 0,
+      "rdep_count": 0,
+      "descendant_count": 0,
+      "proof_size_tex": null,
+      "effort_local": 0,
+      "proof_size_tex_total": null,
+      "proof_size_lean_total": 971,
+      "effort_total": 0
     }
   ],
   "edges": [
@@ -6413,6 +6637,30 @@
     },
     {
       "from": "def:truncated_field",
+      "to": "lem:norm_truncated_field"
+    },
+    {
+      "from": "lem:truncated_speed_pos",
+      "to": "lem:norm_truncated_field"
+    },
+    {
+      "from": "def:truncated_field",
+      "to": "lem:truncated_field_lipschitz"
+    },
+    {
+      "from": "lem:truncated_speed_lipschitz",
+      "to": "lem:truncated_field_lipschitz"
+    },
+    {
+      "from": "def:truncated_field",
+      "to": "lem:truncated_field_continuous"
+    },
+    {
+      "from": "lem:truncated_speed_continuous",
+      "to": "lem:truncated_field_continuous"
+    },
+    {
+      "from": "def:truncated_field",
       "to": "lem:truncated_field_picard"
     },
     {
@@ -6425,6 +6673,18 @@
     },
     {
       "from": "lem:truncated_speed_continuous",
+      "to": "lem:truncated_field_picard"
+    },
+    {
+      "from": "lem:norm_truncated_field",
+      "to": "lem:truncated_field_picard"
+    },
+    {
+      "from": "lem:truncated_field_lipschitz",
+      "to": "lem:truncated_field_picard"
+    },
+    {
+      "from": "lem:truncated_field_continuous",
       "to": "lem:truncated_field_picard"
     },
     {
@@ -6456,6 +6716,14 @@
       "to": "lem:spherical_flow_unique"
     },
     {
+      "from": "def:truncated_field",
+      "to": "lem:truncated_field_solution_unique"
+    },
+    {
+      "from": "lem:truncated_field_lipschitz",
+      "to": "lem:truncated_field_solution_unique"
+    },
+    {
       "from": "def:spherical_flow",
       "to": "def:spherical_endpoint"
     },
@@ -6469,6 +6737,22 @@
     },
     {
       "from": "def:truncated_speed",
+      "to": "lem:truncated_speed_sub_le"
+    },
+    {
+      "from": "def:truncated_field",
+      "to": "lem:truncated_field_sub_le"
+    },
+    {
+      "from": "lem:truncated_field_lipschitz",
+      "to": "lem:truncated_field_sub_le"
+    },
+    {
+      "from": "lem:truncated_speed_sub_le",
+      "to": "lem:truncated_field_sub_le"
+    },
+    {
+      "from": "def:truncated_speed",
       "to": "lem:invariant_admissible_domain"
     },
     {
@@ -6476,7 +6760,15 @@
       "to": "lem:invariant_admissible_domain"
     },
     {
-      "from": "lem:truncated_speed_lipschitz",
+      "from": "lem:spherical_flow_spec",
+      "to": "lem:invariant_admissible_domain"
+    },
+    {
+      "from": "lem:truncated_field_sub_le",
+      "to": "lem:invariant_admissible_domain"
+    },
+    {
+      "from": "lem:gronwall_L1_drive",
       "to": "lem:invariant_admissible_domain"
     },
     {
@@ -6520,7 +6812,11 @@
       "to": "lem:flow_half_turn_equivariance"
     },
     {
-      "from": "lem:spherical_flow_unique",
+      "from": "lem:truncated_field_solution_unique",
+      "to": "lem:flow_half_turn_equivariance"
+    },
+    {
+      "from": "lem:spherical_flow_spec",
       "to": "lem:flow_half_turn_equivariance"
     },
     {
@@ -6565,8 +6861,8 @@
     }
   ],
   "meta": {
-    "num_nodes": 177,
-    "num_edges": 396,
+    "num_nodes": 185,
+    "num_edges": 414,
     "axioms": [
       "def:is_regular",
       "def:is_closed_curve",
@@ -6588,7 +6884,9 @@
       "lem:exists_kappa_bound",
       "lem:abs_le_of_periodic_two_pi",
       "lem:sphere_normal_inner_eq",
-      "def:realizes_spherical_curvature"
+      "def:realizes_spherical_curvature",
+      "lem:gronwall_L1_drive",
+      "lean:Gluck.abs_div_sub_div_le"
     ],
     "leaves": [
       "lem:realizes_curvature_signedCurvature",
@@ -6613,14 +6911,55 @@
       "lem:exists_eta_clean_L1",
       "thm:gluck_converse_nonconstant",
       "thm:spherical_converse_pos",
-      "lem:spherical_speed_continuous"
+      "lem:spherical_speed_continuous",
+      "lean:Gluck.abs_div_sub_div_le"
     ],
-    "entry": "blueprint/src/web.tex",
-    "has_blueprint": true,
-    "total_lean_decls": 341,
-    "total_blueprint_decls": 177,
-    "duplicate_ids": [],
-    "macros": {}
-  },
-  "error": null
+    "macros": {},
+    "unmatched_lean": [
+      [
+        "lem:truncated_field_solution_unique",
+        "Gluck.truncatedField_solution_unique"
+      ],
+      [
+        "lem:truncated_speed_sub_le",
+        "Gluck.truncatedSpeed_sub_le"
+      ],
+      [
+        "lem:truncated_field_sub_le",
+        "Gluck.truncatedField_sub_le"
+      ],
+      [
+        "lem:gronwall_L1_drive",
+        "Gluck.gronwall_L1_drive"
+      ],
+      [
+        "lem:invariant_admissible_domain",
+        "Gluck.invariant_admissible_domain"
+      ],
+      [
+        "lem:reconstruction_ode",
+        "Gluck.reconstruction_ode"
+      ],
+      [
+        "lem:constant_curvature_arc",
+        "Gluck.constantCurvature_arc"
+      ],
+      [
+        "lem:flow_half_turn_equivariance",
+        "Gluck.flow_half_turn_equivariance"
+      ],
+      [
+        "lem:spherical_endpoint_winding",
+        "Gluck.spherical_endpoint_winding"
+      ],
+      [
+        "lem:spherical_circle_realizes",
+        "Gluck.sphericalCircle_realizes"
+      ],
+      [
+        "lem:spherical_simplicity",
+        "Gluck.spherical_simplicity"
+      ]
+    ]
+  }
 }
