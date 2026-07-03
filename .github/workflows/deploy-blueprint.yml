@@ -1,0 +1,39 @@
+name: Deploy Blueprint
+
+# Publishes the prebuilt leanblueprint site (`blueprint/web/`) to GitHub Pages.
+# The HTML is committed to the repo, so this only uploads and deploys it — it
+# does not rebuild the blueprint or the Lean project.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'blueprint/web/**'
+      - '.github/workflows/deploy-blueprint.yml'
+  workflow_dispatch:
+
+# Allow deploying to GitHub Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; don't cancel an in-progress one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: blueprint/web
+      - id: deployment
+        uses: actions/deploy-pages@v4
