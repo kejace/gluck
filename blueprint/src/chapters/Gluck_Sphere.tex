@@ -168,7 +168,7 @@ $\langle z, i\,e^{i\varphi}\rangle_{\mathbb R}=-(\operatorname{Re}z)\sin\varphi
   \lean{Gluck.sphericalConverse_pos}
   \uses{def:realizes_spherical_curvature, def:sphere_four_vertex,
         lem:spherical_speed_solve, lem:reconstruction_ode,
-        lem:invariant_admissible_domain, lem:spherical_endpoint_winding,
+        lem:spherical_endpoint_winding, lem:realizes_spherical_comp,
         lem:spherical_simplicity, lem:spherical_circle_realizes}
   If $\kappa$ satisfies the positive-stage spherical four-vertex condition
   (\cref{def:sphere_four_vertex}), then there is a simple closed curve $z$ confined to the
@@ -182,23 +182,25 @@ $\langle z, i\,e^{i\varphi}\rangle_{\mathbb R}=-(\operatorname{Re}z)\sin\varphi
 \end{theorem}
 
 \begin{proof}
-  \uses{lem:reconstruction_ode, lem:invariant_admissible_domain,
-        lem:spherical_endpoint_winding, lem:spherical_simplicity,
-        lem:spherical_circle_realizes}
+  \uses{lem:reconstruction_ode, lem:spherical_endpoint_winding,
+        lem:spherical_simplicity, lem:spherical_circle_realizes,
+        lem:realizes_spherical_comp, lem:exists_c1_circle_inverse}
   Split on the four-vertex disjunction (\cref{def:four_vertex_condition}). The
   \emph{constant} branch is discharged directly by the explicit centered circle
   (\cref{lem:spherical_circle_realizes}), with no flow machinery. For the value-separated
-  branch, assemble the proof arc of \cref{sec:sphere_arc}.
-  \cref{lem:spherical_endpoint_winding} supplies a closing configuration $z_0^\ast$ with
-  $E(z_0^\ast)=0$, i.e.\ the reconstruction trajectory of \cref{lem:reconstruction_ode}
-  through $z_0^\ast$ is a closed $C^1$ curve; it is confined to $\{|z|\le R'\}\subset
-  \{|z|<1\}$ by \cref{lem:invariant_admissible_domain}, and it realizes $\kappa$ in the
-  gauge $\varphi(\theta)=\theta$ because the ODE field is exactly the algebraically solved
-  speed relation of \cref{def:realizes_spherical_curvature}
-  (\cref{lem:spherical_speed_solve}). \cref{lem:spherical_simplicity} gives simplicity in
+  (non-constant) branch: \cref{lem:spherical_endpoint_winding} supplies $R<1$,
+  $\delta>0$, a circle reparametrization $h_1$, and a \emph{closed, admissible}
+  trajectory $z$ of the $(\kappa\circ h_1,R,\delta)$-truncated flow.
+  \cref{lem:reconstruction_ode} (with curvature function $\kappa\circ h_1$) upgrades its
+  periodic extension to a closed $C^1$ curve confined to $\{|z|\le R\}\subset\{|z|<1\}$
+  realizing $\kappa\circ h_1$ in the gauge $\varphi(\theta)=\theta$.
+  \cref{lem:realizes_spherical_comp} with $\psi=h_1^{-1}$ pulls this back to a curve
+  realizing $\kappa$ (closedness and injectivity-on-a-period transfer along the
+  circle-equivariant $h_1^{-1}$, as in the Euclidean
+  \texttt{isSimpleClosed\_comp}). \cref{lem:spherical_simplicity} gives simplicity in
   the disk, hence on $S^2$. This mirrors how \texttt{dahlbergConverse} assembles its
-  closing parameter, simplicity transport, and reconstruction. \emph{(Assembled formally in
-  S2-E once the arc lemmas exist in Lean.)}
+  closing parameter, simplicity transport, and reconstruction. \emph{(Assembled formally
+  in S2-E once the S2-D layer exists in Lean.)}
 \end{proof}
 
 \section{Proof arc}
@@ -512,7 +514,8 @@ large ball covers $[0,2\pi]$.
   $(\hat q(z)-\hat q(w))\,e^{i\theta}$).
 \end{definition}
 
-\begin{lemma}[field norm equals speed]
+\begin{lemma}\leanok
+[field norm equals speed]
   \label{lem:norm_truncated_field}
   \lean{Gluck.norm_truncatedField}
   \uses{def:truncated_field, lem:truncated_speed_pos}
@@ -522,11 +525,14 @@ large ball covers $[0,2\pi]$.
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   $\|\hat q\,e^{i\theta}\|=|\hat q|\,\|e^{i\theta}\|=|\hat q|=\hat q$, since the unit
   field has norm one and $\hat q>0$ by \cref{lem:truncated_speed_pos}.
 \end{proof}
 
-\begin{lemma}[field Lipschitz bound]
+\begin{lemma}\leanok
+[field Lipschitz bound]
   \label{lem:truncated_field_lipschitz}
   \lean{Gluck.truncatedField_lipschitz}
   \uses{def:truncated_field, lem:truncated_speed_lipschitz}
@@ -536,13 +542,16 @@ large ball covers $[0,2\pi]$.
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   At fixed $\theta$,
   $F(\theta,z)-F(\theta,w)=(\hat q(\theta,z)-\hat q(\theta,w))\,e^{i\theta}$, whose norm
   is $|\hat q(\theta,z)-\hat q(\theta,w)|\le L\|z-w\|$ by
   \cref{lem:truncated_speed_lipschitz}.
 \end{proof}
 
-\begin{lemma}[field joint continuity]
+\begin{lemma}\leanok
+[field joint continuity]
   \label{lem:truncated_field_continuous}
   \lean{Gluck.truncatedField_continuous}
   \uses{def:truncated_field, lem:truncated_speed_continuous}
@@ -552,6 +561,8 @@ large ball covers $[0,2\pi]$.
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   Scalar multiplication of the jointly continuous truncated speed
   (\cref{lem:truncated_speed_continuous}) by the continuous unit field
   $\theta\mapsto e^{i\theta}$.
@@ -678,7 +689,8 @@ large ball covers $[0,2\pi]$.
   with the flow.
 \end{proof}
 
-\begin{lemma}[two-solution uniqueness on a subinterval]
+\begin{lemma}\leanok
+[two-solution uniqueness on a subinterval]
   \label{lem:truncated_field_solution_unique}
   \lean{Gluck.truncatedField_solution_unique}
   \uses{def:truncated_field, lem:truncated_field_lipschitz}
@@ -691,6 +703,8 @@ large ball covers $[0,2\pi]$.
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   The field is Lipschitz in the space variable uniformly in time
   (\cref{lem:truncated_field_lipschitz}) and each $g_i$ is continuous on $[0,T]$ (it has
   a derivative there), so the standard two-solution uniqueness theorem applies on
@@ -730,7 +744,8 @@ large ball covers $[0,2\pi]$.
 \section{Admissibility and truncation removal (S2-C)}
 \label{sec:sphere_admissible}
 
-\begin{lemma}[curvature sensitivity of the truncated speed]
+\begin{lemma}\leanok
+[curvature sensitivity of the truncated speed]
   \label{lem:truncated_speed_sub_le}
   \lean{Gluck.truncatedSpeed_sub_le}
   \uses{def:truncated_speed}
@@ -743,6 +758,8 @@ large ball covers $[0,2\pi]$.
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   The two speeds share the numerator $n=1+(\min(\|z\|,R))^2\in[1,1+R^2]$ and have
   denominators $D=2\max(\kappa(\theta)-c,\delta)$, $D^\ast=2\max(\kappa^\ast(\theta)-c,
   \delta)$ with $c=\langle z,ie^{i\theta}\rangle$; both are $\ge2\delta$, and since
@@ -759,12 +776,15 @@ large ball covers $[0,2\pi]$.
   set to zero.)
 \end{proof}
 
-\begin{lemma}[combined field sensitivity]
+\begin{lemma}\leanok
+[combined field sensitivity]
   \label{lem:truncated_field_sub_le}
   \lean{Gluck.truncatedField_sub_le}
   \uses{def:truncated_field, lem:truncated_field_lipschitz, lem:truncated_speed_sub_le}
-  Let $0\le R$, $0<\delta$, $M=\tfrac{1+R^2}{2\delta^2}$, and let $L$ be the Lipschitz
-  constant of \cref{lem:truncated_field_lipschitz}. Then for all $\kappa,\kappa^\ast$,
+  Let $0\le R$, $0<\delta$, $M=\tfrac{1+R^2}{2\delta^2}$, and let $L$ be \emph{any}
+  Lipschitz constant of the truncated field in $z$ (a witness of
+  \cref{lem:truncated_field_lipschitz}, consumed as a hypothesis so that one fixed $L$
+  can be threaded through the Gr\"onwall argument). Then for all $\kappa,\kappa^\ast$,
   $\theta$, $z$, $\tilde z$,
   \[
     \|F_{\kappa,R,\delta}(\theta,z)-F_{\kappa^\ast,R,\delta}(\theta,\tilde z)\|
@@ -773,6 +793,8 @@ large ball covers $[0,2\pi]$.
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   Insert the mixed term $F_{\kappa,R,\delta}(\theta,\tilde z)$ and use the triangle
   inequality: the first difference is controlled by
   \cref{lem:truncated_field_lipschitz}; the second is
@@ -781,7 +803,8 @@ large ball covers $[0,2\pi]$.
   \cref{lem:truncated_speed_sub_le}.
 \end{proof}
 
-\begin{lemma}[Gr\"onwall with $L^1$ drive]
+\begin{lemma}\leanok
+[Gr\"onwall with $L^1$ drive]
   \label{lem:gronwall_L1_drive}
   \lean{Gluck.gronwall_L1_drive}
   Let $T\ge0$, $L\ge0$, $d_0\ge0$, and let $d,g:[0,T]\to\mathbb R$ be continuous with
@@ -790,16 +813,21 @@ large ball covers $[0,2\pi]$.
     d(t)\;\le\;d_0+\int_0^t\bigl(L\,d(s)+g(s)\bigr)\,ds
     \qquad\text{for all }t\in[0,T],
   \]
-  then
+  then, pointwise,
   \[
-    \sup_{t\in[0,T]}d(t)\;\le\;e^{LT}\Bigl(d_0+\int_0^T g\Bigr) .
+    d(t)\;\le\;e^{LT}\Bigl(d_0+\int_0^T g\Bigr)\qquad\text{for all }t\in[0,T] .
   \]
   (Project-side infrastructure: Mathlib's Gr\"onwall lemmas bound the derivative by
   $K\|f\|+\varepsilon$ with a \emph{constant} $\varepsilon$; here the drive $g$ is only
-  small in $L^1$, which is exactly the regime of the Dahlberg-style reparametrization.)
+  small in $L^1$, which is exactly the regime of the Dahlberg-style reparametrization.
+  The Lean statement quantifies the conclusion pointwise over $t\in[0,T]$ rather than
+  through a $\sup$; the hypothesis $d\ge0$ is kept for blueprint fidelity though the
+  proof does not use it.)
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   Set $u(t)=d_0+\int_0^t(L\,d+g)$. The integrand is continuous, so by the fundamental
   theorem of calculus $u$ is differentiable with $u'(t)=L\,d(t)+g(t)$, and $d\le u$ by
   hypothesis, so $u'(t)\le L\,u(t)+g(t)$ ($L\ge0$, and $u\ge d\ge0$). Consider
@@ -814,6 +842,8 @@ large ball covers $[0,2\pi]$.
 \end{proof}
 
 \begin{lemma}
+
+\leanok
 [invariant admissible domain — perturbative margin transport]
   \label{lem:invariant_admissible_domain}
   \lean{Gluck.invariant_admissible_domain}
@@ -828,7 +858,9 @@ large ball covers $[0,2\pi]$.
     \qquad
     \sup_\theta\,\langle z^\ast(\theta),\,i e^{i\theta}\rangle\le\kappa_0-\delta-\mu .
   \]
-  Let $L$ be the Lipschitz constant of \cref{lem:truncated_speed_lipschitz} and
+  Let $L$ be any Lipschitz constant of the truncated field in $z$ (a witness of
+  \cref{lem:truncated_field_lipschitz}; in Lean $L:\mathbb R_{\ge0}$, coerced to
+  $\mathbb R$ inside the exponential) and
   $M=\tfrac{1+R^2}{2\delta^2}$. Then every trajectory $z$ of the $\kappa$-truncated flow
   with
   \[
@@ -840,6 +872,8 @@ large ball covers $[0,2\pi]$.
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   \emph{Field sensitivity.} By \cref{lem:truncated_field_sub_le},
   \[
     \|F_{\kappa}(\theta,z)-F_{\kappa^\ast}(\theta,\tilde z)\|
@@ -876,23 +910,55 @@ large ball covers $[0,2\pi]$.
   the Dahlberg-style reparametrization of \cref{chap:dahlberg_step1}.
 \end{proof}
 
+\begin{definition}[periodic extension of a fundamental-window function]
+  \label{def:periodic_extension}
+  \lean{Gluck.periodicExtension}
+  For $z:\mathbb R\to\mathbb C$, the \emph{$2\pi$-periodic extension} is
+  $\tilde z(t)=z\bigl(t-2\pi\lfloor t/(2\pi)\rfloor\bigr)$: every $t$ is reduced by an
+  integer multiple of $2\pi$ into the fundamental window $[0,2\pi)$ and $z$ is evaluated
+  there. This is the device promised in \cref{lem:reconstruction_ode} for promoting a
+  trajectory defined on $[0,2\pi]$ to a globally defined closed curve.
+\end{definition}
+
+\begin{lemma}[the periodic extension is periodic]
+  \label{lem:periodic_extension_periodic}
+  \lean{Gluck.periodicExtension_periodic}
+  \uses{def:periodic_extension}
+  For every $z$, the extension $\tilde z$ of \cref{def:periodic_extension} is
+  $2\pi$-periodic: $\tilde z(t+2\pi)=\tilde z(t)$ for all $t$.
+\end{lemma}
+
+\begin{proof}
+  $\lfloor(t+2\pi)/(2\pi)\rfloor=\lfloor t/(2\pi)\rfloor+1$, so the reduced arguments
+  agree: $t+2\pi-2\pi(\lfloor t/(2\pi)\rfloor+1)=t-2\pi\lfloor t/(2\pi)\rfloor$.
+\end{proof}
+
 \begin{lemma}
+
+\leanok
 [truncation removal: admissible closed trajectories realize $\kappa$]
   \label{lem:reconstruction_ode}
   \lean{Gluck.reconstruction_ode}
   \uses{lem:truncated_speed_eq, lem:spherical_flow_spec, lem:truncated_speed_pos,
         lem:spherical_speed_solve, def:realizes_spherical_curvature,
-        lem:spherical_speed_periodic}
-  Let $\kappa$ be a curvature function, $0<\delta$, $0\le R<1$, and let
+        lem:spherical_speed_periodic, def:periodic_extension,
+        lem:periodic_extension_periodic}
+  Let $\kappa$ be a curvature function, $0<\delta$, $R<1$, and let
   $z:[0,2\pi]\to\mathbb C$ be a trajectory of the truncated flow that is admissible
   ($\|z(\theta)\|\le R$ and $\kappa(\theta)-\langle z(\theta),ie^{i\theta}\rangle\ge\delta$
-  for all $\theta$) and closed ($z(2\pi)=z(0)$). Then the $2\pi$-periodic extension of $z$
-  is a $C^1$ closed curve confined to the open unit disk which solves the \emph{true}
-  reconstruction ODE $z'=q_\kappa(\theta,z)e^{i\theta}$ and realizes $\kappa$
-  (\cref{def:realizes_spherical_curvature}) in the gauge $\varphi(\theta)=\theta$.
+  for all $\theta$) and closed ($z(2\pi)=z(0)$). Then the $2\pi$-periodic extension
+  $\tilde z$ of $z$ (\cref{def:periodic_extension}) agrees with $z$ on $[0,2\pi]$, is a
+  closed curve, and realizes $\kappa$ (\cref{def:realizes_spherical_curvature}) in the
+  gauge $\varphi(\theta)=\theta$ — in particular it is $C^1$, confined to the open unit
+  disk, and solves the \emph{true} reconstruction ODE $z'=q_\kappa(\theta,z)e^{i\theta}$.
+  (The Lean statement packages the conclusion as the conjunction
+  $\mathrm{EqOn}\wedge\mathrm{IsClosedCurve}\wedge\mathrm{RealizesSphericalCurvature}$
+  for $\tilde z$; the hypothesis $0\le R$ turned out to be unnecessary and is dropped.)
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   On the admissible set $\hat q=q_\kappa$ (\cref{lem:truncated_speed_eq}), so the flow
   equation of \cref{lem:spherical_flow_spec} becomes the true ODE on $[0,2\pi]$; the
   right-hand side is continuous, so $z$ is $C^1$ there. Closedness plus
@@ -909,11 +975,57 @@ large ball covers $[0,2\pi]$.
 \section{Endpoint winding over the symmetric step model (S2-D)}
 \label{sec:sphere_winding}
 
+\begin{lemma}[arc bracket identity]
+  \label{lem:constant_arc_inner}
+  \lean{Gluck.constantArc_inner}
+  For all $w\in\mathbb C$, $r,\theta\in\mathbb R$:
+  $\bigl\langle w-i\,r\,e^{i\theta},\,i e^{i\theta}\bigr\rangle
+   =\langle w,ie^{i\theta}\rangle-r$.
+\end{lemma}
+
+\begin{proof}
+  Bilinearity of the real inner product and
+  $\langle ie^{i\theta},ie^{i\theta}\rangle=\|ie^{i\theta}\|^2=1$
+  (\texttt{real\_inner\_smul\_left}, \texttt{real\_inner\_self\_eq\_norm\_sq}).
+\end{proof}
+
+\begin{lemma}[arc norm expansion]
+  \label{lem:constant_arc_norm_sq}
+  \lean{Gluck.constantArc_norm_sq}
+  For all $w\in\mathbb C$, $r,\theta\in\mathbb R$:
+  $\|w-i\,r\,e^{i\theta}\|^2=\|w\|^2-2r\langle w,ie^{i\theta}\rangle+r^2$.
+\end{lemma}
+
+\begin{proof}
+  The real polarization expansion $\|u-v\|^2=\|u\|^2-2\langle u,v\rangle+\|v\|^2$
+  (\texttt{norm\_sub\_sq\_real}) with $\|i\,r\,e^{i\theta}\|^2=r^2$ and
+  \cref{lem:constant_arc_inner}-style bilinearity for the cross term.
+\end{proof}
+
+\begin{lemma}[consistency identity of the arc data]
+  \label{lem:constant_arc_consistency}
+  \lean{Gluck.constantArc_consistency}
+  \uses{def:spherical_speed, lem:constant_arc_norm_sq, lem:constant_arc_inner}
+  Fix $K$ and start data $(\theta_0,z_0)$ with positive bracket
+  $K-\langle z_0,ie^{i\theta_0}\rangle>0$, and set $r=q_K(\theta_0,z_0)$,
+  $w=z_0+i\,r\,e^{i\theta_0}$. Then $1+\|w\|^2=2rK+r^2$.
+\end{lemma}
+
+\begin{proof}
+  Expand $\|w\|^2=\|z_0\|^2+2r\langle z_0,ie^{i\theta_0}\rangle+r^2$
+  (\texttt{norm\_add\_sq\_real}), then substitute the defining relation
+  $2r\bigl(K-\langle z_0,ie^{i\theta_0}\rangle\bigr)=1+\|z_0\|^2$ of
+  $r=q_K(\theta_0,z_0)$ (\cref{def:spherical_speed}).
+\end{proof}
+
 \begin{lemma}
+
+\leanok
 [constant-curvature arcs are explicit circular arcs]
   \label{lem:constant_curvature_arc}
   \lean{Gluck.constantCurvature_arc}
-  \uses{def:spherical_speed, lem:spherical_flow_unique}
+  \uses{def:spherical_speed, lem:spherical_flow_unique, lem:constant_arc_inner,
+        lem:constant_arc_norm_sq, lem:constant_arc_consistency}
   Fix $K>0$, a start $(\theta_0,z_0)$ with $K-\langle z_0,ie^{i\theta_0}\rangle>0$, and set
   \[
     r=\frac{1+\|z_0\|^2}{2\bigl(K-\langle z_0,ie^{i\theta_0}\rangle\bigr)}=q_K(\theta_0,z_0),
@@ -930,6 +1042,8 @@ large ball covers $[0,2\pi]$.
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   Differentiate: $z'(\theta)=r e^{i\theta}$, so the claim is $q_K(\theta,z(\theta))=r$.
   Compute $\langle z,ie^{i\theta}\rangle=\langle w,ie^{i\theta}\rangle-r$ and
   $\|z\|^2=\|w\|^2-2r\langle w,ie^{i\theta}\rangle+r^2$; then
@@ -942,11 +1056,45 @@ large ball covers $[0,2\pi]$.
   admissible, with clamps inactive) is \cref{lem:spherical_flow_unique}.
 \end{proof}
 
+\begin{lemma}[half-turn invariance of the truncated speed]
+  \label{lem:truncated_speed_half_turn}
+  \lean{Gluck.truncatedSpeed_half_turn}
+  \uses{def:truncated_speed}
+  If $\kappa(\theta+\pi)=\kappa(\theta)$, then
+  $\hat q_{\kappa,R,\delta}(\theta+\pi,-z)=\hat q_{\kappa,R,\delta}(\theta,z)$ for all
+  $\theta,z$.
+\end{lemma}
+
+\begin{proof}
+  $\|{-z}\|=\|z\|$ and $ie^{i(\theta+\pi)}=-ie^{i\theta}$, so
+  $\langle -z,ie^{i(\theta+\pi)}\rangle=\langle z,ie^{i\theta}\rangle$; with
+  $\kappa(\theta+\pi)=\kappa(\theta)$ every ingredient of the clamped quotient is
+  unchanged.
+\end{proof}
+
+\begin{lemma}[half-turn anti-equivariance of the truncated field]
+  \label{lem:truncated_field_half_turn}
+  \lean{Gluck.truncatedField_half_turn}
+  \uses{def:truncated_field, lem:truncated_speed_half_turn}
+  If $\kappa(\theta+\pi)=\kappa(\theta)$, then
+  $F_{\kappa,R,\delta}(\theta+\pi,-z)=-F_{\kappa,R,\delta}(\theta,z)$ for all
+  $\theta,z$.
+\end{lemma}
+
+\begin{proof}
+  $F(\theta+\pi,-z)=\hat q(\theta+\pi,-z)\,e^{i(\theta+\pi)}
+   =\hat q(\theta,z)\cdot(-e^{i\theta})=-F(\theta,z)$ by
+  \cref{lem:truncated_speed_half_turn} and $e^{i\pi}=-1$.
+\end{proof}
+
 \begin{lemma}
+
+\leanok
 [half-turn equivariance]
   \label{lem:flow_half_turn_equivariance}
   \lean{Gluck.flow_half_turn_equivariance}
-  \uses{def:truncated_speed, lem:truncated_field_solution_unique, lem:spherical_flow_spec}
+  \uses{def:truncated_speed, lem:truncated_field_solution_unique, lem:spherical_flow_spec,
+        lem:truncated_speed_half_turn, lem:truncated_field_half_turn}
   If $\kappa(\theta+\pi)=\kappa(\theta)$ for all $\theta$, then the truncated field is
   invariant under the half turn: $\hat q(\theta+\pi,-z)=\hat q(\theta,z)$, hence if
   $z(\cdot)$ solves the truncated ODE on $[0,2\pi]$ then $y(\theta)=-z(\theta+\pi)$
@@ -957,6 +1105,8 @@ large ball covers $[0,2\pi]$.
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   $\|{-z}\|=\|z\|$ and $\langle -z,\,ie^{i(\theta+\pi)}\rangle=\langle -z,\,-ie^{i\theta}
   \rangle=\langle z,ie^{i\theta}\rangle$, and $\kappa(\theta+\pi)=\kappa(\theta)$; so
   every ingredient of $\hat q$ is unchanged. For $\theta\in[0,\pi]$ one has
@@ -971,75 +1121,529 @@ large ball covers $[0,2\pi]$.
   $z(2\pi)=-z(\pi)=z_0$.
 \end{proof}
 
-\begin{lemma}
-[spherical endpoint map: boundary winding over the symmetric step model]
-  \label{lem:spherical_endpoint_winding}
-  \lean{Gluck.spherical_endpoint_winding}
-  \uses{def:spherical_endpoint, lem:spherical_endpoint_continuousOn,
-        lem:constant_curvature_arc, lem:flow_half_turn_equivariance,
-        lem:invariant_admissible_domain, thm:existence_of_zero}
-  For $\kappa$ obtained from the four-vertex reparametrization ($L^1$-close to a
-  two-value step model with values $a>b>0$), there is a compact disk $D$ of initial
-  points $z_0$, centered at the model's closing configuration, on which the endpoint
-  map $E$ of \cref{def:spherical_endpoint} is continuous, nonzero on $\partial D$, and
-  has nonzero boundary winding; the in-tree \cref{thm:existence_of_zero} then supplies an
-  interior zero $E(z_0^\ast)=0$, a closed trajectory of the truncated flow.
+\subsection*{Design overview (S2-D, resolved iter-048)}
+
+The two formerly-open sub-questions of this phase are now resolved at design level, and
+the whole phase is elementary algebra plus the in-tree winding toolkit. The shape:
+
+\textbf{DO-NOT (degeneracy of the constant model).} For \emph{constant} $\kappa=K$ every
+admissible initial point lies on a spherical circle of curvature $K$
+(\cref{lem:constant_curvature_arc}), so every trajectory closes and the endpoint error
+map vanishes identically: the constant family carries no degree and must NOT be the
+homotopy target. The fix is the \emph{symmetric step bicircle} with \emph{small
+contrast}: levels $a=c-h/2$, $b=c+h/2$ around the midpoint $c$ of the four-vertex
+overlap window, on the in-tree canonical equal-quarter breakpoints $0,\pi/2,\pi,3\pi/2$
+(\cref{def:four_arc_step_function} — note $\kappa^\ast=$
+$\texttt{stepCurvature } b\,a\,0\,(\pi/2)\,\pi\,(3\pi/2)$ takes the value $a$ on
+$[0,\pi/2)\cup[\pi,3\pi/2)$ and $b$ on the complement, and is $\pi$-periodic).
+
+\textbf{Everything is explicit arc algebra.} Because the step is piecewise constant, its
+model trajectories are concatenations of \emph{explicit circular arcs}
+(\cref{lem:constant_curvature_arc}); no flow, no variational equation, and no
+$\mathrm{PicardLindel\ddot of}$ package is needed on the model side. The model endpoint
+error map $E^\ast_{a,b}$ (\cref{def:step_error_map}) is a closed-form composition of
+four arc maps. Its degeneracy at $h=0$ becomes a feature: $E^\ast_{c,c}\equiv0$
+identically, so $E^\ast_{a,b}=h\,W+O(h^2)$ for an explicit \emph{first-variation field}
+$W$, and the planner's symbolic computation (numerically validated: the arc composite
+matches an RK4 integration of the step ODE to $10^{-7}$, $E^\ast(z_0^\ast)=O(h^2)$, and
+$E^\ast/h$ matches the predicted linearization with ratio $\to1$) gives
+\[
+  W(z_0^\ast)=0,\qquad
+  DW(z_0^\ast)=-\tfrac{2r^\ast}{1+c^2}\cdot\overline{(\,\cdot\,)}
+  \qquad(z_0^\ast=-i\,r^\ast,\ r^\ast=\sqrt{1+c^2}-c),
+\]
+a \emph{conjugation-type} (orientation-reversing) nondegenerate linear map: the model
+error loop on a small circle $\partial B(z_0^\ast,\rho)$ has winding $-1\ne0$. The exact
+mechanism behind the cancellations is the \emph{quadratic identity}
+\cref{lem:speed_quadratic_identity}: $q_c(\theta,z)-r^\ast$ vanishes to second order in
+the distance to the centered circle, with an exact rational formula (no Taylor
+remainders anywhere: all expansions in this section are exact algebraic identities plus
+norm estimates of explicitly-controlled factors).
+
+\textbf{Transport.} The comparison of the actual (reparametrized) $\kappa$-flow with the
+step model cannot use \cref{lem:invariant_admissible_domain} directly ($\kappa^\ast$ is
+discontinuous, and the concatenated model has corners), and Mathlib-style continuity of
+the drive fails at the breakpoints. The resolution is \emph{arcwise chaining}: on each
+quarter arc the model level is a \emph{constant} $K\in\{a,b\}$, the drive
+$M|\kappa-K|$ is continuous there, and the single-arc transport
+(\cref{lem:invariant_admissible_arc}) is the verbatim margin-transport proof on a
+shifted interval. Four chained applications give the full-period transport
+(\cref{lem:step_model_transport}) with constant $e^{2\pi L}$, both for admissibility and
+for the endpoint estimate $\|E_\kappa(z_0)-E^\ast(z_0)\|\le e^{2\pi L}M\!\int|\kappa-
+\kappa^\ast|$.
+
+\textbf{Quantifier order.} $c$ and $\kappa_0=\min\kappa$ are fixed by $\kappa$; margins
+$(R,\delta,\mu,\rho_0,h_0)$ by \cref{lem:step_model_margins}; the disk radius $\rho$ and
+contrast $h$ by \cref{lem:step_error_expansion} (boundary margin
+$\sim\tfrac{r^\ast}{1+c^2}h\rho$); the reparametrization quality $\varepsilon\ll h\rho$
+last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
+\texttt{errorMap\_winding\_eq\_one} \emph{value} is not reusable; only
+\cref{thm:existence_of_zero} and the perturbation/congruence lemmas of
+\cref{chap:winding} are.
+
+\begin{definition}[spherical arc map]
+  \label{def:spherical_arc_map}
+  \lean{Gluck.sphericalArcMap}
+  \uses{def:spherical_speed}
+  For $K,\theta_0,\Delta\in\mathbb R$ and $z\in\mathbb C$, the \emph{arc map} is
+  \[
+    A_{K,\theta_0,\Delta}(z)\;=\;z+i\,q_K(\theta_0,z)\,e^{i\theta_0}\bigl(1-e^{i\Delta}\bigr),
+  \]
+  where $q_K$ abbreviates the gauge speed $q_{(\theta\mapsto K)}$ of
+  \cref{def:spherical_speed} for the constant curvature $K$. By
+  \cref{lem:constant_curvature_arc}, where the bracket stays positive this is the
+  time-$\Delta$ endpoint of the constant-$K$ trajectory started at $(\theta_0,z)$: the
+  arc trajectory is $\theta\mapsto w-i\,r\,e^{i\theta}$ with $r=q_K(\theta_0,z)$,
+  $w=z+i\,r\,e^{i\theta_0}$, and its value at $\theta_0+\Delta$ is exactly
+  $A_{K,\theta_0,\Delta}(z)$. (A total function of the junk-value kind, like $q$ itself:
+  the geometric meaning requires bracket positivity, the definition does not.)
+\end{definition}
+
+\begin{lemma}[quadratic identity: exact second-order vanishing of $q$ at the centered circle]
+  \label{lem:speed_quadratic_identity}
+  \lean{Gluck.sphericalSpeed_sub_radius}
+  \uses{def:spherical_speed, lem:spherical_speed_circle}
+  Fix $c>0$ and set $r^\ast=\sqrt{1+c^2}-c$, so that $r^{\ast2}+2cr^\ast-1=0$. For all
+  $\theta$ and all $z$ with $D:=c-\langle z,ie^{i\theta}\rangle\ne0$,
+  \[
+    q_c(\theta,z)-r^\ast\;=\;\frac{\bigl\|z+r^\ast i e^{i\theta}\bigr\|^2}{2D}
+    \;=\;\frac{\|z-z_c(\theta)\|^2}{2D},
+    \qquad z_c(\theta):=-r^\ast i e^{i\theta}
+  \]
+  ($z_c$ is the centered circle of \cref{lem:spherical_speed_circle}). In particular
+  $q_c-r^\ast$ vanishes \emph{exactly to second order} in the distance to the centered
+  circle: the $z$-gradient of $q_c(\theta,\cdot)$ vanishes at $z_c(\theta)$, and on
+  $D>0$ one has $q_c\ge r^\ast$.
 \end{lemma}
 
 \begin{proof}
-  \emph{(Pinned design, two sub-questions still open — S2-D is the remaining hard phase.)}
-  \textbf{DO-NOT (degeneracy of the constant model).} For \emph{constant} $\kappa=K$
-  every admissible initial point lies on a spherical circle of curvature $K$
-  (\cref{lem:constant_curvature_arc}), so every trajectory closes and $E\equiv0$ on an
-  open set: the constant-curvature family carries no degree and must NOT be used as the
-  homotopy target. Equivalently, the $z$-gradient of $q$ vanishes identically along
-  circle solutions (a consequence of the consistency identity), so the linearized
-  monodromy is the identity.
-  \textbf{Model.} Use instead the \emph{symmetric step bicircle}: the two-value
-  $\pi$-periodic step curvature (values $a,b$, the in-tree canonical breakpoint pattern),
-  whose trajectories obey the half-turn equivariance
-  (\cref{lem:flow_half_turn_equivariance}). Closure reduces to the 2-D fixed-point
-  equation $G(z_0):=H(z_0)+z_0=0$ for the half-period map $H$. At $a=b=K$ the map $G$
-  has the explicit zero $z_0=-i\,r^\ast$, $r^\ast=\sqrt{1+K^2}-K$ (the centered circle),
-  and — because the linearization along circle arcs is the identity — $DG=2\,\mathrm{Id}$
-  there: an isolated nondegenerate zero with local winding $+1$. This is where the
-  linearization degeneracy becomes a \emph{feature}.
-  \textbf{Quantitative scheme (strategy-critic refinement, accepted).} The two step
-  levels $a>b$ are \emph{free} inside the four-vertex overlap interval
-  $(\max(\kappa(q_1),\kappa(q_2)),\,\min(\kappa(p_1),\kappa(p_2)))$, so they may be
-  chosen with \emph{small contrast} $h=a-b$ around a midpoint $c$. Then the step model
-  is an $O(h)$ perturbation of the constant $c$, the continuation from the explicit
-  $a=b$ zero is \emph{local} (boundary nonvanishing on a fixed small disk from
-  $DG=2\,\mathrm{Id}+O(h)$), and — crucially — $H$ for the step model is an
-  \emph{explicit closed-form} composition of two arc maps
-  $z_0\mapsto z_0+i\,q_K(\theta_0,z_0)\,e^{i\theta_0}(1-e^{i\Delta})$
-  (\cref{lem:constant_curvature_arc}), so $DH$ and all isolation radii are finite
-  symbolic computations, with no variational-equation formalization.
-  \textbf{Open sub-question (a) — sharpened.} Compute $DG=DH+\mathrm{Id}$ for the
-  explicit two-arc composition and verify invertibility (hence local winding $+1$) for
-  small $h>0$ at the symmetric configuration.
-  \textbf{Open sub-question (b) — sharpened.} Transfer the winding from $G$ to the
-  full-period $E$. Note $E(z_0)=-H_2(-H_1(z_0))-z_0$ with $H_1=H_2=H$ in the
-  $\pi$-periodic case, so $DE=DH^2-\mathrm{Id}=O(h)$: the model zero of $E$ is isolated
-  only at scale $h$ (for $h=0$, $E\equiv0$ — the DO-NOT above). The order of quantifiers
-  works: first fix the contrast $h$, extract the $O(h)$ isolation radius and boundary
-  margin of $E$ from the explicit $DE$, THEN choose the reparametrization quality
-  $\varepsilon\ll h$ (the $L^1$ distance of \cref{chap:dahlberg_step1} is free) so the
-  $\kappa$-homotopy (flow $L^1$-continuity, the estimate of
-  \cref{lem:invariant_admissible_domain}) keeps $E\ne0$ on the boundary circle
-  throughout. The Euclidean \texttt{errorMap\_winding\_eq\_one} \emph{value} is not
-  reusable; only \cref{thm:existence_of_zero} is. \emph{Caveat for the formalization:}
-  \cref{lem:invariant_admissible_domain} takes $\kappa^\ast$ \emph{continuous}, while the
-  step model is piecewise constant — compare through continuous approximants of the step,
-  or restate the transport with $z^\ast$ merely continuous piecewise-$C^1$ satisfying the
-  integral identity $z^\ast(\theta)=z^\ast(0)+\int_0^\theta F_{\kappa^\ast}(s,z^\ast(s))ds$
-  (which concatenated arcs satisfy); decide when S2-D is dispatched.
+  \uses{lem:constant_arc_norm_sq, lem:constant_arc_inner}
+  $q_c-r^\ast=\dfrac{(1+\|z\|^2)-2r^\ast D}{2D}$, and the numerator is
+  \[
+    1+\|z\|^2-2r^\ast c+2r^\ast\langle z,ie^{i\theta}\rangle
+    =\|z\|^2+r^{\ast2}+2\langle z,\,r^\ast ie^{i\theta}\rangle
+    =\|z+r^\ast ie^{i\theta}\|^2,
+  \]
+  using $1-2r^\ast c=r^{\ast2}$ (the defining identity of $r^\ast$) and the polarization
+  expansion (\cref{lem:constant_arc_norm_sq} with $-r$ replaced by $r^\ast$).
+\end{proof}
+
+\begin{lemma}[speed half-turn (true speed)]
+  \label{lem:spherical_speed_half_turn}
+  \lean{Gluck.sphericalSpeed_half_turn}
+  \uses{def:spherical_speed}
+  For every constant $K$: $q_K(\theta+\pi,-z)=q_K(\theta,z)$ for all $\theta,z$. (Same
+  computation as \cref{lem:truncated_speed_half_turn}, without clamps: $\|-z\|=\|z\|$ and
+  $\langle -z,ie^{i(\theta+\pi)}\rangle=\langle z,ie^{i\theta}\rangle$.)
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:truncated_speed_half_turn}
+  As stated; $ie^{i(\theta+\pi)}=-ie^{i\theta}$ and bilinearity of the inner product.
+\end{proof}
+
+\begin{lemma}[arc-map half-turn anti-equivariance]
+  \label{lem:arc_map_half_turn}
+  \lean{Gluck.sphericalArcMap_half_turn}
+  \uses{def:spherical_arc_map, lem:spherical_speed_half_turn}
+  $A_{K,\theta_0+\pi,\Delta}(-z)=-A_{K,\theta_0,\Delta}(z)$ for all
+  $K,\theta_0,\Delta,z$.
+\end{lemma}
+
+\begin{proof}
+  $q_K(\theta_0+\pi,-z)=q_K(\theta_0,z)$ (\cref{lem:spherical_speed_half_turn}) and
+  $e^{i(\theta_0+\pi)}=-e^{i\theta_0}$, so every term of
+  \cref{def:spherical_arc_map} flips sign.
+\end{proof}
+
+\begin{lemma}[arc concatenation]
+  \label{lem:arc_map_concat}
+  \lean{Gluck.sphericalArcMap_concat}
+  \uses{def:spherical_arc_map, lem:constant_curvature_arc}
+  Fix $K>0$, start data $(\theta_0,z)$ with positive bracket, and $\Delta_1,\Delta_2\ge0$.
+  If the bracket $K-\langle z(\theta),ie^{i\theta}\rangle$ stays positive along the arc
+  trajectory $z(\theta)=w-ire^{i\theta}$ for $\theta\in[\theta_0,\theta_0+\Delta_1+
+  \Delta_2]$, then
+  \[
+    A_{K,\theta_0+\Delta_1,\Delta_2}\bigl(A_{K,\theta_0,\Delta_1}(z)\bigr)
+    =A_{K,\theta_0,\Delta_1+\Delta_2}(z) .
+  \]
+\end{lemma}
+
+\begin{proof}
+  By \cref{lem:constant_curvature_arc}(iii), $q_K$ is constant $=r$ along the arc where
+  the bracket is positive; in particular
+  $q_K(\theta_0+\Delta_1,\,z(\theta_0+\Delta_1))=r=q_K(\theta_0,z)$, so the second arc
+  continues the same circle: both sides equal $w-ire^{i(\theta_0+\Delta_1+\Delta_2)}$
+  after expanding \cref{def:spherical_arc_map} and collecting the exponentials.
+  In particular the full-turn map is the identity where admissible:
+  $A_{K,\theta_0,2\pi}(z)=z$ (since $e^{2\pi i}=1$), which is the exact form of the
+  constant-model degeneracy.
+\end{proof}
+
+\begin{definition}[step half-period map]
+  \label{def:step_half_map}
+  \lean{Gluck.stepHalfMap}
+  \uses{def:spherical_arc_map}
+  For levels $a,b$, the \emph{half-period map} of the symmetric equal-quarter step is
+  the composition of the two quarter-arc maps
+  \[
+    H_{a,b}(z)\;=\;A_{b,\pi/2,\pi/2}\bigl(A_{a,0,\pi/2}(z)\bigr) .
+  \]
+  (First quarter has level $a$, second $b$, matching
+  $\kappa^\ast=\texttt{stepCurvature } b\,a\,0\,(\pi/2)\,\pi\,(3\pi/2)$ of
+  \cref{def:four_arc_step_function}.)
+\end{definition}
+
+\begin{definition}[step model error map]
+  \label{def:step_error_map}
+  \lean{Gluck.stepErrorMap}
+  \uses{def:step_half_map}
+  $E^\ast_{a,b}(z)\;=\;-H_{a,b}\bigl(-H_{a,b}(z)\bigr)-z$. By
+  \cref{lem:arc_map_half_turn}, the arcs of the second half period (levels $a,b$ at
+  $\theta_0=\pi,3\pi/2$, by $\pi$-periodicity of the step) are obtained from the first
+  half by the half turn, so $z+E^\ast_{a,b}(z)$ is exactly the four-arc composite
+  \[
+    A_{b,3\pi/2,\pi/2}\circ A_{a,\pi,\pi/2}\circ A_{b,\pi/2,\pi/2}\circ A_{a,0,\pi/2}
+  \]
+  — the endpoint at $2\pi$ of the concatenated step-model trajectory. At $a=b=c$,
+  $E^\ast_{c,c}(z)=0$ wherever the circle through $z$ stays bracket-positive
+  (\cref{lem:arc_map_concat}).
+\end{definition}
+
+\begin{lemma}[explicit arcs solve the truncated ODE]
+  \label{lem:constant_arc_solves_truncated}
+  \lean{Gluck.constantArc_solves_truncated}
+  \uses{lem:constant_curvature_arc, lem:truncated_speed_eq, def:truncated_field}
+  Fix a constant $K$, $0<\delta$, $R$, start data $(\theta_0,z_0)$, and let
+  $z(\theta)=w-ire^{i\theta}$ be the arc trajectory of \cref{lem:constant_curvature_arc}.
+  If along $\theta\in[t_1,t_2]$ the arc is \emph{admissible with clamps inactive} —
+  $\|z(\theta)\|\le R$ and $K-\langle z(\theta),ie^{i\theta}\rangle\ge\delta$ — then $z$
+  solves the \emph{truncated} ODE for the constant curvature $K$ on $[t_1,t_2]$ in the
+  $\mathrm{HasDerivWithinAt}$ sense:
+  $z'(\theta)=\hat q_{K,R,\delta}(\theta,z(\theta))\,e^{i\theta}$ on $[t_1,t_2]$.
+\end{lemma}
+
+\begin{proof}
+  On the admissible set the clamps are inactive, $\hat q=q_K$
+  (\cref{lem:truncated_speed_eq}), and $z'(\theta)=re^{i\theta}
+  =q_K(\theta,z(\theta))e^{i\theta}$ by \cref{lem:constant_curvature_arc}.
+\end{proof}
+
+\begin{lemma}[single-arc margin transport (shifted interval, constant model level)]
+  \label{lem:invariant_admissible_arc}
+  \lean{Gluck.invariant_admissible_arc}
+  \uses{lem:truncated_field_sub_le, lem:gronwall_L1_drive,
+        lem:invariant_admissible_domain}
+  Let $\kappa$ be continuous with $\kappa\ge\kappa_0$ pointwise, $0<\delta$, let $L$ be a
+  Lipschitz witness of \cref{lem:truncated_field_lipschitz} and
+  $M=\tfrac{1+R^2}{2\delta^2}$. Let $[t_1,t_2]\subseteq\mathbb R$, $K\in\mathbb R$
+  (\emph{constant} model level), and let $z,z^\ast:[t_1,t_2]\to\mathbb C$ be continuous
+  with, in the $\mathrm{HasDerivWithinAt}$ sense on $[t_1,t_2]$,
+  \[
+    z'=\hat q_{\kappa,R,\delta}(\theta,z)\,e^{i\theta},\qquad
+    z^{\ast\prime}=\hat q_{K,R,\delta}(\theta,z^\ast)\,e^{i\theta},
+  \]
+  and suppose the model has margins $\mu>0$ on the arc:
+  $\|z^\ast(\theta)\|\le R-\mu$ and
+  $\langle z^\ast(\theta),ie^{i\theta}\rangle\le\kappa_0-\delta-\mu$ for
+  $\theta\in[t_1,t_2]$. If
+  \[
+    e^{L(t_2-t_1)}\Bigl(\|z(t_1)-z^\ast(t_1)\|
+      +M\!\int_{t_1}^{t_2}\!|\kappa(s)-K|\,ds\Bigr)\;\le\;\mu,
+  \]
+  then for all $\theta\in[t_1,t_2]$:
+  \[
+    \|z(\theta)-z^\ast(\theta)\|\le
+    e^{L(t_2-t_1)}\Bigl(\|z(t_1)-z^\ast(t_1)\|+M\!\int_{t_1}^{t_2}\!|\kappa-K|\Bigr),
+    \quad
+    \|z(\theta)\|\le R,\quad
+    \kappa(\theta)-\langle z(\theta),ie^{i\theta}\rangle\ge\delta .
+  \]
+\end{lemma}
+
+\begin{proof}
+  Verbatim the proof of \cref{lem:invariant_admissible_domain} after the time shift
+  $s\mapsto t_1+s$ (which turns $[t_1,t_2]$ into $[0,T]$, $T=t_2-t_1$, and shifts the
+  fields accordingly): FTC difference identity, the field sensitivity
+  \cref{lem:truncated_field_sub_le} with $\kappa^\ast\equiv K$ — the drive
+  $g=M|\kappa-K|$ is \emph{continuous} because the model level is constant, which is the
+  entire point of the arcwise formulation — then \cref{lem:gronwall_L1_drive} and margin
+  propagation via $|\langle z-z^\ast,ie^{i\theta}\rangle|\le\|z-z^\ast\|$.
+\end{proof}
+
+\begin{lemma}[four-arc chained transport against the step model]
+  \label{lem:step_model_transport}
+  \lean{Gluck.stepModel_transport}
+  \uses{lem:invariant_admissible_arc, lem:constant_arc_solves_truncated,
+        def:step_half_map, def:step_error_map, lem:arc_map_half_turn,
+        def:four_arc_step_function, def:spherical_flow, lem:spherical_flow_spec}
+  Let $\kappa$ be continuous with $\kappa\ge\kappa_0$ pointwise, $0<\delta$, $L$, $M$ as
+  above, levels $a,b$, and $\kappa^\ast=\texttt{stepCurvature } b\,a\,0\,(\pi/2)\,\pi\,
+  (3\pi/2)$. Let $z$ be a trajectory of the $\kappa$-truncated flow on $[0,2\pi]$ with
+  $z(0)=z_0$, and let the \emph{concatenated step model} from $z_0$ be the four
+  quarter-arc trajectories with levels $a,b,a,b$ at $\theta_0=0,\pi/2,\pi,3\pi/2$, each
+  arc started at the endpoint of the previous one. Assume each of the four arcs is
+  admissible with margins $\mu$ as in \cref{lem:invariant_admissible_arc} (with its own
+  constant level), and
+  \[
+    e^{2\pi L}\,M\!\int_0^{2\pi}\!|\kappa-\kappa^\ast|\;\le\;\mu .
+  \]
+  Then $z$ is admissible on $[0,2\pi]$ ($\|z\|\le R$, bracket $\ge\delta$), and the
+  endpoint satisfies
+  \[
+    \bigl\|\,\bigl(z(2\pi)-z_0\bigr)-E^\ast_{a,b}(z_0)\,\bigr\|
+    \;\le\;e^{2\pi L}\,M\!\int_0^{2\pi}\!|\kappa-\kappa^\ast| .
+  \]
+\end{lemma}
+
+\begin{proof}
+  Apply \cref{lem:invariant_admissible_arc} on each quarter $[\theta_j,\theta_{j+1}]$,
+  $\theta_j=j\pi/2$, with the constant level $K_j\in\{a,b\}$ of that quarter; the model
+  arcs solve the truncated ODE by \cref{lem:constant_arc_solves_truncated}, and on each
+  quarter $\int_{\theta_j}^{\theta_{j+1}}|\kappa-K_j|=\int_{\theta_j}^{\theta_{j+1}}
+  |\kappa-\kappa^\ast|$ ($\kappa^\ast=K_j$ off the single breakpoint). Chain the distance
+  bounds: with $d_j=\|z(\theta_j)-z^\ast(\theta_j)\|$ and $I_j=M\int_{\theta_j}^{
+  \theta_{j+1}}|\kappa-\kappa^\ast|$, each quarter gives $d_{j+1}\le e^{L\pi/2}(d_j+I_j)$
+  and $d_0=0$, whence inductively $d(\theta)\le e^{2\pi L}\sum_j I_j$ throughout —
+  in particular each quarter's smallness hypothesis holds and admissibility propagates
+  across all four quarters. The model endpoint at $2\pi$ is the four-arc composite,
+  which equals $z_0+E^\ast_{a,b}(z_0)$ by \cref{def:step_error_map} (via
+  \cref{lem:arc_map_half_turn}), giving the endpoint estimate. (The prover may extract
+  the composite-equals-$E^\ast$ step as a helper lemma.)
+\end{proof}
+
+\begin{lemma}[uniform margins of the step model near the centered circle]
+  \label{lem:step_model_margins}
+  \lean{Gluck.stepModel_margins}
+  \uses{def:spherical_arc_map, lem:constant_arc_inner, lem:speed_quadratic_identity,
+        lem:spherical_speed_circle, def:step_half_map}
+  Fix $c>0$ and $\kappa_0\in(0,c]$, and set $r^\ast=\sqrt{1+c^2}-c$,
+  $z_0^\ast=-i\,r^\ast$. There exist explicit $R<1$, $\delta>0$, $\mu>0$, $\rho_0>0$,
+  $h_0>0$ (functions of $c,\kappa_0$ only) such that for all levels $a,b$ with
+  $|a-c|\le h_0$, $|b-c|\le h_0$ and every $z_0$ with $\|z_0-z_0^\ast\|\le\rho_0$, each
+  of the four quarter arcs of the concatenated step model from $z_0$
+  (\cref{lem:step_model_transport}) satisfies, along the whole arc,
+  \[
+    \|z^\ast(\theta)\|\le R-\mu,\qquad
+    \langle z^\ast(\theta),ie^{i\theta}\rangle\le\kappa_0-\delta-\mu,\qquad
+    K_j-\langle z^\ast(\theta),ie^{i\theta}\rangle\ge\delta
+  \]
+  (the last condition keeps the clamps inactive so
+  \cref{lem:constant_arc_solves_truncated} applies).
+\end{lemma}
+
+\begin{proof}
+  Along the centered circle itself ($a=b=c$, $z_0=z_0^\ast$) one has
+  $\|z^\ast\|\equiv r^\ast<1$ and $\langle z^\ast(\theta),ie^{i\theta}\rangle\equiv
+  -r^\ast<0$ (\cref{lem:spherical_speed_circle}), so all three quantities have strict
+  slack: e.g.\ $R=(1+r^\ast)/2$, $\delta+\mu\le\min(\kappa_0+r^\ast,c+r^\ast)/2$.
+  Each arc map $A_{K,\theta_0,\pi/2}$ is explicitly Lipschitz in $(K,z)$ on the compact
+  neighborhood $\{|K-c|\le c/2,\ \|z-z_c(\theta_0)\|\le r^\ast/2\}$ (the bracket is
+  bounded below there via \cref{lem:constant_arc_inner} and Cauchy–Schwarz, so $q_K$ is a
+  quotient of Lipschitz functions with denominator bounded away from $0$), and along each
+  arc $\langle z^\ast(\theta),ie^{i\theta}\rangle=\langle w_j,ie^{i\theta}\rangle-r_j$
+  with $(w_j,r_j)$ Lipschitz-close to $(0,r^\ast)$. Chaining the four Lipschitz maps,
+  the whole concatenated trajectory deviates from the centered circle by at most
+  $C(c)\,(\rho_0+h_0)$; choose $\rho_0,h_0$ so this is below half the slack. All
+  constants are explicit; no compactness argument is needed.
+\end{proof}
+
+\begin{lemma}[first-variation expansion of the step error map]
+  \label{lem:step_error_expansion}
+  \lean{Gluck.stepError_expansion}
+  \uses{def:step_error_map, def:step_half_map, def:spherical_arc_map,
+        lem:speed_quadratic_identity, lem:arc_map_concat, lem:constant_arc_inner}
+  Fix $c>0$; let $r^\ast,z_0^\ast$ be as above and set $\eta=\tfrac{2r^\ast}{1+c^2}>0$.
+  There exist explicit $\rho_1>0$, $h_1>0$, $C>0$ (functions of $c$ only) such that for
+  all $h\in(0,h_1]$, with levels $a=c-h/2$, $b=c+h/2$, and all $z_0$ with
+  $\|z_0-z_0^\ast\|\le\rho_1$:
+  \[
+    \Bigl\|\,E^\ast_{a,b}(z_0)\;+\;\eta\,h\,\overline{(z_0-z_0^\ast)}\,\Bigr\|
+    \;\le\;C\,h\,\bigl(\|z_0-z_0^\ast\|^2+h\bigr) .
+  \]
+  \emph{Provenance.} The linear part $-\eta\,h\,\overline{(\,\cdot\,)}$ is
+  planner-derived (iter-048) and numerically validated ($E^\ast/h$ against the predicted
+  field at multiple base points and directions, ratio $\to1$ as the offset shrinks);
+  the prover should re-derive the coefficient symbolically during formalization and may
+  correct its exact value — the \emph{load-bearing} content is only that the linear part
+  is a nonzero real multiple of complex conjugation (orientation-reversing,
+  nondegenerate).
+\end{lemma}
+
+\begin{proof}
+  All expansions are exact algebra; no abstract Taylor theorem is used. Write
+  $\delta z=z_0-z_0^\ast$. The two mechanisms:
+  (i) \emph{level sensitivity is exact}: for any levels $K,K'$ and admissible $z$,
+  \[
+    q_K(\theta,z)-q_{K'}(\theta,z)
+    =\frac{(1+\|z\|^2)\,(K'-K)}{2\,D_K D_{K'}},\qquad
+    D_K=K-\langle z,ie^{i\theta}\rangle,
+  \]
+  a one-line quotient identity; at the circle base point this evaluates to
+  $\mp\tfrac{h}{2}\cdot\tfrac{r^\ast}{\sqrt{1+c^2}}+O(h(h+\|\delta z\|))$ for
+  $K=c\pm h/2$.
+  (ii) \emph{base-point sensitivity is exactly quadratic}:
+  \cref{lem:speed_quadratic_identity} gives $q_c(\theta,z)-r^\ast=\|z-z_c(\theta)\|^2/
+  (2D)$, so all first-order-in-$\delta z$ contributions at level $c$ vanish and
+  re-enter only through the $h$-dependent terms.
+  Expand the four-arc composite $z_0+E^\ast_{a,b}(z_0)$ arc by arc using (i), (ii) and
+  the gradient formula for $q_c$ implied by (ii) (each arc's output is the input plus
+  $i\,q\,e^{i\theta_0}(1-e^{i\pi/2})$ with $1-e^{i\pi/2}=1-i$, and intermediate points
+  stay within $O(\|\delta z\|+h)$ of the centered circle by
+  \cref{lem:step_model_margins}-style bounds); after cancellation of the $h$-free part
+  ($E^\ast_{c,c}\equiv0$, \cref{lem:arc_map_concat}) the coefficient of $h$ collects to
+  $-\eta\,\overline{\delta z}+O(\|\delta z\|^2)$ and every remaining term carries
+  $h(\|\delta z\|^2+h)$. The bookkeeping is finite (eight $q$-evaluations), and the
+  prover should organize it through named intermediate \texttt{have}-identities rather
+  than one monolithic \texttt{ring} call.
+\end{proof}
+
+\begin{lemma}[winding of a conjugate loop]
+  \label{lem:winding_conj_loop}
+  \lean{Gluck.windingNumberC_conj_loop}
+  \uses{def:winding_number_c, lem:winding_number_eq_div_of_lift}
+  For $w\ne0$, the loop $t\mapsto w\cdot\overline{e^{2\pi it}}$ on $[0,1]$ is nowhere
+  zero and has $\mathbb C$-winding number $-1$.
+\end{lemma}
+
+\begin{proof}
+  The normalization of the loop is $t\mapsto\mathrm{circleProj}(w)\cdot e^{-2\pi it}$,
+  which lifts through $\mathrm{Circle.exp}$ via $t\mapsto\arg(w)-2\pi t$; by
+  \cref{lem:winding_number_eq_div_of_lift} the winding number is
+  $\bigl((\arg w-2\pi)-\arg w\bigr)/(2\pi)=-1$. (CAUTION — the \emph{entire} lift layer
+  of \texttt{Winding.lean} is \texttt{private} and not importable: not just
+  \texttt{windingNumber\_negStandard} but also \texttt{windingNumber\_eq\_div\_of\_lift},
+  \texttt{angleLift}, and the raw \texttt{windingNumber}; the public surface is only
+  \texttt{windingNumberC}, \texttt{windingNumberC\_congr},
+  \texttt{windingNumberC\_eq\_of\_perturb}, \texttt{windingNumberC\_posScalarField},
+  \texttt{diskBoundaryLoop}, and \texttt{thm:existence\_of\_zero}. The local proof must
+  therefore redo the angle-lift computation self-contained from Mathlib's
+  \texttt{Circle.isCoveringMap\_exp} path lifting — the same route as
+  \texttt{Winding.lean}'s construction, an estimated 80--120 LOC helper layer, NOT a
+  five-line replication.)
+\end{proof}
+
+\begin{lemma}[four values at freely chosen levels]
+  \label{lem:exists_abab_levels}
+  \lean{Gluck.exists_abab_levels}
+  \uses{def:four_vertex_condition, lem:ivt_hits, lem:abab_values}
+  Let $\kappa$ be continuous and $2\pi$-periodic with alternating extrema data
+  $p_1<q_1<p_2<q_2<p_1+2\pi$ satisfying the strict value separation
+  $\max(\kappa(q_1),\kappa(q_2))<\min(\kappa(p_1),\kappa(p_2))$. Then for \emph{every}
+  pair of levels $a,b$ with
+  $\max(\kappa(q_1),\kappa(q_2))<a<b<\min(\kappa(p_1),\kappa(p_2))$ there exist
+  $\theta_1<\theta_2<\theta_3<\theta_4<\theta_1+2\pi$ with
+  $\kappa(\theta_1,\theta_2,\theta_3,\theta_4)=(a,b,a,b)$. (This refines
+  \cref{lem:abab_values}, which produces one specific pair of levels — the endpoints of
+  the overlap window; here the levels are free, which is what allows the small-contrast
+  choice $a=c-h/2$, $b=c+h/2$.)
+\end{lemma}
+
+\begin{proof}
+  Four applications of the packaged IVT (\cref{lem:ivt_hits}): on $[q_1,p_2]$, $\kappa$
+  runs from $\le a$ to $\ge b$, giving $\theta_1$ with $\kappa=a$ and then, on
+  $[\theta_1,p_2]$, $\theta_2\ge\theta_1$ with $\kappa=b$ (strict inequality since the
+  values differ); on $[p_2,q_2]$ ($\ge b\to\le a$) a point $\theta_3$ with $\kappa=a$;
+  on $[q_2,p_1+2\pi]$ ($\le a\to\kappa(p_1)\ge b$, using periodicity) a point
+  $\theta_4$ with $\kappa=b$. The ordering and window conditions follow since
+  $\theta_4\le p_1+2\pi<q_1+2\pi\le\theta_1+2\pi$. (Home: this lemma lives in the S²
+  file — the Euclidean files are frozen.)
+\end{proof}
+
+\begin{lemma}[$L^1$ step reparametrization]
+  \label{lem:step_L1_reparam}
+  \lean{Gluck.exists_step_L1_reparam}
+  \uses{lem:exists_preliminary_reparam, def:four_arc_step_function,
+        def:is_curvature_function}
+  Let $\kappa$ be a curvature function, $0<a<b$, and $\theta_1<\theta_2<\theta_3<
+  \theta_4<\theta_1+2\pi$ with $\kappa(\theta_1,\theta_2,\theta_3,\theta_4)=(a,b,a,b)$.
+  For every $\varepsilon>0$ there is an orientation-preserving circle reparametrization
+  $h_1$ ($\mathrm{StrictMono}$, $C^1$ with continuous positive derivative,
+  $h_1(\theta+2\pi)=h_1(\theta)+2\pi$) such that
+  \[
+    \int_0^{2\pi}\bigl|\kappa(h_1(\theta))-\kappa^\ast(\theta)\bigr|\,d\theta
+    \;<\;\varepsilon,
+    \qquad \kappa^\ast=\texttt{stepCurvature } b\,a\,0\,(\pi/2)\,\pi\,(3\pi/2).
+  \]
+\end{lemma}
+
+\begin{proof}
+  Apply \cref{lem:exists_preliminary_reparam} with
+  $\varepsilon'=\varepsilon/\bigl(B+2\pi+1\bigr)$ where
+  $B=\sup_{[0,2\pi]}\kappa+b$ (finite by compactness and periodicity, and a pointwise
+  bound for $|\kappa\circ h_1-\kappa^\ast|$ since $0<\kappa^\ast\le b$ and $\kappa\circ
+  h_1$ ranges over the values of $\kappa$). Split the integral over the bad set (measure
+  $<\varepsilon'$, integrand $\le B$) and its complement in $[0,2\pi)$ (integrand
+  $\le\varepsilon'$, measure $\le2\pi$):
+  $\int\le\varepsilon' B+2\pi\varepsilon'<\varepsilon$.
+\end{proof}
+
+\begin{lemma}[spherical endpoint winding: closed admissible trajectory for the
+reparametrized curvature]
+  \label{lem:spherical_endpoint_winding}
+  \lean{Gluck.spherical_endpoint_winding}
+  \uses{def:spherical_endpoint, lem:spherical_endpoint_continuousOn,
+        def:step_error_map, lem:step_model_transport, lem:step_model_margins,
+        lem:step_error_expansion, lem:winding_conj_loop,
+        lem:winding_number_c_perturb, lem:exists_abab_levels, lem:step_L1_reparam,
+        thm:existence_of_zero, def:sphere_four_vertex,
+        lem:sphere_curvature_lower_bound}
+  Let $\kappa$ satisfy \cref{def:sphere_four_vertex} and be non-constant. Then there
+  exist $R<1$, $\delta>0$, an orientation-preserving circle reparametrization $h_1$
+  ($\mathrm{StrictMono}$, $C^1$ with continuous positive derivative,
+  $h_1(\theta+2\pi)=h_1(\theta)+2\pi$), and $z_0\in\mathbb C$, such that the trajectory
+  of the $(\kappa\circ h_1,R,\delta)$-truncated flow through $z_0$ is \emph{closed}
+  ($\Phi(z_0,2\pi)=z_0$, i.e.\ the endpoint map of \cref{def:spherical_endpoint}
+  vanishes at $z_0$) and \emph{admissible} on $[0,2\pi]$:
+  $\|z(\theta)\|\le R$ and
+  $(\kappa\circ h_1)(\theta)-\langle z(\theta),ie^{i\theta}\rangle\ge\delta$.
+\end{lemma}
+
+\begin{proof}
+  \emph{Data.} From the non-constant four-vertex branch take the alternating extrema and
+  the overlap window; let $c$ be its midpoint and $\kappa_0=\min_{[0,2\pi]}\kappa>0$
+  ($\le c$, shrinking $\kappa_0$ if necessary). \cref{lem:step_model_margins} for
+  $(c,\kappa_0)$ fixes $R,\delta,\mu,\rho_0,h_0$; \cref{lem:step_error_expansion} fixes
+  $\rho_1,h_1',C,\eta$. Choose
+  $\rho=\min\bigl(\rho_0,\rho_1,\tfrac{\eta}{4C}\bigr)$ and then
+  $h=\min\bigl(h_0,h_1',\tfrac{\eta\rho}{4C},\tfrac{w}{2}\bigr)$ where $w$ is the
+  half-width of the overlap window; set $a=c-h/2$, $b=c+h/2$.
+  \emph{Boundary margin of the model.} On the circle $\|z_0-z_0^\ast\|=\rho$,
+  \cref{lem:step_error_expansion} gives
+  $\|E^\ast_{a,b}(z_0)+\eta h\overline{(z_0-z_0^\ast)}\|\le Ch(\rho^2+h)\le
+  \tfrac{\eta h\rho}{2}$, so $\|E^\ast_{a,b}\|\ge\tfrac{\eta h\rho}{2}$ there.
+  \emph{Reparametrization.} \cref{lem:exists_abab_levels} supplies the $(a,b,a,b)$
+  crossing data; \cref{lem:step_L1_reparam} then supplies $h_1$ with
+  $\int_0^{2\pi}|\kappa\circ h_1-\kappa^\ast|<\varepsilon$, where $\varepsilon>0$ is
+  chosen with $e^{2\pi L}M\varepsilon\le\min\bigl(\mu,\tfrac{\eta h\rho}{8}\bigr)$
+  ($L$ a Lipschitz witness for the truncated field, $M=\tfrac{1+R^2}{2\delta^2}$). Note
+  $\kappa\circ h_1$ is continuous, $2\pi$-periodic, and $\ge\kappa_0$.
+  \emph{Winding.} For $z_0$ on the boundary circle, \cref{lem:step_model_transport}
+  (margins from \cref{lem:step_model_margins}) bounds
+  $\|E_{\kappa\circ h_1}(z_0)-E^\ast_{a,b}(z_0)\|\le e^{2\pi L}M\varepsilon\le
+  \tfrac{\eta h\rho}{8}$, where $E_{\kappa\circ h_1}$ is the truncated endpoint map of
+  \cref{def:spherical_endpoint}. Combining with the boundary margin and the expansion,
+  the loop of $E_{\kappa\circ h_1}$ around $\partial B(z_0^\ast,\rho)$ is a
+  perturbation, of size $<$ the model's norm, of the conjugate-linear loop
+  $t\mapsto-\eta h\,\rho\,\overline{e^{2\pi it}}$; by
+  \cref{lem:winding_number_c_perturb} and \cref{lem:winding_conj_loop} its winding is
+  $-1\ne0$, and it is nowhere zero on the boundary.
+  \emph{Zero.} $E_{\kappa\circ h_1}$ is continuous on the closed ball
+  (\cref{lem:spherical_endpoint_continuousOn}); after the affine chart
+  $w\mapsto z_0^\ast+\rho w$ of the unit disk, \cref{thm:existence_of_zero} yields an
+  interior $z_0$ with $E_{\kappa\circ h_1}(z_0)=0$: the trajectory closes.
+  \emph{Admissibility.} Apply \cref{lem:step_model_transport} once more at this interior
+  $z_0$ (its model margins hold since $\|z_0-z_0^\ast\|<\rho\le\rho_0$), with the same
+  $\varepsilon$-smallness: the closed trajectory is admissible on $[0,2\pi]$.
 \end{proof}
 
 \section{Simplicity and capstone (S2-E)}
 \label{sec:sphere_simplicity}
 
 \begin{lemma}
+
+\leanok
 [constant curvature branch: the centered circle realizes constant $\kappa$]
   \label{lem:spherical_circle_realizes}
   \lean{Gluck.sphericalCircle_realizes}
@@ -1055,6 +1659,7 @@ large ball covers $[0,2\pi]$.
 
 \begin{proof}
   \uses{lem:spherical_speed_circle}
+  \leanok
   $z$ is $C^1$ (an explicit exponential), $2\pi$-periodic, and
   $z'(\theta)=r^\ast e^{i\theta}\ne0$, so the tangent-angle witness is
   $\varphi(\theta)=\theta$ with $\|z'\|=r^\ast$. Confinement: $\|z\|=r^\ast<1$ since
@@ -1065,6 +1670,31 @@ large ball covers $[0,2\pi]$.
   $r^\ast=\sqrt{1+c^2}-c$; this is the content of \cref{lem:spherical_speed_circle} read
   as an identity, with $c=(1-r^{\ast2})/(2r^\ast)$). Simplicity: on $[0,2\pi)$ the map
   $\theta\mapsto -r^\ast ie^{i\theta}$ is injective because $e^{i\theta}$ is.
+\end{proof}
+
+\begin{lemma}[spherical realization transfers under reparametrization]
+  \label{lem:realizes_spherical_comp}
+  \lean{Gluck.realizesSphericalCurvature_comp}
+  \uses{def:realizes_spherical_curvature, lem:realizes_curvature_comp}
+  If $z$ realizes the spherical curvature $\mu$
+  (\cref{def:realizes_spherical_curvature}) and $\psi:\mathbb R\to\mathbb R$ is $C^1$
+  with $\psi'>0$ everywhere, then $z\circ\psi$ realizes $\mu\circ\psi$.
+\end{lemma}
+
+\begin{proof}
+  Mirror of the Euclidean \cref{lem:realizes_curvature_comp}
+  (\texttt{Gluck.realizesCurvature\_comp}): the chain rule gives
+  $(z\circ\psi)'=\psi'\cdot(z'\circ\psi)$, so the speed scales by $\psi'>0$, the
+  tangent-angle witness is $\varphi\circ\psi$, and the spherical speed relation of
+  \cref{def:realizes_spherical_curvature} at $\psi(t)$ multiplies through by
+  $\psi'(t)>0$ on both sides — the extra conformal factor $(1+\|z\|^2)/2$ and the
+  bracket term are pointwise in the curve value and transport unchanged. Confinement and
+  regularity are pointwise. This is what pulls a realization of $\kappa\circ h_1$ back
+  to a realization of $\kappa$ in the capstone: apply it with $\psi=h_1^{-1}$, whose
+  existence, $C^1$ regularity, positive derivative, and circle-equivariance are exactly
+  the PUBLIC in-tree lemma \texttt{Gluck.exists\_C1\_circle\_inverse}
+  (\texttt{Reduction.lean}, \cref{lem:exists_c1_circle_inverse}) — reuse it directly,
+  no local replication needed.
 \end{proof}
 
 \begin{lemma}[simplicity]
