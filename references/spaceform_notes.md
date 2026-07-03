@@ -1,10 +1,11 @@
-<!-- Reference notes only. NOT a project state file, NOT read by any archon agent.
-     Scoping record for a potential FUTURE extension of the converse four vertex
-     theorem to constant-curvature space forms (S², H²). The current gluck project
-     (Euclidean gluck_converse + dahlbergConverse) is COMPLETE; nothing here is a
-     committed work item. Written 2026-07-03 during an archon discuss session,
-     synthesizing three independent analyses (a Gemini transcript, two GPT-5.5 MCP
-     runs, and the advisor's own). -->
+<!-- Reference spec for the ACTIVE S² extension goal — plan/prover agents MAY and SHOULD
+     read this. Scoping + derivation for extending the converse four vertex theorem to
+     constant-curvature space forms (S², H²). As of 2026-07-03 the S²-positive phase is
+     ACTIVE (see .archon/PROGRESS.md ## Current Objectives, STRATEGY.md ## S² extension,
+     and the S² persistent hints in USER_HINTS.md); the Euclidean gluck_converse +
+     dahlbergConverse remain COMPLETE and must not be disturbed. Written during an archon
+     discuss session, synthesizing three independent analyses (a Gemini transcript, two
+     GPT-5.5 MCP runs, and the advisor's own). -->
 
 # Converse Four Vertex Theorem in Space Forms — Scoping Notes
 
