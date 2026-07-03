@@ -168,26 +168,3 @@ input to the winding argument of \cref{chap:winding}.
   transfers along a.e.\ equality.
 \end{proof}
 
-\begin{corollary}
-
-\leanok
-[Bicircle closes iff opposite arcs equal]
-  \label{cor:bicircle_closes_iff}
-  \lean{Gluck.bicircleErrorVector_eq_zero_iff}
-  \uses{lem:error_vector_of_bicircle, lem:closes_iff}
-  \textit{Source: DeTurck--Gluck, Proposition 9.1 (closure criterion).}
-  Since $a \ne b$ the scalar $\tfrac{1}{ia} - \tfrac{1}{ib} \ne 0$, so the
-  bicircle closes up ($E_{\mathrm{bi}} = 0$) if and only if
-  $\bigl(e^{i\theta_2} - e^{i\theta_1}\bigr) + \bigl(e^{i\theta_4} -
-  e^{i\theta_3}\bigr) = 0$, i.e. the two chords $e^{i\theta_2} - e^{i\theta_1}$
-  and $e^{i\theta_4} - e^{i\theta_3}$ are equal and opposite. Geometrically this
-  is the source's ``opposite arcs are equal in length'': the arc-length of each
-  arc is its angular extent divided by its curvature, and the condition equates
-  the two pairs of opposite arcs.
-\end{corollary}
-\begin{proof}
-  \uses{lem:error_vector_of_bicircle}
-  \leanok
-  Immediate from \cref{lem:error_vector_of_bicircle}: a nonzero complex scalar
-  times a vector is zero iff the vector is zero.
-\end{proof}

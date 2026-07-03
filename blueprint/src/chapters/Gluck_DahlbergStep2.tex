@@ -87,7 +87,7 @@ $|\alpha-\alpha^*|\le C\varepsilon$ estimate). The simplicity transport
     (\hat\kappa_1,\dots,\hat\kappa_5)=(a,b,a,b,a),
   \]
   matching the five-arc value pattern of \cref{lem:error_vector_of_bicircle}
-  (and of $k_{a,b}=a(1-f)+bf$, \cref{lem:clean_bicircle_eq_step}). Put
+  (and of $k_{a,b}=a(1-f)+bf$, \cref{def:clean_bicircle}). Put
   \[
     \lambda(z)=\frac1{2\pi}\sum_{j=1}^5\frac{\Delta_j}{\hat\kappa_j}
       =\frac1{2\pi}\Bigl(\frac{\pi+\delta(z.\mathrm{re}-z.\mathrm{im})}{a}
@@ -138,6 +138,28 @@ $|\alpha-\alpha^*|\le C\varepsilon$ estimate). The simplicity transport
   $\alpha_{K_z}(s_j)=\theta_j$ --- the configuration nodes, \emph{not} the canonical
   $c_j$.
 \end{definition}
+
+\begin{lemma}
+[The closing family is a running-integral reparametrisation]
+  \label{lem:closing_family_eq}
+  \lean{Gluck.closingFamily_eq}
+  \uses{def:closing_family, def:integral_reparam}
+  For $0<a<b$, $0<\delta\le\pi/8$ and $z\in\overline{\mathbb{D}}$, the node-placing
+  family is the generic running integral of the closing density anchored at $0$:
+  \[
+    \mathrm{closingFamily}\,a\,b\,\delta\,z
+      =\mathrm{integralReparam}\,(\mathrm{closingDensity}\,a\,b\,\delta\,z)\,0 ,
+  \]
+  i.e.\ $g_z(s)=\int_0^s w_z(u)\,du$ with anchor constant $0$.
+\end{lemma}
+\begin{proof}
+  \uses{def:closing_family, def:integral_reparam}
+  Both sides are by definition the map
+  $s\mapsto\int_0^s\mathrm{closingDensity}\,a\,b\,\delta\,z$: the generic
+  reparametrisation $\mathrm{integralReparam}\,w\,c$ is the running integral of $w$
+  from the anchor $c$, and here $c=0$, which is exactly the definition of
+  $\mathrm{closingFamily}$.
+\end{proof}
 
 % --- New-family API package (the lemmas the prover creates for closingFamily) ---
 \begin{lemma}
@@ -191,7 +213,7 @@ $|\alpha-\alpha^*|\le C\varepsilon$ estimate). The simplicity transport
 [Basic interface of the node-placing family]
   \label{lem:closing_family_props}
   \lean{Gluck.closingFamily_zero, Gluck.closingFamily_add_two_pi, Gluck.closingFamily_two_pi, Gluck.strictMono_closingFamily, Gluck.continuous_uncurry_closingFamily, Gluck.hasDerivAt_closingFamily, Gluck.closingDensity_pos, Gluck.closingFamily_slope_bounds, Gluck.closingRamp_pos, Gluck.closingDensity_periodic, Gluck.continuous_closingFamily, Gluck.continuous_closingBase, Gluck.continuous_closingDensity_s, Gluck.continuous_closingLen1, Gluck.continuous_closingLen2, Gluck.continuous_closingLen3, Gluck.continuous_closingLen4, Gluck.continuous_closingLen5, Gluck.continuous_closingMid1, Gluck.continuous_closingMid2, Gluck.continuous_closingMid3, Gluck.continuous_closingMid4, Gluck.continuous_closingMid5, Gluck.continuous_heightAux, Gluck.continuous_lenAux, Gluck.continuous_uncurry_closingDensity, Gluck.continuous_uncurry_term, Gluck.closingDensity_period_integral, Gluck.clampTent_period_integral, Gluck.comp_closingFamily_periodic}
-  \uses{def:closing_family, lem:closing_lambda_pos}
+  \uses{def:closing_family, lem:closing_lambda_pos, lem:closing_family_eq}
   The family $g_z=\mathrm{closingFamily}\,a\,b\,\delta\,z$ satisfies: $g_z(0)=0$;
   quasiperiodicity $g_z(s+2\pi)=g_z(s)+2\pi$ (hence $g_z(2\pi)=2\pi$); strict
   monotonicity; everywhere-differentiability $\mathrm{HasDerivAt}\,g_z\,(w_z(s))\,s$
@@ -219,7 +241,7 @@ $|\alpha-\alpha^*|\le C\varepsilon$ estimate). The simplicity transport
 [Node-mapping of the closing family onto the canonical clean arcs]
   \label{lem:closing_family_nodes}
   \lean{Gluck.closingFamily_node, Gluck.closingDensity_arcs, Gluck.closingDensity_integral_split, Gluck.closingHeight_mul, Gluck.half_le_arccos_cos_wide, Gluck.clampTent_integral_eq_zero_wide}
-  \uses{def:closing_family, lem:closing_family_props, lem:closing_lambda_pos, lem:closing_len_bounds, lem:clean_bicircle_eq_step}
+  \uses{def:closing_family, lem:closing_family_props, lem:closing_lambda_pos, lem:closing_len_bounds}
   For $0<a<b$, $0<\delta\le\pi/8$ and $z\in\overline{\mathbb{D}}$, the node-placing
   family sends each arc-length breakpoint to the corresponding canonical
   clean-bicircle breakpoint:
@@ -235,7 +257,7 @@ $|\alpha-\alpha^*|\le C\varepsilon$ estimate). The simplicity transport
   a.e.\ on $(s_{j-1},s_j)$.
 \end{lemma}
 \begin{proof}
-  \uses{def:closing_family, lem:closing_family_props, lem:clean_bicircle_eq_step}
+  \uses{def:closing_family, lem:closing_family_props, def:clean_bicircle}
   By \cref{def:closing_family} the density is $w_z=m+\sum_{k=1}^5 h_k\,T_k$, where
   $m=\mathrm{closingBase}=\tfrac{\lambda a}{2}$ is the baseline, $T_k=\mathrm{clampTent}$
   is the unit-height trapezoidal clamped tent $\mathrm{clampTent}\,\eta\,L_k\,C_k$
@@ -266,7 +288,9 @@ $|\alpha-\alpha^*|\le C\varepsilon$ estimate). The simplicity transport
   $g_z(s_j)=\int_0^{s_j}w_z=\sum_{k\le j}w_k=c_j$. Strict monotonicity
   (\cref{lem:closing_family_props}) upgrades the endpoint equalities to the
   open-arc bijection, and the a.e.\ value $k_{a,b}\circ g_z=\hat\kappa_j$ on
-  $(s_{j-1},s_j)$ then follows from \cref{lem:clean_bicircle_eq_step}.
+  $(s_{j-1},s_j)$ then follows since $g_z$ maps that open arc into the canonical
+  clean-bicircle arc $(c_{j-1},c_j)$, on which $k_{a,b}=a(1-f)+bf$ takes the
+  constant value $\hat\kappa_j$ (\cref{def:clean_bicircle}).
 \end{proof}
 
 \begin{lemma}
@@ -275,7 +299,7 @@ $|\alpha-\alpha^*|\le C\varepsilon$ estimate). The simplicity transport
 [Node-landing: cumulative normalised arc-length angle hits $\mathrm{configSpace}$]
   \label{lem:clean_arclength_nodes}
   \lean{Gluck.cleanArcLength_node_values}
-  \uses{def:closing_family, def:arclength_norm, lem:clean_bicircle_eq_step, lem:clean_prefactor, lem:closing_family_nodes}
+  \uses{def:closing_family, def:arclength_norm, lem:clean_prefactor, lem:closing_family_nodes}
   Let $K_z=\mathrm{arcLengthNorm}\,(k_{a,b})\,a\,b\,\delta\,z$ be the normalised clean
   arc-length curvature and $\alpha_{K_z}(s)=\int_0^s K_z$ its cumulative tangent
   angle (\cref{def:dahlberg_angle}). At the arc-length breakpoints
@@ -289,9 +313,9 @@ $|\alpha-\alpha^*|\le C\varepsilon$ estimate). The simplicity transport
   $(s_{j-1},s_j)$.
 \end{lemma}
 \begin{proof}
-  \uses{lem:clean_bicircle_eq_step, lem:clean_prefactor, lem:closing_family_nodes}
+  \uses{lem:clean_prefactor, lem:closing_family_nodes}
   \leanok
-  By \cref{lem:clean_bicircle_eq_step}, $k_{a,b}$ is a.e.\ the step function with
+  By \cref{lem:clean_prefactor}, $k_{a,b}$ is a.e.\ the step function with
   value $\hat\kappa_j$ on $(c_{j-1},c_j)$, and $g_z$ maps $(s_{j-1},s_j)$ onto
   $(c_{j-1},c_j)$ (\cref{def:closing_family}), so $k_{a,b}(g_z(s))=\hat\kappa_j$ for
   $s\in(s_{j-1},s_j)$. The clean total curvature is
@@ -385,7 +409,7 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
 [Clean total curvature and the positive prefactor $c(z)=1/\lambda(z)$]
   \label{lem:clean_prefactor}
   \lean{Gluck.cleanTotalCurvature_eq, Gluck.cleanPrefactor_pos, Gluck.cleanBicircle_arcs, Gluck.clean_arc_ae, Gluck.clean_arc_int}
-  \uses{def:closing_family, def:clean_bicircle, lem:clean_bicircle_eq_step, lem:closing_lambda_pos, lem:closing_len_bounds, lem:closing_family_nodes}
+  \uses{def:closing_family, def:clean_bicircle, lem:closing_lambda_pos, lem:closing_len_bounds, lem:closing_family_nodes}
   For $0<a<b$, $0<\delta\le\pi/8$ and $z\in\overline{\mathbb{D}}$,
   \[
     I_z=\int_0^{2\pi}k_{a,b}(g_z\,t)\,dt=\frac{2\pi}{\lambda(z)},
@@ -396,8 +420,8 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
   the clean total curvature is $z$-dependent for the node-placing family.)
 \end{lemma}
 \begin{proof}
-  \uses{lem:clean_bicircle_eq_step, lem:closing_lambda_pos, lem:closing_family_nodes}
-  By \cref{lem:clean_bicircle_eq_step}, $k_{a,b}(g_z\,\cdot)$ is a.e.\ the step
+  \uses{lem:closing_lambda_pos, lem:closing_family_nodes}
+  The clean weight $k_{a,b}(g_z\,\cdot)$ is a.e.\ the step
   function with value $\hat\kappa_j$ on $(s_{j-1},s_j)$ (since $g_z$ maps that
   interval into the canonical arc $(c_{j-1},c_j)$ of value $\hat\kappa_j$,
   \cref{def:closing_family}). Hence
@@ -454,7 +478,7 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
 [Arc-length closure of the clean bicircle $=$ positive multiple of \texttt{errorMap}]
   \label{lem:arclength_error_clean_eq_errorMap}
   \lean{Gluck.arcLengthError_clean_eq_errorMap}
-  \uses{def:arclength_error_map, lem:clean_bicircle_eq_step, def:error_map, lem:error_vector_of_bicircle, lem:clean_prefactor, lem:arclength_arc_integral, lem:clean_arclength_nodes}
+  \uses{def:arclength_error_map, def:error_map, lem:error_vector_of_bicircle, lem:clean_prefactor, lem:arclength_arc_integral, lem:clean_arclength_nodes}
   For $0<a<b$, $0<\delta\le\pi/8$ and $z\in\overline{\mathbb{D}}$, the clean
   arc-length error map $F(z)=\mathrm{arcLengthErrorMap}\,(k_{a,b})\,a\,b\,\delta\,z$
   is a \emph{positive} (configuration-dependent) real multiple of the in-tree error
@@ -467,7 +491,7 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
   around $0$ (positive-scalar-field invariance, \cref{lem:clean_error_winds}).
 \end{lemma}
 \begin{proof}
-  \uses{lem:clean_bicircle_eq_step, def:error_map, lem:error_vector_of_bicircle, lem:clean_prefactor, lem:arclength_arc_integral, lem:clean_arclength_nodes}
+  \uses{def:error_map, lem:error_vector_of_bicircle, lem:clean_prefactor, lem:arclength_arc_integral, lem:clean_arclength_nodes}
   \leanok
   Write $K_z=\mathrm{arcLengthNorm}\,(k_{a,b})\,a\,b\,\delta\,z$, so
   $F(z)=\int_0^{2\pi}e^{i\alpha_{K_z}(s)}\,ds$.
@@ -552,6 +576,20 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
   uniformly in $z$.
 \end{proof}
 
+\begin{lemma}
+[A $2\pi$-periodic bound on $[0,2\pi]$ holds everywhere]
+  \label{lem:abs_le_of_periodic_two_pi}
+  \lean{Gluck.abs_le_of_periodic_two_pi}
+  Let $D:\mathbb{R}\to\mathbb{R}$ be $2\pi$-periodic ($D(s+2\pi)=D(s)$) and suppose
+  $|D(s)|\le B$ for all $s\in[0,2\pi]$. Then $|D(s)|\le B$ for every real $s$.
+\end{lemma}
+\begin{proof}
+  Reduce $s$ to its representative $s_0\in[0,2\pi)$ modulo $2\pi$, i.e.\
+  $s_0=s-k\,2\pi$ for the integer $k$ with $s_0\in[0,2\pi)$. Periodicity gives
+  $D(s)=D(s_0)$, and since $s_0\in[0,2\pi]$ the hypothesis bounds $|D(s_0)|\le B$.
+  Hence $|D(s)|\le B$.
+\end{proof}
+
 % SOURCE: [Dahlberg], §3, p. 2135, "the fact that $\lim_{\epsilon \downarrow 0} F^*(\beta,\epsilon) = F(\beta)$" (read from references/dahlberg.pdf)
 % SOURCE QUOTE: "By a standard topology argument and the fact that
 % $\lim_{\epsilon \downarrow 0} F^*(\beta,\epsilon) = F(\beta)$ it follows that if
@@ -562,7 +600,7 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
 [Angle estimate $|\alpha-\alpha^*|\le C\varepsilon$]
   \label{lem:angle_dist_le}
   \lean{Gluck.angle_dist_le, Gluck.dahlbergAngle_arcLengthNorm_add_two_pi, Gluck.intervalIntegrable_expI_arcLengthNorm, Gluck.angle_dist_arith}
-  \uses{def:arclength_error_map, def:preliminary_diffeo_data, lem:total_curvature_ne_zero, lem:clean_prefactor}
+  \uses{def:arclength_error_map, def:preliminary_diffeo_data, lem:total_curvature_ne_zero, lem:clean_prefactor, lem:abs_le_of_periodic_two_pi}
   There is a constant $C'$ (independent of $\varepsilon$ and $z$) such that for
   $\varepsilon$ small, for all $z\in\overline{\mathbb{D}}$ and all $s$,
   $\bigl|\alpha_{K^*_z}(s)-\alpha_{K_z}(s)\bigr|\le C'\varepsilon$.
@@ -693,6 +731,53 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
 
 \section{Simplicity transport and the converse}
 
+\begin{lemma}
+[Chord of the reconstructed curve $=$ integral of its unit tangent]
+  \label{lem:dahlberg_curve_sub}
+  \lean{Gluck.dahlbergCurve_sub}
+  \uses{def:dahlberg_curve, def:dahlberg_angle}
+  Let $K:\mathbb{R}\to\mathbb{R}$ have unit tangent $s\mapsto e^{i\alpha_K(s)}$
+  interval-integrable on every interval (where $\alpha_K$ is the arc-length tangent
+  angle of \cref{def:dahlberg_angle}). Then for all $u,w$,
+  \[
+    \mathrm{dahlbergCurve}\,K\,(w)-\mathrm{dahlbergCurve}\,K\,(u)
+      =\int_u^w e^{\,i\,\alpha_K(s)}\,ds .
+  \]
+\end{lemma}
+\begin{proof}
+  \uses{def:dahlberg_curve, def:dahlberg_angle}
+  By \cref{def:dahlberg_curve}, $\mathrm{dahlbergCurve}\,K\,(t)=\int_0^t
+  e^{i\alpha_K(s)}\,ds$. Subtracting the values at $w$ and $u$ and using additivity
+  of the integral over the adjacent intervals $[0,u]$ and $[u,w]$
+  ($\int_0^w=\int_0^u+\int_u^w$, valid by the interval-integrability hypothesis)
+  gives $\int_0^w-\int_0^u=\int_u^w e^{i\alpha_K(s)}\,ds$.
+\end{proof}
+
+\begin{lemma}
+[Two-sided bounds on the normalised clean-bicircle curvature]
+  \label{lem:clean_bicircle_arclength_norm_bounds}
+  \lean{Gluck.cleanBicircle_arcLengthNorm_bounds}
+  \uses{def:arclength_norm, def:clean_bicircle, lem:closing_lambda_pos, lem:closing_len_bounds}
+  For $0<a<b$, $0<\delta\le\pi/8$ and $\|z\|\le1$, the normalised clean-bicircle
+  curvature is pinned between two positive constants: for all $s$,
+  \[
+    \tfrac14\bigl(\tfrac1a+\tfrac1b\bigr)\,a
+      \;\le\;\mathrm{arcLengthNorm}\,(k_{a,b})\,a\,b\,\delta\,z\,(s)
+      \;\le\;\tfrac58\bigl(\tfrac1a+\tfrac1b\bigr)\,b .
+  \]
+\end{lemma}
+\begin{proof}
+  \uses{def:arclength_norm, def:clean_bicircle, lem:closing_lambda_pos, lem:closing_len_bounds}
+  By \cref{def:arclength_norm} and the clean total curvature $I_z=2\pi/\lambda(z)$,
+  the normalised weight equals $\lambda(z)\,(k_{a,b}\circ g_z)(s)$, where
+  $\lambda(z)=\mathrm{closingLambda}\,a\,b\,\delta\,z>0$
+  (\cref{lem:closing_lambda_pos}). The bicircle $k_{a,b}$ takes values in $[a,b]$
+  (\cref{def:clean_bicircle}), and the $\mathrm{closingLambda}$ bounds
+  (\cref{lem:closing_lambda_pos}, \cref{lem:closing_len_bounds}) pin $\lambda(z)$ into
+  $[\tfrac14(\tfrac1a+\tfrac1b),\,\tfrac58(\tfrac1a+\tfrac1b)]$. Multiplying the two
+  one-sided estimates gives the stated two-sided bound, uniformly in $z$ and $s$.
+\end{proof}
+
 % SOURCE: [Dahlberg], §3, p. 2135, simplicity transport (read from references/dahlberg.pdf)
 % SOURCE QUOTE: "Since the curve $\gamma(t) = \int_0^t e^{i\alpha(u)} du$ is simple
 % and closed and $|\alpha - \alpha^*| \le C\epsilon$, it follows that
@@ -713,7 +798,7 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
   % lem:simplicity_transport can apply the margin on the COMPLEMENT interval
   % [τ, t+2π] ⊆ [0,4π] in its Λ>π case (where 0 ≤ t < τ < 2π ⇒ t+2π < 4π). The
   % compactness proof is unchanged — the set is just the larger compact box [0,4π].
-  \uses{def:closing_family, lem:closing_lambda_pos, lem:closing_len_bounds, lem:clean_bicircle_eq_step}
+  \uses{def:closing_family, lem:closing_lambda_pos, lem:closing_len_bounds, lem:clean_prefactor, lem:clean_bicircle_arclength_norm_bounds, lem:dahlberg_curve_sub}
   There is a margin $m>0$ (depending only on $a,b,\delta$) such that for every
   $z\in\overline{\mathbb{D}}$, writing $\alpha=\alpha_{K_z}$ for the clean normalised
   curvature $K_z=\mathrm{arcLengthNorm}\,(k_{a,b})\,a\,b\,\delta\,z$ (positive, since
@@ -724,7 +809,7 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
   \]
 \end{lemma}
 \begin{proof}
-  \uses{def:closing_family, lem:closing_lambda_pos, lem:closing_len_bounds, lem:clean_bicircle_eq_step}
+  \uses{def:closing_family, lem:closing_lambda_pos, lem:closing_len_bounds, lem:clean_prefactor}
   \leanok
   The landed proof is elementary and uses no compactness; it is keyed to a uniform
   slope bound plus the cosine positivity of the \emph{middle angular half} of the arc.
@@ -732,7 +817,7 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
   \emph{Uniform slope bounds.} Write $K_z=\lambda(z)\,k_{a,b}(g_z\,\cdot)$ with
   $\lambda(z)=2\pi/I_z$. Since $\lambda(z)$ is bounded above and below
   (\cref{lem:closing_lambda_pos}, \cref{lem:closing_len_bounds}) and
-  $k_{a,b}\in[a,b]$ a.e.\ (\cref{lem:clean_bicircle_eq_step}), there are constants
+  $k_{a,b}\in[a,b]$ a.e.\ (\cref{lem:clean_prefactor}), there are constants
   $0<m_K\le M_K$, depending only on $a,b,\delta$, with $m_K\le K_z\le M_K$ for every
   $z\in\overline{\mathbb D}$. Hence $\alpha(s)=\int_0^s K_z$ is continuous, strictly
   increasing, with $m_K(y-x)\le\alpha(y)-\alpha(x)\le M_K(y-x)$.
@@ -763,7 +848,7 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
 [Simplicity of the perturbed curve (condition (1.3))]
   \label{lem:simplicity_transport}
   \lean{Gluck.simplicity_transport}
-  \uses{def:preliminary_diffeo_data, lem:clean_chord_margin, lem:angle_dist_le, thm:exists_closing_param}
+  \uses{def:preliminary_diffeo_data, lem:clean_chord_margin, lem:angle_dist_le, thm:exists_closing_param, lem:dahlberg_curve_sub}
   For $\varepsilon$ small enough, the closing parameter $z^*$ of
   \cref{thm:exists_closing_param} ($F^*(z^*,\varepsilon)=0$) gives a $K^*_{z^*}$
   satisfying condition (1.3):
@@ -801,39 +886,6 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
   which is (1.3).
 \end{proof}
 
-% Archon-original: a self-contained C¹ circle-inverse construction local to
-% DahlbergStep2.lean. The positive-case `exists_C1_circle_inverse` lives PRIVATE in
-% FourVertex.lean, which DahlbergStep2.lean does NOT import; rather than a cross-file
-% refactor during final assembly, the same IFT+IVT construction is rebuilt here.
-\begin{lemma}
-
-\leanok
-[$C^1$ circle inverse of an orientation-preserving quasiperiodic map]
-  \label{lem:dahlberg_c1_circle_inverse}
-  \lean{Gluck.exists_C1_inverse_circle, Gluck.intShift_qp}
-  Let $h:\mathbb{R}\to\mathbb{R}$ have a continuous strictly positive derivative
-  $v$ ($\forall\theta,\ \mathrm{HasDerivAt}\,h\,(v\theta)\,\theta$, $v>0$, $v$
-  continuous) and be quasiperiodic, $h(\theta+2\pi)=h(\theta)+2\pi$. Then there is
-  $H:\mathbb{R}\to\mathbb{R}$ with: $H$ continuous and strictly monotone; $h(H t)=t$
-  and $H(h t)=t$ for all $t$; $H(t+2\pi)=H(t)+2\pi$; and
-  $\mathrm{HasDerivAt}\,H\,(1/v(H t))\,t$ for all $t$ (so $H$ is $C^1$ with positive
-  derivative). This is the construction of the positive case
-  (\cref{thm:gluck_converse}'s reparam-back), rebuilt in this file.
-\end{lemma}
-\begin{proof}
-
-\leanok
-  $h$ is strictly increasing (positive derivative) and continuous (differentiable);
-  the quasiperiodicity gives $h(n\cdot2\pi)=h(0)+n\cdot2\pi$, so $h$ is unbounded
-  above and below, hence surjective (IVT). A continuous strictly monotone bijection
-  has a continuous strictly monotone two-sided inverse $H$. Quasiperiodicity of $H$
-  follows from that of $h$ by applying $H$ to $h(H t+2\pi)=h(Ht)+2\pi=t+2\pi$. The
-  derivative of $H$ at $t$ is $1/v(Ht)$ by the inverse-function rule
-  (\texttt{HasDerivAt.of\_local\_left\_inverse}, with $v(Ht)\neq0$); continuity of
-  $t\mapsto1/v(Ht)$ makes $H$ a $C^1$ map. (Identical to the positive-case
-  \texttt{exists\_C1\_circle\_inverse}.)
-\end{proof}
-
 % SOURCE: [Dahlberg], §1, p. 2131, Theorem 1.1 (read from references/dahlberg.pdf)
 % SOURCE QUOTE: "Theorem 1.1. Suppose $\kappa : T \to R$ is not a constant and
 % assume that $\kappa$ has at least four critical points ordered counterclockwise
@@ -848,7 +900,7 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
 [Dahlberg converse to the four vertex theorem (Theorem 1.1)]
   \label{thm:dahlberg_converse}
   \lean{Gluck.dahlbergConverse}
-  \uses{def:mixed_sign_four_vertex, thm:exists_preliminary_diffeo, def:preliminary_diffeo_data, thm:exists_closing_param, lem:total_curvature_ne_zero, lem:simplicity_transport, lem:dahlberg_c1_circle_inverse, lem:closing_family_props, thm:realizes_of_non_normalised, def:non_normalised_curvature}
+  \uses{def:mixed_sign_four_vertex, thm:exists_preliminary_diffeo, def:preliminary_diffeo_data, thm:exists_closing_param, lem:total_curvature_ne_zero, lem:simplicity_transport, lem:exists_c1_circle_inverse, lem:closing_family_props, thm:realizes_of_non_normalised, def:non_normalised_curvature}
   \textit{Source: Dahlberg, §1, Theorem 1.1.}
   Let $\kappa:\mathbb{R}\to\mathbb{R}$ be continuous, $2\pi$-periodic and
   non-constant, satisfying the mixed-sign four-vertex condition
@@ -857,7 +909,7 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
        \mathrm{RealizesCurvature}\,\gamma\,\kappa$.
 \end{theorem}
 \begin{proof}
-  \uses{thm:exists_preliminary_diffeo, thm:exists_closing_param, lem:simplicity_transport, lem:total_curvature_ne_zero, lem:dahlberg_c1_circle_inverse, lem:closing_family_props, thm:realizes_of_non_normalised}
+  \uses{thm:exists_preliminary_diffeo, thm:exists_closing_param, lem:simplicity_transport, lem:total_curvature_ne_zero, lem:exists_c1_circle_inverse, lem:closing_family_props, thm:realizes_of_non_normalised}
   \leanok
   From \cref{def:mixed_sign_four_vertex}, $\kappa$ is continuous and $2\pi$-periodic.
   Fix $\delta=\pi/8$. Apply \cref{thm:exists_preliminary_diffeo} to obtain $0<a<b$
@@ -881,7 +933,7 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
   (v_\eta\circ g_{z^*})\cdot w_{z^*}$ is therefore continuous and strictly positive,
   so $\varphi$ is $C^1$ with $\varphi'>0$. Quasiperiodicity composes:
   $\varphi(s+2\pi)=\eta(g_{z^*}(s)+2\pi)=\eta(g_{z^*}(s))+2\pi=\varphi(s)+2\pi$. By
-  \cref{lem:dahlberg_c1_circle_inverse} applied to $\varphi$ (with derivative
+  \cref{lem:exists_c1_circle_inverse} applied to $\varphi$ (with derivative
   $v_\varphi$) there is a $C^1$ orientation-preserving quasiperiodic two-sided
   inverse $\psi$ with $\psi'=1/v_\varphi\circ\psi>0$.
 
@@ -894,6 +946,27 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
   with $\mathrm{RealizesCurvature}\,\gamma\,\kappa$, completing the proof. (This is the
   mixed-sign analogue of \cref{thm:gluck_converse}, stated through the same
   realization predicate per the unification directive.)
+\end{proof}
+
+\begin{theorem}
+[Gluck converse, non-constant strictly-positive case]
+  \label{thm:gluck_converse_nonconstant}
+  \lean{Gluck.gluck_converse_nonconstant}
+  \uses{thm:dahlberg_converse, lem:mixed_sign_four_vertex_of_is_curvature_function}
+  Let $\kappa:\mathbb{R}\to\mathbb{R}$ be a strictly positive curvature function
+  ($\mathrm{IsCurvatureFunction}\,\kappa$) satisfying the non-constant four-vertex
+  condition. Then $\kappa$ is realized by a simple closed curve:
+  $\exists\,\gamma,\ \mathrm{IsSimpleClosed}\,\gamma\,\wedge\,
+       \mathrm{RealizesCurvature}\,\gamma\,\kappa$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:dahlberg_converse, lem:mixed_sign_four_vertex_of_is_curvature_function}
+  A strictly positive four-vertex $\kappa$ satisfies the mixed-sign four-vertex
+  hypothesis of \cref{def:mixed_sign_four_vertex}, by
+  \cref{lem:mixed_sign_four_vertex_of_is_curvature_function}. Applying
+  \cref{thm:dahlberg_converse} to this hypothesis produces the simple closed curve
+  realizing $\kappa$. (The omitted constant case is a round circle, handled
+  separately by \cref{thm:gluck_converse}.)
 \end{proof}
 
 \noindent\textbf{Phase status.} \cref{thm:dahlberg_converse} is the project's

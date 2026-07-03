@@ -38,7 +38,7 @@ $\rho>0$, and the inclination parametrization. There is \emph{no} Mathlib gap.
 [A closed inclination-parametrized curve with positive weight is simple]
   \label{thm:reconstruct_injective}
   \lean{Gluck.injOn_reconstruct_of_closed}
-  \uses{def:reconstruct, def:error_vector, lem:closes_iff}
+  \uses{def:reconstruct, def:error_vector, lem:reconstruct_periodic}
   \textit{Source: DeTurck--Gluck, §6 and §11(2) (positive curvature whose tangent
   turns through $2\pi$ is simple).}
   Let $\rho : \mathbb{R} \to \mathbb{R}$ be continuous, $2\pi$-periodic and
@@ -58,8 +58,7 @@ $\rho>0$, and the inclination parametrization. There is \emph{no} Mathlib gap.
   Because $\rho$ is $2\pi$-periodic and $E(\rho) = \int_0^{2\pi}
   e^{i\varphi}\rho\,d\varphi = 0$, the integral of $e^{i\varphi}\rho$ over
   \emph{any} interval of length $2\pi$ vanishes; equivalently, $\alpha_\rho$ is
-  $2\pi$-periodic (this is \cref{lem:closes_iff} together with periodicity of the
-  integrand).
+  $2\pi$-periodic (this is \cref{lem:reconstruct_periodic}).
 
   Suppose $\alpha_\rho(\theta_1) = \alpha_\rho(\theta_2)$ with $0 \le \theta_1 <
   \theta_2 < 2\pi$. Set $L = \theta_2 - \theta_1 \in (0, 2\pi)$. The plane is cut
@@ -113,9 +112,7 @@ $\rho>0$, and the inclination parametrization. There is \emph{no} Mathlib gap.
   \leanok
   $\alpha_\rho(\theta + 2\pi) - \alpha_\rho(\theta) = \int_\theta^{\theta+2\pi}
   e^{i\varphi}\rho\,d\varphi$, which equals $\int_0^{2\pi} e^{i\varphi}\rho =
-  E(\rho) = 0$ because the integrand $e^{i\varphi}\rho(\varphi)$ is $2\pi$-periodic
-  (generalizing the corresponding step of \cref{lem:closes_iff} off $\rho =
-  1/\kappa$ to an arbitrary continuous periodic weight).
+  E(\rho) = 0$ because the integrand $e^{i\varphi}\rho(\varphi)$ is $2\pi$-periodic.
 \end{proof}
 
 \begin{lemma}
@@ -145,14 +142,14 @@ $\rho>0$, and the inclination parametrization. There is \emph{no} Mathlib gap.
 [Positive curvature reconstruction is a simple closed curve]
   \label{cor:positive_curvature_implies_simple}
   \lean{Gluck.isSimpleClosed_reconstruct}
-  \uses{thm:reconstruct_injective, lem:closes_iff, def:is_simple_closed,
+  \uses{thm:reconstruct_injective, lem:reconstruct_periodic, def:is_simple_closed,
         def:reconstruct}
   Let $\rho$ be continuous, $2\pi$-periodic and strictly positive with $E(\rho) =
   0$. Then $\alpha_\rho$ is a simple closed curve (\cref{def:is_simple_closed}):
   it is $2\pi$-periodic and injective on $[0, 2\pi)$.
 \end{corollary}
 \begin{proof}
-  \uses{thm:reconstruct_injective, lem:closes_iff}
+  \uses{thm:reconstruct_injective, lem:reconstruct_periodic}
   \leanok
   Closedness ($2\pi$-periodicity of $\alpha_\rho$) follows from $E(\rho) = 0$ and
   the $2\pi$-periodicity of the integrand $e^{i\varphi}\rho$, as in the proof of
@@ -165,7 +162,7 @@ $\rho>0$, and the inclination parametrization. There is \emph{no} Mathlib gap.
 \begin{remark}
   In \cref{thm:gluck_converse} the curve realizing $\kappa$ is obtained from
   $\beta = \alpha_\rho$ with $\rho = 1/(\kappa\circ h)$ (continuous, positive,
-  periodic; $E(\rho)=0$ by \cref{cor:closing_configuration_exists}) by an
+  periodic; $E(\rho)=0$ by \cref{thm:existence_of_zero}) by an
   orientation-preserving reparametrization $\gamma = \beta\circ h^{-1}$. Since
   $h^{-1}$ is a bijection of the period and $\beta$ is injective on it
   (\cref{thm:reconstruct_injective}), $\gamma$ is injective as well; closedness is

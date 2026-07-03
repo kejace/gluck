@@ -34,9 +34,8 @@ theorem reconstruct_periodic {ρ : ℝ → ℝ} (hcont : Continuous ρ)
     (hper : Function.Periodic ρ (2 * π)) (hE : errorVector ρ = 0) :
     Function.Periodic (reconstruct ρ) (2 * π) := by
   -- The integrand `g φ = e^{iφ} ρ(φ)` is continuous and `2π`-periodic.
-  have hg : Continuous fun φ : ℝ => Complex.exp ((φ : ℂ) * Complex.I) * (ρ φ : ℂ) :=
-    (Complex.continuous_exp.comp (Complex.continuous_ofReal.mul continuous_const)).mul
-      (Complex.continuous_ofReal.comp hcont)
+  have hg : Continuous fun φ : ℝ => Complex.exp ((φ : ℂ) * Complex.I) * (ρ φ : ℂ) := by
+    fun_prop
   have hgper : Function.Periodic
       (fun φ : ℝ => Complex.exp ((φ : ℂ) * Complex.I) * (ρ φ : ℂ)) (2 * π) := by
     intro φ
@@ -70,10 +69,8 @@ theorem chord_integral_ne_zero {ρ : ℝ → ℝ} (hcont : Continuous ρ)
     (∫ φ in c..d, Complex.exp ((φ : ℂ) * Complex.I) * (ρ φ : ℂ)) ≠ 0 := by
   set ψ : ℝ := (c + d) / 2 with hψ
   -- Continuity of the projected real integrands.
-  have hcos : Continuous fun φ : ℝ => Real.cos (φ - ψ) * ρ φ :=
-    (Real.continuous_cos.comp (continuous_id.sub continuous_const)).mul hcont
-  have hsin : Continuous fun φ : ℝ => Real.sin (φ - ψ) * ρ φ :=
-    (Real.continuous_sin.comp (continuous_id.sub continuous_const)).mul hcont
+  have hcos : Continuous fun φ : ℝ => Real.cos (φ - ψ) * ρ φ := by fun_prop
+  have hsin : Continuous fun φ : ℝ => Real.sin (φ - ψ) * ρ φ := by fun_prop
   -- The projected real integral is strictly positive.
   have hint : IntervalIntegrable (fun φ : ℝ => Real.cos (φ - ψ) * ρ φ)
       MeasureTheory.volume c d := hcos.intervalIntegrable c d
@@ -125,9 +122,8 @@ theorem injOn_reconstruct_of_closed {ρ : ℝ → ℝ} (hcont : Continuous ρ)
     (hE : errorVector ρ = 0) :
     Set.InjOn (reconstruct ρ) (Set.Ico 0 (2 * π)) := by
   -- The integrand `g φ = e^{iφ} ρ(φ)` is continuous.
-  have hg : Continuous fun φ : ℝ => Complex.exp ((φ : ℂ) * Complex.I) * (ρ φ : ℂ) :=
-    (Complex.continuous_exp.comp (Complex.continuous_ofReal.mul continuous_const)).mul
-      (Complex.continuous_ofReal.comp hcont)
+  have hg : Continuous fun φ : ℝ => Complex.exp ((φ : ℂ) * Complex.I) * (ρ φ : ℂ) := by
+    fun_prop
   -- `α_ρ` is `2π`-periodic.
   have hαper : Function.Periodic (reconstruct ρ) (2 * π) :=
     reconstruct_periodic hcont hper hE

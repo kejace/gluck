@@ -42,15 +42,6 @@ lemma stepCurvature_periodic (a b θ₁ θ₂ θ₃ θ₄ : ℝ) :
   simp only [stepCurvature]
   rw [toIcoMod_add_right]
 
-/-- `stepCurvature` is bounded below by `a`, hence strictly positive when
-`0 < a < b`. -/
-lemma stepCurvature_ge (a b θ₁ θ₂ θ₃ θ₄ : ℝ) (hab : a ≤ b) (θ : ℝ) :
-    a ≤ stepCurvature a b θ₁ θ₂ θ₃ θ₄ θ := by
-  simp only [stepCurvature]
-  split
-  · exact hab
-  · exact le_refl a
-
 /-- **Error vector is `L¹`-Lipschitz in the weight.** For integrable weights
 `ρ, ρ'` on `[0, 2π]`,
 `‖E(ρ) - E(ρ')‖ ≤ ∫₀^{2π} |ρ θ - ρ' θ| dθ`. This is the rigorous replacement for
@@ -93,9 +84,8 @@ theorem dist_errorVector_le {ρ ρ' : ℝ → ℝ}
     _ = ∫ φ in (0 : ℝ)..(2 * π), |ρ φ - ρ' φ| := by
         refine intervalIntegral.integral_congr ?_
         intro φ _
-        simp only [norm_mul, Complex.norm_real, Real.norm_eq_abs]
-        have h1 : ‖Complex.exp ((φ : ℂ) * Complex.I)‖ = 1 := by simp
-        rw [h1, one_mul]
+        simp only [norm_mul, Complex.norm_exp_ofReal_mul_I, one_mul, Complex.norm_real,
+          Real.norm_eq_abs]
 
 /-- Pointwise modulus of continuity of `κ` at a point `c`: for every `ε > 0`
 there is `η > 0` with `|κ t - κ c| ≤ ε` whenever `|t - c| ≤ η`. Applied at the
@@ -129,14 +119,15 @@ lemma integral_affine (c s a b : ℝ) :
 noncomputable def tentBump (δ τ θ : ℝ) : ℝ :=
   max 0 (1 - (2 / δ) * Real.arccos (Real.cos (θ - τ)))
 
-lemma tentBump_nonneg (δ τ θ : ℝ) : 0 ≤ tentBump δ τ θ := le_max_left _ _
+private lemma tentBump_nonneg (δ τ θ : ℝ) : 0 ≤ tentBump δ τ θ := le_max_left _ _
 
-lemma tentBump_continuous (δ τ : ℝ) : Continuous (fun θ => tentBump δ τ θ) :=
+@[fun_prop]
+private lemma tentBump_continuous (δ τ : ℝ) : Continuous (fun θ => tentBump δ τ θ) :=
   continuous_const.max (continuous_const.sub (continuous_const.mul
     (Real.continuous_arccos.comp (Real.continuous_cos.comp
       (continuous_id.sub continuous_const)))))
 
-lemma tentBump_periodic (δ τ : ℝ) :
+private lemma tentBump_periodic (δ τ : ℝ) :
     Function.Periodic (fun θ => tentBump δ τ θ) (2 * π) := by
   intro θ
   simp only [tentBump]
@@ -144,7 +135,7 @@ lemma tentBump_periodic (δ τ : ℝ) :
 
 /-- For `y` at angular distance `≥ δ/2` from `0` (within one period),
 `cos y ≤ cos (δ/2)`. -/
-lemma cos_le_cos_half {δ y : ℝ} (hδ : 0 < δ) (hδ' : δ < π)
+private lemma cos_le_cos_half {δ y : ℝ} (hδ : 0 < δ) (hδ' : δ < π)
     (h1 : δ / 2 ≤ y) (h2 : y ≤ 2 * π - δ / 2) : Real.cos y ≤ Real.cos (δ / 2) := by
   have hδ2 : δ / 2 ≤ π := by linarith
   rcases le_total y π with hy | hy
@@ -173,7 +164,7 @@ lemma tentBump_eq_zero_of_cos_le {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {τ 
   linarith
 
 /-- On the support of the centred bump it equals the affine tent `1 - (2/δ)|u|`. -/
-lemma tentBump_affine_zero {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {u : ℝ}
+private lemma tentBump_affine_zero {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {u : ℝ}
     (h1 : -(δ / 2) ≤ u) (h2 : u ≤ δ / 2) : tentBump δ 0 u = 1 - (2 / δ) * |u| := by
   have habs : |u| ≤ δ / 2 := abs_le.mpr ⟨by linarith, h2⟩
   have hπ := Real.pi_pos
@@ -188,7 +179,7 @@ lemma tentBump_affine_zero {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {u : ℝ}
   linarith
 
 /-- `∫` of the centred bump over `[0, δ/2]` (its right half) is `δ/4`. -/
-lemma tentBump_integral_right {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
+private lemma tentBump_integral_right {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
     (∫ u in (0 : ℝ)..(δ / 2), tentBump δ 0 u) = δ / 4 := by
   have hδne : δ ≠ 0 := hδ.ne'
   have hcong : (∫ u in (0 : ℝ)..(δ / 2), tentBump δ 0 u)
@@ -200,7 +191,7 @@ lemma tentBump_integral_right {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
   rw [hcong, integral_affine]; field_simp; ring
 
 /-- `∫` of the centred bump over `[-δ/2, 0]` (its left half) is `δ/4`. -/
-lemma tentBump_integral_left {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
+private lemma tentBump_integral_left {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
     (∫ u in (-(δ / 2))..(0 : ℝ), tentBump δ 0 u) = δ / 4 := by
   have hδne : δ ≠ 0 := hδ.ne'
   have hcong : (∫ u in (-(δ / 2))..(0 : ℝ), tentBump δ 0 u)
@@ -212,7 +203,7 @@ lemma tentBump_integral_left {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
   rw [hcong, integral_affine]; field_simp; ring
 
 /-- The centred bump integrates to `δ/2` over its full support `[-δ/2, δ/2]`. -/
-lemma tentBump_integral_center {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
+private lemma tentBump_integral_center {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
     (∫ u in (-(δ / 2))..(δ / 2), tentBump δ 0 u) = δ / 2 := by
   rw [← intervalIntegral.integral_add_adjacent_intervals (b := (0 : ℝ))
         ((tentBump_continuous δ 0).intervalIntegrable _ _)
@@ -221,7 +212,7 @@ lemma tentBump_integral_center {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) :
   ring
 
 /-- A bump centred at `τ` integrates to `δ/2` over its support `[τ-δ/2, τ+δ/2]`. -/
-lemma tentBump_integral_support {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) (τ : ℝ) :
+private lemma tentBump_integral_support {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) (τ : ℝ) :
     (∫ θ in (τ - δ / 2)..(τ + δ / 2), tentBump δ τ θ) = δ / 2 := by
   have hshift : ∀ θ, tentBump δ τ θ = tentBump δ 0 (θ - τ) := by
     intro θ; simp [tentBump, sub_zero]
@@ -231,13 +222,13 @@ lemma tentBump_integral_support {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) (τ :
   exact tentBump_integral_center hδ hδ'
 
 /-- Integral over an interval on which the bump is identically zero. -/
-lemma tentBump_integral_zero_of_forall {δ τ a b : ℝ}
+private lemma tentBump_integral_zero_of_forall {δ τ a b : ℝ}
     (h : ∀ θ ∈ Set.uIcc a b, tentBump δ τ θ = 0) :
     (∫ θ in a..b, tentBump δ τ θ) = 0 := by
   rw [intervalIntegral.integral_congr h, intervalIntegral.integral_zero]
 
 /-- Cumulative integral from `0` past the full support: `δ/2`. -/
-lemma tentBump_integral_full {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {τ θ : ℝ}
+private lemma tentBump_integral_full {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {τ θ : ℝ}
     (hτ : δ / 2 ≤ τ) (hθ1 : τ + δ / 2 ≤ θ) (hθ2 : θ ≤ 2 * π - δ / 2)
     (hτ2 : τ ≤ 2 * π - δ / 2) :
     (∫ s in (0 : ℝ)..θ, tentBump δ τ s) = δ / 2 := by
@@ -264,7 +255,7 @@ lemma tentBump_integral_full {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {τ θ :
   ring
 
 /-- Cumulative integral from `0` not yet reaching the support: `0`. -/
-lemma tentBump_integral_none {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {τ θ : ℝ}
+private lemma tentBump_integral_none {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {τ θ : ℝ}
     (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ τ - δ / 2) (hτ2 : τ ≤ 2 * π - δ / 2) :
     (∫ s in (0 : ℝ)..θ, tentBump δ τ s) = 0 := by
   apply tentBump_integral_zero_of_forall
@@ -276,7 +267,7 @@ lemma tentBump_integral_none {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {τ θ :
 
 /-- Cumulative integral from `0` of the boundary bump (centred at `0`): its right
 half `δ/4`. -/
-lemma tentBump_integral_boundary {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {θ : ℝ}
+private lemma tentBump_integral_boundary {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {θ : ℝ}
     (hθ1 : δ / 2 ≤ θ) (hθ2 : θ ≤ 2 * π - δ / 2) :
     (∫ s in (0 : ℝ)..θ, tentBump δ 0 s) = δ / 4 := by
   have hz : (∫ s in (δ / 2)..θ, tentBump δ 0 s) = 0 := by
@@ -293,7 +284,7 @@ lemma tentBump_integral_boundary {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {θ 
   ring
 
 /-- A bump integrates to `δ/2` over a full period centred at its centre. -/
-lemma tentBump_integral_period {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) (τ : ℝ) :
+private lemma tentBump_integral_period {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) (τ : ℝ) :
     (∫ θ in (τ - π)..(τ + π), tentBump δ τ θ) = δ / 2 := by
   have hz1 : (∫ θ in (τ - π)..(τ - δ / 2), tentBump δ τ θ) = 0 := by
     apply tentBump_integral_zero_of_forall
@@ -322,7 +313,7 @@ lemma tentBump_integral_period {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) (τ : 
   ring
 
 /-- A bump integrates to `δ/2` over the standard period `[0, 2π]`. -/
-lemma tentBump_integral_two_pi {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) (τ : ℝ) :
+private lemma tentBump_integral_two_pi {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) (τ : ℝ) :
     (∫ θ in (0 : ℝ)..(2 * π), tentBump δ τ θ) = δ / 2 := by
   have hper := (tentBump_periodic δ τ).intervalIntegral_add_eq 0 (τ - π)
   rw [zero_add] at hper
@@ -514,6 +505,103 @@ lemma exists_plateau_density {c₁ c₂ c₃ c₄ m₀ η δ : ℝ}
     rw [hval, add_sub_cancel_left]
     exact hfinal _ (by rw [abs_le]; constructor <;> linarith)
 
+/-- The four flanking plateau intervals (each of length `π/2 - δ`, separated by the
+four `δ`-wide "race" sub-arcs) have total Lebesgue measure `2π - 4δ`, for `0 < δ < π/2`. -/
+private lemma plateau_union_measure {δ : ℝ} (hδpos : 0 < δ) (hδlt : δ < π / 2) :
+    MeasureTheory.volume
+        (Set.Icc (δ / 2) (π / 2 - δ / 2) ∪ Set.Icc (π / 2 + δ / 2) (π - δ / 2) ∪
+          Set.Icc (π + δ / 2) (3 * π / 2 - δ / 2) ∪
+          Set.Icc (3 * π / 2 + δ / 2) (2 * π - δ / 2))
+      = ENNReal.ofReal (2 * π - 4 * δ) := by
+  have hπ : 0 < π := Real.pi_pos
+  have hxpos : 0 ≤ π / 2 - δ := by linarith
+  have hvP1 : MeasureTheory.volume (Set.Icc (δ / 2) (π / 2 - δ / 2))
+      = ENNReal.ofReal (π / 2 - δ) := by rw [Real.volume_Icc]; congr 1; ring
+  have hvP2 : MeasureTheory.volume (Set.Icc (π / 2 + δ / 2) (π - δ / 2))
+      = ENNReal.ofReal (π / 2 - δ) := by rw [Real.volume_Icc]; congr 1; ring
+  have hvP3 : MeasureTheory.volume (Set.Icc (π + δ / 2) (3 * π / 2 - δ / 2))
+      = ENNReal.ofReal (π / 2 - δ) := by rw [Real.volume_Icc]; congr 1; ring
+  have hvP4 : MeasureTheory.volume (Set.Icc (3 * π / 2 + δ / 2) (2 * π - δ / 2))
+      = ENNReal.ofReal (π / 2 - δ) := by rw [Real.volume_Icc]; congr 1; ring
+  have hd12 : Disjoint (Set.Icc (δ / 2) (π / 2 - δ / 2))
+      (Set.Icc (π / 2 + δ / 2) (π - δ / 2)) := by
+    rw [Set.disjoint_left]; intro x hx hy
+    simp only [Set.mem_Icc] at hx hy; linarith
+  have hd123 : Disjoint (Set.Icc (δ / 2) (π / 2 - δ / 2) ∪ Set.Icc (π / 2 + δ / 2) (π - δ / 2))
+      (Set.Icc (π + δ / 2) (3 * π / 2 - δ / 2)) := by
+    rw [Set.disjoint_left]; intro x hx hy
+    rw [Set.mem_Icc] at hy
+    simp only [Set.mem_union, Set.mem_Icc] at hx
+    rcases hx with h | h <;> linarith [h.1, h.2]
+  have hd1234 : Disjoint (Set.Icc (δ / 2) (π / 2 - δ / 2) ∪
+      Set.Icc (π / 2 + δ / 2) (π - δ / 2) ∪ Set.Icc (π + δ / 2) (3 * π / 2 - δ / 2))
+      (Set.Icc (3 * π / 2 + δ / 2) (2 * π - δ / 2)) := by
+    rw [Set.disjoint_left]; intro x hx hy
+    rw [Set.mem_Icc] at hy
+    simp only [Set.mem_union, Set.mem_Icc] at hx
+    rcases hx with (h | h) | h <;> linarith [h.1, h.2]
+  rw [MeasureTheory.measure_union hd1234 measurableSet_Icc,
+      MeasureTheory.measure_union hd123 measurableSet_Icc,
+      MeasureTheory.measure_union hd12 measurableSet_Icc,
+      hvP1, hvP2, hvP3, hvP4,
+      ← ENNReal.ofReal_add hxpos hxpos,
+      ← ENNReal.ofReal_add (by linarith) hxpos,
+      ← ENNReal.ofReal_add (by linarith) hxpos]
+  congr 1; ring
+
+/-- Values of the canonical four-arc step curvature `stepCurvature b a 0 (π/2) π (3π/2)`
+on the four arcs of `[0, 2π)`: `a` on `[0,π/2)` and `[π,3π/2)`, `b` on `[π/2,π)` and
+`[3π/2,2π)`. -/
+private lemma stepCurvature_canonical_values (a b : ℝ) :
+    (∀ θ, 0 ≤ θ → θ < π / 2 → stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = a) ∧
+    (∀ θ, π / 2 ≤ θ → θ < π → stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = b) ∧
+    (∀ θ, π ≤ θ → θ < 3 * π / 2 → stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = a) ∧
+    (∀ θ, 3 * π / 2 ≤ θ → θ < 2 * π → stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = b) := by
+  have hπ : 0 < π := Real.pi_pos
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro θ h0 h2
+    have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
+      rw [toIcoMod_eq_self]; refine ⟨h0, ?_⟩; simp; linarith
+    simp only [stepCurvature, ht]; rw [if_pos]; left; linarith
+  · intro θ h0 h2
+    have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
+      rw [toIcoMod_eq_self]; refine ⟨by linarith, ?_⟩; simp; linarith
+    simp only [stepCurvature, ht]; rw [if_neg]
+    simp only [not_or, not_and, not_lt]; exact ⟨by linarith, fun h => by linarith⟩
+  · intro θ h0 h2
+    have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
+      rw [toIcoMod_eq_self]; refine ⟨by linarith, ?_⟩; simp; linarith
+    simp only [stepCurvature, ht]; rw [if_pos]; right; exact ⟨h0, h2⟩
+  · intro θ h0 h2
+    have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
+      rw [toIcoMod_eq_self]; refine ⟨by linarith, ?_⟩; simp; linarith
+    simp only [stepCurvature, ht]; rw [if_neg]
+    simp only [not_or, not_and, not_lt]; exact ⟨by linarith, fun h => by linarith⟩
+
+/-- Given four positive moduli and four positive gaps, there is a single positive
+radius `η` below all four moduli and strictly below all four gaps (take half their
+common minimum). -/
+private lemma exists_plateau_radius {η₁ η₂ η₃ η₄ g₁ g₂ g₃ g₄ : ℝ}
+    (hη₁ : 0 < η₁) (hη₂ : 0 < η₂) (hη₃ : 0 < η₃) (hη₄ : 0 < η₄)
+    (hg₁ : 0 < g₁) (hg₂ : 0 < g₂) (hg₃ : 0 < g₃) (hg₄ : 0 < g₄) :
+    ∃ η : ℝ, 0 < η ∧ η ≤ η₁ ∧ η ≤ η₂ ∧ η ≤ η₃ ∧ η ≤ η₄ ∧
+      η < g₁ ∧ η < g₂ ∧ η < g₃ ∧ η < g₄ := by
+  set M : ℝ := min (min (min η₁ η₂) (min η₃ η₄)) (min (min g₁ g₂) (min g₃ g₄)) with hMdef
+  have hMle₁ : M ≤ η₁ := le_trans (min_le_left _ _) (le_trans (min_le_left _ _) (min_le_left _ _))
+  have hMle₂ : M ≤ η₂ := le_trans (min_le_left _ _) (le_trans (min_le_left _ _) (min_le_right _ _))
+  have hMle₃ : M ≤ η₃ := le_trans (min_le_left _ _) (le_trans (min_le_right _ _) (min_le_left _ _))
+  have hMle₄ : M ≤ η₄ := le_trans (min_le_left _ _) (le_trans (min_le_right _ _) (min_le_right _ _))
+  have hMg₁ : M ≤ g₁ := le_trans (min_le_right _ _) (le_trans (min_le_left _ _) (min_le_left _ _))
+  have hMg₂ : M ≤ g₂ := le_trans (min_le_right _ _) (le_trans (min_le_left _ _) (min_le_right _ _))
+  have hMg₃ : M ≤ g₃ := le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_left _ _))
+  have hMg₄ : M ≤ g₄ := le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_right _ _))
+  have hMpos : 0 < M := by
+    rw [hMdef]
+    exact lt_min (lt_min (lt_min hη₁ hη₂) (lt_min hη₃ hη₄))
+      (lt_min (lt_min hg₁ hg₂) (lt_min hg₃ hg₄))
+  exact ⟨M / 2, by linarith, by linarith, by linarith, by linarith, by linarith,
+    by linarith, by linarith, by linarith, by linarith⟩
+
 set_option maxHeartbeats 1000000 in
 -- The measure-bound branch reasons over a large local hypothesis context
 -- (four moduli, plateau radii, plateau intervals and their disjointness), so
@@ -558,42 +646,12 @@ theorem exists_preliminary_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
   have hgap₂ : 0 < (c₃ - c₂) / 2 := by linarith
   have hgap₃ : 0 < (c₄ - c₃) / 2 := by linarith
   have hgap₄ : 0 < (c₁ + 2 * π - c₄) / 2 := by linarith
-  -- A single positive lower bound `M` for all four moduli and half-gaps.
-  set M : ℝ := min (min (min η₁ η₂) (min η₃ η₄))
-      (min (min ((c₂ - c₁) / 2) ((c₃ - c₂) / 2))
-           (min ((c₄ - c₃) / 2) ((c₁ + 2 * π - c₄) / 2))) with hMdef
-  have hMle₁ : M ≤ η₁ := le_trans (min_le_left _ _) (le_trans (min_le_left _ _) (min_le_left _ _))
-  have hMle₂ : M ≤ η₂ := le_trans (min_le_left _ _) (le_trans (min_le_left _ _) (min_le_right _ _))
-  have hMle₃ : M ≤ η₃ := le_trans (min_le_left _ _) (le_trans (min_le_right _ _) (min_le_left _ _))
-  have hMle₄ : M ≤ η₄ := le_trans (min_le_left _ _) (le_trans (min_le_right _ _) (min_le_right _ _))
-  have hMg₁ : M ≤ (c₂ - c₁) / 2 :=
-    le_trans (min_le_right _ _) (le_trans (min_le_left _ _) (min_le_left _ _))
-  have hMg₂ : M ≤ (c₃ - c₂) / 2 :=
-    le_trans (min_le_right _ _) (le_trans (min_le_left _ _) (min_le_right _ _))
-  have hMg₃ : M ≤ (c₄ - c₃) / 2 :=
-    le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_left _ _))
-  have hMg₄ : M ≤ (c₁ + 2 * π - c₄) / 2 :=
-    le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_right _ _))
-  have hMpos : 0 < M := by
-    rw [hMdef]
-    exact lt_min (lt_min (lt_min hη₁ hη₂) (lt_min hη₃ hη₄))
-      (lt_min (lt_min hgap₁ hgap₂) (lt_min hgap₃ hgap₄))
-  -- Plateau radius: half of `M`, so strictly below every half-gap.
-  set η : ℝ := M / 2 with hηdef
-  -- Flank width parameter `δ`: small enough that `4δ < ε` and `δ < π/2`.
+  obtain ⟨η, hηpos, hηle₁, hηle₂, hηle₃, hηle₄, hfit₁, hfit₂, hfit₃, hfit₄⟩ :=
+    exists_plateau_radius hη₁ hη₂ hη₃ hη₄ hgap₁ hgap₂ hgap₃ hgap₄
   set δ : ℝ := min (ε / 8) (π / 4) with hδdef
-  have hηpos : 0 < η := by rw [hηdef]; linarith
   have hδpos : 0 < δ := by rw [hδdef]; exact lt_min (by linarith) (by linarith)
   have hδlt : δ < π / 2 := by
     rw [hδdef]; exact lt_of_le_of_lt (min_le_right _ _) (by linarith)
-  have hηle₁ : η ≤ η₁ := by rw [hηdef]; linarith
-  have hηle₂ : η ≤ η₂ := by rw [hηdef]; linarith
-  have hηle₃ : η ≤ η₃ := by rw [hηdef]; linarith
-  have hηle₄ : η ≤ η₄ := by rw [hηdef]; linarith
-  have hfit₁ : η < (c₂ - c₁) / 2 := by rw [hηdef]; linarith
-  have hfit₂ : η < (c₃ - c₂) / 2 := by rw [hηdef]; linarith
-  have hfit₃ : η < (c₄ - c₃) / 2 := by rw [hηdef]; linarith
-  have hfit₄ : η < (c₁ + 2 * π - c₄) / 2 := by rw [hηdef]; linarith
   -- The calibrated continuous plateau density.
   obtain ⟨w, hw, hwpos, hwper, hwint, hpl1, hpl2, hpl3, hpl4⟩ :=
     exists_plateau_density (m₀ := (c₁ + c₄) / 2 - π) h12 h23 h34 h41 rfl
@@ -637,32 +695,7 @@ theorem exists_preliminary_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
   · -- Measure bound: the bad set avoids all four plateaus, hence sits in the
     -- complement of the plateaus inside one period, of measure `4δ < ε`.
     -- Value of the canonical step curvature on the four arcs.
-    have hstep1 : ∀ θ, 0 ≤ θ → θ < π / 2 →
-        stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = a := by
-      intro θ h0 h2
-      have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
-        rw [toIcoMod_eq_self]; refine ⟨h0, ?_⟩; simp; linarith
-      simp only [stepCurvature, ht]; rw [if_pos]; left; linarith
-    have hstep2 : ∀ θ, π / 2 ≤ θ → θ < π →
-        stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = b := by
-      intro θ h0 h2
-      have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
-        rw [toIcoMod_eq_self]; refine ⟨by linarith, ?_⟩; simp; linarith
-      simp only [stepCurvature, ht]; rw [if_neg]
-      simp only [not_or, not_and, not_lt]; exact ⟨by linarith, fun h => by linarith⟩
-    have hstep3 : ∀ θ, π ≤ θ → θ < 3 * π / 2 →
-        stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = a := by
-      intro θ h0 h2
-      have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
-        rw [toIcoMod_eq_self]; refine ⟨by linarith, ?_⟩; simp; linarith
-      simp only [stepCurvature, ht]; rw [if_pos]; right; exact ⟨h0, h2⟩
-    have hstep4 : ∀ θ, 3 * π / 2 ≤ θ → θ < 2 * π →
-        stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = b := by
-      intro θ h0 h2
-      have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
-        rw [toIcoMod_eq_self]; refine ⟨by linarith, ?_⟩; simp; linarith
-      simp only [stepCurvature, ht]; rw [if_neg]
-      simp only [not_or, not_and, not_lt]; exact ⟨by linarith, fun h => by linarith⟩
+    obtain ⟨hstep1, hstep2, hstep3, hstep4⟩ := stepCurvature_canonical_values a b
     -- The four plateaus and the ambient period.
     set U := Set.Ico (0 : ℝ) (2 * π) with hUdef
     set P₁ := Set.Icc (δ / 2) (π / 2 - δ / 2) with hP1def
@@ -703,41 +736,13 @@ theorem exists_preliminary_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
     have hδle : δ ≤ π / 4 := by rw [hδdef]; exact min_le_right _ _
     have h4δlt : 4 * δ < ε := by
       rw [hδdef]; have := min_le_left (ε / 8) (π / 4); linarith
-    have hxpos : 0 ≤ π / 2 - δ := by linarith
     have hmeasP : MeasurableSet (P₁ ∪ P₂ ∪ P₃ ∪ P₄) :=
       ((measurableSet_Icc.union measurableSet_Icc).union measurableSet_Icc).union
         measurableSet_Icc
-    have hvP1 : MeasureTheory.volume P₁ = ENNReal.ofReal (π / 2 - δ) := by
-      rw [hP1def, Real.volume_Icc]; congr 1; ring
-    have hvP2 : MeasureTheory.volume P₂ = ENNReal.ofReal (π / 2 - δ) := by
-      rw [hP2def, Real.volume_Icc]; congr 1; ring
-    have hvP3 : MeasureTheory.volume P₃ = ENNReal.ofReal (π / 2 - δ) := by
-      rw [hP3def, Real.volume_Icc]; congr 1; ring
-    have hvP4 : MeasureTheory.volume P₄ = ENNReal.ofReal (π / 2 - δ) := by
-      rw [hP4def, Real.volume_Icc]; congr 1; ring
-    have hd12 : Disjoint P₁ P₂ := by
-      rw [hP1def, hP2def, Set.disjoint_left]; intro x hx hy
-      simp only [Set.mem_Icc] at hx hy; linarith
-    have hd123 : Disjoint (P₁ ∪ P₂) P₃ := by
-      rw [Set.disjoint_left]; intro x hx hy
-      rw [hP3def, Set.mem_Icc] at hy
-      simp only [hP1def, hP2def, Set.mem_union, Set.mem_Icc] at hx
-      rcases hx with h | h <;> linarith [h.1, h.2]
-    have hd1234 : Disjoint (P₁ ∪ P₂ ∪ P₃) P₄ := by
-      rw [Set.disjoint_left]; intro x hx hy
-      rw [hP4def, Set.mem_Icc] at hy
-      simp only [hP1def, hP2def, hP3def, Set.mem_union, Set.mem_Icc] at hx
-      rcases hx with (h | h) | h <;> linarith [h.1, h.2]
     have hvP : MeasureTheory.volume (P₁ ∪ P₂ ∪ P₃ ∪ P₄)
         = ENNReal.ofReal (2 * π - 4 * δ) := by
-      rw [MeasureTheory.measure_union hd1234 measurableSet_Icc,
-          MeasureTheory.measure_union hd123 measurableSet_Icc,
-          MeasureTheory.measure_union hd12 measurableSet_Icc,
-          hvP1, hvP2, hvP3, hvP4,
-          ← ENNReal.ofReal_add hxpos hxpos,
-          ← ENNReal.ofReal_add (by linarith) hxpos,
-          ← ENNReal.ofReal_add (by linarith) hxpos]
-      congr 1; ring
+      rw [hP1def, hP2def, hP3def, hP4def]
+      exact plateau_union_measure hδpos hδlt
     have hvU : MeasureTheory.volume U = ENNReal.ofReal (2 * π) := by
       rw [hUdef, Real.volume_Ico]; congr 1; ring
     have hPU : (P₁ ∪ P₂ ∪ P₃ ∪ P₄) ⊆ U := by

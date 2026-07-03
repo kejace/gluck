@@ -25,38 +25,14 @@ Obtained by the fundamental theorem of calculus with antiderivative
 theorem reconstruct_const (r : ℝ) (θ : ℝ) :
     reconstruct (fun _ => r) θ
       = (r : ℂ) * Complex.I * (1 - Complex.exp (θ * Complex.I)) := by
-  -- The antiderivative `F` of the integrand `φ ↦ e^{iφ}·r`.
-  set F : ℝ → ℂ := fun x => (r : ℂ) * Complex.I * (1 - Complex.exp (x * Complex.I)) with hF
-  -- Derivative of `x ↦ e^{ixI}` (cf. `signedCurvature_reconstruct`).
-  have hExp : ∀ x : ℝ, HasDerivAt (fun y : ℝ => Complex.exp (↑y * Complex.I))
-      (Complex.exp (↑x * Complex.I) * Complex.I) x := by
-    intro x
-    have h1 : HasDerivAt (fun y : ℝ => (↑y : ℂ) * Complex.I) Complex.I x := by
-      simpa using ((hasDerivAt_id x).ofReal_comp.mul_const Complex.I)
-    simpa using h1.cexp
-  -- `F` has derivative equal to the integrand at every point.
-  have hFderiv : ∀ x : ℝ, HasDerivAt F (Complex.exp (↑x * Complex.I) * (r : ℂ)) x := by
-    intro x
-    have hsub : HasDerivAt (fun y : ℝ => 1 - Complex.exp (↑y * Complex.I))
-        (-(Complex.exp (↑x * Complex.I) * Complex.I)) x :=
-      (hExp x).const_sub (1 : ℂ)
-    have hmul := hsub.const_mul ((r : ℂ) * Complex.I)
-    have hval : (r : ℂ) * Complex.I * -(Complex.exp (↑x * Complex.I) * Complex.I)
-        = Complex.exp (↑x * Complex.I) * (r : ℂ) := by
-      linear_combination -(r : ℂ) * Complex.exp (↑x * Complex.I) * Complex.I_mul_I
-    rw [← hval]
-    exact hmul
-  -- Integrand is continuous, hence interval-integrable.
-  have hcont : Continuous fun φ : ℝ => Complex.exp ((φ : ℂ) * Complex.I) * ((fun _ => r) φ : ℂ) :=
-    (Complex.continuous_exp.comp (Complex.continuous_ofReal.mul continuous_const)).mul
-      continuous_const
-  -- FTC: `∫₀^θ = F θ - F 0`, and `F 0 = 0`.
-  rw [reconstruct,
-    intervalIntegral.integral_eq_sub_of_hasDerivAt (fun x _ => hFderiv x)
-      (hcont.intervalIntegrable 0 θ)]
-  simp only [hF]
-  rw [show ((0 : ℝ) : ℂ) * Complex.I = 0 by push_cast; ring]
-  simp
+  -- Pull out the constant `r`, apply the closed-form interval integral of
+  -- `x ↦ e^{cx}` (`integral_exp_mul_complex` with `c = I`), then simplify.
+  rw [reconstruct, intervalIntegral.integral_mul_const]
+  simp_rw [mul_comm (_ : ℂ) Complex.I]
+  rw [integral_exp_mul_complex Complex.I_ne_zero]
+  simp only [Complex.ofReal_zero, mul_zero, Complex.exp_zero]
+  rw [div_mul_eq_mul_div, Complex.div_I]
+  ring
 
 /-- **The reconstruction realizes its curvature** (blueprint
 `lem:realizes_curvature_reconstruct`). For `μ` continuous and strictly positive,
@@ -73,9 +49,8 @@ private lemma realizesCurvature_reconstruct {μ : ℝ → ℝ} (hcont : Continuo
     fun t => (hasDerivAt_reconstruct hρcont t).deriv
   have hnorm : ∀ t, ‖deriv (reconstruct ρ) t‖ = ρ t := by
     intro t
-    rw [hd, norm_mul]
-    have h1 : ‖Complex.exp (↑t * Complex.I)‖ = 1 := by simp
-    rw [h1, one_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (hρpos t)]
+    rw [hd, norm_mul, Complex.norm_exp_ofReal_mul_I, one_mul, Complex.norm_real,
+      Real.norm_eq_abs, abs_of_pos (hρpos t)]
   refine ⟨?_, ?_, id, differentiable_id, ?_, ?_⟩
   · -- `ContDiff ℝ 1`: differentiable with continuous derivative `θ ↦ e^{iθ}ρ(θ)`.
     refine contDiff_one_iff_deriv.mpr ⟨fun t =>
@@ -152,20 +127,6 @@ lemma realizesCurvature_comp {Γ : ℝ → ℂ} {μ : ℝ → ℝ} {ψ : ℝ →
     simp only [Function.comp_apply]
     ring
 
-/-- A circle reparametrization `ψ` (with `ψ(t+2π)=ψ(t)+2π`) commutes with adding
-an integer multiple of the period: `ψ(t + n·2π) = ψ(t) + n·2π`. Proof: `ψ - id`
-is `2π`-periodic. -/
-private lemma psi_add_int_period {ψ : ℝ → ℝ}
-    (hper : ∀ t, ψ (t + 2 * π) = ψ t + 2 * π) (n : ℤ) (t : ℝ) :
-    ψ (t + n • (2 * π)) = ψ t + n • (2 * π) := by
-  have hg : Function.Periodic (fun s => ψ s - s) (2 * π) := by
-    intro s; simp only; rw [hper s]; ring
-  have h2 : (fun s => ψ s - s) t = (fun s => ψ s - s) (t + n • (2 * π)) := by
-    have := hg.sub_zsmul_eq (x := t + n • (2 * π)) n
-    simpa using this
-  simp only at h2
-  linarith [h2]
-
 /-- A `2π`-periodic curve `f` that is injective on `[0, 2π)` is "injective up to
 period": `f u = f w` forces `u ≡ w (mod 2π)`, i.e. `u - w = n·2π` for some
 integer `n`. Proof: reduce `u, w` into `[0, 2π)` with `toIcoMod`; periodicity
@@ -235,65 +196,6 @@ lemma isSimpleClosed_comp {Γ : ℝ → ℂ} {ψ : ℝ → ℝ}
     rw [hn0] at hxe
     simpa using hxe
 
-/-- **The `C¹` inverse of a `C¹` circle reparametrization** (blueprint
-`lem:exists_c1_circle_inverse`). If `h` has a continuous strictly positive
-derivative `v` (`HasDerivAt h (v θ) θ`) and `h(θ+2π)=h(θ)+2π`, then `h` has a
-`C¹` two-sided inverse `H` which is again an orientation-preserving circle
-reparametrization, with `HasDerivAt H (1/v(H t)) t`. -/
-private lemma exists_C1_circle_inverse {h : ℝ → ℝ} {v : ℝ → ℝ}
-    (_hvc : Continuous v) (hvp : ∀ θ, 0 < v θ) (hvd : ∀ θ, HasDerivAt h (v θ) θ)
-    (hper : ∀ θ, h (θ + 2 * π) = h θ + 2 * π) :
-    ∃ H : ℝ → ℝ, Continuous H ∧ StrictMono H ∧ (∀ t, h (H t) = t) ∧
-      (∀ t, H (h t) = t) ∧ (∀ t, H (t + 2 * π) = H t + 2 * π) ∧
-      (∀ t, HasDerivAt H (1 / v (H t)) t) := by
-  have hpi : 0 < (2 : ℝ) * π := by positivity
-  -- `h` strictly increasing (positive derivative) and continuous (differentiable).
-  have hmono : StrictMono h := strictMono_of_hasDerivAt_pos hvd hvp
-  have hhdiff : Differentiable ℝ h := fun θ => (hvd θ).differentiableAt
-  have hhcont : Continuous h := hhdiff.continuous
-  -- `h(n·2π) = h 0 + n·2π`.
-  have hshift : ∀ n : ℤ, h (n • (2 * π)) = h 0 + n • (2 * π) := by
-    intro n
-    have := psi_add_int_period hper n 0
-    rwa [zero_add] at this
-  -- `h` is surjective: unbounded above and below by the shift relation.
-  have hsurj : Function.Surjective h := by
-    refine hhcont.surjective ?_ ?_
-    · apply hmono.monotone.tendsto_atTop_atTop
-      intro b
-      obtain ⟨n, hn⟩ := exists_int_gt ((b - h 0) / (2 * π))
-      refine ⟨n • (2 * π), ?_⟩
-      rw [hshift n, zsmul_eq_mul]
-      rw [div_lt_iff₀ hpi] at hn
-      linarith [hn]
-    · apply hmono.monotone.tendsto_atBot_atBot
-      intro b
-      obtain ⟨n, hn⟩ := exists_int_lt ((b - h 0) / (2 * π))
-      refine ⟨n • (2 * π), ?_⟩
-      rw [hshift n, zsmul_eq_mul]
-      rw [lt_div_iff₀ hpi] at hn
-      linarith [hn]
-  -- The order isomorphism induced by `h`; `H := e.symm`.
-  obtain ⟨e, hecoe⟩ : ∃ e : ℝ ≃o ℝ, ⇑e = h :=
-    ⟨StrictMono.orderIsoOfSurjective h hmono hsurj,
-      StrictMono.coe_orderIsoOfSurjective h hmono hsurj⟩
-  have hHh : ∀ s, h (e.symm s) = s := fun s => by rw [← hecoe]; exact e.apply_symm_apply s
-  have hhH : ∀ s, e.symm (h s) = s := fun s => by rw [← hecoe]; exact e.symm_apply_apply s
-  refine ⟨e.symm, e.symm.continuous, e.symm.strictMono, hHh, hhH, ?_, ?_⟩
-  · -- *Periodicity of `H`:* `h(H t + 2π) = t + 2π = h(H(t+2π))`, then injectivity.
-    intro t
-    have h1 : h (e.symm t + 2 * π) = t + 2 * π := by rw [hper (e.symm t), hHh t]
-    have h2 : h (e.symm (t + 2 * π)) = t + 2 * π := hHh (t + 2 * π)
-    have := hmono.injective (h1.trans h2.symm)
-    linarith [this]
-  · -- *Derivative:* inverse-function rule, `H'(t) = (v(H t))⁻¹ = 1/v(H t)`.
-    intro t
-    have hHcont : ContinuousAt e.symm t := e.symm.continuous.continuousAt
-    have hf : HasDerivAt h (v (e.symm t)) (e.symm t) := hvd (e.symm t)
-    have hfg : ∀ᶠ y in nhds t, h (e.symm y) = y := Filter.Eventually.of_forall hHh
-    have hres := HasDerivAt.of_local_left_inverse hHcont hf (hvp (e.symm t)).ne' hfg
-    rwa [← one_div] at hres
-
 /-- **Gluck's converse to the Four Vertex Theorem (strictly positive case).**
 Let `κ : ℝ → ℝ` be a curvature function (continuous, `2π`-periodic, strictly
 positive) satisfying the four-vertex condition (either constant, or with at
@@ -330,9 +232,8 @@ theorem gluck_converse (κ : ℝ → ℝ) (hκ : IsCurvatureFunction κ)
       fun t => (hasDerivAt_reconstruct continuous_const t).deriv
     have hnorm : ∀ t, ‖deriv (reconstruct (fun _ => r)) t‖ = r := by
       intro t
-      rw [hdg, norm_mul]
-      have h1 : ‖Complex.exp (↑t * Complex.I)‖ = 1 := by simp
-      rw [h1, one_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hr0]
+      rw [hdg, norm_mul, Complex.norm_exp_ofReal_mul_I, one_mul, Complex.norm_real,
+        Real.norm_eq_abs, abs_of_pos hr0]
     refine ⟨reconstruct (fun _ => r), ⟨?_, ?_⟩, ?_, ?_, id, differentiable_id, ?_, ?_⟩
     · -- *Closed:* `γ(x + 2π) = γ(x)` since `e^{i(x+2π)} = e^{ix}`.
       intro x
@@ -378,9 +279,8 @@ theorem gluck_converse (κ : ℝ → ℝ) (hκ : IsCurvatureFunction κ)
       intro t
       rw [hdg]
       have hn : ‖Complex.exp (↑t * Complex.I) * (r : ℂ)‖ = r := by
-        rw [norm_mul]
-        have h1 : ‖Complex.exp (↑t * Complex.I)‖ = 1 := by simp
-        rw [h1, one_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hr0]
+        rw [norm_mul, Complex.norm_exp_ofReal_mul_I, one_mul, Complex.norm_real,
+          Real.norm_eq_abs, abs_of_pos hr0]
       rw [hn]
       simp only [id_eq]
       ring

@@ -99,9 +99,8 @@ source for the reconstruction integral.
   If $\gamma$ is $C^2$ and regular and realizes $\kappa$
   (\cref{def:realizes_curvature}), then its signed curvature equals $\kappa$:
   $\kappa_\gamma(t) = \kappa(t)$ for all $t$. (Bridge between the intrinsic
-  notion and the deriv²-formula; lets the smooth lemma
-  \cref{lem:signed_curvature_reconstruct} and the intrinsic realization be used
-  interchangeably on $C^2$ data.)
+  notion and the deriv²-formula; lets the deriv²-formula and the intrinsic
+  realization be used interchangeably on $C^2$ data.)
 \end{lemma}
 \begin{proof}
   \uses{def:realizes_curvature, def:signed_curvature}
@@ -152,17 +151,3 @@ source for the reconstruction integral.
   curve this is equivalent to convexity of the enclosed region.
 \end{definition}
 
-\begin{lemma}\leanok
-[Positive curvature forces convexity]
-  \label{lem:pos_curvature_convex}
-  \lean{Gluck.isConvexCurve_of_signedCurvature_pos}
-  \uses{def:is_convex_curve, def:signed_curvature}
-  If $\gamma$ is regular and $\kappa_\gamma(t) > 0$ for all $t$, then $\gamma$ is
-  convex.
-\end{lemma}
-\begin{proof}
-
-\leanok
-  Immediate from the definition of \cref{def:is_convex_curve}: convexity is
-  precisely the everywhere-positivity of the signed curvature.
-\end{proof}
