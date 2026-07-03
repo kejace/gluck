@@ -25,38 +25,14 @@ Obtained by the fundamental theorem of calculus with antiderivative
 theorem reconstruct_const (r : ℝ) (θ : ℝ) :
     reconstruct (fun _ => r) θ
       = (r : ℂ) * Complex.I * (1 - Complex.exp (θ * Complex.I)) := by
-  -- The antiderivative `F` of the integrand `φ ↦ e^{iφ}·r`.
-  set F : ℝ → ℂ := fun x => (r : ℂ) * Complex.I * (1 - Complex.exp (x * Complex.I)) with hF
-  -- Derivative of `x ↦ e^{ixI}`.
-  have hExp : ∀ x : ℝ, HasDerivAt (fun y : ℝ => Complex.exp (↑y * Complex.I))
-      (Complex.exp (↑x * Complex.I) * Complex.I) x := by
-    intro x
-    have h1 : HasDerivAt (fun y : ℝ => (↑y : ℂ) * Complex.I) Complex.I x := by
-      simpa using ((hasDerivAt_id x).ofReal_comp.mul_const Complex.I)
-    simpa using h1.cexp
-  -- `F` has derivative equal to the integrand at every point.
-  have hFderiv : ∀ x : ℝ, HasDerivAt F (Complex.exp (↑x * Complex.I) * (r : ℂ)) x := by
-    intro x
-    have hsub : HasDerivAt (fun y : ℝ => 1 - Complex.exp (↑y * Complex.I))
-        (-(Complex.exp (↑x * Complex.I) * Complex.I)) x :=
-      (hExp x).const_sub (1 : ℂ)
-    have hmul := hsub.const_mul ((r : ℂ) * Complex.I)
-    have hval : (r : ℂ) * Complex.I * -(Complex.exp (↑x * Complex.I) * Complex.I)
-        = Complex.exp (↑x * Complex.I) * (r : ℂ) := by
-      linear_combination -(r : ℂ) * Complex.exp (↑x * Complex.I) * Complex.I_mul_I
-    rw [← hval]
-    exact hmul
-  -- Integrand is continuous, hence interval-integrable.
-  have hcont : Continuous fun φ : ℝ => Complex.exp ((φ : ℂ) * Complex.I) * ((fun _ => r) φ : ℂ) :=
-    (Complex.continuous_exp.comp (Complex.continuous_ofReal.mul continuous_const)).mul
-      continuous_const
-  -- FTC: `∫₀^θ = F θ - F 0`, and `F 0 = 0`.
-  rw [reconstruct,
-    intervalIntegral.integral_eq_sub_of_hasDerivAt (fun x _ => hFderiv x)
-      (hcont.intervalIntegrable 0 θ)]
-  simp only [hF]
-  rw [show ((0 : ℝ) : ℂ) * Complex.I = 0 by push_cast; ring]
-  simp
+  -- Pull out the constant `r`, apply the closed-form interval integral of
+  -- `x ↦ e^{cx}` (`integral_exp_mul_complex` with `c = I`), then simplify.
+  rw [reconstruct, intervalIntegral.integral_mul_const]
+  simp_rw [mul_comm (_ : ℂ) Complex.I]
+  rw [integral_exp_mul_complex Complex.I_ne_zero]
+  simp only [Complex.ofReal_zero, mul_zero, Complex.exp_zero]
+  rw [div_mul_eq_mul_div, Complex.div_I]
+  ring
 
 /-- **The reconstruction realizes its curvature** (blueprint
 `lem:realizes_curvature_reconstruct`). For `μ` continuous and strictly positive,
@@ -73,9 +49,8 @@ private lemma realizesCurvature_reconstruct {μ : ℝ → ℝ} (hcont : Continuo
     fun t => (hasDerivAt_reconstruct hρcont t).deriv
   have hnorm : ∀ t, ‖deriv (reconstruct ρ) t‖ = ρ t := by
     intro t
-    rw [hd, norm_mul]
-    have h1 : ‖Complex.exp (↑t * Complex.I)‖ = 1 := by simp
-    rw [h1, one_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (hρpos t)]
+    rw [hd, norm_mul, Complex.norm_exp_ofReal_mul_I, one_mul, Complex.norm_real,
+      Real.norm_eq_abs, abs_of_pos (hρpos t)]
   refine ⟨?_, ?_, id, differentiable_id, ?_, ?_⟩
   · -- `ContDiff ℝ 1`: differentiable with continuous derivative `θ ↦ e^{iθ}ρ(θ)`.
     refine contDiff_one_iff_deriv.mpr ⟨fun t =>
@@ -257,9 +232,8 @@ theorem gluck_converse (κ : ℝ → ℝ) (hκ : IsCurvatureFunction κ)
       fun t => (hasDerivAt_reconstruct continuous_const t).deriv
     have hnorm : ∀ t, ‖deriv (reconstruct (fun _ => r)) t‖ = r := by
       intro t
-      rw [hdg, norm_mul]
-      have h1 : ‖Complex.exp (↑t * Complex.I)‖ = 1 := by simp
-      rw [h1, one_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hr0]
+      rw [hdg, norm_mul, Complex.norm_exp_ofReal_mul_I, one_mul, Complex.norm_real,
+        Real.norm_eq_abs, abs_of_pos hr0]
     refine ⟨reconstruct (fun _ => r), ⟨?_, ?_⟩, ?_, ?_, id, differentiable_id, ?_, ?_⟩
     · -- *Closed:* `γ(x + 2π) = γ(x)` since `e^{i(x+2π)} = e^{ix}`.
       intro x
@@ -305,9 +279,8 @@ theorem gluck_converse (κ : ℝ → ℝ) (hκ : IsCurvatureFunction κ)
       intro t
       rw [hdg]
       have hn : ‖Complex.exp (↑t * Complex.I) * (r : ℂ)‖ = r := by
-        rw [norm_mul]
-        have h1 : ‖Complex.exp (↑t * Complex.I)‖ = 1 := by simp
-        rw [h1, one_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hr0]
+        rw [norm_mul, Complex.norm_exp_ofReal_mul_I, one_mul, Complex.norm_real,
+          Real.norm_eq_abs, abs_of_pos hr0]
       rw [hn]
       simp only [id_eq]
       ring

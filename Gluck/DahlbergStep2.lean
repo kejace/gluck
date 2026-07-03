@@ -2397,9 +2397,8 @@ private lemma dahlbergCurve_sub {K : ℝ → ℝ}
       (fun s => Complex.exp ((dahlbergAngle K s : ℂ) * Complex.I)) volume p q) (u w : ℝ) :
     dahlbergCurve K w - dahlbergCurve K u
       = ∫ s in u..w, Complex.exp ((dahlbergAngle K s : ℂ) * Complex.I) := by
-  rw [dahlbergCurve, dahlbergCurve,
-    ← intervalIntegral.integral_add_adjacent_intervals (hii 0 u) (hii u w)]
-  ring
+  rw [dahlbergCurve, dahlbergCurve]
+  exact intervalIntegral.integral_interval_sub_left (hii 0 w) (hii 0 u)
 
 /-- Pointwise bounds on the normalised clean-bicircle curvature: for `‖z‖ ≤ 1`,
 `(1/4)(1/a+1/b)·a ≤ arcLengthNorm (cleanBicircle a b) a b δ z ≤ (5/8)(1/a+1/b)·b`.

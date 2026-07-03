@@ -38,10 +38,7 @@ theorem hasDerivAt_reconstruct {ρ : ℝ → ℝ} (hρ : Continuous ρ) (θ : �
   have hcont : Continuous fun φ : ℝ => Complex.exp ((φ : ℂ) * Complex.I) * (ρ φ : ℂ) :=
     (Complex.continuous_exp.comp (Complex.continuous_ofReal.mul continuous_const)).mul
       (Complex.continuous_ofReal.comp hρ)
-  exact intervalIntegral.integral_hasDerivAt_right
-    (hcont.intervalIntegrable 0 θ)
-    (hcont.stronglyMeasurableAtFilter _ _)
-    hcont.continuousAt
+  exact (hcont.integral_hasStrictDerivAt 0 θ).hasDerivAt
 
 /-- The *error vector* of the weight `ρ` is `E(ρ) = α_ρ(2π) = ∫₀^{2π} e^{iθ} ρ(θ) dθ`.
 It measures the failure of the reconstruction curve to close up.

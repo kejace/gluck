@@ -28,23 +28,9 @@ noncomputable def bicircleErrorVector (a b θ₁ θ₂ θ₃ θ₄ : ℝ) : ℂ 
 lemma integral_cexp_I (c d : ℝ) :
     (∫ θ in c..d, Complex.exp ((θ : ℂ) * Complex.I))
       = -Complex.I * (Complex.exp ((d : ℂ) * Complex.I) - Complex.exp ((c : ℂ) * Complex.I)) := by
-  have hderiv : ∀ x ∈ Set.uIcc c d,
-      HasDerivAt (fun θ : ℝ => -Complex.I * Complex.exp ((θ : ℂ) * Complex.I))
-        (Complex.exp ((x : ℂ) * Complex.I)) x := by
-    intro x _
-    have h1 : HasDerivAt (fun θ : ℝ => (θ : ℂ) * Complex.I) Complex.I x := by
-      simpa using ((hasDerivAt_id x).ofReal_comp.mul_const Complex.I)
-    have h2 : HasDerivAt (fun θ : ℝ => Complex.exp ((θ : ℂ) * Complex.I))
-        (Complex.exp ((x : ℂ) * Complex.I) * Complex.I) x := by simpa using h1.cexp
-    have h3 := h2.const_mul (-Complex.I)
-    have heq : (-Complex.I) * (Complex.exp ((x : ℂ) * Complex.I) * Complex.I)
-        = Complex.exp ((x : ℂ) * Complex.I) := by
-      linear_combination (-Complex.exp ((x : ℂ) * Complex.I)) * Complex.I_mul_I
-    rw [heq] at h3
-    exact h3
-  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv
-      ((Complex.continuous_exp.comp
-        (Complex.continuous_ofReal.mul continuous_const)).intervalIntegrable c d)]
+  have h := integral_exp_mul_complex (a := c) (b := d) (c := Complex.I) Complex.I_ne_zero
+  simp_rw [mul_comm Complex.I] at h
+  rw [h, Complex.div_I]
   ring
 
 /-- On the half-open arc `(c,d]` where the step curvature is constant `= v`, the
@@ -57,9 +43,7 @@ lemma bicircle_arc_integrand_eq (a b θ₁ θ₂ θ₃ θ₄ v c d : ℝ) (hcd :
       =ᵐ[volume.restrict (Set.uIoc c d)]
     (fun θ : ℝ => Complex.exp ((θ : ℂ) * Complex.I) * ((1 / v : ℝ) : ℂ)) := by
   rw [Set.uIoc_of_le hcd]
-  have hd : ∀ᵐ θ ∂volume, θ ≠ d := by
-    have h0 : volume {d} = 0 := Real.volume_singleton
-    rw [MeasureTheory.ae_iff]; simp [h0]
+  have hd : ∀ᵐ θ ∂volume, θ ≠ d := Measure.ae_ne volume d
   rw [Filter.EventuallyEq, ae_restrict_iff' measurableSet_Ioc]
   filter_upwards [hd] with θ hθd hθ
   have hmem : θ ∈ Set.Ioo c d := ⟨hθ.1, lt_of_le_of_ne hθ.2 hθd⟩
@@ -90,9 +74,7 @@ lemma bicircle_arc_integrable (a b θ₁ θ₂ θ₃ θ₄ v c d : ℝ) (hcd : c
         * ((radius (stepCurvature a b θ₁ θ₂ θ₃ θ₄) θ : ℝ) : ℂ)) volume c d := by
   have hcont : IntervalIntegrable
       (fun θ : ℝ => Complex.exp ((θ : ℂ) * Complex.I) * ((1 / v : ℝ) : ℂ)) volume c d :=
-    ((Complex.continuous_exp.comp
-        (Complex.continuous_ofReal.mul continuous_const)).mul
-          continuous_const).intervalIntegrable c d
+    (Continuous.intervalIntegrable (by fun_prop) c d)
   rw [intervalIntegrable_iff] at hcont ⊢
   exact hcont.congr (bicircle_arc_integrand_eq a b θ₁ θ₂ θ₃ θ₄ v c d hcd hv).symm
 

@@ -655,16 +655,13 @@ lemma integralReparam_changeOfVar {w : ℝ → ℝ} (hw : Continuous w) (hpos : 
       = Set.Icc (integralReparam w c 0) (integralReparam w c (2 * π)) :=
     ContinuousOn.image_Icc_of_monotoneOn (by positivity)
       (continuous_integralReparam hw c).continuousOn (hmono.monotone.monotoneOn _)
-  have hcov := MeasureTheory.integral_image_eq_integral_abs_deriv_smul
+  have hcov := MeasureTheory.integral_image_eq_integral_deriv_smul_of_monotoneOn
     (s := Set.Icc (0 : ℝ) (2 * π)) measurableSet_Icc
     (fun x _ => (hasDerivAt_integralReparam hw c x).hasDerivWithinAt)
-    (hmono.injective.injOn) G
+    (hmono.monotone.monotoneOn _) G
   rw [himg] at hcov
+  simp only [smul_eq_mul] at hcov
   rw [hcov]
-  apply MeasureTheory.setIntegral_congr_fun measurableSet_Icc
-  intro x _
-  dsimp only
-  rw [abs_of_nonneg (hpos x).le, smul_eq_mul]
 
 /-- **The breakpoint-aligning reparametrization family** (blueprint
 `def:align_reparam`).  For `0 < δ ≤ π/8` and `z` in the closed unit disk,
@@ -1171,10 +1168,8 @@ set.  Helper for the `L¹` estimate. -/
 private lemma integrableOn_of_measurable_bounded {f : ℝ → ℝ} {s : Set ℝ} {C : ℝ}
     (hmeas : Measurable f) (hfin : MeasureTheory.volume s ≠ ⊤)
     (hb : ∀ x, |f x| ≤ C) : MeasureTheory.IntegrableOn f s MeasureTheory.volume := by
-  apply MeasureTheory.Integrable.mono' (g := fun _ => C)
-  · exact MeasureTheory.integrableOn_const hfin
-  · exact hmeas.aestronglyMeasurable
-  · exact MeasureTheory.ae_of_all _ (fun x => by rw [Real.norm_eq_abs]; exact hb x)
+  exact Measure.integrableOn_of_bounded hfin hmeas.aestronglyMeasurable
+    (MeasureTheory.ae_of_all _ fun x => by rw [Real.norm_eq_abs]; exact hb x)
 
 /-- **There is a preliminary reparametrization making `E_κ` uniformly close to
 `E_bi`** (blueprint `lem:kappa_error_map_close`, existence form).  For any target

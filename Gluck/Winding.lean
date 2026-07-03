@@ -752,9 +752,8 @@ private theorem Lpart_norm (δ : ℝ) (hδ : 0 < δ) {z : ℂ} (hz : z.re ^ 2 + 
   rw [Lpart, norm_mul, norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one, Complex.norm_real,
     Real.norm_eq_abs, abs_of_pos hδ]
   have hone : ‖(z.re : ℂ) - (z.im : ℂ) * Complex.I‖ = 1 := by
-    rw [Complex.norm_def, show Complex.normSq ((z.re : ℂ) - (z.im : ℂ) * Complex.I)
-        = z.re ^ 2 + z.im ^ 2 by simp [Complex.normSq_apply]; ring, hz]
-    exact Real.sqrt_one
+    rw [sub_eq_add_neg, ← neg_mul, ← Complex.ofReal_neg, Complex.norm_add_mul_I, neg_sq, hz,
+      Real.sqrt_one]
   rw [hone, mul_one]
 
 /-- The key perturbation inequality: on the unit circle, `Vpart` is closer to its
@@ -858,18 +857,16 @@ theorem errorMap_winding_eq_one (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (hab : 
   have hztcs : ∀ t : I, (((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)).re ^ 2
       + (((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)).im ^ 2 = 1 := by
     intro t
-    have h := Complex.normSq_apply (((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ))
-    have h2 := Complex.normSq_eq_norm_sq (((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ))
-    rw [Circle.norm_coe] at h2; rw [h2] at h; nlinarith [h]
+    have h2 := Complex.sq_norm ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)
+    rw [Circle.norm_coe, Complex.normSq_apply] at h2; nlinarith [h2]
   -- nonvanishing of the chord-sum loop and the error map on the sphere
   have hV : ∀ t : I, errVloop δ t ≠ 0 := fun t => Vpart_ne δ hδ hδ' (hztcs t)
   have hbd : ∀ z ∈ Metric.sphere (0 : ℂ) 1, errorMap a b δ z ≠ 0 := by
     intro z hz
     rw [mem_sphere_zero_iff_norm] at hz
     have hcs : z.re ^ 2 + z.im ^ 2 = 1 := by
-      have h := Complex.normSq_apply z
-      have h2 := Complex.normSq_eq_norm_sq z
-      rw [hz] at h2; rw [h2] at h; nlinarith [h]
+      have h2 := Complex.sq_norm z
+      rw [hz, Complex.normSq_apply] at h2; nlinarith [h2]
     rw [errorMap_eq a b δ hδ hδ' (le_of_eq hz)]
     exact mul_ne_zero hs (Vpart_ne δ hδ hδ' hcs)
   refine ⟨continuousOn_errorMap a b δ hδ hδ', hbd, ?_⟩

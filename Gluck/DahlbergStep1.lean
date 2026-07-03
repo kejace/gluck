@@ -288,19 +288,8 @@ Used in the `L¹` estimate of `exists_eta_clean_L1`. (Helper; no separate bluepr
 entry.) -/
 private lemma exists_kappa_bound {κ : ℝ → ℝ} (hcont : Continuous κ)
     (hper : Function.Periodic κ (2 * π)) : ∃ N, ∀ x, |κ x| ≤ N := by
-  obtain ⟨N, hN⟩ :=
-    (isCompact_Icc (a := (0 : ℝ)) (b := 2 * π)).exists_bound_of_continuousOn hcont.continuousOn
-  refine ⟨N, fun x => ?_⟩
-  have hrep : κ x = κ (toIcoMod Real.two_pi_pos 0 x) := by
-    have hx := toIcoMod_add_toIcoDiv_zsmul Real.two_pi_pos 0 x
-    have h2 : κ (toIcoMod Real.two_pi_pos 0 x + toIcoDiv Real.two_pi_pos 0 x • (2 * π))
-        = κ (toIcoMod Real.two_pi_pos 0 x) := hper.zsmul (toIcoDiv Real.two_pi_pos 0 x) _
-    rw [hx] at h2; exact h2
-  rw [hrep]
-  have hmem := toIcoMod_mem_Ico Real.two_pi_pos 0 x
-  have hb := hN (toIcoMod Real.two_pi_pos 0 x)
-    (Set.mem_Icc.mpr ⟨(Set.mem_Ico.mp hmem).1, by linarith [(Set.mem_Ico.mp hmem).2]⟩)
-  simpa [Real.norm_eq_abs] using hb
+  obtain ⟨N, hN⟩ := (hper.isBounded_of_continuous Real.two_pi_pos.ne' hcont).exists_norm_le
+  exact ⟨N, fun x => by simpa [Real.norm_eq_abs] using hN (κ x) (Set.mem_range_self x)⟩
 
 /-- The clean bicircle takes values in `[a, b]` (it is `a` or `b` pointwise).
 Used in the `L¹` estimate of `exists_eta_clean_L1`. (Helper; no separate blueprint

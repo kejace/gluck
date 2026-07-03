@@ -84,9 +84,8 @@ theorem dist_errorVector_le {ρ ρ' : ℝ → ℝ}
     _ = ∫ φ in (0 : ℝ)..(2 * π), |ρ φ - ρ' φ| := by
         refine intervalIntegral.integral_congr ?_
         intro φ _
-        simp only [norm_mul, Complex.norm_real, Real.norm_eq_abs]
-        have h1 : ‖Complex.exp ((φ : ℂ) * Complex.I)‖ = 1 := by simp
-        rw [h1, one_mul]
+        simp only [norm_mul, Complex.norm_exp_ofReal_mul_I, one_mul, Complex.norm_real,
+          Real.norm_eq_abs]
 
 /-- Pointwise modulus of continuity of `κ` at a point `c`: for every `ε > 0`
 there is `η > 0` with `|κ t - κ c| ≤ ε` whenever `|t - c| ≤ η`. Applied at the
