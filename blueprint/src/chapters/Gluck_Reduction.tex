@@ -13,7 +13,7 @@ reconstruction curve closes up.
 \medskip
 
 \noindent\emph{Why a new chapter / file.} The conclusion consumes
-\cref{cor:closing_configuration_exists} from \cref{chap:winding}, which imports
+\cref{thm:existence_of_zero} from \cref{chap:winding}, which imports
 \cref{chap:bicircle} and hence \cref{chap:stepreduction}; so the statement cannot
 live in \texttt{StepReduction.lean} (that would be an import cycle). It is placed
 in a new file \texttt{Reduction.lean} that \texttt{import}s
@@ -21,7 +21,7 @@ in a new file \texttt{Reduction.lean} that \texttt{import}s
 
 \medskip
 
-\noindent\emph{The genuine remaining construction.} \cref{cor:closing_configuration_exists}
+\noindent\emph{The genuine remaining construction.} \cref{thm:existence_of_zero}
 produces a zero of the \emph{bicircle} (step-function) error map
 $\mathrm{errorMap} = E_{\mathrm{bi}}$ --- a closing configuration of the
 two-valued step family --- but \emph{not} a curve realising the original
@@ -169,6 +169,20 @@ exact corner positions on the map itself.)
 \end{proof}
 
 \begin{lemma}
+[Disk smallness of the breakpoint shifts]
+  \label{lem:align_delta_bounds}
+  \lean{Gluck.align_delta_bounds}
+  \uses{def:align_density}
+  For $0<\delta\le\pi/8$ and $\|z\|\le1$, the two varying breakpoint shifts satisfy
+  $\delta\,z.\mathrm{re},\ \delta\,z.\mathrm{im}\in[-\tfrac\pi8,\tfrac\pi8]$.
+\end{lemma}
+\begin{proof}
+  \uses{def:align_density}
+  $|z.\mathrm{re}|,\,|z.\mathrm{im}|\le\|z\|\le1$, so
+  $|\delta\,z.\mathrm{re}|,\,|\delta\,z.\mathrm{im}|\le\delta\le\pi/8$.
+\end{proof}
+
+\begin{lemma}
 [Exact arc integrals]
   \label{lem:align_density_arc_integral}
   \lean{Gluck.alignDensity_arc1, Gluck.alignDensity_arc2, Gluck.alignDensity_arc3,
@@ -176,7 +190,7 @@ exact corner positions on the map itself.)
         Gluck.alignDensity_integral_split, Gluck.clampTent_centered_integral,
         Gluck.clampTent_integral_support, Gluck.clampTent_integral_eq_zero,
         Gluck.clampTent_eq_zero, Gluck.half_le_arccos_cos}
-  \uses{def:align_density}
+  \uses{def:align_density, lem:align_delta_bounds}
   For each arc $k\in\{1,2,3,4\}$, $\int_{\theta_k}^{\theta_{k+1}}w_z=\tfrac\pi2$,
   and hence the full-period integral $\int_{\theta_1}^{\theta_1+2\pi}w_z=2\pi$.
 \end{lemma}
@@ -187,6 +201,108 @@ exact corner positions on the map itself.)
   left half of the node-$\theta_{k+1}$ ramp ($\int=\tfrac\eta2(m_k+V)$); the sum is
   $m_k(L_k-\eta)+\eta V$, which equals $\pi/2$ by the choice of $m_k$ in
   \cref{def:align_density}. Summing the four arcs gives $4\cdot\tfrac\pi2=2\pi$.
+\end{proof}
+
+\section{The generic running-integral reparametrization}
+
+The structural facts about $g_z$ --- the fundamental theorem of calculus,
+continuity, strict monotonicity, quasi-periodicity, and the one-period change of
+variables --- do not depend on the specific calibrated density $w_z$; they hold for
+the running integral of any continuous (and, where needed, strictly positive,
+$2\pi$-periodic) weight. We isolate them once on a generic family
+$\mathrm{integralReparam}$ and let the $g_z$ lemmas delegate to them.
+
+\begin{definition}
+[Running-integral reparametrization]
+  \label{def:integral_reparam}
+  \lean{Gluck.integralReparam}
+  Project-bespoke. For a weight $w:\mathbb R\to\mathbb R$ and an anchor constant
+  $c\in\mathbb R$, define
+  \[
+    \mathrm{integralReparam}\,w\,c \;:\; s \;\longmapsto\; c + \int_0^{s} w(t)\,dt .
+  \]
+\end{definition}
+
+\begin{lemma}
+[FTC derivative of the running integral]
+  \label{lem:has_deriv_integral_reparam}
+  \lean{Gluck.hasDerivAt_integralReparam}
+  \uses{def:integral_reparam}
+  If $w$ is continuous, then $\mathrm{integralReparam}\,w\,c$ is differentiable with
+  $(\mathrm{integralReparam}\,w\,c)'(s) = w(s)$ for every $s$.
+\end{lemma}
+\begin{proof}
+  \uses{def:integral_reparam}
+  By the fundamental theorem of calculus the derivative of the primitive
+  $s\mapsto\int_0^{s}w$ of the continuous integrand $w$ is $w(s)$; adding the
+  constant $c$ does not change the derivative.
+\end{proof}
+
+\begin{lemma}
+[Continuity of the running integral]
+  \label{lem:continuous_integral_reparam}
+  \lean{Gluck.continuous_integralReparam}
+  \uses{def:integral_reparam}
+  If $w$ is continuous, then $\mathrm{integralReparam}\,w\,c$ is continuous.
+\end{lemma}
+\begin{proof}
+  \uses{def:integral_reparam}
+  The primitive of a continuous (hence locally interval-integrable) function is
+  continuous, and adding the constant $c$ preserves continuity.
+\end{proof}
+
+\begin{lemma}
+[Strict monotonicity from a positive density]
+  \label{lem:strict_mono_integral_reparam}
+  \lean{Gluck.strictMono_integralReparam}
+  \uses{def:integral_reparam}
+  If $w$ is continuous and strictly positive everywhere ($0<w(s)$ for all $s$), then
+  $\mathrm{integralReparam}\,w\,c$ is strictly increasing.
+\end{lemma}
+\begin{proof}
+  \uses{def:integral_reparam}
+  For $x<y$,
+  $\mathrm{integralReparam}\,w\,c\,(y)-\mathrm{integralReparam}\,w\,c\,(x)
+  =\int_x^y w>0$, since the integrand is strictly positive on the nondegenerate
+  interval $[x,y]$.
+\end{proof}
+
+\begin{lemma}
+[Quasi-periodicity of the running integral]
+  \label{lem:integral_reparam_add_two_pi}
+  \lean{Gluck.integralReparam_add_two_pi}
+  \uses{def:integral_reparam}
+  If $w$ is continuous, $2\pi$-periodic, with full-period integral
+  $\int_0^{2\pi} w = 2\pi$, then
+  $\mathrm{integralReparam}\,w\,c\,(s+2\pi)=\mathrm{integralReparam}\,w\,c\,(s)+2\pi$.
+\end{lemma}
+\begin{proof}
+  \uses{def:integral_reparam}
+  Split $\int_0^{s+2\pi}=\int_0^{s}+\int_{s}^{s+2\pi}$; by $2\pi$-periodicity of $w$
+  the second integral equals the full-period integral $\int_0^{2\pi} w = 2\pi$.
+\end{proof}
+
+\begin{lemma}
+[Change of variables for the running integral]
+  \label{lem:integral_reparam_change_of_var}
+  \lean{Gluck.integralReparam_changeOfVar}
+  \uses{def:integral_reparam, lem:has_deriv_integral_reparam,
+        lem:continuous_integral_reparam, lem:strict_mono_integral_reparam}
+  For a continuous, strictly-positive weight $w$ and any integrand $G$, writing
+  $g=\mathrm{integralReparam}\,w\,c$,
+  \[
+    \int_{g(0)}^{g(2\pi)} G(x)\,dx \;=\; \int_0^{2\pi} w(x)\,G\bigl(g(x)\bigr)\,dx .
+  \]
+\end{lemma}
+\begin{proof}
+  \uses{lem:has_deriv_integral_reparam, lem:continuous_integral_reparam,
+        lem:strict_mono_integral_reparam}
+  $g$ is strictly monotone (\cref{lem:strict_mono_integral_reparam}), hence
+  injective, and $C^1$ with derivative $w$ (\cref{lem:has_deriv_integral_reparam});
+  being continuous (\cref{lem:continuous_integral_reparam}) and monotone it maps
+  $[0,2\pi]$ onto $[g(0),g(2\pi)]$. The one-dimensional substitution rule
+  $\int_{g(I)}G=\int_I |g'|\,(G\circ g)$ applies, and $|g'|=w>0$ drops the absolute
+  value.
 \end{proof}
 
 \begin{definition}
@@ -219,6 +335,27 @@ exact corner positions on the map itself.)
   slope bound ($1/K\le w_z\le K$; see \cref{def:align_density}).
 \end{definition}
 
+\begin{lemma}
+[$g_z$ is an instance of the generic family]
+  \label{lem:align_reparam_eq}
+  \lean{Gluck.alignReparam_eq}
+  \uses{def:align_reparam, def:integral_reparam, def:align_density}
+  For every $\delta,z$,
+  \[
+    \mathrm{alignReparam}(\delta)(z)
+      = \mathrm{integralReparam}\,(w_z)\,\Bigl(\tfrac\pi2-\int_0^{\theta_1} w_z\Bigr),
+  \]
+  where $\theta_1=\mathrm{alignN1}(\delta)(z)$ is the first configuration breakpoint.
+\end{lemma}
+\begin{proof}
+  \uses{def:align_reparam, def:integral_reparam, def:align_density}
+  By definition $g_z(\theta)=\tfrac\pi2+\int_{\theta_1}^{\theta} w_z$, and
+  $\int_{\theta_1}^{\theta} w_z = \int_0^{\theta} w_z - \int_0^{\theta_1} w_z$, so the
+  anchor $\theta_1$ folds into the additive constant
+  $\tfrac\pi2-\int_0^{\theta_1} w_z$, exhibiting $g_z$ as
+  $\mathrm{integralReparam}\,(w_z)$ at that anchor.
+\end{proof}
+
 These structural properties are recorded as separate Lean lemmas (used by
 \cref{lem:kappa_error_map_continuous} and \cref{lem:kappa_error_map_close}):
 
@@ -247,7 +384,8 @@ These structural properties are recorded as separate Lean lemmas (used by
 [Quasi-periodicity of $g_z$]
   \label{lem:align_reparam_add_two_pi}
   \lean{Gluck.alignReparam_add_two_pi}
-  \uses{def:align_reparam, lem:align_density_arc_integral}
+  \uses{def:align_reparam, lem:align_density_arc_integral,
+        lem:integral_reparam_add_two_pi, lem:align_reparam_eq}
   $g_z(\theta+2\pi)=g_z(\theta)+2\pi$ for all $\theta$.
 \end{lemma}
 \begin{proof}
@@ -265,7 +403,8 @@ These structural properties are recorded as separate Lean lemmas (used by
 [Continuity of $g_z$ in $\theta$]
   \label{lem:continuous_align_reparam}
   \lean{Gluck.continuous_alignReparam}
-  \uses{def:align_reparam, lem:align_density_props}
+  \uses{def:align_reparam, lem:align_density_props,
+        lem:continuous_integral_reparam, lem:align_reparam_eq}
   $g_z$ is continuous for each fixed $\delta,z$.
 \end{lemma}
 \begin{proof}
@@ -303,7 +442,8 @@ These structural properties are recorded as separate Lean lemmas (used by
 [Strict monotonicity of $g_z$ on the disk]
   \label{lem:strict_mono_align_reparam}
   \lean{Gluck.strictMono_alignReparam}
-  \uses{def:align_reparam, lem:align_density_props}
+  \uses{def:align_reparam, lem:align_density_props,
+        lem:strict_mono_integral_reparam, lem:align_reparam_eq}
   For $0<\delta\le\pi/8$ and $\|z\|\le1$, $g_z$ is strictly increasing.
 \end{lemma}
 \begin{proof}
@@ -406,7 +546,8 @@ analytic facts about $g_z$ carry this; both are proved.
 [FTC derivative of $g_z$]
   \label{lem:has_deriv_align_reparam}
   \lean{Gluck.hasDerivAt_alignReparam}
-  \uses{def:align_reparam, lem:align_density_props}
+  \uses{def:align_reparam, lem:align_density_props,
+        lem:has_deriv_integral_reparam, lem:align_reparam_eq}
   $g_z$ is differentiable with $g_z'(\theta)=w_z(\theta)$ for every $\theta$.
 \end{lemma}
 \begin{proof}
@@ -424,7 +565,8 @@ analytic facts about $g_z$ carry this; both are proved.
 [Change of variables through $g_z$]
   \label{lem:align_reparam_change_of_var}
   \lean{Gluck.alignReparam_changeOfVar}
-  \uses{lem:has_deriv_align_reparam, lem:strict_mono_align_reparam}
+  \uses{lem:has_deriv_align_reparam, lem:strict_mono_align_reparam,
+        lem:integral_reparam_change_of_var, lem:align_reparam_eq}
   For any measurable $G$,
   $\int_{[g_z(0),\,g_z(2\pi)]} G
      = \int_{[0,2\pi]} w_z(\theta)\,G(g_z(\theta))\,d\theta$.
@@ -540,13 +682,13 @@ analytic facts about $g_z$ carry this; both are proved.
   \uses{lem:abab_values, lem:exists_preliminary_reparam, def:kappa_error_map,
         lem:kappa_error_map_continuous, lem:kappa_error_map_close,
         lem:exists_reparam_close, lem:error_map_winds_boundary,
-        thm:existence_of_zero, lem:closes_iff}
+        thm:existence_of_zero}
   \textit{Source: DeTurck--Gluck, §6 (robustness of the winding argument).}
   Let $\kappa$ be a curvature function satisfying the four-vertex condition. Then
   there is a reparametrization $h$ of the circle (\texttt{StrictMono},
   \texttt{Continuous}, $h(\theta+2\pi)=h(\theta)+2\pi$) such that $\kappa\circ h$ is
   again a curvature function whose reconstruction weight $\rho = 1/(\kappa\circ h)$
-  has $E(\rho)=0$; so by \cref{lem:closes_iff} the reconstruction curve
+  has $E(\rho)=0$; so by \cref{lem:reconstruct_periodic} the reconstruction curve
   $\alpha_\rho$ closes up. Moreover $h$ is a $C^1$ circle diffeomorphism with
   strictly positive derivative: there is a continuous $v>0$ with
   $h'(\theta)=v(\theta)$ for all $\theta$. This $C^1$ regularity is what lets the
@@ -556,7 +698,7 @@ analytic facts about $g_z$ carry this; both are proved.
 \begin{proof}
   \uses{lem:abab_values, lem:exists_preliminary_reparam, lem:exists_reparam_close,
         lem:kappa_error_map_continuous, lem:kappa_error_map_close,
-        lem:error_map_winds_boundary, thm:existence_of_zero, lem:closes_iff,
+        lem:error_map_winds_boundary, thm:existence_of_zero,
         lem:has_deriv_align_reparam, lem:align_density_props}
         \leanok
   \emph{Step 1 (fix the winding margin).} Fix the configuration-disk radius
@@ -588,7 +730,7 @@ analytic facts about $g_z$ carry this; both are proved.
   $h = h_1\circ g_{z_0}$; then $\kappa\circ h$ is a curvature function (composition
   of a curvature function with orientation-preserving circle homeomorphisms) with
   $E(\mathrm{radius}(\kappa\circ h))=0$, which is the claim. (By
-  \cref{lem:closes_iff} the reconstruction $\alpha_{1/(\kappa\circ h)}$ then closes
+  \cref{lem:reconstruct_periodic} the reconstruction $\alpha_{1/(\kappa\circ h)}$ then closes
   up; reparametrizing back as in \cref{thm:gluck_converse} realizes $\kappa$.)
 
   \emph{$C^1$ regularity of $h$.} Both factors are $C^1$ with strictly positive

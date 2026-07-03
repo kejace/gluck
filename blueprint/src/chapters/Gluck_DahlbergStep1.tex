@@ -113,66 +113,6 @@ two maxima.
   (via the $\mathrm{toIcoMod}$ representative) extends the bound to all of $\mathbb{R}$.
 \end{proof}
 
-\begin{lemma}
-
-\leanok
-[The clean bicircle is the in-tree four-arc step function]
-  \label{lem:clean_bicircle_eq_step}
-  \lean{Gluck.cleanBicircle_eq_stepCurvature}
-  \uses{def:clean_bicircle, def:four_arc_step_function, lem:toIcoMod_pi4_mem_Ioo_iff}
-  For $0<a<b$, the clean bicircle $k_{a,b}$ coincides almost everywhere with the
-  project's four-arc step curvature on the standard breakpoints
-  $\tfrac{\pi}{4},\tfrac{3\pi}{4},\tfrac{5\pi}{4},\tfrac{7\pi}{4}$ with the value
-  pattern $b,a,b,a$ on the four arcs $(\tfrac{\pi}{4},\tfrac{3\pi}{4})$, etc.
-  % NOTE: value pattern is b,a,b,a (NOT a,b,a,b): the in-tree
-  % stepCurvature a b θ₁ θ₂ θ₃ θ₄ is b on [θ₁,θ₂)∪[θ₃,θ₄), so
-  % stepCurvature a b (π/4)(3π/4)(5π/4)(7π/4) = b on (π/4,3π/4)∪(5π/4,7π/4) = k_{a,b}.
-  % The Lean lemma `cleanBicircle a b =ᵐ stepCurvature a b (π/4)(3π/4)(5π/4)(7π/4)`
-  % is TRUE as stated (verified iter-028 vs StepReduction.lean:34). A prior LVB
-  % check (iter-028) flagged it as false by misreading stepCurvature's arg order —
-  % that flag is wrong; do NOT change the Lean to `stepCurvature b a …`.
-  Hence the bicircle closure error vector $E(P)$ of $k_{a,b}$ at a perturbed
-  breakpoint configuration $P$ is exactly the in-tree
-  $\mathrm{errorMap}\,a\,b\,\delta\,z$ (\cref{def:error_map}).
-\end{lemma}
-\begin{proof}
-  \uses{def:clean_bicircle, def:four_arc_step_function, def:error_map, lem:toIcoMod_pi4_mem_Ioo_iff}
-  \leanok
-  Unfold both definitions and compare the value on each of the four arcs. The
-  indicator $f$ has its two value-$1$ arcs at
-  $(\tfrac{\pi}{4},\tfrac{3\pi}{4})$ and $(\tfrac{5\pi}{4},\tfrac{7\pi}{4})$,
-  which are precisely the second and fourth arcs cut out by the standard
-  breakpoints $\tfrac{\pi}{4},\tfrac{3\pi}{4},\tfrac{5\pi}{4},\tfrac{7\pi}{4}$.
-  On those arcs $k_{a,b}=b$; on the complementary two arcs $k_{a,b}=a$. The
-  breakpoints themselves form a measure-zero set, so the two functions agree
-  a.e. The identification of the bicircle error vector with $\mathrm{errorMap}$
-  is then \cref{lem:error_vector_of_bicircle} read at the configuration
-  $\mathrm{configSpace}\,\delta\,(z.\mathrm{re},z.\mathrm{im})$
-  (\cref{def:configuration_space}).
-\end{proof}
-
-\begin{lemma}
-
-\leanok
-[Representative-arc membership for the standard breakpoints]
-  \label{lem:toIcoMod_pi4_mem_Ioo_iff}
-  \lean{Gluck.toIcoMod_pi4_mem_Ioo_iff}
-  Internal helper of \cref{lem:clean_bicircle_eq_step}. For a base arc
-  $(\mathrm{lo},\mathrm{hi})$ inside one period $[\tfrac{\pi}{4},\tfrac{\pi}{4}+2\pi)$,
-  a point $\theta$ lies in some $2\pi$-translate $(\mathrm{lo}+2\pi k,\mathrm{hi}+2\pi k)$
-  iff its canonical representative $\mathrm{toIcoMod}\,(2\pi)\,\tfrac{\pi}{4}\,\theta$
-  lies in $(\mathrm{lo},\mathrm{hi})$.
-\end{lemma}
-\begin{proof}
-
-\leanok
-  Forward: shift by the (unique) period offset using
-  $\texttt{toIcoMod\_add\_zsmul}$ and $\texttt{toIcoMod\_eq\_self}$. Backward:
-  $\theta=\mathrm{toIcoMod}(\theta)+2\pi\cdot\mathrm{toIcoDiv}(\theta)$
-  ($\texttt{toIcoMod\_add\_toIcoDiv\_zsmul}$, $\texttt{zsmul\_eq\_mul}$) exhibits the
-  witnessing translate.
-\end{proof}
-
 \section{Level extraction from the four-vertex condition}
 
 In the positive case the in-tree \cref{lem:abab_values}
@@ -211,6 +151,35 @@ positivity-at-the-maxima hypothesis is used.
   the maxima-positivity clause; the minima $\kappa(q_1),\kappa(q_2)$ may be
   $\le 0$.
 \end{definition}
+
+\begin{lemma}
+[Strictly positive four-vertex curvature is mixed-sign]
+  \label{lem:mixed_sign_four_vertex_of_is_curvature_function}
+  \lean{Gluck.mixedSignFourVertex_of_isCurvatureFunction}
+  \uses{def:is_curvature_function, def:four_vertex_condition, def:mixed_sign_four_vertex}
+  Let $\kappa$ be a curvature function (\cref{def:is_curvature_function}: continuous,
+  $2\pi$-periodic and \emph{strictly positive}) which is non-constant and satisfies
+  the four-vertex condition (\cref{def:four_vertex_condition}). Then $\kappa$
+  satisfies the mixed-sign four-vertex condition
+  (\cref{def:mixed_sign_four_vertex}). In particular the mixed-sign hypothesis
+  subsumes the non-constant strictly-positive case, so the mixed-sign converse
+  applies to every non-constant positive curvature function meeting the four-vertex
+  condition.
+\end{lemma}
+\begin{proof}
+  \uses{def:is_curvature_function, def:four_vertex_condition, def:mixed_sign_four_vertex}
+  Since $\kappa$ is non-constant, the constant branch of the four-vertex condition
+  is excluded, so \cref{def:four_vertex_condition} supplies the four
+  value-separated alternating extrema $p_1<q_1<p_2<q_2<p_1+2\pi$ with $p_1,p_2$
+  local maxima, $q_1,q_2$ local minima, and
+  $\max(\kappa(q_1),\kappa(q_2))<\min(\kappa(p_1),\kappa(p_2))$. These data, together
+  with continuity and $2\pi$-periodicity, are exactly the requirements of the
+  mixed-sign condition except for the extra positivity-at-the-maxima clause
+  $0<\min(\kappa(p_1),\kappa(p_2))$. But that clause is automatic: $\kappa$ is
+  everywhere strictly positive, so $0<\kappa(p_1)$ and $0<\kappa(p_2)$, whence
+  $0<\min(\kappa(p_1),\kappa(p_2))$. Thus $\kappa$ satisfies
+  \cref{def:mixed_sign_four_vertex}.
+\end{proof}
 
 % SOURCE: [Dahlberg], §3, p. 2135, first construction paragraph (read from references/dahlberg.pdf)
 % SOURCE QUOTE: "We need some definitions in order to construct the first
