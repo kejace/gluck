@@ -79,7 +79,8 @@ robust winding argument transfer from $\kappa_0$ to $\kappa$.
 
 % Project-bespoke: elementary unfolding of the step function at the canonical
 % breakpoints; no external source.
-\begin{lemma}[Canonical step-curvature values on the four arcs]
+\begin{lemma}\leanok
+[Canonical step-curvature values on the four arcs]
   \label{lem:step_curvature_canonical_values}
   \lean{Gluck.stepCurvature_canonical_values}
   \uses{def:four_arc_step_function}
@@ -91,6 +92,7 @@ robust winding argument transfer from $\kappa_0$ to $\kappa$.
 \end{lemma}
 \begin{proof}
   \uses{def:four_arc_step_function}
+  \leanok
   Fix $\theta$ in one of the four arcs. Since $0\le\theta<2\pi$, reducing $\theta$
   to its representative in $[0,2\pi)$ leaves it unchanged, so evaluating
   $\kappa_0$ at $\theta$ amounts to deciding which of the two indicator branches
@@ -250,7 +252,8 @@ $<4\delta$. Choosing $\eta,\delta$ small makes this $\varepsilon$-close in measu
 \end{proof}
 
 % Project-bespoke: elementary choice of a common small radius; no external source.
-\begin{lemma}[Existence of a common plateau radius]
+\begin{lemma}\leanok
+[Existence of a common plateau radius]
   \label{lem:exists_plateau_radius}
   \lean{Gluck.exists_plateau_radius}
   Project-bespoke. Given four positive moduli $\eta_1,\eta_2,\eta_3,\eta_4>0$ and
@@ -258,6 +261,8 @@ $<4\delta$. Choosing $\eta,\delta$ small makes this $\varepsilon$-close in measu
   $\eta>0$ with $\eta\le\eta_i$ for every $i$ and $\eta<g_j$ for every $j$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Take $\eta=\tfrac12\min(\eta_1,\eta_2,\eta_3,\eta_4,g_1,g_2,g_3,g_4)$. The
   minimum of finitely many positive numbers is positive, so $\eta>0$. As $\eta$
   is half that minimum it satisfies $\eta\le\min\le\eta_i$ for each $i$ and
@@ -266,7 +271,8 @@ $<4\delta$. Choosing $\eta,\delta$ small makes this $\varepsilon$-close in measu
 \end{proof}
 
 % Project-bespoke: elementary Lebesgue-measure computation; no external source.
-\begin{lemma}[Total measure of the four plateau intervals]
+\begin{lemma}\leanok
+[Total measure of the four plateau intervals]
   \label{lem:plateau_union_measure}
   \lean{Gluck.plateau_union_measure}
   Project-bespoke. For $0<\delta<\pi/2$ the four flanking plateau intervals
@@ -280,6 +286,8 @@ $<4\delta$. Choosing $\eta,\delta$ small makes this $\varepsilon$-close in measu
   sub-arcs, have total Lebesgue measure $2\pi-4\delta$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Since $0<\delta<\pi/2$, the right endpoint of each interval lies strictly below
   the left endpoint of the next (the gap between consecutive intervals is exactly
   $\delta>0$), so the four intervals are pairwise disjoint. Each has length
