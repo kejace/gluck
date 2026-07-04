@@ -2,6 +2,9 @@ import Gluck.Curve
 import Gluck.Curvature
 import Gluck.StepReduction
 import Gluck.Winding
+import Gluck.Simplicity
+import Gluck.Reduction
+import Gluck.FourVertex
 import Mathlib.Analysis.ODE.ExistUnique
 import Mathlib.MeasureTheory.Function.Floor
 import Mathlib.MeasureTheory.Order.Group.Lattice
@@ -4144,6 +4147,153 @@ lemma realizesSphericalCurvature_comp {z : ℝ → ℂ} {μ : ℝ → ℝ} {ψ :
     simp only [Function.comp_apply]
     rw [hφψ, hnorm]
     linear_combination deriv ψ t * h
+
+/-- **Trajectory speed of an admissible closed trajectory.** In the hypothesis
+form of `reconstruction_ode`, the speed `ρ(t) = q_κ(t, z̃(t))` along the
+periodic extension is continuous, `2π`-periodic, and strictly positive — the
+weight data feeding the Euclidean simple-closedness machinery.
+(Blueprint `lem:spherical_trajectory_speed`.) -/
+lemma sphericalTrajectory_speed {κ : ℝ → ℝ} {R δ : ℝ} (hκc : Continuous κ)
+    (hκper : Function.Periodic κ (2 * π)) (hR1 : R < 1) (hδ : 0 < δ) {z : ℝ → ℂ}
+    (hz : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
+      HasDerivWithinAt z (truncatedField κ R δ θ (z θ)) (Set.Icc 0 (2 * π)) θ)
+    (hadm : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖z θ‖ ≤ R ∧
+      δ ≤ κ θ - ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
+    (hclosed : z (2 * π) = z 0) :
+    Continuous (fun t => sphericalSpeed κ t (periodicExtension z t)) ∧
+      Function.Periodic
+        (fun t => sphericalSpeed κ t (periodicExtension z t)) (2 * π) ∧
+      ∀ t, 0 < sphericalSpeed κ t (periodicExtension z t) := by
+  obtain ⟨-, -, -, hZderiv⟩ :=
+    reconstruction_ode hκc hκper hR1 hδ hz hadm hclosed
+  -- extended admissibility along the periodic extension
+  have hadmZ : ∀ t : ℝ, ‖periodicExtension z t‖ ≤ R ∧
+      δ ≤ κ t - ⟪periodicExtension z t,
+        Complex.I * Complex.exp ((t : ℂ) * Complex.I)⟫_ℝ := by
+    intro t
+    have hmem := frac_mem_Ico t
+    have h := hadm _ ⟨hmem.1, hmem.2.le⟩
+    unfold periodicExtension
+    refine ⟨h.1, ?_⟩
+    have hbr := h.2
+    rw [hκper.sub_int_mul_eq, expI_sub_int_mul] at hbr
+    exact hbr
+  have hZdiff : Differentiable ℝ (periodicExtension z) :=
+    fun t => (hZderiv t).differentiableAt
+  have hZc : Continuous (periodicExtension z) := hZdiff.continuous
+  refine ⟨?_, ?_, fun t => ?_⟩
+  · -- continuity: quotient with denominator ≥ 2δ > 0
+    have hexpc : Continuous fun t : ℝ =>
+        Complex.I * Complex.exp ((t : ℂ) * Complex.I) :=
+      continuous_const.mul (Complex.continuous_exp.comp
+        (Complex.continuous_ofReal.mul continuous_const))
+    have hnum : Continuous fun t : ℝ => 1 + ‖periodicExtension z t‖ ^ 2 :=
+      continuous_const.add (hZc.norm.pow 2)
+    have hden : Continuous fun t : ℝ => 2 * (κ t - ⟪periodicExtension z t,
+        Complex.I * Complex.exp ((t : ℂ) * Complex.I)⟫_ℝ) :=
+      continuous_const.mul (hκc.sub (hZc.inner hexpc))
+    unfold sphericalSpeed
+    exact hnum.div hden fun t =>
+      ne_of_gt (by have := (hadmZ t).2; linarith)
+  · -- periodicity: all three inputs are `2π`-periodic
+    intro t
+    change sphericalSpeed κ (t + 2 * π) (periodicExtension z (t + 2 * π))
+      = sphericalSpeed κ t (periodicExtension z t)
+    have h := sphericalSpeed_sub_int_mul hκper 1 (t + 2 * π)
+      (periodicExtension z t)
+    rw [show t + 2 * π - ((1 : ℤ) : ℝ) * (2 * π) = t by push_cast; ring] at h
+    rw [periodicExtension_periodic z t]
+    exact h.symm
+  · -- positivity: numerator ≥ 1, denominator ≥ 2δ
+    have h := (hadmZ t).2
+    unfold sphericalSpeed
+    exact div_pos (by positivity) (by linarith)
+
+/-- **Simplicity is translation-invariant.** Project-local mirror lemma (the
+Euclidean files are frozen): adding a constant to a simple closed curve gives
+a simple closed curve. (Blueprint `lem:is_simple_closed_const_add`.) -/
+lemma isSimpleClosed_const_add {γ : ℝ → ℂ} (hγ : IsSimpleClosed γ) (w : ℂ) :
+    IsSimpleClosed fun t => w + γ t := by
+  obtain ⟨hper, hinj⟩ := hγ
+  refine ⟨fun t => ?_, fun a ha b hb hab => hinj ha hb ?_⟩
+  · change w + γ (t + 2 * π) = w + γ t
+    rw [hper t]
+  · exact add_left_cancel hab
+
+/-- **The closing trajectory is a translated reconstruction curve.** In the
+hypothesis form of `reconstruction_ode`, the periodic extension equals
+`z̃(0) + reconstruct ρ` for the trajectory speed `ρ(t) = q_κ(t, z̃(t))`: both
+sides have derivative `ρ(t)·e^{it}` on all of `ℝ` and agree at `0`.
+(Blueprint `lem:spherical_trajectory_eq_reconstruct`.) -/
+lemma sphericalTrajectory_eq_reconstruct {κ : ℝ → ℝ} {R δ : ℝ}
+    (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π)) (hR1 : R < 1)
+    (hδ : 0 < δ) {z : ℝ → ℂ}
+    (hz : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
+      HasDerivWithinAt z (truncatedField κ R δ θ (z θ)) (Set.Icc 0 (2 * π)) θ)
+    (hadm : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖z θ‖ ≤ R ∧
+      δ ≤ κ θ - ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
+    (hclosed : z (2 * π) = z 0) :
+    ∀ t, periodicExtension z t = periodicExtension z 0
+      + reconstruct (fun s => sphericalSpeed κ s (periodicExtension z s)) t := by
+  obtain ⟨-, -, -, hZderiv⟩ :=
+    reconstruction_ode hκc hκper hR1 hδ hz hadm hclosed
+  obtain ⟨hρc, -, -⟩ :=
+    sphericalTrajectory_speed hκc hκper hR1 hδ hz hadm hclosed
+  set ρ : ℝ → ℝ := fun s => sphericalSpeed κ s (periodicExtension z s) with hρ
+  have h0 : reconstruct ρ 0 = 0 := by
+    unfold reconstruct
+    exact intervalIntegral.integral_same
+  have hdiff : ∀ t, HasDerivAt
+      (fun u => periodicExtension z u - reconstruct ρ u) 0 t := by
+    intro t
+    have h := (hZderiv t).sub (hasDerivAt_reconstruct hρc t)
+    have hval : ρ t • Complex.exp ((t : ℂ) * Complex.I)
+        - Complex.exp ((t : ℂ) * Complex.I) * (ρ t : ℂ) = 0 := by
+      rw [Complex.real_smul]; ring
+    rwa [hval] at h
+  have hconst : ∀ t, periodicExtension z t - reconstruct ρ t
+      = periodicExtension z 0 - reconstruct ρ 0 := fun t =>
+    is_const_of_deriv_eq_zero (fun u => (hdiff u).differentiableAt)
+      (fun u => (hdiff u).deriv) t 0
+  intro t
+  have h := hconst t
+  rw [h0] at h
+  linear_combination h
+
+/-- **Simplicity of the closing trajectory.** In the hypothesis form of
+`reconstruction_ode`, the periodic extension of an admissible closed
+trajectory is a *simple* closed curve: it is a translate of the Euclidean
+reconstruction curve of its (continuous, `2π`-periodic, positive) trajectory
+speed, whose error vector vanishes by closedness, so the Euclidean
+chord-integral machinery (`isSimpleClosed_reconstruct`) applies.
+(Blueprint `lem:spherical_simplicity`.) -/
+lemma spherical_simplicity {κ : ℝ → ℝ} {R δ : ℝ}
+    (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π)) (hR1 : R < 1)
+    (hδ : 0 < δ) {z : ℝ → ℂ}
+    (hz : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
+      HasDerivWithinAt z (truncatedField κ R δ θ (z θ)) (Set.Icc 0 (2 * π)) θ)
+    (hadm : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖z θ‖ ≤ R ∧
+      δ ≤ κ θ - ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
+    (hclosed : z (2 * π) = z 0) :
+    IsSimpleClosed (periodicExtension z) := by
+  obtain ⟨hρc, hρper, hρpos⟩ :=
+    sphericalTrajectory_speed hκc hκper hR1 hδ hz hadm hclosed
+  have heq :=
+    sphericalTrajectory_eq_reconstruct hκc hκper hR1 hδ hz hadm hclosed
+  set ρ : ℝ → ℝ := fun s => sphericalSpeed κ s (periodicExtension z s) with hρ
+  have hE : errorVector ρ = 0 := by
+    have h2 := heq (2 * π)
+    have hp : periodicExtension z (2 * π) = periodicExtension z 0 := by
+      have h := periodicExtension_periodic z 0
+      rwa [zero_add] at h
+    rw [hp] at h2
+    change reconstruct ρ (2 * π) = 0
+    linear_combination -h2
+  have hsimple := isSimpleClosed_reconstruct hρc hρper hρpos hE
+  have hfun : periodicExtension z
+      = fun t => periodicExtension z 0 + reconstruct ρ t := funext heq
+  rw [hfun]
+  exact isSimpleClosed_const_add hsimple _
 
 /-- **Spherical converse, positive stage.** If `κ` satisfies the positive-stage
 spherical four-vertex condition, then there is a simple closed curve `z` confined
