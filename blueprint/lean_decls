@@ -349,6 +349,8 @@ Gluck.truncatedSpeed_continuous
 Gluck.truncatedField
 Gluck.norm_truncatedField
 Gluck.truncatedField_lipschitz
+Gluck.truncatedSpeed_lipschitz_uniform
+Gluck.truncatedField_lipschitz_uniform
 Gluck.truncatedField_continuous
 Gluck.truncatedField_isPicardLindelof
 Gluck.exists_sphericalFlow
@@ -403,9 +405,6 @@ Gluck.sphericalTrajectory_eq_reconstruct
 Gluck.isSimpleClosed_const_add
 Gluck.spherical_simplicity
 Gluck.MixedSignSphereFourVertex
-Gluck.SphericalAdmissibleProfile
 Gluck.exists_step_L1_reparam_relaxed
-Gluck.mixedSphere_margin_transport
 Gluck.mixed_spherical_endpoint_winding
-Gluck.mixed_spherical_simplicity
 Gluck.sphericalConverse

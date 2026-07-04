@@ -77,7 +77,8 @@ and the capstone \cref{thm:spherical_converse}.
 
 \section{Declarations}
 
-\begin{definition}[mixed-sign spherical four-vertex hypothesis]
+\begin{definition}\leanok
+[mixed-sign spherical four-vertex hypothesis]
   \label{def:mixed_sign_sphere_four_vertex}
   \lean{Gluck.MixedSignSphereFourVertex}
   \uses{def:four_vertex_condition, def:sphere_four_vertex}
@@ -112,7 +113,8 @@ and the capstone \cref{thm:spherical_converse}.
   sanity lemma worth stating.)
 \end{definition}
 
-\begin{lemma}[$L^1$ step reparametrization without positivity]
+\begin{lemma}\leanok
+[$L^1$ step reparametrization without positivity]
   \label{lem:step_L1_reparam_relaxed}
   \lean{Gluck.exists_step_L1_reparam_relaxed}
   \uses{lem:step_L1_reparam, def:four_arc_step_function}
@@ -131,6 +133,7 @@ and the capstone \cref{thm:spherical_converse}.
 
 \begin{proof}
   \uses{lem:step_L1_reparam}
+  \leanok
   Constant-shift reduction to the positive-stage lemma; the frozen Euclidean
   plateau engine is applied only to a positive function. Pick
   $M>\max\bigl(0,-\min_{[0,2\pi]}\kappa\bigr)$ (finite by compactness and
@@ -148,7 +151,8 @@ and the capstone \cref{thm:spherical_converse}.
   the pointwise shift identity for \texttt{stepCurvature}.)
 \end{proof}
 
-\begin{lemma}[mixed-sign endpoint winding]
+\begin{lemma}\leanok
+[mixed-sign endpoint winding]
   \label{lem:mixed_spherical_endpoint_winding}
   \lean{Gluck.mixed_spherical_endpoint_winding}
   \uses{def:mixed_sign_sphere_four_vertex, def:spherical_endpoint,
@@ -188,6 +192,7 @@ and the capstone \cref{thm:spherical_converse}.
         thm:existence_of_zero, lem:step_model_transport,
         lem:truncated_field_lipschitz_uniform, lem:winding_conj_loop,
         lem:winding_number_c_perturb}
+        \leanok
   The six-step assembly of the landed positive proof
   (\cref{lem:spherical_endpoint_winding}: Data $\to$ boundary margin $\to$
   reparametrization $\to$ winding $\to$ zero $\to$ admissibility), with a
@@ -251,7 +256,8 @@ and the capstone \cref{thm:spherical_converse}.
   \texttt{maxHeartbeats} budget; \texttt{linarith only [...]}).
 \end{proof}
 
-\begin{theorem}[spherical converse, mixed sign]
+\begin{theorem}\leanok
+[spherical converse, mixed sign]
   \label{thm:spherical_converse}
   \lean{Gluck.sphericalConverse}
   \uses{def:mixed_sign_sphere_four_vertex, def:realizes_spherical_curvature,
@@ -277,6 +283,7 @@ and the capstone \cref{thm:spherical_converse}.
         lem:spherical_simplicity, lem:spherical_circle_realizes,
         lem:realizes_spherical_comp, lem:exists_c1_circle_inverse,
         lem:is_simple_closed_comp, lem:spherical_flow_spec}
+        \leanok
   The landed positive capstone proof (\texttt{sphericalConverse\_pos}, end of
   Sphere.lean) with the mixed winding lemma substituted; every downstream
   ingredient landed sign-agnostic. Split the mixed-sign disjunction. The

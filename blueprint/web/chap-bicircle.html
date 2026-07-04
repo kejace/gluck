@@ -210,9 +210,16 @@
   <ul class="sub-toc-1">
      <li class="">
   <a href="chap-sphere_mixed.html#a0000000030"><span class="toc_ref">14.1</span> <span class="toc_entry">Overview</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-2">
+     <li class="">
+  <a href="chap-sphere_mixed.html#a0000000031"><span class="toc_ref"></span> <span class="toc_entry">Stage-2 prerequisites inside <a href="chap-sphere.html">chapter 13</a> (Sphere.lean).</span></a>
+ </li>
+
+  </ul>
  </li>
 <li class="">
-  <a href="chap-sphere_mixed.html#a0000000031"><span class="toc_ref">14.2</span> <span class="toc_entry">Declarations</span></a>
+  <a href="chap-sphere_mixed.html#a0000000032"><span class="toc_ref">14.2</span> <span class="toc_entry">Declarations</span></a>
  </li>
 
   </ul>
@@ -309,7 +316,7 @@
 
     <a class="icon proof" href="chap-bicircle.html#lem:error_vector_of_bicircle">#</a>
     
-    <a class="icon proof" href="chap-bicircle.html#a0000000064"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-bicircle.html#a0000000065"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -363,13 +370,13 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[Explicit error vector of a bicircle]    <i class="itshape">Source: DeTurck–Gluck, Proposition 9.1 (§9), error-vector formula.</i> With the notation of <a href="chap-bicircle.html#def:bicircle_error_vector">definition 28</a>, </p>
-<div class="displaymath" id="a0000000065">
+<div class="displaymath" id="a0000000066">
   \[  E_{\mathrm{bi}}(a,b,\theta _1,\theta _2,\theta _3,\theta _4) \; =\;  \Bigl(\tfrac {1}{ib} - \tfrac {1}{ia}\Bigr) \Bigl(\bigl[e^{i\theta _2} - e^{i\theta _1}\bigr] + \bigl[e^{i\theta _4} - e^{i\theta _3}\bigr]\Bigr).  \]
 </div>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000064">
+<div class="proof_wrapper" id="a0000000065">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -378,7 +385,7 @@
   </div>
   <div class="proof_content">
   <p> The weight \(\rho _0 = 1/\kappa _0\) is piecewise constant: it equals \(1/b\) on the two arcs \([\theta _1,\theta _2)\) and \([\theta _3,\theta _4)\) and \(1/a\) on the two complementary arcs. Split the integral \(E(\rho _0) = \int _0^{2\pi } e^{i\theta }\rho _0(\theta )\, d\theta \) into the four arcs. On each arc \(\rho _0\) is constant and \(\int _{c}^{d} e^{i\theta }\, d\theta = \frac{1}{i}\bigl(e^{id} - e^{ic}\bigr)\). Summing, </p>
-<div class="displaymath" id="a0000000066">
+<div class="displaymath" id="a0000000067">
   \[  E(\rho _0) = \tfrac {1}{ib}\bigl(e^{i\theta _2}-e^{i\theta _1}\bigr) + \tfrac {1}{ia}\bigl(e^{i\theta _3}-e^{i\theta _2}\bigr) + \tfrac {1}{ib}\bigl(e^{i\theta _4}-e^{i\theta _3}\bigr) + \tfrac {1}{ia}\bigl(e^{i(\theta _1+2\pi )}-e^{i\theta _4}\bigr).  \]
 </div>
 <p> Using \(e^{i(\theta _1+2\pi )} = e^{i\theta _1}\) and collecting the \(1/(ia)\) and \(1/(ib)\) terms, the four \(1/(ia)\) contributions sum to \(\tfrac {1}{ia}\bigl((e^{i\theta _3}-e^{i\theta _2}) + (e^{i\theta _1}-e^{i\theta _4})\bigr) = -\tfrac {1}{ia}\bigl((e^{i\theta _2} - e^{i\theta _1}) + (e^{i\theta _4} - e^{i\theta _3})\bigr)\), while the two \(1/(ib)\) contributions sum to \(\tfrac {1}{ib}\bigl((e^{i\theta _2} - e^{i\theta _1}) + (e^{i\theta _4} - e^{i\theta _3})\bigr)\). Hence the total is exactly \(\bigl(\tfrac {1}{ib} - \tfrac {1}{ia}\bigr)\bigl([e^{i\theta _2} - e^{i\theta _1}] + [e^{i\theta _4} - e^{i\theta _3}]\bigr)\), the stated form. (The source’s \(\bigl(\tfrac {1}{ia} - \tfrac {1}{ib}\bigr)\) is the same up to the overall sign, which only reflects the opposite labelling of the two curvature values on the arcs.) </p>
@@ -400,7 +407,7 @@
 
     <a class="icon proof" href="chap-bicircle.html#lem:integral_cexp_I">#</a>
     
-    <a class="icon proof" href="chap-bicircle.html#a0000000067"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-bicircle.html#a0000000068"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -431,7 +438,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000067">
+<div class="proof_wrapper" id="a0000000068">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -458,7 +465,7 @@
 
     <a class="icon proof" href="chap-bicircle.html#lem:bicircle_arc_integrand_eq">#</a>
     
-    <a class="icon proof" href="chap-bicircle.html#a0000000068"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-bicircle.html#a0000000069"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -509,7 +516,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000068">
+<div class="proof_wrapper" id="a0000000069">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -536,7 +543,7 @@
 
     <a class="icon proof" href="chap-bicircle.html#lem:bicircle_arc_integral">#</a>
     
-    <a class="icon proof" href="chap-bicircle.html#a0000000069"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-bicircle.html#a0000000070"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -589,7 +596,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000069">
+<div class="proof_wrapper" id="a0000000070">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -616,7 +623,7 @@
 
     <a class="icon proof" href="chap-bicircle.html#lem:bicircle_arc_integrable">#</a>
     
-    <a class="icon proof" href="chap-bicircle.html#a0000000070"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-bicircle.html#a0000000071"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -667,7 +674,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000070">
+<div class="proof_wrapper" id="a0000000071">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof

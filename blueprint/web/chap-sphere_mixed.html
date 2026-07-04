@@ -209,9 +209,16 @@
   <ul class="sub-toc-1 active">
      <li class="">
   <a href="chap-sphere_mixed.html#a0000000030"><span class="toc_ref">14.1</span> <span class="toc_entry">Overview</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-2">
+     <li class="">
+  <a href="chap-sphere_mixed.html#a0000000031"><span class="toc_ref"></span> <span class="toc_entry">Stage-2 prerequisites inside <a href="chap-sphere.html">chapter 13</a> (Sphere.lean).</span></a>
+ </li>
+
+  </ul>
  </li>
 <li class="">
-  <a href="chap-sphere_mixed.html#a0000000031"><span class="toc_ref">14.2</span> <span class="toc_entry">Declarations</span></a>
+  <a href="chap-sphere_mixed.html#a0000000032"><span class="toc_ref">14.2</span> <span class="toc_entry">Declarations</span></a>
  </li>
 
   </ul>
@@ -228,24 +235,28 @@
 <h1 id="chap:sphere_mixed">14 Spherical converse, stage 2: mixed-sign curvature</h1>
 
 <h1 id="a0000000030">14.1 Overview</h1>
-<p>Stage 2 removes global positivity from <a href="chap-sphere.html#thm:spherical_converse_pos">theorem 149</a>: the prescribed geodesic curvature \(\kappa \) may be \(\le 0\) on part of the circle, provided the position-dependent admissibility \(\kappa (\theta )-\langle z(\theta ),ie^{i\theta }\rangle {\gt}0\) can be maintained. The pivotal observation (iter-048) is that the <em>entire</em> S2-D winding layer of <a href="chap-sphere.html">chapter 13</a> is sign-agnostic and is reused verbatim: </p>
+<p>Stage 2 removes global positivity from <a href="chap-sphere.html#thm:spherical_converse_pos">theorem 149</a>: the prescribed geodesic curvature \(\kappa \) may be \(\le 0\) on part of the circle, provided the position-dependent admissibility \(\kappa (\theta )-\langle z(\theta ),ie^{i\theta }\rangle {\gt}0\) can be maintained. The pivotal observation (iter-048, sharpened iter-053 against the landed code) is that essentially the <em>entire</em> stage-1 machinery of <a href="chap-sphere.html">chapter 13</a> is already sign-agnostic: </p>
 <ul class="itemize">
-  <li><p>The four-vertex overlap window \(\bigl(\max (\kappa (q_1),\kappa (q_2)),\, \min (\kappa (p_1),\kappa (p_2))\bigr)\) has a <em>positive</em> upper part whenever the two maxima are positive — even when the minima are \(\le 0\). The small-contrast step levels \(a=c-h/2\), \(b=c+h/2\) of <a href="chap-sphere.html#lem:exists_abab_levels">lemma 209</a> are chosen inside that positive part, so the step model, the arc algebra, the first-variation expansion (<a href="chap-sphere.html#lem:step_error_expansion">lemma 205</a>) and the boundary winding are literally the positive-stage objects. </p>
+  <li><p>The four-vertex overlap window \(\bigl(\max (\kappa (q_1),\kappa (q_2)),\, \min (\kappa (p_1),\kappa (p_2))\bigr)\) has a <em>positive</em> upper part whenever the two maxima are positive — even when the minima are \(\le 0\). The small-contrast step levels \(a=c-h/2\), \(b=c+h/2\) are chosen inside that positive part, so the step model, the arc algebra, the first-variation expansion (<a href="chap-sphere.html#lem:step_error_expansion">lemma 207</a>) and the boundary winding are literally the positive-stage objects. <a href="chap-sphere.html#lem:exists_abab_levels">lemma 211</a> landed with hypotheses (Continuous, Periodic) only. </p>
 </li>
-  <li><p>The transport lemmas (<a href="chap-sphere.html#lem:invariant_admissible_arc">lemma 200</a>, <a href="chap-sphere.html#lem:step_model_transport">lemma 203</a>) already take the actual curvature only through a pointwise lower bound \(\kappa \ge \kappa _0\) <em>with no sign assumption on \(\kappa _0\)</em>: the model margin hypothesis \(\langle z^\ast (\theta ),ie^{i\theta }\rangle \le \kappa _0-\delta -\mu \) is exactly the sign-changing admissibility in disguise. Along the near-centered-circle model, \(\langle z^\ast ,ie^{i\theta }\rangle \approx -r^\ast \), so the margin is satisfiable precisely when \(\kappa _0{\gt}-r^\ast \) (up to slack) — the quantitative version of the notes’ “\(\kappa _S{\gt}-R\)” lower range. </p>
+  <li><p>The transport layer (<a href="chap-sphere.html#lem:invariant_admissible_arc">lemma 202</a>, <a href="chap-sphere.html#lem:step_model_transport">lemma 205</a>) takes the curvature only through a pointwise lower bound \(\kappa \ge \kappa _0\) <em>with no sign assumption on \(\kappa _0\)</em>. The margins lemma <a href="chap-sphere.html#lem:step_model_margins">lemma 206</a> is relaxed in place from \(0{\lt}\kappa _0\) to \(-r^\ast (c){\lt}\kappa _0\) (see the re-sign note there: positivity entered its landed proof only through positivity of the slack \(m=\min (1-r^\ast ,\kappa _0+r^\ast )\)) — the quantitative version of the notes’ “\(\kappa _S{\gt}-R\)” lower range. </p>
+</li>
+  <li><p>The whole S2-E chain — <a href="chap-sphere.html#lem:reconstruction_ode">lemma 183</a>, <a href="chap-sphere.html#lem:spherical_trajectory_speed">lemma 216</a>, <a href="chap-sphere.html#lem:spherical_trajectory_eq_reconstruct">lemma 217</a>, <a href="chap-sphere.html#lem:spherical_simplicity">lemma 219</a> — landed in stage 1 with hypotheses (Continuous \(\kappa \), \(2\pi \)-periodic \(\kappa \), admissible closed trajectory) only: trajectory-speed positivity comes from the admissibility margin \(\ge \delta \), never from \(\kappa {\gt}0\). Stage 2 consumes these four declarations verbatim; no variant blocks exist or are needed. </p>
 </li>
 </ul>
-<p>What genuinely changes: (a) the hypothesis package (<a href="chap-sphere_mixed.html#def:mixed_sign_sphere_four_vertex">definition 218</a>); (b) the margins lemma must admit \(\kappa _0\in (-r^\ast ,c]\) instead of \((0,c]\) (<a href="chap-sphere_mixed.html#lem:mixed_sphere_margin_transport">lemma 221</a>); (c) two positive-stage lemmas carry an unused positivity hypothesis (<span class="ttfamily">IsCurvatureFunction</span>) that must not survive into stage 2. For <a href="chap-sphere.html#lem:reconstruction_ode">lemma 181</a> the relaxation to “continuous and \(2\pi \)-periodic” is folded into the stage-1 S2-E re-sign (positivity of the speed comes from the admissibility margin, not from \(\kappa {\gt}0\); see the statement note there) — one declaration serves both stages, no variant block needed. For <a href="chap-sphere.html#lem:step_L1_reparam">lemma 210</a> the Euclidean plateau engine <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 27</a> is frozen with its positive hypothesis, so stage 2 uses the constant-shift reduction <a href="chap-sphere_mixed.html#lem:step_L1_reparam_relaxed">lemma 220</a> below — a genuine (small) new lemma, not an edit to frozen files. </p>
-<h1 id="a0000000031">14.2 Declarations</h1>
+<h4 id="a0000000031">Stage-2 prerequisites inside <a href="chap-sphere.html">chapter 13</a> (Sphere.lean).</h4>
+<p> Two mechanical edits to the completed stage-1 file, both recorded as re-sign / visibility notes in the affected blocks: (i) relax the hypothesis of <a href="chap-sphere.html#lem:step_model_margins">lemma 206</a> from \(0{\lt}\kappa _0\) to \(-r^\ast (c){\lt}\kappa _0\) (sole stage-1 consumer fixed up trivially); (ii) de-privatize <a href="chap-sphere.html#lem:truncated_speed_lipschitz_uniform">lemma 165</a> and <a href="chap-sphere.html#lem:truncated_field_lipschitz_uniform">lemma 166</a> so the mixed assembly can use the same uniform-in-\(\kappa \) Lipschitz witnesses that broke the \(\varepsilon \)/\(L\)/\(h_1\) quantifier circularity in the positive assembly. Everything else in this chapter lives in the new file <span class="ttfamily">Gluck/SphereMixed.lean</span>. The genuinely new Lean surface is: <a href="chap-sphere_mixed.html#def:mixed_sign_sphere_four_vertex">definition 220</a>, <a href="chap-sphere_mixed.html#lem:step_L1_reparam_relaxed">lemma 221</a> (constant-shift reduction; the frozen Euclidean plateau engine <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 27</a> keeps its positive hypothesis), <a href="chap-sphere_mixed.html#lem:mixed_spherical_endpoint_winding">lemma 222</a> (the assembly, mirroring the landed positive proof with a mixed-sign data step), and the capstone <a href="chap-sphere_mixed.html#thm:spherical_converse">theorem 223</a>. </p>
+<h1 id="a0000000032">14.2 Declarations</h1>
 <div class="definition_thmwrapper theorem-style-definition" id="def:mixed_sign_sphere_four_vertex">
   <div class="definition_thmheading">
     <span class="definition_thmcaption">
     Definition
     </span>
-    <span class="definition_thmlabel">218</span>
-    <span class="definition_thmtitle">mixed-sign spherical four-vertex hypothesis</span>
+    <span class="definition_thmlabel">220</span>
     <div class="thm_header_extras">
 
+    
+    ✓
         </div>
     <div class="thm_header_hidden_extras">
 
@@ -297,73 +308,11 @@
         </div>
   </div>
   <div class="definition_thmcontent">
-  <p>    A function \(\kappa :\mathbb R\to \mathbb R\) satisfies the <em>mixed-sign spherical four-vertex hypothesis</em> if it is continuous, \(2\pi \)-periodic, and either constant positive, or has the value-separated alternating extrema of <a href="chap-curvature.html#def:four_vertex_condition">definition 12</a> with both maxima positive (\(\kappa (p_1),\kappa (p_2){\gt}0\)), and moreover for some \(c\) in the positive part of the overlap window (\(\max (0,\kappa (q_1),\kappa (q_2)){\lt}c{\lt}\min (\kappa (p_1),\kappa (p_2))\)) the global lower bound </p>
-<div class="displaymath" id="a0000000306">
+  <p>[mixed-sign spherical four-vertex hypothesis]    A function \(\kappa :\mathbb R\to \mathbb R\) satisfies the <em>mixed-sign spherical four-vertex hypothesis</em> if it is continuous, \(2\pi \)-periodic, and either constant positive, or has the value-separated alternating extrema of <a href="chap-curvature.html#def:four_vertex_condition">definition 12</a> — four points \(p_1{\lt}q_1{\lt}p_2{\lt}q_2{\lt}p_1+2\pi \) with \(p_1,p_2\) local maxima, \(q_1,q_2\) local minima, and \(\max (\kappa (q_1),\kappa (q_2)){\lt}\min (\kappa (p_1),\kappa (p_2))\) — with both maxima positive, and moreover for some \(c\) in the positive part of the overlap window (\(\max \bigl(0,\kappa (q_1),\kappa (q_2)\bigr){\lt}c{\lt}\min (\kappa (p_1),\kappa (p_2))\)) the global lower bound </p>
+<div class="displaymath" id="a0000000309">
   \[  \kappa (\theta )\; {\gt}\; -\bigl(\sqrt{1+c^2}-c\bigr)\qquad \text{for all }\theta  \]
 </div>
-<p> holds. (No global positivity: \(\kappa \) may be \(\le 0\) at and around the minima. The lower bound is the confinement-forcing condition: \(r^\ast (c)= \sqrt{1+c^2}-c\) is the model-circle radius, and \(\kappa {\gt}-r^\ast \) is what keeps the position-dependent denominator \(\kappa -\langle z,ie^{i\theta } \rangle \) positive along trajectories near the model. Compare <span class="ttfamily">MixedSignFourVertex</span> in the Euclidean Dahlberg extension, where the analogous package is positivity at the two maxima only.) </p>
-
-  </div>
-</div>
-<div class="definition_thmwrapper theorem-style-definition" id="def:spherical_admissible_profile">
-  <div class="definition_thmheading">
-    <span class="definition_thmcaption">
-    Definition
-    </span>
-    <span class="definition_thmlabel">219</span>
-    <span class="definition_thmtitle">spherical admissible profile</span>
-    <div class="thm_header_extras">
-
-        </div>
-    <div class="thm_header_hidden_extras">
-
-    <a class="icon proof" href="chap-sphere_mixed.html#def:spherical_admissible_profile">#</a>
-    
-    
-    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
-</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Uses</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-        
-        <ul class="uses">
-          
-          <li><a href="chap-sphere_mixed.html#def:mixed_sign_sphere_four_vertex">Definition 218</a></li>
-          
-        </ul>
-    
-      </div>
-    </div>
-
-    
-    
-    <button class="modal lean">L∃∀N</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Lean declarations</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-        
-        <ul class="uses">
-          
-          <li><a href="/find/#doc/Gluck.SphericalAdmissibleProfile" class="lean_decl">Gluck.SphericalAdmissibleProfile</a></li>
-          
-        </ul>
-    
-      </div>
-    </div>
-
-    
-        </div>
-  </div>
-  <div class="definition_thmcontent">
-  <p>    The compact data package extracted from <a href="chap-sphere_mixed.html#def:mixed_sign_sphere_four_vertex">definition 218</a> that the mixed-sign argument threads through the flow layer: the window midpoint \(c\), the disk radius \(R{\lt}1\), the denominator margin \(\delta {\gt}0\), the transport margin \(\mu {\gt}0\), and the pointwise lower bound \(\kappa _0\in (-r^\ast (c),c]\) with \(\kappa \ge \kappa _0\). (Replaces the positive-stage shortcut \(\kappa _0=\min \kappa {\gt}0\) of <a href="chap-sphere.html#lem:sphere_curvature_lower_bound">lemma 148</a>; it is the stage-2 stand-in the positive-stage docstrings promised.) </p>
+<p> holds. (No global positivity: \(\kappa \) may be \(\le 0\) at and around the minima. The lower bound is the confinement-forcing condition: \(r^\ast (c)=\sqrt{1+c^2}-c\) is the model-circle radius, and \(\kappa {\gt}-r^\ast \) is what keeps the position-dependent denominator \(\kappa -\langle z,ie^{i\theta }\rangle \) positive along trajectories near the model. Compare <span class="ttfamily">MixedSignFourVertex</span> in the Euclidean Dahlberg extension, where the analogous package is positivity at the two maxima only. Lean shape: mirror <span class="ttfamily">SphereFourVertex</span> — a conjunction of Continuous, Periodic, and a disjunction whose non-constant branch bundles the four points, the two <span class="ttfamily">IsLocalMax</span> / two <span class="ttfamily">IsLocalMin</span> facts, the value separation with the extra \(0\) inside the \(\max \), and the existential \(c\) with the window membership and the global lower bound. Note \(\mathrm{SphereFourVertex}\; \kappa \to \mathrm{MixedSignSphereFourVertex}\; \kappa \): for positive \(\kappa \) any window midpoint works since \(-r^\ast {\lt}0{\lt}\kappa \); this implication is a cheap sanity lemma worth stating.) </p>
 
   </div>
 </div>
@@ -372,16 +321,17 @@
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">220</span>
-    <span class="lemma_thmtitle">\(L^1\) step reparametrization without positivity</span>
+    <span class="lemma_thmlabel">221</span>
     <div class="thm_header_extras">
 
+    
+    ✓
         </div>
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="chap-sphere_mixed.html#lem:step_L1_reparam_relaxed">#</a>
     
-    <a class="icon proof" href="chap-sphere_mixed.html#a0000000307"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere_mixed.html#a0000000310"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -397,11 +347,11 @@
         
         <ul class="uses">
           
-          <li><a href="chap-sphere.html#lem:step_L1_reparam">Lemma 210</a></li>
+          <li><a href="chap-sphere.html#lem:step_L1_reparam">Lemma 212</a></li>
           
           <li><a href="chap-stepreduction.html#def:four_arc_step_function">Definition 19</a></li>
           
-          <li><a href="chap-sphere.html#lem:step_L1_reparam">Lemma 210</a></li>
+          <li><a href="chap-sphere.html#lem:step_L1_reparam">Lemma 212</a></li>
           
         </ul>
     
@@ -432,14 +382,14 @@
         </div>
   </div>
   <div class="lemma_thmcontent">
-  <p>    Let \(\kappa \) be continuous and \(2\pi \)-periodic (no positivity), \(0{\lt}a{\lt}b\), and \(\theta _1{\lt}\theta _2{\lt}\theta _3{\lt}\theta _4{\lt}\theta _1+2\pi \) with \(\kappa (\theta _1,\theta _2,\theta _3,\theta _4)=(a,b,a,b)\). For every \(\varepsilon {\gt}0\) there is an orientation-preserving circle reparametrization \(h_1\) (\(\mathrm{StrictMono}\), \(C^1\) with continuous positive derivative, \(h_1(\theta +2\pi )=h_1(\theta )+2\pi \)) such that </p>
-<div class="displaymath" id="a0000000308">
+  <p>[\(L^1\) step reparametrization without positivity]    Let \(\kappa \) be continuous and \(2\pi \)-periodic (no positivity), \(0{\lt}a{\lt}b\), and \(\theta _1{\lt}\theta _2{\lt}\theta _3{\lt}\theta _4{\lt}\theta _1+2\pi \) with \(\kappa (\theta _1,\theta _2,\theta _3,\theta _4)=(a,b,a,b)\). For every \(\varepsilon {\gt}0\) there is an orientation-preserving circle reparametrization \(h_1\) (\(\mathrm{StrictMono}\), continuous, \(C^1\) with continuous positive derivative, \(h_1(\theta +2\pi )=h_1(\theta )+2\pi \)) such that </p>
+<div class="displaymath" id="a0000000311">
   \[  \int _0^{2\pi }\bigl|\kappa (h_1(\theta ))-\kappa ^\ast (\theta )\bigr|\, d\theta \; {\lt}\; \varepsilon , \qquad \kappa ^\ast =\texttt{stepCurvature } b\, a\, 0\, (\pi /2)\, \pi \, (3\pi /2).  \]
 </div>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000307">
+<div class="proof_wrapper" id="a0000000310">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -447,90 +397,7 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p> Constant-shift reduction to the positive-stage lemma; the frozen Euclidean plateau engine is applied only to a positive function. Pick \(M{\gt}\max \bigl(0,-\min _{[0,2\pi ]}\kappa \bigr)\) (finite by compactness and periodicity), so \(\kappa +M\) is a curvature function (continuous, \(2\pi \)-periodic, \({\gt}0\)). The crossing data shifts to \((\kappa +M)(\theta _k)=(a+M,b+M,a+M,b+M)\) with \(0{\lt}a+M{\lt}b+M\), so <a href="chap-sphere.html#lem:step_L1_reparam">lemma 210</a> applied to \(\kappa +M\) with levels \(a+M,b+M\) yields \(h_1\) with \(\int _0^{2\pi }|(\kappa +M)\circ h_1-\kappa ^\ast _M|{\lt}\varepsilon \), where \(\kappa ^\ast _M=\texttt{stepCurvature}\, (b+M)\, (a+M)\, 0\, (\pi /2)\, \pi \,  (3\pi /2)\). Pointwise \(\kappa ^\ast _M=\kappa ^\ast +M\) (the step function takes only the two level values, each shifted by \(M\)), so the integrand equals \(|\kappa \circ h_1-\kappa ^\ast |\) pointwise and the same \(h_1\) witnesses the claim. (\(\sim \)30–60 LOC; the only Lean content beyond the application is the pointwise shift identity for <span class="ttfamily">stepCurvature</span>.) </p>
-
-  </div>
-</div>
-<div class="lemma_thmwrapper theorem-style-plain" id="lem:mixed_sphere_margin_transport">
-  <div class="lemma_thmheading">
-    <span class="lemma_thmcaption">
-    Lemma
-    </span>
-    <span class="lemma_thmlabel">221</span>
-    <span class="lemma_thmtitle">mixed-sign margin transport</span>
-    <div class="thm_header_extras">
-
-        </div>
-    <div class="thm_header_hidden_extras">
-
-    <a class="icon proof" href="chap-sphere_mixed.html#lem:mixed_sphere_margin_transport">#</a>
-    
-    <a class="icon proof" href="chap-sphere_mixed.html#a0000000309"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
-</a>
-    
-    
-    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
-</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Uses</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-        
-        <ul class="uses">
-          
-          <li><a href="chap-sphere_mixed.html#def:spherical_admissible_profile">Definition 219</a></li>
-          
-          <li><a href="chap-sphere.html#lem:invariant_admissible_arc">Lemma 200</a></li>
-          
-          <li><a href="chap-sphere.html#lem:step_model_transport">Lemma 203</a></li>
-          
-          <li><a href="chap-sphere.html#lem:step_model_margins">Lemma 204</a></li>
-          
-        </ul>
-    
-      </div>
-    </div>
-
-    
-    
-    <button class="modal lean">L∃∀N</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Lean declarations</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-        
-        <ul class="uses">
-          
-          <li><a href="/find/#doc/Gluck.mixedSphere_margin_transport" class="lean_decl">Gluck.mixedSphere_margin_transport</a></li>
-          
-        </ul>
-    
-      </div>
-    </div>
-
-    
-        </div>
-  </div>
-  <div class="lemma_thmcontent">
-  <p>    <a href="chap-sphere.html#lem:step_model_margins">Lemma 204</a> holds with the hypothesis \(\kappa _0\in (0,c]\) relaxed to \(\kappa _0\in (-r^\ast (c)+\sigma ,\, c]\) for any slack \(\sigma {\gt}0\) (with margins now depending on \(\sigma \)): explicit \(R{\lt}1\), \(\delta {\gt}0\), \(\mu {\gt}0\), \(\rho _0{\gt}0\), \(h_0{\gt}0\) such that the four quarter arcs of the concatenated step model near the centered circle satisfy \(\| z^\ast \| \le R-\mu \), \(\langle z^\ast (\theta ),ie^{i\theta }\rangle \le \kappa _0-\delta -\mu \), and clamp-inactivity. Consequently <a href="chap-sphere.html#lem:step_model_transport">lemma 203</a> applies to mixed-sign \(\kappa \ge \kappa _0\) unchanged. </p>
-
-  </div>
-</div>
-<div class="proof_wrapper" id="a0000000309">
-  <div class="proof_heading">
-    <span class="proof_caption">
-    Proof
-    </span>
-    <span class="expand-proof">▶</span>
-  </div>
-  <div class="proof_content">
-  <p>Along the centered circle \(\langle z^\ast (\theta ),ie^{i\theta }\rangle \equiv -r^\ast \), so the required margin inequality reads \(-r^\ast \le \kappa _0-\delta -\mu \), i.e. \(\delta +\mu \le \kappa _0+r^\ast \), which has room exactly when \(\kappa _0{\gt}-r^\ast \); take \(\delta +\mu =\sigma /2\), and shrink \(\rho _0,h_0\) by the same Lipschitz-deviation argument as in <a href="chap-sphere.html#lem:step_model_margins">lemma 204</a>. The transport (<a href="chap-sphere.html#lem:invariant_admissible_arc">lemma 200</a>, <a href="chap-sphere.html#lem:step_model_transport">lemma 203</a>) never used \(\kappa _0{\gt}0\). </p>
+  <p> Constant-shift reduction to the positive-stage lemma; the frozen Euclidean plateau engine is applied only to a positive function. Pick \(M{\gt}\max \bigl(0,-\min _{[0,2\pi ]}\kappa \bigr)\) (finite by compactness and periodicity), so \(\kappa +M\) is a curvature function (continuous, \(2\pi \)-periodic, \({\gt}0\)). The crossing data shifts to \((\kappa +M)(\theta _k)=(a+M,b+M,a+M,b+M)\) with \(0{\lt}a+M{\lt}b+M\), so <a href="chap-sphere.html#lem:step_L1_reparam">lemma 212</a> applied to \(\kappa +M\) with levels \(a+M,b+M\) yields \(h_1\) with \(\int _0^{2\pi }|(\kappa +M)\circ h_1-\kappa ^\ast _M|{\lt}\varepsilon \), where \(\kappa ^\ast _M=\texttt{stepCurvature}\, (b+M)\, (a+M)\, 0\, (\pi /2)\, \pi \,  (3\pi /2)\). Pointwise \(\kappa ^\ast _M=\kappa ^\ast +M\) (the step function takes only the two level values, each shifted by \(M\)), so the integrand equals \(|\kappa \circ h_1-\kappa ^\ast |\) pointwise and the same \(h_1\) witnesses the claim. (\(\sim \)30–60 LOC; the only Lean content beyond the application is the pointwise shift identity for <span class="ttfamily">stepCurvature</span>.) </p>
 
   </div>
 </div>
@@ -540,15 +407,16 @@
     Lemma
     </span>
     <span class="lemma_thmlabel">222</span>
-    <span class="lemma_thmtitle">mixed-sign endpoint winding</span>
     <div class="thm_header_extras">
 
+    
+    ✓
         </div>
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="chap-sphere_mixed.html#lem:mixed_spherical_endpoint_winding">#</a>
     
-    <a class="icon proof" href="chap-sphere_mixed.html#a0000000310"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere_mixed.html#a0000000312"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -564,39 +432,49 @@
         
         <ul class="uses">
           
-          <li><a href="chap-sphere.html#def:spherical_endpoint">Definition 173</a></li>
+          <li><a href="chap-sphere_mixed.html#def:mixed_sign_sphere_four_vertex">Definition 220</a></li>
           
-          <li><a href="chap-sphere.html#lem:spherical_endpoint_continuousOn">Lemma 174</a></li>
+          <li><a href="chap-sphere.html#def:spherical_endpoint">Definition 175</a></li>
           
-          <li><a href="chap-sphere.html#def:step_error_map">Definition 197</a></li>
+          <li><a href="chap-sphere.html#lem:spherical_endpoint_continuousOn">Lemma 176</a></li>
           
-          <li><a href="chap-sphere.html#lem:step_model_transport">Lemma 203</a></li>
+          <li><a href="chap-sphere.html#def:step_error_map">Definition 199</a></li>
           
-          <li><a href="chap-sphere_mixed.html#lem:mixed_sphere_margin_transport">Lemma 221</a></li>
+          <li><a href="chap-sphere.html#lem:step_model_transport">Lemma 205</a></li>
           
-          <li><a href="chap-sphere_mixed.html#def:spherical_admissible_profile">Definition 219</a></li>
+          <li><a href="chap-sphere.html#lem:step_model_margins">Lemma 206</a></li>
           
-          <li><a href="chap-sphere.html#lem:step_error_expansion">Lemma 205</a></li>
+          <li><a href="chap-sphere.html#lem:step_error_expansion">Lemma 207</a></li>
           
-          <li><a href="chap-sphere.html#lem:exists_abab_levels">Lemma 209</a></li>
+          <li><a href="chap-sphere.html#lem:exists_abab_levels">Lemma 211</a></li>
           
-          <li><a href="chap-sphere_mixed.html#lem:step_L1_reparam_relaxed">Lemma 220</a></li>
+          <li><a href="chap-sphere_mixed.html#lem:step_L1_reparam_relaxed">Lemma 221</a></li>
           
           <li><a href="chap-winding.html#thm:existence_of_zero">Theorem 57</a></li>
           
-          <li><a href="chap-sphere.html#lem:winding_conj_loop">Lemma 208</a></li>
+          <li><a href="chap-sphere.html#lem:winding_conj_loop">Lemma 210</a></li>
           
           <li><a href="chap-winding.html#lem:winding_number_c_perturb">Lemma 49</a></li>
           
-          <li><a href="chap-sphere_mixed.html#def:mixed_sign_sphere_four_vertex">Definition 218</a></li>
+          <li><a href="chap-sphere.html#lem:truncated_field_lipschitz_uniform">Lemma 166</a></li>
           
-          <li><a href="chap-sphere_mixed.html#lem:mixed_sphere_margin_transport">Lemma 221</a></li>
+          <li><a href="chap-sphere.html#lem:step_model_margins">Lemma 206</a></li>
           
-          <li><a href="chap-sphere_mixed.html#lem:step_L1_reparam_relaxed">Lemma 220</a></li>
+          <li><a href="chap-sphere_mixed.html#lem:step_L1_reparam_relaxed">Lemma 221</a></li>
           
-          <li><a href="chap-sphere.html#lem:step_error_expansion">Lemma 205</a></li>
+          <li><a href="chap-sphere.html#lem:step_error_expansion">Lemma 207</a></li>
+          
+          <li><a href="chap-sphere.html#lem:exists_abab_levels">Lemma 211</a></li>
           
           <li><a href="chap-winding.html#thm:existence_of_zero">Theorem 57</a></li>
+          
+          <li><a href="chap-sphere.html#lem:step_model_transport">Lemma 205</a></li>
+          
+          <li><a href="chap-sphere.html#lem:truncated_field_lipschitz_uniform">Lemma 166</a></li>
+          
+          <li><a href="chap-sphere.html#lem:winding_conj_loop">Lemma 210</a></li>
+          
+          <li><a href="chap-winding.html#lem:winding_number_c_perturb">Lemma 49</a></li>
           
         </ul>
     
@@ -627,11 +505,11 @@
         </div>
   </div>
   <div class="lemma_thmcontent">
-  <p>    Let \(\kappa \) satisfy <a href="chap-sphere_mixed.html#def:mixed_sign_sphere_four_vertex">definition 218</a> and be non-constant. Then there exist \(R{\lt}1\), \(\delta {\gt}0\), a circle reparametrization \(h_1\) and \(z_0\) such that the \((\kappa \circ h_1,R,\delta )\)-truncated trajectory through \(z_0\) is closed and admissible on \([0,2\pi ]\). </p>
+  <p>[mixed-sign endpoint winding]    Let \(\kappa \) be continuous and \(2\pi \)-periodic with the non-constant mixed-sign four-vertex data of <a href="chap-sphere_mixed.html#def:mixed_sign_sphere_four_vertex">definition 220</a>: four points \(p_1{\lt}q_1{\lt}p_2{\lt}q_2{\lt}p_1+2\pi \) with \(\max \bigl(0,\kappa (q_1),\kappa (q_2)\bigr){\lt}c{\lt} \min (\kappa (p_1),\kappa (p_2))\) for some \(c\) satisfying \(\kappa (\theta ){\gt}-r^\ast (c)\) for all \(\theta \), where \(r^\ast (c)=\sqrt{1+c^2}-c\). Then there exist \(R{\lt}1\), \(\delta {\gt}0\), an orientation-preserving circle reparametrization \(h_1\) (\(\mathrm{StrictMono}\), continuous, \(C^1\) with continuous positive derivative witness, \(h_1(\theta +2\pi )=h_1(\theta )+2\pi \)), a radius parameter \(r_0:\mathbb R_{\ge 0}\), and \(z_0\in \overline{B}(0,r_0)\), such that the trajectory of the \((\kappa \circ h_1,R,\delta )\)-truncated flow through \(z_0\) is <em>closed</em> (\(\Phi (z_0,2\pi )=z_0\)) and <em>admissible</em> on \([0,2\pi ]\): \(\| z(\theta )\| \le R\) and \((\kappa \circ h_1)(\theta )-\langle z(\theta ),ie^{i\theta }\rangle \ge \delta \). (The Lean statement mirrors the landed <span class="ttfamily">Gluck.spherical_endpoint_winding</span> conclusion verbatim — including the derivative-witness conjunct for \(h_1\) and the quantified \(r_0\) with \(z_0\in \overline{B}(0,r_0)\) — and takes the destructured hypothesis data: continuity, periodicity, the four ordered points, and the existential-\(c\) clause. The capstone destructures the definition itself.) </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000310">
+<div class="proof_wrapper" id="a0000000312">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -639,102 +517,11 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p> The same six-step assembly as the proof of the positive-stage <a href="chap-sphere.html#lem:spherical_endpoint_winding">lemma 211</a> (Data \(\to \) boundary margin \(\to \) reparametrization \(\to \) winding \(\to \) zero \(\to \) admissibility), rebuilt from the sign-agnostic components rather than by invoking the positive wrapper (whose hypothesis <a href="chap-sphere.html#def:sphere_four_vertex">definition 147</a> we do not have). Two substitutions: the margins come from <a href="chap-sphere_mixed.html#lem:mixed_sphere_margin_transport">lemma 221</a> (with \(\kappa _0\) the mixed-sign lower bound of <a href="chap-sphere_mixed.html#def:spherical_admissible_profile">definition 219</a> instead of \(\min \kappa {\gt}0\)), and the \(L^1\) reparametrization is <a href="chap-sphere_mixed.html#lem:step_L1_reparam_relaxed">lemma 220</a> (continuity and periodicity of \(\kappa \) suffice; the step levels \(a,b\) are chosen in the <em>positive</em> part of the window, so the target step is the same positive-stage object and <a href="chap-sphere.html#lem:step_error_expansion">lemma 205</a> applies unchanged). All other ingredients (<a href="chap-sphere.html#def:spherical_endpoint">definition 173</a>, <a href="chap-sphere.html#lem:spherical_endpoint_continuousOn">lemma 174</a>, <a href="chap-sphere.html#lem:step_model_transport">lemma 203</a>, <a href="chap-sphere.html#lem:winding_conj_loop">lemma 208</a>, <a href="chap-winding.html#lem:winding_number_c_perturb">lemma 49</a>, <a href="chap-winding.html#thm:existence_of_zero">theorem 57</a>) are already sign-agnostic and are consumed verbatim. </p>
-
-  </div>
-</div>
-<div class="lemma_thmwrapper theorem-style-plain" id="lem:mixed_spherical_simplicity">
-  <div class="lemma_thmheading">
-    <span class="lemma_thmcaption">
-    Lemma
-    </span>
-    <span class="lemma_thmlabel">223</span>
-    <span class="lemma_thmtitle">mixed-sign simplicity</span>
-    <div class="thm_header_extras">
-
-        </div>
-    <div class="thm_header_hidden_extras">
-
-    <a class="icon proof" href="chap-sphere_mixed.html#lem:mixed_spherical_simplicity">#</a>
-    
-    <a class="icon proof" href="chap-sphere_mixed.html#a0000000311"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
-</a>
-    
-    
-    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
-</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Uses</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-        
-        <ul class="uses">
-          
-          <li><a href="chap-sphere_mixed.html#lem:mixed_spherical_endpoint_winding">Lemma 222</a></li>
-          
-          <li><a href="chap-sphere.html#lem:reconstruction_ode">Lemma 181</a></li>
-          
-          <li><a href="chap-sphere.html#lem:spherical_trajectory_speed">Lemma 214</a></li>
-          
-          <li><a href="chap-sphere.html#lem:spherical_trajectory_eq_reconstruct">Lemma 215</a></li>
-          
-          <li><a href="chap-sphere.html#lem:is_simple_closed_const_add">Lemma 216</a></li>
-          
-          <li><a href="chap-simplicity.html#cor:positive_curvature_implies_simple">Corollary 86</a></li>
-          
-          <li><a href="chap-closure.html#def:error_vector">Definition 18</a></li>
-          
-          <li><a href="chap-sphere.html#lem:spherical_trajectory_eq_reconstruct">Lemma 215</a></li>
-          
-          <li><a href="chap-sphere.html#lem:is_simple_closed_const_add">Lemma 216</a></li>
-          
-          <li><a href="chap-simplicity.html#cor:positive_curvature_implies_simple">Corollary 86</a></li>
-          
-        </ul>
-    
-      </div>
-    </div>
-
-    
-    
-    <button class="modal lean">L∃∀N</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Lean declarations</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-        
-        <ul class="uses">
-          
-          <li><a href="/find/#doc/Gluck.mixed_spherical_simplicity" class="lean_decl">Gluck.mixed_spherical_simplicity</a></li>
-          
-        </ul>
-    
-      </div>
-    </div>
-
-    
-        </div>
-  </div>
-  <div class="lemma_thmcontent">
-  <p>    The closed admissible mixed-sign trajectory of <a href="chap-sphere_mixed.html#lem:mixed_spherical_endpoint_winding">lemma 222</a> (periodically extended) is simple. </p>
-
-  </div>
-</div>
-<div class="proof_wrapper" id="a0000000311">
-  <div class="proof_heading">
-    <span class="proof_caption">
-    Proof
-    </span>
-    <span class="expand-proof">▶</span>
-  </div>
-  <div class="proof_content">
-  <p> The S2-E chain verbatim, through the relaxed (post-re-sign) <a href="chap-sphere.html#lem:reconstruction_ode">lemma 181</a>: the exposed derivative conjunct gives \(\tilde z'=\rho (t)e^{it}\) with trajectory speed \(\rho (t)=q_{\kappa \circ h_1}(t,\tilde z(t))\) continuous, \(2\pi \)-periodic and \({\gt}0\) — positivity from the admissibility margin (denominator \(\ge 2\delta \)), the sign of \(\kappa \) irrelevant, exactly as in <a href="chap-sphere.html#lem:spherical_trajectory_speed">lemma 214</a> whose proof never consumes \(\kappa {\gt}0\). Then <a href="chap-sphere.html#lem:spherical_trajectory_eq_reconstruct">lemma 215</a> identifies \(\tilde z\) with \(\tilde z(0)+\mathrm{reconstruct}\, \rho \), closure kills the error vector, <a href="chap-simplicity.html#cor:positive_curvature_implies_simple">corollary 86</a> (public <span class="ttfamily">isSimpleClosed_reconstruct</span>) gives simplicity of \(\mathrm{reconstruct}\, \rho \), and <a href="chap-sphere.html#lem:is_simple_closed_const_add">lemma 216</a> transfers it to \(\tilde z\). At stage-2 dispatch time the two trajectory lemmas should be stated (or generalized in place) with the relaxed hypothesis so the same Lean declarations serve both stages; if they land positive-only in S2-E, stage 2 re-signs them the same way as <a href="chap-sphere.html#lem:reconstruction_ode">lemma 181</a>. </p>
+  <p> The six-step assembly of the landed positive proof (<a href="chap-sphere.html#lem:spherical_endpoint_winding">lemma 213</a>: Data \(\to \) boundary margin \(\to \) reparametrization \(\to \) winding \(\to \) zero \(\to \) admissibility), with a mixed-sign Data step and two substitutions; every later step consumes the curvature only through \(\kappa \ge \kappa _0\), the margins package, and the \(L^1\) bound, so it transfers verbatim. </p>
+<p><em>Data (mixed).</em> The window value \(c\) is given by hypothesis (not the window midpoint, which may be \(\le 0\) in the mixed regime). Let \(\kappa _0=\min _{[0,2\pi ]}\kappa \) (attained by compactness; by \(2\pi \)-periodicity \(\kappa \ge \kappa _0\) globally); the hypothesis gives \(\kappa _0{\gt}-r^\ast (c)\). Let \(w=\min \bigl(c-\max (0,\kappa (q_1),\kappa (q_2)),\,  \min (\kappa (p_1),\kappa (p_2))-c\bigr){\gt}0\) be the distance from \(c\) to the ends of the positive window part. The relaxed <a href="chap-sphere.html#lem:step_model_margins">lemma 206</a> at \((c,\kappa _0)\) — this is where the stage-2 re-sign is consumed — fixes \(R,\delta ,\mu ,\rho _0,h_0\); <a href="chap-sphere.html#lem:step_error_expansion">lemma 207</a> at \(c\) fixes \(\rho _1,\bar h,C,\eta \) (unchanged: the expansion is a statement about the step model at positive levels near \(c{\gt}0\), blind to \(\kappa \)). Choose \(\rho =\min \bigl(\rho _0,\rho _1,\tfrac {\eta }{4C}\bigr)\), then \(h=\min \bigl(h_0,\bar h,\tfrac {\eta \rho }{4C},w\bigr)\), and set \(a=c-h/2\), \(b=c+h/2\): then \(0\le \max (0,\kappa (q_1),\kappa (q_2)){\lt}a{\lt}b{\lt}\min (\kappa (p_1),\kappa (p_2))\), so the levels are <em>positive</em> and interior to the window — the step model is the positive-stage object even though \(\kappa \) is not positive. </p>
+<p><em>Boundary margin of the model.</em> Verbatim: on \(\| z_0-z_0^\ast \| =\rho \), <a href="chap-sphere.html#lem:step_error_expansion">lemma 207</a> gives \(\| E^\ast _{a,b}(z_0)+\eta h\overline{(z_0-z_0^\ast )}\| \le Ch(\rho ^2+h)\le \tfrac {\eta h\rho }{2}\), so \(\| E^\ast _{a,b}\| \ge \tfrac {\eta h\rho }{2}\) there. </p>
+<p><em>Reparametrization.</em> <a href="chap-sphere.html#lem:exists_abab_levels">lemma 211</a> (continuity and periodicity suffice) supplies the \((a,b,a,b)\) crossing data at \(a{\gt}\max (\kappa (q_1),\kappa (q_2))\), \(b{\lt}\min (\kappa (p_1),\kappa (p_2))\); <a href="chap-sphere_mixed.html#lem:step_L1_reparam_relaxed">lemma 221</a> — the second substitution — supplies \(h_1\) with \(\int _0^{2\pi }|\kappa \circ h_1-\kappa ^\ast |{\lt}\varepsilon \), where \(\varepsilon {\gt}0\) is chosen with \(e^{2\pi L}M\varepsilon \le \min \bigl(\mu ,\tfrac {\eta h\rho }{8}\bigr)\), \(L\) the uniform-in-\(\kappa \) Lipschitz witness of <a href="chap-sphere.html#lem:truncated_field_lipschitz_uniform">lemma 166</a> (de-privatized for exactly this use) and \(M=\tfrac {1+R^2}{2\delta ^2}\). Note \(\kappa \circ h_1\) is continuous, \(2\pi \)-periodic, and \(\ge \kappa _0\) (a global bound survives composition). </p>
+<p><em>Winding, zero, admissibility.</em> Verbatim from the positive assembly: the master estimate (margins from the relaxed <a href="chap-sphere.html#lem:step_model_margins">lemma 206</a>, transport <a href="chap-sphere.html#lem:step_model_transport">lemma 205</a>, expansion) makes the endpoint loop over \(\| z_0-z_0^\ast \| =\rho \) a \({}{\lt}\eta h\rho \) perturbation of the conjugate loop of winding \(-1\) (<a href="chap-sphere.html#lem:winding_conj_loop">lemma 210</a>); <a href="chap-winding.html#lem:winding_number_c_perturb">lemma 49</a> and <a href="chap-winding.html#thm:existence_of_zero">theorem 57</a> give an interior zero \(z_0\) of the endpoint map (<a href="chap-sphere.html#def:spherical_endpoint">definition 175</a>, continuity by <a href="chap-sphere.html#lem:spherical_endpoint_continuousOn">lemma 176</a>), i.e. a closed trajectory; the master estimate at that \(z_0\) gives admissibility on \([0,2\pi ]\). Take \(r_0=(r^\ast +\rho )^{+}\) as in the landed positive statement, covering the boundary disk and the produced zero. Elaboration hazards and the quantifier order are exactly those recorded at <a href="chap-sphere.html#lem:spherical_endpoint_winding">lemma 213</a> (uniform-\(L\) first, \(\rho \) before \(h\) before \(\varepsilon \); <span class="ttfamily">maxHeartbeats</span> budget; <span class="ttfamily">linarith only [...]</span>). </p>
 
   </div>
 </div>
@@ -743,16 +530,17 @@
     <span class="theorem_thmcaption">
     Theorem
     </span>
-    <span class="theorem_thmlabel">224</span>
-    <span class="theorem_thmtitle">spherical converse, mixed sign</span>
+    <span class="theorem_thmlabel">223</span>
     <div class="thm_header_extras">
 
+    
+    ✓
         </div>
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="chap-sphere_mixed.html#thm:spherical_converse">#</a>
     
-    <a class="icon proof" href="chap-sphere_mixed.html#a0000000312"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere_mixed.html#a0000000313"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -768,19 +556,35 @@
         
         <ul class="uses">
           
-          <li><a href="chap-sphere_mixed.html#def:mixed_sign_sphere_four_vertex">Definition 218</a></li>
+          <li><a href="chap-sphere_mixed.html#def:mixed_sign_sphere_four_vertex">Definition 220</a></li>
           
           <li><a href="chap-sphere.html#def:realizes_spherical_curvature">Definition 146</a></li>
           
           <li><a href="chap-sphere_mixed.html#lem:mixed_spherical_endpoint_winding">Lemma 222</a></li>
           
-          <li><a href="chap-sphere_mixed.html#lem:mixed_spherical_simplicity">Lemma 223</a></li>
+          <li><a href="chap-sphere.html#lem:reconstruction_ode">Lemma 183</a></li>
           
-          <li><a href="chap-sphere.html#lem:reconstruction_ode">Lemma 181</a></li>
+          <li><a href="chap-sphere.html#lem:spherical_simplicity">Lemma 219</a></li>
           
-          <li><a href="chap-sphere.html#lem:realizes_spherical_comp">Lemma 213</a></li>
+          <li><a href="chap-sphere.html#lem:realizes_spherical_comp">Lemma 215</a></li>
           
-          <li><a href="chap-sphere.html#lem:spherical_circle_realizes">Lemma 212</a></li>
+          <li><a href="chap-sphere.html#lem:spherical_circle_realizes">Lemma 214</a></li>
+          
+          <li><a href="chap-sphere_mixed.html#lem:mixed_spherical_endpoint_winding">Lemma 222</a></li>
+          
+          <li><a href="chap-sphere.html#lem:reconstruction_ode">Lemma 183</a></li>
+          
+          <li><a href="chap-sphere.html#lem:spherical_simplicity">Lemma 219</a></li>
+          
+          <li><a href="chap-sphere.html#lem:spherical_circle_realizes">Lemma 214</a></li>
+          
+          <li><a href="chap-sphere.html#lem:realizes_spherical_comp">Lemma 215</a></li>
+          
+          <li><a href="chap-fourvertex.html#lem:exists_c1_circle_inverse">Lemma 91</a></li>
+          
+          <li><a href="chap-fourvertex.html#lem:is_simple_closed_comp">Lemma 90</a></li>
+          
+          <li><a href="chap-sphere.html#lem:spherical_flow_spec">Lemma 171</a></li>
           
         </ul>
     
@@ -811,14 +615,15 @@
         </div>
   </div>
   <div class="theorem_thmcontent">
-  <p>    If \(\kappa \) satisfies the mixed-sign spherical four-vertex hypothesis (<a href="chap-sphere_mixed.html#def:mixed_sign_sphere_four_vertex">definition 218</a>), then there is a simple closed curve \(z\) confined to the open disk realizing \(\kappa \) as its spherical geodesic curvature: </p>
-<div class="displaymath" id="a0000000313">
+  <p>[spherical converse, mixed sign]    If \(\kappa \) satisfies the mixed-sign spherical four-vertex hypothesis (<a href="chap-sphere_mixed.html#def:mixed_sign_sphere_four_vertex">definition 220</a>), then there is a simple closed curve \(z\) confined to the open disk realizing \(\kappa \) as its spherical geodesic curvature: </p>
+<div class="displaymath" id="a0000000314">
   \[  \texttt{MixedSignSphereFourVertex }\kappa \; \Longrightarrow \;  \exists \, z,\  \texttt{IsSimpleClosed }z\  \wedge  \texttt{RealizesSphericalCurvature }z\, \kappa .  \]
 </div>
+<p> This subsumes <a href="chap-sphere.html#thm:spherical_converse_pos">theorem 149</a> (positive \(\kappa \) satisfies the mixed hypothesis trivially) and is the S² analogue of the Euclidean <span class="ttfamily">dahlbergConverse</span>. </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000312">
+<div class="proof_wrapper" id="a0000000313">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -826,7 +631,7 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p>Same assembly as <a href="chap-sphere.html#thm:spherical_converse_pos">theorem 149</a>: constant branch by the centered circle (<a href="chap-sphere.html#lem:spherical_circle_realizes">lemma 212</a>; the constant is positive by hypothesis); non-constant branch by <a href="chap-sphere_mixed.html#lem:mixed_spherical_endpoint_winding">lemma 222</a>, truncation removal by the relaxed-hypothesis variant of <a href="chap-sphere.html#lem:reconstruction_ode">lemma 181</a> (speed positivity from the admissibility margin \(\delta \), not from \(\kappa {\gt}0\)), pullback along \(h_1^{-1}\) by <a href="chap-sphere.html#lem:realizes_spherical_comp">lemma 213</a>, and simplicity by <a href="chap-sphere_mixed.html#lem:mixed_spherical_simplicity">lemma 223</a>. </p>
+  <p> The landed positive capstone proof (<span class="ttfamily">sphericalConverse_pos</span>, end of Sphere.lean) with the mixed winding lemma substituted; every downstream ingredient landed sign-agnostic. Split the mixed-sign disjunction. The <em>constant</em> branch is constant <em>positive</em> by hypothesis: <a href="chap-sphere.html#lem:spherical_circle_realizes">lemma 214</a> plus <span class="ttfamily">funext</span>, no flow machinery. For the non-constant branch: <a href="chap-sphere_mixed.html#lem:mixed_spherical_endpoint_winding">lemma 222</a> supplies \(R{\lt}1\), \(\delta {\gt}0\), \(h_1\) (with derivative witness), and a closed admissible trajectory of the \((\kappa \circ h_1,R,\delta )\)-truncated flow; the flow specification (<a href="chap-sphere.html#lem:spherical_flow_spec">lemma 171</a>) turns the flow value into the \(\mathrm{HasDerivWithinAt}\) trajectory hypotheses; <a href="chap-sphere.html#lem:reconstruction_ode">lemma 183</a> (hypotheses: \(\kappa \circ h_1\) continuous and \(2\pi \)-periodic — exactly what the mixed data gives; positivity of the speed comes from the admissibility margin \(\delta \)) upgrades the periodic extension to a closed \(C^1\) curve confined to \(\{ |z|\le R\} \subset \{ |z|{\lt}1\} \) realizing \(\kappa \circ h_1\) in the gauge \(\varphi (\theta )=\theta \), and <a href="chap-sphere.html#lem:spherical_simplicity">lemma 219</a> makes it simple. Pull back along \(\psi =h_1^{-1}\) from <a href="chap-fourvertex.html#lem:exists_c1_circle_inverse">lemma 91</a> (\(C^1\) from the \(1/v(H\, t)\) derivative): <a href="chap-sphere.html#lem:realizes_spherical_comp">lemma 215</a> transfers realization with \((\kappa \circ h_1)\circ H=\kappa \) by the left-inverse identity, and <a href="chap-fourvertex.html#lem:is_simple_closed_comp">lemma 90</a> transfers simplicity. </p>
 
   </div>
 </div>

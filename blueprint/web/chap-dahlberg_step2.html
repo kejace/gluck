@@ -210,9 +210,16 @@
   <ul class="sub-toc-1">
      <li class="">
   <a href="chap-sphere_mixed.html#a0000000030"><span class="toc_ref">14.1</span> <span class="toc_entry">Overview</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-2">
+     <li class="">
+  <a href="chap-sphere_mixed.html#a0000000031"><span class="toc_ref"></span> <span class="toc_entry">Stage-2 prerequisites inside <a href="chap-sphere.html">chapter 13</a> (Sphere.lean).</span></a>
+ </li>
+
+  </ul>
  </li>
 <li class="">
-  <a href="chap-sphere_mixed.html#a0000000031"><span class="toc_ref">14.2</span> <span class="toc_entry">Declarations</span></a>
+  <a href="chap-sphere_mixed.html#a0000000032"><span class="toc_ref">14.2</span> <span class="toc_entry">Declarations</span></a>
  </li>
 
   </ul>
@@ -347,19 +354,19 @@
   </div>
   <div class="definition_thmcontent">
   <p>[Closing reparametrisation family — node-placing arc-length reparam]    Fix \(0{\lt}a{\lt}b\) and \(0{\lt}\delta \le \pi /8\). For \(z\in \overline{\mathbb {D}}\) write the configuration nodes </p>
-<div class="displaymath" id="a0000000162">
+<div class="displaymath" id="a0000000163">
   \[  (\theta _1,\theta _2,\theta _3,\theta _4)=\mathrm{configSpace}\, \delta \, (z.\mathrm{re},z.\mathrm{im}) =\bigl(\tfrac {\pi }{4}+\delta z.\mathrm{re},\, \tfrac {3\pi }{4}+\delta z.\mathrm{im},\, \tfrac {5\pi }{4},\, \tfrac {7\pi }{4}\bigr),  \]
 </div>
 <p> with \(\theta _0=0\), \(\theta _5=2\pi \), and let the five <em>cumulative-angle</em> increments and clean-curvature values be </p>
-<div class="displaymath" id="a0000000163">
+<div class="displaymath" id="a0000000164">
   \[  \Delta _j=\theta _j-\theta _{j-1}\quad (j=1,\dots ,5),\qquad (\hat\kappa _1,\dots ,\hat\kappa _5)=(a,b,a,b,a),  \]
 </div>
 <p> matching the five-arc value pattern of <a href="chap-bicircle.html#lem:error_vector_of_bicircle">lemma 29</a> (and of \(k_{a,b}=a(1-f)+bf\), <a href="chap-dahlberg_step1.html#def:clean_bicircle">definition 110</a>). Put </p>
-<div class="displaymath" id="a0000000164">
+<div class="displaymath" id="a0000000165">
   \[  \lambda (z)=\frac1{2\pi }\sum _{j=1}^5\frac{\Delta _j}{\hat\kappa _j} =\frac1{2\pi }\Bigl(\frac{\pi +\delta (z.\mathrm{re}-z.\mathrm{im})}{a} +\frac{\pi +\delta (z.\mathrm{im}-z.\mathrm{re})}{b}\Bigr){\gt}0, \qquad L_j(z)=\frac{\Delta _j}{\lambda (z)\, \hat\kappa _j}{\gt}0,  \]
 </div>
 <p> so that \(\sum _{j=1}^5 L_j(z)=2\pi \) (the two value-\(a\) end arcs \(\Delta _1,\Delta _5\) contribute to the same \(1/a\) term). Let the canonical clean-bicircle breakpoints be \(c_0=0\), \(c_1=\tfrac {\pi }{4}\), \(c_2=\tfrac {3\pi }{4}\), \(c_3=\tfrac {5\pi }{4}\), \(c_4=\tfrac {7\pi }{4}\), \(c_5=2\pi \) (the FIXED jump points of \(k_{a,b}\), with arc widths \(w_j=c_j-c_{j-1}\) equal to \(\tfrac {\pi }{4},\tfrac {\pi }{2},\tfrac {\pi }{2},\tfrac {\pi }{2},\tfrac {\pi }{4}\) and values \(a,b,a,b,a\)). Define \(g_z=\mathrm{closingFamily}\, a\, b\, \delta \, z:\mathbb {R}\to \mathbb {R}\) to be the \(C^1\) orientation-preserving circle reparametrisation (\(g_z(s+2\pi )=g_z(s)+2\pi \), \(g_z'{\gt}0\), jointly continuous in \((z,s)\), \(g_z(0)=0\)) that maps the \(j\)-th <em>arc-length</em> interval \([s_{j-1},s_j]\) (\(s_j=\sum _{k\le j}L_k(z)\), so \(s_0=0\), \(s_5=2\pi \)) onto the \(j\)-th canonical clean-bicircle arc \([c_{j-1},c_j]\). Concretely \(g_z(s)=\int _0^s w_z(u)\, du\) is the running integral of a continuous positive \(2\pi \)-periodic density built as a constant <em>baseline</em> plus five <em>calibrated clamped-tent pulses</em>, one centred on each arc-length interval: </p>
-<div class="displaymath" id="a0000000165">
+<div class="displaymath" id="a0000000166">
   \[  w_z=m+\sum _{j=1}^5 h_j\, T_j,\qquad m=\mathrm{closingBase}=\tfrac {\lambda (z)\, a}{2}, \quad \eta =\mathrm{closingRamp}=\tfrac {\pi a}{20(a+b)},  \]
 </div>
 <p> where \(T_j=\mathrm{clampTent}\, \eta \, L_j\, C_j\) is the unit-height trapezoidal clamped tent centred on the arc midpoint \(C_j=s_{j-1}+L_j/2\), with one-period support window \([s_{j-1},s_j]\) (the full arc, width \(L_j\); value \(0\) at the endpoints), ramp intervals of width \(\eta \) at each end, plateau \([s_{j-1}+\eta ,\, s_j-\eta ]\) of width \(L_j-2\eta \), and trapezoidal area \(\int T_j=L_j-\eta \), and \(h_j=\mathrm{closingHeight}=\dfrac {w_j-m\, L_j}{\max (\eta ,\, L_j-\eta )} =\dfrac {w_j-m\, L_j}{L_j-\eta }\) the calibrated pulse height (the \(\max \)-clamp is inactive on the disk, where \(2\eta \le L_j\)). The ramp width \(\eta \) is \(a,b\)-dependent and below the compact-disk lower bound on the \(L_j\) (the fixed \(\pi /16\) ramp of <a href="chap-reduction.html#def:align_reparam">definition 68</a> is NOT reusable, since \(L_j(z)\) can be small when \(b/a\) is large). The calibration makes the per-arc integral exactly the canonical width, \(\int _{s_{j-1}}^{s_j}w_z=m\, L_j+h_j(L_j-\eta )=w_j\) (so the per-arc <em>average</em> slope is \(w_j/L_j(z)\), though the density is not flat on the arc); this is the node-mapping <a href="chap-dahlberg_step2.html#lem:closing_family_nodes">lemma 124</a>. This is the arc-length analogue of <a href="chap-reduction.html#def:align_reparam">definition 68</a>; it plays the role of Dahlberg’s Möbius \(\{ g_\beta \} \). </p>
@@ -382,7 +389,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:closing_family_eq">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000166"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000167"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -436,14 +443,14 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[The closing family is a running-integral reparametrisation]    For \(0{\lt}a{\lt}b\), \(0{\lt}\delta \le \pi /8\) and \(z\in \overline{\mathbb {D}}\), the node-placing family is the generic running integral of the closing density anchored at \(0\): </p>
-<div class="displaymath" id="a0000000167">
+<div class="displaymath" id="a0000000168">
   \[  \mathrm{closingFamily}\, a\, b\, \delta \, z =\mathrm{integralReparam}\, (\mathrm{closingDensity}\, a\, b\, \delta \, z)\, 0 ,  \]
 </div>
 <p> i.e. \(g_z(s)=\int _0^s w_z(u)\, du\) with anchor constant \(0\). </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000166">
+<div class="proof_wrapper" id="a0000000167">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -469,7 +476,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:closing_lambda_pos">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000168"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000169"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -534,7 +541,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000168">
+<div class="proof_wrapper" id="a0000000169">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -560,7 +567,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:closing_len_bounds">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000169"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000170"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -621,7 +628,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000169">
+<div class="proof_wrapper" id="a0000000170">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -647,7 +654,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:closing_family_props">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000170"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000171"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -764,7 +771,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000170">
+<div class="proof_wrapper" id="a0000000171">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -789,7 +796,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:closing_family_nodes">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000171"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000172"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -859,14 +866,14 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[Node-mapping of the closing family onto the canonical clean arcs]    For \(0{\lt}a{\lt}b\), \(0{\lt}\delta \le \pi /8\) and \(z\in \overline{\mathbb {D}}\), the node-placing family sends each arc-length breakpoint to the corresponding canonical clean-bicircle breakpoint: </p>
-<div class="displaymath" id="a0000000172">
+<div class="displaymath" id="a0000000173">
   \[  \mathrm{closingFamily}\, a\, b\, \delta \, z\, (s_j)=c_j,\qquad j=0,\dots ,5,  \]
 </div>
 <p> where \(s_j=\sum _{k\le j}L_k(z)\) (\(s_0=0\), \(s_5=2\pi \)) and \((c_0,\dots ,c_5)=(0,\tfrac {\pi }{4},\tfrac {3\pi }{4},\tfrac {5\pi }{4},\tfrac {7\pi }{4},2\pi )\). Equivalently the per-arc density integral is \(\int _{s_{j-1}}^{s_j}w_z=w_j\) (the canonical arc width \(w_j=c_j-c_{j-1}\)). Consequently \(g_z\) maps the open arc \((s_{j-1},s_j)\) strictly monotonically onto \((c_{j-1},c_j)\), so \(k_{a,b}\circ g_z=\hat\kappa _j\) a.e. on \((s_{j-1},s_j)\). </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000171">
+<div class="proof_wrapper" id="a0000000172">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -875,7 +882,7 @@
   </div>
   <div class="proof_content">
   <p> By <a href="chap-dahlberg_step2.html#def:closing_family">definition 119</a> the density is \(w_z=m+\sum _{k=1}^5 h_k\, T_k\), where \(m=\mathrm{closingBase}=\tfrac {\lambda a}{2}\) is the baseline, \(T_k=\mathrm{clampTent}\) is the unit-height trapezoidal clamped tent \(\mathrm{clampTent}\, \eta \, L_k\, C_k\) centred on the \(k\)-th arc midpoint \(C_k=s_{k-1}+L_k/2\), with one-period support window \([s_{k-1},s_k]\) (the full \(k\)-th arc, value \(0\) at the endpoints), ramps of width \(\eta \), plateau \([s_{k-1}+\eta ,s_k-\eta ]\) of width \(L_k-2\eta \), and trapezoidal area \(\int T_k=L_k-\eta \); and \(h_k=\dfrac {w_k-m\, L_k}{\max (\eta ,L_k-\eta )}=\dfrac {w_k-m\, L_k}{L_k-\eta }\) the calibrated pulse height (the clamp is inactive: \(2\eta \le L_k\) on the disk, so \(\max (\eta ,L_k-\eta )=L_k-\eta \)). The support windows of distinct \(T_k\) meet only at shared arc endpoints (where the pulse value is \(0\)), so on the <em>open</em> arc \((s_{j-1},s_j)\) only the \(j\)-th pulse is nonzero and </p>
-<div class="displaymath" id="a0000000173">
+<div class="displaymath" id="a0000000174">
   \[  \int _{s_{j-1}}^{s_j}w_z=m\, L_j+h_j\bigl(\textstyle \int _{s_{j-1}}^{s_j}T_j\bigr) =m\, L_j+h_j\, (L_j-\eta )=m\, L_j+(w_j-m\, L_j)=w_j .  \]
 </div>
 <p> Here the per-arc tent integral \(\int _{s_{j-1}}^{s_j}T_j=L_j-\eta \) is the trapezoidal <em>area</em> (NOT the support width \(L_j\)): plateau of width \(L_j-2\eta \) at height \(1\) plus two unit-height ramps of base \(\eta \) contribute \((L_j-2\eta )+2\cdot \tfrac {\eta }{2}=L_j-\eta \). The vanishing of the <em>other</em> pulses \(T_k\) (\(k\neq j\)) on \((s_{j-1},s_j)\) is the in-tree periodic off-support-zero fact; the existing helper assumes support half-width below \(\pi /2\) (i.e. \(L{\lt}\pi \)), but for the node-placing family \(L_k\) can exceed \(\pi \) (e.g. \(L_3\le 5\pi /3\) as \(b/a\to \infty \)), so the periodic copies must be excluded for the full range \(0{\lt}L{\lt}2\pi \). This generalised off-support zero is provable from <span class="ttfamily">Real.arccos_cos</span> by the case split \(y\le \pi \) / \(y{\gt}\pi \) (a \(\sim 30\)-line helper). Telescoping the running integral, \(g_z(s_j)=\int _0^{s_j}w_z=\sum _{k\le j}w_k=c_j\). Strict monotonicity (<a href="chap-dahlberg_step2.html#lem:closing_family_props">lemma 123</a>) upgrades the endpoint equalities to the open-arc bijection, and the a.e. value \(k_{a,b}\circ g_z=\hat\kappa _j\) on \((s_{j-1},s_j)\) then follows since \(g_z\) maps that open arc into the canonical clean-bicircle arc \((c_{j-1},c_j)\), on which \(k_{a,b}=a(1-f)+bf\) takes the constant value \(\hat\kappa _j\) (<a href="chap-dahlberg_step1.html#def:clean_bicircle">definition 110</a>). </p>
@@ -897,7 +904,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:clean_arclength_nodes">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000174"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000175"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -955,14 +962,14 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[Node-landing: cumulative normalised arc-length angle hits \(\mathrm{configSpace}\)]    Let \(K_z=\mathrm{arcLengthNorm}\, (k_{a,b})\, a\, b\, \delta \, z\) be the normalised clean arc-length curvature and \(\alpha _{K_z}(s)=\int _0^s K_z\) its cumulative tangent angle (<a href="chap-arclength.html#def:dahlberg_angle">definition 92</a>). At the arc-length breakpoints \(s_j=\sum _{k\le j}L_k(z)\), </p>
-<div class="displaymath" id="a0000000175">
+<div class="displaymath" id="a0000000176">
   \[  \alpha _{K_z}(s_j)=\theta _j\quad (j=0,\dots ,5),\qquad (\theta _0,\dots ,\theta _5)=(0,\theta _1,\theta _2,\theta _3,\theta _4,2\pi ),  \]
 </div>
 <p> with \((\theta _1,\dots ,\theta _4)=\mathrm{configSpace}\, \delta \, (z.\mathrm{re},z.\mathrm{im})\). Moreover \(K_z\) is constant \(=\lambda (z)\hat\kappa _j\) on each open arc \((s_{j-1},s_j)\). </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000174">
+<div class="proof_wrapper" id="a0000000175">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -971,7 +978,7 @@
   </div>
   <div class="proof_content">
   <p> By <a href="chap-dahlberg_step2.html#lem:clean_prefactor">lemma 129</a>, \(k_{a,b}\) is a.e. the step function with value \(\hat\kappa _j\) on \((c_{j-1},c_j)\), and \(g_z\) maps \((s_{j-1},s_j)\) onto \((c_{j-1},c_j)\) (<a href="chap-dahlberg_step2.html#def:closing_family">definition 119</a>), so \(k_{a,b}(g_z(s))=\hat\kappa _j\) for \(s\in (s_{j-1},s_j)\). The clean total curvature is \(I_z=\int _0^{2\pi }k_{a,b}(g_z)=\sum _j\hat\kappa _j L_j(z) =\sum _j\hat\kappa _j\frac{\Delta _j}{\lambda \hat\kappa _j}=\frac1\lambda \sum _j\Delta _j =\frac{2\pi }{\lambda }\) (<a href="chap-dahlberg_step2.html#lem:clean_prefactor">lemma 129</a>), so the normalising factor is \(2\pi /I_z=\lambda \) and \(K_z=\lambda \, \hat\kappa _j\) on \((s_{j-1},s_j)\). Hence </p>
-<div class="displaymath" id="a0000000176">
+<div class="displaymath" id="a0000000177">
   \[  \alpha _{K_z}(s_j)=\int _0^{s_j}K_z=\sum _{k\le j}\lambda \hat\kappa _k L_k(z) =\sum _{k\le j}\lambda \hat\kappa _k\frac{\Delta _k}{\lambda \hat\kappa _k} =\sum _{k\le j}\Delta _k=\theta _j. \qedhere  \]
 </div>
 
@@ -1037,7 +1044,7 @@
   </div>
   <div class="definition_thmcontent">
   <p>[Normalised arc-length curvature weight]    For a curvature weight \(g:\mathbb {R}\to \mathbb {R}\), parameters \(a,b,\delta \) and configuration \(z\in \overline{\mathbb {D}}\), the <em>normalised arc-length weight</em> is the \(\tfrac {2\pi }{I_z}\)-rescaled reparametrised weight </p>
-<div class="displaymath" id="a0000000177">
+<div class="displaymath" id="a0000000178">
   \[  K_z(s)=\frac{2\pi }{I_z}\, (g\circ g_z)(s),\qquad I_z=\int _0^{2\pi }(g\circ g_z)(t)\, dt,  \]
 </div>
 <p> where \(g_z=\mathrm{closingFamily}\, a\, b\, \delta \, z\) (<a href="chap-dahlberg_step2.html#def:closing_family">definition 119</a>). This is the common encoding of Dahlberg’s normalisations \(K_z\) (clean, \(g=k_{a,b}\)) and \(K^*_z\) (perturbed, \(g=\kappa \circ \eta \)); both \(F\) and \(F^*\) are built from it. When \(I_z{\gt}0\) and \(g\ge 0\) a.e., \(K_z\) has unit total mass \(\int _0^{2\pi }K_z=2\pi \). </p>
@@ -1110,7 +1117,7 @@
   </div>
   <div class="definition_thmcontent">
   <p>[Perturbed and clean arc-length error maps]    Fix \(\kappa ,\eta ,a,b,e\) from <a href="chap-dahlberg_step1.html#thm:exists_preliminary_diffeo">theorem 117</a> at a parameter \(\varepsilon {\gt}0\). For \(z\in \overline{\mathbb {D}}\) set \(k^*_z = (\kappa \circ \eta )\circ g_z\), \(k_z = k_{a,b}\circ g_z\), with total curvatures \(I^*_z,I_z\) and normalisations \(K^*_z,K_z\) as above. The <em>perturbed</em> and <em>clean</em> arc-length error maps are the closure defects </p>
-<div class="displaymath" id="a0000000178">
+<div class="displaymath" id="a0000000179">
   \[  F^*(z,\varepsilon )=\int _0^{2\pi }e^{i\alpha _{K^*_z}(s)}\, ds=\gamma _{K^*_z}(2\pi ), \qquad F(z)=\int _0^{2\pi }e^{i\alpha _{K_z}(s)}\, ds=\gamma _{K_z}(2\pi ),  \]
 </div>
 <p> where \(\alpha _{K}\) and \(\gamma _K\) are the arc-length tangent angle and curve of ??. A zero \(F^*(z^*,\varepsilon )=0\) is exactly condition (1.2) for \(K^*_{z^*}\). </p>
@@ -1132,7 +1139,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:arclength_error_continuous">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000179"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000180"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1191,7 +1198,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000179">
+<div class="proof_wrapper" id="a0000000180">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1219,7 +1226,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:clean_prefactor">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000180"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000181"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1287,14 +1294,14 @@
   </div>
   <div class="lemma_thmcontent">
   <p>    For \(0{\lt}a{\lt}b\), \(0{\lt}\delta \le \pi /8\) and \(z\in \overline{\mathbb {D}}\), </p>
-<div class="displaymath" id="a0000000181">
+<div class="displaymath" id="a0000000182">
   \[  I_z=\int _0^{2\pi }k_{a,b}(g_z\, t)\, dt=\frac{2\pi }{\lambda (z)}, \qquad c(z):=\frac{I_z}{2\pi }=\frac1{\lambda (z)}{\gt}0 ,  \]
 </div>
 <p> with \(c\) continuous and bounded between positive constants on \(\overline{\mathbb {D}}\). (This <em>replaces</em> the false fixed value \((a+b)\pi \): the clean total curvature is \(z\)-dependent for the node-placing family.) </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000180">
+<div class="proof_wrapper" id="a0000000181">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1321,7 +1328,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:arclength_arc_integral">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000182"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000183"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1371,14 +1378,14 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[Arc-length arc integral on a constant-curvature arc]    Let \(K:\mathbb {R}\to \mathbb {R}\) be <em>globally interval-integrable</em> (\(\forall p\, q,\  \mathrm{IntervalIntegrable}\, K\, \mathrm{volume}\, p\, q\)) and constant \(K\equiv m\) on the open arc \((c,d)\) (\(c\le d\)) with \(m\neq 0\), and write \(\alpha _K(s)=\int _0^s K\) for the arc-length tangent angle (<a href="chap-arclength.html#def:dahlberg_angle">definition 92</a>). Then </p>
-<div class="displaymath" id="a0000000183">
+<div class="displaymath" id="a0000000184">
   \[  \int _c^d e^{\, i\, \alpha _K(s)}\, ds =\frac{1}{m}\, (-i)\, \bigl(e^{\, i\, \alpha _K(d)}-e^{\, i\, \alpha _K(c)}\bigr).  \]
 </div>
 <p> This is the arc-length analogue of the inclination-variable building block \(\mathrm{bicircle\_ arc\_ integral}\) of <a href="chap-bicircle.html#lem:error_vector_of_bicircle">lemma 29</a>. The global interval-integrability hypothesis (not merely integrability on \([c,d]\)) is needed because \(\alpha _K\) integrates from \(0\), so the split passes through \(0\); it is met at the use site (\(K_z\) is globally interval-integrable). </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000182">
+<div class="proof_wrapper" id="a0000000183">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1405,7 +1412,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:arclength_error_clean_eq_errorMap">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000184"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000185"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1473,14 +1480,14 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[Arc-length closure of the clean bicircle \(=\) positive multiple of <span class="ttfamily">errorMap</span>]    For \(0{\lt}a{\lt}b\), \(0{\lt}\delta \le \pi /8\) and \(z\in \overline{\mathbb {D}}\), the clean arc-length error map \(F(z)=\mathrm{arcLengthErrorMap}\, (k_{a,b})\, a\, b\, \delta \, z\) is a <em>positive</em> (configuration-dependent) real multiple of the in-tree error map: </p>
-<div class="displaymath" id="a0000000185">
+<div class="displaymath" id="a0000000186">
   \[  F(z)=c(z)\cdot \mathrm{errorMap}\, a\, b\, \delta \, z,\qquad c(z)=\frac1{\lambda (z)}{\gt}0 .  \]
 </div>
 <p> In particular \(F(z)=0\iff \mathrm{errorMap}\, a\, b\, \delta \, z=0\), and for any loop in \(\overline{\mathbb {D}}\setminus \{ F=0\} \) the two maps have the same winding number around \(0\) (positive-scalar-field invariance, <a href="chap-dahlberg_step2.html#lem:clean_error_winds">lemma 137</a>). </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000184">
+<div class="proof_wrapper" id="a0000000185">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1491,7 +1498,7 @@
   <p> Write \(K_z=\mathrm{arcLengthNorm}\, (k_{a,b})\, a\, b\, \delta \, z\), so \(F(z)=\int _0^{2\pi }e^{i\alpha _{K_z}(s)}\, ds\). </p>
 <p><em>Arc structure and node landing.</em> By <a href="chap-dahlberg_step2.html#lem:clean_arclength_nodes">lemma 125</a> there are breakpoints \(0=s_0{\lt}s_1{\lt}\dots {\lt}s_5=2\pi \) with \(K_z\) constant \(\hat\kappa _j\lambda (z)\) on each open arc \((s_{j-1},s_j)\) (values \(a,b,a,b,a\) scaled by \(\lambda \)), and the cumulative angle landing \(\alpha _{K_z}(s_j)=\theta _j\), where \(\theta _0=0\), \(\theta _5=2\pi \) and \((\theta _1,\theta _2,\theta _3,\theta _4)=\mathrm{configSpace}\, \delta \, (z.\mathrm{re},z.\mathrm{im})\). </p>
 <p><em>Arc-length split.</em> Splitting \(F(z)\) at \(s_1,\dots ,s_4\) and applying <a href="chap-dahlberg_step2.html#lem:arclength_arc_integral">lemma 130</a> with \(m=\hat\kappa _j\lambda (z)\) on each arc (the global interval-integrability of \(K_z\) holds since \(K_z\) is a bounded a.e.-step function), </p>
-<div class="displaymath" id="a0000000186">
+<div class="displaymath" id="a0000000187">
   \[  F(z)=\sum _{j=1}^{5}\frac{1}{\hat\kappa _j\lambda (z)}\, (-i)\,  \bigl(e^{\, i\, \theta _j}-e^{\, i\, \theta _{j-1}}\bigr) =\frac1{\lambda (z)}\sum _{j=1}^{5}\frac{1}{\hat\kappa _j}\, (-i)\,  \bigl(e^{\, i\, \theta _j}-e^{\, i\, \theta _{j-1}}\bigr).  \]
 </div>
 <p><em>Match.</em> By the arc-by-arc evaluation of <a href="chap-bicircle.html#lem:error_vector_of_bicircle">lemma 29</a> (\(\mathrm{bicircleErrorVector\_ eq}\), whose \(\mathrm{bicircle\_ arc\_ integral}\) building block contributes exactly \(\tfrac 1{\hat\kappa _j}(-i)(e^{i\theta _j}-e^{i\theta _{j-1}})\) on the arc \((\theta _{j-1},\theta _j)\) of value \(\hat\kappa _j\)), the sum \(\sum _{j}\tfrac {1}{\hat\kappa _j}(-i)(e^{i\theta _j}-e^{i\theta _{j-1}})\) with the same nodes \(\theta _j\) and the same arc values \(a,b,a,b,a\) is precisely \(\mathrm{bicircleErrorVector}\, a\, b\, \theta _1\theta _2\theta _3\theta _4 =\mathrm{errorMap}\, a\, b\, \delta \, z\) (<a href="chap-winding.html#def:error_map">definition 54</a>). Therefore \(F(z)=\tfrac 1{\lambda (z)}\, \mathrm{errorMap}\, a\, b\, \delta \, z=c(z)\, \mathrm{errorMap}\, a\, b\, \delta \, z\) with \(c(z){\gt}0\) (<a href="chap-dahlberg_step2.html#lem:clean_prefactor">lemma 129</a>). The vanishing equivalence is immediate; the equal-winding claim is <a href="chap-dahlberg_step2.html#lem:clean_error_winds">lemma 137</a>. </p>
@@ -1577,7 +1584,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:total_curvature_ne_zero">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000187"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000188"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1646,7 +1653,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000187">
+<div class="proof_wrapper" id="a0000000188">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1673,7 +1680,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:abs_le_of_periodic_two_pi">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000188"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000189"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1704,7 +1711,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000188">
+<div class="proof_wrapper" id="a0000000189">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1729,7 +1736,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:angle_dist_le">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000189"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000190"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1800,7 +1807,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000189">
+<div class="proof_wrapper" id="a0000000190">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1826,7 +1833,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:arclength_error_tendsto">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000190"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000191"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1885,7 +1892,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000190">
+<div class="proof_wrapper" id="a0000000191">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1913,7 +1920,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:clean_error_winds">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000191"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000192"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1978,7 +1985,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000191">
+<div class="proof_wrapper" id="a0000000192">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2005,7 +2012,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#thm:exists_closing_param">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000192"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000193"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2074,7 +2081,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000192">
+<div class="proof_wrapper" id="a0000000193">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2102,7 +2109,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:dahlberg_curve_sub">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000193"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000194"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2156,13 +2163,13 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[Chord of the reconstructed curve \(=\) integral of its unit tangent]    Let \(K:\mathbb {R}\to \mathbb {R}\) have unit tangent \(s\mapsto e^{i\alpha _K(s)}\) interval-integrable on every interval (where \(\alpha _K\) is the arc-length tangent angle of <a href="chap-arclength.html#def:dahlberg_angle">definition 92</a>). Then for all \(u,w\), </p>
-<div class="displaymath" id="a0000000194">
+<div class="displaymath" id="a0000000195">
   \[  \mathrm{dahlbergCurve}\, K\, (w)-\mathrm{dahlbergCurve}\, K\, (u) =\int _u^w e^{\, i\, \alpha _K(s)}\, ds .  \]
 </div>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000193">
+<div class="proof_wrapper" id="a0000000194">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2189,7 +2196,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:clean_bicircle_arclength_norm_bounds">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000195"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000196"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2251,13 +2258,13 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[Two-sided bounds on the normalised clean-bicircle curvature]    For \(0{\lt}a{\lt}b\), \(0{\lt}\delta \le \pi /8\) and \(\| z\| \le 1\), the normalised clean-bicircle curvature is pinned between two positive constants: for all \(s\), </p>
-<div class="displaymath" id="a0000000196">
+<div class="displaymath" id="a0000000197">
   \[  \tfrac 14\bigl(\tfrac 1a+\tfrac 1b\bigr)\, a \; \le \; \mathrm{arcLengthNorm}\, (k_{a,b})\, a\, b\, \delta \, z\, (s) \; \le \; \tfrac 58\bigl(\tfrac 1a+\tfrac 1b\bigr)\, b .  \]
 </div>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000195">
+<div class="proof_wrapper" id="a0000000196">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2284,7 +2291,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:clean_chord_margin">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000197"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000198"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2350,13 +2357,13 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[Clean chord integrals are bounded away from \(0\) on inclination-span-\(\le \pi \) arcs]    There is a margin \(m{\gt}0\) (depending only on \(a,b,\delta \)) such that for every \(z\in \overline{\mathbb {D}}\), writing \(\alpha =\alpha _{K_z}\) for the clean normalised curvature \(K_z=\mathrm{arcLengthNorm}\, (k_{a,b})\, a\, b\, \delta \, z\) (positive, since \(a,b{\gt}0\)), </p>
-<div class="displaymath" id="a0000000198">
+<div class="displaymath" id="a0000000199">
   \[  m\, (\tau -t)\; \le \; \bigl\| \textstyle \int _t^\tau e^{i\alpha (s)}\, ds\bigr\|  \qquad \text{for all } 0\le t{\lt}\tau \le 4\pi \text{ with } \alpha (\tau )-\alpha (t)\le \pi .  \]
 </div>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000197">
+<div class="proof_wrapper" id="a0000000198">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2368,7 +2375,7 @@
 <p><em>Uniform slope bounds.</em> Write \(K_z=\lambda (z)\, k_{a,b}(g_z\, \cdot )\) with \(\lambda (z)=2\pi /I_z\). Since \(\lambda (z)\) is bounded above and below (<a href="chap-dahlberg_step2.html#lem:closing_lambda_pos">lemma 121</a>, <a href="chap-dahlberg_step2.html#lem:closing_len_bounds">lemma 122</a>) and \(k_{a,b}\in [a,b]\) a.e. (<a href="chap-dahlberg_step2.html#lem:clean_prefactor">lemma 129</a>), there are constants \(0{\lt}m_K\le M_K\), depending only on \(a,b,\delta \), with \(m_K\le K_z\le M_K\) for every \(z\in \overline{\mathbb D}\). Hence \(\alpha (s)=\int _0^s K_z\) is continuous, strictly increasing, with \(m_K(y-x)\le \alpha (y)-\alpha (x)\le M_K(y-x)\). </p>
 <p><em>Middle-half projection.</em> Project the chord onto the angular-midpoint direction \(e^{i\psi }\), \(\psi =\tfrac 12(\alpha (t)+\alpha (\tau ))\): \(\| \int _t^\tau e^{i\alpha }\| \ge \mathrm{Re}\bigl(e^{-i\psi }\int _t^\tau e^{i\alpha }\bigr) =\int _t^\tau \cos (\alpha (s)-\psi )\, ds\). Writing \(\Lambda =\alpha (\tau )-\alpha (t)\le \pi \), on all of \([t,\tau ]\) we have \(|\alpha (s)-\psi |\le \Lambda /2\le \pi /2\), so the integrand is \(\ge 0\). By IVT pick \(s_1,s_2\in [t,\tau ]\) with \(\alpha (s_1)=\alpha (t)+\Lambda /4\) and \(\alpha (s_2)=\alpha (t)+3\Lambda /4\); on \([s_1,s_2]\), \(|\alpha (s)-\psi |\le \Lambda /4\le \pi /4\), so \(\cos (\alpha (s)-\psi )\ge \cos (\pi /4)\). </p>
 <p><em>Length of the middle half.</em> From \(\Lambda /2=\alpha (s_2)-\alpha (s_1)\le M_K(s_2-s_1)\) and \(\Lambda \ge m_K(\tau -t)\) we get \(s_2-s_1\ge \Lambda /(2M_K)\ge m_K(\tau -t)/(2M_K)\). Dropping the nonnegative tails outside \([s_1,s_2]\), </p>
-<div class="displaymath" id="a0000000199">
+<div class="displaymath" id="a0000000200">
   \[  \Bigl\| \textstyle \int _t^\tau e^{i\alpha }\Bigr\| \ge \int _{s_1}^{s_2}\cos (\alpha -\psi ) \ge \cos (\tfrac \pi 4)\, (s_2-s_1)\ge m\, (\tau -t),\qquad m=\frac{m_K\cos (\pi /4)}{2M_K}{\gt}0,  \]
 </div>
 <p> uniform in \(z\). This is exactly the half-circle limit (\(\Lambda =\pi \), chord/arc \(=2/\pi \)) that a naive whole-arc midpoint bound \((\tau -t)\cos (\Lambda /2)\) misses. </p>
@@ -2390,7 +2397,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#lem:simplicity_transport">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000200"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000201"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2455,7 +2462,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000200">
+<div class="proof_wrapper" id="a0000000201">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2464,7 +2471,7 @@
   </div>
   <div class="proof_content">
   <p> Write \(\alpha =\alpha _{K_{z^*}}\) (clean, at the same \(z^*\)) and \(\alpha ^*=\alpha _{K^*_{z^*}}\) (perturbed). Fix \(\varepsilon \) with \(C'\varepsilon {\lt}m\), where \(m\) is the uniform clean margin of <a href="chap-dahlberg_step2.html#lem:clean_chord_margin">lemma 141</a> and \(C'\) the angle constant of <a href="chap-dahlberg_step2.html#lem:angle_dist_le">lemma 135</a>; note the threshold is independent of \(z^*\) (both \(m\) and \(C'\) are uniform in \(z\)), so it may be chosen before \(z^*\) is produced. The transport estimate over any arc \([u,v]\) is, by <a href="chap-dahlberg_step2.html#lem:angle_dist_le">lemma 135</a> and \(|e^{ix}-e^{iy}|\le |x-y|\), </p>
-<div class="displaymath" id="a0000000201">
+<div class="displaymath" id="a0000000202">
   \[  \bigl\| \textstyle \int _u^v e^{i\alpha ^*}-\int _u^v e^{i\alpha }\bigr\|  \le \int _u^v|\alpha ^*-\alpha |\le (v-u)\, C'\varepsilon . \tag {$\dagger $}  \]
 </div>
 <p> Let \(\Lambda =\alpha (\tau )-\alpha (t)\) be the clean inclination span of \([t,\tau ]\); since \(\alpha (2\pi )-\alpha (0)=2\pi \) exactly (normalisation), the complementary span is \(2\pi -\Lambda \), and exactly one of \(\Lambda ,2\pi -\Lambda \) is \(\le \pi \). </p>
@@ -2488,7 +2495,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#thm:dahlberg_converse">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000202"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000203"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2571,7 +2578,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000202">
+<div class="proof_wrapper" id="a0000000203">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2600,7 +2607,7 @@
 
     <a class="icon proof" href="chap-dahlberg_step2.html#thm:gluck_converse_nonconstant">#</a>
     
-    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000203"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-dahlberg_step2.html#a0000000204"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2657,7 +2664,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000203">
+<div class="proof_wrapper" id="a0000000204">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
