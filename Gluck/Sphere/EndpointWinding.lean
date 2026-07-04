@@ -33,6 +33,52 @@ section EndpointWindingAssembly
 
 open scoped unitInterval
 
+/-- The clamped-square numerator `1 + (min ‖·‖ R)²` of the truncated speed is
+`2R`-Lipschitz: clamping to `[0, R]` is `1`-Lipschitz, and the square derivative
+is bounded by `2R`. -/
+private lemma abs_one_add_sq_truncationRadius_sub_le {R : ℝ} (hR : 0 ≤ R)
+    (z w : ℂ) :
+    |(1 + (min ‖z‖ R) ^ 2) - (1 + (min ‖w‖ R) ^ 2)| ≤ 2 * R * ‖z - w‖ := by
+  have hminz : (0 : ℝ) ≤ min ‖z‖ R := le_min (norm_nonneg _) hR
+  have hminw : (0 : ℝ) ≤ min ‖w‖ R := le_min (norm_nonneg _) hR
+  have hminzR : min ‖z‖ R ≤ R := min_le_right _ _
+  have hminwR : min ‖w‖ R ≤ R := min_le_right _ _
+  have hmin_diff : |min ‖z‖ R - min ‖w‖ R| ≤ ‖z - w‖ := by
+    refine (abs_min_sub_min_le_max _ _ _ _).trans ?_
+    rw [sub_self, abs_zero, max_eq_left (abs_nonneg _)]
+    exact abs_norm_sub_norm_le z w
+  have expand : (1 + (min ‖z‖ R) ^ 2) - (1 + (min ‖w‖ R) ^ 2)
+      = (min ‖z‖ R + min ‖w‖ R) * (min ‖z‖ R - min ‖w‖ R) := by ring
+  rw [expand, abs_mul]
+  have h1 : |min ‖z‖ R + min ‖w‖ R| ≤ 2 * R := by
+    rw [abs_of_nonneg (by linarith)]
+    linarith
+  exact mul_le_mul h1 hmin_diff (abs_nonneg _) (by linarith)
+
+/-- The clamped denominator `2·max (k − ⟪·, v⟫) δ` of the truncated speed is
+`2`-Lipschitz when `‖v‖ = 1`: `θ ↦ ⟪·, v⟫` is `1`-Lipschitz by Cauchy–Schwarz,
+and `max · δ` is `1`-Lipschitz. -/
+private lemma abs_two_mul_max_sub_inner_le {v : ℂ} (hv : ‖v‖ = 1) (k δ : ℝ)
+    (z w : ℂ) :
+    |2 * max (k - ⟪z, v⟫_ℝ) δ - 2 * max (k - ⟪w, v⟫_ℝ) δ| ≤ 2 * ‖z - w‖ := by
+  have hinner : |⟪z, v⟫_ℝ - ⟪w, v⟫_ℝ| ≤ ‖z - w‖ := by
+    rw [← inner_sub_left]
+    have h := abs_real_inner_le_norm (z - w) v
+    rwa [hv, mul_one] at h
+  have hmax : |max (k - ⟪z, v⟫_ℝ) δ - max (k - ⟪w, v⟫_ℝ) δ|
+      ≤ |⟪z, v⟫_ℝ - ⟪w, v⟫_ℝ| := by
+    refine (abs_max_sub_max_le_max _ _ _ _).trans ?_
+    rw [sub_self, abs_zero, max_eq_left (abs_nonneg _)]
+    have : (k - ⟪z, v⟫_ℝ) - (k - ⟪w, v⟫_ℝ) = -(⟪z, v⟫_ℝ - ⟪w, v⟫_ℝ) := by
+      ring
+    rw [this, abs_neg]
+  calc |2 * max (k - ⟪z, v⟫_ℝ) δ - 2 * max (k - ⟪w, v⟫_ℝ) δ|
+      = 2 * |max (k - ⟪z, v⟫_ℝ) δ - max (k - ⟪w, v⟫_ℝ) δ| := by
+        rw [← mul_sub, abs_mul, abs_two]
+    _ ≤ 2 * ‖z - w‖ := by
+        have := hmax.trans hinner
+        linarith
+
 /-- Uniform-in-`κ` form of `truncatedSpeed_lipschitz`: the explicit constant
 `R/δ + (1 + R²)/(2δ²)` never sees the curvature, so one witness serves *every*
 curvature function. This breaks the quantifier circularity of the winding
@@ -50,42 +96,10 @@ private lemma truncatedSpeed_lipschitz_uniform {R δ : ℝ} (hR : 0 ≤ R)
   set v : ℂ := Complex.I * Complex.exp ((θ : ℂ) * Complex.I) with hv
   have hvnorm : ‖v‖ = 1 := by
     rw [hv, norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul]
+  have hnum_diff := abs_one_add_sq_truncationRadius_sub_le hR z w
+  have hden_diff := abs_two_mul_max_sub_inner_le hvnorm (κ θ) δ z w
   have hminz : (0 : ℝ) ≤ min ‖z‖ R := le_min (norm_nonneg _) hR
-  have hminw : (0 : ℝ) ≤ min ‖w‖ R := le_min (norm_nonneg _) hR
   have hminzR : min ‖z‖ R ≤ R := min_le_right _ _
-  have hminwR : min ‖w‖ R ≤ R := min_le_right _ _
-  have hmin_diff : |min ‖z‖ R - min ‖w‖ R| ≤ ‖z - w‖ := by
-    refine (abs_min_sub_min_le_max _ _ _ _).trans ?_
-    rw [sub_self, abs_zero, max_eq_left (abs_nonneg _)]
-    exact abs_norm_sub_norm_le z w
-  have hnum_diff : |(1 + (min ‖z‖ R) ^ 2) - (1 + (min ‖w‖ R) ^ 2)|
-      ≤ 2 * R * ‖z - w‖ := by
-    have expand : (1 + (min ‖z‖ R) ^ 2) - (1 + (min ‖w‖ R) ^ 2)
-        = (min ‖z‖ R + min ‖w‖ R) * (min ‖z‖ R - min ‖w‖ R) := by ring
-    rw [expand, abs_mul]
-    have h1 : |min ‖z‖ R + min ‖w‖ R| ≤ 2 * R := by
-      rw [abs_of_nonneg (by linarith)]
-      linarith
-    exact mul_le_mul h1 hmin_diff (abs_nonneg _) (by linarith)
-  have hinner : |⟪z, v⟫_ℝ - ⟪w, v⟫_ℝ| ≤ ‖z - w‖ := by
-    rw [← inner_sub_left]
-    have h := abs_real_inner_le_norm (z - w) v
-    rwa [hvnorm, mul_one] at h
-  have hden_diff : |2 * max (κ θ - ⟪z, v⟫_ℝ) δ - 2 * max (κ θ - ⟪w, v⟫_ℝ) δ|
-      ≤ 2 * ‖z - w‖ := by
-    have hmax : |max (κ θ - ⟪z, v⟫_ℝ) δ - max (κ θ - ⟪w, v⟫_ℝ) δ|
-        ≤ |⟪z, v⟫_ℝ - ⟪w, v⟫_ℝ| := by
-      refine (abs_max_sub_max_le_max _ _ _ _).trans ?_
-      rw [sub_self, abs_zero, max_eq_left (abs_nonneg _)]
-      have : (κ θ - ⟪z, v⟫_ℝ) - (κ θ - ⟪w, v⟫_ℝ) = -(⟪z, v⟫_ℝ - ⟪w, v⟫_ℝ) := by
-        ring
-      rw [this, abs_neg]
-    calc |2 * max (κ θ - ⟪z, v⟫_ℝ) δ - 2 * max (κ θ - ⟪w, v⟫_ℝ) δ|
-        = 2 * |max (κ θ - ⟪z, v⟫_ℝ) δ - max (κ θ - ⟪w, v⟫_ℝ) δ| := by
-          rw [← mul_sub, abs_mul, abs_two]
-      _ ≤ 2 * ‖z - w‖ := by
-          have := hmax.trans hinner
-          linarith
   have hdenz : 2 * δ ≤ 2 * max (κ θ - ⟪z, v⟫_ℝ) δ := by
     have := le_max_right (κ θ - ⟪z, v⟫_ℝ) δ
     linarith
@@ -114,9 +128,177 @@ lemma truncatedField_lipschitz_uniform {R δ : ℝ} (hR : 0 ≤ R)
   rwa [← sub_smul, norm_smul, Real.norm_eq_abs, Complex.norm_exp_ofReal_mul_I,
     mul_one]
 
-set_option maxHeartbeats 1600000 in
--- The transport instantiation threads four nested arc-map start points, as in
--- `stepModel_transport` / `stepModel_margins`; the default budget is too small.
+/-- **Master estimate at a near start point.** For every initial point `z₀`
+in the `ρ`-disk about the model start `-rs·i`, the reparametrized truncated flow
+is admissible on `[0, 2π]` and its endpoint error is a small perturbation of the
+step-model error: margins (`stepModel_margins`) feed the transport comparison
+(`stepModel_transport`) with the flow's own endpoint, and the first-variation
+expansion (`stepError_expansion`, supplied as `hexp`) identifies the model error
+with the conjugate-linear term `η h · conj(z₀ + rs·i)`. -/
+private lemma flow_admissible_and_endpoint_estimate
+    {κ' : ℝ → ℝ} {κ₀ R δ μ a b rs ρ ρ₀ ρ₁ η h C : ℝ} {L : ℝ≥0} {r₀ : ℝ≥0}
+    (hκ'c : Continuous κ') (hκ'₀ : ∀ θ, κ₀ ≤ κ' θ) (hR0 : 0 < R) (hδ0 : 0 < δ)
+    (hLuni : ∀ θ, LipschitzWith L (fun w => truncatedField κ' R δ θ w))
+    (hrs0 : 0 < rs) (hr₀coe : (r₀ : ℝ) = rs + ρ)
+    (hρρ₀ : ρ ≤ ρ₀) (hρρ₁ : ρ ≤ ρ₁)
+    (hmarg : ∀ z₀ : ℂ, ‖z₀ + rs • Complex.I‖ ≤ ρ₀ →
+      arcMargins κ₀ R δ μ a 0 (π / 2) z₀ ∧
+      arcMargins κ₀ R δ μ b (π / 2) π (sphericalArcMap a 0 (π / 2) z₀) ∧
+      arcMargins κ₀ R δ μ a π (3 * π / 2)
+        (sphericalArcMap b (π / 2) (π / 2) (sphericalArcMap a 0 (π / 2) z₀)) ∧
+      arcMargins κ₀ R δ μ b (3 * π / 2) (2 * π)
+        (sphericalArcMap a π (π / 2) (sphericalArcMap b (π / 2) (π / 2)
+          (sphericalArcMap a 0 (π / 2) z₀))))
+    (hexp : ∀ z₀ : ℂ, ‖z₀ + rs • Complex.I‖ ≤ ρ₁ →
+      ‖stepErrorMap a b z₀
+          + ((η * h : ℝ) : ℂ) * (starRingEnd ℂ) (z₀ + rs • Complex.I)‖
+        ≤ C * h * (‖z₀ + rs • Complex.I‖ ^ 2 + h))
+    (hIμ : Real.exp (2 * π * (L : ℝ)) * ((1 + R ^ 2) / (2 * δ ^ 2)
+        * ∫ θ in (0 : ℝ)..(2 * π),
+            |κ' θ - stepCurvature b a 0 (π / 2) π (3 * π / 2) θ|) ≤ μ)
+    (hI8 : Real.exp (2 * π * (L : ℝ)) * ((1 + R ^ 2) / (2 * δ ^ 2)
+        * ∫ θ in (0 : ℝ)..(2 * π),
+            |κ' θ - stepCurvature b a 0 (π / 2) π (3 * π / 2) θ|)
+      ≤ η * h * ρ / 8) :
+    ∀ z₀ : ℂ, ‖z₀ + rs • Complex.I‖ ≤ ρ →
+      (∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
+          ‖sphericalFlow κ' R δ r₀ (z₀, θ)‖ ≤ R ∧
+          δ ≤ κ' θ - ⟪sphericalFlow κ' R δ r₀ (z₀, θ),
+            Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ) ∧
+        ‖sphericalEndpoint κ' R δ r₀ z₀
+            + ((η * h : ℝ) : ℂ) * (starRingEnd ℂ) (z₀ + rs • Complex.I)‖
+          ≤ η * h * ρ / 8 + C * h * (‖z₀ + rs • Complex.I‖ ^ 2 + h) := by
+  intro z₀ hd
+  have hz₀mem : z₀ ∈ Metric.closedBall (0 : ℂ) r₀ := by
+    rw [Metric.mem_closedBall, dist_zero_right, hr₀coe]
+    have h1 := norm_sub_le (z₀ + rs • Complex.I) (rs • Complex.I)
+    rw [add_sub_cancel_right] at h1
+    have h2 : ‖(rs : ℝ) • Complex.I‖ = rs := by
+      rw [norm_smul, Complex.norm_I, mul_one, Real.norm_eq_abs, abs_of_pos hrs0]
+    linarith
+  obtain ⟨hz0, hzode⟩ := sphericalFlow_spec hκ'c hR0.le hδ0 r₀ hz₀mem
+  obtain ⟨hm0, hm1, hm2, hm3⟩ := hmarg z₀ (le_trans hd hρρ₀)
+  have htrans := stepModel_transport hκ'c hκ'₀ hR0.le hδ0 hLuni hzode hz0
+    hm0 hm1 hm2 hm3 hIμ
+  refine ⟨htrans.1, ?_⟩
+  have hend := htrans.2
+  have hexp' := hexp z₀ (le_trans hd hρρ₁)
+  have hEdef : sphericalEndpoint κ' R δ r₀ z₀
+      = sphericalFlow κ' R δ r₀ (z₀, 2 * π) - z₀ := rfl
+  calc ‖sphericalEndpoint κ' R δ r₀ z₀
+        + ((η * h : ℝ) : ℂ) * (starRingEnd ℂ) (z₀ + rs • Complex.I)‖
+      = ‖((sphericalFlow κ' R δ r₀ (z₀, 2 * π) - z₀) - stepErrorMap a b z₀)
+          + (stepErrorMap a b z₀
+            + ((η * h : ℝ) : ℂ) * (starRingEnd ℂ) (z₀ + rs • Complex.I))‖ := by
+        rw [hEdef]
+        congr 1
+        ring
+    _ ≤ ‖(sphericalFlow κ' R δ r₀ (z₀, 2 * π) - z₀) - stepErrorMap a b z₀‖
+          + ‖stepErrorMap a b z₀
+            + ((η * h : ℝ) : ℂ) * (starRingEnd ℂ) (z₀ + rs • Complex.I)‖ :=
+        norm_add_le _ _
+    _ ≤ η * h * ρ / 8 + C * h * (‖z₀ + rs • Complex.I‖ ^ 2 + h) :=
+        add_le_add (hend.trans hI8) hexp'
+
+/-- **Conjugate-linear domination on the boundary circle.** Given the master
+endpoint estimate `hmain`, on the unit circle of the affine chart of the
+`ρ`-disk the flow endpoint stays strictly closer to `-η h ρ · conj u` than the
+norm `η h ρ` of that model term. The two slack inequalities `C ρ ≤ η/4` and
+`C h ≤ η ρ/4` absorb the quadratic remainder. -/
+private lemma endpoint_conj_dominant_on_circle
+    {κ' : ℝ → ℝ} {R δ rs ρ η h C : ℝ} {r₀ : ℝ≥0} {zs : ℂ}
+    (hρ0 : 0 < ρ) (hh0 : 0 < h) (hwR0 : 0 < η * h * ρ)
+    (hδvec : ∀ u : ℂ, zs + (ρ : ℂ) * u + rs • Complex.I = (ρ : ℂ) * u)
+    (hCρ : C * ρ ≤ η / 4) (hCh : C * h ≤ η * ρ / 4)
+    (hmain : ∀ z₀ : ℂ, ‖z₀ + rs • Complex.I‖ ≤ ρ →
+      ‖sphericalEndpoint κ' R δ r₀ z₀
+          + ((η * h : ℝ) : ℂ) * (starRingEnd ℂ) (z₀ + rs • Complex.I)‖
+        ≤ η * h * ρ / 8 + C * h * (‖z₀ + rs • Complex.I‖ ^ 2 + h)) :
+    ∀ u : ℂ, ‖u‖ = 1 →
+      ‖sphericalEndpoint κ' R δ r₀ (zs + (ρ : ℂ) * u)
+        + ((η * h * ρ : ℝ) : ℂ) * (starRingEnd ℂ) u‖ < η * h * ρ := by
+  intro u hu
+  have hnormρu : ‖(ρ : ℂ) * u‖ = ρ := by
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hρ0, hu, mul_one]
+  have hd : ‖zs + (ρ : ℂ) * u + rs • Complex.I‖ ≤ ρ := by
+    rw [hδvec u, hnormρu]
+  have hm := hmain (zs + (ρ : ℂ) * u) hd
+  rw [hδvec u, hnormρu] at hm
+  have hconj : ((η * h : ℝ) : ℂ) * (starRingEnd ℂ) ((ρ : ℂ) * u)
+      = ((η * h * ρ : ℝ) : ℂ) * (starRingEnd ℂ) u := by
+    rw [map_mul, Complex.conj_ofReal]
+    push_cast
+    ring
+  rw [hconj] at hm
+  refine lt_of_le_of_lt hm ?_
+  have hp1 : C * ρ * (h * ρ) ≤ η / 4 * (h * ρ) :=
+    mul_le_mul_of_nonneg_right hCρ (by positivity)
+  have hp2 : C * h * h ≤ η * ρ / 4 * h :=
+    mul_le_mul_of_nonneg_right hCh hh0.le
+  nlinarith only [hp1, hp2, hwR0]
+
+/-- **Interior zero from a dominant conjugate-linear boundary term.** If `F` is
+continuous on the closed unit disk and, on the unit circle, `F u` stays strictly
+closer to `-A · conj u` than the norm `A` of that term, then the boundary loop
+of `F` is a small perturbation of the conjugate loop `conjLoop (-A)` of winding
+`-1`, so its winding number is `-1` and `F` vanishes in the open disk
+(`exists_zero_of_boundary_winding`). -/
+private lemma exists_interior_zero_of_conj_dominant {F : ℂ → ℂ}
+    (hFc : ContinuousOn F (Metric.closedBall (0 : ℂ) 1)) {A : ℝ} (hA : 0 < A)
+    (hkey : ∀ u : ℂ, ‖u‖ = 1 →
+      ‖F u + ((A : ℝ) : ℂ) * (starRingEnd ℂ) u‖ < A) :
+    ∃ u ∈ Metric.ball (0 : ℂ) 1, F u = 0 := by
+  have hbd : ∀ z ∈ Metric.sphere (0 : ℂ) 1, F z ≠ 0 := by
+    intro z hz
+    rw [mem_sphere_zero_iff_norm] at hz
+    have hk := hkey z hz
+    intro h0
+    rw [h0, zero_add, norm_mul, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_pos hA, RCLike.norm_conj, hz, mul_one] at hk
+    exact lt_irrefl _ hk
+  set w₀ : ℂ := ((-A : ℝ) : ℂ) with hw₀def
+  have hw₀ne : w₀ ≠ 0 := by
+    rw [hw₀def]
+    exact Complex.ofReal_ne_zero.mpr (by linarith)
+  have hconjval : ∀ t : I, conjLoop w₀ t
+      = w₀ * (starRingEnd ℂ) ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ) :=
+    fun t => rfl
+  have hγFval : ∀ t : I, diskBoundaryLoop F hFc t
+      = F ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ) := fun t => rfl
+  have hexp01 : Circle.exp (2 * π * ((0 : I) : ℝ))
+      = Circle.exp (2 * π * ((1 : I) : ℝ)) := by
+    rw [Set.Icc.coe_zero, Set.Icc.coe_one, mul_zero, mul_one, Circle.exp_zero,
+      Circle.exp_two_pi]
+  have hloopγ : conjLoop w₀ 0 = conjLoop w₀ 1 := by
+    rw [hconjval 0, hconjval 1, hexp01]
+  have hloopγ' : diskBoundaryLoop F hFc 0 = diskBoundaryLoop F hFc 1 := by
+    rw [hγFval 0, hγFval 1, hexp01]
+  have hpert : ∀ t : I,
+      ‖diskBoundaryLoop F hFc t - conjLoop w₀ t‖ < ‖conjLoop w₀ t‖ := by
+    intro t
+    have hu : ‖((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)‖ = 1 :=
+      Circle.norm_coe _
+    have hk := hkey _ hu
+    have h1 : diskBoundaryLoop F hFc t - conjLoop w₀ t
+        = F ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)
+          + ((A : ℝ) : ℂ)
+            * (starRingEnd ℂ) ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ) := by
+      rw [hγFval t, hconjval t, hw₀def]
+      push_cast
+      ring
+    have h2 : ‖conjLoop w₀ t‖ = A := by
+      rw [hconjval t, norm_mul, hw₀def, Complex.norm_real, Real.norm_eq_abs,
+        abs_neg, abs_of_pos hA, RCLike.norm_conj, hu, mul_one]
+    rw [h1, h2]
+    exact hk
+  have hwval : windingNumberC (diskBoundaryLoop F hFc)
+      (diskBoundaryLoop_ne_zero F hFc hbd) = -1 := by
+    rw [← windingNumberC_eq_of_perturb (conjLoop w₀) (diskBoundaryLoop F hFc)
+      (conjLoop_ne_zero hw₀ne) (diskBoundaryLoop_ne_zero F hFc hbd)
+      hloopγ hloopγ' hpert]
+    exact windingNumberC_conj_loop hw₀ne
+  exact exists_zero_of_boundary_winding F hFc hbd (by rw [hwval]; norm_num)
+
 /-- **Spherical endpoint winding: a closed admissible trajectory for the
 reparametrized curvature.** Given the value-separated four-point data of the
 non-constant four-vertex branch, there are `0 < R < 1`, `δ > 0`, an
@@ -264,49 +446,16 @@ theorem spherical_endpoint_winding {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
     rw [hzsdef, Complex.real_smul]
     ring
   -- ### Master estimate: margins + transport + expansion at any near start
-  have main : ∀ z₀ : ℂ, ‖z₀ + rs • Complex.I‖ ≤ ρ →
-      (∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
-          ‖sphericalFlow (κ ∘ h₁) R δ r₀ (z₀, θ)‖ ≤ R ∧
-          δ ≤ (κ ∘ h₁) θ - ⟪sphericalFlow (κ ∘ h₁) R δ r₀ (z₀, θ),
-            Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ) ∧
-        ‖sphericalEndpoint (κ ∘ h₁) R δ r₀ z₀
-            + ((η * h : ℝ) : ℂ) * (starRingEnd ℂ) (z₀ + rs • Complex.I)‖
-          ≤ η * h * ρ / 8 + C * h * (‖z₀ + rs • Complex.I‖ ^ 2 + h) := by
-    intro z₀ hd
-    have hz₀mem : z₀ ∈ Metric.closedBall (0 : ℂ) r₀ := by
-      rw [Metric.mem_closedBall, dist_zero_right, hr₀coe]
-      have h1 := norm_sub_le (z₀ + rs • Complex.I) (rs • Complex.I)
-      rw [add_sub_cancel_right] at h1
-      have h2 : ‖(rs : ℝ) • Complex.I‖ = rs := by
-        rw [norm_smul, Complex.norm_I, mul_one, Real.norm_eq_abs,
-          abs_of_pos hrs0]
-      linarith
-    obtain ⟨hz0, hzode⟩ := sphericalFlow_spec hκ'c hR0.le hδ0 r₀ hz₀mem
-    obtain ⟨hm0, hm1, hm2, hm3⟩ := hmarg a b haC hbC z₀ (le_trans hd hρρ₀)
-    have htrans := stepModel_transport hκ'c hκ'₀ hR0.le hδ0
-      (fun θ => hLuni (κ ∘ h₁) θ) hzode hz0 hm0 hm1 hm2 hm3 hIμ
-    refine ⟨htrans.1, ?_⟩
-    have hend := htrans.2
-    have hexp' := hexp h hh0 hhbar z₀ (le_trans hd hρρ₁)
-    rw [← hadef, ← hbdef] at hexp'
-    have hEdef : sphericalEndpoint (κ ∘ h₁) R δ r₀ z₀
-        = sphericalFlow (κ ∘ h₁) R δ r₀ (z₀, 2 * π) - z₀ := rfl
-    calc ‖sphericalEndpoint (κ ∘ h₁) R δ r₀ z₀
+  have hexpm : ∀ z₀ : ℂ, ‖z₀ + rs • Complex.I‖ ≤ ρ₁ →
+      ‖stepErrorMap a b z₀
           + ((η * h : ℝ) : ℂ) * (starRingEnd ℂ) (z₀ + rs • Complex.I)‖
-        = ‖((sphericalFlow (κ ∘ h₁) R δ r₀ (z₀, 2 * π) - z₀)
-              - stepErrorMap a b z₀)
-            + (stepErrorMap a b z₀
-              + ((η * h : ℝ) : ℂ) * (starRingEnd ℂ) (z₀ + rs • Complex.I))‖ := by
-          rw [hEdef]
-          congr 1
-          ring
-      _ ≤ ‖(sphericalFlow (κ ∘ h₁) R δ r₀ (z₀, 2 * π) - z₀)
-              - stepErrorMap a b z₀‖
-            + ‖stepErrorMap a b z₀
-              + ((η * h : ℝ) : ℂ) * (starRingEnd ℂ) (z₀ + rs • Complex.I)‖ :=
-          norm_add_le _ _
-      _ ≤ η * h * ρ / 8 + C * h * (‖z₀ + rs • Complex.I‖ ^ 2 + h) :=
-          add_le_add (hend.trans hI8) hexp'
+        ≤ C * h * (‖z₀ + rs • Complex.I‖ ^ 2 + h) := by
+    intro z₀ hz
+    have hx := hexp h hh0 hhbar z₀ hz
+    rwa [← hadef, ← hbdef] at hx
+  have main := flow_admissible_and_endpoint_estimate hκ'c hκ'₀ hR0 hδ0
+    (fun θ => hLuni (κ ∘ h₁) θ) hrs0 hr₀coe hρρ₀ hρρ₁ (hmarg a b haC hbC) hexpm
+    hIμ hI8
   -- ### Boundary comparison: the flow endpoint loop is a small perturbation
   -- of the conjugate-linear model loop `−ηhρ·conj`
   have hwR0 : 0 < η * h * ρ := mul_pos (mul_pos hη0 hh0) hρ0
@@ -316,29 +465,8 @@ theorem spherical_endpoint_winding {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
   have hCh : C * h ≤ η * ρ / 4 := by
     rw [le_div_iff₀ (by linarith : (0 : ℝ) < 4 * C)] at hhηρ
     linarith
-  have key : ∀ u : ℂ, ‖u‖ = 1 →
-      ‖sphericalEndpoint (κ ∘ h₁) R δ r₀ (zs + (ρ : ℂ) * u)
-        + ((η * h * ρ : ℝ) : ℂ) * (starRingEnd ℂ) u‖ < η * h * ρ := by
-    intro u hu
-    have hnormρu : ‖(ρ : ℂ) * u‖ = ρ := by
-      rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hρ0, hu,
-        mul_one]
-    have hd : ‖zs + (ρ : ℂ) * u + rs • Complex.I‖ ≤ ρ := by
-      rw [hδvec u, hnormρu]
-    have hmain := (main (zs + (ρ : ℂ) * u) hd).2
-    rw [hδvec u, hnormρu] at hmain
-    have hconj : ((η * h : ℝ) : ℂ) * (starRingEnd ℂ) ((ρ : ℂ) * u)
-        = ((η * h * ρ : ℝ) : ℂ) * (starRingEnd ℂ) u := by
-      rw [map_mul, Complex.conj_ofReal]
-      push_cast
-      ring
-    rw [hconj] at hmain
-    refine lt_of_le_of_lt hmain ?_
-    have hp1 : C * ρ * (h * ρ) ≤ η / 4 * (h * ρ) :=
-      mul_le_mul_of_nonneg_right hCρ (by positivity)
-    have hp2 : C * h * h ≤ η * ρ / 4 * h :=
-      mul_le_mul_of_nonneg_right hCh hh0.le
-    nlinarith only [hp1, hp2, hwR0]
+  have key := endpoint_conj_dominant_on_circle hρ0 hh0 hwR0 hδvec hCρ hCh
+    (fun z₀ hz => (main z₀ hz).2)
   -- the affine chart of the `ρ`-disk of initial points
   have hmemball : ∀ u : ℂ, ‖u‖ ≤ 1 →
       zs + (ρ : ℂ) * u ∈ Metric.closedBall (0 : ℂ) r₀ := by
@@ -358,65 +486,9 @@ theorem spherical_endpoint_winding {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
     (sphericalEndpoint_continuousOn hκ'c hR0.le hδ0 r₀).comp haff.continuousOn
       (fun u hu => hmemball u
         (by rwa [Metric.mem_closedBall, dist_zero_right] at hu))
-  have hbd : ∀ z ∈ Metric.sphere (0 : ℂ) 1,
-      (fun u : ℂ => sphericalEndpoint (κ ∘ h₁) R δ r₀ (zs + (ρ : ℂ) * u)) z
-        ≠ 0 := by
-    intro z hz
-    rw [mem_sphere_zero_iff_norm] at hz
-    have hk := key z hz
-    intro h0
-    simp only at h0
-    rw [h0, zero_add, norm_mul, Complex.norm_real, Real.norm_eq_abs,
-      abs_of_pos hwR0, RCLike.norm_conj, hz, mul_one] at hk
-    exact lt_irrefl _ hk
-  -- loop values and closure
-  set w₀ : ℂ := ((-(η * h * ρ) : ℝ) : ℂ) with hw₀def
-  have hw₀ne : w₀ ≠ 0 := by
-    rw [hw₀def]
-    exact Complex.ofReal_ne_zero.mpr (by linarith)
-  have hγFval : ∀ t : I, diskBoundaryLoop _ hFc t
-      = sphericalEndpoint (κ ∘ h₁) R δ r₀
-          (zs + (ρ : ℂ) * ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)) :=
-    fun t => rfl
-  have hconjval : ∀ t : I, conjLoop w₀ t
-      = w₀ * (starRingEnd ℂ) ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ) :=
-    fun t => rfl
-  have hexp01 : Circle.exp (2 * π * ((0 : I) : ℝ))
-      = Circle.exp (2 * π * ((1 : I) : ℝ)) := by
-    rw [Set.Icc.coe_zero, Set.Icc.coe_one, mul_zero, mul_one, Circle.exp_zero,
-      Circle.exp_two_pi]
-  have hloopγ : conjLoop w₀ 0 = conjLoop w₀ 1 := by
-    rw [hconjval 0, hconjval 1, hexp01]
-  have hloopγ' : diskBoundaryLoop _ hFc 0 = diskBoundaryLoop _ hFc 1 := by
-    rw [hγFval 0, hγFval 1, hexp01]
-  have hpert : ∀ t : I,
-      ‖diskBoundaryLoop _ hFc t - conjLoop w₀ t‖ < ‖conjLoop w₀ t‖ := by
-    intro t
-    have hu : ‖((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)‖ = 1 :=
-      Circle.norm_coe _
-    have hk := key _ hu
-    have h1 : diskBoundaryLoop _ hFc t - conjLoop w₀ t
-        = sphericalEndpoint (κ ∘ h₁) R δ r₀
-            (zs + (ρ : ℂ) * ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ))
-          + ((η * h * ρ : ℝ) : ℂ)
-            * (starRingEnd ℂ) ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ) := by
-      rw [hγFval t, hconjval t, hw₀def]
-      push_cast
-      ring
-    have h2 : ‖conjLoop w₀ t‖ = η * h * ρ := by
-      rw [hconjval t, norm_mul, hw₀def, Complex.norm_real, Real.norm_eq_abs,
-        abs_neg, abs_of_pos hwR0, RCLike.norm_conj, hu, mul_one]
-    rw [h1, h2]
-    exact hk
   -- winding `−1` and the interior zero
-  have hwval : windingNumberC (diskBoundaryLoop _ hFc)
-      (diskBoundaryLoop_ne_zero _ hFc hbd) = -1 := by
-    rw [← windingNumberC_eq_of_perturb (conjLoop w₀) (diskBoundaryLoop _ hFc)
-      (conjLoop_ne_zero hw₀ne) (diskBoundaryLoop_ne_zero _ hFc hbd)
-      hloopγ hloopγ' hpert]
-    exact windingNumberC_conj_loop hw₀ne
-  obtain ⟨u, humem, hFu⟩ := exists_zero_of_boundary_winding _ hFc hbd
-    (by rw [hwval]; norm_num)
+  obtain ⟨u, humem, hFu⟩ :=
+    exists_interior_zero_of_conj_dominant hFc hwR0 key
   have hu1 : ‖u‖ ≤ 1 := by
     rw [Metric.mem_ball, dist_zero_right] at humem
     exact humem.le
