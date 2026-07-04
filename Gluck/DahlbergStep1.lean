@@ -486,56 +486,7 @@ private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ
     change h₁ (t + 2 * π + π / 4) = h₁ (t + π / 4) + 2 * π
     have : t + 2 * π + π / 4 = (t + π / 4) + 2 * π := by ring
     rw [this, hh₁per (t + π / 4)]
-  · -- The `L¹` estimate (the only remaining gap of D-B). Goal:
-    --   `∫₀²π |κ(h₁(t+π/4)) - cleanBicircle a b t| dt < ε`.
-    --
-    -- ROADMAP for the next prover (all auxiliary facts above are in scope and the
-    -- two key bounds `exists_kappa_bound` / `cleanBicircle_bounds` are proven):
-    --
-    -- 0. ⚠ RECALIBRATE `δ` FIRST. The current `δ = min (ε'/8) (π/4)` does *not*
-    --    see the curvature bound `N` (from `exists_kappa_bound hκcont h.2.1`), but
-    --    the gap contribution to the integral is `(N + b)·4δ`, so the proof needs
-    --    `δ < ε / (8 (N + b))` as well. Since `N` depends only on `κ` it can be
-    --    obtained *before* the `exists_plateau_density` call; replace the `set δ`
-    --    line by `δ = min (min (ε'/8) (π/4)) (ε / (8 (N + b + 1)))` (and re-derive
-    --    `hδpos`, `hδlt`; the `hfit` lemmas are `δ`-independent and unchanged).
-    --
-    -- 1. The universal bound is in scope: `N` (from `exists_kappa_bound`) with
-    --    `hN : ∀ x, |κ x| ≤ N`. Then for every `t`,
-    --    `|κ(h₁(t+π/4)) - cleanBicircle a b t| ≤ N + b`
-    --    (triangle inequality + `hN (h₁ (t+π/4))` + `cleanBicircle_bounds a b t hab.le`,
-    --    using `0 < a < b`; this gives `|cleanBicircle a b t| ≤ b`).
-    --
-    -- 2. The four plateaus over the period split (handling the around-`0` plateau
-    --    by the `2π`-periodicity `hh₁per` + `h.2.1` (κ periodic) for its wrapped
-    --    part `[7π/4+δ/2, 2π]`):
-    --      Q1ₐ = [0, π/4-δ/2],  Q2 = [π/4+δ/2, 3π/4-δ/2],
-    --      Q3 = [3π/4+δ/2, 5π/4-δ/2], Q4 = [5π/4+δ/2, 7π/4-δ/2],
-    --      Q1ᵦ = [7π/4+δ/2, 2π].
-    --    On each plateau `t+π/4` lies in the matching `exists_plateau_density`
-    --    interval, so `|h₁(t+π/4) - rₖ| ≤ ρ ≤ ρₖ` (`hplₖ` + `hρleₖ`), hence by `hmₖ`
-    --    `|κ(h₁(t+π/4)) - κ rₖ| ≤ ε'`; and `cleanBicircle a b t = κ rₖ`
-    --    (`= a` for k=1,3, `= b` for k=2,4) — read off via the proven helper
-    --    `dahlbergF_on_period` (the plateau `t` lies in a constancy arc of
-    --    `cleanBicircle`: e.g. `t ∈ (π/4,3π/4) ⇒ dahlbergF t = 1 ⇒ cleanBicircle = b`).
-    --    Thus the integrand is `≤ ε'` on the plateaus.
-    --
-    -- 3. Split `∫₀²π` at the 8 plateau/gap endpoints with
-    --    `intervalIntegral.integral_add_adjacent_intervals` (integrand interval-
-    --    integrable: `(hκcont.comp (hηcont of h₁(·+π/4))).sub (cleanBicircle_iI)`,
-    --    then `.abs`). Bound each plateau piece by `ε'·(length)` via
-    --    `intervalIntegral.integral_mono_on` against the constant `ε'`, and each gap
-    --    piece by `(N+b)·(length)`. Sum: `≤ ε'·(2π-4δ) + (N+b)·4δ ≤ ε'·2π + (N+b)·4δ`.
-    --
-    -- 4. Conclude `< ε` from `ε'·2π = ε/2` (`hε'def`, `field_simp`) and
-    --    `(N+b)·4δ < ε/2` (step 0's `δ` bound). Use strict `<` from `hδpos`/`hε`.
-    --
-    -- This is the mixed-sign `L¹` analogue of the measure-bound branch of
-    -- `exists_preliminary_reparam` (StepReduction.lean:637–758); that proof cannot
-    -- be reused directly (it is stated under `IsCurvatureFunction κ`, i.e. global
-    -- positivity, which mixed-sign `κ` lacks), but its arc/measure bookkeeping is a
-    -- close template.
-    --
+  · -- The `L¹` estimate: `∫₀²π |κ(h₁(t+π/4)) - cleanBicircle a b t| dt < ε`.
     -- Beta-reduce the composite `η = h₁(· + π/4)` in the goal.
     change (∫ t in (0:ℝ)..(2 * π),
         |κ (h₁ (t + π / 4)) - cleanBicircle a b t|) < ε
