@@ -186,6 +186,7 @@ $\langle z, i\,e^{i\varphi}\rangle_{\mathbb R}=-(\operatorname{Re}z)\sin\varphi
         lem:spherical_simplicity, lem:spherical_circle_realizes,
         lem:realizes_spherical_comp, lem:exists_c1_circle_inverse,
         lem:is_simple_closed_comp}
+        \leanok
   Split on the four-vertex disjunction (\cref{def:four_vertex_condition}). The
   \emph{constant} branch is discharged directly by the explicit centered circle
   (\cref{lem:spherical_circle_realizes}), with no flow machinery. For the value-separated
@@ -551,6 +552,46 @@ large ball covers $[0,2\pi]$.
   \cref{lem:truncated_speed_lipschitz}.
 \end{proof}
 
+\begin{lemma}[speed Lipschitz bound, uniform in the curvature]
+  \label{lem:truncated_speed_lipschitz_uniform}
+  \lean{Gluck.truncatedSpeed_lipschitz_uniform}
+  \uses{def:truncated_speed, lem:truncated_speed_lipschitz}
+  For $0\le R$, $0<\delta$ there is a single $L\ge0$ such that for \emph{every}
+  curvature function $\kappa$ and every $\theta$ the map
+  $z\mapsto\hat q_{\kappa,R,\delta}(\theta,z)$ is $L$-Lipschitz. (The explicit
+  constant of \cref{lem:truncated_speed_lipschitz} depends only on $(R,\delta)$,
+  never on $\kappa$; this uniform form breaks the quantifier circularity of the
+  winding assembly, where the $L^1$ tolerance $\varepsilon$ must be fixed
+  \emph{before} the reparametrized curvature $\kappa\circ h_1$ exists. Landed
+  \texttt{private} in stage 1; stage 2 de-privatizes it so the mixed-sign
+  assembly in \cref{chap:sphere_mixed} can consume the same witness.)
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:truncated_speed_lipschitz}
+  The proof of \cref{lem:truncated_speed_lipschitz} verbatim, with the constant
+  $L=\tfrac{R}{\delta}+\tfrac{1+R^2}{2\delta^2}$ quantified before $\kappa$:
+  no step of the numerator/denominator estimate inspects $\kappa$ beyond the
+  clamp $\max(\cdot,\delta)$, which is $1$-Lipschitz regardless of its argument.
+\end{proof}
+
+\begin{lemma}[field Lipschitz bound, uniform in the curvature]
+  \label{lem:truncated_field_lipschitz_uniform}
+  \lean{Gluck.truncatedField_lipschitz_uniform}
+  \uses{def:truncated_field, lem:truncated_speed_lipschitz_uniform}
+  For $0\le R$, $0<\delta$ there is a single $L\ge0$ such that for every
+  curvature function $\kappa$ and every $\theta$ the map
+  $z\mapsto F_{\kappa,R,\delta}(\theta,z)$ is $L$-Lipschitz. (Same
+  de-privatization note as \cref{lem:truncated_speed_lipschitz_uniform}.)
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:truncated_speed_lipschitz_uniform}
+  The witness of \cref{lem:truncated_speed_lipschitz_uniform} works: the unit
+  frame factor $e^{i\theta}$ has norm one, as in
+  \cref{lem:truncated_field_lipschitz}.
+\end{proof}
+
 \begin{lemma}\leanok
 [field joint continuity]
   \label{lem:truncated_field_continuous}
@@ -911,7 +952,8 @@ large ball covers $[0,2\pi]$.
   the Dahlberg-style reparametrization of \cref{chap:dahlberg_step1}.
 \end{proof}
 
-\begin{definition}[periodic extension of a fundamental-window function]
+\begin{definition}\leanok
+[periodic extension of a fundamental-window function]
   \label{def:periodic_extension}
   \lean{Gluck.periodicExtension}
   For $z:\mathbb R\to\mathbb C$, the \emph{$2\pi$-periodic extension} is
@@ -921,7 +963,8 @@ large ball covers $[0,2\pi]$.
   trajectory defined on $[0,2\pi]$ to a globally defined closed curve.
 \end{definition}
 
-\begin{lemma}[the periodic extension is periodic]
+\begin{lemma}\leanok
+[the periodic extension is periodic]
   \label{lem:periodic_extension_periodic}
   \lean{Gluck.periodicExtension_periodic}
   \uses{def:periodic_extension}
@@ -930,6 +973,8 @@ large ball covers $[0,2\pi]$.
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   $\lfloor(t+2\pi)/(2\pi)\rfloor=\lfloor t/(2\pi)\rfloor+1$, so the reduced arguments
   agree: $t+2\pi-2\pi(\lfloor t/(2\pi)\rfloor+1)=t-2\pi\lfloor t/(2\pi)\rfloor$.
 \end{proof}
@@ -991,7 +1036,8 @@ large ball covers $[0,2\pi]$.
 \section{Endpoint winding over the symmetric step model (S2-D)}
 \label{sec:sphere_winding}
 
-\begin{lemma}[arc bracket identity]
+\begin{lemma}\leanok
+[arc bracket identity]
   \label{lem:constant_arc_inner}
   \lean{Gluck.constantArc_inner}
   For all $w\in\mathbb C$, $r,\theta\in\mathbb R$:
@@ -1000,12 +1046,15 @@ large ball covers $[0,2\pi]$.
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   Bilinearity of the real inner product and
   $\langle ie^{i\theta},ie^{i\theta}\rangle=\|ie^{i\theta}\|^2=1$
   (\texttt{real\_inner\_smul\_left}, \texttt{real\_inner\_self\_eq\_norm\_sq}).
 \end{proof}
 
-\begin{lemma}[arc norm expansion]
+\begin{lemma}\leanok
+[arc norm expansion]
   \label{lem:constant_arc_norm_sq}
   \lean{Gluck.constantArc_norm_sq}
   For all $w\in\mathbb C$, $r,\theta\in\mathbb R$:
@@ -1013,12 +1062,15 @@ large ball covers $[0,2\pi]$.
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   The real polarization expansion $\|u-v\|^2=\|u\|^2-2\langle u,v\rangle+\|v\|^2$
   (\texttt{norm\_sub\_sq\_real}) with $\|i\,r\,e^{i\theta}\|^2=r^2$ and
   \cref{lem:constant_arc_inner}-style bilinearity for the cross term.
 \end{proof}
 
-\begin{lemma}[consistency identity of the arc data]
+\begin{lemma}\leanok
+[consistency identity of the arc data]
   \label{lem:constant_arc_consistency}
   \lean{Gluck.constantArc_consistency}
   \uses{def:spherical_speed, lem:constant_arc_norm_sq, lem:constant_arc_inner}
@@ -1028,6 +1080,8 @@ large ball covers $[0,2\pi]$.
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   Expand $\|w\|^2=\|z_0\|^2+2r\langle z_0,ie^{i\theta_0}\rangle+r^2$
   (\texttt{norm\_add\_sq\_real}), then substitute the defining relation
   $2r\bigl(K-\langle z_0,ie^{i\theta_0}\rangle\bigr)=1+\|z_0\|^2$ of
@@ -1072,7 +1126,8 @@ large ball covers $[0,2\pi]$.
   admissible, with clamps inactive) is \cref{lem:spherical_flow_unique}.
 \end{proof}
 
-\begin{lemma}[half-turn invariance of the truncated speed]
+\begin{lemma}\leanok
+[half-turn invariance of the truncated speed]
   \label{lem:truncated_speed_half_turn}
   \lean{Gluck.truncatedSpeed_half_turn}
   \uses{def:truncated_speed}
@@ -1082,13 +1137,16 @@ large ball covers $[0,2\pi]$.
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   $\|{-z}\|=\|z\|$ and $ie^{i(\theta+\pi)}=-ie^{i\theta}$, so
   $\langle -z,ie^{i(\theta+\pi)}\rangle=\langle z,ie^{i\theta}\rangle$; with
   $\kappa(\theta+\pi)=\kappa(\theta)$ every ingredient of the clamped quotient is
   unchanged.
 \end{proof}
 
-\begin{lemma}[half-turn anti-equivariance of the truncated field]
+\begin{lemma}\leanok
+[half-turn anti-equivariance of the truncated field]
   \label{lem:truncated_field_half_turn}
   \lean{Gluck.truncatedField_half_turn}
   \uses{def:truncated_field, lem:truncated_speed_half_turn}
@@ -1098,6 +1156,8 @@ large ball covers $[0,2\pi]$.
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   $F(\theta+\pi,-z)=\hat q(\theta+\pi,-z)\,e^{i(\theta+\pi)}
    =\hat q(\theta,z)\cdot(-e^{i\theta})=-F(\theta,z)$ by
   \cref{lem:truncated_speed_half_turn} and $e^{i\pi}=-1$.
@@ -1197,7 +1257,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 \cref{thm:existence_of_zero} and the perturbation/congruence lemmas of
 \cref{chap:winding} are.
 
-\begin{definition}[spherical arc map]
+\begin{definition}\leanok
+[spherical arc map]
   \label{def:spherical_arc_map}
   \lean{Gluck.sphericalArcMap}
   \uses{def:spherical_speed}
@@ -1215,7 +1276,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   the geometric meaning requires bracket positivity, the definition does not.)
 \end{definition}
 
-\begin{lemma}[quadratic identity: exact second-order vanishing of $q$ at the centered circle]
+\begin{lemma}\leanok
+[quadratic identity: exact second-order vanishing of $q$ at the centered circle]
   \label{lem:speed_quadratic_identity}
   \lean{Gluck.sphericalSpeed_sub_radius}
   \uses{def:spherical_speed, lem:spherical_speed_circle}
@@ -1234,6 +1296,7 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 
 \begin{proof}
   \uses{lem:constant_arc_norm_sq, lem:constant_arc_inner}
+  \leanok
   $q_c-r^\ast=\dfrac{(1+\|z\|^2)-2r^\ast D}{2D}$, and the numerator is
   \[
     1+\|z\|^2-2r^\ast c+2r^\ast\langle z,ie^{i\theta}\rangle
@@ -1244,7 +1307,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   expansion (\cref{lem:constant_arc_norm_sq} with $-r$ replaced by $r^\ast$).
 \end{proof}
 
-\begin{lemma}[speed dominates the centered radius]
+\begin{lemma}\leanok
+[speed dominates the centered radius]
   \label{lem:speed_radius_le}
   \lean{Gluck.sphericalSpeed_radius_le}
   \uses{def:spherical_speed, lem:speed_quadratic_identity}
@@ -1256,11 +1320,13 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 
 \begin{proof}
   \uses{lem:speed_quadratic_identity}
+  \leanok
   Immediate from \cref{lem:speed_quadratic_identity}: $q_c-r^\ast$ is a square divided
   by $2D>0$, hence nonnegative.
 \end{proof}
 
-\begin{lemma}[exact level sensitivity of the gauge speed]
+\begin{lemma}\leanok
+[exact level sensitivity of the gauge speed]
   \label{lem:speed_level_sensitivity}
   \lean{Gluck.sphericalSpeed_sub_level}
   \uses{def:spherical_speed}
@@ -1275,11 +1341,14 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   Both speeds are the quotients $(1+\|z\|^2)/(2D_K)$ and $(1+\|z\|^2)/(2D_{K'})$
   (\cref{def:spherical_speed} at constant curvature); subtract and clear denominators.
 \end{proof}
 
-\begin{lemma}[speed half-turn (true speed)]
+\begin{lemma}\leanok
+[speed half-turn (true speed)]
   \label{lem:spherical_speed_half_turn}
   \lean{Gluck.sphericalSpeed_half_turn}
   \uses{def:spherical_speed}
@@ -1290,10 +1359,12 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 
 \begin{proof}
   \uses{lem:truncated_speed_half_turn}
+  \leanok
   As stated; $ie^{i(\theta+\pi)}=-ie^{i\theta}$ and bilinearity of the inner product.
 \end{proof}
 
-\begin{lemma}[arc-map half-turn anti-equivariance]
+\begin{lemma}\leanok
+[arc-map half-turn anti-equivariance]
   \label{lem:arc_map_half_turn}
   \lean{Gluck.sphericalArcMap_half_turn}
   \uses{def:spherical_arc_map, lem:spherical_speed_half_turn}
@@ -1302,12 +1373,15 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   $q_K(\theta_0+\pi,-z)=q_K(\theta_0,z)$ (\cref{lem:spherical_speed_half_turn}) and
   $e^{i(\theta_0+\pi)}=-e^{i\theta_0}$, so every term of
   \cref{def:spherical_arc_map} flips sign.
 \end{proof}
 
-\begin{lemma}[arc concatenation]
+\begin{lemma}\leanok
+[arc concatenation]
   \label{lem:arc_map_concat}
   \lean{Gluck.sphericalArcMap_concat}
   \uses{def:spherical_arc_map, lem:constant_curvature_arc}
@@ -1322,6 +1396,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   By \cref{lem:constant_curvature_arc}(iii), $q_K$ is constant $=r$ along the arc where
   the bracket is positive; in particular
   $q_K(\theta_0+\Delta_1,\,z(\theta_0+\Delta_1))=r=q_K(\theta_0,z)$, so the second arc
@@ -1332,7 +1408,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   constant-model degeneracy.
 \end{proof}
 
-\begin{definition}[step half-period map]
+\begin{definition}\leanok
+[step half-period map]
   \label{def:step_half_map}
   \lean{Gluck.stepHalfMap}
   \uses{def:spherical_arc_map}
@@ -1346,7 +1423,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   \cref{def:four_arc_step_function}.)
 \end{definition}
 
-\begin{definition}[step model error map]
+\begin{definition}\leanok
+[step model error map]
   \label{def:step_error_map}
   \lean{Gluck.stepErrorMap}
   \uses{def:step_half_map}
@@ -1362,7 +1440,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   (\cref{lem:arc_map_concat}).
 \end{definition}
 
-\begin{lemma}[four-arc composite form of the step error map]
+\begin{lemma}\leanok
+[four-arc composite form of the step error map]
   \label{lem:step_error_map_four_arc}
   \lean{Gluck.stepErrorMap_four_arc}
   \uses{def:step_error_map, def:step_half_map, lem:arc_map_half_turn}
@@ -1379,6 +1458,7 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 
 \begin{proof}
   \uses{lem:arc_map_half_turn}
+  \leanok
   \cref{lem:arc_map_half_turn} at $\theta_0=0$ and $\theta_0=\pi/2$ rewrites the two
   arcs of the second half period: $A_{a,\pi,\pi/2}(y)=-A_{a,0,\pi/2}(-y)$ and
   $A_{b,3\pi/2,\pi/2}(y)=-A_{b,\pi/2,\pi/2}(-y)$. Unfolding
@@ -1386,7 +1466,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   the composite.
 \end{proof}
 
-\begin{lemma}[explicit arcs solve the truncated ODE]
+\begin{lemma}\leanok
+[explicit arcs solve the truncated ODE]
   \label{lem:constant_arc_solves_truncated}
   \lean{Gluck.constantArc_solves_truncated}
   \uses{lem:constant_curvature_arc, lem:truncated_speed_eq, def:truncated_field}
@@ -1400,12 +1481,15 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   On the admissible set the clamps are inactive, $\hat q=q_K$
   (\cref{lem:truncated_speed_eq}), and $z'(\theta)=re^{i\theta}
   =q_K(\theta,z(\theta))e^{i\theta}$ by \cref{lem:constant_curvature_arc}.
 \end{proof}
 
-\begin{lemma}[single-arc margin transport (shifted interval, constant model level)]
+\begin{lemma}\leanok
+[single-arc margin transport (shifted interval, constant model level)]
   \label{lem:invariant_admissible_arc}
   \lean{Gluck.invariant_admissible_arc}
   \uses{lem:truncated_field_sub_le, lem:gronwall_L1_drive,
@@ -1438,6 +1522,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   Verbatim the proof of \cref{lem:invariant_admissible_domain} after the time shift
   $s\mapsto t_1+s$ (which turns $[t_1,t_2]$ into $[0,T]$, $T=t_2-t_1$, and shifts the
   fields accordingly): FTC difference identity, the field sensitivity
@@ -1447,7 +1533,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   propagation via $|\langle z-z^\ast,ie^{i\theta}\rangle|\le\|z-z^\ast\|$.
 \end{proof}
 
-\begin{definition}[quarter-arc margin package]
+\begin{definition}\leanok
+[quarter-arc margin package]
   \label{def:arc_margins}
   \lean{Gluck.arcMargins}
   \uses{def:spherical_speed, def:spherical_arc_map}
@@ -1466,7 +1553,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   of \cref{lem:constant_arc_solves_truncated}.
 \end{definition}
 
-\begin{lemma}[one quarter-arc of the step transport]
+\begin{lemma}\leanok
+[one quarter-arc of the step transport]
   \label{lem:quarter_step_transport}
   \lean{Gluck.quarter_step_transport}
   \uses{def:arc_margins, def:spherical_arc_map, def:truncated_field,
@@ -1490,6 +1578,7 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 \begin{proof}
   \uses{lem:invariant_admissible_arc, lem:constant_arc_solves_truncated,
         lem:constant_arc_consistency}
+        \leanok
   The clamp-inactivity component of \cref{def:arc_margins} at $\theta=t_1$ gives
   bracket positivity at the start, hence the consistency identity
   (\cref{lem:constant_arc_consistency}) for the arc data $(w,r)$; by
@@ -1500,7 +1589,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   $A_{K,t_1,t_2-t_1}(p)$ by \cref{def:spherical_arc_map}.
 \end{proof}
 
-\begin{lemma}[four-arc chained transport against the step model]
+\begin{lemma}\leanok
+[four-arc chained transport against the step model]
   \label{lem:step_model_transport}
   \lean{Gluck.stepModel_transport}
   \uses{def:arc_margins, def:spherical_arc_map, lem:invariant_admissible_arc,
@@ -1531,6 +1621,7 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 
 \begin{proof}
   \uses{lem:quarter_step_transport, lem:step_error_map_four_arc}
+  \leanok
   Apply \cref{lem:quarter_step_transport} on each quarter $[\theta_j,\theta_{j+1}]$,
   $\theta_j=j\pi/2$, with the constant level $K_j\in\{a,b\}$ of that quarter; on each
   quarter $\int_{\theta_j}^{\theta_{j+1}}|\kappa-K_j|=\int_{\theta_j}^{\theta_{j+1}}
@@ -1544,14 +1635,26 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   the endpoint estimate.
 \end{proof}
 
-\begin{lemma}[uniform margins of the step model near the centered circle]
+\begin{lemma}\leanok
+[uniform margins of the step model near the centered circle]
   \label{lem:step_model_margins}
   \lean{Gluck.stepModel_margins}
   \uses{def:arc_margins, def:spherical_arc_map, lem:constant_arc_inner,
         lem:speed_quadratic_identity, lem:speed_radius_le,
         lem:spherical_speed_circle, def:step_half_map}
-  Fix $c>0$ and $\kappa_0\in(0,c]$, and set $r^\ast=\sqrt{1+c^2}-c$,
-  $z_0^\ast=-i\,r^\ast$. There exist explicit $0<R<1$ (the positivity witness is needed
+  Fix $c>0$ and set $r^\ast=\sqrt{1+c^2}-c$, $z_0^\ast=-i\,r^\ast$, and let
+  $\kappa_0>-r^\ast$. (Stage-2 re-sign: the lemma landed in stage 1 with the
+  hypothesis $0<\kappa_0$; the mixed-sign stage \cref{chap:sphere_mixed} RELAXES it
+  to $-r^\ast<\kappa_0$ — same conclusion, same constants ledger. Positivity of
+  $\kappa_0$ enters the landed proof \emph{only} through positivity of the slack
+  $m=\min(1-r^\ast,\ \kappa_0+r^\ast)$, which holds exactly when
+  $\kappa_0>-r^\ast$; the three slack inequalities fed to the per-arc margin
+  step use only $m\le\kappa_0+r^\ast$ and $m>0$, never the sign of $\kappa_0$.
+  The sole stage-1 consumer, \cref{lem:spherical_endpoint_winding}, supplies
+  $-r^\ast<\kappa_0$ trivially from $0<\kappa_0$ and $r^\ast>0$. Fallback if the
+  relaxation surfaces a genuine positivity use: keep the positive form and add a
+  separate relaxed variant, recording the obstacle in the task result.)
+  There exist explicit $0<R<1$ (the positivity witness is needed
   by \cref{lem:step_model_transport}'s hypothesis $0\le R$), $\delta>0$, $\mu>0$,
   $\rho_0>0$, $h_0>0$ (functions of $c,\kappa_0$ only) such that for all levels $a,b$
   with $|a-c|\le h_0$, $|b-c|\le h_0$ and every $z_0$ with $\|z_0-z_0^\ast\|\le\rho_0$,
@@ -1568,6 +1671,7 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 
 \begin{proof}
   \uses{lem:spherical_speed_circle, lem:constant_arc_inner, lem:speed_radius_le}
+  \leanok
   Along the centered circle itself ($a=b=c$, $z_0=z_0^\ast$) one has
   $\|z^\ast\|\equiv r^\ast<1$ and $\langle z^\ast(\theta),ie^{i\theta}\rangle\equiv
   -r^\ast<0$ (\cref{lem:spherical_speed_circle}), so all three quantities have strict
@@ -1598,7 +1702,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   explicit; no compactness argument is needed.
 \end{proof}
 
-\begin{lemma}[first-variation expansion of the step error map]
+\begin{lemma}\leanok
+[first-variation expansion of the step error map]
   \label{lem:step_error_expansion}
   \lean{Gluck.stepError_expansion}
   \uses{def:step_error_map, def:step_half_map, def:spherical_arc_map,
@@ -1622,6 +1727,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   All expansions are exact algebra; no abstract Taylor theorem is used. Write
   $\delta z=z_0-z_0^\ast$. The two mechanisms:
   (i) \emph{level sensitivity is exact}: the LANDED lemma
@@ -1652,7 +1759,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   than one monolithic \texttt{ring} call.
 \end{proof}
 
-\begin{definition}[conjugate boundary loop]
+\begin{definition}\leanok
+[conjugate boundary loop]
   \label{def:conj_loop}
   \lean{Gluck.conjLoop}
   For $w\in\mathbb C$, the \emph{conjugate loop} is the continuous map
@@ -1662,7 +1770,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   \cref{lem:step_error_expansion}.
 \end{definition}
 
-\begin{lemma}[the conjugate loop avoids the origin]
+\begin{lemma}\leanok
+[the conjugate loop avoids the origin]
   \label{lem:conj_loop_ne_zero}
   \lean{Gluck.conjLoop_ne_zero}
   \uses{def:conj_loop}
@@ -1672,10 +1781,12 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 
 \begin{proof}
   \uses{def:conj_loop}
+  \leanok
   Immediate: $|w\,e^{-2\pi it}|=|w|\ne0$.
 \end{proof}
 
-\begin{lemma}[winding of a conjugate loop]
+\begin{lemma}\leanok
+[winding of a conjugate loop]
   \label{lem:winding_conj_loop}
   \lean{Gluck.windingNumberC_conj_loop}
   \uses{def:winding_number_c, def:conj_loop, lem:conj_loop_ne_zero}
@@ -1684,6 +1795,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   The normalization of the loop is $t\mapsto\mathrm{circleProj}(w)\cdot e^{-2\pi it}$,
   which lifts through $\mathrm{Circle.exp}$ via $t\mapsto\arg(w)-2\pi t$; by
   the same lift computation as \cref{lem:winding_number_eq_div_of_lift} — which is
@@ -1702,7 +1815,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   five-line replication.)
 \end{proof}
 
-\begin{lemma}[four values at freely chosen levels]
+\begin{lemma}\leanok
+[four values at freely chosen levels]
   \label{lem:exists_abab_levels}
   \lean{Gluck.exists_abab_levels}
   \uses{def:four_vertex_condition, lem:ivt_hits, lem:abab_values}
@@ -1719,6 +1833,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   Four applications of the packaged IVT (\cref{lem:ivt_hits}): on $[q_1,p_2]$, $\kappa$
   runs from $\le a$ to $\ge b$, giving $\theta_1$ with $\kappa=a$ and then, on
   $[\theta_1,p_2]$, $\theta_2\ge\theta_1$ with $\kappa=b$ (strict inequality since the
@@ -1729,7 +1845,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   file — the Euclidean files are frozen.)
 \end{proof}
 
-\begin{lemma}[$L^1$ step reparametrization]
+\begin{lemma}\leanok
+[$L^1$ step reparametrization]
   \label{lem:step_L1_reparam}
   \lean{Gluck.exists_step_L1_reparam}
   \uses{lem:exists_preliminary_reparam, def:four_arc_step_function,
@@ -1747,6 +1864,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   Apply \cref{lem:exists_preliminary_reparam} with
   $\varepsilon'=\varepsilon/\bigl(B+2\pi+1\bigr)$ where
   $B=\sup_{[0,2\pi]}\kappa+b$ (finite by compactness and periodicity, and a pointwise
@@ -1757,7 +1876,8 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   $\int\le\varepsilon' B+2\pi\varepsilon'<\varepsilon$.
 \end{proof}
 
-\begin{lemma}[spherical endpoint winding: closed admissible trajectory for the
+\begin{lemma}\leanok
+[spherical endpoint winding: closed admissible trajectory for the
 reparametrized curvature]
   \label{lem:spherical_endpoint_winding}
   \lean{Gluck.spherical_endpoint_winding}
@@ -1779,6 +1899,8 @@ reparametrized curvature]
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   \emph{Data.} From the non-constant four-vertex branch take the alternating extrema and
   the overlap window; let $c$ be its midpoint and $\kappa_0=\min_{[0,2\pi]}\kappa>0$
   ($\le c$, shrinking $\kappa_0$ if necessary). \cref{lem:step_model_margins} for
@@ -1848,7 +1970,8 @@ reparametrized curvature]
   $\theta\mapsto -r^\ast ie^{i\theta}$ is injective because $e^{i\theta}$ is.
 \end{proof}
 
-\begin{lemma}[spherical realization transfers under reparametrization]
+\begin{lemma}\leanok
+[spherical realization transfers under reparametrization]
   \label{lem:realizes_spherical_comp}
   \lean{Gluck.realizesSphericalCurvature_comp}
   \uses{def:realizes_spherical_curvature, lem:realizes_curvature_comp}
@@ -1858,6 +1981,8 @@ reparametrized curvature]
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   Mirror of the Euclidean \cref{lem:realizes_curvature_comp}
   (\texttt{Gluck.realizesCurvature\_comp}): the chain rule gives
   $(z\circ\psi)'=\psi'\cdot(z'\circ\psi)$, so the speed scales by $\psi'>0$, the
@@ -1882,7 +2007,8 @@ $\mathrm{reconstruct}\,\rho$ (\cref{def:reconstruct}) for the \emph{trajectory s
 $\rho(\theta)=q_\kappa(\theta,\tilde z(\theta))$. The disk metric plays no role in
 injectivity. The chain below works this out in three finite steps and one assembly.
 
-\begin{lemma}[trajectory speed: continuity, periodicity, positivity]
+\begin{lemma}\leanok
+[trajectory speed: continuity, periodicity, positivity]
   \label{lem:spherical_trajectory_speed}
   \lean{Gluck.sphericalTrajectory_speed}
   \uses{def:spherical_speed, def:periodic_extension, lem:periodic_extension_periodic,
@@ -1898,6 +2024,7 @@ injectivity. The chain below works this out in three finite steps and one assemb
 
 \begin{proof}
   \uses{lem:reconstruction_ode, lem:periodic_extension_periodic}
+  \leanok
   \emph{Extended admissibility.} For any $t$ reduce $u=t-2\pi\lfloor t/(2\pi)\rfloor
   \in[0,2\pi)$; admissibility at $u$ plus $2\pi$-periodicity of $\kappa$ and of
   $\theta\mapsto e^{i\theta}$ give $\|\tilde z(t)\|\le R$ and
@@ -1914,7 +2041,8 @@ injectivity. The chain below works this out in three finite steps and one assemb
   \emph{Positivity.} Numerator $1+\|\tilde z\|^2\ge1>0$, denominator $\ge2\delta>0$.
 \end{proof}
 
-\begin{lemma}[the closing trajectory is a translated reconstruction curve]
+\begin{lemma}\leanok
+[the closing trajectory is a translated reconstruction curve]
   \label{lem:spherical_trajectory_eq_reconstruct}
   \lean{Gluck.sphericalTrajectory_eq_reconstruct}
   \uses{lem:spherical_trajectory_speed, lem:reconstruction_ode, def:reconstruct,
@@ -1928,6 +2056,7 @@ injectivity. The chain below works this out in three finite steps and one assemb
 
 \begin{proof}
   \uses{lem:spherical_trajectory_speed, lem:reconstruct_deriv}
+  \leanok
   Both sides are differentiable on all of $\mathbb R$ with the \emph{same} derivative
   $\rho(t)e^{it}$: the left side by the exposed derivative conjunct of
   \cref{lem:reconstruction_ode} (which is $q_\kappa(t,\tilde z(t))e^{it}
@@ -1938,7 +2067,8 @@ injectivity. The chain below works this out in three finite steps and one assemb
   $\tilde z(0)$ since $\mathrm{reconstruct}\,\rho\,(0)=\int_0^0=0$.
 \end{proof}
 
-\begin{lemma}[simplicity is translation-invariant]
+\begin{lemma}\leanok
+[simplicity is translation-invariant]
   \label{lem:is_simple_closed_const_add}
   \lean{Gluck.isSimpleClosed_const_add}
   \uses{def:is_simple_closed, def:is_closed_curve}
@@ -1947,12 +2077,15 @@ injectivity. The chain below works this out in three finite steps and one assemb
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   Closedness: $w+\gamma(t+2\pi)=w+\gamma(t)$ (\cref{def:is_closed_curve} is
   $2\pi$-periodicity, which survives adding a constant). Injectivity on $[0,2\pi)$:
   $w+\gamma(s)=w+\gamma(t)$ iff $\gamma(s)=\gamma(t)$ — cancel $w$.
 \end{proof}
 
-\begin{lemma}[simplicity]
+\begin{lemma}\leanok
+[simplicity]
   \label{lem:spherical_simplicity}
   \lean{Gluck.spherical_simplicity}
   \uses{lem:spherical_trajectory_speed, lem:spherical_trajectory_eq_reconstruct,
@@ -1969,6 +2102,7 @@ injectivity. The chain below works this out in three finite steps and one assemb
 \begin{proof}
   \uses{lem:spherical_trajectory_eq_reconstruct, cor:positive_curvature_implies_simple,
         lem:is_simple_closed_const_add}
+        \leanok
   Let $\rho$ be the trajectory speed of \cref{lem:spherical_trajectory_speed}:
   continuous, $2\pi$-periodic, strictly positive. Its error vector
   (\cref{def:error_vector}) vanishes:

@@ -190,9 +190,29 @@
  </li>
 <li class="">
   <a href="chap-sphere.html#sec:sphere_winding"><span class="toc_ref">13.6</span> <span class="toc_entry">Endpoint winding over the symmetric step model (S2-D)</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-2">
+     <li class="">
+  <a href="chap-sphere.html#a0000000029"><span class="toc_ref"></span> <span class="toc_entry">Design overview (S2-D, resolved iter-048)</span></a>
+ </li>
+
+  </ul>
  </li>
 <li class="">
   <a href="chap-sphere.html#sec:sphere_simplicity"><span class="toc_ref">13.7</span> <span class="toc_entry">Simplicity and capstone (S2-E)</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chap-sphere_mixed.html"><span class="toc_ref">14</span> <span class="toc_entry">Spherical converse, stage 2: mixed-sign curvature</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chap-sphere_mixed.html#a0000000030"><span class="toc_ref">14.1</span> <span class="toc_entry">Overview</span></a>
+ </li>
+<li class="">
+  <a href="chap-sphere_mixed.html#a0000000031"><span class="toc_ref">14.2</span> <span class="toc_entry">Declarations</span></a>
  </li>
 
   </ul>
@@ -216,7 +236,7 @@
 <h1 id="a0000000008">7.1 The breakpoint-aligning reparametrization family \(g_z\)</h1>
 <p>Recall the centred bicircle configuration \(\mathrm{configSpace}(\delta )(z) = (\tfrac {\pi }{4}+\delta \, z.\mathrm{re},\  \tfrac {3\pi }{4}+\delta \, z.\mathrm{im}, \tfrac {5\pi }{4},\  \tfrac {7\pi }{4})\) (<a href="chap-winding.html#def:configuration_space">definition 52</a>): only the two leading breakpoints move with \(z\in \overline{\mathbb {D}}\), the trailing two are pinned. The preliminary reparametrization \(h_1\) of <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 27</a> makes \(\kappa \circ h_1\) \(\varepsilon \)-close in measure to the canonical four-arc step function \(\kappa _0 = \mathrm{stepCurvature}\,  b\, a\, 0\, \tfrac {\pi }{2}\, \pi \, \tfrac {3\pi }{2}\) (breakpoints \(0,\tfrac {\pi }{2}, \pi ,\tfrac {3\pi }{2}\), values \(a,b,a,b\)). </p>
 <p>The four arcs \([\theta _1,\theta _2),[\theta _2,\theta _3),[\theta _3,\theta _4),[\theta _4,\theta _1+2\pi )\) have lengths </p>
-<div class="displaymath" id="a0000000086">
+<div class="displaymath" id="a0000000089">
   \[  L_1=\tfrac {\pi }{2}+\delta (z.\mathrm{im}-z.\mathrm{re}),\quad L_2=\tfrac {\pi }{2}-\delta z.\mathrm{im},\quad L_3=\tfrac {\pi }{2},\quad L_4=\tfrac {\pi }{2}+\delta z.\mathrm{re};  \]
 </div>
 <p> for \(\delta \le \pi /8\) and \(z\in \overline{\mathbb D}\) each \(L_k\) lies in \([\tfrac {\pi }{4},\tfrac {3\pi }{4}]\) and depends continuously on \(z\). </p>
@@ -322,7 +342,7 @@
 </li>
 </ul>
 <p> The plateau height \(m_k(z)\) is solved so that the arc integral is exactly \(\pi /2\): with \(\int _{\theta _k}^{\theta _{k+1}}w_z = m_k(z)\, (L_k-2\eta ) + \tfrac {\eta }{2}(V+m_k(z)) + \tfrac {\eta }{2}(m_k(z)+V) = m_k(z)(L_k-\eta ) + \eta V\), setting this to \(\pi /2\) gives </p>
-<div class="displaymath" id="a0000000087">
+<div class="displaymath" id="a0000000090">
   \[  m_k(z) \; =\;  \frac{\pi /2-\eta V}{L_k-\eta }.  \]
 </div>
 <p> Since \(L_k\in [\tfrac \pi 4,\tfrac {3\pi }4]\), \(\eta =\pi /16\) and \(V=2/3\), the numerator \(\pi /2-\eta V = \pi /2-\pi /24{\gt}0\) and the denominator \(L_k-\eta \in [\tfrac {3\pi }{16},\tfrac {11\pi }{16}]\), so each \(m_k(z)\) is a continuous, strictly positive function of \(z\). Since \(w_z\) is a convex combination of the node value \(V\) and the plateau heights \(m_k(z)\) (it is affine between them on the ramps), \(w_z(\theta )\in [c_-,c_+]\subset (0,\infty )\) with \(c_-=\min (V,\min _k m_k)\) and \(c_+=\max (V,\max _k m_k)\). A direct computation over \(L_k\in [\tfrac \pi 4,\tfrac {3\pi }4]\) gives \(\min _k m_k=2/3\) (at \(L_k=3\pi /4\)) and \(\max _k m_k=22/9\) (at \(L_k=\pi /4\)), so \(c_-=2/3\) and \(c_+=22/9\); we set the uniform slope bound \(K:=\max (c_+,1/c_-)=22/9\) (so \(1/K\le w_z\le K\)). This is the same kind of explicit continuous trapezoidal-density construction already carried out (for a different calibration) in the preliminary reparametrization of <a href="chap-stepreduction.html">chapter 4</a>; the present density is self-contained and depends on none of that chapter’s lemmas. </p>
@@ -344,7 +364,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:align_density_props">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000088"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000091"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -449,7 +469,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000088">
+<div class="proof_wrapper" id="a0000000091">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -476,7 +496,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:align_delta_bounds">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000089"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000092"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -529,7 +549,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000089">
+<div class="proof_wrapper" id="a0000000092">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -555,7 +575,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:align_density_arc_integral">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000090"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000093"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -630,7 +650,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000090">
+<div class="proof_wrapper" id="a0000000093">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -684,7 +704,7 @@
   </div>
   <div class="definition_thmcontent">
   <p>[Running-integral reparametrization]   Project-bespoke. For a weight \(w:\mathbb R\to \mathbb R\) and an anchor constant \(c\in \mathbb R\), define </p>
-<div class="displaymath" id="a0000000091">
+<div class="displaymath" id="a0000000094">
   \[  \mathrm{integralReparam}\, w\, c \; :\;  s \; \longmapsto \;  c + \int _0^{s} w(t)\, dt .  \]
 </div>
 
@@ -705,7 +725,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:has_deriv_integral_reparam">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000092"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000095"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -758,7 +778,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000092">
+<div class="proof_wrapper" id="a0000000095">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -785,7 +805,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:continuous_integral_reparam">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000093"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000096"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -838,7 +858,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000093">
+<div class="proof_wrapper" id="a0000000096">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -865,7 +885,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:strict_mono_integral_reparam">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000094"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000097"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -918,7 +938,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000094">
+<div class="proof_wrapper" id="a0000000097">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -945,7 +965,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:integral_reparam_add_two_pi">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000095"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000098"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -998,7 +1018,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000095">
+<div class="proof_wrapper" id="a0000000098">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1025,7 +1045,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:integral_reparam_change_of_var">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000096"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000099"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1085,13 +1105,13 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[Change of variables for the running integral]    For a continuous, strictly-positive weight \(w\) and any integrand \(G\), writing \(g=\mathrm{integralReparam}\, w\, c\), </p>
-<div class="displaymath" id="a0000000097">
+<div class="displaymath" id="a0000000100">
   \[  \int _{g(0)}^{g(2\pi )} G(x)\, dx \; =\;  \int _0^{2\pi } w(x)\, G\bigl(g(x)\bigr)\, dx .  \]
 </div>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000096">
+<div class="proof_wrapper" id="a0000000099">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1167,11 +1187,11 @@
   </div>
   <div class="definition_thmcontent">
   <p>[Breakpoint-aligning reparametrization family]    Project-bespoke. For \(0{\lt}\delta \le \pi /8\) and \(z\in \overline{\mathbb {D}}\) define \(g_z := \mathrm{alignReparam}(\delta )(z) : \mathbb {R}\to \mathbb {R}\) as the running integral of the calibrated density \(w_z\) (<a href="chap-reduction.html#def:align_density">definition 58</a>) anchored so that \(g_z(\theta _1)=\pi /2\): </p>
-<div class="displaymath" id="a0000000098">
+<div class="displaymath" id="a0000000101">
   \[  g_z(\theta ) \; :=\;  \tfrac {\pi }{2} + \int _{\theta _1}^{\theta } w_z(t)\, dt .  \]
 </div>
 <p> \(g_z\) is the orientation-preserving circle homeomorphism that sends the four breakpoints of the \(z\)-configuration </p>
-<div class="displaymath" id="a0000000099">
+<div class="displaymath" id="a0000000102">
   \[  \theta _1=\tfrac {\pi }{4}+\delta z.\mathrm{re},\quad \theta _2=\tfrac {3\pi }{4}+\delta z.\mathrm{im},\quad \theta _3=\tfrac {5\pi }{4},\quad \theta _4=\tfrac {7\pi }{4}  \]
 </div>
 <p> to the canonical breakpoints \(\tfrac {\pi }{2},\pi ,\tfrac {3\pi }{2},2\pi \) respectively (<a href="chap-reduction.html#lem:align_reparam_node_values">lemma 70</a>), is strictly increasing with slope \(g_z'=w_z\in [c_-,c_+]\subset (0,\infty )\), and is quasi-periodic (\(g_z(\theta +2\pi )=g_z(\theta )+2\pi \)) because the full-period integral of \(w_z\) is \(2\pi \) (<a href="chap-reduction.html#lem:align_density_arc_integral">lemma 61</a>). We write \(K=22/9\) for the uniform slope bound (\(1/K\le w_z\le K\); see <a href="chap-reduction.html#def:align_density">definition 58</a>). </p>
@@ -1193,7 +1213,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:align_reparam_eq">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000100"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000103"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1251,14 +1271,14 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[\(g_z\) is an instance of the generic family]    For every \(\delta ,z\), </p>
-<div class="displaymath" id="a0000000101">
+<div class="displaymath" id="a0000000104">
   \[  \mathrm{alignReparam}(\delta )(z) = \mathrm{integralReparam}\, (w_z)\, \Bigl(\tfrac \pi 2-\int _0^{\theta _1} w_z\Bigr),  \]
 </div>
 <p> where \(\theta _1=\mathrm{alignN1}(\delta )(z)\) is the first configuration breakpoint. </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000100">
+<div class="proof_wrapper" id="a0000000103">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1286,7 +1306,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:align_reparam_node_values">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000102"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000105"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1343,7 +1363,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000102">
+<div class="proof_wrapper" id="a0000000105">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1370,7 +1390,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:align_reparam_add_two_pi">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000103"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000106"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1431,7 +1451,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000103">
+<div class="proof_wrapper" id="a0000000106">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1458,7 +1478,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:continuous_align_reparam">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000104"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000107"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1519,7 +1539,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000104">
+<div class="proof_wrapper" id="a0000000107">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1546,7 +1566,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:continuous_uncurry_align_reparam">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000105"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000108"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1603,7 +1623,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000105">
+<div class="proof_wrapper" id="a0000000108">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1630,7 +1650,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:strict_mono_align_reparam">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000106"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000109"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1691,7 +1711,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000106">
+<div class="proof_wrapper" id="a0000000109">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1718,7 +1738,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:align_reparam_matches">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000107"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000110"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1780,14 +1800,14 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[\(g_z\) aligns the step functions]    Let \(\kappa _0=\mathrm{stepCurvature}\, b\, a\, 0\, \tfrac \pi 2\, \pi \, \tfrac {3\pi }2\) be the canonical four-arc step function of <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 27</a>. Then for almost every \(\theta \), </p>
-<div class="displaymath" id="a0000000108">
+<div class="displaymath" id="a0000000111">
   \[  \kappa _0\bigl(g_z(\theta )\bigr) \; =\;  \mathrm{stepCurvature}\, a\, b\, (\mathrm{configSpace}(\delta )(z))\, (\theta ),  \]
 </div>
 <p> the step function of the \(z\)-configuration. Consequently \(\mathrm{errorMap}(a,b,\delta )(z)=\mathrm{errorVector}(\mathrm{radius}(\kappa _0\circ g_z))\). </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000107">
+<div class="proof_wrapper" id="a0000000110">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1864,7 +1884,7 @@
   </div>
   <div class="definition_thmcontent">
   <p>[The \(\kappa \)-error map]    Project-bespoke. For a curvature function \(\kappa \), the reparametrization \(h_1\), and \(0{\lt}\delta \le \pi /8\), </p>
-<div class="displaymath" id="a0000000109">
+<div class="displaymath" id="a0000000112">
   \[  E_\kappa (z) \; :=\;  \mathrm{errorVector}\bigl(\mathrm{radius}(\kappa \circ h_1\circ g_z)\bigr) \; =\;  \int _0^{2\pi } e^{i\theta }\, \frac{d\theta }{\kappa \bigl(h_1(g_z(\theta ))\bigr)}, \qquad z\in \overline{\mathbb {D}} .  \]
 </div>
 <p> This is the error vector of the curve reconstructed from the curvature function \(\kappa \circ h_1\circ g_z\); \(E_\kappa (z)=0\) means precisely that this curve closes up. </p>
@@ -1886,7 +1906,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:kappa_error_map_continuous">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000110"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000113"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1943,7 +1963,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000110">
+<div class="proof_wrapper" id="a0000000113">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1972,7 +1992,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:has_deriv_align_reparam">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000111"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000114"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2033,7 +2053,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000111">
+<div class="proof_wrapper" id="a0000000114">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2060,7 +2080,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:align_reparam_change_of_var">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000112"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000115"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2121,7 +2141,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000112">
+<div class="proof_wrapper" id="a0000000115">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2149,7 +2169,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:kappa_error_map_close">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000113"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000116"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2223,13 +2243,13 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[\(E_\kappa \) is uniformly close to \(E_{\mathrm{bi}}\)]    Let \(M = 1/\min \kappa \) and let \(h_1\) be chosen for a tolerance \(\varepsilon {\gt}0\) as in <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 27</a>. There is an absolute constant \(K\) (the slope bound of \(g_z\)) such that, for every \(z\in \overline{\mathbb {D}}\), </p>
-<div class="displaymath" id="a0000000114">
+<div class="displaymath" id="a0000000117">
   \[  \bigl\lVert E_\kappa (z) - \mathrm{errorMap}(a,b,\delta )(z)\bigr\rVert \; \le \;  K\, M^2\, \varepsilon .  \]
 </div>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000113">
+<div class="proof_wrapper" id="a0000000116">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2238,7 +2258,7 @@
   </div>
   <div class="proof_content">
   <p> Fix \(z\). By <a href="chap-reduction.html#lem:align_reparam_matches">lemma 75</a>, \(\mathrm{errorMap}(a,b,\delta )(z) = \mathrm{errorVector}(\mathrm{radius}(\kappa _0\circ g_z))\), since \(\kappa _0\circ g_z\) equals the \(z\)-configuration step function a.e. By <a href="chap-stepreduction.html#lem:error_vector_lipschitz">lemma 22</a> applied to the weights \(\rho = \mathrm{radius}(\kappa \circ h_1\circ g_z)\) and \(\rho _0 = \mathrm{radius}(\kappa _0\circ g_z)\), </p>
-<div class="displaymath" id="a0000000115">
+<div class="displaymath" id="a0000000118">
   \[  \lVert E_\kappa (z) - \mathrm{errorMap}(z)\rVert \le \int _0^{2\pi }\Bigl\lvert \tfrac {1}{\kappa (h_1(g_z\theta ))} - \tfrac {1}{\kappa _0(g_z\theta )}\Bigr\rvert \, d\theta .  \]
 </div>
 <p> Both weights lie in \([0,M]\), and \(\lvert 1/u-1/v\rvert \le M^2\lvert u-v\rvert \) for \(u,v\ge 1/M\), so the integrand is \(\le M^2\lvert \kappa \circ h_1 - \kappa _0\rvert \circ g_z\). Substituting \(\phi = g_z(\theta )\) (a piecewise-affine change of variables with \(g_z'\ge 1/K\)) pulls the bound back to the \(\phi \)-line: the set where \(\lvert \kappa (h_1\phi )-\kappa _0(\phi )\rvert {\gt}\varepsilon \) has measure \({\lt}\varepsilon \) (<a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 27</a>), and its \(g_z\)-preimage has measure \({\lt}K\varepsilon \); off it the integrand is \(\le M^2\varepsilon \), and on it the integrand is \(\le 2M\cdot M = 2M^2\). Hence the integral is \(\le M^2\varepsilon \cdot 2\pi + 2M^2\cdot K\varepsilon \le K' M^2\varepsilon \) for an absolute constant \(K'\). Absorb \(2\pi \) and the factor into \(K\). </p>
@@ -2258,7 +2278,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:exists_reparam_close">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000116"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000119"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2335,7 +2355,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000116">
+<div class="proof_wrapper" id="a0000000119">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2363,7 +2383,7 @@
 
     <a class="icon proof" href="chap-reduction.html#lem:reduction_justified">#</a>
     
-    <a class="icon proof" href="chap-reduction.html#a0000000117"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-reduction.html#a0000000120"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2446,7 +2466,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000117">
+<div class="proof_wrapper" id="a0000000120">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof

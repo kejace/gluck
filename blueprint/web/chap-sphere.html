@@ -13,6 +13,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>The spherical converse (S², positive curvature)</title>
+<link rel="next" href="chap-sphere_mixed.html" title="Spherical converse, stage 2: mixed-sign curvature" />
 <link rel="prev" href="chap-dahlberg_step2.html" title="Dahlberg Step 2: the closing parameter and the converse (Phase D-C)" />
 <link rel="up" href="index.html" title="gluck" />
 <link rel="stylesheet" href="styles/theme-white.css" />
@@ -189,9 +190,29 @@
  </li>
 <li class="">
   <a href="chap-sphere.html#sec:sphere_winding"><span class="toc_ref">13.6</span> <span class="toc_entry">Endpoint winding over the symmetric step model (S2-D)</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-2">
+     <li class="">
+  <a href="chap-sphere.html#a0000000029"><span class="toc_ref"></span> <span class="toc_entry">Design overview (S2-D, resolved iter-048)</span></a>
+ </li>
+
+  </ul>
  </li>
 <li class="">
   <a href="chap-sphere.html#sec:sphere_simplicity"><span class="toc_ref">13.7</span> <span class="toc_entry">Simplicity and capstone (S2-E)</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chap-sphere_mixed.html"><span class="toc_ref">14</span> <span class="toc_entry">Spherical converse, stage 2: mixed-sign curvature</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chap-sphere_mixed.html#a0000000030"><span class="toc_ref">14.1</span> <span class="toc_entry">Overview</span></a>
+ </li>
+<li class="">
+  <a href="chap-sphere_mixed.html#a0000000031"><span class="toc_ref">14.2</span> <span class="toc_entry">Declarations</span></a>
  </li>
 
   </ul>
@@ -212,22 +233,22 @@
 <h1 id="sec:sphere_conformal">13.1 The conformal geodesic-curvature law</h1>
 
 <p>Write \(z=(x,y)\in \mathbb R^2\cong \mathbb C\) for a point of the disk and let a curve have unit Euclidean tangent \(T=e^{i\varphi }\) at inclination angle \(\varphi \). We use the <em>outward</em> (right) unit normal </p>
-<div class="displaymath" id="a0000000201">
+<div class="displaymath" id="a0000000204">
   \[  n=-iT=e^{i(\varphi -\pi /2)}=(\sin \varphi ,-\cos \varphi ),\qquad \langle z,n\rangle =x\sin \varphi -y\cos \varphi .  \]
 </div>
 <p> For the isothermal factor \(e^{2\lambda }=4/(1+|z|^2)^2\) one has \(\lambda =\ln 2-\ln (1+|z|^2)\) and \(\nabla \lambda =-2z/(1+|z|^2)\), so \(\partial _n\lambda =\langle \nabla \lambda ,n\rangle =-2\langle z,n\rangle /(1+|z|^2)\). The conformal transformation law \(\kappa _g=e^{-\lambda }(\kappa _E+\partial _n\lambda )\) gives the fundamental identity used throughout: </p>
-<div class="displaymath" id="a0000000202">
+<div class="displaymath" id="a0000000205">
   \[  \kappa _S \; =\;  \frac{1+|z|^2}{2}\, \kappa _E \; -\;  \langle z,n\rangle .  \]
 </div>
 <p> Here \(\kappa _E\) is the Euclidean signed curvature of the disk representative and \(\kappa _S\) its spherical geodesic curvature. In the tangent-angle gauge (<a href="chap-sphere.html#sec:sphere_defs">section 13.2</a>) \(\kappa _E=\varphi '/\| z'\| \), so the law rearranges to the <em>speed relation</em> </p>
-<div class="displaymath" id="a0000000203">
+<div class="displaymath" id="a0000000206">
   \[  \frac{1+|z|^2}{2}\, \varphi ' \; =\;  \bigl(\kappa _S+\langle z,n\rangle \bigr)\, \| z'\|  , \qquad \text{gauge speed}\quad q=\frac{1+|z|^2}{2\bigl(\kappa _S+\langle z,n\rangle \bigr)} .  \]
 </div>
 <h4 id="a0000000027">Geodesic-circle sanity anchor (decisive sign check).</h4>
 <p> A counterclockwise Euclidean circle \(|z|=r\) has \(\kappa _E=1/r\) and outward normal \(n=z/r\), so \(\langle z,n\rangle =r\) and \(\kappa _S=\dfrac {1+r^2}{2r}-r=\dfrac {1-r^2}{2r}=\cot \rho \) with \(r=\tan (\rho /2)\) — exactly the geodesic curvature of a spherical circle of intrinsic radius \(\rho \) (and \(0\) on the equator \(\rho =\pi /2\)). The gauge speed is then \(q=r\). The opposite sign choice would give \((1+3r^2)/(2r)\ne \cot \rho \), so <em>the outward normal with a minus sign is the correct convention</em>; any Lean formalization must reproduce \(q(\text{circle }r)=r\). </p>
 <h4 id="a0000000028">Lean encoding of the normal term.</h4>
 <p> In Lean the left normal \(iT\) is the natural object: \(\langle z,iT\rangle =\langle z, i\, e^{i\varphi }\rangle =-x\sin \varphi +y\cos \varphi =-\langle z,n\rangle \). Hence the speed relation is encoded with \(\langle z,n\rangle \) replaced by \(-\langle z,iT\rangle \): </p>
-<div class="displaymath" id="a0000000204">
+<div class="displaymath" id="a0000000207">
   \[  \frac{1+\| z\| ^2}{2}\, \varphi ' =\bigl(\kappa -\langle z,\,  i\, e^{i\varphi }\rangle _{\mathbb R}\bigr)\, \| z'\|  .  \]
 </div>
 <p> The project supplies the rewrite lemma \(\langle z, i\, e^{i\varphi }\rangle _{\mathbb R}=-(\operatorname {Re}z)\sin \varphi +(\operatorname {Im}z)\cos \varphi \) so both forms are interchangeable. </p>
@@ -248,7 +269,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:sphere_normal_inner_eq">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000205"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000208"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -279,7 +300,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000205">
+<div class="proof_wrapper" id="a0000000208">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -331,7 +352,7 @@
   </div>
   <div class="definition_thmcontent">
   <p>[realizes spherical curvature]   A curve \(z:\mathbb R\to \mathbb C\) <em>realizes the spherical curvature function</em> \(\kappa :\mathbb R\to \mathbb R\) when it is \(C^1\), regular (\(z'(t)\neq 0\) for all \(t\)), confined to the open disk (\(\| z(t)\| {\lt}1\) for all \(t\)), and there is a differentiable tangent-angle function \(\varphi :\mathbb R\to \mathbb R\) with, for all \(t\), </p>
-<div class="displaymath" id="a0000000206">
+<div class="displaymath" id="a0000000209">
   \[  z'(t)=\| z'(t)\| \, e^{i\varphi (t)},\qquad \frac{1+\| z(t)\| ^2}{2}\, \varphi '(t) =\bigl(\kappa (t)-\langle z(t),\, i\, e^{i\varphi (t)}\rangle _{\mathbb R}\bigr)\, \| z'(t)\|  .  \]
 </div>
 <p> By <a href="chap-sphere.html#sec:sphere_conformal">section 13.1</a> the coefficient \(\kappa -\langle z,iT\rangle =\kappa +\langle z,n\rangle \) is the reciprocal-speed weight of the conformal law, so this says precisely that \(\kappa \) is the spherical geodesic curvature of \(z\). It mirrors the Euclidean <a href="chap-curve.html#def:realizes_curvature">definition 3</a> exactly: it is <em>speed-free</em> (only the angle \(\varphi \), not \(z\), must be differentiable; the speed \(\| z'\| \) is never normalized to arc length), so it is meaningful for a merely continuous \(\kappa \) and does not reintroduce the three-dimensional spherical frame problem. </p>
@@ -418,7 +439,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:sphere_curvature_lower_bound">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000207"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000210"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -469,7 +490,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000207">
+<div class="proof_wrapper" id="a0000000210">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -489,12 +510,14 @@
     <span class="theorem_thmlabel">149</span>
     <div class="thm_header_extras">
 
+    
+    ✓
         </div>
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="chap-sphere.html#thm:spherical_converse_pos">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000208"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000211"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -516,25 +539,29 @@
           
           <li><a href="chap-sphere.html#lem:spherical_speed_solve">Lemma 152</a></li>
           
-          <li><a href="chap-sphere.html#lem:reconstruction_ode">Lemma 179</a></li>
+          <li><a href="chap-sphere.html#lem:reconstruction_ode">Lemma 181</a></li>
           
-          <li><a href="chap-sphere.html#lem:invariant_admissible_domain">Lemma 178</a></li>
+          <li><a href="chap-sphere.html#lem:spherical_endpoint_winding">Lemma 211</a></li>
           
-          <li><a href="chap-sphere.html#lem:spherical_endpoint_winding">Lemma 182</a></li>
+          <li><a href="chap-sphere.html#lem:realizes_spherical_comp">Lemma 213</a></li>
           
-          <li><a href="chap-sphere.html#lem:spherical_simplicity">Lemma 184</a></li>
+          <li><a href="chap-sphere.html#lem:spherical_simplicity">Lemma 217</a></li>
           
-          <li><a href="chap-sphere.html#lem:spherical_circle_realizes">Lemma 183</a></li>
+          <li><a href="chap-sphere.html#lem:spherical_circle_realizes">Lemma 212</a></li>
           
-          <li><a href="chap-sphere.html#lem:reconstruction_ode">Lemma 179</a></li>
+          <li><a href="chap-sphere.html#lem:reconstruction_ode">Lemma 181</a></li>
           
-          <li><a href="chap-sphere.html#lem:invariant_admissible_domain">Lemma 178</a></li>
+          <li><a href="chap-sphere.html#lem:spherical_endpoint_winding">Lemma 211</a></li>
           
-          <li><a href="chap-sphere.html#lem:spherical_endpoint_winding">Lemma 182</a></li>
+          <li><a href="chap-sphere.html#lem:spherical_simplicity">Lemma 217</a></li>
           
-          <li><a href="chap-sphere.html#lem:spherical_simplicity">Lemma 184</a></li>
+          <li><a href="chap-sphere.html#lem:spherical_circle_realizes">Lemma 212</a></li>
           
-          <li><a href="chap-sphere.html#lem:spherical_circle_realizes">Lemma 183</a></li>
+          <li><a href="chap-sphere.html#lem:realizes_spherical_comp">Lemma 213</a></li>
+          
+          <li><a href="chap-fourvertex.html#lem:exists_c1_circle_inverse">Lemma 91</a></li>
+          
+          <li><a href="chap-fourvertex.html#lem:is_simple_closed_comp">Lemma 90</a></li>
           
         </ul>
     
@@ -566,14 +593,14 @@
   </div>
   <div class="theorem_thmcontent">
   <p>[spherical converse, positive stage]    If \(\kappa \) satisfies the positive-stage spherical four-vertex condition (<a href="chap-sphere.html#def:sphere_four_vertex">definition 147</a>), then there is a simple closed curve \(z\) confined to the open disk that realizes \(\kappa \) as its spherical geodesic curvature: </p>
-<div class="displaymath" id="a0000000209">
+<div class="displaymath" id="a0000000212">
   \[  \texttt{SphereFourVertex }\kappa \; \Longrightarrow \;  \exists \, z,\  \texttt{IsSimpleClosed }z\  \wedge \  \texttt{RealizesSphericalCurvature }z\, \kappa .  \]
 </div>
 <p> This is the same conclusion shape as the Euclidean <span class="ttfamily">gluck_converse</span>, with <span class="ttfamily">RealizesCurvature</span> replaced by its spherical analogue. </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000208">
+<div class="proof_wrapper" id="a0000000211">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -581,7 +608,7 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p> Split on the four-vertex disjunction (<a href="chap-curvature.html#def:four_vertex_condition">definition 12</a>). The <em>constant</em> branch is discharged directly by the explicit centered circle (<a href="chap-sphere.html#lem:spherical_circle_realizes">lemma 183</a>), with no flow machinery. For the value-separated branch, assemble the proof arc of <a href="chap-sphere.html#sec:sphere_arc">section 13.3</a>. <a href="chap-sphere.html#lem:spherical_endpoint_winding">lemma 182</a> supplies a closing configuration \(z_0^\ast \) with \(E(z_0^\ast )=0\), i.e. the reconstruction trajectory of <a href="chap-sphere.html#lem:reconstruction_ode">lemma 179</a> through \(z_0^\ast \) is a closed \(C^1\) curve; it is confined to \(\{ |z|\le R'\} \subset \{ |z|{\lt}1\} \) by <a href="chap-sphere.html#lem:invariant_admissible_domain">lemma 178</a>, and it realizes \(\kappa \) in the gauge \(\varphi (\theta )=\theta \) because the ODE field is exactly the algebraically solved speed relation of <a href="chap-sphere.html#def:realizes_spherical_curvature">definition 146</a> (<a href="chap-sphere.html#lem:spherical_speed_solve">lemma 152</a>). <a href="chap-sphere.html#lem:spherical_simplicity">lemma 184</a> gives simplicity in the disk, hence on \(S^2\). This mirrors how <span class="ttfamily">dahlbergConverse</span> assembles its closing parameter, simplicity transport, and reconstruction. <em>(Assembled formally in S2-E once the arc lemmas exist in Lean.)</em> </p>
+  <p> Split on the four-vertex disjunction (<a href="chap-curvature.html#def:four_vertex_condition">definition 12</a>). The <em>constant</em> branch is discharged directly by the explicit centered circle (<a href="chap-sphere.html#lem:spherical_circle_realizes">lemma 212</a>), with no flow machinery. For the value-separated (non-constant) branch: <a href="chap-sphere.html#lem:spherical_endpoint_winding">lemma 211</a> supplies \(R{\lt}1\), \(\delta {\gt}0\), a circle reparametrization \(h_1\), and a <em>closed, admissible</em> trajectory \(z\) of the \((\kappa \circ h_1,R,\delta )\)-truncated flow. <a href="chap-sphere.html#lem:reconstruction_ode">lemma 181</a> (with curvature function \(\kappa \circ h_1\)) upgrades its periodic extension to a closed \(C^1\) curve confined to \(\{ |z|\le R\} \subset \{ |z|{\lt}1\} \) realizing \(\kappa \circ h_1\) in the gauge \(\varphi (\theta )=\theta \). <a href="chap-sphere.html#lem:realizes_spherical_comp">lemma 213</a> with \(\psi =h_1^{-1}\) pulls this back to a curve realizing \(\kappa \) (closedness and injectivity-on-a-period transfer along the circle-equivariant \(h_1^{-1}\), as in the Euclidean <span class="ttfamily">isSimpleClosed_comp</span>). <a href="chap-sphere.html#lem:spherical_simplicity">lemma 217</a> gives simplicity in the disk, hence on \(S^2\). This mirrors how <span class="ttfamily">dahlbergConverse</span> assembles its closing parameter, simplicity transport, and reconstruction. <em>(Assembled formally in S2-E once the S2-D layer exists in Lean.)</em> </p>
 
   </div>
 </div>
@@ -591,12 +618,12 @@
 <ol class="enumerate">
   <li><p><b class="bfseries">S2-B (truncated flow, unconditional).</b> The gauge speed is truncated algebraically (<a href="chap-sphere.html#def:truncated_speed">definition 156</a>) so the ODE field becomes globally Lipschitz and bounded; global existence on \([0,2\pi ]\), uniqueness, and continuous dependence on the initial point are then unconditional, with no confinement prerequisite. Only the closed curve found at the end must be shown, a posteriori, to be <em>admissible</em> (both truncations inactive), whereupon it is an honest spherical curve. </p>
 </li>
-  <li><p><b class="bfseries">S2-C (admissibility by margin transport).</b> The confinement mechanism is <em>perturbative</em>: an explicit model trajectory (a spherical bicircle made of circular arcs, <a href="chap-sphere.html#lem:constant_curvature_arc">lemma 180</a>) is admissible with quantitative margins, and a Grönwall estimate with \(L^1\)-in-\(\theta \) drive (<a href="chap-sphere.html#lem:invariant_admissible_domain">lemma 178</a>) transports the margins to every trajectory whose curvature is \(L^1\)-close and whose start is near the model start. The Dahlberg-style reparametrization already formalized in <a href="chap-dahlberg_step1.html">chapter 11</a> supplies arbitrarily small \(L^1\) distance to a two-value step model, so no uniform-in-\(\kappa _0\) direct confinement estimate is needed (none exists: no disk is flow-invariant, see the discussion in <a href="chap-sphere.html#lem:invariant_admissible_domain">lemma 178</a>). </p>
+  <li><p><b class="bfseries">S2-C (admissibility by margin transport).</b> The confinement mechanism is <em>perturbative</em>: an explicit model trajectory (a spherical bicircle made of circular arcs, <a href="chap-sphere.html#lem:constant_curvature_arc">lemma 185</a>) is admissible with quantitative margins, and a Grönwall estimate with \(L^1\)-in-\(\theta \) drive (<a href="chap-sphere.html#lem:invariant_admissible_domain">lemma 178</a>) transports the margins to every trajectory whose curvature is \(L^1\)-close and whose start is near the model start. The Dahlberg-style reparametrization already formalized in <a href="chap-dahlberg_step1.html">chapter 11</a> supplies arbitrarily small \(L^1\) distance to a two-value step model, so no uniform-in-\(\kappa _0\) direct confinement estimate is needed (none exists: no disk is flow-invariant, see the discussion in <a href="chap-sphere.html#lem:invariant_admissible_domain">lemma 178</a>). </p>
 </li>
-  <li><p><b class="bfseries">S2-D (endpoint map and winding).</b> The degree argument runs over a compact \(2\)-disk of <em>initial points</em> \(z_0\), but its computable model is the symmetric two-value (\(\pi \)-periodic) step curvature, exploited through the half-turn equivariance \(z\mapsto -z\), \(\theta \mapsto \theta +\pi \) (<a href="chap-sphere.html#lem:flow_half_turn_equivariance">lemma 181</a>). The constant-curvature model is <em>unusable</em>: for constant \(\kappa \) every admissible trajectory closes (all spherical circles), so the endpoint error vanishes identically and carries no degree — see the DO-NOT recorded in <a href="chap-sphere.html#lem:spherical_endpoint_winding">lemma 182</a>. </p>
+  <li><p><b class="bfseries">S2-D (endpoint map and winding).</b> The degree argument runs over a compact \(2\)-disk of <em>initial points</em> \(z_0\), but its computable model is the symmetric two-value (\(\pi \)-periodic) step curvature, exploited through the half-turn equivariance \(z\mapsto -z\), \(\theta \mapsto \theta +\pi \) (<a href="chap-sphere.html#lem:flow_half_turn_equivariance">lemma 188</a>). The constant-curvature model is <em>unusable</em>: for constant \(\kappa \) every admissible trajectory closes (all spherical circles), so the endpoint error vanishes identically and carries no degree — see the DO-NOT recorded in <a href="chap-sphere.html#lem:spherical_endpoint_winding">lemma 211</a>. </p>
 </li>
 </ol>
-<p> The speed layer below is formalized; the truncated-flow layer is the current prover objective; S2-C/S2-D blocks state the pinned design with honest flags on the two remaining open sub-questions (both in <a href="chap-sphere.html#lem:spherical_endpoint_winding">lemma 182</a>). </p>
+<p> The speed, flow, transport, and step-model layers (S2-A through S2-D except the final assembly) are formalized axiom-clean; what remains is the assembly <a href="chap-sphere.html#lem:spherical_endpoint_winding">lemma 211</a>, the S2-E simplicity chain, and the capstone. </p>
 <div class="definition_thmwrapper theorem-style-definition" id="def:spherical_speed">
   <div class="definition_thmheading">
     <span class="definition_thmcaption">
@@ -657,7 +684,7 @@
   </div>
   <div class="definition_thmcontent">
   <p>[gauge speed]    For \(\kappa :\mathbb R\to \mathbb R\), \(\theta \in \mathbb R\) and \(z\in \mathbb C\) set </p>
-<div class="displaymath" id="a0000000210">
+<div class="displaymath" id="a0000000213">
   \[  q_\kappa (\theta ,z)\; =\; \frac{1+\| z\| ^2}{2\bigl(\kappa (\theta )-\langle z,\, i\, e^{i\theta }\rangle _{\mathbb R}\bigr)} .  \]
 </div>
 <p> By <a href="chap-sphere.html#lem:sphere_normal_inner_eq">lemma 145</a> the bracket equals \(\kappa (\theta )+\langle z,n\rangle \) for the outward normal \(n=-i\, e^{i\theta }\) of the gauge \(\varphi (\theta )=\theta \), so \(q_\kappa \) is the algebraic solution of the speed relation of <a href="chap-sphere.html#def:realizes_spherical_curvature">definition 146</a> for the speed \(\| z'\| \). It is a total function of the junk-value kind: where the bracket vanishes it returns division-by-zero junk, and every lemma about it carries the admissibility hypothesis \(\| z\| \le R{\lt}\kappa (\theta )\). </p>
@@ -679,7 +706,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:sphere_denom_pos">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000211"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000214"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -730,7 +757,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000211">
+<div class="proof_wrapper" id="a0000000214">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -757,7 +784,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:spherical_speed_solve">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000212"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000215"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -812,7 +839,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000212">
+<div class="proof_wrapper" id="a0000000215">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -839,7 +866,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:spherical_speed_continuous">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000213"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000216"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -892,7 +919,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000213">
+<div class="proof_wrapper" id="a0000000216">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -919,7 +946,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:spherical_speed_periodic">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000214"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000217"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -970,7 +997,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000214">
+<div class="proof_wrapper" id="a0000000217">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -997,7 +1024,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:spherical_speed_circle">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000215"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000218"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1048,7 +1075,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000215">
+<div class="proof_wrapper" id="a0000000218">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1123,7 +1150,7 @@
   </div>
   <div class="definition_thmcontent">
   <p>[truncated gauge speed]    For parameters \(R,\delta \) set </p>
-<div class="displaymath" id="a0000000216">
+<div class="displaymath" id="a0000000219">
   \[  \hat q_{\kappa ,R,\delta }(\theta ,z)\; =\;  \frac{1+\min (\| z\| ,R)^2}{2\, \max \bigl(\kappa (\theta )-\langle z,\, i\, e^{i\theta }\rangle _{\mathbb R},\  \delta \bigr)}.  \]
 </div>
 <p> On the <em>admissible set</em> \(\{ (\theta ,z):\| z\| \le R\  \wedge \  \kappa (\theta )-\langle z,i e^{i\theta }\rangle \ge \delta \} \) both clamps are inactive and \(\hat q=q_\kappa \); off it, \(\hat q\) is a globally tame surrogate. </p>
@@ -1145,7 +1172,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:truncated_speed_eq">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000217"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000220"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1198,7 +1225,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000217">
+<div class="proof_wrapper" id="a0000000220">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1225,7 +1252,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:truncated_speed_pos">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000218"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000221"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1276,7 +1303,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000218">
+<div class="proof_wrapper" id="a0000000221">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1303,7 +1330,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:truncated_speed_le">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000219"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000222"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1354,7 +1381,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000219">
+<div class="proof_wrapper" id="a0000000222">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1381,7 +1408,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:truncated_speed_lipschitz">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000220"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000223"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1432,7 +1459,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000220">
+<div class="proof_wrapper" id="a0000000223">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1441,7 +1468,7 @@
   </div>
   <div class="proof_content">
   <p>Write \(\hat q=N/D\) with \(N(z)=1+\min (\| z\| ,R)^2\) and \(D(z)=2\max (\kappa (\theta )-\langle z,i e^{i\theta }\rangle ,\delta )\). The norm is \(1\)-Lipschitz, the clamp \(x\mapsto \min (x,R)\) is \(1\)-Lipschitz and bounded by \(R\) (for \(x\ge 0\)), so \(N\) is \(2R\)-Lipschitz (difference of squares of clamped values, both \(\le R\)) and \(1\le N\le 1+R^2\). The linear functional \(z\mapsto \langle z,i e^{i\theta }\rangle \) is \(1\)-Lipschitz (Cauchy–Schwarz against a unit vector) and \(x\mapsto \max (x,\delta )\) is \(1\)-Lipschitz, so \(D\) is \(2\)-Lipschitz and \(D\ge 2\delta \). Then </p>
-<div class="displaymath" id="a0000000221">
+<div class="displaymath" id="a0000000224">
   \[  \Bigl|\frac{N(z)}{D(z)}-\frac{N(w)}{D(w)}\Bigr| \le \frac{|N(z)-N(w)|}{D(w)}+N(z)\, \frac{|D(z)-D(w)|}{D(z)D(w)} \le \Bigl(\frac{2R}{2\delta }+\frac{(1+R^2)\cdot 2}{4\delta ^2}\Bigr)|z-w| .  \]
 </div>
 <p> (Formalization route: reciprocal is \(\tfrac 1{(2\delta )^2}\)-Lipschitz on \([2\delta ,\infty )\) by the mean value inequality; compose and multiply bounded-Lipschitz factors.) </p>
@@ -1463,7 +1490,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:truncated_speed_continuous">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000222"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000225"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1514,7 +1541,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000222">
+<div class="proof_wrapper" id="a0000000225">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1604,7 +1631,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:norm_truncated_field">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000223"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000226"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1657,7 +1684,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000223">
+<div class="proof_wrapper" id="a0000000226">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1684,7 +1711,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:truncated_field_lipschitz">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000224"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000227"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1737,7 +1764,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000224">
+<div class="proof_wrapper" id="a0000000227">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1764,7 +1791,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:truncated_field_continuous">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000225"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000228"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1817,7 +1844,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000225">
+<div class="proof_wrapper" id="a0000000228">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1844,7 +1871,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:truncated_field_picard">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000226"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000229"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1907,7 +1934,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000226">
+<div class="proof_wrapper" id="a0000000229">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -1934,7 +1961,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:spherical_flow_exists">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000227"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000230"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -1985,7 +2012,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000227">
+<div class="proof_wrapper" id="a0000000230">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2075,7 +2102,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:spherical_flow_spec">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000228"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000231"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2126,7 +2153,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000228">
+<div class="proof_wrapper" id="a0000000231">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2153,7 +2180,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:spherical_flow_continuousOn">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000229"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000232"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2204,7 +2231,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000229">
+<div class="proof_wrapper" id="a0000000232">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2231,7 +2258,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:spherical_flow_unique">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000230"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000233"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2286,7 +2313,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000230">
+<div class="proof_wrapper" id="a0000000233">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2313,7 +2340,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:truncated_field_solution_unique">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000231"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000234"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2366,7 +2393,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000231">
+<div class="proof_wrapper" id="a0000000234">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2456,7 +2483,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:spherical_endpoint_continuousOn">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000232"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000235"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2509,7 +2536,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000232">
+<div class="proof_wrapper" id="a0000000235">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2538,7 +2565,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:truncated_speed_sub_le">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000233"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000236"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2586,13 +2613,13 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[curvature sensitivity of the truncated speed]    Let \(0\le R\), \(0{\lt}\delta \) and set \(M=\tfrac {1+R^2}{2\delta ^2}\). Then for all \(\kappa ,\kappa ^\ast :\mathbb R\to \mathbb R\), \(\theta \) and \(z\), </p>
-<div class="displaymath" id="a0000000234">
+<div class="displaymath" id="a0000000237">
   \[  \bigl|\hat q_{\kappa ,R,\delta }(\theta ,z)-\hat q_{\kappa ^\ast ,R,\delta }(\theta ,z)\bigr| \le M\, \bigl|\kappa (\theta )-\kappa ^\ast (\theta )\bigr| .  \]
 </div>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000233">
+<div class="proof_wrapper" id="a0000000236">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2601,7 +2628,7 @@
   </div>
   <div class="proof_content">
   <p>The two speeds share the numerator \(n=1+(\min (\| z\| ,R))^2\in [1,1+R^2]\) and have denominators \(D=2\max (\kappa (\theta )-c,\delta )\), \(D^\ast =2\max (\kappa ^\ast (\theta )-c, \delta )\) with \(c=\langle z,ie^{i\theta }\rangle \); both are \(\ge 2\delta \), and since \(x\mapsto \max (x,\delta )\) is \(1\)-Lipschitz, \(|D-D^\ast |\le 2|\kappa (\theta )- \kappa ^\ast (\theta )|\). Hence </p>
-<div class="displaymath" id="a0000000235">
+<div class="displaymath" id="a0000000238">
   \[  \Bigl|\frac nD-\frac n{D^\ast }\Bigr| =\frac{n\, |D-D^\ast |}{D\, D^\ast } \le \frac{(1+R^2)\cdot 2|\kappa (\theta )-\kappa ^\ast (\theta )|}{4\delta ^2} =M\, |\kappa (\theta )-\kappa ^\ast (\theta )| .  \]
 </div>
 <p> (The quotient-difference bound already extracted for <a href="chap-sphere.html#lem:truncated_speed_lipschitz">lemma 160</a> applies verbatim with the numerator difference set to zero.) </p>
@@ -2623,7 +2650,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:truncated_field_sub_le">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000236"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000239"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2674,14 +2701,14 @@
         </div>
   </div>
   <div class="lemma_thmcontent">
-  <p>[combined field sensitivity]    Let \(0\le R\), \(0{\lt}\delta \), \(M=\tfrac {1+R^2}{2\delta ^2}\), and let \(L\) be the Lipschitz constant of <a href="chap-sphere.html#lem:truncated_field_lipschitz">lemma 164</a>. Then for all \(\kappa ,\kappa ^\ast \), \(\theta \), \(z\), \(\tilde z\), </p>
-<div class="displaymath" id="a0000000237">
+  <p>[combined field sensitivity]    Let \(0\le R\), \(0{\lt}\delta \), \(M=\tfrac {1+R^2}{2\delta ^2}\), and let \(L\) be <em>any</em> Lipschitz constant of the truncated field in \(z\) (a witness of <a href="chap-sphere.html#lem:truncated_field_lipschitz">lemma 164</a>, consumed as a hypothesis so that one fixed \(L\) can be threaded through the Grönwall argument). Then for all \(\kappa ,\kappa ^\ast \), \(\theta \), \(z\), \(\tilde z\), </p>
+<div class="displaymath" id="a0000000240">
   \[  \| F_{\kappa ,R,\delta }(\theta ,z)-F_{\kappa ^\ast ,R,\delta }(\theta ,\tilde z)\|  \le L\, \| z-\tilde z\| +M\, |\kappa (\theta )-\kappa ^\ast (\theta )| .  \]
 </div>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000236">
+<div class="proof_wrapper" id="a0000000239">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2708,7 +2735,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:gronwall_L1_drive">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000238"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000241"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2736,18 +2763,18 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[Grönwall with \(L^1\) drive]   Let \(T\ge 0\), \(L\ge 0\), \(d_0\ge 0\), and let \(d,g:[0,T]\to \mathbb R\) be continuous with \(d\ge 0\) and \(g\ge 0\) pointwise. If </p>
-<div class="displaymath" id="a0000000239">
+<div class="displaymath" id="a0000000242">
   \[  d(t)\; \le \; d_0+\int _0^t\bigl(L\, d(s)+g(s)\bigr)\, ds \qquad \text{for all }t\in [0,T],  \]
 </div>
-<p> then </p>
-<div class="displaymath" id="a0000000240">
-  \[  \sup _{t\in [0,T]}d(t)\; \le \; e^{LT}\Bigl(d_0+\int _0^T g\Bigr) .  \]
+<p> then, pointwise, </p>
+<div class="displaymath" id="a0000000243">
+  \[  d(t)\; \le \; e^{LT}\Bigl(d_0+\int _0^T g\Bigr)\qquad \text{for all }t\in [0,T] .  \]
 </div>
-<p> (Project-side infrastructure: Mathlib’s Grönwall lemmas bound the derivative by \(K\| f\| +\varepsilon \) with a <em>constant</em> \(\varepsilon \); here the drive \(g\) is only small in \(L^1\), which is exactly the regime of the Dahlberg-style reparametrization.) </p>
+<p> (Project-side infrastructure: Mathlib’s Grönwall lemmas bound the derivative by \(K\| f\| +\varepsilon \) with a <em>constant</em> \(\varepsilon \); here the drive \(g\) is only small in \(L^1\), which is exactly the regime of the Dahlberg-style reparametrization. The Lean statement quantifies the conclusion pointwise over \(t\in [0,T]\) rather than through a \(\sup \); the hypothesis \(d\ge 0\) is kept for blueprint fidelity though the proof does not use it.) </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000238">
+<div class="proof_wrapper" id="a0000000241">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2756,7 +2783,7 @@
   </div>
   <div class="proof_content">
   <p>Set \(u(t)=d_0+\int _0^t(L\, d+g)\). The integrand is continuous, so by the fundamental theorem of calculus \(u\) is differentiable with \(u'(t)=L\, d(t)+g(t)\), and \(d\le u\) by hypothesis, so \(u'(t)\le L\, u(t)+g(t)\) (\(L\ge 0\), and \(u\ge d\ge 0\)). Consider \(v(t)=e^{-Lt}u(t)-\int _0^t g\): it is differentiable with </p>
-<div class="displaymath" id="a0000000241">
+<div class="displaymath" id="a0000000244">
   \[  v'(t)=e^{-Lt}\bigl(u'(t)-L\, u(t)\bigr)-g(t)\le e^{-Lt}g(t)-g(t)\le 0,  \]
 </div>
 <p> using \(0{\lt}e^{-Lt}\le 1\) and \(g\ge 0\). A differentiable function with nonpositive derivative on an interval is antitone, so \(v(t)\le v(0)=d_0\), i.e. \(e^{-Lt}u(t)\le d_0+\int _0^t g\le d_0+\int _0^T g\) (\(g\ge 0\) again). Hence \(d(t)\le u(t)\le e^{Lt}\bigl(d_0+\int _0^T g\bigr)\le e^{LT}\bigl(d_0+\int _0^T g\bigr)\). </p>
@@ -2778,7 +2805,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:invariant_admissible_domain">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000242"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000245"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2836,18 +2863,18 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[invariant admissible domain — perturbative margin transport]    Let \(\kappa ,\kappa ^\ast \) be continuous with \(\kappa \ge \kappa _0{\gt}0\) pointwise, let \(0\le R\), \(0{\lt}\delta \), and let \(z^\ast :[0,2\pi ]\to \mathbb C\) be a trajectory of the \(\kappa ^\ast \)-truncated flow that is <em>admissible with margin</em> \(\mu {\gt}0\): </p>
-<div class="displaymath" id="a0000000243">
+<div class="displaymath" id="a0000000246">
   \[  \sup _\theta \| z^\ast (\theta )\| \le R-\mu , \qquad \sup _\theta \, \langle z^\ast (\theta ),\, i e^{i\theta }\rangle \le \kappa _0-\delta -\mu .  \]
 </div>
-<p> Let \(L\) be the Lipschitz constant of <a href="chap-sphere.html#lem:truncated_speed_lipschitz">lemma 160</a> and \(M=\tfrac {1+R^2}{2\delta ^2}\). Then every trajectory \(z\) of the \(\kappa \)-truncated flow with </p>
-<div class="displaymath" id="a0000000244">
+<p> Let \(L\) be any Lipschitz constant of the truncated field in \(z\) (a witness of <a href="chap-sphere.html#lem:truncated_field_lipschitz">lemma 164</a>; in Lean \(L:\mathbb R_{\ge 0}\), coerced to \(\mathbb R\) inside the exponential) and \(M=\tfrac {1+R^2}{2\delta ^2}\). Then every trajectory \(z\) of the \(\kappa \)-truncated flow with </p>
+<div class="displaymath" id="a0000000247">
   \[  e^{2\pi L}\Bigl(\| z(0)-z^\ast (0)\| +M\! \int _0^{2\pi }\! |\kappa -\kappa ^\ast |\Bigr)\le \mu  \]
 </div>
 <p> is admissible: \(\| z(\theta )\| \le R\) and \(\kappa (\theta )-\langle z(\theta ),i e^{i\theta }\rangle \ge \delta \) for all \(\theta \in [0,2\pi ]\). </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000242">
+<div class="proof_wrapper" id="a0000000245">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2856,14 +2883,135 @@
   </div>
   <div class="proof_content">
   <p><em>Field sensitivity.</em> By <a href="chap-sphere.html#lem:truncated_field_sub_le">lemma 176</a>, </p>
-<div class="displaymath" id="a0000000245">
+<div class="displaymath" id="a0000000248">
   \[  \| F_{\kappa }(\theta ,z)-F_{\kappa ^\ast }(\theta ,\tilde z)\|  \le L\| z-\tilde z\| +M\, |\kappa (\theta )-\kappa ^\ast (\theta )| .  \]
 </div>
 <p> <em>Integral inequality.</em> Both trajectories are \(C^1\) on \([0,2\pi ]\) with derivatives given by their fields (<a href="chap-sphere.html#lem:spherical_flow_spec">lemma 169</a>), so by the fundamental theorem of calculus \(z(\theta )-z^\ast (\theta )=z(0)-z^\ast (0)+\int _0^\theta \bigl(F_\kappa (s, z(s))-F_{\kappa ^\ast }(s,z^\ast (s))\bigr)ds\); taking norms and using the field sensitivity, \(d(\theta )=\| z(\theta )-z^\ast (\theta )\| \) satisfies \(d(\theta )\le d(0)+\int _0^\theta \bigl(L\, d+M|\kappa -\kappa ^\ast |\bigr)\), with \(d\) continuous and the drive \(g=M|\kappa -\kappa ^\ast |\) continuous and nonnegative. <em>Grönwall with \(L^1\) drive.</em> <a href="chap-sphere.html#lem:gronwall_L1_drive">lemma 177</a> gives \(\sup _{[0,2\pi ]}d\le e^{2\pi L}\bigl(d(0)+M\| \kappa -\kappa ^\ast \| _{L^1[0,2\pi ]}\bigr) \le \mu \). <em>Margin propagation.</em> Then \(\| z(\theta )\| \le \| z^\ast (\theta )\| +\mu \le R\), and since \(|\langle z-z^\ast ,\, i e^{i\theta }\rangle |\le d(\theta )\le \mu \), </p>
-<div class="displaymath" id="a0000000246">
+<div class="displaymath" id="a0000000249">
   \[  \kappa (\theta )-\langle z,i e^{i\theta }\rangle \ge \kappa _0-\langle z^\ast ,i e^{i\theta }\rangle -\mu \ge \delta .  \]
 </div>
 <p> <em>Why perturbative is the right shape.</em> No direct confinement estimate uniform in \(\kappa _0\) exists: the radial velocity \(d\| z\| ^2/d\theta =2q\langle z,e^{i\theta }\rangle \) changes sign, no disk is flow-invariant (at a radial critical point with \(c=\langle z,ie^{i\theta }\rangle =-\| z\| \) one computes that a local maximum of \(\| z\| \) is allowed exactly when \(\kappa (\theta )\ge (1-\| z\| ^2)/(2\| z\| )\)), and for \(\kappa _0{\lt}1/\sqrt3\) the disk of the model radius already contains denominator-vanishing states — admissibility is irreducibly a condition on the pair \((\| z\| ,\langle z,ie^{i\theta }\rangle )\). The margins are instead supplied by an <em>explicit</em> model (the symmetric step bicircle of <a href="chap-sphere.html#sec:sphere_winding">section 13.6</a>, whose arcs give \(\langle z^\ast ,ie^{i\theta }\rangle =\langle w_j,ie^{i\theta }\rangle -r_j \le \| w_j\| -r_j\) on the \(j\)-th arc), and the \(L^1\) distance is made arbitrarily small by the Dahlberg-style reparametrization of <a href="chap-dahlberg_step1.html">chapter 11</a>. </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:periodic_extension">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">179</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#def:periodic_extension">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.periodicExtension" class="lean_decl">Gluck.periodicExtension</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>[periodic extension of a fundamental-window function]   For \(z:\mathbb R\to \mathbb C\), the <em>\(2\pi \)-periodic extension</em> is \(\tilde z(t)=z\bigl(t-2\pi \lfloor t/(2\pi )\rfloor \bigr)\): every \(t\) is reduced by an integer multiple of \(2\pi \) into the fundamental window \([0,2\pi )\) and \(z\) is evaluated there. This is the device promised in <a href="chap-sphere.html#lem:reconstruction_ode">lemma 181</a> for promoting a trajectory defined on \([0,2\pi ]\) to a globally defined closed curve. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:periodic_extension_periodic">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">180</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:periodic_extension_periodic">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000250"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:periodic_extension">Definition 179</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.periodicExtension_periodic" class="lean_decl">Gluck.periodicExtension_periodic</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[the periodic extension is periodic]    For every \(z\), the extension \(\tilde z\) of <a href="chap-sphere.html#def:periodic_extension">definition 179</a> is \(2\pi \)-periodic: \(\tilde z(t+2\pi )=\tilde z(t)\) for all \(t\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000250">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>\(\lfloor (t+2\pi )/(2\pi )\rfloor =\lfloor t/(2\pi )\rfloor +1\), so the reduced arguments agree: \(t+2\pi -2\pi (\lfloor t/(2\pi )\rfloor +1)=t-2\pi \lfloor t/(2\pi )\rfloor \). </p>
 
   </div>
 </div>
@@ -2872,7 +3020,7 @@
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">179</span>
+    <span class="lemma_thmlabel">181</span>
     <div class="thm_header_extras">
 
     
@@ -2882,7 +3030,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:reconstruction_ode">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000247"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000251"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2909,6 +3057,10 @@
           <li><a href="chap-sphere.html#def:realizes_spherical_curvature">Definition 146</a></li>
           
           <li><a href="chap-sphere.html#lem:spherical_speed_periodic">Lemma 154</a></li>
+          
+          <li><a href="chap-sphere.html#def:periodic_extension">Definition 179</a></li>
+          
+          <li><a href="chap-sphere.html#lem:periodic_extension_periodic">Lemma 180</a></li>
           
         </ul>
     
@@ -2939,11 +3091,11 @@
         </div>
   </div>
   <div class="lemma_thmcontent">
-  <p>[truncation removal: admissible closed trajectories realize \(\kappa \)]    Let \(\kappa \) be a curvature function, \(0{\lt}\delta \), \(0\le R{\lt}1\), and let \(z:[0,2\pi ]\to \mathbb C\) be a trajectory of the truncated flow that is admissible (\(\| z(\theta )\| \le R\) and \(\kappa (\theta )-\langle z(\theta ),ie^{i\theta }\rangle \ge \delta \) for all \(\theta \)) and closed (\(z(2\pi )=z(0)\)). Then the \(2\pi \)-periodic extension of \(z\) is a \(C^1\) closed curve confined to the open unit disk which solves the <em>true</em> reconstruction ODE \(z'=q_\kappa (\theta ,z)e^{i\theta }\) and realizes \(\kappa \) (<a href="chap-sphere.html#def:realizes_spherical_curvature">definition 146</a>) in the gauge \(\varphi (\theta )=\theta \). </p>
+  <p>[truncation removal: admissible closed trajectories realize \(\kappa \)]    Let \(\kappa \) be continuous and \(2\pi \)-periodic (positivity NOT assumed — see the re-sign note at the end of this statement), \(0{\lt}\delta \), \(R{\lt}1\), and let \(z:[0,2\pi ]\to \mathbb C\) be a trajectory of the truncated flow that is admissible (\(\| z(\theta )\| \le R\) and \(\kappa (\theta )-\langle z(\theta ),ie^{i\theta }\rangle \ge \delta \) for all \(\theta \)) and closed (\(z(2\pi )=z(0)\)). Then the \(2\pi \)-periodic extension \(\tilde z\) of \(z\) (<a href="chap-sphere.html#def:periodic_extension">definition 179</a>) agrees with \(z\) on \([0,2\pi ]\), is a closed curve, and realizes \(\kappa \) (<a href="chap-sphere.html#def:realizes_spherical_curvature">definition 146</a>) in the gauge \(\varphi (\theta )=\theta \) — in particular it is \(C^1\), confined to the open unit disk, and solves the <em>true</em> reconstruction ODE \(z'=q_\kappa (\theta ,z)e^{i\theta }\). (The Lean statement packages the conclusion as the conjunction \(\mathrm{EqOn}\wedge \mathrm{IsClosedCurve}\wedge \mathrm{RealizesSphericalCurvature}\) for \(\tilde z\), <em>plus a fourth conjunct exposing the true-ODE derivative globally</em>: \(\forall t,\  \tilde z\) has at \(t\) the derivative \(q_\kappa (t,\tilde z(t))\, e^{it}\). The proof already establishes this fact on the way to the realization predicate; exposing it is what lets the simplicity chain (<a href="chap-sphere.html#lem:spherical_trajectory_eq_reconstruct">lemma 215</a>) identify \(\tilde z\) with a translated Euclidean reconstruction curve without re-deriving the seam-matching argument. The hypothesis \(0\le R\) turned out to be unnecessary and is dropped. Additionally, the re-sign RELAXES the hypothesis “\(\kappa \) is a curvature function” to “\(\kappa \) is continuous and \(2\pi \)-periodic” — positivity of \(\kappa \) enters the proof only through the admissibility margin \(\kappa -\langle z,ie^{i\theta }\rangle \ge \delta \), never through \(\kappa {\gt}0\) itself, and the relaxed form is exactly what stage 2 (<a href="chap-sphere_mixed.html">chapter 14</a>) needs, so one declaration serves both stages. Fallback if the relaxation surfaces a genuine positivity use: keep the positive hypothesis and record the obstacle in the task result; the derivative conjunct alone still unblocks the S2-E chain.) </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000247">
+<div class="proof_wrapper" id="a0000000251">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -2957,12 +3109,210 @@
 </div>
 <h1 id="sec:sphere_winding">13.6 Endpoint winding over the symmetric step model (S2-D)</h1>
 
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:constant_arc_inner">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">182</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:constant_arc_inner">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000252"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.constantArc_inner" class="lean_decl">Gluck.constantArc_inner</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[arc bracket identity]   For all \(w\in \mathbb C\), \(r,\theta \in \mathbb R\): \(\bigl\langle w-i\, r\, e^{i\theta },\, i e^{i\theta }\bigr\rangle =\langle w,ie^{i\theta }\rangle -r\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000252">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Bilinearity of the real inner product and \(\langle ie^{i\theta },ie^{i\theta }\rangle =\| ie^{i\theta }\| ^2=1\) (<span class="ttfamily">real_inner_smul_left</span>, <span class="ttfamily">real_inner_self_eq_norm_sq</span>). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:constant_arc_norm_sq">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">183</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:constant_arc_norm_sq">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000253"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.constantArc_norm_sq" class="lean_decl">Gluck.constantArc_norm_sq</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[arc norm expansion]   For all \(w\in \mathbb C\), \(r,\theta \in \mathbb R\): \(\| w-i\, r\, e^{i\theta }\| ^2=\| w\| ^2-2r\langle w,ie^{i\theta }\rangle +r^2\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000253">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>The real polarization expansion \(\| u-v\| ^2=\| u\| ^2-2\langle u,v\rangle +\| v\| ^2\) (<span class="ttfamily">norm_sub_sq_real</span>) with \(\| i\, r\, e^{i\theta }\| ^2=r^2\) and <a href="chap-sphere.html#lem:constant_arc_inner">lemma 182</a>-style bilinearity for the cross term. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:constant_arc_consistency">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">184</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:constant_arc_consistency">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000254"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:spherical_speed">Definition 150</a></li>
+          
+          <li><a href="chap-sphere.html#lem:constant_arc_norm_sq">Lemma 183</a></li>
+          
+          <li><a href="chap-sphere.html#lem:constant_arc_inner">Lemma 182</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.constantArc_consistency" class="lean_decl">Gluck.constantArc_consistency</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[consistency identity of the arc data]    Fix \(K\) and start data \((\theta _0,z_0)\) with positive bracket \(K-\langle z_0,ie^{i\theta _0}\rangle {\gt}0\), and set \(r=q_K(\theta _0,z_0)\), \(w=z_0+i\, r\, e^{i\theta _0}\). Then \(1+\| w\| ^2=2rK+r^2\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000254">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Expand \(\| w\| ^2=\| z_0\| ^2+2r\langle z_0,ie^{i\theta _0}\rangle +r^2\) (<span class="ttfamily">norm_add_sq_real</span>), then substitute the defining relation \(2r\bigl(K-\langle z_0,ie^{i\theta _0}\rangle \bigr)=1+\| z_0\| ^2\) of \(r=q_K(\theta _0,z_0)\) (<a href="chap-sphere.html#def:spherical_speed">definition 150</a>). </p>
+
+  </div>
+</div>
 <div class="lemma_thmwrapper theorem-style-plain" id="lem:constant_curvature_arc">
   <div class="lemma_thmheading">
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">180</span>
+    <span class="lemma_thmlabel">185</span>
     <div class="thm_header_extras">
 
     
@@ -2972,7 +3322,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:constant_curvature_arc">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000248"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000255"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -2991,6 +3341,12 @@
           <li><a href="chap-sphere.html#def:spherical_speed">Definition 150</a></li>
           
           <li><a href="chap-sphere.html#lem:spherical_flow_unique">Lemma 171</a></li>
+          
+          <li><a href="chap-sphere.html#lem:constant_arc_inner">Lemma 182</a></li>
+          
+          <li><a href="chap-sphere.html#lem:constant_arc_norm_sq">Lemma 183</a></li>
+          
+          <li><a href="chap-sphere.html#lem:constant_arc_consistency">Lemma 184</a></li>
           
         </ul>
     
@@ -3022,14 +3378,14 @@
   </div>
   <div class="lemma_thmcontent">
   <p>[constant-curvature arcs are explicit circular arcs]    Fix \(K{\gt}0\), a start \((\theta _0,z_0)\) with \(K-\langle z_0,ie^{i\theta _0}\rangle {\gt}0\), and set </p>
-<div class="displaymath" id="a0000000249">
+<div class="displaymath" id="a0000000256">
   \[  r=\frac{1+\| z_0\| ^2}{2\bigl(K-\langle z_0,ie^{i\theta _0}\rangle \bigr)}=q_K(\theta _0,z_0), \qquad w=z_0+i\, r\, e^{i\theta _0}.  \]
 </div>
 <p> Then \(z(\theta )=w-i\, r\, e^{i\theta }\) solves the true reconstruction ODE \(z'=q_K(\theta ,z)e^{i\theta }\) with constant curvature \(K\), pointwise at every \(\theta \) where the bracket stays positive (\(K-\langle z(\theta ),ie^{i\theta }\rangle {\gt}0\)): at each such \(\theta \) one has \(q_K(\theta ,z(\theta ))=r\) and hence \(z'(\theta )=q_K(\theta ,z(\theta ))\, e^{i\theta }\). Along the arc \(\langle z(\theta ),ie^{i\theta }\rangle =\langle w,ie^{i\theta }\rangle -r\). Moreover the Euclidean data satisfy the <em>consistency identity</em> \(K=(1+\| w\| ^2-r^2)/(2r)\) (generalizing the centered case \(w=0\) of <a href="chap-sphere.html#lem:spherical_speed_circle">lemma 155</a>). </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000248">
+<div class="proof_wrapper" id="a0000000255">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -3041,12 +3397,170 @@
 
   </div>
 </div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:truncated_speed_half_turn">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">186</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:truncated_speed_half_turn">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000257"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:truncated_speed">Definition 156</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.truncatedSpeed_half_turn" class="lean_decl">Gluck.truncatedSpeed_half_turn</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[half-turn invariance of the truncated speed]    If \(\kappa (\theta +\pi )=\kappa (\theta )\), then \(\hat q_{\kappa ,R,\delta }(\theta +\pi ,-z)=\hat q_{\kappa ,R,\delta }(\theta ,z)\) for all \(\theta ,z\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000257">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>\(\| {-z}\| =\| z\| \) and \(ie^{i(\theta +\pi )}=-ie^{i\theta }\), so \(\langle -z,ie^{i(\theta +\pi )}\rangle =\langle z,ie^{i\theta }\rangle \); with \(\kappa (\theta +\pi )=\kappa (\theta )\) every ingredient of the clamped quotient is unchanged. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:truncated_field_half_turn">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">187</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:truncated_field_half_turn">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000258"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:truncated_field">Definition 162</a></li>
+          
+          <li><a href="chap-sphere.html#lem:truncated_speed_half_turn">Lemma 186</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.truncatedField_half_turn" class="lean_decl">Gluck.truncatedField_half_turn</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[half-turn anti-equivariance of the truncated field]    If \(\kappa (\theta +\pi )=\kappa (\theta )\), then \(F_{\kappa ,R,\delta }(\theta +\pi ,-z)=-F_{\kappa ,R,\delta }(\theta ,z)\) for all \(\theta ,z\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000258">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>\(F(\theta +\pi ,-z)=\hat q(\theta +\pi ,-z)\, e^{i(\theta +\pi )} =\hat q(\theta ,z)\cdot (-e^{i\theta })=-F(\theta ,z)\) by <a href="chap-sphere.html#lem:truncated_speed_half_turn">lemma 186</a> and \(e^{i\pi }=-1\). </p>
+
+  </div>
+</div>
 <div class="lemma_thmwrapper theorem-style-plain" id="lem:flow_half_turn_equivariance">
   <div class="lemma_thmheading">
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">181</span>
+    <span class="lemma_thmlabel">188</span>
     <div class="thm_header_extras">
 
     
@@ -3056,7 +3570,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:flow_half_turn_equivariance">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000250"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000259"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -3077,6 +3591,10 @@
           <li><a href="chap-sphere.html#lem:truncated_field_solution_unique">Lemma 172</a></li>
           
           <li><a href="chap-sphere.html#lem:spherical_flow_spec">Lemma 169</a></li>
+          
+          <li><a href="chap-sphere.html#lem:truncated_speed_half_turn">Lemma 186</a></li>
+          
+          <li><a href="chap-sphere.html#lem:truncated_field_half_turn">Lemma 187</a></li>
           
         </ul>
     
@@ -3111,7 +3629,7 @@
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000250">
+<div class="proof_wrapper" id="a0000000259">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -3123,21 +3641,1841 @@
 
   </div>
 </div>
+<h2 id="a0000000029">Design overview (S2-D, resolved iter-048)</h2>
+<p>The two formerly-open sub-questions of this phase are now resolved at design level, and the whole phase is elementary algebra plus the in-tree winding toolkit. The shape: </p>
+<p><b class="bfseries">DO-NOT (degeneracy of the constant model).</b> For <em>constant</em> \(\kappa =K\) every admissible initial point lies on a spherical circle of curvature \(K\) (<a href="chap-sphere.html#lem:constant_curvature_arc">lemma 185</a>), so every trajectory closes and the endpoint error map vanishes identically: the constant family carries no degree and must NOT be the homotopy target. The fix is the <em>symmetric step bicircle</em> with <em>small contrast</em>: levels \(a=c-h/2\), \(b=c+h/2\) around the midpoint \(c\) of the four-vertex overlap window, on the in-tree canonical equal-quarter breakpoints \(0,\pi /2,\pi ,3\pi /2\) (<a href="chap-stepreduction.html#def:four_arc_step_function">definition 19</a> — note \(\kappa ^\ast =\) \(\texttt{stepCurvature } b\, a\, 0\, (\pi /2)\, \pi \, (3\pi /2)\) takes the value \(a\) on \([0,\pi /2)\cup [\pi ,3\pi /2)\) and \(b\) on the complement, and is \(\pi \)-periodic). </p>
+<p><b class="bfseries">Everything is explicit arc algebra.</b> Because the step is piecewise constant, its model trajectories are concatenations of <em>explicit circular arcs</em> (<a href="chap-sphere.html#lem:constant_curvature_arc">lemma 185</a>); no flow, no variational equation, and no \(\mathrm{PicardLindel\ddot of}\) package is needed on the model side. The model endpoint error map \(E^\ast _{a,b}\) (<a href="chap-sphere.html#def:step_error_map">definition 197</a>) is a closed-form composition of four arc maps. Its degeneracy at \(h=0\) becomes a feature: \(E^\ast _{c,c}\equiv 0\) identically, so \(E^\ast _{a,b}=h\, W+O(h^2)\) for an explicit <em>first-variation field</em> \(W\), and the planner’s symbolic computation (numerically validated: the arc composite matches an RK4 integration of the step ODE to \(10^{-7}\), \(E^\ast (z_0^\ast )=O(h^2)\), and \(E^\ast /h\) matches the predicted linearization with ratio \(\to 1\)) gives </p>
+<div class="displaymath" id="a0000000260">
+  \[  W(z_0^\ast )=0,\qquad DW(z_0^\ast )=-\tfrac {2r^\ast }{1+c^2}\cdot \overline{(\, \cdot \, )} \qquad (z_0^\ast =-i\, r^\ast ,\  r^\ast =\sqrt{1+c^2}-c),  \]
+</div>
+<p> a <em>conjugation-type</em> (orientation-reversing) nondegenerate linear map: the model error loop on a small circle \(\partial B(z_0^\ast ,\rho )\) has winding \(-1\ne 0\). The exact mechanism behind the cancellations is the <em>quadratic identity</em> <a href="chap-sphere.html#lem:speed_quadratic_identity">lemma 190</a>: \(q_c(\theta ,z)-r^\ast \) vanishes to second order in the distance to the centered circle, with an exact rational formula (no Taylor remainders anywhere: all expansions in this section are exact algebraic identities plus norm estimates of explicitly-controlled factors). </p>
+<p><b class="bfseries">Transport.</b> The comparison of the actual (reparametrized) \(\kappa \)-flow with the step model cannot use <a href="chap-sphere.html#lem:invariant_admissible_domain">lemma 178</a> directly (\(\kappa ^\ast \) is discontinuous, and the concatenated model has corners), and Mathlib-style continuity of the drive fails at the breakpoints. The resolution is <em>arcwise chaining</em>: on each quarter arc the model level is a <em>constant</em> \(K\in \{ a,b\} \), the drive \(M|\kappa -K|\) is continuous there, and the single-arc transport (<a href="chap-sphere.html#lem:invariant_admissible_arc">lemma 200</a>) is the verbatim margin-transport proof on a shifted interval. Four chained applications give the full-period transport (<a href="chap-sphere.html#lem:step_model_transport">lemma 203</a>) with constant \(e^{2\pi L}\), both for admissibility and for the endpoint estimate \(\| E_\kappa (z_0)-E^\ast (z_0)\| \le e^{2\pi L}M\! \int |\kappa - \kappa ^\ast |\). </p>
+<p><b class="bfseries">Quantifier order.</b> \(c\) and \(\kappa _0=\min \kappa \) are fixed by \(\kappa \); margins \((R,\delta ,\mu ,\rho _0,h_0)\) by <a href="chap-sphere.html#lem:step_model_margins">lemma 204</a>; the disk radius \(\rho \) and contrast \(h\) by <a href="chap-sphere.html#lem:step_error_expansion">lemma 205</a> (boundary margin \(\sim \tfrac {r^\ast }{1+c^2}h\rho \)); the reparametrization quality \(\varepsilon \ll h\rho \) last (it is free, <a href="chap-sphere.html#lem:step_L1_reparam">lemma 210</a>). The Euclidean <span class="ttfamily">errorMap_winding_eq_one</span> <em>value</em> is not reusable; only <a href="chap-winding.html#thm:existence_of_zero">theorem 57</a> and the perturbation/congruence lemmas of <a href="chap-winding.html">chapter 6</a> are. </p>
+<div class="definition_thmwrapper theorem-style-definition" id="def:spherical_arc_map">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">189</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#def:spherical_arc_map">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:spherical_speed">Definition 150</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.sphericalArcMap" class="lean_decl">Gluck.sphericalArcMap</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>[spherical arc map]    For \(K,\theta _0,\Delta \in \mathbb R\) and \(z\in \mathbb C\), the <em>arc map</em> is </p>
+<div class="displaymath" id="a0000000261">
+  \[  A_{K,\theta _0,\Delta }(z)\; =\; z+i\, q_K(\theta _0,z)\, e^{i\theta _0}\bigl(1-e^{i\Delta }\bigr),  \]
+</div>
+<p> where \(q_K\) abbreviates the gauge speed \(q_{(\theta \mapsto K)}\) of <a href="chap-sphere.html#def:spherical_speed">definition 150</a> for the constant curvature \(K\). By <a href="chap-sphere.html#lem:constant_curvature_arc">lemma 185</a>, where the bracket stays positive this is the time-\(\Delta \) endpoint of the constant-\(K\) trajectory started at \((\theta _0,z)\): the arc trajectory is \(\theta \mapsto w-i\, r\, e^{i\theta }\) with \(r=q_K(\theta _0,z)\), \(w=z+i\, r\, e^{i\theta _0}\), and its value at \(\theta _0+\Delta \) is exactly \(A_{K,\theta _0,\Delta }(z)\). (A total function of the junk-value kind, like \(q\) itself: the geometric meaning requires bracket positivity, the definition does not.) </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:speed_quadratic_identity">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">190</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:speed_quadratic_identity">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000262"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:spherical_speed">Definition 150</a></li>
+          
+          <li><a href="chap-sphere.html#lem:spherical_speed_circle">Lemma 155</a></li>
+          
+          <li><a href="chap-sphere.html#lem:constant_arc_norm_sq">Lemma 183</a></li>
+          
+          <li><a href="chap-sphere.html#lem:constant_arc_inner">Lemma 182</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.sphericalSpeed_sub_radius" class="lean_decl">Gluck.sphericalSpeed_sub_radius</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[quadratic identity: exact second-order vanishing of \(q\) at the centered circle]    Fix \(c{\gt}0\) and set \(r^\ast =\sqrt{1+c^2}-c\), so that \(r^{\ast 2}+2cr^\ast -1=0\). For all \(\theta \) and all \(z\) with \(D:=c-\langle z,ie^{i\theta }\rangle \ne 0\), </p>
+<div class="displaymath" id="a0000000263">
+  \[  q_c(\theta ,z)-r^\ast \; =\; \frac{\bigl\| z+r^\ast i e^{i\theta }\bigr\| ^2}{2D} \; =\; \frac{\| z-z_c(\theta )\| ^2}{2D}, \qquad z_c(\theta ):=-r^\ast i e^{i\theta }  \]
+</div>
+<p> (\(z_c\) is the centered circle of <a href="chap-sphere.html#lem:spherical_speed_circle">lemma 155</a>). In particular \(q_c-r^\ast \) vanishes <em>exactly to second order</em> in the distance to the centered circle: the \(z\)-gradient of \(q_c(\theta ,\cdot )\) vanishes at \(z_c(\theta )\), and on \(D{\gt}0\) one has \(q_c\ge r^\ast \). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000262">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p> \(q_c-r^\ast =\dfrac {(1+\| z\| ^2)-2r^\ast D}{2D}\), and the numerator is </p>
+<div class="displaymath" id="a0000000264">
+  \[  1+\| z\| ^2-2r^\ast c+2r^\ast \langle z,ie^{i\theta }\rangle =\| z\| ^2+r^{\ast 2}+2\langle z,\, r^\ast ie^{i\theta }\rangle =\| z+r^\ast ie^{i\theta }\| ^2,  \]
+</div>
+<p> using \(1-2r^\ast c=r^{\ast 2}\) (the defining identity of \(r^\ast \)) and the polarization expansion (<a href="chap-sphere.html#lem:constant_arc_norm_sq">lemma 183</a> with \(-r\) replaced by \(r^\ast \)). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:speed_radius_le">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">191</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:speed_radius_le">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000265"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:spherical_speed">Definition 150</a></li>
+          
+          <li><a href="chap-sphere.html#lem:speed_quadratic_identity">Lemma 190</a></li>
+          
+          <li><a href="chap-sphere.html#lem:speed_quadratic_identity">Lemma 190</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.sphericalSpeed_radius_le" class="lean_decl">Gluck.sphericalSpeed_radius_le</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[speed dominates the centered radius]    Fix \(c{\gt}0\) and \(r^\ast =\sqrt{1+c^2}-c\). Wherever \(D=c-\langle z,ie^{i\theta }\rangle {\gt}0\) one has \(r^\ast \le q_c(\theta ,z)\) — the inequality half of <a href="chap-sphere.html#lem:speed_quadratic_identity">lemma 190</a>, used to keep model arcs outside the centered circle. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000265">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p> Immediate from <a href="chap-sphere.html#lem:speed_quadratic_identity">lemma 190</a>: \(q_c-r^\ast \) is a square divided by \(2D{\gt}0\), hence nonnegative. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:speed_level_sensitivity">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">192</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:speed_level_sensitivity">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000266"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:spherical_speed">Definition 150</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.sphericalSpeed_sub_level" class="lean_decl">Gluck.sphericalSpeed_sub_level</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[exact level sensitivity of the gauge speed]    For constant levels \(K,K'\) and any \((\theta ,z)\) with both brackets \(D_K=K-\langle z,ie^{i\theta }\rangle \) and \(D_{K'}=K'-\langle z,ie^{i\theta }\rangle \) nonzero, </p>
+<div class="displaymath" id="a0000000267">
+  \[  q_K(\theta ,z)-q_{K'}(\theta ,z)=\frac{(1+\| z\| ^2)\, (K'-K)}{2\, D_K\, D_{K'}} .  \]
+</div>
+<p> This is mechanism (i) of <a href="chap-sphere.html#lem:step_error_expansion">lemma 205</a>: the level sensitivity of the gauge speed is an exact one-line quotient identity — no Taylor remainder. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000266">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Both speeds are the quotients \((1+\| z\| ^2)/(2D_K)\) and \((1+\| z\| ^2)/(2D_{K'})\) (<a href="chap-sphere.html#def:spherical_speed">definition 150</a> at constant curvature); subtract and clear denominators. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:spherical_speed_half_turn">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">193</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:spherical_speed_half_turn">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000268"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:spherical_speed">Definition 150</a></li>
+          
+          <li><a href="chap-sphere.html#lem:truncated_speed_half_turn">Lemma 186</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.sphericalSpeed_half_turn" class="lean_decl">Gluck.sphericalSpeed_half_turn</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[speed half-turn (true speed)]    For every constant \(K\): \(q_K(\theta +\pi ,-z)=q_K(\theta ,z)\) for all \(\theta ,z\). (Same computation as <a href="chap-sphere.html#lem:truncated_speed_half_turn">lemma 186</a>, without clamps: \(\| -z\| =\| z\| \) and \(\langle -z,ie^{i(\theta +\pi )}\rangle =\langle z,ie^{i\theta }\rangle \).) </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000268">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p> As stated; \(ie^{i(\theta +\pi )}=-ie^{i\theta }\) and bilinearity of the inner product. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:arc_map_half_turn">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">194</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:arc_map_half_turn">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000269"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:spherical_arc_map">Definition 189</a></li>
+          
+          <li><a href="chap-sphere.html#lem:spherical_speed_half_turn">Lemma 193</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.sphericalArcMap_half_turn" class="lean_decl">Gluck.sphericalArcMap_half_turn</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[arc-map half-turn anti-equivariance]    \(A_{K,\theta _0+\pi ,\Delta }(-z)=-A_{K,\theta _0,\Delta }(z)\) for all \(K,\theta _0,\Delta ,z\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000269">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>\(q_K(\theta _0+\pi ,-z)=q_K(\theta _0,z)\) (<a href="chap-sphere.html#lem:spherical_speed_half_turn">lemma 193</a>) and \(e^{i(\theta _0+\pi )}=-e^{i\theta _0}\), so every term of <a href="chap-sphere.html#def:spherical_arc_map">definition 189</a> flips sign. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:arc_map_concat">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">195</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:arc_map_concat">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000270"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:spherical_arc_map">Definition 189</a></li>
+          
+          <li><a href="chap-sphere.html#lem:constant_curvature_arc">Lemma 185</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.sphericalArcMap_concat" class="lean_decl">Gluck.sphericalArcMap_concat</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[arc concatenation]    Fix \(K{\gt}0\), start data \((\theta _0,z)\) with positive bracket, and \(\Delta _1,\Delta _2\ge 0\). If the bracket \(K-\langle z(\theta ),ie^{i\theta }\rangle \) stays positive along the arc trajectory \(z(\theta )=w-ire^{i\theta }\) for \(\theta \in [\theta _0,\theta _0+\Delta _1+ \Delta _2]\), then </p>
+<div class="displaymath" id="a0000000271">
+  \[  A_{K,\theta _0+\Delta _1,\Delta _2}\bigl(A_{K,\theta _0,\Delta _1}(z)\bigr) =A_{K,\theta _0,\Delta _1+\Delta _2}(z) .  \]
+</div>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000270">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>By <a href="chap-sphere.html#lem:constant_curvature_arc">lemma 185</a>(iii), \(q_K\) is constant \(=r\) along the arc where the bracket is positive; in particular \(q_K(\theta _0+\Delta _1,\, z(\theta _0+\Delta _1))=r=q_K(\theta _0,z)\), so the second arc continues the same circle: both sides equal \(w-ire^{i(\theta _0+\Delta _1+\Delta _2)}\) after expanding <a href="chap-sphere.html#def:spherical_arc_map">definition 189</a> and collecting the exponentials. In particular the full-turn map is the identity where admissible: \(A_{K,\theta _0,2\pi }(z)=z\) (since \(e^{2\pi i}=1\)), which is the exact form of the constant-model degeneracy. </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:step_half_map">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">196</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#def:step_half_map">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:spherical_arc_map">Definition 189</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.stepHalfMap" class="lean_decl">Gluck.stepHalfMap</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>[step half-period map]    For levels \(a,b\), the <em>half-period map</em> of the symmetric equal-quarter step is the composition of the two quarter-arc maps </p>
+<div class="displaymath" id="a0000000272">
+  \[  H_{a,b}(z)\; =\; A_{b,\pi /2,\pi /2}\bigl(A_{a,0,\pi /2}(z)\bigr) .  \]
+</div>
+<p> (First quarter has level \(a\), second \(b\), matching \(\kappa ^\ast =\texttt{stepCurvature } b\, a\, 0\, (\pi /2)\, \pi \, (3\pi /2)\) of <a href="chap-stepreduction.html#def:four_arc_step_function">definition 19</a>.) </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:step_error_map">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">197</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#def:step_error_map">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:step_half_map">Definition 196</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.stepErrorMap" class="lean_decl">Gluck.stepErrorMap</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>[step model error map]    \(E^\ast _{a,b}(z)\; =\; -H_{a,b}\bigl(-H_{a,b}(z)\bigr)-z\). By <a href="chap-sphere.html#lem:arc_map_half_turn">lemma 194</a>, the arcs of the second half period (levels \(a,b\) at \(\theta _0=\pi ,3\pi /2\), by \(\pi \)-periodicity of the step) are obtained from the first half by the half turn, so \(z+E^\ast _{a,b}(z)\) is exactly the four-arc composite </p>
+<div class="displaymath" id="a0000000273">
+  \[  A_{b,3\pi /2,\pi /2}\circ A_{a,\pi ,\pi /2}\circ A_{b,\pi /2,\pi /2}\circ A_{a,0,\pi /2}  \]
+</div>
+<p> — the endpoint at \(2\pi \) of the concatenated step-model trajectory. At \(a=b=c\), \(E^\ast _{c,c}(z)=0\) wherever the circle through \(z\) stays bracket-positive (<a href="chap-sphere.html#lem:arc_map_concat">lemma 195</a>). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:step_error_map_four_arc">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">198</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:step_error_map_four_arc">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000274"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:step_error_map">Definition 197</a></li>
+          
+          <li><a href="chap-sphere.html#def:step_half_map">Definition 196</a></li>
+          
+          <li><a href="chap-sphere.html#lem:arc_map_half_turn">Lemma 194</a></li>
+          
+          <li><a href="chap-sphere.html#lem:arc_map_half_turn">Lemma 194</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.stepErrorMap_four_arc" class="lean_decl">Gluck.stepErrorMap_four_arc</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[four-arc composite form of the step error map]    For all levels \(a,b\) and all \(z\), </p>
+<div class="displaymath" id="a0000000275">
+  \[  z+E^\ast _{a,b}(z) =A_{b,3\pi /2,\pi /2}\Bigl(A_{a,\pi ,\pi /2}\bigl(A_{b,\pi /2,\pi /2}(A_{a,0,\pi /2}(z)) \bigr)\Bigr) :  \]
+</div>
+<p> the reflected double-half-period form of <a href="chap-sphere.html#def:step_error_map">definition 197</a> coincides with the four-arc composite — the endpoint at \(2\pi \) of the concatenated step-model trajectory. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000274">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p> <a href="chap-sphere.html#lem:arc_map_half_turn">lemma 194</a> at \(\theta _0=0\) and \(\theta _0=\pi /2\) rewrites the two arcs of the second half period: \(A_{a,\pi ,\pi /2}(y)=-A_{a,0,\pi /2}(-y)\) and \(A_{b,3\pi /2,\pi /2}(y)=-A_{b,\pi /2,\pi /2}(-y)\). Unfolding \(E^\ast _{a,b}(z)=-H_{a,b}(-H_{a,b}(z))-z\) and cancelling the double negations gives the composite. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:constant_arc_solves_truncated">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">199</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:constant_arc_solves_truncated">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000276"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#lem:constant_curvature_arc">Lemma 185</a></li>
+          
+          <li><a href="chap-sphere.html#lem:truncated_speed_eq">Lemma 157</a></li>
+          
+          <li><a href="chap-sphere.html#def:truncated_field">Definition 162</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.constantArc_solves_truncated" class="lean_decl">Gluck.constantArc_solves_truncated</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[explicit arcs solve the truncated ODE]    Fix a constant \(K\), \(0{\lt}\delta \), \(R\), start data \((\theta _0,z_0)\), and let \(z(\theta )=w-ire^{i\theta }\) be the arc trajectory of <a href="chap-sphere.html#lem:constant_curvature_arc">lemma 185</a>. If along \(\theta \in [t_1,t_2]\) the arc is <em>admissible with clamps inactive</em> — \(\| z(\theta )\| \le R\) and \(K-\langle z(\theta ),ie^{i\theta }\rangle \ge \delta \) — then \(z\) solves the <em>truncated</em> ODE for the constant curvature \(K\) on \([t_1,t_2]\) in the \(\mathrm{HasDerivWithinAt}\) sense: \(z'(\theta )=\hat q_{K,R,\delta }(\theta ,z(\theta ))\, e^{i\theta }\) on \([t_1,t_2]\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000276">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>On the admissible set the clamps are inactive, \(\hat q=q_K\) (<a href="chap-sphere.html#lem:truncated_speed_eq">lemma 157</a>), and \(z'(\theta )=re^{i\theta } =q_K(\theta ,z(\theta ))e^{i\theta }\) by <a href="chap-sphere.html#lem:constant_curvature_arc">lemma 185</a>. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:invariant_admissible_arc">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">200</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:invariant_admissible_arc">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000277"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#lem:truncated_field_sub_le">Lemma 176</a></li>
+          
+          <li><a href="chap-sphere.html#lem:gronwall_L1_drive">Lemma 177</a></li>
+          
+          <li><a href="chap-sphere.html#lem:invariant_admissible_domain">Lemma 178</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.invariant_admissible_arc" class="lean_decl">Gluck.invariant_admissible_arc</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[single-arc margin transport (shifted interval, constant model level)]    Let \(\kappa \) be continuous with \(\kappa \ge \kappa _0\) pointwise, \(0{\lt}\delta \), let \(L\) be a Lipschitz witness of <a href="chap-sphere.html#lem:truncated_field_lipschitz">lemma 164</a> and \(M=\tfrac {1+R^2}{2\delta ^2}\). Let \([t_1,t_2]\subseteq \mathbb R\), \(K\in \mathbb R\) (<em>constant</em> model level), and let \(z,z^\ast :[t_1,t_2]\to \mathbb C\) be continuous with, in the \(\mathrm{HasDerivWithinAt}\) sense on \([t_1,t_2]\), </p>
+<div class="displaymath" id="a0000000278">
+  \[  z'=\hat q_{\kappa ,R,\delta }(\theta ,z)\, e^{i\theta },\qquad z^{\ast \prime }=\hat q_{K,R,\delta }(\theta ,z^\ast )\, e^{i\theta },  \]
+</div>
+<p> and suppose the model has margins \(\mu {\gt}0\) on the arc: \(\| z^\ast (\theta )\| \le R-\mu \) and \(\langle z^\ast (\theta ),ie^{i\theta }\rangle \le \kappa _0-\delta -\mu \) for \(\theta \in [t_1,t_2]\). If </p>
+<div class="displaymath" id="a0000000279">
+  \[  e^{L(t_2-t_1)}\Bigl(\| z(t_1)-z^\ast (t_1)\|  +M\! \int _{t_1}^{t_2}\! |\kappa (s)-K|\, ds\Bigr)\; \le \; \mu ,  \]
+</div>
+<p> then for all \(\theta \in [t_1,t_2]\): </p>
+<div class="displaymath" id="a0000000280">
+  \[  \| z(\theta )-z^\ast (\theta )\| \le e^{L(t_2-t_1)}\Bigl(\| z(t_1)-z^\ast (t_1)\| +M\! \int _{t_1}^{t_2}\! |\kappa -K|\Bigr), \quad \| z(\theta )\| \le R,\quad \kappa (\theta )-\langle z(\theta ),ie^{i\theta }\rangle \ge \delta .  \]
+</div>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000277">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Verbatim the proof of <a href="chap-sphere.html#lem:invariant_admissible_domain">lemma 178</a> after the time shift \(s\mapsto t_1+s\) (which turns \([t_1,t_2]\) into \([0,T]\), \(T=t_2-t_1\), and shifts the fields accordingly): FTC difference identity, the field sensitivity <a href="chap-sphere.html#lem:truncated_field_sub_le">lemma 176</a> with \(\kappa ^\ast \equiv K\) — the drive \(g=M|\kappa -K|\) is <em>continuous</em> because the model level is constant, which is the entire point of the arcwise formulation — then <a href="chap-sphere.html#lem:gronwall_L1_drive">lemma 177</a> and margin propagation via \(|\langle z-z^\ast ,ie^{i\theta }\rangle |\le \| z-z^\ast \| \). </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:arc_margins">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">201</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#def:arc_margins">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:spherical_speed">Definition 150</a></li>
+          
+          <li><a href="chap-sphere.html#def:spherical_arc_map">Definition 189</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.arcMargins" class="lean_decl">Gluck.arcMargins</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>[quarter-arc margin package]    For data \((\kappa _0,R,\delta ,\mu ,K,t_1,t_2)\) and a start point \(p\), write \(\mathrm{arcMargins}(\kappa _0,R,\delta ,\mu ,K,t_1,t_2,p)\) for the statement that along the constant-level-\(K\) arc trajectory \(z^\ast (\theta )=w-i\, r\, e^{i\theta }\) through \((t_1,p)\) (with \(r=q_K(t_1,p)\), \(w=p+i\, r\, e^{it_1}\)), for every \(\theta \in [t_1,t_2]\): </p>
+<div class="displaymath" id="a0000000281">
+  \[  \| z^\ast (\theta )\| \le R-\mu ,\qquad \langle z^\ast (\theta ),ie^{i\theta }\rangle \le \kappa _0-\delta -\mu ,\qquad K-\langle z^\ast (\theta ),ie^{i\theta }\rangle \ge \delta .  \]
+</div>
+<p> This packages, for one quarter arc, exactly the model-margin hypotheses of <a href="chap-sphere.html#lem:invariant_admissible_arc">lemma 200</a> together with the clamp-inactivity hypothesis of <a href="chap-sphere.html#lem:constant_arc_solves_truncated">lemma 199</a>. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:quarter_step_transport">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">202</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:quarter_step_transport">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000282"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:arc_margins">Definition 201</a></li>
+          
+          <li><a href="chap-sphere.html#def:spherical_arc_map">Definition 189</a></li>
+          
+          <li><a href="chap-sphere.html#def:truncated_field">Definition 162</a></li>
+          
+          <li><a href="chap-sphere.html#lem:truncated_field_lipschitz">Lemma 164</a></li>
+          
+          <li><a href="chap-sphere.html#lem:invariant_admissible_arc">Lemma 200</a></li>
+          
+          <li><a href="chap-sphere.html#lem:constant_arc_solves_truncated">Lemma 199</a></li>
+          
+          <li><a href="chap-sphere.html#lem:constant_arc_consistency">Lemma 184</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.quarter_step_transport" class="lean_decl">Gluck.quarter_step_transport</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[one quarter-arc of the step transport]    Let \(\kappa \) be continuous with \(\kappa \ge \kappa _0\), \(0\le R\), \(0{\lt}\delta \), \(t_1\le t_2\), \(L\) a Lipschitz witness for the truncated field, and \(M=\tfrac {1+R^2}{2\delta ^2}\). Let \(z\) solve the \(\kappa \)-truncated ODE on \([t_1,t_2]\) (in the \(\mathrm{HasDerivWithinAt}\) sense), let \(p\in \mathbb C\) carry \(\mathrm{arcMargins}(\kappa _0,R,\delta ,\mu ,K,t_1,t_2,p)\), and suppose </p>
+<div class="displaymath" id="a0000000283">
+  \[  e^{L(t_2-t_1)}\Bigl(\| z(t_1)-p\| +M\! \int _{t_1}^{t_2}\! |\kappa -K|\Bigr)\le \mu .  \]
+</div>
+<p> Then \(z\) is admissible on \([t_1,t_2]\) (\(\| z\| \le R\), bracket \(\ge \delta \)) and </p>
+<div class="displaymath" id="a0000000284">
+  \[  \bigl\| z(t_2)-A_{K,t_1,t_2-t_1}(p)\bigr\|  \le e^{L(t_2-t_1)}\Bigl(\| z(t_1)-p\| +M\! \int _{t_1}^{t_2}\! |\kappa -K|\Bigr)  \]
+</div>
+<p> — the single step of the <a href="chap-sphere.html#lem:step_model_transport">lemma 203</a> chain. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000282">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p> The clamp-inactivity component of <a href="chap-sphere.html#def:arc_margins">definition 201</a> at \(\theta =t_1\) gives bracket positivity at the start, hence the consistency identity (<a href="chap-sphere.html#lem:constant_arc_consistency">lemma 184</a>) for the arc data \((w,r)\); by <a href="chap-sphere.html#lem:constant_arc_solves_truncated">lemma 199</a> the model arc solves the truncated ODE on the quarter (its norm is \(\le R-\mu \le R\) and its level-\(K\) bracket \(\ge \delta \) by the package). <a href="chap-sphere.html#lem:invariant_admissible_arc">lemma 200</a> then transports the distance bound and admissibility; the model arc endpoint at \(t_2\) is exactly \(A_{K,t_1,t_2-t_1}(p)\) by <a href="chap-sphere.html#def:spherical_arc_map">definition 189</a>. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:step_model_transport">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">203</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:step_model_transport">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000285"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:arc_margins">Definition 201</a></li>
+          
+          <li><a href="chap-sphere.html#def:spherical_arc_map">Definition 189</a></li>
+          
+          <li><a href="chap-sphere.html#lem:invariant_admissible_arc">Lemma 200</a></li>
+          
+          <li><a href="chap-sphere.html#lem:constant_arc_solves_truncated">Lemma 199</a></li>
+          
+          <li><a href="chap-sphere.html#def:step_half_map">Definition 196</a></li>
+          
+          <li><a href="chap-sphere.html#def:step_error_map">Definition 197</a></li>
+          
+          <li><a href="chap-sphere.html#lem:arc_map_half_turn">Lemma 194</a></li>
+          
+          <li><a href="chap-stepreduction.html#def:four_arc_step_function">Definition 19</a></li>
+          
+          <li><a href="chap-sphere.html#def:spherical_flow">Definition 168</a></li>
+          
+          <li><a href="chap-sphere.html#lem:spherical_flow_spec">Lemma 169</a></li>
+          
+          <li><a href="chap-sphere.html#lem:quarter_step_transport">Lemma 202</a></li>
+          
+          <li><a href="chap-sphere.html#lem:step_error_map_four_arc">Lemma 198</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.stepModel_transport" class="lean_decl">Gluck.stepModel_transport</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[four-arc chained transport against the step model]    Let \(\kappa \) be continuous with \(\kappa \ge \kappa _0\) pointwise, \(0{\lt}\delta \), \(L\), \(M\) as above, levels \(a,b\), and \(\kappa ^\ast =\texttt{stepCurvature } b\, a\, 0\, (\pi /2)\, \pi \,  (3\pi /2)\). Let \(z\) be a trajectory of the \(\kappa \)-truncated flow on \([0,2\pi ]\) with \(z(0)=z_0\), and let the <em>concatenated step model</em> from \(z_0\) be the four quarter-arc trajectories with levels \(a,b,a,b\) at \(\theta _0=0,\pi /2,\pi ,3\pi /2\), each arc started at the endpoint of the previous one. Assume each of the four arcs carries the margin package \(\mathrm{arcMargins}(\kappa _0,R,\delta ,\mu ,K_j,\theta _j,\theta _{j+1},p_j)\) of <a href="chap-sphere.html#def:arc_margins">definition 201</a>, where \(\theta _j=j\pi /2\), \(K_j\) alternates \(a,b,a,b\), and \(p_j\) is the \(j\)-fold nested arc-map start point (\(p_0=z_0\), \(p_{j+1}=A_{K_j,\theta _j,\pi /2}(p_j)\)), and </p>
+<div class="displaymath" id="a0000000286">
+  \[  e^{2\pi L}\, M\! \int _0^{2\pi }\! |\kappa -\kappa ^\ast |\; \le \; \mu .  \]
+</div>
+<p> Then \(z\) is admissible on \([0,2\pi ]\) (\(\| z\| \le R\), bracket \(\ge \delta \)), and the endpoint satisfies </p>
+<div class="displaymath" id="a0000000287">
+  \[  \bigl\| \, \bigl(z(2\pi )-z_0\bigr)-E^\ast _{a,b}(z_0)\, \bigr\|  \; \le \; e^{2\pi L}\, M\! \int _0^{2\pi }\! |\kappa -\kappa ^\ast | .  \]
+</div>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000285">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p> Apply <a href="chap-sphere.html#lem:quarter_step_transport">lemma 202</a> on each quarter \([\theta _j,\theta _{j+1}]\), \(\theta _j=j\pi /2\), with the constant level \(K_j\in \{ a,b\} \) of that quarter; on each quarter \(\int _{\theta _j}^{\theta _{j+1}}|\kappa -K_j|=\int _{\theta _j}^{\theta _{j+1}} |\kappa -\kappa ^\ast |\) (\(\kappa ^\ast =K_j\) off the single breakpoint). Chain the distance bounds: with \(d_j=\| z(\theta _j)-p_j\| \) and \(I_j=M\int _{\theta _j}^{ \theta _{j+1}}|\kappa -\kappa ^\ast |\), each quarter gives \(d_{j+1}\le e^{L\pi /2}(d_j+I_j)\) and \(d_0=0\), whence inductively \(d(\theta )\le e^{2\pi L}\sum _j I_j\) throughout — in particular each quarter’s smallness hypothesis holds and admissibility propagates across all four quarters. The model endpoint at \(2\pi \) is the four-arc composite, which equals \(z_0+E^\ast _{a,b}(z_0)\) by <a href="chap-sphere.html#lem:step_error_map_four_arc">lemma 198</a>, giving the endpoint estimate. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:step_model_margins">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">204</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:step_model_margins">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000288"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:arc_margins">Definition 201</a></li>
+          
+          <li><a href="chap-sphere.html#def:spherical_arc_map">Definition 189</a></li>
+          
+          <li><a href="chap-sphere.html#lem:constant_arc_inner">Lemma 182</a></li>
+          
+          <li><a href="chap-sphere.html#lem:speed_quadratic_identity">Lemma 190</a></li>
+          
+          <li><a href="chap-sphere.html#lem:speed_radius_le">Lemma 191</a></li>
+          
+          <li><a href="chap-sphere.html#lem:spherical_speed_circle">Lemma 155</a></li>
+          
+          <li><a href="chap-sphere.html#def:step_half_map">Definition 196</a></li>
+          
+          <li><a href="chap-sphere.html#lem:spherical_speed_circle">Lemma 155</a></li>
+          
+          <li><a href="chap-sphere.html#lem:constant_arc_inner">Lemma 182</a></li>
+          
+          <li><a href="chap-sphere.html#lem:speed_radius_le">Lemma 191</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.stepModel_margins" class="lean_decl">Gluck.stepModel_margins</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[uniform margins of the step model near the centered circle]    Fix \(c{\gt}0\) and \(\kappa _0\in (0,c]\), and set \(r^\ast =\sqrt{1+c^2}-c\), \(z_0^\ast =-i\, r^\ast \). There exist explicit \(0{\lt}R{\lt}1\) (the positivity witness is needed by <a href="chap-sphere.html#lem:step_model_transport">lemma 203</a>’s hypothesis \(0\le R\)), \(\delta {\gt}0\), \(\mu {\gt}0\), \(\rho _0{\gt}0\), \(h_0{\gt}0\) (functions of \(c,\kappa _0\) only) such that for all levels \(a,b\) with \(|a-c|\le h_0\), \(|b-c|\le h_0\) and every \(z_0\) with \(\| z_0-z_0^\ast \| \le \rho _0\), the four quarter-arc margin packages of <a href="chap-sphere.html#lem:step_model_transport">lemma 203</a> hold: </p>
+<div class="displaymath" id="a0000000289">
+  \[  \mathrm{arcMargins}(\kappa _0,R,\delta ,\mu ,K_j,\theta _j,\theta _{j+1},p_j), \qquad j=0,1,2,3,  \]
+</div>
+<p> with \(\theta _j=j\pi /2\), levels \(K_j\) alternating \(a,b,a,b\), and nested start points \(p_0=z_0\), \(p_{j+1}=A_{K_j,\theta _j,\pi /2}(p_j)\) (<a href="chap-sphere.html#def:arc_margins">definition 201</a>; the third component keeps the clamps inactive so <a href="chap-sphere.html#lem:constant_arc_solves_truncated">lemma 199</a> applies inside <a href="chap-sphere.html#lem:quarter_step_transport">lemma 202</a>). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000288">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p> Along the centered circle itself (\(a=b=c\), \(z_0=z_0^\ast \)) one has \(\| z^\ast \| \equiv r^\ast {\lt}1\) and \(\langle z^\ast (\theta ),ie^{i\theta }\rangle \equiv -r^\ast {\lt}0\) (<a href="chap-sphere.html#lem:spherical_speed_circle">lemma 155</a>), so all three quantities have strict slack: norm slack \(1-r^\ast \), bracket slacks \(\kappa _0+r^\ast \) and \(c+r^\ast \). A concrete admissible ledger (the prover may adjust constants, recording its choices in the task result): \(R=(1+r^\ast )/2\) (norm slack \(\tfrac {1-r^\ast }{2}\)), \(\delta =\mu =\tfrac 18\min \bigl(1-r^\ast ,\  \kappa _0+r^\ast \bigr)\), so that \(\delta +\mu \le \tfrac {\kappa _0+r^\ast }{4}\) and (since \(\kappa _0\le c\)) also \(\le \tfrac {c+r^\ast }{4}\); at the centered circle all three inequalities then hold with residual slack \(\ge \tfrac 12\min \bigl(\tfrac {1-r^\ast }{2}, \tfrac {\kappa _0+r^\ast }{2}\bigr)=:\sigma \). Stability: each quarter arc is \(\theta \mapsto w_j-i r_j e^{i\theta }\) with \(r_j=q_{K_j}(\theta _j,p_j)\), \(w_j=p_j+i r_j e^{i\theta _j}\); on the compact neighborhood \(\{ |K-c|\le c/2,\  \| z-z_c(\theta _j)\| \le r^\ast /2\} \) the bracket \(K-\langle z,ie^{i\theta _j}\rangle \) is bounded below by an explicit positive constant (Cauchy–Schwarz plus <a href="chap-sphere.html#lem:constant_arc_inner">lemma 182</a>; cf. <a href="chap-sphere.html#lem:speed_radius_le">lemma 191</a> for the lower bound \(q\ge r^\ast \) on the positive-bracket region), so \(q_K(\theta _j,\cdot )\) is a quotient of Lipschitz functions with denominator bounded away from \(0\) and \((K,p)\mapsto (w,r)\), hence each arc map \(A_{K,\theta _j,\pi /2}\), is Lipschitz with an explicit constant \(C_1(c)\). Along each arc, \(\langle z^\ast (\theta ),ie^{i\theta }\rangle =\langle w_j,ie^{i\theta }\rangle -r_j\) with \((w_j,r_j)\) within \(C_1(c)(\rho _0+h_0)\) of \((0,r^\ast )\). Chaining the four Lipschitz maps, every point of the concatenated trajectory and every pair \((w_j,r_j)\) deviates from the centered-circle data by at most \(C(c)\, (\rho _0+h_0)\) with \(C(c)=C_1(c)^4+C_1(c)^3+C_1(c)^2+C_1(c)+1\) (a crude but explicit chaining constant); choose \(\rho _0=h_0=\sigma /(4C(c))\). All constants are explicit; no compactness argument is needed. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:step_error_expansion">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">205</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:step_error_expansion">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000290"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:step_error_map">Definition 197</a></li>
+          
+          <li><a href="chap-sphere.html#def:step_half_map">Definition 196</a></li>
+          
+          <li><a href="chap-sphere.html#def:spherical_arc_map">Definition 189</a></li>
+          
+          <li><a href="chap-sphere.html#lem:speed_quadratic_identity">Lemma 190</a></li>
+          
+          <li><a href="chap-sphere.html#lem:speed_level_sensitivity">Lemma 192</a></li>
+          
+          <li><a href="chap-sphere.html#lem:step_error_map_four_arc">Lemma 198</a></li>
+          
+          <li><a href="chap-sphere.html#lem:arc_map_concat">Lemma 195</a></li>
+          
+          <li><a href="chap-sphere.html#lem:constant_arc_inner">Lemma 182</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.stepError_expansion" class="lean_decl">Gluck.stepError_expansion</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[first-variation expansion of the step error map]    Fix \(c{\gt}0\); let \(r^\ast ,z_0^\ast \) be as above and set \(\eta =\tfrac {2r^\ast }{1+c^2}{\gt}0\). There exist explicit \(\rho _1{\gt}0\), \(h_1{\gt}0\), \(C{\gt}0\) (functions of \(c\) only) such that for all \(h\in (0,h_1]\), with levels \(a=c-h/2\), \(b=c+h/2\), and all \(z_0\) with \(\| z_0-z_0^\ast \| \le \rho _1\): </p>
+<div class="displaymath" id="a0000000291">
+  \[  \Bigl\| \, E^\ast _{a,b}(z_0)\; +\; \eta \, h\, \overline{(z_0-z_0^\ast )}\, \Bigr\|  \; \le \; C\, h\, \bigl(\| z_0-z_0^\ast \| ^2+h\bigr) .  \]
+</div>
+<p> <em>Provenance.</em> The linear part \(-\eta \, h\, \overline{(\, \cdot \, )}\) is planner-derived (iter-048) and numerically validated (\(E^\ast /h\) against the predicted field at multiple base points and directions, ratio \(\to 1\) as the offset shrinks); the prover should re-derive the coefficient symbolically during formalization and may correct its exact value — the <em>load-bearing</em> content is only that the linear part is a nonzero real multiple of complex conjugation (orientation-reversing, nondegenerate). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000290">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>All expansions are exact algebra; no abstract Taylor theorem is used. Write \(\delta z=z_0-z_0^\ast \). The two mechanisms: (i) <em>level sensitivity is exact</em>: the LANDED lemma <a href="chap-sphere.html#lem:speed_level_sensitivity">lemma 192</a> (<span class="ttfamily">Gluck.sphericalSpeed_sub_level</span>) gives, for any levels \(K,K'\) and admissible \(z\), </p>
+<div class="displaymath" id="a0000000292">
+  \[  q_K(\theta ,z)-q_{K'}(\theta ,z) =\frac{(1+\| z\| ^2)\, (K'-K)}{2\, D_K D_{K'}},\qquad D_K=K-\langle z,ie^{i\theta }\rangle ;  \]
+</div>
+<p> at the circle base point this evaluates to \(\mp \tfrac {h}{2}\cdot \tfrac {r^\ast }{\sqrt{1+c^2}}+O(h(h+\| \delta z\| ))\) for \(K=c\pm h/2\). (ii) <em>base-point sensitivity is exactly quadratic</em>: <a href="chap-sphere.html#lem:speed_quadratic_identity">lemma 190</a> gives \(q_c(\theta ,z)-r^\ast =\| z-z_c(\theta )\| ^2/ (2D)\), so all first-order-in-\(\delta z\) contributions at level \(c\) vanish and re-enter only through the \(h\)-dependent terms. Expand the four-arc composite \(z_0+E^\ast _{a,b}(z_0)\) (<a href="chap-sphere.html#lem:step_error_map_four_arc">lemma 198</a>) arc by arc using (i), (ii) and the gradient formula for \(q_c\) implied by (ii) (each arc’s output is the input plus \(i\, q\, e^{i\theta _0}(1-e^{i\pi /2})\) with \(1-e^{i\pi /2}=1-i\), and intermediate points stay within \(O(\| \delta z\| +h)\) of the centered circle by <a href="chap-sphere.html#lem:step_model_margins">lemma 204</a>-style bounds); after cancellation of the \(h\)-free part (\(E^\ast _{c,c}\equiv 0\), <a href="chap-sphere.html#lem:arc_map_concat">lemma 195</a>) the coefficient of \(h\) collects to \(-\eta \, \overline{\delta z}+O(\| \delta z\| ^2)\) and every remaining term carries \(h(\| \delta z\| ^2+h)\). The bookkeeping is finite (eight \(q\)-evaluations), and the prover should organize it through named intermediate <span class="ttfamily">have</span>-identities rather than one monolithic <span class="ttfamily">ring</span> call. </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:conj_loop">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">206</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#def:conj_loop">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.conjLoop" class="lean_decl">Gluck.conjLoop</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>[conjugate boundary loop]   For \(w\in \mathbb C\), the <em>conjugate loop</em> is the continuous map \([0,1]\to \mathbb C\), \(t\mapsto w\cdot \overline{e^{2\pi it}}=w\, e^{-2\pi it}\) — the once-clockwise circle of radius \(|w|\) through \(w\). It is the model loop for the boundary behaviour of the conjugation-type first variation of <a href="chap-sphere.html#lem:step_error_expansion">lemma 205</a>. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:conj_loop_ne_zero">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">207</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:conj_loop_ne_zero">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000293"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:conj_loop">Definition 206</a></li>
+          
+          <li><a href="chap-sphere.html#def:conj_loop">Definition 206</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.conjLoop_ne_zero" class="lean_decl">Gluck.conjLoop_ne_zero</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[the conjugate loop avoids the origin]    For \(w\ne 0\) and every \(t\in [0,1]\), \(w\cdot \overline{e^{2\pi it}}\ne 0\): it is a product of two nonzero factors (\(|e^{-2\pi it}|=1\)). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000293">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p> Immediate: \(|w\, e^{-2\pi it}|=|w|\ne 0\). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:winding_conj_loop">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">208</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:winding_conj_loop">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000294"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-winding.html#def:winding_number_c">Definition 46</a></li>
+          
+          <li><a href="chap-sphere.html#def:conj_loop">Definition 206</a></li>
+          
+          <li><a href="chap-sphere.html#lem:conj_loop_ne_zero">Lemma 207</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.windingNumberC_conj_loop" class="lean_decl">Gluck.windingNumberC_conj_loop</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[winding of a conjugate loop]    For \(w\ne 0\), the loop \(t\mapsto w\cdot \overline{e^{2\pi it}}\) on \([0,1]\) is nowhere zero and has \(\mathbb C\)-winding number \(-1\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000294">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>The normalization of the loop is \(t\mapsto \mathrm{circleProj}(w)\cdot e^{-2\pi it}\), which lifts through \(\mathrm{Circle.exp}\) via \(t\mapsto \arg (w)-2\pi t\); by the same lift computation as <a href="chap-winding.html#lem:winding_number_eq_div_of_lift">lemma 39</a> — which is <span class="ttfamily">private</span> and must be replicated locally, see the CAUTION below — the winding number is \(\bigl((\arg w-2\pi )-\arg w\bigr)/(2\pi )=-1\). (CAUTION — the <em>entire</em> lift layer of <span class="ttfamily">Winding.lean</span> is <span class="ttfamily">private</span> and not importable: not just <span class="ttfamily">windingNumber_negStandard</span> but also <span class="ttfamily">windingNumber_eq_div_of_lift</span>, <span class="ttfamily">angleLift</span>, and the raw <span class="ttfamily">windingNumber</span>; the public surface is only <span class="ttfamily">windingNumberC</span>, <span class="ttfamily">windingNumberC_congr</span>, <span class="ttfamily">windingNumberC_eq_of_perturb</span>, <span class="ttfamily">windingNumberC_posScalarField</span>, <span class="ttfamily">diskBoundaryLoop</span>, and <span class="ttfamily">thm:existence_of_zero</span>. The local proof must therefore redo the angle-lift computation self-contained from Mathlib’s <span class="ttfamily">Circle.isCoveringMap_exp</span> path lifting — the same route as <span class="ttfamily">Winding.lean</span>’s construction, an estimated 80–120 LOC helper layer, NOT a five-line replication.) </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:exists_abab_levels">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">209</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:exists_abab_levels">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000295"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-curvature.html#def:four_vertex_condition">Definition 12</a></li>
+          
+          <li><a href="chap-curvature.html#lem:ivt_hits">Lemma 11</a></li>
+          
+          <li><a href="chap-curvature.html#lem:abab_values">Lemma 14</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.exists_abab_levels" class="lean_decl">Gluck.exists_abab_levels</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[four values at freely chosen levels]    Let \(\kappa \) be continuous and \(2\pi \)-periodic with alternating extrema data \(p_1{\lt}q_1{\lt}p_2{\lt}q_2{\lt}p_1+2\pi \) satisfying the strict value separation \(\max (\kappa (q_1),\kappa (q_2)){\lt}\min (\kappa (p_1),\kappa (p_2))\). Then for <em>every</em> pair of levels \(a,b\) with \(\max (\kappa (q_1),\kappa (q_2)){\lt}a{\lt}b{\lt}\min (\kappa (p_1),\kappa (p_2))\) there exist \(\theta _1{\lt}\theta _2{\lt}\theta _3{\lt}\theta _4{\lt}\theta _1+2\pi \) with \(\kappa (\theta _1,\theta _2,\theta _3,\theta _4)=(a,b,a,b)\). (This refines <a href="chap-curvature.html#lem:abab_values">lemma 14</a>, which produces one specific pair of levels — the endpoints of the overlap window; here the levels are free, which is what allows the small-contrast choice \(a=c-h/2\), \(b=c+h/2\).) </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000295">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Four applications of the packaged IVT (<a href="chap-curvature.html#lem:ivt_hits">lemma 11</a>): on \([q_1,p_2]\), \(\kappa \) runs from \(\le a\) to \(\ge b\), giving \(\theta _1\) with \(\kappa =a\) and then, on \([\theta _1,p_2]\), \(\theta _2\ge \theta _1\) with \(\kappa =b\) (strict inequality since the values differ); on \([p_2,q_2]\) (\(\ge b\to \le a\)) a point \(\theta _3\) with \(\kappa =a\); on \([q_2,p_1+2\pi ]\) (\(\le a\to \kappa (p_1)\ge b\), using periodicity) a point \(\theta _4\) with \(\kappa =b\). The ordering and window conditions follow since \(\theta _4\le p_1+2\pi {\lt}q_1+2\pi \le \theta _1+2\pi \). (Home: this lemma lives in the S² file — the Euclidean files are frozen.) </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:step_L1_reparam">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">210</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:step_L1_reparam">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000296"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-stepreduction.html#lem:exists_preliminary_reparam">Lemma 27</a></li>
+          
+          <li><a href="chap-stepreduction.html#def:four_arc_step_function">Definition 19</a></li>
+          
+          <li><a href="chap-curvature.html#def:is_curvature_function">Definition 8</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.exists_step_L1_reparam" class="lean_decl">Gluck.exists_step_L1_reparam</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[\(L^1\) step reparametrization]    Let \(\kappa \) be a curvature function, \(0{\lt}a{\lt}b\), and \(\theta _1{\lt}\theta _2{\lt}\theta _3{\lt} \theta _4{\lt}\theta _1+2\pi \) with \(\kappa (\theta _1,\theta _2,\theta _3,\theta _4)=(a,b,a,b)\). For every \(\varepsilon {\gt}0\) there is an orientation-preserving circle reparametrization \(h_1\) (\(\mathrm{StrictMono}\), \(C^1\) with continuous positive derivative, \(h_1(\theta +2\pi )=h_1(\theta )+2\pi \)) such that </p>
+<div class="displaymath" id="a0000000297">
+  \[  \int _0^{2\pi }\bigl|\kappa (h_1(\theta ))-\kappa ^\ast (\theta )\bigr|\, d\theta \; {\lt}\; \varepsilon , \qquad \kappa ^\ast =\texttt{stepCurvature } b\, a\, 0\, (\pi /2)\, \pi \, (3\pi /2).  \]
+</div>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000296">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Apply <a href="chap-stepreduction.html#lem:exists_preliminary_reparam">lemma 27</a> with \(\varepsilon '=\varepsilon /\bigl(B+2\pi +1\bigr)\) where \(B=\sup _{[0,2\pi ]}\kappa +b\) (finite by compactness and periodicity, and a pointwise bound for \(|\kappa \circ h_1-\kappa ^\ast |\) since \(0{\lt}\kappa ^\ast \le b\) and \(\kappa \circ h_1\) ranges over the values of \(\kappa \)). Split the integral over the bad set (measure \({\lt}\varepsilon '\), integrand \(\le B\)) and its complement in \([0,2\pi )\) (integrand \(\le \varepsilon '\), measure \(\le 2\pi \)): \(\int \le \varepsilon ' B+2\pi \varepsilon '{\lt}\varepsilon \). </p>
+
+  </div>
+</div>
 <div class="lemma_thmwrapper theorem-style-plain" id="lem:spherical_endpoint_winding">
   <div class="lemma_thmheading">
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">182</span>
-    <span class="lemma_thmtitle">spherical endpoint map: boundary winding over the symmetric step model</span>
+    <span class="lemma_thmlabel">211</span>
     <div class="thm_header_extras">
 
+    
+    ✓
         </div>
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="chap-sphere.html#lem:spherical_endpoint_winding">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000251"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000298"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -3157,13 +5495,27 @@
           
           <li><a href="chap-sphere.html#lem:spherical_endpoint_continuousOn">Lemma 174</a></li>
           
-          <li><a href="chap-sphere.html#lem:constant_curvature_arc">Lemma 180</a></li>
+          <li><a href="chap-sphere.html#def:step_error_map">Definition 197</a></li>
           
-          <li><a href="chap-sphere.html#lem:flow_half_turn_equivariance">Lemma 181</a></li>
+          <li><a href="chap-sphere.html#lem:step_model_transport">Lemma 203</a></li>
           
-          <li><a href="chap-sphere.html#lem:invariant_admissible_domain">Lemma 178</a></li>
+          <li><a href="chap-sphere.html#lem:step_model_margins">Lemma 204</a></li>
+          
+          <li><a href="chap-sphere.html#lem:step_error_expansion">Lemma 205</a></li>
+          
+          <li><a href="chap-sphere.html#lem:winding_conj_loop">Lemma 208</a></li>
+          
+          <li><a href="chap-winding.html#lem:winding_number_c_perturb">Lemma 49</a></li>
+          
+          <li><a href="chap-sphere.html#lem:exists_abab_levels">Lemma 209</a></li>
+          
+          <li><a href="chap-sphere.html#lem:step_L1_reparam">Lemma 210</a></li>
           
           <li><a href="chap-winding.html#thm:existence_of_zero">Theorem 57</a></li>
+          
+          <li><a href="chap-sphere.html#def:sphere_four_vertex">Definition 147</a></li>
+          
+          <li><a href="chap-sphere.html#lem:sphere_curvature_lower_bound">Lemma 148</a></li>
           
         </ul>
     
@@ -3194,11 +5546,11 @@
         </div>
   </div>
   <div class="lemma_thmcontent">
-  <p>    For \(\kappa \) obtained from the four-vertex reparametrization (\(L^1\)-close to a two-value step model with values \(a{\gt}b{\gt}0\)), there is a compact disk \(D\) of initial points \(z_0\), centered at the model’s closing configuration, on which the endpoint map \(E\) of <a href="chap-sphere.html#def:spherical_endpoint">definition 173</a> is continuous, nonzero on \(\partial D\), and has nonzero boundary winding; the in-tree <a href="chap-winding.html#thm:existence_of_zero">theorem 57</a> then supplies an interior zero \(E(z_0^\ast )=0\), a closed trajectory of the truncated flow. </p>
+  <p>[spherical endpoint winding: closed admissible trajectory for the reparametrized curvature]    Let \(\kappa \) satisfy <a href="chap-sphere.html#def:sphere_four_vertex">definition 147</a> and be non-constant. Then there exist \(R{\lt}1\), \(\delta {\gt}0\), an orientation-preserving circle reparametrization \(h_1\) (\(\mathrm{StrictMono}\), \(C^1\) with continuous positive derivative, \(h_1(\theta +2\pi )=h_1(\theta )+2\pi \)), and \(z_0\in \mathbb C\), such that the trajectory of the \((\kappa \circ h_1,R,\delta )\)-truncated flow through \(z_0\) is <em>closed</em> (\(\Phi (z_0,2\pi )=z_0\), i.e. the endpoint map of <a href="chap-sphere.html#def:spherical_endpoint">definition 173</a> vanishes at \(z_0\)) and <em>admissible</em> on \([0,2\pi ]\): \(\| z(\theta )\| \le R\) and \((\kappa \circ h_1)(\theta )-\langle z(\theta ),ie^{i\theta }\rangle \ge \delta \). </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000251">
+<div class="proof_wrapper" id="a0000000298">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -3206,7 +5558,7 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p><em>(Pinned design, two sub-questions still open — S2-D is the remaining hard phase.)</em> <b class="bfseries">DO-NOT (degeneracy of the constant model).</b> For <em>constant</em> \(\kappa =K\) every admissible initial point lies on a spherical circle of curvature \(K\) (<a href="chap-sphere.html#lem:constant_curvature_arc">lemma 180</a>), so every trajectory closes and \(E\equiv 0\) on an open set: the constant-curvature family carries no degree and must NOT be used as the homotopy target. Equivalently, the \(z\)-gradient of \(q\) vanishes identically along circle solutions (a consequence of the consistency identity), so the linearized monodromy is the identity. <b class="bfseries">Model.</b> Use instead the <em>symmetric step bicircle</em>: the two-value \(\pi \)-periodic step curvature (values \(a,b\), the in-tree canonical breakpoint pattern), whose trajectories obey the half-turn equivariance (<a href="chap-sphere.html#lem:flow_half_turn_equivariance">lemma 181</a>). Closure reduces to the 2-D fixed-point equation \(G(z_0):=H(z_0)+z_0=0\) for the half-period map \(H\). At \(a=b=K\) the map \(G\) has the explicit zero \(z_0=-i\, r^\ast \), \(r^\ast =\sqrt{1+K^2}-K\) (the centered circle), and — because the linearization along circle arcs is the identity — \(DG=2\, \mathrm{Id}\) there: an isolated nondegenerate zero with local winding \(+1\). This is where the linearization degeneracy becomes a <em>feature</em>. <b class="bfseries">Quantitative scheme (strategy-critic refinement, accepted).</b> The two step levels \(a{\gt}b\) are <em>free</em> inside the four-vertex overlap interval \((\max (\kappa (q_1),\kappa (q_2)),\, \min (\kappa (p_1),\kappa (p_2)))\), so they may be chosen with <em>small contrast</em> \(h=a-b\) around a midpoint \(c\). Then the step model is an \(O(h)\) perturbation of the constant \(c\), the continuation from the explicit \(a=b\) zero is <em>local</em> (boundary nonvanishing on a fixed small disk from \(DG=2\, \mathrm{Id}+O(h)\)), and — crucially — \(H\) for the step model is an <em>explicit closed-form</em> composition of two arc maps \(z_0\mapsto z_0+i\, q_K(\theta _0,z_0)\, e^{i\theta _0}(1-e^{i\Delta })\) (<a href="chap-sphere.html#lem:constant_curvature_arc">lemma 180</a>), so \(DH\) and all isolation radii are finite symbolic computations, with no variational-equation formalization. <b class="bfseries">Open sub-question (a) — sharpened.</b> Compute \(DG=DH+\mathrm{Id}\) for the explicit two-arc composition and verify invertibility (hence local winding \(+1\)) for small \(h{\gt}0\) at the symmetric configuration. <b class="bfseries">Open sub-question (b) — sharpened.</b> Transfer the winding from \(G\) to the full-period \(E\). Note \(E(z_0)=-H_2(-H_1(z_0))-z_0\) with \(H_1=H_2=H\) in the \(\pi \)-periodic case, so \(DE=DH^2-\mathrm{Id}=O(h)\): the model zero of \(E\) is isolated only at scale \(h\) (for \(h=0\), \(E\equiv 0\) — the DO-NOT above). The order of quantifiers works: first fix the contrast \(h\), extract the \(O(h)\) isolation radius and boundary margin of \(E\) from the explicit \(DE\), THEN choose the reparametrization quality \(\varepsilon \ll h\) (the \(L^1\) distance of <a href="chap-dahlberg_step1.html">chapter 11</a> is free) so the \(\kappa \)-homotopy (flow \(L^1\)-continuity, the estimate of <a href="chap-sphere.html#lem:invariant_admissible_domain">lemma 178</a>) keeps \(E\ne 0\) on the boundary circle throughout. The Euclidean <span class="ttfamily">errorMap_winding_eq_one</span> <em>value</em> is not reusable; only <a href="chap-winding.html#thm:existence_of_zero">theorem 57</a> is. <em>Caveat for the formalization:</em> <a href="chap-sphere.html#lem:invariant_admissible_domain">lemma 178</a> takes \(\kappa ^\ast \) <em>continuous</em>, while the step model is piecewise constant — compare through continuous approximants of the step, or restate the transport with \(z^\ast \) merely continuous piecewise-\(C^1\) satisfying the integral identity \(z^\ast (\theta )=z^\ast (0)+\int _0^\theta F_{\kappa ^\ast }(s,z^\ast (s))ds\) (which concatenated arcs satisfy); decide when S2-D is dispatched. </p>
+  <p><em>Data.</em> From the non-constant four-vertex branch take the alternating extrema and the overlap window; let \(c\) be its midpoint and \(\kappa _0=\min _{[0,2\pi ]}\kappa {\gt}0\) (\(\le c\), shrinking \(\kappa _0\) if necessary). <a href="chap-sphere.html#lem:step_model_margins">lemma 204</a> for \((c,\kappa _0)\) fixes \(R,\delta ,\mu ,\rho _0,h_0\); <a href="chap-sphere.html#lem:step_error_expansion">lemma 205</a> fixes \(\rho _1,h_1',C,\eta \). Choose \(\rho =\min \bigl(\rho _0,\rho _1,\tfrac {\eta }{4C}\bigr)\) and then \(h=\min \bigl(h_0,h_1',\tfrac {\eta \rho }{4C},\tfrac {w}{2}\bigr)\) where \(w\) is the half-width of the overlap window; set \(a=c-h/2\), \(b=c+h/2\). <em>Boundary margin of the model.</em> On the circle \(\| z_0-z_0^\ast \| =\rho \), <a href="chap-sphere.html#lem:step_error_expansion">lemma 205</a> gives \(\| E^\ast _{a,b}(z_0)+\eta h\overline{(z_0-z_0^\ast )}\| \le Ch(\rho ^2+h)\le \tfrac {\eta h\rho }{2}\), so \(\| E^\ast _{a,b}\| \ge \tfrac {\eta h\rho }{2}\) there. <em>Reparametrization.</em> <a href="chap-sphere.html#lem:exists_abab_levels">lemma 209</a> supplies the \((a,b,a,b)\) crossing data; <a href="chap-sphere.html#lem:step_L1_reparam">lemma 210</a> then supplies \(h_1\) with \(\int _0^{2\pi }|\kappa \circ h_1-\kappa ^\ast |{\lt}\varepsilon \), where \(\varepsilon {\gt}0\) is chosen with \(e^{2\pi L}M\varepsilon \le \min \bigl(\mu ,\tfrac {\eta h\rho }{8}\bigr)\) (\(L\) a Lipschitz witness for the truncated field, \(M=\tfrac {1+R^2}{2\delta ^2}\)). Note \(\kappa \circ h_1\) is continuous, \(2\pi \)-periodic, and \(\ge \kappa _0\). <em>Winding.</em> For \(z_0\) on the boundary circle, <a href="chap-sphere.html#lem:step_model_transport">lemma 203</a> (margins from <a href="chap-sphere.html#lem:step_model_margins">lemma 204</a>) bounds \(\| E_{\kappa \circ h_1}(z_0)-E^\ast _{a,b}(z_0)\| \le e^{2\pi L}M\varepsilon \le \tfrac {\eta h\rho }{8}\), where \(E_{\kappa \circ h_1}\) is the truncated endpoint map of <a href="chap-sphere.html#def:spherical_endpoint">definition 173</a>. Combining with the boundary margin and the expansion, the loop of \(E_{\kappa \circ h_1}\) around \(\partial B(z_0^\ast ,\rho )\) is a perturbation, of size \({\lt}\) the model’s norm, of the conjugate-linear loop \(t\mapsto -\eta h\, \rho \, \overline{e^{2\pi it}}\); by <a href="chap-winding.html#lem:winding_number_c_perturb">lemma 49</a> and <a href="chap-sphere.html#lem:winding_conj_loop">lemma 208</a> its winding is \(-1\ne 0\), and it is nowhere zero on the boundary. <em>Zero.</em> \(E_{\kappa \circ h_1}\) is continuous on the closed ball (<a href="chap-sphere.html#lem:spherical_endpoint_continuousOn">lemma 174</a>); after the affine chart \(w\mapsto z_0^\ast +\rho w\) of the unit disk, <a href="chap-winding.html#thm:existence_of_zero">theorem 57</a> yields an interior \(z_0\) with \(E_{\kappa \circ h_1}(z_0)=0\): the trajectory closes. <em>Admissibility.</em> Apply <a href="chap-sphere.html#lem:step_model_transport">lemma 203</a> once more at this interior \(z_0\) (its model margins hold since \(\| z_0-z_0^\ast \| {\lt}\rho \le \rho _0\)), with the same \(\varepsilon \)-smallness: the closed trajectory is admissible on \([0,2\pi ]\). </p>
 
   </div>
 </div>
@@ -3217,7 +5569,8 @@
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">183</span>
+    <span class="lemma_thmlabel">212</span>
+    <span class="lemma_thmtitle">constant curvature branch: the centered circle realizes constant \(\kappa \)</span>
     <div class="thm_header_extras">
 
     
@@ -3227,7 +5580,7 @@
 
     <a class="icon proof" href="chap-sphere.html#lem:spherical_circle_realizes">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000252"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000299"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -3278,11 +5631,11 @@
         </div>
   </div>
   <div class="lemma_thmcontent">
-  <p>[constant curvature branch: the centered circle realizes constant \(\kappa \)]    For every constant \(c{\gt}0\) the centered circle \(z(\theta )=-r^\ast \, i\, e^{i\theta }\) with \(r^\ast =\sqrt{1+c^2}-c\in (0,1)\) is a simple closed curve realizing the constant curvature function \(\kappa \equiv c\) (<a href="chap-sphere.html#def:realizes_spherical_curvature">definition 146</a>). This discharges the constant disjunct of <a href="chap-curvature.html#def:four_vertex_condition">definition 12</a> in the capstone, exactly as the Euclidean <span class="ttfamily">gluck_converse</span> handles its constant branch with a round circle; the reconstruction flow and the degree argument are NOT needed for it. </p>
+  <p>    For every constant \(c{\gt}0\) the centered circle \(z(\theta )=-r^\ast \, i\, e^{i\theta }\) with \(r^\ast =\sqrt{1+c^2}-c\in (0,1)\) is a simple closed curve realizing the constant curvature function \(\kappa \equiv c\) (<a href="chap-sphere.html#def:realizes_spherical_curvature">definition 146</a>). This discharges the constant disjunct of <a href="chap-curvature.html#def:four_vertex_condition">definition 12</a> in the capstone, exactly as the Euclidean <span class="ttfamily">gluck_converse</span> handles its constant branch with a round circle; the reconstruction flow and the degree argument are NOT needed for it. </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000252">
+<div class="proof_wrapper" id="a0000000299">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -3294,21 +5647,22 @@
 
   </div>
 </div>
-<div class="lemma_thmwrapper theorem-style-plain" id="lem:spherical_simplicity">
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:realizes_spherical_comp">
   <div class="lemma_thmheading">
     <span class="lemma_thmcaption">
     Lemma
     </span>
-    <span class="lemma_thmlabel">184</span>
-    <span class="lemma_thmtitle">simplicity</span>
+    <span class="lemma_thmlabel">213</span>
     <div class="thm_header_extras">
 
+    
+    ✓
         </div>
     <div class="thm_header_hidden_extras">
 
-    <a class="icon proof" href="chap-sphere.html#lem:spherical_simplicity">#</a>
+    <a class="icon proof" href="chap-sphere.html#lem:realizes_spherical_comp">#</a>
     
-    <a class="icon proof" href="chap-sphere.html#a0000000253"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    <a class="icon proof" href="chap-sphere.html#a0000000300"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
     
     
@@ -3324,9 +5678,365 @@
         
         <ul class="uses">
           
-          <li><a href="chap-sphere.html#lem:spherical_endpoint_winding">Lemma 182</a></li>
+          <li><a href="chap-sphere.html#def:realizes_spherical_curvature">Definition 146</a></li>
           
-          <li><a href="chap-sphere.html#lem:reconstruction_ode">Lemma 179</a></li>
+          <li><a href="chap-fourvertex.html#lem:realizes_curvature_comp">Lemma 89</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.realizesSphericalCurvature_comp" class="lean_decl">Gluck.realizesSphericalCurvature_comp</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[spherical realization transfers under reparametrization]    If \(z\) realizes the spherical curvature \(\mu \) (<a href="chap-sphere.html#def:realizes_spherical_curvature">definition 146</a>) and \(\psi :\mathbb R\to \mathbb R\) is \(C^1\) with \(\psi '{\gt}0\) everywhere, then \(z\circ \psi \) realizes \(\mu \circ \psi \). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000300">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Mirror of the Euclidean <a href="chap-fourvertex.html#lem:realizes_curvature_comp">lemma 89</a> (<span class="ttfamily">Gluck.realizesCurvature_comp</span>): the chain rule gives \((z\circ \psi )'=\psi '\cdot (z'\circ \psi )\), so the speed scales by \(\psi '{\gt}0\), the tangent-angle witness is \(\varphi \circ \psi \), and the spherical speed relation of <a href="chap-sphere.html#def:realizes_spherical_curvature">definition 146</a> at \(\psi (t)\) multiplies through by \(\psi '(t){\gt}0\) on both sides — the extra conformal factor \((1+\| z\| ^2)/2\) and the bracket term are pointwise in the curve value and transport unchanged. Confinement and regularity are pointwise. This is what pulls a realization of \(\kappa \circ h_1\) back to a realization of \(\kappa \) in the capstone: apply it with \(\psi =h_1^{-1}\), whose existence, \(C^1\) regularity, positive derivative, and circle-equivariance are exactly the PUBLIC in-tree lemma <span class="ttfamily">Gluck.exists_C1_circle_inverse</span> (<span class="ttfamily">Reduction.lean</span>, <a href="chap-fourvertex.html#lem:exists_c1_circle_inverse">lemma 91</a>) — reuse it directly, no local replication needed. </p>
+
+  </div>
+</div>
+<p>The simplicity of the closing trajectory reduces to the Euclidean chord-integral machinery of <a href="chap-simplicity.html">chapter 8</a> through one observation: in the gauge \(\varphi (\theta )=\theta \) the disk representative is an ordinary plane curve with \(\tilde z'=\rho (\theta )\, e^{i\theta }\), \(\rho {\gt}0\), i.e. (up to the additive constant \(\tilde z(0)\)) exactly a Euclidean reconstruction curve \(\mathrm{reconstruct}\, \rho \) (<a href="chap-closure.html#def:reconstruct">definition 15</a>) for the <em>trajectory speed</em> \(\rho (\theta )=q_\kappa (\theta ,\tilde z(\theta ))\). The disk metric plays no role in injectivity. The chain below works this out in three finite steps and one assembly. </p>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:spherical_trajectory_speed">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">214</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:spherical_trajectory_speed">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000301"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#def:spherical_speed">Definition 150</a></li>
+          
+          <li><a href="chap-sphere.html#def:periodic_extension">Definition 179</a></li>
+          
+          <li><a href="chap-sphere.html#lem:periodic_extension_periodic">Lemma 180</a></li>
+          
+          <li><a href="chap-sphere.html#lem:reconstruction_ode">Lemma 181</a></li>
+          
+          <li><a href="chap-curvature.html#def:is_curvature_function">Definition 8</a></li>
+          
+          <li><a href="chap-sphere.html#lem:reconstruction_ode">Lemma 181</a></li>
+          
+          <li><a href="chap-sphere.html#lem:periodic_extension_periodic">Lemma 180</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.sphericalTrajectory_speed" class="lean_decl">Gluck.sphericalTrajectory_speed</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[trajectory speed: continuity, periodicity, positivity]    Let \(\kappa \) be a curvature function, \(R{\lt}1\), \(\delta {\gt}0\), and let \(z:[0,2\pi ]\to \mathbb C\) be a trajectory of the \((\kappa ,R,\delta )\)-truncated flow (in the hypothesis form of <a href="chap-sphere.html#lem:reconstruction_ode">lemma 181</a>) that is admissible and closed. Write \(\tilde z\) for its periodic extension and set \(\rho (t)=q_\kappa \bigl(t,\tilde z(t)\bigr)\) (<a href="chap-sphere.html#def:spherical_speed">definition 150</a>). Then \(\rho \) is continuous, \(2\pi \)-periodic, and \(\rho (t){\gt}0\) for all \(t\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000301">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p> <em>Extended admissibility.</em> For any \(t\) reduce \(u=t-2\pi \lfloor t/(2\pi )\rfloor \in [0,2\pi )\); admissibility at \(u\) plus \(2\pi \)-periodicity of \(\kappa \) and of \(\theta \mapsto e^{i\theta }\) give \(\| \tilde z(t)\| \le R\) and \(\kappa (t)-\langle \tilde z(t),ie^{it}\rangle \ge \delta \) (the same reduction as inside the proof of <a href="chap-sphere.html#lem:reconstruction_ode">lemma 181</a>). <em>Continuity.</em> \(\tilde z\) is differentiable (the exposed derivative conjunct of <a href="chap-sphere.html#lem:reconstruction_ode">lemma 181</a>), hence continuous; \(\rho \) is the quotient \(\rho =\tfrac {1+\| \tilde z\| ^2}{2(\kappa -\langle \tilde z,ie^{it}\rangle )}\) whose denominator is continuous and \(\ge 2\delta {\gt}0\) by extended admissibility, so \(\rho \) is continuous. <em>Periodicity.</em> \(\tilde z(t+2\pi )=\tilde z(t)\) (<a href="chap-sphere.html#lem:periodic_extension_periodic">lemma 180</a>), \(\kappa (t+2\pi )=\kappa (t)\), and \(e^{i(t+2\pi )}=e^{it}\); all three inputs of \(\rho \) are \(2\pi \)-periodic. <em>Positivity.</em> Numerator \(1+\| \tilde z\| ^2\ge 1{\gt}0\), denominator \(\ge 2\delta {\gt}0\). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:spherical_trajectory_eq_reconstruct">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">215</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:spherical_trajectory_eq_reconstruct">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000302"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#lem:spherical_trajectory_speed">Lemma 214</a></li>
+          
+          <li><a href="chap-sphere.html#lem:reconstruction_ode">Lemma 181</a></li>
+          
+          <li><a href="chap-closure.html#def:reconstruct">Definition 15</a></li>
+          
+          <li><a href="chap-closure.html#lem:reconstruct_deriv">Lemma 17</a></li>
+          
+          <li><a href="chap-sphere.html#lem:spherical_trajectory_speed">Lemma 214</a></li>
+          
+          <li><a href="chap-closure.html#lem:reconstruct_deriv">Lemma 17</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.sphericalTrajectory_eq_reconstruct" class="lean_decl">Gluck.sphericalTrajectory_eq_reconstruct</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[the closing trajectory is a translated reconstruction curve]    In the setting of <a href="chap-sphere.html#lem:spherical_trajectory_speed">lemma 214</a>, </p>
+<div class="displaymath" id="a0000000303">
+  \[  \tilde z(t)\; =\; \tilde z(0)+\mathrm{reconstruct}\, \rho \, (t) \qquad \text{for all } t\in \mathbb R .  \]
+</div>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000302">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p> Both sides are differentiable on all of \(\mathbb R\) with the <em>same</em> derivative \(\rho (t)e^{it}\): the left side by the exposed derivative conjunct of <a href="chap-sphere.html#lem:reconstruction_ode">lemma 181</a> (which is \(q_\kappa (t,\tilde z(t))e^{it} =\rho (t)e^{it}\) by definition of \(\rho \)), the right side by <a href="chap-closure.html#lem:reconstruct_deriv">lemma 17</a> (\(\rho \) is continuous by <a href="chap-sphere.html#lem:spherical_trajectory_speed">lemma 214</a>). Their difference has vanishing derivative on the connected set \(\mathbb R\), hence is constant; at \(t=0\) the difference is \(\tilde z(0)\) since \(\mathrm{reconstruct}\, \rho \, (0)=\int _0^0=0\). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:is_simple_closed_const_add">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">216</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:is_simple_closed_const_add">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000304"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-curve.html#def:is_simple_closed">Definition 6</a></li>
+          
+          <li><a href="chap-curve.html#def:is_closed_curve">Definition 5</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="/find/#doc/Gluck.isSimpleClosed_const_add" class="lean_decl">Gluck.isSimpleClosed_const_add</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>[simplicity is translation-invariant]    If \(\gamma \) is a simple closed curve and \(w\in \mathbb C\), then \(t\mapsto w+\gamma (t)\) is a simple closed curve. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000304">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Closedness: \(w+\gamma (t+2\pi )=w+\gamma (t)\) (<a href="chap-curve.html#def:is_closed_curve">definition 5</a> is \(2\pi \)-periodicity, which survives adding a constant). Injectivity on \([0,2\pi )\): \(w+\gamma (s)=w+\gamma (t)\) iff \(\gamma (s)=\gamma (t)\) — cancel \(w\). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:spherical_simplicity">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">217</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chap-sphere.html#lem:spherical_simplicity">#</a>
+    
+    <a class="icon proof" href="chap-sphere.html#a0000000305"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chap-sphere.html#lem:spherical_trajectory_speed">Lemma 214</a></li>
+          
+          <li><a href="chap-sphere.html#lem:spherical_trajectory_eq_reconstruct">Lemma 215</a></li>
+          
+          <li><a href="chap-sphere.html#lem:is_simple_closed_const_add">Lemma 216</a></li>
+          
+          <li><a href="chap-simplicity.html#cor:positive_curvature_implies_simple">Corollary 86</a></li>
+          
+          <li><a href="chap-closure.html#def:error_vector">Definition 18</a></li>
+          
+          <li><a href="chap-sphere.html#lem:reconstruction_ode">Lemma 181</a></li>
+          
+          <li><a href="chap-sphere.html#lem:spherical_trajectory_eq_reconstruct">Lemma 215</a></li>
+          
+          <li><a href="chap-simplicity.html#cor:positive_curvature_implies_simple">Corollary 86</a></li>
+          
+          <li><a href="chap-sphere.html#lem:is_simple_closed_const_add">Lemma 216</a></li>
           
         </ul>
     
@@ -3357,11 +6067,11 @@
         </div>
   </div>
   <div class="lemma_thmcontent">
-  <p>    The closing trajectory is simple: distinct parameters in \([0,2\pi )\) give distinct disk points, and (being confined to \(\{ |z|{\lt}1\} \)) it is therefore simple on \(S^2\). </p>
+  <p>[simplicity]    In the setting of <a href="chap-sphere.html#lem:spherical_trajectory_speed">lemma 214</a> (curvature function \(\kappa \), \(R{\lt}1\), \(\delta {\gt}0\), an admissible closed trajectory \(z\) of the truncated flow on \([0,2\pi ]\)), the periodic extension \(\tilde z\) is a <em>simple</em> closed curve: distinct parameters in \([0,2\pi )\) give distinct disk points. (Confinement \(\| \tilde z\| \le R{\lt}1\) already places the curve in the open disk, so this is simplicity on \(S^2\) via the stereographic chart; no further transport is needed.) </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000253">
+<div class="proof_wrapper" id="a0000000305">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -3369,7 +6079,7 @@
     <span class="expand-proof">▶</span>
   </div>
   <div class="proof_content">
-  <p>The disk representative is an ordinary plane curve with \(z_\theta =q\, e^{i\theta }\), \(q{\gt}0\), so the tangent direction \(e^{i\theta }\) is strictly monotone in \(\theta \); the disk metric plays no role in injectivity. The directional cosine (chord) integral controlling injectivity is therefore bounded away from \(0\) exactly as in <a href="chap-simplicity.html">chapter 8</a>, via the public primitives <span class="ttfamily">chord_integral_ne_zero</span> / <span class="ttfamily">isSimpleClosed_reconstruct</span> (the Euclidean <span class="ttfamily">simplicity_transport</span> lemma is <span class="ttfamily">private</span> in <span class="ttfamily">DahlbergStep2</span> and is not importable, so simplicity is re-derived from the public chord primitive). Confinement to \(\{ |z|{\lt}1\} \) then transports simplicity to \(S^2\) through the stereographic diffeomorphism. <em>(Arc-level; S2-E.)</em> </p>
+  <p> Let \(\rho \) be the trajectory speed of <a href="chap-sphere.html#lem:spherical_trajectory_speed">lemma 214</a>: continuous, \(2\pi \)-periodic, strictly positive. Its error vector (<a href="chap-closure.html#def:error_vector">definition 18</a>) vanishes: \(\mathrm{errorVector}\, \rho =\mathrm{reconstruct}\, \rho \, (2\pi ) =\tilde z(2\pi )-\tilde z(0)=0\) by <a href="chap-sphere.html#lem:spherical_trajectory_eq_reconstruct">lemma 215</a> and \(2\pi \)-periodicity of \(\tilde z\). Hence <a href="chap-simplicity.html#cor:positive_curvature_implies_simple">corollary 86</a> (the public Euclidean <span class="ttfamily">isSimpleClosed_reconstruct</span>; the <span class="ttfamily">private</span> <span class="ttfamily">simplicity_transport</span> of <span class="ttfamily">DahlbergStep2</span> is not needed) makes \(\mathrm{reconstruct}\, \rho \) a simple closed curve, and <a href="chap-sphere.html#lem:spherical_trajectory_eq_reconstruct">lemma 215</a> + <a href="chap-sphere.html#lem:is_simple_closed_const_add">lemma 216</a> (translation by \(\tilde z(0)\)) transfer simplicity to \(\tilde z\). </p>
 
   </div>
 </div>
@@ -3387,6 +6097,8 @@
   <a href="chap-dahlberg_step2.html" title="Dahlberg Step 2: the closing parameter and the converse (Phase D-C)"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
 </a>
   <a href="index.html" title="gluck"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="chap-sphere_mixed.html" title="Spherical converse, stage 2: mixed-sign curvature"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
 </a>
 </nav>
 
