@@ -10,6 +10,12 @@
         "lean-lsp-mcp"
       ],
       "env": {}
+    },
+    "chatgpt-math": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/home/archon/.claude/mcp-servers/chatgpt-math/server.js"],
+      "env": {}
     }
   }
 }
