@@ -405,6 +405,9 @@ Gluck.sphericalTrajectory_eq_reconstruct
 Gluck.isSimpleClosed_const_add
 Gluck.spherical_simplicity
 Gluck.MixedSignSphereFourVertex
+Gluck.centeredRadius_pos
+Gluck.MixedSignSphereFourVertex.of_sphereFourVertex
+Gluck.stepCurvature_add_const
 Gluck.exists_step_L1_reparam_relaxed
 Gluck.mixed_spherical_endpoint_winding
 Gluck.sphericalConverse

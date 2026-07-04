@@ -113,7 +113,8 @@ and the capstone \cref{thm:spherical_converse}.
   sanity lemma worth stating.)
 \end{definition}
 
-\begin{lemma}[positivity of the model-circle radius]
+\begin{lemma}\leanok
+[positivity of the model-circle radius]
   \label{lem:centered_radius_pos}
   \lean{Gluck.centeredRadius_pos}
   For every real $c$ the model-circle radius is positive:
@@ -123,12 +124,15 @@ and the capstone \cref{thm:spherical_converse}.
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   If $c\le0$ this is immediate from $\sqrt{1+c^2}>0$. If $c\ge0$ then
   $c=\sqrt{c^2}<\sqrt{c^2+1}=\sqrt{1+c^2}$ by strict monotonicity of the
   square root.
 \end{proof}
 
-\begin{lemma}[positive stage implies mixed stage]
+\begin{lemma}\leanok
+[positive stage implies mixed stage]
   \label{lem:mixed_of_sphere_four_vertex}
   \lean{Gluck.MixedSignSphereFourVertex.of_sphereFourVertex}
   \uses{def:sphere_four_vertex, def:mixed_sign_sphere_four_vertex,
@@ -141,6 +145,7 @@ and the capstone \cref{thm:spherical_converse}.
 
 \begin{proof}
   \uses{lem:centered_radius_pos}
+  \leanok
   The constant branch carries over verbatim. In the non-constant branch the
   value separation gains the extra $0$ inside the $\max$ from global
   positivity ($\min(\kappa(p_1),\kappa(p_2))>0$), and the window midpoint
@@ -150,7 +155,8 @@ and the capstone \cref{thm:spherical_converse}.
   \cref{lem:centered_radius_pos} and positivity.
 \end{proof}
 
-\begin{lemma}[constant shift of the step curvature]
+\begin{lemma}\leanok
+[constant shift of the step curvature]
   \label{lem:step_curvature_add_const}
   \lean{Gluck.stepCurvature_add_const}
   \uses{def:four_arc_step_function}
@@ -167,6 +173,8 @@ and the capstone \cref{thm:spherical_converse}.
 \end{lemma}
 
 \begin{proof}
+
+\leanok
   The step function takes only the two level values, each shifted by $M$;
   unfold and check both branches of the case split.
 \end{proof}
