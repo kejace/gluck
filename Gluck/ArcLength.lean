@@ -260,11 +260,11 @@ realized by a simple closed curve.
 (Blueprint `thm:realizes_of_non_normalised`; Dahlberg §1, reduction after (1.4).) -/
 theorem realizesCurvature_of_nonNormalised {κ φ ψ : ℝ → ℝ}
     (hκ : Continuous κ) (hκper : Function.Periodic κ (2 * π))
-    (hφ : ContDiff ℝ 1 φ) (hφpos : ∀ t, 0 < deriv φ t)
+    (hφ : ContDiff ℝ 1 φ) (_hφpos : ∀ t, 0 < deriv φ t)
     (hφper : ∀ t, φ (t + 2 * π) = φ t + 2 * π)
     (hψ : ContDiff ℝ 1 ψ) (hψpos : ∀ t, 0 < deriv ψ t)
     (hψper : ∀ t, ψ (t + 2 * π) = ψ t + 2 * π)
-    (hleft : Function.LeftInverse ψ φ) (hright : Function.RightInverse ψ φ)
+    (_hleft : Function.LeftInverse ψ φ) (hright : Function.RightInverse ψ φ)
     (hNN : NonNormalisedCurvature (κ ∘ φ))
     (hIpos : 0 < ∫ t in (0 : ℝ)..(2 * π), (κ ∘ φ) t) :
     ∃ γ : ℝ → ℂ, IsSimpleClosed γ ∧ RealizesCurvature γ κ := by
