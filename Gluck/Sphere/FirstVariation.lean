@@ -478,6 +478,23 @@ private lemma real_inner_kappa_one_sub_I (z : ℂ) (κ : ℝ) :
   simp [Complex.mul_re, Complex.mul_im]
   ring
 
+-- Seam (a4): coordinate bounds `|Re ± Im|, |2·Re| ≤ 2‖z‖` used to size the
+-- gauge-direction inner products against `‖δ‖`.
+/-- `|Re z + Im z| ≤ 2‖z‖`. -/
+private lemma abs_re_add_im_le (z : ℂ) : |z.re + z.im| ≤ 2 * ‖z‖ := by
+  refine le_trans (abs_add_le _ _) ?_
+  linarith only [Complex.abs_re_le_norm z, Complex.abs_im_le_norm z]
+
+/-- `|Re z − Im z| ≤ 2‖z‖`. -/
+private lemma abs_re_sub_im_le (z : ℂ) : |z.re - z.im| ≤ 2 * ‖z‖ := by
+  refine le_trans (abs_sub _ _) ?_
+  linarith only [Complex.abs_re_le_norm z, Complex.abs_im_le_norm z]
+
+/-- `|2·Re z| ≤ 2‖z‖`. -/
+private lemma abs_two_mul_re_le (z : ℂ) : |2 * z.re| ≤ 2 * ‖z‖ := by
+  rw [abs_mul, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 2)]
+  linarith only [Complex.abs_re_le_norm z]
+
 -- Seam (b1): the crude `‖±1 ± i‖ ≤ 2` and `‖2i‖ ≤ 2` direction-norm bounds.
 /-- `‖1 + i‖ ≤ 2`. -/
 private lemma norm_one_add_I_le_two : ‖(1 : ℂ) + Complex.I‖ ≤ 2 := by
@@ -905,15 +922,9 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
         (by norm_num) hs1
     rw [div_one] at h6
     nlinarith
-  have hxsum : |δ.re + δ.im| ≤ 2 * ‖δ‖ := by
-    refine le_trans (abs_add_le _ _) ?_
-    linarith only [hδre, hδim]
-  have hxdiff : |δ.re - δ.im| ≤ 2 * ‖δ‖ := by
-    refine le_trans (abs_sub _ _) ?_
-    linarith only [hδre, hδim]
-  have hxre : |2 * δ.re| ≤ 2 * ‖δ‖ := by
-    rw [abs_mul, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 2)]
-    linarith only [hδre]
+  have hxsum : |δ.re + δ.im| ≤ 2 * ‖δ‖ := abs_re_add_im_le δ
+  have hxdiff : |δ.re - δ.im| ≤ 2 * ‖δ‖ := abs_re_sub_im_le δ
+  have hxre : |2 * δ.re| ≤ 2 * ‖δ‖ := abs_two_mul_re_le δ
   have hM₁b : |(s - c) / s * -(h / 2) + (s - c) / s ^ 2 * -(h / 2) * -δ.re
       + κ * (δ.re + δ.im) / s| ≤ h / 2 + 2 * h * ‖δ‖ := by
     have t1 : |(s - c) / s * -(h / 2)| ≤ h / 2 := by
