@@ -233,7 +233,7 @@ private lemma tentBump_integral_zero_of_forall {δ τ a b : ℝ}
 /-- Cumulative integral from `0` past the full support: `δ/2`. -/
 private lemma tentBump_integral_full {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) {τ θ : ℝ}
     (hτ : δ / 2 ≤ τ) (hθ1 : τ + δ / 2 ≤ θ) (hθ2 : θ ≤ 2 * π - δ / 2)
-    (hτ2 : τ ≤ 2 * π - δ / 2) :
+    (_hτ2 : τ ≤ 2 * π - δ / 2) :
     (∫ s in (0 : ℝ)..θ, tentBump δ τ s) = δ / 2 := by
   have hz1 : (∫ s in (0 : ℝ)..(τ - δ / 2), tentBump δ τ s) = 0 := by
     apply tentBump_integral_zero_of_forall
@@ -349,7 +349,7 @@ piecewise-linear density with per-arc calibration); it is isolated here as a
 single obligation so the surrounding `exists_preliminary_reparam` can be proved
 unconditionally. (Blueprint `lem:exists_preliminary_reparam`, density part.) -/
 lemma exists_plateau_density {c₁ c₂ c₃ c₄ m₀ η δ : ℝ}
-    (h12 : c₁ < c₂) (h23 : c₂ < c₃) (h34 : c₃ < c₄) (h41 : c₄ < c₁ + 2 * π)
+    (_h12 : c₁ < c₂) (_h23 : c₂ < c₃) (_h34 : c₃ < c₄) (_h41 : c₄ < c₁ + 2 * π)
     (hm₀ : m₀ = (c₁ + c₄) / 2 - π)
     (hη : 0 < η) (hδ : 0 < δ) (hδ' : δ < π / 2)
     (hfit₁ : η < (c₂ - c₁) / 2) (hfit₂ : η < (c₃ - c₂) / 2)
@@ -625,7 +625,7 @@ from `w` being continuous, positive, `2π`-periodic with period-integral `2π`, 
 the measure bound follows because the bad set is contained in the four flanking
 "race" sub-arcs of total measure `4δ < ε`. -/
 theorem exists_preliminary_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
-    {a b c₁ c₂ c₃ c₄ : ℝ} (ha : 0 < a) (hab : a < b)
+    {a b c₁ c₂ c₃ c₄ : ℝ} (_ha : 0 < a) (_hab : a < b)
     (h12 : c₁ < c₂) (h23 : c₂ < c₃) (h34 : c₃ < c₄) (h41 : c₄ < c₁ + 2 * π)
     (hc₁ : κ c₁ = a) (hc₂ : κ c₂ = b) (hc₃ : κ c₃ = a) (hc₄ : κ c₄ = b)
     {ε : ℝ} (hε : 0 < ε) :
@@ -758,7 +758,7 @@ theorem exists_preliminary_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
               ε < |κ (h₁ θ) - stepCurvature b a 0 (π / 2) π (3 * π / 2) θ|}
         ≤ MeasureTheory.volume (U \ (P₁ ∪ P₂ ∪ P₃ ∪ P₄)) := MeasureTheory.measure_mono hBsub
       _ = MeasureTheory.volume U - MeasureTheory.volume (P₁ ∪ P₂ ∪ P₃ ∪ P₄) :=
-          MeasureTheory.measure_diff hPU hmeasP.nullMeasurableSet
+          MeasureTheory.measure_sdiff hPU hmeasP.nullMeasurableSet
             (by rw [hvP]; exact ENNReal.ofReal_ne_top)
       _ = ENNReal.ofReal (2 * π) - ENNReal.ofReal (2 * π - 4 * δ) := by rw [hvU, hvP]
       _ = ENNReal.ofReal (4 * δ) := by
