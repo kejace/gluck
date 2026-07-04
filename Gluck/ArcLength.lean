@@ -257,11 +257,7 @@ theorem isSimpleClosed_smul {γ : ℝ → ℂ} {c : ℂ} (hc : c ≠ 0)
 satisfying the `2π`-shift law) such that `κ ∘ φ` is a non-normalised curvature
 function with positive total curvature `I = ∫₀^{2π} κ∘φ > 0`, then `κ` is
 realized by a simple closed curve.
-(Blueprint `thm:realizes_of_non_normalised`; Dahlberg §1, reduction after (1.4).)
-
-The proof (a later prover round) reuses `realizesCurvature_comp` /
-`isSimpleClosed_comp`, currently `private` in `Gluck/FourVertex.lean`; those must
-be shared before the body is filled. -/
+(Blueprint `thm:realizes_of_non_normalised`; Dahlberg §1, reduction after (1.4).) -/
 theorem realizesCurvature_of_nonNormalised {κ φ ψ : ℝ → ℝ}
     (hκ : Continuous κ) (hκper : Function.Periodic κ (2 * π))
     (hφ : ContDiff ℝ 1 φ) (hφpos : ∀ t, 0 < deriv φ t)
@@ -312,10 +308,9 @@ theorem realizesCurvature_of_nonNormalised {κ φ ψ : ℝ → ℝ}
     field_simp
   rw [hfun] at hrc_scaled
   -- At this point `c·γ_K` realizes `κ∘φ` and is simple closed. Reparametrising by
-  -- `ψ = φ⁻¹` transfers these to `κ` via the (currently `private` in
-  -- `Gluck/FourVertex.lean`) lemmas `realizesCurvature_comp` and
-  -- `isSimpleClosed_comp`. Those must be shared to a public module before this
-  -- final step can be discharged. Witness: `Γ(t) = (2π/I)·γ_K(ψ(t))`.
+  -- `ψ = φ⁻¹` transfers these to `κ` via `realizesCurvature_comp` and
+  -- `isSimpleClosed_comp` (public in `Gluck/FourVertex.lean`).
+  -- Witness: `Γ(t) = (2π/I)·γ_K(ψ(t))`.
   -- `ψ` is strictly increasing (positive `C¹` derivative).
   have hψderiv : ∀ t, HasDerivAt ψ (deriv ψ t) t :=
     fun t => (hψ.differentiable (by norm_num)).differentiableAt.hasDerivAt
