@@ -26,6 +26,138 @@ namespace Gluck
 
 open scoped Real InnerProductSpace NNReal
 
+/-- Velocity of the centered circle `z(θ) = (-r)·(i·e^{iθ})`: the chain rule
+gives `z'(θ) = r·e^{iθ}` (the two factors of `i` cancel). -/
+private lemma sphericalCircle_hasDerivAt (r θ : ℝ) :
+    HasDerivAt (fun t : ℝ => (-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I)))
+      ((r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)) θ := by
+  have hfun : (fun t : ℝ => (-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I)))
+      = fun t : ℝ => ((-r : ℝ) : ℂ) * (Complex.I * Complex.exp ((t : ℂ) * Complex.I)) := by
+    funext t
+    rw [Complex.real_smul]
+  rw [hfun]
+  have h := ((hasDerivAt_expI θ).const_mul Complex.I).const_mul ((-r : ℝ) : ℂ)
+  have hval : ((-r : ℝ) : ℂ)
+        * (Complex.I * (Complex.exp ((θ : ℂ) * Complex.I) * Complex.I))
+      = (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I) := by
+    push_cast
+    linear_combination (-(r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)) * Complex.I_mul_I
+  rw [hval] at h
+  exact h
+
+/-- The centered circle of radius `r > 0` has constant modulus `‖z(θ)‖ = r`. -/
+private lemma sphericalCircle_norm_z {r : ℝ} (hr0 : 0 < r) (θ : ℝ) :
+    ‖(-r) • (Complex.I * Complex.exp ((θ : ℂ) * Complex.I))‖ = r := by
+  rw [norm_smul, Real.norm_eq_abs, abs_neg, abs_of_pos hr0, norm_mul, Complex.norm_I,
+    Complex.norm_exp_ofReal_mul_I, one_mul, mul_one]
+
+/-- The velocity `r·e^{iθ}` of the centered circle has modulus `r` for `r > 0`. -/
+private lemma sphericalCircle_norm_velocity {r : ℝ} (hr0 : 0 < r) (θ : ℝ) :
+    ‖(r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)‖ = r := by
+  rw [norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one, Complex.norm_real,
+    Real.norm_eq_abs, abs_of_pos hr0]
+
+/-- Position–tangent inner product for the centered circle:
+`⟪z(θ), i·e^{iθ}⟫ = -r`. -/
+private lemma sphericalCircle_inner (r θ : ℝ) :
+    ⟪(-r) • (Complex.I * Complex.exp ((θ : ℂ) * Complex.I)),
+      Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ = -r := by
+  rw [real_inner_smul_left, real_inner_self_eq_norm_sq]
+  have hv : ‖Complex.I * Complex.exp ((θ : ℂ) * Complex.I)‖ = 1 := by
+    rw [norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul]
+  rw [hv]; ring
+
+/-- The centered circle is `2π`-periodic. -/
+private lemma sphericalCircle_periodic (r : ℝ) :
+    Function.Periodic
+      (fun θ : ℝ => (-r) • (Complex.I * Complex.exp ((θ : ℂ) * Complex.I))) (2 * π) := by
+  have hexp : ∀ x : ℝ, Complex.exp (((x + 2 * π : ℝ) : ℂ) * Complex.I)
+      = Complex.exp ((x : ℂ) * Complex.I) := by
+    intro x
+    push_cast
+    rw [add_mul, Complex.exp_add, Complex.exp_two_pi_mul_I, mul_one]
+  intro x
+  simp only [hexp x]
+
+/-- The centered circle of radius `r > 0` is injective on the fundamental
+period `[0, 2π)`: equal points differ by an integer multiple of `2π`, and the
+interval width forces that integer to be `0`. -/
+private lemma sphericalCircle_injOn {r : ℝ} (hr0 : 0 < r) :
+    Set.InjOn (fun θ : ℝ => (-r) • (Complex.I * Complex.exp ((θ : ℂ) * Complex.I)))
+      (Set.Ico 0 (2 * π)) := by
+  intro a ha b hb hab
+  simp only at hab
+  have hrne : -r ≠ 0 := neg_ne_zero.mpr hr0.ne'
+  have h1 : Complex.I * Complex.exp ((a : ℂ) * Complex.I)
+      = Complex.I * Complex.exp ((b : ℂ) * Complex.I) :=
+    smul_right_injective ℂ hrne hab
+  have h2 : Complex.exp ((a : ℂ) * Complex.I) = Complex.exp ((b : ℂ) * Complex.I) :=
+    mul_left_cancel₀ Complex.I_ne_zero h1
+  rw [Complex.exp_eq_exp_iff_exists_int] at h2
+  obtain ⟨n, hn⟩ := h2
+  have h3 : (a : ℂ) * Complex.I = ((b : ℝ) + (n : ℝ) * (2 * π)) * Complex.I := by
+    rw [hn]; push_cast; ring
+  have h4 : (a : ℂ) = ((b : ℝ) + (n : ℝ) * (2 * π) : ℝ) :=
+    mul_right_cancel₀ Complex.I_ne_zero (by rw [h3]; push_cast; ring)
+  have hreal : a = b + (n : ℝ) * (2 * π) := by exact_mod_cast h4
+  have hpi : 0 < π := Real.pi_pos
+  have hn1 : (n : ℝ) < 1 := by nlinarith [ha.1, ha.2, hb.1, hb.2]
+  have hn2 : (-1 : ℝ) < (n : ℝ) := by nlinarith [ha.1, ha.2, hb.1, hb.2]
+  have ha' : n < 1 := by exact_mod_cast hn1
+  have hb' : -1 < n := by exact_mod_cast hn2
+  have hn0 : n = 0 := by omega
+  rw [hn0] at hreal
+  simpa using hreal
+
+/-- The centered circle is `C¹`: its derivative is the continuous map
+`θ ↦ r·e^{iθ}`. -/
+private lemma sphericalCircle_contDiff (r : ℝ) :
+    ContDiff ℝ 1 (fun t : ℝ => (-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I))) := by
+  refine contDiff_one_iff_deriv.mpr
+    ⟨fun t => (sphericalCircle_hasDerivAt r t).differentiableAt, ?_⟩
+  have heq : deriv (fun t : ℝ => (-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I)))
+      = fun θ : ℝ => (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I) :=
+    funext fun θ => (sphericalCircle_hasDerivAt r θ).deriv
+  rw [heq]
+  exact continuous_const.mul (Complex.continuous_exp.comp
+    (Complex.continuous_ofReal.mul continuous_const))
+
+/-- The centered circle of radius `r > 0` is regular: `z'(θ) = r·e^{iθ} ≠ 0`. -/
+private lemma sphericalCircle_deriv_ne_zero {r : ℝ} (hr0 : 0 < r) (t : ℝ) :
+    deriv (fun t : ℝ => (-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I))) t ≠ 0 := by
+  rw [(sphericalCircle_hasDerivAt r t).deriv]
+  exact mul_ne_zero (by exact_mod_cast hr0.ne') (Complex.exp_ne_zero _)
+
+/-- The centered circle of radius `r < 1` is confined to the open unit disk. -/
+private lemma sphericalCircle_norm_lt_one {r : ℝ} (hr0 : 0 < r) (hr1 : r < 1) (t : ℝ) :
+    ‖(-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I))‖ < 1 := by
+  rw [sphericalCircle_norm_z hr0 t]; exact hr1
+
+/-- Tangent-angle equation for the centered circle in the gauge `φ = id`:
+`z'(t) = ‖z'(t)‖·e^{it}`. -/
+private lemma sphericalCircle_tangent {r : ℝ} (hr0 : 0 < r) (t : ℝ) :
+    deriv (fun t : ℝ => (-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I))) t
+      = (↑‖deriv (fun t : ℝ => (-r) •
+            (Complex.I * Complex.exp ((t : ℂ) * Complex.I))) t‖ : ℂ)
+        * Complex.exp ((t : ℂ) * Complex.I) := by
+  rw [(sphericalCircle_hasDerivAt r t).deriv, sphericalCircle_norm_velocity hr0 t]
+
+/-- Spherical speed relation for the centered circle in the gauge `φ = id`: with
+`r = √(1+c²) − c`, the circle identity `1 + r² = 2r(c + r)` is exactly
+`(1 + ‖z‖²)/2 · φ' = (c − ⟪z, i·e^{iφ}⟫)·‖z'‖`. -/
+private lemma sphericalCircle_speed {c r : ℝ} (hr0 : 0 < r)
+    (hcirc : 1 + r ^ 2 = 2 * r * (c + r)) (t : ℝ) :
+    (1 + ‖(-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I))‖ ^ 2) / 2
+        * deriv (id : ℝ → ℝ) t
+      = (c - ⟪(-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I)),
+          Complex.I * Complex.exp ((t : ℂ) * Complex.I)⟫_ℝ)
+        * ‖deriv (fun t : ℝ => (-r) •
+            (Complex.I * Complex.exp ((t : ℂ) * Complex.I))) t‖ := by
+  have hid : deriv (id : ℝ → ℝ) t = 1 := by simp
+  rw [(sphericalCircle_hasDerivAt r t).deriv, hid, sphericalCircle_norm_z hr0 t,
+    sphericalCircle_inner r t, sphericalCircle_norm_velocity hr0 t]
+  nlinarith [hcirc]
+
 /-- **Constant-curvature branch: the centered circle realizes constant `κ ≡ c`.**
 For `c > 0` the circle `z(θ) = −r*·(i·e^{iθ})` with `r* = √(1+c²) − c ∈ (0,1)`
 is a simple closed curve realizing the constant curvature function `fun _ => c`:
@@ -50,95 +182,10 @@ lemma sphericalCircle_realizes {c : ℝ} (hc : 0 < c) :
       = 2 * (Real.sqrt (1 + c ^ 2) - c) * (c + (Real.sqrt (1 + c ^ 2) - c)) := by
     nlinarith [hs2]
   set r : ℝ := Real.sqrt (1 + c ^ 2) - c with hrdef
-  -- shared pointwise facts
-  have hvnorm : ∀ θ : ℝ, ‖Complex.I * Complex.exp ((θ : ℂ) * Complex.I)‖ = 1 := by
-    intro θ
-    rw [norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul]
-  have hznorm : ∀ θ : ℝ,
-      ‖(-r) • (Complex.I * Complex.exp ((θ : ℂ) * Complex.I))‖ = r := by
-    intro θ
-    rw [norm_smul, hvnorm, mul_one, Real.norm_eq_abs, abs_neg, abs_of_pos hr0]
-  have hfun : (fun t : ℝ => (-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I)))
-      = fun t : ℝ => ((-r : ℝ) : ℂ) * (Complex.I * Complex.exp ((t : ℂ) * Complex.I)) := by
-    funext t
-    rw [Complex.real_smul]
-  have hz' : ∀ θ : ℝ, HasDerivAt
-      (fun t : ℝ => (-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I)))
-      ((r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)) θ := by
-    intro θ
-    rw [hfun]
-    have h := ((hasDerivAt_expI θ).const_mul Complex.I).const_mul ((-r : ℝ) : ℂ)
-    have hval : ((-r : ℝ) : ℂ)
-          * (Complex.I * (Complex.exp ((θ : ℂ) * Complex.I) * Complex.I))
-        = (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I) := by
-      push_cast
-      linear_combination (-(r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)) * Complex.I_mul_I
-    rw [hval] at h
-    exact h
-  have hdnorm : ∀ θ : ℝ, ‖(r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)‖ = r := by
-    intro θ
-    rw [norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one, Complex.norm_real,
-      Real.norm_eq_abs, abs_of_pos hr0]
-  have hinner : ∀ θ : ℝ,
-      ⟪(-r) • (Complex.I * Complex.exp ((θ : ℂ) * Complex.I)),
-        Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ = -r := by
-    intro θ
-    rw [real_inner_smul_left, real_inner_self_eq_norm_sq, hvnorm]
-    ring
-  have hexp_per : ∀ x : ℝ, Complex.exp (((x + 2 * π : ℝ) : ℂ) * Complex.I)
-      = Complex.exp ((x : ℂ) * Complex.I) := by
-    intro x
-    push_cast
-    rw [add_mul, Complex.exp_add, Complex.exp_two_pi_mul_I, mul_one]
-  refine ⟨⟨fun x => by simp only [hexp_per x], ?_⟩, ?_, fun t => ?_, fun t => ?_,
-    id, differentiable_id, fun t => ?_, fun t => ?_⟩
-  · -- injectivity on `[0, 2π)`
-    intro a ha b hb hab
-    simp only at hab
-    have hrne : -r ≠ 0 := neg_ne_zero.mpr hr0.ne'
-    have h1 : Complex.I * Complex.exp ((a : ℂ) * Complex.I)
-        = Complex.I * Complex.exp ((b : ℂ) * Complex.I) :=
-      smul_right_injective ℂ hrne hab
-    have h2 : Complex.exp ((a : ℂ) * Complex.I) = Complex.exp ((b : ℂ) * Complex.I) :=
-      mul_left_cancel₀ Complex.I_ne_zero h1
-    rw [Complex.exp_eq_exp_iff_exists_int] at h2
-    obtain ⟨n, hn⟩ := h2
-    have h3 : (a : ℂ) * Complex.I = ((b : ℝ) + (n : ℝ) * (2 * π)) * Complex.I := by
-      rw [hn]; push_cast; ring
-    have h4 : (a : ℂ) = ((b : ℝ) + (n : ℝ) * (2 * π) : ℝ) :=
-      mul_right_cancel₀ Complex.I_ne_zero (by rw [h3]; push_cast; ring)
-    have hreal : a = b + (n : ℝ) * (2 * π) := by exact_mod_cast h4
-    have hpi : 0 < π := Real.pi_pos
-    have hn1 : (n : ℝ) < 1 := by nlinarith [ha.1, ha.2, hb.1, hb.2]
-    have hn2 : (-1 : ℝ) < (n : ℝ) := by nlinarith [ha.1, ha.2, hb.1, hb.2]
-    have ha' : n < 1 := by exact_mod_cast hn1
-    have hb' : -1 < n := by exact_mod_cast hn2
-    have hn0 : n = 0 := by omega
-    rw [hn0] at hreal
-    simpa using hreal
-  · -- `C¹`
-    refine contDiff_one_iff_deriv.mpr ⟨fun t => (hz' t).differentiableAt, ?_⟩
-    have heq : deriv (fun t : ℝ => (-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I)))
-        = fun θ : ℝ => (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I) :=
-      funext fun θ => (hz' θ).deriv
-    rw [heq]
-    exact continuous_const.mul (Complex.continuous_exp.comp
-      (Complex.continuous_ofReal.mul continuous_const))
-  · -- regular
-    rw [(hz' t).deriv]
-    exact mul_ne_zero (by exact_mod_cast hr0.ne') (Complex.exp_ne_zero _)
-  · -- confined to the open disk
-    simp only
-    rw [hznorm t]
-    exact hr1
-  · -- tangent-angle equation with `φ = id`
-    rw [(hz' t).deriv, hdnorm t]
-    simp only [id_eq]
-  · -- speed relation: the circle identity
-    have hid : deriv (id : ℝ → ℝ) t = 1 := by simp
-    simp only [id_eq]
-    rw [(hz' t).deriv, hid, hznorm t, hinner t, hdnorm t]
-    nlinarith [hcirc]
+  exact ⟨⟨sphericalCircle_periodic r, sphericalCircle_injOn hr0⟩,
+    sphericalCircle_contDiff r, fun t => sphericalCircle_deriv_ne_zero hr0 t,
+    fun t => sphericalCircle_norm_lt_one hr0 hr1 t, id, differentiable_id,
+    fun t => sphericalCircle_tangent hr0 t, fun t => sphericalCircle_speed hr0 hcirc t⟩
 
 /-- **Spherical realization transfers under orientation-preserving `C¹`
 reparametrization**: if `z` realizes the spherical curvature `μ` and
@@ -348,6 +395,70 @@ lemma spherical_simplicity {κ : ℝ → ℝ} {R δ : ℝ}
   rw [hfun]
   exact isSimpleClosed_const_add hsimple _
 
+/-- **Constant branch of the spherical converse.** If `κ ≡ c` (necessarily
+`c > 0` by positivity), the explicit centered circle realizes it, with no flow
+machinery. This discharges the constant disjunct of the four-vertex condition. -/
+private theorem sphericalConverse_pos_const {κ : ℝ → ℝ}
+    (hκcf : IsCurvatureFunction κ) {c : ℝ} (hc : ∀ θ, κ θ = c) :
+    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ RealizesSphericalCurvature z κ := by
+  have hc0 : 0 < c := by
+    have := hκcf.2.2 0
+    rwa [hc 0] at this
+  have hκeq : κ = fun _ => c := funext hc
+  obtain ⟨hsimple, hreal⟩ := sphericalCircle_realizes hc0
+  rw [hκeq]
+  exact ⟨_, hsimple, hreal⟩
+
+/-- **Non-constant branch of the spherical converse.** From two value-separated
+alternating extrema, the endpoint-winding assembly produces a closed admissible
+trajectory for the reparametrized curvature `κ ∘ h₁`; truncation removal makes
+its periodic extension realize `κ ∘ h₁`, simplicity comes from
+`spherical_simplicity`, and pulling back along the `C¹` inverse `H = h₁⁻¹`
+(orientation-preserving) yields a simple closed realization of `κ` itself. -/
+private theorem sphericalConverse_pos_nonconst {κ : ℝ → ℝ}
+    (hκcf : IsCurvatureFunction κ) {p₁ q₁ p₂ q₂ : ℝ} (h12 : p₁ < q₁) (h23 : q₁ < p₂)
+    (h34 : p₂ < q₂) (h41 : q₂ < p₁ + 2 * π)
+    (hsep : max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂)) :
+    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ RealizesSphericalCurvature z κ := by
+  obtain ⟨R, δ, h₁, r₀, z₀, hR0, hR1, hδ0, hmono, hh₁c, hh₁per,
+      ⟨v, hvc, hvpos, hvd⟩, hz₀mem, hflow_closed, hadm⟩ :=
+      spherical_endpoint_winding hκcf h12 h23 h34 h41 hsep
+  have hκ'c : Continuous (κ ∘ h₁) := hκcf.1.comp hh₁c
+  have hκ'per : Function.Periodic (κ ∘ h₁) (2 * π) := by
+    intro θ
+    simp only [Function.comp_apply]
+    rw [hh₁per θ, hκcf.2.1 (h₁ θ)]
+  obtain ⟨hz0, hzode⟩ := sphericalFlow_spec hκ'c hR0.le hδ0 r₀ hz₀mem
+  have hclosed : sphericalFlow (κ ∘ h₁) R δ r₀ (z₀, 2 * π)
+      = sphericalFlow (κ ∘ h₁) R δ r₀ (z₀, 0) := hflow_closed.trans hz0.symm
+  -- truncation removal: the periodic extension realizes `κ ∘ h₁`
+  obtain ⟨-, -, hreal, -⟩ :=
+    reconstruction_ode hκ'c hκ'per hR1 hδ0 hzode hadm hclosed
+  -- simplicity of the periodic extension
+  have hsimple := spherical_simplicity hκ'c hκ'per hR1 hδ0 hzode hadm hclosed
+  -- the `C¹` inverse of the circle reparametrization
+  obtain ⟨H, hHc, hHmono, hh₁H, hHh₁, hHper, hHd⟩ :=
+    exists_C1_circle_inverse hvc hvpos hvd hh₁per
+  have hHdiff : Differentiable ℝ H := fun t => (hHd t).differentiableAt
+  have hHderiv : ∀ t, deriv H t = 1 / v (H t) := fun t => (hHd t).deriv
+  have hHC1 : ContDiff ℝ 1 H := by
+    refine contDiff_one_iff_deriv.mpr ⟨hHdiff, ?_⟩
+    have hde : deriv H = fun t => 1 / v (H t) := funext hHderiv
+    rw [hde]
+    exact continuous_const.div (hvc.comp hHc) fun t => (hvpos (H t)).ne'
+  have hHpos : ∀ t, 0 < deriv H t := by
+    intro t
+    rw [hHderiv t]
+    exact one_div_pos.mpr (hvpos (H t))
+  -- pull the realization of `κ ∘ h₁` back to a realization of `κ`
+  have hcomp := realizesSphericalCurvature_comp hreal hHC1 hHpos
+  have hμeq : (κ ∘ h₁) ∘ H = κ := by
+    funext t
+    simp only [Function.comp_apply]
+    rw [hh₁H t]
+  rw [hμeq] at hcomp
+  exact ⟨_, isSimpleClosed_comp hsimple hHc hHmono hHper, hcomp⟩
+
 /-- **Spherical converse, positive stage.** If `κ` satisfies the positive-stage
 spherical four-vertex condition, then there is a simple closed curve `z` confined
 to the open disk that realizes `κ` as its spherical geodesic curvature. This is
@@ -358,53 +469,7 @@ theorem sphericalConverse_pos {κ : ℝ → ℝ} (hκ : SphereFourVertex κ) :
     ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ RealizesSphericalCurvature z κ := by
   obtain ⟨hκcf, hfv⟩ := hκ
   rcases hfv with ⟨c, hc⟩ | ⟨p₁, q₁, p₂, q₂, h12, h23, h34, h41, -, -, -, -, hsep⟩
-  · -- constant branch: the explicit centered circle, no flow machinery
-    have hc0 : 0 < c := by
-      have := hκcf.2.2 0
-      rwa [hc 0] at this
-    have hκeq : κ = fun _ => c := funext hc
-    obtain ⟨hsimple, hreal⟩ := sphericalCircle_realizes hc0
-    rw [hκeq]
-    exact ⟨_, hsimple, hreal⟩
-  · -- non-constant branch: winding → closed admissible trajectory →
-    -- truncation removal → simplicity → pull back along `h₁⁻¹`
-    obtain ⟨R, δ, h₁, r₀, z₀, hR0, hR1, hδ0, hmono, hh₁c, hh₁per,
-      ⟨v, hvc, hvpos, hvd⟩, hz₀mem, hflow_closed, hadm⟩ :=
-      spherical_endpoint_winding hκcf h12 h23 h34 h41 hsep
-    have hκ'c : Continuous (κ ∘ h₁) := hκcf.1.comp hh₁c
-    have hκ'per : Function.Periodic (κ ∘ h₁) (2 * π) := by
-      intro θ
-      simp only [Function.comp_apply]
-      rw [hh₁per θ, hκcf.2.1 (h₁ θ)]
-    obtain ⟨hz0, hzode⟩ := sphericalFlow_spec hκ'c hR0.le hδ0 r₀ hz₀mem
-    have hclosed : sphericalFlow (κ ∘ h₁) R δ r₀ (z₀, 2 * π)
-        = sphericalFlow (κ ∘ h₁) R δ r₀ (z₀, 0) := hflow_closed.trans hz0.symm
-    -- truncation removal: the periodic extension realizes `κ ∘ h₁`
-    obtain ⟨-, -, hreal, -⟩ :=
-      reconstruction_ode hκ'c hκ'per hR1 hδ0 hzode hadm hclosed
-    -- simplicity of the periodic extension
-    have hsimple := spherical_simplicity hκ'c hκ'per hR1 hδ0 hzode hadm hclosed
-    -- the `C¹` inverse of the circle reparametrization
-    obtain ⟨H, hHc, hHmono, hh₁H, hHh₁, hHper, hHd⟩ :=
-      exists_C1_circle_inverse hvc hvpos hvd hh₁per
-    have hHdiff : Differentiable ℝ H := fun t => (hHd t).differentiableAt
-    have hHderiv : ∀ t, deriv H t = 1 / v (H t) := fun t => (hHd t).deriv
-    have hHC1 : ContDiff ℝ 1 H := by
-      refine contDiff_one_iff_deriv.mpr ⟨hHdiff, ?_⟩
-      have hde : deriv H = fun t => 1 / v (H t) := funext hHderiv
-      rw [hde]
-      exact continuous_const.div (hvc.comp hHc) fun t => (hvpos (H t)).ne'
-    have hHpos : ∀ t, 0 < deriv H t := by
-      intro t
-      rw [hHderiv t]
-      exact one_div_pos.mpr (hvpos (H t))
-    -- pull the realization of `κ ∘ h₁` back to a realization of `κ`
-    have hcomp := realizesSphericalCurvature_comp hreal hHC1 hHpos
-    have hμeq : (κ ∘ h₁) ∘ H = κ := by
-      funext t
-      simp only [Function.comp_apply]
-      rw [hh₁H t]
-    rw [hμeq] at hcomp
-    exact ⟨_, isSimpleClosed_comp hsimple hHc hHmono hHper, hcomp⟩
+  · exact sphericalConverse_pos_const hκcf hc
+  · exact sphericalConverse_pos_nonconst hκcf h12 h23 h34 h41 hsep
 
 end Gluck
