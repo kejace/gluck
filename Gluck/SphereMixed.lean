@@ -539,3 +539,5 @@ theorem sphericalConverse {κ : ℝ → ℝ} (hκ : MixedSignSphereFourVertex κ
       rw [hh₁H t]
     rw [hμeq] at hcomp
     exact ⟨_, isSimpleClosed_comp hsimple hHc hHmono hHper, hcomp⟩
+
+end Gluck
