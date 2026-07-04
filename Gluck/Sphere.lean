@@ -4708,6 +4708,56 @@ the same conclusion shape as the Euclidean `gluck_converse`, with
 `RealizesCurvature` replaced by its spherical analogue.
 (Blueprint `thm:spherical_converse_pos`.) -/
 theorem sphericalConverse_pos {κ : ℝ → ℝ} (hκ : SphereFourVertex κ) :
-    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ RealizesSphericalCurvature z κ := sorry
+    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ RealizesSphericalCurvature z κ := by
+  obtain ⟨hκcf, hfv⟩ := hκ
+  rcases hfv with ⟨c, hc⟩ | ⟨p₁, q₁, p₂, q₂, h12, h23, h34, h41, -, -, -, -, hsep⟩
+  · -- constant branch: the explicit centered circle, no flow machinery
+    have hc0 : 0 < c := by
+      have := hκcf.2.2 0
+      rwa [hc 0] at this
+    have hκeq : κ = fun _ => c := funext hc
+    obtain ⟨hsimple, hreal⟩ := sphericalCircle_realizes hc0
+    rw [hκeq]
+    exact ⟨_, hsimple, hreal⟩
+  · -- non-constant branch: winding → closed admissible trajectory →
+    -- truncation removal → simplicity → pull back along `h₁⁻¹`
+    obtain ⟨R, δ, h₁, r₀, z₀, hR0, hR1, hδ0, hmono, hh₁c, hh₁per,
+      ⟨v, hvc, hvpos, hvd⟩, hz₀mem, hflow_closed, hadm⟩ :=
+      spherical_endpoint_winding hκcf h12 h23 h34 h41 hsep
+    have hκ'c : Continuous (κ ∘ h₁) := hκcf.1.comp hh₁c
+    have hκ'per : Function.Periodic (κ ∘ h₁) (2 * π) := by
+      intro θ
+      simp only [Function.comp_apply]
+      rw [hh₁per θ, hκcf.2.1 (h₁ θ)]
+    obtain ⟨hz0, hzode⟩ := sphericalFlow_spec hκ'c hR0.le hδ0 r₀ hz₀mem
+    have hclosed : sphericalFlow (κ ∘ h₁) R δ r₀ (z₀, 2 * π)
+        = sphericalFlow (κ ∘ h₁) R δ r₀ (z₀, 0) := hflow_closed.trans hz0.symm
+    -- truncation removal: the periodic extension realizes `κ ∘ h₁`
+    obtain ⟨-, -, hreal, -⟩ :=
+      reconstruction_ode hκ'c hκ'per hR1 hδ0 hzode hadm hclosed
+    -- simplicity of the periodic extension
+    have hsimple := spherical_simplicity hκ'c hκ'per hR1 hδ0 hzode hadm hclosed
+    -- the `C¹` inverse of the circle reparametrization
+    obtain ⟨H, hHc, hHmono, hh₁H, hHh₁, hHper, hHd⟩ :=
+      exists_C1_circle_inverse hvc hvpos hvd hh₁per
+    have hHdiff : Differentiable ℝ H := fun t => (hHd t).differentiableAt
+    have hHderiv : ∀ t, deriv H t = 1 / v (H t) := fun t => (hHd t).deriv
+    have hHC1 : ContDiff ℝ 1 H := by
+      refine contDiff_one_iff_deriv.mpr ⟨hHdiff, ?_⟩
+      have hde : deriv H = fun t => 1 / v (H t) := funext hHderiv
+      rw [hde]
+      exact continuous_const.div (hvc.comp hHc) fun t => (hvpos (H t)).ne'
+    have hHpos : ∀ t, 0 < deriv H t := by
+      intro t
+      rw [hHderiv t]
+      exact one_div_pos.mpr (hvpos (H t))
+    -- pull the realization of `κ ∘ h₁` back to a realization of `κ`
+    have hcomp := realizesSphericalCurvature_comp hreal hHC1 hHpos
+    have hμeq : (κ ∘ h₁) ∘ H = κ := by
+      funext t
+      simp only [Function.comp_apply]
+      rw [hh₁H t]
+    rw [hμeq] at hcomp
+    exact ⟨_, isSimpleClosed_comp hsimple hHc hHmono hHper, hcomp⟩
 
 end Gluck
