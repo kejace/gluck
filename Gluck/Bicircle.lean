@@ -95,7 +95,7 @@ theorem bicircleErrorVector_eq (a b θ₁ θ₂ θ₃ θ₄ : ℝ)
       rw [← toIcoMod_add_right Real.two_pi_pos θ₁ θ]
       exact (toIcoMod_eq_self Real.two_pi_pos).mpr ⟨by linarith, by linarith⟩
     simp only [stepCurvature, htm0]
-    rw [if_neg (by push_neg; exact ⟨by linarith, fun _ => by linarith⟩)]
+    rw [if_neg (by push Not; exact ⟨by linarith, fun _ => by linarith⟩)]
   have hvP1 : ∀ θ ∈ Set.Ioo θ₁ θ₂, stepCurvature a b θ₁ θ₂ θ₃ θ₄ θ = b := by
     intro θ hθ; obtain ⟨hl, hr⟩ := hθ
     have h := htm θ (le_of_lt hl) (by linarith)
@@ -105,7 +105,7 @@ theorem bicircleErrorVector_eq (a b θ₁ θ₂ θ₃ θ₄ : ℝ)
     intro θ hθ; obtain ⟨hl, hr⟩ := hθ
     have h := htm θ (by linarith) (by linarith)
     simp only [stepCurvature, h]
-    rw [if_neg (by push_neg; exact ⟨by linarith, fun _ => by linarith⟩)]
+    rw [if_neg (by push Not; exact ⟨by linarith, fun _ => by linarith⟩)]
   have hvP3 : ∀ θ ∈ Set.Ioo θ₃ θ₄, stepCurvature a b θ₁ θ₂ θ₃ θ₄ θ = b := by
     intro θ hθ; obtain ⟨hl, hr⟩ := hθ
     have h := htm θ (by linarith) (by linarith)
@@ -115,7 +115,7 @@ theorem bicircleErrorVector_eq (a b θ₁ θ₂ θ₃ θ₄ : ℝ)
     intro θ hθ; obtain ⟨hl, hr⟩ := hθ
     have h := htm θ (by linarith) (by linarith)
     simp only [stepCurvature, h]
-    rw [if_neg (by push_neg; exact ⟨by linarith, fun _ => by linarith⟩)]
+    rw [if_neg (by push Not; exact ⟨by linarith, fun _ => by linarith⟩)]
   -- Interval-integrability on each arc.
   have hi0 := bicircle_arc_integrable a b θ₁ θ₂ θ₃ θ₄ a 0 θ₁ h1 hvP0
   have hi1 := bicircle_arc_integrable a b θ₁ θ₂ θ₃ θ₄ b θ₁ θ₂ (le_of_lt h12) hvP1
