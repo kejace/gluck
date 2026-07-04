@@ -2390,16 +2390,20 @@ set_option maxHeartbeats 1000000 in
 -- The four nested arc-map start points make the elaboration of the four
 -- packages heavy, as in `stepModel_transport`.
 /-- **Uniform margins of the step model near the centered circle.** For
-`c > 0` and `κ₀ ∈ (0, c]` there are explicit `0 < R < 1`, `δ, μ, ρ₀, h₀ > 0`
+`c > 0` and `κ₀ > −r*` (with `r* = √(1+c²) − c`; stage-2 re-sign — the
+mixed-sign assembly needs the curvature floor only above `−r*`, not above `0`)
+there are explicit `0 < R < 1`, `δ, μ, ρ₀, h₀ > 0`
 (functions of `c, κ₀` only) such that for all levels within `h₀` of `c` and
 every start `z₀` within `ρ₀` of `z₀* = −i·r*`, the four quarter-arc margin
 packages of `stepModel_transport` hold. Constants ledger: with
 `m = min(1−r*, κ₀+r*)` and `σ = min(r*/2, m/4)` we take `R = (1+r*)/2`,
 `δ = μ = m/8`, `ρ₀ = σ/32`, `h₀ = min(σ/480, c/2)`; the deviation from the
 centered circle grows by at most `d ↦ 2d + 16h₀` per arc
-(`arcDeviation_bound`), so it stays `≤ σ` across all four arcs.
-(Blueprint `lem:step_model_margins`.) -/
-lemma stepModel_margins {c κ₀ : ℝ} (hc : 0 < c) (hκ₀ : 0 < κ₀) :
+(`arcDeviation_bound`), so it stays `≤ σ` across all four arcs. The sign of
+`κ₀` enters only through positivity of the slack `m`, which is exactly
+`κ₀ > −r*`. (Blueprint `lem:step_model_margins`.) -/
+lemma stepModel_margins {c κ₀ : ℝ} (hc : 0 < c)
+    (hκ₀ : -(Real.sqrt (1 + c ^ 2) - c) < κ₀) :
     ∃ R δ μ ρ₀ h₀ : ℝ, 0 < R ∧ R < 1 ∧ 0 < δ ∧ 0 < μ ∧ 0 < ρ₀ ∧ 0 < h₀ ∧
       ∀ a b : ℝ, |a - c| ≤ h₀ → |b - c| ≤ h₀ →
         ∀ z₀ : ℂ, ‖z₀ + (Real.sqrt (1 + c ^ 2) - c) • Complex.I‖ ≤ ρ₀ →
@@ -4109,8 +4113,11 @@ theorem spherical_endpoint_winding {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
     rw [hcdef]; linarith
   obtain ⟨κ₀, hκ₀0, -, hκ₀κ⟩ := exists_curvature_lower_bound hκ
   -- ### Margins and expansion packages at `(c, κ₀)`
+  -- (Stage-2 re-sign: `stepModel_margins` now asks only `−r* < κ₀`, which the
+  -- positive floor `0 < κ₀` supplies via `r* > 0`.)
+  have hrsc0 : 0 < Real.sqrt (1 + c ^ 2) - c := (centeredRadius_facts hc).1
   obtain ⟨R, δ, μ, ρ₀, h₀, hR0, hR1, hδ0, hμ0, hρ₀0, hh₀0, hmarg⟩ :=
-    stepModel_margins hc hκ₀0
+    stepModel_margins (κ₀ := κ₀) hc (by linarith)
   obtain ⟨ρ₁, hbar, C, hρ₁0, hbar0, hC0, hexp⟩ := stepError_expansion hc
   -- centered radius `r* = √(1+c²) − c` and conjugation coefficient `η`
   have h1c : (0 : ℝ) < 1 + c ^ 2 := by positivity
