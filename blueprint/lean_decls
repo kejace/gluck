@@ -368,10 +368,10 @@ Gluck.invariant_admissible_domain
 Gluck.periodicExtension
 Gluck.periodicExtension_periodic
 Gluck.reconstruction_ode
-Gluck.constantArc_inner
-Gluck.constantArc_norm_sq
-Gluck.constantArc_consistency
-Gluck.constantCurvature_arc
+Gluck.constant_arc_inner
+Gluck.constant_arc_norm_sq
+Gluck.constant_arc_consistency
+Gluck.constant_curvature_arc
 Gluck.truncatedSpeed_half_turn
 Gluck.truncatedField_half_turn
 Gluck.flow_half_turn_equivariance
@@ -385,7 +385,7 @@ Gluck.sphericalArcMap_concat
 Gluck.stepHalfMap
 Gluck.stepErrorMap
 Gluck.stepErrorMap_four_arc
-Gluck.constantArc_solves_truncated
+Gluck.constant_arc_solves_truncated
 Gluck.invariant_admissible_arc
 Gluck.arcMargins
 Gluck.quarter_step_transport

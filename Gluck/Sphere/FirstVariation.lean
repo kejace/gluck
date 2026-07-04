@@ -1,10 +1,11 @@
+/-
+Copyright (c) 2026 kejace. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: kejace
+-/
 import Gluck.Sphere.Margins
 
-namespace Gluck
-
-open scoped Real InnerProductSpace NNReal
-
-/-! ## First-variation expansion of the step error map (S2-D tranche 2)
+/-! # First-variation expansion of the step error map (S2-D tranche 2)
 
 The symmetric step `a = c − h/2`, `b = c + h/2` degenerates at `h = 0` (every
 constant-level trajectory closes), so the step error map has the exact form
@@ -17,7 +18,20 @@ into a level-shift quotient (`sphericalSpeed_sub_level`), a quadratic
 base-point term (`sphericalSpeed_sub_radius`), and controlled remainders
 (`arcSpeed_decomp`); the four main terms collapse to the conjugation by an
 explicit algebraic identity. All constants are absolute because
-`s = √(1+c²) = c + r* ≥ 1`. -/
+`s = √(1+c²) = c + r* ≥ 1`.
+
+The named `private` helper lemmas between `arcSpeed_decomp` and
+`stepError_expansion` (the four quarter-angle frame values, coordinate
+inner-product identities, constant direction-norm bounds, generic norm/abs
+algebra, reference-circle quarter points, and the four arc-step identities)
+factor out the pieces of the main computation that do not depend on its local
+`set`-bindings, following the blueprint directive to organize
+`lem:step_error_expansion` through named intermediate facts rather than one
+monolithic proof. -/
+
+namespace Gluck
+
+open scoped Real InnerProductSpace NNReal
 
 /-- `|N/D| ≤ B` from `D ≥ 1/2` and `|N| ≤ B/2` — the quotient-bounding step
 used for every remainder term of `arcSpeed_decomp`. -/
@@ -64,15 +78,6 @@ private lemma real_inner_complex (z w : ℂ) :
   rw [Complex.inner]
   simp [Complex.mul_re]
   ring
-
-/-- `‖1 − i‖ ≤ 3/2` (and by symmetry all four constants `±1 ± i`): the crude
-`√2 ≤ 3/2` bound used when chaining arc contributions. -/
-private lemma norm_one_sub_I_le : ‖(1 : ℂ) - Complex.I‖ ≤ 3 / 2 := by
-  have h : ‖(1 : ℂ) - Complex.I‖ ^ 2 = 2 := by
-    rw [Complex.sq_norm, Complex.normSq_apply]
-    simp
-    norm_num
-  nlinarith [norm_nonneg ((1 : ℂ) - Complex.I)]
 
 set_option maxHeartbeats 8000000 in
 -- The two `field_simp; ring` identity steps clear four distinct denominators.
@@ -121,19 +126,13 @@ private lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
   obtain ⟨hεlo, hεhi⟩ := abs_le.mp hε
   -- norm bounds on the three basic vectors
   have hun : ‖u‖ ≤ 2 * ‖δ‖ + 5 * h := by
-    have h1 : ‖u‖ ≤ ‖u - δ‖ + ‖δ‖ := by
-      have h2 := norm_add_le (u - δ) δ
-      simpa using h2
+    have h1 : ‖u‖ ≤ ‖u - δ‖ + ‖δ‖ := by simpa using norm_add_le (u - δ) δ
     nlinarith [hzu]
   have huyn : ‖uy‖ ≤ 2 * ‖δ‖ := by
-    have h1 : ‖uy‖ ≤ ‖uy - δ‖ + ‖δ‖ := by
-      have h2 := norm_add_le (uy - δ) δ
-      simpa using h2
+    have h1 : ‖uy‖ ≤ ‖uy - δ‖ + ‖δ‖ := by simpa using norm_add_le (uy - δ) δ
     nlinarith [hyu]
   have hgn : ‖g‖ ≤ 5 * h := by
-    have h1 : ‖g‖ ≤ ‖g - G‖ + ‖G‖ := by
-      have h2 := norm_add_le (g - G) G
-      simpa using h2
+    have h1 : ‖g‖ ≤ ‖g - G‖ + ‖G‖ := by simpa using norm_add_le (g - G) G
     nlinarith [hgG, hσ0, hh0.le, mul_le_mul_of_nonneg_left hσ1 hh0.le,
       mul_le_mul_of_nonneg_left hh1 hh0.le]
   -- frame inner products
@@ -402,22 +401,6 @@ private lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
     sq_nonneg h, mul_nonneg hσ0 (sq_nonneg h),
     mul_nonneg (mul_nonneg hσ0 hσ0) hh0.le]
 
-/-! ### Named intermediate facts for `stepError_expansion`
-
-The first-variation expansion below is one long context-heavy computation.
-Following the blueprint's directive to "organize it through named intermediate
-have-identities rather than one monolithic proof" (`lem:step_error_expansion`),
-the pieces that do **not** depend on the local `set`-bindings of the main proof
-(the four quarter-angle frame values, the coordinate inner-product identities,
-the constant direction-norm bounds, the generic norm/absolute-value algebra,
-the reference-circle quarter points, and the four arc-step identities) are
-factored out here as reusable `private` lemmas. Each is stated in maximal
-generality (in the deviation `z`, the gauge shift `κ`, the circle centre `W`,
-the radius `r`, the level `K`); the main proof invokes them as one-line
-`have`-aliases so every downstream reference is unchanged. No Mathlib lemma
-covers these composite facts (searched: `real_inner`, `starRingEnd`, direction
-norms) — they build on the file-local `real_inner_complex` / `expI_*` layer. -/
-
 -- Seam (a1): the four quarter-angle frame values `i·e^{iθ}` (θ ∈ {0,π/2,π,3π/2}).
 /-- Frame value at `θ = 0`: `i·e^{i·0} = i`. -/
 private lemma I_mul_expI_zero :
@@ -529,8 +512,7 @@ private lemma norm_real_mul_le_two {x : ℝ} {w : ℂ} (hw : ‖w‖ ≤ 2) :
 
 /-- Split an absolute value around a base point: `|a| ≤ |a − b| + |b|`. -/
 private lemma abs_le_abs_sub_add (a b : ℝ) : |a| ≤ |a - b| + |b| := by
-  have h1 := abs_add_le (a - b) b
-  simpa using h1
+  simpa using abs_add_le (a - b) b
 
 /-- Four-term triangle inequality. -/
 private lemma norm_add_four_le (p q u t : ℂ) :
@@ -616,7 +598,7 @@ set_option maxHeartbeats 2000000 in
 `‖E*_{a,b}(z₀) + η·h·conj(z₀ − z₀*)‖ ≤ C·h·(‖z₀ − z₀*‖² + h)`.
 The four-arc composite reduces, after subtracting the constant-speed
 reference circle through `z₀` (whose four contributions cancel exactly since
-its gauge speed is constant `constantCurvature_arc`), to four
+its gauge speed is constant `constant_curvature_arc`), to four
 `arcSpeed_decomp` main terms whose weighted sum collapses to `−η·h·conj(δ)`
 by a closed-form algebraic identity. The linear part is a *negative real
 multiple of complex conjugation* — orientation-reversing and nondegenerate —
@@ -698,14 +680,14 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
     refine le_trans (norm_add_le _ _) ?_
     rw [norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Real.norm_eq_abs]
     linarith only [hrs_r]
-  have hcons0 := constantArc_consistency (K := c) (θ₀ := 0) (z₀ := z₀) hbr0
+  have hcons0 := constant_arc_consistency (K := c) (θ₀ := 0) (z₀ := z₀) hbr0
   rw [← hrdef, expI_zero, mul_one, ← hWdef] at hcons0
   -- bracket positivity along the whole reference circle
   have hposθ : ∀ φ : ℝ, 0 < c - ⟪W - Complex.I * (r : ℂ)
       * Complex.exp ((φ : ℂ) * Complex.I),
       Complex.I * Complex.exp ((φ : ℂ) * Complex.I)⟫_ℝ := by
     intro φ
-    rw [constantArc_inner]
+    rw [constant_arc_inner]
     have h1 : |⟪W, Complex.I * Complex.exp ((φ : ℂ) * Complex.I)⟫_ℝ| ≤ ‖W‖ := by
       have h2 := abs_real_inner_le_norm W
         (Complex.I * Complex.exp ((φ : ℂ) * Complex.I))
@@ -715,7 +697,7 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
   -- gauge speed along the reference circle is constant `r`
   have hsp : ∀ φ : ℝ, sphericalSpeed (fun _ => c) φ
       (W - Complex.I * (r : ℂ) * Complex.exp ((φ : ℂ) * Complex.I)) = r :=
-    fun φ => (constantCurvature_arc hcons0 (hposθ φ)).1
+    fun φ => (constant_curvature_arc hcons0 (hposθ φ)).1
   -- the circle points at the quarter angles
   have hy₁eq : W - Complex.I * (r : ℂ)
       * Complex.exp (((π / 2 : ℝ) : ℂ) * Complex.I) = W + (r : ℂ) :=
@@ -1174,6 +1156,5 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
   refine le_trans hfinal ?_
   nlinarith only [sq_nonneg ‖δ‖, hh0.le, hσ0, mul_nonneg hh0.le (sq_nonneg ‖δ‖),
     sq_nonneg h]
-
 
 end Gluck

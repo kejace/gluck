@@ -1,10 +1,15 @@
-import Gluck.Curve
+/-
+Copyright (c) 2026 kejace. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: kejace
+-/
 import Gluck.Curvature
+import Gluck.Curve
+import Gluck.FourVertex
+import Gluck.Reduction
+import Gluck.Simplicity
 import Gluck.StepReduction
 import Gluck.Winding
-import Gluck.Simplicity
-import Gluck.Reduction
-import Gluck.FourVertex
 import Mathlib.Analysis.ODE.ExistUnique
 import Mathlib.MeasureTheory.Function.Floor
 import Mathlib.MeasureTheory.Order.Group.Lattice
@@ -29,6 +34,11 @@ The conformal geodesic-curvature law (see the blueprint chapter `Gluck_Sphere.te
 `κ_S = (1 + |z|²)/2 · κ_E − ⟨z, n⟩`. In Lean the *left* normal `i·T` is the natural
 object and `⟨z, i·e^{iφ}⟩_ℝ = -⟨z, n⟩`, so the speed relation is encoded with the
 **minus** sign: `(1 + ‖z‖²)/2 · φ' = (κ − ⟪z, i·e^{iφ}⟫_ℝ) · ‖z'‖`.
+
+In the tangent-angle gauge `φ(θ) = θ` this relation solves algebraically for the
+speed `‖z'‖ = q_κ(θ, z)` (`sphericalSpeed`); the reconstruction ODE of the proof
+arc (S2-B) is `z' = q_κ(θ, z) · e^{iθ}`, and the lemmas here supply the
+positivity, continuity and periodicity of that field.
 
 Blueprint: `blueprint/src/chapters/Gluck_Sphere.tex`.
 -/
@@ -105,13 +115,6 @@ lemma exists_curvature_lower_bound {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
     have hym : κ θ₀ ≤ κ y := hmin ⟨hy.1, hy.2.le⟩
     rw [hyθ]
     linarith
-
-/-! ## Gauge-speed layer
-
-In the tangent-angle gauge `φ(θ) = θ` the conformal speed relation solves
-algebraically for the speed `‖z'‖ = q_κ(θ, z)`. The reconstruction ODE of the
-proof arc (S2-B) is `z' = q_κ(θ, z) · e^{iθ}`; the lemmas below supply the
-positivity, continuity and periodicity of the field needed there. -/
 
 /-- The *gauge speed* `q_κ(θ, z) = (1 + ‖z‖²) / (2(κ(θ) − ⟪z, i·e^{iθ}⟫_ℝ))`:
 the algebraic solution of the speed relation of `RealizesSphericalCurvature`
@@ -211,6 +214,5 @@ lemma sphericalSpeed_circle {r : ℝ} (hr : 0 < r) (θ : ℝ) :
     ring
   rw [hden, div_div_eq_mul_div, mul_comm (1 + r ^ 2) r, mul_div_assoc,
     div_self h1, mul_one]
-
 
 end Gluck

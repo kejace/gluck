@@ -1,15 +1,20 @@
+/-
+Copyright (c) 2026 kejace. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: kejace
+-/
 import Gluck.Sphere.Flow
 
-namespace Gluck
-
-open scoped Real InnerProductSpace NNReal
-
-/-! ## Admissibility and truncation removal (S2-C)
+/-! # Admissibility and truncation removal (S2-C)
 
 The confinement mechanism is perturbative: an explicit model trajectory is
 admissible with quantitative margins, and a Grönwall estimate with
 `L¹`-in-`θ` drive transports the margins to every trajectory whose curvature
 is `L¹`-close and whose start is near the model start. -/
+
+namespace Gluck
+
+open scoped Real InnerProductSpace NNReal
 
 /-- **Curvature sensitivity of the truncated speed.** Two truncated speeds
 with the same clamps `R, δ` but different curvatures differ by at most
@@ -63,8 +68,7 @@ lemma truncatedField_sub_le {κ κ' : ℝ → ℝ} {R δ : ℝ} (hR : 0 ≤ R) (
       ≤ L * ‖z - z'‖ + (1 + R ^ 2) / (2 * δ ^ 2) * |κ θ - κ' θ| := by
   have h1 : ‖truncatedField κ R δ θ z - truncatedField κ R δ θ z'‖
       ≤ L * ‖z - z'‖ := by
-    have h := (hL θ).dist_le_mul z z'
-    rwa [dist_eq_norm, dist_eq_norm] at h
+    simpa only [dist_eq_norm] using (hL θ).dist_le_mul z z'
   have h2 : ‖truncatedField κ R δ θ z' - truncatedField κ' R δ θ z'‖
       ≤ (1 + R ^ 2) / (2 * δ ^ 2) * |κ θ - κ' θ| := by
     rw [truncatedField, truncatedField, ← sub_smul, norm_smul, Real.norm_eq_abs,
@@ -100,9 +104,8 @@ lemma truncatedField_solution_unique {κ : ℝ → ℝ} {R δ T : ℝ} (hR : 0 �
       ∀ θ ∈ Set.Ico (0 : ℝ) T, HasDerivWithinAt u
         (truncatedField κ R δ θ (u θ)) (Set.Ici θ) θ := by
     intro u hu θ hθ
-    refine (hu θ ⟨hθ.1, hθ.2.le⟩).mono_of_mem_nhdsWithin ?_
-    exact mem_nhdsGE_iff_exists_Icc_subset.mpr
-      ⟨T, hθ.2, Set.Icc_subset_Icc_left hθ.1⟩
+    exact (hu θ ⟨hθ.1, hθ.2.le⟩).mono_of_mem_nhdsWithin
+      (mem_nhdsGE_iff_exists_Icc_subset.mpr ⟨T, hθ.2, Set.Icc_subset_Icc_left hθ.1⟩)
   exact ODE_solution_unique_of_mem_Icc_right
     (fun t _ => (hK t).lipschitzOnWith)
     (HasDerivWithinAt.continuousOn hg₁) (upgrade hg₁)
@@ -375,6 +378,5 @@ lemma invariant_admissible_domain {κ κ' : ℝ → ℝ} {κ₀ R δ μ : ℝ} {
     have h3 := le_abs_self
       ⟪z θ - zs θ, Complex.I * Complex.exp ((θ:ℂ) * Complex.I)⟫_ℝ
     linarith
-
 
 end Gluck

@@ -1047,7 +1047,7 @@ large ball covers $[0,2\pi]$.
 \begin{lemma}\leanok
 [arc bracket identity]
   \label{lem:constant_arc_inner}
-  \lean{Gluck.constantArc_inner}
+  \lean{Gluck.constant_arc_inner}
   For all $w\in\mathbb C$, $r,\theta\in\mathbb R$:
   $\bigl\langle w-i\,r\,e^{i\theta},\,i e^{i\theta}\bigr\rangle
    =\langle w,ie^{i\theta}\rangle-r$.
@@ -1064,7 +1064,7 @@ large ball covers $[0,2\pi]$.
 \begin{lemma}\leanok
 [arc norm expansion]
   \label{lem:constant_arc_norm_sq}
-  \lean{Gluck.constantArc_norm_sq}
+  \lean{Gluck.constant_arc_norm_sq}
   For all $w\in\mathbb C$, $r,\theta\in\mathbb R$:
   $\|w-i\,r\,e^{i\theta}\|^2=\|w\|^2-2r\langle w,ie^{i\theta}\rangle+r^2$.
 \end{lemma}
@@ -1080,7 +1080,7 @@ large ball covers $[0,2\pi]$.
 \begin{lemma}\leanok
 [consistency identity of the arc data]
   \label{lem:constant_arc_consistency}
-  \lean{Gluck.constantArc_consistency}
+  \lean{Gluck.constant_arc_consistency}
   \uses{def:spherical_speed, lem:constant_arc_norm_sq, lem:constant_arc_inner}
   Fix $K$ and start data $(\theta_0,z_0)$ with positive bracket
   $K-\langle z_0,ie^{i\theta_0}\rangle>0$, and set $r=q_K(\theta_0,z_0)$,
@@ -1101,7 +1101,7 @@ large ball covers $[0,2\pi]$.
 \leanok
 [constant-curvature arcs are explicit circular arcs]
   \label{lem:constant_curvature_arc}
-  \lean{Gluck.constantCurvature_arc}
+  \lean{Gluck.constant_curvature_arc}
   \uses{def:spherical_speed, lem:spherical_flow_unique, lem:constant_arc_inner,
         lem:constant_arc_norm_sq, lem:constant_arc_consistency}
   Fix $K>0$, a start $(\theta_0,z_0)$ with $K-\langle z_0,ie^{i\theta_0}\rangle>0$, and set
@@ -1477,7 +1477,7 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
 \begin{lemma}\leanok
 [explicit arcs solve the truncated ODE]
   \label{lem:constant_arc_solves_truncated}
-  \lean{Gluck.constantArc_solves_truncated}
+  \lean{Gluck.constant_arc_solves_truncated}
   \uses{lem:constant_curvature_arc, lem:truncated_speed_eq, def:truncated_field}
   Fix a constant $K$, $0<\delta$, $R$, start data $(\theta_0,z_0)$, and let
   $z(\theta)=w-ire^{i\theta}$ be the arc trajectory of \cref{lem:constant_curvature_arc}.

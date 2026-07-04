@@ -1,4 +1,28 @@
+/-
+Copyright (c) 2026 kejace. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: kejace
+-/
 import Gluck.Sphere.ArcAlgebra
+
+/-!
+# Step reparametrization and step-model transport
+
+This file upgrades the preliminary reparametrization of a curvature function to an
+`L¹` bound against the canonical four-arc step curvature, and compares a trajectory of
+the truncated flow with the symmetric four-quarter-arc step model.
+
+## Main results
+
+* `exists_abab_levels`: for value-separated alternating extrema, four points at freely
+  chosen levels `κ = (a, b, a, b)`.
+* `exists_step_L1_reparam`: an orientation-preserving reparametrization making the `L¹`
+  distance of `κ ∘ h₁` to the canonical step curvature arbitrarily small.
+* `quarter_step_transport`: one quarter-arc Grönwall comparison of the truncated flow
+  with the constant-level model arc.
+* `stepModel_transport`: the four chained quarter steps, giving admissibility on
+  `[0, 2π]` and an endpoint bound against the composite step error map.
+-/
 
 namespace Gluck
 
@@ -24,7 +48,6 @@ lemma exists_abab_levels {κ : ℝ → ℝ} (hcont : Continuous κ)
   have hq2a : κ q₂ < a := lt_of_le_of_lt (le_max_right _ _) ha
   have hbp1 : b < κ p₁ := lt_of_lt_of_le hb (min_le_left _ _)
   have hbp2 : b < κ p₂ := lt_of_lt_of_le hb (min_le_right _ _)
-  have hperp1 : κ (p₁ + 2 * π) = κ p₁ := hper p₁
   -- `θ₁ ∈ [q₁, p₂]` with value `a`
   obtain ⟨θ₁, hθ₁mem, hθ₁⟩ := ivt_hits hcont hq1p2.le (by
     rw [Set.mem_Icc]
@@ -41,7 +64,7 @@ lemma exists_abab_levels {κ : ℝ → ℝ} (hcont : Continuous κ)
       (hab.le.trans hbp2.le).trans (le_max_left _ _)⟩)
   -- `θ₄ ∈ [q₂, p₁ + 2π]` with value `b` (periodicity feeds `κ p₁` in)
   obtain ⟨θ₄, hθ₄mem, hθ₄⟩ := ivt_hits hcont hq2p1.le (by
-    rw [Set.mem_Icc, hperp1]
+    rw [Set.mem_Icc, hper p₁]
     exact ⟨(min_le_left _ _).trans (hq2a.le.trans hab.le),
       hbp1.le.trans (le_max_right _ _)⟩)
   refine ⟨θ₁, θ₂, θ₃, θ₄, ?_, ?_, ?_, ?_, hθ₁, hθ₂, hθ₃, hθ₄⟩
@@ -51,9 +74,7 @@ lemma exists_abab_levels {κ : ℝ → ℝ} (hcont : Continuous κ)
     intro h; apply ne_of_lt hab; rw [← hθ₃, ← hθ₂, h]
   · refine lt_of_le_of_ne (hθ₃mem.2.trans hθ₄mem.1) ?_
     intro h; apply ne_of_lt hab; rw [← hθ₃, ← hθ₄, h]
-  · have h1 : q₁ ≤ θ₁ := hθ₁mem.1
-    have h2 : θ₄ ≤ p₁ + 2 * π := hθ₄mem.2
-    linarith
+  · linarith [hθ₁mem.1, hθ₄mem.2]
 
 /-- The canonical four-arc step curvature is measurable (a two-valued step
 over a measurable set). Local replication of the `private` helper of the same
@@ -219,7 +240,7 @@ constant-level-`K` arc trajectory through `(t₁, p)` stays `μ`-inside the norm
 clamp (`≤ R − μ`), `μ`-inside the bracket margin against curvatures `≥ κ₀`
 (`⟪·, i·e^{iθ}⟫ ≤ κ₀ − δ − μ`), and keeps the level-`K` clamps inactive
 (`K − ⟪·, i·e^{iθ}⟫ ≥ δ`). Support definition packaging the hypotheses of
-`invariant_admissible_arc` + `constantArc_solves_truncated` for one arc;
+`invariant_admissible_arc` + `constant_arc_solves_truncated` for one arc;
 `stepModel_margins` is to discharge it near the centered circle.
 (Blueprint `lem:invariant_admissible_arc` / `lem:step_model_transport`.) -/
 def arcMargins (κ₀ R δ μ K t₁ t₂ : ℝ) (p : ℂ) : Prop :=
@@ -245,19 +266,15 @@ next exponential factor. -/
 private lemma chain_bound {E E' M d S₁ J : ℝ} (hE : 0 ≤ E) (he1 : 1 ≤ E')
     (hd : d ≤ E' * (M * S₁)) (hJ : 0 ≤ M * J) :
     E * (d + M * J) ≤ E * E' * (M * (S₁ + J)) := by
-  have h1 : M * J ≤ E' * (M * J) := le_mul_of_one_le_left hJ he1
-  have h2 : d + M * J ≤ E' * (M * S₁) + E' * (M * J) := add_le_add hd h1
-  have h3 : E' * (M * S₁) + E' * (M * J) = E' * (M * (S₁ + J)) := by ring
-  calc E * (d + M * J) ≤ E * (E' * (M * (S₁ + J))) := by
-        rw [← h3]; exact mul_le_mul_of_nonneg_left h2 hE
-    _ = E * E' * (M * (S₁ + J)) := by ring
+  nlinarith [mul_le_mul_of_nonneg_left hd hE,
+    mul_le_mul_of_nonneg_left (le_mul_of_one_le_left hJ he1) hE]
 
 /-- **One quarter-arc of the step transport**: on `[t₁, t₂]` compare a
 trajectory of the `κ`-truncated flow with the constant-level-`K` model arc
 through `(t₁, p)`. Under the arc margins and the smallness condition, the
 trajectory is admissible on the quarter and its endpoint lands within the
 Grönwall bound of the arc-map image `A_{K,t₁,t₂−t₁}(p)` — the single step of
-the `stepModel_transport` chain. Combines `constantArc_solves_truncated` with
+the `stepModel_transport` chain. Combines `constant_arc_solves_truncated` with
 `invariant_admissible_arc`. (Blueprint `lem:step_model_transport`, one arc.) -/
 lemma quarter_step_transport {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : ℝ} {L : ℝ≥0}
     (hκ : Continuous κ) (hκ₀ : ∀ θ, κ₀ ≤ κ θ) (hR : 0 ≤ R) (hδ : 0 < δ)
@@ -303,12 +320,12 @@ lemma quarter_step_transport {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : ℝ
     have h := hzsK t₁ ⟨le_refl t₁, ht⟩
     rw [hpt1] at h
     linarith
-  have hcons : 1 + ‖W‖ ^ 2 = 2 * r * K + r ^ 2 := constantArc_consistency hp0
+  have hcons : 1 + ‖W‖ ^ 2 = 2 * r * K + r ^ 2 := constant_arc_consistency hp0
   -- the model arc solves the truncated ODE on the quarter
   have hzsode : ∀ θ ∈ Set.Icc t₁ t₂,
       HasDerivWithinAt zs (truncatedField (fun _ => K) R δ θ (zs θ))
         (Set.Icc t₁ t₂) θ :=
-    constantArc_solves_truncated hcons hδ
+    constant_arc_solves_truncated hcons hδ
       (fun θ hθ => ⟨le_trans (hzsR θ hθ) (by linarith), hzsK θ hθ⟩)
   -- transport the margins along the quarter
   have hsmall' : Real.exp ((L : ℝ) * (t₂ - t₁)) * (‖z t₁ - zs t₁‖
@@ -605,6 +622,5 @@ lemma stepModel_transport {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ} {L : ℝ�
     refine le_trans (le_of_eq ?_) hD₄
     rw [show z (2 * π) - (z₀ + stepErrorMap a b z₀)
       = (z (2 * π) - z₀) - stepErrorMap a b z₀ by ring]
-
 
 end Gluck

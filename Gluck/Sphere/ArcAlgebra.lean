@@ -1,26 +1,56 @@
+/-
+Copyright (c) 2026 kejace. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: kejace
+-/
 import Gluck.Sphere.Admissible
+
+/-!
+# Arc algebra for the endpoint winding frontier (S2-D)
+
+This file develops the closed-form arc algebra behind the endpoint winding
+frontier of the symmetric step model. The symmetric step model is a
+concatenation of four explicit circular arcs, so its endpoint error map is
+closed-form arc algebra — no flow machinery enters on the model side. The
+lemmas here build that algebra: the arc map, the quadratic identity controlling
+the gauge speed near the centered circle, half-turn anti-equivariance, arc
+concatenation, and the single-arc margin transport that feeds the model arcs
+into the flow-based estimates.
+
+## Main definitions
+
+* `sphericalArcMap` — the time-`Δ` endpoint of a constant-curvature arc.
+* `stepHalfMap` — the half-period map of the symmetric equal-quarter step.
+* `stepErrorMap` — the step-model endpoint error map.
+
+## Main results
+
+* `constant_curvature_arc` — constant-curvature arcs are explicit circular arcs.
+* `sphericalSpeed_sub_radius` / `sphericalSpeed_radius_le` — the quadratic
+  identity and inequality for the gauge speed near the centered circle.
+* `sphericalArcMap_half_turn` / `stepErrorMap_four_arc` — half-turn
+  anti-equivariance and the four-arc composite form of the error map.
+* `invariant_admissible_arc` — single-arc Grönwall margin transport.
+-/
 
 namespace Gluck
 
 open scoped Real InnerProductSpace NNReal
-
-/-! ## Endpoint winding frontier (S2-D) -/
 
 /-- Derivative of the unit tangent field `θ ↦ e^{iθ}` as a map `ℝ → ℂ`.
 Project-local convenience wrapper around `Complex.hasDerivAt_exp`. -/
 lemma hasDerivAt_expI (θ : ℝ) :
     HasDerivAt (fun t : ℝ => Complex.exp ((t : ℂ) * Complex.I))
       (Complex.exp ((θ : ℂ) * Complex.I) * Complex.I) θ := by
-  have h0 : HasDerivAt (fun t : ℝ => ((t : ℝ) : ℂ)) 1 θ := (hasDerivAt_id θ).ofReal_comp
   have h1 : HasDerivAt (fun t : ℝ => (t : ℂ) * Complex.I) Complex.I θ := by
-    simpa using h0.mul_const Complex.I
+    simpa using (hasDerivAt_id θ).ofReal_comp.mul_const Complex.I
   exact (Complex.hasDerivAt_exp ((θ : ℂ) * Complex.I)).comp θ h1
 
 /-- **Bracket identity along a circular arc**: for the arc
 `z(θ) = w − i·r·e^{iθ}` one has `⟪z(θ), i·e^{iθ}⟫ = ⟪w, i·e^{iθ}⟫ − r`.
-Support lemma for `constantCurvature_arc`; S2-D uses it to read off arc
+Support lemma for `constant_curvature_arc`; S2-D uses it to read off arc
 margins. (Blueprint `lem:constant_curvature_arc`, part (i).) -/
-lemma constantArc_inner (r : ℝ) (w : ℂ) (θ : ℝ) :
+lemma constant_arc_inner (r : ℝ) (w : ℂ) (θ : ℝ) :
     ⟪w - Complex.I * (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I),
       Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ
     = ⟪w, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ - r := by
@@ -34,8 +64,8 @@ lemma constantArc_inner (r : ℝ) (w : ℂ) (θ : ℝ) :
 
 /-- **Norm expansion along a circular arc**:
 `‖w − i·r·e^{iθ}‖² = ‖w‖² − 2r·⟪w, i·e^{iθ}⟫ + r²`. Support lemma for
-`constantCurvature_arc`. (Blueprint `lem:constant_curvature_arc`, part (i).) -/
-lemma constantArc_norm_sq (r : ℝ) (w : ℂ) (θ : ℝ) :
+`constant_curvature_arc`. (Blueprint `lem:constant_curvature_arc`, part (i).) -/
+lemma constant_arc_norm_sq (r : ℝ) (w : ℂ) (θ : ℝ) :
     ‖w - Complex.I * (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)‖ ^ 2
     = ‖w‖ ^ 2 - 2 * r * ⟪w, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ
       + r ^ 2 := by
@@ -51,9 +81,9 @@ lemma constantArc_norm_sq (r : ℝ) (w : ℂ) (θ : ℝ) :
 /-- **Consistency identity at the start configuration**: with
 `r = q_K(θ₀, z₀)` and `w = z₀ + i·r·e^{iθ₀}` the Euclidean data satisfy
 `1 + ‖w‖² = 2rK + r²` (equivalently `K = (1 + ‖w‖² − r²)/(2r)`). Support
-lemma for `constantCurvature_arc`.
+lemma for `constant_curvature_arc`.
 (Blueprint `lem:constant_curvature_arc`, part (ii).) -/
-lemma constantArc_consistency {K θ₀ : ℝ} {z₀ : ℂ}
+lemma constant_arc_consistency {K θ₀ : ℝ} {z₀ : ℂ}
     (hpos : 0 < K - ⟪z₀, Complex.I * Complex.exp ((θ₀ : ℂ) * Complex.I)⟫_ℝ) :
     1 + ‖z₀ + Complex.I * ((sphericalSpeed (fun _ => K) θ₀ z₀ : ℝ) : ℂ)
         * Complex.exp ((θ₀ : ℂ) * Complex.I)‖ ^ 2
@@ -82,9 +112,9 @@ consistency identity `1 + ‖w‖² = 2rK + r²`, at every angle `θ` where the
 bracket `K − ⟪z(θ), i·e^{iθ}⟫` stays positive, the circular arc
 `z(θ) = w − i·r·e^{iθ}` has gauge speed exactly `r` and solves the *true*
 reconstruction ODE `z' = q_K(θ, z)·e^{iθ}` for the constant curvature `K`.
-Entry data: `constantArc_consistency` supplies the consistency identity for
+Entry data: `constant_arc_consistency` supplies the consistency identity for
 the arc through a start `(θ₀, z₀)`. (Blueprint `lem:constant_curvature_arc`.) -/
-lemma constantCurvature_arc {K r : ℝ} {w : ℂ}
+lemma constant_curvature_arc {K r : ℝ} {w : ℂ}
     (hcons : 1 + ‖w‖ ^ 2 = 2 * r * K + r ^ 2) {θ : ℝ}
     (hpos : 0 < K - ⟪w - Complex.I * (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I),
       Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ) :
@@ -95,8 +125,8 @@ lemma constantCurvature_arc {K r : ℝ} {w : ℂ}
         (sphericalSpeed (fun _ => K) θ
             (w - Complex.I * (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I))
           • Complex.exp ((θ : ℂ) * Complex.I)) θ := by
-  have hin := constantArc_inner r w θ
-  have hnq := constantArc_norm_sq r w θ
+  have hin := constant_arc_inner r w θ
+  have hnq := constant_arc_norm_sq r w θ
   have hpos' : 0 < K - (⟪w, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ - r) := by
     rw [← hin]; exact hpos
   have hq : sphericalSpeed (fun _ => K) θ
@@ -167,15 +197,13 @@ lemma flow_half_turn_equivariance {κ : ℝ → ℝ} {R δ : ℝ} (hR : 0 ≤ R)
     have hmaps : Set.MapsTo (fun t : ℝ => t + π) (Set.Icc (0 : ℝ) π)
         (Set.Icc (0 : ℝ) (2 * π)) :=
       fun t ht => ⟨by linarith [ht.1], by linarith [ht.2]⟩
-    have hcomp := HasDerivWithinAt.scomp θ (hz (θ + π) hθ2) hshift hmaps
-    have hneg := hcomp.neg
+    have hneg := (HasDerivWithinAt.scomp θ (hz (θ + π) hθ2) hshift hmaps).neg
     have hval : -((1 : ℝ) • truncatedField κ R δ (θ + π) (z (θ + π)))
         = truncatedField κ R δ θ (-z (θ + π)) := by
       have h := truncatedField_half_turn (R := R) (δ := δ) hπ θ (-z (θ + π))
       rw [neg_neg] at h
       rw [one_smul, h, neg_neg]
-    rw [hval] at hneg
-    exact hneg
+    rwa [hval] at hneg
   -- `z` itself solves on the subinterval `[0, π]`
   have hzres : ∀ θ ∈ Set.Icc (0 : ℝ) π,
       HasDerivWithinAt z (truncatedField κ R δ θ (z θ)) (Set.Icc 0 π) θ :=
@@ -183,25 +211,16 @@ lemma flow_half_turn_equivariance {κ : ℝ → ℝ} {R δ : ℝ} (hR : 0 ≤ R)
       (Set.Icc_subset_Icc_right (by linarith))
   have h0 : (fun t => -z (t + π)) 0 = z 0 := by simp [hhalf]
   have heq := truncatedField_solution_unique hR hδ hy hzres h0
-  refine ⟨fun θ hθ => ?_, ?_⟩
-  · exact neg_eq_iff_eq_neg.mp (heq hθ)
+  refine ⟨fun θ hθ => neg_eq_iff_eq_neg.mp (heq hθ), ?_⟩
   · have h1 := heq (Set.right_mem_Icc.mpr hπpos.le)
     simp only at h1
     rw [show π + π = 2 * π by ring, hhalf] at h1
     exact neg_injective h1
 
-/-! ## Endpoint winding arc algebra (S2-D tranche 1)
-
-The symmetric step model is a concatenation of four explicit circular arcs, so
-its endpoint error map is closed-form arc algebra — no flow machinery enters on
-the model side. The lemmas below build that algebra: the arc map, the quadratic
-identity controlling the gauge speed near the centered circle, half-turn
-anti-equivariance, and arc concatenation. -/
-
 /-- The *spherical arc map*
 `A_{K,θ₀,Δ}(z) = z + i·q_K(θ₀,z)·e^{iθ₀}·(1 − e^{iΔ})`: the time-`Δ` endpoint
 of the constant-curvature-`K` arc trajectory started at `(θ₀, z)`, wherever the
-bracket stays positive (`constantCurvature_arc`); a total function of the
+bracket stays positive (`constant_curvature_arc`); a total function of the
 junk-value kind otherwise, like the gauge speed itself.
 (Blueprint `def:spherical_arc_map`.) -/
 noncomputable def sphericalArcMap (K θ₀ Δ : ℝ) (z : ℂ) : ℂ :=
@@ -307,7 +326,7 @@ lemma expI_add (x y : ℝ) :
 trajectory `θ ↦ w − i·r·e^{iθ}` (`r = q_K(θ₀,z)`, `w = z + i·r·e^{iθ₀}`) on
 `[θ₀, θ₀+Δ₁+Δ₂]`, then following the level-`K` arc for time `Δ₁` and then for
 time `Δ₂` equals following it for `Δ₁+Δ₂`: the gauge speed is constant `= r`
-along the arc (`constantCurvature_arc`), so the second arc continues the same
+along the arc (`constant_curvature_arc`), so the second arc continues the same
 circle. In particular the admissible full turn is the identity
 (`e^{2πi} = 1`) — the exact form of the constant-model degeneracy.
 (Blueprint `lem:arc_map_concat`.) -/
@@ -326,13 +345,13 @@ lemma sphericalArcMap_concat {K θ₀ Δ₁ Δ₂ : ℝ} {z : ℂ} (hΔ₁ : 0 �
     with hwdef
   -- bracket positivity at the start point itself
   have h0 : 0 < K - ⟪z, Complex.I * Complex.exp ((θ₀ : ℂ) * Complex.I)⟫_ℝ := by
-    have h := hpos θ₀ ⟨le_refl _, by linarith⟩
+    have h := hpos θ₀ ⟨le_rfl, by linarith⟩
     have hzpt : w - Complex.I * (r : ℂ) * Complex.exp ((θ₀ : ℂ) * Complex.I)
         = z := by
       rw [hwdef]; ring
     rwa [hzpt] at h
   -- consistency identity of the circle through `(θ₀, z)`
-  have hcons : 1 + ‖w‖ ^ 2 = 2 * r * K + r ^ 2 := constantArc_consistency h0
+  have hcons : 1 + ‖w‖ ^ 2 = 2 * r * K + r ^ 2 := constant_arc_consistency h0
   -- the first arc lands on the same circle at angle `θ₀ + Δ₁`
   have hz₁ : sphericalArcMap K θ₀ Δ₁ z
       = w - Complex.I * (r : ℂ) * Complex.exp (((θ₀ + Δ₁ : ℝ) : ℂ) * Complex.I) := by
@@ -344,7 +363,7 @@ lemma sphericalArcMap_concat {K θ₀ Δ₁ Δ₂ : ℝ} {z : ℂ} (hΔ₁ : 0 �
   -- the gauge speed is still `r` there
   have hq1 : sphericalSpeed (fun _ => K) (θ₀ + Δ₁)
       (w - Complex.I * (r : ℝ) * Complex.exp (((θ₀ + Δ₁ : ℝ) : ℂ) * Complex.I))
-      = r := (constantCurvature_arc hcons hpos1).1
+      = r := (constant_curvature_arc hcons hpos1).1
   rw [hz₁]
   unfold sphericalArcMap
   rw [hq1, ← hrdef, hwdef, expI_add θ₀ Δ₁, expI_add Δ₁ Δ₂]
@@ -393,12 +412,12 @@ lemma stepErrorMap_four_arc (a b : ℝ) (z : ℂ) :
 
 /-- **Explicit arcs solve the truncated ODE where clamps are inactive.** If
 along `[t₁, t₂]` the circular arc `z(θ) = w − i·r·e^{iθ}` (with the consistency
-identity supplied by `constantArc_consistency`) is admissible with clamps
+identity supplied by `constant_arc_consistency`) is admissible with clamps
 inactive — `‖z(θ)‖ ≤ R` and `K − ⟪z(θ), i·e^{iθ}⟫ ≥ δ` — then it solves the
 *truncated* reconstruction ODE for the constant curvature `K` there, in the
 `HasDerivWithinAt` sense. This feeds the model arcs into the margin transport
 `invariant_admissible_arc`. (Blueprint `lem:constant_arc_solves_truncated`.) -/
-lemma constantArc_solves_truncated {K r R δ t₁ t₂ : ℝ} {w : ℂ}
+lemma constant_arc_solves_truncated {K r R δ t₁ t₂ : ℝ} {w : ℂ}
     (hcons : 1 + ‖w‖ ^ 2 = 2 * r * K + r ^ 2) (hδ : 0 < δ)
     (hadm : ∀ θ ∈ Set.Icc t₁ t₂,
       ‖w - Complex.I * (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)‖ ≤ R ∧
@@ -414,9 +433,8 @@ lemma constantArc_solves_truncated {K r R δ t₁ t₂ : ℝ} {w : ℂ}
   obtain ⟨hRθ, hbr⟩ := hadm θ hθ
   have hpos : 0 < K - ⟪w - Complex.I * (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I),
       Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ := lt_of_lt_of_le hδ hbr
-  have h := (constantCurvature_arc hcons hpos).2
   rw [truncatedField, truncatedSpeed_eq hRθ hbr]
-  exact h.hasDerivWithinAt
+  exact (constant_curvature_arc hcons hpos).2.hasDerivWithinAt
 
 /-- **Single-arc margin transport (shifted interval, constant model level).**
 The `invariant_admissible_domain` argument, run on `[t₁, t₂]` against a model
@@ -622,6 +640,5 @@ lemma invariant_admissible_arc {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : �
     have h3 := le_abs_self
       ⟪z θ - zs θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ
     linarith
-
 
 end Gluck

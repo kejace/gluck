@@ -1,10 +1,30 @@
+/-
+Copyright (c) 2026 kejace. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: kejace
+-/
 import Gluck.Sphere.EndpointWinding
+
+/-!
+# Spherical converse: simplicity and the positive-stage capstone (S2-E)
+
+This file assembles the positive-stage spherical converse. It packages the
+simplicity and realization frontier: the constant-curvature circle realizes a
+constant `κ`, spherical realization transfers under orientation-preserving `C¹`
+reparametrization, the closing trajectory of an admissible closed curve is a
+simple closed curve (as a translated Euclidean reconstruction curve), and these
+combine into the capstone.
+
+## Main results
+
+* `sphericalConverse_pos`: if `κ` satisfies the positive-stage spherical
+  four-vertex condition, there is a simple closed curve confined to the open disk
+  realizing `κ` as its spherical geodesic curvature.
+-/
 
 namespace Gluck
 
 open scoped Real InnerProductSpace NNReal
-
-/-! ## Simplicity and capstone frontier (S2-E) -/
 
 /-- **Constant-curvature branch: the centered circle realizes constant `κ ≡ c`.**
 For `c > 0` the circle `z(θ) = −r*·(i·e^{iθ})` with `r* = √(1+c²) − c ∈ (0,1)`
@@ -386,6 +406,5 @@ theorem sphericalConverse_pos {κ : ℝ → ℝ} (hκ : SphereFourVertex κ) :
       rw [hh₁H t]
     rw [hμeq] at hcomp
     exact ⟨_, isSimpleClosed_comp hsimple hHc hHmono hHper, hcomp⟩
-
 
 end Gluck

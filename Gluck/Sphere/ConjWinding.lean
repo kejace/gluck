@@ -1,14 +1,16 @@
+/-
+Copyright (c) 2026 kejace. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: kejace
+-/
 import Gluck.Sphere.Reconstruction
 
-namespace Gluck
+/-!
+# Winding of the conjugate loop
 
-open scoped Real InnerProductSpace NNReal
-
-section ConjLoopWinding
-
-open scoped unitInterval
-
-/-! ## Winding of the conjugate loop (S2-D tranche 2)
+This file computes the `ℂ`-winding number of the conjugate once-around loop
+`t ↦ w · conj(e^{2πit})` on `[0,1]`, establishing that it equals `-1` for
+`w ≠ 0`.
 
 `Winding.lean`'s entire angle-lift layer (`angleLift`, `windingNumber`,
 `windingNumber_eq_div_of_lift`, `circleProj`, `normLoop`, …) is `private`;
@@ -17,7 +19,25 @@ lemmas, none of which pins a concrete nonzero value. The value computation
 for the conjugate once-around loop therefore replicates the lift layer
 locally, **verbatim**, so that the replica is *definitionally equal* to the
 hidden implementation and the bridge to `windingNumberC` is `rfl`
-(`windingNumberC_eq_replica`). -/
+(`windingNumberC_eq_replica`).
+
+## Main definitions
+
+* `Gluck.conjLoop` — the conjugate once-around loop `t ↦ w · conj(e^{2πit})`.
+
+## Main results
+
+* `Gluck.windingNumberC_conj_loop` — for `w ≠ 0`, the conjugate loop has
+  `ℂ`-winding number `-1`.
+-/
+
+namespace Gluck
+
+open scoped Real InnerProductSpace NNReal
+
+section ConjLoopWinding
+
+open scoped unitInterval
 
 /-- Local replica of `Winding.lean`'s private `angleLift` (verbatim, for
 definitional equality): the continuous angle lift of a circle loop along the
@@ -66,7 +86,7 @@ private theorem windingNumberC_eq_replica (γ : C(I, ℂ)) (h : ∀ t, γ t ≠ 
 
 /-- Local replica of the private `int_valued_eq`: a continuous integer-valued
 function on `[0,1]` is constant. -/
-private theorem intValuedEqS {q : C(I, ℝ)} (hq : ∀ t, ∃ m : ℤ, q t = (m : ℝ))
+private theorem int_valued_eqS {q : C(I, ℝ)} (hq : ∀ t, ∃ m : ℤ, q t = (m : ℝ))
     (a b : I) : q a = q b := by
   rcases lt_trichotomy (q a) (q b) with h | h | h
   · exfalso
@@ -126,7 +146,7 @@ private theorem windingNumberS_eq_div_of_lift (g : C(I, Circle)) (φ : C(I, ℝ)
     refine ⟨m, ?_⟩
     change (φ t - angleLiftS g t) / (2 * π) = (m : ℝ)
     rw [hm]; field_simp; ring
-  have hend := intValuedEqS hq'int 0 1
+  have hend := int_valued_eqS hq'int 0 1
   have hkey : φ 0 - angleLiftS g 0 = φ 1 - angleLiftS g 1 := by
     have h2 := hend
     simp only [hq'def, ContinuousMap.coe_mk] at h2
@@ -211,6 +231,5 @@ lemma windingNumberC_conj_loop {w : ℂ} (hw : w ≠ 0) :
   ring
 
 end ConjLoopWinding
-
 
 end Gluck

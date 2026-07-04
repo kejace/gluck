@@ -1,10 +1,32 @@
+/-
+Copyright (c) 2026 kejace. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: kejace
+-/
 import Gluck.Sphere.FirstVariation
+
+/-!
+# Truncation removal: reconstruction ODE
+
+This file continues the truncation-removal stage (S2-C). Given a trajectory of the truncated
+reconstruction flow on `[0, 2π]` that is admissible (both clamps inactive) and closed, its
+`2π`-periodic extension is shown to be a closed `C¹` curve confined to the open unit disk that
+solves the *true* reconstruction ODE `z' = q_κ(θ, z)·e^{iθ}` and realizes the prescribed
+spherical curvature `κ` in the gauge `φ(θ) = θ`.
+
+## Main definitions
+
+* `periodicExtension` — the `2π`-periodic extension of a curve from its values on `[0, 2π)`.
+
+## Main results
+
+* `reconstruction_ode` — admissible closed trajectories of the truncated flow realize `κ`
+  via their periodic extension (Blueprint `lem:reconstruction_ode`).
+-/
 
 namespace Gluck
 
 open scoped Real InnerProductSpace NNReal
-
-/-! ## Truncation removal (S2-C, continued) -/
 
 /-- The `2π`-periodic extension of a curve from its values on `[0, 2π)`:
 `t ↦ z(t − 2π·⌊t/(2π)⌋)`. Support definition for `reconstruction_ode`: the
@@ -42,8 +64,7 @@ lemma periodicExtension_periodic (z : ℝ → ℂ) :
     Function.Periodic (periodicExtension z) (2 * π) := by
   intro t
   unfold periodicExtension
-  have h1 : (t + 2 * π) / (2 * π) = t / (2 * π) + 1 := by
-    field_simp
+  have h1 : (t + 2 * π) / (2 * π) = t / (2 * π) + 1 := by field_simp
   rw [h1, Int.floor_add_one]
   congr 1
   push_cast
@@ -250,6 +271,5 @@ lemma reconstruction_ode {κ : ℝ → ℝ} {R δ : ℝ} (hκc : Continuous κ)
         Complex.I * Complex.exp ((t : ℂ) * Complex.I)⟫_ℝ ≠ 0 := by linarith
     field_simp
     rw [mul_comm Complex.I (t : ℂ), div_self hne]
-
 
 end Gluck

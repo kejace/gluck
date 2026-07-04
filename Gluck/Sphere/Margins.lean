@@ -1,10 +1,11 @@
+/-
+Copyright (c) 2026 kejace. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: kejace
+-/
 import Gluck.Sphere.StepReparam
 
-namespace Gluck
-
-open scoped Real InnerProductSpace NNReal
-
-/-! ## Step-model margins near the centered circle (S2-D tranche 2)
+/-! # Step-model margins near the centered circle (S2-D tranche 2)
 
 `stepModel_transport` consumes four `arcMargins` packages. Along the centered
 circle `ẑ(θ) = −r*·i·e^{iθ}` (`r* = √(1+c²) − c`) all three margin quantities
@@ -16,6 +17,10 @@ whole arc then stays within `2d + 16h` of the centered circle
 (`arcDeviation_bound`), and the deviation propagates across the four chained
 arcs with factor `2` per arc. All bracket lower bounds come from
 `c + r* = √(1+c²) ≥ 1`, so the constants are absolute. -/
+
+namespace Gluck
+
+open scoped Real InnerProductSpace NNReal
 
 /-- The rotating unit frame `i·e^{iθ}` has norm one. Support lemma inlined
 throughout the margin estimates. -/
@@ -343,6 +348,5 @@ lemma stepModel_margins {c κ₀ : ℝ} (hc : 0 < c)
         (sphericalArcMap a 0 (π / 2) z₀))) :=
     arcMargins_of_dev hc hb (fun θ => le_trans (hdev₃' θ) hD₃σ) h1σ h2σ h3σ
   exact ⟨hmarg₀, hmarg₁, hmarg₂, hmarg₃⟩
-
 
 end Gluck

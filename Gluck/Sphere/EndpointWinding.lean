@@ -1,4 +1,29 @@
+/-
+Copyright (c) 2026 kejace. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: kejace
+-/
 import Gluck.Sphere.ConjWinding
+
+/-!
+# Spherical endpoint winding
+
+This file assembles the **spherical endpoint winding** result (stage S2-D): for the
+value-separated four-point data of a non-constant four-vertex curvature branch there is a
+closed admissible trajectory of the reparametrized truncated flow.
+
+The enabling lemma is a *uniform-in-`κ`* Lipschitz bound for the truncated speed and field:
+the explicit Lipschitz constant never sees the curvature, so one witness serves every
+curvature function. This breaks the quantifier circularity of the winding assembly, where the
+`L¹` tolerance `ε` must be fixed before the reparametrized curvature `κ ∘ h₁` exists.
+
+## Main results
+
+* `truncatedField_lipschitz_uniform`: a single Lipschitz constant works for the truncated
+  field of every curvature function.
+* `spherical_endpoint_winding`: existence of a closed admissible trajectory for the
+  reparametrized curvature (Blueprint `lem:spherical_endpoint_winding`).
+-/
 
 namespace Gluck
 
@@ -8,15 +33,13 @@ section EndpointWindingAssembly
 
 open scoped unitInterval
 
-/-! ## Endpoint winding assembly (S2-D) -/
-
 /-- Uniform-in-`κ` form of `truncatedSpeed_lipschitz`: the explicit constant
 `R/δ + (1 + R²)/(2δ²)` never sees the curvature, so one witness serves *every*
 curvature function. This breaks the quantifier circularity of the winding
 assembly: the `L¹` tolerance `ε` must be fixed before the reparametrized
 curvature `κ ∘ h₁` exists, yet `ε` depends on the Lipschitz constant of the
 truncated field for `κ ∘ h₁`. -/
-lemma truncatedSpeed_lipschitz_uniform {R δ : ℝ} (hR : 0 ≤ R)
+private lemma truncatedSpeed_lipschitz_uniform {R δ : ℝ} (hR : 0 ≤ R)
     (hδ : 0 < δ) :
     ∃ L : ℝ≥0, ∀ (κ : ℝ → ℝ) (θ : ℝ),
       LipschitzWith L (fun z => truncatedSpeed κ R δ θ z) := by
@@ -88,9 +111,8 @@ lemma truncatedField_lipschitz_uniform {R δ : ℝ} (hR : 0 ≤ R)
   rw [Real.dist_eq, dist_eq_norm] at h
   rw [dist_eq_norm, dist_eq_norm]
   unfold truncatedField
-  rw [← sub_smul, norm_smul, Real.norm_eq_abs, Complex.norm_exp_ofReal_mul_I,
+  rwa [← sub_smul, norm_smul, Real.norm_eq_abs, Complex.norm_exp_ofReal_mul_I,
     mul_one]
-  exact h
 
 set_option maxHeartbeats 1600000 in
 -- The transport instantiation threads four nested arc-map start points, as in
@@ -412,6 +434,5 @@ theorem spherical_endpoint_winding {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
     exact (main _ hd).1
 
 end EndpointWindingAssembly
-
 
 end Gluck

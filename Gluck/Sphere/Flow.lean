@@ -1,10 +1,11 @@
+/-
+Copyright (c) 2026 kejace. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: kejace
+-/
 import Gluck.Sphere.Defs
 
-namespace Gluck
-
-open scoped Real InnerProductSpace NNReal
-
-/-! ## Truncated flow layer (S2-B)
+/-! # Truncated flow layer (S2-B)
 
 The gauge speed is truncated *algebraically* — the norm clamped in the
 numerator, the denominator clamped from below — so that the reconstruction
@@ -13,6 +14,10 @@ flow machinery (existence on `[0, 2π]`, uniqueness, continuous dependence,
 the endpoint map) is then *unconditional*: no confinement lemma is needed to
 run the degree argument. Admissibility is re-imposed a posteriori (S2-C) on
 the single closed trajectory the winding argument produces. -/
+
+namespace Gluck
+
+open scoped Real InnerProductSpace NNReal
 
 /-- The *truncated gauge speed*
 `q̂_{κ,R,δ}(θ, z) = (1 + (min ‖z‖ R)²) / (2 · max (κ(θ) − ⟪z, i·e^{iθ}⟫_ℝ) δ)`.
@@ -357,6 +362,5 @@ lemma sphericalEndpoint_continuousOn {κ : ℝ → ℝ} {R δ : ℝ} (hκ : Cont
   exact (((sphericalFlow_continuousOn hκ hR hδ r₀).comp
     (continuous_id.prodMk continuous_const).continuousOn hmap).sub
     continuousOn_id)
-
 
 end Gluck
