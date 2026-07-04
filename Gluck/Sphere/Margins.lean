@@ -40,6 +40,55 @@ lemma centeredRadius_facts {c : ℝ} (hc : 0 < c) :
   · nlinarith [sq_nonneg (Real.sqrt (1 + c ^ 2) + 1 + c)]
   · nlinarith [sq_nonneg (Real.sqrt (1 + c ^ 2) - 1)]
 
+/-- **Frame inner-product bound.** If `p` lies within `d` of `−rs·v` for a unit
+vector `v`, then `⟪p, v⟫ ≤ d − rs`. The one-sided companion of the norm bound,
+used for both the level-shift setup and the arc frame margin. -/
+private lemma real_inner_frame_le {v p : ℂ} {rs d : ℝ} (hv : ‖v‖ = 1)
+    (hdev : ‖p + rs • v‖ ≤ d) : ⟪p, v⟫_ℝ ≤ d - rs := by
+  have h1 : ⟪p + rs • v, v⟫_ℝ = ⟪p, v⟫_ℝ + rs := by
+    rw [inner_add_left, real_inner_smul_left, real_inner_self_eq_norm_sq, hv]; ring
+  have h2 : |⟪p + rs • v, v⟫_ℝ| ≤ ‖p + rs • v‖ := by
+    have h := abs_real_inner_le_norm (p + rs • v) v
+    rwa [hv, mul_one] at h
+  have h3 := le_trans (le_abs_self _) (le_trans h2 hdev)
+  rw [h1] at h3; linarith
+
+/-- **Norm bound from a frame deviation.** If `p` lies within `d` of `−rs·v` for
+a unit vector `v` and `0 ≤ rs`, then `‖p‖ ≤ d + rs`. -/
+private lemma norm_le_of_frame_dev {v p : ℂ} {rs d : ℝ} (hv : ‖v‖ = 1)
+    (hrs : 0 ≤ rs) (hdev : ‖p + rs • v‖ ≤ d) : ‖p‖ ≤ d + rs := by
+  have h1 : ‖p‖ ≤ ‖p + rs • v‖ + ‖rs • v‖ := by
+    have h := norm_sub_le (p + rs • v) (rs • v); simpa using h
+  rw [norm_smul, hv, mul_one, Real.norm_eq_abs, abs_of_nonneg hrs] at h1
+  linarith
+
+/-- **Level-shift quotient bound.** The exact level-sensitivity quotient of the
+gauge speed is `≤ 8h`: the numerator `(1+P)(c−K)` is `≤ 4h` (since `1+P ≤ 4` and
+`|c−K| ≤ h`) and the denominator bracket `|2(K−β)(c−β)| ≥ 1/2`. -/
+private lemma level_quotient_bound {P c K β h : ℝ} (hP0 : 0 ≤ P) (hP4 : 1 + P ≤ 4)
+    (hK : |K - c| ≤ h) (hDc : 1 / 2 ≤ c - β) (hDK : 1 / 2 ≤ K - β) :
+    |(1 + P) * (c - K)| / |2 * (K - β) * (c - β)| ≤ 8 * h := by
+  have hh0 : 0 ≤ h := le_trans (abs_nonneg _) hK
+  have hnum : |(1 + P) * (c - K)| ≤ 4 * h := by
+    rw [abs_mul, abs_of_pos (by positivity : (0 : ℝ) < 1 + P)]
+    have h2 : |c - K| ≤ h := by rw [abs_sub_comm]; exact hK
+    nlinarith [hP0, abs_nonneg (c - K)]
+  have hden : 1 / 2 ≤ |2 * (K - β) * (c - β)| := by
+    rw [abs_of_pos (by nlinarith)]; nlinarith
+  have hdenpos : 0 < |2 * (K - β) * (c - β)| := lt_of_lt_of_le (by norm_num) hden
+  rw [div_le_iff₀ hdenpos]
+  nlinarith [hnum, mul_nonneg hh0 (by linarith : (0 : ℝ) ≤
+    |2 * (K - β) * (c - β)| - 1 / 2)]
+
+/-- **Quadratic deviation bound.** The nonnegative quotient `N / (2(c−β))` is
+`≤ d²` whenever `N ≤ d²` and the bracket `c−β ≥ 1/2`. -/
+private lemma quadratic_deviation_bound {N c β d : ℝ} (hN0 : 0 ≤ N)
+    (hNd : N ≤ d ^ 2) (hDc : 1 / 2 ≤ c - β) :
+    |N / (2 * (c - β))| ≤ d ^ 2 := by
+  have hpos : (0 : ℝ) < 2 * (c - β) := by linarith
+  rw [abs_div, abs_of_nonneg hN0, abs_of_pos hpos, div_le_iff₀ hpos]
+  nlinarith [sq_nonneg d]
+
 /-- **Speed stability near the centered circle.** If the constant level `K` is
 within `h ≤ c/2` of `c` and the start point `p` is within `d ≤ r*/2` of the
 centered-circle point at angle `t₁`, then the gauge speed `q_K(t₁, p)` is
@@ -63,26 +112,14 @@ private lemma sphericalSpeed_near_circle {c K t₁ h d : ℝ} {p : ℂ}
   have hh0 : 0 ≤ h := le_trans (abs_nonneg _) hK
   obtain ⟨hKlo, hKhi⟩ := abs_le.mp hK
   -- the inner product against the frame deviates from `−r*` by at most `d`
-  have hβle : β ≤ d - rs := by
-    have h1 : ⟪p + rs • v, v⟫_ℝ = β + rs := by
-      rw [inner_add_left, real_inner_smul_left, real_inner_self_eq_norm_sq, hv]
-      ring
-    have h2 : |⟪p + rs • v, v⟫_ℝ| ≤ ‖p + rs • v‖ := by
-      have h := abs_real_inner_le_norm (p + rs • v) v
-      rwa [hv, mul_one] at h
-    have h3 := le_trans (le_abs_self _) h2
-    rw [h1] at h3
-    linarith
+  have hβle : β ≤ d - rs := by rw [hβdef]; exact real_inner_frame_le hv hdev
   -- bracket lower bounds
   have hDc : 1 / 2 ≤ c - β := by linarith
   have hDK : 1 / 2 ≤ K - β := by linarith
   -- norm bound on the start point
   have hp2 : 1 + ‖p‖ ^ 2 ≤ 4 := by
-    have h1 : ‖p‖ ≤ ‖p + rs • v‖ + ‖rs • v‖ := by
-      have h := norm_sub_le (p + rs • v) (rs • v)
-      simpa using h
-    rw [norm_smul, hv, mul_one, Real.norm_eq_abs, abs_of_pos hrs0] at h1
-    have h2 : ‖p‖ ≤ 3 / 2 := by linarith
+    have h1 : ‖p‖ ≤ 3 / 2 := by
+      have := norm_le_of_frame_dev hv hrs0.le hdev; linarith
     nlinarith [norm_nonneg p]
   -- exact level shift
   have hlevel := sphericalSpeed_sub_level (K := K) (K' := c) (θ := t₁) (z := p)
@@ -97,27 +134,14 @@ private lemma sphericalSpeed_near_circle {c K t₁ h d : ℝ} {p : ℂ}
   have hlevbound : |sphericalSpeed (fun _ => K) t₁ p
       - sphericalSpeed (fun _ => c) t₁ p| ≤ 8 * h := by
     rw [hlevel, abs_div]
-    have hnum : |(1 + ‖p‖ ^ 2) * (c - K)| ≤ 4 * h := by
-      rw [abs_mul]
-      have h1 : |1 + ‖p‖ ^ 2| = 1 + ‖p‖ ^ 2 := abs_of_pos (by positivity)
-      have h2 : |c - K| ≤ h := by rw [abs_sub_comm]; exact hK
-      rw [h1]
-      nlinarith [norm_nonneg p, sq_nonneg ‖p‖]
-    have hden : 1 / 2 ≤ |2 * (K - β) * (c - β)| := by
-      rw [abs_of_pos (by nlinarith)]
-      nlinarith
-    have hdenpos : 0 < |2 * (K - β) * (c - β)| := lt_of_lt_of_le (by norm_num) hden
-    rw [div_le_iff₀ hdenpos]
-    nlinarith
+    exact level_quotient_bound (sq_nonneg _) hp2 hK hDc hDK
   -- bound the quadratic deviation by `d²`, with nonnegativity
   have hquadbound : |sphericalSpeed (fun _ => c) t₁ p - rs| ≤ d ^ 2 := by
     have hnum : ‖p + rs • v‖ ^ 2 ≤ d ^ 2 := by
       have := pow_le_pow_left₀ (norm_nonneg _) hdev 2
       simpa using this
-    have hpos : (0 : ℝ) < 2 * (c - β) := by linarith
-    rw [hquad, abs_div, abs_of_nonneg (sq_nonneg _), abs_of_pos hpos,
-      div_le_iff₀ hpos]
-    nlinarith [sq_nonneg d]
+    rw [hquad]
+    exact quadratic_deviation_bound (sq_nonneg _) hnum hDc
   calc |sphericalSpeed (fun _ => K) t₁ p - rs|
       ≤ |sphericalSpeed (fun _ => K) t₁ p - sphericalSpeed (fun _ => c) t₁ p|
         + |sphericalSpeed (fun _ => c) t₁ p - rs| := abs_sub_le _ _ _
@@ -223,29 +247,35 @@ private lemma arcMargins_of_dev {c κ₀ R δ μ K t₁ t₂ h Dv : ℝ} {p : �
   set v : ℂ := Complex.I * Complex.exp ((θ : ℂ) * Complex.I) with hvdef
   have hv : ‖v‖ = 1 := norm_I_expI θ
   have hx : ‖x + rs • v‖ ≤ Dv := hdev θ
-  -- norm bound
-  have hxn : ‖x‖ ≤ Dv + rs := by
-    have h4 : ‖x‖ ≤ ‖x + rs • v‖ + ‖rs • v‖ := by
-      have h := norm_sub_le (x + rs • v) (rs • v)
-      simpa using h
-    rw [norm_smul, hv, mul_one, Real.norm_eq_abs, abs_of_pos hrs0] at h4
-    linarith
-  -- frame inner-product bound
-  have hxi : ⟪x, v⟫_ℝ ≤ Dv - rs := by
-    have h4 : ⟪x + rs • v, v⟫_ℝ = ⟪x, v⟫_ℝ + rs := by
-      rw [inner_add_left, real_inner_smul_left, real_inner_self_eq_norm_sq, hv]
-      ring
-    have h5 : |⟪x + rs • v, v⟫_ℝ| ≤ ‖x + rs • v‖ := by
-      have h := abs_real_inner_le_norm (x + rs • v) v
-      rwa [hv, mul_one] at h
-    have h6 := le_trans (le_abs_self _) (le_trans h5 hx)
-    rw [h4] at h6
-    linarith
+  -- norm bound and frame inner-product bound
+  have hxn : ‖x‖ ≤ Dv + rs := norm_le_of_frame_dev hv hrs0.le hx
+  have hxi : ⟪x, v⟫_ℝ ≤ Dv - rs := real_inner_frame_le hv hx
   exact ⟨by linarith, by linarith, by linarith⟩
 
-set_option maxHeartbeats 1000000 in
--- The four nested arc-map start points make the elaboration of the four
--- packages heavy, as in `stepModel_transport`.
+/-- **One quarter-arc margin step.** From a start point `p` within `d` of the
+centered circle at angle `t₁`, the level-`K` arc satisfies its `arcMargins`
+package (via `arcDeviation_bound` + `arcMargins_of_dev`, using `2d + 16h ≤ Dv`)
+AND the next arc's start point `A_{K,t₁,π/2}(p)` sits within `2d + 16h` of the
+centered circle at the shifted angle `θ₂ = t₁ + π/2`. Applied once per quarter
+to chain the four packages. -/
+private lemma arcMargins_step {c κ₀ R δ μ K t₁ t₂ h d Dv θ₂ : ℝ} {p : ℂ}
+    (hc : 0 < c) (hK : |K - c| ≤ h) (hh : h ≤ c / 2)
+    (hdev : ‖p + (Real.sqrt (1 + c ^ 2) - c) •
+        (Complex.I * Complex.exp ((t₁ : ℂ) * Complex.I))‖ ≤ d)
+    (hd : d ≤ (Real.sqrt (1 + c ^ 2) - c) / 2)
+    (hDσ : 2 * d + 16 * h ≤ Dv)
+    (h1 : Real.sqrt (1 + c ^ 2) - c + Dv ≤ R - μ)
+    (h2 : Dv - (Real.sqrt (1 + c ^ 2) - c) ≤ κ₀ - δ - μ)
+    (h3 : δ ≤ c - h + (Real.sqrt (1 + c ^ 2) - c) - Dv)
+    (hθ₂ : θ₂ = t₁ + π / 2) :
+    arcMargins κ₀ R δ μ K t₁ t₂ p ∧
+      ‖sphericalArcMap K t₁ (π / 2) p + (Real.sqrt (1 + c ^ 2) - c) •
+          (Complex.I * Complex.exp ((θ₂ : ℂ) * Complex.I))‖ ≤ 2 * d + 16 * h := by
+  have hdevfun := fun θ => arcDeviation_bound hc hK hh hdev hd θ
+  refine ⟨arcMargins_of_dev hc hK (fun θ => le_trans (hdevfun θ) hDσ) h1 h2 h3, ?_⟩
+  rw [sphericalArcMap_eq_arcPoint hθ₂ p]
+  exact hdevfun θ₂
+
 /-- **Uniform margins of the step model near the centered circle.** For
 `c > 0` and `κ₀ > −r*` (with `r* = √(1+c²) − c`; stage-2 re-sign — the
 mixed-sign assembly needs the curvature floor only above `−r*`, not above `0`)
@@ -291,62 +321,32 @@ lemma stepModel_margins {c κ₀ : ℝ} (hc : 0 < c)
   refine ⟨(1 + rs) / 2, m / 8, m / 8, ρ₀, h₀, by linarith, by linarith,
     by linarith, by linarith, hρ₀0, hh₀0, ?_⟩
   intro a b ha hb z₀ hz₀
-  -- the three slack inequalities of `arcMargins_of_dev`, uniform over arcs
+  -- the three slack inequalities of `arcMargins_step`, uniform over arcs
   have h1σ : rs + σ ≤ (1 + rs) / 2 - m / 8 := by linarith
   have h2σ : σ - rs ≤ κ₀ - m / 8 - m / 8 := by linarith
   have h3σ : m / 8 ≤ c - h₀ + rs - σ := by linarith
-  -- arc 0: level `a` from `(0, z₀)`
+  -- the accumulated deviation stays `≤ σ` and `≤ rs/2` across all four arcs
   have hz₀' : ‖z₀ + rs • (Complex.I
-      * Complex.exp (((0 : ℝ) : ℂ) * Complex.I))‖ ≤ ρ₀ := by
-    simpa using hz₀
+      * Complex.exp (((0 : ℝ) : ℂ) * Complex.I))‖ ≤ ρ₀ := by simpa using hz₀
   have hdρ₀ : ρ₀ ≤ rs / 2 := by linarith
-  have hdev₀ := fun θ => arcDeviation_bound hc ha hh₀c hz₀' hdρ₀ θ
   have hD₀σ : 2 * ρ₀ + 16 * h₀ ≤ σ := by linarith
-  have hmarg₀ : arcMargins κ₀ ((1 + rs) / 2) (m / 8) (m / 8) a 0 (π / 2) z₀ :=
-    arcMargins_of_dev hc ha (fun θ => le_trans (hdev₀ θ) hD₀σ) h1σ h2σ h3σ
-  -- arc 1: level `b` from `(π/2, p₁)`
-  have hdev₁ : ‖sphericalArcMap a 0 (π / 2) z₀ + rs • (Complex.I
-      * Complex.exp (((π / 2 : ℝ) : ℂ) * Complex.I))‖ ≤ 2 * ρ₀ + 16 * h₀ := by
-    rw [sphericalArcMap_eq_arcPoint (show (π / 2 : ℝ) = 0 + π / 2 by ring) z₀]
-    exact hdev₀ (π / 2)
   have hd₁ : 2 * ρ₀ + 16 * h₀ ≤ rs / 2 := by linarith
-  have hdev₁' := fun θ => arcDeviation_bound hc hb hh₀c hdev₁ hd₁ θ
   have hD₁σ : 2 * (2 * ρ₀ + 16 * h₀) + 16 * h₀ ≤ σ := by linarith
-  have hmarg₁ : arcMargins κ₀ ((1 + rs) / 2) (m / 8) (m / 8) b (π / 2) π
-      (sphericalArcMap a 0 (π / 2) z₀) :=
-    arcMargins_of_dev hc hb (fun θ => le_trans (hdev₁' θ) hD₁σ) h1σ h2σ h3σ
-  -- arc 2: level `a` from `(π, p₂)`
-  have hdev₂ : ‖sphericalArcMap b (π / 2) (π / 2)
-        (sphericalArcMap a 0 (π / 2) z₀) + rs • (Complex.I
-      * Complex.exp (((π : ℝ) : ℂ) * Complex.I))‖
-      ≤ 2 * (2 * ρ₀ + 16 * h₀) + 16 * h₀ := by
-    rw [sphericalArcMap_eq_arcPoint (show (π : ℝ) = π / 2 + π / 2 by ring)
-      (sphericalArcMap a 0 (π / 2) z₀)]
-    exact hdev₁' π
   have hd₂ : 2 * (2 * ρ₀ + 16 * h₀) + 16 * h₀ ≤ rs / 2 := by linarith
-  have hdev₂' := fun θ => arcDeviation_bound hc ha hh₀c hdev₂ hd₂ θ
-  have hD₂σ : 2 * (2 * (2 * ρ₀ + 16 * h₀) + 16 * h₀) + 16 * h₀ ≤ σ := by
-    linarith
-  have hmarg₂ : arcMargins κ₀ ((1 + rs) / 2) (m / 8) (m / 8) a π (3 * π / 2)
-      (sphericalArcMap b (π / 2) (π / 2) (sphericalArcMap a 0 (π / 2) z₀)) :=
-    arcMargins_of_dev hc ha (fun θ => le_trans (hdev₂' θ) hD₂σ) h1σ h2σ h3σ
-  -- arc 3: level `b` from `(3π/2, p₃)`
-  have hdev₃ : ‖sphericalArcMap a π (π / 2) (sphericalArcMap b (π / 2) (π / 2)
-        (sphericalArcMap a 0 (π / 2) z₀)) + rs • (Complex.I
-      * Complex.exp (((3 * π / 2 : ℝ) : ℂ) * Complex.I))‖
-      ≤ 2 * (2 * (2 * ρ₀ + 16 * h₀) + 16 * h₀) + 16 * h₀ := by
-    rw [sphericalArcMap_eq_arcPoint (show (3 * π / 2 : ℝ) = π + π / 2 by ring)
-      (sphericalArcMap b (π / 2) (π / 2) (sphericalArcMap a 0 (π / 2) z₀))]
-    exact hdev₂' (3 * π / 2)
+  have hD₂σ : 2 * (2 * (2 * ρ₀ + 16 * h₀) + 16 * h₀) + 16 * h₀ ≤ σ := by linarith
   have hd₃ : 2 * (2 * (2 * ρ₀ + 16 * h₀) + 16 * h₀) + 16 * h₀ ≤ rs / 2 := by
     linarith
-  have hdev₃' := fun θ => arcDeviation_bound hc hb hh₀c hdev₃ hd₃ θ
   have hD₃σ : 2 * (2 * (2 * (2 * ρ₀ + 16 * h₀) + 16 * h₀) + 16 * h₀)
       + 16 * h₀ ≤ σ := by linarith
-  have hmarg₃ : arcMargins κ₀ ((1 + rs) / 2) (m / 8) (m / 8) b (3 * π / 2)
-      (2 * π) (sphericalArcMap a π (π / 2) (sphericalArcMap b (π / 2) (π / 2)
-        (sphericalArcMap a 0 (π / 2) z₀))) :=
-    arcMargins_of_dev hc hb (fun θ => le_trans (hdev₃' θ) hD₃σ) h1σ h2σ h3σ
+  -- chain the four quarter arcs, each feeding the next its start deviation
+  obtain ⟨hmarg₀, hdev₁⟩ := arcMargins_step (t₂ := π / 2) (θ₂ := π / 2)
+    hc ha hh₀c hz₀' hdρ₀ hD₀σ h1σ h2σ h3σ (by ring)
+  obtain ⟨hmarg₁, hdev₂⟩ := arcMargins_step (t₂ := π) (θ₂ := π)
+    hc hb hh₀c hdev₁ hd₁ hD₁σ h1σ h2σ h3σ (by ring)
+  obtain ⟨hmarg₂, hdev₃⟩ := arcMargins_step (t₂ := 3 * π / 2) (θ₂ := 3 * π / 2)
+    hc ha hh₀c hdev₂ hd₂ hD₂σ h1σ h2σ h3σ (by ring)
+  obtain ⟨hmarg₃, _⟩ := arcMargins_step (t₂ := 2 * π) (θ₂ := 2 * π)
+    hc hb hh₀c hdev₃ hd₃ hD₃σ h1σ h2σ h3σ (by ring)
   exact ⟨hmarg₀, hmarg₁, hmarg₂, hmarg₃⟩
 
 end Gluck
