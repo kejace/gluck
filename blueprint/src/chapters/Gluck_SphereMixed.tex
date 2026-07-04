@@ -113,11 +113,70 @@ and the capstone \cref{thm:spherical_converse}.
   sanity lemma worth stating.)
 \end{definition}
 
+\begin{lemma}[positivity of the model-circle radius]
+  \label{lem:centered_radius_pos}
+  \lean{Gluck.centeredRadius_pos}
+  For every real $c$ the model-circle radius is positive:
+  $r^\ast(c)=\sqrt{1+c^2}-c>0$. (Project-local restatement: the stage-1
+  \texttt{centeredRadius\_facts} is private to \texttt{Sphere.lean} and
+  carries a positivity hypothesis on $c$ that this version drops.)
+\end{lemma}
+
+\begin{proof}
+  If $c\le0$ this is immediate from $\sqrt{1+c^2}>0$. If $c\ge0$ then
+  $c=\sqrt{c^2}<\sqrt{c^2+1}=\sqrt{1+c^2}$ by strict monotonicity of the
+  square root.
+\end{proof}
+
+\begin{lemma}[positive stage implies mixed stage]
+  \label{lem:mixed_of_sphere_four_vertex}
+  \lean{Gluck.MixedSignSphereFourVertex.of_sphereFourVertex}
+  \uses{def:sphere_four_vertex, def:mixed_sign_sphere_four_vertex,
+        lem:centered_radius_pos}
+  If $\kappa$ satisfies the positive-stage hypothesis
+  \cref{def:sphere_four_vertex}, it satisfies the mixed-sign hypothesis
+  \cref{def:mixed_sign_sphere_four_vertex}. Sanity lemma: the stage-2
+  capstone subsumes the stage-1 statement.
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:centered_radius_pos}
+  The constant branch carries over verbatim. In the non-constant branch the
+  value separation gains the extra $0$ inside the $\max$ from global
+  positivity ($\min(\kappa(p_1),\kappa(p_2))>0$), and the window midpoint
+  $c=\tfrac12\bigl(\max(0,\kappa(q_1),\kappa(q_2))+\min(\kappa(p_1),
+  \kappa(p_2))\bigr)$ lies in the (positive part of the) overlap window; the
+  global lower bound holds since $-r^\ast(c)<0<\kappa(\theta)$ by
+  \cref{lem:centered_radius_pos} and positivity.
+\end{proof}
+
+\begin{lemma}[constant shift of the step curvature]
+  \label{lem:step_curvature_add_const}
+  \lean{Gluck.stepCurvature_add_const}
+  \uses{def:four_arc_step_function}
+  For all levels $a,b$, breakpoints $\theta_1,\dots,\theta_4$, constants $M$
+  and angles $\theta$:
+  \[
+    \texttt{stepCurvature}\,(a+M)\,(b+M)\,\theta_1\,\theta_2\,\theta_3\,
+    \theta_4\,\theta \;=\;
+    \texttt{stepCurvature}\,a\,b\,\theta_1\,\theta_2\,\theta_3\,\theta_4\,
+    \theta + M.
+  \]
+  The single Lean fact behind the constant-shift reduction of
+  \cref{lem:step_L1_reparam_relaxed}.
+\end{lemma}
+
+\begin{proof}
+  The step function takes only the two level values, each shifted by $M$;
+  unfold and check both branches of the case split.
+\end{proof}
+
 \begin{lemma}\leanok
 [$L^1$ step reparametrization without positivity]
   \label{lem:step_L1_reparam_relaxed}
   \lean{Gluck.exists_step_L1_reparam_relaxed}
-  \uses{lem:step_L1_reparam, def:four_arc_step_function}
+  \uses{lem:step_L1_reparam, def:four_arc_step_function,
+        lem:step_curvature_add_const}
   Let $\kappa$ be continuous and $2\pi$-periodic (no positivity), $0<a<b$, and
   $\theta_1<\theta_2<\theta_3<\theta_4<\theta_1+2\pi$ with
   $\kappa(\theta_1,\theta_2,\theta_3,\theta_4)=(a,b,a,b)$. For every
@@ -132,7 +191,7 @@ and the capstone \cref{thm:spherical_converse}.
 \end{lemma}
 
 \begin{proof}
-  \uses{lem:step_L1_reparam}
+  \uses{lem:step_L1_reparam, lem:step_curvature_add_const}
   \leanok
   Constant-shift reduction to the positive-stage lemma; the frozen Euclidean
   plateau engine is applied only to a positive function. Pick
@@ -161,7 +220,8 @@ and the capstone \cref{thm:spherical_converse}.
         lem:step_model_margins, lem:step_error_expansion,
         lem:exists_abab_levels, lem:step_L1_reparam_relaxed,
         thm:existence_of_zero, lem:winding_conj_loop,
-        lem:winding_number_c_perturb, lem:truncated_field_lipschitz_uniform}
+        lem:winding_number_c_perturb, lem:truncated_field_lipschitz_uniform,
+        lem:centered_radius_pos}
   Let $\kappa$ be continuous and $2\pi$-periodic with the non-constant
   mixed-sign four-vertex data of
   \cref{def:mixed_sign_sphere_four_vertex}: four points

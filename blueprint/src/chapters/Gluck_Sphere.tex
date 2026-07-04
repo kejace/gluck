@@ -2016,8 +2016,10 @@ injectivity. The chain below works this out in three finite steps and one assemb
   \label{lem:spherical_trajectory_speed}
   \lean{Gluck.sphericalTrajectory_speed}
   \uses{def:spherical_speed, def:periodic_extension, lem:periodic_extension_periodic,
-        lem:reconstruction_ode, def:is_curvature_function}
-  Let $\kappa$ be a curvature function, $R<1$, $\delta>0$, and let
+        lem:reconstruction_ode}
+  Let $\kappa$ be continuous and $2\pi$-periodic (no positivity — the whole
+  chain is sign-agnostic and is consumed verbatim by the mixed-sign stage 2),
+  $R<1$, $\delta>0$, and let
   $z:[0,2\pi]\to\mathbb C$ be a trajectory of the $(\kappa,R,\delta)$-truncated flow
   (in the hypothesis form of \cref{lem:reconstruction_ode}) that is admissible and
   closed. Write $\tilde z$ for its periodic extension and set
@@ -2095,8 +2097,9 @@ injectivity. The chain below works this out in three finite steps and one assemb
   \uses{lem:spherical_trajectory_speed, lem:spherical_trajectory_eq_reconstruct,
         lem:is_simple_closed_const_add, cor:positive_curvature_implies_simple,
         def:error_vector, lem:reconstruction_ode}
-  In the setting of \cref{lem:spherical_trajectory_speed} (curvature function $\kappa$,
-  $R<1$, $\delta>0$, an admissible closed trajectory $z$ of the truncated flow on
+  In the setting of \cref{lem:spherical_trajectory_speed} (continuous
+  $2\pi$-periodic $\kappa$ — no positivity, $R<1$, $\delta>0$, an admissible
+  closed trajectory $z$ of the truncated flow on
   $[0,2\pi]$), the periodic extension $\tilde z$ is a \emph{simple} closed curve:
   distinct parameters in $[0,2\pi)$ give distinct disk points. (Confinement
   $\|\tilde z\|\le R<1$ already places the curve in the open disk, so this is
