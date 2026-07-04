@@ -95,7 +95,8 @@ private noncomputable def closingLen5 (a b δ : ℝ) (z : ℂ) : ℝ :=
 /-- Cumulative arc-length breakpoint `s_1 = L_1`. -/
 private noncomputable def closingS1 (a b δ : ℝ) (z : ℂ) : ℝ := closingLen1 a b δ z
 /-- Cumulative arc-length breakpoint `s_2 = L_1 + L_2`. -/
-private noncomputable def closingS2 (a b δ : ℝ) (z : ℂ) : ℝ := closingLen1 a b δ z + closingLen2 a b δ z
+private noncomputable def closingS2 (a b δ : ℝ) (z : ℂ) : ℝ :=
+  closingLen1 a b δ z + closingLen2 a b δ z
 /-- Cumulative arc-length breakpoint `s_3 = L_1 + L_2 + L_3`. -/
 private noncomputable def closingS3 (a b δ : ℝ) (z : ℂ) : ℝ :=
   closingLen1 a b δ z + closingLen2 a b δ z + closingLen3 a b δ z
@@ -106,13 +107,17 @@ private noncomputable def closingS4 (a b δ : ℝ) (z : ℂ) : ℝ :=
 /-- Arc-length midpoint of interval 1, `C_1 = L_1/2`. -/
 private noncomputable def closingMid1 (a b δ : ℝ) (z : ℂ) : ℝ := closingLen1 a b δ z / 2
 /-- Arc-length midpoint of interval 2, `C_2 = s_1 + L_2/2`. -/
-private noncomputable def closingMid2 (a b δ : ℝ) (z : ℂ) : ℝ := closingS1 a b δ z + closingLen2 a b δ z / 2
+private noncomputable def closingMid2 (a b δ : ℝ) (z : ℂ) : ℝ :=
+  closingS1 a b δ z + closingLen2 a b δ z / 2
 /-- Arc-length midpoint of interval 3, `C_3 = s_2 + L_3/2`. -/
-private noncomputable def closingMid3 (a b δ : ℝ) (z : ℂ) : ℝ := closingS2 a b δ z + closingLen3 a b δ z / 2
+private noncomputable def closingMid3 (a b δ : ℝ) (z : ℂ) : ℝ :=
+  closingS2 a b δ z + closingLen3 a b δ z / 2
 /-- Arc-length midpoint of interval 4, `C_4 = s_3 + L_4/2`. -/
-private noncomputable def closingMid4 (a b δ : ℝ) (z : ℂ) : ℝ := closingS3 a b δ z + closingLen4 a b δ z / 2
+private noncomputable def closingMid4 (a b δ : ℝ) (z : ℂ) : ℝ :=
+  closingS3 a b δ z + closingLen4 a b δ z / 2
 /-- Arc-length midpoint of interval 5, `C_5 = s_4 + L_5/2`. -/
-private noncomputable def closingMid5 (a b δ : ℝ) (z : ℂ) : ℝ := closingS4 a b δ z + closingLen5 a b δ z / 2
+private noncomputable def closingMid5 (a b δ : ℝ) (z : ℂ) : ℝ :=
+  closingS4 a b δ z + closingLen5 a b δ z / 2
 
 /-- The uniform ramp half-width `η = π·a/(20(a+b))`, chosen below the compact-disk
 lower bound on the interval half-lengths `L_j/2` (so the trapezoidal pulses fit
@@ -382,7 +387,8 @@ private lemma hasDerivAt_closingFamily (a b δ : ℝ) (z : ℂ) (s : ℝ) :
   rw [closingFamily_eq]; exact hasDerivAt_integralReparam (continuous_closingDensity_s a b δ z) 0 s
 
 /-- **`g_z` is continuous** in `s` (for fixed `z`). -/
-private lemma continuous_closingFamily (a b δ : ℝ) (z : ℂ) : Continuous (closingFamily a b δ z) := by
+private lemma continuous_closingFamily (a b δ : ℝ) (z : ℂ) :
+    Continuous (closingFamily a b δ z) := by
   rw [closingFamily_eq]; exact continuous_integralReparam (continuous_closingDensity_s a b δ z) 0
 
 /-- **Joint continuity of `(z, s) ↦ g_z(s)`** (`lem:closing_family_props`).
@@ -484,7 +490,7 @@ if some `2π`-translate of `y` lands in `[L/2, 2π - L/2]` then
 `arccos (cos y) ≥ L/2`.  Generalizes `half_le_arccos_cos` (which assumes `L < π`)
 to the node-placing family, where `L_j` can exceed `π` (up to `5π/3`).  The proof
 is the `w ≤ π` / `w > π` case split of `Real.arccos_cos`. -/
-private lemma half_le_arccos_cos_wide {L y : ℝ} (hL0 : 0 < L) (hLπ : L ≤ 2 * π) (n : ℤ)
+private lemma half_le_arccos_cos_wide {L y : ℝ} (hL0 : 0 < L) (_hLπ : L ≤ 2 * π) (n : ℤ)
     (h1 : L / 2 ≤ y + n * (2 * π)) (h2 : y + n * (2 * π) ≤ 2 * π - L / 2) :
     L / 2 ≤ Real.arccos (Real.cos y) := by
   have hcos : Real.cos y = Real.cos (y + n * (2 * π)) :=
@@ -659,9 +665,11 @@ private lemma closingLen_bounds (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ :
   obtain ⟨hx1, hx2⟩ := abs_le.mp hx
   obtain ⟨hy1, hy2⟩ := abs_le.mp hy
   have hdx2 : δ * z.re ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.re)]
-  have hdx1 : -(π / 8) ≤ δ * z.re := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.re + 1)]
+  have hdx1 : -(π / 8) ≤ δ * z.re := by
+    nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.re + 1)]
   have hdy2 : δ * z.im ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.im)]
-  have hdy1 : -(π / 8) ≤ δ * z.im := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.im + 1)]
+  have hdy1 : -(π / 8) ≤ δ * z.im := by
+    nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.im + 1)]
   have hPp : 3 * π / 4 ≤ π + δ * (z.re - z.im) := by
     nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.re - z.im + 2)]
   have hP : π + δ * (z.re - z.im) ≤ 5 * π / 4 := by
@@ -685,14 +693,16 @@ private lemma closingLen_bounds (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ :
     rw [hR]; nlinarith [mul_le_mul_of_nonneg_left hP hb.le, mul_le_mul_of_nonneg_left hQ ha.le]
   have hlamA_lb : 3 / 8 ≤ closingLambda a b δ z * a := by
     rw [hvalA, le_div_iff₀ (by positivity)]
-    nlinarith [mul_le_mul_of_nonneg_left hPp hb.le, mul_le_mul_of_nonneg_left hQp ha.le, mul_pos ha hb]
+    nlinarith [mul_le_mul_of_nonneg_left hPp hb.le, mul_le_mul_of_nonneg_left hQp ha.le,
+      mul_pos ha hb]
   have hlamB_ub : closingLambda a b δ z * b ≤ 5 / 8 * ((a + b) / a) := by
     rw [hvalB, div_le_iff₀ (by positivity)]
     have hR : 5 / 8 * ((a + b) / a) * (2 * π * a) = 5 * π / 4 * (a + b) := by field_simp; ring
     rw [hR]; nlinarith [mul_le_mul_of_nonneg_left hP hb.le, mul_le_mul_of_nonneg_left hQ ha.le]
   have hlamB_lb : 3 / 8 ≤ closingLambda a b δ z * b := by
     rw [hvalB, le_div_iff₀ (by positivity)]
-    nlinarith [mul_le_mul_of_nonneg_left hPp hb.le, mul_le_mul_of_nonneg_left hQp ha.le, mul_pos ha hb]
+    nlinarith [mul_le_mul_of_nonneg_left hPp hb.le, mul_le_mul_of_nonneg_left hQp ha.le,
+      mul_pos ha hb]
   have hlamA_pos : 0 < closingLambda a b δ z * a := mul_pos (closingLambda_pos a b δ ha hb z) ha
   have hlamB_pos : 0 < closingLambda a b δ z * b := mul_pos (closingLambda_pos a b δ ha hb z) hb
   -- The two `2·ramp·ub` reductions.
@@ -916,22 +926,23 @@ private lemma closingDensity_arcs (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ
     have s2 : (∫ θ in (0 : ℝ)..(closingS1 a b δ z),
         clampTent (closingRamp a b) (closingLen2 a b δ z) (closingMid2 a b δ z) θ) = 0 :=
       clampTent_integral_eq_zero_wide hramp hL2p h2L (by simp only [closingS1]; linarith) 1
-        (by simp only [closingMid2, closingS1]; linarith) (by simp only [closingMid2, closingS1]; linarith)
+        (by simp only [closingMid2, closingS1]; linarith)
+        (by simp only [closingMid2, closingS1]; linarith)
     have s3 : (∫ θ in (0 : ℝ)..(closingS1 a b δ z),
         clampTent (closingRamp a b) (closingLen3 a b δ z) (closingMid3 a b δ z) θ) = 0 :=
       clampTent_integral_eq_zero_wide hramp hL3p h3L (by simp only [closingS1]; linarith) 1
-        (by simp only [closingMid3, closingS2, closingS1]; linarith)
+        (by simp only [closingMid3, closingS2]; linarith)
         (by simp only [closingMid3, closingS2, closingS1]; linarith)
     have s4 : (∫ θ in (0 : ℝ)..(closingS1 a b δ z),
         clampTent (closingRamp a b) (closingLen4 a b δ z) (closingMid4 a b δ z) θ) = 0 :=
       clampTent_integral_eq_zero_wide hramp hL4p h4L (by simp only [closingS1]; linarith) 1
-        (by simp only [closingMid4, closingS3, closingS2, closingS1]; linarith)
-        (by simp only [closingMid4, closingS3, closingS2, closingS1]; linarith)
+        (by simp only [closingMid4, closingS3]; linarith)
+        (by simp only [closingMid4, closingS3, closingS1]; linarith)
     have s5 : (∫ θ in (0 : ℝ)..(closingS1 a b δ z),
         clampTent (closingRamp a b) (closingLen5 a b δ z) (closingMid5 a b δ z) θ) = 0 :=
       clampTent_integral_eq_zero_wide hramp hL5p h5L (by simp only [closingS1]; linarith) 1
-        (by simp only [closingMid5, closingS4, closingS3, closingS2, closingS1]; linarith)
-        (by simp only [closingMid5, closingS4, closingS3, closingS2, closingS1]; linarith)
+        (by simp only [closingMid5, closingS4]; linarith)
+        (by simp only [closingMid5, closingS4, closingS1]; linarith)
     rw [s1, s2, s3, s4, s5, closingHeight_mul a b δ ha hb (π / 4) (closingLen1 a b δ z) h1η,
         closingS1]
     ring
@@ -946,24 +957,28 @@ private lemma closingDensity_arcs (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ
     rw [hlo, hhi] at s2
     have s1 : (∫ θ in (closingS1 a b δ z)..(closingS2 a b δ z),
         clampTent (closingRamp a b) (closingLen1 a b δ z) (closingMid1 a b δ z) θ) = 0 :=
-      clampTent_integral_eq_zero_wide hramp hL1p h1L (by simp only [closingS2, closingS1]; linarith) 0
+      clampTent_integral_eq_zero_wide hramp hL1p h1L
+        (by simp only [closingS2, closingS1]; linarith) 0
         (by simp only [closingMid1, closingS1]; linarith)
-        (by simp only [closingMid1, closingS2, closingS1]; linarith)
+        (by simp only [closingMid1, closingS2]; linarith)
     have s3 : (∫ θ in (closingS1 a b δ z)..(closingS2 a b δ z),
         clampTent (closingRamp a b) (closingLen3 a b δ z) (closingMid3 a b δ z) θ) = 0 :=
-      clampTent_integral_eq_zero_wide hramp hL3p h3L (by simp only [closingS2, closingS1]; linarith) 1
+      clampTent_integral_eq_zero_wide hramp hL3p h3L
+        (by simp only [closingS2, closingS1]; linarith) 1
         (by simp only [closingMid3, closingS2, closingS1]; linarith)
-        (by simp only [closingMid3, closingS2, closingS1]; linarith)
+        (by simp only [closingMid3, closingS2]; linarith)
     have s4 : (∫ θ in (closingS1 a b δ z)..(closingS2 a b δ z),
         clampTent (closingRamp a b) (closingLen4 a b δ z) (closingMid4 a b δ z) θ) = 0 :=
-      clampTent_integral_eq_zero_wide hramp hL4p h4L (by simp only [closingS2, closingS1]; linarith) 1
-        (by simp only [closingMid4, closingS3, closingS2, closingS1]; linarith)
-        (by simp only [closingMid4, closingS3, closingS2, closingS1]; linarith)
+      clampTent_integral_eq_zero_wide hramp hL4p h4L
+        (by simp only [closingS2, closingS1]; linarith) 1
+        (by simp only [closingMid4, closingS3, closingS1]; linarith)
+        (by simp only [closingMid4, closingS3, closingS2]; linarith)
     have s5 : (∫ θ in (closingS1 a b δ z)..(closingS2 a b δ z),
         clampTent (closingRamp a b) (closingLen5 a b δ z) (closingMid5 a b δ z) θ) = 0 :=
-      clampTent_integral_eq_zero_wide hramp hL5p h5L (by simp only [closingS2, closingS1]; linarith) 1
-        (by simp only [closingMid5, closingS4, closingS3, closingS2, closingS1]; linarith)
-        (by simp only [closingMid5, closingS4, closingS3, closingS2, closingS1]; linarith)
+      clampTent_integral_eq_zero_wide hramp hL5p h5L
+        (by simp only [closingS2, closingS1]; linarith) 1
+        (by simp only [closingMid5, closingS4, closingS1]; linarith)
+        (by simp only [closingMid5, closingS4, closingS2]; linarith)
     rw [s1, s2, s3, s4, s5, closingHeight_mul a b δ ha hb (π / 2) (closingLen2 a b δ z) h2η]
     have hL : closingS2 a b δ z - closingS1 a b δ z = closingLen2 a b δ z := by
       simp only [closingS2, closingS1]; ring
@@ -979,24 +994,28 @@ private lemma closingDensity_arcs (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ
     rw [hlo, hhi] at s3
     have s1 : (∫ θ in (closingS2 a b δ z)..(closingS3 a b δ z),
         clampTent (closingRamp a b) (closingLen1 a b δ z) (closingMid1 a b δ z) θ) = 0 :=
-      clampTent_integral_eq_zero_wide hramp hL1p h1L (by simp only [closingS3, closingS2]; linarith) 0
-        (by simp only [closingMid1, closingS2, closingS1]; linarith)
-        (by simp only [closingMid1, closingS3, closingS2, closingS1]; linarith)
+      clampTent_integral_eq_zero_wide hramp hL1p h1L
+        (by simp only [closingS3, closingS2]; linarith) 0
+        (by simp only [closingMid1, closingS2]; linarith)
+        (by simp only [closingMid1, closingS3]; linarith)
     have s2 : (∫ θ in (closingS2 a b δ z)..(closingS3 a b δ z),
         clampTent (closingRamp a b) (closingLen2 a b δ z) (closingMid2 a b δ z) θ) = 0 :=
-      clampTent_integral_eq_zero_wide hramp hL2p h2L (by simp only [closingS3, closingS2]; linarith) 0
+      clampTent_integral_eq_zero_wide hramp hL2p h2L
+        (by simp only [closingS3, closingS2]; linarith) 0
         (by simp only [closingMid2, closingS2, closingS1]; linarith)
-        (by simp only [closingMid2, closingS3, closingS2, closingS1]; linarith)
+        (by simp only [closingMid2, closingS3, closingS1]; linarith)
     have s4 : (∫ θ in (closingS2 a b δ z)..(closingS3 a b δ z),
         clampTent (closingRamp a b) (closingLen4 a b δ z) (closingMid4 a b δ z) θ) = 0 :=
-      clampTent_integral_eq_zero_wide hramp hL4p h4L (by simp only [closingS3, closingS2]; linarith) 1
+      clampTent_integral_eq_zero_wide hramp hL4p h4L
+        (by simp only [closingS3, closingS2]; linarith) 1
         (by simp only [closingMid4, closingS3, closingS2]; linarith)
-        (by simp only [closingMid4, closingS3, closingS2]; linarith)
+        (by simp only [closingMid4, closingS3]; linarith)
     have s5 : (∫ θ in (closingS2 a b δ z)..(closingS3 a b δ z),
         clampTent (closingRamp a b) (closingLen5 a b δ z) (closingMid5 a b δ z) θ) = 0 :=
-      clampTent_integral_eq_zero_wide hramp hL5p h5L (by simp only [closingS3, closingS2]; linarith) 1
-        (by simp only [closingMid5, closingS4, closingS3, closingS2]; linarith)
-        (by simp only [closingMid5, closingS4, closingS3, closingS2]; linarith)
+      clampTent_integral_eq_zero_wide hramp hL5p h5L
+        (by simp only [closingS3, closingS2]; linarith) 1
+        (by simp only [closingMid5, closingS4, closingS2]; linarith)
+        (by simp only [closingMid5, closingS4, closingS3]; linarith)
     rw [s1, s2, s3, s4, s5, closingHeight_mul a b δ ha hb (π / 2) (closingLen3 a b δ z) h3η]
     have hL : closingS3 a b δ z - closingS2 a b δ z = closingLen3 a b δ z := by
       simp only [closingS3, closingS2]; ring
@@ -1012,24 +1031,28 @@ private lemma closingDensity_arcs (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ
     rw [hlo, hhi] at s4
     have s1 : (∫ θ in (closingS3 a b δ z)..(closingS4 a b δ z),
         clampTent (closingRamp a b) (closingLen1 a b δ z) (closingMid1 a b δ z) θ) = 0 :=
-      clampTent_integral_eq_zero_wide hramp hL1p h1L (by simp only [closingS4, closingS3]; linarith) 0
-        (by simp only [closingMid1, closingS3, closingS2, closingS1]; linarith)
-        (by simp only [closingMid1, closingS4, closingS3, closingS2, closingS1]; linarith)
+      clampTent_integral_eq_zero_wide hramp hL1p h1L
+        (by simp only [closingS4, closingS3]; linarith) 0
+        (by simp only [closingMid1, closingS3]; linarith)
+        (by simp only [closingMid1, closingS4]; linarith)
     have s2 : (∫ θ in (closingS3 a b δ z)..(closingS4 a b δ z),
         clampTent (closingRamp a b) (closingLen2 a b δ z) (closingMid2 a b δ z) θ) = 0 :=
-      clampTent_integral_eq_zero_wide hramp hL2p h2L (by simp only [closingS4, closingS3]; linarith) 0
-        (by simp only [closingMid2, closingS3, closingS2, closingS1]; linarith)
-        (by simp only [closingMid2, closingS4, closingS3, closingS2, closingS1]; linarith)
+      clampTent_integral_eq_zero_wide hramp hL2p h2L
+        (by simp only [closingS4, closingS3]; linarith) 0
+        (by simp only [closingMid2, closingS3, closingS1]; linarith)
+        (by simp only [closingMid2, closingS4, closingS1]; linarith)
     have s3 : (∫ θ in (closingS3 a b δ z)..(closingS4 a b δ z),
         clampTent (closingRamp a b) (closingLen3 a b δ z) (closingMid3 a b δ z) θ) = 0 :=
-      clampTent_integral_eq_zero_wide hramp hL3p h3L (by simp only [closingS4, closingS3]; linarith) 0
+      clampTent_integral_eq_zero_wide hramp hL3p h3L
+        (by simp only [closingS4, closingS3]; linarith) 0
         (by simp only [closingMid3, closingS3, closingS2]; linarith)
-        (by simp only [closingMid3, closingS4, closingS3, closingS2]; linarith)
+        (by simp only [closingMid3, closingS4, closingS2]; linarith)
     have s5 : (∫ θ in (closingS3 a b δ z)..(closingS4 a b δ z),
         clampTent (closingRamp a b) (closingLen5 a b δ z) (closingMid5 a b δ z) θ) = 0 :=
-      clampTent_integral_eq_zero_wide hramp hL5p h5L (by simp only [closingS4, closingS3]; linarith) 1
+      clampTent_integral_eq_zero_wide hramp hL5p h5L
+        (by simp only [closingS4, closingS3]; linarith) 1
         (by simp only [closingMid5, closingS4, closingS3]; linarith)
-        (by simp only [closingMid5, closingS4, closingS3]; linarith)
+        (by simp only [closingMid5, closingS4]; linarith)
     rw [s1, s2, s3, s4, s5, closingHeight_mul a b δ ha hb (π / 2) (closingLen4 a b δ z) h4η]
     have hL : closingS4 a b δ z - closingS3 a b δ z = closingLen4 a b δ z := by
       simp only [closingS4, closingS3]; ring
@@ -1046,23 +1069,23 @@ private lemma closingDensity_arcs (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ
     have s1 : (∫ θ in (closingS4 a b δ z)..(2 * π),
         clampTent (closingRamp a b) (closingLen1 a b δ z) (closingMid1 a b δ z) θ) = 0 :=
       clampTent_integral_eq_zero_wide hramp hL1p h1L (by simp only [closingS4]; linarith) 0
-        (by simp only [closingMid1, closingS4, closingS3, closingS2, closingS1]; linarith)
-        (by simp only [closingMid1, closingS4, closingS3, closingS2, closingS1]; linarith)
+        (by simp only [closingMid1, closingS4]; linarith)
+        (by simp only [closingMid1]; linarith)
     have s2 : (∫ θ in (closingS4 a b δ z)..(2 * π),
         clampTent (closingRamp a b) (closingLen2 a b δ z) (closingMid2 a b δ z) θ) = 0 :=
       clampTent_integral_eq_zero_wide hramp hL2p h2L (by simp only [closingS4]; linarith) 0
-        (by simp only [closingMid2, closingS4, closingS3, closingS2, closingS1]; linarith)
-        (by simp only [closingMid2, closingS4, closingS3, closingS2, closingS1]; linarith)
+        (by simp only [closingMid2, closingS4, closingS1]; linarith)
+        (by simp only [closingMid2, closingS1]; linarith)
     have s3 : (∫ θ in (closingS4 a b δ z)..(2 * π),
         clampTent (closingRamp a b) (closingLen3 a b δ z) (closingMid3 a b δ z) θ) = 0 :=
       clampTent_integral_eq_zero_wide hramp hL3p h3L (by simp only [closingS4]; linarith) 0
-        (by simp only [closingMid3, closingS4, closingS3, closingS2]; linarith)
-        (by simp only [closingMid3, closingS4, closingS3, closingS2]; linarith)
+        (by simp only [closingMid3, closingS4, closingS2]; linarith)
+        (by simp only [closingMid3, closingS2]; linarith)
     have s4 : (∫ θ in (closingS4 a b δ z)..(2 * π),
         clampTent (closingRamp a b) (closingLen4 a b δ z) (closingMid4 a b δ z) θ) = 0 :=
       clampTent_integral_eq_zero_wide hramp hL4p h4L (by simp only [closingS4]; linarith) 0
         (by simp only [closingMid4, closingS4, closingS3]; linarith)
-        (by simp only [closingMid4, closingS4, closingS3]; linarith)
+        (by simp only [closingMid4, closingS3]; linarith)
     rw [s1, s2, s3, s4, s5, closingHeight_mul a b δ ha hb (π / 4) (closingLen5 a b δ z) h5η]
     have hL : 2 * π - closingS4 a b δ z = closingLen5 a b δ z := by
       simp only [closingS4]; linarith
@@ -1115,13 +1138,15 @@ private lemma cleanBicircle_arcs (a b : ℝ) :
     (∀ θ ∈ Set.Ioo (7 * π / 4) (2 * π), cleanBicircle a b θ = a) := by
   have hpi : 0 < π := Real.pi_pos
   -- value `a` (f = 0): `θ` avoids every translate of the two base arcs
-  have valA : ∀ θ : ℝ, θ ∉ (⋃ k : ℤ, Set.Ioo (π / 4 + 2 * π * (k : ℝ)) (3 * π / 4 + 2 * π * (k : ℝ)) ∪
+  have valA : ∀ θ : ℝ, θ ∉ (⋃ k : ℤ, Set.Ioo (π / 4 + 2 * π * (k : ℝ))
+        (3 * π / 4 + 2 * π * (k : ℝ)) ∪
         Set.Ioo (5 * π / 4 + 2 * π * (k : ℝ)) (7 * π / 4 + 2 * π * (k : ℝ))) →
       cleanBicircle a b θ = a := by
     intro θ hθ
     rw [cleanBicircle, dahlbergF, Set.indicator_of_notMem hθ]; ring
   -- value `b` (f = 1) via the `k = 0` witness
-  have valB : ∀ θ : ℝ, θ ∈ (⋃ k : ℤ, Set.Ioo (π / 4 + 2 * π * (k : ℝ)) (3 * π / 4 + 2 * π * (k : ℝ)) ∪
+  have valB : ∀ θ : ℝ, θ ∈ (⋃ k : ℤ, Set.Ioo (π / 4 + 2 * π * (k : ℝ))
+        (3 * π / 4 + 2 * π * (k : ℝ)) ∪
         Set.Ioo (5 * π / 4 + 2 * π * (k : ℝ)) (7 * π / 4 + 2 * π * (k : ℝ))) →
       cleanBicircle a b θ = b := by
     intro θ hθ
@@ -1269,7 +1294,8 @@ private lemma cleanTotalCurvature_eq (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (
       = (2 * π - closingS4 a b δ z) * a := by
     rw [intervalIntegral.integral_congr_ae ae5, intervalIntegral.integral_const, smul_eq_mul]
   -- split and assemble
-  rw [← intervalIntegral.integral_add_adjacent_intervals ii1 (((ii2.trans ii3).trans ii4).trans ii5),
+  rw [← intervalIntegral.integral_add_adjacent_intervals ii1
+        (((ii2.trans ii3).trans ii4).trans ii5),
       ← intervalIntegral.integral_add_adjacent_intervals ii2 ((ii3.trans ii4).trans ii5),
       ← intervalIntegral.integral_add_adjacent_intervals ii3 (ii4.trans ii5),
       ← intervalIntegral.integral_add_adjacent_intervals ii4 ii5,
@@ -1280,8 +1306,7 @@ private lemma cleanTotalCurvature_eq (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (
   have hraw_ne : closingLambdaRaw a b δ z ≠ 0 := by
     rw [← hlam]; exact (closingLambda_pos a b δ ha hb z).ne'
   simp only [closingS1, closingS2, closingS3, closingS4, closingLen1, closingLen2, closingLen3,
-    closingLen4, closingLen5, closingDelta1, closingDelta2, closingDelta3, closingDelta4,
-    closingDelta5]
+    closingLen4, closingDelta1, closingDelta2, closingDelta3, closingDelta4]
   rw [hlam, eq_comm, ← sub_eq_zero]
   field_simp
   simp only [closingLambdaRaw]
@@ -1491,9 +1516,11 @@ private lemma arcLengthError_clean_eq_errorMap (a b δ : ℝ) (ha : 0 < a) (hab 
   obtain ⟨hx1, hx2⟩ := abs_le.mp hx
   obtain ⟨hy1, hy2⟩ := abs_le.mp hy
   have hdx2 : δ * z.re ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.re)]
-  have hdx1 : -(π / 8) ≤ δ * z.re := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.re + 1)]
+  have hdx1 : -(π / 8) ≤ δ * z.re := by
+    nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.re + 1)]
   have hdy2 : δ * z.im ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - z.im)]
-  have hdy1 : -(π / 8) ≤ δ * z.im := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.im + 1)]
+  have hdy1 : -(π / 8) ≤ δ * z.im := by
+    nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ z.im + 1)]
   -- arc orderings
   have h01 : (0 : ℝ) < closingS1 a b δ z := by simp only [closingS1]; exact hL1p
   have h12 : closingS1 a b δ z < closingS2 a b δ z := by simp only [closingS2, closingS1]; linarith
@@ -1510,7 +1537,8 @@ private lemma arcLengthError_clean_eq_errorMap (a b δ : ℝ) (ha : 0 < a) (hab 
   have hKfun : arcLengthNorm (cleanBicircle a b) a b δ z
       = fun s => closingLambda a b δ z * cleanBicircle a b (closingFamily a b δ z s) := funext hKeq
   -- global interval-integrability of `K`
-  have hcgz_per : Function.Periodic (fun t => cleanBicircle a b (closingFamily a b δ z t)) (2 * π) := by
+  have hcgz_per :
+      Function.Periodic (fun t => cleanBicircle a b (closingFamily a b δ z t)) (2 * π) := by
     intro s
     simp only
     rw [closingFamily_add_two_pi a b δ ha hab hδ hδ' hz s, cleanBicircle_periodic]
@@ -1535,19 +1563,24 @@ private lemma arcLengthError_clean_eq_errorMap (a b δ : ℝ) (ha : 0 < a) (hab 
   -- `K` constant `λκ̂_j` on each open arc
   have hKval1 : ∀ s ∈ Set.Ioo (0 : ℝ) (closingS1 a b δ z),
       arcLengthNorm (cleanBicircle a b) a b δ z s = closingLambda a b δ z * a := by
-    intro s hs; rw [hKeq]; congr 1; exact cv1 _ (by rw [← hg0, ← hg1]; exact ⟨hmono hs.1, hmono hs.2⟩)
+    intro s hs; rw [hKeq]; congr 1;
+    exact cv1 _ (by rw [← hg0, ← hg1]; exact ⟨hmono hs.1, hmono hs.2⟩)
   have hKval2 : ∀ s ∈ Set.Ioo (closingS1 a b δ z) (closingS2 a b δ z),
       arcLengthNorm (cleanBicircle a b) a b δ z s = closingLambda a b δ z * b := by
-    intro s hs; rw [hKeq]; congr 1; exact cv2 _ (by rw [← hg1, ← hg2]; exact ⟨hmono hs.1, hmono hs.2⟩)
+    intro s hs; rw [hKeq]; congr 1;
+    exact cv2 _ (by rw [← hg1, ← hg2]; exact ⟨hmono hs.1, hmono hs.2⟩)
   have hKval3 : ∀ s ∈ Set.Ioo (closingS2 a b δ z) (closingS3 a b δ z),
       arcLengthNorm (cleanBicircle a b) a b δ z s = closingLambda a b δ z * a := by
-    intro s hs; rw [hKeq]; congr 1; exact cv3 _ (by rw [← hg2, ← hg3]; exact ⟨hmono hs.1, hmono hs.2⟩)
+    intro s hs; rw [hKeq]; congr 1;
+    exact cv3 _ (by rw [← hg2, ← hg3]; exact ⟨hmono hs.1, hmono hs.2⟩)
   have hKval4 : ∀ s ∈ Set.Ioo (closingS3 a b δ z) (closingS4 a b δ z),
       arcLengthNorm (cleanBicircle a b) a b δ z s = closingLambda a b δ z * b := by
-    intro s hs; rw [hKeq]; congr 1; exact cv4 _ (by rw [← hg3, ← hg4]; exact ⟨hmono hs.1, hmono hs.2⟩)
+    intro s hs; rw [hKeq]; congr 1;
+    exact cv4 _ (by rw [← hg3, ← hg4]; exact ⟨hmono hs.1, hmono hs.2⟩)
   have hKval5 : ∀ s ∈ Set.Ioo (closingS4 a b δ z) (2 * π),
       arcLengthNorm (cleanBicircle a b) a b δ z s = closingLambda a b δ z * a := by
-    intro s hs; rw [hKeq]; congr 1; exact cv5 _ (by rw [← hg4, ← hg5]; exact ⟨hmono hs.1, hmono hs.2⟩)
+    intro s hs; rw [hKeq]; congr 1;
+    exact cv5 _ (by rw [← hg4, ← hg5]; exact ⟨hmono hs.1, hmono hs.2⟩)
   -- boundary angle values
   have hα0 : dahlbergAngle (arcLengthNorm (cleanBicircle a b) a b δ z) 0 = 0 := by
     simp [dahlbergAngle]
@@ -1564,7 +1597,8 @@ private lemma arcLengthError_clean_eq_errorMap (a b δ : ℝ) (ha : 0 < a) (hab 
     Complex.continuous_exp.comp ((Complex.continuous_ofReal.comp hcontA).mul continuous_const)
   have eii : ∀ p q, IntervalIntegrable
       (fun s => Complex.exp
-        ((dahlbergAngle (arcLengthNorm (cleanBicircle a b) a b δ z) s : ℂ) * Complex.I)) volume p q :=
+        ((dahlbergAngle (arcLengthNorm (cleanBicircle a b) a b δ z) s : ℂ) * Complex.I))
+        volume p q :=
     fun p q => hcontE.intervalIntegrable p q
   -- split `F` into the five arcs and evaluate
   rw [arcLengthErrorMap, dahlbergCurve,
@@ -1572,14 +1606,18 @@ private lemma arcLengthError_clean_eq_errorMap (a b δ : ℝ) (ha : 0 < a) (hab 
         ((((eii (closingS1 a b δ z) (closingS2 a b δ z)).trans
           (eii (closingS2 a b δ z) (closingS3 a b δ z))).trans
           (eii (closingS3 a b δ z) (closingS4 a b δ z))).trans (eii (closingS4 a b δ z) (2 * π))),
-      ← intervalIntegral.integral_add_adjacent_intervals (eii (closingS1 a b δ z) (closingS2 a b δ z))
+      ← intervalIntegral.integral_add_adjacent_intervals
+        (eii (closingS1 a b δ z) (closingS2 a b δ z))
         (((eii (closingS2 a b δ z) (closingS3 a b δ z)).trans
           (eii (closingS3 a b δ z) (closingS4 a b δ z))).trans (eii (closingS4 a b δ z) (2 * π))),
-      ← intervalIntegral.integral_add_adjacent_intervals (eii (closingS2 a b δ z) (closingS3 a b δ z))
+      ← intervalIntegral.integral_add_adjacent_intervals
+        (eii (closingS2 a b δ z) (closingS3 a b δ z))
         ((eii (closingS3 a b δ z) (closingS4 a b δ z)).trans (eii (closingS4 a b δ z) (2 * π))),
-      ← intervalIntegral.integral_add_adjacent_intervals (eii (closingS3 a b δ z) (closingS4 a b δ z))
+      ← intervalIntegral.integral_add_adjacent_intervals
+        (eii (closingS3 a b δ z) (closingS4 a b δ z))
         (eii (closingS4 a b δ z) (2 * π)),
-      arcLengthArcIntegral _ (closingLambda a b δ z * a) 0 (closingS1 a b δ z) h01.le hKii hma hKval1,
+      arcLengthArcIntegral _ (closingLambda a b δ z * a) 0 (closingS1 a b δ z)
+        h01.le hKii hma hKval1,
       arcLengthArcIntegral _ (closingLambda a b δ z * b) (closingS1 a b δ z) (closingS2 a b δ z)
         h12.le hKii hmb hKval2,
       arcLengthArcIntegral _ (closingLambda a b δ z * a) (closingS2 a b δ z) (closingS3 a b δ z)
@@ -1776,7 +1814,7 @@ private lemma measurable_cleanBicircle (a b : ℝ) : Measurable (cleanBicircle a
 /-- **Interval-integrability of `cleanBicircle ∘ g_z`** on any `[p,q]`: the
 composition is measurable (continuous `g_z`) and bounded in `[a,b]`. -/
 private lemma intervalIntegrable_cleanBicircle_comp (a b δ : ℝ) (ha : 0 < a) (hab : a < b)
-    (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {z : ℂ} (hz : ‖z‖ ≤ 1) (p q : ℝ) :
+    (_hδ : 0 < δ) (_hδ' : δ ≤ π / 8) {z : ℂ} (_hz : ‖z‖ ≤ 1) (p q : ℝ) :
     IntervalIntegrable (fun t => cleanBicircle a b (closingFamily a b δ z t)) volume p q := by
   have hb : 0 < b := lt_trans ha hab
   have hmeas : Measurable (fun t => cleanBicircle a b (closingFamily a b δ z t)) :=
@@ -2055,8 +2093,10 @@ private lemma angle_dist_le {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a) (hab :
         = fun u => cleanBicircle a b (closingFamily a b δ z u)
             + e (closingFamily a b δ z u) := by funext u; exact hdecomp _
     rw [heq]; exact (hclean_all p q).add (he_comp_all p q)
-  have hclean_per : Function.Periodic (fun u => cleanBicircle a b (closingFamily a b δ z u)) (2 * π) :=
-    comp_closingFamily_periodic (cleanBicircle a b) a b δ ha hab hδ hδ' hz (cleanBicircle_periodic a b)
+  have hclean_per :
+      Function.Periodic (fun u => cleanBicircle a b (closingFamily a b δ z u)) (2 * π) :=
+    comp_closingFamily_periodic (cleanBicircle a b) a b δ ha hab hδ hδ' hz
+      (cleanBicircle_periodic a b)
   have hkη_per : Function.Periodic (fun u => κ (η (closingFamily a b δ z u))) (2 * π) := by
     refine comp_closingFamily_periodic (fun t => κ (η t)) a b δ ha hab hδ hδ' hz ?_
     intro t
@@ -2256,10 +2296,10 @@ private lemma cleanError_winds_boundary (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b)
   have hexp1 : wf 1 = 1 := by
     simp only [hwfdef, Set.Icc.coe_one, mul_one, Circle.exp_two_pi, Circle.coe_one]
   have hloopγ : γE 0 = γE 1 := by
-    show errorMap a b δ (wf 0) = errorMap a b δ (wf 1)
+    change errorMap a b δ (wf 0) = errorMap a b δ (wf 1)
     rw [hexp0, hexp1]
   have hloopc : cloop 0 = cloop 1 := by
-    show 1 / closingLambda a b δ (wf 0) = 1 / closingLambda a b δ (wf 1)
+    change 1 / closingLambda a b δ (wf 0) = 1 / closingLambda a b δ (wf 1)
     rw [hexp0, hexp1]
   -- Positive-scalar-field invariance.
   have hscaled := windingNumberC_posScalarField cloop hcpos γE hγEne hloopγ hloopc
@@ -2270,7 +2310,7 @@ private lemma cleanError_winds_boundary (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b)
     rw [← hscaled]
     apply windingNumberC_congr
     intro t
-    show arcLengthErrorMap (cleanBicircle a b) a b δ (wf t)
+    change arcLengthErrorMap (cleanBicircle a b) a b δ (wf t)
         = (cloop t : ℂ) * errorMap a b δ (wf t)
     rw [hbridge (wf t) (le_of_eq (hwfnorm t))]
     simp only [hcloopdef, ContinuousMap.coe_mk]
@@ -2495,13 +2535,15 @@ private lemma clean_chord_margin (a b δ : ℝ) (ha : 0 < a) (hab : a < b) (hδ 
     intro x y hxy
     rw [hαdiff]
     have h1 : (∫ _s in x..y, mK) ≤ ∫ s in x..y, Kz s :=
-      intervalIntegral.integral_mono_on hxy intervalIntegrable_const (hKzii x y) (fun s _ => hKz_lb s)
+      intervalIntegral.integral_mono_on hxy intervalIntegrable_const (hKzii x y)
+        (fun s _ => hKz_lb s)
     rwa [intervalIntegral.integral_const, smul_eq_mul, mul_comm] at h1
   have hαub : ∀ x y, x ≤ y → dahlbergAngle Kz y - dahlbergAngle Kz x ≤ MK * (y - x) := by
     intro x y hxy
     rw [hαdiff]
     have h1 : (∫ s in x..y, Kz s) ≤ ∫ _s in x..y, MK :=
-      intervalIntegral.integral_mono_on hxy (hKzii x y) intervalIntegrable_const (fun s _ => hKz_ub s)
+      intervalIntegral.integral_mono_on hxy (hKzii x y) intervalIntegrable_const
+        (fun s _ => hKz_ub s)
     rwa [intervalIntegral.integral_const, smul_eq_mul, mul_comm] at h1
   have hαmono : StrictMono (dahlbergAngle Kz) := by
     intro x y hxy
@@ -2656,7 +2698,8 @@ private lemma simplicity_transport {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a)
   intro ε hε hεlt η e hdata z hz hFzero t τ ht htτ hτ
   have hεlt1 : ε < ε₁ := lt_of_lt_of_le hεlt (min_le_left _ _)
   have hεlttc : ε < ε₁tc := lt_of_lt_of_le hεlt (le_trans (min_le_right _ _) (min_le_left _ _))
-  have hεltm : ε < m / (2 * C') := lt_of_lt_of_le hεlt (le_trans (min_le_right _ _) (min_le_right _ _))
+  have hεltm : ε < m / (2 * C') :=
+    lt_of_lt_of_le hεlt (le_trans (min_le_right _ _) (min_le_right _ _))
   have hC'εlt : C' * ε < m := by
     calc C' * ε < C' * (m / (2 * C')) := mul_lt_mul_of_pos_left hεltm hC'pos
       _ = m / 2 := by field_simp
@@ -2673,17 +2716,19 @@ private lemma simplicity_transport {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a)
   -- Periodicity of the two reparametrised weights.
   have hκηper : Function.Periodic (fun t => κ (η t)) (2 * π) := by
     intro s
-    show κ (η (s + 2 * π)) = κ (η s)
+    change κ (η (s + 2 * π)) = κ (η s)
     rw [hdecomp (s + 2 * π), hdecomp s, cleanBicircle_periodic a b s, he_per s]
   have hg_clean_per :
       Function.Periodic (fun u => cleanBicircle a b (closingFamily a b δ z u)) (2 * π) :=
-    comp_closingFamily_periodic (cleanBicircle a b) a b δ ha hab hδ hδ' hz (cleanBicircle_periodic a b)
+    comp_closingFamily_periodic (cleanBicircle a b) a b δ ha hab hδ hδ' hz
+      (cleanBicircle_periodic a b)
   have hg_star_per :
       Function.Periodic (fun u => (fun t => κ (η t)) (closingFamily a b δ z u)) (2 * π) :=
     comp_closingFamily_periodic (fun t => κ (η t)) a b δ ha hab hδ hδ' hz hκηper
   -- Interval integrability of `g* ∘ g_z` on a period, hence everywhere.
   have hg_star_ii_0 :
-      IntervalIntegrable (fun u => (fun t => κ (η t)) (closingFamily a b δ z u)) volume 0 (2 * π) := by
+      IntervalIntegrable (fun u => (fun t => κ (η t)) (closingFamily a b δ z u))
+        volume 0 (2 * π) := by
     have heq : (fun u => (fun t => κ (η t)) (closingFamily a b δ z u))
         = fun u => cleanBicircle a b (closingFamily a b δ z u) + e (closingFamily a b δ z u) := by
       funext u; exact hdecomp _
@@ -2715,7 +2760,7 @@ private lemma simplicity_transport {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a)
       (fun s => Complex.exp ((dahlbergAngle (arcLengthNorm (cleanBicircle a b) a b δ z) s : ℂ)
         * Complex.I)) (2 * π) := by
     intro s
-    show Complex.exp ((dahlbergAngle (arcLengthNorm (cleanBicircle a b) a b δ z) (s + 2 * π) : ℂ)
+    change Complex.exp ((dahlbergAngle (arcLengthNorm (cleanBicircle a b) a b δ z) (s + 2 * π) : ℂ)
           * Complex.I)
         = Complex.exp ((dahlbergAngle (arcLengthNorm (cleanBicircle a b) a b δ z) s : ℂ)
           * Complex.I)
@@ -2725,7 +2770,7 @@ private lemma simplicity_transport {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a)
       (fun s => Complex.exp ((dahlbergAngle (arcLengthNorm (fun t => κ (η t)) a b δ z) s : ℂ)
         * Complex.I)) (2 * π) := by
     intro s
-    show Complex.exp ((dahlbergAngle (arcLengthNorm (fun t => κ (η t)) a b δ z) (s + 2 * π) : ℂ)
+    change Complex.exp ((dahlbergAngle (arcLengthNorm (fun t => κ (η t)) a b δ z) (s + 2 * π) : ℂ)
           * Complex.I)
         = Complex.exp ((dahlbergAngle (arcLengthNorm (fun t => κ (η t)) a b δ z) s : ℂ)
           * Complex.I)
@@ -2735,7 +2780,8 @@ private lemma simplicity_transport {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a)
       (fun s => Complex.exp ((dahlbergAngle (arcLengthNorm (cleanBicircle a b) a b δ z) s : ℂ)
         * Complex.I)) volume p q :=
     fun p q => hEc_per.intervalIntegrable₀ h2πne
-      (intervalIntegrable_expI_arcLengthNorm (cleanBicircle a b) a b δ z (hclean_ii_pq 0 (2 * π))) p q
+      (intervalIntegrable_expI_arcLengthNorm (cleanBicircle a b) a b δ z
+        (hclean_ii_pq 0 (2 * π))) p q
   have hEsii_pq : ∀ p q, IntervalIntegrable
       (fun s => Complex.exp ((dahlbergAngle (arcLengthNorm (fun t => κ (η t)) a b δ z) s : ℂ)
         * Complex.I)) volume p q :=
@@ -2750,7 +2796,8 @@ private lemma simplicity_transport {κ : ℝ → ℝ} (a b C : ℝ) (ha : 0 < a)
   have htransport : ∀ u w, u ≤ w →
       ‖(∫ s in u..w, Complex.exp ((dahlbergAngle (arcLengthNorm (fun t => κ (η t)) a b δ z) s : ℂ)
             * Complex.I))
-          - (∫ s in u..w, Complex.exp ((dahlbergAngle (arcLengthNorm (cleanBicircle a b) a b δ z) s : ℂ)
+          - (∫ s in u..w, Complex.exp
+              ((dahlbergAngle (arcLengthNorm (cleanBicircle a b) a b δ z) s : ℂ)
             * Complex.I))‖
         ≤ C' * ε * (w - u) := by
     intro u w huw
@@ -2871,7 +2918,7 @@ theorem dahlbergConverse {κ : ℝ → ℝ} (h : MixedSignFourVertex κ) :
   have hφpos : ∀ t, 0 < deriv φ t := fun t => by rw [hφderivval]; exact hvφpos t
   have hφper : ∀ t, φ (t + 2 * π) = φ t + 2 * π := by
     intro t
-    show η (closingFamily a b δ zs (t + 2 * π)) = η (closingFamily a b δ zs t) + 2 * π
+    change η (closingFamily a b δ zs (t + 2 * π)) = η (closingFamily a b δ zs t) + 2 * π
     rw [closingFamily_add_two_pi a b δ ha hab hδ hδ' hzsle t, hηper]
   -- The `C¹` inverse `ψ`.
   obtain ⟨ψ, hψcont, hψmono, hφψ, hψφ, hψper, hψderivH⟩ :=
