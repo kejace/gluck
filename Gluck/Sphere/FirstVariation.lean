@@ -627,28 +627,19 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
   have hh1' : h ≤ 1 / 4096 := le_trans hh1 (by linarith)
   have hσsq : ‖δ‖ ^ 2 ≤ ‖δ‖ * (1 / 4096) := by nlinarith
   -- frame values at the four quarter angles
-  have hV0 : Complex.I * Complex.exp (((0 : ℝ) : ℂ) * Complex.I) = Complex.I := by
-    rw [expI_zero, mul_one]
-  have hV1 : Complex.I * Complex.exp (((π / 2 : ℝ) : ℂ) * Complex.I) = -1 := by
-    rw [expI_pi_div_two, Complex.I_mul_I]
-  have hV2 : Complex.I * Complex.exp (((π : ℝ) : ℂ) * Complex.I) = -Complex.I := by
-    rw [expI_pi]
-    ring
-  have hV3 : Complex.I * Complex.exp (((3 * π / 2 : ℝ) : ℂ) * Complex.I) = 1 := by
-    rw [expI_three_pi_div_two, mul_neg, Complex.I_mul_I, neg_neg]
+  have hV0 : Complex.I * Complex.exp (((0 : ℝ) : ℂ) * Complex.I) = Complex.I :=
+    I_mul_expI_zero
+  have hV1 : Complex.I * Complex.exp (((π / 2 : ℝ) : ℂ) * Complex.I) = -1 :=
+    I_mul_expI_pi_div_two
+  have hV2 : Complex.I * Complex.exp (((π : ℝ) : ℂ) * Complex.I) = -Complex.I :=
+    I_mul_expI_pi
+  have hV3 : Complex.I * Complex.exp (((3 * π / 2 : ℝ) : ℂ) * Complex.I) = 1 :=
+    I_mul_expI_three_pi_div_two
   -- inner products of the deviation against the frame values
-  have hi0 : ⟪δ, Complex.I⟫_ℝ = δ.im := by
-    rw [real_inner_complex]
-    simp
-  have hi1 : ⟪δ, (-1 : ℂ)⟫_ℝ = -δ.re := by
-    rw [real_inner_complex]
-    simp
-  have hi2 : ⟪δ, -Complex.I⟫_ℝ = -δ.im := by
-    rw [real_inner_complex]
-    simp
-  have hi3 : ⟪δ, (1 : ℂ)⟫_ℝ = δ.re := by
-    rw [real_inner_complex]
-    simp
+  have hi0 : ⟪δ, Complex.I⟫_ℝ = δ.im := real_inner_I' δ
+  have hi1 : ⟪δ, (-1 : ℂ)⟫_ℝ = -δ.re := real_inner_neg_one δ
+  have hi2 : ⟪δ, -Complex.I⟫_ℝ = -δ.im := real_inner_neg_I δ
+  have hi3 : ⟪δ, (1 : ℂ)⟫_ℝ = δ.re := real_inner_one' δ
   have hδre : |δ.re| ≤ ‖δ‖ := Complex.abs_re_le_norm δ
   have hδim : |δ.im| ≤ ‖δ‖ := Complex.abs_im_le_norm δ
   -- bracket at the start and the circle radius `r`
@@ -710,17 +701,14 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
     fun φ => (constantCurvature_arc hcons0 (hposθ φ)).1
   -- the circle points at the quarter angles
   have hy₁eq : W - Complex.I * (r : ℂ)
-      * Complex.exp (((π / 2 : ℝ) : ℂ) * Complex.I) = W + (r : ℂ) := by
-    rw [expI_pi_div_two]
-    linear_combination -(r : ℂ) * Complex.I_sq
+      * Complex.exp (((π / 2 : ℝ) : ℂ) * Complex.I) = W + (r : ℂ) :=
+    circlePoint_pi_div_two W r
   have hy₂eq : W - Complex.I * (r : ℂ)
-      * Complex.exp (((π : ℝ) : ℂ) * Complex.I) = W + Complex.I * (r : ℂ) := by
-    rw [expI_pi]
-    ring
+      * Complex.exp (((π : ℝ) : ℂ) * Complex.I) = W + Complex.I * (r : ℂ) :=
+    circlePoint_pi W r
   have hy₃eq : W - Complex.I * (r : ℂ)
-      * Complex.exp (((3 * π / 2 : ℝ) : ℂ) * Complex.I) = W - (r : ℂ) := by
-    rw [expI_three_pi_div_two]
-    linear_combination (r : ℂ) * Complex.I_sq
+      * Complex.exp (((3 * π / 2 : ℝ) : ℂ) * Complex.I) = W - (r : ℂ) :=
+    circlePoint_three_pi_div_two W r
   have hsp₁ : sphericalSpeed (fun _ => c) (π / 2) (W + (r : ℂ)) = r := by
     have h1 := hsp (π / 2)
     rwa [hy₁eq] at h1
@@ -739,25 +727,14 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
   set z₃ : ℂ := sphericalArcMap (c - h / 2) π (π / 2) z₂ with hz₃def
   set Q₃ : ℝ := sphericalSpeed (fun _ => c + h / 2) (3 * π / 2) z₃ with hQ₃def
   have hstep₀ : z₁ = z₀ + (Q₀ : ℂ) * (1 + Complex.I) := by
-    rw [hz₁def]
-    unfold sphericalArcMap
-    rw [expI_zero, expI_pi_div_two, ← hQ₀def]
-    linear_combination -(Q₀ : ℂ) * Complex.I_sq
+    rw [hz₁def, hQ₀def]; exact sphericalArcMap_step_zero (c - h / 2) z₀
   have hstep₁ : z₂ = z₁ + (Q₁ : ℂ) * (-1 + Complex.I) := by
-    rw [hz₂def]
-    unfold sphericalArcMap
-    rw [expI_pi_div_two, ← hQ₁def]
-    linear_combination (Q₁ : ℂ) * (1 - Complex.I) * Complex.I_sq
+    rw [hz₂def, hQ₁def]; exact sphericalArcMap_step_pi_div_two (c + h / 2) z₁
   have hstep₂ : z₃ = z₂ + (Q₂ : ℂ) * (-1 - Complex.I) := by
-    rw [hz₃def]
-    unfold sphericalArcMap
-    rw [expI_pi, expI_pi_div_two, ← hQ₂def]
-    linear_combination (Q₂ : ℂ) * Complex.I_sq
+    rw [hz₃def, hQ₂def]; exact sphericalArcMap_step_pi (c - h / 2) z₂
   have hstep₃ : sphericalArcMap (c + h / 2) (3 * π / 2) (π / 2) z₃
       = z₃ + (Q₃ : ℂ) * (1 - Complex.I) := by
-    unfold sphericalArcMap
-    rw [expI_three_pi_div_two, expI_pi_div_two, ← hQ₃def]
-    linear_combination -(Q₃ : ℂ) * (1 - Complex.I) * Complex.I_sq
+    rw [hQ₃def]; exact sphericalArcMap_step_three_pi_div_two (c + h / 2) z₃
   have hE : stepErrorMap (c - h / 2) (c + h / 2) z₀
       = (Q₀ : ℂ) * (1 + Complex.I) + (Q₁ : ℂ) * (-1 + Complex.I)
         + (Q₂ : ℂ) * (-1 - Complex.I) + (Q₃ : ℂ) * (1 - Complex.I) := by
@@ -772,46 +749,20 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
   have hκh : κ ≤ h / 2 := by
     rw [hκdef, div_le_iff₀ (by linarith : (0:ℝ) < 2 * s)]
     nlinarith
-  have hig1 : ⟪δ, (κ : ℂ) * (1 + Complex.I)⟫_ℝ = κ * (δ.re + δ.im) := by
-    rw [real_inner_complex]
-    simp [Complex.mul_re, Complex.mul_im]
-    ring
-  have hig2 : ⟪δ, (κ : ℂ) * 2⟫_ℝ = 2 * κ * δ.re := by
-    rw [real_inner_complex]
-    simp [Complex.mul_re, Complex.mul_im]
-    ring
-  have hig3 : ⟪δ, (κ : ℂ) * (1 - Complex.I)⟫_ℝ = κ * (δ.re - δ.im) := by
-    rw [real_inner_complex]
-    simp [Complex.mul_re, Complex.mul_im]
-    ring
+  have hig1 : ⟪δ, (κ : ℂ) * (1 + Complex.I)⟫_ℝ = κ * (δ.re + δ.im) :=
+    real_inner_kappa_one_add_I δ κ
+  have hig2 : ⟪δ, (κ : ℂ) * 2⟫_ℝ = 2 * κ * δ.re := real_inner_kappa_two δ κ
+  have hig3 : ⟪δ, (κ : ℂ) * (1 - Complex.I)⟫_ℝ = κ * (δ.re - δ.im) :=
+    real_inner_kappa_one_sub_I δ κ
   -- norms of the constant directions
-  have hn1I : ‖(1 : ℂ) + Complex.I‖ ≤ 2 := by
-    refine le_trans (norm_add_le _ _) ?_
-    rw [norm_one, Complex.norm_I]
-    norm_num
-  have hn1I' : ‖(1 : ℂ) - Complex.I‖ ≤ 2 := by
-    refine le_trans (norm_sub_le _ _) ?_
-    rw [norm_one, Complex.norm_I]
-    norm_num
-  have hnm1I : ‖(-1 : ℂ) + Complex.I‖ ≤ 2 := by
-    refine le_trans (norm_add_le _ _) ?_
-    rw [norm_neg, norm_one, Complex.norm_I]
-    norm_num
-  have hnm1I' : ‖(-1 : ℂ) - Complex.I‖ ≤ 2 := by
-    refine le_trans (norm_sub_le _ _) ?_
-    rw [norm_neg, norm_one, Complex.norm_I]
-    norm_num
-  have hn2I : ‖(2 : ℂ) * Complex.I‖ ≤ 2 := by
-    rw [norm_mul, Complex.norm_I, mul_one]
-    norm_num
-  have hcmul : ∀ (x : ℝ) (w : ℂ), ‖w‖ ≤ 2 → ‖(x : ℂ) * w‖ ≤ |x| * 2 := by
-    intro x w hw
-    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs]
-    exact mul_le_mul_of_nonneg_left hw (abs_nonneg x)
-  have habs_split : ∀ a b : ℝ, |a| ≤ |a - b| + |b| := by
-    intro a b
-    have h1 := abs_add_le (a - b) b
-    simpa using h1
+  have hn1I : ‖(1 : ℂ) + Complex.I‖ ≤ 2 := norm_one_add_I_le_two
+  have hn1I' : ‖(1 : ℂ) - Complex.I‖ ≤ 2 := norm_one_sub_I_le_two
+  have hnm1I : ‖(-1 : ℂ) + Complex.I‖ ≤ 2 := norm_neg_one_add_I_le_two
+  have hnm1I' : ‖(-1 : ℂ) - Complex.I‖ ≤ 2 := norm_neg_one_sub_I_le_two
+  have hn2I : ‖(2 : ℂ) * Complex.I‖ ≤ 2 := norm_two_mul_I_le_two
+  have hcmul : ∀ (x : ℝ) (w : ℂ), ‖w‖ ≤ 2 → ‖(x : ℂ) * w‖ ≤ |x| * 2 :=
+    fun _ _ hw => norm_real_mul_le_two hw
+  have habs_split : ∀ a b : ℝ, |a| ≤ |a - b| + |b| := abs_le_abs_sub_add
   have hσ2h : ‖δ‖ ^ 2 * h ≤ ‖δ‖ * h * (1 / 4096) := by
     nlinarith only [hσsq, hσ1, hσ0, hh0.le]
   have hεpos : |h / 2| ≤ h / 2 := by rw [abs_of_pos (by linarith)]
@@ -1175,8 +1126,8 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
   simp only [show c - -(h / 2) = c + h / 2 by ring] at harc₃
   rw [hV3, hi3, hig3, hsp₃, ← hQ₃def] at harc₃
   -- assemble: the four main terms collapse to the conjugation
-  have hconj : (starRingEnd ℂ) δ = (δ.re : ℂ) - (δ.im : ℂ) * Complex.I := by
-    apply Complex.ext <;> simp
+  have hconj : (starRingEnd ℂ) δ = (δ.re : ℂ) - (δ.im : ℂ) * Complex.I :=
+    conj_eq_re_sub_im_mul_I δ
   have hsum : stepErrorMap (c - h / 2) (c + h / 2) z₀
       + ((2 * (s - c) / s ^ 2 * h : ℝ) : ℂ) * (starRingEnd ℂ) δ
       = ((Q₀ - r - ((s - c) / s * (h / 2)
@@ -1197,12 +1148,8 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
     field_simp
     ring
   rw [hsum]
-  have hnorm4 : ∀ p q u' t : ℂ, ‖p + q + u' + t‖ ≤ ‖p‖ + ‖q‖ + ‖u'‖ + ‖t‖ := by
-    intro p q u' t
-    calc ‖p + q + u' + t‖ ≤ ‖p + q + u'‖ + ‖t‖ := norm_add_le _ _
-      _ ≤ (‖p + q‖ + ‖u'‖) + ‖t‖ := add_le_add (norm_add_le _ _) le_rfl
-      _ ≤ ((‖p‖ + ‖q‖) + ‖u'‖) + ‖t‖ :=
-          add_le_add (add_le_add (norm_add_le _ _) le_rfl) le_rfl
+  have hnorm4 : ∀ p q u' t : ℂ, ‖p + q + u' + t‖ ≤ ‖p‖ + ‖q‖ + ‖u'‖ + ‖t‖ :=
+    norm_add_four_le
   refine le_trans (hnorm4 _ _ _ _) ?_
   have hb₀ := le_trans (hcmul _ _ hn1I)
     (mul_le_mul_of_nonneg_right harc₀ (by norm_num : (0 : ℝ) ≤ 2))
