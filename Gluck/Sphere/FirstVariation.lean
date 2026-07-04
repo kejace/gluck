@@ -402,6 +402,191 @@ private lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
     sq_nonneg h, mul_nonneg hσ0 (sq_nonneg h),
     mul_nonneg (mul_nonneg hσ0 hσ0) hh0.le]
 
+/-! ### Named intermediate facts for `stepError_expansion`
+
+The first-variation expansion below is one long context-heavy computation.
+Following the blueprint's directive to "organize it through named intermediate
+have-identities rather than one monolithic proof" (`lem:step_error_expansion`),
+the pieces that do **not** depend on the local `set`-bindings of the main proof
+(the four quarter-angle frame values, the coordinate inner-product identities,
+the constant direction-norm bounds, the generic norm/absolute-value algebra,
+the reference-circle quarter points, and the four arc-step identities) are
+factored out here as reusable `private` lemmas. Each is stated in maximal
+generality (in the deviation `z`, the gauge shift `κ`, the circle centre `W`,
+the radius `r`, the level `K`); the main proof invokes them as one-line
+`have`-aliases so every downstream reference is unchanged. No Mathlib lemma
+covers these composite facts (searched: `real_inner`, `starRingEnd`, direction
+norms) — they build on the file-local `real_inner_complex` / `expI_*` layer. -/
+
+-- Seam (a1): the four quarter-angle frame values `i·e^{iθ}` (θ ∈ {0,π/2,π,3π/2}).
+/-- Frame value at `θ = 0`: `i·e^{i·0} = i`. -/
+private lemma I_mul_expI_zero :
+    Complex.I * Complex.exp (((0 : ℝ) : ℂ) * Complex.I) = Complex.I := by
+  rw [expI_zero, mul_one]
+
+/-- Frame value at `θ = π/2`: `i·e^{iπ/2} = −1`. -/
+private lemma I_mul_expI_pi_div_two :
+    Complex.I * Complex.exp (((π / 2 : ℝ) : ℂ) * Complex.I) = -1 := by
+  rw [expI_pi_div_two, Complex.I_mul_I]
+
+/-- Frame value at `θ = π`: `i·e^{iπ} = −i`. -/
+private lemma I_mul_expI_pi :
+    Complex.I * Complex.exp (((π : ℝ) : ℂ) * Complex.I) = -Complex.I := by
+  rw [expI_pi]; ring
+
+/-- Frame value at `θ = 3π/2`: `i·e^{i3π/2} = 1`. -/
+private lemma I_mul_expI_three_pi_div_two :
+    Complex.I * Complex.exp (((3 * π / 2 : ℝ) : ℂ) * Complex.I) = 1 := by
+  rw [expI_three_pi_div_two, mul_neg, Complex.I_mul_I, neg_neg]
+
+-- Seam (a2): coordinate inner products of a deviation against the frame values.
+/-- `⟪z, i⟫ℝ = Im z`. -/
+private lemma real_inner_I' (z : ℂ) : ⟪z, Complex.I⟫_ℝ = z.im := by
+  rw [real_inner_complex]; simp
+
+/-- `⟪z, −1⟫ℝ = −Re z`. -/
+private lemma real_inner_neg_one (z : ℂ) : ⟪z, (-1 : ℂ)⟫_ℝ = -z.re := by
+  rw [real_inner_complex]; simp
+
+/-- `⟪z, −i⟫ℝ = −Im z`. -/
+private lemma real_inner_neg_I (z : ℂ) : ⟪z, -Complex.I⟫_ℝ = -z.im := by
+  rw [real_inner_complex]; simp
+
+/-- `⟪z, 1⟫ℝ = Re z`. -/
+private lemma real_inner_one' (z : ℂ) : ⟪z, (1 : ℂ)⟫_ℝ = z.re := by
+  rw [real_inner_complex]; simp
+
+-- Seam (a3): inner products of a deviation against the gauge-shift directions.
+/-- `⟪z, κ·(1+i)⟫ℝ = κ·(Re z + Im z)`. -/
+private lemma real_inner_kappa_one_add_I (z : ℂ) (κ : ℝ) :
+    ⟪z, (κ : ℂ) * (1 + Complex.I)⟫_ℝ = κ * (z.re + z.im) := by
+  rw [real_inner_complex]
+  simp [Complex.mul_re, Complex.mul_im]
+  ring
+
+/-- `⟪z, κ·2⟫ℝ = 2·κ·Re z`. -/
+private lemma real_inner_kappa_two (z : ℂ) (κ : ℝ) :
+    ⟪z, (κ : ℂ) * 2⟫_ℝ = 2 * κ * z.re := by
+  rw [real_inner_complex]
+  simp [Complex.mul_re, Complex.mul_im]
+  ring
+
+/-- `⟪z, κ·(1−i)⟫ℝ = κ·(Re z − Im z)`. -/
+private lemma real_inner_kappa_one_sub_I (z : ℂ) (κ : ℝ) :
+    ⟪z, (κ : ℂ) * (1 - Complex.I)⟫_ℝ = κ * (z.re - z.im) := by
+  rw [real_inner_complex]
+  simp [Complex.mul_re, Complex.mul_im]
+  ring
+
+-- Seam (b1): the crude `‖±1 ± i‖ ≤ 2` and `‖2i‖ ≤ 2` direction-norm bounds.
+/-- `‖1 + i‖ ≤ 2`. -/
+private lemma norm_one_add_I_le_two : ‖(1 : ℂ) + Complex.I‖ ≤ 2 := by
+  refine le_trans (norm_add_le _ _) ?_
+  rw [norm_one, Complex.norm_I]; norm_num
+
+/-- `‖1 − i‖ ≤ 2`. -/
+private lemma norm_one_sub_I_le_two : ‖(1 : ℂ) - Complex.I‖ ≤ 2 := by
+  refine le_trans (norm_sub_le _ _) ?_
+  rw [norm_one, Complex.norm_I]; norm_num
+
+/-- `‖−1 + i‖ ≤ 2`. -/
+private lemma norm_neg_one_add_I_le_two : ‖(-1 : ℂ) + Complex.I‖ ≤ 2 := by
+  refine le_trans (norm_add_le _ _) ?_
+  rw [norm_neg, norm_one, Complex.norm_I]; norm_num
+
+/-- `‖−1 − i‖ ≤ 2`. -/
+private lemma norm_neg_one_sub_I_le_two : ‖(-1 : ℂ) - Complex.I‖ ≤ 2 := by
+  refine le_trans (norm_sub_le _ _) ?_
+  rw [norm_neg, norm_one, Complex.norm_I]; norm_num
+
+/-- `‖2·i‖ ≤ 2`. -/
+private lemma norm_two_mul_I_le_two : ‖(2 : ℂ) * Complex.I‖ ≤ 2 := by
+  rw [norm_mul, Complex.norm_I, mul_one]; norm_num
+
+-- Seam (b2): generic norm/absolute-value algebra used to chain the arc bounds.
+/-- Scaling a `‖·‖ ≤ 2` direction by a real: `‖x·w‖ ≤ |x|·2`. -/
+private lemma norm_real_mul_le_two {x : ℝ} {w : ℂ} (hw : ‖w‖ ≤ 2) :
+    ‖(x : ℂ) * w‖ ≤ |x| * 2 := by
+  rw [norm_mul, Complex.norm_real, Real.norm_eq_abs]
+  exact mul_le_mul_of_nonneg_left hw (abs_nonneg x)
+
+/-- Split an absolute value around a base point: `|a| ≤ |a − b| + |b|`. -/
+private lemma abs_le_abs_sub_add (a b : ℝ) : |a| ≤ |a - b| + |b| := by
+  have h1 := abs_add_le (a - b) b
+  simpa using h1
+
+/-- Four-term triangle inequality. -/
+private lemma norm_add_four_le (p q u t : ℂ) :
+    ‖p + q + u + t‖ ≤ ‖p‖ + ‖q‖ + ‖u‖ + ‖t‖ := by
+  calc ‖p + q + u + t‖ ≤ ‖p + q + u‖ + ‖t‖ := norm_add_le _ _
+    _ ≤ (‖p + q‖ + ‖u‖) + ‖t‖ := add_le_add (norm_add_le _ _) le_rfl
+    _ ≤ ((‖p‖ + ‖q‖) + ‖u‖) + ‖t‖ :=
+        add_le_add (add_le_add (norm_add_le _ _) le_rfl) le_rfl
+
+/-- Cartesian form of complex conjugation: `conj z = Re z − (Im z)·i`. -/
+private lemma conj_eq_re_sub_im_mul_I (z : ℂ) :
+    (starRingEnd ℂ) z = (z.re : ℂ) - (z.im : ℂ) * Complex.I := by
+  apply Complex.ext <;> simp
+
+-- Seam (c): the reference-circle points at the three later quarter angles.
+/-- Circle point at `π/2`: `W − i·r·e^{iπ/2} = W + r`. -/
+private lemma circlePoint_pi_div_two (W : ℂ) (r : ℝ) :
+    W - Complex.I * (r : ℂ) * Complex.exp (((π / 2 : ℝ) : ℂ) * Complex.I)
+      = W + (r : ℂ) := by
+  rw [expI_pi_div_two]
+  linear_combination -(r : ℂ) * Complex.I_sq
+
+/-- Circle point at `π`: `W − i·r·e^{iπ} = W + i·r`. -/
+private lemma circlePoint_pi (W : ℂ) (r : ℝ) :
+    W - Complex.I * (r : ℂ) * Complex.exp (((π : ℝ) : ℂ) * Complex.I)
+      = W + Complex.I * (r : ℂ) := by
+  rw [expI_pi]; ring
+
+/-- Circle point at `3π/2`: `W − i·r·e^{i3π/2} = W − r`. -/
+private lemma circlePoint_three_pi_div_two (W : ℂ) (r : ℝ) :
+    W - Complex.I * (r : ℂ) * Complex.exp (((3 * π / 2 : ℝ) : ℂ) * Complex.I)
+      = W - (r : ℂ) := by
+  rw [expI_three_pi_div_two]
+  linear_combination (r : ℂ) * Complex.I_sq
+
+-- Seam (d0): the four arc-step identities of the perturbed trajectory. Each
+-- `sphericalArcMap K θ₀ (π/2) z` advances by `i·q·e^{iθ₀}·(1−i)`, which at the
+-- successive quarter base angles collapses to the constant directions
+-- `1+i, −1+i, −1−i, 1−i`.
+/-- Arc step from base angle `0`: output is input `+ q·(1+i)`. -/
+private lemma sphericalArcMap_step_zero (K : ℝ) (z : ℂ) :
+    sphericalArcMap K 0 (π / 2) z
+      = z + (sphericalSpeed (fun _ => K) 0 z : ℂ) * (1 + Complex.I) := by
+  unfold sphericalArcMap
+  rw [expI_zero, expI_pi_div_two]
+  linear_combination -(sphericalSpeed (fun _ => K) 0 z : ℂ) * Complex.I_sq
+
+/-- Arc step from base angle `π/2`: output is input `+ q·(−1+i)`. -/
+private lemma sphericalArcMap_step_pi_div_two (K : ℝ) (z : ℂ) :
+    sphericalArcMap K (π / 2) (π / 2) z
+      = z + (sphericalSpeed (fun _ => K) (π / 2) z : ℂ) * (-1 + Complex.I) := by
+  unfold sphericalArcMap
+  rw [expI_pi_div_two]
+  linear_combination (sphericalSpeed (fun _ => K) (π / 2) z : ℂ)
+    * (1 - Complex.I) * Complex.I_sq
+
+/-- Arc step from base angle `π`: output is input `+ q·(−1−i)`. -/
+private lemma sphericalArcMap_step_pi (K : ℝ) (z : ℂ) :
+    sphericalArcMap K π (π / 2) z
+      = z + (sphericalSpeed (fun _ => K) π z : ℂ) * (-1 - Complex.I) := by
+  unfold sphericalArcMap
+  rw [expI_pi, expI_pi_div_two]
+  linear_combination (sphericalSpeed (fun _ => K) π z : ℂ) * Complex.I_sq
+
+/-- Arc step from base angle `3π/2`: output is input `+ q·(1−i)`. -/
+private lemma sphericalArcMap_step_three_pi_div_two (K : ℝ) (z : ℂ) :
+    sphericalArcMap K (3 * π / 2) (π / 2) z
+      = z + (sphericalSpeed (fun _ => K) (3 * π / 2) z : ℂ) * (1 - Complex.I) := by
+  unfold sphericalArcMap
+  rw [expI_three_pi_div_two, expI_pi_div_two]
+  linear_combination -(sphericalSpeed (fun _ => K) (3 * π / 2) z : ℂ)
+    * (1 - Complex.I) * Complex.I_sq
+
 -- This proof carries ~100 local hypotheses; every `linarith`/`nlinarith` uses
 -- `only [...]` so the simplex solver never scans the full context (that scan,
 -- not any single tactic, was the cost — it needed 16M heartbeats without it).
