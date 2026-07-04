@@ -1,4 +1,11 @@
-import Mathlib
+import Mathlib.Analysis.Calculus.Deriv.Basic
+import Mathlib.Analysis.Calculus.ContDiff.Basic
+import Mathlib.Analysis.Normed.Group.Basic
+import Mathlib.Analysis.Complex.RealDeriv
+import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+import Mathlib.Analysis.Calculus.Deriv.Mul
+import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Tactic
 
 /-!
 # Plane curves and signed curvature

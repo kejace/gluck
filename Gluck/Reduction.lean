@@ -1,4 +1,7 @@
 import Gluck.Winding
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
+import Mathlib.MeasureTheory.Function.Floor
+import Mathlib.MeasureTheory.Order.Group.Lattice
 
 /-!
 # Closing the κ-curve: the reduction is justified
@@ -1262,7 +1265,7 @@ private theorem exists_reparam_kappaErrorMap_close {κ : ℝ → ℝ} (hκ : IsC
   -- Facts about `κ ∘ h₁` and `F`.
   have hκh_cont : Continuous (fun φ => κ (h₁ φ)) := hκcont.comp h1cont
   have hκh_meas : Measurable (fun φ => κ (h₁ φ)) := hκh_cont.measurable
-  have hF_meas : Measurable F := by rw [hFdef]; exact (hκh_meas.sub hκ₀meas).abs
+  have hF_meas : Measurable F := by rw [hFdef]; exact measurable_abs.comp (hκh_meas.sub hκ₀meas)
   have hF_nonneg : ∀ φ, 0 ≤ F φ := fun φ => by rw [hFdef]; exact abs_nonneg _
   have hF_le : ∀ φ, F φ ≤ cmax + b := by
     intro φ; rw [hFdef]
@@ -1286,8 +1289,8 @@ private theorem exists_reparam_kappaErrorMap_close {κ : ℝ → ℝ} (hκ : IsC
       - radius κ₀ (alignReparam δ z θ)| with hΦdef
   have hΦ_meas : Measurable Φ := by
     rw [hΦdef]; simp only [radius]
-    exact ((measurable_const.div (hκh_meas.comp hgmeas)).sub
-      (measurable_const.div (hκ₀meas.comp hgmeas))).abs
+    exact measurable_abs.comp ((measurable_const.div (hκh_meas.comp hgmeas)).sub
+      (measurable_const.div (hκ₀meas.comp hgmeas)))
   -- Pointwise bounds.
   have hpt1 : ∀ θ, Φ θ ≤ (1 / m ^ 2) * F (alignReparam δ z θ) := by
     intro θ

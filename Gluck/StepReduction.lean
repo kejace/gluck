@@ -1,5 +1,8 @@
 import Gluck.Closure
 import Gluck.Curvature
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
+import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 
 /-!
 # Reduction to a four-arc step function

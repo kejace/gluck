@@ -1,4 +1,7 @@
-import Mathlib
+import Mathlib.Topology.Basic
+import Mathlib.Topology.Order.LocalExtr
+import Mathlib.Topology.Order.IntermediateValue
+import Mathlib.Tactic
 
 /-!
 # Curvature functions on the circle

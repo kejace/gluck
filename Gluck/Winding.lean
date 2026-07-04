@@ -1,4 +1,14 @@
-import Mathlib
+import Mathlib.Analysis.SpecialFunctions.Complex.Circle
+import Mathlib.Topology.ContinuousMap.Basic
+import Mathlib.Topology.Order.IntermediateValue
+import Mathlib.Analysis.Normed.Group.Basic
+import Mathlib.Topology.MetricSpace.Basic
+import Mathlib.Analysis.Complex.RealDeriv
+import Mathlib.Analysis.Calculus.Deriv.Basic
+import Mathlib.Analysis.Calculus.ContDiff.Basic
+import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Topology.Homotopy.Lifting
+import Mathlib.Tactic
 import Gluck.Closure
 import Gluck.Bicircle
 

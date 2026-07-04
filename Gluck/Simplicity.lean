@@ -1,4 +1,5 @@
 import Gluck.Closure
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
 
 /-!
 # Simplicity of the reconstructed curve
