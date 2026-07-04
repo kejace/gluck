@@ -105,6 +105,58 @@ private lemma measurable_stepCurvature_canonical (b a : ℝ) :
     ((measurableSet_le measurable_const hmtic).inter
       (measurableSet_lt hmtic measurable_const))
 
+/-- A continuous `2π`-periodic curvature attains a global positive upper bound
+(the maximum over one compact period). -/
+private lemma exists_global_curvature_bound {κ : ℝ → ℝ} (hcont : Continuous κ)
+    (hper : Function.Periodic κ (2 * π)) (hpos : ∀ t, 0 < κ t) :
+    ∃ C : ℝ, 0 < C ∧ ∀ t, κ t ≤ C := by
+  obtain ⟨θm, -, hmax⟩ := isCompact_Icc.exists_isMaxOn
+    (Set.nonempty_Icc.mpr (by positivity : (0 : ℝ) ≤ 2 * π)) hcont.continuousOn
+  refine ⟨κ θm, hpos θm, fun t => ?_⟩
+  obtain ⟨y, hy, hyt⟩ := hper.exists_mem_Ico₀ Real.two_pi_pos t
+  rw [hyt]
+  exact hmax ⟨hy.1, hy.2.le⟩
+
+/-- The canonical step curvature takes values in `[0, b]` when `0 ≤ a ≤ b`. -/
+private lemma stepCurvature_canonical_mem {a b : ℝ} (ha : 0 ≤ a) (hab : a ≤ b) (θ : ℝ) :
+    0 ≤ stepCurvature b a 0 (π / 2) π (3 * π / 2) θ
+      ∧ stepCurvature b a 0 (π / 2) π (3 * π / 2) θ ≤ b := by
+  simp only [stepCurvature]
+  split
+  · exact ⟨ha, hab⟩
+  · exact ⟨le_trans ha hab, le_refl b⟩
+
+/-- Elementary bound `|x - y| ≤ C + b` from `0 < x ≤ C` and `0 ≤ y ≤ b`. -/
+private lemma abs_sub_le_of_le {x y C b : ℝ}
+    (hxup : x ≤ C) (hxlo : 0 < x) (hy0 : 0 ≤ y) (hyb : y ≤ b) :
+    |x - y| ≤ C + b := by
+  rw [abs_le]; constructor <;> linarith
+
+/-- Integrability on a finite-measure set from a global norm bound. -/
+private lemma integrableOn_of_norm_le_const {f : ℝ → ℝ} {s : Set ℝ} {B : ℝ}
+    (hs : MeasureTheory.volume s ≠ ⊤) (hmeas : Measurable f)
+    (hbd : ∀ x, ‖f x‖ ≤ B) :
+    MeasureTheory.IntegrableOn f s MeasureTheory.volume := by
+  refine MeasureTheory.Integrable.mono'
+    (MeasureTheory.integrableOn_const (C := B) hs)
+    hmeas.aestronglyMeasurable.restrict ?_
+  filter_upwards with x
+  exact hbd x
+
+/-- Set integral of `|f|` bounded by `C · D` from a pointwise bound `‖|f|‖ ≤ C`
+on the set of finite real measure `≤ D`. -/
+private lemma setIntegral_abs_le_mul {f : ℝ → ℝ} {s : Set ℝ} {C D : ℝ}
+    (hs : MeasureTheory.volume s < ⊤)
+    (hbd : ∀ x ∈ s, ‖|f x|‖ ≤ C) (hC0 : 0 ≤ C)
+    (hμ : MeasureTheory.volume.real s ≤ D) :
+    (∫ x in s, |f x|) ≤ C * D := by
+  have h := MeasureTheory.norm_setIntegral_le_of_norm_le_const
+    (μ := MeasureTheory.volume) (C := C) hs hbd
+  calc (∫ x in s, |f x|)
+      ≤ ‖∫ x in s, |f x|‖ := Real.le_norm_self _
+    _ ≤ C * MeasureTheory.volume.real s := h
+    _ ≤ C * D := mul_le_mul_of_nonneg_left hμ hC0
+
 /-- **`L¹` step reparametrization.** Given `(a, b, a, b)` crossing data, for
 every `ε > 0` there is an orientation-preserving circle reparametrization `h₁`
 (strictly monotone, `C¹` with continuous positive derivative,
@@ -129,16 +181,8 @@ lemma exists_step_L1_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
   have hper := hκ.2.1
   have hpos := hκ.2.2
   have h2π := Real.two_pi_pos
-  -- global upper bound for `κ` from one compact period
-  obtain ⟨θm, -, hmax⟩ := isCompact_Icc.exists_isMaxOn
-    (Set.nonempty_Icc.mpr (by positivity : (0 : ℝ) ≤ 2 * π)) hcont.continuousOn
-  have hCglob : ∀ t, κ t ≤ κ θm := by
-    intro t
-    obtain ⟨y, hy, hyt⟩ := hper.exists_mem_Ico₀ h2π t
-    rw [hyt]
-    exact hmax ⟨hy.1, hy.2.le⟩
-  have hC0 : 0 < κ θm := hpos θm
-  set B : ℝ := κ θm + b with hBdef
+  obtain ⟨C, hC0, hCglob⟩ := exists_global_curvature_bound hcont hper hpos
+  set B : ℝ := C + b with hBdef
   have hB0 : 0 < B := by rw [hBdef]; linarith
   set ε' : ℝ := ε / (B + 2 * π + 1) with hε'def
   have hden : 0 < B + 2 * π + 1 := by linarith
@@ -151,32 +195,18 @@ lemma exists_step_L1_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
   have hκsmeas : Measurable κs := measurable_stepCurvature_canonical b a
   have hfmeas : Measurable (fun θ : ℝ => |κ (h₁ θ) - κs θ|) :=
     ((hcont.comp hh₁cont).measurable.sub hκsmeas).abs
-  have hstep_bounds : ∀ θ, 0 ≤ κs θ ∧ κs θ ≤ b := by
-    intro θ
-    rw [hκsdef]
-    simp only [stepCurvature]
-    split
-    · exact ⟨ha.le, hab.le⟩
-    · exact ⟨by linarith, le_refl b⟩
-  have hfB : ∀ θ, |κ (h₁ θ) - κs θ| ≤ B := by
-    intro θ
-    have h1 := hCglob (h₁ θ)
-    have h2 := hpos (h₁ θ)
-    obtain ⟨h3, h4⟩ := hstep_bounds θ
-    rw [hBdef, abs_le]
-    constructor <;> linarith
+  have hfB : ∀ θ, |κ (h₁ θ) - κs θ| ≤ B := fun θ =>
+    abs_sub_le_of_le (hCglob (h₁ θ)) (hpos (h₁ θ))
+      (stepCurvature_canonical_mem ha.le hab.le θ).1
+      (stepCurvature_canonical_mem ha.le hab.le θ).2
   -- integrability over the fundamental window
   have hIcofin : MeasureTheory.volume (Set.Ico (0 : ℝ) (2 * π)) < ⊤ := by
     rw [Real.volume_Ico]
     exact ENNReal.ofReal_lt_top
   have hint : MeasureTheory.IntegrableOn (fun θ : ℝ => |κ (h₁ θ) - κs θ|)
-      (Set.Ico (0 : ℝ) (2 * π)) MeasureTheory.volume := by
-    refine MeasureTheory.Integrable.mono'
-      (MeasureTheory.integrableOn_const (C := B) hIcofin.ne)
-      hfmeas.aestronglyMeasurable.restrict ?_
-    filter_upwards with x
-    rw [Real.norm_eq_abs, abs_abs]
-    exact hfB x
+      (Set.Ico (0 : ℝ) (2 * π)) MeasureTheory.volume :=
+    integrableOn_of_norm_le_const hIcofin.ne hfmeas
+      (fun x => by rw [Real.norm_eq_abs, abs_abs]; exact hfB x)
   -- the bad set of the preliminary reparametrization
   set bad : Set ℝ := {θ : ℝ | θ ∈ Set.Ico (0 : ℝ) (2 * π)
       ∧ ε' < |κ (h₁ θ) - κs θ|} with hbaddef
@@ -192,19 +222,12 @@ lemma exists_step_L1_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
       ≤ B * ε' := by
     have hvol : MeasureTheory.volume (Set.Ico (0 : ℝ) (2 * π) ∩ bad) < ⊤ :=
       lt_of_le_of_lt (MeasureTheory.measure_mono Set.inter_subset_left) hIcofin
-    have h := MeasureTheory.norm_setIntegral_le_of_norm_le_const
-      (μ := MeasureTheory.volume) (C := B) hvol
-      (fun x _ => by rw [Real.norm_eq_abs, abs_abs]; exact hfB x)
     have hμ : MeasureTheory.volume.real (Set.Ico (0 : ℝ) (2 * π) ∩ bad) ≤ ε' := by
       rw [MeasureTheory.measureReal_def]
-      refine ENNReal.toReal_le_of_le_ofReal hε'.le ?_
-      exact le_of_lt (lt_of_le_of_lt
-        (MeasureTheory.measure_mono Set.inter_subset_right) hbad)
-    calc (∫ θ in Set.Ico (0 : ℝ) (2 * π) ∩ bad, |κ (h₁ θ) - κs θ|)
-        ≤ ‖∫ θ in Set.Ico (0 : ℝ) (2 * π) ∩ bad, |κ (h₁ θ) - κs θ|‖ :=
-          Real.le_norm_self _
-      _ ≤ B * MeasureTheory.volume.real (Set.Ico (0 : ℝ) (2 * π) ∩ bad) := h
-      _ ≤ B * ε' := by nlinarith
+      exact ENNReal.toReal_le_of_le_ofReal hε'.le (le_of_lt (lt_of_le_of_lt
+        (MeasureTheory.measure_mono Set.inter_subset_right) hbad))
+    exact setIntegral_abs_le_mul hvol
+      (fun x _ => by rw [Real.norm_eq_abs, abs_abs]; exact hfB x) hB0.le hμ
   -- good part: integrand `≤ ε'`, measure `≤ 2π`
   have hbound2 : (∫ θ in Set.Ico (0 : ℝ) (2 * π) \ bad, |κ (h₁ θ) - κs θ|)
       ≤ ε' * (2 * π) := by
@@ -216,19 +239,13 @@ lemma exists_step_L1_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
       rw [Real.norm_eq_abs, abs_abs]
       by_contra hlt
       exact hx.2 ⟨hx.1, lt_of_not_ge hlt⟩
-    have h := MeasureTheory.norm_setIntegral_le_of_norm_le_const
-      (μ := MeasureTheory.volume) (C := ε') hvol hgood
     have hμ : MeasureTheory.volume.real (Set.Ico (0 : ℝ) (2 * π) \ bad)
         ≤ 2 * π := by
       rw [MeasureTheory.measureReal_def]
       refine ENNReal.toReal_le_of_le_ofReal (by linarith) ?_
       refine le_trans (MeasureTheory.measure_mono Set.sdiff_subset) ?_
       rw [Real.volume_Ico, sub_zero]
-    calc (∫ θ in Set.Ico (0 : ℝ) (2 * π) \ bad, |κ (h₁ θ) - κs θ|)
-        ≤ ‖∫ θ in Set.Ico (0 : ℝ) (2 * π) \ bad, |κ (h₁ θ) - κs θ|‖ :=
-          Real.le_norm_self _
-      _ ≤ ε' * MeasureTheory.volume.real (Set.Ico (0 : ℝ) (2 * π) \ bad) := h
-      _ ≤ ε' * (2 * π) := by nlinarith
+    exact setIntegral_abs_le_mul hvol hgood hε'.le hμ
   -- assemble: `(B + 2π)·ε' < (B + 2π + 1)·ε' = ε`
   have hε'mul : ε' * (B + 2 * π + 1) = ε := by
     rw [hε'def]
@@ -268,6 +285,21 @@ private lemma chain_bound {E E' M d S₁ J : ℝ} (hE : 0 ≤ E) (he1 : 1 ≤ E'
     E * (d + M * J) ≤ E * E' * (M * (S₁ + J)) := by
   nlinarith [mul_le_mul_of_nonneg_left hd hE,
     mul_le_mul_of_nonneg_left (le_mul_of_one_le_left hJ he1) hE]
+
+/-- The spherical arc map over the parameter length `t₂ − t₁` is the model-arc
+endpoint at `t₂`: `A_{K,t₁,t₂−t₁}(p) = W − i·r·e^{it₂}` where
+`r = q_K(t₁, p)` and `W = p + i·r·e^{it₁}` is the arc's center displacement. -/
+private lemma sphericalArcMap_eq_sub (K t₁ t₂ : ℝ) (p : ℂ) :
+    sphericalArcMap K t₁ (t₂ - t₁) p
+      = (p + Complex.I * (sphericalSpeed (fun _ => K) t₁ p : ℂ)
+            * Complex.exp ((t₁ : ℂ) * Complex.I))
+        - Complex.I * (sphericalSpeed (fun _ => K) t₁ p : ℂ)
+            * Complex.exp ((t₂ : ℂ) * Complex.I) := by
+  unfold sphericalArcMap
+  have h := expI_add t₁ (t₂ - t₁)
+  rw [show t₁ + (t₂ - t₁) = t₂ by ring] at h
+  rw [h]
+  ring
 
 /-- **One quarter-arc of the step transport**: on `[t₁, t₂]` compare a
 trajectory of the `κ`-truncated flow with the constant-level-`K` model arc
@@ -336,23 +368,136 @@ lemma quarter_step_transport {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : ℝ
     hzsR hzsinner hsmall'
   refine ⟨fun θ hθ => ⟨(htrans θ hθ).2.1, (htrans θ hθ).2.2⟩, ?_⟩
   -- the arc-map image is exactly the model endpoint at `t₂`
-  have harc : sphericalArcMap K t₁ (t₂ - t₁) p
-      = W - Complex.I * (r : ℂ) * Complex.exp ((t₂ : ℂ) * Complex.I) := by
-    unfold sphericalArcMap
-    rw [← hrdef, hWdef]
-    have h := expI_add t₁ (t₂ - t₁)
-    rw [show t₁ + (t₂ - t₁) = t₂ by ring] at h
-    rw [h]
-    ring
   have h := (htrans t₂ ⟨ht, le_refl t₂⟩).1
   rw [hpt1] at h
-  rw [harc]
+  rw [sphericalArcMap_eq_sub K t₁ t₂ p, ← hrdef, ← hWdef]
   exact h
 
-set_option maxHeartbeats 1000000 in
--- The four chained quarter steps each instantiate the transport lemma against
--- an explicit nested-arc-map start point, so the default heartbeat budget is
--- insufficient for the combined elaboration.
+/-- Interval integrability of `|κ − κs|` when `κ` is continuous and `κs` is a
+measurable two-valued function (values in `{a, b}`). -/
+private lemma intervalIntegrable_abs_sub_of_mem_pair {κ κs : ℝ → ℝ} {a b : ℝ}
+    (hκ : Continuous κ) (hκsmeas : Measurable κs)
+    (hvals : ∀ x, κs x = a ∨ κs x = b) (c d : ℝ) :
+    IntervalIntegrable (fun θ => |κ θ - κs θ|) MeasureTheory.volume c d := by
+  have hmeas : Measurable fun θ : ℝ => |κ θ - κs θ| := (hκ.measurable.sub hκsmeas).abs
+  rw [intervalIntegrable_iff]
+  obtain ⟨Cκ, hCκ⟩ :=
+    isCompact_uIcc.exists_bound_of_continuousOn (hκ.continuousOn (s := Set.uIcc c d))
+  refine MeasureTheory.Integrable.mono'
+    (MeasureTheory.integrableOn_const (C := Cκ + (|a| + |b|)) ?_)
+    hmeas.aestronglyMeasurable.restrict ?_
+  · rw [Real.volume_uIoc]; exact ENNReal.ofReal_ne_top
+  · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_uIoc] with x hx
+    have h1 : ‖κ x‖ ≤ Cκ := hCκ x (Set.uIoc_subset_uIcc hx)
+    rw [Real.norm_eq_abs] at h1
+    rw [Real.norm_eq_abs, abs_abs]
+    have hb1 : |κs x| ≤ |a| + |b| := by
+      rcases hvals x with h | h <;> rw [h]
+      · exact le_add_of_nonneg_right (abs_nonneg b)
+      · exact le_add_of_nonneg_left (abs_nonneg a)
+    have htri : |κ x - κs x| ≤ |κ x| + |κs x| := abs_sub (κ x) (κs x)
+    linarith
+
+/-- Value of the canonical step curvature on the fundamental window `[0, 2π)`. -/
+private lemma stepCurvature_canonical_eq (b a : ℝ) {θ : ℝ} (h0 : 0 ≤ θ) (h2 : θ < 2 * π) :
+    stepCurvature b a 0 (π / 2) π (3 * π / 2) θ
+      = if θ < π / 2 ∨ (π ≤ θ ∧ θ < 3 * π / 2) then a else b := by
+  simp only [stepCurvature]
+  have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
+    rw [toIcoMod_eq_self]
+    exact ⟨h0, by rw [zero_add]; exact h2⟩
+  rw [ht]
+
+/-- Level `a` on the open first quarter `(0, π/2)`. -/
+private lemma stepCurvature_canonical_first_quarter (b a : ℝ) {θ : ℝ}
+    (h1 : 0 < θ) (h2 : θ < π / 2) : stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = a := by
+  rw [stepCurvature_canonical_eq b a h1.le (by linarith), if_pos (Or.inl h2)]
+
+/-- Level `b` on the open second quarter `(π/2, π)`. -/
+private lemma stepCurvature_canonical_second_quarter (b a : ℝ) {θ : ℝ}
+    (h1 : π / 2 < θ) (h2 : θ < π) : stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = b := by
+  rw [stepCurvature_canonical_eq b a (by linarith) (by linarith), if_neg]
+  simp only [not_or, not_and, not_lt]
+  exact ⟨by linarith, fun h => by linarith⟩
+
+/-- Level `a` on the open third quarter `(π, 3π/2)`. -/
+private lemma stepCurvature_canonical_third_quarter (b a : ℝ) {θ : ℝ}
+    (h1 : π < θ) (h2 : θ < 3 * π / 2) : stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = a := by
+  rw [stepCurvature_canonical_eq b a (by linarith) (by linarith),
+    if_pos (Or.inr ⟨h1.le, h2⟩)]
+
+/-- Level `b` on the open fourth quarter `(3π/2, 2π)`. -/
+private lemma stepCurvature_canonical_fourth_quarter (b a : ℝ) {θ : ℝ}
+    (h1 : 3 * π / 2 < θ) (h2 : θ < 2 * π) : stepCurvature b a 0 (π / 2) π (3 * π / 2) θ = b := by
+  rw [stepCurvature_canonical_eq b a (by linarith) h2, if_neg]
+  simp only [not_or, not_and, not_lt]
+  exact ⟨by linarith, fun h => by linarith⟩
+
+/-- Replacing a constant level `v` by a step function `κs` that equals `v` on
+the open interval `(c, d)` leaves the `L¹` distance from `κ` unchanged. -/
+private lemma integral_abs_sub_eq_of_eqOn_Ioo {κ κs : ℝ → ℝ} {c d v : ℝ}
+    (hcd : c ≤ d) (hval : ∀ θ, c < θ → θ < d → κs θ = v) :
+    (∫ θ in c..d, |κ θ - v|) = ∫ θ in c..d, |κ θ - κs θ| := by
+  refine intervalIntegral.integral_congr_ae ?_
+  have hnull : MeasureTheory.volume ({d} : Set ℝ) = 0 := MeasureTheory.measure_singleton _
+  filter_upwards [MeasureTheory.compl_mem_ae_iff.mpr hnull] with x hx hmem
+  rw [Set.uIoc_of_le hcd] at hmem
+  have hxd : x < d := lt_of_le_of_ne hmem.2 hx
+  rw [hval x hmem.1 hxd]
+
+/-- Additivity of an interval integral over the four quarter intervals of
+`[0, 2π]`. -/
+private lemma integral_split_four_quarters {f : ℝ → ℝ}
+    (hI : ∀ c d : ℝ, IntervalIntegrable f MeasureTheory.volume c d) :
+    (∫ θ in (0 : ℝ)..(2 * π), f θ)
+      = (∫ θ in (0 : ℝ)..(π / 2), f θ) + (∫ θ in (π / 2 : ℝ)..π, f θ)
+        + (∫ θ in (π : ℝ)..(3 * π / 2), f θ) + (∫ θ in (3 * π / 2 : ℝ)..(2 * π), f θ) := by
+  rw [intervalIntegral.integral_add_adjacent_intervals (hI 0 (π / 2)) (hI (π / 2) π),
+    intervalIntegral.integral_add_adjacent_intervals (hI 0 π) (hI π (3 * π / 2)),
+    intervalIntegral.integral_add_adjacent_intervals (hI 0 (3 * π / 2))
+      (hI (3 * π / 2) (2 * π))]
+
+/-- **One recurrence step of the four-arc chain.** Given the running bound
+`‖z t₁ − pprev‖ ≤ e^{L t₁}·(M·Sprev)`, the arc margins on `[t₁, t₂]`, and the
+budget `e^{L t₂}·(M·(Sprev + Jcur)) ≤ μ`, the trajectory is admissible on the
+quarter and its endpoint lands within `e^{L t₂}·(M·(Sprev + Jcur))` of the
+arc-map image. This packages `chain_bound`, the exponential collapse, and one
+call to `quarter_step_transport`, so the four quarters of `stepModel_transport`
+are four uniform instances of it. -/
+private lemma stepModel_transport_quarter
+    {κ : ℝ → ℝ} {κ₀ R δ μ M Sprev Jcur t₁ t₂ K : ℝ} {L : ℝ≥0} {z : ℝ → ℂ} {pprev : ℂ}
+    (hκ : Continuous κ) (hκ₀ : ∀ θ, κ₀ ≤ κ θ) (hR : 0 ≤ R) (hδ : 0 < δ)
+    (hL : ∀ θ, LipschitzWith L (fun w => truncatedField κ R δ θ w))
+    (hMeq : M = (1 + R ^ 2) / (2 * δ ^ 2)) (hM0 : 0 ≤ M) (hJ0 : 0 ≤ Jcur)
+    (h0t : 0 ≤ t₁) (ht12 : t₁ ≤ t₂)
+    (hz : ∀ θ ∈ Set.Icc t₁ t₂,
+      HasDerivWithinAt z (truncatedField κ R δ θ (z θ)) (Set.Icc t₁ t₂) θ)
+    (hmarg : arcMargins κ₀ R δ μ K t₁ t₂ pprev)
+    (hJcur : (∫ θ in t₁..t₂, |κ θ - K|) = Jcur)
+    (hDprev : ‖z t₁ - pprev‖ ≤ Real.exp ((L : ℝ) * t₁) * (M * Sprev))
+    (hcollapse : Real.exp ((L : ℝ) * (t₂ - t₁)) * Real.exp ((L : ℝ) * t₁)
+        = Real.exp ((L : ℝ) * t₂))
+    (hbudget : Real.exp ((L : ℝ) * t₂) * (M * (Sprev + Jcur)) ≤ μ) :
+    (∀ θ ∈ Set.Icc t₁ t₂, ‖z θ‖ ≤ R ∧
+      δ ≤ κ θ - ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ) ∧
+    ‖z t₂ - sphericalArcMap K t₁ (t₂ - t₁) pprev‖
+      ≤ Real.exp ((L : ℝ) * t₂) * (M * (Sprev + Jcur)) := by
+  have hchain := chain_bound (E := Real.exp ((L : ℝ) * (t₂ - t₁))) (Real.exp_nonneg _)
+    (by rw [← Real.exp_zero]; exact Real.exp_le_exp.mpr (mul_nonneg L.coe_nonneg h0t))
+    hDprev (mul_nonneg hM0 hJ0)
+  have hbound : Real.exp ((L : ℝ) * (t₂ - t₁)) * (‖z t₁ - pprev‖ + M * Jcur)
+      ≤ Real.exp ((L : ℝ) * t₂) * (M * (Sprev + Jcur)) := by
+    refine le_trans hchain (le_of_eq ?_)
+    rw [hcollapse]
+  have hsmall : Real.exp ((L : ℝ) * (t₂ - t₁)) * (‖z t₁ - pprev‖
+      + (1 + R ^ 2) / (2 * δ ^ 2) * ∫ θ in t₁..t₂, |κ θ - K|) ≤ μ := by
+    rw [← hMeq, hJcur]
+    exact le_trans hbound hbudget
+  have hstep := quarter_step_transport hκ hκ₀ hR hδ ht12 hL hz hmarg hsmall
+  refine ⟨hstep.1, le_trans hstep.2 ?_⟩
+  rw [← hMeq, hJcur]
+  exact hbound
+
 /-- **Four-arc chained transport against the symmetric step model.** Compare a
 trajectory of the `κ`-truncated flow on `[0, 2π]` with the concatenated
 four-quarter-arc step model from `z₀` (levels `a, b, a, b` at
@@ -392,7 +537,7 @@ lemma stepModel_transport {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ} {L : ℝ�
   set M : ℝ := (1 + R ^ 2) / (2 * δ ^ 2) with hMdef
   have hM0 : 0 ≤ M := by positivity
   set κs : ℝ → ℝ := stepCurvature b a 0 (π / 2) π (3 * π / 2) with hκsdef
-  -- measurability + boundedness → integrability of the `L¹` distance
+  -- measurability, integrability, and the quarter/total `L¹` splitting
   have hκsmeas : Measurable κs := measurable_stepCurvature_canonical b a
   have hκs_vals : ∀ x, κs x = a ∨ κs x = b := by
     intro x
@@ -402,103 +547,36 @@ lemma stepModel_transport {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ} {L : ℝ�
     · exact Or.inl rfl
     · exact Or.inr rfl
   have hIabs : ∀ c d : ℝ, IntervalIntegrable (fun θ => |κ θ - κs θ|)
-      MeasureTheory.volume c d := by
-    intro c d
-    have hmeas : Measurable fun θ : ℝ => |κ θ - κs θ| :=
-      (hκ.measurable.sub hκsmeas).abs
-    rw [intervalIntegrable_iff]
-    obtain ⟨Cκ, hCκ⟩ :=
-      isCompact_uIcc.exists_bound_of_continuousOn (hκ.continuousOn (s := Set.uIcc c d))
-    refine MeasureTheory.Integrable.mono'
-      (MeasureTheory.integrableOn_const (C := Cκ + (|a| + |b|)) ?_)
-      hmeas.aestronglyMeasurable.restrict ?_
-    · rw [Real.volume_uIoc]
-      exact ENNReal.ofReal_ne_top
-    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_uIoc] with x hx
-      have h1 : ‖κ x‖ ≤ Cκ := hCκ x (Set.uIoc_subset_uIcc hx)
-      rw [Real.norm_eq_abs] at h1
-      rw [Real.norm_eq_abs, abs_abs]
-      have hb1 : |κs x| ≤ |a| + |b| := by
-        rcases hκs_vals x with h | h <;> rw [h]
-        · exact le_add_of_nonneg_right (abs_nonneg b)
-        · exact le_add_of_nonneg_left (abs_nonneg a)
-      have htri : |κ x - κs x| ≤ |κ x| + |κs x| := abs_sub (κ x) (κs x)
-      linarith
-  -- the step value on the open quarters
-  have hκs_val : ∀ θ, 0 ≤ θ → θ < 2 * π →
-      κs θ = if θ < π / 2 ∨ (π ≤ θ ∧ θ < 3 * π / 2) then a else b := by
-    intro θ h0 h2
-    rw [hκsdef]
-    simp only [stepCurvature]
-    have ht : toIcoMod Real.two_pi_pos 0 θ = θ := by
-      rw [toIcoMod_eq_self]
-      exact ⟨h0, by rw [zero_add]; exact h2⟩
-    rw [ht]
-  have hq0 : ∀ θ, 0 < θ → θ < π / 2 → κs θ = a := by
-    intro θ h1 h2
-    rw [hκs_val θ h1.le (by linarith), if_pos (Or.inl h2)]
-  have hq1 : ∀ θ, π / 2 < θ → θ < π → κs θ = b := by
-    intro θ h1 h2
-    rw [hκs_val θ (by linarith) (by linarith), if_neg]
-    simp only [not_or, not_and, not_lt]
-    exact ⟨by linarith, fun h => by linarith⟩
-  have hq2 : ∀ θ, π < θ → θ < 3 * π / 2 → κs θ = a := by
-    intro θ h1 h2
-    rw [hκs_val θ (by linarith) (by linarith), if_pos (Or.inr ⟨h1.le, h2⟩)]
-  have hq3 : ∀ θ, 3 * π / 2 < θ → θ < 2 * π → κs θ = b := by
-    intro θ h1 h2
-    rw [hκs_val θ (by linarith) h2, if_neg]
-    simp only [not_or, not_and, not_lt]
-    exact ⟨by linarith, fun h => by linarith⟩
-  -- each quarter's constant-level `L¹` distance equals the `κ*` distance
-  have hquarter : ∀ c d v : ℝ, c ≤ d → (∀ θ, c < θ → θ < d → κs θ = v) →
-      (∫ θ in c..d, |κ θ - v|) = ∫ θ in c..d, |κ θ - κs θ| := by
-    intro c d v hcd hval
-    refine intervalIntegral.integral_congr_ae ?_
-    have hnull : MeasureTheory.volume ({d} : Set ℝ) = 0 :=
-      MeasureTheory.measure_singleton _
-    filter_upwards [MeasureTheory.compl_mem_ae_iff.mpr hnull] with x hx hmem
-    rw [Set.uIoc_of_le hcd] at hmem
-    have hxd : x < d := lt_of_le_of_ne hmem.2 hx
-    rw [hval x hmem.1 hxd]
-  -- the four quarter integrals and the total
+      MeasureTheory.volume c d :=
+    fun c d => intervalIntegrable_abs_sub_of_mem_pair hκ hκsmeas hκs_vals c d
   set J₀ : ℝ := ∫ θ in (0 : ℝ)..(π / 2), |κ θ - κs θ| with hJ₀def
   set J₁ : ℝ := ∫ θ in (π / 2 : ℝ)..π, |κ θ - κs θ| with hJ₁def
   set J₂ : ℝ := ∫ θ in (π : ℝ)..(3 * π / 2), |κ θ - κs θ| with hJ₂def
   set J₃ : ℝ := ∫ θ in (3 * π / 2 : ℝ)..(2 * π), |κ θ - κs θ| with hJ₃def
-  have hJ₀0 : 0 ≤ J₀ := by
-    rw [hJ₀def]
-    exact intervalIntegral.integral_nonneg (by linarith) (fun x _ => abs_nonneg _)
-  have hJ₁0 : 0 ≤ J₁ := by
-    rw [hJ₁def]
-    exact intervalIntegral.integral_nonneg (by linarith) (fun x _ => abs_nonneg _)
-  have hJ₂0 : 0 ≤ J₂ := by
-    rw [hJ₂def]
-    exact intervalIntegral.integral_nonneg (by linarith) (fun x _ => abs_nonneg _)
-  have hJ₃0 : 0 ≤ J₃ := by
-    rw [hJ₃def]
-    exact intervalIntegral.integral_nonneg (by linarith) (fun x _ => abs_nonneg _)
-  have hStot : (∫ θ in (0 : ℝ)..(2 * π), |κ θ - κs θ|) = J₀ + J₁ + J₂ + J₃ := by
-    rw [hJ₀def, hJ₁def, hJ₂def, hJ₃def,
-      intervalIntegral.integral_add_adjacent_intervals (hIabs 0 (π / 2))
-        (hIabs (π / 2) π),
-      intervalIntegral.integral_add_adjacent_intervals (hIabs 0 π)
-        (hIabs π (3 * π / 2)),
-      intervalIntegral.integral_add_adjacent_intervals (hIabs 0 (3 * π / 2))
-        (hIabs (3 * π / 2) (2 * π))]
-  have hK₀ : (∫ θ in (0 : ℝ)..(π / 2), |κ θ - a|) = J₀ := by
-    rw [hJ₀def]; exact hquarter 0 (π / 2) a (by linarith) hq0
-  have hK₁ : (∫ θ in (π / 2 : ℝ)..π, |κ θ - b|) = J₁ := by
-    rw [hJ₁def]; exact hquarter (π / 2) π b (by linarith) hq1
-  have hK₂ : (∫ θ in (π : ℝ)..(3 * π / 2), |κ θ - a|) = J₂ := by
-    rw [hJ₂def]; exact hquarter π (3 * π / 2) a (by linarith) hq2
-  have hK₃ : (∫ θ in (3 * π / 2 : ℝ)..(2 * π), |κ θ - b|) = J₃ := by
-    rw [hJ₃def]; exact hquarter (3 * π / 2) (2 * π) b (by linarith) hq3
+  have hJ₀0 : 0 ≤ J₀ :=
+    intervalIntegral.integral_nonneg (by linarith) (fun x _ => abs_nonneg _)
+  have hJ₁0 : 0 ≤ J₁ :=
+    intervalIntegral.integral_nonneg (by linarith) (fun x _ => abs_nonneg _)
+  have hJ₂0 : 0 ≤ J₂ :=
+    intervalIntegral.integral_nonneg (by linarith) (fun x _ => abs_nonneg _)
+  have hJ₃0 : 0 ≤ J₃ :=
+    intervalIntegral.integral_nonneg (by linarith) (fun x _ => abs_nonneg _)
+  have hStot : (∫ θ in (0 : ℝ)..(2 * π), |κ θ - κs θ|) = J₀ + J₁ + J₂ + J₃ :=
+    integral_split_four_quarters (fun c d => hIabs c d)
+  have hK₀ : (∫ θ in (0 : ℝ)..(π / 2), |κ θ - a|) = J₀ :=
+    integral_abs_sub_eq_of_eqOn_Ioo (by linarith)
+      (fun θ h1 h2 => stepCurvature_canonical_first_quarter b a h1 h2)
+  have hK₁ : (∫ θ in (π / 2 : ℝ)..π, |κ θ - b|) = J₁ :=
+    integral_abs_sub_eq_of_eqOn_Ioo (by linarith)
+      (fun θ h1 h2 => stepCurvature_canonical_second_quarter b a h1 h2)
+  have hK₂ : (∫ θ in (π : ℝ)..(3 * π / 2), |κ θ - a|) = J₂ :=
+    integral_abs_sub_eq_of_eqOn_Ioo (by linarith)
+      (fun θ h1 h2 => stepCurvature_canonical_third_quarter b a h1 h2)
+  have hK₃ : (∫ θ in (3 * π / 2 : ℝ)..(2 * π), |κ θ - b|) = J₃ :=
+    integral_abs_sub_eq_of_eqOn_Ioo (by linarith)
+      (fun θ h1 h2 => stepCurvature_canonical_fourth_quarter b a h1 h2)
   -- fold the smallness hypothesis onto the quarter sum
   rw [hStot] at hsmall
-  have hE1 : (1 : ℝ) ≤ Real.exp ((L : ℝ) * (π / 2)) := by
-    rw [← Real.exp_zero]
-    exact Real.exp_le_exp.mpr (by positivity)
   -- generic tail comparison against the total bound
   have htot : ∀ x y : ℝ, (L : ℝ) * x ≤ 2 * π * (L : ℝ) → 0 ≤ y →
       y ≤ J₀ + J₁ + J₂ + J₃ →
@@ -508,101 +586,60 @@ lemma stepModel_transport {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ} {L : ℝ�
     refine mul_le_mul (Real.exp_le_exp.mpr hx) ?_
       (mul_nonneg hM0 hy) (Real.exp_nonneg _)
     exact mul_le_mul_of_nonneg_left hyle hM0
-  -- restriction of the trajectory to a quarter
+  -- restriction of the trajectory to a quarter, exponential collapse, arc starts
   have hzq : ∀ c d : ℝ, 0 ≤ c → d ≤ 2 * π → ∀ θ ∈ Set.Icc c d,
       HasDerivWithinAt z (truncatedField κ R δ θ (z θ)) (Set.Icc c d) θ :=
     fun c d hc hd θ hθ => (hz θ ⟨hc.trans hθ.1, hθ.2.trans hd⟩).mono
       (Set.Icc_subset_Icc hc hd)
+  have hcol : ∀ s t : ℝ, Real.exp ((L : ℝ) * (t - s)) * Real.exp ((L : ℝ) * s)
+      = Real.exp ((L : ℝ) * t) := fun s t => by rw [← Real.exp_add]; congr 1; ring
   set p₁ : ℂ := sphericalArcMap a 0 (π / 2) z₀ with hp₁def
   set p₂ : ℂ := sphericalArcMap b (π / 2) (π / 2) p₁ with hp₂def
   set p₃ : ℂ := sphericalArcMap a π (π / 2) p₂ with hp₃def
-  -- ---- quarter 0: `[0, π/2]`, level `a`, start `z₀`
-  have hsmall₀ : Real.exp ((L : ℝ) * (π / 2 - 0)) * (‖z 0 - z₀‖
-      + M * ∫ θ in (0 : ℝ)..(π / 2), |κ θ - a|) ≤ μ := by
-    rw [show (L : ℝ) * (π / 2 - 0) = (L : ℝ) * (π / 2) by ring, hK₀,
-      hz0, sub_self, norm_zero, zero_add]
-    exact le_trans (htot (π / 2) J₀ (by nlinarith [L.coe_nonneg]) hJ₀0
-      (by linarith)) hsmall
-  have hstep0 := quarter_step_transport hκ hκ₀ hR hδ (by linarith : (0 : ℝ) ≤ π / 2)
-    hL (hzq 0 (π / 2) (le_refl 0) (by linarith)) hm0 hsmall₀
+  -- quarter 0: `[0, π/2]`, level `a`, start `z₀`
+  have hD₀ : ‖z 0 - z₀‖ ≤ Real.exp ((L : ℝ) * 0) * (M * 0) := by
+    rw [hz0, sub_self, norm_zero]; positivity
+  have hstep0 := stepModel_transport_quarter hκ hκ₀ hR hδ hL hMdef hM0 hJ₀0
+    le_rfl (by linarith) (hzq 0 (π / 2) le_rfl (by linarith)) hm0 hK₀ hD₀ (hcol 0 (π / 2))
+    (by rw [zero_add]
+        exact le_trans
+          (htot (π / 2) J₀ (by nlinarith [L.coe_nonneg]) hJ₀0 (by linarith)) hsmall)
   have hD₁ : ‖z (π / 2) - p₁‖ ≤ Real.exp ((L : ℝ) * (π / 2)) * (M * J₀) := by
     have h := hstep0.2
-    rw [sub_zero, hz0, sub_self, norm_zero, zero_add, hK₀] at h
+    rw [sub_zero, zero_add, ← hp₁def] at h
     exact h
-  -- ---- quarter 1: `[π/2, π]`, level `b`, start `p₁`
-  have hchain₁ := chain_bound (E := Real.exp ((L : ℝ) * (π / 2)))
-    (Real.exp_nonneg _) hE1 hD₁ (mul_nonneg hM0 hJ₁0)
-  have hcollapse₁ : Real.exp ((L : ℝ) * (π / 2)) * Real.exp ((L : ℝ) * (π / 2))
-      = Real.exp ((L : ℝ) * π) := by
-    rw [← Real.exp_add]
-    congr 1
-    ring
-  have hsmall₁ : Real.exp ((L : ℝ) * (π - π / 2)) * (‖z (π / 2) - p₁‖
-      + M * ∫ θ in (π / 2 : ℝ)..π, |κ θ - b|) ≤ μ := by
-    rw [show (L : ℝ) * (π - π / 2) = (L : ℝ) * (π / 2) by ring, hK₁]
-    refine le_trans hchain₁ ?_
-    rw [hcollapse₁]
-    exact le_trans (htot π (J₀ + J₁) (by nlinarith [L.coe_nonneg])
-      (by linarith) (by linarith)) hsmall
-  have hstep1 := quarter_step_transport hκ hκ₀ hR hδ
-    (by linarith : π / 2 ≤ π) hL (hzq (π / 2) π (by linarith) (by linarith))
-    hm1 hsmall₁
+  -- quarter 1: `[π/2, π]`, level `b`, start `p₁`
+  have hstep1 := stepModel_transport_quarter hκ hκ₀ hR hδ hL hMdef hM0 hJ₁0
+    (by linarith) (by linarith) (hzq (π / 2) π (by linarith) (by linarith)) hm1 hK₁ hD₁
+    (hcol (π / 2) π)
+    (le_trans (htot π (J₀ + J₁) (by nlinarith [L.coe_nonneg]) (by linarith) (by linarith)) hsmall)
   have hD₂ : ‖z π - p₂‖ ≤ Real.exp ((L : ℝ) * π) * (M * (J₀ + J₁)) := by
     have h := hstep1.2
-    rw [show π - π / 2 = π / 2 by ring, hK₁] at h
-    refine le_trans h (le_trans hchain₁ (le_of_eq ?_))
-    rw [hcollapse₁]
-  -- ---- quarter 2: `[π, 3π/2]`, level `a`, start `p₂`
-  have hchain₂ := chain_bound (E := Real.exp ((L : ℝ) * (π / 2)))
-    (Real.exp_nonneg _) (by
-      rw [← Real.exp_zero]
-      exact Real.exp_le_exp.mpr (by positivity)) hD₂ (mul_nonneg hM0 hJ₂0)
-  have hcollapse₂ : Real.exp ((L : ℝ) * (π / 2)) * Real.exp ((L : ℝ) * π)
-      = Real.exp ((L : ℝ) * (3 * π / 2)) := by
-    rw [← Real.exp_add]
-    congr 1
-    ring
-  have hsmall₂ : Real.exp ((L : ℝ) * (3 * π / 2 - π)) * (‖z π - p₂‖
-      + M * ∫ θ in (π : ℝ)..(3 * π / 2), |κ θ - a|) ≤ μ := by
-    rw [show (L : ℝ) * (3 * π / 2 - π) = (L : ℝ) * (π / 2) by ring, hK₂]
-    refine le_trans hchain₂ ?_
-    rw [hcollapse₂]
-    exact le_trans (htot (3 * π / 2) (J₀ + J₁ + J₂) (by nlinarith [L.coe_nonneg])
-      (by linarith) (by linarith)) hsmall
-  have hstep2 := quarter_step_transport hκ hκ₀ hR hδ
-    (by linarith : π ≤ 3 * π / 2) hL
-    (hzq π (3 * π / 2) (by linarith) (by linarith)) hm2 hsmall₂
+    rw [show π - π / 2 = π / 2 from by ring, ← hp₂def] at h
+    exact h
+  -- quarter 2: `[π, 3π/2]`, level `a`, start `p₂`
+  have hstep2 := stepModel_transport_quarter hκ hκ₀ hR hδ hL hMdef hM0 hJ₂0
+    (by linarith) (by linarith) (hzq π (3 * π / 2) (by linarith) (by linarith)) hm2 hK₂ hD₂
+    (hcol π (3 * π / 2))
+    (le_trans (htot (3 * π / 2) (J₀ + J₁ + J₂) (by nlinarith [L.coe_nonneg])
+      (by linarith) (by linarith)) hsmall)
   have hD₃ : ‖z (3 * π / 2) - p₃‖
       ≤ Real.exp ((L : ℝ) * (3 * π / 2)) * (M * (J₀ + J₁ + J₂)) := by
     have h := hstep2.2
-    rw [show 3 * π / 2 - π = π / 2 by ring, hK₂] at h
-    refine le_trans h (le_trans hchain₂ (le_of_eq ?_))
-    rw [hcollapse₂]
-  -- ---- quarter 3: `[3π/2, 2π]`, level `b`, start `p₃`
-  have hchain₃ := chain_bound (E := Real.exp ((L : ℝ) * (π / 2)))
-    (Real.exp_nonneg _) (by
-      rw [← Real.exp_zero]
-      exact Real.exp_le_exp.mpr (by positivity)) hD₃ (mul_nonneg hM0 hJ₃0)
-  have hcollapse₃ : Real.exp ((L : ℝ) * (π / 2)) * Real.exp ((L : ℝ) * (3 * π / 2))
-      = Real.exp (2 * π * (L : ℝ)) := by
-    rw [← Real.exp_add]
-    congr 1
-    ring
-  have hsmall₃ : Real.exp ((L : ℝ) * (2 * π - 3 * π / 2)) * (‖z (3 * π / 2) - p₃‖
-      + M * ∫ θ in (3 * π / 2 : ℝ)..(2 * π), |κ θ - b|) ≤ μ := by
-    rw [show (L : ℝ) * (2 * π - 3 * π / 2) = (L : ℝ) * (π / 2) by ring, hK₃]
-    refine le_trans hchain₃ ?_
-    rw [hcollapse₃]
-    exact le_trans (le_of_eq (by ring)) hsmall
-  have hstep3 := quarter_step_transport hκ hκ₀ hR hδ
-    (by linarith : 3 * π / 2 ≤ 2 * π) hL
-    (hzq (3 * π / 2) (2 * π) (by linarith) (le_refl _)) hm3 hsmall₃
+    rw [show 3 * π / 2 - π = π / 2 from by ring, ← hp₃def] at h
+    exact h
+  -- quarter 3: `[3π/2, 2π]`, level `b`, start `p₃`
+  have hstep3 := stepModel_transport_quarter hκ hκ₀ hR hδ hL hMdef hM0 hJ₃0
+    (by linarith) (by linarith) (hzq (3 * π / 2) (2 * π) (by linarith) le_rfl) hm3 hK₃ hD₃
+    (hcol (3 * π / 2) (2 * π))
+    (le_trans (htot (2 * π) (J₀ + J₁ + J₂ + J₃) (by nlinarith [L.coe_nonneg])
+      (by linarith) le_rfl) hsmall)
   have hD₄ : ‖z (2 * π) - sphericalArcMap b (3 * π / 2) (π / 2) p₃‖
       ≤ Real.exp (2 * π * (L : ℝ)) * (M * (J₀ + J₁ + J₂ + J₃)) := by
     have h := hstep3.2
-    rw [show 2 * π - 3 * π / 2 = π / 2 by ring, hK₃] at h
-    refine le_trans h (le_trans hchain₃ (le_of_eq ?_))
-    rw [hcollapse₃]
+    rw [show (2 : ℝ) * π - 3 * π / 2 = π / 2 from by ring,
+      show (L : ℝ) * (2 * π) = 2 * π * (L : ℝ) from by ring] at h
+    exact h
   -- assemble: admissibility quarter by quarter, endpoint via the composite
   constructor
   · intro θ hθ
