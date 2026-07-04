@@ -3158,7 +3158,7 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
     rw [hdev0, norm_zero]
     positivity
   have hgG₀ : ‖z₀ - z₀ - 0‖ ≤ 3000 * h * (‖δ‖ + h) := by
-    simp only [sub_self, sub_zero, norm_zero]
+    simp only [sub_self, norm_zero]
     positivity
   have hG₀n : ‖(0 : ℂ)‖ ≤ 3 * h := by
     rw [norm_zero]
@@ -3970,7 +3970,7 @@ lemma windingNumberC_conj_loop {w : ℂ} (hw : w ≠ 0) :
       congr 1
       push_cast
       ring
-    show Complex.exp (((Complex.arg w - 2 * π * (t : ℝ) : ℝ)) * Complex.I)
+    change Complex.exp (((Complex.arg w - 2 * π * (t : ℝ) : ℝ)) * Complex.I)
       = conjLoop w t / (‖w‖ : ℂ)
     rw [hsplit, hargw, hval, hconj]
     field_simp
