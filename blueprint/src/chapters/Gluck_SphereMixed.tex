@@ -47,12 +47,15 @@ What genuinely changes: (a) the hypothesis package
 $\kappa_0\in(-r^\ast,c]$ instead of $(0,c]$
 (\cref{lem:mixed_sphere_margin_transport}); (c) two positive-stage lemmas
 carry an unused positivity hypothesis (\texttt{IsCurvatureFunction}) that must
-be relaxed to ``continuous and $2\pi$-periodic'':
-\cref{lem:reconstruction_ode} (positivity of the speed comes from the
-admissibility margin, not from $\kappa>0$) and \cref{lem:step_L1_reparam}
-(via \cref{lem:exists_preliminary_reparam}, whose plateau construction does
-not use positivity). These are hypothesis-relaxation variants, not new
-mathematics.
+not survive into stage 2. For \cref{lem:reconstruction_ode} the relaxation to
+``continuous and $2\pi$-periodic'' is folded into the stage-1 S2-E re-sign
+(positivity of the speed comes from the admissibility margin, not from
+$\kappa>0$; see the statement note there) — one declaration serves both
+stages, no variant block needed. For \cref{lem:step_L1_reparam} the Euclidean
+plateau engine \cref{lem:exists_preliminary_reparam} is frozen with its
+positive hypothesis, so stage 2 uses the constant-shift reduction
+\cref{lem:step_L1_reparam_relaxed} below — a genuine (small) new lemma, not an
+edit to frozen files.
 
 \section{Declarations}
 
@@ -94,6 +97,42 @@ mathematics.
   the stage-2 stand-in the positive-stage docstrings promised.)
 \end{definition}
 
+\begin{lemma}[$L^1$ step reparametrization without positivity]
+  \label{lem:step_L1_reparam_relaxed}
+  \lean{Gluck.exists_step_L1_reparam_relaxed}
+  \uses{lem:step_L1_reparam, def:four_arc_step_function}
+  Let $\kappa$ be continuous and $2\pi$-periodic (no positivity), $0<a<b$, and
+  $\theta_1<\theta_2<\theta_3<\theta_4<\theta_1+2\pi$ with
+  $\kappa(\theta_1,\theta_2,\theta_3,\theta_4)=(a,b,a,b)$. For every
+  $\varepsilon>0$ there is an orientation-preserving circle reparametrization
+  $h_1$ ($\mathrm{StrictMono}$, $C^1$ with continuous positive derivative,
+  $h_1(\theta+2\pi)=h_1(\theta)+2\pi$) such that
+  \[
+    \int_0^{2\pi}\bigl|\kappa(h_1(\theta))-\kappa^\ast(\theta)\bigr|\,d\theta
+    \;<\;\varepsilon,
+    \qquad \kappa^\ast=\texttt{stepCurvature } b\,a\,0\,(\pi/2)\,\pi\,(3\pi/2).
+  \]
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:step_L1_reparam}
+  Constant-shift reduction to the positive-stage lemma; the frozen Euclidean
+  plateau engine is applied only to a positive function. Pick
+  $M>\max\bigl(0,-\min_{[0,2\pi]}\kappa\bigr)$ (finite by compactness and
+  periodicity), so $\kappa+M$ is a curvature function
+  (continuous, $2\pi$-periodic, $>0$). The crossing data shifts to
+  $(\kappa+M)(\theta_k)=(a+M,b+M,a+M,b+M)$ with $0<a+M<b+M$, so
+  \cref{lem:step_L1_reparam} applied to $\kappa+M$ with levels $a+M,b+M$
+  yields $h_1$ with
+  $\int_0^{2\pi}|(\kappa+M)\circ h_1-\kappa^\ast_M|<\varepsilon$, where
+  $\kappa^\ast_M=\texttt{stepCurvature}\,(b+M)\,(a+M)\,0\,(\pi/2)\,\pi\,
+  (3\pi/2)$. Pointwise $\kappa^\ast_M=\kappa^\ast+M$ (the step function takes
+  only the two level values, each shifted by $M$), so the integrand equals
+  $|\kappa\circ h_1-\kappa^\ast|$ pointwise and the same $h_1$ witnesses the
+  claim. ($\sim$30--60 LOC; the only Lean content beyond the application is
+  the pointwise shift identity for \texttt{stepCurvature}.)
+\end{proof}
+
 \begin{lemma}[mixed-sign margin transport]
   \label{lem:mixed_sphere_margin_transport}
   \lean{Gluck.mixedSphere_margin_transport}
@@ -124,10 +163,13 @@ mathematics.
 \begin{lemma}[mixed-sign endpoint winding]
   \label{lem:mixed_spherical_endpoint_winding}
   \lean{Gluck.mixed_spherical_endpoint_winding}
-  \uses{lem:spherical_endpoint_winding, lem:mixed_sphere_margin_transport,
-        lem:step_error_expansion, lem:exists_abab_levels, lem:step_L1_reparam,
-        thm:existence_of_zero, lem:winding_conj_loop,
-        lem:winding_number_c_perturb}
+  \uses{def:spherical_endpoint, lem:spherical_endpoint_continuousOn,
+        def:step_error_map, lem:step_model_transport,
+        lem:mixed_sphere_margin_transport, def:spherical_admissible_profile,
+        lem:step_error_expansion, lem:exists_abab_levels,
+        lem:step_L1_reparam_relaxed, thm:existence_of_zero,
+        lem:winding_conj_loop, lem:winding_number_c_perturb,
+        def:mixed_sign_sphere_four_vertex}
   Let $\kappa$ satisfy \cref{def:mixed_sign_sphere_four_vertex} and be
   non-constant. Then there exist $R<1$, $\delta>0$, a circle reparametrization
   $h_1$ and $z_0$ such that the $(\kappa\circ h_1,R,\delta)$-truncated
@@ -135,35 +177,61 @@ mathematics.
 \end{lemma}
 
 \begin{proof}
-  Verbatim the assembly of \cref{lem:spherical_endpoint_winding} with two
-  substitutions: the margins come from
+  \uses{lem:mixed_sphere_margin_transport, lem:step_L1_reparam_relaxed,
+        lem:step_error_expansion, thm:existence_of_zero}
+  The same six-step assembly as the proof of the positive-stage
+  \cref{lem:spherical_endpoint_winding} (Data $\to$ boundary margin $\to$
+  reparametrization $\to$ winding $\to$ zero $\to$ admissibility), rebuilt
+  from the sign-agnostic components rather than by invoking the positive
+  wrapper (whose hypothesis \cref{def:sphere_four_vertex} we do not have).
+  Two substitutions: the margins come from
   \cref{lem:mixed_sphere_margin_transport} (with $\kappa_0$ the mixed-sign
   lower bound of \cref{def:spherical_admissible_profile} instead of
-  $\min\kappa>0$), and the $L^1$ reparametrization uses the
-  relaxed-hypothesis variant of \cref{lem:step_L1_reparam} (continuity and
-  periodicity of $\kappa$ suffice; the step levels $a,b$ are chosen in the
-  \emph{positive} part of the window, so the target step is the same
-  positive-stage object and \cref{lem:step_error_expansion} applies
-  unchanged).
+  $\min\kappa>0$), and the $L^1$ reparametrization is
+  \cref{lem:step_L1_reparam_relaxed} (continuity and periodicity of $\kappa$
+  suffice; the step levels $a,b$ are chosen in the \emph{positive} part of
+  the window, so the target step is the same positive-stage object and
+  \cref{lem:step_error_expansion} applies unchanged). All other ingredients
+  (\cref{def:spherical_endpoint}, \cref{lem:spherical_endpoint_continuousOn},
+  \cref{lem:step_model_transport}, \cref{lem:winding_conj_loop},
+  \cref{lem:winding_number_c_perturb}, \cref{thm:existence_of_zero}) are
+  already sign-agnostic and are consumed verbatim.
 \end{proof}
 
 \begin{lemma}[mixed-sign simplicity]
   \label{lem:mixed_spherical_simplicity}
   \lean{Gluck.mixed_spherical_simplicity}
-  \uses{lem:spherical_simplicity, lem:mixed_spherical_endpoint_winding}
+  \uses{lem:mixed_spherical_endpoint_winding, lem:reconstruction_ode,
+        lem:spherical_trajectory_speed,
+        lem:spherical_trajectory_eq_reconstruct,
+        lem:is_simple_closed_const_add,
+        cor:positive_curvature_implies_simple, def:error_vector}
   The closed admissible mixed-sign trajectory of
-  \cref{lem:mixed_spherical_endpoint_winding} is simple.
+  \cref{lem:mixed_spherical_endpoint_winding} (periodically extended) is
+  simple.
 \end{lemma}
 
 \begin{proof}
-  Identical mechanism to \cref{lem:spherical_simplicity}: the disk
-  representative has $z'=q\,e^{i\theta}$ with $q>0$ from the admissibility
-  margin (sign of $\kappa$ irrelevant), so the chord/cosine-integral
-  injectivity argument through the public primitives
-  \texttt{chord\_integral\_ne\_zero} / \texttt{isSimpleClosed\_reconstruct}
-  applies unchanged; confinement transports simplicity to $S^2$. (Fill in
-  when \cref{lem:spherical_simplicity} itself is worked to finite effort in
-  S2-E; the two should share their Lean infrastructure.)
+  \uses{lem:spherical_trajectory_eq_reconstruct,
+        lem:is_simple_closed_const_add,
+        cor:positive_curvature_implies_simple}
+  The S2-E chain verbatim, through the relaxed (post-re-sign)
+  \cref{lem:reconstruction_ode}: the exposed derivative conjunct gives
+  $\tilde z'=\rho(t)e^{it}$ with trajectory speed
+  $\rho(t)=q_{\kappa\circ h_1}(t,\tilde z(t))$ continuous, $2\pi$-periodic and
+  $>0$ — positivity from the admissibility margin (denominator $\ge2\delta$),
+  the sign of $\kappa$ irrelevant, exactly as in
+  \cref{lem:spherical_trajectory_speed} whose proof never consumes $\kappa>0$.
+  Then \cref{lem:spherical_trajectory_eq_reconstruct} identifies $\tilde z$
+  with $\tilde z(0)+\mathrm{reconstruct}\,\rho$, closure kills the error
+  vector, \cref{cor:positive_curvature_implies_simple} (public
+  \texttt{isSimpleClosed\_reconstruct}) gives simplicity of
+  $\mathrm{reconstruct}\,\rho$, and \cref{lem:is_simple_closed_const_add}
+  transfers it to $\tilde z$. At stage-2 dispatch time the two trajectory
+  lemmas should be stated (or generalized in place) with the relaxed
+  hypothesis so the same Lean declarations serve both stages; if they land
+  positive-only in S2-E, stage 2 re-signs them the same way as
+  \cref{lem:reconstruction_ode}.
 \end{proof}
 
 \begin{theorem}[spherical converse, mixed sign]
