@@ -3562,9 +3562,14 @@ lemma periodicExtension_periodic (z : ℝ → ℂ) :
 trajectory of the truncated flow on `[0, 2π]` is admissible (both clamps
 inactive) and closed, its `2π`-periodic extension is a closed `C¹` curve
 confined to the open unit disk which solves the *true* reconstruction ODE
-`z' = q_κ(θ, z)·e^{iθ}` and realizes `κ` in the gauge `φ(θ) = θ`.
+`z' = q_κ(θ, z)·e^{iθ}` and realizes `κ` in the gauge `φ(θ) = θ`. The fourth
+conjunct exposes the true-ODE derivative globally — it is what lets the
+simplicity chain identify the extension with a translated Euclidean
+reconstruction curve. Positivity of `κ` is NOT assumed: it enters only through
+the admissibility margin, so the statement serves the mixed-sign stage too.
 (Blueprint `lem:reconstruction_ode`.) -/
-lemma reconstruction_ode {κ : ℝ → ℝ} {R δ : ℝ} (hκ : IsCurvatureFunction κ)
+lemma reconstruction_ode {κ : ℝ → ℝ} {R δ : ℝ} (hκc : Continuous κ)
+    (hκper : Function.Periodic κ (2 * π))
     (hR1 : R < 1) (hδ : 0 < δ) {z : ℝ → ℂ}
     (hz : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
       HasDerivWithinAt z (truncatedField κ R δ θ (z θ)) (Set.Icc 0 (2 * π)) θ)
@@ -3573,8 +3578,10 @@ lemma reconstruction_ode {κ : ℝ → ℝ} {R δ : ℝ} (hκ : IsCurvatureFunct
     (hclosed : z (2 * π) = z 0) :
     Set.EqOn (periodicExtension z) z (Set.Icc 0 (2 * π)) ∧
       IsClosedCurve (periodicExtension z) ∧
-      RealizesSphericalCurvature (periodicExtension z) κ := by
-  obtain ⟨hκc, hκper, hκpos⟩ := hκ
+      RealizesSphericalCurvature (periodicExtension z) κ ∧
+      ∀ t, HasDerivAt (periodicExtension z)
+        (sphericalSpeed κ t (periodicExtension z t) •
+          Complex.exp ((t : ℂ) * Complex.I)) t := by
   have h2π := Real.two_pi_pos
   -- extended admissibility along the periodic extension
   have hadmZ : ∀ t : ℝ, ‖periodicExtension z t‖ ≤ R ∧
@@ -3697,8 +3704,9 @@ lemma reconstruction_ode {κ : ℝ → ℝ} {R δ : ℝ} (hκ : IsCurvatureFunct
     exact div_pos (by positivity) (by linarith)
   have hZdiff : Differentiable ℝ (periodicExtension z) :=
     fun t => (hZderiv t).differentiableAt
-  refine ⟨?_, periodicExtension_periodic z, ?_, fun t => ?_, fun t => ?_,
-    id, differentiable_id, fun t => ?_, fun t => ?_⟩
+  refine ⟨?_, periodicExtension_periodic z,
+    ⟨?_, fun t => ?_, fun t => ?_, id, differentiable_id, fun t => ?_,
+      fun t => ?_⟩, hZderiv⟩
   · -- agreement with `z` on the fundamental window
     intro t ht
     have h := hZeq 0 t (by
