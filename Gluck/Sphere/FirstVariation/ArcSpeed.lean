@@ -14,14 +14,224 @@ core of `stepError_expansion`, consumed four times (once per quarter arc) in
 `FirstVariation.Main`.
 
 De-privatized from the original monolithic file so that `FirstVariation.Main`
-can use it across the module boundary. -/
+can use it across the module boundary.
+
+The proof is decomposed into:
+* two closed-form rational identities cleared by `field_simp; ring`
+  (`arcSpeed_level_identity` for the level shift, `arcSpeed_basepoint_identity`
+  for the base-point sensitivity) — these are the elaboration-heavy pieces and
+  live in their own scopes so the main proof fits the default heartbeat budget;
+* nine per-term remainder bounds (`arcSpeed_*_term_bound` /
+  `arcSpeed_*_swap_bound`), each a `|N / D| ≤ B` estimate via
+  `abs_div_le_of_half`. -/
 
 namespace Gluck
 
 open scoped Real InnerProductSpace NNReal
 
-set_option maxHeartbeats 8000000 in
--- The two `field_simp; ring` identity steps clear four distinct denominators.
+/-- **Level-shift remainder identity.** Purely algebraic normal form of the
+`c ↦ c − ε` level shift once the level quotient has been substituted: the
+difference of the two gauge speeds minus its linear main term equals the four
+explicit quadratic remainder quotients. Here `N` stands for `‖u‖²`. -/
+private lemma arcSpeed_level_identity {s c ε β N : ℝ}
+    (hs0 : s ≠ 0) (hDz0 : s - β ≠ 0) (hDzK0 : s - β - ε ≠ 0) :
+    (2 * (s - c) * (s - β) + N) * ε / (2 * (s - β - ε) * (s - β))
+      - ((s - c) / s * ε + (s - c) / s ^ 2 * ε * β)
+      = (s - c) * ε ^ 2 / (s * (s - β - ε))
+        + (s - c) * ε * β ^ 2 / (s ^ 2 * (s - β - ε))
+        + (s - c) * ε ^ 2 * β / (s ^ 2 * (s - β - ε))
+        + N * ε / (2 * (s - β - ε) * (s - β)) := by
+  field_simp
+  ring
+
+/-- **Base-point remainder identity.** Purely algebraic normal form of the
+change of base point `z ↦ y` once both quadratic quotients have been
+substituted and `‖u‖² = ‖uy‖² + 2⟪uy,g⟫ + ‖g‖²` expanded: the difference of the
+two level-`c` speeds minus its linear main term equals the three explicit
+remainder quotients. Here `M = ‖uy‖²`, `I1 = ⟪uy,g⟫`, `P = ‖g‖²` and
+`β − βy = ⟪g,v⟫`. -/
+private lemma arcSpeed_basepoint_identity {s c β βy M I1 P : ℝ}
+    (hs0 : s ≠ 0) (hDz0 : s - β ≠ 0) (hDy0 : s - βy ≠ 0) :
+    (s - c + (M + 2 * I1 + P) / (2 * (s - β))) - (s - c + M / (2 * (s - βy)))
+        - I1 / s
+      = I1 * β / (s * (s - β)) + P / (2 * (s - β))
+        + M * (β - βy) / (2 * (s - β) * (s - βy)) := by
+  field_simp
+  ring
+
+/-- The `(s−c)·ε²` level-remainder quotient is `≤ h²/2`. -/
+private lemma arcSpeed_epsSq_term_bound {s c ε β h : ℝ}
+    (hs1 : 1 ≤ s) (hDzK : 1 / 2 ≤ s - β - ε) (hrs01 : 0 ≤ s - c)
+    (hnum1 : (s - c) * ε ^ 2 ≤ h ^ 2 / 4) :
+    |(s - c) * ε ^ 2 / (s * (s - β - ε))| ≤ h ^ 2 / 2 := by
+  refine abs_div_le_of_half (by nlinarith [hs1, hDzK]) ?_
+  rw [abs_mul, abs_of_nonneg hrs01, abs_of_nonneg (sq_nonneg ε)]
+  linarith
+
+/-- The `(s−c)·ε·β²` level-remainder quotient is `≤ h·‖u‖²`. -/
+private lemma arcSpeed_epsBetaSq_term_bound {s c ε β h : ℝ} {u : ℂ}
+    (hh0 : 0 < h) (hs1 : 1 ≤ s) (hDzK : 1 / 2 ≤ s - β - ε) (hrs01 : 0 ≤ s - c)
+    (hrs1 : s - c ≤ 1) (hε : |ε| ≤ h / 2) (hβ2 : β ^ 2 ≤ ‖u‖ ^ 2) :
+    |(s - c) * ε * β ^ 2 / (s ^ 2 * (s - β - ε))| ≤ h * ‖u‖ ^ 2 := by
+  refine abs_div_le_of_half (by nlinarith [hs1, hDzK, sq_nonneg s]) ?_
+  rw [abs_mul, abs_mul, abs_of_nonneg hrs01, abs_of_nonneg (sq_nonneg β)]
+  have h1 : (s - c) * |ε| ≤ h / 2 := by nlinarith [abs_nonneg ε]
+  calc (s - c) * |ε| * β ^ 2 ≤ h / 2 * ‖u‖ ^ 2 :=
+        mul_le_mul h1 hβ2 (sq_nonneg β) (by positivity)
+    _ = h * ‖u‖ ^ 2 / 2 := by ring
+
+/-- The `(s−c)·ε²·β` level-remainder quotient is `≤ h²/2`. -/
+private lemma arcSpeed_epsSqBeta_term_bound {s c ε β h : ℝ}
+    (hs1 : 1 ≤ s) (hDzK : 1 / 2 ≤ s - β - ε) (hrs01 : 0 ≤ s - c)
+    (hnum1 : (s - c) * ε ^ 2 ≤ h ^ 2 / 4) (hβsmall : |β| ≤ 7 / 4096) :
+    |(s - c) * ε ^ 2 * β / (s ^ 2 * (s - β - ε))| ≤ h ^ 2 / 2 := by
+  refine abs_div_le_of_half (by nlinarith [hs1, hDzK, sq_nonneg s]) ?_
+  rw [abs_mul, abs_mul, abs_of_nonneg hrs01, abs_of_nonneg (sq_nonneg ε)]
+  have h1 : |β| ≤ 1 := by linarith
+  calc (s - c) * ε ^ 2 * |β| ≤ h ^ 2 / 4 * 1 :=
+        mul_le_mul hnum1 h1 (abs_nonneg β) (by positivity)
+    _ = h ^ 2 / 2 / 2 := by ring
+
+/-- The `‖u‖²·ε` level-remainder quotient is `≤ h·‖u‖²`. -/
+private lemma arcSpeed_normSqEps_term_bound {s ε β h : ℝ} {u : ℂ}
+    (hDzK : 1 / 2 ≤ s - β - ε) (hDz : 1 / 2 ≤ s - β) (hε : |ε| ≤ h / 2) :
+    |‖u‖ ^ 2 * ε / (2 * (s - β - ε) * (s - β))| ≤ h * ‖u‖ ^ 2 := by
+  refine abs_div_le_of_half (by nlinarith [hDzK, hDz]) ?_
+  rw [abs_mul, abs_of_nonneg (sq_nonneg ‖u‖)]
+  calc ‖u‖ ^ 2 * |ε| ≤ ‖u‖ ^ 2 * (h / 2) :=
+        mul_le_mul_of_nonneg_left hε (sq_nonneg ‖u‖)
+    _ = h * ‖u‖ ^ 2 / 2 := by ring
+
+/-- The `⟪uy,g⟫·β` base-point remainder quotient is `≤ 2·‖uy‖·‖g‖·‖u‖`. -/
+private lemma arcSpeed_innerBeta_term_bound {s β : ℝ} {u uy g : ℂ}
+    (hs1 : 1 ≤ s) (hDz : 1 / 2 ≤ s - β) (hβabs : |β| ≤ ‖u‖) :
+    |⟪uy, g⟫_ℝ * β / (s * (s - β))| ≤ 2 * (‖uy‖ * ‖g‖ * ‖u‖) := by
+  refine abs_div_le_of_half (by nlinarith [hs1, hDz]) ?_
+  rw [abs_mul]
+  have hinuy : |⟪uy, g⟫_ℝ| ≤ ‖uy‖ * ‖g‖ := abs_real_inner_le_norm uy g
+  have h1 : |⟪uy, g⟫_ℝ| * |β| ≤ ‖uy‖ * ‖g‖ * ‖u‖ :=
+    mul_le_mul hinuy hβabs (abs_nonneg β) (mul_nonneg (norm_nonneg uy) (norm_nonneg g))
+  linarith
+
+/-- The `‖g‖²` base-point remainder quotient is `≤ 2·‖g‖²`. -/
+private lemma arcSpeed_gNormSq_term_bound {s β : ℝ} {g : ℂ}
+    (hDz : 1 / 2 ≤ s - β) :
+    |‖g‖ ^ 2 / (2 * (s - β))| ≤ 2 * ‖g‖ ^ 2 := by
+  refine abs_div_le_of_half (by nlinarith [hDz]) ?_
+  rw [abs_of_nonneg (sq_nonneg ‖g‖)]
+  nlinarith [sq_nonneg ‖g‖]
+
+/-- The `‖uy‖²·⟪g,v⟫` base-point remainder quotient is `≤ 2·‖uy‖²·‖g‖`. -/
+private lemma arcSpeed_uyNormSqInner_term_bound {s β βy : ℝ} {v uy g : ℂ}
+    (hv : ‖v‖ = 1) (hDz : 1 / 2 ≤ s - β) (hDy : 1 / 2 ≤ s - βy) :
+    |‖uy‖ ^ 2 * ⟪g, v⟫_ℝ / (2 * (s - β) * (s - βy))| ≤ 2 * (‖uy‖ ^ 2 * ‖g‖) := by
+  refine abs_div_le_of_half (by nlinarith [hDz, hDy]) ?_
+  rw [abs_mul, abs_of_nonneg (sq_nonneg ‖uy‖)]
+  have hingv : |⟪g, v⟫_ℝ| ≤ ‖g‖ := by
+    have h1 := abs_real_inner_le_norm g v
+    rwa [hv, mul_one] at h1
+  have h1 : ‖uy‖ ^ 2 * |⟪g, v⟫_ℝ| ≤ ‖uy‖ ^ 2 * ‖g‖ :=
+    mul_le_mul_of_nonneg_left hingv (sq_nonneg ‖uy‖)
+  linarith
+
+/-- The frame-deviation swap term `(s−c)/s²·ε·(β−⟪δ,v⟫)` is
+`≤ (h/2)·(2‖δ‖² + 5h)`. -/
+private lemma arcSpeed_frameDeviation_swap_bound {s c ε β h : ℝ} {u δ v : ℂ}
+    (hc : 0 < c) (hh0 : 0 < h) (hs1 : 1 ≤ s) (hrs01 : 0 ≤ s - c)
+    (hε : |ε| ≤ h / 2) (hv : ‖v‖ = 1)
+    (hβδ : β - ⟪δ, v⟫_ℝ = ⟪u - δ, v⟫_ℝ)
+    (hzu : ‖u - δ‖ ≤ 2 * ‖δ‖ ^ 2 + 5 * h) :
+    |(s - c) / s ^ 2 * ε * (β - ⟪δ, v⟫_ℝ)| ≤ h / 2 * (2 * ‖δ‖ ^ 2 + 5 * h) := by
+  rw [hβδ, abs_mul, abs_mul]
+  have h1 : |(s - c) / s ^ 2| ≤ 1 := by
+    rw [abs_div, abs_of_nonneg hrs01, abs_of_nonneg (by positivity : (0:ℝ) ≤ s ^ 2)]
+    rw [div_le_one (by positivity)]
+    nlinarith [hs1, hc, sq_nonneg (s - 1)]
+  have h2 : |⟪u - δ, v⟫_ℝ| ≤ 2 * ‖δ‖ ^ 2 + 5 * h := by
+    have h3 := abs_real_inner_le_norm (u - δ) v
+    rw [hv, mul_one] at h3
+    exact le_trans h3 hzu
+  have h4 : (0:ℝ) ≤ 2 * ‖δ‖ ^ 2 + 5 * h := by positivity
+  calc |(s - c) / s ^ 2| * |ε| * |⟪u - δ, v⟫_ℝ|
+      ≤ 1 * (h / 2) * (2 * ‖δ‖ ^ 2 + 5 * h) := by
+        have := mul_le_mul h1 hε (abs_nonneg ε) (by norm_num : (0:ℝ) ≤ 1)
+        exact mul_le_mul this h2 (abs_nonneg _) (by positivity)
+    _ = h / 2 * (2 * ‖δ‖ ^ 2 + 5 * h) := by ring
+
+/-- The inner-product swap term `(⟪uy,g⟫ − ⟪δ,G⟫)/s` is
+`≤ 2‖δ‖²‖g‖ + ‖δ‖·(3000·h·(‖δ‖+h))`. -/
+private lemma arcSpeed_inner_swap_bound {s h : ℝ} {uy δ g G : ℂ}
+    (hs1 : 1 ≤ s)
+    (hyu : ‖uy - δ‖ ≤ 2 * ‖δ‖ ^ 2)
+    (hgG : ‖g - G‖ ≤ 3000 * h * (‖δ‖ + h)) :
+    |(⟪uy, g⟫_ℝ - ⟪δ, G⟫_ℝ) / s|
+      ≤ 2 * ‖δ‖ ^ 2 * ‖g‖ + ‖δ‖ * (3000 * h * (‖δ‖ + h)) := by
+  rw [abs_div, abs_of_pos (by linarith : (0:ℝ) < s)]
+  have hσ0 : 0 ≤ ‖δ‖ := norm_nonneg δ
+  have hg0 : 0 ≤ ‖g‖ := norm_nonneg g
+  have hW2eq : ⟪uy, g⟫_ℝ - ⟪δ, G⟫_ℝ = ⟪uy - δ, g⟫_ℝ + ⟪δ, g - G⟫_ℝ := by
+    rw [inner_sub_left (𝕜 := ℝ) uy δ g, inner_sub_right (𝕜 := ℝ) δ g G]
+    ring
+  have h1 : |⟪uy, g⟫_ℝ - ⟪δ, G⟫_ℝ|
+      ≤ 2 * ‖δ‖ ^ 2 * ‖g‖ + ‖δ‖ * (3000 * h * (‖δ‖ + h)) := by
+    rw [hW2eq]
+    have h2 : |⟪uy - δ, g⟫_ℝ| ≤ 2 * ‖δ‖ ^ 2 * ‖g‖ := by
+      have h3 := abs_real_inner_le_norm (uy - δ) g
+      have h4 := mul_le_mul_of_nonneg_right hyu hg0
+      calc |⟪uy - δ, g⟫_ℝ| ≤ ‖uy - δ‖ * ‖g‖ := h3
+        _ ≤ 2 * ‖δ‖ ^ 2 * ‖g‖ := h4
+    have h5 : |⟪δ, g - G⟫_ℝ| ≤ ‖δ‖ * (3000 * h * (‖δ‖ + h)) := by
+      have h6 := abs_real_inner_le_norm δ (g - G)
+      have h7 := mul_le_mul_of_nonneg_left hgG hσ0
+      exact le_trans h6 h7
+    calc |⟪uy - δ, g⟫_ℝ + ⟪δ, g - G⟫_ℝ|
+        ≤ |⟪uy - δ, g⟫_ℝ| + |⟪δ, g - G⟫_ℝ| := abs_add_le _ _
+      _ ≤ 2 * ‖δ‖ ^ 2 * ‖g‖ + ‖δ‖ * (3000 * h * (‖δ‖ + h)) :=
+          add_le_add h2 h5
+  calc |⟪uy, g⟫_ℝ - ⟪δ, G⟫_ℝ| / s ≤ |⟪uy, g⟫_ℝ - ⟪δ, G⟫_ℝ| / 1 := by
+        apply div_le_div_of_nonneg_left (abs_nonneg _) (by norm_num) hs1
+    _ = |⟪uy, g⟫_ℝ - ⟪δ, G⟫_ℝ| := by rw [div_one]
+    _ ≤ _ := h1
+
+/-- **Final numeric absorption.** The sum of the nine remainder-term bounds is
+absorbed into `3200·h·‖δ‖² + 60·h²`. Stated over the abstract norms
+`U = ‖u‖`, `Uy = ‖uy‖`, `Gn = ‖g‖`, `D = ‖δ‖`: given the frame norm bounds and
+the absolute smallness `D, h ≤ 1/4096`, the accumulated remainder is dominated
+by the claimed quadratic. Isolated so the main proof stays cheap. -/
+private lemma arcSpeed_remainder_absorption {U Uy Gn D h : ℝ}
+    (hh0 : 0 < h) (hU0 : 0 ≤ U) (hUy0 : 0 ≤ Uy) (hGn0 : 0 ≤ Gn) (hD0 : 0 ≤ D)
+    (hun : U ≤ 2 * D + 5 * h) (huyn : Uy ≤ 2 * D) (hgn : Gn ≤ 5 * h)
+    (hσ1 : D ≤ 1 / 4096) (hh1 : h ≤ 1 / 4096) :
+    (h ^ 2 + 2 * (h * U ^ 2))
+        + (2 * (Uy * Gn * U) + 2 * Gn ^ 2 + 2 * (Uy ^ 2 * Gn))
+        + h / 2 * (2 * D ^ 2 + 5 * h)
+        + (2 * D ^ 2 * Gn + D * (3000 * h * (D + h)))
+      ≤ 3200 * h * D ^ 2 + 60 * h ^ 2 := by
+  have hu2 : U ^ 2 ≤ 8 * D ^ 2 + 50 * h ^ 2 := by
+    nlinarith [hun, hU0, hD0, hh0.le, sq_nonneg (2 * D - 5 * h)]
+  have huy2 : Uy ^ 2 ≤ 4 * D ^ 2 := by nlinarith [huyn, hUy0, hD0]
+  have hg2 : Gn ^ 2 ≤ 25 * h ^ 2 := by nlinarith [hgn, hGn0, hh0.le]
+  have hprod1 : Uy * Gn * U ≤ 20 * D ^ 2 * h + 50 * D * h ^ 2 := by
+    have h1 : Uy * Gn ≤ 2 * D * (5 * h) :=
+      mul_le_mul huyn hgn hGn0 (by positivity)
+    have h2 : Uy * Gn * U ≤ 2 * D * (5 * h) * (2 * D + 5 * h) :=
+      mul_le_mul h1 hun hU0 (by positivity)
+    nlinarith [h2]
+  have hprod2 : Uy ^ 2 * Gn ≤ 4 * D ^ 2 * (5 * h) :=
+    mul_le_mul huy2 hgn hGn0 (by positivity)
+  have hprod3 : D ^ 2 * Gn ≤ D ^ 2 * (5 * h) :=
+    mul_le_mul_of_nonneg_left hgn (by positivity)
+  have hcube : h ^ 3 ≤ h ^ 2 * (1 / 4096) := by nlinarith [hh1, sq_nonneg h, hh0.le]
+  have hσh2 : D * h ^ 2 ≤ h ^ 2 * (1 / 4096) := by nlinarith [hσ1, sq_nonneg h]
+  have hhu2 : h * U ^ 2 ≤ 8 * h * D ^ 2 + 50 * h ^ 3 := by
+    nlinarith [hu2, hh0.le]
+  nlinarith [hhu2, hcube, hσh2, hprod1, hprod2, hprod3, hg2, hD0, hh0.le,
+    sq_nonneg h, mul_nonneg hD0 (sq_nonneg h),
+    mul_nonneg (mul_nonneg hD0 hD0) hh0.le]
+
+-- The two `field_simp; ring` identity steps and the final numeric absorption are
+-- extracted above; the main proof assembles the level and base-point identities
+-- and the nine remainder bounds, then invokes the absorption lemma.
 /-- **Per-arc speed decomposition with explicit remainder.** Compare the
 level-`(c−ε)` gauge speed at a point `z` of the perturbed trajectory with the
 level-`c` speed at the corresponding point `y` of the reference circle
@@ -144,17 +354,15 @@ lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
     congr 1
     rw [hudef, huydef, hgGdef]
     abel
-  -- the X-identity (level part)
+  -- the X-identity (level part): reduce to the closed-form algebraic identity
   have hXeq : sphericalSpeed (fun _ => c - ε) θ z - sphericalSpeed (fun _ => c) θ z
       - ((s - c) / s * ε + (s - c) / s ^ 2 * ε * β)
       = (s - c) * ε ^ 2 / (s * (s - β - ε))
         + (s - c) * ε * β ^ 2 / (s ^ 2 * (s - β - ε))
         + (s - c) * ε ^ 2 * β / (s ^ 2 * (s - β - ε))
         + ‖u‖ ^ 2 * ε / (2 * (s - β - ε) * (s - β)) := by
-    rw [hLeq]
-    field_simp
-    ring
-  -- the Y-identity (base-point part)
+    rw [hLeq]; exact arcSpeed_level_identity hs0 hDz0 hDzK0
+  -- the Y-identity (base-point part): reduce to the closed-form algebraic identity
   have hYeq : sphericalSpeed (fun _ => c) θ z - sphericalSpeed (fun _ => c) θ y
       - ⟪uy, g⟫_ℝ / s
       = ⟪uy, g⟫_ℝ * β / (s * (s - β))
@@ -165,14 +373,10 @@ lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
     have hPy : sphericalSpeed (fun _ => c) θ y
         = (s - c) + ‖uy‖ ^ 2 / (2 * (s - βy)) := by linear_combination hqy
     rw [hPz, hPy, hnorm, ← hβg]
-    field_simp
-    ring
-  -- swap identities
+    exact arcSpeed_basepoint_identity hs0 hDz0 hDy0
+  -- swap identity for the frame deviation term
   have hβδ : β - ⟪δ, v⟫_ℝ = ⟪u - δ, v⟫_ℝ := by
     rw [hβdef, ← inner_sub_left]
-  have hW2eq : ⟪uy, g⟫_ℝ - ⟪δ, G⟫_ℝ = ⟪uy - δ, g⟫_ℝ + ⟪δ, g - G⟫_ℝ := by
-    rw [inner_sub_left (𝕜 := ℝ) uy δ g, inner_sub_right (𝕜 := ℝ) δ g G]
-    ring
   -- decompose the target quantity
   have hkey : sphericalSpeed (fun _ => c - ε) θ z
       - sphericalSpeed (fun _ => c) θ y
@@ -205,92 +409,16 @@ lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
     rw [← sq_abs]
     exact pow_le_pow_left₀ (abs_nonneg β) hβabs 2
   have hnum1 : (s - c) * ε ^ 2 ≤ h ^ 2 / 4 := by nlinarith [sq_nonneg ε]
-  have hT1 : |(s - c) * ε ^ 2 / (s * (s - β - ε))| ≤ h ^ 2 / 2 := by
-    refine abs_div_le_of_half (by nlinarith [hs1, hDzK]) ?_
-    rw [abs_mul, abs_of_nonneg hrs01, abs_of_nonneg (sq_nonneg ε)]
-    linarith
-  have hT2 : |(s - c) * ε * β ^ 2 / (s ^ 2 * (s - β - ε))| ≤ h * ‖u‖ ^ 2 := by
-    refine abs_div_le_of_half (by nlinarith [hs1, hDzK, sq_nonneg s]) ?_
-    rw [abs_mul, abs_mul, abs_of_nonneg hrs01, abs_of_nonneg (sq_nonneg β)]
-    have h1 : (s - c) * |ε| ≤ h / 2 := by nlinarith [abs_nonneg ε]
-    calc (s - c) * |ε| * β ^ 2 ≤ h / 2 * ‖u‖ ^ 2 :=
-          mul_le_mul h1 hβ2 (sq_nonneg β) (by positivity)
-      _ = h * ‖u‖ ^ 2 / 2 := by ring
-  have hT3 : |(s - c) * ε ^ 2 * β / (s ^ 2 * (s - β - ε))| ≤ h ^ 2 / 2 := by
-    refine abs_div_le_of_half (by nlinarith [hs1, hDzK, sq_nonneg s]) ?_
-    rw [abs_mul, abs_mul, abs_of_nonneg hrs01, abs_of_nonneg (sq_nonneg ε)]
-    have h1 : |β| ≤ 1 := by linarith
-    calc (s - c) * ε ^ 2 * |β| ≤ h ^ 2 / 4 * 1 :=
-          mul_le_mul hnum1 h1 (abs_nonneg β) (by positivity)
-      _ = h ^ 2 / 2 / 2 := by ring
-  have hT4 : |‖u‖ ^ 2 * ε / (2 * (s - β - ε) * (s - β))| ≤ h * ‖u‖ ^ 2 := by
-    refine abs_div_le_of_half (by nlinarith [hDzK, hDz]) ?_
-    rw [abs_mul, abs_of_nonneg (sq_nonneg ‖u‖)]
-    calc ‖u‖ ^ 2 * |ε| ≤ ‖u‖ ^ 2 * (h / 2) :=
-          mul_le_mul_of_nonneg_left hε (sq_nonneg ‖u‖)
-      _ = h * ‖u‖ ^ 2 / 2 := by ring
-  have hinuy : |⟪uy, g⟫_ℝ| ≤ ‖uy‖ * ‖g‖ := abs_real_inner_le_norm uy g
-  have hY1 : |⟪uy, g⟫_ℝ * β / (s * (s - β))| ≤ 2 * (‖uy‖ * ‖g‖ * ‖u‖) := by
-    refine abs_div_le_of_half (by nlinarith [hs1, hDz]) ?_
-    rw [abs_mul]
-    have h1 : |⟪uy, g⟫_ℝ| * |β| ≤ ‖uy‖ * ‖g‖ * ‖u‖ :=
-      mul_le_mul hinuy hβabs (abs_nonneg β)
-        (mul_nonneg huy0 hg0)
-    linarith
-  have hY2 : |‖g‖ ^ 2 / (2 * (s - β))| ≤ 2 * ‖g‖ ^ 2 := by
-    refine abs_div_le_of_half (by nlinarith [hDz]) ?_
-    rw [abs_of_nonneg (sq_nonneg ‖g‖)]
-    nlinarith [sq_nonneg ‖g‖]
-  have hingv : |⟪g, v⟫_ℝ| ≤ ‖g‖ := by
-    have h1 := abs_real_inner_le_norm g v
-    rwa [hv, mul_one] at h1
-  have hY3 : |‖uy‖ ^ 2 * ⟪g, v⟫_ℝ / (2 * (s - β) * (s - βy))|
-      ≤ 2 * (‖uy‖ ^ 2 * ‖g‖) := by
-    refine abs_div_le_of_half (by nlinarith [hDz, hDy]) ?_
-    rw [abs_mul, abs_of_nonneg (sq_nonneg ‖uy‖)]
-    have h1 : ‖uy‖ ^ 2 * |⟪g, v⟫_ℝ| ≤ ‖uy‖ ^ 2 * ‖g‖ :=
-      mul_le_mul_of_nonneg_left hingv (sq_nonneg ‖uy‖)
-    linarith
-  have hW1 : |(s - c) / s ^ 2 * ε * (β - ⟪δ, v⟫_ℝ)|
-      ≤ h / 2 * (2 * ‖δ‖ ^ 2 + 5 * h) := by
-    rw [hβδ, abs_mul, abs_mul]
-    have h1 : |(s - c) / s ^ 2| ≤ 1 := by
-      rw [abs_div, abs_of_nonneg hrs01, abs_of_nonneg (by positivity : (0:ℝ) ≤ s ^ 2)]
-      rw [div_le_one (by positivity)]
-      nlinarith
-    have h2 : |⟪u - δ, v⟫_ℝ| ≤ 2 * ‖δ‖ ^ 2 + 5 * h := by
-      have h3 := abs_real_inner_le_norm (u - δ) v
-      rw [hv, mul_one] at h3
-      exact le_trans h3 hzu
-    have h4 : (0:ℝ) ≤ 2 * ‖δ‖ ^ 2 + 5 * h := by positivity
-    calc |(s - c) / s ^ 2| * |ε| * |⟪u - δ, v⟫_ℝ|
-        ≤ 1 * (h / 2) * (2 * ‖δ‖ ^ 2 + 5 * h) := by
-          have := mul_le_mul h1 hε (abs_nonneg ε) (by norm_num : (0:ℝ) ≤ 1)
-          exact mul_le_mul this h2 (abs_nonneg _) (by positivity)
-      _ = h / 2 * (2 * ‖δ‖ ^ 2 + 5 * h) := by ring
-  have hW2 : |(⟪uy, g⟫_ℝ - ⟪δ, G⟫_ℝ) / s|
-      ≤ 2 * ‖δ‖ ^ 2 * ‖g‖ + ‖δ‖ * (3000 * h * (‖δ‖ + h)) := by
-    rw [abs_div, abs_of_pos (by linarith : (0:ℝ) < s)]
-    have h1 : |⟪uy, g⟫_ℝ - ⟪δ, G⟫_ℝ|
-        ≤ 2 * ‖δ‖ ^ 2 * ‖g‖ + ‖δ‖ * (3000 * h * (‖δ‖ + h)) := by
-      rw [hW2eq]
-      have h2 : |⟪uy - δ, g⟫_ℝ| ≤ 2 * ‖δ‖ ^ 2 * ‖g‖ := by
-        have h3 := abs_real_inner_le_norm (uy - δ) g
-        have h4 := mul_le_mul_of_nonneg_right hyu hg0
-        calc |⟪uy - δ, g⟫_ℝ| ≤ ‖uy - δ‖ * ‖g‖ := h3
-          _ ≤ 2 * ‖δ‖ ^ 2 * ‖g‖ := h4
-      have h5 : |⟪δ, g - G⟫_ℝ| ≤ ‖δ‖ * (3000 * h * (‖δ‖ + h)) := by
-        have h6 := abs_real_inner_le_norm δ (g - G)
-        have h7 := mul_le_mul_of_nonneg_left hgG hσ0
-        exact le_trans h6 h7
-      calc |⟪uy - δ, g⟫_ℝ + ⟪δ, g - G⟫_ℝ|
-          ≤ |⟪uy - δ, g⟫_ℝ| + |⟪δ, g - G⟫_ℝ| := abs_add_le _ _
-        _ ≤ 2 * ‖δ‖ ^ 2 * ‖g‖ + ‖δ‖ * (3000 * h * (‖δ‖ + h)) :=
-            add_le_add h2 h5
-    calc |⟪uy, g⟫_ℝ - ⟪δ, G⟫_ℝ| / s ≤ |⟪uy, g⟫_ℝ - ⟪δ, G⟫_ℝ| / 1 := by
-          apply div_le_div_of_nonneg_left (abs_nonneg _) (by norm_num) hs1
-      _ = |⟪uy, g⟫_ℝ - ⟪δ, G⟫_ℝ| := by rw [div_one]
-      _ ≤ _ := h1
+  -- the nine per-term remainder bounds
+  have hT1 := arcSpeed_epsSq_term_bound hs1 hDzK hrs01 hnum1
+  have hT2 := arcSpeed_epsBetaSq_term_bound hh0 hs1 hDzK hrs01 hrs1.le hε hβ2
+  have hT3 := arcSpeed_epsSqBeta_term_bound hs1 hDzK hrs01 hnum1 hβsmall
+  have hT4 := arcSpeed_normSqEps_term_bound (u := u) hDzK hDz hε
+  have hY1 := arcSpeed_innerBeta_term_bound (uy := uy) (g := g) hs1 hDz hβabs
+  have hY2 := arcSpeed_gNormSq_term_bound (g := g) hDz
+  have hY3 := arcSpeed_uyNormSqInner_term_bound (uy := uy) (g := g) hv hDz hDy
+  have hW1 := arcSpeed_frameDeviation_swap_bound hc hh0 hs1 hrs01 hε hv hβδ hzu
+  have hW2 := arcSpeed_inner_swap_bound hs1 hyu hgG
   -- assemble: triangle inequality over the nine terms
   have habs4 : ∀ p q r t : ℝ, |p + q + r + t| ≤ |p| + |q| + |r| + |t| := by
     intro p q r t
@@ -319,27 +447,7 @@ lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
   have htotal := le_trans (habs4 _ _ _ _)
     (add_le_add (add_le_add (add_le_add hTsum hYsum) hW1) hW2)
   refine le_trans htotal ?_
-  -- final numeric absorption
-  have hu2 : ‖u‖ ^ 2 ≤ 8 * ‖δ‖ ^ 2 + 50 * h ^ 2 := by
-    nlinarith [hun, hu0, hσ0, hh0.le, sq_nonneg (2 * ‖δ‖ - 5 * h)]
-  have huy2 : ‖uy‖ ^ 2 ≤ 4 * ‖δ‖ ^ 2 := by nlinarith [huyn, huy0, hσ0]
-  have hg2 : ‖g‖ ^ 2 ≤ 25 * h ^ 2 := by nlinarith [hgn, hg0, hh0.le]
-  have hprod1 : ‖uy‖ * ‖g‖ * ‖u‖ ≤ 20 * ‖δ‖ ^ 2 * h + 50 * ‖δ‖ * h ^ 2 := by
-    have h1 : ‖uy‖ * ‖g‖ ≤ 2 * ‖δ‖ * (5 * h) :=
-      mul_le_mul huyn hgn hg0 (by positivity)
-    have h2 : ‖uy‖ * ‖g‖ * ‖u‖ ≤ 2 * ‖δ‖ * (5 * h) * (2 * ‖δ‖ + 5 * h) :=
-      mul_le_mul h1 hun hu0 (by positivity)
-    nlinarith [h2]
-  have hprod2 : ‖uy‖ ^ 2 * ‖g‖ ≤ 4 * ‖δ‖ ^ 2 * (5 * h) :=
-    mul_le_mul huy2 hgn hg0 (by positivity)
-  have hprod3 : ‖δ‖ ^ 2 * ‖g‖ ≤ ‖δ‖ ^ 2 * (5 * h) :=
-    mul_le_mul_of_nonneg_left hgn (by positivity)
-  have hcube : h ^ 3 ≤ h ^ 2 * (1 / 4096) := by nlinarith [hh1, sq_nonneg h, hh0.le]
-  have hσh2 : ‖δ‖ * h ^ 2 ≤ h ^ 2 * (1 / 4096) := by nlinarith [hσ1, sq_nonneg h]
-  have hhu2 : h * ‖u‖ ^ 2 ≤ 8 * h * ‖δ‖ ^ 2 + 50 * h ^ 3 := by
-    nlinarith [hu2, hh0.le]
-  nlinarith [hhu2, hcube, hσh2, hprod1, hprod2, hprod3, hg2, hσ0, hh0.le,
-    sq_nonneg h, mul_nonneg hσ0 (sq_nonneg h),
-    mul_nonneg (mul_nonneg hσ0 hσ0) hh0.le]
+  -- final numeric absorption (isolated lemma over the abstract frame norms)
+  exact arcSpeed_remainder_absorption hh0 hu0 huy0 hg0 hσ0 hun huyn hgn hσ1 hh1
 
 end Gluck
