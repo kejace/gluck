@@ -1172,6 +1172,25 @@ lemma sphericalSpeed_radius_le {c θ : ℝ} {z : ℂ}
     div_nonneg (by positivity) (by linarith)
   linarith
 
+/-- **Exact level sensitivity of the gauge speed**: for two constant levels
+`K, K'` with nonvanishing brackets at `(θ, z)`,
+`q_K(θ,z) − q_{K'}(θ,z) = (1+‖z‖²)·(K'−K) / (2·D_K·D_{K'})` — the one-line
+quotient identity behind the first-variation expansion of the step error map.
+(Blueprint `lem:step_error_expansion`, mechanism (i).) -/
+lemma sphericalSpeed_sub_level {K K' θ : ℝ} {z : ℂ}
+    (hD : K - ⟪z, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ ≠ 0)
+    (hD' : K' - ⟪z, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ ≠ 0) :
+    sphericalSpeed (fun _ => K) θ z - sphericalSpeed (fun _ => K') θ z
+      = (1 + ‖z‖ ^ 2) * (K' - K)
+        / (2 * (K - ⟪z, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
+          * (K' - ⟪z, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)) := by
+  set β : ℝ := ⟪z, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ with hβdef
+  have h1 : sphericalSpeed (fun _ => K) θ z = (1 + ‖z‖ ^ 2) / (2 * (K - β)) := rfl
+  have h2 : sphericalSpeed (fun _ => K') θ z = (1 + ‖z‖ ^ 2) / (2 * (K' - β)) := rfl
+  rw [h1, h2]
+  field_simp
+  ring
+
 /-- **Half-turn invariance of the gauge speed** for `π`-periodic `κ`:
 `q_κ(θ+π, −z) = q_κ(θ, z)` — the clamp-free mirror of
 `truncatedSpeed_half_turn`; constant curvatures are the intended instance.
