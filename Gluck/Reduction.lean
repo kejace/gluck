@@ -466,16 +466,16 @@ private lemma alignDensity_arc1 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
       clampTent (π / 16) (alignL2 δ z) (alignC2 δ z) θ) = 0 :=
     clampTent_integral_eq_zero (by positivity) (by linarith) (by linarith) hle12 1
       (by simp only [alignL2, alignC2, alignN1, alignN2, alignN3]; push_cast; linarith)
-      (by simp only [alignL2, alignC2, alignN1, alignN2, alignN3]; push_cast; linarith)
+      (by simp only [alignL2, alignC2, alignN2, alignN3]; push_cast; linarith)
   have hs3 : (∫ θ in (alignN1 δ z)..(alignN2 δ z),
       clampTent (π / 16) (alignL3 δ z) (alignC3 δ z) θ) = 0 :=
     clampTent_integral_eq_zero (by positivity) (by linarith) (by linarith) hle12 1
-      (by simp only [alignL3, alignC3, alignN1, alignN2, alignN3, alignN4]; push_cast; linarith)
-      (by simp only [alignL3, alignC3, alignN1, alignN2, alignN3, alignN4]; push_cast; linarith)
+      (by simp only [alignL3, alignC3, alignN1, alignN3, alignN4]; push_cast; linarith)
+      (by simp only [alignL3, alignC3, alignN2, alignN3, alignN4]; push_cast; linarith)
   have hs4 : (∫ θ in (alignN1 δ z)..(alignN2 δ z),
       clampTent (π / 16) (alignL4 δ z) (alignC4 δ z) θ) = 0 :=
     clampTent_integral_eq_zero (by positivity) (by linarith) (by linarith) hle12 1
-      (by simp only [alignL4, alignC4, alignN1, alignN2, alignN4]; push_cast; linarith)
+      (by simp only [alignL4, alignC4, alignN1, alignN4]; push_cast; linarith)
       (by simp only [alignL4, alignC4, alignN1, alignN2, alignN4]; push_cast; linarith)
   rw [alignDensity_integral_split, hs1, hs2, hs3, hs4, mul_zero, mul_zero, mul_zero,
       add_zero, add_zero, add_zero, alignHt_eq (by linarith)]
@@ -501,18 +501,18 @@ private lemma alignDensity_arc2 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
   have hs1 : (∫ θ in (alignN2 δ z)..(alignN3 δ z),
       clampTent (π / 16) (alignL1 δ z) (alignC1 δ z) θ) = 0 :=
     clampTent_integral_eq_zero (by positivity) (by linarith) (by linarith) hle23 0
-      (by simp only [alignL1, alignC1, alignN1, alignN2, alignN3]; push_cast; linarith)
+      (by simp only [alignL1, alignC1, alignN1, alignN2]; push_cast; linarith)
       (by simp only [alignL1, alignC1, alignN1, alignN2, alignN3]; push_cast; linarith)
   have hs3 : (∫ θ in (alignN2 δ z)..(alignN3 δ z),
       clampTent (π / 16) (alignL3 δ z) (alignC3 δ z) θ) = 0 :=
     clampTent_integral_eq_zero (by positivity) (by linarith) (by linarith) hle23 1
       (by simp only [alignL3, alignC3, alignN2, alignN3, alignN4]; push_cast; linarith)
-      (by simp only [alignL3, alignC3, alignN2, alignN3, alignN4]; push_cast; linarith)
+      (by simp only [alignL3, alignC3, alignN3, alignN4]; push_cast; linarith)
   have hs4 : (∫ θ in (alignN2 δ z)..(alignN3 δ z),
       clampTent (π / 16) (alignL4 δ z) (alignC4 δ z) θ) = 0 :=
     clampTent_integral_eq_zero (by positivity) (by linarith) (by linarith) hle23 1
-      (by simp only [alignL4, alignC4, alignN1, alignN2, alignN3, alignN4]; push_cast; linarith)
-      (by simp only [alignL4, alignC4, alignN1, alignN2, alignN3, alignN4]; push_cast; linarith)
+      (by simp only [alignL4, alignC4, alignN1, alignN2, alignN4]; push_cast; linarith)
+      (by simp only [alignL4, alignC4, alignN1, alignN3, alignN4]; push_cast; linarith)
   rw [alignDensity_integral_split, hs1, hs2, hs3, hs4, mul_zero, mul_zero, mul_zero,
       add_zero, add_zero, add_zero, alignHt_eq (by linarith)]
   have hd : alignL2 δ z - π / 16 ≠ 0 := by linarith
@@ -537,18 +537,18 @@ private lemma alignDensity_arc3 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
   have hs1 : (∫ θ in (alignN3 δ z)..(alignN4 δ z),
       clampTent (π / 16) (alignL1 δ z) (alignC1 δ z) θ) = 0 :=
     clampTent_integral_eq_zero (by positivity) (by linarith) (by linarith) hle34 0
-      (by simp only [alignL1, alignC1, alignN1, alignN2, alignN3, alignN4]; push_cast; linarith)
-      (by simp only [alignL1, alignC1, alignN1, alignN2, alignN3, alignN4]; push_cast; linarith)
+      (by simp only [alignL1, alignC1, alignN1, alignN2, alignN3]; push_cast; linarith)
+      (by simp only [alignL1, alignC1, alignN1, alignN2, alignN4]; push_cast; linarith)
   have hs2 : (∫ θ in (alignN3 δ z)..(alignN4 δ z),
       clampTent (π / 16) (alignL2 δ z) (alignC2 δ z) θ) = 0 :=
     clampTent_integral_eq_zero (by positivity) (by linarith) (by linarith) hle34 0
-      (by simp only [alignL2, alignC2, alignN2, alignN3, alignN4]; push_cast; linarith)
+      (by simp only [alignL2, alignC2, alignN2, alignN3]; push_cast; linarith)
       (by simp only [alignL2, alignC2, alignN2, alignN3, alignN4]; push_cast; linarith)
   have hs4 : (∫ θ in (alignN3 δ z)..(alignN4 δ z),
       clampTent (π / 16) (alignL4 δ z) (alignC4 δ z) θ) = 0 :=
     clampTent_integral_eq_zero (by positivity) (by linarith) (by linarith) hle34 1
       (by simp only [alignL4, alignC4, alignN1, alignN3, alignN4]; push_cast; linarith)
-      (by simp only [alignL4, alignC4, alignN1, alignN3, alignN4]; push_cast; linarith)
+      (by simp only [alignL4, alignC4, alignN1, alignN4]; push_cast; linarith)
   rw [alignDensity_integral_split, hs1, hs2, hs3, hs4, mul_zero, mul_zero, mul_zero,
       add_zero, add_zero, add_zero, alignHt_eq (by linarith)]
   have hd : alignL3 δ z - π / 16 ≠ 0 := by linarith
@@ -575,16 +575,16 @@ private lemma alignDensity_arc4 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
       clampTent (π / 16) (alignL1 δ z) (alignC1 δ z) θ) = 0 :=
     clampTent_integral_eq_zero (by positivity) (by linarith) (by linarith) hle41 0
       (by simp only [alignL1, alignC1, alignN1, alignN2, alignN4]; push_cast; linarith)
-      (by simp only [alignL1, alignC1, alignN1, alignN2, alignN4]; push_cast; linarith)
+      (by simp only [alignL1, alignC1, alignN1, alignN2]; push_cast; linarith)
   have hs2 : (∫ θ in (alignN4 δ z)..(alignN1 δ z + 2 * π),
       clampTent (π / 16) (alignL2 δ z) (alignC2 δ z) θ) = 0 :=
     clampTent_integral_eq_zero (by positivity) (by linarith) (by linarith) hle41 0
-      (by simp only [alignL2, alignC2, alignN1, alignN2, alignN3, alignN4]; push_cast; linarith)
-      (by simp only [alignL2, alignC2, alignN1, alignN2, alignN3, alignN4]; push_cast; linarith)
+      (by simp only [alignL2, alignC2, alignN2, alignN3, alignN4]; push_cast; linarith)
+      (by simp only [alignL2, alignC2, alignN1, alignN2, alignN3]; push_cast; linarith)
   have hs3 : (∫ θ in (alignN4 δ z)..(alignN1 δ z + 2 * π),
       clampTent (π / 16) (alignL3 δ z) (alignC3 δ z) θ) = 0 :=
     clampTent_integral_eq_zero (by positivity) (by linarith) (by linarith) hle41 0
-      (by simp only [alignL3, alignC3, alignN1, alignN3, alignN4]; push_cast; linarith)
+      (by simp only [alignL3, alignC3, alignN3, alignN4]; push_cast; linarith)
       (by simp only [alignL3, alignC3, alignN1, alignN3, alignN4]; push_cast; linarith)
   rw [alignDensity_integral_split, hs1, hs2, hs3, hs4, mul_zero, mul_zero, mul_zero,
       add_zero, add_zero, add_zero, alignHt_eq (by linarith)]
@@ -913,7 +913,8 @@ private theorem kappaZero_comp_alignReparam (a b δ : ℝ) (hδ : 0 < δ) (hδ' 
       rw [alignReparam_add_two_pi δ hδ hδ' hz, hn1]; ring
     rcases lt_or_ge t₀ (alignN2 δ z) with hc2 | hc2
     · -- arc 1: value `b`, `g t₀ ∈ [π/2, π)`
-      have hLHS : stepCurvature a b (alignN1 δ z) (alignN2 δ z) (alignN3 δ z) (alignN4 δ z) t₀ = b := by
+      have hLHS : stepCurvature a b (alignN1 δ z) (alignN2 δ z) (alignN3 δ z)
+          (alignN4 δ z) t₀ = b := by
         simp only [stepCurvature, htic]; exact if_pos (Or.inl hc2)
       have hga : π / 2 ≤ alignReparam δ z t₀ := hn1 ▸ hmono.le_iff_le.mpr hlo
       have hgb : alignReparam δ z t₀ < π := hn2 ▸ hmono hc2
@@ -921,13 +922,14 @@ private theorem kappaZero_comp_alignReparam (a b δ : ℝ) (hδ : 0 < δ) (hδ' 
         simp only [stepCurvature]
         rw [(toIcoMod_eq_self Real.two_pi_pos).mpr
             (Set.mem_Ico.mpr ⟨by linarith, by linarith⟩)]
-        exact if_neg (by push_neg; exact ⟨by linarith, fun h => by linarith⟩)
+        exact if_neg (by push Not; exact ⟨by linarith, fun h => by linarith⟩)
       rw [hLHS, hRHS]
     rcases lt_or_ge t₀ (alignN3 δ z) with hc3 | hc3
     · -- arc 2: value `a`, `g t₀ ∈ [π, 3π/2)`
-      have hLHS : stepCurvature a b (alignN1 δ z) (alignN2 δ z) (alignN3 δ z) (alignN4 δ z) t₀ = a := by
+      have hLHS : stepCurvature a b (alignN1 δ z) (alignN2 δ z) (alignN3 δ z)
+          (alignN4 δ z) t₀ = a := by
         simp only [stepCurvature, htic]
-        exact if_neg (by push_neg; exact ⟨by linarith, fun h => by linarith⟩)
+        exact if_neg (by push Not; exact ⟨by linarith, fun h => by linarith⟩)
       have hga : π ≤ alignReparam δ z t₀ := hn2 ▸ hmono.le_iff_le.mpr hc2
       have hgb : alignReparam δ z t₀ < 3 * π / 2 := hn3 ▸ hmono hc3
       have hRHS : stepCurvature b a 0 (π / 2) π (3 * π / 2) (alignReparam δ z t₀) = a := by
@@ -938,7 +940,8 @@ private theorem kappaZero_comp_alignReparam (a b δ : ℝ) (hδ : 0 < δ) (hδ' 
       rw [hLHS, hRHS]
     rcases lt_or_ge t₀ (alignN4 δ z) with hc4 | hc4
     · -- arc 3: value `b`, `g t₀ ∈ [3π/2, 2π)`
-      have hLHS : stepCurvature a b (alignN1 δ z) (alignN2 δ z) (alignN3 δ z) (alignN4 δ z) t₀ = b := by
+      have hLHS : stepCurvature a b (alignN1 δ z) (alignN2 δ z) (alignN3 δ z)
+          (alignN4 δ z) t₀ = b := by
         simp only [stepCurvature, htic]
         exact if_pos (Or.inr ⟨hc3, hc4⟩)
       have hga : 3 * π / 2 ≤ alignReparam δ z t₀ := hn3 ▸ hmono.le_iff_le.mpr hc3
@@ -947,12 +950,13 @@ private theorem kappaZero_comp_alignReparam (a b δ : ℝ) (hδ : 0 < δ) (hδ' 
         simp only [stepCurvature]
         rw [(toIcoMod_eq_self Real.two_pi_pos).mpr
             (Set.mem_Ico.mpr ⟨by linarith, by linarith⟩)]
-        exact if_neg (by push_neg; exact ⟨by linarith, fun _ => by linarith⟩)
+        exact if_neg (by push Not; exact ⟨by linarith, fun _ => by linarith⟩)
       rw [hLHS, hRHS]
     · -- arc 4: value `a`, `g t₀ ∈ [2π, 5π/2)`
-      have hLHS : stepCurvature a b (alignN1 δ z) (alignN2 δ z) (alignN3 δ z) (alignN4 δ z) t₀ = a := by
+      have hLHS : stepCurvature a b (alignN1 δ z) (alignN2 δ z) (alignN3 δ z)
+          (alignN4 δ z) t₀ = a := by
         simp only [stepCurvature, htic]
-        refine if_neg (by push_neg; refine ⟨by linarith, fun _ => by linarith⟩)
+        refine if_neg (by push Not; refine ⟨by linarith, fun _ => by linarith⟩)
       have hga : 2 * π ≤ alignReparam δ z t₀ := hn4 ▸ hmono.le_iff_le.mpr hc4
       have hgb : alignReparam δ z t₀ < 5 * π / 2 := hg5 ▸ hmono hhi
       have htoIco : toIcoMod Real.two_pi_pos 0 (alignReparam δ z t₀)
