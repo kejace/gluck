@@ -3987,7 +3987,7 @@ curvature function. This breaks the quantifier circularity of the winding
 assembly: the `L¹` tolerance `ε` must be fixed before the reparametrized
 curvature `κ ∘ h₁` exists, yet `ε` depends on the Lipschitz constant of the
 truncated field for `κ ∘ h₁`. -/
-private lemma truncatedSpeed_lipschitz_uniform {R δ : ℝ} (hR : 0 ≤ R)
+lemma truncatedSpeed_lipschitz_uniform {R δ : ℝ} (hR : 0 ≤ R)
     (hδ : 0 < δ) :
     ∃ L : ℝ≥0, ∀ (κ : ℝ → ℝ) (θ : ℝ),
       LipschitzWith L (fun z => truncatedSpeed κ R δ θ z) := by
@@ -4049,7 +4049,7 @@ private lemma truncatedSpeed_lipschitz_uniform {R δ : ℝ} (hR : 0 ≤ R)
 
 /-- Uniform-in-`κ` form of `truncatedField_lipschitz`, inherited from
 `truncatedSpeed_lipschitz_uniform` (the frame factor `e^{iθ}` has norm one). -/
-private lemma truncatedField_lipschitz_uniform {R δ : ℝ} (hR : 0 ≤ R)
+lemma truncatedField_lipschitz_uniform {R δ : ℝ} (hR : 0 ≤ R)
     (hδ : 0 < δ) :
     ∃ L : ℝ≥0, ∀ (κ : ℝ → ℝ) (θ : ℝ),
       LipschitzWith L (fun z => truncatedField κ R δ θ z) := by
