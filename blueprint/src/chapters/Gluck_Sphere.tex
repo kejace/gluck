@@ -552,7 +552,8 @@ large ball covers $[0,2\pi]$.
   \cref{lem:truncated_speed_lipschitz}.
 \end{proof}
 
-\begin{lemma}[speed Lipschitz bound, uniform in the curvature]
+\begin{lemma}\leanok
+[speed Lipschitz bound, uniform in the curvature]
   \label{lem:truncated_speed_lipschitz_uniform}
   \lean{Gluck.truncatedSpeed_lipschitz_uniform}
   \uses{def:truncated_speed, lem:truncated_speed_lipschitz}
@@ -569,13 +570,15 @@ large ball covers $[0,2\pi]$.
 
 \begin{proof}
   \uses{lem:truncated_speed_lipschitz}
+  \leanok
   The proof of \cref{lem:truncated_speed_lipschitz} verbatim, with the constant
   $L=\tfrac{R}{\delta}+\tfrac{1+R^2}{2\delta^2}$ quantified before $\kappa$:
   no step of the numerator/denominator estimate inspects $\kappa$ beyond the
   clamp $\max(\cdot,\delta)$, which is $1$-Lipschitz regardless of its argument.
 \end{proof}
 
-\begin{lemma}[field Lipschitz bound, uniform in the curvature]
+\begin{lemma}\leanok
+[field Lipschitz bound, uniform in the curvature]
   \label{lem:truncated_field_lipschitz_uniform}
   \lean{Gluck.truncatedField_lipschitz_uniform}
   \uses{def:truncated_field, lem:truncated_speed_lipschitz_uniform}
@@ -587,6 +590,7 @@ large ball covers $[0,2\pi]$.
 
 \begin{proof}
   \uses{lem:truncated_speed_lipschitz_uniform}
+  \leanok
   The witness of \cref{lem:truncated_speed_lipschitz_uniform} works: the unit
   frame factor $e^{i\theta}$ has norm one, as in
   \cref{lem:truncated_field_lipschitz}.
