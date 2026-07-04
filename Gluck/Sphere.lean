@@ -1524,6 +1524,216 @@ lemma invariant_admissible_arc {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : �
       ⟪z θ - zs θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ
     linarith
 
+/-- **Four values at freely chosen levels.** Value-separated alternating
+extrema give, for *every* pair `a < b` inside the overlap window
+`(max(κ q₁, κ q₂), min(κ p₁, κ p₂))`, four points `θ₁ < θ₂ < θ₃ < θ₄ < θ₁+2π`
+with `κ = (a, b, a, b)` — the refinement of `exists_abab_of_fourVertex` (which
+produces one specific pair of levels) that allows the small-contrast choice
+`a = c − h/2`, `b = c + h/2` of the S2-D winding argument. Lives in the S²
+file because the Euclidean files are frozen.
+(Blueprint `lem:exists_abab_levels`.) -/
+lemma exists_abab_levels {κ : ℝ → ℝ} (hcont : Continuous κ)
+    (hper : Function.Periodic κ (2 * π)) {p₁ q₁ p₂ q₂ : ℝ}
+    (hp1q1 : p₁ < q₁) (hq1p2 : q₁ < p₂) (hp2q2 : p₂ < q₂)
+    (hq2p1 : q₂ < p₁ + 2 * π) {a b : ℝ}
+    (ha : max (κ q₁) (κ q₂) < a) (hab : a < b)
+    (hb : b < min (κ p₁) (κ p₂)) :
+    ∃ θ₁ θ₂ θ₃ θ₄, θ₁ < θ₂ ∧ θ₂ < θ₃ ∧ θ₃ < θ₄ ∧ θ₄ < θ₁ + 2 * π ∧
+      κ θ₁ = a ∧ κ θ₂ = b ∧ κ θ₃ = a ∧ κ θ₄ = b := by
+  have hq1a : κ q₁ < a := lt_of_le_of_lt (le_max_left _ _) ha
+  have hq2a : κ q₂ < a := lt_of_le_of_lt (le_max_right _ _) ha
+  have hbp1 : b < κ p₁ := lt_of_lt_of_le hb (min_le_left _ _)
+  have hbp2 : b < κ p₂ := lt_of_lt_of_le hb (min_le_right _ _)
+  have hperp1 : κ (p₁ + 2 * π) = κ p₁ := hper p₁
+  -- `θ₁ ∈ [q₁, p₂]` with value `a`
+  obtain ⟨θ₁, hθ₁mem, hθ₁⟩ := ivt_hits hcont hq1p2.le (by
+    rw [Set.mem_Icc]
+    exact ⟨(min_le_left _ _).trans hq1a.le,
+      ((hab.le.trans hbp2.le)).trans (le_max_right _ _)⟩)
+  -- `θ₂ ∈ [θ₁, p₂]` with value `b`
+  obtain ⟨θ₂, hθ₂mem, hθ₂⟩ := ivt_hits hcont hθ₁mem.2 (by
+    rw [Set.mem_Icc, hθ₁]
+    exact ⟨(min_le_left _ _).trans hab.le, hbp2.le.trans (le_max_right _ _)⟩)
+  -- `θ₃ ∈ [p₂, q₂]` with value `a`
+  obtain ⟨θ₃, hθ₃mem, hθ₃⟩ := ivt_hits hcont hp2q2.le (by
+    rw [Set.mem_Icc]
+    exact ⟨(min_le_right _ _).trans hq2a.le,
+      (hab.le.trans hbp2.le).trans (le_max_left _ _)⟩)
+  -- `θ₄ ∈ [q₂, p₁ + 2π]` with value `b` (periodicity feeds `κ p₁` in)
+  obtain ⟨θ₄, hθ₄mem, hθ₄⟩ := ivt_hits hcont hq2p1.le (by
+    rw [Set.mem_Icc, hperp1]
+    exact ⟨(min_le_left _ _).trans (hq2a.le.trans hab.le),
+      hbp1.le.trans (le_max_right _ _)⟩)
+  refine ⟨θ₁, θ₂, θ₃, θ₄, ?_, ?_, ?_, ?_, hθ₁, hθ₂, hθ₃, hθ₄⟩
+  · refine lt_of_le_of_ne hθ₂mem.1 ?_
+    intro h; apply ne_of_lt hab; rw [← hθ₁, ← hθ₂, h]
+  · refine lt_of_le_of_ne (hθ₂mem.2.trans hθ₃mem.1) ?_
+    intro h; apply ne_of_lt hab; rw [← hθ₃, ← hθ₂, h]
+  · refine lt_of_le_of_ne (hθ₃mem.2.trans hθ₄mem.1) ?_
+    intro h; apply ne_of_lt hab; rw [← hθ₃, ← hθ₄, h]
+  · have h1 : q₁ ≤ θ₁ := hθ₁mem.1
+    have h2 : θ₄ ≤ p₁ + 2 * π := hθ₄mem.2
+    linarith
+
+/-- The canonical four-arc step curvature is measurable (a two-valued step
+over a measurable set). Local replication of the `private` helper of the same
+name in `Reduction.lean` — private declarations are not importable. -/
+private lemma measurable_stepCurvature_canonical (b a : ℝ) :
+    Measurable (stepCurvature b a 0 (π / 2) π (3 * π / 2)) := by
+  have hmtic : Measurable (toIcoMod Real.two_pi_pos (0 : ℝ)) := by
+    have heq : (toIcoMod Real.two_pi_pos (0 : ℝ))
+        = fun x => x - (toIcoDiv Real.two_pi_pos 0 x : ℝ) * (2 * π) := by
+      funext x
+      have h := toIcoMod_add_toIcoDiv_zsmul Real.two_pi_pos 0 x
+      rw [zsmul_eq_mul] at h
+      linarith
+    rw [heq]
+    have hfloor : Measurable (fun x : ℝ => (toIcoDiv Real.two_pi_pos 0 x : ℝ)) := by
+      have hcast : (fun x : ℝ => (toIcoDiv Real.two_pi_pos 0 x : ℝ))
+          = fun x => ((⌊(x - 0) / (2 * π)⌋ : ℤ) : ℝ) := by
+        funext x; rw [toIcoDiv_eq_floor]
+      rw [hcast]
+      have hcastm : Measurable (fun n : ℤ => (n : ℝ)) :=
+        continuous_of_discreteTopology.measurable
+      exact hcastm.comp
+        (Int.measurable_floor.comp ((measurable_id.sub measurable_const).div_const _))
+    exact measurable_id.sub (hfloor.mul measurable_const)
+  unfold stepCurvature
+  apply Measurable.ite ?_ measurable_const measurable_const
+  exact (measurableSet_lt hmtic measurable_const).union
+    ((measurableSet_le measurable_const hmtic).inter
+      (measurableSet_lt hmtic measurable_const))
+
+/-- **`L¹` step reparametrization.** Given `(a, b, a, b)` crossing data, for
+every `ε > 0` there is an orientation-preserving circle reparametrization `h₁`
+(strictly monotone, `C¹` with continuous positive derivative,
+`h₁(θ+2π) = h₁(θ)+2π`) with
+`∫₀^{2π} |κ(h₁ θ) − κ*(θ)| dθ < ε`, `κ* = stepCurvature b a 0 (π/2) π (3π/2)`.
+Upgrade of `exists_preliminary_reparam` from measure-of-bad-set control to an
+`L¹` bound: apply it at `ε' = ε/(B + 2π + 1)` where `B` bounds the integrand,
+then split the integral over the bad set (measure `< ε'`, integrand `≤ B`) and
+its complement (integrand `≤ ε'`, measure `≤ 2π`).
+(Blueprint `lem:step_L1_reparam`.) -/
+lemma exists_step_L1_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
+    {a b θ₁ θ₂ θ₃ θ₄ : ℝ} (ha : 0 < a) (hab : a < b)
+    (h12 : θ₁ < θ₂) (h23 : θ₂ < θ₃) (h34 : θ₃ < θ₄) (h41 : θ₄ < θ₁ + 2 * π)
+    (hv₁ : κ θ₁ = a) (hv₂ : κ θ₂ = b) (hv₃ : κ θ₃ = a) (hv₄ : κ θ₄ = b)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∃ h₁ : ℝ → ℝ, StrictMono h₁ ∧ Continuous h₁ ∧
+      (∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π) ∧
+      (∃ v : ℝ → ℝ, Continuous v ∧ (∀ θ, 0 < v θ) ∧ ∀ θ, HasDerivAt h₁ (v θ) θ) ∧
+      (∫ θ in (0 : ℝ)..(2 * π),
+        |κ (h₁ θ) - stepCurvature b a 0 (π / 2) π (3 * π / 2) θ|) < ε := by
+  have hcont := hκ.1
+  have hper := hκ.2.1
+  have hpos := hκ.2.2
+  have h2π := Real.two_pi_pos
+  -- global upper bound for `κ` from one compact period
+  obtain ⟨θm, -, hmax⟩ := isCompact_Icc.exists_isMaxOn
+    (Set.nonempty_Icc.mpr (by positivity : (0 : ℝ) ≤ 2 * π)) hcont.continuousOn
+  have hCglob : ∀ t, κ t ≤ κ θm := by
+    intro t
+    obtain ⟨y, hy, hyt⟩ := hper.exists_mem_Ico₀ h2π t
+    rw [hyt]
+    exact hmax ⟨hy.1, hy.2.le⟩
+  have hC0 : 0 < κ θm := hpos θm
+  set B : ℝ := κ θm + b with hBdef
+  have hB0 : 0 < B := by rw [hBdef]; linarith
+  set ε' : ℝ := ε / (B + 2 * π + 1) with hε'def
+  have hden : 0 < B + 2 * π + 1 := by linarith
+  have hε' : 0 < ε' := div_pos hε hden
+  obtain ⟨h₁, hmono, hh₁cont, hqper, hbad, hv⟩ :=
+    exists_preliminary_reparam hκ ha hab h12 h23 h34 h41 hv₁ hv₂ hv₃ hv₄ hε'
+  refine ⟨h₁, hmono, hh₁cont, hqper, hv, ?_⟩
+  set κs : ℝ → ℝ := stepCurvature b a 0 (π / 2) π (3 * π / 2) with hκsdef
+  -- measurability and pointwise bounds of the integrand
+  have hκsmeas : Measurable κs := measurable_stepCurvature_canonical b a
+  have hfmeas : Measurable (fun θ : ℝ => |κ (h₁ θ) - κs θ|) :=
+    ((hcont.comp hh₁cont).measurable.sub hκsmeas).abs
+  have hstep_bounds : ∀ θ, 0 ≤ κs θ ∧ κs θ ≤ b := by
+    intro θ
+    rw [hκsdef]
+    simp only [stepCurvature]
+    split
+    · exact ⟨ha.le, hab.le⟩
+    · exact ⟨by linarith, le_refl b⟩
+  have hfB : ∀ θ, |κ (h₁ θ) - κs θ| ≤ B := by
+    intro θ
+    have h1 := hCglob (h₁ θ)
+    have h2 := hpos (h₁ θ)
+    obtain ⟨h3, h4⟩ := hstep_bounds θ
+    rw [hBdef, abs_le]
+    constructor <;> linarith
+  -- integrability over the fundamental window
+  have hIcofin : MeasureTheory.volume (Set.Ico (0 : ℝ) (2 * π)) < ⊤ := by
+    rw [Real.volume_Ico]
+    exact ENNReal.ofReal_lt_top
+  have hint : MeasureTheory.IntegrableOn (fun θ : ℝ => |κ (h₁ θ) - κs θ|)
+      (Set.Ico (0 : ℝ) (2 * π)) MeasureTheory.volume := by
+    refine MeasureTheory.Integrable.mono'
+      (MeasureTheory.integrableOn_const (C := B) hIcofin.ne)
+      hfmeas.aestronglyMeasurable.restrict ?_
+    filter_upwards with x
+    rw [Real.norm_eq_abs, abs_abs]
+    exact hfB x
+  -- the bad set of the preliminary reparametrization
+  set bad : Set ℝ := {θ : ℝ | θ ∈ Set.Ico (0 : ℝ) (2 * π)
+      ∧ ε' < |κ (h₁ θ) - κs θ|} with hbaddef
+  have hbadmeas : MeasurableSet bad :=
+    measurableSet_Ico.inter (measurableSet_lt measurable_const hfmeas)
+  -- pass to the set integral over `Ico 0 (2π)` and split along the bad set
+  rw [intervalIntegral.integral_of_le h2π.le,
+    MeasureTheory.integral_Ioc_eq_integral_Ioo,
+    ← MeasureTheory.integral_Ico_eq_integral_Ioo,
+    ← MeasureTheory.integral_inter_add_sdiff (t := bad) hbadmeas hint]
+  -- bad part: integrand `≤ B`, measure `< ε'`
+  have hbound1 : (∫ θ in Set.Ico (0 : ℝ) (2 * π) ∩ bad, |κ (h₁ θ) - κs θ|)
+      ≤ B * ε' := by
+    have hvol : MeasureTheory.volume (Set.Ico (0 : ℝ) (2 * π) ∩ bad) < ⊤ :=
+      lt_of_le_of_lt (MeasureTheory.measure_mono Set.inter_subset_left) hIcofin
+    have h := MeasureTheory.norm_setIntegral_le_of_norm_le_const
+      (μ := MeasureTheory.volume) (C := B) hvol
+      (fun x _ => by rw [Real.norm_eq_abs, abs_abs]; exact hfB x)
+    have hμ : MeasureTheory.volume.real (Set.Ico (0 : ℝ) (2 * π) ∩ bad) ≤ ε' := by
+      rw [MeasureTheory.measureReal_def]
+      refine ENNReal.toReal_le_of_le_ofReal hε'.le ?_
+      exact le_of_lt (lt_of_le_of_lt
+        (MeasureTheory.measure_mono Set.inter_subset_right) hbad)
+    calc (∫ θ in Set.Ico (0 : ℝ) (2 * π) ∩ bad, |κ (h₁ θ) - κs θ|)
+        ≤ ‖∫ θ in Set.Ico (0 : ℝ) (2 * π) ∩ bad, |κ (h₁ θ) - κs θ|‖ :=
+          Real.le_norm_self _
+      _ ≤ B * MeasureTheory.volume.real (Set.Ico (0 : ℝ) (2 * π) ∩ bad) := h
+      _ ≤ B * ε' := by nlinarith
+  -- good part: integrand `≤ ε'`, measure `≤ 2π`
+  have hbound2 : (∫ θ in Set.Ico (0 : ℝ) (2 * π) \ bad, |κ (h₁ θ) - κs θ|)
+      ≤ ε' * (2 * π) := by
+    have hvol : MeasureTheory.volume (Set.Ico (0 : ℝ) (2 * π) \ bad) < ⊤ :=
+      lt_of_le_of_lt (MeasureTheory.measure_mono Set.sdiff_subset) hIcofin
+    have hgood : ∀ x ∈ Set.Ico (0 : ℝ) (2 * π) \ bad,
+        ‖|κ (h₁ x) - κs x|‖ ≤ ε' := by
+      intro x hx
+      rw [Real.norm_eq_abs, abs_abs]
+      by_contra hlt
+      exact hx.2 ⟨hx.1, lt_of_not_ge hlt⟩
+    have h := MeasureTheory.norm_setIntegral_le_of_norm_le_const
+      (μ := MeasureTheory.volume) (C := ε') hvol hgood
+    have hμ : MeasureTheory.volume.real (Set.Ico (0 : ℝ) (2 * π) \ bad)
+        ≤ 2 * π := by
+      rw [MeasureTheory.measureReal_def]
+      refine ENNReal.toReal_le_of_le_ofReal (by linarith) ?_
+      refine le_trans (MeasureTheory.measure_mono Set.sdiff_subset) ?_
+      rw [Real.volume_Ico, sub_zero]
+    calc (∫ θ in Set.Ico (0 : ℝ) (2 * π) \ bad, |κ (h₁ θ) - κs θ|)
+        ≤ ‖∫ θ in Set.Ico (0 : ℝ) (2 * π) \ bad, |κ (h₁ θ) - κs θ|‖ :=
+          Real.le_norm_self _
+      _ ≤ ε' * MeasureTheory.volume.real (Set.Ico (0 : ℝ) (2 * π) \ bad) := h
+      _ ≤ ε' * (2 * π) := by nlinarith
+  -- assemble: `(B + 2π)·ε' < (B + 2π + 1)·ε' = ε`
+  have hε'mul : ε' * (B + 2 * π + 1) = ε := by
+    rw [hε'def]
+    field_simp
+  nlinarith [hbound1, hbound2, hε', hε'mul]
+
 /-! ## Truncation removal (S2-C, continued) -/
 
 /-- The `2π`-periodic extension of a curve from its values on `[0, 2π)`:
@@ -1878,6 +2088,67 @@ lemma sphericalCircle_realizes {c : ℝ} (hc : 0 < c) :
     simp only [id_eq]
     rw [(hz' t).deriv, hid, hznorm t, hinner t, hdnorm t]
     nlinarith [hcirc]
+
+/-- **Spherical realization transfers under orientation-preserving `C¹`
+reparametrization**: if `z` realizes the spherical curvature `μ` and
+`ψ : ℝ → ℝ` is `C¹` with `ψ' > 0` everywhere, then `z ∘ ψ` realizes `μ ∘ ψ`.
+Mirror of the Euclidean `realizesCurvature_comp`: the chain rule scales the
+speed by `ψ' > 0`, the tangent-angle witness is `φ ∘ ψ`, and the conformal
+factor and bracket are pointwise in the curve value, so the spherical speed
+relation multiplies through by `ψ'` on both sides. In the capstone this pulls
+a realization of `κ ∘ h₁` back to a realization of `κ`, with `ψ = h₁⁻¹`
+supplied by the public `exists_C1_circle_inverse`.
+(Blueprint `lem:realizes_spherical_comp`.) -/
+lemma realizesSphericalCurvature_comp {z : ℝ → ℂ} {μ : ℝ → ℝ} {ψ : ℝ → ℝ}
+    (hz : RealizesSphericalCurvature z μ) (hψ : ContDiff ℝ 1 ψ)
+    (hψpos : ∀ t, 0 < deriv ψ t) :
+    RealizesSphericalCurvature (z ∘ ψ) (μ ∘ ψ) := by
+  obtain ⟨hz1, hreg, hconf, φ, hφ, htan, hcurv⟩ := hz
+  -- pointwise `HasDerivAt` data and the chain rule
+  have hzdiff : ∀ x, HasDerivAt z (deriv z x) x :=
+    fun x => (hz1.differentiable (by norm_num)).differentiableAt.hasDerivAt
+  have hψdiff : ∀ t, HasDerivAt ψ (deriv ψ t) t :=
+    fun t => (hψ.differentiable (by norm_num)).differentiableAt.hasDerivAt
+  have hcomp : ∀ t, HasDerivAt (z ∘ ψ) (deriv ψ t • deriv z (ψ t)) t :=
+    fun t => (hzdiff (ψ t)).scomp t (hψdiff t)
+  have hd : ∀ t, deriv (z ∘ ψ) t = deriv ψ t • deriv z (ψ t) :=
+    fun t => (hcomp t).deriv
+  have hnorm : ∀ t, ‖deriv (z ∘ ψ) t‖ = deriv ψ t * ‖deriv z (ψ t)‖ := by
+    intro t
+    rw [hd, norm_smul, Real.norm_eq_abs, abs_of_pos (hψpos t)]
+  have hz'cont : Continuous (deriv z) := (contDiff_one_iff_deriv.mp hz1).2
+  have hψ'cont : Continuous (deriv ψ) := (contDiff_one_iff_deriv.mp hψ).2
+  have hψcont : Continuous ψ := hψ.continuous
+  refine ⟨?_, ?_, ?_, φ ∘ ψ, ?_, ?_, ?_⟩
+  · -- `C¹`
+    refine contDiff_one_iff_deriv.mpr ⟨fun t => (hcomp t).differentiableAt, ?_⟩
+    have heq : deriv (z ∘ ψ) = fun t => deriv ψ t • deriv z (ψ t) := funext hd
+    rw [heq]
+    exact hψ'cont.smul (hz'cont.comp hψcont)
+  · -- regular
+    intro t
+    rw [hd]
+    exact smul_ne_zero (hψpos t).ne' (hreg (ψ t))
+  · -- confined to the open disk (pointwise in the curve value)
+    intro t
+    exact hconf (ψ t)
+  · -- tangent angle `φ ∘ ψ` is differentiable
+    exact hφ.comp (hψ.differentiable (by norm_num))
+  · -- tangent equation
+    intro t
+    rw [hnorm, hd, Complex.real_smul]
+    conv_lhs => rw [htan (ψ t)]
+    simp only [Function.comp_apply]
+    push_cast
+    ring
+  · -- spherical speed relation: multiply the relation at `ψ t` through by `ψ'`
+    intro t
+    have hφψ : deriv (φ ∘ ψ) t = deriv φ (ψ t) * deriv ψ t :=
+      ((hφ (ψ t)).hasDerivAt.comp t (hψdiff t)).deriv
+    have h := hcurv (ψ t)
+    simp only [Function.comp_apply]
+    rw [hφψ, hnorm]
+    linear_combination deriv ψ t * h
 
 /-- **Spherical converse, positive stage.** If `κ` satisfies the positive-stage
 spherical four-vertex condition, then there is a simple closed curve `z` confined
