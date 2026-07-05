@@ -180,7 +180,7 @@ private lemma sf_term_bound {s N D B DEN c P : ℝ} (hs0 : 0 < s)
 
 /-- Per-arc remainder term T1 bound. -/
 private lemma sf_bnd_T1 {s R η h D dz : ℝ} (hs0 : 0 < s) (hR0 : 0 < R) (hR1 : R < 1)
-    (hη2 : η ^ 2 ≤ h ^ 2 / 4) (hh0 : 0 ≤ h) (hD0 : 0 ≤ D) (hdz : s / 2 ≤ dz) :
+    (hη2 : η ^ 2 ≤ h ^ 2 / 4) (hh0 : 0 ≤ h) (_hD0 : 0 ≤ D) (hdz : s / 2 ≤ dz) :
     |R * η ^ 2 / (s * dz)| ≤ 10 * ((1 / s + 1 / s ^ 3) * (h * (D ^ 2 + h))) := by
   refine sf_term_bound (B := s ^ 2 / 2) (DEN := 2 * s) hs0
     (by have := pow_pos hs0 2; linarith) (by nlinarith [hdz, hs0]) (by linarith)
@@ -196,7 +196,7 @@ private lemma sf_bnd_T1 {s R η h D dz : ℝ} (hs0 : 0 < s) (hR0 : 0 < R) (hR1 :
 private lemma sf_bnd_T2 {s R ε η h D β U dz : ℝ} (hs0 : 0 < s) (hR0 : 0 < R)
     (hR1 : R < 1) (hη : |η| ≤ h / 2) (hε2 : ε * ε = 1) (hβ2 : β ^ 2 ≤ U ^ 2)
     (hhU2 : h * U ^ 2 ≤ 8 * (h * D ^ 2) + h ^ 2)
-    (hh0 : 0 ≤ h) (hD0 : 0 ≤ D) (hU0 : 0 ≤ U) (hdz : s / 2 ≤ dz) :
+    (hh0 : 0 ≤ h) (_hD0 : 0 ≤ D) (_hU0 : 0 ≤ U) (hdz : s / 2 ≤ dz) :
     |R * η * (ε * β) ^ 2 / (s ^ 2 * dz)|
       ≤ 200 * ((1 / s + 1 / s ^ 3) * (h * (D ^ 2 + h))) := by
   refine sf_term_bound (B := s ^ 3 / 2) (DEN := 2) hs0
@@ -206,18 +206,19 @@ private lemma sf_bnd_T2 {s R ε η h D β U dz : ℝ} (hs0 : 0 < s) (hR0 : 0 < R
     rw [abs_mul, abs_mul, abs_of_nonneg hR0.le]
     have h1 : (ε * β) ^ 2 = β ^ 2 := by rw [mul_pow]; nlinarith [hε2]
     rw [abs_of_nonneg (sq_nonneg (ε * β)), h1]
-    nlinarith [mul_nonneg (mul_nonneg (show (0:ℝ) ≤ 1 - R by linarith) (abs_nonneg η)) (sq_nonneg β),
+    nlinarith [mul_nonneg (mul_nonneg (show (0:ℝ) ≤ 1 - R by linarith) (abs_nonneg η))
+        (sq_nonneg β),
       mul_nonneg (show (0:ℝ) ≤ h / 2 - |η| by linarith) (sq_nonneg β),
       mul_nonneg (show (0:ℝ) ≤ h / 2 by linarith) (show (0:ℝ) ≤ U ^ 2 - β ^ 2 by linarith),
       hR0, abs_nonneg η]
   have hc1 : |R * η * (ε * β) ^ 2| * 2 ≤ h * U ^ 2 := by nlinarith [hNb]
   nlinarith [hc1, hhU2, mul_nonneg (mul_nonneg hh0 (sq_nonneg D)) (sq_nonneg s),
-    mul_nonneg hh0 (sq_nonneg D), mul_nonneg (sq_nonneg s) (sq_nonneg h), sq_nonneg h, hh0, hD0]
+    mul_nonneg hh0 (sq_nonneg D), mul_nonneg (sq_nonneg s) (sq_nonneg h), sq_nonneg h, hh0, _hD0]
 
 /-- Per-arc remainder term T3 bound. -/
 private lemma sf_bnd_T3 {s R ε η h D β U dz : ℝ} (hs0 : 0 < s) (hR0 : 0 < R)
     (hR1 : R < 1) (hη2 : η ^ 2 ≤ h ^ 2 / 4) (hεβU : |ε * β| ≤ U) (hUs : U ≤ s / 2)
-    (hh0 : 0 ≤ h) (hD0 : 0 ≤ D) (hU0 : 0 ≤ U) (hdz : s / 2 ≤ dz) :
+    (hh0 : 0 ≤ h) (_hD0 : 0 ≤ D) (_hU0 : 0 ≤ U) (hdz : s / 2 ≤ dz) :
     |R * η ^ 2 * (ε * β) / (s ^ 2 * dz)|
       ≤ 10 * ((1 / s + 1 / s ^ 3) * (h * (D ^ 2 + h))) := by
   refine sf_term_bound (B := s ^ 3 / 2) (DEN := 2) hs0
@@ -225,7 +226,8 @@ private lemma sf_bnd_T3 {s R ε η h D β U dz : ℝ} (hs0 : 0 < s) (hR0 : 0 < R
     (by norm_num) (by ring) ?_
   have hNb : |R * η ^ 2 * (ε * β)| ≤ h ^ 2 / 4 * (s / 2) := by
     rw [abs_mul, abs_mul, abs_of_nonneg hR0.le, abs_of_nonneg (sq_nonneg η)]
-    nlinarith [mul_nonneg (mul_nonneg (show (0:ℝ) ≤ 1 - R by linarith) (sq_nonneg η)) (abs_nonneg (ε * β)),
+    nlinarith [mul_nonneg (mul_nonneg (show (0:ℝ) ≤ 1 - R by linarith) (sq_nonneg η))
+        (abs_nonneg (ε * β)),
       mul_nonneg (show (0:ℝ) ≤ h ^ 2 / 4 - η ^ 2 by linarith) (abs_nonneg (ε * β)),
       mul_nonneg (show (0:ℝ) ≤ h ^ 2 / 4 by positivity) (show (0:ℝ) ≤ U - |ε * β| by linarith),
       mul_nonneg (show (0:ℝ) ≤ h ^ 2 / 4 by positivity) (show (0:ℝ) ≤ s / 2 - U by linarith),
@@ -237,7 +239,7 @@ private lemma sf_bnd_T3 {s R ε η h D β U dz : ℝ} (hs0 : 0 < s) (hR0 : 0 < R
 /-- Per-arc remainder term T4 bound. -/
 private lemma sf_bnd_T4 {s ε U η h D dz dz0 : ℝ} (hs0 : 0 < s) (hεabs1 : |ε| = 1)
     (hη : |η| ≤ h / 2) (hhU2 : h * U ^ 2 ≤ 8 * (h * D ^ 2) + h ^ 2)
-    (hh0 : 0 ≤ h) (hD0 : 0 ≤ D) (hdz : s / 2 ≤ dz) (hdz0 : s / 2 ≤ dz0) :
+    (hh0 : 0 ≤ h) (_hD0 : 0 ≤ D) (hdz : s / 2 ≤ dz) (hdz0 : s / 2 ≤ dz0) :
     |ε * U ^ 2 * η / (2 * dz * dz0)|
       ≤ 200 * ((1 / s + 1 / s ^ 3) * (h * (D ^ 2 + h))) := by
   refine sf_term_bound (B := s ^ 2 / 2) (DEN := 2 * s) hs0
@@ -253,7 +255,7 @@ private lemma sf_bnd_T4 {s ε U η h D dz dz0 : ℝ} (hs0 : 0 < s) (hεabs1 : |�
   nlinarith [hc1, hc2,
     mul_nonneg (mul_nonneg hh0 (sq_nonneg D)) (sq_nonneg (s - 1)),
     mul_nonneg (mul_nonneg hh0 (sq_nonneg D)) (sq_nonneg s), mul_nonneg hh0 (sq_nonneg D),
-    mul_nonneg (sq_nonneg s) (sq_nonneg h), sq_nonneg h, hh0, hD0, hs0.le,
+    mul_nonneg (sq_nonneg s) (sq_nonneg h), sq_nonneg h, hh0, _hD0, hs0.le,
     mul_nonneg (sq_nonneg h) (sq_nonneg (s - 1))]
 
 /-- Per-arc remainder term Y1 bound. -/
@@ -290,7 +292,7 @@ private lemma sf_bnd_Y1 {s ε IuyG β U Uy Gn D h dz0 : ℝ} (hs0 : 0 < s)
 
 /-- Per-arc remainder term Y2 bound. -/
 private lemma sf_bnd_Y2 {s ε Gn D h dz0 : ℝ} (hs0 : 0 < s) (hεabs1 : |ε| = 1)
-    (hGns : Gn * s ≤ 40 * h) (hGn0 : 0 ≤ Gn) (hh0 : 0 ≤ h) (hD0 : 0 ≤ D)
+    (hGns : Gn * s ≤ 40 * h) (hGn0 : 0 ≤ Gn) (hh0 : 0 ≤ h) (_hD0 : 0 ≤ D)
     (hdz0 : s / 2 ≤ dz0) :
     |ε * Gn ^ 2 / (2 * dz0)| ≤ 20000 * ((1 / s + 1 / s ^ 3) * (h * (D ^ 2 + h))) := by
   refine sf_term_bound (B := s) (DEN := s ^ 2) hs0 hs0 (by linarith)
@@ -306,7 +308,7 @@ private lemma sf_bnd_Y2 {s ε Gn D h dz0 : ℝ} (hs0 : 0 < s) (hεabs1 : |ε| = 
 /-- Per-arc remainder term Y3 bound. -/
 private lemma sf_bnd_Y3 {s ε β βy Uy Gn D h dz0 dyy : ℝ} (hs0 : 0 < s)
     (hεabs1 : |ε| = 1) (hβby : |β - βy| ≤ Gn) (hUy2 : Uy ^ 2 ≤ 4 * D ^ 2)
-    (hGns : Gn * s ≤ 40 * h) (hGn0 : 0 ≤ Gn) (hh0 : 0 ≤ h) (hD0 : 0 ≤ D)
+    (hGns : Gn * s ≤ 40 * h) (_hGn0 : 0 ≤ Gn) (hh0 : 0 ≤ h) (_hD0 : 0 ≤ D)
     (hdz0 : s / 2 ≤ dz0) (hdyy : s / 2 ≤ dyy) :
     |ε * Uy ^ 2 * (ε * β - ε * βy) / (2 * dz0 * dyy)|
       ≤ 4000 * ((1 / s + 1 / s ^ 3) * (h * (D ^ 2 + h))) := by
@@ -328,13 +330,13 @@ private lemma sf_bnd_Y3 {s ε β βy Uy Gn D h dz0 dyy : ℝ} (hs0 : 0 < s)
     nlinarith [mul_le_mul_of_nonneg_right hUy2 (show (0:ℝ) ≤ 80 * h by linarith)]
   nlinarith [hc1, hc2, mul_nonneg (mul_nonneg hh0 (sq_nonneg D)) (sq_nonneg s),
     mul_nonneg hh0 (sq_nonneg D), mul_nonneg (sq_nonneg s) (sq_nonneg h), sq_nonneg h,
-    hh0, hD0, hs0.le]
+    hh0, _hD0, hs0.le]
 
 /-- Per-arc remainder swap term FR bound. -/
 private lemma sf_bnd_FR {s R ε η h D β IδV Nud : ℝ} (hs0 : 0 < s) (hR0 : 0 < R)
     (hR1 : R < 1) (hη : |η| ≤ h / 2) (hεabs1 : |ε| = 1) (hβδ : |β - IδV| ≤ Nud)
-    (hud_s : Nud * s ≤ 2 * D ^ 2 * s + 40 * h) (hh0 : 0 ≤ h) (hD0 : 0 ≤ D)
-    (hNud0 : 0 ≤ Nud) :
+    (hud_s : Nud * s ≤ 2 * D ^ 2 * s + 40 * h) (hh0 : 0 ≤ h) (_hD0 : 0 ≤ D)
+    (_hNud0 : 0 ≤ Nud) :
     |R * ε / s ^ 2 * η * (β - IδV)|
       ≤ 400 * ((1 / s + 1 / s ^ 3) * (h * (D ^ 2 + h))) := by
   rw [show R * ε / s ^ 2 * η * (β - IδV) = R * ε * η * (β - IδV) / s ^ 2 by ring]
@@ -342,7 +344,8 @@ private lemma sf_bnd_FR {s R ε η h D β IδV Nud : ℝ} (hs0 : 0 < s) (hR0 : 0
     (by ring) ?_
   have hNb : |R * ε * η * (β - IδV)| ≤ h / 2 * Nud := by
     rw [abs_mul, abs_mul, abs_mul, hεabs1, mul_one, abs_of_nonneg hR0.le]
-    nlinarith [mul_nonneg (mul_nonneg (show (0:ℝ) ≤ 1 - R by linarith) (abs_nonneg η)) (abs_nonneg (β - IδV)),
+    nlinarith [mul_nonneg (mul_nonneg (show (0:ℝ) ≤ 1 - R by linarith) (abs_nonneg η))
+        (abs_nonneg (β - IδV)),
       mul_nonneg (show (0:ℝ) ≤ h / 2 - |η| by linarith) (abs_nonneg (β - IδV)),
       mul_nonneg (show (0:ℝ) ≤ h / 2 by linarith) (show (0:ℝ) ≤ Nud - |β - IδV| by linarith),
       hR0]
@@ -350,12 +353,12 @@ private lemma sf_bnd_FR {s R ε η h D β IδV Nud : ℝ} (hs0 : 0 < s) (hR0 : 0
   nlinarith [hNb, mul_le_mul_of_nonneg_left hud_s (show (0:ℝ) ≤ h / 2 by linarith),
     mul_nonneg (mul_nonneg hh0 (sq_nonneg D)) (sq_nonneg (s - 1)),
     mul_nonneg (mul_nonneg hh0 (sq_nonneg D)) (sq_nonneg s), mul_nonneg hh0 (sq_nonneg D),
-    mul_nonneg (sq_nonneg s) (sq_nonneg h), sq_nonneg h, hh0, hD0]
+    mul_nonneg (sq_nonneg s) (sq_nonneg h), sq_nonneg h, hh0, _hD0]
 
 /-- Per-arc inner-swap term bound (carries the drift-approximation slack).
 The non-slack part is the `s`-scaled `2‖δ‖²/s·‖g‖` inner deviation. -/
 private lemma sf_bnd_IS {s X D Gn Ag h : ℝ} (hs0 : 0 < s) (hh0 : 0 ≤ h)
-    (hD0 : 0 ≤ D) (hGn0 : 0 ≤ Gn) (hAg0 : 0 ≤ Ag)
+    (_hD0 : 0 ≤ D) (_hGn0 : 0 ≤ Gn) (_hAg0 : 0 ≤ Ag)
     (hnum : |X| ≤ 2 * D ^ 2 / s * Gn + D * Ag) (hGns : Gn * s ≤ 40 * h) :
     |X / s| ≤ 100 * ((1 / s + 1 / s ^ 3) * (h * (D ^ 2 + h))) + D * Ag / s := by
   rw [abs_div, abs_of_pos hs0]
@@ -373,16 +376,16 @@ private lemma sf_bnd_IS {s X D Gn Ag h : ℝ} (hs0 : 0 < s) (hh0 : 0 ≤ h)
   have hred : 80 * D ^ 2 * h ≤ 100 * (s ^ 2 + 1) * (h * (D ^ 2 + h)) := by
     nlinarith [mul_nonneg (mul_nonneg hh0 (sq_nonneg D)) (sq_nonneg s),
       mul_nonneg (sq_nonneg h) (sq_nonneg s), mul_nonneg hh0 (sq_nonneg D), sq_nonneg h,
-      hh0, hD0]
+      hh0, _hD0]
   rw [show (100 : ℝ) * ((1 / s + 1 / s ^ 3) * (h * (D ^ 2 + h)))
       = 100 * (s ^ 2 + 1) * (h * (D ^ 2 + h)) / s ^ 3 by field_simp,
     div_le_div_iff₀ (pow_pos hs0 3) (pow_pos hs0 3)]
   exact mul_le_mul_of_nonneg_right hred (pow_nonneg hs0.le 3)
 
+set_option maxHeartbeats 8000000 in
 -- The proof assembles the exact level/base-point identities and nine per-arc
 -- remainder bounds; the extracted `sf_bnd_*` lemmas each carry their own budget,
 -- but the shared algebraic setup plus the assembly still needs a raised limit.
-set_option maxHeartbeats 8000000 in
 /-- **Per-arc speed decomposition** (`ε`-generic, `s`-scaled). Compares the
 perturbed level-`(c−η)` gauge speed at `z` with the level-`c` speed at the
 reference point `y`. Modulo an `O(h(‖δ‖²+h))` remainder (plus a `‖δ‖·Ag/s` term
@@ -435,8 +438,10 @@ private lemma sf_arcSpeed_decomp {ε c h η θ : ℝ} {δ z y G : ℂ} {Ag : ℝ
   have hδ0 : 0 ≤ ‖δ‖ := norm_nonneg δ
   have hδ1 : ‖δ‖ ≤ 1/8192 := le_trans hσ (by have := min_le_left (1:ℝ) (c^2+ε); linarith)
   have hh1 : h ≤ 1/8192 := le_trans hh (by have := min_le_left (1:ℝ) (c^2+ε); linarith)
-  have hδs2 : ‖δ‖ ≤ s^2/8192 := le_trans hσ (by rw [hs2]; have := min_le_right (1:ℝ) (c^2+ε); linarith)
-  have hhs2 : h ≤ s^2/8192 := le_trans hh (by rw [hs2]; have := min_le_right (1:ℝ) (c^2+ε); linarith)
+  have hδs2 : ‖δ‖ ≤ s^2/8192 :=
+    le_trans hσ (by rw [hs2]; have := min_le_right (1:ℝ) (c^2+ε); linarith)
+  have hhs2 : h ≤ s^2/8192 :=
+    le_trans hh (by rw [hs2]; have := min_le_right (1:ℝ) (c^2+ε); linarith)
   have hη2 : η^2 ≤ h^2/4 := by
     have h1 : η^2 ≤ (h/2)^2 := by rw [← sq_abs]; exact pow_le_pow_left₀ (abs_nonneg η) hη 2
     nlinarith [h1]
@@ -472,7 +477,8 @@ private lemma sf_arcSpeed_decomp {ε c h η θ : ℝ} {δ z y G : ℂ} {Ag : ℝ
   have husmall : ‖u‖ ≤ s / 4 := by
     have key : ‖u‖ * s ≤ (s/4) * s := by
       rcases lt_or_ge s 1 with hsle | hsgt
-      · nlinarith [hun_s, hδs2, hhs2, hs0, mul_nonneg hs0.le (show (0:ℝ) ≤ 1 - s by linarith), hδ0, hh0.le]
+      · nlinarith [hun_s, hδs2, hhs2, hs0, mul_nonneg hs0.le (show (0:ℝ) ≤ 1 - s by linarith),
+          hδ0, hh0.le]
       · nlinarith [hun_s, hδ1, hh1, hsgt, hs0, hδ0, hh0.le]
     exact le_of_mul_le_mul_right key hs0
   have huysmall : ‖uy‖ ≤ s / 4 := by linarith [huyn, h8δs]
@@ -506,7 +512,8 @@ private lemma sf_arcSpeed_decomp {ε c h η θ : ℝ} {δ z y G : ℂ} {Ag : ℝ
   have hhU2 : h * ‖u‖ ^ 2 ≤ 8 * (h * ‖δ‖ ^ 2) + h ^ 2 := by
     have key2 : (h * ‖u‖ ^ 2) * s ^ 2 ≤ (8 * (h * ‖δ‖ ^ 2) + h ^ 2) * s ^ 2 := by
       have h1 := mul_le_mul_of_nonneg_left hUsq_s2 hh0.le
-      nlinarith [h1, mul_nonneg (sq_nonneg h) (show (0:ℝ) ≤ s ^ 2 - 3200 * h by nlinarith [hhs2, hs0, hh0.le])]
+      nlinarith [h1,
+        mul_nonneg (sq_nonneg h) (show (0:ℝ) ≤ s ^ 2 - 3200 * h by nlinarith [hhs2, hs0, hh0.le])]
     exact le_of_mul_le_mul_right key2 (pow_pos hs0 2)
   have hDs' : ‖δ‖ / s ≤ 1 / 8192 := by
     rw [div_le_div_iff₀ hs0 (by norm_num : (0:ℝ) < 8192)]
@@ -621,7 +628,8 @@ private lemma sf_arcSpeed_decomp {ε c h η θ : ℝ} {δ z y G : ℂ} {Ag : ℝ
   -- per-term bounds
   have hT1 := sf_bnd_T1 (D := ‖δ‖) hs0 hrs0 hrs1 hη2 hh0.le hδ0 hdzKf
   have hT2 := sf_bnd_T2 hs0 hrs0 hrs1 hη hε2 hβ2 hhU2 hh0.le hδ0 (norm_nonneg u) hdzKf
-  have hT3 := sf_bnd_T3 hs0 hrs0 hrs1 hη2 hεβabs (by linarith [husmall]) hh0.le hδ0 (norm_nonneg u) hdzKf
+  have hT3 := sf_bnd_T3 hs0 hrs0 hrs1 hη2 hεβabs (by linarith [husmall]) hh0.le hδ0 (norm_nonneg u)
+    hdzKf
   have hT4 := sf_bnd_T4 hs0 hεabs1 hη hhU2 hh0.le hδ0 hdzKf hdz0f
   have hY1 := sf_bnd_Y1 hs0 hIuyGb hβU hεabs1 hgc hun huyn hDs' hh0.le hδ0
     (norm_nonneg g) (norm_nonneg u) (norm_nonneg uy) hdz0f
@@ -725,7 +733,7 @@ private lemma sf_leftover {h nδ s : ℝ} (hX : 0 ≤ h * nδ / s ^ 2) :
   rw [show h * nδ / (2 * s ^ 2) = (1/2) * (h * nδ / s ^ 2) by ring,
     show (2:ℝ) * h * nδ / s ^ 2 = 2 * (h * nδ / s ^ 2) by ring]
   linarith [hX]
-private lemma sf_qterm {q h s : ℝ} {d : ℂ} (hs0 : 0 < s) (hh0 : 0 ≤ h) (hd : ‖d‖ ≤ 2)
+private lemma sf_qterm {q h s : ℝ} {d : ℂ} (_hs0 : 0 < s) (_hh0 : 0 ≤ h) (hd : ‖d‖ ≤ 2)
     (hq : |q| ≤ 6 * h / s) : ‖(q : ℂ) * d‖ ≤ 12 * (h / s) := by
   refine le_trans (sf_norm_dir hd) ?_
   calc |q| * 2 ≤ (6 * h / s) * 2 := mul_le_mul_of_nonneg_right hq (by norm_num)
@@ -737,6 +745,9 @@ private lemma sf_kterm {q B h nδ s : ℝ} {d : ℂ} (hd : ‖d‖ ≤ 2)
   exact mul_le_mul_of_nonneg_right hq (by norm_num)
 
 set_option maxHeartbeats 2000000 in
+-- The per-arc assembly discharges the level identities and remainder bounds through
+-- many `linarith`/`nlinarith` calls over a large hypothesis context, exceeding the
+-- default heartbeat budget.
 private lemma sf_stepError_arc1 {ε c h : ℝ} {δ z₁ W : ℂ} {Q₀ Q₁ r s R κ Bres : ℝ}
     (hε : ε = 1 ∨ ε = -1) (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c))
     (hh0 : 0 < h) (hσdec : ‖δ‖ ≤ min 1 (c ^ 2 + ε) / 8192)
@@ -759,8 +770,8 @@ private lemma sf_stepError_arc1 {ε c h : ℝ} {δ z₁ W : ℂ} {Q₀ Q₁ r s 
     (hBresnn : 0 ≤ Bres) (hBres1 : Bres ≤ h / s)
     (hAgfold : ‖δ‖ * (12 * Bres + 12 * h * ‖δ‖ / s ^ 2) / s ≤ Bres)
     (hXnn : 0 ≤ h * ‖δ‖ / s ^ 2) (hn1I : ‖(1 : ℂ) + Complex.I‖ ≤ 2)
-    (hnm1I : ‖(-1 : ℂ) + Complex.I‖ ≤ 2)
-    (hδs : ‖δ‖ ≤ s / 8192) (hσ0 : 0 ≤ ‖δ‖) (hRdef : R = centeredRadius ε c) :
+    (_hnm1I : ‖(-1 : ℂ) + Complex.I‖ ≤ 2)
+    (hδs : ‖δ‖ ≤ s / 8192) (_hσ0 : 0 ≤ ‖δ‖) (hRdef : R = centeredRadius ε c) :
     (|Q₁ - r - (R / s * -(h / 2) + R * ε / s ^ 2 * -(h / 2) * -δ.re
         + ε * κ * (δ.re + δ.im) / s)| ≤ 2 * Bres)
       ∧ |Q₁ - r| ≤ 6 * h / s
@@ -845,6 +856,9 @@ private lemma sf_stepError_arc1 {ε c h : ℝ} {δ z₁ W : ℂ} {Q₀ Q₁ r s 
   exact ⟨hres₁, hQ₁r, hQ₁κ⟩
 
 set_option maxHeartbeats 2000000 in
+-- The per-arc assembly discharges the level identities and remainder bounds through
+-- many `linarith`/`nlinarith` calls over a large hypothesis context, exceeding the
+-- default heartbeat budget.
 private lemma sf_stepError_arc2 {ε c h : ℝ} {δ z₂ W : ℂ} {Q₀ Q₁ Q₂ r s R κ Bres : ℝ}
     (hε : ε = 1 ∨ ε = -1) (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c))
     (hh0 : 0 < h) (hσdec : ‖δ‖ ≤ min 1 (c ^ 2 + ε) / 8192)
@@ -870,14 +884,16 @@ private lemma sf_stepError_arc2 {ε c h : ℝ} {δ z₂ W : ℂ} {Q₀ Q₁ Q₂
     (hAgfold : ‖δ‖ * (12 * Bres + 12 * h * ‖δ‖ / s ^ 2) / s ≤ Bres)
     (hXnn : 0 ≤ h * ‖δ‖ / s ^ 2) (hn1I : ‖(1 : ℂ) + Complex.I‖ ≤ 2)
     (hnm1I : ‖(-1 : ℂ) + Complex.I‖ ≤ 2) (hn2I : ‖(2 : ℂ) * Complex.I‖ ≤ 2)
-    (hδs : ‖δ‖ ≤ s / 8192) (hσ0 : 0 ≤ ‖δ‖) (hRdef : R = centeredRadius ε c) :
+    (hδs : ‖δ‖ ≤ s / 8192) (_hσ0 : 0 ≤ ‖δ‖) (hRdef : R = centeredRadius ε c) :
     (|Q₂ - r - (R / s * (h / 2) + R * ε / s ^ 2 * (h / 2) * -δ.im
         + ε * (2 * κ * δ.re) / s)| ≤ 2 * Bres)
       ∧ |Q₂ - r| ≤ 6 * h / s
       ∧ |Q₂ - r - κ| ≤ 2 * Bres + 2 * h * ‖δ‖ / s ^ 2 := by
-  have hyu₂ : ‖(W + Complex.I * (r : ℂ)) + R • (Complex.I * Complex.exp (((π : ℝ) : ℂ) * Complex.I)) - δ‖ ≤ 2 * ‖δ‖ ^ 2 / s := by
+  have hyu₂ : ‖(W + Complex.I * (r : ℂ))
+      + R • (Complex.I * Complex.exp (((π : ℝ) : ℂ) * Complex.I)) - δ‖ ≤ 2 * ‖δ‖ ^ 2 / s := by
     rw [hV2]
-    have h1 : W + Complex.I * (r : ℂ) + R • (-Complex.I) - δ = ((r - R : ℝ) : ℂ) * (2 * Complex.I) := by
+    have h1 : W + Complex.I * (r : ℂ) + R • (-Complex.I) - δ
+        = ((r - R : ℝ) : ℂ) * (2 * Complex.I) := by
       rw [hWδ, Complex.real_smul]; push_cast; ring
     rw [h1]
     calc ‖((r - R : ℝ) : ℂ) * (2 * Complex.I)‖ ≤ |r - R| * 2 := sf_norm_dir hn2I
@@ -890,18 +906,25 @@ private lemma sf_stepError_arc2 {ε c h : ℝ} {δ z₂ W : ℂ} {Q₀ Q₁ Q₂
     have h1 := sf_qterm hs0 hh0.le hnm1I hQ₁r
     rw [show (36 : ℝ) * h / s = 36 * (h / s) by ring]
     linarith [h0, h1]
-  have hzu₂ : ‖z₂ + R • (Complex.I * Complex.exp (((π : ℝ) : ℂ) * Complex.I)) - δ‖ ≤ 2 * ‖δ‖ ^ 2 / s + 40 * h / s := by
+  have hzu₂ : ‖z₂ + R • (Complex.I * Complex.exp (((π : ℝ) : ℂ) * Complex.I)) - δ‖
+      ≤ 2 * ‖δ‖ ^ 2 / s + 40 * h / s := by
     have hsp : z₂ + R • (Complex.I * Complex.exp (((π : ℝ) : ℂ) * Complex.I)) - δ
-        = ((W + Complex.I * (r : ℂ)) + R • (Complex.I * Complex.exp (((π : ℝ) : ℂ) * Complex.I)) - δ) + (z₂ - (W + Complex.I * (r : ℂ))) := by abel
+        = ((W + Complex.I * (r : ℂ))
+            + R • (Complex.I * Complex.exp (((π : ℝ) : ℂ) * Complex.I)) - δ)
+          + (z₂ - (W + Complex.I * (r : ℂ))) := by abel
     rw [hsp]; exact le_trans (norm_add_le _ _) (by linarith [hyu₂, hgn₂])
   have hGn₂ : ‖(κ : ℂ) * 2‖ ≤ 40 * h / s := by
-    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hκ0, show ‖(2:ℂ)‖ = 2 by norm_num]
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hκ0,
+      show ‖(2:ℂ)‖ = 2 by norm_num]
     refine sf_le40 hs0 hh0.le ?_
     calc κ * 2 ≤ (h / (2 * s)) * 2 := mul_le_mul_of_nonneg_right hκs (by norm_num)
       _ = h / s := by ring
       _ ≤ 36 * h / s := div_le_div_of_nonneg_right (by nlinarith [hh0.le]) hs0.le
-  have hgG₂ : ‖z₂ - (W + Complex.I * (r : ℂ)) - (κ : ℂ) * 2‖ ≤ 12 * Bres + 12 * h * ‖δ‖ / s ^ 2 := by
-    have h1 : z₂ - (W + Complex.I * (r : ℂ)) - (κ : ℂ) * 2 = ((Q₀ - r - κ : ℝ) : ℂ) * (1 + Complex.I) + ((Q₁ - r + κ : ℝ) : ℂ) * (-1 + Complex.I) := by
+  have hgG₂ : ‖z₂ - (W + Complex.I * (r : ℂ)) - (κ : ℂ) * 2‖
+      ≤ 12 * Bres + 12 * h * ‖δ‖ / s ^ 2 := by
+    have h1 : z₂ - (W + Complex.I * (r : ℂ)) - (κ : ℂ) * 2
+        = ((Q₀ - r - κ : ℝ) : ℂ) * (1 + Complex.I)
+          + ((Q₁ - r + κ : ℝ) : ℂ) * (-1 + Complex.I) := by
       rw [hg₂]; push_cast; ring
     rw [h1]
     refine le_trans (norm_add_le _ _) ?_
@@ -920,19 +943,27 @@ private lemma sf_stepError_arc2 {ε c h : ℝ} {δ z₂ W : ℂ} {Q₀ Q₁ Q₂
     rw [show ε * (2 * κ * δ.re) = ε * κ * (2 * δ.re) by ring]
     refine sf_absKap hs0 hκ0 hκs hh0.le hεabs1 ?_
     rw [abs_mul, show |(2:ℝ)| = 2 by norm_num]; linarith [hδre]
-  have hmain₂ : |R / s * (h / 2) + R * ε / s ^ 2 * (h / 2) * -δ.im + ε * (2 * κ * δ.re) / s| ≤ h / s :=
+  have hmain₂ : |R / s * (h / 2) + R * ε / s ^ 2 * (h / 2) * -δ.im + ε * (2 * κ * δ.re) / s|
+      ≤ h / s :=
     sf_mainbnd hs0 hrs0 hrs1 hh0.le hεabs1 hη0 (by rw [abs_neg]; exact hδim) hg₂g hδs
-  have hres₂ : |Q₂ - r - (R / s * (h / 2) + R * ε / s ^ 2 * (h / 2) * -δ.im + ε * (2 * κ * δ.re) / s)| ≤ 2 * Bres :=
+  have hres₂ : |Q₂ - r - (R / s * (h / 2) + R * ε / s ^ 2 * (h / 2) * -δ.im
+      + ε * (2 * κ * δ.re) / s)| ≤ 2 * Bres :=
     le_trans harc₂ (by linarith [hAgfold])
   have hQ₂r : |Q₂ - r| ≤ 6 * h / s := by
-    have h1 : |Q₂ - r| ≤ |Q₂ - r - (R / s * (h / 2) + R * ε / s ^ 2 * (h / 2) * -δ.im + ε * (2 * κ * δ.re) / s)| + |R / s * (h / 2) + R * ε / s ^ 2 * (h / 2) * -δ.im + ε * (2 * κ * δ.re) / s| := by
-      have := abs_add_le (Q₂ - r - (R / s * (h / 2) + R * ε / s ^ 2 * (h / 2) * -δ.im + ε * (2 * κ * δ.re) / s)) (R / s * (h / 2) + R * ε / s ^ 2 * (h / 2) * -δ.im + ε * (2 * κ * δ.re) / s)
+    have h1 : |Q₂ - r|
+        ≤ |Q₂ - r - (R / s * (h / 2) + R * ε / s ^ 2 * (h / 2) * -δ.im + ε * (2 * κ * δ.re) / s)|
+          + |R / s * (h / 2) + R * ε / s ^ 2 * (h / 2) * -δ.im + ε * (2 * κ * δ.re) / s| := by
+      have := abs_add_le
+        (Q₂ - r - (R / s * (h / 2) + R * ε / s ^ 2 * (h / 2) * -δ.im + ε * (2 * κ * δ.re) / s))
+        (R / s * (h / 2) + R * ε / s ^ 2 * (h / 2) * -δ.im + ε * (2 * κ * δ.re) / s)
       simpa using this
     have h6 : |Q₂ - r| ≤ 2 * Bres + h / s := le_trans h1 (add_le_add hres₂ hmain₂)
     rw [show 6 * h / s = 6 * (h / s) by ring]
     linarith [h6, hBres1, div_nonneg hh0.le hs0.le]
   have hQ₂κ : |Q₂ - r - κ| ≤ 2 * Bres + 2 * h * ‖δ‖ / s ^ 2 := by
-    have he : Q₂ - r - κ = (Q₂ - r - (R / s * (h / 2) + R * ε / s ^ 2 * (h / 2) * -δ.im + ε * (2 * κ * δ.re) / s)) + (R * ε / s ^ 2 * (h / 2) * -δ.im + ε * (2 * κ * δ.re) / s) := by
+    have he : Q₂ - r - κ
+        = (Q₂ - r - (R / s * (h / 2) + R * ε / s ^ 2 * (h / 2) * -δ.im + ε * (2 * κ * δ.re) / s))
+          + (R * ε / s ^ 2 * (h / 2) * -δ.im + ε * (2 * κ * δ.re) / s) := by
       rw [hκdef]; ring
     rw [he]
     refine le_trans (abs_add_le _ _) ?_
@@ -943,12 +974,15 @@ private lemma sf_stepError_arc2 {ε c h : ℝ} {δ z₂ W : ℂ} {Q₀ Q₁ Q₂
   exact ⟨hres₂, hQ₂r, hQ₂κ⟩
 
 set_option maxHeartbeats 2000000 in
+-- The per-arc assembly discharges the level identities and remainder bounds through
+-- many `linarith`/`nlinarith` calls over a large hypothesis context, exceeding the
+-- default heartbeat budget.
 private lemma sf_stepError_arc3 {ε c h : ℝ} {δ z₃ W : ℂ} {Q₀ Q₁ Q₂ Q₃ r s R κ Bres : ℝ}
     (hε : ε = 1 ∨ ε = -1) (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c))
     (hh0 : 0 < h) (hσdec : ‖δ‖ ≤ min 1 (c ^ 2 + ε) / 8192)
     (hhdec : h ≤ min 1 (c ^ 2 + ε) / 8192) (hsdef : s = Real.sqrt (c ^ 2 + ε))
-    (hs2 : s ^ 2 = c ^ 2 + ε) (hs0 : 0 < s) (hrs0 : 0 < R) (hrs1 : R < 1)
-    (hεabs1 : |ε| = 1)
+    (hs2 : s ^ 2 = c ^ 2 + ε) (hs0 : 0 < s) (_hrs0 : 0 < R) (_hrs1 : R < 1)
+    (_hεabs1 : |ε| = 1)
     (hV3 : Complex.I * Complex.exp (((3 * π / 2 : ℝ) : ℂ) * Complex.I) = 1)
     (hi3 : ⟪δ, (1 : ℂ)⟫_ℝ = δ.re)
     (hig3 : ⟪δ, (κ : ℂ) * (1 - Complex.I)⟫_ℝ = κ * (δ.re - δ.im))
@@ -961,18 +995,20 @@ private lemma sf_stepError_arc3 {ε c h : ℝ} {δ z₃ W : ℂ} {Q₀ Q₁ Q₂
     (hQ₀κ : |Q₀ - r - κ| ≤ 2 * Bres + 2 * h * ‖δ‖ / s ^ 2)
     (hQ₁κ : |Q₁ - r + κ| ≤ 2 * Bres + 2 * h * ‖δ‖ / s ^ 2)
     (hQ₂κ : |Q₂ - r - κ| ≤ 2 * Bres + 2 * h * ‖δ‖ / s ^ 2)
-    (hκ0 : 0 ≤ κ) (hκs : κ ≤ h / (2 * s)) (hκdef : κ = R * h / (2 * s))
-    (hδre : |δ.re| ≤ ‖δ‖) (hη1 : |(-(h / 2))| ≤ h / 2)
+    (hκ0 : 0 ≤ κ) (hκs : κ ≤ h / (2 * s)) (_hκdef : κ = R * h / (2 * s))
+    (_hδre : |δ.re| ≤ ‖δ‖) (hη1 : |(-(h / 2))| ≤ h / 2)
     (hQ₃def : Q₃ = spaceFormSpeed ε (fun _ => c + h / 2) (3 * π / 2) z₃)
     (hBresdef : Bres = 10 ^ 6 * (1 / s + 1 / s ^ 3) * h * (‖δ‖ ^ 2 + h))
-    (hBresnn : 0 ≤ Bres) (hAgfold : ‖δ‖ * (12 * Bres + 12 * h * ‖δ‖ / s ^ 2) / s ≤ Bres)
-    (hXnn : 0 ≤ h * ‖δ‖ / s ^ 2) (hn1I : ‖(1 : ℂ) + Complex.I‖ ≤ 2)
+    (_hBresnn : 0 ≤ Bres) (hAgfold : ‖δ‖ * (12 * Bres + 12 * h * ‖δ‖ / s ^ 2) / s ≤ Bres)
+    (_hXnn : 0 ≤ h * ‖δ‖ / s ^ 2) (hn1I : ‖(1 : ℂ) + Complex.I‖ ≤ 2)
     (hnm1I : ‖(-1 : ℂ) + Complex.I‖ ≤ 2) (hnm1I' : ‖(-1 : ℂ) - Complex.I‖ ≤ 2)
     (hn1I' : ‖(1 : ℂ) - Complex.I‖ ≤ 2)
-    (hδs : ‖δ‖ ≤ s / 8192) (hσ0 : 0 ≤ ‖δ‖) (hRdef : R = centeredRadius ε c) :
+    (_hδs : ‖δ‖ ≤ s / 8192) (_hσ0 : 0 ≤ ‖δ‖) (hRdef : R = centeredRadius ε c) :
     |Q₃ - r - (R / s * -(h / 2) + R * ε / s ^ 2 * -(h / 2) * δ.re
         + ε * κ * (δ.re - δ.im) / s)| ≤ 2 * Bres := by
-  have hyu₃ : ‖(W - (r : ℂ)) + R • (Complex.I * Complex.exp (((3 * π / 2 : ℝ) : ℂ) * Complex.I)) - δ‖ ≤ 2 * ‖δ‖ ^ 2 / s := by
+  have hyu₃ : ‖(W - (r : ℂ))
+      + R • (Complex.I * Complex.exp (((3 * π / 2 : ℝ) : ℂ) * Complex.I)) - δ‖
+      ≤ 2 * ‖δ‖ ^ 2 / s := by
     rw [hV3]
     have h1 : W - (r : ℂ) + R • (1 : ℂ) - δ = ((r - R : ℝ) : ℂ) * (-1 + Complex.I) := by
       rw [hWδ, Complex.real_smul]; push_cast; ring
@@ -982,15 +1018,19 @@ private lemma sf_stepError_arc3 {ε c h : ℝ} {δ z₃ W : ℂ} {Q₀ Q₁ Q₂
       _ = 2 * ‖δ‖ ^ 2 / s := by ring
   have hgn₃ : ‖z₃ - (W - (r : ℂ))‖ ≤ 40 * h / s := by
     rw [hg₃]
-    refine sf_le40 hs0 hh0.le (le_trans (norm_add_le _ _) (le_trans (add_le_add (norm_add_le _ _) le_rfl) ?_))
+    refine sf_le40 hs0 hh0.le
+      (le_trans (norm_add_le _ _) (le_trans (add_le_add (norm_add_le _ _) le_rfl) ?_))
     have h0 := sf_qterm hs0 hh0.le hn1I hQ₀r
     have h1 := sf_qterm hs0 hh0.le hnm1I hQ₁r
     have h2 := sf_qterm hs0 hh0.le hnm1I' hQ₂r
     rw [show (36 : ℝ) * h / s = 36 * (h / s) by ring]
     linarith [h0, h1, h2]
-  have hzu₃ : ‖z₃ + R • (Complex.I * Complex.exp (((3 * π / 2 : ℝ) : ℂ) * Complex.I)) - δ‖ ≤ 2 * ‖δ‖ ^ 2 / s + 40 * h / s := by
+  have hzu₃ : ‖z₃ + R • (Complex.I * Complex.exp (((3 * π / 2 : ℝ) : ℂ) * Complex.I)) - δ‖
+      ≤ 2 * ‖δ‖ ^ 2 / s + 40 * h / s := by
     have hsp : z₃ + R • (Complex.I * Complex.exp (((3 * π / 2 : ℝ) : ℂ) * Complex.I)) - δ
-        = ((W - (r : ℂ)) + R • (Complex.I * Complex.exp (((3 * π / 2 : ℝ) : ℂ) * Complex.I)) - δ) + (z₃ - (W - (r : ℂ))) := by abel
+        = ((W - (r : ℂ))
+            + R • (Complex.I * Complex.exp (((3 * π / 2 : ℝ) : ℂ) * Complex.I)) - δ)
+          + (z₃ - (W - (r : ℂ))) := by abel
     rw [hsp]; exact le_trans (norm_add_le _ _) (by linarith [hyu₃, hgn₃])
   have hGn₃ : ‖(κ : ℂ) * (1 - Complex.I)‖ ≤ 40 * h / s := by
     refine sf_le40 hs0 hh0.le (le_trans (sf_norm_dir (q := κ) hn1I') ?_)
@@ -998,8 +1038,11 @@ private lemma sf_stepError_arc3 {ε c h : ℝ} {δ z₃ W : ℂ} {Q₀ Q₁ Q₂
     calc κ * 2 ≤ (h / (2 * s)) * 2 := mul_le_mul_of_nonneg_right hκs (by norm_num)
       _ = h / s := by ring
       _ ≤ 36 * h / s := div_le_div_of_nonneg_right (by nlinarith [hh0.le]) hs0.le
-  have hgG₃ : ‖z₃ - (W - (r : ℂ)) - (κ : ℂ) * (1 - Complex.I)‖ ≤ 12 * Bres + 12 * h * ‖δ‖ / s ^ 2 := by
-    have h1 : z₃ - (W - (r : ℂ)) - (κ : ℂ) * (1 - Complex.I) = ((Q₀ - r - κ : ℝ) : ℂ) * (1 + Complex.I) + ((Q₁ - r + κ : ℝ) : ℂ) * (-1 + Complex.I) + ((Q₂ - r - κ : ℝ) : ℂ) * (-1 - Complex.I) := by
+  have hgG₃ : ‖z₃ - (W - (r : ℂ)) - (κ : ℂ) * (1 - Complex.I)‖
+      ≤ 12 * Bres + 12 * h * ‖δ‖ / s ^ 2 := by
+    have h1 : z₃ - (W - (r : ℂ)) - (κ : ℂ) * (1 - Complex.I)
+        = ((Q₀ - r - κ : ℝ) : ℂ) * (1 + Complex.I) + ((Q₁ - r + κ : ℝ) : ℂ) * (-1 + Complex.I)
+          + ((Q₂ - r - κ : ℝ) : ℂ) * (-1 - Complex.I) := by
       rw [hg₃]; push_cast; ring
     rw [h1]
     refine le_trans (norm_add_le _ _) (le_trans (add_le_add (norm_add_le _ _) le_rfl) ?_)
@@ -1007,7 +1050,7 @@ private lemma sf_stepError_arc3 {ε c h : ℝ} {δ z₃ W : ℂ} {Q₀ Q₁ Q₂
     have h1' := sf_kterm hnm1I hQ₁κ
     have h2 := sf_kterm hnm1I' hQ₂κ
     rw [show 12 * Bres + 12 * h * ‖δ‖ / s ^ 2 = 12 * Bres + 12 * (h * ‖δ‖ / s ^ 2) by ring]
-    linarith [h0, h1', h2, hBresnn, hXnn]
+    linarith [h0, h1', h2, _hBresnn, _hXnn]
   rw [hsdef] at hzu₃ hyu₃ hgn₃ hGn₃
   rw [hRdef] at hzu₃ hyu₃
   have harc₃ := sf_arcSpeed_decomp (ε := ε) (c := c) (h := h) (η := -(h / 2)) (θ := 3 * π / 2)
@@ -1021,6 +1064,9 @@ private lemma sf_stepError_arc3 {ε c h : ℝ} {δ z₃ W : ℂ} {Q₀ Q₁ Q₂
 
 
 set_option maxHeartbeats 4000000 in
+-- The top-level expansion assembles the four per-arc bounds and the base-point
+-- identities in one `nlinarith`-heavy proof over a large hypothesis context,
+-- exceeding the default heartbeat budget.
 /-- **First-variation expansion.** For an admissible level `c`, there are radii
 `ρ₁, h₁` and a constant `C` such that for every small step height `h ≤ h₁` and
 every base point `z₀` within `ρ₁` of the model-circle center `−r*·i`
