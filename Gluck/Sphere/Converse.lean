@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
 import Gluck.Sphere.EndpointWinding
+import Gluck.SpaceForm.Converse
 
 /-!
 # Spherical converse: simplicity and the positive-stage capstone (S2-E)
@@ -459,17 +460,39 @@ private theorem sphericalConverse_pos_nonconst {κ : ℝ → ℝ}
   rw [hμeq] at hcomp
   exact ⟨_, isSimpleClosed_comp hsimple hHc hHmono hHper, hcomp⟩
 
+/-- The spherical realization predicate is the `ε = +1` instance of the
+`ε`-generic space-form predicate (the metric factor `1 + ε‖z‖²` becomes `1 + ‖z‖²`). -/
+theorem realizesSphericalCurvature_iff_realizes_one (z : ℝ → ℂ) (κ : ℝ → ℝ) :
+    RealizesSphericalCurvature z κ ↔ SpaceForm.Realizes 1 z κ := by
+  unfold RealizesSphericalCurvature SpaceForm.Realizes
+  simp only [one_mul]
+
+/-- The spherical four-vertex hypothesis is the `ε = +1` instance of the
+`ε`-generic one (whose extra `ε < 0 → 1 < κ` escape-velocity clause is vacuous at `ε = +1`). -/
+theorem sphereFourVertex_iff_spaceFormFourVertex_one (κ : ℝ → ℝ) :
+    SphereFourVertex κ ↔ SpaceForm.SpaceFormFourVertex 1 κ := by
+  unfold SphereFourVertex SpaceForm.SpaceFormFourVertex
+  constructor
+  · rintro ⟨h1, h2⟩; exact ⟨h1, h2, by norm_num⟩
+  · rintro ⟨h1, h2, _⟩; exact ⟨h1, h2⟩
+
+/-- The spherical geodesic speed is the `ε = +1` instance of the `ε`-generic space-form speed. -/
+theorem sphericalSpeed_eq_spaceFormSpeed_one (κ : ℝ → ℝ) (θ : ℝ) (z : ℂ) :
+    sphericalSpeed κ θ z = SpaceForm.spaceFormSpeed 1 κ θ z := by
+  unfold sphericalSpeed SpaceForm.spaceFormSpeed
+  simp only [one_mul]
+
 /-- **Spherical converse, positive stage.** If `κ` satisfies the positive-stage
 spherical four-vertex condition, then there is a simple closed curve `z` confined
 to the open disk that realizes `κ` as its spherical geodesic curvature. This is
 the same conclusion shape as the Euclidean `gluck_converse`, with
-`RealizesCurvature` replaced by its spherical analogue.
+`RealizesCurvature` replaced by its spherical analogue. Now derived from the
+`ε`-generic `SpaceForm.spaceFormConverse_pos` at `ε = +1`.
 (Blueprint `thm:spherical_converse_pos`.) -/
 theorem sphericalConverse_pos {κ : ℝ → ℝ} (hκ : SphereFourVertex κ) :
     ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ RealizesSphericalCurvature z κ := by
-  obtain ⟨hκcf, hfv⟩ := hκ
-  rcases hfv with ⟨c, hc⟩ | ⟨p₁, q₁, p₂, q₂, h12, h23, h34, h41, -, -, -, -, hsep⟩
-  · exact sphericalConverse_pos_const hκcf hc
-  · exact sphericalConverse_pos_nonconst hκcf h12 h23 h34 h41 hsep
+  obtain ⟨z, hsimple, hreal⟩ := SpaceForm.spaceFormConverse_pos (Or.inl rfl)
+    ((sphereFourVertex_iff_spaceFormFourVertex_one κ).mp hκ)
+  exact ⟨z, hsimple, (realizesSphericalCurvature_iff_realizes_one z κ).mpr hreal⟩
 
 end Gluck
