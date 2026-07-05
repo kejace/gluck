@@ -31,6 +31,64 @@ namespace Gluck
 
 open scoped Real InnerProductSpace NNReal
 
+/-- The closed-form cancellation identity behind `stepError_expansion`: the four
+weighted arc speeds `Qᵢ` combined with the linear conjugation term collapse,
+after unfolding `κ = (s−c)h/(2s)`, into the four `arcSpeed_decomp` main-term
+residues `Qᵢ − r − (main termᵢ)`. Pure algebra over `ℝ`/`ℂ` (`field_simp; ring`),
+extracted so its `field_simp` normalisation does not run in the main proof's
+heartbeat budget. -/
+private lemma stepError_assembly_identity (δ : ℂ)
+    (E : ℂ) (Q₀ Q₁ Q₂ Q₃ r s c h κ : ℝ) (hs : s ≠ 0)
+    (hκ : κ = (s - c) * h / (2 * s))
+    (hE : E = (Q₀ : ℂ) * (1 + Complex.I) + (Q₁ : ℂ) * (-1 + Complex.I)
+        + (Q₂ : ℂ) * (-1 - Complex.I) + (Q₃ : ℂ) * (1 - Complex.I)) :
+    E + ((2 * (s - c) / s ^ 2 * h : ℝ) : ℂ) * (starRingEnd ℂ) δ
+      = ((Q₀ - r - ((s - c) / s * (h / 2)
+            + (s - c) / s ^ 2 * (h / 2) * δ.im) : ℝ) : ℂ) * (1 + Complex.I)
+        + ((Q₁ - r - ((s - c) / s * -(h / 2)
+            + (s - c) / s ^ 2 * -(h / 2) * -δ.re
+            + κ * (δ.re + δ.im) / s) : ℝ) : ℂ) * (-1 + Complex.I)
+        + ((Q₂ - r - ((s - c) / s * (h / 2)
+            + (s - c) / s ^ 2 * (h / 2) * -δ.im
+            + 2 * κ * δ.re / s) : ℝ) : ℂ) * (-1 - Complex.I)
+        + ((Q₃ - r - ((s - c) / s * -(h / 2)
+            + (s - c) / s ^ 2 * -(h / 2) * δ.re
+            + κ * (δ.re - δ.im) / s) : ℝ) : ℂ) * (1 - Complex.I) := by
+  rw [hE, conj_eq_re_sub_im_mul_I δ, hκ]
+  have hsne : (s : ℂ) ≠ 0 := by exact_mod_cast hs
+  push_cast
+  field_simp
+  ring
+
+/-- Four-term norm absorption for `stepError_expansion`: four residues bounded by
+the per-arc error budget `3200 h‖δ‖² + 60 h²`, each carried on a direction of
+norm `≤ 2`, sum to at most `30000 h(‖δ‖² + h)`. Isolated from the main proof so
+its `norm_add_four_le` split and final `nlinarith` run outside the heartbeat
+budget. -/
+private lemma stepError_norm_absorb {a₀ a₁ a₂ a₃ h nδ : ℝ}
+    (hh0 : 0 < h) (_hnδ : 0 ≤ nδ)
+    (ha₀ : |a₀| ≤ 3200 * h * nδ ^ 2 + 60 * h ^ 2)
+    (ha₁ : |a₁| ≤ 3200 * h * nδ ^ 2 + 60 * h ^ 2)
+    (ha₂ : |a₂| ≤ 3200 * h * nδ ^ 2 + 60 * h ^ 2)
+    (ha₃ : |a₃| ≤ 3200 * h * nδ ^ 2 + 60 * h ^ 2)
+    {d₀ d₁ d₂ d₃ : ℂ} (hd₀ : ‖d₀‖ ≤ 2) (hd₁ : ‖d₁‖ ≤ 2)
+    (hd₂ : ‖d₂‖ ≤ 2) (hd₃ : ‖d₃‖ ≤ 2) :
+    ‖(a₀ : ℂ) * d₀ + (a₁ : ℂ) * d₁ + (a₂ : ℂ) * d₂ + (a₃ : ℂ) * d₃‖
+      ≤ 30000 * h * (nδ ^ 2 + h) := by
+  refine le_trans (norm_add_four_le _ _ _ _) ?_
+  have hb₀ := le_trans (norm_real_mul_le_two hd₀)
+    (mul_le_mul_of_nonneg_right ha₀ (by norm_num : (0 : ℝ) ≤ 2))
+  have hb₁ := le_trans (norm_real_mul_le_two hd₁)
+    (mul_le_mul_of_nonneg_right ha₁ (by norm_num : (0 : ℝ) ≤ 2))
+  have hb₂ := le_trans (norm_real_mul_le_two hd₂)
+    (mul_le_mul_of_nonneg_right ha₂ (by norm_num : (0 : ℝ) ≤ 2))
+  have hb₃ := le_trans (norm_real_mul_le_two hd₃)
+    (mul_le_mul_of_nonneg_right ha₃ (by norm_num : (0 : ℝ) ≤ 2))
+  have hfinal := add_le_add (add_le_add (add_le_add hb₀ hb₁) hb₂) hb₃
+  refine le_trans hfinal ?_
+  nlinarith only [sq_nonneg nδ, hh0.le, mul_nonneg hh0.le (sq_nonneg nδ),
+    sq_nonneg h]
+
 -- This proof carries ~100 local hypotheses; every `linarith`/`nlinarith` uses
 -- `only [...]` so the simplex solver never scans the full context (that scan,
 -- not any single tactic, was the cost — it needed 16M heartbeats without it).
@@ -564,42 +622,11 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
   simp only [show c - -(h / 2) = c + h / 2 by ring] at harc₃
   rw [hV3, hi3, hig3, hsp₃, ← hQ₃def] at harc₃
   -- assemble: the four main terms collapse to the conjugation
-  have hconj : (starRingEnd ℂ) δ = (δ.re : ℂ) - (δ.im : ℂ) * Complex.I :=
-    conj_eq_re_sub_im_mul_I δ
-  have hsum : stepErrorMap (c - h / 2) (c + h / 2) z₀
-      + ((2 * (s - c) / s ^ 2 * h : ℝ) : ℂ) * (starRingEnd ℂ) δ
-      = ((Q₀ - r - ((s - c) / s * (h / 2)
-            + (s - c) / s ^ 2 * (h / 2) * δ.im) : ℝ) : ℂ) * (1 + Complex.I)
-        + ((Q₁ - r - ((s - c) / s * -(h / 2)
-            + (s - c) / s ^ 2 * -(h / 2) * -δ.re
-            + κ * (δ.re + δ.im) / s) : ℝ) : ℂ) * (-1 + Complex.I)
-        + ((Q₂ - r - ((s - c) / s * (h / 2)
-            + (s - c) / s ^ 2 * (h / 2) * -δ.im
-            + 2 * κ * δ.re / s) : ℝ) : ℂ) * (-1 - Complex.I)
-        + ((Q₃ - r - ((s - c) / s * -(h / 2)
-            + (s - c) / s ^ 2 * -(h / 2) * δ.re
-            + κ * (δ.re - δ.im) / s) : ℝ) : ℂ) * (1 - Complex.I) := by
-    rw [hE, hconj, hκdef]
-    have hsne : (s : ℂ) ≠ 0 := by
-      exact_mod_cast (by linarith : (0 : ℝ) < s).ne'
-    push_cast
-    field_simp
-    ring
+  have hsum := stepError_assembly_identity δ
+    (stepErrorMap (c - h / 2) (c + h / 2) z₀) Q₀ Q₁ Q₂ Q₃ r s c h κ
+    (by linarith : (0 : ℝ) < s).ne' hκdef hE
   rw [hsum]
-  have hnorm4 : ∀ p q u' t : ℂ, ‖p + q + u' + t‖ ≤ ‖p‖ + ‖q‖ + ‖u'‖ + ‖t‖ :=
-    norm_add_four_le
-  refine le_trans (hnorm4 _ _ _ _) ?_
-  have hb₀ := le_trans (hcmul _ _ hn1I)
-    (mul_le_mul_of_nonneg_right harc₀ (by norm_num : (0 : ℝ) ≤ 2))
-  have hb₁ := le_trans (hcmul _ _ hnm1I)
-    (mul_le_mul_of_nonneg_right harc₁ (by norm_num : (0 : ℝ) ≤ 2))
-  have hb₂ := le_trans (hcmul _ _ hnm1I')
-    (mul_le_mul_of_nonneg_right harc₂ (by norm_num : (0 : ℝ) ≤ 2))
-  have hb₃ := le_trans (hcmul _ _ hn1I')
-    (mul_le_mul_of_nonneg_right harc₃ (by norm_num : (0 : ℝ) ≤ 2))
-  have hfinal := add_le_add (add_le_add (add_le_add hb₀ hb₁) hb₂) hb₃
-  refine le_trans hfinal ?_
-  nlinarith only [sq_nonneg ‖δ‖, hh0.le, hσ0, mul_nonneg hh0.le (sq_nonneg ‖δ‖),
-    sq_nonneg h]
+  exact stepError_norm_absorb hh0 hσ0 harc₀ harc₁ harc₂ harc₃
+    hn1I hnm1I hnm1I' hn1I'
 
 end Gluck
