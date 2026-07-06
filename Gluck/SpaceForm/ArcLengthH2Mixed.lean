@@ -1608,40 +1608,375 @@ theorem exists_quarterLanding_mixed :
 
 /-! ## ALM-5 — capstone: simplicity transport and the mixed converse -/
 
-/-- **Non-convex chord non-vanishing (simplicity transport).**  THE crux leaf.
-For the confined arc-length trajectory of the negative ramped bicircle
-`arcRampProfile a c L δ` (`a < 0`, non-convex, tangent angle `φ` **non-monotone**),
-the chord integral `∫_t^τ e^{iφ} ≠ 0` on every proper sub-arc — hence the curve is
-simple (`injOn_arcCurve`, `ArcLengthH2.lean:4450`).  The positive-gate route
-(`gate_chord_ne_zero`, strict `φ`-monotonicity from `arcAngleSpeed > 0`) **fails**
-because `φ` is non-monotone.  Honest route (transport of `Gluck.simplicity_transport`,
-`DahlbergStep2.lean:2678`): the trajectory's tangent angle `φ` stays
-`L¹`-Grönwall-close (`arcTrajectory_diff_bound`, sorry-free) to the **monotone**
-tangent angle of the *convex* clean bicircle (levels `1 < a' < b'` from ALM-2,
-`arcAngleSpeed > 0` ⇒ strictly increasing); the clean chord has a uniform margin
-`m·(τ − t)` on inclination-span-`≤ π` arcs (transport of `clean_chord_margin`,
-`DahlbergStep2.lean:2486`), and the perturbed chord differs by `≤ C·δ·(τ − t)`, so
-for `δ` small the perturbed chord stays `> 0`.  The turning-`> π` case uses the
-complementary arc `[τ, t + L]` (the window closes, `∫₀^L e^{iφ} = 0`).  The chord
-argument is a `ℂ`-property, independent of the H² metric.
+/-- **Route-A abstract core — injectivity from a radial-argument lift.**  If the
+window curve `z` (unit-speed, `z' = e^{iφ}`) admits a continuous *argument lift* `θ`
+with `z σ = ‖z σ‖·e^{iθ σ}` on `[0, L]`, never vanishes, and `θ` is strictly
+increasing with total increment exactly `2π` (`θ L = θ 0 + 2π`), then the arc-length
+chord `∫_t^τ e^{iφ} ≠ 0` on every proper sub-arc.  Radial monotonicity ⇒ simplicity:
+`z t = z τ` forces `θ τ − θ t ∈ 2πℤ`, but strict monotonicity + total increment `2π`
+pin it to `(0, 2π)`, a contradiction.  This is the metric-independent `ℂ`-core that
+replaces the (here-inapplicable) monotone-tangent projection `gate_chord_ne_zero`. -/
+lemma chord_ne_zero_of_lift {z : ℝ → ℂ} {φ : ℝ → ℝ} {θ : ℝ → ℝ} {L : ℝ} (hL : 0 < L)
+    (hzd : ∀ σ ∈ Set.Icc (0 : ℝ) L,
+      HasDerivWithinAt z (Complex.exp ((φ σ : ℂ) * Complex.I)) (Set.Icc 0 L) σ)
+    (hzc : ContinuousOn z (Set.Icc 0 L))
+    (hφc : ContinuousOn φ (Set.Icc 0 L))
+    (hlift : ∀ σ ∈ Set.Icc (0 : ℝ) L,
+      z σ = (‖z σ‖ : ℂ) * Complex.exp ((θ σ : ℂ) * Complex.I))
+    (hne : ∀ σ ∈ Set.Icc (0 : ℝ) L, z σ ≠ 0)
+    (hmono : StrictMonoOn θ (Set.Icc 0 L))
+    (hturn : θ L = θ 0 + 2 * π) :
+    ∀ t τ : ℝ, 0 ≤ t → t < τ → τ < L →
+      (∫ s in t..τ, Complex.exp ((φ s : ℂ) * Complex.I)) ≠ 0 := by
+  have hL0 : (0 : ℝ) ≤ L := hL.le
+  have hexpc : ContinuousOn (fun s => Complex.exp ((φ s : ℂ) * Complex.I)) (Set.Icc 0 L) :=
+    Complex.continuous_exp.comp_continuousOn
+      ((Complex.continuous_ofReal.comp_continuousOn hφc).mul continuousOn_const)
+  have hint : ∀ a b : ℝ, a ∈ Set.Icc (0 : ℝ) L → b ∈ Set.Icc (0 : ℝ) L →
+      IntervalIntegrable (fun s => Complex.exp ((φ s : ℂ) * Complex.I)) MeasureTheory.volume a b :=
+    fun a b ha hb => (hexpc.mono (Set.uIcc_subset_Icc ha hb)).intervalIntegrable
+  have hchordEq : ∀ a b : ℝ, a ∈ Set.Icc (0 : ℝ) L → b ∈ Set.Icc (0 : ℝ) L → a ≤ b →
+      (∫ s in a..b, Complex.exp ((φ s : ℂ) * Complex.I)) = z b - z a := by
+    intro a b ha hb hab
+    refine intervalIntegral.integral_eq_sub_of_hasDeriv_right_of_le hab
+      (hzc.mono (Set.Icc_subset_Icc ha.1 hb.2)) (fun x hx => ?_) (hint a b ha hb)
+    have hxmem : x ∈ Set.Icc (0 : ℝ) L := ⟨le_trans ha.1 hx.1.le, le_trans hx.2.le hb.2⟩
+    have hxL : x < L := lt_of_lt_of_le hx.2 hb.2
+    exact ((hzd x hxmem).mono_of_mem_nhdsWithin
+      (mem_nhdsGE_iff_exists_Icc_subset.mpr
+        ⟨L, hxL, Set.Icc_subset_Icc_left hxmem.1⟩)).mono Set.Ioi_subset_Ici_self
+  intro t τ ht htτ hτL
+  have htmem : t ∈ Set.Icc (0 : ℝ) L := ⟨ht, (lt_trans htτ hτL).le⟩
+  have hτmem : τ ∈ Set.Icc (0 : ℝ) L := ⟨(lt_of_le_of_lt ht htτ).le, hτL.le⟩
+  have h0mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) L := ⟨le_refl 0, hL0⟩
+  have hLmem : L ∈ Set.Icc (0 : ℝ) L := ⟨hL0, le_refl L⟩
+  rw [hchordEq t τ htmem hτmem htτ.le]
+  intro hzero
+  have hzeq : z t = z τ := (sub_eq_zero.mp hzero).symm
+  have e1 := hlift t htmem
+  have e2 := hlift τ hτmem
+  rw [hzeq] at e1
+  have hcancel : (‖z τ‖ : ℂ) * Complex.exp ((θ t : ℂ) * Complex.I)
+      = (‖z τ‖ : ℂ) * Complex.exp ((θ τ : ℂ) * Complex.I) := by rw [← e1, ← e2]
+  have hnz : (‖z τ‖ : ℂ) ≠ 0 := by
+    simpa using (norm_ne_zero_iff.mpr (hne τ hτmem))
+  have hexp : Complex.exp ((θ t : ℂ) * Complex.I) = Complex.exp ((θ τ : ℂ) * Complex.I) :=
+    mul_left_cancel₀ hnz hcancel
+  obtain ⟨n, hn⟩ := Complex.exp_eq_one_iff.mp
+    (Complex.exp_eq_exp_iff_exp_sub_eq_one.mp hexp)
+  have hreal : θ t - θ τ = (n : ℝ) * (2 * π) := by
+    have h2 : ((θ t - θ τ : ℝ) : ℂ) * Complex.I
+        = (((n : ℝ) * (2 * π) : ℝ) : ℂ) * Complex.I := by
+      push_cast at hn ⊢; linear_combination hn
+    exact_mod_cast mul_right_cancel₀ Complex.I_ne_zero h2
+  have hlt : θ t < θ τ := hmono htmem hτmem htτ
+  have hτL' : θ τ < θ L := hmono hτmem hLmem hτL
+  have h0t : θ 0 ≤ θ t := hmono.monotoneOn h0mem htmem ht
+  have hpi : (0 : ℝ) < π := Real.pi_pos
+  have hgap0 : 0 < θ τ - θ t := by linarith
+  have hgap2 : θ τ - θ t < 2 * π := by rw [hturn] at hτL'; linarith
+  have hgapn : θ τ - θ t = ((-n : ℤ) : ℝ) * (2 * π) := by push_cast; linarith [hreal]
+  have hm1 : (1 : ℝ) ≤ ((-n : ℤ) : ℝ) := by
+    by_contra h
+    push_neg at h
+    have hle0 : (-n : ℤ) ≤ 0 := by
+      have : (-n : ℤ) < 1 := by exact_mod_cast h
+      omega
+    have : ((-n : ℤ) : ℝ) ≤ 0 := by exact_mod_cast hle0
+    nlinarith [hgap0, hgapn, hpi]
+  have hm2 : ((-n : ℤ) : ℝ) * (2 * π) < 2 * π := by rw [← hgapn]; exact hgap2
+  nlinarith [hm1, hm2, hpi]
 
-**RESIDUAL RISK (adversarial):** the transport realizes only profiles whose
-negative excursion is `L¹`-small after `h₁` — i.e. the *near-convex* (shallow-
-dimple) regime the floor `−(centeredRadius (−1) c)` delimits.  This IS the honest
-scope of the confined construction (identical to the Euclidean/spherical stages);
-it is NOT truly-unrestricted-below minima.  See `decomposition_alm.md` §ALM-5
-adversarial block. -/
-lemma mixed_chord_ne_zero {a c L δ R M : ℝ} {r₀ : ℝ≥0} {W₀ : ℂ × ℝ}
-    (ha : a < 0) (ha1 : -1 < a) (hc : 1 < c) (hL : 0 < L) (hδ : 0 < δ)
-    (hR0 : 0 < R) (hR1 : R < 1) (hM : ∀ σ, |arcRampProfile a c L δ σ| ≤ M)
-    (hW₀ : W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀)
+lemma lift_field_identity {z e : ℂ} (hz : z ≠ 0) :
+    e - Complex.I * ((-(inner ℝ z (Complex.I * e)) / ‖z‖ ^ 2 : ℝ) : ℂ) * z
+      = (((inner ℝ z e) / ‖z‖ ^ 2 : ℝ) : ℂ) * z := by
+  set n : ℝ := ‖z‖ ^ 2 with hn
+  have hnpos : 0 < n := by rw [hn]; positivity
+  have hn0 : (n : ℂ) ≠ 0 := by exact_mod_cast hnpos.ne'
+  set ζ : ℂ := e * (starRingEnd ℂ) z with hζ
+  have hzz : ζ * z = e * (n : ℂ) := by
+    rw [hζ, mul_assoc, ← Complex.normSq_eq_conj_mul_self, hn, Complex.normSq_eq_norm_sq]
+  have hc : (inner ℝ z e : ℝ) = ζ.re := by rw [hζ]; exact Complex.inner z e
+  have hw : (inner ℝ z (Complex.I * e) : ℝ) = -ζ.im := by
+    rw [Complex.inner z (Complex.I * e), mul_assoc, ← hζ, Complex.I_mul_re]
+  rw [hc, hw]
+  have h1 : (((ζ.re / n : ℝ)) : ℂ) + Complex.I * (((-(-ζ.im) / n : ℝ)) : ℂ) = ζ / (n : ℂ) := by
+    rw [Complex.ofReal_div, Complex.ofReal_div]
+    field_simp
+    linear_combination Complex.re_add_im ζ
+  have h2 : (((ζ.re / n : ℝ)) : ℂ) * z + Complex.I * (((-(-ζ.im) / n : ℝ)) : ℂ) * z = e := by
+    have : ((((ζ.re / n : ℝ)) : ℂ) + Complex.I * (((-(-ζ.im) / n : ℝ)) : ℂ)) * z = e := by
+      rw [h1, div_mul_eq_mul_div, hzz, mul_div_assoc, div_self hn0, mul_one]
+    linear_combination this
+  linear_combination -h2
+
+/-- Abstract B: the argument-lift identity `z = ‖z‖ e^{iθ}` for a unit-speed curve
+whose lift `θ` integrates the radial speed `θ' = −⟪z, i e^{iφ}⟫/‖z‖²`. -/
+lemma lift_identity_of_deriv {z : ℝ → ℂ} {φ θ : ℝ → ℝ} {L : ℝ} (hL0 : 0 ≤ L)
+    (hzd : ∀ σ ∈ Set.Icc (0 : ℝ) L,
+      HasDerivWithinAt z (Complex.exp ((φ σ : ℂ) * Complex.I)) (Set.Icc 0 L) σ)
+    (hzc : ContinuousOn z (Set.Icc 0 L)) (hφc : ContinuousOn φ (Set.Icc 0 L))
+    (hθc : ContinuousOn θ (Set.Icc 0 L))
+    (hne : ∀ σ ∈ Set.Icc (0 : ℝ) L, z σ ≠ 0)
+    (hθd : ∀ σ ∈ Set.Icc (0 : ℝ) L, HasDerivWithinAt θ
+      (-(inner ℝ (z σ) (Complex.I * Complex.exp ((φ σ : ℂ) * Complex.I))) / ‖z σ‖ ^ 2)
+      (Set.Icc 0 L) σ)
+    (hθ0 : Complex.exp ((θ 0 : ℂ) * Complex.I) = z 0 / (‖z 0‖ : ℂ)) :
+    ∀ σ ∈ Set.Icc (0 : ℝ) L, z σ = (‖z σ‖ : ℂ) * Complex.exp ((θ σ : ℂ) * Complex.I) := by
+  -- the "unrotated" curve
+  set m : ℝ → ℂ := fun σ => z σ * Complex.exp ((θ σ : ℂ) * (-Complex.I)) with hmdef
+  set c : ℝ → ℝ := fun σ => (inner ℝ (z σ) (Complex.exp ((φ σ : ℂ) * Complex.I))) / ‖z σ‖ ^ 2
+    with hcdef
+  -- m solves m' = c·m
+  have hmd : ∀ σ ∈ Set.Icc (0 : ℝ) L,
+      HasDerivWithinAt m ((c σ : ℂ) * m σ) (Set.Icc 0 L) σ := by
+    intro σ hσ
+    have hz' := hzd σ hσ
+    have hθ' := (hθd σ hσ).ofReal_comp
+    have hg : HasDerivWithinAt (fun σ => (θ σ : ℂ) * (-Complex.I))
+        ((-(inner ℝ (z σ) (Complex.I * Complex.exp ((φ σ : ℂ) * Complex.I))) / ‖z σ‖ ^ 2 : ℝ)
+          * (-Complex.I)) (Set.Icc 0 L) σ :=
+      hθ'.mul_const (-Complex.I)
+    have hEm := hg.cexp
+    have hprod := hz'.mul hEm
+    -- rewrite the derivative value to `c σ • m σ`
+    have hval : Complex.exp ((φ σ : ℂ) * Complex.I) * Complex.exp ((θ σ : ℂ) * (-Complex.I))
+          + z σ * (Complex.exp ((θ σ : ℂ) * (-Complex.I))
+            * (((-(inner ℝ (z σ) (Complex.I * Complex.exp ((φ σ : ℂ) * Complex.I))) / ‖z σ‖ ^ 2 : ℝ))
+              * (-Complex.I)))
+        = (c σ : ℂ) * m σ := by
+      rw [hcdef, hmdef]
+      have hid := lift_field_identity (z := z σ) (e := Complex.exp ((φ σ : ℂ) * Complex.I))
+        (hne σ hσ)
+      linear_combination Complex.exp ((θ σ : ℂ) * (-Complex.I)) * hid
+    rw [← hval]
+    exact hprod
+  -- imaginary part J solves J' = c·J, J 0 = 0 ⟹ J ≡ 0
+  set J : ℝ → ℝ := fun σ => (m σ).im with hJdef
+  have hJd : ∀ σ ∈ Set.Ico (0 : ℝ) L, HasDerivWithinAt J (c σ * J σ) (Set.Ici σ) σ := by
+    intro σ hσ
+    have hσ' : σ ∈ Set.Icc (0 : ℝ) L := ⟨hσ.1, hσ.2.le⟩
+    have h := Complex.imCLM.hasFDerivAt.comp_hasDerivWithinAt σ (hmd σ hσ')
+    have hval : (Complex.imCLM ((c σ : ℂ) * m σ)) = c σ * J σ := by
+      simp only [Complex.imCLM_apply, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, hJdef]
+      ring
+    rw [hval] at h
+    have hJeq : (⇑Complex.imCLM ∘ m) = J := by
+      funext x; simp only [Function.comp_apply, Complex.imCLM_apply, hJdef]
+    rw [hJeq] at h
+    exact h.mono_of_mem_nhdsWithin
+      (mem_nhdsGE_iff_exists_Icc_subset.mpr ⟨L, hσ.2, Set.Icc_subset_Icc_left hσ.1⟩)
+  -- ‖m σ‖ = ‖z σ‖
+  have hmnorm : ∀ σ, ‖m σ‖ = ‖z σ‖ := fun σ => by
+    rw [hmdef, norm_mul,
+      show (θ σ : ℂ) * (-Complex.I) = ((-θ σ : ℝ) : ℂ) * Complex.I by push_cast; ring,
+      Complex.norm_exp_ofReal_mul_I, mul_one]
+  -- initial value m 0 = ‖z 0‖ (real)
+  have hz0 : z 0 ≠ 0 := hne 0 ⟨le_refl 0, hL0⟩
+  have hm0 : m 0 = (‖z 0‖ : ℂ) := by
+    change z 0 * Complex.exp ((θ 0 : ℂ) * (-Complex.I)) = (‖z 0‖ : ℂ)
+    rw [show (θ 0 : ℂ) * (-Complex.I) = -((θ 0 : ℂ) * Complex.I) by ring,
+      Complex.exp_neg, hθ0, inv_div]
+    field_simp
+  have hJ0 : J 0 = 0 := by change (m 0).im = 0; rw [hm0, Complex.ofReal_im]
+  -- continuity of c on the window
+  have hexpc : ContinuousOn (fun σ => Complex.exp ((φ σ : ℂ) * Complex.I)) (Set.Icc 0 L) :=
+    Complex.continuous_exp.comp_continuousOn
+      ((Complex.continuous_ofReal.comp_continuousOn hφc).mul continuousOn_const)
+  have hcont_c : ContinuousOn c (Set.Icc 0 L) := by
+    refine ContinuousOn.div (hzc.inner hexpc) (hzc.norm.pow 2) (fun σ hσ => ?_)
+    have := hne σ hσ; positivity
+  obtain ⟨K, hK⟩ := (isCompact_Icc (a := (0 : ℝ)) (b := L)).exists_bound_of_continuousOn hcont_c
+  -- J ≡ 0
+  have hJcont : ContinuousOn J (Set.Icc 0 L) :=
+    (Complex.continuous_im.comp_continuousOn
+      (hzc.mul (Complex.continuous_exp.comp_continuousOn
+        ((Complex.continuous_ofReal.comp_continuousOn hθc).mul continuousOn_const))))
+  have hJzero : ∀ σ ∈ Set.Icc (0 : ℝ) L, J σ = 0 := by
+    refine eq_zero_of_abs_deriv_le_mul_abs_self_of_eq_zero_right (K := K)
+      hJcont hJd hJ0 (fun σ hσ => ?_)
+    have hσ' : σ ∈ Set.Icc (0 : ℝ) L := ⟨hσ.1, hσ.2.le⟩
+    rw [Real.norm_eq_abs, abs_mul]
+    calc |c σ| * |J σ| ≤ K * |J σ| :=
+          mul_le_mul_of_nonneg_right (by simpa [Real.norm_eq_abs] using hK σ hσ') (abs_nonneg _)
+      _ = K * ‖J σ‖ := by rw [Real.norm_eq_abs]
+  -- m σ is real (im = 0), and ‖z σ‖ = |Re m σ|
+  have hmreal : ∀ σ ∈ Set.Icc (0 : ℝ) L, m σ = ((m σ).re : ℂ) := fun σ hσ => by
+    have him0 : (m σ).im = 0 := hJzero σ hσ
+    apply Complex.ext
+    · exact (Complex.ofReal_re _).symm
+    · rw [Complex.ofReal_im]; exact him0
+  have hzabs : ∀ σ ∈ Set.Icc (0 : ℝ) L, ‖z σ‖ = |(m σ).re| := fun σ hσ => by
+    rw [← hmnorm σ]
+    nth_rewrite 1 [hmreal σ hσ]
+    rw [Complex.norm_real, Real.norm_eq_abs]
+  -- Re m σ is never zero and positive at 0, hence positive throughout
+  have hRe_ne : ∀ σ ∈ Set.Icc (0 : ℝ) L, (m σ).re ≠ 0 := by
+    intro σ hσ h0
+    have hzn : ‖z σ‖ = 0 := by rw [hzabs σ hσ, h0, abs_zero]
+    exact hne σ hσ (norm_eq_zero.mp hzn)
+  have hRecont : ContinuousOn (fun σ => (m σ).re) (Set.Icc 0 L) :=
+    Complex.continuous_re.comp_continuousOn
+      (hzc.mul (Complex.continuous_exp.comp_continuousOn
+        ((Complex.continuous_ofReal.comp_continuousOn hθc).mul continuousOn_const)))
+  have hRe0 : 0 < (m 0).re := by rw [hm0, Complex.ofReal_re]; exact norm_pos_iff.mpr hz0
+  have hRepos : ∀ σ ∈ Set.Icc (0 : ℝ) L, 0 < (m σ).re := by
+    intro σ hσ
+    rcases lt_trichotomy 0 (m σ).re with h | h | h
+    · exact h
+    · exact absurd h.symm (hRe_ne σ hσ)
+    · exfalso
+      have hsub : Set.uIcc σ 0 ⊆ Set.Icc (0 : ℝ) L :=
+        Set.uIcc_subset_Icc hσ ⟨le_refl 0, hL0⟩
+      have hmem : (0 : ℝ) ∈ Set.uIcc (m σ).re (m 0).re :=
+        Set.mem_uIcc.mpr (Or.inl ⟨h.le, hRe0.le⟩)
+      obtain ⟨s, hs, hs0⟩ := intermediate_value_uIcc (hRecont.mono hsub) hmem
+      exact hRe_ne s (hsub hs) hs0
+  -- conclude
+  intro σ hσ
+  have hrpos : 0 < (m σ).re := hRepos σ hσ
+  have hnormeq : ‖z σ‖ = (m σ).re := by rw [hzabs σ hσ, abs_of_pos hrpos]
+  have hmval : m σ = (‖z σ‖ : ℂ) := by rw [hnormeq]; exact hmreal σ hσ
+  have hzeq : z σ = m σ * Complex.exp ((θ σ : ℂ) * Complex.I) := by
+    show z σ = z σ * Complex.exp ((θ σ : ℂ) * (-Complex.I))
+        * Complex.exp ((θ σ : ℂ) * Complex.I)
+    rw [mul_assoc, ← Complex.exp_add,
+      show (θ σ : ℂ) * (-Complex.I) + (θ σ : ℂ) * Complex.I = 0 by ring,
+      Complex.exp_zero, mul_one]
+  rw [hmval] at hzeq
+  exact hzeq
+
+/-- **Route-A concrete input — the radial-argument lift of the confined negative
+bicircle.**  For the params-fixed confined-and-closing trajectory of
+`arcRampProfile (−3/10) 2 L δ` from `W₀ = (i·h, π)`, the window curve
+`z σ = (arcFlow …).1` admits a continuous argument lift `θ` with
+`z σ = ‖z σ‖·e^{iθ σ}` on `[0, L]`, never vanishes there, and `θ` is strictly
+increasing with total increment `2π`.
+
+Construction (numerically pre-verified, `.mathlib-quality` scratch): the star-shaped
+inner product `⟪z, i e^{iφ}⟫ < 0` (max `≤ −1/50` over the rectangle, attained at the
+join `σ = L/8`; transported to the smooth flow by the two-leg `L¹`-Grönwall of ALM-3
+with the exposed `δ`-smallness) makes `θ' = −⟪z, i e^{iφ}⟫/‖z‖² > 0`; `θ` is defined
+by integrating this speed from `arg z(0) = π/2`.  The lift identity
+`z = ‖z‖ e^{iθ}` is a linear-ODE uniqueness (`z e^{−iθ}` solves `y' = c·y` with real
+`c`, matching `‖z‖`).  The total increment is pinned to `2π` by the Klein symmetry
+(`arcRev_eqOn` conjugation + `arcClosure_eqOn` central symmetry make `⟪z,ie^{iφ}⟫`,
+`‖z‖` and `θ'` invariant under the quarter tiling) together with the axis endpoints
+`z(0)=ih`, `z(L/4)∈ℝ_{<0}`, `z(L/2)=−ih` giving per-quarter increment `π/2`. -/
+lemma mixed_radial_lift {δ h L : ℝ}
+    (hδ : 0 < δ) (hh1 : (1 : ℝ) / 10 ≤ h) (hh2 : h ≤ 3 / 20)
+    (hL1 : (157 : ℝ) / 50 ≤ L) (hL2 : L ≤ 161 / 50)
+    (hδC : negRobustConst * δ ≤ 1 / 200)
+    (him : (arcFlow (arcRampProfile (-3 / 10) 2 L δ) (4 / 5) L 2 4
+      ((Complex.I * (h : ℂ), π), L / 4)).1.im = 0)
+    (hφe : (arcFlow (arcRampProfile (-3 / 10) 2 L δ) (4 / 5) L 2 4
+      ((Complex.I * (h : ℂ), π), L / 4)).2 = 3 * π / 2)
     (hconf : ∀ σ ∈ Set.Icc (0 : ℝ) L,
-      ‖(arcFlow (arcRampProfile a c L δ) R L M r₀ (W₀, σ)).1‖ ≤ R)
-    (hclose : (arcFlow (arcRampProfile a c L δ) R L M r₀ (W₀, L)).2 = W₀.2 + 2 * π) :
+      ‖(arcFlow (arcRampProfile (-3 / 10) 2 L δ) (4 / 5) L 2 4
+        ((Complex.I * (h : ℂ), π), σ)).1‖ ≤ 4 / 5)
+    (hclose1 : (arcFlow (arcRampProfile (-3 / 10) 2 L δ) (4 / 5) L 2 4
+      ((Complex.I * (h : ℂ), π), L)).1 = (Complex.I * (h : ℂ), π).1)
+    (hclose2 : (arcFlow (arcRampProfile (-3 / 10) 2 L δ) (4 / 5) L 2 4
+      ((Complex.I * (h : ℂ), π), L)).2 = (Complex.I * (h : ℂ), π).2 + 2 * π) :
+    ∃ θ : ℝ → ℝ,
+      (∀ σ ∈ Set.Icc (0 : ℝ) L,
+        (arcFlow (arcRampProfile (-3 / 10) 2 L δ) (4 / 5) L 2 4
+            ((Complex.I * (h : ℂ), π), σ)).1
+          = (‖(arcFlow (arcRampProfile (-3 / 10) 2 L δ) (4 / 5) L 2 4
+              ((Complex.I * (h : ℂ), π), σ)).1‖ : ℂ) * Complex.exp ((θ σ : ℂ) * Complex.I)) ∧
+      (∀ σ ∈ Set.Icc (0 : ℝ) L,
+        (arcFlow (arcRampProfile (-3 / 10) 2 L δ) (4 / 5) L 2 4
+          ((Complex.I * (h : ℂ), π), σ)).1 ≠ 0) ∧
+      StrictMonoOn θ (Set.Icc 0 L) ∧
+      θ L = θ 0 + 2 * π := by
+  sorry
+
+/-- **Non-convex chord non-vanishing (simplicity), params-fixed — RADIAL-MONOTONE
+route A.**  THE crux leaf.  For the confined arc-length trajectory of the negative
+ramped bicircle `arcRampProfile (−3/10) 2 L δ` from the mirror-axis start
+`W₀ = (i·h, π)` over the ALM-4 landing sub-rectangle `h ∈ [1/10, 3/20]`,
+`L ∈ [157/50, 161/50]`, confined to `‖z‖ ≤ 4/5` and closing with total turning `2π`,
+the chord integral `∫_t^τ e^{iφ} ≠ 0` on every proper sub-arc — hence the curve is
+simple (`injOn_arcCurve`, `ArcLengthH2.lean:4450`).
+
+**Why params-fixed** (B2, `.mathlib-quality/b2_log.jsonl` ALM-5a): the former generic
+`{a c L δ R M r₀ W₀}` shape is UNSOUND — "confined + closing" does NOT imply simple
+for arbitrary params; only the numerically-gated concrete rectangle is verified
+simple.  The positive-gate projection route (`gate_chord_ne_zero`, strict `φ`
+monotonicity) **fails** because `φ` is genuinely non-monotone here (`φ' = 1/r_a < 0`
+on the concave arc, `r_a ∈ [−5/4, −1]`), and the single-window midpoint projection is
+provably insufficient (∃ a sub-arc where neither it nor its complement has
+`φ`-span `< π`).  The L¹-perturbation-from-a-convex-bicircle route is also unsound
+(the negative level `a = −3/10` on a full arc is `O(1)` away in L¹).
+
+**ROUTE A (radial monotonicity / star-shaped about the origin).**  Numerically the
+confined curve is *star-shaped about `0`*: `⟪z(σ), i·e^{iφ(σ)}⟫ < 0` for all `σ`
+(equivalently `Im(conj z · e^{iφ}) > 0`, so `arg z(σ)` is strictly increasing,
+sweeping exactly `2π`) and `z(σ) ≠ 0`.  Radial monotonicity gives injectivity: for
+`0 ≤ t < τ < L` the argument increases by an amount in `(0, 2π)`, so `z(t) ≠ z(τ)`,
+i.e. the chord is nonzero.  The key inner-product sign is `Klein`-symmetric (invariant
+under `arcRev_eqOn` conjugation `z ↦ conj z, φ ↦ 3π − φ` and `arcClosure_eqOn` central
+symmetry `z ↦ −z, φ ↦ φ + π`), so it reduces to the quarter `[0, L/4]`, where a
+two-arc `L¹`-Grönwall transport from the constant-curvature model (its max is at the
+join `σ = L/8`, `≤ −1/50` over the rectangle) plus the exposed `δ`-smallness
+`negRobustConst·δ ≤ 1/200` keeps `⟪z, i e^{iφ}⟫ < 0` for the smooth flow.  The
+argument is a `ℂ`-property, independent of the H² metric. -/
+lemma mixed_chord_ne_zero {δ h L : ℝ}
+    (hδ : 0 < δ) (hh1 : (1 : ℝ) / 10 ≤ h) (hh2 : h ≤ 3 / 20)
+    (hL1 : (157 : ℝ) / 50 ≤ L) (hL2 : L ≤ 161 / 50)
+    (hδC : negRobustConst * δ ≤ 1 / 200)
+    (him : (arcFlow (arcRampProfile (-3 / 10) 2 L δ) (4 / 5) L 2 4
+      ((Complex.I * (h : ℂ), π), L / 4)).1.im = 0)
+    (hφe : (arcFlow (arcRampProfile (-3 / 10) 2 L δ) (4 / 5) L 2 4
+      ((Complex.I * (h : ℂ), π), L / 4)).2 = 3 * π / 2)
+    (hconf : ∀ σ ∈ Set.Icc (0 : ℝ) L,
+      ‖(arcFlow (arcRampProfile (-3 / 10) 2 L δ) (4 / 5) L 2 4
+        ((Complex.I * (h : ℂ), π), σ)).1‖ ≤ 4 / 5)
+    (hclose1 : (arcFlow (arcRampProfile (-3 / 10) 2 L δ) (4 / 5) L 2 4
+      ((Complex.I * (h : ℂ), π), L)).1 = (Complex.I * (h : ℂ), π).1)
+    (hclose2 : (arcFlow (arcRampProfile (-3 / 10) 2 L δ) (4 / 5) L 2 4
+      ((Complex.I * (h : ℂ), π), L)).2 = (Complex.I * (h : ℂ), π).2 + 2 * π) :
     ∀ t τ : ℝ, 0 ≤ t → t < τ → τ < L →
       (∫ s in t..τ, Complex.exp
-        (((arcFlow (arcRampProfile a c L δ) R L M r₀ (W₀, s)).2 : ℂ) * Complex.I)) ≠ 0 := by
-  sorry
+        (((arcFlow (arcRampProfile (-3 / 10) 2 L δ) (4 / 5) L 2 4
+          ((Complex.I * (h : ℂ), π), s)).2 : ℂ) * Complex.I)) ≠ 0 := by
+  have hLpos : (0 : ℝ) < L := by linarith
+  have hL0 : (0 : ℝ) ≤ L := hLpos.le
+  have hR : (0 : ℝ) ≤ 4 / 5 := by norm_num
+  have hR1 : (4 : ℝ) / 5 < 1 := by norm_num
+  set κ := arcRampProfile (-3 / 10) 2 L δ with hκdef
+  set W₀ : ℂ × ℝ := (Complex.I * (h : ℂ), π) with hW₀def
+  have hκc : Continuous κ := arcRampProfile_continuous _ _ _ _
+  have hκabs : ∀ σ, |κ σ| ≤ 2 := neg_abs_le L δ
+  have hW₀mem : W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) 4 := by
+    rw [Metric.mem_closedBall, dist_zero_right, hW₀def, Prod.norm_def]
+    have e1 : ‖Complex.I * (h : ℂ)‖ = |h| := by
+      rw [Complex.norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Real.norm_eq_abs]
+    have e2 : ‖(π : ℝ)‖ = π := by rw [Real.norm_eq_abs, abs_of_pos Real.pi_pos]
+    rw [e1, e2]
+    exact by simpa using
+      (max_le (by rw [abs_of_nonneg (by linarith : (0 : ℝ) ≤ h)]; linarith)
+        (by linarith [Real.pi_lt_four]) : max |h| π ≤ 4)
+  obtain ⟨hf0, hfd⟩ := arcFlow_spec hκc hR hR1 hL0 hκabs 4 hW₀mem
+  set Φ : ℝ → ℂ × ℝ := fun σ => arcFlow κ (4 / 5) L 2 4 (W₀, σ) with hΦdef
+  set z : ℝ → ℂ := fun σ => (Φ σ).1 with hzdef
+  set φ : ℝ → ℝ := fun σ => (Φ σ).2 with hφdef
+  have hzd : ∀ σ ∈ Set.Icc (0 : ℝ) L,
+      HasDerivWithinAt z (Complex.exp ((φ σ : ℂ) * Complex.I)) (Set.Icc 0 L) σ := by
+    intro σ hσ
+    have h := (ContinuousLinearMap.fst ℝ ℂ ℝ).hasFDerivAt.comp_hasDerivWithinAt σ (hfd σ hσ)
+    simpa only [arcField, ContinuousLinearMap.coe_fst', Function.comp_def] using h
+  have hφd : ∀ σ ∈ Set.Icc (0 : ℝ) L,
+      HasDerivWithinAt φ (arcAngleSpeed κ σ (z σ) (φ σ)) (Set.Icc 0 L) σ := by
+    intro σ hσ
+    have h := (ContinuousLinearMap.snd ℝ ℂ ℝ).hasFDerivAt.comp_hasDerivWithinAt σ (hfd σ hσ)
+    simp only [arcField, ContinuousLinearMap.coe_snd', Function.comp_def] at h
+    rwa [truncatedArcAngleSpeed_eq (hconf σ hσ)] at h
+  have hzc : ContinuousOn z (Set.Icc 0 L) := HasDerivWithinAt.continuousOn hzd
+  have hφc : ContinuousOn φ (Set.Icc 0 L) := HasDerivWithinAt.continuousOn hφd
+  obtain ⟨θ, hlift, hne, hmono, hturn⟩ :=
+    mixed_radial_lift hδ hh1 hh2 hL1 hL2 hδC him hφe hconf hclose1 hclose2
+  exact chord_ne_zero_of_lift hLpos hzd hzc hφc hlift hne hmono hturn
 
 /-- **The constant escape-velocity hyperbolic circle realizes `κ ≡ c`.**  For
 `c > 1` the explicit origin-centred hyperbolic circle of geodesic curvature `c`
