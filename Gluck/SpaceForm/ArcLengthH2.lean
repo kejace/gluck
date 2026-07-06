@@ -991,6 +991,50 @@ private lemma arcClosure_of_halfPeriodMatch {κ : ℝ → ℝ} {R L M : ℝ}
     rw [← hbL]; exact hΦL
   exact ⟨by rw [hfin], by rw [hfin]⟩
 
+/-- **Poincaré–Miranda on a rectangle (2-D intermediate value theorem).**  A
+continuous map `G = (G₁, G₂) : [a₁,a₂]×[b₁,b₂] → ℝ²` with each component
+sign-definite on the pair of faces it controls — `G₁ ≤ 0` on the left face
+`{a₁}×[b₁,b₂]` and `G₁ ≥ 0` on the right face `{a₂}×[b₁,b₂]`; `G₂ ≤ 0` on the
+bottom face `[a₁,a₂]×{b₁}` and `G₂ ≥ 0` on the top face `[a₁,a₂]×{b₂}` — has a zero
+in the rectangle.  This is the 2-D generalisation of the intermediate value
+theorem and the topological engine behind the arc-length closing crux (the
+quarter-period residual `G(b,L)=(Im z(L/4), φ(L/4)−3π/2)` has exactly this
+sign-definite-face structure on the shooting rectangle, per the numerical degree
+gate `h2_negative_dev.md §2-D DEGREE GATE`).
+
+**Mathlib status:** absent (no `Miranda`/`poincare` in mathlib as of v4.31.0), so
+this is a genuine project/mathlib gap.  **Scoped sub-`sorry` with sketch.**
+
+**Proof sketch (two standard routes).**
+* *Via Brouwer / topological degree.* Poincaré–Miranda is equivalent to Brouwer's
+  fixed-point theorem; the sign-definite faces give the boundary map
+  `∂rect → ℝ²∖{0}` degree `±1`, forcing an interior zero.  Mathlib has Brouwer via
+  `Mathlib.Topology.Homotopy` sphere/`ℝ²`-degree only in fragments; a direct port
+  is the cleanest long-term route.
+* *Via the project's planar degree principle* (`Gluck.exists_zero_of_boundary_winding`,
+  `Winding.lean:265`).  Affinely rescale the rectangle to the closed unit disk
+  `[a₁,a₂]×[b₁,b₂] ≃ closedBall 0 1`, push `G` forward to `F : ℂ → ℂ`
+  (identify `ℝ² ≅ ℂ`).  The four sign faces give `F ≠ 0` on the boundary circle
+  (every boundary point lies on a face where one component is sign-definite, hence
+  nonzero), and the boundary loop threads the four half-planes `{Im<0}` (bottom),
+  `{Re>0}` (right), `{Im>0}` (top), `{Re<0}` (left) in cyclic CCW order, so its
+  winding number about `0` is `±1 ≠ 0`; `exists_zero_of_boundary_winding` then
+  supplies the interior zero.  The remaining analytic content is the
+  "loop through four half-planes in cyclic order ⇒ winding `±1`" lemma (a
+  `Complex.arg`-continuity / argument-principle computation on the winding API).
+
+This is the clean, reusable form; the caller supplies a continuous residual with
+the four sign inequalities. -/
+theorem poincareMiranda_rect {a₁ a₂ b₁ b₂ : ℝ} (_ha : a₁ ≤ a₂) (_hb : b₁ ≤ b₂)
+    (G : ℝ × ℝ → ℝ × ℝ)
+    (_hG : ContinuousOn G (Set.Icc a₁ a₂ ×ˢ Set.Icc b₁ b₂))
+    (_hleft : ∀ y ∈ Set.Icc b₁ b₂, (G (a₁, y)).1 ≤ 0)
+    (_hright : ∀ y ∈ Set.Icc b₁ b₂, 0 ≤ (G (a₂, y)).1)
+    (_hbot : ∀ x ∈ Set.Icc a₁ a₂, (G (x, b₁)).2 ≤ 0)
+    (_htop : ∀ x ∈ Set.Icc a₁ a₂, 0 ≤ (G (x, b₂)).2) :
+    ∃ p ∈ Set.Icc a₁ a₂ ×ˢ Set.Icc b₁ b₂, G p = 0 := by
+  sorry
+
 /-- **AL4-d′ — existence of a half-period matching start (2-D shooting/degree).**
 THE NEW CRUX.  There is a start `W₀` in the ball whose half-period endpoint is its
 `ρ_π`-image: `arcFlow …(W₀, L/2) = (−W₀.1, W₀.2 + π)`.
@@ -1017,7 +1061,61 @@ unlike the dead fixed-`φ₀` `z`-monodromy, is the object to show nonzero — o
 Poincaré–Miranda box argument).  **GATE: numerically verify the 2-D degree/sign
 pattern for a concrete symmetric profile before grinding.**  (No 1-D Euclidean
 template; the closest is the *automatic* closure `dahlbergCurve_periodic`, which the
-coupling breaks.)  Discharge: **rebuild** — 2-D topological degree. -/
+coupling breaks.)  Discharge: **rebuild** — 2-D topological degree.
+
+────────────────────────────────────────────────────────────────────────────────
+**⛔ DECISIVE FINDING (2026-07-06, BEASTMODE worker; confirmed `chatgpt-math`
+gpt-5.5 high): THIS LEMMA IS FALSE AS STATED — a THIRD decomposition obstruction
+(a statement gap, like AL-6), not a dischargeable leaf.**
+
+The hypotheses universally quantify **both** `κ` and `L` (linked only by
+`hhalf : Periodic κ (L/2)`).  But the second component of the matching,
+`φ(L/2) = φ₀ + π`, is an **exact real equality** (the downstream
+`arcClosure_of_halfPeriodMatch` consumes exact real equality to derive
+`φ(L) = φ₀ + 2π`; it cannot be relaxed mod `2π`).  It forces the half-period total
+turning to equal exactly `π`:
+    `∫₀^{L/2} φ'(σ) dσ = π`,  where  `φ' = 2(κ + ⟪z, i·e^{iφ}⟫)/(1 − ‖z‖²) > 0`.
+
+**Counterexample.** Take `κ ≡ 10` (constant ⇒ `Periodic κ t` for every `t`, so
+`hhalf` holds for any `L`), `R,r₀` arbitrary, `L = 2π` (so `L/2 = π`).  On any
+confined trajectory `‖z‖ < 1`:
+    `|⟪z, i·e^{iφ}⟫| ≤ ‖z‖ < 1`  ⇒  `κ + ⟪…⟫ > 10 − 1 = 9`,   `0 < 1 − ‖z‖² ≤ 1`,
+so `φ'(σ) > 18` for all `σ`, whence
+    `φ(L/2) − φ₀ = ∫₀^{π} φ' dσ > 18π ≫ π`.
+The match `φ(L/2) = φ₀ + π` is therefore **unsatisfiable** for this `(κ, L)`.
+General obstruction: if `κ ≥ K > 1` on `[0, L/2]` then the half-period turning
+exceeds `2(K−1)·(L/2) = (K−1)L`; whenever `(K−1)L ≥ π` no matching start exists.
+
+**Why the 2-D DEGREE GATE does not save it.** The passed gate (degree `+1`,
+`h2_negative_dev.md §2-D DEGREE GATE`) shoots over the **two** parameters `(b, L)`
+— it TUNES the window `L` to the profile so the turning lands on `π` (e.g.
+`(b*,L*)=(0.292, 2.491)` for `a=0.8,b=2.0`).  With `L` a *fixed universal
+hypothesis* that degree of freedom is gone: only the start varies, and for a
+generic fixed `L` the achievable half-period turning misses `π`.  The gate
+certifies the *co-constructed* `(κ, L)`, not the ∀-`L` statement here.
+
+**Required signature fix (a `/develop --continue` replan, NOT a leaf grind).** One
+of:
+  (i) quantify `L` existentially together with the start:
+      `∃ L > 0, Periodic κ (L/2) ∧ ∃ W₀ ∈ ball, arcFlow κ R L M r₀ (W₀,L/2) = ρ_π W₀`
+      (then `exists_closing_arcState` and the capstone must thread the chosen `L`);
+  (ii) add a turning-compatibility / four-vertex-bicircle hypothesis on `κ`
+      pinning `∫₀^{L/2}φ' = π` (the even-palindrome bicircle structure the gate
+      actually uses — which ALSO supplies the mirror-reversal `κ`-evenness the
+      recommended reversible-shooting discharge needs, but which is ABSENT from the
+      current hypotheses, a second reason the reversal reduction cannot be stated
+      here).
+This mirrors the AL-6 gap (`L=2π` normalisation): the free-`L` degree of freedom
+lives at the capstone, where `(κ, L)` are co-constructed; it must be threaded
+down, not universally quantified at this leaf.  See `tickets_h2negative.md`
+[AL-4] and `decomposition_al4_v2.md`.
+
+**Discharge once restated:** the corrected lemma (co-constructed `(κ,L)`, plus
+confinement `arcFlow_confined` for `‖z‖<1` on the rectangle) reduces — via
+continuity of the quarter-period residual `G(b,L)` from `exists_arcFlow`'s
+`ContinuousOn α` half — to `poincareMiranda_rect` (above) applied with the four
+numerically-gated sign faces (`G₁<0/>0` across the `b`-faces, `G₂<0/>0` across the
+`L`-faces).  Left as `sorry` because the statement itself is unsound. -/
 private lemma exists_halfPeriodMatch {κ : ℝ → ℝ} {R L M : ℝ}
     (hκ : Continuous κ) (hR : 0 < R) (hR1 : R < 1) (hL : 0 < L)
     (hM : ∀ σ, |κ σ| ≤ M) (hhalf : Function.Periodic κ (L / 2)) (r₀ : ℝ≥0) :
