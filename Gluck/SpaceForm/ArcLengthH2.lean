@@ -2063,71 +2063,87 @@ private lemma arcRev_solves {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuous �
   rw [arcField_conj_reflect (Φ (L / 2 - σ)) (hevenQ σ).symm]
   convert hV using 2 <;> simp [Function.comp_def, map_neg, hΦdef]
 
-/-- **AL4-c quarter-period landing (the residual analytic crux, `sorry`).**  For
-the symmetric four-vertex-bicircle profile (`κ` even about `0` and about `L/4`,
-half-periodic — the `a,b,a,b` palindrome), the quarter-period endpoint of the
-mirror-axis start `W₀ = (i·b, π)` lands on the *second* mirror axis
-`Fix(X) = {Im z = 0, φ = 3π/2}`:
-  `Φ(L/4) = X(Φ(L/4))  where  X(z, φ) = (z̄, 3π − φ)`,
-i.e. `Im z(L/4) = 0 ∧ φ(L/4) = 3π/2`.
+/-! ### AL4-c quarter-period landing — ⛔ DECISIVE FINDING: NOT derivable from the
+turning; it is the genuine co-constructed 2-D-degree input (packaged into `hturn`)
 
-**Content (`h2_negative_dev.md §AL4-c`, §2-D DEGREE GATE).**  Two scalar facts:
+**⛔ DECISIVE FINDING (2026-07-06, BEASTMODE worker; numerically demonstrated,
+mpmath dps=40, via the exact closed-form model `arcModelConst`).**  The former leaf
+`arcQuarterLanding` — "for the symmetric palindrome start `W₀ = (i·b, π)`, the
+half-period turning `hφ : φ(L/2) = φ₀ + π` forces the quarter-period landing
+`Φ(L/4) ∈ Fix(X)`, `X(z, φ) = (z̄, 3π − φ)`, i.e. `Im z(L/4) = 0 ∧ φ(L/4) = 3π/2`" —
+is **FALSE AS STATED**.  The half-period turning `hφ` and the quarter landing are
+**independent conditions**; `hφ` ties the window `L` to `b` along a 1-parameter
+curve, but the landing needs the *further* condition `Im z(L/4) = 0`, which selects
+the co-constructed `b = b*`.
 
-* `φ(L/4) = 3π/2`.  The angle speed `φ' = 2(κ + ⟪z, i·e^{iφ}⟫)/(1 − ‖z‖²)` is
-  invariant under the `L/4`-reflection (`arcField_conj_reflect`, the `φ`-component),
-  so the turning on `[0, L/4]` equals the turning on `[L/4, L/2]`; with the total
-  half-period turning pinned to `π` (`hφ`, `φ(L/2) = φ₀ + π = 2π`) each quarter
-  contributes `π/2`, giving `φ(L/4) = φ₀ + π/2 = 3π/2`.
+**Numerical falsification.**  Fix the palindrome `a(L/8) b(L/4) a(L/8)`, `a = 0.8`,
+`b = 2.0` (the primary gate profile).  For each mirror-axis height `bval`, solve for
+`L` so that `hφ` holds (`φ(L/2) = 2π`), then evaluate the landing residuals
+(everything confined, `max‖z‖ ≈ 0.48 < 1`, so the closed form *equals* `arcFlow` by
+`arcModelConst_eq_arcFlow`):
 
-* `Im z(L/4) = 0`.  Compose the two constant-curvature arcs of the palindrome via
-  the closed-form model `arcModelConst` (Leaf group 3′): `z(L/4)` is the explicit
-  Euclidean composition `z₀ ↦ arc_a(L/8) ↦ arc_b(L/8)` (radii `r_a, r_b` from
-  `arcModelRadius`).  As a function of the free curvature `b` (with `a` fixed),
-  `Im z(L/4)` is continuous (`exists_arcFlow` continuity) with the gate's sign
-  faces `Im z(L/4) < 0` for small `b`, `> 0` for large `b` (numerically gated to
-  `1e-41`, e.g. `(b*, L*) = (0.292, 2.491)` for `a = 0.8`); `intermediate_value_Icc`
-  then yields the vanishing `Im z(L/4) = 0` at the co-constructed `b`.
+    bval     L         Im z(L/4)    φ(L/4) − 3π/2   (hφ holds by construction)
+    0.20     2.48098   −0.10434     +0.04196
+    0.29239  2.49093   ≈ 0 (1e-16)  ≈ 0            ← the gate solution b* only
+    0.35     2.47420   +0.06864     −0.02753
+    0.40     2.44342   +0.13056     −0.05244
 
-The reversal ODE two-sided uniqueness assembly (`arcRev_solves` +
-`ODE_solution_unique_of_mem_Icc`) that turns this landing into the half-period
-`z`-match is fully proven in `exists_halfPeriodMatch_zmatch` below; this lemma is
-the sole remaining analytic obligation.  See `tickets_h2negative.md [AL-4]`. -/
-private lemma arcQuarterLanding {κ : ℝ → ℝ} {R L M : ℝ}
-    (hκ : Continuous κ) (hR : 0 < R) (hR1 : R < 1) (hL : 0 < L)
-    (hM : ∀ σ, |κ σ| ≤ M) (hhalf : Function.Periodic κ (L / 2))
-    (hevenO : ∀ σ, κ (-σ) = κ σ) (hevenQ : ∀ σ, κ (L / 2 - σ) = κ σ)
-    (r₀ : ℝ≥0) {W₀ : ℂ × ℝ}
-    (hW₀ : W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀)
-    (hre : (W₀.1).re = 0) (hφ0 : W₀.2 = π)
-    (hφ : (arcFlow κ R L M r₀ (W₀, L / 2)).2 = W₀.2 + π) :
-    arcFlow κ R L M r₀ (W₀, L / 4)
-      = ((starRingEnd ℂ (arcFlow κ R L M r₀ (W₀, L / 4)).1,
-          3 * π - (arcFlow κ R L M r₀ (W₀, L / 4)).2) : ℂ × ℝ) := by
-  sorry
+Both quarter residuals are non-zero for every `bval ≠ b*`, so the landing fails
+despite `hφ` (robust also for the genuinely concave target `a = −0.3, b = 2.5`).
+Consequently the old `exists_halfPeriodMatch` proof was unsound: its turning-only
+`hturn` is satisfiable at many `W₀` (e.g. `bval = 0.35`) at which the concluded
+`z`-match `z(L/2) = −z₀` is false.
 
-/-- **AL4-d′ `z`-match (the reversible-shooting `z`-component), reversal assembly
-now sorry-free.**  Given a mirror-axis start `W₀ = (i·b, π)` (`hre`, `hφ0`) whose
-half-period turning already lands (`hφ : φ(L/2) = φ₀ + π`), the half-period space
-endpoint is the central-symmetry image `z(L/2) = −z₀`.
+**Root cause (same as the AL-6 / `exists_halfPeriodMatch` gaps): CO-CONSTRUCT.**  The
+landing is a genuine **2-D shooting condition** — the degree gate (`h2_negative_dev.md
+§2-D DEGREE GATE`, degree `+1`, Poincaré–Miranda) shoots over `(b, L)` to hit *both*
+`Im z(L/4) = 0` and `φ(L/4) = 3π/2`; it cannot be manufactured from the single
+turning equation.  Turning `hφ` even follows *from* the landing (`V ≡ Φ ⇒
+φ(L/2) = 2π`), not the other way round.
+
+**SOUND RESTATEMENT (fix, this file).**  The quarter landing is now carried as the
+co-constructed input directly on `hturn` (in `exists_halfPeriodMatch` /
+`exists_closing_arcState`), *replacing* the strictly-weaker turning condition.  Given
+that landing, the reversible-shooting reflection is **rigorous and sorry-free**:
+`arcRev_solves` (from `hevenQ`) makes the mirror trajectory
+`V(σ) = X(Φ(L/2 − σ))` solve the same ODE on `[0, L/2]`, it agrees with `Φ` at the
+interior quarter point `L/4` *exactly because of the landing hypothesis*, and
+two-sided ODE uniqueness (`ODE_solution_unique_of_mem_Icc`) gives `V ≡ Φ`, whence at
+`σ = 0` the **full** half-period match `arcFlow …(W₀, L/2) = (−W₀.1, W₀.2 + π)`
+(both the `z`-match, via `Re W₀.1 = 0`, and the turning, via `W₀.2 = π`).  See
+`exists_halfPeriodMatch_zmatch` immediately below.  The remaining genuine obligation
+— *existence* of a `W₀` with the quarter landing — is the 2-D Brouwer-degree /
+Poincaré–Miranda argument, honestly localised to `hturn`.  See
+`tickets_h2negative.md [AL-4]`. -/
+
+/-- **AL4-d′ full half-period match (the reversible-shooting reflection),
+sorry-free.**  Given a mirror-axis start `W₀ = (i·b, π)` (`hre`, `hφ0`) whose
+quarter-period endpoint **lands** on the second mirror axis
+`Φ(L/4) ∈ Fix(X)` (`hland`, `X(z, φ) = (z̄, 3π − φ)` — the co-constructed 2-D-degree
+input; see the ⛔ DECISIVE FINDING above), the full half-period endpoint is the
+central-symmetry image: `arcFlow …(W₀, L/2) = (−W₀.1, W₀.2 + π)`.
 
 **Proof (reversible shooting).**  With `κ` even about `L/4` (`hevenQ`) the
-conjugate–time-reversed trajectory `V(σ) = X(Φ(L/2 − σ))` (`X(z, φ) = (z̄, 3π − φ)`)
-solves the same ODE on `[0, L/2]` (`arcRev_solves`).  It agrees with `Φ` at the
-interior quarter point `L/4` — precisely the quarter-period landing
-`Φ(L/4) ∈ Fix(X)` (`arcQuarterLanding`, the sole residual analytic `sorry`) — so
-two-sided ODE uniqueness (`ODE_solution_unique_of_mem_Icc`, global Lipschitz from
-`arcField_lipschitz`) gives `V ≡ Φ` on `[0, L/2]`.  Evaluating at `0`:
-`W₀ = Φ(0) = V(0) = X(Φ(L/2))`, so `z(L/2) = z̄₀ = −z₀` (the last step uses
-`Re z₀ = 0`, `hre`).  See `tickets_h2negative.md [AL-4]`. -/
+conjugate–time-reversed trajectory `V(σ) = X(Φ(L/2 − σ))` solves the same ODE on
+`[0, L/2]` (`arcRev_solves`).  It agrees with `Φ` at the interior quarter point
+`L/4` — precisely the landing hypothesis `hland` — so two-sided ODE uniqueness
+(`ODE_solution_unique_of_mem_Icc`, global Lipschitz from `arcField_lipschitz`) gives
+`V ≡ Φ` on `[0, L/2]`.  Evaluating at `0`: `W₀ = Φ(0) = V(0) = X(Φ(L/2))`, so
+`z(L/2) = z̄₀ = −z₀` (`Re z₀ = 0`, `hre`) **and** `φ(L/2) = 3π − W₀.2 = 2π = W₀.2 + π`
+(`W₀.2 = π`, `hφ0`) — both components of the match.  This is the reflection that the
+former (false) turning-only `arcQuarterLanding` route could not supply; the landing
+is now taken as an explicit co-constructed hypothesis.  See
+`tickets_h2negative.md [AL-4]`. -/
 private lemma exists_halfPeriodMatch_zmatch {κ : ℝ → ℝ} {R L M : ℝ}
     (hκ : Continuous κ) (hR : 0 < R) (hR1 : R < 1) (hL : 0 < L)
-    (hM : ∀ σ, |κ σ| ≤ M) (hhalf : Function.Periodic κ (L / 2))
-    (hevenO : ∀ σ, κ (-σ) = κ σ) (hevenQ : ∀ σ, κ (L / 2 - σ) = κ σ)
+    (hM : ∀ σ, |κ σ| ≤ M) (hevenQ : ∀ σ, κ (L / 2 - σ) = κ σ)
     (r₀ : ℝ≥0) {W₀ : ℂ × ℝ}
     (hW₀ : W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀)
     (hre : (W₀.1).re = 0) (hφ0 : W₀.2 = π)
-    (hφ : (arcFlow κ R L M r₀ (W₀, L / 2)).2 = W₀.2 + π) :
-    (arcFlow κ R L M r₀ (W₀, L / 2)).1 = -W₀.1 := by
+    (hland : arcFlow κ R L M r₀ (W₀, L / 4)
+      = ((starRingEnd ℂ (arcFlow κ R L M r₀ (W₀, L / 4)).1,
+          3 * π - (arcFlow κ R L M r₀ (W₀, L / 4)).2) : ℂ × ℝ)) :
+    arcFlow κ R L M r₀ (W₀, L / 2) = (-W₀.1, W₀.2 + π) := by
   have hL0 : (0 : ℝ) ≤ L := hL.le
   have hLh : (0 : ℝ) ≤ L / 2 := by linarith
   obtain ⟨K, hK⟩ := arcField_lipschitz hR.le hR1 hM
@@ -2142,7 +2158,8 @@ private lemma exists_halfPeriodMatch_zmatch {κ : ℝ → ℝ} {R L M : ℝ}
           3 * π - (arcFlow κ R L M r₀ (W₀, L / 2 - t)).2) : ℂ × ℝ)) (Set.Icc 0 (L / 2)) :=
     HasDerivWithinAt.continuousOn
       (fun t ht => arcRev_solves hκ hR.le hR1 hL0 hM hevenQ r₀ hW₀ ht)
-  -- Two-sided ODE uniqueness from agreement at the interior quarter point `L/4`.
+  -- Two-sided ODE uniqueness from agreement at the interior quarter point `L/4`
+  -- (supplied by the co-constructed quarter-landing hypothesis `hland`).
   have hEq : Set.EqOn (fun t => arcFlow κ R L M r₀ (W₀, t))
       (fun t => ((starRingEnd ℂ (arcFlow κ R L M r₀ (W₀, L / 2 - t)).1,
           3 * π - (arcFlow κ R L M r₀ (W₀, L / 2 - t)).2) : ℂ × ℝ)) (Set.Icc 0 (L / 2)) := by
@@ -2158,16 +2175,20 @@ private lemma exists_halfPeriodMatch_zmatch {κ : ℝ → ℝ} {R L M : ℝ}
     · show arcFlow κ R L M r₀ (W₀, L / 4)
         = ((starRingEnd ℂ (arcFlow κ R L M r₀ (W₀, L / 2 - L / 4)).1,
             3 * π - (arcFlow κ R L M r₀ (W₀, L / 2 - L / 4)).2) : ℂ × ℝ)
-      rw [show L / 2 - L / 4 = L / 4 by ring]
-      exact arcQuarterLanding hκ hR hR1 hL hM hhalf hevenO hevenQ r₀ hW₀ hre hφ0 hφ
-  -- Evaluate the equality at `0`: `W₀ = X(Φ(L/2))`, whence `z(L/2) = z̄₀ = −z₀`.
+      rw [show L / 2 - L / 4 = L / 4 by ring]; exact hland
+  -- Evaluate the equality at `0`: `W₀ = X(Φ(L/2))`, giving *both* components of the
+  -- match — the `z`-match `z(L/2) = z̄₀ = −z₀` (`Re W₀.1 = 0`) and the turning
+  -- `φ(L/2) = 3π − W₀.2 = 2π = W₀.2 + π` (`W₀.2 = π`).
   have h0 := hEq (Set.left_mem_Icc.mpr hLh)
   simp only [hf0, sub_zero] at h0
-  have h1 : W₀.1 = starRingEnd ℂ (arcFlow κ R L M r₀ (W₀, L / 2)).1 := congrArg Prod.fst h0
-  have h2 : (arcFlow κ R L M r₀ (W₀, L / 2)).1 = starRingEnd ℂ W₀.1 := by
-    rw [h1, Complex.conj_conj]
-  rw [h2, Complex.ext_iff]
-  refine ⟨?_, ?_⟩ <;> simp [Complex.conj_re, Complex.conj_im, hre]
+  refine Prod.ext ?_ ?_
+  · have h1 : W₀.1 = starRingEnd ℂ (arcFlow κ R L M r₀ (W₀, L / 2)).1 := congrArg Prod.fst h0
+    have h2 : (arcFlow κ R L M r₀ (W₀, L / 2)).1 = starRingEnd ℂ W₀.1 := by
+      rw [h1, Complex.conj_conj]
+    rw [h2, Complex.ext_iff]
+    refine ⟨?_, ?_⟩ <;> simp [Complex.conj_re, Complex.conj_im, hre]
+  · have h1 : W₀.2 = 3 * π - (arcFlow κ R L M r₀ (W₀, L / 2)).2 := congrArg Prod.snd h0
+    rw [hφ0] at h1 ⊢; linarith
 
 /-- **AL4-d′ — existence of a half-period matching start (2-D shooting/degree).**
 THE NEW CRUX.  There is a start `W₀` in the ball whose half-period endpoint is its
@@ -2241,12 +2262,15 @@ four-vertex-bicircle** structure the 2-D degree gate actually uses
   `a(L/8) b(L/4) a(L/8)` and supply the mirror-reversal `κ`-evenness the reversible
   shooting reduction needs (previously ABSENT, a second reason the reversal could
   not be stated).
-* `hturn` — the **turning-compatibility** hypothesis pinning the co-constructed
-  window: at a mirror-axis start `W₀` (`Re W₀.1 = 0`, `W₀.2 = π`) the half-period
-  **turning** lands on the match value, `φ(L/2) = W₀.2 + π = 2π`, i.e. the exact
-  `∫₀^{L/2} φ' = π` the gate tunes `L` to achieve.  This is fix (ii)'s "turning
-  compatibility as a clean hypothesis": `L` remains a parameter but is *understood
-  as co-constructed upstream* (the gate shoots over `(b, L)` to satisfy `hturn`);
+* `hturn` — the **quarter-landing compatibility** hypothesis pinning the
+  co-constructed `(b, L)`: at a mirror-axis start `W₀` (`Re W₀.1 = 0`, `W₀.2 = π`)
+  the quarter-period endpoint lands on the second mirror axis,
+  `Φ(L/4) ∈ Fix(X)`, `X(z, φ) = (z̄, 3π − φ)`.  (The strictly-weaker *turning-only*
+  `φ(L/2) = W₀.2 + π` was **unsound** — see the ⛔ DECISIVE FINDING above the
+  quarter-landing note: turning does **not** force the landing, so it does not force
+  the `z`-match either.)  This is the honest "co-constructed input as a clean
+  hypothesis": `L` remains a parameter but is *understood as co-constructed
+  upstream* (the 2-D degree gate shoots over `(b, L)` to satisfy the landing);
   encoding it as a hypothesis lets `L` thread uniformly and leaves
   `arcClosure_of_halfPeriodMatch` (the sorry-free core) untouched.
 
@@ -2260,35 +2284,38 @@ window so that `φ(L/2) = 2π`, which the pathological `L = 2π` does NOT satisf
 It also keeps `L` a genuine parameter, so `exists_closing_arcState` and
 `arcClosure_of_halfPeriodMatch` thread it without an existential-`L` cascade.
 
-**Discharge (scoped `sorry` with sketch).**  Given `hturn`'s mirror-axis start
-`W₀` with the correct half-turning, the `z`-component of the match `z(L/2) = −z₀`
-follows from the **reversible-shooting reflection**: `κ` even about `0`
-(`hevenO`) makes the flow `I_y`-reversible, so the trajectory from `W₀ ∈ Fix(I_y)`
-is a palindrome; `κ` even about `L/4` (`hevenQ`) supplies the second mirror, and
-the quarter-period landing on `Fix(I_x)` reflects to the full half-period match
-`arcFlow …(W₀, L/2) = (−W₀.1, W₀.2 + π)` (verified end-to-end to `1e-41` in the
-gate).  The full 2-D existence (dropping `hturn` for a genuine `poincareMiranda_rect`
-argument over `(b, L)`) uses the four numerically-gated sign faces + confinement
-`arcFlow_confined`; here we take `hturn` as the co-constructed input and leave the
-reflection identity as the `sorry`.  See `tickets_h2negative.md` [AL-4]. -/
+**Discharge (sorry-free from `hturn`).**  Given `hturn`'s mirror-axis start `W₀`
+with the quarter-period landing `Φ(L/4) ∈ Fix(X)`, the **reversible-shooting
+reflection** (`exists_halfPeriodMatch_zmatch`) delivers the full half-period match
+`arcFlow …(W₀, L/2) = (−W₀.1, W₀.2 + π)`: `κ` even about `L/4` (`hevenQ`) makes the
+mirror trajectory `V(σ) = X(Φ(L/2 − σ))` solve the same ODE (`arcRev_solves`), the
+landing hypothesis pins `V = Φ` at the interior quarter point `L/4`, and two-sided
+ODE uniqueness gives `V ≡ Φ`, whence at `σ = 0` **both** the `z`-match (via
+`Re W₀.1 = 0`) and the turning (via `W₀.2 = π`).  The one genuine remaining
+obligation is the *existence* of such a landing `W₀` — the 2-D Brouwer-degree /
+`poincareMiranda_rect` argument over `(b, L)` (four numerically-gated sign faces +
+confinement `arcFlow_confined`, `h2_negative_dev.md §2-D DEGREE GATE`) — honestly
+localised to `hturn`.  See `tickets_h2negative.md` [AL-4]. -/
 private lemma exists_halfPeriodMatch {κ : ℝ → ℝ} {R L M : ℝ}
     (hκ : Continuous κ) (hR : 0 < R) (hR1 : R < 1) (hL : 0 < L)
-    (hM : ∀ σ, |κ σ| ≤ M) (hhalf : Function.Periodic κ (L / 2))
-    (hevenO : ∀ σ, κ (-σ) = κ σ) (hevenQ : ∀ σ, κ (L / 2 - σ) = κ σ)
+    (hM : ∀ σ, |κ σ| ≤ M) (_hhalf : Function.Periodic κ (L / 2))
+    (_hevenO : ∀ σ, κ (-σ) = κ σ) (hevenQ : ∀ σ, κ (L / 2 - σ) = κ σ)
     (r₀ : ℝ≥0)
     (hturn : ∃ W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀,
       (W₀.1).re = 0 ∧ W₀.2 = π ∧
-      (arcFlow κ R L M r₀ (W₀, L / 2)).2 = W₀.2 + π) :
+      arcFlow κ R L M r₀ (W₀, L / 4)
+        = ((starRingEnd ℂ (arcFlow κ R L M r₀ (W₀, L / 4)).1,
+            3 * π - (arcFlow κ R L M r₀ (W₀, L / 4)).2) : ℂ × ℝ)) :
     ∃ W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀,
       arcFlow κ R L M r₀ (W₀, L / 2) = (-W₀.1, W₀.2 + π) := by
-  -- From `hturn`: a mirror-axis start `W₀ = (i·b, π)` with the correct half-period
-  -- turning `φ(L/2) = φ₀ + π = 2π`.  The `φ`-component of the match is *exactly*
-  -- `hturn`'s turning equality; the only remaining obligation is the `z`-component
-  -- `z(L/2) = −z₀`, which follows from the reversible-shooting reflection
-  -- (`hevenO`/`hevenQ`).  See `exists_halfPeriodMatch_zmatch` below.
-  obtain ⟨W₀, hW₀, _hre, _hφ0, hφ⟩ := hturn
-  exact ⟨W₀, hW₀, Prod.ext (exists_halfPeriodMatch_zmatch
-    hκ hR hR1 hL hM hhalf hevenO hevenQ r₀ hW₀ _hre _hφ0 hφ) hφ⟩
+  -- From `hturn`: a mirror-axis start `W₀ = (i·b, π)` with the co-constructed
+  -- quarter-period landing `Φ(L/4) ∈ Fix(X)`.  The reversible-shooting reflection
+  -- (`exists_halfPeriodMatch_zmatch`, `arcRev_solves` + ODE uniqueness anchored at
+  -- the landing) then yields the **full** half-period match — *both* the `z`-match
+  -- `z(L/2) = −z₀` and the turning `φ(L/2) = W₀.2 + π`.
+  obtain ⟨W₀, hW₀, hre, hφ0, hland⟩ := hturn
+  exact ⟨W₀, hW₀,
+    exists_halfPeriodMatch_zmatch hκ hR hR1 hL hM hevenQ r₀ hW₀ hre hφ0 hland⟩
 
 /-- **The reconstruction closes: existence of a closing initial state** (replan
 assembly, sorry-free).  Via the central-symmetry route: `exists_halfPeriodMatch`
@@ -2319,7 +2346,9 @@ lemma exists_closing_arcState {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuous
     (r₀ : ℝ≥0)
     (hturn : ∃ W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀,
       (W₀.1).re = 0 ∧ W₀.2 = π ∧
-      (arcFlow κ R L M r₀ (W₀, L / 2)).2 = W₀.2 + π) :
+      arcFlow κ R L M r₀ (W₀, L / 4)
+        = ((starRingEnd ℂ (arcFlow κ R L M r₀ (W₀, L / 4)).1,
+            3 * π - (arcFlow κ R L M r₀ (W₀, L / 4)).2) : ℂ × ℝ)) :
     ∃ W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀,
       (arcFlow κ R L M r₀ (W₀, L)).1 = W₀.1 ∧
       (arcFlow κ R L M r₀ (W₀, L)).2 = W₀.2 + 2 * π := by
