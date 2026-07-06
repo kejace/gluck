@@ -992,6 +992,679 @@ private lemma arcClosure_of_halfPeriodMatch {κ : ℝ → ℝ} {R L M : ℝ}
     rw [← hbL]; exact hΦL
   exact ⟨by rw [hfin], by rw [hfin]⟩
 
+/-!
+### Winding-number engine for the strict Poincaré–Miranda argument
+
+`Gluck/Winding.lean`'s angle-lift layer (`angleLift`, `windingNumber`,
+`windingNumber_eq_div_of_lift`, `windingNumber_eq_of_homotopy`, `circleProj`,
+`normLoop`) is `private`.  Following `Gluck/Sphere/ConjWinding.lean`, we replicate
+the needed pieces **verbatim** so the bridge `windingNumberC_eq_replicaR` to the
+public `windingNumberC` is definitional (`rfl`), and add the two computations the
+strict Poincaré–Miranda proof needs: the standard once-around loop has winding
+`+1`, and a nowhere-zero loop whose four boundary arcs lie in the four coordinate
+half-planes (`re>0`, `im>0`, `re<0`, `im<0` in cyclic order) is line-homotopic to
+it, hence also has winding `+1`.
+-/
+
+-- `open scoped unitInterval` (for the `I` / `C(I, ·)` notation) is confined to this
+-- section: elsewhere in the file `σ` is a bound-variable name that would clash with
+-- the `unitInterval` `σ` (symmetry) notation.
+section PoincareMirandaWinding
+
+open scoped unitInterval
+
+/-- Local replica of `Gluck/Winding.lean`'s private `angleLift` (verbatim). -/
+private noncomputable def angleLiftR (g : C(I, Circle)) : C(I, ℝ) :=
+  Circle.isCoveringMap_exp.liftPath g (Circle.exp_surjective (g 0)).choose
+    (Circle.exp_surjective (g 0)).choose_spec.symm
+
+private theorem angleLiftR_lifts (g : C(I, Circle)) (t : I) :
+    Circle.exp (angleLiftR g t) = g t := by
+  have h := Circle.isCoveringMap_exp.liftPath_lifts g (Circle.exp_surjective (g 0)).choose
+    (Circle.exp_surjective (g 0)).choose_spec.symm
+  have h' := congrFun h t
+  simpa [angleLiftR, Function.comp] using h'
+
+/-- Local replica of the private `windingNumber` (verbatim). -/
+private noncomputable def windingNumberR (g : C(I, Circle)) : ℝ :=
+  (angleLiftR g 1 - angleLiftR g 0) / (2 * π)
+
+/-- Local replica of the private `circleProj` (verbatim). -/
+private noncomputable def circleProjR (z : ℂ) (hz : z ≠ 0) : Circle :=
+  ⟨z / (‖z‖ : ℂ), by
+    rw [← SetLike.mem_coe, Submonoid.coe_unitSphere, mem_sphere_zero_iff_norm,
+      norm_div, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_pos (norm_pos_iff.2 hz), div_self (norm_pos_iff.2 hz).ne']⟩
+
+private theorem circleProjR_congr {a b : ℂ} (ha : a ≠ 0) (hb : b ≠ 0) (h : a = b) :
+    circleProjR a ha = circleProjR b hb := by subst h; rfl
+
+/-- Local replica of the private `normLoop` (verbatim). -/
+private noncomputable def normLoopR (γ : C(I, ℂ)) (h : ∀ t, γ t ≠ 0) : C(I, Circle) :=
+  ⟨fun t => circleProjR (γ t) (h t), by
+    apply Continuous.subtype_mk
+    exact γ.continuous.div
+      (Complex.continuous_ofReal.comp (continuous_norm.comp γ.continuous))
+      (fun t => Complex.ofReal_ne_zero.2 (norm_ne_zero_iff.2 (h t)))⟩
+
+/-- Bridge to the public `windingNumberC` (definitional). -/
+private theorem windingNumberC_eq_replicaR (γ : C(I, ℂ)) (h : ∀ t, γ t ≠ 0) :
+    windingNumberC γ h = windingNumberR (normLoopR γ h) := rfl
+
+/-- Local replica of the private `int_valued_eq` (verbatim). -/
+private theorem int_valued_eqR {q : C(I, ℝ)} (hq : ∀ t, ∃ m : ℤ, q t = (m : ℝ))
+    (a b : I) : q a = q b := by
+  rcases lt_trichotomy (q a) (q b) with h | h | h
+  · exfalso
+    obtain ⟨ma, hma⟩ := hq a
+    obtain ⟨mb, hmb⟩ := hq b
+    have hmab : ma < mb := by
+      have hh := h; rw [hma, hmb] at hh; exact_mod_cast hh
+    have hv1 : q a ≤ (ma : ℝ) + 1 / 2 := by rw [hma]; linarith
+    have hv2 : (ma : ℝ) + 1 / 2 ≤ q b := by
+      rw [hmb]
+      have hcast : (ma : ℝ) + 1 ≤ (mb : ℝ) := by exact_mod_cast hmab
+      linarith
+    obtain ⟨t, ht⟩ := intermediate_value_univ a b q.continuous ⟨hv1, hv2⟩
+    obtain ⟨mt, hmt⟩ := hq t
+    rw [hmt] at ht
+    have hcontra : (2 * mt : ℤ) = 2 * ma + 1 := by
+      have h2 : (2 : ℝ) * (mt : ℝ) = 2 * (ma : ℝ) + 1 := by linarith
+      exact_mod_cast h2
+    omega
+  · exact h
+  · exfalso
+    obtain ⟨ma, hma⟩ := hq a
+    obtain ⟨mb, hmb⟩ := hq b
+    have hmab : mb < ma := by
+      have hh := h; rw [hma, hmb] at hh; exact_mod_cast hh
+    have hv1 : q b ≤ (mb : ℝ) + 1 / 2 := by rw [hmb]; linarith
+    have hv2 : (mb : ℝ) + 1 / 2 ≤ q a := by
+      rw [hma]
+      have hcast : (mb : ℝ) + 1 ≤ (ma : ℝ) := by exact_mod_cast hmab
+      linarith
+    obtain ⟨t, ht⟩ := intermediate_value_univ b a q.continuous ⟨hv1, hv2⟩
+    obtain ⟨mt, hmt⟩ := hq t
+    rw [hmt] at ht
+    have hcontra : (2 * mt : ℤ) = 2 * mb + 1 := by
+      have h2 : (2 : ℝ) * (mt : ℝ) = 2 * (mb : ℝ) + 1 := by linarith
+      exact_mod_cast h2
+    omega
+
+/-- Local replica of the private `windingNumber_eq_div_of_lift` (verbatim). -/
+private theorem windingNumberR_eq_div_of_lift (g : C(I, Circle)) (φ : C(I, ℝ))
+    (hφ : ∀ t, Circle.exp (φ t) = g t) :
+    windingNumberR g = (φ 1 - φ 0) / (2 * π) := by
+  have hψ : ∀ t, Circle.exp (angleLiftR g t) = g t := angleLiftR_lifts g
+  have h2pi : (2 * π : ℝ) ≠ 0 := by positivity
+  have hcont : Continuous fun t : I => (φ t - angleLiftR g t) / (2 * π) :=
+    (φ.continuous.sub (angleLiftR g).continuous).div_const _
+  set q' : C(I, ℝ) := ⟨fun t => (φ t - angleLiftR g t) / (2 * π), hcont⟩ with hq'def
+  have hq'int : ∀ t, ∃ m : ℤ, q' t = (m : ℝ) := by
+    intro t
+    have hee : Circle.exp (φ t) = Circle.exp (angleLiftR g t) := (hφ t).trans (hψ t).symm
+    rw [Circle.exp_eq_exp] at hee
+    obtain ⟨m, hm⟩ := hee
+    refine ⟨m, ?_⟩
+    change (φ t - angleLiftR g t) / (2 * π) = (m : ℝ)
+    rw [hm]; field_simp; ring
+  have hend := int_valued_eqR hq'int 0 1
+  have hkey : φ 0 - angleLiftR g 0 = φ 1 - angleLiftR g 1 := by
+    have h2 := hend
+    simp only [hq'def, ContinuousMap.coe_mk] at h2
+    rw [div_eq_div_iff h2pi h2pi] at h2
+    exact mul_right_cancel₀ h2pi h2
+  rw [windingNumberR]
+  have hdiff : φ 1 - φ 0 = angleLiftR g 1 - angleLiftR g 0 := by linarith
+  rw [hdiff]
+
+/-- Local replica of the private `windingNumber_eq_of_homotopy` (verbatim). -/
+private theorem windingNumberR_eq_of_homotopy {g₀ g₁ : C(I, Circle)} (H : C(I × I, Circle))
+    (h0 : ∀ t, H (0, t) = g₀ t) (h1 : ∀ t, H (1, t) = g₁ t)
+    (hloop : ∀ s, H (s, 0) = H (s, 1)) :
+    windingNumberR g₀ = windingNumberR g₁ := by
+  have H_0 : ∀ t : I, H (0, t) = Circle.exp (angleLiftR g₀ t) := by
+    intro t; rw [h0 t]; exact (angleLiftR_lifts g₀ t).symm
+  set Ht := Circle.isCoveringMap_exp.liftHomotopy H (angleLiftR g₀) H_0 with hHt
+  have hlifts : ∀ st : I × I, Circle.exp (Ht st) = H st := by
+    intro st
+    have := congrFun (Circle.isCoveringMap_exp.liftHomotopy_lifts H (angleLiftR g₀) H_0) st
+    simpa [hHt, Function.comp] using this
+  have hWcont : Continuous fun s : I => (Ht (s, 1) - Ht (s, 0)) / (2 * π) := by
+    apply Continuous.div_const
+    exact (Ht.continuous.comp (continuous_id.prodMk continuous_const)).sub
+      (Ht.continuous.comp (continuous_id.prodMk continuous_const))
+  set W : C(I, ℝ) := ⟨fun s => (Ht (s, 1) - Ht (s, 0)) / (2 * π), hWcont⟩ with hWdef
+  have hWint : ∀ s, ∃ m : ℤ, W s = (m : ℝ) := by
+    intro s
+    have hee : Circle.exp (Ht (s, 1)) = Circle.exp (Ht (s, 0)) := by
+      rw [hlifts (s, 1), hlifts (s, 0)]; exact (hloop s).symm
+    rw [Circle.exp_eq_exp] at hee
+    obtain ⟨m, hm⟩ := hee
+    refine ⟨m, ?_⟩
+    change (Ht (s, 1) - Ht (s, 0)) / (2 * π) = (m : ℝ)
+    rw [hm]; field_simp; ring
+  have key : ∀ s : I, ∀ gs : C(I, Circle), (∀ t, H (s, t) = gs t) →
+      windingNumberR gs = (Ht (s, 1) - Ht (s, 0)) / (2 * π) := by
+    intro s gs hgs
+    have hφcont : Continuous fun t : I => Ht (s, t) :=
+      Ht.continuous.comp (continuous_const.prodMk continuous_id)
+    have hlift := windingNumberR_eq_div_of_lift gs ⟨fun t => Ht (s, t), hφcont⟩ (by
+      intro t; change Circle.exp (Ht (s, t)) = gs t; rw [hlifts (s, t), hgs t])
+    simpa using hlift
+  have hW0 := key 0 g₀ h0
+  have hW1 := key 1 g₁ h1
+  have hWeq : W 0 = W 1 := int_valued_eqR hWint 0 1
+  rw [hW0, hW1]
+  simpa [hWdef] using hWeq
+
+/-- The standard once-around loop `t ↦ e^{2π i t}`. -/
+private noncomputable def fwdLoop : C(I, ℂ) :=
+  ⟨fun t => ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ),
+    continuous_subtype_val.comp
+      (Circle.exp.continuous.comp (continuous_const.mul continuous_subtype_val))⟩
+
+private theorem fwdLoop_ne (t : I) : fwdLoop t ≠ 0 := by
+  change ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ) ≠ 0
+  exact norm_pos_iff.1 (by rw [Circle.norm_coe]; norm_num)
+
+/-- The standard once-around loop has `ℂ`-winding number `+1`. -/
+private theorem windingNumberC_fwdLoop : windingNumberC fwdLoop fwdLoop_ne = 1 := by
+  rw [windingNumberC_eq_replicaR]
+  have hφcont : Continuous fun t : I => 2 * π * (t : ℝ) :=
+    continuous_const.mul continuous_subtype_val
+  have hlift : ∀ t : I,
+      Circle.exp ((⟨fun t : I => 2 * π * (t : ℝ), hφcont⟩ : C(I, ℝ)) t)
+        = normLoopR fwdLoop fwdLoop_ne t := by
+    intro t
+    apply Subtype.ext
+    have hnval : ‖fwdLoop t‖ = 1 := by
+      change ‖((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)‖ = 1
+      rw [Circle.norm_coe]
+    have hrhs : ((normLoopR fwdLoop fwdLoop_ne t : Circle) : ℂ)
+        = fwdLoop t / (‖fwdLoop t‖ : ℂ) := rfl
+    rw [hrhs, hnval]
+    change (Circle.exp (2 * π * (t : ℝ)) : ℂ)
+        = ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ) / ((1 : ℝ) : ℂ)
+    rw [Complex.ofReal_one, div_one]
+  rw [windingNumberR_eq_div_of_lift _ _ hlift]
+  simp only [ContinuousMap.coe_mk, Set.Icc.coe_one, Set.Icc.coe_zero, mul_one, mul_zero, sub_zero]
+  have h2pi : (2 * π : ℝ) ≠ 0 := by positivity
+  field_simp
+
+/-- **Line-homotopy invariance of the `ℂ`-winding number.**  If `γ`, `γ'` are
+nowhere-zero loops and the straight-line homotopy between them stays nowhere zero,
+they have the same winding number. -/
+private theorem windingNumberC_eq_of_lineHomotopy (γ γ' : C(I, ℂ))
+    (hγ : ∀ t, γ t ≠ 0) (hγ' : ∀ t, γ' t ≠ 0)
+    (hloopγ : γ 0 = γ 1) (hloopγ' : γ' 0 = γ' 1)
+    (hne : ∀ (s : I) (t : I), γ t + (s : ℝ) • (γ' t - γ t) ≠ 0) :
+    windingNumberC γ hγ = windingNumberC γ' hγ' := by
+  set Hc : I × I → ℂ := fun st => γ st.2 + (st.1 : ℝ) • (γ' st.2 - γ st.2) with hHcdef
+  have hHccont : Continuous Hc := by
+    rw [hHcdef]
+    exact (γ.continuous.comp continuous_snd).add
+      ((continuous_subtype_val.comp continuous_fst).smul
+        ((γ'.continuous.comp continuous_snd).sub (γ.continuous.comp continuous_snd)))
+  have hHcne : ∀ st : I × I, Hc st ≠ 0 := fun st => hne st.1 st.2
+  set H : C(I × I, Circle) :=
+    ⟨fun st => circleProjR (Hc st) (hHcne st), by
+      apply Continuous.subtype_mk
+      exact hHccont.div (Complex.continuous_ofReal.comp (continuous_norm.comp hHccont))
+        (fun st => Complex.ofReal_ne_zero.2 (norm_ne_zero_iff.2 (hHcne st)))⟩ with hHdef
+  have h0 : ∀ t : I, H (0, t) = normLoopR γ hγ t := by
+    intro t
+    change circleProjR (Hc (0, t)) (hHcne (0, t)) = circleProjR (γ t) (hγ t)
+    apply circleProjR_congr
+    change γ t + ((0 : I) : ℝ) • (γ' t - γ t) = γ t
+    rw [Set.Icc.coe_zero, zero_smul, add_zero]
+  have h1 : ∀ t : I, H (1, t) = normLoopR γ' hγ' t := by
+    intro t
+    change circleProjR (Hc (1, t)) (hHcne (1, t)) = circleProjR (γ' t) (hγ' t)
+    apply circleProjR_congr
+    change γ t + ((1 : I) : ℝ) • (γ' t - γ t) = γ' t
+    rw [Set.Icc.coe_one, one_smul, add_sub_cancel]
+  have hloop : ∀ s : I, H (s, 0) = H (s, 1) := by
+    intro s
+    change circleProjR (Hc (s, 0)) (hHcne (s, 0)) = circleProjR (Hc (s, 1)) (hHcne (s, 1))
+    apply circleProjR_congr
+    change γ (0 : I) + (s : ℝ) • (γ' (0 : I) - γ (0 : I))
+      = γ (1 : I) + (s : ℝ) • (γ' (1 : I) - γ (1 : I))
+    rw [hloopγ, hloopγ']
+  have hinv := windingNumberR_eq_of_homotopy H h0 h1 hloop
+  rw [windingNumberC_eq_replicaR γ hγ, windingNumberC_eq_replicaR γ' hγ']
+  exact hinv
+
+/-- **Four-arc winding.**  A nowhere-zero loop `γ` whose boundary, split at the
+quarter marks `1/8, 3/8, 5/8, 7/8`, lies successively in the open half-planes
+`{re>0}` (right arc, wrapping through `0`), `{im>0}` (top), `{re<0}` (left),
+`{im<0}` (bottom) — the cyclic order the four sign-definite rectangle faces impose
+— is line-homotopic to the standard once-around loop, so its winding number is
+`+1`. -/
+private lemma windingNumberC_eq_one_of_fourArcs (γ : C(I, ℂ)) (hγ : ∀ t, γ t ≠ 0)
+    (hloop : γ 0 = γ 1)
+    (harcR : ∀ t : I, ((t : ℝ) ≤ 1 / 8 ∨ 7 / 8 ≤ (t : ℝ)) → 0 < (γ t).re)
+    (harcT : ∀ t : I, 1 / 8 ≤ (t : ℝ) → (t : ℝ) ≤ 3 / 8 → 0 < (γ t).im)
+    (harcL : ∀ t : I, 3 / 8 ≤ (t : ℝ) → (t : ℝ) ≤ 5 / 8 → (γ t).re < 0)
+    (harcB : ∀ t : I, 5 / 8 ≤ (t : ℝ) → (t : ℝ) ≤ 7 / 8 → (γ t).im < 0) :
+    windingNumberC γ hγ = 1 := by
+  have hpi := Real.pi_pos
+  have h2pi : (0 : ℝ) < 2 * π := by positivity
+  have hfwdre : ∀ t : I, (fwdLoop t).re = Real.cos (2 * π * (t : ℝ)) := by
+    intro t
+    change ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ).re = _
+    rw [Circle.coe_exp, Complex.exp_ofReal_mul_I_re]
+  have hfwdim : ∀ t : I, (fwdLoop t).im = Real.sin (2 * π * (t : ℝ)) := by
+    intro t
+    change ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ).im = _
+    rw [Circle.coe_exp, Complex.exp_ofReal_mul_I_im]
+  -- forward loop's coordinate signs on the four arcs
+  have hfwdR : ∀ t : I, ((t : ℝ) ≤ 1 / 8 ∨ 7 / 8 ≤ (t : ℝ)) → 0 < (fwdLoop t).re := by
+    intro t ht
+    rw [hfwdre t]
+    have h0t := t.2.1
+    have h1t := t.2.2
+    rcases ht with ht | ht
+    · apply Real.cos_pos_of_mem_Ioo
+      constructor <;> nlinarith [h2pi, hpi]
+    · rw [show 2 * π * (t : ℝ) = (2 * π * (t : ℝ) - 2 * π) + 2 * π by ring, Real.cos_add_two_pi]
+      apply Real.cos_pos_of_mem_Ioo
+      constructor <;> nlinarith [h2pi, hpi]
+  have hfwdT : ∀ t : I, 1 / 8 ≤ (t : ℝ) → (t : ℝ) ≤ 3 / 8 → 0 < (fwdLoop t).im := by
+    intro t hl hr
+    rw [hfwdim t]
+    apply Real.sin_pos_of_pos_of_lt_pi <;> nlinarith [h2pi, hpi]
+  have hfwdL : ∀ t : I, 3 / 8 ≤ (t : ℝ) → (t : ℝ) ≤ 5 / 8 → (fwdLoop t).re < 0 := by
+    intro t hl hr
+    rw [hfwdre t]
+    apply Real.cos_neg_of_pi_div_two_lt_of_lt <;> nlinarith [h2pi, hpi]
+  have hfwdB : ∀ t : I, 5 / 8 ≤ (t : ℝ) → (t : ℝ) ≤ 7 / 8 → (fwdLoop t).im < 0 := by
+    intro t hl hr
+    rw [hfwdim t]
+    rw [show 2 * π * (t : ℝ) = (2 * π * (t : ℝ) - 2 * π) + 2 * π by ring, Real.sin_add_two_pi]
+    apply Real.sin_neg_of_neg_of_neg_pi_lt <;> nlinarith [h2pi, hpi]
+  -- the standard loop is a loop
+  have hf0 : fwdLoop 0 = 1 := by
+    change ((Circle.exp (2 * π * ((0 : I) : ℝ)) : Circle) : ℂ) = 1
+    norm_num
+  have hf1 : fwdLoop 1 = 1 := by
+    change ((Circle.exp (2 * π * ((1 : I) : ℝ)) : Circle) : ℂ) = 1
+    rw [Set.Icc.coe_one, mul_one, Circle.exp_two_pi]; norm_num
+  have hfwdloop : fwdLoop 0 = fwdLoop 1 := by rw [hf0, hf1]
+  -- straight-line homotopy from the standard loop to `γ` stays nowhere zero
+  have hne : ∀ (s : I) (t : I), fwdLoop t + (s : ℝ) • (γ t - fwdLoop t) ≠ 0 := by
+    intro s t
+    have hs0 : (0 : ℝ) ≤ (s : ℝ) := s.2.1
+    have hs1 : (s : ℝ) ≤ 1 := s.2.2
+    have hconv_pos : ∀ a b : ℝ, 0 < a → 0 < b → 0 < (1 - (s : ℝ)) * a + (s : ℝ) * b := by
+      intro a b ha hb
+      rcases le_total (s : ℝ) (1 / 2) with hsl | hsl
+      · have hX : 0 < (1 - (s : ℝ)) * a := mul_pos (by linarith) ha
+        have hY : 0 ≤ (s : ℝ) * b := mul_nonneg hs0 hb.le
+        linarith
+      · have hX : 0 ≤ (1 - (s : ℝ)) * a := mul_nonneg (by linarith) ha.le
+        have hY : 0 < (s : ℝ) * b := mul_pos (by linarith) hb
+        linarith
+    have hre : (fwdLoop t + (s : ℝ) • (γ t - fwdLoop t)).re
+        = (1 - (s : ℝ)) * (fwdLoop t).re + (s : ℝ) * (γ t).re := by
+      simp only [Complex.add_re, Complex.real_smul, Complex.mul_re, Complex.sub_re,
+        Complex.sub_im, Complex.ofReal_re, Complex.ofReal_im]
+      ring
+    have him : (fwdLoop t + (s : ℝ) • (γ t - fwdLoop t)).im
+        = (1 - (s : ℝ)) * (fwdLoop t).im + (s : ℝ) * (γ t).im := by
+      simp only [Complex.add_im, Complex.real_smul, Complex.mul_im, Complex.sub_re,
+        Complex.sub_im, Complex.ofReal_re, Complex.ofReal_im]
+      ring
+    rcases le_or_gt (t : ℝ) (1 / 8) with h1 | h1
+    · intro hzero
+      have hz : (fwdLoop t + (s : ℝ) • (γ t - fwdLoop t)).re = 0 := by rw [hzero]; simp
+      rw [hre] at hz
+      linarith [hconv_pos _ _ (hfwdR t (Or.inl h1)) (harcR t (Or.inl h1))]
+    · rcases le_or_gt (t : ℝ) (3 / 8) with h2 | h2
+      · intro hzero
+        have hz : (fwdLoop t + (s : ℝ) • (γ t - fwdLoop t)).im = 0 := by rw [hzero]; simp
+        rw [him] at hz
+        linarith [hconv_pos _ _ (hfwdT t h1.le h2) (harcT t h1.le h2)]
+      · rcases le_or_gt (t : ℝ) (5 / 8) with h3 | h3
+        · intro hzero
+          have hz : (fwdLoop t + (s : ℝ) • (γ t - fwdLoop t)).re = 0 := by rw [hzero]; simp
+          rw [hre] at hz
+          nlinarith [hconv_pos (-(fwdLoop t).re) (-(γ t).re)
+            (by linarith [hfwdL t h2.le h3]) (by linarith [harcL t h2.le h3])]
+        · rcases le_or_gt (t : ℝ) (7 / 8) with h4 | h4
+          · intro hzero
+            have hz : (fwdLoop t + (s : ℝ) • (γ t - fwdLoop t)).im = 0 := by rw [hzero]; simp
+            rw [him] at hz
+            nlinarith [hconv_pos (-(fwdLoop t).im) (-(γ t).im)
+              (by linarith [hfwdB t h3.le h4]) (by linarith [harcB t h3.le h4])]
+          · intro hzero
+            have hz : (fwdLoop t + (s : ℝ) • (γ t - fwdLoop t)).re = 0 := by rw [hzero]; simp
+            rw [hre] at hz
+            linarith [hconv_pos _ _ (hfwdR t (Or.inr h4.le)) (harcR t (Or.inr h4.le))]
+  have hkey := windingNumberC_eq_of_lineHomotopy fwdLoop γ fwdLoop_ne hγ hfwdloop hloop hne
+  rw [← hkey, windingNumberC_fwdLoop]
+
+/-- Scaling denominator of the radial disk→square chart: `‖z‖_∞ = max |z.re| |z.im|`. -/
+private noncomputable def sqDen (z : ℂ) : ℝ := max |z.re| |z.im|
+
+private theorem sqDen_continuous : Continuous sqDen :=
+  (continuous_abs.comp Complex.continuous_re).max (continuous_abs.comp Complex.continuous_im)
+
+private theorem sqDen_pos {z : ℂ} (hz : z ≠ 0) : 0 < sqDen z := by
+  rw [sqDen]
+  rcases eq_or_ne z.re 0 with hr | hr
+  · have hi : z.im ≠ 0 := fun hi => hz (Complex.ext hr hi)
+    exact lt_of_lt_of_le (abs_pos.2 hi) (le_max_right _ _)
+  · exact lt_of_lt_of_le (abs_pos.2 hr) (le_max_left _ _)
+
+/-- The radial disk→square chart `z ↦ (‖z‖ / ‖z‖_∞) • z`, mapping the closed unit
+disk onto the closed square `[-1,1]²` (radially), the unit circle onto the square's
+boundary.  (Junk value `0` at `z = 0`, which is also its continuous value there.) -/
+private noncomputable def SquareChart (z : ℂ) : ℂ := (‖z‖ / sqDen z) • z
+
+private theorem SquareChart_norm_le (z : ℂ) : ‖SquareChart z‖ ≤ 2 * ‖z‖ := by
+  by_cases hz : z = 0
+  · subst hz; simp [SquareChart]
+  · have hden : 0 < sqDen z := sqDen_pos hz
+    have hz1 : ‖z‖ ≤ |z.re| + |z.im| := by
+      conv_lhs => rw [← Complex.re_add_im z]
+      calc ‖(z.re : ℂ) + z.im * Complex.I‖
+          ≤ ‖(z.re : ℂ)‖ + ‖(z.im : ℂ) * Complex.I‖ := norm_add_le _ _
+        _ = |z.re| + |z.im| := by
+            rw [Complex.norm_real, norm_mul, Complex.norm_I, mul_one, Complex.norm_real,
+              Real.norm_eq_abs, Real.norm_eq_abs]
+    have hz2 : ‖z‖ ≤ 2 * sqDen z := by
+      rw [sqDen]
+      have h1 := le_max_left |z.re| |z.im|
+      have h2 := le_max_right |z.re| |z.im|
+      linarith
+    rw [SquareChart, norm_smul, Real.norm_eq_abs, abs_div, abs_of_nonneg (norm_nonneg z),
+      abs_of_pos hden, div_mul_eq_mul_div, div_le_iff₀ hden]
+    nlinarith [norm_nonneg z, hz2]
+
+private theorem SquareChart_continuous : Continuous SquareChart := by
+  rw [continuous_iff_continuousAt]
+  intro z
+  by_cases hz : z = 0
+  · subst hz
+    have h0 : SquareChart 0 = 0 := by simp [SquareChart]
+    rw [ContinuousAt, h0]
+    refine squeeze_zero_norm (fun x => SquareChart_norm_le x) ?_
+    simpa using (continuous_norm.tendsto (0 : ℂ)).const_mul (2 : ℝ)
+  · have hden : sqDen z ≠ 0 := (sqDen_pos hz).ne'
+    exact (continuous_norm.continuousAt.div sqDen_continuous.continuousAt hden).smul continuousAt_id
+
+/-- On the unit circle, `SquareChart` lands on the boundary of the square: one of
+its two coordinates has absolute value `1` and the other lies in `[-1,1]`. -/
+private theorem SquareChart_re (z : ℂ) : (SquareChart z).re = (‖z‖ / sqDen z) * z.re := by
+  rw [SquareChart, Complex.real_smul, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+  ring
+
+private theorem SquareChart_im (z : ℂ) : (SquareChart z).im = (‖z‖ / sqDen z) * z.im := by
+  rw [SquareChart, Complex.real_smul, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im]
+  ring
+
+private theorem SquareChart_re_le (z : ℂ) : |(SquareChart z).re| ≤ ‖z‖ := by
+  by_cases hz : z = 0
+  · subst hz; simp [SquareChart]
+  · have hden : 0 < sqDen z := sqDen_pos hz
+    rw [SquareChart_re, abs_mul, abs_div, abs_of_nonneg (norm_nonneg z), abs_of_pos hden,
+      div_mul_eq_mul_div, div_le_iff₀ hden]
+    exact mul_le_mul_of_nonneg_left (le_max_left _ _) (norm_nonneg z)
+
+private theorem SquareChart_im_le (z : ℂ) : |(SquareChart z).im| ≤ ‖z‖ := by
+  by_cases hz : z = 0
+  · subst hz; simp [SquareChart]
+  · have hden : 0 < sqDen z := sqDen_pos hz
+    rw [SquareChart_im, abs_mul, abs_div, abs_of_nonneg (norm_nonneg z), abs_of_pos hden,
+      div_mul_eq_mul_div, div_le_iff₀ hden]
+    exact mul_le_mul_of_nonneg_left (le_max_right _ _) (norm_nonneg z)
+
+private theorem SquareChart_re_eq_one {z : ℂ} (hzn : ‖z‖ = 1) (hle : |z.im| ≤ |z.re|)
+    (hpos : 0 < z.re) : (SquareChart z).re = 1 := by
+  have hden_eq : sqDen z = z.re := by rw [sqDen, max_eq_left hle, abs_of_pos hpos]
+  rw [SquareChart_re, hzn, hden_eq, one_div_mul_cancel hpos.ne']
+
+private theorem SquareChart_re_eq_neg_one {z : ℂ} (hzn : ‖z‖ = 1) (hle : |z.im| ≤ |z.re|)
+    (hneg : z.re < 0) : (SquareChart z).re = -1 := by
+  have hden_eq : sqDen z = -z.re := by rw [sqDen, max_eq_left hle, abs_of_neg hneg]
+  rw [SquareChart_re, hzn, hden_eq, div_mul_eq_mul_div, one_mul, div_neg, div_self hneg.ne]
+
+private theorem SquareChart_im_eq_one {z : ℂ} (hzn : ‖z‖ = 1) (hle : |z.re| ≤ |z.im|)
+    (hpos : 0 < z.im) : (SquareChart z).im = 1 := by
+  have hden_eq : sqDen z = z.im := by rw [sqDen, max_eq_right hle, abs_of_pos hpos]
+  rw [SquareChart_im, hzn, hden_eq, one_div_mul_cancel hpos.ne']
+
+private theorem SquareChart_im_eq_neg_one {z : ℂ} (hzn : ‖z‖ = 1) (hle : |z.re| ≤ |z.im|)
+    (hneg : z.im < 0) : (SquareChart z).im = -1 := by
+  have hden_eq : sqDen z = -z.im := by rw [sqDen, max_eq_right hle, abs_of_neg hneg]
+  rw [SquareChart_im, hzn, hden_eq, div_mul_eq_mul_div, one_mul, div_neg, div_self hneg.ne]
+
+/-- `cos 2x ≥ 0` forces `|sin x| ≤ |cos x|` (equivalently `sin²x ≤ cos²x`). -/
+private theorem abs_sin_le_abs_cos_of {x : ℝ} (h : 0 ≤ Real.cos (2 * x)) :
+    |Real.sin x| ≤ |Real.cos x| := by
+  rw [← Real.sqrt_sq_eq_abs, ← Real.sqrt_sq_eq_abs]
+  apply Real.sqrt_le_sqrt
+  nlinarith [Real.sin_sq_add_cos_sq x, Real.cos_two_mul x, h]
+
+/-- `cos 2x ≤ 0` forces `|cos x| ≤ |sin x|` (equivalently `cos²x ≤ sin²x`). -/
+private theorem abs_cos_le_abs_sin_of {x : ℝ} (h : Real.cos (2 * x) ≤ 0) :
+    |Real.cos x| ≤ |Real.sin x| := by
+  rw [← Real.sqrt_sq_eq_abs, ← Real.sqrt_sq_eq_abs]
+  apply Real.sqrt_le_sqrt
+  nlinarith [Real.sin_sq_add_cos_sq x, Real.cos_two_mul x, h]
+
+/-- **Poincaré–Miranda on a rectangle, strict form.**  Same as
+`poincareMiranda_rect` but with a nondegenerate rectangle (`a₁ < a₂`, `b₁ < b₂`)
+and *strict* sign-definite opposite faces (`< 0` / `0 <`).  The strict form is the
+one proven by the winding argument; the non-strict `poincareMiranda_rect` reduces
+to it by a vanishing perturbation and compactness. -/
+private lemma poincareMiranda_rect_strict {a₁ a₂ b₁ b₂ : ℝ} (ha : a₁ < a₂) (hb : b₁ < b₂)
+    (G : ℝ × ℝ → ℝ × ℝ)
+    (hG : ContinuousOn G (Set.Icc a₁ a₂ ×ˢ Set.Icc b₁ b₂))
+    (hleft : ∀ y ∈ Set.Icc b₁ b₂, (G (a₁, y)).1 < 0)
+    (hright : ∀ y ∈ Set.Icc b₁ b₂, 0 < (G (a₂, y)).1)
+    (hbot : ∀ x ∈ Set.Icc a₁ a₂, (G (x, b₁)).2 < 0)
+    (htop : ∀ x ∈ Set.Icc a₁ a₂, 0 < (G (x, b₂)).2) :
+    ∃ p ∈ Set.Icc a₁ a₂ ×ˢ Set.Icc b₁ b₂, G p = 0 := by
+  -- affine `[-1,1] → [a₁,a₂]` and `[-1,1] → [b₁,b₂]` land inside the faces
+  have haffineX : ∀ u : ℝ, |u| ≤ 1 → (a₁ + a₂) / 2 + (a₂ - a₁) / 2 * u ∈ Set.Icc a₁ a₂ := by
+    intro u hu
+    obtain ⟨h1, h2⟩ := abs_le.1 hu
+    constructor <;> nlinarith [ha, h1, h2]
+  have haffineY : ∀ v : ℝ, |v| ≤ 1 → (b₁ + b₂) / 2 + (b₂ - b₁) / 2 * v ∈ Set.Icc b₁ b₂ := by
+    intro v hv
+    obtain ⟨h1, h2⟩ := abs_le.1 hv
+    constructor <;> nlinarith [hb, h1, h2]
+  -- the radial disk→rectangle chart
+  set Φ : ℂ → ℝ × ℝ := fun z =>
+    ((a₁ + a₂) / 2 + (a₂ - a₁) / 2 * (SquareChart z).re,
+     (b₁ + b₂) / 2 + (b₂ - b₁) / 2 * (SquareChart z).im) with hΦ
+  have hΦcont : Continuous Φ := by
+    rw [hΦ]
+    exact (continuous_const.add (continuous_const.mul
+        (Complex.continuous_re.comp SquareChart_continuous))).prodMk
+      (continuous_const.add (continuous_const.mul
+        (Complex.continuous_im.comp SquareChart_continuous)))
+  have hΦmem : ∀ z ∈ Metric.closedBall (0 : ℂ) 1,
+      Φ z ∈ Set.Icc a₁ a₂ ×ˢ Set.Icc b₁ b₂ := by
+    intro z hz
+    have hzn : ‖z‖ ≤ 1 := by simpa [Metric.mem_closedBall, dist_zero_right] using hz
+    exact Set.mk_mem_prod (haffineX _ (le_trans (SquareChart_re_le z) hzn))
+      (haffineY _ (le_trans (SquareChart_im_le z) hzn))
+  have hΦxmem : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, (Φ z).1 ∈ Set.Icc a₁ a₂ :=
+    fun z hz => (Set.mem_prod.1 (hΦmem z hz)).1
+  have hΦymem : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, (Φ z).2 ∈ Set.Icc b₁ b₂ :=
+    fun z hz => (Set.mem_prod.1 (hΦmem z hz)).2
+  -- the complexified residual `F = G₁ + i G₂ ∘ Φ`
+  set F : ℂ → ℂ := fun z => ((G (Φ z)).1 : ℂ) + ((G (Φ z)).2 : ℂ) * Complex.I with hFdef
+  have hFre : ∀ z, (F z).re = (G (Φ z)).1 := by intro z; rw [hFdef]; simp
+  have hFim : ∀ z, (F z).im = (G (Φ z)).2 := by intro z; rw [hFdef]; simp
+  have hGΦ : ContinuousOn (fun z => G (Φ z)) (Metric.closedBall 0 1) :=
+    hG.comp hΦcont.continuousOn hΦmem
+  have hF : ContinuousOn F (Metric.closedBall 0 1) := by
+    rw [hFdef]
+    exact (Complex.continuous_ofReal.comp_continuousOn
+        (continuous_fst.comp_continuousOn hGΦ)).add
+      ((Complex.continuous_ofReal.comp_continuousOn
+        (continuous_snd.comp_continuousOn hGΦ)).mul continuousOn_const)
+  -- the four faces give definite signs of `G` at chart-boundary points
+  have hface_r_pos : ∀ z, (SquareChart z).re = 1 → (Φ z).2 ∈ Set.Icc b₁ b₂ →
+      0 < (G (Φ z)).1 := by
+    intro z hsc hy
+    have hx : (Φ z).1 = a₂ := by rw [hΦ]; dsimp only; rw [hsc]; ring
+    have heq : Φ z = (a₂, (Φ z).2) := Prod.ext hx rfl
+    rw [heq]; exact hright _ hy
+  have hface_r_neg : ∀ z, (SquareChart z).re = -1 → (Φ z).2 ∈ Set.Icc b₁ b₂ →
+      (G (Φ z)).1 < 0 := by
+    intro z hsc hy
+    have hx : (Φ z).1 = a₁ := by rw [hΦ]; dsimp only; rw [hsc]; ring
+    have heq : Φ z = (a₁, (Φ z).2) := Prod.ext hx rfl
+    rw [heq]; exact hleft _ hy
+  have hface_t_pos : ∀ z, (SquareChart z).im = 1 → (Φ z).1 ∈ Set.Icc a₁ a₂ →
+      0 < (G (Φ z)).2 := by
+    intro z hsc hx
+    have hy : (Φ z).2 = b₂ := by rw [hΦ]; dsimp only; rw [hsc]; ring
+    have heq : Φ z = ((Φ z).1, b₂) := Prod.ext rfl hy
+    rw [heq]; exact htop _ hx
+  have hface_b_neg : ∀ z, (SquareChart z).im = -1 → (Φ z).1 ∈ Set.Icc a₁ a₂ →
+      (G (Φ z)).2 < 0 := by
+    intro z hsc hx
+    have hy : (Φ z).2 = b₁ := by rw [hΦ]; dsimp only; rw [hsc]; ring
+    have heq : Φ z = ((Φ z).1, b₁) := Prod.ext rfl hy
+    rw [heq]; exact hbot _ hx
+  -- `F ≠ 0` on the boundary circle (each sphere point lands on a face)
+  have hbd : ∀ z ∈ Metric.sphere (0 : ℂ) 1, F z ≠ 0 := by
+    intro z hz
+    have hzn : ‖z‖ = 1 := mem_sphere_zero_iff_norm.1 hz
+    have hz0 : z ≠ 0 := by intro h; rw [h, norm_zero] at hzn; exact one_ne_zero hzn.symm
+    have hzcb : z ∈ Metric.closedBall (0 : ℂ) 1 := by
+      simp [Metric.mem_closedBall, dist_zero_right, hzn]
+    intro hFz
+    have hA : (G (Φ z)).1 = 0 := by rw [← hFre z, hFz, Complex.zero_re]
+    have hB : (G (Φ z)).2 = 0 := by rw [← hFim z, hFz, Complex.zero_im]
+    rcases le_total |z.im| |z.re| with hle | hle
+    · have hre0 : z.re ≠ 0 := by
+        intro h; rw [h, abs_zero] at hle
+        exact hz0 (Complex.ext h (abs_nonpos_iff.1 hle))
+      rcases lt_or_gt_of_ne hre0 with hneg | hpos
+      · have := hface_r_neg z (SquareChart_re_eq_neg_one hzn hle hneg) (hΦymem z hzcb); linarith
+      · have := hface_r_pos z (SquareChart_re_eq_one hzn hle hpos) (hΦymem z hzcb); linarith
+    · have him0 : z.im ≠ 0 := by
+        intro h; rw [h, abs_zero] at hle
+        exact hz0 (Complex.ext (abs_nonpos_iff.1 hle) h)
+      rcases lt_or_gt_of_ne him0 with hneg | hpos
+      · have := hface_b_neg z (SquareChart_im_eq_neg_one hzn hle hneg) (hΦxmem z hzcb); linarith
+      · have := hface_t_pos z (SquareChart_im_eq_one hzn hle hpos) (hΦxmem z hzcb); linarith
+  -- the boundary loop threads the four half-planes ⇒ winding `+1 ≠ 0`
+  have hwind : windingNumberC (diskBoundaryLoop F hF)
+      (diskBoundaryLoop_ne_zero F hF hbd) ≠ 0 := by
+    have hpi := Real.pi_pos
+    have h2pi : (0 : ℝ) < 2 * π := by positivity
+    have hwtn : ∀ t : I, ‖((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)‖ = 1 :=
+      fun t => Circle.norm_coe _
+    have hwtre : ∀ t : I, ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ).re
+        = Real.cos (2 * π * (t : ℝ)) := by
+      intro t; rw [Circle.coe_exp, Complex.exp_ofReal_mul_I_re]
+    have hwtim : ∀ t : I, ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ).im
+        = Real.sin (2 * π * (t : ℝ)) := by
+      intro t; rw [Circle.coe_exp, Complex.exp_ofReal_mul_I_im]
+    have hwtcb : ∀ t : I, ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)
+        ∈ Metric.closedBall (0 : ℂ) 1 := by
+      intro t
+      exact Metric.mem_closedBall.mpr (by rw [dist_zero_right]; exact le_of_eq (hwtn t))
+    have hbl : ∀ t : I, diskBoundaryLoop F hF t
+        = F ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ) := fun t => rfl
+    have hw1 : windingNumberC (diskBoundaryLoop F hF) (diskBoundaryLoop_ne_zero F hF hbd) = 1 := by
+      apply windingNumberC_eq_one_of_fourArcs
+      · -- loop
+        rw [hbl 0, hbl 1]
+        have e0 : ((Circle.exp (2 * π * ((0 : I) : ℝ)) : Circle) : ℂ) = 1 := by norm_num
+        have e1 : ((Circle.exp (2 * π * ((1 : I) : ℝ)) : Circle) : ℂ) = 1 := by
+          rw [Set.Icc.coe_one, mul_one, Circle.exp_two_pi]; norm_num
+        rw [e0, e1]
+      · -- right arc: re > 0
+        intro t ht
+        rw [hbl t, hFre]
+        refine hface_r_pos _ ?_ (hΦymem _ (hwtcb t))
+        apply SquareChart_re_eq_one (hwtn t)
+        · rw [hwtre t, hwtim t]
+          apply abs_sin_le_abs_cos_of
+          rw [show (2 : ℝ) * (2 * π * (t : ℝ)) = 4 * π * (t : ℝ) by ring]
+          rcases ht with h | h
+          · exact Real.cos_nonneg_of_mem_Icc
+              (Set.mem_Icc.mpr ⟨by nlinarith [hpi, h2pi, t.2.1], by nlinarith [hpi, h2pi, h]⟩)
+          · rw [show 4 * π * (t : ℝ) = (4 * π * (t : ℝ) - 4 * π) + 2 * π + 2 * π by ring,
+              Real.cos_add_two_pi, Real.cos_add_two_pi]
+            exact Real.cos_nonneg_of_mem_Icc
+              (Set.mem_Icc.mpr ⟨by nlinarith [hpi, h2pi, h], by nlinarith [hpi, h2pi, t.2.2]⟩)
+        · rw [hwtre t]
+          rcases ht with h | h
+          · exact Real.cos_pos_of_mem_Ioo
+              (Set.mem_Ioo.mpr ⟨by nlinarith [hpi, h2pi, t.2.1], by nlinarith [hpi, h2pi, h]⟩)
+          · rw [show 2 * π * (t : ℝ) = (2 * π * (t : ℝ) - 2 * π) + 2 * π by ring,
+              Real.cos_add_two_pi]
+            exact Real.cos_pos_of_mem_Ioo
+              (Set.mem_Ioo.mpr ⟨by nlinarith [hpi, h2pi, h], by nlinarith [hpi, h2pi, t.2.2]⟩)
+      · -- top arc: im > 0
+        intro t hl hr
+        rw [hbl t, hFim]
+        refine hface_t_pos _ ?_ (hΦxmem _ (hwtcb t))
+        apply SquareChart_im_eq_one (hwtn t)
+        · rw [hwtre t, hwtim t]
+          apply abs_cos_le_abs_sin_of
+          rw [show (2 : ℝ) * (2 * π * (t : ℝ)) = 4 * π * (t : ℝ) by ring]
+          have hp : (0 : ℝ) ≤ Real.cos (4 * π * (t : ℝ) + π) := by
+            rw [show 4 * π * (t : ℝ) + π = (4 * π * (t : ℝ) - π) + 2 * π by ring,
+              Real.cos_add_two_pi]
+            exact Real.cos_nonneg_of_mem_Icc
+              (Set.mem_Icc.mpr ⟨by nlinarith [hpi, h2pi, hl], by nlinarith [hpi, h2pi, hr]⟩)
+          have hcp := Real.cos_add_pi (4 * π * (t : ℝ))
+          linarith
+        · rw [hwtim t]
+          exact Real.sin_pos_of_pos_of_lt_pi (by nlinarith [hpi, h2pi, hl])
+            (by nlinarith [hpi, h2pi, hr])
+      · -- left arc: re < 0
+        intro t hl hr
+        rw [hbl t, hFre]
+        refine hface_r_neg _ ?_ (hΦymem _ (hwtcb t))
+        apply SquareChart_re_eq_neg_one (hwtn t)
+        · rw [hwtre t, hwtim t]
+          apply abs_sin_le_abs_cos_of
+          rw [show (2 : ℝ) * (2 * π * (t : ℝ)) = 4 * π * (t : ℝ) by ring,
+            show 4 * π * (t : ℝ) = (4 * π * (t : ℝ) - 2 * π) + 2 * π by ring, Real.cos_add_two_pi]
+          exact Real.cos_nonneg_of_mem_Icc
+            (Set.mem_Icc.mpr ⟨by nlinarith [hpi, h2pi, hl], by nlinarith [hpi, h2pi, hr]⟩)
+        · rw [hwtre t]
+          exact Real.cos_neg_of_pi_div_two_lt_of_lt
+            (by nlinarith [hpi, h2pi, hl]) (by nlinarith [hpi, h2pi, hr])
+      · -- bottom arc: im < 0
+        intro t hl hr
+        rw [hbl t, hFim]
+        refine hface_b_neg _ ?_ (hΦxmem _ (hwtcb t))
+        apply SquareChart_im_eq_neg_one (hwtn t)
+        · rw [hwtre t, hwtim t]
+          apply abs_cos_le_abs_sin_of
+          rw [show (2 : ℝ) * (2 * π * (t : ℝ)) = 4 * π * (t : ℝ) by ring]
+          have hp : (0 : ℝ) ≤ Real.cos (4 * π * (t : ℝ) + π) := by
+            rw [show 4 * π * (t : ℝ) + π = (4 * π * (t : ℝ) - 3 * π) + 2 * π + 2 * π by ring,
+              Real.cos_add_two_pi, Real.cos_add_two_pi]
+            exact Real.cos_nonneg_of_mem_Icc
+              (Set.mem_Icc.mpr ⟨by nlinarith [hpi, h2pi, hl], by nlinarith [hpi, h2pi, hr]⟩)
+          have hcp := Real.cos_add_pi (4 * π * (t : ℝ))
+          linarith
+        · rw [hwtim t]
+          rw [show 2 * π * (t : ℝ) = (2 * π * (t : ℝ) - 2 * π) + 2 * π by ring, Real.sin_add_two_pi]
+          exact Real.sin_neg_of_neg_of_neg_pi_lt
+            (by nlinarith [hpi, h2pi, hr]) (by nlinarith [hpi, h2pi, hl])
+    rw [hw1]; norm_num
+  obtain ⟨z₀, hz₀ball, hz₀⟩ := exists_zero_of_boundary_winding F hF hbd hwind
+  have hz₀cb : z₀ ∈ Metric.closedBall (0 : ℂ) 1 := Metric.ball_subset_closedBall hz₀ball
+  refine ⟨Φ z₀, hΦmem z₀ hz₀cb, ?_⟩
+  have hA : (G (Φ z₀)).1 = 0 := by rw [← hFre z₀, hz₀, Complex.zero_re]
+  have hB : (G (Φ z₀)).2 = 0 := by rw [← hFim z₀, hz₀, Complex.zero_im]
+  exact Prod.ext hA hB
+
 /-- **Poincaré–Miranda on a rectangle (2-D intermediate value theorem).**  A
 continuous map `G = (G₁, G₂) : [a₁,a₂]×[b₁,b₂] → ℝ²` with each component
 sign-definite on the pair of faces it controls — `G₁ ≤ 0` on the left face
@@ -1034,7 +1707,115 @@ theorem poincareMiranda_rect {a₁ a₂ b₁ b₂ : ℝ} (_ha : a₁ ≤ a₂) (
     (_hbot : ∀ x ∈ Set.Icc a₁ a₂, (G (x, b₁)).2 ≤ 0)
     (_htop : ∀ x ∈ Set.Icc a₁ a₂, 0 ≤ (G (x, b₂)).2) :
     ∃ p ∈ Set.Icc a₁ a₂ ×ˢ Set.Icc b₁ b₂, G p = 0 := by
-  sorry
+  -- Degenerate rectangle `a₁ = a₂`: `G.1 ≡ 0` on the segment, 1-D IVT on `G.2`.
+  rcases eq_or_lt_of_le _ha with hae | ha
+  · have hxmem : a₁ ∈ Set.Icc a₁ a₂ := ⟨le_refl _, _ha⟩
+    have hg1 : ∀ y ∈ Set.Icc b₁ b₂, (G (a₁, y)).1 = 0 := by
+      intro y hy
+      have h1 := _hleft y hy
+      have h2 := _hright y hy
+      rw [← hae] at h2
+      linarith
+    have hfcont : ContinuousOn (fun y => G (a₁, y)) (Set.Icc b₁ b₂) :=
+      _hG.comp ((continuous_const.prodMk continuous_id).continuousOn)
+        (fun y hy => Set.mk_mem_prod hxmem hy)
+    have hcont : ContinuousOn (fun y => (G (a₁, y)).2) (Set.Icc b₁ b₂) :=
+      continuous_snd.comp_continuousOn hfcont
+    have hmem : (0 : ℝ) ∈ Set.Icc ((fun y => (G (a₁, y)).2) b₁) ((fun y => (G (a₁, y)).2) b₂) :=
+      ⟨_hbot a₁ hxmem, _htop a₁ hxmem⟩
+    obtain ⟨y₀, hy₀mem, hy₀⟩ := intermediate_value_Icc _hb hcont hmem
+    exact ⟨(a₁, y₀), Set.mk_mem_prod hxmem hy₀mem, Prod.ext (hg1 y₀ hy₀mem) hy₀⟩
+  -- Degenerate rectangle `b₁ = b₂`: `G.2 ≡ 0` on the segment, 1-D IVT on `G.1`.
+  rcases eq_or_lt_of_le _hb with hbe | hb
+  · have hymem : b₁ ∈ Set.Icc b₁ b₂ := ⟨le_refl _, _hb⟩
+    have hg2 : ∀ x ∈ Set.Icc a₁ a₂, (G (x, b₁)).2 = 0 := by
+      intro x hx
+      have h1 := _hbot x hx
+      have h2 := _htop x hx
+      rw [← hbe] at h2
+      linarith
+    have hfcont : ContinuousOn (fun x => G (x, b₁)) (Set.Icc a₁ a₂) :=
+      _hG.comp ((continuous_id.prodMk continuous_const).continuousOn)
+        (fun x hx => Set.mk_mem_prod hx hymem)
+    have hcont : ContinuousOn (fun x => (G (x, b₁)).1) (Set.Icc a₁ a₂) :=
+      continuous_fst.comp_continuousOn hfcont
+    have hmem : (0 : ℝ) ∈ Set.Icc ((fun x => (G (x, b₁)).1) a₁) ((fun x => (G (x, b₁)).1) a₂) :=
+      ⟨_hleft b₁ hymem, _hright b₁ hymem⟩
+    obtain ⟨x₀, hx₀mem, hx₀⟩ := intermediate_value_Icc _ha hcont hmem
+    exact ⟨(x₀, b₁), Set.mk_mem_prod hx₀mem hymem, Prod.ext hx₀ (hg2 x₀ hx₀mem)⟩
+  -- Nondegenerate: reduce to the strict form by a vanishing perturbation.
+  set K : Set (ℝ × ℝ) := Set.Icc a₁ a₂ ×ˢ Set.Icc b₁ b₂ with hK
+  have hKcomp : IsCompact K := isCompact_Icc.prod isCompact_Icc
+  set cx : ℝ := (a₁ + a₂) / 2 with hcx
+  set cy : ℝ := (b₁ + b₂) / 2 with hcy
+  set w : ℝ × ℝ → ℝ × ℝ := fun p => (p.1 - cx, p.2 - cy) with hw
+  have hwcont : Continuous w := by fun_prop
+  set Gn : ℕ → ℝ × ℝ → ℝ × ℝ := fun n p => G p + (1 / ((n : ℝ) + 1)) • w p with hGn
+  have hpos : ∀ n : ℕ, (0 : ℝ) < 1 / ((n : ℝ) + 1) := fun n => by positivity
+  have hzero : ∀ n : ℕ, ∃ p ∈ K, Gn n p = 0 := by
+    intro n
+    apply poincareMiranda_rect_strict ha hb (Gn n)
+    · exact _hG.add ((continuous_const.smul hwcont).continuousOn)
+    · intro y hy
+      have hGl := _hleft y hy
+      have he : (Gn n (a₁, y)).1 = (G (a₁, y)).1 + (1 / ((n : ℝ) + 1)) * (a₁ - cx) := by
+        simp [hGn, hw]
+      rw [he]
+      have : (1 / ((n : ℝ) + 1)) * (a₁ - cx) < 0 :=
+        mul_neg_of_pos_of_neg (hpos n) (by rw [hcx]; linarith)
+      linarith
+    · intro y hy
+      have hGr := _hright y hy
+      have he : (Gn n (a₂, y)).1 = (G (a₂, y)).1 + (1 / ((n : ℝ) + 1)) * (a₂ - cx) := by
+        simp [hGn, hw]
+      rw [he]
+      have : (0 : ℝ) < (1 / ((n : ℝ) + 1)) * (a₂ - cx) :=
+        mul_pos (hpos n) (by rw [hcx]; linarith)
+      linarith
+    · intro x hx
+      have hGb := _hbot x hx
+      have he : (Gn n (x, b₁)).2 = (G (x, b₁)).2 + (1 / ((n : ℝ) + 1)) * (b₁ - cy) := by
+        simp [hGn, hw]
+      rw [he]
+      have : (1 / ((n : ℝ) + 1)) * (b₁ - cy) < 0 :=
+        mul_neg_of_pos_of_neg (hpos n) (by rw [hcy]; linarith)
+      linarith
+    · intro x hx
+      have hGt := _htop x hx
+      have he : (Gn n (x, b₂)).2 = (G (x, b₂)).2 + (1 / ((n : ℝ) + 1)) * (b₂ - cy) := by
+        simp [hGn, hw]
+      rw [he]
+      have : (0 : ℝ) < (1 / ((n : ℝ) + 1)) * (b₂ - cy) :=
+        mul_pos (hpos n) (by rw [hcy]; linarith)
+      linarith
+  choose p hpK hpz using hzero
+  obtain ⟨q, hqK, φ, hφ, hlim⟩ := hKcomp.tendsto_subseq hpK
+  refine ⟨q, hqK, ?_⟩
+  have hGq : Filter.Tendsto (fun k => G (p (φ k))) Filter.atTop (nhds (G q)) := by
+    have hcw : ContinuousWithinAt G K q := _hG q hqK
+    have hin : Filter.Tendsto (fun k => p (φ k)) Filter.atTop (nhdsWithin q K) := by
+      rw [tendsto_nhdsWithin_iff]
+      exact ⟨hlim, Filter.Eventually.of_forall (fun k => hpK (φ k))⟩
+    exact (hcw.tendsto).comp hin
+  have hpert : Filter.Tendsto (fun k => (1 / ((φ k : ℝ) + 1)) • w (p (φ k)))
+      Filter.atTop (nhds (0 : ℝ × ℝ)) := by
+    have h0 : Filter.Tendsto (fun k => 1 / ((φ k : ℝ) + 1)) Filter.atTop (nhds 0) :=
+      tendsto_one_div_add_atTop_nhds_zero_nat.comp hφ.tendsto_atTop
+    have hwlim : Filter.Tendsto (fun k => w (p (φ k))) Filter.atTop (nhds (w q)) :=
+      (hwcont.tendsto q).comp hlim
+    simpa using h0.smul hwlim
+  have heq : Filter.Tendsto (fun k => G (p (φ k))) Filter.atTop (nhds (0 : ℝ × ℝ)) := by
+    have hcancel : ∀ k, G (p (φ k)) = -((1 / ((φ k : ℝ) + 1)) • w (p (φ k))) := by
+      intro k
+      have h := hpz (φ k)
+      simp only [hGn] at h
+      exact eq_neg_of_add_eq_zero_left h
+    have hneg : Filter.Tendsto (fun k => -((1 / ((φ k : ℝ) + 1)) • w (p (φ k))))
+        Filter.atTop (nhds (0 : ℝ × ℝ)) := by simpa using hpert.neg
+    exact hneg.congr (fun k => (hcancel k).symm)
+  exact tendsto_nhds_unique hGq heq
+
+end PoincareMirandaWinding
 
 /-- **AL4-d′ — existence of a half-period matching start (2-D shooting/degree).**
 THE NEW CRUX.  There is a start `W₀` in the ball whose half-period endpoint is its
