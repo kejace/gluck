@@ -87,21 +87,77 @@ truncated arc-length ODE `W'(σ) = G(σ, W(σ))` on the state space `ℂ × ℝ`
 noncomputable def arcField (κ : ℝ → ℝ) (R σ : ℝ) (W : ℂ × ℝ) : ℂ × ℝ :=
   (Complex.exp ((W.2 : ℂ) * Complex.I), truncatedArcAngleSpeed κ R σ W.1 W.2)
 
+/-- Radial-clamp scale identity: `min 1 (R / ‖z‖) · ‖z‖ = min ‖z‖ R`. -/
+private lemma min_one_div_mul {R : ℝ} (hR : 0 ≤ R) {s : ℝ} (hs : 0 ≤ s) :
+    min 1 (R / s) * s = min s R := by
+  rcases eq_or_lt_of_le hs with h | h
+  · rw [← h, mul_zero, min_eq_left hR]
+  · rw [mul_comm, mul_min_of_nonneg _ _ hs, mul_one, mul_div_cancel₀ _ (ne_of_gt h)]
+
 /-- **Clamp is the identity on the disk.** For `‖z‖ ≤ R` the radial clamp is
 inactive: `clampBall R z = z`. (Mirror of the inactive-clamp step in
 `Gluck.SpaceForm.truncatedSpeed_eq`, `Flow.lean:35`.) -/
 lemma clampBall_eq_self {R : ℝ} {z : ℂ} (hz : ‖z‖ ≤ R) : clampBall R z = z := by
-  sorry
+  unfold clampBall
+  rcases eq_or_ne z 0 with h | h
+  · simp [h]
+  · have hpos : 0 < ‖z‖ := norm_pos_iff.mpr h
+    rw [min_eq_left ((one_le_div hpos).mpr hz), one_smul]
 
 /-- **Clamp stays in the disk.** `‖clampBall R z‖ ≤ R` for `0 ≤ R`. -/
 lemma norm_clampBall_le {R : ℝ} (hR : 0 ≤ R) (z : ℂ) : ‖clampBall R z‖ ≤ R := by
-  sorry
+  unfold clampBall
+  rcases eq_or_ne z 0 with h | h
+  · simp [h, hR]
+  · have hpos : 0 < ‖z‖ := norm_pos_iff.mpr h
+    have hmin_nonneg : 0 ≤ min 1 (R / ‖z‖) := le_min zero_le_one (by positivity)
+    rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg hmin_nonneg]
+    calc min 1 (R / ‖z‖) * ‖z‖
+        ≤ R / ‖z‖ * ‖z‖ := mul_le_mul_of_nonneg_right (min_le_right _ _) hpos.le
+      _ = R := by field_simp
 
 /-- **Clamp is Lipschitz** (nonexpansive up to the radial rescaling): the radial
 projection onto a convex ball is `1`-Lipschitz. -/
 lemma clampBall_lipschitz {R : ℝ} (hR : 0 ≤ R) :
     LipschitzWith 1 (clampBall R) := by
-  sorry
+  refine LipschitzWith.of_dist_le_mul fun z w => ?_
+  simp only [NNReal.coe_one, one_mul, dist_eq_norm]
+  set s := ‖z‖ with hs
+  set t := ‖w‖ with ht
+  set lz := min 1 (R / s) with hlz
+  set lw := min 1 (R / t) with hlw
+  have hs0 : 0 ≤ s := norm_nonneg _
+  have ht0 : 0 ≤ t := norm_nonneg _
+  have hlz0 : 0 ≤ lz := le_min zero_le_one (by positivity)
+  have hlz1 : lz ≤ 1 := min_le_left _ _
+  have hlw0 : 0 ≤ lw := le_min zero_le_one (by positivity)
+  have hlw1 : lw ≤ 1 := min_le_left _ _
+  have hlzs : lz * s = min s R := min_one_div_mul hR hs0
+  have hlwt : lw * t = min t R := min_one_div_mul hR ht0
+  set c := ⟪z, w⟫_ℝ with hc
+  have hcle : c ≤ s * t := real_inner_le_norm z w
+  -- Reduce to the squared inequality.
+  have expand : ‖clampBall R z - clampBall R w‖ ^ 2
+      = lz ^ 2 * s ^ 2 - 2 * (lz * lw) * c + lw ^ 2 * t ^ 2 := by
+    change ‖lz • z - lw • w‖ ^ 2 = _
+    rw [norm_sub_sq_real, norm_smul, norm_smul, real_inner_smul_left,
+      real_inner_smul_right, Real.norm_eq_abs, Real.norm_eq_abs,
+      abs_of_nonneg hlz0, abs_of_nonneg hlw0]
+    rw [← hs, ← ht, ← hc]; ring
+  have habs : |min s R - min t R| ≤ |s - t| := by
+    refine (abs_min_sub_min_le_max s R t R).trans ?_
+    rw [sub_self, abs_zero]; exact max_le le_rfl (abs_nonneg _)
+  have hpq : (lz * s - lw * t) ^ 2 ≤ (s - t) ^ 2 := by
+    rw [hlzs, hlwt, ← sq_abs (min s R - min t R), ← sq_abs (s - t)]
+    exact pow_le_pow_left₀ (abs_nonneg _) habs 2
+  have h1mm : lz * lw ≤ 1 := by nlinarith
+  have hprod : 0 ≤ (s * t - c) * (1 - lz * lw) := by
+    apply mul_nonneg (by linarith) (by linarith)
+  have key : ‖clampBall R z - clampBall R w‖ ^ 2 ≤ ‖z - w‖ ^ 2 := by
+    rw [expand, norm_sub_sq_real, ← hs, ← ht, ← hc]
+    nlinarith [hpq, hprod]
+  have := Real.sqrt_le_sqrt key
+  rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq (norm_nonneg _)] at this
 
 /-- **Truncated speed agrees with the true speed on the confined set.** If
 `‖z‖ ≤ R` then `truncatedArcAngleSpeed κ R σ z φ = arcAngleSpeed κ σ z φ`.
@@ -109,7 +165,8 @@ lemma clampBall_lipschitz {R : ℝ} (hR : 0 ≤ R) :
 lemma truncatedArcAngleSpeed_eq {κ : ℝ → ℝ} {R σ : ℝ} {z : ℂ} {φ : ℝ}
     (hz : ‖z‖ ≤ R) :
     truncatedArcAngleSpeed κ R σ z φ = arcAngleSpeed κ σ z φ := by
-  sorry
+  unfold truncatedArcAngleSpeed arcAngleSpeed
+  rw [clampBall_eq_self hz]
 
 /-- **Truncated metric-factor positivity.** For `0 ≤ R < 1` the clamped
 denominator `1 − ‖clampBall R z‖²` is `≥ 1 − R² > 0`. (Mirror of
@@ -117,27 +174,176 @@ denominator `1 − ‖clampBall R z‖²` is `≥ 1 − R² > 0`. (Mirror of
 `ε = −1` case of `Gluck.SpaceForm.one_add_mul_normSq_pos`, `Defs.lean:122`.) -/
 lemma truncatedArcDenom_pos {R : ℝ} (hR : 0 ≤ R) (hR1 : R < 1) (z : ℂ) :
     0 < 1 - ‖clampBall R z‖ ^ 2 := by
-  sorry
+  have h := norm_clampBall_le hR z
+  have h0 := norm_nonneg (clampBall R z)
+  nlinarith
 
 /-- **The reconstruction field is jointly continuous** on `ℝ × (ℂ × ℝ)`.
 (Mirror of `Gluck.SpaceForm.truncatedField_continuous`, `Flow.lean:219`.) -/
 lemma arcField_continuous {κ : ℝ → ℝ} {R : ℝ} (hκ : Continuous κ)
     (hR : 0 ≤ R) (hR1 : R < 1) :
     Continuous fun p : ℝ × (ℂ × ℝ) => arcField κ R p.1 p.2 := by
-  sorry
+  have hcb : Continuous fun p : ℝ × (ℂ × ℝ) => clampBall R p.2.1 :=
+    (clampBall_lipschitz hR).continuous.comp continuous_snd.fst
+  have hexp : Continuous fun p : ℝ × (ℂ × ℝ) =>
+      Complex.exp ((p.2.2 : ℂ) * Complex.I) :=
+    Complex.continuous_exp.comp ((Complex.continuous_ofReal.comp
+      (continuous_snd.comp continuous_snd)).mul continuous_const)
+  have hv : Continuous fun p : ℝ × (ℂ × ℝ) =>
+      Complex.I * Complex.exp ((p.2.2 : ℂ) * Complex.I) := continuous_const.mul hexp
+  simp only [arcField]
+  refine Continuous.prodMk hexp ?_
+  simp only [truncatedArcAngleSpeed]
+  refine Continuous.div ?_ ?_ (fun p => ne_of_gt (truncatedArcDenom_pos hR hR1 p.2.1))
+  · exact continuous_const.mul ((hκ.comp continuous_fst).add (hcb.inner hv))
+  · exact continuous_const.sub (hcb.norm.pow 2)
+
+/-- **`e^{iφ}` is `1`-Lipschitz in the angle `φ`.** -/
+private lemma expCircle_lipschitz :
+    LipschitzWith 1 (fun φ : ℝ => Complex.exp ((φ : ℂ) * Complex.I)) := by
+  refine LipschitzWith.of_dist_le_mul fun a b => ?_
+  rw [NNReal.coe_one, one_mul, dist_eq_norm, Real.dist_eq]
+  have factor : Complex.exp ((a : ℂ) * Complex.I) - Complex.exp ((b : ℂ) * Complex.I)
+      = Complex.exp ((b : ℂ) * Complex.I) *
+        (Complex.exp (((a - b : ℝ) : ℂ) * Complex.I) - 1) := by
+    rw [mul_sub, mul_one, ← Complex.exp_add]; congr 2; push_cast; ring
+  rw [factor, norm_mul, Complex.norm_exp_ofReal_mul_I, one_mul]
+  have h := Real.norm_exp_I_mul_ofReal_sub_one_le (x := a - b)
+  rw [Real.norm_eq_abs] at h
+  rw [mul_comm ((a - b : ℝ) : ℂ) Complex.I]
+  exact h
+
+/-- Quotient-difference bound (absolute-value numerator version): if two quotients
+have numerators bounded by `|n₁| ≤ B` differing by `≤ dn`, and denominators `≥ δ > 0`
+differing by `≤ dd`, the quotients differ by `≤ dn/δ + B·dd/δ²`. -/
+private lemma abs_div_sub_div_le' {n₁ n₂ d₁ d₂ δ B dn dd : ℝ} (hδ : 0 < δ)
+    (hd₁ : δ ≤ d₁) (hd₂ : δ ≤ d₂) (hn₁B : |n₁| ≤ B)
+    (hn : |n₁ - n₂| ≤ dn) (hd : |d₁ - d₂| ≤ dd) :
+    |n₁ / d₁ - n₂ / d₂| ≤ dn / δ + B * dd / δ ^ 2 := by
+  have h₁ : 0 < d₁ := hδ.trans_le hd₁
+  have h₂ : 0 < d₂ := hδ.trans_le hd₂
+  have hdn0 : 0 ≤ dn := (abs_nonneg _).trans hn
+  have hdd0 : 0 ≤ dd := (abs_nonneg _).trans hd
+  have hB0 : 0 ≤ B := (abs_nonneg _).trans hn₁B
+  have key : n₁ / d₁ - n₂ / d₂ = (n₁ - n₂) / d₂ + n₁ * (d₂ - d₁) / (d₁ * d₂) := by
+    field_simp; ring
+  rw [key]
+  refine (abs_add_le _ _).trans (add_le_add ?_ ?_)
+  · rw [abs_div, abs_of_pos h₂]
+    exact div_le_div₀ hdn0 hn hδ hd₂
+  · rw [abs_div, abs_of_pos (mul_pos h₁ h₂), abs_mul]
+    refine div_le_div₀ (mul_nonneg hB0 hdd0) ?_ (by positivity) ?_
+    · exact mul_le_mul hn₁B (by rw [abs_sub_comm]; exact hd) (abs_nonneg _) hB0
+    · rw [sq]; exact mul_le_mul hd₁ hd₂ hδ.le h₁.le
 
 /-- **The reconstruction field is globally Lipschitz in the state `W = (z, φ)`,
-uniformly in `σ`.** The `e^{iφ}` component is `1`-Lipschitz in `φ`; the
-`truncatedArcAngleSpeed` component is Lipschitz in `z` (clamped inner product and
-metric factor, `≥ 1 − R²`) and in `φ` (constant `≤ 2R/(1 − R²)`). This is the key
-estimate powering one global Picard–Lindelöf application. (Coupled analogue of
-`Gluck.SpaceForm.truncatedField_lipschitz`, `Flow.lean:206` /
+uniformly in `σ`** (under a curvature bound `|κ| ≤ M`). The `e^{iφ}` component is
+`1`-Lipschitz in `φ`; the `truncatedArcAngleSpeed` component is Lipschitz in `z`
+(clamped inner product and metric factor, `≥ 1 − R²`) and in `φ` (via `e^{iφ}`).
+This is the key estimate powering one global Picard–Lindelöf application. (Coupled
+analogue of `Gluck.SpaceForm.truncatedField_lipschitz`, `Flow.lean:206` /
 `truncatedSpeed_lipschitz`, `Flow.lean:108`; genuinely new work — the field now
-depends on `φ` through `e^{iφ}` as well.) -/
-lemma arcField_lipschitz {κ : ℝ → ℝ} {R : ℝ} (hκ : Continuous κ)
-    (hR : 0 ≤ R) (hR1 : R < 1) :
+depends on `φ` through `e^{iφ}` as well, and `κ` sits in the numerator.) -/
+lemma arcField_lipschitz {κ : ℝ → ℝ} {R M : ℝ} (hR : 0 ≤ R) (hR1 : R < 1)
+    (hM : ∀ σ, |κ σ| ≤ M) :
     ∃ L : ℝ≥0, ∀ σ, LipschitzWith L (fun W : ℂ × ℝ => arcField κ R σ W) := by
-  sorry
+  have hδ : 0 < 1 - R ^ 2 := by nlinarith
+  have hM0 : 0 ≤ M := le_trans (abs_nonneg _) (hM 0)
+  set δ := 1 - R ^ 2 with hδdef
+  set B := 2 * (M + R) with hBdef
+  have hB0 : 0 ≤ B := by positivity
+  set K2r : ℝ := 2 * (1 + R) / δ + 2 * R * B / δ ^ 2 with hK2r
+  have hK2r0 : 0 ≤ K2r := by positivity
+  -- speed component is Lipschitz
+  have speedLip : ∀ σ, LipschitzWith K2r.toNNReal
+      (fun W : ℂ × ℝ => truncatedArcAngleSpeed κ R σ W.1 W.2) := by
+    intro σ
+    refine LipschitzWith.of_dist_le_mul fun W W' => ?_
+    rw [Real.dist_eq, Real.coe_toNNReal _ hK2r0]
+    set z := W.1; set φ := W.2; set z' := W'.1; set φ' := W'.2
+    set v : ℝ → ℂ := fun t => Complex.I * Complex.exp ((t : ℂ) * Complex.I) with hvdef
+    have hvnorm : ∀ t, ‖v t‖ = 1 := fun t => by
+      rw [hvdef, norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul]
+    have hcbz : ‖clampBall R z‖ ≤ R := norm_clampBall_le hR z
+    have hcbz' : ‖clampBall R z'‖ ≤ R := norm_clampBall_le hR z'
+    have hd₁ : δ ≤ 1 - ‖clampBall R z‖ ^ 2 := by nlinarith [norm_nonneg (clampBall R z)]
+    have hd₂ : δ ≤ 1 - ‖clampBall R z'‖ ^ 2 := by nlinarith [norm_nonneg (clampBall R z')]
+    -- state distance bounds
+    have hzd : ‖z - z'‖ ≤ dist W W' := by
+      rw [← dist_eq_norm, Prod.dist_eq]; exact le_max_left _ _
+    have hφd : |φ - φ'| ≤ dist W W' := by
+      rw [← Real.dist_eq, Prod.dist_eq]; exact le_max_right _ _
+    have hcbd : ‖clampBall R z - clampBall R z'‖ ≤ ‖z - z'‖ := by
+      have := (clampBall_lipschitz hR).dist_le_mul z z'
+      rwa [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm] at this
+    have hvd : ‖v φ - v φ'‖ ≤ |φ - φ'| := by
+      have := expCircle_lipschitz.dist_le_mul φ φ'
+      rw [NNReal.coe_one, one_mul, dist_eq_norm, Real.dist_eq] at this
+      calc ‖v φ - v φ'‖
+          = ‖Complex.exp ((φ : ℂ) * Complex.I) - Complex.exp ((φ' : ℂ) * Complex.I)‖ := by
+            rw [hvdef]; rw [← mul_sub, norm_mul, Complex.norm_I, one_mul]
+        _ ≤ |φ - φ'| := this
+    -- numerator difference bound
+    have hnum : |2 * (κ σ + ⟪clampBall R z, v φ⟫_ℝ) - 2 * (κ σ + ⟪clampBall R z', v φ'⟫_ℝ)|
+        ≤ 2 * (‖z - z'‖ + R * |φ - φ'|) := by
+      have hsplit : 2 * (κ σ + ⟪clampBall R z, v φ⟫_ℝ) - 2 * (κ σ + ⟪clampBall R z', v φ'⟫_ℝ)
+          = 2 * (⟪clampBall R z - clampBall R z', v φ⟫_ℝ
+              + ⟪clampBall R z', v φ - v φ'⟫_ℝ) := by
+        rw [inner_sub_left, inner_sub_right]; ring
+      rw [hsplit, abs_mul, abs_two]
+      refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
+      refine (abs_add_le _ _).trans (add_le_add ?_ ?_)
+      · calc |⟪clampBall R z - clampBall R z', v φ⟫_ℝ|
+            ≤ ‖clampBall R z - clampBall R z'‖ * ‖v φ‖ := abs_real_inner_le_norm _ _
+          _ = ‖clampBall R z - clampBall R z'‖ := by rw [hvnorm, mul_one]
+          _ ≤ ‖z - z'‖ := hcbd
+      · calc |⟪clampBall R z', v φ - v φ'⟫_ℝ|
+            ≤ ‖clampBall R z'‖ * ‖v φ - v φ'‖ := abs_real_inner_le_norm _ _
+          _ ≤ R * |φ - φ'| := mul_le_mul hcbz' hvd (norm_nonneg _) hR
+    -- denominator difference bound
+    have hden : |(1 - ‖clampBall R z‖ ^ 2) - (1 - ‖clampBall R z'‖ ^ 2)|
+        ≤ 2 * R * ‖z - z'‖ := by
+      have heq : (1 - ‖clampBall R z‖ ^ 2) - (1 - ‖clampBall R z'‖ ^ 2)
+          = (‖clampBall R z'‖ - ‖clampBall R z‖) * (‖clampBall R z'‖ + ‖clampBall R z‖) := by
+        ring
+      rw [heq, abs_mul]
+      have h1 : |‖clampBall R z'‖ - ‖clampBall R z‖| ≤ ‖z - z'‖ := by
+        rw [abs_sub_comm]
+        exact (abs_norm_sub_norm_le _ _).trans hcbd
+      have h2 : |‖clampBall R z'‖ + ‖clampBall R z‖| ≤ 2 * R := by
+        rw [abs_of_nonneg (by positivity)]; linarith
+      calc |‖clampBall R z'‖ - ‖clampBall R z‖| * |‖clampBall R z'‖ + ‖clampBall R z‖|
+          ≤ ‖z - z'‖ * (2 * R) := mul_le_mul h1 h2 (abs_nonneg _) (norm_nonneg _)
+        _ = 2 * R * ‖z - z'‖ := by ring
+    -- numerator bound
+    have hnB : |2 * (κ σ + ⟪clampBall R z, v φ⟫_ℝ)| ≤ B := by
+      rw [abs_mul, abs_two, hBdef]
+      refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
+      refine (abs_add_le _ _).trans (add_le_add (hM σ) ?_)
+      calc |⟪clampBall R z, v φ⟫_ℝ| ≤ ‖clampBall R z‖ * ‖v φ‖ := abs_real_inner_le_norm _ _
+        _ = ‖clampBall R z‖ := by rw [hvnorm, mul_one]
+        _ ≤ R := hcbz
+    -- assemble via quotient bound
+    have hmain := abs_div_sub_div_le' hδ hd₁ hd₂ hnB hnum hden
+    simp only [truncatedArcAngleSpeed]
+    refine hmain.trans ?_
+    have e1 : 2 * (‖z - z'‖ + R * |φ - φ'|) / δ ≤ 2 * (1 + R) / δ * dist W W' := by
+      rw [div_mul_eq_mul_div, div_le_div_iff_of_pos_right hδ]
+      nlinarith [hzd, hφd, hR, mul_nonneg hR (sub_nonneg.mpr hφd)]
+    have e2 : B * (2 * R * ‖z - z'‖) / δ ^ 2 ≤ 2 * R * B / δ ^ 2 * dist W W' := by
+      rw [div_mul_eq_mul_div, div_le_div_iff_of_pos_right (by positivity)]
+      nlinarith [hzd, hB0, hR, mul_nonneg (mul_nonneg hR hB0) (sub_nonneg.mpr hzd)]
+    calc 2 * (‖z - z'‖ + R * |φ - φ'|) / δ + B * (2 * R * ‖z - z'‖) / δ ^ 2
+        ≤ 2 * (1 + R) / δ * dist W W' + 2 * R * B / δ ^ 2 * dist W W' := add_le_add e1 e2
+      _ = K2r * dist W W' := by rw [hK2r]; ring
+  -- combine exp and speed components
+  refine ⟨max 1 K2r.toNNReal, fun σ => ?_⟩
+  have hf1 : LipschitzWith 1 (fun W : ℂ × ℝ => Complex.exp ((W.2 : ℂ) * Complex.I)) := by
+    refine LipschitzWith.of_dist_le_mul fun W W' => ?_
+    have h := expCircle_lipschitz.dist_le_mul W.2 W'.2
+    rw [NNReal.coe_one, one_mul] at h ⊢
+    exact h.trans (by rw [Prod.dist_eq]; exact le_max_right _ _)
+  exact hf1.prodMk (speedLip σ)
 
 /-- **The reconstruction field is bounded** by `B = max 1 (2·(M + R)/(1 − R²))`
 under a curvature bound `|κ| ≤ M`: the `e^{iφ}` component has norm `1`, and the
@@ -147,7 +353,30 @@ clamped angle speed is `≤ 2(M + R)/(1 − R²)` (numerator `≤ 2(M + R)`, den
 lemma arcField_norm_le {κ : ℝ → ℝ} {R M : ℝ} (hR : 0 ≤ R) (hR1 : R < 1)
     (hM : ∀ σ, |κ σ| ≤ M) (σ : ℝ) (W : ℂ × ℝ) :
     ‖arcField κ R σ W‖ ≤ max 1 (2 * (M + R) / (1 - R ^ 2)) := by
-  sorry
+  rw [arcField, Prod.norm_def]
+  refine max_le_max (le_of_eq (Complex.norm_exp_ofReal_mul_I _)) ?_
+  rw [Real.norm_eq_abs, truncatedArcAngleSpeed]
+  set cb := clampBall R W.1 with hcbdef
+  have hdenom : 0 < 1 - ‖cb‖ ^ 2 := truncatedArcDenom_pos hR hR1 W.1
+  have hcb : ‖cb‖ ≤ R := norm_clampBall_le hR W.1
+  have hvnorm : ‖Complex.I * Complex.exp ((W.2 : ℂ) * Complex.I)‖ = 1 := by
+    rw [norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul]
+  have hinner : |⟪cb, Complex.I * Complex.exp ((W.2 : ℂ) * Complex.I)⟫_ℝ| ≤ R :=
+    calc |⟪cb, Complex.I * Complex.exp ((W.2 : ℂ) * Complex.I)⟫_ℝ|
+        ≤ ‖cb‖ * ‖Complex.I * Complex.exp ((W.2 : ℂ) * Complex.I)‖ :=
+          abs_real_inner_le_norm _ _
+      _ = ‖cb‖ := by rw [hvnorm, mul_one]
+      _ ≤ R := hcb
+  have hM0 : 0 ≤ M := le_trans (abs_nonneg _) (hM σ)
+  rw [abs_div, abs_of_pos hdenom]
+  refine div_le_div₀ (by positivity) ?_ (by nlinarith : (0:ℝ) < 1 - R ^ 2) ?_
+  · calc |2 * (κ σ + ⟪cb, Complex.I * Complex.exp ((W.2 : ℂ) * Complex.I)⟫_ℝ)|
+        = 2 * |κ σ + ⟪cb, Complex.I * Complex.exp ((W.2 : ℂ) * Complex.I)⟫_ℝ| := by
+          rw [abs_mul]; norm_num
+      _ ≤ 2 * (M + R) := by
+          refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
+          exact (abs_add_le _ _).trans (add_le_add (hM σ) hinner)
+  · nlinarith [hcb, norm_nonneg cb, hR]
 
 /-- **Global flow with continuous dependence for the reconstruction field** on
 `[0, L]`. One map `α : (ℂ × ℝ) × ℝ → ℂ × ℝ` such that every initial state
@@ -165,7 +394,28 @@ lemma exists_arcFlow {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuous κ)
           HasDerivWithinAt (fun t => α (W₀, t))
             (arcField κ R σ (α (W₀, σ))) (Set.Icc 0 L) σ) ∧
       ContinuousOn α (Metric.closedBall 0 r₀ ×ˢ Set.Icc 0 L) := by
-  sorry
+  obtain ⟨K, hK⟩ := arcField_lipschitz hR hR1 hM
+  set B : ℝ := max 1 (2 * (M + R) / (1 - R ^ 2)) with hB
+  have hB0 : (0 : ℝ) ≤ B := le_trans zero_le_one (le_max_left _ _)
+  have hcont : Continuous fun p : ℝ × (ℂ × ℝ) => arcField κ R p.1 p.2 :=
+    arcField_continuous hκ hR hR1
+  have hLB0 : (0 : ℝ) ≤ L * B + 1 := by positivity
+  have hPL : IsPicardLindelof (arcField κ R)
+      (⟨0, Set.left_mem_Icc.mpr hL⟩ : Set.Icc (0 : ℝ) L) 0
+      (r₀ + (L * B + 1).toNNReal) r₀ B.toNNReal K := by
+    refine ⟨fun t _ => (hK t).lipschitzOnWith, fun x _ =>
+      (hcont.comp (continuous_id.prodMk continuous_const)).continuousOn, ?_, ?_⟩
+    · intro t _ x _
+      rw [Real.coe_toNNReal _ hB0]
+      exact arcField_norm_le hR hR1 hM t x
+    · have hcoe : ((⟨0, Set.left_mem_Icc.mpr hL⟩ : Set.Icc (0 : ℝ) L) : ℝ) = 0 := rfl
+      rw [hcoe, NNReal.coe_add, Real.coe_toNNReal _ hLB0, Real.coe_toNNReal _ hB0]
+      simp only [sub_zero, add_sub_cancel_left]
+      rw [max_eq_left hL]
+      nlinarith [mul_nonneg hL hB0]
+  obtain ⟨α, hα1, hα2⟩ :=
+    hPL.exists_forall_mem_closedBall_eq_hasDerivWithinAt_continuousOn
+  exact ⟨α, fun W₀ hW₀ => hα1 W₀ hW₀, hα2⟩
 
 open scoped Classical in
 /-- **The chosen H² arc-length flow** `Ψ = Ψ_{κ,R,L,M,r₀} : (ℂ × ℝ) × ℝ → ℂ × ℝ`:
@@ -188,7 +438,11 @@ lemma arcFlow_spec {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuous κ) (hR : 
       ∀ σ ∈ Set.Icc (0 : ℝ) L,
         HasDerivWithinAt (fun t => arcFlow κ R L M r₀ (W₀, t))
           (arcField κ R σ (arcFlow κ R L M r₀ (W₀, σ))) (Set.Icc 0 L) σ := by
-  sorry
+  have h : Continuous κ ∧ 0 ≤ R ∧ R < 1 ∧ 0 ≤ L ∧ ∀ σ, |κ σ| ≤ M :=
+    ⟨hκ, hR, hR1, hL, hM⟩
+  simp only [arcFlow, dif_pos h]
+  exact (Classical.choose_spec
+    (exists_arcFlow h.1 h.2.1 h.2.2.1 h.2.2.2.1 h.2.2.2.2 r₀)).1 W₀ hW₀
 
 /-- **Flow uniqueness**: any solution of `W' = G_{κ,R}(σ, W)` on `[0, L]` with
 `g 0 = W₀`, `‖W₀‖ ≤ r₀`, agrees with `Ψ(W₀, ·)`. Global Lipschitz in space ⇒ ODE
@@ -200,7 +454,24 @@ lemma arcFlow_unique {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuous κ) (hR 
       HasDerivWithinAt g (arcField κ R σ (g σ)) (Set.Icc 0 L) σ)
     (hg0 : g 0 = W₀) :
     Set.EqOn g (fun σ => arcFlow κ R L M r₀ (W₀, σ)) (Set.Icc 0 L) := by
-  sorry
+  obtain ⟨K, hK⟩ := arcField_lipschitz hR hR1 hM
+  obtain ⟨hf0, hfderiv⟩ := arcFlow_spec hκ hR hR1 hL hM r₀ hW₀
+  have upgrade : ∀ {u : ℝ → ℂ × ℝ},
+      (∀ σ ∈ Set.Icc (0 : ℝ) L, HasDerivWithinAt u
+        (arcField κ R σ (u σ)) (Set.Icc 0 L) σ) →
+      ∀ σ ∈ Set.Ico (0 : ℝ) L, HasDerivWithinAt u
+        (arcField κ R σ (u σ)) (Set.Ici σ) σ := by
+    intro u hu σ hσ
+    refine (hu σ ⟨hσ.1, hσ.2.le⟩).mono_of_mem_nhdsWithin ?_
+    exact mem_nhdsGE_iff_exists_Icc_subset.mpr
+      ⟨L, hσ.2, Set.Icc_subset_Icc_left hσ.1⟩
+  exact ODE_solution_unique_of_mem_Icc_right
+    (fun t _ => (hK t).lipschitzOnWith)
+    (HasDerivWithinAt.continuousOn hg) (upgrade hg)
+    (fun t _ => Set.mem_univ (g t))
+    (HasDerivWithinAt.continuousOn hfderiv) (upgrade hfderiv)
+    (fun t _ => Set.mem_univ _)
+    (by rw [hg0, hf0])
 
 /-! ## Leaf group 2 — confinement (the H² boundary-degeneration crux) -/
 
