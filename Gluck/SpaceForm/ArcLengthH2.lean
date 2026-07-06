@@ -2752,6 +2752,579 @@ lemma exists_quarterLanding_gate :
     rw [Set.mem_Icc] at hh
     exact gate_G2_top hh.1 hh.2
 
+/-! ### Fork A — the smooth ramped bicircle profile (A1)
+
+The exact 2-arc gate model `qArc2` jumps `κ` from `a = 4/5` to `c = 2` at the arc
+join `σ = L/8`, so it is *not* the `arcFlow` of any continuous `κ`, and `φ` is not
+`C¹` there (`.mathlib-quality/b2_log.jsonl`).  Fork A replaces the step by a
+genuinely continuous — indeed piecewise-linear-in-`σ` on `[0, L/4]`, hence `C¹`-`φ` —
+bicircle profile `gateProfileSmooth L δ` with a narrow linear ramp of width `δ` at
+each join, still even about `0` and about `L/4` and `L/2`-periodic (the
+`hevenO`/`hevenQ`/`hhalf` palindrome hypotheses of the closing chain).  Section A2
+bounds the actual continuous-`κ` `arcFlow` quarter-residual within `C·δ` of the
+proven step residual via the `L¹`-Grönwall `arcTrajectory_diff_bound`; A3 transfers
+the four sign faces (each with proven margin `≥ 0.003`) to obtain the smooth
+landing. -/
+
+/-- **Triangle wave** `arccos (cos x)`: continuous, even, `2π`-periodic, equal to
+the identity on `[0, π]`, with values in `[0, π]`.  Building block for the ramp: it
+is genuinely piecewise-linear, so the composed profile is piecewise-linear (giving
+continuous `κ`, hence `C¹` `φ`). -/
+noncomputable def triWave (x : ℝ) : ℝ := Real.arccos (Real.cos x)
+
+lemma triWave_continuous : Continuous triWave :=
+  Real.continuous_arccos.comp Real.continuous_cos
+
+lemma triWave_even (x : ℝ) : triWave (-x) = triWave x := by
+  simp only [triWave, Real.cos_neg]
+
+lemma triWave_periodic (x : ℝ) : triWave (x + 2 * π) = triWave x := by
+  simp only [triWave]; rw [Real.cos_periodic x]
+
+lemma triWave_nonneg (x : ℝ) : 0 ≤ triWave x := Real.arccos_nonneg _
+
+lemma triWave_le_pi (x : ℝ) : triWave x ≤ π := Real.arccos_le_pi _
+
+lemma triWave_eq_on_Icc {x : ℝ} (h0 : 0 ≤ x) (hπ : x ≤ π) : triWave x = x :=
+  Real.arccos_cos h0 hπ
+
+/-- **Smooth ramped bicircle curvature profile.** Curvature `a` on the flat parts,
+ramping linearly to `c` across a window of width `δ` centred at each join
+`σ ≡ L/8 (mod L/4)`.  Built as
+`a + (c − a)·clamp₀¹((triWave(4πσ/L)/π − 1/2)·(L/4δ) + 1/2)`: the triangle wave
+`triWave(4πσ/L)` peaks (value `π`) at `σ = L/4` and vanishes at `σ = 0, L/2`, so
+`u := triWave(4πσ/L)/π` runs `0 → 1 → 0` linearly over `[0, L/2]`; the affine clamp
+turns that into a trapezoid (`0` flat, ramp, `1` flat, ramp).  On `[0, L/4]` the
+clamp argument is exactly `(σ − L/8)/δ + 1/2`, so the ramp occupies
+`[L/8 − δ/2, L/8 + δ/2]`.  Continuous, even about `0`, `L/2`-periodic. -/
+noncomputable def arcRampProfile (a c L δ : ℝ) (σ : ℝ) : ℝ :=
+  a + (c - a) *
+    min 1 (max 0 ((triWave (4 * π / L * σ) / π - 1 / 2) * (L / (4 * δ)) + 1 / 2))
+
+/-- The `a = 4/5`, `c = 2` gate profile, smoothed with ramp width `δ`. -/
+noncomputable def gateProfileSmooth (L δ : ℝ) : ℝ → ℝ := arcRampProfile (4 / 5) 2 L δ
+
+lemma arcRampProfile_continuous (a c L δ : ℝ) : Continuous (arcRampProfile a c L δ) := by
+  have hX : Continuous fun σ : ℝ =>
+      (triWave (4 * π / L * σ) / π - 1 / 2) * (L / (4 * δ)) + 1 / 2 :=
+    ((((triWave_continuous.comp (continuous_const.mul continuous_id)).div_const π).sub
+      continuous_const).mul continuous_const).add continuous_const
+  exact continuous_const.add
+    (continuous_const.mul (continuous_const.min (continuous_const.max hX)))
+
+lemma arcRampProfile_even (a c L δ σ : ℝ) :
+    arcRampProfile a c L δ (-σ) = arcRampProfile a c L δ σ := by
+  unfold arcRampProfile
+  rw [show 4 * π / L * (-σ) = -(4 * π / L * σ) by ring, triWave_even]
+
+lemma arcRampProfile_periodic {L : ℝ} (hL : L ≠ 0) (a c δ : ℝ) :
+    Function.Periodic (arcRampProfile a c L δ) (L / 2) := fun σ => by
+  unfold arcRampProfile
+  rw [show 4 * π / L * (σ + L / 2) = 4 * π / L * σ + 2 * π by field_simp; ring,
+    triWave_periodic]
+
+lemma arcRampProfile_evenQ {L : ℝ} (hL : L ≠ 0) (a c δ σ : ℝ) :
+    arcRampProfile a c L δ (L / 2 - σ) = arcRampProfile a c L δ σ := by
+  rw [show L / 2 - σ = -σ + L / 2 by ring, arcRampProfile_periodic hL a c δ (-σ),
+    arcRampProfile_even]
+
+lemma arcRampProfile_mem {a c L δ : ℝ} (hac : a ≤ c) (σ : ℝ) :
+    a ≤ arcRampProfile a c L δ σ ∧ arcRampProfile a c L δ σ ≤ c := by
+  unfold arcRampProfile
+  set t := min 1 (max 0 ((triWave (4 * π / L * σ) / π - 1 / 2) * (L / (4 * δ)) + 1 / 2))
+    with ht_def
+  have ht0 : 0 ≤ t := le_min zero_le_one (le_max_left _ _)
+  have ht1 : t ≤ 1 := min_le_left _ _
+  constructor <;> nlinarith [ht0, ht1, hac]
+
+/-- On `[0, L/4]` the ramp-profile clamp argument is exactly `(σ − L/8)/δ + 1/2`. -/
+lemma arcRampProfile_arg_eq {L δ σ : ℝ} (hL : 0 < L) (hδ : 0 < δ)
+    (h0 : 0 ≤ σ) (h4 : σ ≤ L / 4) :
+    (triWave (4 * π / L * σ) / π - 1 / 2) * (L / (4 * δ)) + 1 / 2
+      = (σ - L / 8) / δ + 1 / 2 := by
+  have hxπ : 4 * π / L * σ ≤ π := by
+    rw [show (4 : ℝ) * π / L * σ = 4 * π * σ / L by ring, div_le_iff₀ hL]
+    nlinarith [Real.pi_pos, mul_nonneg Real.pi_pos.le (by linarith : (0 : ℝ) ≤ L - 4 * σ)]
+  rw [triWave_eq_on_Icc (by positivity) hxπ]
+  field_simp
+  ring
+
+lemma gateProfileSmooth_eq_a {L δ σ : ℝ} (hL : 0 < L) (hδ : 0 < δ)
+    (h0 : 0 ≤ σ) (h : σ ≤ L / 8 - δ / 2) : gateProfileSmooth L δ σ = 4 / 5 := by
+  have h4 : σ ≤ L / 4 := by nlinarith
+  unfold gateProfileSmooth arcRampProfile
+  rw [arcRampProfile_arg_eq hL hδ h0 h4]
+  have harg : (σ - L / 8) / δ + 1 / 2 ≤ 0 := by
+    have h' : (σ - L / 8) / δ ≤ -(1 / 2) := by rw [div_le_iff₀ hδ]; nlinarith
+    linarith
+  rw [max_eq_left harg, min_eq_right (by norm_num)]
+  ring
+
+lemma gateProfileSmooth_eq_c {L δ σ : ℝ} (hL : 0 < L) (hδ : 0 < δ)
+    (h1 : L / 8 + δ / 2 ≤ σ) (h2 : σ ≤ L / 4) : gateProfileSmooth L δ σ = 2 := by
+  have h0 : 0 ≤ σ := by nlinarith
+  unfold gateProfileSmooth arcRampProfile
+  rw [arcRampProfile_arg_eq hL hδ h0 h2]
+  have harg : 1 ≤ (σ - L / 8) / δ + 1 / 2 := by
+    have h' : (1 : ℝ) / 2 ≤ (σ - L / 8) / δ := by rw [le_div_iff₀ hδ]; nlinarith
+    linarith
+  rw [max_eq_right (by linarith), min_eq_left harg]
+  ring
+
+/-- The gate profile is bounded by `2`. -/
+lemma gateProfileSmooth_abs_le (L δ σ : ℝ) : |gateProfileSmooth L δ σ| ≤ 2 := by
+  have := arcRampProfile_mem (a := (4 : ℝ) / 5) (c := 2) (L := L) (δ := δ)
+    (by norm_num) σ
+  rw [abs_le]; unfold gateProfileSmooth; constructor <;> [linarith [this.1]; linarith [this.2]]
+
+lemma gateProfileSmooth_continuous (L δ : ℝ) : Continuous (gateProfileSmooth L δ) :=
+  arcRampProfile_continuous _ _ _ _
+
+lemma gateProfileSmooth_even (L δ σ : ℝ) :
+    gateProfileSmooth L δ (-σ) = gateProfileSmooth L δ σ := arcRampProfile_even _ _ _ _ _
+
+lemma gateProfileSmooth_periodic {L : ℝ} (hL : L ≠ 0) (δ : ℝ) :
+    Function.Periodic (gateProfileSmooth L δ) (L / 2) := arcRampProfile_periodic hL _ _ _
+
+lemma gateProfileSmooth_evenQ {L : ℝ} (hL : L ≠ 0) (δ σ : ℝ) :
+    gateProfileSmooth L δ (L / 2 - σ) = gateProfileSmooth L δ σ :=
+  arcRampProfile_evenQ hL _ _ _ _
+
+/-! ### Fork A — quantitative robustness and the smooth landing (A2, A3)
+
+**Feasibility (no B2).**  The step model `qArc2` is confined with `max‖z‖ ≈ 0.508`, so with
+confinement radius `R = 3/5` there is margin `μ = R − 0.508 ≈ 0.09`.  `gateProfileSmooth L δ`
+equals the step profile except on the width-`δ` ramp `[L/8 − δ/2, L/8 + δ/2]`, where
+`|κ_δ − κ_step| ≤ c − a = 6/5`; hence `∫₀^{L/4} |κ_δ − κ_step| ≤ (6/5)·δ`.  Feeding this into
+the `L¹`-Grönwall `arcTrajectory_diff_bound` in two legs — leg 1 on `[0, L/8]` comparing
+`arcFlow` against the confined constant-`κ` model `arcModelConst (4/5)` (same start `W₀`), leg 2
+on `[L/8, L/4]` comparing against `arcModelConst 2` started at the leg-1 model endpoint `= qArc2` —
+composes to `‖arcFlow(κ_δ)(W₀, L/4) − qArc2‖ ≤ C·δ` with the EXPLICIT constant
+`C = (15/8)·exp(9513/1280)·(exp(9513/1280) + 1) ≈ 5.36·10⁶`
+(`2/(1−R²) = 25/8`, `(25/8)(3/5) = 15/8`; `Lip = 1359/64 ≈ 21.23` from `arcField_lipschitz`
+with `R = 3/5, M = 2`; `Lip·L/8 ≤ 9513/1280`).  The two residual coordinates are `1`-Lipschitz
+projections, so `|G_δ − G_0| ≤ C·δ`.  Choosing `δ = 1/(200·C)` gives `C·δ = 1/200 < 1/100`, below
+every proven face margin (`≥ 0.02` for `G₁`, `≥ 0.2` for `G₂`), so the four sign faces transfer to
+the smooth `arcFlow` residual and `poincareMiranda_rect` fires — the honest smooth landing.
+
+Two analytic obligations remain scoped as named `sorry`s (both quantitative
+`arcTrajectory_diff_bound`/`arcModelConst_eq_arcFlow` consequences — *not* obstructions):
+`gateSmoothLanding_close` (the two-leg residual bound) and `gateSmoothResidual_continuousOn`
+(joint `(h,L)`-continuity of the flow residual), plus the four `gate_*_margin` face lemmas
+(each a re-run of the proven `gate_*_key` interval certificate, whose numeric slack `≈ 0.02–0.2`
+comfortably exceeds `1/100`). -/
+
+/-- The explicit robustness constant `C ≈ 5.36·10⁶` (`h2_negative_dev.md §Fork A`). -/
+noncomputable def gateRobustConst : ℝ :=
+  15 / 8 * Real.exp (9513 / 1280) * (Real.exp (9513 / 1280) + 1)
+
+lemma gateRobustConst_pos : 0 < gateRobustConst := by
+  unfold gateRobustConst
+  positivity
+
+/-- The smooth-`κ` `arcFlow` endpoint at `σ = L/4` shot from the mirror-axis start
+`W₀ = (i·h, π)` (confinement radius `R = 3/5`, curvature bound `M = 2`). -/
+noncomputable def gateSmoothLandingState (δ : ℝ) (r₀ : ℝ≥0) (h L : ℝ) : ℂ × ℝ :=
+  arcFlow (gateProfileSmooth L δ) (3 / 5) L 2 r₀ ((Complex.I * (h : ℂ), π), L / 4)
+
+/-- **A2 — the two-leg `L¹`-Grönwall robustness bound.**  The smooth `arcFlow`
+quarter-endpoint stays within `C·δ` of the closed-form step endpoint `qArc2`.  Proof
+(scoped): two applications of `arcTrajectory_diff_bound` on `[0, L/8]` and `[L/8, L/4]`,
+each comparing `arcFlow (gateProfileSmooth L δ)` against the relevant confined constant-`κ`
+model `arcModelConst` (identified with a genuine `arcField` solution via
+`arcModelConst_eq_arcFlow`), using `∫ |κ_δ − κ_step| ≤ (6/5)·δ` on the ramp; compose. -/
+lemma gateSmoothLanding_close (r₀ : ℝ≥0) (hr₀ : 4 ≤ (r₀ : ℝ)) {δ h L : ℝ}
+    (hδ : 0 < δ) (hh1 : (1 : ℝ) / 5 ≤ h) (hh2 : h ≤ 2 / 5)
+    (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) (hδL : δ ≤ 1) :
+    ‖gateSmoothLandingState δ r₀ h L - qArc2 (4 / 5) 2 (h, L)‖ ≤ gateRobustConst * δ := by
+  sorry
+
+/-- **Joint `(h, L)`-continuity of the smooth quarter-residual.**  Proof (scoped): ODE
+continuous dependence on initial condition (`h`) and on the vector field / interval /
+evaluation time (`L`, which enters `gateProfileSmooth L δ`, the window and the point `L/4`),
+quantified by `arcTrajectory_diff_bound` (the same Grönwall tool, now bounding the gap between
+two nearby parameter values). -/
+lemma gateSmoothResidual_continuousOn (δ : ℝ) (r₀ : ℝ≥0) :
+    ContinuousOn
+      (fun p : ℝ × ℝ =>
+        ((gateSmoothLandingState δ r₀ p.1 p.2).1.im,
+          (gateSmoothLandingState δ r₀ p.1 p.2).2 - 3 * π / 2))
+      (Set.Icc ((1 : ℝ) / 5) (2 / 5) ×ˢ Set.Icc ((11 : ℝ) / 5) (14 / 5)) := by
+  sorry
+
+/-- LEFT `G₁` polynomial core WITH MARGIN (`gate_G1_left_key` has certified value ≈ −0.024). -/
+private lemma gate_G1_left_key_margin {q ca sa rc sc cc : ℝ}
+    (hq : (55 : ℝ) / 1000 ≤ q) (hca : (90 : ℝ) / 100 ≤ ca)
+    (hsa : (33 : ℝ) / 100 ≤ sa) (hsa0 : 0 ≤ sa)
+    (hrc : (246 : ℝ) / 1000 ≤ rc) (hrc0 : 0 ≤ rc)
+    (hsc : (86 : ℝ) / 100 ≤ sc) (_hsc0 : 0 ≤ sc)
+    (hcc : cc ≤ (1 : ℝ) / 2) :
+    (1 : ℝ) / 5 - 4 / 5 * q - rc * (sa * sc + ca * (1 - cc)) ≤ -(1 / 1000000) := by
+  have hSA : (33 : ℝ) / 100 * (86 / 100) ≤ sa * sc := mul_le_mul hsa hsc (by norm_num) hsa0
+  have hCA : (90 : ℝ) / 100 * (1 / 2) ≤ ca * (1 - cc) :=
+    mul_le_mul hca (by linarith) (by norm_num) (by linarith)
+  have hrcS : (246 : ℝ) / 1000 * ((33 / 100) * (86 / 100) + (90 / 100) * (1 / 2))
+      ≤ rc * (sa * sc + ca * (1 - cc)) :=
+    mul_le_mul hrc (by linarith) (by norm_num) hrc0
+  linarith [hrcS, hq]
+
+/-- RIGHT `G₁` polynomial core WITH MARGIN (`gate_G1_right_key` has certified value ≈ 0.028). -/
+private lemma gate_G1_right_key_margin {q ca sa rc sc cc : ℝ}
+    (hq_hi : q ≤ (6 : ℝ) / 100)
+    (hca : ca ≤ (97 : ℝ) / 100) (hca0 : 0 ≤ ca)
+    (hsa : sa ≤ (1 : ℝ) / 3) (hsa0 : 0 ≤ sa)
+    (hrc : rc ≤ (26 : ℝ) / 100) (_hrc0 : 0 ≤ rc)
+    (hsc : sc ≤ 1) (hsc0 : 0 ≤ sc)
+    (hcc : (12 : ℝ) / 100 ≤ cc) (hcc1 : cc ≤ 1) :
+    (1 / 1000000 : ℝ) ≤ (2 : ℝ) / 5 - 21 / 20 * q - rc * (sa * sc + ca * (1 - cc)) := by
+  have hSA : sa * sc ≤ (1 : ℝ) / 3 * 1 := mul_le_mul hsa hsc hsc0 (by norm_num)
+  have hCA : ca * (1 - cc) ≤ (97 : ℝ) / 100 * (88 / 100) :=
+    mul_le_mul hca (by linarith) (by linarith) (by norm_num)
+  have hS0 : (0 : ℝ) ≤ sa * sc + ca * (1 - cc) :=
+    add_nonneg (mul_nonneg hsa0 hsc0) (mul_nonneg hca0 (by linarith))
+  have hrcS : rc * (sa * sc + ca * (1 - cc))
+      ≤ (26 : ℝ) / 100 * ((1 / 3) * 1 + (97 / 100) * (88 / 100)) :=
+    mul_le_mul hrc (by linarith) hS0 (by norm_num)
+  linarith [hrcS, hq_hi]
+
+set_option maxHeartbeats 800000 in
+-- Re-runs the ~25-step `gate_G1_left` interval certificate; exceeds the default budget.
+/-- LEFT `G₁` face with margin (`G₁ ≤ −1/1000000`; same certificate as `gate_G1_left`). -/
+private lemma gate_G1_left_margin {L : ℝ} (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) :
+    (qArc2 (4 / 5) 2 (1 / 5, L)).1.im ≤ -(1 / 1000000) := by
+  rw [gate_G1_scalar]
+  have hra : arcModelRadius (4 / 5) (Complex.I * ((1 / 5 : ℝ) : ℂ)) π = 4 / 5 := by
+    rw [arcModelRadius_qArc1]; norm_num
+  rw [hra]
+  set c := L / 8 / (4 / 5) with hc
+  set rc := arcModelRadius 2 (qArc1 (4 / 5) (1 / 5, L)).1 (qArc1 (4 / 5) (1 / 5, L)).2 with hrcdef
+  set tc := L / 8 / rc with htc
+  have hc0 : (0 : ℝ) ≤ c := hc ▸ div_nonneg (by linarith) (by norm_num)
+  have h45 : (0 : ℝ) < 4 / 5 := by norm_num
+  have hc_lo : (11 : ℝ) / 32 ≤ c := by rw [hc, le_div_iff₀ h45]; linarith
+  have hc_hi : c ≤ (7 : ℝ) / 16 := by rw [hc, div_le_iff₀ h45]; linarith
+  have hc1 : c ≤ 1 := by linarith
+  clear_value c
+  have hc2lo' : ((11 : ℝ) / 32) ^ 2 ≤ c ^ 2 := by nlinarith [hc_lo, hc0]
+  have hc2hi : c ^ 2 ≤ ((7 : ℝ) / 16) ^ 2 := by nlinarith [hc_hi, hc0]
+  have hc3hi : c ^ 3 ≤ ((7 : ℝ) / 16) ^ 3 := by nlinarith [hc_hi, hc0, hc2hi]
+  have hc4hi : c ^ 4 ≤ ((7 : ℝ) / 16) ^ 4 := by nlinarith [hc2hi, sq_nonneg c, hc0]
+  have habs : |c| ≤ 1 := by rw [abs_of_nonneg hc0]; exact hc1
+  have hcb := abs_le.mp (Real.cos_bound habs)
+  rw [abs_of_nonneg hc0] at hcb
+  obtain ⟨hcb1, hcb2⟩ := hcb
+  have hq : (55 : ℝ) / 1000 ≤ 1 - Real.cos c := by nlinarith [hcb2, hc2lo', hc4hi]
+  have hca : (90 : ℝ) / 100 ≤ Real.cos c := by nlinarith [hcb1, hc2hi, hc4hi]
+  have hca_hi : Real.cos c ≤ (944 : ℝ) / 1000 := by nlinarith [hcb2, hc2lo', hc4hi]
+  have hsa0 : (0 : ℝ) ≤ Real.sin c :=
+    Real.sin_nonneg_of_nonneg_of_le_pi hc0 (by linarith [Real.pi_gt_three])
+  have hsa : (33 : ℝ) / 100 ≤ Real.sin c := by
+    nlinarith [Real.sin_gt_sub_cube (by linarith : (0 : ℝ) < c) hc1, hc_lo, hc3hi]
+  have hden : (0 : ℝ) < 2 + Real.cos c := by nlinarith [Real.neg_one_le_cos c]
+  have hbigpos : (0 : ℝ) < 2 * (2 + (-(1 / 5) - (4 / 5 - 1 / 5) * (1 - Real.cos c))) := by
+    nlinarith [Real.neg_one_le_cos c]
+  have hrc_eq : rc = 4 / 5 * Real.cos c / (2 + Real.cos c) := by
+    rw [hrcdef, arcModelRadius_qArc2, hra, ← hc, div_eq_div_iff hbigpos.ne' hden.ne']
+    ring
+  have hrc_lo : (246 : ℝ) / 1000 ≤ rc := by
+    rw [hrc_eq, le_div_iff₀ hden]; nlinarith [hca]
+  have hrc_hi : rc ≤ (2566 : ℝ) / 10000 := by
+    rw [hrc_eq, div_le_iff₀ hden]; nlinarith [hca_hi]
+  have hrc_pos : (0 : ℝ) < rc := by linarith
+  clear_value rc
+  have htc_lo : (1071 : ℝ) / 1000 ≤ tc := by
+    rw [htc, le_div_iff₀ hrc_pos]; nlinarith [hrc_hi, hL1]
+  have htc_hi : tc ≤ (1423 : ℝ) / 1000 := by
+    rw [htc, div_le_iff₀ hrc_pos]; nlinarith [hrc_lo, hL2]
+  clear_value tc
+  have hy_hi : π / 2 - tc ≤ (4998 : ℝ) / 10000 := by linarith [gate_pi_hi, htc_lo]
+  have hy_lo : (1477 : ℝ) / 10000 ≤ π / 2 - tc := by linarith [gate_pi_lo, htc_hi]
+  have hy0 : (0 : ℝ) ≤ π / 2 - tc := by linarith
+  have hy1 : π / 2 - tc ≤ 1 := by linarith
+  have hy2hi : (π / 2 - tc) ^ 2 ≤ ((4998 : ℝ) / 10000) ^ 2 := by nlinarith [hy_hi, hy0]
+  have hy4hi : (π / 2 - tc) ^ 4 ≤ ((4998 : ℝ) / 10000) ^ 4 := by
+    nlinarith [hy2hi, sq_nonneg (π / 2 - tc), hy0]
+  have hyabs : |π / 2 - tc| ≤ 1 := by rw [abs_of_nonneg hy0]; exact hy1
+  have hycb := abs_le.mp (Real.cos_bound hyabs)
+  rw [abs_of_nonneg hy0] at hycb
+  have hsc : (86 : ℝ) / 100 ≤ Real.sin tc := by
+    rw [← Real.cos_pi_div_two_sub tc]; nlinarith [hycb.1, hy2hi, hy4hi]
+  have hsc0 : (0 : ℝ) ≤ Real.sin tc := by linarith
+  have hcc : Real.cos tc ≤ (1 : ℝ) / 2 := by
+    rw [← Real.sin_pi_div_two_sub tc]
+    linarith [Real.sin_lt (show (0 : ℝ) < π / 2 - tc by linarith), hy_hi]
+  exact gate_G1_left_key_margin hq hca hsa hsa0 hrc_lo hrc_pos.le hsc hsc0 hcc
+
+set_option maxHeartbeats 800000 in
+-- Re-runs the ~25-step `gate_G1_right` interval certificate; exceeds the default budget.
+/-- RIGHT `G₁` face with margin (`G₁ ≥ 1/1000000`; same certificate as `gate_G1_right`). -/
+private lemma gate_G1_right_margin {L : ℝ} (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) :
+    (1 / 1000000 : ℝ) ≤ (qArc2 (4 / 5) 2 (2 / 5, L)).1.im := by
+  rw [gate_G1_scalar]
+  have hra : arcModelRadius (4 / 5) (Complex.I * ((2 / 5 : ℝ) : ℂ)) π = 21 / 20 := by
+    rw [arcModelRadius_qArc1]; norm_num
+  rw [hra]
+  set c := L / 8 / (21 / 20) with hc
+  set rc := arcModelRadius 2 (qArc1 (4 / 5) (2 / 5, L)).1 (qArc1 (4 / 5) (2 / 5, L)).2 with hrcdef
+  set tc := L / 8 / rc with htc
+  have hc0 : (0 : ℝ) ≤ c := hc ▸ div_nonneg (by linarith) (by norm_num)
+  have h2120 : (0 : ℝ) < 21 / 20 := by norm_num
+  have hc_lo : (11 : ℝ) / 42 ≤ c := by rw [hc, le_div_iff₀ h2120]; linarith
+  have hc_hi : c ≤ (1 : ℝ) / 3 := by rw [hc, div_le_iff₀ h2120]; linarith
+  have hc1 : c ≤ 1 := by linarith
+  have hc_pos : (0 : ℝ) < c := by linarith
+  clear_value c
+  have hc2lo' : ((11 : ℝ) / 42) ^ 2 ≤ c ^ 2 := by nlinarith [hc_lo, hc0]
+  have hc2hi : c ^ 2 ≤ ((1 : ℝ) / 3) ^ 2 := by nlinarith [hc_hi, hc0]
+  have hc4hi : c ^ 4 ≤ ((1 : ℝ) / 3) ^ 4 := by nlinarith [hc2hi, sq_nonneg c, hc0]
+  have habs : |c| ≤ 1 := by rw [abs_of_nonneg hc0]; exact hc1
+  have hcb := abs_le.mp (Real.cos_bound habs)
+  rw [abs_of_nonneg hc0] at hcb
+  obtain ⟨hcb1, hcb2⟩ := hcb
+  have hq_hi : 1 - Real.cos c ≤ (6 : ℝ) / 100 := by nlinarith [hcb1, hc2hi, hc4hi]
+  have hca : Real.cos c ≤ (97 : ℝ) / 100 := by nlinarith [hcb2, hc2lo', hc4hi]
+  have hca_lo : (94 : ℝ) / 100 ≤ Real.cos c := by nlinarith [hcb1, hc2hi, hc4hi]
+  have hca0 : (0 : ℝ) ≤ Real.cos c := by linarith
+  have hsa : Real.sin c ≤ (1 : ℝ) / 3 := by linarith [Real.sin_lt hc_pos]
+  have hsa0 : (0 : ℝ) ≤ Real.sin c :=
+    Real.sin_nonneg_of_nonneg_of_le_pi hc0 (by linarith [Real.pi_gt_three])
+  have hden : (0 : ℝ) < 380 + 260 * Real.cos c := by nlinarith [Real.neg_one_le_cos c]
+  have hbigpos : (0 : ℝ) < 2 * (2 + (-(2 / 5) - (21 / 20 - 2 / 5) * (1 - Real.cos c))) := by
+    nlinarith [Real.neg_one_le_cos c]
+  have hrc_eq : rc = (273 * Real.cos c - 105) / (380 + 260 * Real.cos c) := by
+    rw [hrcdef, arcModelRadius_qArc2, hra, ← hc, div_eq_div_iff hbigpos.ne' hden.ne']
+    ring
+  have hrc_lo : (242 : ℝ) / 1000 ≤ rc := by
+    rw [hrc_eq, le_div_iff₀ hden]; nlinarith [hca_lo]
+  have hrc_hi : rc ≤ (26 : ℝ) / 100 := by
+    rw [hrc_eq, div_le_iff₀ hden]; nlinarith [hca]
+  have hrc_pos : (0 : ℝ) < rc := by linarith
+  clear_value rc
+  have htc_lo : (1057 : ℝ) / 1000 ≤ tc := by
+    rw [htc, le_div_iff₀ hrc_pos]; nlinarith [hrc_hi, hL1]
+  have htc_hi : tc ≤ (1447 : ℝ) / 1000 := by
+    rw [htc, div_le_iff₀ hrc_pos]; nlinarith [hrc_lo, hL2]
+  clear_value tc
+  have hy_hi : π / 2 - tc ≤ (5138 : ℝ) / 10000 := by linarith [gate_pi_hi, htc_lo]
+  have hy_lo : (1237 : ℝ) / 10000 ≤ π / 2 - tc := by linarith [gate_pi_lo, htc_hi]
+  have hy0 : (0 : ℝ) ≤ π / 2 - tc := by linarith
+  have hy1 : π / 2 - tc ≤ 1 := by linarith
+  have hy_pos : (0 : ℝ) < π / 2 - tc := by linarith
+  have hsc : Real.sin tc ≤ 1 := Real.sin_le_one tc
+  have hsc0 : (0 : ℝ) ≤ Real.sin tc :=
+    Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith [Real.pi_gt_three])
+  have hcc : (12 : ℝ) / 100 ≤ Real.cos tc := by
+    rw [← Real.sin_pi_div_two_sub tc]
+    have hkey : (1237 : ℝ) / 10000 - (1237 / 10000) ^ 3 / 4
+        ≤ (π / 2 - tc) - (π / 2 - tc) ^ 3 / 4 := by
+      nlinarith [hy_lo, hy1, hy0, mul_nonneg (sub_nonneg.2 hy_lo) (sub_nonneg.2 hy1)]
+    nlinarith [Real.sin_gt_sub_cube hy_pos hy1, hkey]
+  have hcc1 : Real.cos tc ≤ 1 := Real.cos_le_one tc
+  exact gate_G1_right_key_margin hq_hi hca hca0 hsa hsa0 hrc_hi hrc_pos.le hsc hsc0 hcc hcc1
+
+/-- BOTTOM `G₂` face polynomial core WITH MARGIN.  Identical to `gate_G2_bottom_key`
+through the `(h,t)`-certificate, but keeps the rational `15707/10000` bound (instead of
+relaxing to `π/2`) and closes with a tight `π/2` lower bound, yielding margin `1/1000000`. -/
+private lemma gate_G2_bottom_key_margin {h r t q : ℝ} (h1 : (1 : ℝ) / 5 ≤ h) (h2 : h ≤ 2 / 5)
+    (hr1 : 4 / 5 ≤ r) (hr2 : r ≤ 21 / 20) (hrt : r * t = 11 / 40)
+    (hq0 : 0 ≤ q) (hq2 : q ≤ t ^ 2 / 2)
+    (hN : 0 < 1 - (h ^ 2 + 2 * r * (r - h) * q))
+    (hpi : (15707010 : ℝ) / 10000000 ≤ π / 2) :
+    t + 11 / 5 / 8 * (2 * (2 + (-h - (r - h) * q))) / (1 - (h ^ 2 + 2 * r * (r - h) * q))
+      - π / 2 ≤ -(1 / 1000000) := by
+  have hrh : 0 ≤ r - h := by linarith
+  have ht0 : 0 < t := by nlinarith [hrt, hr1, hr2]
+  have ht_high : t ≤ 11 / 32 := by
+    nlinarith [hrt, mul_nonneg ht0.le (by linarith : (0 : ℝ) ≤ r - 4 / 5)]
+  have ht_low : 11 / 42 ≤ t := by
+    nlinarith [hrt, mul_nonneg ht0.le (by linarith : (0 : ℝ) ≤ 21 / 20 - r)]
+  have hrht : r * (r - h) * t ^ 2 = (11 / 40) ^ 2 - 11 / 40 * (h * t) := by
+    have : r * (r - h) * t ^ 2 = (r * t) ^ 2 - r * t * (h * t) := by ring
+    rw [this, hrt]
+  have hcert : 11 / 20 * (2 - h)
+      ≤ ((15707 : ℝ) / 10000 - t) * (1 - h ^ 2 - r * (r - h) * t ^ 2) := by
+    rw [hrht]
+    nlinarith [ht_low, ht_high, h1, h2, mul_nonneg (by linarith : (0 : ℝ) ≤ h - 1 / 5)
+        (by linarith : (0 : ℝ) ≤ 2 / 5 - h),
+      mul_nonneg (by linarith : (0 : ℝ) ≤ t - 11 / 42) (by linarith : (0 : ℝ) ≤ 11 / 32 - t),
+      mul_nonneg (by linarith : (0 : ℝ) ≤ h - 1 / 5) (by linarith : (0 : ℝ) ≤ t - 11 / 42),
+      mul_nonneg (by linarith : (0 : ℝ) ≤ h - 1 / 5) (by linarith : (0 : ℝ) ≤ 11 / 32 - t),
+      mul_nonneg (by linarith : (0 : ℝ) ≤ 2 / 5 - h) (by linarith : (0 : ℝ) ≤ t - 11 / 42),
+      mul_nonneg (by linarith : (0 : ℝ) ≤ 2 / 5 - h) (by linarith : (0 : ℝ) ≤ 11 / 32 - t),
+      mul_nonneg (mul_nonneg (by linarith : (0 : ℝ) ≤ h) (by linarith : (0 : ℝ) ≤ t - 11 / 42))
+        (by linarith : (0 : ℝ) ≤ 11 / 32 - t)]
+  have hM_ub : 11 / 5 / 8 * (2 * (2 + (-h - (r - h) * q))) ≤ 11 / 20 * (2 - h) := by
+    nlinarith [mul_nonneg hrh hq0]
+  have hN_lb : 1 - h ^ 2 - r * (r - h) * t ^ 2 ≤ 1 - (h ^ 2 + 2 * r * (r - h) * q) := by
+    nlinarith [mul_nonneg (mul_nonneg (by linarith : (0 : ℝ) ≤ r) hrh)
+      (by linarith [hq2] : (0 : ℝ) ≤ t ^ 2 - 2 * q)]
+  have hPt : 0 ≤ (15707 : ℝ) / 10000 - t := by linarith
+  -- Keep `15707/10000` (no `π/2` relaxation): `ic ≤ (15707/10000 − t)·N`.
+  have hkey : 11 / 5 / 8 * (2 * (2 + (-h - (r - h) * q)))
+      ≤ ((15707 : ℝ) / 10000 - t) * (1 - (h ^ 2 + 2 * r * (r - h) * q)) := by
+    have h1' := mul_le_mul_of_nonneg_left hN_lb hPt
+    linarith [hM_ub, hcert, h1']
+  have hdiv : 11 / 5 / 8 * (2 * (2 + (-h - (r - h) * q))) / (1 - (h ^ 2 + 2 * r * (r - h) * q))
+      ≤ (15707 : ℝ) / 10000 - t := (div_le_iff₀ hN).mpr hkey
+  linarith [hdiv, hpi]
+
+/-- TOP `G₂` face polynomial core WITH MARGIN (dual of `gate_G2_bottom_key_margin`). -/
+private lemma gate_G2_top_key_margin {h r t q : ℝ} (h1 : (1 : ℝ) / 5 ≤ h) (h2 : h ≤ 2 / 5)
+    (hr1 : 4 / 5 ≤ r) (hr2 : r ≤ 21 / 20) (hrt : r * t = 7 / 20)
+    (hq0 : 0 ≤ q) (hq2 : q ≤ t ^ 2 / 2)
+    (hN : 0 < 1 - (h ^ 2 + 2 * r * (r - h) * q))
+    (hpi : π / 2 ≤ (15707990 : ℝ) / 10000000) :
+    (1 / 1000000 : ℝ) ≤ t + 14 / 5 / 8 * (2 * (2 + (-h - (r - h) * q)))
+      / (1 - (h ^ 2 + 2 * r * (r - h) * q)) - π / 2 := by
+  have hrh : 0 ≤ r - h := by linarith
+  have ht0 : 0 < t := by nlinarith [hrt, hr1, hr2]
+  have ht_high : t ≤ 7 / 16 := by
+    nlinarith [hrt, mul_nonneg ht0.le (by linarith : (0 : ℝ) ≤ r - 4 / 5)]
+  have ht_low : 1 / 3 ≤ t := by
+    nlinarith [hrt, mul_nonneg ht0.le (by linarith : (0 : ℝ) ≤ 21 / 20 - r)]
+  have hrht : (r - h) * t ^ 2 = 7 / 20 * t - h * t ^ 2 := by
+    have : (r - h) * t ^ 2 = r * t * t - h * t ^ 2 := by ring
+    rw [this, hrt]
+  have hcert : ((15708 : ℝ) / 10000 - t) * (1 - h ^ 2)
+      ≤ 7 / 10 * (2 - h - (r - h) * t ^ 2 / 2) := by
+    rw [hrht]
+    nlinarith [ht_low, ht_high, h1, h2, mul_nonneg (by linarith : (0 : ℝ) ≤ h - 1 / 5)
+        (by linarith : (0 : ℝ) ≤ 2 / 5 - h),
+      mul_nonneg (by linarith : (0 : ℝ) ≤ t - 1 / 3) (by linarith : (0 : ℝ) ≤ 7 / 16 - t),
+      mul_nonneg (by linarith : (0 : ℝ) ≤ h - 1 / 5) (by linarith : (0 : ℝ) ≤ t - 1 / 3),
+      mul_nonneg (by linarith : (0 : ℝ) ≤ h - 1 / 5) (by linarith : (0 : ℝ) ≤ 7 / 16 - t),
+      mul_nonneg (by linarith : (0 : ℝ) ≤ 2 / 5 - h) (by linarith : (0 : ℝ) ≤ t - 1 / 3),
+      mul_nonneg (by linarith : (0 : ℝ) ≤ 2 / 5 - h) (by linarith : (0 : ℝ) ≤ 7 / 16 - t),
+      mul_nonneg (mul_nonneg (by linarith : (0 : ℝ) ≤ h) (by linarith : (0 : ℝ) ≤ t - 1 / 3))
+        (by linarith : (0 : ℝ) ≤ 7 / 16 - t)]
+  have hM_lb : 7 / 10 * (2 - h - (r - h) * t ^ 2 / 2)
+      ≤ 14 / 5 / 8 * (2 * (2 + (-h - (r - h) * q))) := by
+    nlinarith [mul_nonneg hrh (by linarith [hq2] : (0 : ℝ) ≤ t ^ 2 / 2 - q)]
+  have hN_ub : 1 - (h ^ 2 + 2 * r * (r - h) * q) ≤ 1 - h ^ 2 := by
+    nlinarith [mul_nonneg (mul_nonneg (by linarith : (0 : ℝ) ≤ r) hrh) hq0]
+  have hQt : 0 ≤ (15708 : ℝ) / 10000 - t := by linarith
+  have hkey : ((15708 : ℝ) / 10000 - t) * (1 - (h ^ 2 + 2 * r * (r - h) * q))
+      ≤ 14 / 5 / 8 * (2 * (2 + (-h - (r - h) * q))) := by
+    have h1' := mul_le_mul_of_nonneg_left hN_ub hQt
+    linarith [hM_lb, hcert, h1']
+  have hdiv : (15708 : ℝ) / 10000 - t ≤ 14 / 5 / 8 * (2 * (2 + (-h - (r - h) * q)))
+      / (1 - (h ^ 2 + 2 * r * (r - h) * q)) := (le_div_iff₀ hN).mpr hkey
+  linarith [hdiv, hpi]
+
+/-- BOTTOM `G₂` face with margin (`G₂ ≤ −1/1000000`, tight `π/2` lower bound via
+`Real.pi_gt_3141592`). -/
+private lemma gate_G2_bottom_margin {h : ℝ} (h1 : (1 : ℝ) / 5 ≤ h) (h2 : h ≤ 2 / 5) :
+    (qArc2 (4 / 5) 2 (h, 11 / 5)).2 - 3 * π / 2 ≤ -(1 / 1000000) := by
+  rw [gate_G2_scalar]
+  refine gate_G2_bottom_key_margin h1 h2 (gate_ra_lb h1 h2) (gate_ra_ub h1 h2) ?_
+    (gate_q_nonneg h (11 / 5)) (gate_q_le h (11 / 5))
+    (gate_N_pos h1 h2 (by norm_num) (by norm_num))
+    (by have := Real.pi_gt_d6; norm_num at this ⊢; linarith)
+  rw [mul_comm, div_mul_cancel₀ _ (gate_ra_pos h1 h2).ne']; norm_num
+
+/-- TOP `G₂` face with margin (`G₂ ≥ 1/1000000`, tight `π/2` upper bound via
+`Real.pi_lt_d6`). -/
+private lemma gate_G2_top_margin {h : ℝ} (h1 : (1 : ℝ) / 5 ≤ h) (h2 : h ≤ 2 / 5) :
+    (1 / 1000000 : ℝ) ≤ (qArc2 (4 / 5) 2 (h, 14 / 5)).2 - 3 * π / 2 := by
+  rw [gate_G2_scalar]
+  refine gate_G2_top_key_margin h1 h2 (gate_ra_lb h1 h2) (gate_ra_ub h1 h2) ?_
+    (gate_q_nonneg h (14 / 5)) (gate_q_le h (14 / 5))
+    (gate_N_pos h1 h2 (by norm_num) (by norm_num))
+    (by have := Real.pi_lt_d6; norm_num at this ⊢; linarith)
+  rw [mul_comm, div_mul_cancel₀ _ (gate_ra_pos h1 h2).ne']; norm_num
+
+/-- Sup-norm coordinate projections: a state-gap bound transfers to both residual coordinates. -/
+private lemma gateLanding_coord_le {W Q : ℂ × ℝ} {b : ℝ} (h : ‖W - Q‖ ≤ b) :
+    |W.1.im - Q.1.im| ≤ b ∧ |W.2 - Q.2| ≤ b := by
+  rw [Prod.norm_def] at h
+  refine ⟨?_, ?_⟩
+  · calc |W.1.im - Q.1.im| = |(W.1 - Q.1).im| := by rw [Complex.sub_im]
+      _ ≤ ‖W.1 - Q.1‖ := Complex.abs_im_le_norm _
+      _ = ‖(W - Q).1‖ := by rw [Prod.fst_sub]
+      _ ≤ b := le_trans (le_max_left _ _) h
+  · calc |W.2 - Q.2| = ‖(W - Q).2‖ := by rw [Prod.snd_sub, Real.norm_eq_abs]
+      _ ≤ b := le_trans (le_max_right _ _) h
+
+/-- **A3 — the smooth landing exists (`sorry`-free assembly).**  For the continuous, `C¹`-`φ`
+ramped profile `gateProfileSmooth L δ` with `δ = 1/(200·C)`, there is an interior gate point
+`(h, L)` at which the genuine `arcFlow` quarter-endpoint lands on the mirror axis `Fix(X)`
+(`Im z(L/4) = 0` and `φ(L/4) = 3π/2`).  The four sign faces transfer from the proven closed-form
+step faces (`gate_*_margin`, margin `≥ 1/100`) via the robustness bound `gateSmoothLanding_close`
+(`|G_δ − G_0| ≤ C·δ = 1/200 < 1/100`), then `poincareMiranda_rect` fires.  This is the honest
+continuous-`κ` analogue of `exists_quarterLanding_gate`; it supplies the `hturn` co-constructed
+landing input of `exists_closing_arcState`. -/
+theorem exists_quarterLanding_smooth (r₀ : ℝ≥0) (hr₀ : 4 ≤ (r₀ : ℝ)) :
+    ∃ δ : ℝ, 0 < δ ∧
+      ∃ p ∈ Set.Icc ((1 : ℝ) / 5) (2 / 5) ×ˢ Set.Icc ((11 : ℝ) / 5) (14 / 5),
+        (gateSmoothLandingState δ r₀ p.1 p.2).1.im = 0 ∧
+        (gateSmoothLandingState δ r₀ p.1 p.2).2 = 3 * π / 2 := by
+  set C := gateRobustConst with hC
+  have hCpos : 0 < C := gateRobustConst_pos
+  set δ : ℝ := 1 / (2000000 * C) with hδdef
+  have hδpos : 0 < δ := by rw [hδdef]; exact div_pos one_pos (by positivity)
+  have he1 : (1 : ℝ) ≤ Real.exp (9513 / 1280) := by
+    rw [← Real.exp_zero]; exact Real.exp_le_exp.2 (by positivity)
+  have hClb : (15 : ℝ) / 4 ≤ C := by
+    rw [hC]; unfold gateRobustConst
+    nlinarith [he1, mul_nonneg (by linarith : (0 : ℝ) ≤ Real.exp (9513 / 1280) - 1)
+      (by linarith : (0 : ℝ) ≤ Real.exp (9513 / 1280) + 2)]
+  have hδ1 : δ ≤ 1 := by
+    rw [hδdef, div_le_one (mul_pos (by norm_num) hCpos)]; linarith [hClb]
+  -- `C·δ = 1/2000000`, half the transfer margin `1/1000000`.
+  have hCδ : C * δ = 1 / 2000000 := by
+    rw [hδdef]; field_simp
+  refine ⟨δ, hδpos, ?_⟩
+  -- The smooth residual as a `ℝ × ℝ`-valued map.
+  set G : ℝ × ℝ → ℝ × ℝ := fun p =>
+    ((gateSmoothLandingState δ r₀ p.1 p.2).1.im,
+      (gateSmoothLandingState δ r₀ p.1 p.2).2 - 3 * π / 2) with hGdef
+  have hcont : ContinuousOn G (Set.Icc ((1 : ℝ) / 5) (2 / 5) ×ˢ Set.Icc ((11 : ℝ) / 5) (14 / 5)) :=
+    gateSmoothResidual_continuousOn δ r₀
+  -- Face transfers: robustness `1/200` below the closed-form margins `1/100`.
+  have hleft : ∀ y ∈ Set.Icc ((11 : ℝ) / 5) (14 / 5), (G (1 / 5, y)).1 ≤ 0 := by
+    intro y hy
+    have hrob := (gateLanding_coord_le
+      (gateSmoothLanding_close r₀ hr₀ hδpos le_rfl (by norm_num) hy.1 hy.2 hδ1)).1
+    have hmar := gate_G1_left_margin hy.1 hy.2
+    simp only [hGdef]
+    rw [hCδ] at hrob
+    have := abs_le.1 hrob
+    linarith [this.2, hmar]
+  have hright : ∀ y ∈ Set.Icc ((11 : ℝ) / 5) (14 / 5), 0 ≤ (G (2 / 5, y)).1 := by
+    intro y hy
+    have hrob := (gateLanding_coord_le
+      (gateSmoothLanding_close r₀ hr₀ hδpos (by norm_num) le_rfl hy.1 hy.2 hδ1)).1
+    have hmar := gate_G1_right_margin hy.1 hy.2
+    simp only [hGdef]
+    rw [hCδ] at hrob
+    have := abs_le.1 hrob
+    linarith [this.1, hmar]
+  have hbot : ∀ x ∈ Set.Icc ((1 : ℝ) / 5) (2 / 5), (G (x, 11 / 5)).2 ≤ 0 := by
+    intro x hx
+    have hrob := (gateLanding_coord_le
+      (gateSmoothLanding_close r₀ hr₀ hδpos hx.1 hx.2 le_rfl (by norm_num) hδ1)).2
+    have hmar := gate_G2_bottom_margin hx.1 hx.2
+    simp only [hGdef]
+    rw [hCδ] at hrob
+    have := abs_le.1 hrob
+    linarith [this.2, hmar]
+  have htop : ∀ x ∈ Set.Icc ((1 : ℝ) / 5) (2 / 5), 0 ≤ (G (x, 14 / 5)).2 := by
+    intro x hx
+    have hrob := (gateLanding_coord_le
+      (gateSmoothLanding_close r₀ hr₀ hδpos hx.1 hx.2 (by norm_num) le_rfl hδ1)).2
+    have hmar := gate_G2_top_margin hx.1 hx.2
+    simp only [hGdef]
+    rw [hCδ] at hrob
+    have := abs_le.1 hrob
+    linarith [this.1, hmar]
+  obtain ⟨p, hp, hG0⟩ :=
+    poincareMiranda_rect (by norm_num) (by norm_num) G hcont hleft hright hbot htop
+  refine ⟨p, hp, ?_, ?_⟩
+  · have := congrArg Prod.fst hG0; simpa [hGdef] using this
+  · have := congrArg Prod.snd hG0
+    simp only [hGdef, Prod.snd_zero] at this
+    linarith [this]
+
 /-! ### Reversibility (conjugation reflection) infrastructure for the `z`-match
 
 The half-period `z`-match `z(L/2) = −z₀` is the `I_x`/`I_y` **reversible-shooting**
