@@ -250,9 +250,12 @@ This is the key estimate powering one global Picard–Lindelöf application. (Co
 analogue of `Gluck.SpaceForm.truncatedField_lipschitz`, `Flow.lean:206` /
 `truncatedSpeed_lipschitz`, `Flow.lean:108`; genuinely new work — the field now
 depends on `φ` through `e^{iφ}` as well, and `κ` sits in the numerator.) -/
-lemma arcField_lipschitz {κ : ℝ → ℝ} {R M : ℝ} (hR : 0 ≤ R) (hR1 : R < 1)
+lemma arcField_lipschitzWith {κ : ℝ → ℝ} {R M : ℝ} (hR : 0 ≤ R) (hR1 : R < 1)
     (hM : ∀ σ, |κ σ| ≤ M) :
-    ∃ L : ℝ≥0, ∀ σ, LipschitzWith L (fun W : ℂ × ℝ => arcField κ R σ W) := by
+    ∀ σ, LipschitzWith
+      (max 1 (Real.toNNReal
+        (2 * (1 + R) / (1 - R ^ 2) + 2 * R * (2 * (M + R)) / (1 - R ^ 2) ^ 2)))
+      (fun W : ℂ × ℝ => arcField κ R σ W) := by
   have hδ : 0 < 1 - R ^ 2 := by nlinarith
   have hM0 : 0 ≤ M := le_trans (abs_nonneg _) (hM 0)
   set δ := 1 - R ^ 2 with hδdef
@@ -343,13 +346,20 @@ lemma arcField_lipschitz {κ : ℝ → ℝ} {R M : ℝ} (hR : 0 ≤ R) (hR1 : R 
         ≤ 2 * (1 + R) / δ * dist W W' + 2 * R * B / δ ^ 2 * dist W W' := add_le_add e1 e2
       _ = K2r * dist W W' := by rw [hK2r]; ring
   -- combine exp and speed components
-  refine ⟨max 1 K2r.toNNReal, fun σ => ?_⟩
+  intro σ
   have hf1 : LipschitzWith 1 (fun W : ℂ × ℝ => Complex.exp ((W.2 : ℂ) * Complex.I)) := by
     refine LipschitzWith.of_dist_le_mul fun W W' => ?_
     have h := expCircle_lipschitz.dist_le_mul W.2 W'.2
     rw [NNReal.coe_one, one_mul] at h ⊢
     exact h.trans (by rw [Prod.dist_eq]; exact le_max_right _ _)
   exact hf1.prodMk (speedLip σ)
+
+/-- Existential form of `arcField_lipschitzWith` (the explicit constant is
+irrelevant for Picard–Lindelöf; only its existence matters). -/
+lemma arcField_lipschitz {κ : ℝ → ℝ} {R M : ℝ} (hR : 0 ≤ R) (hR1 : R < 1)
+    (hM : ∀ σ, |κ σ| ≤ M) :
+    ∃ L : ℝ≥0, ∀ σ, LipschitzWith L (fun W : ℂ × ℝ => arcField κ R σ W) :=
+  ⟨_, arcField_lipschitzWith hR hR1 hM⟩
 
 /-- **The reconstruction field is bounded** by `B = max 1 (2·(M + R)/(1 − R²))`
 under a curvature bound `|κ| ≤ M`: the `e^{iφ}` component has norm `1`, and the
@@ -2880,6 +2890,318 @@ lemma gateProfileSmooth_abs_le (L δ σ : ℝ) : |gateProfileSmooth L δ σ| ≤
 lemma gateProfileSmooth_continuous (L δ : ℝ) : Continuous (gateProfileSmooth L δ) :=
   arcRampProfile_continuous _ _ _ _
 
+/-! ### Model-arc confinement helpers (Fork A leg confinement)
+
+The reference model `arcModelConst K z₀ φ₀` is a genuine `arcField (fun _ => K)` solution
+only on windows where it stays confined (`‖z‖ ≤ R`).  Two clean confinement routes:
+the **whole-circle bound** `‖z(σ)‖ ≤ ‖c‖ + |r|` (centre `c`, radius `r`), sharp for the
+tightly-curved second arc; and, for the gently-curved first arc, the **monotone endpoint
+bound** (`‖z(σ)‖² = (h−r)² + r² + 2(h−r)r·cos(σ/r)` is increasing on `[0, θ]` for `θ ≤ π`). -/
+
+/-- **Whole-circle norm bound.**  With centre `c = z₀ + r·i·e^{iφ₀}` and radius `r`,
+`z(σ) = c − r·i·e^{iφ₀}·e^{iσ/r}` and `‖i·e^{iφ₀}·e^{iσ/r}‖ = 1`, so the reconstruction
+stays within `‖c‖ + |r|` of the origin. -/
+private lemma arcModelConst_norm_le_center (K : ℝ) (z₀ : ℂ) (φ₀ σ : ℝ) :
+    ‖(arcModelConst K z₀ φ₀ σ).1‖
+      ≤ ‖z₀ + (arcModelRadius K z₀ φ₀ : ℂ) * Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I)‖
+        + |arcModelRadius K z₀ φ₀| := by
+  set r := arcModelRadius K z₀ φ₀ with hr
+  have hz : (arcModelConst K z₀ φ₀ σ).1
+      = (z₀ + (r : ℂ) * Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I))
+          - (r : ℂ) * Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I)
+            * Complex.exp (((σ / r : ℝ) : ℂ) * Complex.I) := by
+    simp only [arcModelConst, ← hr]; ring
+  rw [hz]
+  refine (norm_sub_le _ _).trans ?_
+  gcongr
+  rw [norm_mul, norm_mul, norm_mul, Complex.norm_I, Complex.norm_real,
+    Complex.norm_exp_ofReal_mul_I, Complex.norm_exp_ofReal_mul_I, Real.norm_eq_abs]
+  exact le_of_eq (by ring)
+
+/-- **Centre-norm identity.**  For the model radius `r = (1 − ‖z₀‖²)/(2(K + ⟪z₀, i·e^{iφ₀}⟫))`
+(denominator nonzero) the Euclidean centre satisfies `‖z₀ + r·i·e^{iφ₀}‖² = 1 + r² − 2rK`
+(the doc's `|z_c|² = 1 + r² − 2rK`). -/
+private lemma arcModelConst_center_normSq {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
+    (hden : K + ⟪z₀, Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I)⟫_ℝ ≠ 0) :
+    ‖z₀ + (arcModelRadius K z₀ φ₀ : ℂ) * Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I)‖ ^ 2
+      = 1 + arcModelRadius K z₀ φ₀ ^ 2 - 2 * arcModelRadius K z₀ φ₀ * K := by
+  set v : ℂ := Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I) with hv
+  set r := arcModelRadius K z₀ φ₀ with hr
+  have hvnorm : ‖v‖ = 1 := by
+    rw [hv, norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul]
+  have hrv : (r : ℂ) * Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I) = (r : ℂ) * v := by
+    rw [hv]; ring
+  have hrdef : r * (2 * (K + ⟪z₀, v⟫_ℝ)) = 1 - ‖z₀‖ ^ 2 := by
+    have hne : 2 * (K + ⟪z₀, v⟫_ℝ) ≠ 0 := mul_ne_zero two_ne_zero hden
+    rw [hr, arcModelRadius, hv, div_mul_cancel₀ _ hne]
+  have hexpand : ‖z₀ + (r : ℂ) * v‖ ^ 2
+      = ‖z₀‖ ^ 2 + 2 * (r * ⟪z₀, v⟫_ℝ) + r ^ 2 * ‖v‖ ^ 2 := by
+    rw [← Complex.real_smul, norm_add_sq_real, real_inner_smul_right, norm_smul]
+    simp only [Real.norm_eq_abs, mul_pow, sq_abs]
+  rw [hrv, hexpand, hvnorm]
+  nlinarith [hrdef]
+
+/-- The general-window squared norm of the first arc (`z₀ = i·h`, `φ₀ = π`), obtained
+from the `L/8`-endpoint formula `qArc1_fst_normSq` by the substitution `L = 8σ`:
+`‖z(σ)‖² = h² + 2r(r−h)(1 − cos(σ/r))`, `r = arcModelRadius a (i·h) π`. -/
+private lemma arcModelConst_ihpi_normSq (a h σ : ℝ) :
+    ‖(arcModelConst a (Complex.I * (h : ℂ)) π σ).1‖ ^ 2 =
+      h ^ 2 + 2 * arcModelRadius a (Complex.I * (h : ℂ)) π
+          * (arcModelRadius a (Complex.I * (h : ℂ)) π - h)
+          * (1 - Real.cos (σ / arcModelRadius a (Complex.I * (h : ℂ)) π)) := by
+  have hq := qArc1_fst_normSq a h (8 * σ)
+  simp only [qArc1, show (8 * σ) / 8 = σ by ring] at hq
+  exact hq
+
+/-- **First-arc confinement over the gate window.**  For `a = 4/5`, `h ∈ [1/5, 2/5]`,
+`L ∈ [11/5, 14/5]` and `σ ∈ [0, L/8]`, the gently-curved first arc stays within
+`‖z(σ)‖ ≤ 3/5`.  The squared norm `h² + 2r(r−h)(1 − cos(σ/r))` is monotone in `σ` (cosine
+antitone on `[0, π]`), so it is maximised at the endpoint `‖qArc1‖² ≤ 9/25`. -/
+private lemma gate_arc1_confined {h L σ : ℝ} (h1 : (1 : ℝ) / 5 ≤ h) (h2 : h ≤ 2 / 5)
+    (hL0 : 0 ≤ L) (hL2 : L ≤ 14 / 5) (hσ0 : 0 ≤ σ) (hσ : σ ≤ L / 8) :
+    ‖(arcModelConst (4 / 5) (Complex.I * (h : ℂ)) π σ).1‖ ≤ 3 / 5 := by
+  set r := arcModelRadius (4 / 5) (Complex.I * (h : ℂ)) π with hr
+  have hrl := gate_ra_lb h1 h2
+  have hru := gate_ra_ub h1 h2
+  have hrpos := gate_ra_pos h1 h2
+  -- angle bounds
+  have hσr0 : 0 ≤ σ / r := div_nonneg hσ0 hrpos.le
+  have hthaub : (L / 8) / r ≤ 7 / 16 := by
+    refine le_trans (gate_tha_ub h1 h2 hL0) ?_
+    rw [div_le_iff₀ (by norm_num : (0 : ℝ) < 4 / 5)]; nlinarith
+  have hσr_le : σ / r ≤ (L / 8) / r := (div_le_div_iff_of_pos_right hrpos).mpr hσ
+  have hπ : (L / 8) / r ≤ π := le_trans hthaub (by linarith [Real.pi_gt_three])
+  -- cosine antitone ⇒ squared-norm monotone
+  have hcos : Real.cos ((L / 8) / r) ≤ Real.cos (σ / r) :=
+    Real.cos_le_cos_of_nonneg_of_le_pi hσr0 hπ hσr_le
+  have hnsq : ‖(arcModelConst (4 / 5) (Complex.I * (h : ℂ)) π σ).1‖ ^ 2 ≤ 9 / 25 := by
+    rw [arcModelConst_ihpi_normSq, ← hr]
+    have h1' : (0 : ℝ) ≤ 1 - Real.cos (σ / r) := by linarith [Real.cos_le_one (σ / r)]
+    have hqu : 1 - Real.cos ((L / 8) / r) ≤ 1 / 10 := gate_q_ub h1 h2 hL0 hL2
+    have hb : r * (r - h) * (1 - Real.cos (σ / r)) ≤ 21 / 20 * (17 / 20) * (1 / 10) := by
+      apply mul_le_mul _ (by linarith [hcos, hqu]) h1' (by positivity)
+      apply mul_le_mul hru (by linarith) (by linarith) (by norm_num)
+    nlinarith [hb, h1, h2]
+  nlinarith [norm_nonneg (arcModelConst (4 / 5) (Complex.I * (h : ℂ)) π σ).1, hnsq]
+
+/-- Second-arc radius `r_c` lies in `[8/35, 3/5]` over the gate rectangle (numerically
+`r_c ∈ [0.244, 0.257]`); the lower bound `8/35` is exactly what the whole-circle
+confinement `‖c₂‖ ≤ 3/5 − r_c` needs. -/
+private lemma gate_rc_bounds {h L : ℝ} (h1 : (1 : ℝ) / 5 ≤ h) (h2 : h ≤ 2 / 5)
+    (hL0 : 0 ≤ L) (hL2 : L ≤ 14 / 5) :
+    (8 : ℝ) / 35 ≤ arcModelRadius 2 (qArc1 (4 / 5) (h, L)).1 (qArc1 (4 / 5) (h, L)).2 ∧
+      arcModelRadius 2 (qArc1 (4 / 5) (h, L)).1 (qArc1 (4 / 5) (h, L)).2 ≤ 3 / 5 := by
+  rw [arcModelRadius_qArc2]
+  set ra := arcModelRadius (4 / 5) (Complex.I * (h : ℂ)) π with hra
+  set q := 1 - Real.cos ((L / 8) / ra) with hq
+  have hrl := gate_ra_lb h1 h2
+  have hru := gate_ra_ub h1 h2
+  have hrpos := gate_ra_pos h1 h2
+  have hqn := gate_q_nonneg h L
+  have hden : 0 < 2 - h - (ra - h) * q := gate_innerc_pos h1 h2 hL0 hL2
+  have hden' : (0 : ℝ) < 2 * (2 + (-h - (ra - h) * q)) := by nlinarith [hden]
+  -- Tight Taylor bound `q ≤ θ_a²/2` rewritten as the polynomial `2·ra²·q ≤ (L/8)²`.
+  have hqt : 2 * ra ^ 2 * q ≤ (L / 8) ^ 2 := by
+    have hql := gate_q_le h L
+    rw [← hra, ← hq, div_pow, div_div, le_div_iff₀ (by positivity)] at hql
+    nlinarith [hql]
+  have hLsq : (L / 8) ^ 2 ≤ 49 / 400 := by nlinarith [hL2, hL0]
+  -- `ra·q ≤ 49/640` and `(ra−h)·q ≤ 49/640` from the tight bound (using `ra ≥ 4/5`).
+  have hraq : ra * q ≤ 49 / 640 := by nlinarith [hqt, hLsq, hrl, hqn, mul_nonneg hrpos.le hqn]
+  refine ⟨?_, ?_⟩
+  · rw [le_div_iff₀ hden']
+    nlinarith [hqt, hLsq, hraq, hrl, hru, h1, h2, hqn,
+      mul_nonneg (by linarith : (0:ℝ) ≤ ra - h) hqn, mul_nonneg hrpos.le hqn,
+      mul_nonneg (mul_nonneg hrpos.le (by linarith : (0:ℝ) ≤ ra - h)) hqn]
+  · rw [div_le_iff₀ hden']
+    nlinarith [hqt, hLsq, hraq, hrl, hru, h1, h2, hqn,
+      mul_nonneg (mul_nonneg hrpos.le (by linarith : (0:ℝ) ≤ ra - h)) hqn]
+
+/-- **Second-arc confinement over the gate window.**  For `a = 4/5`, `c = 2`,
+`h ∈ [1/5, 2/5]`, `L ∈ [11/5, 14/5]` and `σ ∈ [0, L/8]`, the tightly-curved second arc
+stays within `‖z(σ)‖ ≤ 3/5` via the whole-circle bound `‖z(σ)‖ ≤ ‖c₂‖ + r_c ≤ 3/5`
+(using `‖c₂‖² = 1 + r_c² − 4r_c` and `r_c ≥ 8/35`). -/
+private lemma gate_arc2_confined {h L σ : ℝ} (h1 : (1 : ℝ) / 5 ≤ h) (h2 : h ≤ 2 / 5)
+    (hL0 : 0 ≤ L) (hL2 : L ≤ 14 / 5) :
+    ‖(arcModelConst 2 (qArc1 (4 / 5) (h, L)).1 (qArc1 (4 / 5) (h, L)).2 σ).1‖ ≤ 3 / 5 := by
+  set W₁ := qArc1 (4 / 5) (h, L) with hW₁
+  set rc := arcModelRadius 2 W₁.1 W₁.2 with hrc
+  obtain ⟨hrc_lo, hrc_hi⟩ := gate_rc_bounds h1 h2 hL0 hL2
+  rw [← hW₁, ← hrc] at hrc_lo hrc_hi
+  have hrc0 : 0 < rc := lt_of_lt_of_le (by norm_num) hrc_lo
+  -- inner-product denominator is nonzero (so the centre identity applies)
+  have hden : (2 : ℝ) + ⟪W₁.1, Complex.I * Complex.exp ((W₁.2 : ℂ) * Complex.I)⟫_ℝ ≠ 0 := by
+    rw [hW₁, qArc1_inner]
+    have := gate_innerc_pos h1 h2 hL0 hL2
+    intro hc; nlinarith [this]
+  have hcsq : ‖W₁.1 + (rc : ℂ) * Complex.I * Complex.exp ((W₁.2 : ℂ) * Complex.I)‖ ^ 2
+      = 1 + rc ^ 2 - 2 * rc * 2 := by
+    rw [hrc]; exact arcModelConst_center_normSq hden
+  have hcnorm : ‖W₁.1 + (rc : ℂ) * Complex.I * Complex.exp ((W₁.2 : ℂ) * Complex.I)‖
+      ≤ 3 / 5 - rc := by
+    have hn := norm_nonneg (W₁.1 + (rc : ℂ) * Complex.I * Complex.exp ((W₁.2 : ℂ) * Complex.I))
+    nlinarith [hcsq, hn, hrc_lo, hrc_hi]
+  have hle := arcModelConst_norm_le_center 2 W₁.1 W₁.2 σ
+  rw [← hrc] at hle
+  rw [abs_of_pos hrc0] at hle
+  linarith [hle, hcnorm]
+
+/-- **`L¹` bound, flat head.**  If `g` is continuous, `|g| ≤ B`, and `g = 0` on `[0, p]`
+(support in the tail `[p, a]`), then `∫₀^a |g| ≤ B·(a − p)`. -/
+private lemma integral_abs_le_of_flat_head {g : ℝ → ℝ} {a p B : ℝ}
+    (h0p : 0 ≤ p) (hpa : p ≤ a) (hgc : Continuous g)
+    (hbound : ∀ s, |g s| ≤ B) (hzero : ∀ s ∈ Set.Icc 0 p, g s = 0) :
+    ∫ s in (0 : ℝ)..a, |g s| ≤ B * (a - p) := by
+  have hint : ∀ x y : ℝ, IntervalIntegrable (fun s => |g s|) MeasureTheory.volume x y :=
+    fun x y => (hgc.abs).intervalIntegrable x y
+  have hsplit : ∫ s in (0 : ℝ)..a, |g s|
+      = (∫ s in (0 : ℝ)..p, |g s|) + ∫ s in p..a, |g s| :=
+    (intervalIntegral.integral_add_adjacent_intervals (hint 0 p) (hint p a)).symm
+  have hlo0 : ∫ s in (0 : ℝ)..p, |g s| = 0 := by
+    rw [intervalIntegral.integral_congr (g := fun _ => (0 : ℝ)) ?_, intervalIntegral.integral_zero]
+    intro s hs
+    rw [Set.uIcc_of_le h0p] at hs
+    simp [hzero s hs]
+  have hmid : ∫ s in p..a, |g s| ≤ B * (a - p) := by
+    calc ∫ s in p..a, |g s| ≤ ∫ _s in p..a, B :=
+          intervalIntegral.integral_mono_on hpa (hint p a) intervalIntegrable_const
+            (fun s _ => hbound s)
+      _ = B * (a - p) := by rw [intervalIntegral.integral_const]; ring
+  rw [hsplit, hlo0]; linarith [hmid]
+
+/-- **`L¹` bound, flat tail.**  If `g` is continuous, `|g| ≤ B`, and `g = 0` on `[q, a]`
+(support in the head `[0, q]`), then `∫₀^a |g| ≤ B·q`. -/
+private lemma integral_abs_le_of_flat_tail {g : ℝ → ℝ} {a q B : ℝ}
+    (h0q : 0 ≤ q) (hqa : q ≤ a) (hgc : Continuous g)
+    (hbound : ∀ s, |g s| ≤ B) (hzero : ∀ s ∈ Set.Icc q a, g s = 0) :
+    ∫ s in (0 : ℝ)..a, |g s| ≤ B * q := by
+  have hint : ∀ x y : ℝ, IntervalIntegrable (fun s => |g s|) MeasureTheory.volume x y :=
+    fun x y => (hgc.abs).intervalIntegrable x y
+  have hsplit : ∫ s in (0 : ℝ)..a, |g s|
+      = (∫ s in (0 : ℝ)..q, |g s|) + ∫ s in q..a, |g s| :=
+    (intervalIntegral.integral_add_adjacent_intervals (hint 0 q) (hint q a)).symm
+  have hhi0 : ∫ s in q..a, |g s| = 0 := by
+    rw [intervalIntegral.integral_congr (g := fun _ => (0 : ℝ)) ?_, intervalIntegral.integral_zero]
+    intro s hs
+    rw [Set.uIcc_of_le hqa] at hs
+    simp [hzero s hs]
+  have hhead : ∫ s in (0 : ℝ)..q, |g s| ≤ B * q := by
+    calc ∫ s in (0 : ℝ)..q, |g s| ≤ ∫ _s in (0 : ℝ)..q, B :=
+          intervalIntegral.integral_mono_on h0q (hint 0 q) intervalIntegrable_const
+            (fun s _ => hbound s)
+      _ = B * q := by rw [intervalIntegral.integral_const]; ring
+  rw [hsplit, hhi0]; linarith [hhead]
+
+/-- **Leg-1 curvature `L¹` gap.**  The smooth profile differs from the constant `4/5`
+only on the ramp `[L/8 − δ/2, L/8]` (width `δ/2`, gap `≤ 6/5`), so
+`∫₀^{L/8} |κ_δ − 4/5| ≤ (3/5)·δ`.  (Needs `δ ≤ L/4` so the flat region is nonempty.) -/
+private lemma gate_L1_leg1 {L δ : ℝ} (hL : 0 < L) (hδ : 0 < δ) (hfit : δ ≤ L / 4) :
+    ∫ s in (0 : ℝ)..(L / 8), |gateProfileSmooth L δ s - 4 / 5| ≤ 3 / 5 * δ := by
+  have hbound : ∀ s, |gateProfileSmooth L δ s - 4 / 5| ≤ 6 / 5 := by
+    intro s; rw [abs_le]
+    have hm := arcRampProfile_mem (a := (4 : ℝ) / 5) (c := 2) (L := L) (δ := δ) (by norm_num) s
+    unfold gateProfileSmooth; constructor <;> linarith [hm.1, hm.2]
+  have hzero : ∀ s ∈ Set.Icc (0 : ℝ) (L / 8 - δ / 2), gateProfileSmooth L δ s - 4 / 5 = 0 := by
+    intro s hs; rw [Set.mem_Icc] at hs
+    rw [gateProfileSmooth_eq_a hL hδ hs.1 hs.2, sub_self]
+  have hle := integral_abs_le_of_flat_head (g := fun s => gateProfileSmooth L δ s - 4 / 5)
+    (by linarith : (0 : ℝ) ≤ L / 8 - δ / 2) (by linarith : L / 8 - δ / 2 ≤ L / 8)
+    ((gateProfileSmooth_continuous L δ).sub continuous_const) hbound hzero
+  calc (∫ s in (0 : ℝ)..(L / 8), |gateProfileSmooth L δ s - 4 / 5|)
+      ≤ 6 / 5 * (L / 8 - (L / 8 - δ / 2)) := hle
+    _ = 3 / 5 * δ := by ring
+
+/-- **Leg-2 curvature `L¹` gap (shifted).**  The shifted profile `κ_δ(L/8 + ·)` differs
+from the constant `2` only on the ramp `[0, δ/2]` (width `δ/2`, gap `≤ 6/5`), so
+`∫₀^{L/8} |κ_δ(L/8+s) − 2| ≤ (3/5)·δ`. -/
+private lemma gate_L1_leg2 {L δ : ℝ} (hL : 0 < L) (hδ : 0 < δ) (hfit : δ ≤ L / 4) :
+    ∫ s in (0 : ℝ)..(L / 8), |gateProfileSmooth L δ (L / 8 + s) - 2| ≤ 3 / 5 * δ := by
+  have hbound : ∀ s, |gateProfileSmooth L δ (L / 8 + s) - 2| ≤ 6 / 5 := by
+    intro s; rw [abs_le]
+    have hm := arcRampProfile_mem (a := (4 : ℝ) / 5) (c := 2) (L := L) (δ := δ) (by norm_num)
+      (L / 8 + s)
+    unfold gateProfileSmooth; constructor <;> linarith [hm.1, hm.2]
+  have hzero : ∀ s ∈ Set.Icc (δ / 2) (L / 8), gateProfileSmooth L δ (L / 8 + s) - 2 = 0 := by
+    intro s hs; rw [Set.mem_Icc] at hs
+    rw [gateProfileSmooth_eq_c hL hδ (by linarith [hs.1]) (by linarith [hs.2]), sub_self]
+  have hcont : Continuous (fun s => gateProfileSmooth L δ (L / 8 + s) - 2) :=
+    ((gateProfileSmooth_continuous L δ).comp (continuous_const.add continuous_id)).sub
+      continuous_const
+  have hle := integral_abs_le_of_flat_tail (g := fun s => gateProfileSmooth L δ (L / 8 + s) - 2)
+    (by positivity : (0 : ℝ) ≤ δ / 2) (by linarith : δ / 2 ≤ L / 8) hcont hbound hzero
+  calc (∫ s in (0 : ℝ)..(L / 8), |gateProfileSmooth L δ (L / 8 + s) - 2|)
+      ≤ 6 / 5 * (δ / 2) := hle
+    _ = 3 / 5 * δ := by ring
+
+/-- **`L¹`-Grönwall trajectory bound (exponential form).**  Two `arcField` solutions with
+`L¹`-close curvatures `κ, κ'` stay close: `‖W t − Ws t‖ ≤ exp(Lip·L)·(‖W 0 − Ws 0‖ +
+2/(1−R²)·∫₀^L |κ − κ'|)`.  Direct combination of `arcTrajectory_diff_bound` with the
+`gronwall_L1_drive` continuous-dependence estimate (as in `arcConfined_of_reference`). -/
+private lemma arcTrajectory_gronwall {κ κ' : ℝ → ℝ} {R L : ℝ} {Lip : ℝ≥0}
+    (hR : 0 ≤ R) (hR1 : R < 1) (hL : 0 ≤ L) (hκ : Continuous κ) (hκ' : Continuous κ')
+    (hLip : ∀ σ, LipschitzWith Lip (fun W : ℂ × ℝ => arcField κ R σ W))
+    {W Ws : ℝ → ℂ × ℝ}
+    (hW : ∀ σ ∈ Set.Icc (0 : ℝ) L, HasDerivWithinAt W (arcField κ R σ (W σ)) (Set.Icc 0 L) σ)
+    (hWs : ∀ σ ∈ Set.Icc (0 : ℝ) L, HasDerivWithinAt Ws (arcField κ' R σ (Ws σ)) (Set.Icc 0 L) σ)
+    {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) L) :
+    ‖W t - Ws t‖ ≤ Real.exp ((Lip : ℝ) * L) *
+      (‖W 0 - Ws 0‖ + 2 / (1 - R ^ 2) * ∫ σ in (0 : ℝ)..L, |κ σ - κ' σ|) := by
+  have hd : 0 < 1 - R ^ 2 := by nlinarith
+  have hM0 : (0 : ℝ) ≤ 2 / (1 - R ^ 2) := by positivity
+  have hWc := HasDerivWithinAt.continuousOn hW
+  have hWsc := HasDerivWithinAt.continuousOn hWs
+  have hFW : ContinuousOn (fun s => arcField κ R s (W s)) (Set.Icc 0 L) :=
+    Continuous.comp_continuousOn' (arcField_continuous hκ hR hR1) (continuousOn_id.prodMk hWc)
+  have hFWs : ContinuousOn (fun s => arcField κ' R s (Ws s)) (Set.Icc 0 L) :=
+    Continuous.comp_continuousOn' (arcField_continuous hκ' hR hR1) (continuousOn_id.prodMk hWsc)
+  have key : ∀ σ ∈ Set.Icc (0 : ℝ) L, ‖W σ - Ws σ‖ ≤ ‖W 0 - Ws 0‖
+      + ∫ s in (0 : ℝ)..σ, ((Lip : ℝ) * ‖W s - Ws s‖ + 2 / (1 - R ^ 2) * |κ s - κ' s|) :=
+    fun σ hσ => arcTrajectory_diff_bound hR hR1 hκ hκ' hLip hWc hWsc hFW hFWs hW hWs hσ
+  have hgronwall := gronwall_L1_drive hL Lip.coe_nonneg (norm_nonneg (W 0 - Ws 0))
+    (hWc.sub hWsc).norm (continuous_const.mul (hκ.sub hκ').abs).continuousOn
+    (fun t _ => norm_nonneg _) (fun t _ => mul_nonneg hM0 (abs_nonneg _)) key t ht
+  simp only [Pi.mul_apply] at hgronwall
+  rwa [intervalIntegral.integral_const_mul] at hgronwall
+
+/-- The constant-curvature model is an `arcField (fun _ => K)` solution on any confined
+window (`HasDerivWithinAt` form, the derivative input required by `arcTrajectory_gronwall`).
+Extracted from the body of `arcModelConst_eq_arcFlow`. -/
+private lemma arcModelConst_hasDerivWithinAt {K R L : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
+    (hr : arcModelRadius K z₀ φ₀ ≠ 0) (hR1 : R < 1)
+    (hconf : ∀ σ ∈ Set.Icc (0 : ℝ) L, ‖(arcModelConst K z₀ φ₀ σ).1‖ ≤ R) :
+    ∀ σ ∈ Set.Icc (0 : ℝ) L, HasDerivWithinAt (fun t => arcModelConst K z₀ φ₀ t)
+      (arcField (fun _ => K) R σ (arcModelConst K z₀ φ₀ σ)) (Set.Icc 0 L) σ := by
+  intro σ hσ
+  have hle := hconf σ hσ
+  have hconfσ : (1 : ℝ) - ‖(arcModelConst K z₀ φ₀ σ).1‖ ^ 2 ≠ 0 := by
+    nlinarith [norm_nonneg (arcModelConst K z₀ φ₀ σ).1, hle, hR1]
+  obtain ⟨hz, hφ⟩ := arcModelConst_solves hr σ hconfσ
+  have harc : arcField (fun _ => K) R σ (arcModelConst K z₀ φ₀ σ)
+      = (Complex.exp (((arcModelConst K z₀ φ₀ σ).2 : ℂ) * Complex.I),
+          arcAngleSpeed (fun _ => K) σ (arcModelConst K z₀ φ₀ σ).1
+            (arcModelConst K z₀ φ₀ σ).2) := by
+    simp only [arcField, truncatedArcAngleSpeed_eq hle]
+  rw [harc]
+  exact (hz.prodMk hφ).hasDerivWithinAt
+
+/-- Reparametrisation of an `arcFlow` trajectory by the shift `s ↦ b + s`, turning a
+solution on `[0, L]` at `b + σ` into a solution on `[0, L/8]` at `σ` (used to run leg 2
+of the two-leg Grönwall over `[L/8, L/4]`). -/
+private lemma hasDerivWithinAt_shift {Φ : ℝ → ℂ × ℝ} {v : ℂ × ℝ} {b L σ : ℝ}
+    (hmaps : Set.MapsTo (fun s => b + s) (Set.Icc 0 (L / 8)) (Set.Icc 0 L))
+    (hd : HasDerivWithinAt Φ v (Set.Icc 0 L) (b + σ)) :
+    HasDerivWithinAt (fun s => Φ (b + s)) v (Set.Icc 0 (L / 8)) σ := by
+  have hshift : HasDerivWithinAt (fun s => b + s) 1 (Set.Icc 0 (L / 8)) σ := by
+    simpa using (hasDerivWithinAt_id σ (Set.Icc 0 (L / 8))).const_add b
+  have h := hd.scomp σ hshift hmaps
+  rw [one_smul] at h
+  exact h
+
+/-- The model at window `0` is its start point `(z₀, φ₀)`. -/
+private lemma arcModelConst_zero (K : ℝ) (z₀ : ℂ) (φ₀ : ℝ) :
+    arcModelConst K z₀ φ₀ 0 = (z₀, φ₀) := by
+  simp [arcModelConst]
+
 lemma gateProfileSmooth_even (L δ σ : ℝ) :
     gateProfileSmooth L δ (-σ) = gateProfileSmooth L δ σ := arcRampProfile_even _ _ _ _ _
 
@@ -2935,22 +3257,420 @@ model `arcModelConst` (identified with a genuine `arcField` solution via
 `arcModelConst_eq_arcFlow`), using `∫ |κ_δ − κ_step| ≤ (6/5)·δ` on the ramp; compose. -/
 lemma gateSmoothLanding_close (r₀ : ℝ≥0) (hr₀ : 4 ≤ (r₀ : ℝ)) {δ h L : ℝ}
     (hδ : 0 < δ) (hh1 : (1 : ℝ) / 5 ≤ h) (hh2 : h ≤ 2 / 5)
-    (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) (hδL : δ ≤ 1) :
+    (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) (hδfit : δ ≤ L / 4) :
     ‖gateSmoothLandingState δ r₀ h L - qArc2 (4 / 5) 2 (h, L)‖ ≤ gateRobustConst * δ := by
-  sorry
+  have hLpos : (0 : ℝ) < L := by linarith
+  have hL0 : (0 : ℝ) ≤ L := hLpos.le
+  have hL8 : (0 : ℝ) ≤ L / 8 := by linarith
+  have hR : (0 : ℝ) ≤ 3 / 5 := by norm_num
+  have hR1 : (3 : ℝ) / 5 < 1 := by norm_num
+  set κ := gateProfileSmooth L δ with hκdef
+  have hκc : Continuous κ := gateProfileSmooth_continuous L δ
+  have hκabs : ∀ σ, |κ σ| ≤ 2 := gateProfileSmooth_abs_le L δ
+  set W₀ : ℂ × ℝ := (Complex.I * (h : ℂ), π) with hW₀def
+  have hW₀mem : W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀ := by
+    rw [Metric.mem_closedBall, dist_zero_right, hW₀def, Prod.norm_def]
+    have e1 : ‖Complex.I * (h : ℂ)‖ = |h| := by
+      rw [Complex.norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Real.norm_eq_abs]
+    have e2 : ‖(π : ℝ)‖ = π := by rw [Real.norm_eq_abs, abs_of_pos Real.pi_pos]
+    rw [e1, e2]
+    have hmx : max |h| π ≤ 4 := by
+      refine max_le ?_ ?_
+      · rw [abs_of_nonneg (by linarith : (0 : ℝ) ≤ h)]; linarith
+      · linarith [Real.pi_le_four]
+    linarith [hmx, hr₀]
+  obtain ⟨hf0, hfderiv⟩ := arcFlow_spec hκc hR hR1 hL0 hκabs r₀ hW₀mem
+  set Φ : ℝ → ℂ × ℝ := fun σ => arcFlow κ (3 / 5) L 2 r₀ (W₀, σ) with hΦdef
+  have hΦ0 : Φ 0 = W₀ := hf0
+  have hgoal_eq : gateSmoothLandingState δ r₀ h L = Φ (L / 4) := rfl
+  -- Lipschitz constant (same value `1295/64` for `κ` and its `L/8`-shift).
+  have hLip := arcField_lipschitzWith hR hR1 hκabs
+  set Lg : ℝ≥0 := max 1 (Real.toNNReal (2 * (1 + 3 / 5) / (1 - (3 / 5 : ℝ) ^ 2)
+    + 2 * (3 / 5) * (2 * (2 + 3 / 5)) / (1 - (3 / 5) ^ 2) ^ 2)) with hLgdef
+  have hLgval : (Lg : ℝ) = 1295 / 64 := by
+    rw [hLgdef, NNReal.coe_max, NNReal.coe_one, Real.coe_toNNReal _ (by norm_num)]; norm_num
+  set e : ℝ := Real.exp ((Lg : ℝ) * (L / 8)) with hedef
+  set E : ℝ := Real.exp (9513 / 1280) with hEdef
+  have heE : e ≤ E := by
+    rw [hedef, hEdef]; apply Real.exp_le_exp.mpr; rw [hLgval]; nlinarith [hL2, hL0]
+  have he1 : (1 : ℝ) ≤ e := by
+    rw [hedef, ← Real.exp_zero]; apply Real.exp_le_exp.mpr; rw [hLgval]; positivity
+  -- LEG 1: `Φ` vs the confined constant-`4/5` model, same start `W₀`.
+  set M1 : ℝ → ℂ × ℝ := fun σ => arcModelConst (4 / 5) W₀.1 π σ with hM1def
+  have hra_ne : arcModelRadius (4 / 5) W₀.1 π ≠ 0 := by
+    rw [hW₀def]; exact ne_of_gt (gate_ra_pos hh1 hh2)
+  have hM1_0 : M1 0 = W₀ := by rw [hM1def]; exact arcModelConst_zero (4 / 5) W₀.1 π
+  have hM1_L8 : M1 (L / 8) = qArc1 (4 / 5) (h, L) := by rw [hM1def, hW₀def]; rfl
+  have hΦderiv1 : ∀ σ ∈ Set.Icc (0 : ℝ) (L / 8),
+      HasDerivWithinAt Φ (arcField κ (3 / 5) σ (Φ σ)) (Set.Icc 0 (L / 8)) σ := by
+    intro σ hσ
+    exact (hfderiv σ (Set.Icc_subset_Icc_right (by linarith) hσ)).mono
+      (Set.Icc_subset_Icc_right (by linarith))
+  have hM1deriv : ∀ σ ∈ Set.Icc (0 : ℝ) (L / 8),
+      HasDerivWithinAt M1 (arcField (fun _ => (4 / 5 : ℝ)) (3 / 5) σ (M1 σ))
+        (Set.Icc 0 (L / 8)) σ := by
+    have hconf : ∀ σ ∈ Set.Icc (0 : ℝ) (L / 8),
+        ‖(arcModelConst (4 / 5) W₀.1 π σ).1‖ ≤ 3 / 5 := by
+      intro σ hσ; rw [hW₀def]; exact gate_arc1_confined hh1 hh2 hL0 hL2 hσ.1 hσ.2
+    exact arcModelConst_hasDerivWithinAt hra_ne hR1 hconf
+  have hleg1 := arcTrajectory_gronwall hR hR1 hL8 hκc continuous_const hLip hΦderiv1 hM1deriv
+    (Set.right_mem_Icc.mpr hL8)
+  rw [← hedef, hΦ0, hM1_0, sub_self, norm_zero, hM1_L8, zero_add] at hleg1
+  have hI1 : ∫ σ in (0 : ℝ)..(L / 8), |κ σ - 4 / 5| ≤ 3 / 5 * δ := by
+    rw [hκdef]; exact gate_L1_leg1 hLpos hδ hδfit
+  have hb1 : ‖Φ (L / 8) - qArc1 (4 / 5) (h, L)‖ ≤ e * (15 / 8 * δ) := by
+    refine le_trans hleg1 ?_
+    have hcoef : (2 : ℝ) / (1 - (3 / 5 : ℝ) ^ 2) = 25 / 8 := by norm_num
+    rw [hcoef]
+    have : (25 : ℝ) / 8 * ∫ σ in (0 : ℝ)..(L / 8), |κ σ - 4 / 5|
+        ≤ 25 / 8 * (3 / 5 * δ) :=
+      mul_le_mul_of_nonneg_left hI1 (by norm_num)
+    calc e * (25 / 8 * ∫ σ in (0 : ℝ)..(L / 8), |κ σ - 4 / 5|)
+        ≤ e * (25 / 8 * (3 / 5 * δ)) :=
+          mul_le_mul_of_nonneg_left this (by linarith)
+      _ = e * (15 / 8 * δ) := by ring
+  -- LEG 2: shifted `Φ(L/8 + ·)` vs the confined constant-`2` model started at `qArc1`.
+  set M2 : ℝ → ℂ × ℝ :=
+    fun σ => arcModelConst 2 (qArc1 (4 / 5) (h, L)).1 (qArc1 (4 / 5) (h, L)).2 σ
+    with hM2def
+  have hrc_ne : arcModelRadius 2 (qArc1 (4 / 5) (h, L)).1 (qArc1 (4 / 5) (h, L)).2 ≠ 0 :=
+    ne_of_gt (lt_of_lt_of_le (by norm_num) (gate_rc_bounds hh1 hh2 hL0 hL2).1)
+  have hM2_0 : M2 0 = qArc1 (4 / 5) (h, L) := by
+    rw [hM2def]; exact arcModelConst_zero 2 (qArc1 (4 / 5) (h, L)).1 (qArc1 (4 / 5) (h, L)).2
+  have hM2_L8 : M2 (L / 8) = qArc2 (4 / 5) 2 (h, L) := by rw [hM2def]; rfl
+  have hmaps : Set.MapsTo (fun s => L / 8 + s) (Set.Icc (0 : ℝ) (L / 8)) (Set.Icc 0 L) := by
+    intro s hs; rw [Set.mem_Icc] at hs ⊢; exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
+  have hW2deriv : ∀ σ ∈ Set.Icc (0 : ℝ) (L / 8),
+      HasDerivWithinAt (fun s => Φ (L / 8 + s))
+        (arcField (fun s => κ (L / 8 + s)) (3 / 5) σ (Φ (L / 8 + σ)))
+        (Set.Icc 0 (L / 8)) σ := by
+    intro σ hσ
+    exact hasDerivWithinAt_shift hmaps (hfderiv (L / 8 + σ) (hmaps hσ))
+  have hκ2abs : ∀ σ, |(fun s => κ (L / 8 + s)) σ| ≤ 2 := fun σ => hκabs (L / 8 + σ)
+  have hκshiftc : Continuous (fun s => κ (L / 8 + s)) :=
+    hκc.comp (continuous_const.add continuous_id)
+  have hLip2 : ∀ σ,
+      LipschitzWith Lg (fun W : ℂ × ℝ => arcField (fun s => κ (L / 8 + s)) (3 / 5) σ W) := by
+    rw [hLgdef]; exact arcField_lipschitzWith hR hR1 hκ2abs
+  have hM2deriv : ∀ σ ∈ Set.Icc (0 : ℝ) (L / 8),
+      HasDerivWithinAt M2 (arcField (fun _ => (2 : ℝ)) (3 / 5) σ (M2 σ))
+        (Set.Icc 0 (L / 8)) σ := by
+    have hconf : ∀ σ ∈ Set.Icc (0 : ℝ) (L / 8),
+        ‖(arcModelConst 2 (qArc1 (4 / 5) (h, L)).1 (qArc1 (4 / 5) (h, L)).2 σ).1‖ ≤ 3 / 5 :=
+      fun σ _ => gate_arc2_confined hh1 hh2 hL0 hL2
+    exact arcModelConst_hasDerivWithinAt hrc_ne hR1 hconf
+  have hleg2 := arcTrajectory_gronwall hR hR1 hL8 hκshiftc continuous_const hLip2 hW2deriv hM2deriv
+    (Set.right_mem_Icc.mpr hL8)
+  have hL44 : L / 8 + L / 8 = L / 4 := by ring
+  rw [hL44, add_zero, ← hedef, hM2_0, hM2_L8] at hleg2
+  have hI2 : ∫ σ in (0 : ℝ)..(L / 8), |κ (L / 8 + σ) - 2| ≤ 3 / 5 * δ := by
+    rw [hκdef]; exact gate_L1_leg2 hLpos hδ hδfit
+  have hleg2' : ‖Φ (L / 4) - qArc2 (4 / 5) 2 (h, L)‖
+      ≤ e * (‖Φ (L / 8) - qArc1 (4 / 5) (h, L)‖ + 15 / 8 * δ) := by
+    refine le_trans hleg2 ?_
+    have hcoef : (2 : ℝ) / (1 - (3 / 5 : ℝ) ^ 2) = 25 / 8 := by norm_num
+    rw [hcoef]
+    have hstep : (25 : ℝ) / 8 * ∫ σ in (0 : ℝ)..(L / 8), |κ (L / 8 + σ) - 2|
+        ≤ 15 / 8 * δ := by
+      have h25 := mul_le_mul_of_nonneg_left hI2 (by norm_num : (0 : ℝ) ≤ 25 / 8)
+      nlinarith [h25]
+    have hposE : (0 : ℝ) ≤ e := by linarith
+    exact mul_le_mul_of_nonneg_left (by linarith [hstep]) hposE
+  -- Compose the two legs and dominate by the explicit robust constant.
+  rw [hgoal_eq]
+  have hGRC : gateRobustConst = 15 / 8 * E * (E + 1) := by
+    rw [gateRobustConst, hEdef]
+  rw [hGRC]
+  have hd1 : (0 : ℝ) ≤ ‖Φ (L / 8) - qArc1 (4 / 5) (h, L)‖ := norm_nonneg _
+  nlinarith [hleg2', hb1, heE, he1, hδ.le, hd1,
+    mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ 15/8) hδ.le) (by linarith : (0:ℝ) ≤ e),
+    mul_nonneg (by linarith : (0:ℝ) ≤ E - e) (by linarith : (0:ℝ) ≤ E + e + 1)]
+
+/-- The clamp map `t ↦ min 1 (max 0 t)` is `1`-Lipschitz. -/
+private lemma clamp_lip (a b : ℝ) :
+    |min 1 (max 0 a) - min 1 (max 0 b)| ≤ |a - b| := by
+  have onesided : ∀ x y : ℝ, min 1 (max 0 x) - min 1 (max 0 y) ≤ |x - y| := by
+    intro x y
+    have h1 : x - y ≤ |x - y| := le_abs_self _
+    have h2 : y - x ≤ |x - y| := by rw [abs_sub_comm]; exact le_abs_self _
+    have hm : min (1 : ℝ) 0 = 0 := by norm_num
+    rcases le_total (0 : ℝ) x with h0x | h0x <;>
+    rcases le_total (0 : ℝ) y with h0y | h0y <;>
+    rcases le_total x 1 with h1x | h1x <;>
+    rcases le_total y 1 with h1y | h1y <;>
+    simp only [max_eq_right, max_eq_left, min_eq_left, min_eq_right,
+      h0x, h0y, h1x, h1y, hm] <;>
+    nlinarith [h1, h2]
+  rw [abs_le]
+  refine ⟨?_, onesided a b⟩
+  have := onesided b a
+  rw [abs_sub_comm] at this
+  linarith
+
+/-- **Profile `L¹` continuity in `L`.**  For `L, L₀ ∈ [11/5, 14/5]` and `0 < δ`, the ramped
+profiles differ in `L¹` on `[0, L/4]` by at most a constant times `|L − L₀|`: on the common
+identity region both equal `4/5 + (6/5)·clamp((σ − ·/8)/δ + 1/2)` (`arcRampProfile_arg_eq`),
+where the clamp is `1`-Lipschitz (`clamp_lip`), giving the `1/δ` gap; the leftover sliver
+`[min L L₀/4, L/4]` has length `≤ |L − L₀|/4` and integrand `≤ 6/5`. -/
+private lemma gate_profile_L1_diff {δ : ℝ} (hδ : 0 < δ) {L L₀ : ℝ}
+    (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5)
+    (hL01 : (11 : ℝ) / 5 ≤ L₀) (hL02 : L₀ ≤ 14 / 5) :
+    ∫ σ in (0 : ℝ)..(L / 4), |gateProfileSmooth L δ σ - gateProfileSmooth L₀ δ σ|
+      ≤ 6 / 5 * (7 / (80 * δ) + 1 / 4) * |L - L₀| := by
+  have hδ0 : δ ≠ 0 := hδ.ne'
+  have hLpos : (0 : ℝ) < L := by linarith
+  have hL0pos : (0 : ℝ) < L₀ := by linarith
+  set CA : ℝ := 6 / 5 * (|L - L₀| / (8 * δ)) with hCAdef
+  have hCA0 : 0 ≤ CA := by rw [hCAdef]; positivity
+  -- Profile in clamp form on `[0, L'/4]`.
+  have prof_eq : ∀ (L' σ : ℝ), 0 < L' → 0 ≤ σ → σ ≤ L' / 4 →
+      gateProfileSmooth L' δ σ = 4 / 5 + 6 / 5 * min 1 (max 0 ((σ - L' / 8) / δ + 1 / 2)) := by
+    intro L' σ hL' h0 h4
+    unfold gateProfileSmooth arcRampProfile
+    rw [arcRampProfile_arg_eq hL' hδ h0 h4]; ring
+  set m : ℝ := min L L₀ / 4 with hmdef
+  have hm0 : 0 ≤ m := by
+    rw [hmdef]; exact div_nonneg (le_min hLpos.le hL0pos.le) (by norm_num)
+  have hmL : m ≤ L / 4 := by rw [hmdef]; gcongr; exact min_le_left L L₀
+  have hmL0 : m ≤ L₀ / 4 := by rw [hmdef]; gcongr; exact min_le_right L L₀
+  have hm710 : m ≤ 7 / 10 := by
+    rw [hmdef]; have : min L L₀ ≤ 14 / 5 := le_trans (min_le_left _ _) hL2; linarith
+  have hlenB : L / 4 - m ≤ |L - L₀| / 4 := by
+    rw [hmdef]
+    have hkey : L - min L L₀ ≤ |L - L₀| := by
+      rcases le_total L L₀ with hle | hle
+      · rw [min_eq_left hle]; simpa using abs_nonneg (L - L₀)
+      · rw [min_eq_right hle, abs_of_nonneg (by linarith : (0 : ℝ) ≤ L - L₀)]
+    linarith
+  -- Pointwise bounds.
+  have hbdiff : ∀ σ, |gateProfileSmooth L δ σ - gateProfileSmooth L₀ δ σ| ≤ 6 / 5 := by
+    intro σ
+    have hf := arcRampProfile_mem (a := (4 : ℝ) / 5) (c := 2) (L := L) (δ := δ) (by norm_num) σ
+    have hg := arcRampProfile_mem (a := (4 : ℝ) / 5) (c := 2) (L := L₀) (δ := δ) (by norm_num) σ
+    unfold gateProfileSmooth
+    rw [abs_le]; exact ⟨by linarith [hf.1, hg.2], by linarith [hf.2, hg.1]⟩
+  have hboundA : ∀ σ ∈ Set.Icc (0 : ℝ) m,
+      |gateProfileSmooth L δ σ - gateProfileSmooth L₀ δ σ| ≤ CA := by
+    intro σ hσ
+    rw [Set.mem_Icc] at hσ
+    have hσL : σ ≤ L / 4 := le_trans hσ.2 hmL
+    have hσL0 : σ ≤ L₀ / 4 := le_trans hσ.2 hmL0
+    rw [prof_eq L σ hLpos hσ.1 hσL, prof_eq L₀ σ hL0pos hσ.1 hσL0]
+    have hrw : (4 / 5 + 6 / 5 * min 1 (max 0 ((σ - L / 8) / δ + 1 / 2)))
+        - (4 / 5 + 6 / 5 * min 1 (max 0 ((σ - L₀ / 8) / δ + 1 / 2)))
+        = 6 / 5 * (min 1 (max 0 ((σ - L / 8) / δ + 1 / 2))
+            - min 1 (max 0 ((σ - L₀ / 8) / δ + 1 / 2))) := by ring
+    rw [hrw, abs_mul, abs_of_pos (show (0 : ℝ) < 6 / 5 by norm_num)]
+    have hcl := clamp_lip ((σ - L / 8) / δ + 1 / 2) ((σ - L₀ / 8) / δ + 1 / 2)
+    have habs : |((σ - L / 8) / δ + 1 / 2) - ((σ - L₀ / 8) / δ + 1 / 2)|
+        = |L - L₀| / (8 * δ) := by
+      rw [show ((σ - L / 8) / δ + 1 / 2) - ((σ - L₀ / 8) / δ + 1 / 2) = (L₀ - L) / (8 * δ) by
+          field_simp; ring,
+        abs_div, abs_of_pos (show (0 : ℝ) < 8 * δ by positivity), abs_sub_comm L₀ L]
+    rw [habs] at hcl
+    rw [hCAdef]
+    exact mul_le_mul_of_nonneg_left hcl (by norm_num)
+  -- Split and integrate.
+  have hcont : Continuous
+      (fun σ => |gateProfileSmooth L δ σ - gateProfileSmooth L₀ δ σ|) :=
+    ((gateProfileSmooth_continuous L δ).sub (gateProfileSmooth_continuous L₀ δ)).abs
+  have hint : ∀ x y : ℝ, IntervalIntegrable
+      (fun σ => |gateProfileSmooth L δ σ - gateProfileSmooth L₀ δ σ|)
+      MeasureTheory.volume x y := fun x y => hcont.intervalIntegrable x y
+  have hsplit : ∫ σ in (0 : ℝ)..(L / 4), |gateProfileSmooth L δ σ - gateProfileSmooth L₀ δ σ|
+      = (∫ σ in (0 : ℝ)..m, |gateProfileSmooth L δ σ - gateProfileSmooth L₀ δ σ|)
+        + ∫ σ in m..(L / 4), |gateProfileSmooth L δ σ - gateProfileSmooth L₀ δ σ| :=
+    (intervalIntegral.integral_add_adjacent_intervals (hint 0 m) (hint m (L / 4))).symm
+  have hIA : (∫ σ in (0 : ℝ)..m, |gateProfileSmooth L δ σ - gateProfileSmooth L₀ δ σ|)
+      ≤ CA * m := by
+    calc (∫ σ in (0 : ℝ)..m, |gateProfileSmooth L δ σ - gateProfileSmooth L₀ δ σ|)
+        ≤ ∫ _σ in (0 : ℝ)..m, CA :=
+          intervalIntegral.integral_mono_on hm0 (hint 0 m) intervalIntegrable_const hboundA
+      _ = CA * m := by rw [intervalIntegral.integral_const]; ring
+  have hIB : (∫ σ in m..(L / 4), |gateProfileSmooth L δ σ - gateProfileSmooth L₀ δ σ|)
+      ≤ 6 / 5 * (L / 4 - m) := by
+    calc (∫ σ in m..(L / 4), |gateProfileSmooth L δ σ - gateProfileSmooth L₀ δ σ|)
+        ≤ ∫ _σ in m..(L / 4), (6 / 5 : ℝ) :=
+          intervalIntegral.integral_mono_on hmL (hint m (L / 4)) intervalIntegrable_const
+            (fun σ _ => hbdiff σ)
+      _ = 6 / 5 * (L / 4 - m) := by rw [intervalIntegral.integral_const]; ring
+  have hstepA : CA * m ≤ CA * (7 / 10) := mul_le_mul_of_nonneg_left hm710 hCA0
+  have hstepB : 6 / 5 * (L / 4 - m) ≤ 6 / 5 * (|L - L₀| / 4) :=
+    mul_le_mul_of_nonneg_left hlenB (by norm_num)
+  have heq : CA * (7 / 10) + 6 / 5 * (|L - L₀| / 4)
+      = 6 / 5 * (7 / (80 * δ) + 1 / 4) * |L - L₀| := by
+    rw [hCAdef]; field_simp; ring
+  rw [hsplit]
+  linarith [hIA, hIB, hstepA, hstepB, heq]
 
 /-- **Joint `(h, L)`-continuity of the smooth quarter-residual.**  Proof (scoped): ODE
 continuous dependence on initial condition (`h`) and on the vector field / interval /
 evaluation time (`L`, which enters `gateProfileSmooth L δ`, the window and the point `L/4`),
 quantified by `arcTrajectory_diff_bound` (the same Grönwall tool, now bounding the gap between
 two nearby parameter values). -/
-lemma gateSmoothResidual_continuousOn (δ : ℝ) (r₀ : ℝ≥0) :
+lemma gateSmoothResidual_continuousOn (δ : ℝ) (r₀ : ℝ≥0) (hδ : 0 < δ)
+    (hr₀ : 4 ≤ (r₀ : ℝ)) :
     ContinuousOn
       (fun p : ℝ × ℝ =>
         ((gateSmoothLandingState δ r₀ p.1 p.2).1.im,
           (gateSmoothLandingState δ r₀ p.1 p.2).2 - 3 * π / 2))
       (Set.Icc ((1 : ℝ) / 5) (2 / 5) ×ˢ Set.Icc ((11 : ℝ) / 5) (14 / 5)) := by
-  sorry
+  have hgSLS : ContinuousOn (fun p : ℝ × ℝ => gateSmoothLandingState δ r₀ p.1 p.2)
+      (Set.Icc ((1 : ℝ) / 5) (2 / 5) ×ˢ Set.Icc ((11 : ℝ) / 5) (14 / 5)) := by
+    set rect := Set.Icc ((1 : ℝ) / 5) (2 / 5) ×ˢ Set.Icc ((11 : ℝ) / 5) (14 / 5) with hrectdef
+    intro p₀ hp₀
+    rw [hrectdef, Set.mem_prod, Set.mem_Icc, Set.mem_Icc] at hp₀
+    obtain ⟨⟨hh01, hh02⟩, hL01, hL02⟩ := hp₀
+    have hR : (0 : ℝ) ≤ 3 / 5 := by norm_num
+    have hR1 : (3 : ℝ) / 5 < 1 := by norm_num
+    set Lg : ℝ≥0 := max 1 (Real.toNNReal (2 * (1 + 3 / 5) / (1 - (3 / 5 : ℝ) ^ 2)
+      + 2 * (3 / 5) * (2 * (2 + 3 / 5)) / (1 - (3 / 5) ^ 2) ^ 2)) with hLgdef
+    have hLgval : (Lg : ℝ) = 1295 / 64 := by
+      rw [hLgdef, NNReal.coe_max, NNReal.coe_one, Real.coe_toNNReal _ (by norm_num)]; norm_num
+    set Emax : ℝ := Real.exp ((1295 / 64) * (7 / 10)) with hEmaxdef
+    -- The reference solution at `p₀`.
+    have hL0pos : (0 : ℝ) < p₀.2 := by linarith
+    have hW0mem₀ : (Complex.I * (p₀.1 : ℂ), (π : ℝ)) ∈ Metric.closedBall (0 : ℂ × ℝ) r₀ := by
+      rw [Metric.mem_closedBall, dist_zero_right, Prod.norm_def]
+      have e1 : ‖Complex.I * (p₀.1 : ℂ)‖ = |p₀.1| := by
+        rw [Complex.norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Real.norm_eq_abs]
+      have e2 : ‖(π : ℝ)‖ = π := by rw [Real.norm_eq_abs, abs_of_pos Real.pi_pos]
+      rw [e1, e2]
+      have hmx : max |p₀.1| π ≤ 4 := by
+        refine max_le ?_ ?_
+        · rw [abs_of_nonneg (by linarith : (0 : ℝ) ≤ p₀.1)]; linarith
+        · linarith [Real.pi_le_four]
+      linarith [hmx, hr₀]
+    obtain ⟨hf0₀, hfd₀⟩ := arcFlow_spec (gateProfileSmooth_continuous p₀.2 δ) hR hR1 hL0pos.le
+      (gateProfileSmooth_abs_le p₀.2 δ) r₀ hW0mem₀
+    set Φ₀ : ℝ → ℂ × ℝ := fun σ =>
+      arcFlow (gateProfileSmooth p₀.2 δ) (3 / 5) p₀.2 2 r₀ ((Complex.I * (p₀.1 : ℂ), π), σ)
+      with hΦ0def
+    -- TERM2: time-continuity of the reference flow.
+    have hΦ0cont : ContinuousOn Φ₀ (Set.Icc 0 p₀.2) := HasDerivWithinAt.continuousOn hfd₀
+    have hp0mem : p₀.2 / 4 ∈ Set.Icc (0 : ℝ) p₀.2 := ⟨by linarith, by linarith⟩
+    have hproj : ContinuousWithinAt (fun p : ℝ × ℝ => p.2 / 4) rect p₀ :=
+      (continuous_snd.div_const 4).continuousWithinAt
+    have hmaps2 : Set.MapsTo (fun p : ℝ × ℝ => p.2 / 4) rect (Set.Icc (0 : ℝ) p₀.2) := by
+      intro p hp
+      rw [hrectdef, Set.mem_prod, Set.mem_Icc, Set.mem_Icc] at hp
+      rw [Set.mem_Icc]
+      exact ⟨by linarith [hp.2.1], by linarith [hp.2.2]⟩
+    have hTERM2cont : ContinuousWithinAt (fun p : ℝ × ℝ => Φ₀ (p.2 / 4)) rect p₀ :=
+      ContinuousWithinAt.comp (g := Φ₀) (f := fun p : ℝ × ℝ => p.2 / 4)
+        (hΦ0cont (p₀.2 / 4) hp0mem) hproj hmaps2
+    have hTERM2 : Filter.Tendsto (fun p : ℝ × ℝ => dist (Φ₀ (p.2 / 4)) (Φ₀ (p₀.2 / 4)))
+        (nhdsWithin p₀ rect) (nhds 0) := by
+      have h := tendsto_iff_dist_tendsto_zero.mp hTERM2cont
+      simpa [Function.comp] using h
+    -- The two coordinate perturbations tend to `0`.
+    have habs1 : Filter.Tendsto (fun p : ℝ × ℝ => |p.1 - p₀.1|) (nhdsWithin p₀ rect) (nhds 0) := by
+      have hc : Continuous (fun p : ℝ × ℝ => |p.1 - p₀.1|) :=
+        (continuous_fst.sub continuous_const).abs
+      have h2 := hc.tendsto p₀
+      simp only [sub_self, abs_zero] at h2
+      exact h2.mono_left nhdsWithin_le_nhds
+    have habs2 : Filter.Tendsto (fun p : ℝ × ℝ => |p.2 - p₀.2|) (nhdsWithin p₀ rect) (nhds 0) := by
+      have hc : Continuous (fun p : ℝ × ℝ => |p.2 - p₀.2|) :=
+        (continuous_snd.sub continuous_const).abs
+      have h2 := hc.tendsto p₀
+      simp only [sub_self, abs_zero] at h2
+      exact h2.mono_left nhdsWithin_le_nhds
+    have hInner : Filter.Tendsto (fun p : ℝ × ℝ =>
+        |p.1 - p₀.1| + 25 / 8 * (6 / 5 * (7 / (80 * δ) + 1 / 4) * |p.2 - p₀.2|))
+        (nhdsWithin p₀ rect) (nhds 0) := by
+      have h := habs1.add ((habs2.const_mul (6 / 5 * (7 / (80 * δ) + 1 / 4))).const_mul (25 / 8))
+      simpa using h
+    have hOuter : Filter.Tendsto (fun p : ℝ × ℝ =>
+        Emax * (|p.1 - p₀.1| + 25 / 8 * (6 / 5 * (7 / (80 * δ) + 1 / 4) * |p.2 - p₀.2|)))
+        (nhdsWithin p₀ rect) (nhds 0) := by
+      have h := hInner.const_mul Emax
+      simpa using h
+    set B : ℝ × ℝ → ℝ := fun p =>
+      Emax * (|p.1 - p₀.1| + 25 / 8 * (6 / 5 * (7 / (80 * δ) + 1 / 4) * |p.2 - p₀.2|))
+        + dist (Φ₀ (p.2 / 4)) (Φ₀ (p₀.2 / 4)) with hBdef
+    have hB0 : Filter.Tendsto B (nhdsWithin p₀ rect) (nhds 0) := by
+      rw [hBdef]; simpa using hOuter.add hTERM2
+    -- The squeeze bound, valid on the rectangle.
+    have hle : ∀ᶠ p in nhdsWithin p₀ rect,
+        dist (gateSmoothLandingState δ r₀ p.1 p.2)
+          (gateSmoothLandingState δ r₀ p₀.1 p₀.2) ≤ B p := by
+      filter_upwards [self_mem_nhdsWithin] with p hp
+      rw [hrectdef, Set.mem_prod, Set.mem_Icc, Set.mem_Icc] at hp
+      obtain ⟨⟨hh1, hh2⟩, hLp1, hLp2⟩ := hp
+      have hLppos : (0 : ℝ) < p.2 := by linarith
+      have hWpmem : (Complex.I * (p.1 : ℂ), (π : ℝ)) ∈ Metric.closedBall (0 : ℂ × ℝ) r₀ := by
+        rw [Metric.mem_closedBall, dist_zero_right, Prod.norm_def]
+        have e1 : ‖Complex.I * (p.1 : ℂ)‖ = |p.1| := by
+          rw [Complex.norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Real.norm_eq_abs]
+        have e2 : ‖(π : ℝ)‖ = π := by rw [Real.norm_eq_abs, abs_of_pos Real.pi_pos]
+        rw [e1, e2]
+        have hmx : max |p.1| π ≤ 4 := by
+          refine max_le ?_ ?_
+          · rw [abs_of_nonneg (by linarith : (0 : ℝ) ≤ p.1)]; linarith
+          · linarith [Real.pi_le_four]
+        linarith [hmx, hr₀]
+      obtain ⟨hfp0, hfpd⟩ := arcFlow_spec (gateProfileSmooth_continuous p.2 δ) hR hR1 hLppos.le
+        (gateProfileSmooth_abs_le p.2 δ) r₀ hWpmem
+      set Φp : ℝ → ℂ × ℝ := fun σ =>
+        arcFlow (gateProfileSmooth p.2 δ) (3 / 5) p.2 2 r₀ ((Complex.I * (p.1 : ℂ), π), σ)
+        with hΦpdef
+      have hW : ∀ σ ∈ Set.Icc (0 : ℝ) (p.2 / 4),
+          HasDerivWithinAt Φp (arcField (gateProfileSmooth p.2 δ) (3 / 5) σ (Φp σ))
+            (Set.Icc 0 (p.2 / 4)) σ := by
+        intro σ hσ
+        exact (hfpd σ (Set.Icc_subset_Icc_right (by linarith) hσ)).mono
+          (Set.Icc_subset_Icc_right (by linarith))
+      have hWs : ∀ σ ∈ Set.Icc (0 : ℝ) (p.2 / 4),
+          HasDerivWithinAt Φ₀ (arcField (gateProfileSmooth p₀.2 δ) (3 / 5) σ (Φ₀ σ))
+            (Set.Icc 0 (p.2 / 4)) σ := by
+        intro σ hσ
+        exact (hfd₀ σ (Set.Icc_subset_Icc_right (by linarith) hσ)).mono
+          (Set.Icc_subset_Icc_right (by linarith))
+      have hLip : ∀ σ, LipschitzWith Lg
+          (fun W : ℂ × ℝ => arcField (gateProfileSmooth p.2 δ) (3 / 5) σ W) := by
+        rw [hLgdef]; exact arcField_lipschitzWith hR hR1 (gateProfileSmooth_abs_le p.2 δ)
+      have hgron := arcTrajectory_gronwall hR hR1 (by linarith : (0 : ℝ) ≤ p.2 / 4)
+        (gateProfileSmooth_continuous p.2 δ) (gateProfileSmooth_continuous p₀.2 δ)
+        hLip hW hWs (Set.right_mem_Icc.mpr (by linarith : (0 : ℝ) ≤ p.2 / 4))
+      have hstart : ‖Φp 0 - Φ₀ 0‖ = |p.1 - p₀.1| := by
+        have e1 : Φp 0 = (Complex.I * (p.1 : ℂ), π) := hfp0
+        have e2 : Φ₀ 0 = (Complex.I * (p₀.1 : ℂ), π) := hf0₀
+        rw [e1, e2]
+        have hpair : (Complex.I * (p.1 : ℂ), (π : ℝ)) - (Complex.I * (p₀.1 : ℂ), (π : ℝ))
+            = (Complex.I * ((p.1 - p₀.1 : ℝ) : ℂ), (0 : ℝ)) := by
+          rw [Prod.mk_sub_mk, sub_self]; congr 1; push_cast; ring
+        rw [hpair, Prod.norm_def]
+        have en1 : ‖Complex.I * ((p.1 - p₀.1 : ℝ) : ℂ)‖ = |p.1 - p₀.1| := by
+          rw [Complex.norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Real.norm_eq_abs]
+        rw [en1, norm_zero, max_eq_left (abs_nonneg _)]
+      have hcoef : (2 : ℝ) / (1 - (3 / 5 : ℝ) ^ 2) = 25 / 8 := by norm_num
+      have hI := gate_profile_L1_diff hδ hLp1 hLp2 hL01 hL02
+      have hexp : Real.exp ((Lg : ℝ) * (p.2 / 4)) ≤ Emax := by
+        rw [hEmaxdef]; apply Real.exp_le_exp.mpr; rw [hLgval]; nlinarith [hLp2]
+      have hInt_nn : (0 : ℝ) ≤ ∫ σ in (0 : ℝ)..(p.2 / 4),
+          |gateProfileSmooth p.2 δ σ - gateProfileSmooth p₀.2 δ σ| :=
+        intervalIntegral.integral_nonneg (by linarith : (0 : ℝ) ≤ p.2 / 4)
+          (fun σ _ => abs_nonneg _)
+      simp only [hBdef]
+      refine le_trans (dist_triangle (gateSmoothLandingState δ r₀ p.1 p.2) (Φ₀ (p.2 / 4))
+          (gateSmoothLandingState δ r₀ p₀.1 p₀.2)) ?_
+      refine add_le_add ?_ (le_of_eq rfl)
+      rw [dist_eq_norm]
+      rw [hcoef, hstart] at hgron
+      refine le_trans hgron
+        (mul_le_mul hexp ?_ ?_ (by rw [hEmaxdef]; positivity))
+      · have hmul := mul_le_mul_of_nonneg_left hI (by norm_num : (0 : ℝ) ≤ 25 / 8)
+        linarith [hmul]
+      · linarith [hInt_nn, abs_nonneg (p.1 - p₀.1)]
+    have hgoal : Filter.Tendsto (fun p : ℝ × ℝ => gateSmoothLandingState δ r₀ p.1 p.2)
+        (nhdsWithin p₀ rect) (nhds (gateSmoothLandingState δ r₀ p₀.1 p₀.2)) := by
+      rw [tendsto_iff_dist_tendsto_zero]
+      exact squeeze_zero' (Filter.Eventually.of_forall fun p => dist_nonneg) hle hB0
+    exact hgoal
+  refine ContinuousOn.prodMk ?_ ?_
+  · exact Complex.continuous_im.comp_continuousOn (continuous_fst.comp_continuousOn hgSLS)
+  · exact (continuous_snd.comp_continuousOn hgSLS).sub continuousOn_const
 
 /-- LEFT `G₁` polynomial core WITH MARGIN (`gate_G1_left_key` has certified value ≈ −0.024). -/
 private lemma gate_G1_left_key_margin {q ca sa rc sc cc : ℝ}
@@ -3268,8 +3988,9 @@ theorem exists_quarterLanding_smooth (r₀ : ℝ≥0) (hr₀ : 4 ≤ (r₀ : ℝ
     rw [hC]; unfold gateRobustConst
     nlinarith [he1, mul_nonneg (by linarith : (0 : ℝ) ≤ Real.exp (9513 / 1280) - 1)
       (by linarith : (0 : ℝ) ≤ Real.exp (9513 / 1280) + 2)]
-  have hδ1 : δ ≤ 1 := by
-    rw [hδdef, div_le_one (mul_pos (by norm_num) hCpos)]; linarith [hClb]
+  -- `δ` is tiny, comfortably below `L/4 ≥ 11/20` (needed for the ramp to fit in each leg).
+  have hδsmall : δ ≤ 1 / 7500000 := by
+    rw [hδdef]; exact one_div_le_one_div_of_le (by norm_num) (by nlinarith [hClb])
   -- `C·δ = 1/2000000`, half the transfer margin `1/1000000`.
   have hCδ : C * δ = 1 / 2000000 := by
     rw [hδdef]; field_simp
@@ -3279,12 +4000,13 @@ theorem exists_quarterLanding_smooth (r₀ : ℝ≥0) (hr₀ : 4 ≤ (r₀ : ℝ
     ((gateSmoothLandingState δ r₀ p.1 p.2).1.im,
       (gateSmoothLandingState δ r₀ p.1 p.2).2 - 3 * π / 2) with hGdef
   have hcont : ContinuousOn G (Set.Icc ((1 : ℝ) / 5) (2 / 5) ×ˢ Set.Icc ((11 : ℝ) / 5) (14 / 5)) :=
-    gateSmoothResidual_continuousOn δ r₀
+    gateSmoothResidual_continuousOn δ r₀ hδpos hr₀
   -- Face transfers: robustness `1/200` below the closed-form margins `1/100`.
   have hleft : ∀ y ∈ Set.Icc ((11 : ℝ) / 5) (14 / 5), (G (1 / 5, y)).1 ≤ 0 := by
     intro y hy
     have hrob := (gateLanding_coord_le
-      (gateSmoothLanding_close r₀ hr₀ hδpos le_rfl (by norm_num) hy.1 hy.2 hδ1)).1
+      (gateSmoothLanding_close r₀ hr₀ hδpos le_rfl (by norm_num) hy.1 hy.2
+        (le_trans hδsmall (by linarith [hy.1])))).1
     have hmar := gate_G1_left_margin hy.1 hy.2
     simp only [hGdef]
     rw [hCδ] at hrob
@@ -3293,7 +4015,8 @@ theorem exists_quarterLanding_smooth (r₀ : ℝ≥0) (hr₀ : 4 ≤ (r₀ : ℝ
   have hright : ∀ y ∈ Set.Icc ((11 : ℝ) / 5) (14 / 5), 0 ≤ (G (2 / 5, y)).1 := by
     intro y hy
     have hrob := (gateLanding_coord_le
-      (gateSmoothLanding_close r₀ hr₀ hδpos (by norm_num) le_rfl hy.1 hy.2 hδ1)).1
+      (gateSmoothLanding_close r₀ hr₀ hδpos (by norm_num) le_rfl hy.1 hy.2
+        (le_trans hδsmall (by linarith [hy.1])))).1
     have hmar := gate_G1_right_margin hy.1 hy.2
     simp only [hGdef]
     rw [hCδ] at hrob
@@ -3302,7 +4025,8 @@ theorem exists_quarterLanding_smooth (r₀ : ℝ≥0) (hr₀ : 4 ≤ (r₀ : ℝ
   have hbot : ∀ x ∈ Set.Icc ((1 : ℝ) / 5) (2 / 5), (G (x, 11 / 5)).2 ≤ 0 := by
     intro x hx
     have hrob := (gateLanding_coord_le
-      (gateSmoothLanding_close r₀ hr₀ hδpos hx.1 hx.2 le_rfl (by norm_num) hδ1)).2
+      (gateSmoothLanding_close r₀ hr₀ hδpos hx.1 hx.2 le_rfl (by norm_num)
+        (le_trans hδsmall (by norm_num)))).2
     have hmar := gate_G2_bottom_margin hx.1 hx.2
     simp only [hGdef]
     rw [hCδ] at hrob
@@ -3311,7 +4035,8 @@ theorem exists_quarterLanding_smooth (r₀ : ℝ≥0) (hr₀ : 4 ≤ (r₀ : ℝ
   have htop : ∀ x ∈ Set.Icc ((1 : ℝ) / 5) (2 / 5), 0 ≤ (G (x, 14 / 5)).2 := by
     intro x hx
     have hrob := (gateLanding_coord_le
-      (gateSmoothLanding_close r₀ hr₀ hδpos hx.1 hx.2 (by norm_num) le_rfl hδ1)).2
+      (gateSmoothLanding_close r₀ hr₀ hδpos hx.1 hx.2 (by norm_num) le_rfl
+        (le_trans hδsmall (by norm_num)))).2
     have hmar := gate_G2_top_margin hx.1 hx.2
     simp only [hGdef]
     rw [hCδ] at hrob
