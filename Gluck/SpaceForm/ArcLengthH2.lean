@@ -1817,6 +1817,107 @@ theorem poincareMiranda_rect {a₁ a₂ b₁ b₂ : ℝ} (_ha : a₁ ≤ a₂) (
 
 end PoincareMirandaWinding
 
+/-! ### Reversibility (conjugation reflection) infrastructure for the `z`-match
+
+The half-period `z`-match `z(L/2) = −z₀` is the `I_x`/`I_y` **reversible-shooting**
+content.  The mirror reflection is `X : (z, φ) ↦ (z̄, 3π − φ)`; combined with time
+reversal about `L/4` and `κ`-evenness about `L/4` (`hevenQ`) it makes the truncated
+arc-length field reversible, so the conjugate-reversed trajectory solves the same
+ODE.  These helpers are the conjugation analogues of `clampBall_neg`,
+`arcField_reflect`, `arcFlow_central_symmetry`. -/
+
+/-- Radial clamp commutes with **conjugation**: the clamp scale `min 1 (R/‖z‖)`
+depends only on `‖z̄‖ = ‖z‖`. -/
+private lemma clampBall_conj (R : ℝ) (z : ℂ) :
+    clampBall R (starRingEnd ℂ z) = starRingEnd ℂ (clampBall R z) := by
+  simp only [clampBall, Complex.norm_conj, Complex.real_smul, map_mul, Complex.conj_ofReal]
+
+/-- `e^{i(3π − φ)} = −\overline{e^{iφ}}` (the mirror-axis phase reflection). -/
+private lemma exp_three_pi_sub (φ : ℝ) :
+    Complex.exp (((3 * π - φ : ℝ) : ℂ) * Complex.I)
+      = -starRingEnd ℂ (Complex.exp ((φ : ℂ) * Complex.I)) := by
+  rw [← Complex.exp_conj, map_mul, Complex.conj_I, Complex.conj_ofReal,
+    show ((3 * π - φ : ℝ) : ℂ) * Complex.I
+      = (π : ℂ) * Complex.I + (2 * (π : ℂ) * Complex.I + (φ : ℂ) * (-Complex.I)) by
+        push_cast; ring,
+    Complex.exp_add, Complex.exp_add, Complex.exp_pi_mul_I, Complex.exp_two_pi_mul_I]
+  ring
+
+/-- **Reversibility field identity.** With `κ σ = κ σ'` the mirror reflection
+`X(z, φ) = (z̄, 3π − φ)` conjugates `arcField` at `σ` into the negated conjugate of
+the `z`-velocity and the *unchanged* angle speed at `σ'`:
+`arcField κ R σ (z̄, 3π − φ) = (−\overline{e^{iφ}}, s(σ', z, φ))`. The `z`-velocity
+flips-and-conjugates (`exp_three_pi_sub`), while the angle speed is invariant — the
+clamp conjugates (`clampBall_conj`), the denominator is norm-even, and
+`⟪z̄, i·e^{i(3π−φ)}⟫ = ⟪z, i·e^{iφ}⟫` by conjugation-invariance of the real inner
+product. -/
+private lemma arcField_conj_reflect {κ : ℝ → ℝ} {R σ σ' : ℝ} (W : ℂ × ℝ)
+    (hκ : κ σ = κ σ') :
+    arcField κ R σ ((starRingEnd ℂ W.1, 3 * π - W.2) : ℂ × ℝ)
+      = (-(starRingEnd ℂ (arcField κ R σ' W).1), (arcField κ R σ' W).2) := by
+  obtain ⟨z, φ⟩ := W
+  refine Prod.ext (by simpa [arcField] using exp_three_pi_sub φ) ?_
+  simp only [arcField, truncatedArcAngleSpeed, clampBall_conj, Complex.norm_conj, hκ]
+  have key : (inner ℝ (starRingEnd ℂ (clampBall R z))
+      (Complex.I * Complex.exp (((3 * π - φ : ℝ) : ℂ) * Complex.I)) : ℝ)
+      = inner ℝ (clampBall R z) (Complex.I * Complex.exp ((φ : ℂ) * Complex.I)) := by
+    rw [exp_three_pi_sub, show Complex.I * (-starRingEnd ℂ (Complex.exp ((φ : ℂ) * Complex.I)))
+        = starRingEnd ℂ (Complex.I * Complex.exp ((φ : ℂ) * Complex.I)) by
+          rw [map_mul, Complex.conj_I]; ring,
+      Complex.inner, Complex.inner, Complex.conj_conj,
+      ← Complex.conj_re (Complex.I * Complex.exp ((φ : ℂ) * Complex.I) *
+        starRingEnd ℂ (clampBall R z))]
+    congr 1
+    simp only [map_mul, Complex.conj_conj]
+  rw [key]
+
+/-- **AL4-d′ `z`-match (the reversible-shooting `z`-component).**  Given a
+mirror-axis start `W₀ = (i·b, π)` (`hre : Re W₀.1 = 0`, `hφ0 : W₀.2 = π`) whose
+half-period **turning** already lands correctly (`hφ : φ(L/2) = φ₀ + π`, supplied
+by the co-constructed window `hturn`), the half-period **space** endpoint is the
+central-symmetry image: `z(L/2) = −z₀`.
+
+**Dimensionality resolution.**  The full half-period match `H(W₀) = ρ_π(W₀)` is
+`3` scalar equations; the rotation orbit removes one and `hturn` discharges the
+`φ`-turning equation (the second), leaving a **single** residual — the
+`z`-component `z(L/2) = −z₀` proven here.  With `hturn` pinning `L`, this is *not*
+the 2-D `poincareMiranda_rect` shoot over `(b, L)` but its collapsed 1-D core.
+
+**Proof (reversible shooting, `arcField_conj_reflect`; numerically end-to-end
+gated to `1e-41`, `h2_negative_dev.md §2-D DEGREE GATE`).**  Let `X(z, φ) =
+(z̄, 3π − φ)` be the mirror reflection and `Φ(σ) = arcFlow …(W₀, σ)`.  With `κ`
+even about `L/4` (`hevenQ`) the field is reversible — `arcField_conj_reflect` gives
+`arcField κ R σ (X W) = (−\overline{(arcField κ R (L/2−σ) W).1}, (arcField κ R
+(L/2−σ) W).2)` — so the conjugate-time-reversed trajectory `V(σ) = X(Φ(L/2 − σ))`
+solves the same flow ODE on `[0, L/2]`.
+
+* **Quarter landing (the residual analytic crux, `sorry`).**  The symmetric start
+  `Φ(0) = W₀ ∈ Fix(X∘(reflect about 0))` (via `hevenO`, `hre`, `hφ0`) together with
+  the quarter-period landing `Φ(L/4) ∈ Fix(I_x) = {Im z = 0, φ = 3π/2}` makes `V ≡
+  Φ` (both solve the ODE and agree at the interior point `L/4`; two-sided ODE
+  uniqueness).  Then `Φ(L/2) = V(L/2) = X(Φ(0)) = X(W₀) = (\overline{i·b}, 3π − π) =
+  (−i·b, 2π) = (−W₀.1, W₀.2 + π)`, whose `z`-part is exactly `z(L/2) = −z₀`.
+  The quarter landing `Im z(L/4) = 0` is the sign-face content of the gate
+  (`Im z(L/4) < 0` for small `b`, `> 0` for large `b`, `intermediate_value_Icc`);
+  it needs the constant-curvature-arc closed form (`h2_negative_dev.md §AL4-c`:
+  `r_e = (1−‖z‖²)/(2(κ+⟪z, i·e^{iφ}⟫))`, `z_end = z₀ − r_e·i·e^{iφ}(e^{iβ}−1)`)
+  evaluated on the `a,b,a,b` palindrome — an analytic estimate deferred here.
+
+The reversibility field identity (`arcField_conj_reflect`) and its helpers
+(`clampBall_conj`, `exp_three_pi_sub`) are proven sorry-free above; the remaining
+`sorry` is precisely the quarter-period landing sign estimate + the reversal ODE
+uniqueness assembly.  See `tickets_h2negative.md [AL-4]`. -/
+private lemma exists_halfPeriodMatch_zmatch {κ : ℝ → ℝ} {R L M : ℝ}
+    (hκ : Continuous κ) (hR : 0 < R) (hR1 : R < 1) (hL : 0 < L)
+    (hM : ∀ σ, |κ σ| ≤ M) (hhalf : Function.Periodic κ (L / 2))
+    (hevenO : ∀ σ, κ (-σ) = κ σ) (hevenQ : ∀ σ, κ (L / 2 - σ) = κ σ)
+    (r₀ : ℝ≥0) {W₀ : ℂ × ℝ}
+    (hW₀ : W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀)
+    (hre : (W₀.1).re = 0) (hφ0 : W₀.2 = π)
+    (hφ : (arcFlow κ R L M r₀ (W₀, L / 2)).2 = W₀.2 + π) :
+    (arcFlow κ R L M r₀ (W₀, L / 2)).1 = -W₀.1 := by
+  sorry
+
 /-- **AL4-d′ — existence of a half-period matching start (2-D shooting/degree).**
 THE NEW CRUX.  There is a start `W₀` in the ball whose half-period endpoint is its
 `ρ_π`-image: `arcFlow …(W₀, L/2) = (−W₀.1, W₀.2 + π)`.
@@ -1929,10 +2030,14 @@ private lemma exists_halfPeriodMatch {κ : ℝ → ℝ} {R L M : ℝ}
       (arcFlow κ R L M r₀ (W₀, L / 2)).2 = W₀.2 + π) :
     ∃ W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀,
       arcFlow κ R L M r₀ (W₀, L / 2) = (-W₀.1, W₀.2 + π) := by
-  -- From `hturn`: a mirror-axis start with the correct half-period turning.  The
-  -- `z`-match `z(L/2) = −z₀` follows from the reversible-shooting reflection
-  -- (`hevenO`/`hevenQ`); left as a scoped `sorry` (restatement pass).
-  sorry
+  -- From `hturn`: a mirror-axis start `W₀ = (i·b, π)` with the correct half-period
+  -- turning `φ(L/2) = φ₀ + π = 2π`.  The `φ`-component of the match is *exactly*
+  -- `hturn`'s turning equality; the only remaining obligation is the `z`-component
+  -- `z(L/2) = −z₀`, which follows from the reversible-shooting reflection
+  -- (`hevenO`/`hevenQ`).  See `exists_halfPeriodMatch_zmatch` below.
+  obtain ⟨W₀, hW₀, _hre, _hφ0, hφ⟩ := hturn
+  exact ⟨W₀, hW₀, Prod.ext (exists_halfPeriodMatch_zmatch
+    hκ hR hR1 hL hM hhalf hevenO hevenQ r₀ hW₀ _hre _hφ0 hφ) hφ⟩
 
 /-- **The reconstruction closes: existence of a closing initial state** (replan
 assembly, sorry-free).  Via the central-symmetry route: `exists_halfPeriodMatch`
