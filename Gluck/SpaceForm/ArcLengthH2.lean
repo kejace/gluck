@@ -836,7 +836,26 @@ the winding needs no sign (a nonzero real multiple of a conjugation loop keeps
 winding `−1`). Discharge: **rebuild** — the arc-length constant-curvature arc has a
 different closed form, so the per-arc `sf_arcSpeed_decomp` linearisation and the
 base-point identities must be re-derived for `arcStepArcMap`; the nonzero `η` is
-the new-crux obligation. -/
+the new-crux obligation.
+
+**⚠ B2 (crux verdict, 2026-07-06 — see `.mathlib-quality/b2_log.jsonl`,
+`h2_negative_dev.md`).** This lemma is **FALSE AS STATED** and the winding route it
+feeds is broken *as decomposed*. The mandated computation was carried out (exact
+four-arc composition of the constant-curvature arc-length model, verified to 12
+digits): the conjugation coefficient does **not** vanish —
+`η_arc = −(2 + π/2)·R/(c−R)² = −2(4+π)·R³/(1−R²)² ≠ 0` with `R = L/(2π)`,
+`c = (1+R²)/(2R)` (full h-linear variation
+`∂E*/∂h|₀(δ) = (π/2)k·δ − (2+π/2)k·conj δ`, `k = R/(c−R)²`, and `∂E*/∂h|₀(0) = 0`,
+so central symmetry holds). **But** arc length fixes the Euclidean window `L`
+(= circumference `2πR`), not the total turning, so the `h`-INDEPENDENT term does
+not vanish: `E*(δ,0) = π‖δ‖²/(c−R) + O(‖δ‖³) ≠ 0` (an off-centre fixed-length
+curvature-`c` arc has circumference `2π·r_e(z₀) ≠ L`, since `∇r_e(zs)=0`). The
+tangent-angle flow lacks this term (four quarter-*turns* = a full circle, closes for
+any start). This defect makes the boundary loop `u ↦ E*(zs+ρu,h)` have winding
+number **0** (numerically confirmed `=0` for all `ρ,h`), so `exists_zero_of_boundary_winding`
+forces no interior zero: the AL4-c→AL4-e→AL4-f spine is dead. FIX (see dev notes):
+close via central-symmetry half-period IVT (Dahlberg §1), not a fixed-`φ₀` 2D
+z-winding. Leaf left as `sorry` pending the `/develop --continue` replan. -/
 private lemma arcStepError_expansion {κ : ℝ → ℝ} {R L M : ℝ}
     (hκ : Continuous κ) (hR : 0 < R) (hR1 : R < 1) (hL : 0 < L)
     (hM : ∀ σ, |κ σ| ≤ M) (hπper : Function.Periodic κ π) (r₀ : ℝ≥0) :
