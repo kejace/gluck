@@ -1969,6 +1969,90 @@ theorem poincareMiranda_rect {a₁ a₂ b₁ b₂ : ℝ} (_ha : a₁ ≤ a₂) (
 
 end PoincareMirandaWinding
 
+/-! ### Quarter-period landing: the 2-D Poincaré–Miranda residual (model closed form)
+
+The genuine remaining analytic obligation of the closing chain (`exists_closing_arcState`'s
+`hturn`) is the **existence** of a mirror-axis start whose quarter-period endpoint lands on
+the second mirror axis, `Φ(L/4) ∈ Fix(X)`, `X(z,φ) = (z̄, 3π − φ)`, i.e.
+`Im z(L/4) = 0 ∧ φ(L/4) = 3π/2`.  For the even-palindrome four-vertex bicircle
+`a(L/8) c(L/4) a(L/8)` this is a **genuinely 2-D** shooting condition (degree `+1`, verified;
+`h2_negative_dev.md §2-D DEGREE GATE`) in the two co-constructed parameters `(h, L)` — the
+mirror-axis height `h` and the window length `L`.
+
+**The residual in closed form.**  On `[0, L/4]` the profile is *not* constant — it is the
+2-arc composition `κ ≡ a` on `[0, L/8]` then `κ ≡ c` on `[L/8, L/4]` — so the quarter endpoint
+is the composition of two explicit Euclidean circular arcs `arcModelConst` (leaf group 3′),
+starting from the mirror-axis start `W₀ = (i·h, π)`:
+
+* `W₁ = arcModelConst a (i·h) π (L/8)`  (`qArc1`), then
+* `W₂ = arcModelConst c W₁.1 W₁.2 (L/8) = Φ(L/4)`  (`qArc2`).
+
+The residual is `G(h, L) = (Im W₂.1, W₂.2 − 3π/2)` (`quarterResidual`).  Writing
+`r_a = (1−h²)/(2(a−h))`, `θ_a = (L/8)/r_a`, `q = 1 − cos θ_a`, the scalar reductions
+(mpmath-verified exact, ChatGPT-math gpt-5.5) are
+`W₁.1 = (−r_a sin θ_a) + i(h − r_a q)`,  `‖W₁.1‖² = h² + 2r_a(r_a−h)q`,
+`⟪W₁.1, i·e^{iφ₁}⟫ = −h − (r_a−h)q`,  `r_c = (1−‖W₁.1‖²)/(2(c + ⟪…⟫))`,  `θ_c = (L/8)/r_c`,
+`G₂ = θ_a + θ_c − π/2`  and
+`G₁ = h − r_a q − r_c(sin θ_a · sin θ_c + cos θ_a·(1 − cos θ_c))`.
+
+**Verified-honest gate (recomputed independently, mpmath dps 50).**  For the primary profile
+`a = 0.8, c = 2.0` the zero is `(h*, L*) = (0.29239…, 2.49093…)`, `|G| ≈ 1e-16`, `‖z‖ ≤ 0.51 < 1`
+(confined ⇒ the model *is* `arcFlow` by `arcModelConst_eq_arcFlow`).  On the rectangle
+`h ∈ [0.20, 0.40] × L ∈ [2.20, 2.80]` the four faces are sign-definite over the *entire* edges:
+`LEFT` (`h=0.20`) `G₁ ∈ [−0.168,−0.049] < 0`; `RIGHT` (`h=0.40`) `G₁ ∈ [+0.064,+0.175] > 0`;
+`BOTTOM` (`L=2.20`) `G₂ ∈ [−0.215,−0.153] < 0`; `TOP` (`L=2.80`) `G₂ ∈ [+0.194,+0.270] > 0`.
+So `poincareMiranda_rect` fires: `G₁` flips across the `h`-faces, `G₂` across the `L`-faces.
+
+`exists_quarterLanding_of_faces` performs exactly this wiring, **sorry-free**: it packages the
+four sign faces + continuity of the explicit residual as hypotheses and produces the landing
+`∃ (h, L), Im W₂.1 = 0 ∧ W₂.2 = 3π/2`.  The remaining obligation is thus reduced to the four
+*elementary* face inequalities in the closed form above (the `G₂` faces are fractional-linear in
+`q = 1−cos θ_a`, monotone, closable from `Real.one_sub_sq_div_two_le_cos`; the `G₁` faces need a
+small verified sin/cos interval enclosure) plus the continuity/confinement bridge to `arcFlow`.
+See `tickets_h2negative.md` [AL-4]/[AL-5]. -/
+
+/-- First a-arc endpoint of the palindrome: `W₁ = Arc(a, i·h, π, L/8)`
+(`p = (h, L)`). -/
+noncomputable def qArc1 (a : ℝ) (p : ℝ × ℝ) : ℂ × ℝ :=
+  arcModelConst a (Complex.I * (p.1 : ℂ)) π (p.2 / 8)
+
+/-- Quarter-period endpoint of the palindrome:
+`W₂ = Arc(c, W₁.1, W₁.2, L/8) = Φ(L/4)` (`p = (h, L)`). -/
+noncomputable def qArc2 (a c : ℝ) (p : ℝ × ℝ) : ℂ × ℝ :=
+  arcModelConst c (qArc1 a p).1 (qArc1 a p).2 (p.2 / 8)
+
+/-- The **quarter-period landing residual** in constant-curvature model closed form:
+`G(h, L) = (Im z(L/4), φ(L/4) − 3π/2)`.  Its zero is the quarter landing `Φ(L/4) ∈ Fix(X)`. -/
+noncomputable def quarterResidual (a c : ℝ) (p : ℝ × ℝ) : ℝ × ℝ :=
+  ((qArc2 a c p).1.im, (qArc2 a c p).2 - 3 * π / 2)
+
+/-- **Quarter-period landing existence, from the four sign faces (2-D Poincaré–Miranda).**
+Given continuity of the explicit 2-arc-composition residual `quarterResidual a c` on the
+shooting rectangle `[h₁,h₂] × [L₁,L₂]` and the four boundary sign faces (`G₁ ≤ 0` on the left
+`h=h₁`, `G₁ ≥ 0` on the right `h=h₂`, `G₂ ≤ 0` on the bottom `L=L₁`, `G₂ ≥ 0` on the top
+`L=L₂` — all numerically verified honest for the gate rectangle, see the section note), the
+proven degree engine `poincareMiranda_rect` produces an interior `(h, L)` at which the quarter
+endpoint **lands** on the second mirror axis: `Im (Φ(L/4)).1 = 0 ∧ (Φ(L/4)).2 = 3π/2`.  This is
+the co-constructed input that `exists_closing_arcState`'s `hturn` requires (modulo the
+`arcModelConst_eq_arcFlow` confinement bridge from the model to `arcFlow`). **Sorry-free.** -/
+lemma exists_quarterLanding_of_faces (a c : ℝ) {h₁ h₂ L₁ L₂ : ℝ}
+    (hh : h₁ ≤ h₂) (hL : L₁ ≤ L₂)
+    (hcont : ContinuousOn (quarterResidual a c) (Set.Icc h₁ h₂ ×ˢ Set.Icc L₁ L₂))
+    (hleft : ∀ L ∈ Set.Icc L₁ L₂, (quarterResidual a c (h₁, L)).1 ≤ 0)
+    (hright : ∀ L ∈ Set.Icc L₁ L₂, 0 ≤ (quarterResidual a c (h₂, L)).1)
+    (hbot : ∀ h ∈ Set.Icc h₁ h₂, (quarterResidual a c (h, L₁)).2 ≤ 0)
+    (htop : ∀ h ∈ Set.Icc h₁ h₂, 0 ≤ (quarterResidual a c (h, L₂)).2) :
+    ∃ p ∈ Set.Icc h₁ h₂ ×ˢ Set.Icc L₁ L₂,
+      (qArc2 a c p).1.im = 0 ∧ (qArc2 a c p).2 = 3 * π / 2 := by
+  obtain ⟨p, hp, hG⟩ :=
+    poincareMiranda_rect hh hL (quarterResidual a c) hcont hleft hright hbot htop
+  refine ⟨p, hp, ?_, ?_⟩
+  · have h1 := congrArg Prod.fst hG
+    simpa [quarterResidual] using h1
+  · have h2 := congrArg Prod.snd hG
+    simp only [quarterResidual, Prod.snd_zero] at h2
+    linarith
+
 /-! ### Reversibility (conjugation reflection) infrastructure for the `z`-match
 
 The half-period `z`-match `z(L/2) = −z₀` is the `I_x`/`I_y` **reversible-shooting**
