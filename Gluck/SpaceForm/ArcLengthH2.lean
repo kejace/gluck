@@ -701,12 +701,30 @@ confined (`‖z σ‖ < 1`), then `z` satisfies `Realizes (-1) z κ` with tangen
 `(1 − ‖z‖²)/2·φ' = (κ + ⟪z, i·e^{iφ}⟫)·‖z'‖` is exactly the ODE for `φ'`.
 (Mirror of `Gluck.realizesCurvature_dahlbergCurve`, `ArcLength.lean:121`, and
 `Gluck.SpaceForm.reconstruction_realizes_aux`, `Reconstruction.lean:303`.) -/
-lemma arcSolution_realizes {κ : ℝ → ℝ} (hκ : Continuous κ) {z : ℝ → ℂ} {φ : ℝ → ℝ}
+lemma arcSolution_realizes {κ : ℝ → ℝ} (_hκ : Continuous κ) {z : ℝ → ℂ} {φ : ℝ → ℝ}
     (hz : ∀ σ, HasDerivAt z (Complex.exp ((φ σ : ℂ) * Complex.I)) σ)
     (hφ : ∀ σ, HasDerivAt φ (arcAngleSpeed κ σ (z σ) (φ σ)) σ)
     (hconf : ∀ σ, ‖z σ‖ < 1) :
     Realizes (-1) z κ := by
-  sorry
+  have hdz : ∀ t, deriv z t = Complex.exp ((φ t : ℂ) * Complex.I) := fun t => (hz t).deriv
+  have hnorm : ∀ t, ‖deriv z t‖ = 1 := fun t => by
+    rw [hdz]; exact Complex.norm_exp_ofReal_mul_I _
+  have hφdiff : Differentiable ℝ φ := fun t => (hφ t).differentiableAt
+  have hφcont : Continuous φ := hφdiff.continuous
+  have hzcont : Continuous (deriv z) := by
+    have heq : deriv z = fun t => Complex.exp ((φ t : ℂ) * Complex.I) := funext hdz
+    rw [heq]
+    exact Complex.continuous_exp.comp
+      ((Complex.continuous_ofReal.comp hφcont).mul continuous_const)
+  refine ⟨contDiff_one_iff_deriv.mpr ⟨fun t => (hz t).differentiableAt, hzcont⟩,
+    ?_, hconf, φ, hφdiff, ?_, ?_⟩
+  · intro t; rw [hdz]; exact Complex.exp_ne_zero _
+  · intro t; rw [hnorm, hdz, Complex.ofReal_one, one_mul]
+  · intro t
+    rw [hnorm, mul_one, (hφ t).deriv, arcAngleSpeed]
+    have hd : (1 : ℝ) - ‖z t‖ ^ 2 ≠ 0 := by nlinarith [hconf t, norm_nonneg (z t)]
+    field_simp
+    ring
 
 /-! ## Leaf group 4 — closing the reconstruction -/
 
@@ -733,6 +751,20 @@ lemma arcFlow_central_symmetry {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuou
     arcFlow κ R L M r₀ ((-W₀.1, W₀.2 + π), L / 2)
       = (-(arcFlow κ R L M r₀ (W₀, L / 2)).1,
           (arcFlow κ R L M r₀ (W₀, L / 2)).2 + π) := by
+  -- SKETCH (multi-session, part of AL-4).  Via ODE uniqueness (`arcFlow_unique`):
+  -- set `g σ = (-(Ψ(W₀,σ)).1, (Ψ(W₀,σ)).2 + π)` and show it solves the arc-length
+  -- ODE from the reflected start `(-W₀.1, W₀.2+π)`, using the *reflection invariance*
+  -- of `arcField`:  `arcField.1` at `(-z, φ+π) = exp(i(φ+π)) = -exp(iφ) = -(arcField.1 at (z,φ))`;
+  -- and `truncatedArcAngleSpeed κ R σ (-z) (φ+π) = truncatedArcAngleSpeed κ R σ z φ`
+  -- because `clampBall R (-z) = -clampBall R z` (clamp is odd), the denominator is
+  -- even in `z`, and `⟪-clamp, i·exp(i(φ+π))⟫ = ⟪-clamp, -i·exp(iφ)⟫ = ⟪clamp, i·exp(iφ)⟫`
+  -- (two sign flips cancel).  Then `arcFlow_unique` identifies `g` with
+  -- `Ψ((-W₀.1,W₀.2+π), ·)` and evaluation at `L/2` gives the claim.
+  -- OPEN SUBTLETY: the reflected start `(-W₀.1, W₀.2+π)` has `φ`-component shifted by
+  -- `π`, so its `ℂ×ℝ` norm can exceed `r₀`; `arcFlow_spec`/`_unique` need it inside
+  -- `closedBall r₀`.  Fix requires either a `z`-only ball hypothesis or an enlarged
+  -- `r₀`.  (`hπper` is NOT used by the pointwise reflection identity above — only by
+  -- the downstream half-period/monodromy squaring argument.)
   sorry
 
 /-- **The reconstruction closes: existence of a closing initial state.** Via the
@@ -749,6 +781,27 @@ lemma exists_closing_arcState {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuous
     ∃ W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀,
       (arcFlow κ R L M r₀ (W₀, L)).1 = W₀.1 ∧
       (arcFlow κ R L M r₀ (W₀, L)).2 = W₀.2 + 2 * π := by
+  -- SKETCH (the substantial multi-session leaf of AL-4).  This is the arc-length
+  -- `(z,φ)`-analogue of `spaceForm_endpoint_winding` (`EndpointWinding.lean:305`),
+  -- and requires REBUILDING that entire degree/first-variation apparatus for the
+  -- coupled `arcField`/`arcFlow` on `ℂ × ℝ` (the θ-parametrised `spaceFormFlow`
+  -- machinery does NOT transport verbatim — the state, the endpoint map, and the
+  -- linearisation all change).  Required new infrastructure, in order:
+  --   (i)   `arcEndpoint`-based endpoint map `F : ℂ → ℂ × ℝ` as a function of the
+  --         start `z₀` (with a fixed reflected `φ₀`), continuous on the disk;
+  --   (ii)  a *first-variation / stepError expansion* for `arcField`: identify the
+  --         `z`-monodromy near a model bicircle start as `η·h·conj(z₀ − zs) + o`,
+  --         with a NONZERO conjugation coefficient `η` (arc-length analogue of
+  --         `stepError_expansion` + `stepError_coeff_ne_zero`);
+  --   (iii) the bicircle reference model in arc-length coordinates + its margins /
+  --         `L¹`-transport comparison (feeding `arcFlow_confined`, already proven);
+  --   (iv)  boundary domination `‖F u + A·conj u‖ < |A|` on the circle, then REUSE
+  --         `exists_interior_zero_of_conj_dominant'`-style winding
+  --         (`exists_zero_of_boundary_winding` `Winding.lean:265`,
+  --         `windingNumberC_conj_loop = −1` `ConjWinding.lean:186`) to force a zero
+  --         `z`-monodromy; the `φ`-closure `φ L = φ 0 + 2π` comes from the total
+  --         turning bookkeeping.  Central symmetry (`arcFlow_central_symmetry`)
+  --         supplies `errorMap 0 = 0` / the half-period squaring.
   sorry
 
 /-! ## Leaf group 5 — simplicity (reuse of the Euclidean-in-disk chord machinery) -/
@@ -765,7 +818,29 @@ lemma injOn_arcCurve {z : ℝ → ℂ} {φ : ℝ → ℝ} {L : ℝ}
     (hchord : ∀ t τ : ℝ, 0 ≤ t → t < τ → τ < L →
       (∫ s in t..τ, Complex.exp ((φ s : ℂ) * Complex.I)) ≠ 0) :
     Set.InjOn z (Set.Ico 0 L) := by
-  sorry
+  have hdz : deriv z = fun s => Complex.exp ((φ s : ℂ) * Complex.I) :=
+    funext fun t => (hz t).deriv
+  have hmeas : Measurable (fun s => Complex.exp ((φ s : ℂ) * Complex.I)) := by
+    rw [← hdz]; exact measurable_deriv z
+  have hint : ∀ a b : ℝ, IntervalIntegrable
+      (fun s => Complex.exp ((φ s : ℂ) * Complex.I)) MeasureTheory.volume a b := by
+    intro a b
+    exact (intervalIntegrable_const (c := (1 : ℝ))).mono_fun' hmeas.aestronglyMeasurable
+      (Filter.Eventually.of_forall fun s => le_of_eq (Complex.norm_exp_ofReal_mul_I _))
+  -- FTC bridge: `z b - z a = ∫_a^b e^{iφ}`.
+  have hchordEq : ∀ a b : ℝ,
+      (∫ s in a..b, Complex.exp ((φ s : ℂ) * Complex.I)) = z b - z a := fun a b =>
+    intervalIntegral.integral_eq_sub_of_hasDerivAt (fun x _ => hz x) (hint a b)
+  -- Core: for `0 ≤ a < b < L`, `z a ≠ z b`.
+  have main : ∀ a b : ℝ, 0 ≤ a → a < b → b < L → z a ≠ z b := by
+    intro a b ha hab hb heq
+    refine hchord a b ha hab hb ?_
+    rw [hchordEq a b, heq, sub_self]
+  intro θ₁ hθ₁ θ₂ hθ₂ heq
+  rcases lt_trichotomy θ₁ θ₂ with h | h | h
+  · exact absurd heq (main θ₁ θ₂ hθ₁.1 h hθ₂.2)
+  · exact h
+  · exact absurd heq.symm (main θ₂ θ₁ hθ₂.1 h hθ₁.2)
 
 /-! ## Leaf group 6 — the arc-length converse capstone -/
 
@@ -793,6 +868,22 @@ H²). Assembles `arcSolution_realizes` (leaf 3), `injOn_arcCurve` (leaf 5) and t
 theorem arcLengthH2Converse {κ : ℝ → ℝ} (hκ : Continuous κ)
     (hper : Function.Periodic κ (2 * π)) (hALC : ArcLengthH2Curvature κ) :
     ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes (-1) z κ := by
+  obtain ⟨L, hL, z, φ, hz, hφ, hconf, hzclose, hφclose, hinj⟩ := hALC
+  -- The `Realizes (-1) z κ` half is discharged directly by `arcSolution_realizes`
+  -- (leaf 3): the confined arc-length ODE solution realizes `κ` verbatim.
+  refine ⟨z, ?_, arcSolution_realizes hκ hz hφ hconf⟩
+  -- Remaining gap: `IsSimpleClosed z` = `Function.Periodic z (2*π)` ∧
+  -- `Set.InjOn z (Set.Ico 0 (2*π))`.  From `hALC` we have only `z L = z 0` and
+  -- `Set.InjOn z (Set.Ico 0 L)` for the *Euclidean-arc-length* window length `L`.
+  -- Upgrading these to the `2π` convention requires the window to satisfy `L = 2π`
+  -- (equivalently full `2π`-periodicity of `z`, which follows from ODE uniqueness
+  -- only when `arcField κ` is `L`-periodic in `σ`, i.e. when `L ∈ 2πℤ`, since `κ`
+  -- is `2π`-periodic).  A pure `σ ↦ (2π/L)·σ` reparametrization normalises the
+  -- period but composes `κ` with the diffeo, so `spaceFormRealizes_comp` then
+  -- realizes `κ ∘ ψ`, not `κ`.  Hence the statement as written needs `L = 2π`
+  -- (or an explicit reparametrisation datum tying the Euclidean length to `2π`).
+  -- See the session report: this is a decomposition-skeleton statement gap, not a
+  -- provable-as-stated leaf.
   sorry
 
 /-- **Realization up to reparametrization (no rescaling in H²).** If there is a
@@ -808,6 +899,20 @@ theorem realizesH2_of_reparam {κ ψ : ℝ → ℝ} (hκ : Continuous κ)
     (hψpos : ∀ t, 0 < deriv ψ t) (hψper : ∀ t, ψ (t + 2 * π) = ψ t + 2 * π)
     (hALC : ArcLengthH2Curvature (κ ∘ ψ)) :
     ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes (-1) z κ := by
+  -- `κ ∘ ψ` is continuous and `2π`-periodic, so the base converse yields a simple
+  -- closed `Z` realizing `κ ∘ ψ`.
+  have hκψc : Continuous (κ ∘ ψ) := hκ.comp hψ.continuous
+  have hκψper : Function.Periodic (κ ∘ ψ) (2 * π) := by
+    intro t; simp only [Function.comp_apply]; rw [hψper t, hκper (ψ t)]
+  obtain ⟨Z, hZsc, hZreal⟩ := arcLengthH2Converse hκψc hκψper hALC
+  -- Remaining (mechanical, mirrors `realizesCurvature_of_nonNormalised`,
+  -- `ArcLength.lean:261`, with the scaling step dropped): construct the
+  -- strictly-increasing `C¹` inverse `ψ⁻¹` (shift law `ψ⁻¹(t+2π) = ψ⁻¹(t)+2π`),
+  -- then transfer via a *public* space-form reparametrisation lemma
+  -- (`spaceFormRealizes_comp`, currently `private` in `Converse.lean` — needs to be
+  -- re-exposed) and `isSimpleClosed_comp` (`FourVertex.lean:175`):
+  --   `Realizes (-1) Z (κ∘ψ)`  ↦  `Realizes (-1) (Z∘ψ⁻¹) ((κ∘ψ)∘ψ⁻¹) = Realizes (-1) (Z∘ψ⁻¹) κ`.
+  -- Transitively also depends on `arcLengthH2Converse`'s `IsSimpleClosed` gap.
   sorry
 
 end Gluck.SpaceForm
