@@ -35,12 +35,17 @@ This file mirrors the *Euclidean* arc-length engine `Gluck/ArcLength.lean`
 (Dahlberg §1, conditions (1.1)–(1.3), `references/dahlberg.pdf`), adapted to the
 coupled `(z, φ)` system and the H² metric factor. The Picard–Lindelöf and
 truncation scaffolding mirrors `Gluck/SpaceForm/Flow.lean`; the simplicity input
-reuses the Euclidean-in-disk chord machinery of `Gluck/Simplicity.lean`; the
-closing degree core reuses the sign-agnostic winding of `Gluck/Winding.lean` /
-`Gluck/Sphere/ConjWinding.lean`.
+reuses the Euclidean-in-disk chord machinery of `Gluck/Simplicity.lean`.  The
+closing (Leaf group 4′) uses the **central-symmetry half-period** route (Dahlberg
+§1 symmetric closing, `Gluck.dahlbergCurve_periodic`): for a half-periodic `κ`,
+`arcFlow` is `ρ_π`-equivariant, so closing reduces to a half-period matching solved
+by a 2-D shooting/degree argument.  (The earlier fixed-`φ₀` `z`-winding closing is
+**B2/DEAD** — arc length fixes the Euclidean length, not the turning — see
+`.mathlib-quality/decomposition_al4_v2.md`.)
 
-**Every leaf here is `:= by sorry`** — this is the decomposition skeleton, not a
-proof. See `.mathlib-quality/decomposition_h2arclength.md`.
+Groups 1–3 and 5 are proven sorry-free; Leaf group 4′ (closing) and Leaf group 6
+(the AL-6 `L=2π` capstone statement gap) carry the remaining `sorry`s.  See
+`.mathlib-quality/decomposition_h2arclength.md` and `decomposition_al4_v2.md`.
 
 Blueprint: `blueprint/src/chapters/Gluck_ArcLengthH2.tex` (planned).
 -/
@@ -767,35 +772,66 @@ lemma arcFlow_central_symmetry {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuou
   -- the downstream half-period/monodromy squaring argument.)
   sorry
 
-/-! ### Leaf group 4′ — AL-4 sub-decomposition of `exists_closing_arcState`
+/-! ### Leaf group 4′ — AL-4 REPLAN: central-symmetry half-period closing
 
-The arc-length `(z, φ)`-analogue of the entire `EndpointWinding.lean` /
-`FirstVariation.lean` apparatus, adapted to the coupled `arcField`/`arcFlow` on
-`ℂ × ℝ`.  The θ-parametrised machinery does **not** transport verbatim (the state,
-the endpoint map, and the first-variation linearisation all change), so the
-first-variation stack is *rebuilt*; the sign-agnostic winding core
-(`Gluck.exists_zero_of_boundary_winding`, `Gluck.windingNumberC_conj_loop = −1`)
-is *reused*.  Ordered leaves AL4-a … AL4-h below; all `:= by sorry`.  See
-`.mathlib-quality/decomposition_al4.md`. -/
+**REPLAN (2026-07-06, `/develop --continue`).**  The original AL4-c…AL4-f
+fixed-`φ₀` 2D `z`-winding closing is **B2/DEAD** (`.mathlib-quality/b2_log.jsonl`,
+`h2_negative_dev.md §AL4-c CRUX VERDICT`): arc length fixes the Euclidean length
+`L`, not the turning, so the `h`-independent closing defect
+`E*(δ,0)=π‖δ‖²/(c−R)≠0` forces the boundary `z`-winding to `0` (numerically
+confirmed) — no interior zero, even though the conjugation coefficient
+`η_arc≠0`.  The winding/degree apparatus is flow-specific and does not transport.
 
-/-- **AL4-a — the `z`-monodromy residual as a `ℂ → ℂ` map** at a fixed initial
-tangent angle `φ₀`: `F(z₀) = (arcFlow …((z₀, φ₀), L)).1 − z₀`, the `z`-closing
-error whose interior zero is a closed reconstruction (the winding argument runs on
-this `ℂ`-valued map, `φ₀` fixed by the central-symmetry ansatz). (Analogue of
-`Gluck.SpaceForm.spaceFormEndpoint`, `Flow.lean:285` — there the endpoint is
-`Φ(z₀, 2π) − z₀`; here the state carries `φ`, so we project.) -/
+New route — the arc-length analogue of Dahlberg §1's **central-symmetry** closing
+(`Gluck.arcLengthConverse`, `ArcLength.lean:212`; `Gluck.dahlbergCurve_periodic`,
+`ArcLength.lean:163`).  For a `κ` with half-period `L/2`, `arcFlow` is
+`ρ_π`-equivariant (`arcFlow_central_symmetry`): the half-period map
+`H = arcFlow(·, L/2)` commutes with the point reflection
+`ρ_π : (z,φ) ↦ (−z, φ+π) = R_π`.  Hence if the **half-period matching**
+`H(W₀) = ρ_π(W₀)` holds, then the full monodromy `M = arcFlow(·,L) = H∘H` gives
+`M(W₀) = ρ_π²(W₀) = (W₀.1, W₀.2 + 2π)` — the curve closes and is centrally
+symmetric (`z(σ+L/2) = −z(σ)`).  Closing thus **reduces** to solving the
+half-period matching (`arcClosure_of_halfPeriodMatch`, high-confidence structural
+core), and the matching is solved by a **2-parameter shooting/degree** argument
+(`exists_halfPeriodMatch`).
+
+**⚠ NEW CRUX — resolved honestly (2026-07-06, `decomposition_al4_v2.md`; second
+opinion `chatgpt-math`).**  The half-period matching `H(W₀) = ρ_π(W₀)` is **3 real
+scalar equations**.  The rotation symmetry `R_α` (`arcFlow` commutes with
+`(z,φ)↦(e^{iα}z, φ+α)`, the H² metric being rotation-invariant, `κ` a function of
+`σ` only) removes exactly one — solutions come in 1-parameter rotation orbits —
+leaving **2 independent conditions in 2 real parameters** (the mirror-axis height
+`b∈(0,1)` of the symmetric start `W₀=(−ib, 0)`, and the free window length; H² has
+**no** metric rescaling, so the Euclidean length is a genuine shooting parameter,
+cf. AL-6).  Crucially the `φ`-half-turning `φ(L/2)=φ₀+π` is **NOT automatic**: the
+coupled `φ' = 2(κ + ⟪z, i·e^{iφ}⟫)/(1−‖z‖²)` depends on the whole trajectory,
+unlike the *decoupled* Euclidean `φ'=κ` where π-periodicity of `κ` forces the
+half-turning and closure is free (`dahlbergCurve_periodic`).  Therefore the
+symmetric closing is a genuine **2-D Poincaré–Miranda / Brouwer-degree** existence,
+**not a single 1-D IVT** — a *second obstruction* to the plan-as-stated.  Unlike
+B2 it is **not dead**: a solution provably exists (the hyperbolic four-vertex
+bicircle is a real embedded curve), so the 2-D degree is satisfiable; the remaining
+work is the sign/degree input (mirror reversibility for `κ` even → symmetric
+quarter arc landing on the second mirror axis), which should be **numerically
+gated** (à la the B2 check) before a full grind, to rule out a third obstruction.
+
+Ordered leaves below (all `:= by sorry` except the routing assembly, which is
+sorry-free); AL4-a/b retained as generic plumbing. -/
+
+/-- **AL4-a (plumbing, retained) — the `z`-monodromy residual as a `ℂ → ℂ` map**
+at a fixed initial tangent angle `φ₀`: `F(z₀) = (arcFlow …((z₀, φ₀), L)).1 − z₀`.
+Vestigial from the dead fixed-`φ₀` winding route (the winding of this map is `0`,
+B2); retained only as generic plumbing and a continuity target.  (Analogue of
+`Gluck.SpaceForm.spaceFormEndpoint`, `Flow.lean:285`.) -/
 noncomputable def arcZEndpoint (κ : ℝ → ℝ) (R L M : ℝ) (r₀ : ℝ≥0) (φ₀ : ℝ)
     (z₀ : ℂ) : ℂ :=
   (arcFlow κ R L M r₀ ((z₀, φ₀), L)).1 - z₀
 
-/-- **AL4-b — continuity of the `z`-monodromy on the affine chart** of the
-`ρ`-disk of starts about the model center `zs` (with fixed `φ₀`), the input
-`hFc` of the degree argument. Direct reuse of the `ContinuousOn` half of
-`exists_arcFlow` (projected to the `z`-component and precomposed with the affine
-chart `u ↦ zs + ρ·u`), mirroring the inline `hFc` construction and
-`Gluck.SpaceForm.spaceFormEndpoint_continuousOn` (`Flow.lean:347`). Discharge:
-**reuse** (extract `ContinuousOn` from `exists_arcFlow` as `arcFlow_spec`
-extracts the ODE half). -/
+/-- **AL4-b (plumbing, retained) — continuity of the `z`-monodromy** on the affine
+chart `u ↦ zs + ρ·u`.  Generic `ContinuousOn` from the `ContinuousOn` half of
+`exists_arcFlow`; reusable as the continuity input of the half-period matching
+map's 2-D degree argument.  Discharge: **reuse** (extract `ContinuousOn` from
+`exists_arcFlow` as `arcFlow_spec` extracts the ODE half). -/
 private lemma arcZEndpoint_continuousOn {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuous κ)
     (hR : 0 ≤ R) (hR1 : R < 1) (hL : 0 ≤ L) (hM : ∀ σ, |κ σ| ≤ M) (r₀ : ℝ≥0)
     (φ₀ : ℝ) {zs : ℂ} {ρ : ℝ}
@@ -805,184 +841,96 @@ private lemma arcZEndpoint_continuousOn {κ : ℝ → ℝ} {R L M : ℝ} (hκ : 
       (Metric.closedBall (0 : ℂ) 1) := by
   sorry
 
-/-- **The constant-curvature arc-length arc map**: the endpoint state of the
-`arcFlow` of the constant curvature `K` over a Euclidean-length window `Δ`. On the
-bounded model (`‖z‖ ≤ R − μ`, clamp inactive) this is the *exact* constant-geodesic-
-curvature arc (a Poincaré-disk hyperbolic circle) reparametrised by Euclidean arc
-length — the arc-length analogue of the closed-form circular arc
-`Gluck.SpaceForm.spaceFormArcMap` (`ArcAlgebra.lean:284`). -/
-noncomputable def arcStepArcMap (K R M Δ : ℝ) (r₀ : ℝ≥0) (W : ℂ × ℝ) : ℂ × ℝ :=
-  arcFlow (fun _ => K) R Δ M r₀ (W, Δ)
+/-- **The half-period matching defect** at `W₀`: the difference between the
+half-period endpoint `arcFlow …(W₀, L/2)` and its expected `ρ_π`-image
+`(−W₀.1, W₀.2 + π)`.  The reconstruction closes centrally-symmetrically iff this
+vanishes for some `W₀` (`arcClosure_of_halfPeriodMatch`).  (Arc-length analogue of
+the closure `∫₀^{2π} e^{iα}=0` split by the π-symmetry in `Gluck.arcLengthConverse`,
+`ArcLength.lean:212`; `ρ_π = R_π` is the model-circle central symmetry of
+`Gluck.SpaceForm.spaceFormSpeed_circle`, `Defs.lean:169`.) -/
+noncomputable def arcHalfPeriodDefect (κ : ℝ → ℝ) (R L M : ℝ) (r₀ : ℝ≥0)
+    (W₀ : ℂ × ℝ) : ℂ × ℝ :=
+  arcFlow κ R L M r₀ (W₀, L / 2) - (-W₀.1, W₀.2 + π)
 
-/-- **The four-arc arc-length step-error map** (`z`-component): the `z`-monodromy
-of the symmetric `a-b-a-b` bicircle step model over four equal Euclidean-length
-windows `L/4`, minus the start `z`. (Analogue of `Gluck.SpaceForm.stepErrorMap`,
-`ArcAlgebra.lean:341` — there the four quarter-turns are indexed by tangent angle
-`0, π/2, π, 3π/2`; here `φ` is non-monotone, so the partition is by Euclidean
-arc length.) -/
-noncomputable def arcStepErrorMap (a b R M L : ℝ) (r₀ : ℝ≥0) (W : ℂ × ℝ) : ℂ :=
-  (arcStepArcMap b R M (L / 4) r₀ (arcStepArcMap a R M (L / 4) r₀
-      (arcStepArcMap b R M (L / 4) r₀ (arcStepArcMap a R M (L / 4) r₀ W)))).1 - W.1
+/-- **AL4-c′ — closing from the half-period matching (the `ρ_π`-squaring).**  THE
+structural core of the replan (HIGH confidence).  If `κ` has half-period `L/2` and
+the half-period endpoint is the `ρ_π`-image of the start
+(`arcFlow …(W₀, L/2) = (−W₀.1, W₀.2 + π)`), then the full monodromy closes:
+`(arcFlow …(W₀, L)).1 = W₀.1` and `(arcFlow …(W₀, L)).2 = W₀.2 + 2π` (so also
+`z(σ+L/2) = −z(σ)` by symmetry).  Proof:
+`arcFlow(·,L) = arcFlow(·, L/2) ∘ arcFlow(·, L/2)` (ODE concatenation +
+`κ`-half-periodicity, via `arcFlow_unique`: the second half over `[L/2,L]` is the
+`σ↦σ+L/2`-translate of a flow with field `κ(·+L/2)=κ(·)`), then
+`arcFlow_central_symmetry` (`H∘ρ_π = ρ_π∘H`) gives
+`H(H(W₀)) = H(ρ_π W₀) = ρ_π(H(W₀)) = ρ_π²(W₀) = (W₀.1, W₀.2 + 2π)`.  (Mirror of the
+symmetry split in `Gluck.dahlbergCurve_periodic`, `ArcLength.lean:163`.)  Discharge:
+**structural** — ODE concatenation/uniqueness + the equivariance leaf; no degree
+input, so this is the safe half of the replan. -/
+private lemma arcClosure_of_halfPeriodMatch {κ : ℝ → ℝ} {R L M : ℝ}
+    (hκ : Continuous κ) (hR : 0 ≤ R) (hR1 : R < 1) (hL : 0 ≤ L)
+    (hM : ∀ σ, |κ σ| ≤ M) (hhalf : Function.Periodic κ (L / 2)) (r₀ : ℝ≥0)
+    {W₀ : ℂ × ℝ} (hW₀ : W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀)
+    (hmatch : arcFlow κ R L M r₀ (W₀, L / 2) = (-W₀.1, W₀.2 + π)) :
+    (arcFlow κ R L M r₀ (W₀, L)).1 = W₀.1 ∧
+      (arcFlow κ R L M r₀ (W₀, L)).2 = W₀.2 + 2 * π := by
+  sorry
 
-/-- **AL4-c — first-variation (`stepError`) expansion for the arc-length model,
-with a NONZERO conjugation coefficient.** THE CRUX. There are a model center `zs`,
-a coefficient `η ≠ 0`, radii `ρ₁, h`, and `C` such that for every small step
-height and every start `z₀` within `ρ₁` of `zs`, the model `z`-monodromy expands as
-`E*(z₀) = −η·h·conj(z₀ − zs) + O(h(‖z₀ − zs‖² + h))`. This is the arc-length
-`(z, φ)`-analogue of `Gluck.SpaceForm.stepError_expansion` (`FirstVariation.lean:1081`)
-*bundled* with `Gluck.SpaceForm.stepError_coeff_ne_zero` (`FirstVariation.lean:1385`,
-which supplies `η(ε) = 2·r*·ε/(c² + ε) ≠ 0`). The coefficient is `η ≠ 0` only —
-the winding needs no sign (a nonzero real multiple of a conjugation loop keeps
-winding `−1`). Discharge: **rebuild** — the arc-length constant-curvature arc has a
-different closed form, so the per-arc `sf_arcSpeed_decomp` linearisation and the
-base-point identities must be re-derived for `arcStepArcMap`; the nonzero `η` is
-the new-crux obligation.
+/-- **AL4-d′ — existence of a half-period matching start (2-D shooting/degree).**
+THE NEW CRUX.  There is a start `W₀` in the ball whose half-period endpoint is its
+`ρ_π`-image: `arcFlow …(W₀, L/2) = (−W₀.1, W₀.2 + π)`.
 
-**⚠ B2 (crux verdict, 2026-07-06 — see `.mathlib-quality/b2_log.jsonl`,
-`h2_negative_dev.md`).** This lemma is **FALSE AS STATED** and the winding route it
-feeds is broken *as decomposed*. The mandated computation was carried out (exact
-four-arc composition of the constant-curvature arc-length model, verified to 12
-digits): the conjugation coefficient does **not** vanish —
-`η_arc = −(2 + π/2)·R/(c−R)² = −2(4+π)·R³/(1−R²)² ≠ 0` with `R = L/(2π)`,
-`c = (1+R²)/(2R)` (full h-linear variation
-`∂E*/∂h|₀(δ) = (π/2)k·δ − (2+π/2)k·conj δ`, `k = R/(c−R)²`, and `∂E*/∂h|₀(0) = 0`,
-so central symmetry holds). **But** arc length fixes the Euclidean window `L`
-(= circumference `2πR`), not the total turning, so the `h`-INDEPENDENT term does
-not vanish: `E*(δ,0) = π‖δ‖²/(c−R) + O(‖δ‖³) ≠ 0` (an off-centre fixed-length
-curvature-`c` arc has circumference `2π·r_e(z₀) ≠ L`, since `∇r_e(zs)=0`). The
-tangent-angle flow lacks this term (four quarter-*turns* = a full circle, closes for
-any start). This defect makes the boundary loop `u ↦ E*(zs+ρu,h)` have winding
-number **0** (numerically confirmed `=0` for all `ρ,h`), so `exists_zero_of_boundary_winding`
-forces no interior zero: the AL4-c→AL4-e→AL4-f spine is dead. FIX (see dev notes):
-close via central-symmetry half-period IVT (Dahlberg §1), not a fixed-`φ₀` 2D
-z-winding. Leaf left as `sorry` pending the `/develop --continue` replan. -/
-private lemma arcStepError_expansion {κ : ℝ → ℝ} {R L M : ℝ}
+**Honest crux resolution (`decomposition_al4_v2.md`; second opinion `chatgpt-math`,
+gpt-5.5).**  The matching is 3 scalar equations; the rotation symmetry `R_α`
+removes exactly one, leaving **2 independent conditions in 2 real parameters** (the
+mirror-axis height `b∈(0,1)` of the symmetric start `W₀=(−ib, 0)∈Fix(mirror)`, and
+the free window length — H² has no rescaling, cf. AL-6).  The `φ`-turning
+`φ(L/2)=φ₀+π` is **NOT** automatic (the coupled `φ`-equation depends on the whole
+trajectory — contrast the decoupled Euclidean `φ'=κ`, `dahlbergCurve_periodic`).
+Hence a genuine **2-D Poincaré–Miranda / Brouwer-degree** existence, NOT a 1-D IVT.
+It is *satisfiable* (the hyperbolic four-vertex bicircle exists), so — unlike the
+B2 winding route — the route is sound; the discharge needs the 2-D sign/degree
+input.  RECOMMENDED discharge (reversible-shooting, Devaney): with `κ` even about
+the start, the mirror `I_y:(z,φ)↦(−z̄,−φ)` makes the flow reversible; start on
+`Fix(I_y)={(iy,0)}` (1 param `b`) and require the quarter-period endpoint to land
+on the second mirror axis `Fix(I_x)={(x,π/2)}` (2 conditions `Im z(L/4)=0`,
+`φ(L/4)=π/2` in `2` params `b, L`) — two reflections then generate the closed
+centrally-symmetric curve.  Codimension `2` (each `Fix` is 1-D in the 3-D
+unit-tangent bundle), so a 2-D degree (`Gluck.exists_zero_of_boundary_winding`,
+`Winding.lean:265`, applied to the *quarter-period matching map* — whose degree,
+unlike the dead fixed-`φ₀` `z`-monodromy, is the object to show nonzero — or a
+Poincaré–Miranda box argument).  **GATE: numerically verify the 2-D degree/sign
+pattern for a concrete symmetric profile before grinding.**  (No 1-D Euclidean
+template; the closest is the *automatic* closure `dahlbergCurve_periodic`, which the
+coupling breaks.)  Discharge: **rebuild** — 2-D topological degree. -/
+private lemma exists_halfPeriodMatch {κ : ℝ → ℝ} {R L M : ℝ}
     (hκ : Continuous κ) (hR : 0 < R) (hR1 : R < 1) (hL : 0 < L)
-    (hM : ∀ σ, |κ σ| ≤ M) (hπper : Function.Periodic κ π) (r₀ : ℝ≥0) :
-    ∃ (a b φ₀ : ℝ) (zs : ℂ) (η ρ₁ h C : ℝ),
-      0 < ρ₁ ∧ 0 < h ∧ 0 < C ∧ η ≠ 0 ∧
-      ∀ z₀ : ℂ, ‖z₀ - zs‖ ≤ ρ₁ →
-        ‖arcStepErrorMap a b R M L r₀ (z₀, φ₀)
-            + ((η * h : ℝ) : ℂ) * (starRingEnd ℂ) (z₀ - zs)‖
-          ≤ C * h * (‖z₀ - zs‖ ^ 2 + h) := by
+    (hM : ∀ σ, |κ σ| ≤ M) (hhalf : Function.Periodic κ (L / 2)) (r₀ : ℝ≥0) :
+    ∃ W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀,
+      arcFlow κ R L M r₀ (W₀, L / 2) = (-W₀.1, W₀.2 + π) := by
   sorry
 
-/-- **AL4-d — master endpoint estimate at a near start** (transport + expansion).
-For every start `z₀` in the `ρ`-disk about the model center `zs`, the *true*
-arc-length `z`-monodromy `arcZEndpoint` is a small perturbation of the model
-step-error `arcStepErrorMap`: the `L¹`-Grönwall transport comparison
-(`arcTrajectory_diff_bound` / `arcFlow_confined`, already proven) plus the
-first-variation expansion `hexp` identify it with the conjugate-linear term
-`−η·h·conj(z₀ − zs)` up to `|η|·h·ρ/8` (transport) `+ O(h(‖·‖² + h))` (expansion).
-(Arc-length analogue of `Gluck.SpaceForm.flow_admissible_and_endpoint_estimate`,
-`EndpointWinding.lean:128`; the transport half mirrors
-`Gluck.SpaceForm.stepModel_transport`, `StepReparam.lean:314`.) Discharge:
-**rebuild** (reuses the proven `arcTrajectory_diff_bound`, `arcFlow_confined`). -/
-private lemma arcFlow_endpoint_estimate {κ : ℝ → ℝ} {R L M : ℝ}
-    (hκ : Continuous κ) (hR : 0 < R) (hR1 : R < 1) (hL : 0 < L)
-    (hM : ∀ σ, |κ σ| ≤ M) (r₀ : ℝ≥0)
-    {a b φ₀ η ρ h C : ℝ} {zs : ℂ}
-    (hρ0 : 0 < ρ) (hh0 : 0 < h) (hηne : η ≠ 0)
-    (hexp : ∀ z₀ : ℂ, ‖z₀ - zs‖ ≤ ρ →
-      ‖arcStepErrorMap a b R M L r₀ (z₀, φ₀)
-          + ((η * h : ℝ) : ℂ) * (starRingEnd ℂ) (z₀ - zs)‖
-        ≤ C * h * (‖z₀ - zs‖ ^ 2 + h)) :
-    ∀ z₀ : ℂ, ‖z₀ - zs‖ ≤ ρ →
-      ‖arcZEndpoint κ R L M r₀ φ₀ z₀
-          + ((η * h : ℝ) : ℂ) * (starRingEnd ℂ) (z₀ - zs)‖
-        ≤ |η| * h * ρ / 8 + C * h * (‖z₀ - zs‖ ^ 2 + h) := by
-  sorry
+/-- **The reconstruction closes: existence of a closing initial state** (replan
+assembly, sorry-free).  Via the central-symmetry route: `exists_halfPeriodMatch`
+(AL4-d′, the 2-D shooting) supplies a start `W₀` whose half-period endpoint is its
+`ρ_π`-image, and `arcClosure_of_halfPeriodMatch` (AL4-c′, the `ρ_π`-squaring)
+upgrades that to full closure `(arcFlow …(W₀, L)).1 = W₀.1`,
+`(arcFlow …(W₀, L)).2 = W₀.2 + 2π`.  (Replaces the dead winding assembly formerly
+mirroring `Gluck.SpaceForm.spaceForm_endpoint_winding`, `EndpointWinding.lean:305`;
+central-symmetry analogue of `Gluck.arcLengthConverse`, `ArcLength.lean:212`.)
 
-/-- **AL4-e — conjugate-linear domination on the boundary circle.** From the master
-estimate, on the unit circle of the affine chart of the `ρ`-disk the flow endpoint
-stays strictly closer to `−η·h·ρ·conj u` than the norm `|η|·h·ρ` of that model
-term, once the two slack inequalities `C·ρ ≤ |η|/4`, `C·h ≤ |η|·ρ/4` absorb the
-quadratic remainder. (Arc-length analogue of
-`Gluck.SpaceForm.endpoint_conj_dominant_on_circle`, `EndpointWinding.lean:201`;
-uses only `η ≠ 0`, not `η > 0`.) Discharge: **rebuild** (same `nlinarith` absorption). -/
-private lemma arcEndpoint_conj_dominant_on_circle {κ : ℝ → ℝ} {R L M : ℝ}
-    (r₀ : ℝ≥0) {φ₀ η ρ h C : ℝ} {zs : ℂ}
-    (hρ0 : 0 < ρ) (hh0 : 0 < h) (hηne : η ≠ 0)
-    (hCρ : C * ρ ≤ |η| / 4) (hCh : C * h ≤ |η| * ρ / 4)
-    (hmain : ∀ z₀ : ℂ, ‖z₀ - zs‖ ≤ ρ →
-      ‖arcZEndpoint κ R L M r₀ φ₀ z₀
-          + ((η * h : ℝ) : ℂ) * (starRingEnd ℂ) (z₀ - zs)‖
-        ≤ |η| * h * ρ / 8 + C * h * (‖z₀ - zs‖ ^ 2 + h)) :
-    ∀ u : ℂ, ‖u‖ = 1 →
-      ‖arcZEndpoint κ R L M r₀ φ₀ (zs + (ρ : ℂ) * u)
-          + ((η * h * ρ : ℝ) : ℂ) * (starRingEnd ℂ) u‖ < |η| * h * ρ := by
-  sorry
-
-/-- **AL4-f — interior zero from a dominant conjugate-linear boundary term** (the
-reused sign-agnostic degree core). If `F` is continuous on the closed unit disk and,
-on the unit circle, `F u` stays strictly closer to `−A·conj u` than `|A|` for a
-NONZERO real `A`, then `F` vanishes in the open disk: the boundary loop is a small
-perturbation of `conjLoop (−A)` of winding `−1`, so `Gluck.exists_zero_of_boundary_winding`
-(`Winding.lean:265`) fires. Verbatim reuse of
-`Gluck.SpaceForm.exists_interior_zero_of_conj_dominant'` (`EndpointWinding.lean:243`,
-currently `private`; re-expose or copy) — this leaf is *model-agnostic* (generic
-`F : ℂ → ℂ`), so the arc-length boundary loop feeds it unchanged. Discharge:
-**reuse**. -/
-private lemma exists_interior_zero_of_conj_dominant_arc {F : ℂ → ℂ}
-    (hFc : ContinuousOn F (Metric.closedBall (0 : ℂ) 1)) {A : ℝ} (hA : A ≠ 0)
-    (hkey : ∀ u : ℂ, ‖u‖ = 1 →
-      ‖F u + ((A : ℝ) : ℂ) * (starRingEnd ℂ) u‖ < |A|) :
-    ∃ u ∈ Metric.ball (0 : ℂ) 1, F u = 0 := by
-  sorry
-
-/-- **AL4-g — total-turning (`φ`-closure) bookkeeping.** At a start `z₀` whose
-`z`-monodromy vanishes (`arcZEndpoint … z₀ = 0`, so the reconstruction closes) and
-which is simple, the tangent angle advances by exactly `2π` over the window:
-`(arcFlow …((z₀, φ₀), L)).2 = φ₀ + 2π`. This is the Hopf `Umlaufsatz` (rotation
-index `+1` of a simple closed curve) for the arc-length reconstruction — automatic
-in the θ-parametrised template (`φ = θ ∈ [0, 2π]` is the parameter, so closure is
-definitional), but a genuine obligation here because `φ` is a *state* variable.
-Discharge: **rebuild / mathlib** (turning number of a simple closed `C¹` curve;
-follows from the winding degree computed in AL4-f together with `injOn_arcCurve`). -/
-private lemma arcFlow_phi_closure {κ : ℝ → ℝ} {R L M : ℝ}
-    (hκ : Continuous κ) (hR : 0 < R) (hR1 : R < 1) (hL : 0 < L)
-    (hM : ∀ σ, |κ σ| ≤ M) (r₀ : ℝ≥0) {φ₀ : ℝ} {z₀ : ℂ}
-    (hz₀ : (z₀, φ₀) ∈ Metric.closedBall (0 : ℂ × ℝ) r₀)
-    (hclose : arcZEndpoint κ R L M r₀ φ₀ z₀ = 0) :
-    (arcFlow κ R L M r₀ ((z₀, φ₀), L)).2 = φ₀ + 2 * π := by
-  sorry
-
-/-- **The reconstruction closes: existence of a closing initial state.** Via the
-sign-agnostic winding/degree core (`Gluck.exists_zero_of_boundary_winding`,
-`Winding.lean:265`, with the reflected-model boundary winding
-`Gluck.windingNumberC_conj_loop = −1`, `ConjWinding.lean:186` — which survives the
-holomorphic `+1` orientation of the reflected H² model, per STEP-1), there is an
-initial state `W₀` in the disk whose `z`-monodromy vanishes: the reconstruction
-closes up, `(arcFlow …(W₀, L)).1 = W₀.1`. (Mirror of the closing step assembled in
-`Gluck.SpaceForm.spaceForm_endpoint_winding`, `EndpointWinding.lean:305`.) -/
+Hypothesis note: the closing needs `κ` half-periodic in **arc length**
+(`Function.Periodic κ (L/2)`), the honest central-symmetry hypothesis — under the
+AL-6 `L=2π` reparametrisation convention this is the `π`-periodicity of the clean
+bicircle profile. -/
 lemma exists_closing_arcState {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuous κ)
     (hR : 0 < R) (hR1 : R < 1) (hL : 0 < L) (hM : ∀ σ, |κ σ| ≤ M)
-    (hπper : Function.Periodic κ π) (r₀ : ℝ≥0) :
+    (hhalf : Function.Periodic κ (L / 2)) (r₀ : ℝ≥0) :
     ∃ W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀,
       (arcFlow κ R L M r₀ (W₀, L)).1 = W₀.1 ∧
       (arcFlow κ R L M r₀ (W₀, L)).2 = W₀.2 + 2 * π := by
-  -- ASSEMBLY of the AL-4 sub-decomposition (leaves AL4-a … AL4-g above; mirror of
-  -- `spaceForm_endpoint_winding`, `EndpointWinding.lean:305`).  In order:
-  --   1. `arcStepError_expansion` (AL4-c) supplies the model data `(a, b, φ₀, zs)`,
-  --      the nonzero conjugation coefficient `η`, radii `ρ₁, h`, constant `C`, and
-  --      the pure first-variation bound `hexp` on `arcStepErrorMap`.
-  --   2. Choose the working radius `ρ ≤ min ρ₁ (|η|/(4C))` and shrink `h ≤ |η|ρ/(4C)`
-  --      exactly as `spaceForm_endpoint_winding` sets `ρ, h` (`EndpointWinding.lean:368-385`),
-  --      so the slack `C·ρ ≤ |η|/4`, `C·h ≤ |η|ρ/4` holds.
-  --   3. `arcFlow_endpoint_estimate` (AL4-d) transports `hexp` to the true
-  --      `arcZEndpoint` (via the proven `arcTrajectory_diff_bound`/`arcFlow_confined`).
-  --   4. `arcEndpoint_conj_dominant_on_circle` (AL4-e) ⇒ boundary domination
-  --      `‖arcZEndpoint(zs + ρu) + (ηhρ)·conj u‖ < |η|hρ` on `‖u‖ = 1`.
-  --   5. `arcZEndpoint_continuousOn` (AL4-b) gives `hFc`; then
-  --      `exists_interior_zero_of_conj_dominant_arc` (AL4-f, the reused sign-agnostic
-  --      degree core `exists_zero_of_boundary_winding`) yields `u ∈ ball 0 1` with
-  --      `arcZEndpoint … (zs + ρu) = 0`, i.e. the `z`-monodromy closes.  Set
-  --      `W₀ = (zs + ρu, φ₀)`.
-  --   6. `arcFlow_phi_closure` (AL4-g) upgrades the closed simple `z`-curve to the
-  --      `φ`-closure `(arcFlow …(W₀,L)).2 = φ₀ + 2π` (Hopf `Umlaufsatz`).
-  --   `arcFlow_central_symmetry` supplies `arcZEndpoint … zs = 0` (the reflected
-  --   model center is a self-symmetric closing point) fixing the reflected `φ₀`.
-  sorry
+  obtain ⟨W₀, hW₀, hmatch⟩ := exists_halfPeriodMatch hκ hR hR1 hL hM hhalf r₀
+  exact ⟨W₀, hW₀,
+    arcClosure_of_halfPeriodMatch hκ hR.le hR1 hL.le hM hhalf r₀ hW₀ hmatch⟩
 
 /-! ## Leaf group 5 — simplicity (reuse of the Euclidean-in-disk chord machinery) -/
 
