@@ -4515,15 +4515,16 @@ honest H² analogue of `Gluck.arcLengthConverse` (`ArcLength.lean:212`) with the
 scaling step replaced by reparametrisation.
 
 The `Realizes (-1) (z ∘ ψ) (κ ∘ ψ)` half is **proven** (via `arcSolution_realizes`,
-leaf 3, then `spaceFormRealizes_comp`).  The `IsSimpleClosed (z ∘ ψ)` half is a
-scoped `sorry`: it needs `z` genuinely `L`-periodic (`z(σ+L) = z(σ)`, upgrading the
-single closure `z L = z 0`), which holds when the arc-length field is `L`-periodic
-in `σ`, i.e. when `κ` is `L`-periodic — available in the four-vertex application
-because the profile is co-constructed `L/2`-periodic (cf. `exists_closing_arcState`'s
-`hhalf`), plus `Set.InjOn (z ∘ ψ) (Set.Ico 0 (2π))` from `hinj` and `ψ` strictly
-monotone. -/
+leaf 3, then `spaceFormRealizes_comp`).  The `IsSimpleClosed (z ∘ ψ)` half is now
+**also proven sorry-free**: `z` is genuinely `L`-periodic (`Function.Periodic z L`,
+supplied by the `ArcLengthH2Curvature` witness — cf. the global floor-gluing
+`periodic_glue` / `arcLengthH2Curvature_of_windowSolution`), and the linear window
+reparam `ψ(t) = (L/2π)·t` transports periodicity to `2π` and `Set.InjOn z (Set.Ico 0 L)`
+(`hinj`) to `Set.InjOn (z ∘ ψ) (Set.Ico 0 (2π))` (`ψ` strictly monotone).
+The formerly-required (and for the co-constructed gate profile FALSE, since `L ∉ 2π·ℤ`)
+`Periodic κ (2π)` hypothesis has been **dropped** — it was unused by the proof. -/
 theorem arcLengthH2Converse {κ : ℝ → ℝ} (hκ : Continuous κ)
-    (_hper : Function.Periodic κ (2 * π)) (hALC : ArcLengthH2Curvature κ) :
+    (hALC : ArcLengthH2Curvature κ) :
     ∃ (z : ℝ → ℂ) (ψ : ℝ → ℝ),
       ContDiff ℝ 1 ψ ∧ (∀ t, 0 < deriv ψ t) ∧
       IsSimpleClosed z ∧ Realizes (-1) z (κ ∘ ψ) := by
@@ -4587,17 +4588,15 @@ honest conclusion keeps the reparam: `z = Z` realizes `κ ∘ Ψ` with
 `Gluck.realizesCurvature_of_nonNormalised`, `ArcLength.lean:261`, with the scaling
 step replaced by reparametrisation.) -/
 theorem realizesH2_of_reparam {κ ψ : ℝ → ℝ} (hκ : Continuous κ)
-    (hκper : Function.Periodic κ (2 * π)) (hψ : ContDiff ℝ 1 ψ)
-    (hψpos : ∀ t, 0 < deriv ψ t) (hψper : ∀ t, ψ (t + 2 * π) = ψ t + 2 * π)
+    (_hκper : Function.Periodic κ (2 * π)) (hψ : ContDiff ℝ 1 ψ)
+    (hψpos : ∀ t, 0 < deriv ψ t) (_hψper : ∀ t, ψ (t + 2 * π) = ψ t + 2 * π)
     (hALC : ArcLengthH2Curvature (κ ∘ ψ)) :
     ∃ (z : ℝ → ℂ) (Ψ : ℝ → ℝ), ContDiff ℝ 1 Ψ ∧ (∀ t, 0 < deriv Ψ t) ∧
       IsSimpleClosed z ∧ Realizes (-1) z (κ ∘ Ψ) := by
   -- `κ ∘ ψ` is continuous and `2π`-periodic, so the base converse yields a simple
   -- closed `Z` realizing `(κ ∘ ψ) ∘ χ` for the internal linear window reparam `χ`.
   have hκψc : Continuous (κ ∘ ψ) := hκ.comp hψ.continuous
-  have hκψper : Function.Periodic (κ ∘ ψ) (2 * π) := by
-    intro t; simp only [Function.comp_apply]; rw [hψper t, hκper (ψ t)]
-  obtain ⟨Z, χ, hχC1, hχpos, hZsc, hZreal⟩ := arcLengthH2Converse hκψc hκψper hALC
+  obtain ⟨Z, χ, hχC1, hχpos, hZsc, hZreal⟩ := arcLengthH2Converse hκψc hALC
   -- The composite reparam `Ψ := ψ ∘ χ` is orientation-preserving `C¹`, and
   -- `(κ ∘ ψ) ∘ χ = κ ∘ (ψ ∘ χ) = κ ∘ Ψ` definitionally, so `Z` realizes `κ ∘ Ψ`.
   refine ⟨Z, ψ ∘ χ, hψ.comp hχC1, ?_, hZsc, hZreal⟩
@@ -4682,5 +4681,352 @@ theorem exists_gateProfileSmooth_closing :
       (fun σ => gateProfileSmooth_evenQ hLpos.ne' δ σ)
       4 ⟨W₀, hW₀mem, hRe, hφ0, hland⟩
   exact ⟨δ, L, W₀', hδpos, hL1, hL2, hW₀', hclose1, hclose2⟩
+
+/-! ## A4-REMAINING — the hypothesis-free simple-closed realization
+
+The window arc-length solution `Φ = arcFlow κ (3/5) L 2 4 (W₀, ·)` on `[0, L]` closes
+(`exists_gateProfileSmooth_closing`).  To feed it into `arcLengthH2Converse` we must
+build the `ArcLengthH2Curvature` witness: a *global* solution `(z, φ) : ℝ → ℂ × ℝ` of
+the H² arc-length system, `L`-periodic in `z`, confined and simple.  The construction
+is the explicit **floor-gluing periodic extension** `Z σ = Φ(σ − L⌊σ/L⌋) + ⌊σ/L⌋·D`
+with drift `D = (0, 2π)` (mathlib has no global-ODE-existence shortcut).  The junction
+derivatives glue via `HasDerivWithinAt.union`, using the endpoint match `Φ L = Φ 0 + D`
+and the field periodicity `κ(σ+L) = κ(σ)`. -/
+
+/-- The floor-glued global extension of a window function `Φ` on `[0, L]` with drift
+`D`: `gext L Φ D σ = Φ(σ − L⌊σ/L⌋) + ⌊σ/L⌋·D`. -/
+private noncomputable def gext {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (L : ℝ) (Φ : ℝ → E) (D : E) (s : ℝ) : E :=
+  Φ (s - L * ⌊s / L⌋) + (⌊s / L⌋ : ℝ) • D
+
+/-- On `[Lj, L(j+1)]` the extension equals the `j`-th local model `Φ(·−Lj)+j·D`
+(using the closure `Φ L = Φ 0 + D` at the right endpoint). -/
+private lemma gext_eq_local {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {L : ℝ} (hL : 0 < L) {Φ : ℝ → E} {D : E}
+    (hclose : Φ L = Φ 0 + D) (j : ℤ) {s : ℝ}
+    (hs : s ∈ Set.Icc (L * (j : ℝ)) (L * ((j : ℝ) + 1))) :
+    gext L Φ D s = Φ (s - L * (j : ℝ)) + (j : ℝ) • D := by
+  obtain ⟨hs1, hs2⟩ := hs
+  by_cases he : s = L * ((j : ℝ) + 1)
+  · have hfl : ⌊s / L⌋ = j + 1 := by
+      rw [he, mul_comm, mul_div_assoc, div_self hL.ne', mul_one]
+      rw [show ((j : ℝ) + 1) = ((j + 1 : ℤ) : ℝ) by push_cast; ring, Int.floor_intCast]
+    unfold gext
+    rw [hfl]
+    push_cast
+    rw [he]
+    have h0 : L * ((j : ℝ) + 1) - L * ((j : ℝ) + 1) = (0 : ℝ) := by ring
+    have h2 : L * ((j : ℝ) + 1) - L * (j : ℝ) = L := by ring
+    rw [h0, h2, hclose, add_smul, one_smul]
+    abel
+  · have hlt : s < L * ((j : ℝ) + 1) := lt_of_le_of_ne hs2 he
+    have hfl : ⌊s / L⌋ = j := by
+      rw [Int.floor_eq_iff]
+      refine ⟨?_, ?_⟩
+      · rw [le_div_iff₀ hL]; linarith [hs1]
+      · rw [div_lt_iff₀ hL]; linarith [hlt]
+    unfold gext
+    rw [hfl]
+
+/-- **Global periodic gluing of a window ODE solution.**  If `Φ` solves the ODE
+`Φ' = g` on the window `[0, L]` (as `HasDerivWithinAt` on `Icc 0 L`), closes with drift
+`D` (`Φ L = Φ 0 + D`) and the field agrees at the endpoints (`g L = g 0`), then the
+floor-glued extension `gext L Φ D` has a genuine two-sided derivative `g(σ − L⌊σ/L⌋)`
+at *every* `σ ∈ ℝ` — including the junctions `σ = kL`, where the left and right window
+derivatives are glued by `HasDerivWithinAt.union` (equal by the endpoint match). -/
+private lemma periodic_glue {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {L : ℝ} (hL : 0 < L) {Φ g : ℝ → E} {D : E}
+    (hΦd : ∀ σ ∈ Set.Icc (0 : ℝ) L, HasDerivWithinAt Φ (g σ) (Set.Icc 0 L) σ)
+    (hclose : Φ L = Φ 0 + D) (hgLen : g L = g 0) :
+    ∀ σ : ℝ, HasDerivAt (gext L Φ D) (g (σ - L * ⌊σ / L⌋)) σ := by
+  have hmodel : ∀ (j : ℤ) (T : Set ℝ) (p : ℝ), (p - L * (j : ℝ)) ∈ Set.Icc (0 : ℝ) L →
+      Set.MapsTo (fun s => s - L * (j : ℝ)) T (Set.Icc 0 L) →
+      HasDerivWithinAt (fun s => Φ (s - L * (j : ℝ)) + (j : ℝ) • D) (g (p - L * (j : ℝ))) T p := by
+    intro j T p hmem hmaps
+    have hshift : HasDerivWithinAt (fun s => s - L * (j : ℝ)) 1 T p := by
+      simpa using (hasDerivWithinAt_id p T).sub_const (L * (j : ℝ))
+    have hc := (hΦd (p - L * (j : ℝ)) hmem).scomp p hshift hmaps
+    rw [one_smul, Function.comp_def] at hc
+    exact hc.add_const _
+  intro σ
+  set k : ℤ := ⌊σ / L⌋ with hk
+  have hσ1 : L * (k : ℝ) ≤ σ := by
+    have h := Int.floor_le (σ / L); rw [← hk] at h
+    rw [mul_comm]; exact (le_div_iff₀ hL).mp h
+  have hσ2 : σ < L * ((k : ℝ) + 1) := by
+    have h := Int.lt_floor_add_one (σ / L); rw [← hk] at h
+    rw [mul_comm]; exact (div_lt_iff₀ hL).mp h
+  have hLmem : ∀ y : ℝ, L * ((k : ℝ) - 1) ≤ y → y ≤ L * (k : ℝ) →
+      y ∈ Set.Icc (L * ((k - 1 : ℤ) : ℝ)) (L * (((k - 1 : ℤ) : ℝ) + 1)) := by
+    intro y hy1 hy2
+    rw [Int.cast_sub, Int.cast_one]
+    refine ⟨hy1, ?_⟩
+    have he : L * ((k : ℝ) - 1 + 1) = L * (k : ℝ) := by ring
+    rw [he]; exact hy2
+  by_cases hr : σ = L * (k : ℝ)
+  · have hr0 : σ - L * (k : ℝ) = 0 := by rw [hr]; ring
+    have hmemR : (σ - L * (k : ℝ)) ∈ Set.Icc (0 : ℝ) L := by
+      rw [hr0]; exact ⟨le_rfl, hL.le⟩
+    have hmapsR : Set.MapsTo (fun s => s - L * (k : ℝ)) (Set.Icc (L * (k : ℝ)) (L * ((k : ℝ) + 1)))
+        (Set.Icc 0 L) := by
+      intro s hs; exact ⟨by linarith [hs.1], by nlinarith [hs.2]⟩
+    have hR0 := hmodel k (Set.Icc (L * (k : ℝ)) (L * ((k : ℝ) + 1))) σ hmemR hmapsR
+    rw [hr0] at hR0
+    have hReq : HasDerivWithinAt (gext L Φ D) (g 0)
+        (Set.Icc (L * (k : ℝ)) (L * ((k : ℝ) + 1))) σ := by
+      refine hR0.congr (fun y hy => ?_) ?_
+      · rw [gext_eq_local hL hclose k hy]
+      · rw [gext_eq_local hL hclose k (by rw [hr]; exact ⟨le_rfl, by nlinarith [hL]⟩)]
+    have hRici : HasDerivWithinAt (gext L Φ D) (g 0) (Set.Ici σ) σ := by
+      refine hReq.mono_of_mem_nhdsWithin ?_
+      rw [hr]
+      exact mem_nhdsGE_iff_exists_Icc_subset.mpr ⟨L * ((k : ℝ) + 1), by nlinarith [hL], subset_rfl⟩
+    have hmemL : (σ - L * ((k - 1 : ℤ) : ℝ)) ∈ Set.Icc (0 : ℝ) L := by
+      rw [Int.cast_sub, Int.cast_one, hr]; constructor <;> nlinarith [hL]
+    have hmapsL : Set.MapsTo (fun s => s - L * ((k - 1 : ℤ) : ℝ))
+        (Set.Icc (L * ((k : ℝ) - 1)) (L * (k : ℝ))) (Set.Icc 0 L) := by
+      intro s hs
+      rw [Int.cast_sub, Int.cast_one]
+      exact ⟨by nlinarith [hs.1], by nlinarith [hs.2]⟩
+    have hL0 := hmodel (k - 1) (Set.Icc (L * ((k : ℝ) - 1)) (L * (k : ℝ))) σ hmemL hmapsL
+    have hgval : σ - L * ((k - 1 : ℤ) : ℝ) = L := by
+      rw [Int.cast_sub, Int.cast_one, hr]; ring
+    rw [hgval, hgLen] at hL0
+    have hLeq : HasDerivWithinAt (gext L Φ D) (g 0)
+        (Set.Icc (L * ((k : ℝ) - 1)) (L * (k : ℝ))) σ := by
+      refine hL0.congr (fun y hy => ?_) ?_
+      · exact gext_eq_local hL hclose (k - 1) (hLmem y hy.1 hy.2)
+      · exact gext_eq_local hL hclose (k - 1)
+          (hLmem σ (by rw [hr]; nlinarith [hL]) (by rw [hr]))
+    have hLiic : HasDerivWithinAt (gext L Φ D) (g 0) (Set.Iic σ) σ := by
+      refine hLeq.mono_of_mem_nhdsWithin ?_
+      rw [hr]
+      exact mem_nhdsLE_iff_exists_Icc_subset.mpr ⟨L * ((k : ℝ) - 1), by nlinarith [hL], subset_rfl⟩
+    have hunion := hLiic.union hRici
+    rw [Set.Iic_union_Ici, hasDerivWithinAt_univ] at hunion
+    rw [hr0]; exact hunion
+  · have hgt : L * (k : ℝ) < σ := lt_of_le_of_ne hσ1 (Ne.symm hr)
+    have hmemI : (σ - L * (k : ℝ)) ∈ Set.Icc (0 : ℝ) L := ⟨by linarith, by nlinarith [hσ2]⟩
+    have hmapsI : Set.MapsTo (fun s => s - L * (k : ℝ)) (Set.Icc (L * (k : ℝ)) (L * ((k : ℝ) + 1)))
+        (Set.Icc 0 L) := by
+      intro s hs; exact ⟨by linarith [hs.1], by nlinarith [hs.2]⟩
+    have hI0 := hmodel k (Set.Icc (L * (k : ℝ)) (L * ((k : ℝ) + 1))) σ hmemI hmapsI
+    have hnhds : Set.Icc (L * (k : ℝ)) (L * ((k : ℝ) + 1)) ∈ nhds σ := Icc_mem_nhds hgt hσ2
+    have hIat : HasDerivAt (fun s => Φ (s - L * (k : ℝ)) + (k : ℝ) • D) (g (σ - L * (k : ℝ))) σ :=
+      hI0.hasDerivAt hnhds
+    refine hIat.congr_of_eventuallyEq ?_
+    exact Filter.eventuallyEq_of_mem hnhds (fun y hy => (gext_eq_local hL hclose k hy))
+
+/-- `Complex.exp` is invariant under a `2π·k` real shift of its phase. -/
+private lemma exp_add_int_two_pi (x : ℝ) (k : ℤ) :
+    Complex.exp (((x + (k : ℝ) * (2 * π) : ℝ) : ℂ) * Complex.I)
+      = Complex.exp ((x : ℂ) * Complex.I) := by
+  push_cast
+  rw [show ((x : ℂ) + (k : ℂ) * (2 * ↑π)) * Complex.I
+        = (x : ℂ) * Complex.I + (k : ℂ) * (2 * ↑π * Complex.I) by ring,
+      Complex.exp_add, Complex.exp_int_mul_two_pi_mul_I, mul_one]
+
+/-- `Complex.exp` is invariant under a `+2π` real shift of its phase. -/
+private lemma exp_add_two_pi (x : ℝ) :
+    Complex.exp (((x + 2 * π : ℝ) : ℂ) * Complex.I) = Complex.exp ((x : ℂ) * Complex.I) := by
+  have := exp_add_int_two_pi x 1
+  simpa using this
+
+/-- **Window solution ⇒ `ArcLengthH2Curvature` (the general assembly).**  Given a
+continuous, `L`-periodic curvature `κ` whose arc-length window flow `Φ = arcFlow κ R
+L M r₀ (W₀, ·)` on `[0, L]` **closes** (`Φ L = (W₀.1, W₀.2 + 2π)`), is **confined**
+(`‖(Φ σ).1‖ ≤ R` on `[0, L]`) and **simple** (the arc-length chord integral is
+non-zero on every proper sub-arc), the floor-glued periodic extension
+`Z = gext L Φ (0, 2π)` witnesses `ArcLengthH2Curvature κ`: it is a genuine *global*
+solution of the H² arc-length system, `L`-periodic in `z`, confined to the open disk,
+closes with total turning `2π`, and is injective on `[0, L)`. -/
+private lemma arcLengthH2Curvature_of_windowSolution {κ : ℝ → ℝ} {R L M : ℝ} {r₀ : ℝ≥0}
+    {W₀ : ℂ × ℝ} (hκc : Continuous κ) (hR : 0 ≤ R) (hR1 : R < 1) (hL : 0 < L)
+    (hM : ∀ σ, |κ σ| ≤ M) (hκL : Function.Periodic κ L)
+    (hW₀ : W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀)
+    (hclose1 : (arcFlow κ R L M r₀ (W₀, L)).1 = W₀.1)
+    (hclose2 : (arcFlow κ R L M r₀ (W₀, L)).2 = W₀.2 + 2 * π)
+    (hconf : ∀ σ ∈ Set.Icc (0 : ℝ) L, ‖(arcFlow κ R L M r₀ (W₀, σ)).1‖ ≤ R)
+    (hchord : ∀ t τ : ℝ, 0 ≤ t → t < τ → τ < L →
+      (∫ s in t..τ, Complex.exp (((arcFlow κ R L M r₀ (W₀, s)).2 : ℂ) * Complex.I)) ≠ 0) :
+    ArcLengthH2Curvature κ := by
+  set Φ : ℝ → ℂ × ℝ := fun σ => arcFlow κ R L M r₀ (W₀, σ) with hΦdef
+  obtain ⟨hΦ0, hΦd⟩ := arcFlow_spec hκc hR hR1 hL.le hM r₀ hW₀
+  have hΦ0' : Φ 0 = W₀ := hΦ0
+  set g : ℝ → ℂ × ℝ := fun σ => arcField κ R σ (Φ σ) with hgdef
+  set D : ℂ × ℝ := (0, 2 * π) with hDdef
+  -- endpoint match `Φ L = Φ 0 + D`.
+  have hΦL : Φ L = (W₀.1, W₀.2 + 2 * π) := Prod.ext hclose1 hclose2
+  have hcloseD : Φ L = Φ 0 + D := by
+    rw [hΦL, hΦ0', hDdef]; exact Prod.ext (by simp) (by simp)
+  -- field-endpoint match `g L = g 0` (from `κ L = κ 0` and `e^{i·2π}=1`).
+  have hκL0 : κ L = κ 0 := by have := hκL 0; rwa [zero_add] at this
+  have hgLen : g L = g 0 := by
+    change arcField κ R L (Φ L) = arcField κ R 0 (Φ 0)
+    rw [hΦL, hΦ0']
+    unfold arcField truncatedArcAngleSpeed
+    rw [hκL0]
+    have he : Complex.exp (((W₀.2 + 2 * π : ℝ) : ℂ) * Complex.I)
+        = Complex.exp ((W₀.2 : ℂ) * Complex.I) := exp_add_two_pi W₀.2
+    simp only [Prod.mk.injEq]
+    exact ⟨he, by rw [he]⟩
+  -- glue the global solution `Z`.
+  have hZ := periodic_glue hL hΦd hcloseD hgLen
+  set Z : ℝ → ℂ × ℝ := gext L Φ D with hZdef
+  -- component formulas for `Z`.
+  have hZ1 : ∀ σ, (Z σ).1 = (Φ (σ - L * ⌊σ / L⌋)).1 := by
+    intro σ; simp [hZdef, gext, hDdef]
+  have hZ2 : ∀ σ, (Z σ).2 = (Φ (σ - L * ⌊σ / L⌋)).2 + (⌊σ / L⌋ : ℝ) * (2 * π) := by
+    intro σ; simp [hZdef, gext, hDdef]
+  -- field periodicity: `g(σ − L⌊σ/L⌋) = arcField κ R σ (Z σ)`.
+  have hfield : ∀ σ, g (σ - L * ⌊σ / L⌋) = arcField κ R σ (Z σ) := by
+    intro σ
+    have hκper : κ σ = κ (σ - L * ⌊σ / L⌋) := by
+      have := hκL.sub_int_mul_eq (x := σ) ⌊σ / L⌋
+      rw [mul_comm] at this; rw [this]
+    apply Prod.ext
+    · simp only [hgdef, arcField, hZ2]
+      rw [exp_add_int_two_pi]
+    · simp only [hgdef, arcField, truncatedArcAngleSpeed, hZ1, hZ2]
+      rw [exp_add_int_two_pi, hκper]
+  have hZ' : ∀ σ, HasDerivAt Z (arcField κ R σ (Z σ)) σ := by
+    intro σ; rw [← hfield σ]; exact hZ σ
+  set z : ℝ → ℂ := fun σ => (Z σ).1 with hzdef
+  set φ : ℝ → ℝ := fun σ => (Z σ).2 with hφdef
+  -- fract membership.
+  have hfractmem : ∀ σ, σ - L * ⌊σ / L⌋ ∈ Set.Icc (0 : ℝ) L := by
+    intro σ
+    have h1 : L * (⌊σ / L⌋ : ℝ) ≤ σ := by
+      rw [mul_comm]; exact (le_div_iff₀ hL).mp (Int.floor_le (σ / L))
+    have h2 : σ < L * ((⌊σ / L⌋ : ℝ) + 1) := by
+      rw [mul_comm]; exact (div_lt_iff₀ hL).mp (Int.lt_floor_add_one (σ / L))
+    exact ⟨by linarith, by nlinarith [h2]⟩
+  -- global confinement.
+  have hconfG : ∀ σ, ‖z σ‖ ≤ R := by
+    intro σ; change ‖(Z σ).1‖ ≤ R; rw [hZ1]; exact hconf _ (hfractmem σ)
+  have hconfLt : ∀ σ, ‖z σ‖ < 1 := fun σ => lt_of_le_of_lt (hconfG σ) hR1
+  -- `z`-derivative.
+  have hzd : ∀ σ, HasDerivAt z (Complex.exp ((φ σ : ℂ) * Complex.I)) σ := by
+    intro σ
+    have := (hZ' σ).fst
+    simp only [arcField] at this
+    exact this
+  -- `φ`-derivative (untruncate using confinement).
+  have hφd : ∀ σ, HasDerivAt φ (arcAngleSpeed κ σ (z σ) (φ σ)) σ := by
+    intro σ
+    have h := (hZ' σ).snd
+    simp only [arcField] at h
+    rwa [truncatedArcAngleSpeed_eq (hconfG σ)] at h
+  -- `z L = z 0` and `φ L = φ 0 + 2π`.
+  have hZL : Z L = W₀ + D := by
+    rw [hZdef]; unfold gext
+    rw [div_self hL.ne', Int.floor_one]
+    push_cast
+    rw [show L - L * 1 = (0 : ℝ) by ring, one_smul, hΦ0']
+  have hZ0 : Z 0 = W₀ := by
+    rw [hZdef]; unfold gext
+    rw [zero_div, Int.floor_zero]
+    push_cast
+    rw [mul_zero, sub_zero, zero_smul, add_zero, hΦ0']
+  have hzclose : z L = z 0 := by
+    change (Z L).1 = (Z 0).1; rw [hZL, hZ0, hDdef]; simp
+  have hφclose : φ L = φ 0 + 2 * π := by
+    change (Z L).2 = (Z 0).2 + 2 * π; rw [hZL, hZ0, hDdef]; simp
+  -- `z` is `L`-periodic.
+  have hzper : Function.Periodic z L := by
+    intro σ
+    change (Z (σ + L)).1 = (Z σ).1
+    rw [hZ1, hZ1]
+    congr 2
+    rw [show (σ + L) / L = σ / L + 1 by field_simp, Int.floor_add_one]
+    push_cast; ring
+  -- injectivity on `[0, L)` from the chord condition.
+  have hφwin : ∀ σ ∈ Set.Ico (0 : ℝ) L, φ σ = (Φ σ).2 := by
+    intro σ hσ
+    change (Z σ).2 = (Φ σ).2; rw [hZ2]
+    have hfl : ⌊σ / L⌋ = 0 := by
+      rw [Int.floor_eq_zero_iff, Set.mem_Ico]
+      exact ⟨div_nonneg hσ.1 hL.le, by rw [div_lt_one hL]; exact hσ.2⟩
+    rw [hfl]; simp
+  have hinj : Set.InjOn z (Set.Ico 0 L) := by
+    refine injOn_arcCurve hzd (fun t τ ht htτ hτL => ?_)
+    have hcongr : (∫ s in t..τ, Complex.exp ((φ s : ℂ) * Complex.I))
+        = ∫ s in t..τ, Complex.exp (((Φ s).2 : ℂ) * Complex.I) := by
+      refine intervalIntegral.integral_congr (fun s hs => ?_)
+      rw [Set.uIcc_of_le htτ.le] at hs
+      rw [hφwin s ⟨le_trans ht hs.1, lt_of_le_of_lt hs.2 hτL⟩]
+    rw [hcongr]; exact hchord t τ ht htτ hτL
+  exact ⟨L, hL, z, φ, hzd, hφd, hconfLt, hzclose, hφclose, hzper, hinj⟩
+
+/-- **Hypothesis-free simple-closed realization of the smooth gate profile — reduced to
+the two gate-specific analytic inputs (confinement + simplicity).**  Given the honest
+smooth quarter-landing `(δ, h, L)` (`him`/`hφ`, from `exists_quarterLanding_smooth`),
+*plus* full-window confinement (`hconf`, `‖z(σ)‖ ≤ 3/5` on `[0, L]`) and the arc-length
+chord non-vanishing (`hchord`, `∫ e^{iφ} ≠ 0` on every proper sub-arc), the smooth gate
+profile `gateProfileSmooth L δ` is realized — up to an orientation-preserving `C¹`
+reparametrisation `ψ` — by a genuine **simple closed** H² curve `z`.
+
+This is the full closing chain wired through the floor-glued periodic extension
+(`arcLengthH2Curvature_of_windowSolution`) and the arc-length converse
+(`arcLengthH2Converse`): the window arc-length flow from the mirror-axis start
+`W₀ = (i·h, π)` closes with total turning `2π` (via `exists_halfPeriodMatch_zmatch` +
+`arcClosure_of_halfPeriodMatch`), the extension is a global confined `L`-periodic
+solution, and the chord condition makes it injective.  The two remaining hypotheses
+`hconf`, `hchord` are the *gate-specific* analytic obligations (window confinement via
+the two-leg L¹-Grönwall + reflection symmetry; simplicity via the convexity
+`arcAngleSpeed > 0`); discharging them removes all hypotheses. -/
+theorem realizes_gateProfileSmooth_of_confined_simple {δ h L : ℝ}
+    (_hh1 : (1 : ℝ) / 5 ≤ h) (_hh2 : h ≤ 2 / 5) (hL1 : (11 : ℝ) / 5 ≤ L) (_hL2 : L ≤ 14 / 5)
+    (him : (gateSmoothLandingState δ 4 h L).1.im = 0)
+    (hφe : (gateSmoothLandingState δ 4 h L).2 = 3 * π / 2)
+    (hconf : ∀ σ ∈ Set.Icc (0 : ℝ) L,
+      ‖(arcFlow (gateProfileSmooth L δ) (3 / 5) L 2 4 ((Complex.I * (h : ℂ), π), σ)).1‖ ≤ 3 / 5)
+    (hchord : ∀ t τ : ℝ, 0 ≤ t → t < τ → τ < L →
+      (∫ s in t..τ, Complex.exp (((arcFlow (gateProfileSmooth L δ) (3 / 5) L 2 4
+        ((Complex.I * (h : ℂ), π), s)).2 : ℂ) * Complex.I)) ≠ 0) :
+    ∃ (z : ℝ → ℂ) (ψ : ℝ → ℝ),
+      ContDiff ℝ 1 ψ ∧ (∀ t, 0 < deriv ψ t) ∧
+      IsSimpleClosed z ∧ Realizes (-1) z (gateProfileSmooth L δ ∘ ψ) := by
+  have hLpos : (0 : ℝ) < L := by linarith
+  set κ := gateProfileSmooth L δ with hκdef
+  set W₀ : ℂ × ℝ := (Complex.I * (h : ℂ), π) with hW₀def
+  have hκc : Continuous κ := gateProfileSmooth_continuous L δ
+  have hκabs : ∀ σ, |κ σ| ≤ 2 := gateProfileSmooth_abs_le L δ
+  have hW₀mem : W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) 4 := by
+    rw [Metric.mem_closedBall, dist_zero_right, hW₀def, Prod.norm_def]
+    have e1 : ‖Complex.I * (h : ℂ)‖ = |h| := by
+      rw [Complex.norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Real.norm_eq_abs]
+    have e2 : ‖(π : ℝ)‖ = π := by rw [Real.norm_eq_abs, abs_of_pos Real.pi_pos]
+    rw [e1, e2]
+    have : max |h| π ≤ 4 :=
+      max_le (by rw [abs_of_nonneg (by linarith : (0 : ℝ) ≤ h)]; linarith)
+        (by linarith [Real.pi_lt_four])
+    simpa using this
+  have hRe : (W₀.1).re = 0 := by simp [hW₀def, Complex.mul_re]
+  have hφ0 : W₀.2 = π := rfl
+  -- the quarter landing lands on `Fix(X)`.
+  have hQim : (arcFlow κ (3 / 5) L 2 4 (W₀, L / 4)).1.im = 0 := him
+  have hQφ : (arcFlow κ (3 / 5) L 2 4 (W₀, L / 4)).2 = 3 * π / 2 := hφe
+  have hland : arcFlow κ (3 / 5) L 2 4 (W₀, L / 4)
+      = ((starRingEnd ℂ (arcFlow κ (3 / 5) L 2 4 (W₀, L / 4)).1,
+          3 * π - (arcFlow κ (3 / 5) L 2 4 (W₀, L / 4)).2) : ℂ × ℝ) := by
+    refine Prod.ext_iff.mpr ⟨(Complex.conj_eq_iff_im.mpr hQim).symm, ?_⟩
+    change (arcFlow κ (3 / 5) L 2 4 (W₀, L / 4)).2
+      = 3 * π - (arcFlow κ (3 / 5) L 2 4 (W₀, L / 4)).2
+    rw [hQφ]; ring
+  -- half-period match, then full closure.
+  have hmatch := exists_halfPeriodMatch_zmatch hκc (by norm_num) (by norm_num) hLpos hκabs
+    (fun σ => gateProfileSmooth_evenQ hLpos.ne' δ σ) 4 hW₀mem hRe hφ0 hland
+  obtain ⟨hclose1, hclose2⟩ := arcClosure_of_halfPeriodMatch hκc (by norm_num) (by norm_num)
+    hLpos.le hκabs (gateProfileSmooth_periodic hLpos.ne' δ) 4 hW₀mem hmatch
+  -- `κ` is `L`-periodic (from `L/2`-periodicity).
+  have hκL : Function.Periodic κ L := by
+    intro x
+    have hp : Function.Periodic κ (L / 2) := gateProfileSmooth_periodic hLpos.ne' δ
+    rw [show x + L = (x + L / 2) + L / 2 by ring, hp (x + L / 2), hp x]
+  -- assemble the `ArcLengthH2Curvature` witness and run the converse.
+  have hALC := arcLengthH2Curvature_of_windowSolution hκc (by norm_num) (by norm_num) hLpos hκabs
+    hκL hW₀mem hclose1 hclose2 hconf hchord
+  exact arcLengthH2Converse hκc hALC
 
 end Gluck.SpaceForm
