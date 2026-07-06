@@ -244,6 +244,21 @@ lemma centeredRadius_mem_Ioo (ε c : ℝ) (hε : ε = 1 ∨ ε = -1)
       rwa [Real.sqrt_sq (by linarith : (0:ℝ) ≤ c - 1)] at this
     constructor <;> linarith
 
+/-- **Bracket value at the centered circle.** `c + ε·r*(ε, c) = √(c² + ε)`
+(uniform in `ε ∈ {+1,−1}`, since `ε·r* = √(c²+ε) − c`): the denominator
+`κ − ε⟪z, i·e^{iθ}⟫` evaluated at the level-`c` model circle `z = −r*·i·e^{iθ}`
+(where `⟪z, i·e^{iθ}⟫ = −r*`). For the sphere (`ε=+1`) this is `√(1+c²) ≥ 1` — an
+absolute lower bound; for the hyperbolic plane (`ε=−1`) it is `√(c²−1)`, positive
+for `c > 1` but tending to `0` as `c → 1⁺` (the escape-velocity boundary), so
+margin constants scaled by this bracket are `c`-dependent, not absolute. -/
+lemma centeredRadius_bracket (ε c : ℝ) (hε : ε = 1 ∨ ε = -1) :
+    c + ε * centeredRadius ε c = Real.sqrt (c ^ 2 + ε) := by
+  have he2 : ε ^ 2 = 1 := by rcases hε with h | h <;> rw [h] <;> norm_num
+  unfold centeredRadius
+  have h : ε * (ε * (Real.sqrt (c ^ 2 + ε) - c))
+      = ε ^ 2 * (Real.sqrt (c ^ 2 + ε) - c) := by ring
+  rw [h, he2]; ring
+
 /-- **Admissible uniform lower bound.** From `SpaceFormFourVertex ε κ` (with
 `ε ∈ {+1,−1}`) there is a confinement radius `R` with `0 < R < 1` and
 `R < κ(θ)` for all `θ`. Sphere: the minimum of the strictly positive `κ` over
@@ -251,9 +266,18 @@ the compact period, clipped below `1`. Hyperbolic: the centered radius
 `r*(−1, min κ)` of the escape-velocity bound `κ > 1`. This `R` makes the
 denominator `κ − ε⟪z, i·e^{iθ}⟫` strictly positive on `{‖z‖ ≤ R}`
 (`denom_pos`). -/
-lemma exists_admissible_lower_bound {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {κ : ℝ → ℝ}
+lemma exists_admissible_lower_bound {ε : ℝ} {κ : ℝ → ℝ}
     (hκ : SpaceFormFourVertex ε κ) :
     ∃ R, 0 < R ∧ R < 1 ∧ ∀ θ, R < κ θ := by
-  sorry
+  obtain ⟨hcont, hper, hpos⟩ := hκ.1
+  obtain ⟨θ₀, -, hmin⟩ := isCompact_Icc.exists_isMinOn
+    (Set.nonempty_Icc.mpr (by positivity : (0 : ℝ) ≤ 2 * π)) hcont.continuousOn
+  have h1 : min (κ θ₀) 1 ≤ κ θ₀ := min_le_left _ _
+  have h2 : (0 : ℝ) < min (κ θ₀) 1 := lt_min (hpos θ₀) one_pos
+  refine ⟨min (κ θ₀) 1 / 2, by linarith, by linarith [min_le_right (κ θ₀) 1], fun θ => ?_⟩
+  obtain ⟨y, hy, hyθ⟩ := hper.exists_mem_Ico₀ Real.two_pi_pos θ
+  have hym : κ θ₀ ≤ κ y := hmin ⟨hy.1, hy.2.le⟩
+  rw [hyθ]
+  linarith
 
 end Gluck.SpaceForm
