@@ -4565,47 +4565,122 @@ theorem arcLengthH2Converse {κ : ℝ → ℝ} (hκ : Continuous κ)
     have : c * a = c * b := hψeq
     exact mul_left_cancel₀ hc.ne' this
 
-/-- **Realization up to reparametrization (no rescaling in H²).** If there is a
-`C¹` orientation-preserving circle diffeomorphism `ψ` (the `2π`-shift law) such
-that `κ ∘ ψ` is an H² arc-length curvature function, then `κ` itself is realized
-by a simple closed H² curve. In H² only the *reparametrization* transfer is
-available (unlike the Euclidean `realizesCurvature_smul` scaling): the metric is
-fixed, so we reparametrize but never rescale. (Mirror of
+/-- **Realization up to reparametrization (no rescaling in H²) — honest form.**
+Given a `C¹` orientation-preserving `2π`-circle map `ψ` such that `κ ∘ ψ` is an H²
+arc-length curvature function, `κ` is realized — **up to a further orientation-
+preserving `C¹` reparametrisation `Ψ`** — by a simple closed H² curve `z`:
+`Realizes (-1) z (κ ∘ Ψ)` with `Ψ` orientation-preserving `C¹`.
+
+**Why up-to-reparam, not honestly at `2π` (the AL-6 co-constructed-`L` gap, now
+resolved honestly).**  The base converse `arcLengthH2Converse` closes at the
+*co-constructed* Euclidean window `[0, L']` — H² has **no metric rescaling**, so the
+window length `L'` is not free — producing a simple closed curve `Z` that realizes
+`(κ ∘ ψ) ∘ χ` for the linear window reparam `χ(t) = (L'/2π)·t`.  To pull this back
+to an honest `2π`-realization of `κ` one would need `ψ` to conjugate the `L'`-shift
+to `2π` (`ψ(s+L') = ψ(s)+2π`), but only the `2π`-shift law `ψ(t+2π)=ψ(t)+2π` is
+available and generically `L' ≠ 2π`; the two windows are incompatible.  So the
+honest conclusion keeps the reparam: `z = Z` realizes `κ ∘ Ψ` with
+`Ψ = ψ ∘ χ` orientation-preserving `C¹` (`deriv Ψ = (deriv ψ ∘ χ)·deriv χ > 0`).
+(Supersedes the earlier unsound `∃ z, IsSimpleClosed z ∧ Realizes (-1) z κ`; see
+`h2_negative_dev.md` "UNIFYING ROOT CAUSE: CO-CONSTRUCT L" and
+`tickets_h2negative.md` [AL-6].  Honest H² analogue of
 `Gluck.realizesCurvature_of_nonNormalised`, `ArcLength.lean:261`, with the scaling
-step dropped.) -/
+step replaced by reparametrisation.) -/
 theorem realizesH2_of_reparam {κ ψ : ℝ → ℝ} (hκ : Continuous κ)
     (hκper : Function.Periodic κ (2 * π)) (hψ : ContDiff ℝ 1 ψ)
     (hψpos : ∀ t, 0 < deriv ψ t) (hψper : ∀ t, ψ (t + 2 * π) = ψ t + 2 * π)
     (hALC : ArcLengthH2Curvature (κ ∘ ψ)) :
-    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes (-1) z κ := by
+    ∃ (z : ℝ → ℂ) (Ψ : ℝ → ℝ), ContDiff ℝ 1 Ψ ∧ (∀ t, 0 < deriv Ψ t) ∧
+      IsSimpleClosed z ∧ Realizes (-1) z (κ ∘ Ψ) := by
   -- `κ ∘ ψ` is continuous and `2π`-periodic, so the base converse yields a simple
-  -- closed `Z` realizing `κ ∘ ψ`.
+  -- closed `Z` realizing `(κ ∘ ψ) ∘ χ` for the internal linear window reparam `χ`.
   have hκψc : Continuous (κ ∘ ψ) := hκ.comp hψ.continuous
   have hκψper : Function.Periodic (κ ∘ ψ) (2 * π) := by
     intro t; simp only [Function.comp_apply]; rw [hψper t, hκper (ψ t)]
-  -- The restated base converse yields `Z`, an internal *window* reparam `χ`, with
-  -- `Z` simple closed and `Realizes (-1) Z ((κ ∘ ψ) ∘ χ)`.
   obtain ⟨Z, χ, hχC1, hχpos, hZsc, hZreal⟩ := arcLengthH2Converse hκψc hκψper hALC
-  -- The realization is transferred by the strictly-increasing `C¹` inverse
-  -- `η = (ψ ∘ χ)⁻¹`: `Realizes (-1) (Z ∘ η) ((κ∘ψ)∘χ∘η) = Realizes (-1) (Z ∘ η) κ`
-  -- via the no-rescaling transport `spaceFormRealizes_comp`, and simplicity by
-  -- `isSimpleClosed_comp` — PROVIDED `η` (equivalently `g := ψ ∘ χ`) is a genuine
-  -- `2π`-circle diffeomorphism (`g(t+2π) = g(t) + 2π`), the hypothesis of
-  -- `exists_C1_circle_inverse` (`Reduction.lean:1606`).
-  --
-  -- **The genuine obstruction (AL-6 co-constructed-`L` statement gap, NOT tractable
-  -- assembly).**  `χ` is the linear window reparam `χ(t) = (L'/2π)·t` from
-  -- `arcLengthH2Converse`, whose window `L'` is *co-constructed* with the profile
-  -- `κ∘ψ` (H² has no metric rescaling), so `χ(t+2π) = χ(t) + L'` with generically
-  -- `L' ≠ 2π`.  Hence `g(t+2π) = ψ(χ(t) + L')`, which equals `g(t) + 2π` only if
-  -- `ψ` conjugates the `L'`-shift to `2π` (`ψ(s+L') = ψ(s) + 2π`) — but the
-  -- hypothesis supplies the *`2π`*-shift law `ψ(t+2π) = ψ(t)+2π` (and
-  -- `arcLengthH2Converse` exposes no shift law for `χ` at all).  The two windows are
-  -- incompatible: to realize `κ` HONESTLY (not up to reparam) by a `2π`-periodic
-  -- simple curve, the co-constructed `L'` must be threaded through `ψ`'s shift law,
-  -- which is exactly the unified `/develop --continue` replan of the capstone chain
-  -- flagged in `h2_negative_dev.md` (UNIFYING ROOT CAUSE: CO-CONSTRUCT `L`).  Left
-  -- as a scoped `sorry`; see `tickets_h2negative.md` [AL-6].
-  sorry
+  -- The composite reparam `Ψ := ψ ∘ χ` is orientation-preserving `C¹`, and
+  -- `(κ ∘ ψ) ∘ χ = κ ∘ (ψ ∘ χ) = κ ∘ Ψ` definitionally, so `Z` realizes `κ ∘ Ψ`.
+  refine ⟨Z, ψ ∘ χ, hψ.comp hχC1, ?_, hZsc, hZreal⟩
+  intro t
+  have hψd : HasDerivAt ψ (deriv ψ (χ t)) (χ t) :=
+    (hψ.differentiable (by norm_num)).differentiableAt.hasDerivAt
+  have hχd : HasDerivAt χ (deriv χ t) t :=
+    (hχC1.differentiable (by norm_num)).differentiableAt.hasDerivAt
+  rw [(hψd.comp t hχd).deriv]
+  exact mul_pos (hψpos (χ t)) (hχpos t)
+
+/-! ## A4 — the hypothesis-free concrete negative-`κ` realization
+
+Feeding the honest smooth-`κ` landing `exists_quarterLanding_smooth` into the
+sorry-free closing chain `exists_closing_arcState`, co-constructing the concrete
+profile `κ = gateProfileSmooth L* δ` and window `L*` at the landing point. -/
+
+/-- **The concrete gate reconstruction closes (hypothesis-free).**  For the honest
+continuous, `C¹`-`φ` ramped bicircle profile `gateProfileSmooth L δ` (curvature
+oscillating between `4/5` and `2`, `|κ| ≤ 2`, even-palindrome `L/2`-periodic) there
+is a co-constructed window length `L ∈ [11/5, 14/5]`, a ramp width `δ > 0`, and a
+mirror-axis start `W₀ = (i·h, π)` (`‖W₀‖ ≤ 4`) whose full-period arc-length flow
+endpoint **closes** with total turning `2π`:
+`(arcFlow κ (3/5) L 2 4 (W₀, L)).1 = W₀.1` and `… .2 = W₀.2 + 2π`.
+
+This discharges `exists_closing_arcState`'s `hturn` with the honest smooth landing
+`exists_quarterLanding_smooth` (no `ArcLengthH2Curvature` hypothesis, no step
+profile), giving the **first hypothesis-free negative-curvature-admitting H²
+four-vertex closing state**.  (The landing chooses `(h, L)` via
+`poincareMiranda_rect`; `hturn`'s `Fix(X)` equation follows from the landing's
+`Im z(L/4) = 0` and `φ(L/4) = 3π/2`.) -/
+theorem exists_gateProfileSmooth_closing :
+    ∃ (δ L : ℝ) (W₀ : ℂ × ℝ), 0 < δ ∧ (11 : ℝ) / 5 ≤ L ∧ L ≤ 14 / 5 ∧
+      W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) 4 ∧
+      (arcFlow (gateProfileSmooth L δ) (3 / 5) L 2 4 (W₀, L)).1 = W₀.1 ∧
+      (arcFlow (gateProfileSmooth L δ) (3 / 5) L 2 4 (W₀, L)).2 = W₀.2 + 2 * π := by
+  obtain ⟨δ, hδpos, p, hp, him, hφ⟩ := exists_quarterLanding_smooth 4 (by norm_num)
+  obtain ⟨hp1, hp2⟩ := Set.mem_prod.mp hp
+  set h := p.1 with hh
+  set L := p.2 with hL
+  have hh1 : (1 : ℝ) / 5 ≤ h := hp1.1
+  have hh2 : h ≤ 2 / 5 := hp1.2
+  have hL1 : (11 : ℝ) / 5 ≤ L := hp2.1
+  have hL2 : L ≤ 14 / 5 := hp2.2
+  have hLpos : (0 : ℝ) < L := by linarith
+  set κ := gateProfileSmooth L δ with hκdef
+  set W₀ : ℂ × ℝ := (Complex.I * (h : ℂ), π) with hW₀def
+  -- `W₀ ∈ closedBall 0 4`:  `‖W₀‖ = max |h| π ≤ 4`.
+  have hW₀mem : W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) 4 := by
+    rw [Metric.mem_closedBall, dist_zero_right, hW₀def, Prod.norm_def]
+    have e1 : ‖Complex.I * (h : ℂ)‖ = |h| := by
+      rw [Complex.norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Real.norm_eq_abs]
+    have e2 : ‖(π : ℝ)‖ = π := by rw [Real.norm_eq_abs, abs_of_pos Real.pi_pos]
+    rw [e1, e2]
+    have : max |h| π ≤ 4 :=
+      max_le (by rw [abs_of_nonneg (by linarith : (0 : ℝ) ≤ h)]; linarith)
+        (by linarith [Real.pi_lt_four])
+    simpa using this
+  have hRe : (W₀.1).re = 0 := by
+    simp [hW₀def, Complex.mul_re]
+  have hφ0 : W₀.2 = π := rfl
+  -- `Q := arcFlow κ (3/5) L 2 4 (W₀, L/4)` is the landing state, so `Q.1.im = 0`,
+  -- `Q.2 = 3π/2`; hence `Q ∈ Fix(X)`:  `Q = (conj Q.1, 3π − Q.2)`.
+  have hQeq : arcFlow κ (3 / 5) L 2 4 (W₀, L / 4) = gateSmoothLandingState δ 4 h L := rfl
+  have hQim : (arcFlow κ (3 / 5) L 2 4 (W₀, L / 4)).1.im = 0 := by rw [hQeq]; exact him
+  have hQφ : (arcFlow κ (3 / 5) L 2 4 (W₀, L / 4)).2 = 3 * π / 2 := by rw [hQeq]; exact hφ
+  have hland : arcFlow κ (3 / 5) L 2 4 (W₀, L / 4)
+      = ((starRingEnd ℂ (arcFlow κ (3 / 5) L 2 4 (W₀, L / 4)).1,
+          3 * π - (arcFlow κ (3 / 5) L 2 4 (W₀, L / 4)).2) : ℂ × ℝ) := by
+    refine Prod.ext_iff.mpr ⟨?_, ?_⟩
+    · exact (Complex.conj_eq_iff_im.mpr hQim).symm
+    · change (arcFlow κ (3 / 5) L 2 4 (W₀, L / 4)).2
+        = 3 * π - (arcFlow κ (3 / 5) L 2 4 (W₀, L / 4)).2
+      rw [hQφ]; ring
+  -- Run the closing chain.
+  obtain ⟨W₀', hW₀', hclose1, hclose2⟩ :=
+    exists_closing_arcState (κ := κ) (R := 3 / 5) (L := L) (M := 2)
+      (gateProfileSmooth_continuous L δ) (by norm_num) (by norm_num) hLpos
+      (fun σ => gateProfileSmooth_abs_le L δ σ)
+      (gateProfileSmooth_periodic hLpos.ne' δ)
+      (fun σ => gateProfileSmooth_even L δ σ)
+      (fun σ => gateProfileSmooth_evenQ hLpos.ne' δ σ)
+      4 ⟨W₀, hW₀mem, hRe, hφ0, hland⟩
+  exact ⟨δ, L, W₀', hδpos, hL1, hL2, hW₀', hclose1, hclose2⟩
 
 end Gluck.SpaceForm
