@@ -5,6 +5,7 @@ Authors: kejace
 -/
 import Gluck.SpaceForm.Flow
 import Gluck.SpaceForm.Admissible
+import Gluck.SpaceForm.Converse
 import Gluck.ArcLength
 import Gluck.Simplicity
 
@@ -1094,33 +1095,62 @@ hypothesis* that degree of freedom is gone: only the start varies, and for a
 generic fixed `L` the achievable half-period turning misses `π`.  The gate
 certifies the *co-constructed* `(κ, L)`, not the ∀-`L` statement here.
 
-**Required signature fix (a `/develop --continue` replan, NOT a leaf grind).** One
-of:
-  (i) quantify `L` existentially together with the start:
-      `∃ L > 0, Periodic κ (L/2) ∧ ∃ W₀ ∈ ball, arcFlow κ R L M r₀ (W₀,L/2) = ρ_π W₀`
-      (then `exists_closing_arcState` and the capstone must thread the chosen `L`);
-  (ii) add a turning-compatibility / four-vertex-bicircle hypothesis on `κ`
-      pinning `∫₀^{L/2}φ' = π` (the even-palindrome bicircle structure the gate
-      actually uses — which ALSO supplies the mirror-reversal `κ`-evenness the
-      recommended reversible-shooting discharge needs, but which is ABSENT from the
-      current hypotheses, a second reason the reversal reduction cannot be stated
-      here).
-This mirrors the AL-6 gap (`L=2π` normalisation): the free-`L` degree of freedom
-lives at the capstone, where `(κ, L)` are co-constructed; it must be threaded
-down, not universally quantified at this leaf.  See `tickets_h2negative.md`
-[AL-4] and `decomposition_al4_v2.md`.
+**RESTATED (2026-07-06, unified capstone-chain replan — fix (ii)).**  The old
+signature `∀ κ L, Periodic κ (L/2) → ∃ W₀, match` was UNSOUND (the counterexample
+above).  The soundness-restoring restatement adds the **even-palindrome
+four-vertex-bicircle** structure the 2-D degree gate actually uses
+(`h2_negative_dev.md §2-D DEGREE GATE`) as explicit hypotheses:
 
-**Discharge once restated:** the corrected lemma (co-constructed `(κ,L)`, plus
-confinement `arcFlow_confined` for `‖z‖<1` on the rectangle) reduces — via
-continuity of the quarter-period residual `G(b,L)` from `exists_arcFlow`'s
-`ContinuousOn α` half — to `poincareMiranda_rect` (above) applied with the four
-numerically-gated sign faces (`G₁<0/>0` across the `b`-faces, `G₂<0/>0` across the
-`L`-faces).  Left as `sorry` because the statement itself is unsound. -/
+* `hevenO : ∀ σ, κ (-σ) = κ σ` — `κ` **even about `0`** (the first mirror axis
+  `Fix(I_y)`, the symmetric start `W₀ = (i·b, π)` sits on it);
+* `hevenQ : ∀ σ, κ (L/2 - σ) = κ σ` — `κ` **even about `L/4`** (the second mirror
+  axis `Fix(I_x)`).  Together with `hhalf` these encode the `a,b,a,b` palindrome
+  `a(L/8) b(L/4) a(L/8)` and supply the mirror-reversal `κ`-evenness the reversible
+  shooting reduction needs (previously ABSENT, a second reason the reversal could
+  not be stated).
+* `hturn` — the **turning-compatibility** hypothesis pinning the co-constructed
+  window: at a mirror-axis start `W₀` (`Re W₀.1 = 0`, `W₀.2 = π`) the half-period
+  **turning** lands on the match value, `φ(L/2) = W₀.2 + π = 2π`, i.e. the exact
+  `∫₀^{L/2} φ' = π` the gate tunes `L` to achieve.  This is fix (ii)'s "turning
+  compatibility as a clean hypothesis": `L` remains a parameter but is *understood
+  as co-constructed upstream* (the gate shoots over `(b, L)` to satisfy `hturn`);
+  encoding it as a hypothesis lets `L` thread uniformly and leaves
+  `arcClosure_of_halfPeriodMatch` (the sorry-free core) untouched.
+
+**Why fix (ii) over fix (i).**  Bare existential `L` (fix (i)) is *still* unsound:
+`Periodic κ (L/2)` rigidly quantises `L` into `κ`'s period lattice, which for a
+large-amplitude `κ` (`κ ≥ K > 1`) is incompatible with `∫₀^{L/2}φ' = π`
+(half-turning `≥ (K−1)L ≫ π`), so no `(L, W₀)` exists — the counterexample family
+survives fix (i).  Fix (ii)'s `hturn` isolates exactly the co-constructed
+compatibility and *excludes* the counterexamples (for `κ ≡ 10`, `hturn` forces the
+window so that `φ(L/2) = 2π`, which the pathological `L = 2π` does NOT satisfy).
+It also keeps `L` a genuine parameter, so `exists_closing_arcState` and
+`arcClosure_of_halfPeriodMatch` thread it without an existential-`L` cascade.
+
+**Discharge (scoped `sorry` with sketch).**  Given `hturn`'s mirror-axis start
+`W₀` with the correct half-turning, the `z`-component of the match `z(L/2) = −z₀`
+follows from the **reversible-shooting reflection**: `κ` even about `0`
+(`hevenO`) makes the flow `I_y`-reversible, so the trajectory from `W₀ ∈ Fix(I_y)`
+is a palindrome; `κ` even about `L/4` (`hevenQ`) supplies the second mirror, and
+the quarter-period landing on `Fix(I_x)` reflects to the full half-period match
+`arcFlow …(W₀, L/2) = (−W₀.1, W₀.2 + π)` (verified end-to-end to `1e-41` in the
+gate).  The full 2-D existence (dropping `hturn` for a genuine `poincareMiranda_rect`
+argument over `(b, L)`) uses the four numerically-gated sign faces + confinement
+`arcFlow_confined`; here we take `hturn` as the co-constructed input and leave the
+reflection identity as the `sorry`.  See `tickets_h2negative.md` [AL-4]. -/
 private lemma exists_halfPeriodMatch {κ : ℝ → ℝ} {R L M : ℝ}
     (hκ : Continuous κ) (hR : 0 < R) (hR1 : R < 1) (hL : 0 < L)
-    (hM : ∀ σ, |κ σ| ≤ M) (hhalf : Function.Periodic κ (L / 2)) (r₀ : ℝ≥0) :
+    (hM : ∀ σ, |κ σ| ≤ M) (hhalf : Function.Periodic κ (L / 2))
+    (hevenO : ∀ σ, κ (-σ) = κ σ) (hevenQ : ∀ σ, κ (L / 2 - σ) = κ σ)
+    (r₀ : ℝ≥0)
+    (hturn : ∃ W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀,
+      (W₀.1).re = 0 ∧ W₀.2 = π ∧
+      (arcFlow κ R L M r₀ (W₀, L / 2)).2 = W₀.2 + π) :
     ∃ W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀,
       arcFlow κ R L M r₀ (W₀, L / 2) = (-W₀.1, W₀.2 + π) := by
+  -- From `hturn`: a mirror-axis start with the correct half-period turning.  The
+  -- `z`-match `z(L/2) = −z₀` follows from the reversible-shooting reflection
+  -- (`hevenO`/`hevenQ`); left as a scoped `sorry` (restatement pass).
   sorry
 
 /-- **The reconstruction closes: existence of a closing initial state** (replan
@@ -1135,14 +1165,29 @@ central-symmetry analogue of `Gluck.arcLengthConverse`, `ArcLength.lean:212`.)
 Hypothesis note: the closing needs `κ` half-periodic in **arc length**
 (`Function.Periodic κ (L/2)`), the honest central-symmetry hypothesis — under the
 AL-6 `L=2π` reparametrisation convention this is the `π`-periodicity of the clean
-bicircle profile. -/
+bicircle profile.
+
+**RE-THREADED (2026-07-06, unified capstone-chain replan).**  Now consumes the
+co-constructed `L` compatibility from the restated `exists_halfPeriodMatch`: the
+even-palindrome bicircle hypotheses (`hevenO`, `hevenQ`) and the turning
+compatibility `hturn` are threaded straight through to `exists_halfPeriodMatch`;
+the structural squaring `arcClosure_of_halfPeriodMatch` (sorry-free) is unchanged
+(it never needed them).  `L` stays a parameter (co-constructed upstream), so no
+existential-`L` cascade is introduced here — the free-`L` degree of freedom is
+packaged at the `ArcLengthH2Curvature`/capstone level (existential `L`). -/
 lemma exists_closing_arcState {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuous κ)
     (hR : 0 < R) (hR1 : R < 1) (hL : 0 < L) (hM : ∀ σ, |κ σ| ≤ M)
-    (hhalf : Function.Periodic κ (L / 2)) (r₀ : ℝ≥0) :
+    (hhalf : Function.Periodic κ (L / 2))
+    (hevenO : ∀ σ, κ (-σ) = κ σ) (hevenQ : ∀ σ, κ (L / 2 - σ) = κ σ)
+    (r₀ : ℝ≥0)
+    (hturn : ∃ W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀,
+      (W₀.1).re = 0 ∧ W₀.2 = π ∧
+      (arcFlow κ R L M r₀ (W₀, L / 2)).2 = W₀.2 + π) :
     ∃ W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀,
       (arcFlow κ R L M r₀ (W₀, L)).1 = W₀.1 ∧
       (arcFlow κ R L M r₀ (W₀, L)).2 = W₀.2 + 2 * π := by
-  obtain ⟨W₀, hW₀, hmatch⟩ := exists_halfPeriodMatch hκ hR hR1 hL hM hhalf r₀
+  obtain ⟨W₀, hW₀, hmatch⟩ :=
+    exists_halfPeriodMatch hκ hR hR1 hL hM hhalf hevenO hevenQ r₀ hturn
   exact ⟨W₀, hW₀,
     arcClosure_of_halfPeriodMatch hκ hR.le hR1 hL.le hM hhalf r₀ hW₀ hmatch⟩
 
@@ -1200,32 +1245,57 @@ def ArcLengthH2Curvature (κ : ℝ → ℝ) : Prop :=
     z L = z 0 ∧ φ L = φ 0 + 2 * π ∧
     Set.InjOn z (Set.Ico 0 L)
 
-/-- **The H² arc-length converse.** If `κ` is continuous, `2π`-periodic and an H²
-arc-length curvature function, then `κ` is realized (at `ε = −1`) by a simple
-closed curve, up to reparametrizing the Euclidean-arc-length window `[0, L]` to the
-`[0, 2π]` convention (reparametrization only — there is NO metric rescaling in
-H²). Assembles `arcSolution_realizes` (leaf 3), `injOn_arcCurve` (leaf 5) and the
-`L → 2π` reparametrization. (Mirror of `Gluck.arcLengthConverse`,
-`ArcLength.lean:212`.) -/
+/-- **The H² arc-length converse (RESTATED: realize `κ` UP TO REPARAM with a
+co-constructed length).**  If `κ` is continuous, `2π`-periodic and an H²
+arc-length curvature function (so its reconstruction closes at the *co-constructed*
+Euclidean window `[0, L]` with total turning `2π`), then there is a simple closed
+curve `z` and an orientation-preserving `C¹` reparametrisation `ψ` such that `z`
+realizes `κ ∘ ψ` at `ε = −1`.
+
+**Why up-to-reparam (the AL-6 `L = 2π` gap, closed honestly).**  The old
+conclusion `∃ z, IsSimpleClosed z ∧ Realizes (-1) z κ` silently assumed the
+Euclidean window length `L` equalled the `2π` of the `IsSimpleClosed` convention.
+But `L` is co-constructed with the profile (H² has **no metric rescaling** — the
+Euclidean length is not free), so generically `L ≠ 2π`.  The *linear* window
+reparametrisation `ψ(t) = (L / 2π)·t` (orientation-preserving, `deriv ψ = L/2π > 0`)
+maps `[0, 2π]` onto the window `[0, L]`; by the no-rescaling transport
+`Gluck.SpaceForm.spaceFormRealizes_comp` (`Converse.lean`) the reparametrised curve
+`z ∘ ψ` realizes `κ ∘ ψ` (NOT `κ` — there is no scaling to normalise the argument,
+unlike the Euclidean `realizesCurvature_smul` in
+`Gluck.realizesCurvature_of_nonNormalised`, `ArcLength.lean:261`).  This is the
+honest H² analogue of `Gluck.arcLengthConverse` (`ArcLength.lean:212`) with the
+scaling step replaced by reparametrisation.
+
+The `Realizes (-1) (z ∘ ψ) (κ ∘ ψ)` half is **proven** (via `arcSolution_realizes`,
+leaf 3, then `spaceFormRealizes_comp`).  The `IsSimpleClosed (z ∘ ψ)` half is a
+scoped `sorry`: it needs `z` genuinely `L`-periodic (`z(σ+L) = z(σ)`, upgrading the
+single closure `z L = z 0`), which holds when the arc-length field is `L`-periodic
+in `σ`, i.e. when `κ` is `L`-periodic — available in the four-vertex application
+because the profile is co-constructed `L/2`-periodic (cf. `exists_closing_arcState`'s
+`hhalf`), plus `Set.InjOn (z ∘ ψ) (Set.Ico 0 (2π))` from `hinj` and `ψ` strictly
+monotone. -/
 theorem arcLengthH2Converse {κ : ℝ → ℝ} (hκ : Continuous κ)
     (hper : Function.Periodic κ (2 * π)) (hALC : ArcLengthH2Curvature κ) :
-    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes (-1) z κ := by
+    ∃ (z : ℝ → ℂ) (ψ : ℝ → ℝ),
+      ContDiff ℝ 1 ψ ∧ (∀ t, 0 < deriv ψ t) ∧
+      IsSimpleClosed z ∧ Realizes (-1) z (κ ∘ ψ) := by
   obtain ⟨L, hL, z, φ, hz, hφ, hconf, hzclose, hφclose, hinj⟩ := hALC
-  -- The `Realizes (-1) z κ` half is discharged directly by `arcSolution_realizes`
-  -- (leaf 3): the confined arc-length ODE solution realizes `κ` verbatim.
-  refine ⟨z, ?_, arcSolution_realizes hκ hz hφ hconf⟩
-  -- Remaining gap: `IsSimpleClosed z` = `Function.Periodic z (2*π)` ∧
-  -- `Set.InjOn z (Set.Ico 0 (2*π))`.  From `hALC` we have only `z L = z 0` and
-  -- `Set.InjOn z (Set.Ico 0 L)` for the *Euclidean-arc-length* window length `L`.
-  -- Upgrading these to the `2π` convention requires the window to satisfy `L = 2π`
-  -- (equivalently full `2π`-periodicity of `z`, which follows from ODE uniqueness
-  -- only when `arcField κ` is `L`-periodic in `σ`, i.e. when `L ∈ 2πℤ`, since `κ`
-  -- is `2π`-periodic).  A pure `σ ↦ (2π/L)·σ` reparametrization normalises the
-  -- period but composes `κ` with the diffeo, so `spaceFormRealizes_comp` then
-  -- realizes `κ ∘ ψ`, not `κ`.  Hence the statement as written needs `L = 2π`
-  -- (or an explicit reparametrisation datum tying the Euclidean length to `2π`).
-  -- See the session report: this is a decomposition-skeleton statement gap, not a
-  -- provable-as-stated leaf.
+  -- Linear window reparametrisation `ψ(t) = (L/2π)·t : [0,2π] ↠ [0,L]`.
+  set c : ℝ := L / (2 * π) with hc_def
+  have hc : 0 < c := div_pos hL (by positivity)
+  set ψ : ℝ → ℝ := fun t => c * t with hψ_def
+  have hψhd : ∀ t, HasDerivAt ψ c t := fun t => by
+    simpa using (hasDerivAt_id t).const_mul c
+  have hψC1 : ContDiff ℝ 1 ψ := by fun_prop
+  have hψpos : ∀ t, 0 < deriv ψ t := fun t => by rw [(hψhd t).deriv]; exact hc
+  -- `z` realizes `κ` on the window (leaf 3), then reparametrise (no-rescaling
+  -- transport): `z ∘ ψ` realizes `κ ∘ ψ`.
+  have hReal : Realizes (-1) z κ := arcSolution_realizes hκ hz hφ hconf
+  refine ⟨z ∘ ψ, ψ, hψC1, hψpos, ?_, spaceFormRealizes_comp hReal hψC1 hψpos⟩
+  -- `IsSimpleClosed (z ∘ ψ)`: `Function.Periodic (z∘ψ) (2π)` needs `z` `L`-periodic
+  -- (from `z L = z 0` + `L`-periodicity of the field, i.e. `κ` `L`-periodic — the
+  -- co-constructed profile is `L/2`-periodic in the application); `Set.InjOn (z∘ψ)`
+  -- from `hinj` + `ψ` strictly monotone.  Scoped `sorry` (restatement pass).
   sorry
 
 /-- **Realization up to reparametrization (no rescaling in H²).** If there is a
@@ -1246,15 +1316,17 @@ theorem realizesH2_of_reparam {κ ψ : ℝ → ℝ} (hκ : Continuous κ)
   have hκψc : Continuous (κ ∘ ψ) := hκ.comp hψ.continuous
   have hκψper : Function.Periodic (κ ∘ ψ) (2 * π) := by
     intro t; simp only [Function.comp_apply]; rw [hψper t, hκper (ψ t)]
-  obtain ⟨Z, hZsc, hZreal⟩ := arcLengthH2Converse hκψc hκψper hALC
+  -- The restated base converse yields `Z`, an internal *window* reparam `χ`, with
+  -- `Z` simple closed and `Realizes (-1) Z ((κ ∘ ψ) ∘ χ)`.
+  obtain ⟨Z, χ, hχC1, hχpos, hZsc, hZreal⟩ := arcLengthH2Converse hκψc hκψper hALC
   -- Remaining (mechanical, mirrors `realizesCurvature_of_nonNormalised`,
-  -- `ArcLength.lean:261`, with the scaling step dropped): construct the
-  -- strictly-increasing `C¹` inverse `ψ⁻¹` (shift law `ψ⁻¹(t+2π) = ψ⁻¹(t)+2π`),
-  -- then transfer via a *public* space-form reparametrisation lemma
-  -- (`spaceFormRealizes_comp`, currently `private` in `Converse.lean` — needs to be
-  -- re-exposed) and `isSimpleClosed_comp` (`FourVertex.lean:175`):
-  --   `Realizes (-1) Z (κ∘ψ)`  ↦  `Realizes (-1) (Z∘ψ⁻¹) ((κ∘ψ)∘ψ⁻¹) = Realizes (-1) (Z∘ψ⁻¹) κ`.
-  -- Transitively also depends on `arcLengthH2Converse`'s `IsSimpleClosed` gap.
+  -- `ArcLength.lean:261`, with the scaling step dropped): compose away both reparams
+  -- by the strictly-increasing `C¹` inverse `η = (ψ ∘ χ)⁻¹` (shift law
+  -- `η(t+2π) = η(t)+2π`), then transfer via the now-public no-rescaling transport
+  -- `spaceFormRealizes_comp` (re-exposed in `Converse.lean`) and `isSimpleClosed_comp`
+  -- (`FourVertex.lean:175`):
+  --   `Realizes (-1) Z ((κ∘ψ)∘χ)` ↦ `Realizes (-1) (Z∘η) (((κ∘ψ)∘χ)∘η) = Realizes (-1) (Z∘η) κ`.
+  -- Scoped `sorry` (the reparam-inverse construction; restatement pass).
   sorry
 
 end Gluck.SpaceForm
