@@ -864,29 +864,6 @@ gated** (à la the B2 check) before a full grind, to rule out a third obstructio
 Ordered leaves below (all `:= by sorry` except the routing assembly, which is
 sorry-free); AL4-a/b retained as generic plumbing. -/
 
-/-- **AL4-a (plumbing, retained) — the `z`-monodromy residual as a `ℂ → ℂ` map**
-at a fixed initial tangent angle `φ₀`: `F(z₀) = (arcFlow …((z₀, φ₀), L)).1 − z₀`.
-Vestigial from the dead fixed-`φ₀` winding route (the winding of this map is `0`,
-B2); retained only as generic plumbing and a continuity target.  (Analogue of
-`Gluck.SpaceForm.spaceFormEndpoint`, `Flow.lean:285`.) -/
-noncomputable def arcZEndpoint (κ : ℝ → ℝ) (R L M : ℝ) (r₀ : ℝ≥0) (φ₀ : ℝ)
-    (z₀ : ℂ) : ℂ :=
-  (arcFlow κ R L M r₀ ((z₀, φ₀), L)).1 - z₀
-
-/-- **AL4-b (plumbing, retained) — continuity of the `z`-monodromy** on the affine
-chart `u ↦ zs + ρ·u`.  Generic `ContinuousOn` from the `ContinuousOn` half of
-`exists_arcFlow`; reusable as the continuity input of the half-period matching
-map's 2-D degree argument.  Discharge: **reuse** (extract `ContinuousOn` from
-`exists_arcFlow` as `arcFlow_spec` extracts the ODE half). -/
-private lemma arcZEndpoint_continuousOn {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuous κ)
-    (hR : 0 ≤ R) (hR1 : R < 1) (hL : 0 ≤ L) (hM : ∀ σ, |κ σ| ≤ M) (r₀ : ℝ≥0)
-    (φ₀ : ℝ) {zs : ℂ} {ρ : ℝ}
-    (hmaps : ∀ u : ℂ, ‖u‖ ≤ 1 →
-      ((zs + (ρ : ℂ) * u, φ₀) : ℂ × ℝ) ∈ Metric.closedBall (0 : ℂ × ℝ) r₀) :
-    ContinuousOn (fun u : ℂ => arcZEndpoint κ R L M r₀ φ₀ (zs + (ρ : ℂ) * u))
-      (Metric.closedBall (0 : ℂ) 1) := by
-  sorry
-
 /-- **The half-period matching defect** at `W₀`: the difference between the
 half-period endpoint `arcFlow …(W₀, L/2)` and its expected `ρ_π`-image
 `(−W₀.1, W₀.2 + π)`.  The reconstruction closes centrally-symmetrically iff this
@@ -2129,6 +2106,7 @@ def ArcLengthH2Curvature (κ : ℝ → ℝ) : Prop :=
     (∀ σ, HasDerivAt φ (arcAngleSpeed κ σ (z σ) (φ σ)) σ) ∧
     (∀ σ, ‖z σ‖ < 1) ∧
     z L = z 0 ∧ φ L = φ 0 + 2 * π ∧
+    Function.Periodic z L ∧
     Set.InjOn z (Set.Ico 0 L)
 
 /-- **The H² arc-length converse (RESTATED: realize `κ` UP TO REPARAM with a
@@ -2161,11 +2139,11 @@ because the profile is co-constructed `L/2`-periodic (cf. `exists_closing_arcSta
 `hhalf`), plus `Set.InjOn (z ∘ ψ) (Set.Ico 0 (2π))` from `hinj` and `ψ` strictly
 monotone. -/
 theorem arcLengthH2Converse {κ : ℝ → ℝ} (hκ : Continuous κ)
-    (hper : Function.Periodic κ (2 * π)) (hALC : ArcLengthH2Curvature κ) :
+    (_hper : Function.Periodic κ (2 * π)) (hALC : ArcLengthH2Curvature κ) :
     ∃ (z : ℝ → ℂ) (ψ : ℝ → ℝ),
       ContDiff ℝ 1 ψ ∧ (∀ t, 0 < deriv ψ t) ∧
       IsSimpleClosed z ∧ Realizes (-1) z (κ ∘ ψ) := by
-  obtain ⟨L, hL, z, φ, hz, hφ, hconf, hzclose, hφclose, hinj⟩ := hALC
+  obtain ⟨L, hL, z, φ, hz, hφ, hconf, hzclose, hφclose, hzper, hinj⟩ := hALC
   -- Linear window reparametrisation `ψ(t) = (L/2π)·t : [0,2π] ↠ [0,L]`.
   set c : ℝ := L / (2 * π) with hc_def
   have hc : 0 < c := div_pos hL (by positivity)
@@ -2178,11 +2156,30 @@ theorem arcLengthH2Converse {κ : ℝ → ℝ} (hκ : Continuous κ)
   -- transport): `z ∘ ψ` realizes `κ ∘ ψ`.
   have hReal : Realizes (-1) z κ := arcSolution_realizes hκ hz hφ hconf
   refine ⟨z ∘ ψ, ψ, hψC1, hψpos, ?_, spaceFormRealizes_comp hReal hψC1 hψpos⟩
-  -- `IsSimpleClosed (z ∘ ψ)`: `Function.Periodic (z∘ψ) (2π)` needs `z` `L`-periodic
-  -- (from `z L = z 0` + `L`-periodicity of the field, i.e. `κ` `L`-periodic — the
-  -- co-constructed profile is `L/2`-periodic in the application); `Set.InjOn (z∘ψ)`
-  -- from `hinj` + `ψ` strictly monotone.  Scoped `sorry` (restatement pass).
-  sorry
+  -- `IsSimpleClosed (z ∘ ψ)`: the linear window reparam `ψ(t) = c·t` sends the
+  -- `2π`-window bijectively onto the `L`-window (`ψ(t+2π) = ψ(t) + L`, `c·2π = L`),
+  -- so periodicity transfers from `Function.Periodic z L` (`hzper`) and injectivity
+  -- from `Set.InjOn z [0,L)` (`hinj`) along `ψ` strictly monotone.
+  have hc2 : c * (2 * π) = L := by rw [hc_def]; field_simp
+  constructor
+  · -- *Closed:* `(z∘ψ)(t+2π) = z(ψ t + L) = z(ψ t) = (z∘ψ)(t)`.
+    intro t
+    simp only [Function.comp_apply, hψ_def]
+    have hstep : c * (t + 2 * π) = c * t + L := by rw [mul_add, hc2]
+    rw [hstep]
+    exact hzper (c * t)
+  · -- *Injective on `[0,2π)`:* `ψ` maps `[0,2π)` into `[0,L)`, then `hinj` and `c > 0`.
+    have hmem : ∀ x, x ∈ Set.Ico (0 : ℝ) (2 * π) → ψ x ∈ Set.Ico (0 : ℝ) L := by
+      intro x hx
+      refine ⟨mul_nonneg hc.le hx.1, ?_⟩
+      calc ψ x = c * x := rfl
+        _ < c * (2 * π) := mul_lt_mul_of_pos_left hx.2 hc
+        _ = L := hc2
+    intro a ha b hb hab
+    simp only [Function.comp_apply] at hab
+    have hψeq : ψ a = ψ b := hinj (hmem a ha) (hmem b hb) hab
+    have : c * a = c * b := hψeq
+    exact mul_left_cancel₀ hc.ne' this
 
 /-- **Realization up to reparametrization (no rescaling in H²).** If there is a
 `C¹` orientation-preserving circle diffeomorphism `ψ` (the `2π`-shift law) such
@@ -2205,14 +2202,26 @@ theorem realizesH2_of_reparam {κ ψ : ℝ → ℝ} (hκ : Continuous κ)
   -- The restated base converse yields `Z`, an internal *window* reparam `χ`, with
   -- `Z` simple closed and `Realizes (-1) Z ((κ ∘ ψ) ∘ χ)`.
   obtain ⟨Z, χ, hχC1, hχpos, hZsc, hZreal⟩ := arcLengthH2Converse hκψc hκψper hALC
-  -- Remaining (mechanical, mirrors `realizesCurvature_of_nonNormalised`,
-  -- `ArcLength.lean:261`, with the scaling step dropped): compose away both reparams
-  -- by the strictly-increasing `C¹` inverse `η = (ψ ∘ χ)⁻¹` (shift law
-  -- `η(t+2π) = η(t)+2π`), then transfer via the now-public no-rescaling transport
-  -- `spaceFormRealizes_comp` (re-exposed in `Converse.lean`) and `isSimpleClosed_comp`
-  -- (`FourVertex.lean:175`):
-  --   `Realizes (-1) Z ((κ∘ψ)∘χ)` ↦ `Realizes (-1) (Z∘η) (((κ∘ψ)∘χ)∘η) = Realizes (-1) (Z∘η) κ`.
-  -- Scoped `sorry` (the reparam-inverse construction; restatement pass).
+  -- The realization is transferred by the strictly-increasing `C¹` inverse
+  -- `η = (ψ ∘ χ)⁻¹`: `Realizes (-1) (Z ∘ η) ((κ∘ψ)∘χ∘η) = Realizes (-1) (Z ∘ η) κ`
+  -- via the no-rescaling transport `spaceFormRealizes_comp`, and simplicity by
+  -- `isSimpleClosed_comp` — PROVIDED `η` (equivalently `g := ψ ∘ χ`) is a genuine
+  -- `2π`-circle diffeomorphism (`g(t+2π) = g(t) + 2π`), the hypothesis of
+  -- `exists_C1_circle_inverse` (`Reduction.lean:1606`).
+  --
+  -- **The genuine obstruction (AL-6 co-constructed-`L` statement gap, NOT tractable
+  -- assembly).**  `χ` is the linear window reparam `χ(t) = (L'/2π)·t` from
+  -- `arcLengthH2Converse`, whose window `L'` is *co-constructed* with the profile
+  -- `κ∘ψ` (H² has no metric rescaling), so `χ(t+2π) = χ(t) + L'` with generically
+  -- `L' ≠ 2π`.  Hence `g(t+2π) = ψ(χ(t) + L')`, which equals `g(t) + 2π` only if
+  -- `ψ` conjugates the `L'`-shift to `2π` (`ψ(s+L') = ψ(s) + 2π`) — but the
+  -- hypothesis supplies the *`2π`*-shift law `ψ(t+2π) = ψ(t)+2π` (and
+  -- `arcLengthH2Converse` exposes no shift law for `χ` at all).  The two windows are
+  -- incompatible: to realize `κ` HONESTLY (not up to reparam) by a `2π`-periodic
+  -- simple curve, the co-constructed `L'` must be threaded through `ψ`'s shift law,
+  -- which is exactly the unified `/develop --continue` replan of the capstone chain
+  -- flagged in `h2_negative_dev.md` (UNIFYING ROOT CAUSE: CO-CONSTRUCT `L`).  Left
+  -- as a scoped `sorry`; see `tickets_h2negative.md` [AL-6].
   sorry
 
 end Gluck.SpaceForm
