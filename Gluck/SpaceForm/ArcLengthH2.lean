@@ -742,35 +742,80 @@ noncomputable def arcEndpoint (κ : ℝ → ℝ) (R L M : ℝ) (r₀ : ℝ≥0) 
     ℂ × ℝ :=
   arcFlow κ R L M r₀ (W₀, L) - (W₀ + (0, 2 * π))
 
-/-- **Central-symmetry / `ρ_π`-equivariance of the model half-period.** For a
-`π`-periodic `κ` (the central-symmetry ansatz of the four-vertex model), the
-arc-length half-period map is equivariant under the point reflection
-`(z, φ) ↦ (−z, φ + π)`, so the full monodromy is the square of the half map and
-the `z`-endpoint returns by symmetry. (No direct Euclidean template — the
-central-symmetry route; parallels the model-circle symmetry in
-`Gluck.SpaceForm.spaceFormSpeed_circle`, `Defs.lean:169`.) -/
+/-- Radial clamp is **odd**: `clampBall R (−z) = −clampBall R z`. -/
+private lemma clampBall_neg (R : ℝ) (z : ℂ) : clampBall R (-z) = -clampBall R z := by
+  simp only [clampBall, norm_neg, smul_neg]
+
+/-- `e^{i(φ+π)} = −e^{iφ}` (the `ρ_π` phase flip). -/
+private lemma exp_add_pi_mul_I (φ : ℝ) :
+    Complex.exp (((φ + π : ℝ) : ℂ) * Complex.I) = -Complex.exp ((φ : ℂ) * Complex.I) := by
+  rw [Complex.ofReal_add, add_mul, Complex.exp_add, Complex.exp_pi_mul_I, mul_neg_one]
+
+/-- **Reflection invariance of the reconstruction field.** The point reflection
+`ρ_π : (z, φ) ↦ (−z, φ + π)` conjugates `arcField` into its `ρ_π`-linearization
+`(v_z, v_φ) ↦ (−v_z, v_φ)`: the `z`-velocity `e^{iφ}` flips sign, while the angle
+speed is invariant — `clampBall` is odd (`clampBall_neg`), the metric denominator
+`1 − ‖clampBall z‖²` is even, and the two sign flips in
+`⟪−clamp, i·e^{i(φ+π)}⟫ = ⟪clamp, i·e^{iφ}⟫` cancel. Holds at a *fixed* `σ`; no
+periodicity of `κ` is needed. -/
+private lemma arcField_reflect {κ : ℝ → ℝ} {R σ : ℝ} (W : ℂ × ℝ) :
+    arcField κ R σ ((-W.1, W.2 + π) : ℂ × ℝ)
+      = (-(arcField κ R σ W).1, (arcField κ R σ W).2) := by
+  obtain ⟨z, φ⟩ := W
+  have hexp := exp_add_pi_mul_I φ
+  refine Prod.ext ?_ ?_
+  · simpa only [arcField] using hexp
+  · simp only [arcField, truncatedArcAngleSpeed, clampBall_neg, norm_neg]
+    rw [hexp, mul_neg, inner_neg_neg]
+
+/-- `arcField` depends on `σ` only through the value `κ σ`: equal curvature values
+give equal fields. Powers the half-period `σ`-shift in the closing argument. -/
+private lemma arcField_congr_of_kappa {κ : ℝ → ℝ} {R σ σ' : ℝ} (W : ℂ × ℝ)
+    (h : κ σ = κ σ') : arcField κ R σ W = arcField κ R σ' W := by
+  simp only [arcField, truncatedArcAngleSpeed, h]
+
+/-- Derivative transport under `ρ_π`: if `f` has derivative `D` within `s` at `x`,
+then the reflected trajectory `t ↦ (−(f t).1, (f t).2 + π)` has derivative
+`(−D.1, D.2)` (the `π`-shift is a constant, the `z`-part negates). -/
+private lemma reflect_hasDerivWithinAt {f : ℝ → ℂ × ℝ} {D : ℂ × ℝ} {s : Set ℝ} {x : ℝ}
+    (h : HasDerivWithinAt f D s x) :
+    HasDerivWithinAt (fun t => ((-(f t).1, (f t).2 + π) : ℂ × ℝ))
+      ((-D.1, D.2) : ℂ × ℝ) s x := by
+  have hfst : HasDerivWithinAt (fun t => (f t).1) D.1 s x :=
+    (ContinuousLinearMap.fst ℝ ℂ ℝ).hasFDerivAt.comp_hasDerivWithinAt x h
+  have hsnd : HasDerivWithinAt (fun t => (f t).2) D.2 s x :=
+    (ContinuousLinearMap.snd ℝ ℂ ℝ).hasFDerivAt.comp_hasDerivWithinAt x h
+  exact hfst.neg.prodMk (hsnd.add_const π)
+
+/-- **Ball convention (documented fix).** The `φ+π` shift changes the `ℂ×ℝ` norm, so
+the reflected start may leave `closedBall r₀`; `arcFlow_spec`/`_unique` require it
+inside, hence the explicit reflected-start-in-ball hypothesis `hW₀'`. The old
+`hπper : Function.Periodic κ π` is *not* needed here (the reflection identity
+`arcField_reflect` is at a fixed `σ`); half-periodicity is used only downstream in
+`arcClosure_of_halfPeriodMatch`. Proof: `g σ = ρ_π(arcFlow(W₀, σ))` solves the ODE
+with reflected initial data, so `arcFlow_unique` identifies it with
+`arcFlow((−W₀.1, W₀.2+π), ·)`; evaluate at `L/2`. -/
 lemma arcFlow_central_symmetry {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuous κ)
     (hR : 0 ≤ R) (hR1 : R < 1) (hL : 0 ≤ L) (hM : ∀ σ, |κ σ| ≤ M) (r₀ : ℝ≥0)
-    (hπper : Function.Periodic κ π) (W₀ : ℂ × ℝ)
-    (hW₀ : W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀) :
+    (W₀ : ℂ × ℝ) (hW₀ : W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀)
+    (hW₀' : ((-W₀.1, W₀.2 + π) : ℂ × ℝ) ∈ Metric.closedBall (0 : ℂ × ℝ) r₀) :
     arcFlow κ R L M r₀ ((-W₀.1, W₀.2 + π), L / 2)
       = (-(arcFlow κ R L M r₀ (W₀, L / 2)).1,
           (arcFlow κ R L M r₀ (W₀, L / 2)).2 + π) := by
-  -- SKETCH (multi-session, part of AL-4).  Via ODE uniqueness (`arcFlow_unique`):
-  -- set `g σ = (-(Ψ(W₀,σ)).1, (Ψ(W₀,σ)).2 + π)` and show it solves the arc-length
-  -- ODE from the reflected start `(-W₀.1, W₀.2+π)`, using the *reflection invariance*
-  -- of `arcField`:  `arcField.1` at `(-z, φ+π) = exp(i(φ+π)) = -exp(iφ) = -(arcField.1 at (z,φ))`;
-  -- and `truncatedArcAngleSpeed κ R σ (-z) (φ+π) = truncatedArcAngleSpeed κ R σ z φ`
-  -- because `clampBall R (-z) = -clampBall R z` (clamp is odd), the denominator is
-  -- even in `z`, and `⟪-clamp, i·exp(i(φ+π))⟫ = ⟪-clamp, -i·exp(iφ)⟫ = ⟪clamp, i·exp(iφ)⟫`
-  -- (two sign flips cancel).  Then `arcFlow_unique` identifies `g` with
-  -- `Ψ((-W₀.1,W₀.2+π), ·)` and evaluation at `L/2` gives the claim.
-  -- OPEN SUBTLETY: the reflected start `(-W₀.1, W₀.2+π)` has `φ`-component shifted by
-  -- `π`, so its `ℂ×ℝ` norm can exceed `r₀`; `arcFlow_spec`/`_unique` need it inside
-  -- `closedBall r₀`.  Fix requires either a `z`-only ball hypothesis or an enlarged
-  -- `r₀`.  (`hπper` is NOT used by the pointwise reflection identity above — only by
-  -- the downstream half-period/monodromy squaring argument.)
-  sorry
+  obtain ⟨hΦ0, hΦd⟩ := arcFlow_spec hκ hR hR1 hL hM r₀ hW₀
+  set Φ := fun t => arcFlow κ R L M r₀ (W₀, t) with hΦdef
+  have hg : ∀ σ ∈ Set.Icc (0 : ℝ) L,
+      HasDerivWithinAt (fun t => ((-(Φ t).1, (Φ t).2 + π) : ℂ × ℝ))
+        (arcField κ R σ ((-(Φ σ).1, (Φ σ).2 + π) : ℂ × ℝ)) (Set.Icc 0 L) σ := by
+    intro σ hσ
+    rw [arcField_reflect (Φ σ)]
+    exact reflect_hasDerivWithinAt (hΦd σ hσ)
+  have hg0 : (fun t => ((-(Φ t).1, (Φ t).2 + π) : ℂ × ℝ)) 0 = (-W₀.1, W₀.2 + π) := by
+    change ((-(Φ 0).1, (Φ 0).2 + π) : ℂ × ℝ) = (-W₀.1, W₀.2 + π)
+    rw [show Φ 0 = W₀ from hΦ0]
+  have heq := arcFlow_unique hκ hR hR1 hL hM r₀ hW₀' hg hg0
+  have hmem : (L / 2) ∈ Set.Icc (0 : ℝ) L := ⟨by linarith, by linarith⟩
+  exact (heq hmem).symm
 
 /-! ### Leaf group 4′ — AL-4 REPLAN: central-symmetry half-period closing
 
@@ -873,7 +918,78 @@ private lemma arcClosure_of_halfPeriodMatch {κ : ℝ → ℝ} {R L M : ℝ}
     (hmatch : arcFlow κ R L M r₀ (W₀, L / 2) = (-W₀.1, W₀.2 + π)) :
     (arcFlow κ R L M r₀ (W₀, L)).1 = W₀.1 ∧
       (arcFlow κ R L M r₀ (W₀, L)).2 = W₀.2 + 2 * π := by
-  sorry
+  obtain ⟨hΦ0, hΦd⟩ := arcFlow_spec hκ hR hR1 hL hM r₀ hW₀
+  set Φ := fun t => arcFlow κ R L M r₀ (W₀, t) with hΦdef
+  have h0half : (0 : ℝ) ≤ L / 2 := by linarith
+  have hLhalf : L / 2 ≤ L := by linarith
+  set b := fun σ => ((-(Φ (σ - L / 2)).1, (Φ (σ - L / 2)).2 + π) : ℂ × ℝ) with hbdef
+  -- `b` is the `ρ_π`-image of the time-shifted first-half flow; it solves the ODE
+  -- on `[L/2, L]` (reflection identity + half-periodicity of `κ` for the `σ`-shift).
+  have hbderiv : ∀ σ ∈ Set.Icc (L / 2) L,
+      HasDerivWithinAt b (arcField κ R σ (b σ)) (Set.Icc (L / 2) L) σ := by
+    intro σ hσ
+    have hmem : σ - L / 2 ∈ Set.Icc (0 : ℝ) L := ⟨by linarith [hσ.1], by linarith [hσ.2]⟩
+    have hshift : HasDerivWithinAt (fun s => s - L / 2) (1 : ℝ) (Set.Icc (L / 2) L) σ := by
+      simpa using (hasDerivWithinAt_id σ (Set.Icc (L / 2) L)).sub_const (L / 2)
+    have hmaps : Set.MapsTo (fun s => s - L / 2) (Set.Icc (L / 2) L) (Set.Icc 0 L) := by
+      intro s hs; exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
+    have hu : HasDerivWithinAt (fun s => Φ (s - L / 2))
+        (arcField κ R (σ - L / 2) (Φ (σ - L / 2))) (Set.Icc (L / 2) L) σ := by
+      have hcomp := (hΦd (σ - L / 2) hmem).scomp σ hshift hmaps
+      simpa only [Function.comp_def, one_smul] using hcomp
+    have hκσ : κ (σ - L / 2) = κ σ := by
+      have hs : σ - L / 2 + L / 2 = σ := by ring
+      have h := hhalf (σ - L / 2)
+      rw [hs] at h; exact h.symm
+    have hfield : ((-(arcField κ R (σ - L / 2) (Φ (σ - L / 2))).1,
+        (arcField κ R (σ - L / 2) (Φ (σ - L / 2))).2) : ℂ × ℝ) = arcField κ R σ (b σ) := by
+      rw [← arcField_reflect (Φ (σ - L / 2)), arcField_congr_of_kappa _ hκσ]
+    rw [← hfield]
+    exact reflect_hasDerivWithinAt hu
+  -- `Φ = arcFlow(W₀, ·)` also solves the ODE on `[L/2, L]`.
+  have hΦderiv : ∀ σ ∈ Set.Icc (L / 2) L,
+      HasDerivWithinAt Φ (arcField κ R σ (Φ σ)) (Set.Icc (L / 2) L) σ := by
+    intro σ hσ
+    exact (hΦd σ ⟨h0half.trans hσ.1, hσ.2⟩).mono (Set.Icc_subset_Icc_left h0half)
+  -- the two solutions agree at `L/2` (the half-period match).
+  have hinit : Φ (L / 2) = b (L / 2) := by
+    have hb2 : b (L / 2) = ((-(Φ 0).1, (Φ 0).2 + π) : ℂ × ℝ) := by
+      simp only [hbdef, sub_self]
+    rw [hb2, show Φ 0 = W₀ from hΦ0]
+    exact hmatch
+  -- ODE uniqueness on `[L/2, L]`.
+  have hEq : Set.EqOn Φ b (Set.Icc (L / 2) L) := by
+    have upΦ : ∀ σ ∈ Set.Ico (L / 2) L,
+        HasDerivWithinAt Φ (arcField κ R σ (Φ σ)) (Set.Ici σ) σ := fun σ hσ =>
+      (hΦderiv σ ⟨hσ.1, hσ.2.le⟩).mono_of_mem_nhdsWithin
+        (mem_nhdsGE_iff_exists_Icc_subset.mpr ⟨L, hσ.2, Set.Icc_subset_Icc_left hσ.1⟩)
+    have upb : ∀ σ ∈ Set.Ico (L / 2) L,
+        HasDerivWithinAt b (arcField κ R σ (b σ)) (Set.Ici σ) σ := fun σ hσ =>
+      (hbderiv σ ⟨hσ.1, hσ.2.le⟩).mono_of_mem_nhdsWithin
+        (mem_nhdsGE_iff_exists_Icc_subset.mpr ⟨L, hσ.2, Set.Icc_subset_Icc_left hσ.1⟩)
+    obtain ⟨K, hK⟩ := arcField_lipschitz hR hR1 hM
+    exact ODE_solution_unique_of_mem_Icc_right
+      (fun t _ => (hK t).lipschitzOnWith)
+      (HasDerivWithinAt.continuousOn hΦderiv) upΦ
+      (fun t _ => Set.mem_univ (Φ t))
+      (HasDerivWithinAt.continuousOn hbderiv) upb
+      (fun t _ => Set.mem_univ _)
+      hinit
+  -- evaluate at `L`:  Φ(L) = b(L) = ρ_π(ρ_π W₀) = (W₀.1, W₀.2 + 2π).
+  have hΦL : Φ L = b L := hEq ⟨hLhalf, le_refl L⟩
+  have hbL : b L = ((W₀.1, W₀.2 + 2 * π) : ℂ × ℝ) := by
+    have hb2 : b L = ((-(Φ (L / 2)).1, (Φ (L / 2)).2 + π) : ℂ × ℝ) := by
+      have hLL : L - L / 2 = L / 2 := by ring
+      simp only [hbdef]; rw [hLL]
+    rw [hb2, show Φ (L / 2) = ((-W₀.1, W₀.2 + π) : ℂ × ℝ) from hmatch]
+    refine Prod.ext ?_ ?_
+    · change -(-W₀.1) = W₀.1
+      rw [neg_neg]
+    · change W₀.2 + π + π = W₀.2 + 2 * π
+      ring
+  have hfin : arcFlow κ R L M r₀ (W₀, L) = ((W₀.1, W₀.2 + 2 * π) : ℂ × ℝ) := by
+    rw [← hbL]; exact hΦL
+  exact ⟨by rw [hfin], by rw [hfin]⟩
 
 /-- **AL4-d′ — existence of a half-period matching start (2-D shooting/degree).**
 THE NEW CRUX.  There is a start `W₀` in the ball whose half-period endpoint is its
