@@ -6,7 +6,7 @@ Authors: kejace
 import Gluck.SpaceForm.ArcLengthH2Mixed
 
 /-!
-# Fork A: the symbolic `(a, c)`-family bicircle layer (ALM-A1 – ALM-A6)
+# Fork A: the symbolic `(a, c)`-family bicircle layer (ALM-A1 – ALM-A7)
 
 Symbolic-level foundation of the fork-A general-profile H² negative four-vertex
 converse (`.mathlib-quality/decomposition_alm_forkA.md`).  Fork A realizes a general
@@ -134,6 +134,26 @@ monotone-difference factoring pure sign algebra (numeric gate: 0 failures across
   layoutCleanRadius)/2` (the A10/A12 hypothesis shape), the true flow is
   globally confined in `layoutCleanRadius + C₁·ε ≤ layoutConfineRadius < 1` —
   strictly inside its own truncation radius, so the clamp never activates.
+
+* **ALM-A7**: **residual continuity in the layout dofs** — the layout box in
+  set form (`layoutBox`, compact — the A10 Poincaré–Miranda domain), the joint
+  `(w, t)`-continuity ladder A5 deferred here (`nodeDensity_continuousAt_param`
+  from the closed formulas — every denominator is bounded away from `0` near
+  the box; `nodeMap_continuousAt_param` by dominated convergence of the running
+  integral under the crude uniform bound `|w_{w,t}| ≤ 801π/L` on the enlarged
+  box; `kappaArc_continuousAt_param` by composition), and the **parametric
+  Grönwall squeeze** `layoutFlow_period_continuousOn`: two box flows share the
+  start, horizon `2L`, clamp radius, and start ball (the `(w, t)`-uniform
+  `layoutFlow` design), so one `arcTrajectory_gronwall` on `[0, 2L]` bounds
+  their distance by the profile `L¹`-distance
+  `∫₀^{2L} |κ_arc^p − κ_arc^{p₀}|` alone — which the ladder drives to `0` —
+  while the endpoint-time difference `Λ_p → Λ_{p₀}` is absorbed by the
+  `σ`-continuity of the fixed flow.  The **closure residual** `layoutResidual`
+  (`z`-closure `z(Λ) − z(0)` in `.1`, turning `φ(Λ) − (φ(0) + 2π)` in `.2`;
+  turning target `9π/2` on the anchor locus, `layoutResidual_snd_eq`;
+  zero-characterization `layoutResidual_eq_zero_iff`) is then continuous on the
+  box (`layoutResidual_continuousOn`) — the input of the A8 turning nest and
+  the A10 Poincaré–Miranda closing.
 -/
 
 namespace Gluck.SpaceForm
@@ -3578,5 +3598,440 @@ theorem layoutFlow_confined {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
           ((layoutClean a c h L w₁ w₂ σ).1)
         linarith
     _ ≤ layoutCleanRadius a c + b := add_le_add h3 h2
+
+/-! ### ALM-A7: the layout parameter box and the joint `(w, t)`-continuity ladder
+
+The A5 layout box `|w₁|, |w₂|, |t| ≤ L/16` in set form (`layoutBox`), and the
+joint continuity of the layout data in the dofs `p = (w₁, w₂, t)` that A5
+deferred here: the node density (`nodeDensity_continuousAt_param`, from the
+closed formulas — every denominator is bounded away from `0` near the box), the
+node map (`nodeMap_continuousAt_param`, dominated convergence of the running
+integral under the crude uniform density bound `nodeDensity_abs_le`), and the
+arc-length profile (`kappaArc_continuousAt_param`).  These drive the profile
+`L¹`-distance to `0` as `p → p₀` — the parametric input of the A7 Grönwall
+squeeze. -/
+
+/-- **The layout parameter box** `|w₁|, |w₂|, |t| ≤ L/16` (the A5 box in set
+form): the domain of the A7 residual continuity and of the A10
+Poincaré–Miranda closing. -/
+def layoutBox (L : ℝ) : Set (ℝ × ℝ × ℝ) :=
+  {p : ℝ × ℝ × ℝ | |p.1| ≤ L / 16 ∧ |p.2.1| ≤ L / 16 ∧ |p.2.2| ≤ L / 16}
+
+lemma mem_layoutBox {L : ℝ} {p : ℝ × ℝ × ℝ} :
+    p ∈ layoutBox L ↔ |p.1| ≤ L / 16 ∧ |p.2.1| ≤ L / 16 ∧ |p.2.2| ≤ L / 16 :=
+  Iff.rfl
+
+/-- The layout box is compact (A10 pre-payment: the Poincaré–Miranda domain). -/
+lemma isCompact_layoutBox (L : ℝ) : IsCompact (layoutBox L) := by
+  have heq : layoutBox L = Set.Icc (-(L / 16)) (L / 16)
+      ×ˢ (Set.Icc (-(L / 16)) (L / 16) ×ˢ Set.Icc (-(L / 16)) (L / 16)) := by
+    ext p
+    simp only [layoutBox, Set.mem_setOf_eq, abs_le, Set.mem_prod, Set.mem_Icc]
+  rw [heq]
+  exact isCompact_Icc.prod (isCompact_Icc.prod isCompact_Icc)
+
+/-- Joint parameter continuity of the periodic pulse: with a continuous
+nonvanishing period and continuous support data, `periodTent` is continuous in
+the parameter (all denominators of the `clampTent` rescaling are nonzero). -/
+private lemma periodTent_continuousAt_param {X : Type*} [TopologicalSpace X]
+    {Λf ℓf Cf : X → ℝ} {x₀ : X} {η : ℝ}
+    (hΛ : ContinuousAt Λf x₀) (hℓ : ContinuousAt ℓf x₀) (hC : ContinuousAt Cf x₀)
+    (hΛ0 : Λf x₀ ≠ 0) (hη : η ≠ 0) (s : ℝ) :
+    ContinuousAt (fun x => periodTent (Λf x) η (ℓf x) (Cf x) s) x₀ := by
+  have hρ : ContinuousAt (fun x => 2 * π / Λf x) x₀ := continuousAt_const.div hΛ hΛ0
+  have hρ0 : 2 * π / Λf x₀ ≠ 0 := div_ne_zero (by positivity) hΛ0
+  simp only [periodTent, clampTent]
+  refine ContinuousAt.inf continuousAt_const (ContinuousAt.sup continuousAt_const ?_)
+  refine ContinuousAt.div ?_ (hρ.mul continuousAt_const) (mul_ne_zero hρ0 hη)
+  refine ContinuousAt.sub ((hρ.mul hℓ).div_const 2) ?_
+  exact Real.continuous_arccos.continuousAt.comp
+    (Real.continuous_cos.continuousAt.comp
+      ((hρ.mul continuousAt_const).sub (hρ.mul hC)))
+
+/-- Joint parameter continuity of one calibrated pulse: the `nodeHeight`
+denominator is at least the ramp `L/64 > 0`. -/
+private lemma nodePulse_continuousAt_param {X : Type*} [TopologicalSpace X]
+    {Λf uf vf : X → ℝ} {x₀ : X} {L : ℝ} (hL : 0 < L)
+    (hΛ : ContinuousAt Λf x₀) (hu : ContinuousAt uf x₀) (hv : ContinuousAt vf x₀)
+    (hΛ0 : Λf x₀ ≠ 0) (w s : ℝ) :
+    ContinuousAt (fun x => nodePulse (Λf x) L w (uf x) (vf x) s) x₀ := by
+  have hηpos : 0 < nodeRamp L := by rw [nodeRamp]; positivity
+  have hmax : max (nodeRamp L) (vf x₀ - uf x₀ - nodeRamp L) ≠ 0 :=
+    (lt_of_lt_of_le hηpos (le_max_left _ _)).ne'
+  simp only [nodePulse, nodeHeight]
+  exact ((continuousAt_const.sub (continuousAt_const.mul (hv.sub hu))).div
+      (continuousAt_const.sup ((hv.sub hu).sub continuousAt_const)) hmax).mul
+    (periodTent_continuousAt_param hΛ (hv.sub hu) ((hu.add hv).div_const 2)
+      hΛ0 hηpos.ne' s)
+
+/-- **ALM-A7: joint parameter continuity of the node density** at every dof
+point with nonvanishing period (in particular on the layout box, where
+`Λ ≥ 13L/16 > 0`) — the joint-`(w, t)`-continuity lemma A5 deferred here. -/
+lemma nodeDensity_continuousAt_param {L : ℝ} (hL : 0 < L) {p₀ : ℝ × ℝ × ℝ}
+    (hΛ0 : nodePeriod L p₀.1 p₀.2.1 p₀.2.2 ≠ 0) (s : ℝ) :
+    ContinuousAt (fun p : ℝ × ℝ × ℝ => nodeDensity L p.1 p.2.1 p.2.2 s) p₀ := by
+  have hw₁c : ContinuousAt (fun p : ℝ × ℝ × ℝ => p.1) p₀ := continuous_fst.continuousAt
+  have hw₂c : ContinuousAt (fun p : ℝ × ℝ × ℝ => p.2.1) p₀ :=
+    continuous_snd.fst.continuousAt
+  have htc : ContinuousAt (fun p : ℝ × ℝ × ℝ => p.2.2) p₀ :=
+    continuous_snd.snd.continuousAt
+  have hΛc : ContinuousAt (fun p : ℝ × ℝ × ℝ => nodePeriod L p.1 p.2.1 p.2.2) p₀ := by
+    simp only [nodePeriod]
+    exact ((continuousAt_const.add hw₁c).add hw₂c).add htc
+  have hS2 : ContinuousAt (fun p : ℝ × ℝ × ℝ => nodeS2 L p.1) p₀ := by
+    simp only [nodeS2]
+    exact continuousAt_const.add hw₁c
+  have hS3 : ContinuousAt (fun p : ℝ × ℝ × ℝ => nodeS3 L p.1) p₀ := by
+    simp only [nodeS3]
+    exact continuousAt_const.add hw₁c
+  have hS4 : ContinuousAt (fun p : ℝ × ℝ × ℝ => nodeS4 L p.1 p.2.1) p₀ := by
+    simp only [nodeS4]
+    exact (continuousAt_const.add hw₁c).add hw₂c
+  simp only [nodeDensity]
+  exact ((((continuousAt_const.add
+    (nodePulse_continuousAt_param hL hΛc continuousAt_const continuousAt_const hΛ0 _ s)).add
+    (nodePulse_continuousAt_param hL hΛc continuousAt_const hS2 hΛ0 _ s)).add
+    (nodePulse_continuousAt_param hL hΛc hS2 hS3 hΛ0 _ s)).add
+    (nodePulse_continuousAt_param hL hΛc hS3 hS4 hΛ0 _ s)).add
+    (nodePulse_continuousAt_param hL hΛc hS4 hΛc hΛ0 _ s)
+
+/-- Crude uniform bound for the node density on the *enlarged* box
+`|w₁|, |w₂|, |t| ≤ L` (a neighbourhood of the layout box) — the dominating
+function of the A7 parametric integrals: every calibrated height is at most
+`(π/2 + 2π)/(L/64) = 160π/L`. -/
+private lemma nodeDensity_abs_le {L w₁ w₂ t : ℝ} (hL : 0 < L) (hw₁ : |w₁| ≤ L)
+    (hw₂ : |w₂| ≤ L) (ht : |t| ≤ L) (s : ℝ) :
+    |nodeDensity L w₁ w₂ t s| ≤ 801 * π / L := by
+  have hπ := Real.pi_pos
+  have hpulse : ∀ Λ w u v : ℝ, |w| ≤ π / 2 → |v - u| ≤ 2 * L →
+      |nodePulse Λ L w u v s| ≤ 160 * π / L := by
+    intro Λ w u v hw hvu
+    have hηpos : (0 : ℝ) < L / 64 := by positivity
+    have hden : L / 64 ≤ max (nodeRamp L) (v - u - nodeRamp L) := by
+      rw [nodeRamp]
+      exact le_max_left _ _
+    have hnum : |w - nodeBase L * (v - u)| ≤ 5 * π / 2 := by
+      have h1 : |nodeBase L * (v - u)| ≤ 2 * π := by
+        rw [abs_mul, nodeBase, abs_of_pos (by positivity : (0 : ℝ) < π / L)]
+        calc π / L * |v - u| ≤ π / L * (2 * L) := by gcongr
+          _ = 2 * π := by field_simp
+      calc |w - nodeBase L * (v - u)| ≤ |w| + |nodeBase L * (v - u)| := abs_sub _ _
+        _ ≤ π / 2 + 2 * π := add_le_add hw h1
+        _ = 5 * π / 2 := by ring
+    have hh : |nodeHeight (nodeBase L) w (v - u) (nodeRamp L)| ≤ 160 * π / L := by
+      rw [nodeHeight, abs_div, abs_of_pos (lt_of_lt_of_le hηpos hden)]
+      calc |w - nodeBase L * (v - u)| / max (nodeRamp L) (v - u - nodeRamp L)
+          ≤ (5 * π / 2) / (L / 64) := by gcongr
+        _ = 160 * π / L := by field_simp; ring
+    calc |nodePulse Λ L w u v s|
+        = |nodeHeight (nodeBase L) w (v - u) (nodeRamp L)|
+          * |periodTent Λ (nodeRamp L) (v - u) ((u + v) / 2) s| := by
+          rw [nodePulse, abs_mul]
+      _ ≤ 160 * π / L * 1 := by
+          refine mul_le_mul hh ?_ (abs_nonneg _) (by positivity)
+          rw [abs_of_nonneg (periodTent_nonneg _ _ _ _ _)]
+          exact periodTent_le_one _ _ _ _ _
+      _ = 160 * π / L := mul_one _
+  obtain ⟨hw₁l, hw₁r⟩ := abs_le.mp hw₁
+  obtain ⟨hw₂l, hw₂r⟩ := abs_le.mp hw₂
+  obtain ⟨htl, htr⟩ := abs_le.mp ht
+  have hq1 : |π / 4| ≤ π / 2 := by rw [abs_of_pos (by positivity)]; linarith
+  have hq2 : |π / 2| ≤ π / 2 := le_of_eq (abs_of_pos (by positivity))
+  have hb1 : |nodeS1 L - 0| ≤ 2 * L := by
+    rw [nodeS1_sub_zero, abs_le]
+    constructor <;> linarith
+  have hb2 : |nodeS2 L w₁ - nodeS1 L| ≤ 2 * L := by
+    rw [nodeS2_sub_nodeS1, abs_le]
+    constructor <;> linarith
+  have hb3 : |nodeS3 L w₁ - nodeS2 L w₁| ≤ 2 * L := by
+    rw [nodeS3_sub_nodeS2, abs_le]
+    constructor <;> linarith
+  have hb4 : |nodeS4 L w₁ w₂ - nodeS3 L w₁| ≤ 2 * L := by
+    rw [nodeS4_sub_nodeS3, abs_le]
+    constructor <;> linarith
+  have hb5 : |nodePeriod L w₁ w₂ t - nodeS4 L w₁ w₂| ≤ 2 * L := by
+    rw [nodePeriod_sub_nodeS4, abs_le]
+    constructor <;> linarith
+  simp only [nodeDensity]
+  set P1 := nodePulse (nodePeriod L w₁ w₂ t) L (π / 4) 0 (nodeS1 L) s with hP1
+  set P2 := nodePulse (nodePeriod L w₁ w₂ t) L (π / 2) (nodeS1 L) (nodeS2 L w₁) s with hP2
+  set P3 := nodePulse (nodePeriod L w₁ w₂ t) L (π / 2) (nodeS2 L w₁) (nodeS3 L w₁) s
+    with hP3
+  set P4 := nodePulse (nodePeriod L w₁ w₂ t) L (π / 2) (nodeS3 L w₁) (nodeS4 L w₁ w₂) s
+    with hP4
+  set P5 := nodePulse (nodePeriod L w₁ w₂ t) L (π / 4) (nodeS4 L w₁ w₂)
+    (nodePeriod L w₁ w₂ t) s with hP5
+  have h1 : |P1| ≤ 160 * π / L := hpulse _ _ _ _ hq1 hb1
+  have h2 : |P2| ≤ 160 * π / L := hpulse _ _ _ _ hq2 hb2
+  have h3 : |P3| ≤ 160 * π / L := hpulse _ _ _ _ hq2 hb3
+  have h4 : |P4| ≤ 160 * π / L := hpulse _ _ _ _ hq2 hb4
+  have h5 : |P5| ≤ 160 * π / L := hpulse _ _ _ _ hq1 hb5
+  have hbase : |nodeBase L| = π / L := by rw [nodeBase, abs_of_pos (by positivity)]
+  have hA1 := abs_add_le (nodeBase L + P1 + P2 + P3 + P4) P5
+  have hA2 := abs_add_le (nodeBase L + P1 + P2 + P3) P4
+  have hA3 := abs_add_le (nodeBase L + P1 + P2) P3
+  have hA4 := abs_add_le (nodeBase L + P1) P2
+  have hA5 := abs_add_le (nodeBase L) P1
+  have hsum : π / L + 5 * (160 * π / L) = 801 * π / L := by ring
+  linarith
+
+/-- **ALM-A7: joint parameter continuity of the node map** on the layout box:
+dominated convergence of the running density integral under the crude uniform
+bound `nodeDensity_abs_le` on the enlarged open box. -/
+lemma nodeMap_continuousAt_param {L : ℝ} (hL : 0 < L) {p₀ : ℝ × ℝ × ℝ}
+    (hw₁ : |p₀.1| ≤ L / 16) (hw₂ : |p₀.2.1| ≤ L / 16) (ht : |p₀.2.2| ≤ L / 16)
+    (x : ℝ) :
+    ContinuousAt (fun p : ℝ × ℝ × ℝ => nodeMap L p.1 p.2.1 p.2.2 x) p₀ := by
+  have hΛ0 : nodePeriod L p₀.1 p₀.2.1 p₀.2.2 ≠ 0 := by
+    obtain ⟨h1l, h1r⟩ := abs_le.mp hw₁
+    obtain ⟨h2l, h2r⟩ := abs_le.mp hw₂
+    obtain ⟨h3l, h3r⟩ := abs_le.mp ht
+    rw [nodePeriod]
+    exact ne_of_gt (by linarith)
+  simp only [nodeMap, integralReparam]
+  refine ContinuousAt.add continuousAt_const ?_
+  refine intervalIntegral.continuousAt_of_dominated_interval
+      (bound := fun _ => 801 * π / L) ?_ ?_ intervalIntegrable_const ?_
+  · exact Filter.Eventually.of_forall fun p =>
+      (continuous_nodeDensity L p.1 p.2.1 p.2.2).aestronglyMeasurable
+  · have hV : IsOpen {q : ℝ × ℝ × ℝ | |q.1| < L ∧ |q.2.1| < L ∧ |q.2.2| < L} := by
+      rw [Set.setOf_and, Set.setOf_and]
+      exact (isOpen_lt (continuous_fst.abs) continuous_const).inter
+        ((isOpen_lt (continuous_snd.fst.abs) continuous_const).inter
+          (isOpen_lt (continuous_snd.snd.abs) continuous_const))
+    have hmem : p₀ ∈ {q : ℝ × ℝ × ℝ | |q.1| < L ∧ |q.2.1| < L ∧ |q.2.2| < L} :=
+      ⟨lt_of_le_of_lt hw₁ (by linarith), lt_of_le_of_lt hw₂ (by linarith),
+        lt_of_le_of_lt ht (by linarith)⟩
+    filter_upwards [hV.mem_nhds hmem] with p hp
+    refine MeasureTheory.ae_of_all _ fun s _ => ?_
+    rw [Real.norm_eq_abs]
+    exact nodeDensity_abs_le hL hp.1.le hp.2.1.le hp.2.2.le s
+  · exact MeasureTheory.ae_of_all _ fun s _ => nodeDensity_continuousAt_param hL hΛ0 s
+
+/-- **ALM-A7: joint parameter continuity of the arc-length profile** `κ_arc` on
+the layout box (at each fixed arc-length position `s`). -/
+lemma kappaArc_continuousAt_param {κ h₁ : ℝ → ℝ} (hκc : Continuous κ)
+    (hh₁c : Continuous h₁) {L : ℝ} (hL : 0 < L) {p₀ : ℝ × ℝ × ℝ}
+    (hw₁ : |p₀.1| ≤ L / 16) (hw₂ : |p₀.2.1| ≤ L / 16) (ht : |p₀.2.2| ≤ L / 16)
+    (s : ℝ) :
+    ContinuousAt (fun p : ℝ × ℝ × ℝ => kappaArc κ h₁ L p.1 p.2.1 p.2.2 s) p₀ := by
+  simp only [kappaArc]
+  exact hκc.continuousAt.comp (hh₁c.continuousAt.comp
+    (nodeMap_continuousAt_param hL hw₁ hw₂ ht s))
+
+/-- The profile `L¹`-distance over the fixed flow horizon `[0, 2L]` tends to `0`
+as the dofs approach `p₀` — the parametric input of the A7 Grönwall squeeze
+(dominated convergence with the uniform bound `2M`). -/
+private lemma kappaArc_L1_diff_tendsto {κ h₁ : ℝ → ℝ} (hκc : Continuous κ)
+    (hh₁c : Continuous h₁) {M : ℝ} (hM : ∀ θ, |κ θ| ≤ M) {L : ℝ} (hL : 0 < L)
+    {p₀ : ℝ × ℝ × ℝ} (hw₁ : |p₀.1| ≤ L / 16) (hw₂ : |p₀.2.1| ≤ L / 16)
+    (ht : |p₀.2.2| ≤ L / 16) :
+    Filter.Tendsto (fun p : ℝ × ℝ × ℝ => ∫ s in (0 : ℝ)..(2 * L),
+        |kappaArc κ h₁ L p.1 p.2.1 p.2.2 s - kappaArc κ h₁ L p₀.1 p₀.2.1 p₀.2.2 s|)
+      (nhds p₀) (nhds 0) := by
+  have hcont : ContinuousAt (fun p : ℝ × ℝ × ℝ => ∫ s in (0 : ℝ)..(2 * L),
+      |kappaArc κ h₁ L p.1 p.2.1 p.2.2 s - kappaArc κ h₁ L p₀.1 p₀.2.1 p₀.2.2 s|) p₀ := by
+    refine intervalIntegral.continuousAt_of_dominated_interval
+        (bound := fun _ => 2 * M) ?_ ?_ intervalIntegrable_const ?_
+    · exact Filter.Eventually.of_forall fun p =>
+        (((continuous_kappaArc hκc hh₁c L p.1 p.2.1 p.2.2).sub
+          (continuous_kappaArc hκc hh₁c L p₀.1 p₀.2.1 p₀.2.2)).abs).aestronglyMeasurable
+    · refine Filter.Eventually.of_forall fun p => MeasureTheory.ae_of_all _ fun s _ => ?_
+      rw [Real.norm_eq_abs, abs_abs]
+      calc |kappaArc κ h₁ L p.1 p.2.1 p.2.2 s - kappaArc κ h₁ L p₀.1 p₀.2.1 p₀.2.2 s|
+          ≤ |kappaArc κ h₁ L p.1 p.2.1 p.2.2 s|
+            + |kappaArc κ h₁ L p₀.1 p₀.2.1 p₀.2.2 s| := abs_sub _ _
+        _ ≤ M + M := add_le_add (kappaArc_abs_le hM h₁ L _ _ _ _)
+            (kappaArc_abs_le hM h₁ L _ _ _ _)
+        _ = 2 * M := by ring
+    · exact MeasureTheory.ae_of_all _ fun s _ =>
+        ((kappaArc_continuousAt_param hκc hh₁c hL hw₁ hw₂ ht s).sub
+          continuousAt_const).abs
+  have hzero : (∫ s in (0 : ℝ)..(2 * L),
+      |kappaArc κ h₁ L p₀.1 p₀.2.1 p₀.2.2 s - kappaArc κ h₁ L p₀.1 p₀.2.1 p₀.2.2 s|)
+      = 0 := by simp
+  simpa [ContinuousAt, hzero] using hcont
+
+/-! ### ALM-A7: residual continuity in the layout dofs
+
+The parametric Grönwall squeeze (the `negSmoothResidual_continuousOn` pattern of
+`Gluck/SpaceForm/ArcLengthH2Mixed.lean`, with the profile-parameter `L¹`
+bound replaced by the joint-`(w, t)` continuity ladder above): two true flows at
+nearby dofs share the start `layoutStart`, the horizon `2L`, the clamp radius
+and the start ball (the `(w, t)`-uniform `layoutFlow` design), so
+`arcTrajectory_gronwall` on `[0, 2L]` bounds their distance by the profile
+`L¹`-distance alone; the endpoint-time difference is absorbed by the continuity
+of the fixed comparison flow in `σ` along the continuous period `Λ(p)`. -/
+
+/-- **ALM-A7 (`layoutFlow_period_continuousOn`): endpoint-state continuity.**
+The endpoint state of the true layout flow at the layout period,
+`p = (w₁, w₂, t) ↦ Φ_true^{p}(Λ_p)`, is continuous on the layout box: for
+`p → p₀`, the Grönwall bound
+`‖Φ^p(Λ_p) − Φ^{p₀}(Λ_p)‖ ≤ e^{Lip·2L}·(2/(1−R²))·∫₀^{2L}|κ_arc^p − κ_arc^{p₀}|`
+(same start, same horizon — only the profile varies) plus the continuity of
+`σ ↦ Φ^{p₀}(σ)` at `Λ_{p₀}` squeeze the endpoint distance to `0`. -/
+theorem layoutFlow_period_continuousOn {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
+    (hL : L ≤ bicircleBracket a h) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
+    {κ h₁ : ℝ → ℝ} (hκc : Continuous κ) (hh₁c : Continuous h₁)
+    {M : ℝ} (hM : ∀ θ, |κ θ| ≤ M) :
+    ContinuousOn (fun p : ℝ × ℝ × ℝ =>
+        layoutFlow κ h₁ a c h L M p.1 p.2.1 p.2.2 (nodePeriod L p.1 p.2.1 p.2.2))
+      (layoutBox L) := by
+  have hR0 : 0 ≤ layoutConfineRadius a c := layoutConfineRadius_nonneg ha hac
+  have hR1 : layoutConfineRadius a c < 1 := layoutConfineRadius_lt_one ha hac
+  set R := layoutConfineRadius a c with hRdef
+  have hT0 : (0 : ℝ) ≤ 2 * L := by linarith
+  have hball := layoutStart_mem_closedBall ha hac hwin hlow hL0.le hL hφe
+  set Lip : ℝ≥0 := max 1 (Real.toNNReal (2 * (1 + R) / (1 - R ^ 2)
+    + 2 * R * (2 * (M + R)) / (1 - R ^ 2) ^ 2)) with hLipdef
+  set E := Real.exp ((Lip : ℝ) * (2 * L)) with hEdef
+  have hRsq : (0 : ℝ) < 1 - R ^ 2 := by nlinarith
+  set D := 2 / (1 - R ^ 2) with hDdef
+  have hD0 : (0 : ℝ) < D := by positivity
+  have hΛmem : ∀ p : ℝ × ℝ × ℝ, p ∈ layoutBox L →
+      nodePeriod L p.1 p.2.1 p.2.2 ∈ Set.Icc (0 : ℝ) (2 * L) := by
+    intro p hp
+    obtain ⟨h1, h2, h3⟩ := hp
+    obtain ⟨h1l, h1r⟩ := abs_le.mp h1
+    obtain ⟨h2l, h2r⟩ := abs_le.mp h2
+    obtain ⟨h3l, h3r⟩ := abs_le.mp h3
+    rw [nodePeriod, Set.mem_Icc]
+    constructor <;> linarith
+  intro p₀ hp₀
+  obtain ⟨hw₁0, hw₂0, ht0⟩ := hp₀
+  obtain ⟨hf00, hfd0⟩ := arcFlow_spec (continuous_kappaArc hκc hh₁c L p₀.1 p₀.2.1 p₀.2.2)
+    hR0 hR1 hT0 (kappaArc_abs_le hM h₁ L p₀.1 p₀.2.1 p₀.2.2) 9 hball
+  set Φ₀ : ℝ → ℂ × ℝ := fun σ =>
+    arcFlow (kappaArc κ h₁ L p₀.1 p₀.2.1 p₀.2.2) R (2 * L) M 9 (layoutStart a c h L, σ)
+    with hΦ₀def
+  have hΦ₀cont : ContinuousOn Φ₀ (Set.Icc 0 (2 * L)) := HasDerivWithinAt.continuousOn hfd0
+  have hΛc : ContinuousWithinAt (fun p : ℝ × ℝ × ℝ => nodePeriod L p.1 p.2.1 p.2.2)
+      (layoutBox L) p₀ := by
+    simp only [nodePeriod]
+    exact (((continuous_const.add continuous_fst).add continuous_snd.fst).add
+      continuous_snd.snd).continuousWithinAt
+  have hTERM2cont : ContinuousWithinAt
+      (fun p : ℝ × ℝ × ℝ => Φ₀ (nodePeriod L p.1 p.2.1 p.2.2)) (layoutBox L) p₀ :=
+    ContinuousWithinAt.comp (g := Φ₀)
+      (f := fun p : ℝ × ℝ × ℝ => nodePeriod L p.1 p.2.1 p.2.2)
+      (hΦ₀cont _ (hΛmem p₀ ⟨hw₁0, hw₂0, ht0⟩)) hΛc (fun p hp => hΛmem p hp)
+  have hTERM2 : Filter.Tendsto (fun p : ℝ × ℝ × ℝ =>
+      dist (Φ₀ (nodePeriod L p.1 p.2.1 p.2.2)) (Φ₀ (nodePeriod L p₀.1 p₀.2.1 p₀.2.2)))
+      (nhdsWithin p₀ (layoutBox L)) (nhds 0) := by
+    have h := tendsto_iff_dist_tendsto_zero.mp hTERM2cont
+    simpa [Function.comp] using h
+  have hI : Filter.Tendsto (fun p : ℝ × ℝ × ℝ => ∫ s in (0 : ℝ)..(2 * L),
+      |kappaArc κ h₁ L p.1 p.2.1 p.2.2 s - kappaArc κ h₁ L p₀.1 p₀.2.1 p₀.2.2 s|)
+      (nhdsWithin p₀ (layoutBox L)) (nhds 0) :=
+    (kappaArc_L1_diff_tendsto hκc hh₁c hM hL0 hw₁0 hw₂0 ht0).mono_left
+      nhdsWithin_le_nhds
+  set B : ℝ × ℝ × ℝ → ℝ := fun p =>
+    E * (D * ∫ s in (0 : ℝ)..(2 * L),
+        |kappaArc κ h₁ L p.1 p.2.1 p.2.2 s - kappaArc κ h₁ L p₀.1 p₀.2.1 p₀.2.2 s|)
+      + dist (Φ₀ (nodePeriod L p.1 p.2.1 p.2.2)) (Φ₀ (nodePeriod L p₀.1 p₀.2.1 p₀.2.2))
+    with hBdef
+  have hB0 : Filter.Tendsto B (nhdsWithin p₀ (layoutBox L)) (nhds 0) := by
+    rw [hBdef]
+    simpa using ((hI.const_mul D).const_mul E).add hTERM2
+  have hle : ∀ᶠ p in nhdsWithin p₀ (layoutBox L),
+      dist (layoutFlow κ h₁ a c h L M p.1 p.2.1 p.2.2 (nodePeriod L p.1 p.2.1 p.2.2))
+        (layoutFlow κ h₁ a c h L M p₀.1 p₀.2.1 p₀.2.2
+          (nodePeriod L p₀.1 p₀.2.1 p₀.2.2)) ≤ B p := by
+    filter_upwards [self_mem_nhdsWithin] with p hp
+    obtain ⟨hf0p, hfdp⟩ := arcFlow_spec (continuous_kappaArc hκc hh₁c L p.1 p.2.1 p.2.2)
+      hR0 hR1 hT0 (kappaArc_abs_le hM h₁ L p.1 p.2.1 p.2.2) 9 hball
+    set W : ℝ → ℂ × ℝ := fun σ =>
+      arcFlow (kappaArc κ h₁ L p.1 p.2.1 p.2.2) R (2 * L) M 9 (layoutStart a c h L, σ)
+      with hWdef
+    have hLipf : ∀ σ, LipschitzWith Lip
+        (fun Z : ℂ × ℝ => arcField (kappaArc κ h₁ L p.1 p.2.1 p.2.2) R σ Z) := by
+      rw [hLipdef]
+      exact arcField_lipschitzWith hR0 hR1 (kappaArc_abs_le hM h₁ L p.1 p.2.1 p.2.2)
+    have hgron := arcTrajectory_gronwall hR0 hR1 hT0
+      (continuous_kappaArc hκc hh₁c L p.1 p.2.1 p.2.2)
+      (continuous_kappaArc hκc hh₁c L p₀.1 p₀.2.1 p₀.2.2) hLipf hfdp hfd0 (hΛmem p hp)
+    have hW0 : W 0 = layoutStart a c h L := hf0p
+    have hΦ00 : Φ₀ 0 = layoutStart a c h L := hf00
+    rw [hW0, hΦ00, sub_self, norm_zero, zero_add] at hgron
+    have hEp : layoutFlow κ h₁ a c h L M p.1 p.2.1 p.2.2 (nodePeriod L p.1 p.2.1 p.2.2)
+        = W (nodePeriod L p.1 p.2.1 p.2.2) := rfl
+    have hEp₀ : layoutFlow κ h₁ a c h L M p₀.1 p₀.2.1 p₀.2.2
+        (nodePeriod L p₀.1 p₀.2.1 p₀.2.2) = Φ₀ (nodePeriod L p₀.1 p₀.2.1 p₀.2.2) := rfl
+    rw [hEp, hEp₀]
+    calc dist (W (nodePeriod L p.1 p.2.1 p.2.2)) (Φ₀ (nodePeriod L p₀.1 p₀.2.1 p₀.2.2))
+        ≤ dist (W (nodePeriod L p.1 p.2.1 p.2.2)) (Φ₀ (nodePeriod L p.1 p.2.1 p.2.2))
+          + dist (Φ₀ (nodePeriod L p.1 p.2.1 p.2.2))
+              (Φ₀ (nodePeriod L p₀.1 p₀.2.1 p₀.2.2)) := dist_triangle _ _ _
+      _ ≤ B p := by
+          simp only [hBdef]
+          refine add_le_add ?_ le_rfl
+          rw [dist_eq_norm, hEdef, hDdef]
+          exact hgron
+  have hgoal : Filter.Tendsto (fun p : ℝ × ℝ × ℝ =>
+      layoutFlow κ h₁ a c h L M p.1 p.2.1 p.2.2 (nodePeriod L p.1 p.2.1 p.2.2))
+      (nhdsWithin p₀ (layoutBox L))
+      (nhds (layoutFlow κ h₁ a c h L M p₀.1 p₀.2.1 p₀.2.2
+        (nodePeriod L p₀.1 p₀.2.1 p₀.2.2))) := by
+    rw [tendsto_iff_dist_tendsto_zero]
+    exact squeeze_zero' (Filter.Eventually.of_forall fun p => dist_nonneg) hle hB0
+  exact hgoal
+
+/-- **ALM-A7: the layout closure residual.**  The endpoint state of the true
+layout flow at the period `Λ_{w,t}`, minus the closure target — the start point
+with the phase advanced by one full turn `2π`.  Components: `.1` is the
+`z`-closure residual `z(Λ) − z(0)` (A10 consumes its `re`/`im` parts in the
+Poincaré–Miranda closing), `.2` is the turning residual `φ(Λ) − (φ(0) + 2π)`
+(A8's nested root variable; on the anchor locus the target is `9π/2`,
+`layoutResidual_snd_eq`). -/
+noncomputable def layoutResidual (κ h₁ : ℝ → ℝ) (a c h L M w₁ w₂ t : ℝ) : ℂ × ℝ :=
+  layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)
+    - ((layoutStart a c h L).1, (layoutStart a c h L).2 + 2 * π)
+
+lemma layoutResidual_fst (κ h₁ : ℝ → ℝ) (a c h L M w₁ w₂ t : ℝ) :
+    (layoutResidual κ h₁ a c h L M w₁ w₂ t).1
+      = (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)).1
+        - (layoutStart a c h L).1 := rfl
+
+lemma layoutResidual_snd (κ h₁ : ℝ → ℝ) (a c h L M w₁ w₂ t : ℝ) :
+    (layoutResidual κ h₁ a c h L M w₁ w₂ t).2
+      = (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)).2
+        - ((layoutStart a c h L).2 + 2 * π) := rfl
+
+/-- On the anchor locus (`G₂ = 0`, start phase `5π/2`) the turning target is
+`9π/2`. -/
+lemma layoutResidual_snd_eq {a c h L : ℝ} (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
+    (κ h₁ : ℝ → ℝ) (M w₁ w₂ t : ℝ) :
+    (layoutResidual κ h₁ a c h L M w₁ w₂ t).2
+      = (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)).2 - 9 * π / 2 := by
+  rw [layoutResidual_snd, layoutStart_snd hφe]
+  ring
+
+/-- The residual vanishes iff the true flow closes with total turning `2π`. -/
+lemma layoutResidual_eq_zero_iff (κ h₁ : ℝ → ℝ) (a c h L M w₁ w₂ t : ℝ) :
+    layoutResidual κ h₁ a c h L M w₁ w₂ t = 0 ↔
+      (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)).1
+          = (layoutStart a c h L).1
+        ∧ (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)).2
+          = (layoutStart a c h L).2 + 2 * π := by
+  rw [layoutResidual, Prod.ext_iff]
+  simp [Prod.fst_sub, Prod.snd_sub, sub_eq_zero]
+
+/-- **ALM-A7 (`layoutResidual_continuousOn`): residual continuity in the layout
+dofs.**  The endpoint residuals of the true layout flow — `z`-closure and
+`2π`-turning — are jointly continuous on the layout box `|w₁|, |w₂|, |t| ≤ L/16`:
+the endpoint state is continuous (`layoutFlow_period_continuousOn`, the
+parametric Grönwall squeeze) and the closure target is constant.  The A10
+Poincaré–Miranda closing and the A8 turning nest consume this. -/
+theorem layoutResidual_continuousOn {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
+    (hL : L ≤ bicircleBracket a h) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
+    {κ h₁ : ℝ → ℝ} (hκc : Continuous κ) (hh₁c : Continuous h₁)
+    {M : ℝ} (hM : ∀ θ, |κ θ| ≤ M) :
+    ContinuousOn (fun p : ℝ × ℝ × ℝ =>
+        layoutResidual κ h₁ a c h L M p.1 p.2.1 p.2.2) (layoutBox L) := by
+  simp only [layoutResidual]
+  exact (layoutFlow_period_continuousOn ha hac hwin hlow hL0 hL hφe hκc hh₁c hM).sub
+    continuousOn_const
 
 end Gluck.SpaceForm
