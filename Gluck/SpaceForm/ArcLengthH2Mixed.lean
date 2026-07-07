@@ -1846,6 +1846,157 @@ lemma lift_identity_of_deriv {z : ℝ → ℂ} {φ θ : ℝ → ℝ} {L : ℝ} (
   rw [hmval] at hzeq
   exact hzeq
 
+/-! ### Star certificate for the constant-curvature model
+
+The radial inner product `⟪z(σ), i e^{iφ(σ)}⟫` of the constant model
+`arcModelConst K z₀ φ₀` admits the *center form* `⟪z_c, u·e^{iσ/r}⟫ − r`
+(`u = i e^{iφ₀}`, `z_c = z₀ + r·u`).  On the negative first arc this collapses to
+the single cosine `(r−h)·cos(σ/r) − r`. -/
+
+/-- **Center form of the model's radial inner product.**  For the constant-curvature
+model, `⟪z(σ), i e^{iφ(σ)}⟫ = ⟪z_c, u·e^{iσ/r}⟫ − r`, where `u = i e^{iφ₀}` and
+`z_c = z₀ + r·u`. -/
+lemma arcModelConst_inner_center {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
+    (hr : arcModelRadius K z₀ φ₀ ≠ 0) (σ : ℝ) :
+    ⟪(arcModelConst K z₀ φ₀ σ).1,
+        Complex.I * Complex.exp (((arcModelConst K z₀ φ₀ σ).2 : ℂ) * Complex.I)⟫_ℝ
+      = ⟪z₀ + arcModelRadius K z₀ φ₀ • (Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I)),
+          (Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I))
+            * Complex.exp (((σ / arcModelRadius K z₀ φ₀ : ℝ) : ℂ) * Complex.I)⟫_ℝ
+        - arcModelRadius K z₀ φ₀ := by
+  set r := arcModelRadius K z₀ φ₀ with hrdef
+  set u := Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I) with hu_def
+  set z := (arcModelConst K z₀ φ₀ σ).1 with hz_def
+  set p := Complex.I * Complex.exp (((arcModelConst K z₀ φ₀ σ).2 : ℂ) * Complex.I) with hp_def
+  have hpnorm : ‖p‖ ^ 2 = 1 := by
+    rw [hp_def]; simp [Complex.norm_I, Complex.norm_exp_ofReal_mul_I]
+  have hpq : p = u * Complex.exp (((σ / r : ℝ) : ℂ) * Complex.I) := by
+    rw [hp_def, hu_def, show ((arcModelConst K z₀ φ₀ σ).2 : ℂ) = (φ₀ : ℂ) + ((σ / r : ℝ) : ℂ)
+        from by simp [arcModelConst, hrdef], add_mul, Complex.exp_add]
+    ring
+  have hzrep : z = z₀ + r • u - (r : ℂ) * p := by
+    rw [hz_def, hpq, hu_def, Complex.real_smul]
+    simp only [arcModelConst, ← hrdef]
+    ring
+  have hinner : ⟪z, p⟫_ℝ = ⟪z₀ + r • u, p⟫_ℝ - r := by
+    rw [hzrep, show (r : ℂ) * p = r • p from Complex.real_smul.symm,
+      inner_sub_left, real_inner_smul_left, real_inner_self_eq_norm_sq, hpnorm]
+    ring
+  rw [hinner, hpq]
+
+/-- **Scalar closed form of the model's radial inner product.**
+`⟪z(σ), i e^{iφ(σ)}⟫ = −(Re z₀ − r sin φ₀)·sin(φ₀ + σ/r) + (Im z₀ + r cos φ₀)·cos(φ₀ + σ/r) − r`. -/
+lemma arcModelConst_inner_scalar {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
+    (hr : arcModelRadius K z₀ φ₀ ≠ 0) (σ : ℝ) :
+    ⟪(arcModelConst K z₀ φ₀ σ).1,
+        Complex.I * Complex.exp (((arcModelConst K z₀ φ₀ σ).2 : ℂ) * Complex.I)⟫_ℝ
+      = -(z₀.re - arcModelRadius K z₀ φ₀ * Real.sin φ₀)
+            * Real.sin (φ₀ + σ / arcModelRadius K z₀ φ₀)
+        + (z₀.im + arcModelRadius K z₀ φ₀ * Real.cos φ₀)
+            * Real.cos (φ₀ + σ / arcModelRadius K z₀ φ₀)
+        - arcModelRadius K z₀ φ₀ := by
+  set r := arcModelRadius K z₀ φ₀ with hrdef
+  rw [arcModelConst_inner_center hr]
+  have hsecond : (Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I))
+        * Complex.exp (((σ / r : ℝ) : ℂ) * Complex.I)
+      = Complex.I * Complex.exp (((φ₀ + σ / r : ℝ) : ℂ) * Complex.I) := by
+    rw [mul_assoc, ← Complex.exp_add]
+    push_cast
+    ring_nf
+  rw [hsecond, spaceFormNormal_inner_eq]
+  have hre : (z₀ + r • (Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I))).re
+      = z₀.re - r * Real.sin φ₀ := by
+    simp only [Complex.add_re, Complex.real_smul, Complex.mul_re, Complex.mul_im, Complex.I_re,
+      Complex.I_im, Complex.ofReal_re, Complex.ofReal_im, Complex.exp_ofReal_mul_I_re,
+      Complex.exp_ofReal_mul_I_im]
+    ring
+  have him : (z₀ + r • (Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I))).im
+      = z₀.im + r * Real.cos φ₀ := by
+    simp only [Complex.add_im, Complex.real_smul, Complex.mul_re, Complex.mul_im, Complex.I_re,
+      Complex.I_im, Complex.ofReal_re, Complex.ofReal_im, Complex.exp_ofReal_mul_I_re,
+      Complex.exp_ofReal_mul_I_im]
+    ring
+  rw [hre, him]
+
+/-- **First-arc (concave) radial inner product, single-cosine closed form.**
+On the negative first arc `z₀ = i·h`, `φ₀ = π`, the radial inner product collapses to
+`⟪z(σ), i e^{iφ(σ)}⟫ = (r − h)·cos(σ/r) − r`, `r = arcModelRadius (−3/10) (i·h) π`. -/
+lemma neg_arc1_inner {h σ : ℝ}
+    (hr : arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π ≠ 0) :
+    ⟪(arcModelConst (-3 / 10) (Complex.I * (h : ℂ)) π σ).1,
+        Complex.I * Complex.exp
+          (((arcModelConst (-3 / 10) (Complex.I * (h : ℂ)) π σ).2 : ℂ) * Complex.I)⟫_ℝ
+      = (arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π - h)
+          * Real.cos (σ / arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π)
+        - arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π := by
+  rw [arcModelConst_inner_scalar hr]
+  have hzre : (Complex.I * (h : ℂ)).re = 0 := by simp
+  have hzim : (Complex.I * (h : ℂ)).im = h := by simp
+  rw [hzre, hzim, Real.sin_add, Real.cos_add, Real.sin_pi, Real.cos_pi]
+  ring
+
+/-- **First-arc star certificate (constant model).**  On the concave first arc
+`σ ∈ [0, L/8]` the radial inner product satisfies `⟪z(σ), i e^{iφ(σ)}⟫ ≤ −1/50` over
+the landing rectangle: the single cosine `(r−h)cos(σ/r) − r` is increasing (max at the
+join `σ = L/8`), and its join value `−h − (r−h)(1−cos θ_a) ≤ −1/50`. -/
+lemma neg_arc1_inner_ub {h L σ : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h ≤ 3 / 20)
+    (hL1 : (157 : ℝ) / 50 ≤ L) (hL2 : L ≤ 161 / 50) (hσ0 : 0 ≤ σ) (hσ : σ ≤ L / 8) :
+    ⟪(arcModelConst (-3 / 10) (Complex.I * (h : ℂ)) π σ).1,
+        Complex.I * Complex.exp
+          (((arcModelConst (-3 / 10) (Complex.I * (h : ℂ)) π σ).2 : ℂ) * Complex.I)⟫_ℝ
+      ≤ -1 / 50 := by
+  set r := arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π with hr
+  have hru := neg_ra_ub h1 h2
+  have hrl := neg_ra_lb h1 h2
+  rw [← hr] at hru hrl
+  have hrneg : r < 0 := by linarith
+  have hr_ne : r ≠ 0 := ne_of_lt hrneg
+  rw [hr] at hr_ne
+  rw [neg_arc1_inner hr_ne, ← hr]
+  -- monotone cosine: `cos((L/8)/r) ≤ cos(σ/r)` (sign-flipped, `cos` antitone on `[0,π]`)
+  set sp := -r with hsp
+  have hsp1 : (1 : ℝ) ≤ sp := by rw [hsp]; linarith
+  have hsppos : 0 < sp := by linarith
+  have hσsp0 : 0 ≤ σ / sp := div_nonneg hσ0 hsppos.le
+  have hL8nn : (0 : ℝ) ≤ L / 8 := by linarith
+  have hLsp_le : (L / 8) / sp ≤ L / 8 := div_le_self hL8nn hsp1
+  have hLsp_pi : (L / 8) / sp ≤ π := le_trans hLsp_le (by nlinarith [Real.pi_gt_three])
+  have hσsp_le : σ / sp ≤ (L / 8) / sp := (div_le_div_iff_of_pos_right hsppos).mpr hσ
+  have hcosmono : Real.cos ((L / 8) / sp) ≤ Real.cos (σ / sp) :=
+    Real.cos_le_cos_of_nonneg_of_le_pi hσsp0 hLsp_pi hσsp_le
+  have hcos_eq : ∀ x : ℝ, Real.cos (x / r) = Real.cos (x / sp) := fun x => by
+    rw [hsp, div_neg, Real.cos_neg]
+  have hcos : Real.cos ((L / 8) / r) ≤ Real.cos (σ / r) := by
+    rw [hcos_eq (L / 8), hcos_eq σ]; exact hcosmono
+  -- `(r−h)·cos(σ/r) − r ≤ (r−h)·cos((L/8)/r) − r` (coefficient `r−h < 0`)
+  have hstep : (r - h) * Real.cos (σ / r) - r
+      ≤ (r - h) * Real.cos ((L / 8) / r) - r := by
+    have := mul_le_mul_of_nonpos_left hcos (by linarith : r - h ≤ 0)
+    linarith
+  refine le_trans hstep ?_
+  -- join bound: `(r−h)cos((L/8)/r) − r ≤ −1/50` via `q ≤ (L/8)²/(2r²)`
+  have hr2pos : (0 : ℝ) < r ^ 2 := by positivity
+  have hql : 1 - Real.cos ((L / 8) / r) ≤ (L / 8) ^ 2 / (2 * r ^ 2) := by
+    have h0 := neg_q_le h L
+    rw [← hr] at h0
+    have heq : ((L / 8) / r) ^ 2 / 2 = (L / 8) ^ 2 / (2 * r ^ 2) := by rw [div_pow]; ring
+    rw [heq] at h0; exact h0
+  -- the defining relation `2(−3/10 − h)r = 1 − h²`
+  have hden : (2 : ℝ) * (-3 / 10 - h) ≠ 0 := ne_of_lt (by nlinarith)
+  have hrel : 2 * (-3 / 10 - h) * r = 1 - h ^ 2 := by
+    rw [hr, arcModelRadius_qArc1, ← mul_div_assoc, mul_div_cancel_left₀ _ hden]
+  have hpoly : (h - r) * (L / 8) ^ 2 ≤ (h - 1 / 50) * (2 * r ^ 2) := by
+    nlinarith [hrel, hrl, hru, h1, h2, hL1, hL2, hr2pos]
+  have hkey : (h - r) * (1 - Real.cos ((L / 8) / r)) ≤ h - 1 / 50 := by
+    have hA : (h - r) * (1 - Real.cos ((L / 8) / r))
+        ≤ (h - r) * ((L / 8) ^ 2 / (2 * r ^ 2)) :=
+      mul_le_mul_of_nonneg_left hql (by linarith)
+    have hB : (h - r) * ((L / 8) ^ 2 / (2 * r ^ 2)) ≤ h - 1 / 50 := by
+      rw [← mul_div_assoc, div_le_iff₀ (by positivity : (0 : ℝ) < 2 * r ^ 2)]
+      linarith [hpoly]
+    linarith
+  nlinarith [hkey]
+
 /-- **Route-A concrete input — the radial-argument lift of the confined negative
 bicircle.**  For the params-fixed confined-and-closing trajectory of
 `arcRampProfile (−3/10) 2 L δ` from `W₀ = (i·h, π)`, the window curve
