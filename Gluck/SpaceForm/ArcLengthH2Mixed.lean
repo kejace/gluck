@@ -3013,33 +3013,43 @@ theorem hyperbolicCircle_realizes {c : ℝ} (hc : 1 < c) :
 
 /-- **The hyperbolic mixed (Dahlberg) converse — genuinely-negative four-vertex.**
 A `MixedSignHyperbolicFourVertex` profile (continuous, `2π`-periodic, escape
-velocity at the maxima, genuinely-negative minima bounded below by the floor
-`−(centeredRadius (−1) c)`) is realized as the geodesic curvature of a *simple
-closed* curve in the hyperbolic plane at `ε = −1`.
+velocity at the maxima, genuinely-negative minima) is realized, up to an
+orientation-preserving `C¹` reparametrization `Ψ`, as the geodesic curvature of
+a *simple closed* curve in the hyperbolic plane at `ε = −1`.  The up-to-reparam
+form mirrors `realizesH2_of_reparam`/`exists_gateProfileSmooth_realization`
+(`ArcLengthH2.lean`): `H²` has no metric rescaling, so the period is
+co-constructed rather than normalized (the `AL-6` precedent).
 
-Assembly (mirror `Gluck.dahlbergConverse`, `DahlbergStep2.lean:2861`, and
-`Gluck.sphericalConverse`, `SphereMixed.lean:491`, on the arc-length engine):
-constant branch → `hyperbolicCircle_realizes`; four-vertex branch →
-`exists_hyperbolic_bicircle_L1_reparam` (ALM-2) fixes the convex clean levels and
-`h₁`; the negative ramped bicircle `arcRampProfile a c L δ` is confined
-(`mixedProfile_confined`, ALM-3) and closes at the co-constructed `(h, L)`
-(`exists_quarterLanding_mixed` + `exists_closing_arcState`, ALM-4); simplicity via
-`mixed_chord_ne_zero` (ALM-5) + `injOn_arcCurve`; assemble `ArcLengthH2Curvature`
-and run `arcLengthH2Converse` (`ArcLengthH2.lean:4526`); pull the realization back
-along the `C¹` inverse of `h₁` (`exists_C1_circle_inverse`) to realize `κ` up to
-reparametrization. -/
+Fork-A assembly plan (honest Dahlberg §2–3 transcription onto the arc-length
+engine — see `.mathlib-quality/decomposition_alm_forkA.md`): the clean reference
+is the **convex** bicircle with symbolic levels `1 < a < c` inside the
+four-vertex gap above `max 1` (Dahlberg's own Euclidean proof squeezes the
+negative dips to small `L¹` measure — `MixedSignFourVertex`,
+`DahlbergStep1.lean:57`); constant branch → `hyperbolicCircle_realizes`;
+four-vertex branch → `exists_hyperbolic_bicircle_L1_reparam` (ALM-2, the honest
+bridge) → symbolic family anchor + node layout + five-leg Grönwall transport +
+**asymmetric** 3-dof closing (terminal `c`-plateau turning nest + 2-D
+Poincaré–Miranda, `ArcLengthH2Family.lean`, ALM-A1…A10) → simplicity transport
+(ALM-A11) → window bridge `arcLengthH2Curvature_of_windowSolution` →
+`arcLengthH2Converse` → `Ψ := h₁ ∘ g_{w*,t*} ∘ ψ` (ALM-A12).
+
+Note: the ALM-1 confinement floor `−(centeredRadius (−1) c) < κ` is **unused**
+by this route — the minima may be arbitrarily negative (the floor is only
+load-bearing for the fork-B explicit-witness milestone `mixed_chord_ne_zero`). -/
 theorem hyperbolicMixedConverse {κ : ℝ → ℝ} (h : MixedSignHyperbolicFourVertex κ) :
-    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes (-1) z κ := by
+    ∃ (z : ℝ → ℂ) (Ψ : ℝ → ℝ), ContDiff ℝ 1 Ψ ∧ (∀ t, 0 < deriv Ψ t) ∧
+      IsSimpleClosed z ∧ Realizes (-1) z (κ ∘ Ψ) := by
   obtain ⟨hκc, hκper, hdisj⟩ := h
   rcases hdisj with ⟨c, hc1, hc⟩ | ⟨p₁, q₁, p₂, q₂, h12, h23, h34, h41,
       -, -, -, -, hsep, c, hcw₁, hcw₂, hc1, hlow⟩
-  · -- constant branch: the explicit escape-velocity hyperbolic circle.
+  · -- constant branch: the explicit escape-velocity hyperbolic circle, with the
+    -- identity reparametrization.
     have hκeq : κ = fun _ => c := funext hc
     obtain ⟨z, hsimple, hreal⟩ := hyperbolicCircle_realizes hc1
-    exact ⟨z, hsimple, hκeq ▸ hreal⟩
-  · -- non-constant branch: the ALM-2 → ALM-5 chain.
-    -- ALM-2: convex clean levels + reparam `h₁`; ALM-3/4 confinement + closing;
-    -- ALM-5 simplicity; `arcLengthH2Converse`; pull back along `h₁⁻¹`.
+    refine ⟨z, id, contDiff_id, fun t => by simp, hsimple, ?_⟩
+    have : κ ∘ id = fun _ => c := by rw [hκeq]; rfl
+    exact this ▸ hreal
+  · -- non-constant branch: the fork-A ALM-A1…A12 chain (ArcLengthH2Family.lean).
     sorry
 
 /-! ## Wrapper (planned `Gluck/HyperbolicMixed.lean`, mirror `Gluck/Hyperbolic.lean`)
