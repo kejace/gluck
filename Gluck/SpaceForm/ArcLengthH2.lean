@@ -4840,7 +4840,7 @@ non-zero on every proper sub-arc), the floor-glued periodic extension
 `Z = gext L Φ (0, 2π)` witnesses `ArcLengthH2Curvature κ`: it is a genuine *global*
 solution of the H² arc-length system, `L`-periodic in `z`, confined to the open disk,
 closes with total turning `2π`, and is injective on `[0, L)`. -/
-private lemma arcLengthH2Curvature_of_windowSolution {κ : ℝ → ℝ} {R L M : ℝ} {r₀ : ℝ≥0}
+lemma arcLengthH2Curvature_of_windowSolution {κ : ℝ → ℝ} {R L M : ℝ} {r₀ : ℝ≥0}
     {W₀ : ℂ × ℝ} (hκc : Continuous κ) (hR : 0 ≤ R) (hR1 : R < 1) (hL : 0 < L)
     (hM : ∀ σ, |κ σ| ≤ M) (hκL : Function.Periodic κ L)
     (hW₀ : W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀)
