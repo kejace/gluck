@@ -189,6 +189,38 @@ monotone-difference factoring pure sign algebra (numeric gate: 0 failures across
   parametric IVT (`continuous_root_of_strictMono`) with the A7 joint
   continuity gives a continuous `τ(w)` on the `W₀`-box with
   `(layoutResidual … (τ w)).2 = 0` — the slice for the A10 closing.
+
+* **ALM-A9**: **clean face signs over the recombined `w`-box**
+  (`cleanClosure_face_signs`, route R2′ = R1 dof-recombination +
+  Newton-normalized linearization).  The clean `z`-closure residual is
+  `τ_clean`-free: near phase closure the layout endpoint is within
+  `r₅·|phase error|` of the fixed-phase point `ζ₅ + r₅` of the terminal
+  `c`-circle (`a9_phase_bridge`), so the analysis runs on the phase-free
+  residual `G(w) = a9Endpoint(node₄ w) − z_start` (`a9Residual`), which
+  vanishes exactly at the anchor (`a9Residual_anchor`, the A8 clean-closure
+  keystone re-read).  Junction calculus in circle coordinates `(ζ, r, ψ)`
+  gives the two exact derivative columns at `w = 0`
+  (`a9_hasDerivAt_col1/col2`), whose four column signs — `Re ∂₁G < 0`,
+  `Im ∂₁G > 0`, `Re ∂₂G > 0`, `Im ∂₂G > 0` (via the concavity trig lemma
+  `(π−2β)sinβ − 2βcosβ > 0` on `(0, π/4)`, Jordan bounds, and the `a > 1`
+  absorption) — make the `(u, v) = (w₁ ± w₂)`-recombined rows `(A, B)`,
+  `(A′, B′)` sign-definite with determinant margin `dT > 0`;
+  differentiability at the single anchor point (`a9Residual_differentiableAt`)
+  then yields the Poincaré–Miranda face pattern with margin `m ∼ W·dT/2` for
+  **every** box radius `W ≤ W₁` (no C², no compactness).
+
+* **ALM-A10**: the **Poincaré–Miranda closing of the true flow**
+  (`exists_layout_closing`).  The 3-dof problem splits: on `B = (A8 root box)
+  ∩ (A9 face box)`, the continuous turning root `t = τ(w)` kills the turning
+  residual; the recombined true `z`-residual tracks the clean one within
+  `Mc·C₁·ε ≤ m/2` (A6 transport at the endpoint), so the A9 face signs
+  survive with margin `m/2` and `poincareMiranda_rect` yields `(u*, v*)`
+  where both recombined components vanish — invertibility of the
+  recombination recovers `layoutResidual = 0`, the true closure with total
+  turning `2π`.  The transport constant `C₁` is exposed ahead of the
+  threshold `ε₀`, and the closing point comes bundled with the `C₁·ε`
+  closeness to the clean layout and global confinement below
+  `layoutConfineRadius` — the A11/A12 input shapes.
 -/
 
 namespace Gluck.SpaceForm
@@ -9622,8 +9654,6 @@ rectangle where both recombined components vanish; invertibility of the
 recombination (`AB′ − BA′ ≠ 0`) recovers `z`-closure, and `τ` supplies the
 turning closure. -/
 
-set_option maxHeartbeats 400000 in
-set_option diagnostics true in
 /-- **ALM-A10 (`exists_layout_closing`): the true flow closes.**  For anchor
 data `(h, L)` on the window × bracket with both anchor equations, and any
 continuous `2π`-periodic profile `κ` with `|κ| ≤ M` and ALM-2 plateau-pointwise
@@ -9661,7 +9691,7 @@ theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       hh₁c hh₁per hM
   obtain ⟨A, B, A', B', hdet, W₁, hW₁0, hW₁16, hface⟩ :=
     cleanClosure_face_signs ha hac hwin hlow hL0 hL him hφe
-  set W := min W₀ W₁ with hWdef
+  set W := min W₀ W₁
   have hW0 : 0 < W := lt_min hW₀0 hW₁0
   have hWW₀ : W ≤ W₀ := min_le_left _ _
   have hW16 : W ≤ L / 16 := hWW₀.trans hW₀16
@@ -9682,30 +9712,30 @@ theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   refine ⟨C₁, hC₁0, min ε₁ (min (η / C₁) (min (m / (2 * Mc * C₁))
       ((1 - layoutCleanRadius a c) / (2 * C₁)))), lt_min hε₁0 (lt_min
       (div_pos hη0 hC₁0) (lt_min (div_pos hm0 (by positivity))
-      (div_pos (by linarith) (by positivity)))), ?_⟩
+      (div_pos (by linarith only [hRcl]) (by positivity)))), ?_⟩
   intro ε hε0 hεε₀ hL1 hpt
   set εI := ∫ θ in (0 : ℝ)..(2 * π),
-    |κ (h₁ θ) - stepCurvature c a 0 (π / 2) π (3 * π / 2) θ| with hεIdef
+    |κ (h₁ θ) - stepCurvature c a 0 (π / 2) π (3 * π / 2) θ|
   obtain ⟨τ, hτcont, hτ⟩ := hroot hε0 (hεε₀.trans (min_le_left _ _)) hL1 hpt
   -- the three `ε`-smallness consequences of the assembled threshold
   have hεη : C₁ * εI ≤ η := by
     have h1 := (le_div_iff₀ hC₁0).mp
       (hεε₀.trans ((min_le_right _ _).trans (min_le_left _ _)))
     have h2 := mul_le_mul_of_nonneg_left hL1 hC₁0.le
-    nlinarith
+    linarith only [h1, h2]
   have hεm : Mc * (C₁ * εI) ≤ m / 2 := by
     have h1 := (le_div_iff₀ (show (0 : ℝ) < 2 * Mc * C₁ by positivity)).mp
       (hεε₀.trans ((min_le_right _ _).trans ((min_le_right _ _).trans
         (min_le_left _ _))))
     have h2 := mul_le_mul_of_nonneg_left hL1 (mul_nonneg hMc0.le hC₁0.le)
-    nlinarith
+    linarith only [h1, h2]
   have hεconf : C₁ * εI ≤ (1 - layoutCleanRadius a c) / 2 := by
     have h1 := (le_div_iff₀ (show (0 : ℝ) < 2 * C₁ by positivity)).mp
       (hεε₀.trans ((min_le_right _ _).trans ((min_le_right _ _).trans
         (min_le_right _ _))))
     have h2 := mul_le_mul_of_nonneg_left hL1 hC₁0.le
-    nlinarith
-  set S₀ : Set (ℝ × ℝ) := {w : ℝ × ℝ | |w.1| ≤ W₀ ∧ |w.2| ≤ W₀} with hS₀def
+    linarith only [h1, h2]
+  set S₀ : Set (ℝ × ℝ) := {w : ℝ × ℝ | |w.1| ≤ W₀ ∧ |w.2| ≤ W₀}
   -- recombined-to-layout box arithmetic
   have hhalf : ∀ u v : ℝ, |u| ≤ W → |v| ≤ W →
       |(u + v) / 2| ≤ W ∧ |(u - v) / 2| ≤ W := by
@@ -9713,11 +9743,11 @@ theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     constructor
     · rw [abs_div, abs_two]
       have h9 := abs_add_le u v
-      linarith
+      linarith only [h9, hu, hv]
     · rw [abs_div, abs_two]
       have h9 := abs_add_le u (-v)
       rw [← sub_eq_add_neg, abs_neg] at h9
-      linarith
+      linarith only [h9, hu, hv]
   -- the turning root at a recombined box point
   have hpoint : ∀ u v : ℝ, |u| ≤ W → |v| ≤ W →
       |τ ((u + v) / 2, (u - v) / 2)| ≤ L / 16 ∧
@@ -9737,7 +9767,7 @@ theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     obtain ⟨h2a, h2b⟩ := abs_le.mp h2
     obtain ⟨h3a, h3b⟩ := abs_le.mp h3
     simp only [nodePeriod]
-    linarith
+    linarith only [h1a, h1b, h2a, h2b, h3a, h3b]
   have htrans : ∀ w₁ w₂ : ℝ, |w₁| ≤ W → |w₂| ≤ W → ∀ t : ℝ, |t| ≤ L / 16 →
       ∀ σ ∈ Set.Icc (0 : ℝ) (nodePeriod L w₁ w₂ t),
         ‖layoutFlow κ h₁ a c h L M w₁ w₂ t σ - layoutClean a c h L w₁ w₂ σ‖
@@ -9750,7 +9780,7 @@ theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
           - (layoutResidual κ h₁ a c h L M w₁ w₂ t).2| ≤ C₁ * εI := by
     intro w₁ w₂ hw₁ hw₂ t ht
     have hT := htrans w₁ w₂ hw₁ hw₂ t ht (nodePeriod L w₁ w₂ t)
-      ⟨hΛnn w₁ w₂ t (hw₁.trans hW16) (hw₂.trans hW16) ht, le_refl _⟩
+      ⟨hΛnn w₁ w₂ t (hw₁.trans hW16) (hw₂.trans hW16) ht, le_rfl⟩
     constructor
     · have h1 : (layoutResidual κ h₁ a c h L M w₁ w₂ t).1
           - layoutCleanZRes a c h L w₁ w₂ t
@@ -9785,8 +9815,8 @@ theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
           + Q * (layoutCleanZRes a c h L w₁ w₂ t).im)| ≤ m / 2 := by
     intro P Q hPQ w₁ w₂ hw₁ hw₂ t ht
     obtain ⟨hZgap, -⟩ := hgap w₁ w₂ hw₁ hw₂ t ht
-    set Zt := (layoutResidual κ h₁ a c h L M w₁ w₂ t).1 with hZtdef
-    set Zc := layoutCleanZRes a c h L w₁ w₂ t with hZcdef
+    set Zt := (layoutResidual κ h₁ a c h L M w₁ w₂ t).1
+    set Zc := layoutCleanZRes a c h L w₁ w₂ t
     have h5 : P * Zt.re + Q * Zt.im - (P * Zc.re + Q * Zc.im)
         = P * (Zt - Zc).re + Q * (Zt - Zc).im := by
       rw [Complex.sub_re, Complex.sub_im]
@@ -9825,10 +9855,10 @@ theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     obtain ⟨hU1, hU2⟩ := abs_le.mp (htransfer A B hABle _ _ hw₁ hw₂ _ ht16)
     obtain ⟨hV1, hV2⟩ := abs_le.mp (htransfer A' B' hA'B'le _ _ hw₁ hw₂ _ ht16)
     simp only [hGdef]
-    exact ⟨fun huW => by have := hf1 huW; linarith,
-      fun huW => by have := hf2 huW; linarith,
-      fun hvW => by have := hf3 hvW; linarith,
-      fun hvW => by have := hf4 hvW; linarith⟩
+    exact ⟨fun huW => by have h1 := hf1 huW; linarith only [h1, hU1],
+      fun huW => by have h1 := hf2 huW; linarith only [h1, hU2],
+      fun hvW => by have h1 := hf3 hvW; linarith only [h1, hV1],
+      fun hvW => by have h1 := hf4 hvW; linarith only [h1, hV2]⟩
   -- continuity of the recombined true residual on the rectangle
   have hres := layoutResidual_continuousOn ha hac hwin hlow hL0 hL hφe hκc hh₁c hM
   have hwc : ContinuousOn (fun w : ℝ × ℝ => ((w.1, w.2, τ w) : ℝ × ℝ × ℝ)) S₀ :=
@@ -9839,8 +9869,7 @@ theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     rw [mem_layoutBox]
     obtain ⟨hIoo, -⟩ := hτ w hw
     exact ⟨hw.1.trans hW₀16, hw.2.trans hW₀16, (abs_lt.mpr ⟨hIoo.1, hIoo.2⟩).le⟩
-  have hresτ : ContinuousOn (fun w : ℝ × ℝ =>
-      layoutResidual κ h₁ a c h L M w.1 w.2 (τ w)) S₀ := hres.comp hwc hwmaps
+  have hresτ := hres.comp hwc hwmaps
   have hφc : ContinuousOn
       (fun p : ℝ × ℝ => (((p.1 + p.2) / 2, (p.1 - p.2) / 2) : ℝ × ℝ))
       (Set.Icc (-W) W ×ˢ Set.Icc (-W) W) :=
@@ -9853,33 +9882,29 @@ theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     obtain ⟨h1, h2⟩ := hhalf p.1 p.2 (abs_le.mpr ⟨hp.1.1, hp.1.2⟩)
       (abs_le.mpr ⟨hp.2.1, hp.2.2⟩)
     exact ⟨h1.trans hWW₀, h2.trans hWW₀⟩
-  have hZc : ContinuousOn (fun p : ℝ × ℝ =>
-      (layoutResidual κ h₁ a c h L M ((p.1 + p.2) / 2) ((p.1 - p.2) / 2)
-        (τ ((p.1 + p.2) / 2, (p.1 - p.2) / 2))).1)
-      (Set.Icc (-W) W ×ˢ Set.Icc (-W) W) := (hresτ.comp hφc hφmaps).fst
+  have hZc := (hresτ.comp hφc hφmaps).fst
   have hGc : ContinuousOn G (Set.Icc (-W) W ×ˢ Set.Icc (-W) W) := by
     rw [hGdef]
     exact ((continuousOn_const.mul (Complex.continuous_re.comp_continuousOn hZc)).add
         (continuousOn_const.mul (Complex.continuous_im.comp_continuousOn hZc))).prodMk
       ((continuousOn_const.mul (Complex.continuous_re.comp_continuousOn hZc)).add
         (continuousOn_const.mul (Complex.continuous_im.comp_continuousOn hZc)))
-  sorry
-  have hWneg : -W ≤ W := by linarith
+  have hWneg : -W ≤ W := neg_le_self hW0.le
   have huW : |(W : ℝ)| ≤ W := by rw [abs_of_nonneg hW0.le]
   have huWneg : |(-W : ℝ)| ≤ W := by rw [abs_neg, abs_of_nonneg hW0.le]
   obtain ⟨p, hpmem, hp0⟩ := poincareMiranda_rect hWneg hWneg G hGc
     (fun y hy => by
       have h1 := ((hcore (-W) y huWneg (abs_le.mpr ⟨hy.1, hy.2⟩)).2.1) rfl
-      linarith)
+      linarith only [h1, hm0])
     (fun y hy => by
       have h1 := ((hcore W y huW (abs_le.mpr ⟨hy.1, hy.2⟩)).1) rfl
-      linarith)
+      linarith only [h1, hm0])
     (fun x hx => by
       have h1 := ((hcore x (-W) (abs_le.mpr ⟨hx.1, hx.2⟩) huWneg).2.2.2) rfl
-      linarith)
+      linarith only [h1, hm0])
     (fun x hx => by
       have h1 := ((hcore x W (abs_le.mpr ⟨hx.1, hx.2⟩) huW).2.2.1) rfl
-      linarith)
+      linarith only [h1, hm0])
   -- extract the closing layout point from the recombined zero
   obtain ⟨u₀, v₀⟩ := p
   have hu₀W : |u₀| ≤ W := abs_le.mpr ⟨hpmem.1.1, hpmem.1.2⟩
@@ -9887,10 +9912,10 @@ theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   obtain ⟨hw₁, hw₂⟩ := hhalf u₀ v₀ hu₀W hv₀W
   obtain ⟨ht16, hzero⟩ := hpoint u₀ v₀ hu₀W hv₀W
   simp only [hGdef, Prod.mk_eq_zero] at hp0
-  set w₁ := (u₀ + v₀) / 2 with hw₁def
-  set w₂ := (u₀ - v₀) / 2 with hw₂def
-  set t := τ (w₁, w₂) with htdef
-  set X := (layoutResidual κ h₁ a c h L M w₁ w₂ t).1 with hXdef
+  set w₁ := (u₀ + v₀) / 2
+  set w₂ := (u₀ - v₀) / 2
+  set t := τ (w₁, w₂)
+  set X := (layoutResidual κ h₁ a c h L M w₁ w₂ t).1
   have hXre : X.re = 0 := by
     have hd : (A * B' - B * A') * X.re = 0 := by
       linear_combination B' * hp0.1 - B * hp0.2
