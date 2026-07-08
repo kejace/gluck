@@ -7255,4 +7255,690 @@ theorem turningRoot_continuous {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   obtain ⟨τ, hτcont, hτ⟩ := hroot
   exact ⟨τ, hτcont, fun w hw => ⟨(hτ w hw).1, (hτ w hw).2⟩⟩
 
+/-! ## ALM-A9: clean face signs over the layout box
+
+**Route R2′** (pre-gate record: `.mathlib-quality/decomposition_alm_forkA.md`
+§A5.3): the Poincaré–Miranda sign pattern for the clean `z`-closure residual
+over the `(u, v) = (w₁ + w₂, w₁ − w₂)`-recombined `w`-box, with per-`(a, c)`
+margin.
+
+The clean residual is `τ_clean`-free: at (approximate) phase closure the layout
+endpoint is the fixed-phase point `ζ₅ + r₅` of the terminal `c`-circle
+(`a9Endpoint`), so the residual is the explicit map
+`G(w) = a9Endpoint (node₄ w) − z_start` (`a9Residual`), which vanishes exactly
+at the anchor (`layoutClean_anchor_closes`).  Its two `w`-columns at the anchor
+have closed junction-calculus forms (`a9V1re/im`, `a9V2re/im` — each level
+change in circle coordinates `(ζ, r, ψ)` is `s = ⟪ζ, ie^{iψ}⟫ − r`,
+`r′ = r(K+s)/(K′+s)`, `ζ′ = ζ + (r′−r)ie^{iψ}`, and the in-leg flow is trivial),
+whose four strict signs `Re ∂₁G < 0 < Im ∂₁G`, `0 < Re ∂₂G`, `0 < Im ∂₂G`
+(`a9V1_re_neg` … `a9V2_im_pos`) force the Jacobian determinant negative
+column-wise.  The adjugate-composed components then satisfy the PM pattern with
+margin `|det|·W/2` on all small boxes by differentiability at the single anchor
+point (little-o; no compactness, no `C²`).  Numeric gates: face signs GREEN
+family-wide (12 pairs incl. `(1.001, 1.01)`, `(1.05, 100)`); column chain
+verified to 20 digits; sign certificates checked at 160 anchors and on ~2.5M
+relaxed-constraint samples (`forkA_A9_*.py`). -/
+
+/-! ### A9.0 — the junction-chain column values (pure real algebra)
+
+Variables: `C = cos θ_a`, `S = sin θ_a`, `ra = r_a`, `rc = r_c`,
+`D = c + s` with `s = ⟪W₁, ie^{iφ₁}⟫` the common junction impact parameter;
+write `w = ra − rc`, `m = ra + rc`.  Anchor identities used to eliminate the
+levels: `c − a = wD/ra`, `a + s = rcD/ra`, `P₁ = 2θ_c = πra/m`,
+`P₂ = 2θ_a = πrc/m`. -/
+
+private noncomputable def a9Q (C S ra rc D : ℝ) : ℝ :=
+  (ra - rc) ^ 2 * C * S / (ra * D)
+
+private noncomputable def a9dpsi3 (C S ra rc D : ℝ) : ℝ :=
+  1 / ra + π * ra / (ra + rc) * a9Q C S ra rc D / rc
+
+private noncomputable def a9ds3 (C S ra rc D : ℝ) : ℝ :=
+  (C ^ 2 - S ^ 2) * a9Q C S ra rc D - (ra - rc) / ra * (2 * S * C)
+    + (ra - rc) * S * C * a9dpsi3 C S ra rc D + a9Q C S ra rc D
+
+private noncomputable def a9dr4 (C S ra rc D : ℝ) : ℝ :=
+  ra / rc * -a9Q C S ra rc D - ra * (ra - rc) / (D * rc) * a9ds3 C S ra rc D
+
+private noncomputable def a9dz4re (C S ra rc D : ℝ) : ℝ :=
+  (-S * a9Q C S ra rc D - (ra - rc) / ra * C)
+    + (a9dr4 C S ra rc D + a9Q C S ra rc D) * S
+    - (ra - rc) * C * a9dpsi3 C S ra rc D
+
+private noncomputable def a9dz4im (C S ra rc D : ℝ) : ℝ :=
+  (C * a9Q C S ra rc D - (ra - rc) / ra * S)
+    + (a9dr4 C S ra rc D + a9Q C S ra rc D) * C
+    + (ra - rc) * S * a9dpsi3 C S ra rc D
+
+private noncomputable def a9dpsi4 (C S ra rc D : ℝ) : ℝ :=
+  a9dpsi3 C S ra rc D - π * rc / (ra + rc) / ra * a9dr4 C S ra rc D
+
+private noncomputable def a9ds4 (C S ra rc D : ℝ) : ℝ :=
+  -S * a9dz4re C S ra rc D + C * a9dz4im C S ra rc D
+    - (ra - rc) * C * S * a9dpsi4 C S ra rc D - a9dr4 C S ra rc D
+
+private noncomputable def a9dr5 (C S ra rc D : ℝ) : ℝ :=
+  rc / ra * a9dr4 C S ra rc D + (ra - rc) / D * a9ds4 C S ra rc D
+
+/-- Real part of the `w₁`-column of the anchor Jacobian (junction chain). -/
+private noncomputable def a9V1re (C S ra rc D : ℝ) : ℝ :=
+  a9dz4re C S ra rc D - (a9dr5 C S ra rc D - a9dr4 C S ra rc D) * S
+    + (ra - rc) * C * a9dpsi4 C S ra rc D + a9dr5 C S ra rc D
+
+/-- Imaginary part of the `w₁`-column of the anchor Jacobian. -/
+private noncomputable def a9V1im (C S ra rc D : ℝ) : ℝ :=
+  a9dz4im C S ra rc D + (a9dr5 C S ra rc D - a9dr4 C S ra rc D) * C
+    + (ra - rc) * S * a9dpsi4 C S ra rc D
+
+/-- Real part of the `w₂`-column: `X = (w/ra)·(C − wCS(1−S)/D) > 0`. -/
+private noncomputable def a9V2re (C S ra rc D : ℝ) : ℝ :=
+  (ra - rc) / ra * (C - (ra - rc) * C * S * (1 - S) / D)
+
+/-- Imaginary part of the `w₂`-column: `Y = (wS/ra)·(1 − wC²/D) > 0`. -/
+private noncomputable def a9V2im (C S ra rc D : ℝ) : ℝ :=
+  (ra - rc) / ra * (S - (ra - rc) * C ^ 2 * S / D)
+
+/-- **The angle–radius concavity inequality** `2β·cos β ≤ (π − 2β)·sin β` on
+`(0, π/4]`: `q(β) = (π−2β)sin β − 2β cos β` has `q(0) = q(π/4) = 0` and
+`q″ = −(4−2β)cos β + (4+2β−π)sin β < 0` there (`cos > sin` and
+`4−2β > 4+2β−π`), so `q` is strictly concave with vanishing endpoints.  At the
+anchor angle `θ_a = (π/2)·r_c/(r_a+r_c)` this is exactly `r_c·C ≤ r_a·S`. -/
+private lemma a9_q_ineq {β : ℝ} (h0 : 0 < β) (h1 : β ≤ π / 4) :
+    2 * β * Real.cos β ≤ (π - 2 * β) * Real.sin β := by
+  sorry
+
+/-- **The `K₀` inequality** — the value of the `Re`-column quadratic at the
+minimal denominator `D = wC²`, divided by `C²w³`; homogeneous of degree 4 in
+`(ra, rc)`.  Certificate: case split on the signs of `4m² − π²w²` and
+`ra²S² − rc²C²` with the exact cube identity
+`4 − 27t(1−t)² = (3t−1)²(4−3t)`, the positive-definite bound
+`7ra² − 33ra·rc + 40rc² > 0`, and the Jordan/`q` windows. -/
+private lemma a9_K0_pos {C S ra rc : ℝ} (hCS : C ^ 2 + S ^ 2 = 1) (hC : 0 < C)
+    (hS : 0 < S) (hrc : 0 < rc) (hrca : rc < ra) (hSC : S < C)
+    (hJ1 : rc ≤ (ra + rc) * S) (hJ2 : 2 * (ra + rc) * S ≤ π * rc)
+    (hq : rc * C ≤ ra * S) :
+    0 < C ^ 3 * (ra + rc) ^ 2 * rc ^ 2
+      + C * ra * S ^ 2 * rc * (4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2)
+      + 2 * π * (ra - rc) * (ra + rc) * S * (ra ^ 2 * S ^ 2 - rc ^ 2 * C ^ 2) := by
+  sorry
+
+/-- **Numerator identity for `Im ∂₁G`** (modulo `C² + S² = 1`):
+`a9V1im · D³ra m²rc²` equals the manifestly-organized quartic in `D`. -/
+private lemma a9V1im_num_eq {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
+    (hra : 0 < ra) (hrc : 0 < rc) (hD : 0 < D) :
+    a9V1im C S ra rc D * (D ^ 3 * ra * (ra + rc) ^ 2 * rc ^ 2)
+      = S * (ra - rc) * (ra + rc) ^ 2 * rc ^ 2 * D ^ 3
+        + (2 * π * C * ra * (ra - rc) ^ 3 * S ^ 2 * (ra + rc) * rc
+            + 3 * C ^ 2 * (ra - rc) ^ 2 * (ra + rc) ^ 2 * rc ^ 2 * S) * D ^ 2
+        + (2 * π * C ^ 3 * (ra - rc) ^ 4 * S ^ 2 * (ra + rc) * rc ^ 2
+            + π ^ 2 * C ^ 2 * ra * (ra - rc) ^ 5 * S ^ 3 * rc) * D
+        + 2 * π * C ^ 3 * (ra - rc) ^ 5 * S ^ 2 * (ra + rc)
+            * (ra ^ 2 * S ^ 2 - rc ^ 2 * C ^ 2)
+        + C ^ 4 * ra * (ra - rc) ^ 4 * S ^ 3 * rc
+            * (4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2) := by
+  sorry
+
+/-- **Numerator factorization for `Re ∂₁G`** (modulo `C² + S² = 1`):
+`−a9V1re · D³ra m²rc² = (D − wS(1−S)) · K` with `K` quadratic in `D`. -/
+private lemma a9V1re_num_eq {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
+    (hra : 0 < ra) (hrc : 0 < rc) (hD : 0 < D) :
+    -a9V1re C S ra rc D * (D ^ 3 * ra * (ra + rc) ^ 2 * rc ^ 2)
+      = (D - (ra - rc) * S * (1 - S))
+        * (C * (ra - rc) * (ra + rc) ^ 2 * rc ^ 2 * D ^ 2
+          + C ^ 3 * ra * (ra - rc) ^ 3 * S ^ 2 * rc
+              * (4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2)
+          + 2 * π * C ^ 2 * (ra - rc) ^ 4 * (ra + rc) * S
+              * (ra ^ 2 * S ^ 2 - rc ^ 2 * C ^ 2)) := by
+  sorry
+
+/-- **Column sign 1**: `Im ∂₁G > 0`.  All `D`-blocks of the numerator are
+positive after absorbing `R ≥ −rc²C²` and `P ≥ −π²w²` into the `D¹`-blocks
+via `D ≥ wC²`. -/
+private lemma a9V1_im_pos {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
+    (hC : 0 < C) (hS : 0 < S) (hrc : 0 < rc) (hrca : rc < ra)
+    (hD : (ra - rc) * C ^ 2 < D) :
+    0 < a9V1im C S ra rc D := by
+  sorry
+
+/-- **Column sign 2**: `Re ∂₁G < 0`, via `N = Δ·K`, `Δ = D − wS(1−S) > 0`
+(from `C² ≥ S(1−S)`, i.e. `C² − S(1−S) = 1 − S > 0`), `K` increasing in `D`,
+and `K(wC²) > 0` (`a9_K0_pos`). -/
+private lemma a9V1_re_neg {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
+    (hC : 0 < C) (hS : 0 < S) (hrc : 0 < rc) (hrca : rc < ra) (hSC : S < C)
+    (hJ1 : rc ≤ (ra + rc) * S) (hJ2 : 2 * (ra + rc) * S ≤ π * rc)
+    (hq : rc * C ≤ ra * S) (hD : (ra - rc) * C ^ 2 < D) :
+    a9V1re C S ra rc D < 0 := by
+  sorry
+
+/-- **Column sign 3**: `Re ∂₂G > 0` (uses `C² − S(1−S) = 1 − S > 0`). -/
+private lemma a9V2_re_pos {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
+    (hC : 0 < C) (hS : 0 < S) (hrc : 0 < rc) (hrca : rc < ra)
+    (hD : (ra - rc) * C ^ 2 < D) :
+    0 < a9V2re C S ra rc D := by
+  sorry
+
+/-- **Column sign 4**: `Im ∂₂G > 0` (direct from `D > wC²`). -/
+private lemma a9V2_im_pos {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
+    (hC : 0 < C) (hS : 0 < S) (hrc : 0 < rc) (hrca : rc < ra)
+    (hD : (ra - rc) * C ^ 2 < D) :
+    0 < a9V2im C S ra rc D := by
+  sorry
+
+/-! ### A9.1 — anchor data: the reduced variables and their windows
+
+`a9ra, a9theta, a9rc, a9D` package the anchor quantities; the anchor equations
+`him`/`hφe` supply the identities that put the derivative columns in reduced
+form: `⟪W₁, ie^{iφ₁}⟫ = (ra − rc)cos²θ − ra` (via `him`) and
+`L/(8ra) + L/(8rc) = π/2` (via `hφe`). -/
+
+private noncomputable def a9ra (a h : ℝ) : ℝ :=
+  arcModelRadius a (Complex.I * (h : ℂ)) π
+
+private noncomputable def a9theta (a h L : ℝ) : ℝ := L / 8 / a9ra a h
+
+private noncomputable def a9rc (a c h L : ℝ) : ℝ :=
+  arcModelRadius c (qArc1 a (h, L)).1 (qArc1 a (h, L)).2
+
+set_option maxHeartbeats 1600000 in
+-- heavy `qArc` unfolding at `whnf` (WIP A9 salvage; retune at A13 cleanup)
+private noncomputable def a9D (a c h L : ℝ) : ℝ :=
+  c + ⟪(qArc1 a (h, L)).1,
+    Complex.I * Complex.exp (((qArc1 a (h, L)).2 : ℂ) * Complex.I)⟫_ℝ
+
+set_option maxHeartbeats 1600000 in
+-- heavy nlinarith/qArc context (WIP A9 salvage; retune at A13 cleanup)
+/-- **Anchor windows and identities** (bundle): under the anchor hypotheses,
+writing `S = sin θ_a`, `C = cos θ_a`, `ra = r_a`, `rc = r_c`, `D = c + s`:
+`0 < S`, `0 < C`, `0 < rc < ra`, the reduced-denominator bound
+`(ra − rc)·C² < D` (which is exactly `c > r_a`), the angle window `S < C`
+(`θ_a < π/4` from `rc < ra`), the Jordan bounds `rc ≤ (ra+rc)·S` and
+`2(ra+rc)·S ≤ π·rc` (from `θ_a = (π/2)·rc/(ra+rc)`, i.e. `hφe` plus
+`ra·θ_a = rc·θ_c = L/8`), and the concavity bound `rc·C ≤ ra·S`
+(`a9_q_ineq`). -/
+private lemma a9_anchor_facts {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L) (hL : L ≤ bicircleBracket a h)
+    (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
+    0 < Real.sin (a9theta a h L) ∧ 0 < Real.cos (a9theta a h L) ∧
+      0 < a9rc a c h L ∧ a9rc a c h L < a9ra a h ∧
+      (a9ra a h - a9rc a c h L) * Real.cos (a9theta a h L) ^ 2 < a9D a c h L ∧
+      Real.sin (a9theta a h L) < Real.cos (a9theta a h L) ∧
+      a9rc a c h L ≤ (a9ra a h + a9rc a c h L) * Real.sin (a9theta a h L) ∧
+      2 * (a9ra a h + a9rc a c h L) * Real.sin (a9theta a h L)
+        ≤ π * a9rc a c h L ∧
+      a9rc a c h L * Real.cos (a9theta a h L)
+        ≤ a9ra a h * Real.sin (a9theta a h L) := by
+  obtain ⟨hh0, hh1, hw⟩ := hwin
+  have hπ := Real.pi_pos
+  have hc1 : 1 < c := ha.trans hac
+  simp only [a9ra, a9theta, a9rc, a9D]
+  set r := arcModelRadius a (Complex.I * (h : ℂ)) π with hrdef
+  set rc := arcModelRadius c (qArc1 a (h, L)).1 (qArc1 a (h, L)).2 with hrcdef
+  set θ := L / 8 / r with hθdef
+  have hra0 : 0 < r := by rw [hrdef]; exact bicircle_ra_pos ha hh0 hh1
+  have hrh : h ≤ r := by rw [hrdef]; exact bicircle_ra_ge ha hh1 hw
+  have hr2 : 2 * r < 1 + h := by
+    have h1 := bicircle_ra_lt ha hh0 hh1
+    rw [← hrdef] at h1
+    linarith
+  have hra1 : r < 1 := by linarith
+  have hrc0 : 0 < rc := by
+    rw [hrcdef]; exact bicircle_rc_pos ha hac hh0 hh1 hw hL0.le hL
+  obtain ⟨hq0, hq1⟩ : 0 ≤ 1 - Real.cos θ ∧ 1 - Real.cos θ ≤ 1 := by
+    have h1 := bicircle_q_mem ha hh0 hh1 hL0.le hL
+    rw [← hrdef, ← hθdef] at h1
+    exact h1
+  have hθ0 : 0 < θ := by rw [hθdef]; exact div_pos (by linarith) hra0
+  have hθc : L / 8 / rc = π / 2 - θ := by
+    have h1 := bicircle_thetaC_of_G2_zero hφe
+    rw [← hrdef, ← hrcdef, ← hθdef] at h1
+    exact h1
+  -- the two arc lengths agree: `r·θ_a = L/8 = rc·θ_c`
+  have hLr : r * θ = L / 8 := by
+    rw [hθdef, mul_comm r (L / 8 / r), div_mul_cancel₀ _ hra0.ne']
+  have hLrc : rc * (π / 2 - θ) = L / 8 := by
+    rw [← hθc, mul_comm rc (L / 8 / rc), div_mul_cancel₀ _ hrc0.ne']
+  have hsum : θ * (r + rc) = π / 2 * rc := by linear_combination hLr - hLrc
+  -- `rc < r` via the conserved-radius scalar identity `rc(c+s) = r(a+s)`
+  have hDc : 0 < c + (-h - (r - h) * (1 - Real.cos θ)) :=
+    bicircle_D_pos hc1 hh1 hrh hr2 hq1
+  have hDa : 0 < a + (-h - (r - h) * (1 - Real.cos θ)) :=
+    bicircle_D_pos ha hh1 hrh hr2 hq1
+  have hah : (0 : ℝ) < a - h := by linarith
+  have h1h : 1 - h ^ 2 = 2 * r * (a - h) := by
+    rw [hrdef, arcModelRadius_qArc1]
+    field_simp
+  have hrc_scal : rc * (2 * (c + (-h - (r - h) * (1 - Real.cos θ))))
+      = 1 - (h ^ 2 + 2 * r * (r - h) * (1 - Real.cos θ)) := by
+    have h2 := arcModelRadius_qArc2 a c h L
+    rw [← hrdef, ← hrcdef, ← hθdef] at h2
+    have hDc2 : (0 : ℝ) < 2 * (c + (-h - (r - h) * (1 - Real.cos θ))) := by linarith
+    rw [h2]
+    exact div_mul_cancel₀ _ hDc2.ne'
+  have hrc_lt : rc < r := by
+    nlinarith [hrc_scal, h1h, hDc, hDa,
+      mul_pos hra0 (show (0 : ℝ) < c - a by linarith)]
+  -- the angle window `0 < θ_a < π/4`
+  have hθ4 : θ < π / 4 := by
+    nlinarith [hsum, mul_pos hπ (sub_pos.mpr hrc_lt), add_pos hra0 hrc0]
+  have hS : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi hθ0 (by linarith)
+  have hC : 0 < Real.cos θ := Real.cos_pos_of_mem_Ioo ⟨by linarith, by linarith⟩
+  have hSC : Real.sin θ < Real.cos θ := by
+    have h1 := Real.strictMonoOn_sin ⟨by linarith, by linarith⟩
+      ⟨by linarith, by linarith⟩ (by linarith : θ < π / 2 - θ)
+    rwa [Real.sin_pi_div_two_sub] at h1
+  -- Jordan bounds from `θ_a = (π/2)·rc/(r+rc)`
+  have hJ2 : 2 * (r + rc) * Real.sin θ ≤ π * rc := by
+    nlinarith [hsum, Real.sin_lt hθ0, add_pos hra0 hrc0]
+  have hJ1 : rc ≤ (r + rc) * Real.sin θ := by
+    have hms := Real.mul_le_sin hθ0.le (by linarith : θ ≤ π / 2)
+    have h2θ : 2 * θ ≤ π * Real.sin θ := by
+      rw [div_mul_eq_mul_div, div_le_iff₀ hπ] at hms
+      linarith
+    nlinarith [hsum, h2θ, add_pos hra0 hrc0, hπ]
+  -- the concavity bound `rc·C ≤ r·S` from `a9_q_ineq`
+  have hqb : rc * Real.cos θ ≤ r * Real.sin θ := by
+    have hq' := a9_q_ineq hθ0 hθ4.le
+    have hsC : θ * (r + rc) * Real.cos θ = π / 2 * rc * Real.cos θ := by rw [hsum]
+    have hsS : θ * (r + rc) * Real.sin θ = π / 2 * rc * Real.sin θ := by rw [hsum]
+    nlinarith [mul_le_mul_of_nonneg_right hq' (add_pos hra0 hrc0).le, hsC, hsS, hπ]
+  -- the reduced-denominator window `(r − rc)·C² < D` (i.e. `c > r`) via `him`
+  have hG1 := bicircle_G1_scalar a c h L
+  rw [him, ← hrdef, ← hrcdef, ← hθdef, hθc, Real.sin_pi_div_two_sub,
+    Real.cos_pi_div_two_sub] at hG1
+  have hrhC : r - h = (r - rc) * Real.cos θ := by linear_combination hG1
+  have hrhC2 : (r - h) * Real.cos θ = (r - rc) * Real.cos θ ^ 2 := by
+    linear_combination Real.cos θ * hrhC
+  have hDlt : (r - rc) * Real.cos θ ^ 2
+      < c + ⟪(qArc1 a (h, L)).1,
+          Complex.I * Complex.exp (((qArc1 a (h, L)).2 : ℂ) * Complex.I)⟫_ℝ := by
+    have hs_inner := qArc1_inner a h L
+    rw [← hrdef, ← hθdef] at hs_inner
+    rw [hs_inner]
+    nlinarith [hrhC2]
+  exact ⟨hS, hC, hrc0, hrc_lt, hDlt, hSC, hJ1, hJ2, hqb⟩
+
+/-! ### A9.2 — the clean closure residual and its anchor derivative -/
+
+/-- **Fixed-phase endpoint of the terminal `c`-leg**: the point of the level-`c`
+circle through the state `P` at phase `≡ π/2 (mod 2π)`, i.e. `ζ₅ + r₅ =
+z + r(1 + ie^{iψ})`.  At clean phase closure the layout endpoint equals this. -/
+private noncomputable def a9Endpoint (c : ℝ) (P : ℂ × ℝ) : ℂ :=
+  P.1 + (arcModelRadius c P.1 P.2 : ℂ)
+    * (1 + Complex.I * Complex.exp ((P.2 : ℂ) * Complex.I))
+
+/-- **The clean `z`-closure residual** as an explicit (`τ_clean`-free) map of
+the interior dofs `p = (w₁, w₂)`. -/
+private noncomputable def a9Residual (a c h L : ℝ) (p : ℝ × ℝ) : ℂ :=
+  a9Endpoint c (layoutNode4 a c h L p.1 p.2) - (layoutStart a c h L).1
+
+/-- The residual vanishes at the anchor (the `z`-half of
+`layoutClean_anchor_closes` read through the fixed-phase endpoint). -/
+private lemma a9Residual_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
+    (hL : L ≤ bicircleBracket a h)
+    (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
+    a9Residual a c h L (0, 0) = 0 := by
+  -- the exact anchor closure, evaluated on the terminal leg
+  have hclose := layoutClean_anchor_closes ha hac hwin hL0 him hφe
+  have hs₄ : nodeS4 L 0 0 = 7 * L / 8 := by rw [nodeS4]; ring
+  have hL16 : |(0 : ℝ)| ≤ L / 16 := by rw [abs_zero]; positivity
+  rw [layoutClean_leg5 a c h (σ := L) hL0 hL16 hL16 (by rw [hs₄]; linarith), hs₄,
+    show L - 7 * L / 8 = L / 8 by ring] at hclose
+  show a9Endpoint c (layoutNode4 a c h L 0 0) - (layoutStart a c h L).1 = 0
+  simp only [a9Endpoint]
+  set n4 := layoutNode4 a c h L 0 0 with hn4
+  set r₅ := arcModelRadius c n4.1 n4.2 with hr₅
+  -- the two components of the closure equation
+  have hA : n4.2 + L / 8 / r₅ = (layoutStart a c h L).2 + 2 * π := by
+    rw [hr₅]
+    exact congrArg Prod.snd hclose
+  have hB : n4.1 - (r₅ : ℂ) * Complex.I * Complex.exp ((n4.2 : ℂ) * Complex.I)
+      * (Complex.exp (((L / 8 / r₅ : ℝ) : ℂ) * Complex.I) - 1)
+      = (layoutStart a c h L).1 := by
+    rw [hr₅]
+    exact congrArg Prod.fst hclose
+  -- total phase `n4.2 + θ₅ = 5π/2 + 2π = 9π/2`, and `e^{i·9π/2} = i`
+  have hstart2 : (layoutStart a c h L).2 = 5 * π / 2 := layoutStart_snd hφe
+  have hx : L / 8 / r₅ = 9 * π / 2 - n4.2 := by
+    rw [hstart2] at hA
+    linarith
+  have h92 : Complex.exp (((9 * π / 2 : ℝ) : ℂ) * Complex.I) = Complex.I := by
+    rw [show (9 * π / 2 : ℝ) = π / 2 + 2 * π + 2 * π by ring, expI_add_two_pi,
+      expI_add_two_pi]
+    push_cast
+    exact Complex.exp_pi_div_two_mul_I
+  have hprod : Complex.exp ((n4.2 : ℂ) * Complex.I)
+      * Complex.exp (((L / 8 / r₅ : ℝ) : ℂ) * Complex.I) = Complex.I := by
+    rw [hx, ← Complex.exp_add,
+      show (n4.2 : ℂ) * Complex.I + ((9 * π / 2 - n4.2 : ℝ) : ℂ) * Complex.I
+        = ((9 * π / 2 : ℝ) : ℂ) * Complex.I by push_cast; ring,
+      h92]
+  rw [← hB]
+  linear_combination (r₅ : ℂ) * Complex.I * hprod + (r₅ : ℂ) * Complex.I_mul_I
+
+/-- **Anchor node identities (bundle)**: the shared preamble and the
+`hnode1`–`hnode3` steps of `layoutClean_anchor_closes`, extracted once. -/
+private lemma a9_nodes_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a)
+    (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
+    layoutNode1 a c h L
+        = (-(starRingEnd ℂ) (qArc1 a (h, L)).1, 3 * π - (qArc1 a (h, L)).2 + π)
+      ∧ layoutNode2 a c h L 0
+          = ((qArc1 a (h, L)).1, (qArc1 a (h, L)).2 + 2 * π)
+      ∧ layoutNode3 a c h L 0
+          = ((starRingEnd ℂ) (qArc1 a (h, L)).1,
+              3 * π - (qArc1 a (h, L)).2 + 2 * π) := by
+  have hπ := Real.pi_pos
+  obtain ⟨hh0, hh1, -⟩ := hwin
+  have hratio0 := layoutMarginRatio_pos ha hac
+  have hratio1 := layoutMarginRatio_lt_one ha hac
+  -- start data and nondegeneracy of the two anchor arcs
+  have hz₀norm : ‖Complex.I * (h : ℂ)‖ = h := by
+    rw [norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_pos hh0]
+  have hra : 0 < arcModelRadius a (Complex.I * (h : ℂ)) π :=
+    arcModelRadius_pos_of_norm_lt_one ha.le (by rw [hz₀norm]; exact hh1)
+  -- whole-circle confinement of the `a`-arc from `W₀ = (i·h, π)`
+  have hconfa : ∀ σ : ℝ,
+      ‖(arcModelConst a (Complex.I * (h : ℂ)) π σ).1‖
+        ≤ 1 - (1 - h) * layoutMarginRatio a c := by
+    intro σ
+    exact arcModelConst_norm_le_margin ha le_rfl hac.le (by linarith) (by linarith)
+      (by rw [hz₀norm]; linarith) σ
+  have hconfa1 : ∀ σ : ℝ,
+      ‖(arcModelConst a (Complex.I * (h : ℂ)) π σ).1‖ < 1 := by
+    intro σ
+    have h1 := hconfa σ
+    nlinarith
+  have hconfane : ∀ σ : ℝ,
+      (1:ℝ) - ‖(arcModelConst a (Complex.I * (h : ℂ)) π σ).1‖ ^ 2 ≠ 0 := by
+    intro σ
+    have h1 := hconfa1 σ
+    have h2 := norm_nonneg (arcModelConst a (Complex.I * (h : ℂ)) π σ).1
+    nlinarith
+  -- `W₁ = qArc1` and the `c`-arc through it
+  have hW₁ : qArc1 a (h, L) = arcModelConst a (Complex.I * (h : ℂ)) π (L / 8) := rfl
+  have hW₁norm : ‖(qArc1 a (h, L)).1‖ < 1 := by
+    rw [hW₁]
+    exact hconfa1 (L / 8)
+  have hrc : 0 < arcModelRadius c (qArc1 a (h, L)).1 (qArc1 a (h, L)).2 :=
+    arcModelRadius_pos_of_norm_lt_one (by linarith) hW₁norm
+  have hconfc : ∀ σ : ℝ,
+      ‖(arcModelConst c (qArc1 a (h, L)).1 (qArc1 a (h, L)).2 σ).1‖ < 1 := by
+    intro σ
+    have h1 : ‖(qArc1 a (h, L)).1‖
+        ≤ 1 - (1 - h) * layoutMarginRatio a c := by
+      rw [hW₁]
+      exact hconfa (L / 8)
+    have h2 := arcModelConst_norm_le_margin (K := c) (m := (1 - h) * layoutMarginRatio a c)
+      (z₀ := (qArc1 a (h, L)).1) (φ₀ := (qArc1 a (h, L)).2) ha hac.le le_rfl
+      (mul_pos (by linarith) hratio0) (by nlinarith) h1 σ
+    nlinarith [mul_pos (mul_pos (by linarith : (0:ℝ) < 1 - h) hratio0) hratio0]
+  have hconfcne : ∀ σ : ℝ,
+      (1:ℝ) - ‖(arcModelConst c (qArc1 a (h, L)).1 (qArc1 a (h, L)).2 σ).1‖ ^ 2
+        ≠ 0 := by
+    intro σ
+    have h1 := hconfc σ
+    have h2 := norm_nonneg (arcModelConst c (qArc1 a (h, L)).1 (qArc1 a (h, L)).2 σ).1
+    nlinarith
+  -- `W₂ = qArc2` sits on `Fix(X)`
+  have hW₂ : qArc2 a c (h, L)
+      = arcModelConst c (qArc1 a (h, L)).1 (qArc1 a (h, L)).2 (L / 8) := rfl
+  have hfix1 : (starRingEnd ℂ) (qArc2 a c (h, L)).1 = (qArc2 a c (h, L)).1 :=
+    Complex.conj_eq_iff_im.mpr him
+  have hfix2 : 3 * π - (qArc2 a c (h, L)).2 = (qArc2 a c (h, L)).2 := by
+    rw [hφe]
+    ring
+  -- the mirrored `c`-arc: `Arc_c(W₂, s) = X(Arc_c(W₁, L/8 − s))`
+  have MIc : ∀ s : ℝ, arcModelConst c (qArc2 a c (h, L)).1 (qArc2 a c (h, L)).2 s
+      = ((starRingEnd ℂ)
+          (arcModelConst c (qArc1 a (h, L)).1 (qArc1 a (h, L)).2 (L / 8 - s)).1,
+        3 * π - (arcModelConst c (qArc1 a (h, L)).1 (qArc1 a (h, L)).2 (L / 8 - s)).2) := by
+    intro s
+    have h1 := arcModelConst_conj_reverse hrc.ne' (L / 8) (hconfcne (L / 8)) s
+    rw [← hW₂, hfix1, hfix2] at h1
+    exact h1
+  -- the mirrored `a`-arc: `Arc_a(X(W₁), s) = X(Arc_a(W₀, L/8 − s))`
+  have MIa : ∀ s : ℝ, arcModelConst a ((starRingEnd ℂ) (qArc1 a (h, L)).1)
+      (3 * π - (qArc1 a (h, L)).2) s
+      = ((starRingEnd ℂ)
+          (arcModelConst a (Complex.I * (h : ℂ)) π (L / 8 - s)).1,
+        3 * π - (arcModelConst a (Complex.I * (h : ℂ)) π (L / 8 - s)).2) := by
+    intro s
+    have h1 := arcModelConst_conj_reverse hra.ne' (L / 8) (hconfane (L / 8)) s
+    rw [← hW₁] at h1
+    exact h1
+  -- the reversed base `a`-arc: `X(Arc_a(W₀, −s)) = Arc_a(ρ(W₀), s)`
+  have E2z : ∀ s : ℝ,
+      ((starRingEnd ℂ) (arcModelConst a (Complex.I * (h : ℂ)) π (-s)).1,
+        3 * π - (arcModelConst a (Complex.I * (h : ℂ)) π (-s)).2)
+      = arcModelConst a (-(Complex.I * (h : ℂ))) (π + π) s := by
+    intro s
+    have h1 := arcModelConst_conj_reverse hra.ne' 0 (by
+      rw [arcModelConst_zero]
+      have h2 := norm_nonneg (Complex.I * (h : ℂ))
+      rw [show ((Complex.I * (h : ℂ), π) : ℂ × ℝ).1 = Complex.I * (h : ℂ) from rfl]
+      nlinarith [hz₀norm]) s
+    rw [arcModelConst_zero, zero_sub] at h1
+    rw [show ((Complex.I * (h : ℂ), π) : ℂ × ℝ).1 = Complex.I * (h : ℂ) from rfl,
+      show ((Complex.I * (h : ℂ), π) : ℂ × ℝ).2 = π from rfl] at h1
+    rw [← h1, show (starRingEnd ℂ) (Complex.I * (h : ℂ)) = -(Complex.I * (h : ℂ)) by
+      rw [map_mul, Complex.conj_I, Complex.conj_ofReal]; ring,
+      show 3 * π - π = π + π by ring]
+  -- node 1: `ρ X (W₁)`
+  have hnode1 : layoutNode1 a c h L
+      = (-(starRingEnd ℂ) (qArc1 a (h, L)).1, 3 * π - (qArc1 a (h, L)).2 + π) := by
+    rw [layoutNode1,
+      show (layoutStart a c h L).1 = -(qArc2 a c (h, L)).1 from rfl,
+      show (layoutStart a c h L).2 = (qArc2 a c (h, L)).2 + π from rfl,
+      arcModelConst_neg_pi, MIc (L / 8), sub_self, arcModelConst_zero]
+  -- node 2: `W₁ + (0, 2π)`
+  have hnode2 : layoutNode2 a c h L 0
+      = ((qArc1 a (h, L)).1, (qArc1 a (h, L)).2 + 2 * π) := by
+    rw [layoutNode2, hnode1, add_zero]
+    rw [show ((-(starRingEnd ℂ) (qArc1 a (h, L)).1,
+        3 * π - (qArc1 a (h, L)).2 + π) : ℂ × ℝ).1
+      = -(starRingEnd ℂ) (qArc1 a (h, L)).1 from rfl,
+      show ((-(starRingEnd ℂ) (qArc1 a (h, L)).1,
+        3 * π - (qArc1 a (h, L)).2 + π) : ℂ × ℝ).2
+      = 3 * π - (qArc1 a (h, L)).2 + π from rfl]
+    rw [arcModelConst_neg_pi, MIa (L / 4),
+      show L / 8 - L / 4 = -(L / 8) by ring, E2z (L / 8), arcModelConst_neg_pi, ← hW₁]
+    refine Prod.ext ?_ ?_
+    · simp only [neg_neg]
+    · simp only
+      ring
+  -- node 3: `X(W₁) + (0, 2π)`
+  have hnode3 : layoutNode3 a c h L 0
+      = ((starRingEnd ℂ) (qArc1 a (h, L)).1,
+          3 * π - (qArc1 a (h, L)).2 + 2 * π) := by
+    rw [layoutNode3, hnode2]
+    rw [show (((qArc1 a (h, L)).1, (qArc1 a (h, L)).2 + 2 * π) : ℂ × ℝ).1
+      = (qArc1 a (h, L)).1 from rfl,
+      show (((qArc1 a (h, L)).1, (qArc1 a (h, L)).2 + 2 * π) : ℂ × ℝ).2
+      = (qArc1 a (h, L)).2 + 2 * π from rfl]
+    rw [arcModelConst_add_two_pi,
+      show (L / 4 : ℝ) = L / 8 + L / 8 by ring,
+      ← arcModelConst_add hrc.ne' (L / 8) (hconfcne (L / 8)) (L / 8),
+      ← hW₂, MIc (L / 8), sub_self, arcModelConst_zero]
+  exact ⟨hnode1, hnode2, hnode3⟩
+
+/-- **Radius conservation along the first quarter-arc**: the level-`a` radius at
+`W₁ = qArc1` equals the start radius `r_a`. -/
+private lemma a9_radius_qArc1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) :
+    arcModelRadius a (qArc1 a (h, L)).1 (qArc1 a (h, L)).2 = a9ra a h := by
+  obtain ⟨hh0, hh1, -⟩ := hwin
+  have hratio0 := layoutMarginRatio_pos ha hac
+  have hratio1 := layoutMarginRatio_lt_one ha hac
+  have hz₀norm : ‖Complex.I * (h : ℂ)‖ = h := by
+    rw [norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_pos hh0]
+  have hra : 0 < arcModelRadius a (Complex.I * (h : ℂ)) π :=
+    arcModelRadius_pos_of_norm_lt_one ha.le (by rw [hz₀norm]; exact hh1)
+  have hconfa : ‖(arcModelConst a (Complex.I * (h : ℂ)) π (L / 8)).1‖
+      ≤ 1 - (1 - h) * layoutMarginRatio a c :=
+    arcModelConst_norm_le_margin ha le_rfl hac.le (by linarith) (by linarith)
+      (by rw [hz₀norm]; linarith) (L / 8)
+  have hconfa1 : ‖(arcModelConst a (Complex.I * (h : ℂ)) π (L / 8)).1‖ < 1 := by
+    nlinarith
+  have hconfane :
+      (1:ℝ) - ‖(arcModelConst a (Complex.I * (h : ℂ)) π (L / 8)).1‖ ^ 2 ≠ 0 := by
+    have h2 := norm_nonneg (arcModelConst a (Complex.I * (h : ℂ)) π (L / 8)).1
+    nlinarith
+  have hW₁ : qArc1 a (h, L) = arcModelConst a (Complex.I * (h : ℂ)) π (L / 8) := rfl
+  rw [hW₁]
+  exact arcModelRadius_conserved hra.ne' (L / 8) hconfane
+
+/-- **Anchor node 1** `= ρX(W₁)` (extraction of the `hnode1` step of
+`layoutClean_anchor_closes`). -/
+private lemma a9_node1_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L)
+    (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
+    layoutNode1 a c h L
+      = (-(starRingEnd ℂ) (qArc1 a (h, L)).1, 3 * π - (qArc1 a (h, L)).2 + π) :=
+  (a9_nodes_anchor ha hac hwin him hφe).1
+
+/-- **Anchor node 2** `= W₁ + (0, 2π)` (extraction of the `hnode2` step). -/
+private lemma a9_node2_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L)
+    (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
+    layoutNode2 a c h L 0
+      = ((qArc1 a (h, L)).1, (qArc1 a (h, L)).2 + 2 * π) :=
+  (a9_nodes_anchor ha hac hwin him hφe).2.1
+
+/-- **Anchor node 3** `= X(W₁) + (0, 2π)` (extraction of the `hnode3` step). -/
+private lemma a9_node3_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L)
+    (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
+    layoutNode3 a c h L 0
+      = ((starRingEnd ℂ) (qArc1 a (h, L)).1,
+          3 * π - (qArc1 a (h, L)).2 + 2 * π) :=
+  (a9_nodes_anchor ha hac hwin him hφe).2.2
+
+/-- The level-`a` radius at anchor node 1 is `r_a` (Klein equivariance +
+conservation). -/
+private lemma a9_radius_node1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L)
+    (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
+    arcModelRadius a (layoutNode1 a c h L).1 (layoutNode1 a c h L).2
+      = a9ra a h := by
+  rw [a9_node1_anchor ha hac hwin hL0 him hφe]
+  change arcModelRadius a (-(starRingEnd ℂ) (qArc1 a (h, L)).1)
+      (3 * π - (qArc1 a (h, L)).2 + π) = a9ra a h
+  rw [arcModelRadius_neg_pi, arcModelRadius_conj]
+  exact a9_radius_qArc1 ha hac hwin
+
+/-- The level-`c` radius at anchor node 2 is `r_c`. -/
+private lemma a9_radius_node2 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L)
+    (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
+    arcModelRadius c (layoutNode2 a c h L 0).1 (layoutNode2 a c h L 0).2
+      = a9rc a c h L := by
+  rw [a9_node2_anchor ha hac hwin hL0 him hφe]
+  change arcModelRadius c (qArc1 a (h, L)).1 ((qArc1 a (h, L)).2 + 2 * π)
+      = a9rc a c h L
+  exact arcModelRadius_add_two_pi c _ _
+
+/-- The level-`a` radius at anchor node 3 is `r_a`. -/
+private lemma a9_radius_node3 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L)
+    (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
+    arcModelRadius a (layoutNode3 a c h L 0).1 (layoutNode3 a c h L 0).2
+      = a9ra a h := by
+  rw [a9_node3_anchor ha hac hwin hL0 him hφe]
+  change arcModelRadius a ((starRingEnd ℂ) (qArc1 a (h, L)).1)
+      (3 * π - (qArc1 a (h, L)).2 + 2 * π) = a9ra a h
+  rw [arcModelRadius_add_two_pi, arcModelRadius_conj]
+  exact a9_radius_qArc1 ha hac hwin
+
+/-- **`w₂`-column derivative**: the terminal-leg insertion.  The curve
+`t ↦ G(0, t)` differentiates to the closed junction form `a9V2` at the anchor
+variables. -/
+private lemma a9_hasDerivAt_col2 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
+    (hL : L ≤ bicircleBracket a h)
+    (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
+    HasDerivAt (fun t => a9Residual a c h L (0, t))
+      (a9V2re (Real.cos (a9theta a h L)) (Real.sin (a9theta a h L))
+          (a9ra a h) (a9rc a c h L) (a9D a c h L)
+        + a9V2im (Real.cos (a9theta a h L)) (Real.sin (a9theta a h L))
+            (a9ra a h) (a9rc a c h L) (a9D a c h L) * Complex.I) 0 := by
+  sorry
+
+/-- **`w₁`-column derivative**: the two-junction variational chain.  The curve
+`t ↦ G(t, 0)` differentiates to the closed junction form `a9V1` at the anchor
+variables. -/
+private lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
+    (hL : L ≤ bicircleBracket a h)
+    (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
+    HasDerivAt (fun t => a9Residual a c h L (t, 0))
+      (a9V1re (Real.cos (a9theta a h L)) (Real.sin (a9theta a h L))
+          (a9ra a h) (a9rc a c h L) (a9D a c h L)
+        + a9V1im (Real.cos (a9theta a h L)) (Real.sin (a9theta a h L))
+            (a9ra a h) (a9rc a c h L) (a9D a c h L) * Complex.I) 0 := by
+  sorry
+
+/-- Joint differentiability of the clean residual at the anchor (all radii
+positive and denominators nonvanishing there). -/
+private lemma a9Residual_differentiableAt {a c h L : ℝ} (ha : 1 < a)
+    (hac : a < c) (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L)
+    (hL : L ≤ bicircleBracket a h) (hlow : 1 / (10 * c) ≤ h)
+    (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
+    DifferentiableAt ℝ (a9Residual a c h L) (0, 0) := by
+  sorry
+
+/-! ### A9.3 — the phase-closure bridge and the face-sign theorem -/
+
+/-- **The clean `z`-closure residual at the turning dof** (public interface for
+ALM-A10): the layout-endpoint `z`-drift at window parameter `Λ = nodePeriod`. -/
+noncomputable def layoutCleanZRes (a c h L w₁ w₂ t : ℝ) : ℂ :=
+  (layoutClean a c h L w₁ w₂ (nodePeriod L w₁ w₂ t)).1 - (layoutStart a c h L).1
+
+/-- **The clean turning residual at the turning dof** (public interface for
+ALM-A10): the phase drift from the `2π`-advanced start. -/
+noncomputable def layoutCleanTurnRes (a c h L w₁ w₂ t : ℝ) : ℝ :=
+  (layoutClean a c h L w₁ w₂ (nodePeriod L w₁ w₂ t)).2
+    - ((layoutStart a c h L).2 + 2 * π)
+
+/-- **The phase-closure bridge**: within phase error `η` of clean closure, the
+layout endpoint is within `r₅·η ≤ η/(2(c − R_cl))` of the fixed-phase endpoint,
+uniformly over the box. -/
+private lemma a9_phase_bridge {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
+    (hL : L ≤ bicircleBracket a h) {w₁ w₂ t : ℝ} (hw₁ : |w₁| ≤ L / 16)
+    (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16) :
+    ‖layoutCleanZRes a c h L w₁ w₂ t - a9Residual a c h L (w₁, w₂)‖
+      ≤ |layoutCleanTurnRes a c h L w₁ w₂ t|
+        / (2 * (c - layoutCleanRadius a c)) := by
+  sorry
+
+/-- **ALM-A9 (`cleanClosure_face_signs`): Poincaré–Miranda face signs of the
+clean closure residual over the recombined `w`-box.**  There are components
+`(A, B)`, `(A′, B′)` of the `z`-residual (an invertible linear recombination:
+`AB′ − BA′ ≠ 0`), a box radius `W ≤ L/16` in the recombined dofs
+`u = w₁ + w₂`, `v = w₁ − w₂`, a face margin `m > 0`, and a phase tolerance
+`η > 0`, such that whenever the clean turning residual at `(w, t)` is within
+`η` of closure, the first component is `≥ m` on the `u = W` face and `≤ −m` on
+`u = −W`, and the second likewise in `v` — the sign pattern the A10
+Poincaré–Miranda closing slices along (margins per-`(a, c)`, nonconstructive). -/
+theorem cleanClosure_face_signs {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
+    (hL : L ≤ bicircleBracket a h)
+    (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
+    ∃ A B A' B' : ℝ, A * B' - B * A' ≠ 0 ∧
+      ∃ W, 0 < W ∧ W ≤ L / 16 ∧ ∃ m, 0 < m ∧ ∃ η, 0 < η ∧
+        ∀ u v t : ℝ, |u| ≤ W → |v| ≤ W → |t| ≤ L / 16 →
+          |layoutCleanTurnRes a c h L ((u + v) / 2) ((u - v) / 2) t| ≤ η →
+          ((u = W → m ≤ A * (layoutCleanZRes a c h L ((u + v) / 2) ((u - v) / 2) t).re
+              + B * (layoutCleanZRes a c h L ((u + v) / 2) ((u - v) / 2) t).im) ∧
+            (u = -W → A * (layoutCleanZRes a c h L ((u + v) / 2) ((u - v) / 2) t).re
+              + B * (layoutCleanZRes a c h L ((u + v) / 2) ((u - v) / 2) t).im ≤ -m) ∧
+            (v = W → m ≤ A' * (layoutCleanZRes a c h L ((u + v) / 2) ((u - v) / 2) t).re
+              + B' * (layoutCleanZRes a c h L ((u + v) / 2) ((u - v) / 2) t).im) ∧
+            (v = -W → A' * (layoutCleanZRes a c h L ((u + v) / 2) ((u - v) / 2) t).re
+              + B' * (layoutCleanZRes a c h L ((u + v) / 2) ((u - v) / 2) t).im ≤ -m)) := by
+  sorry
+
 end Gluck.SpaceForm
