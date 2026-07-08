@@ -5951,10 +5951,10 @@ private lemma layout_turning_gap {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
     (hL : L ≤ bicircleBracket a h) (hL4 : L ≤ 4 * π)
     (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
-    {κ h₁ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
-    (hh₁c : Continuous h₁) (hh₁per : ∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π)
+    {κ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
     {M : ℝ} (hM : ∀ θ, |κ θ| ≤ M) :
-    ∃ C₂ ≥ 0, ∃ ε₁ > 0, ∀ {ε : ℝ}, 0 < ε → ε ≤ ε₁ →
+    ∃ C₂ ≥ 0, ∃ ε₁ > 0, ∀ h₁ : ℝ → ℝ, Continuous h₁ →
+      (∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π) → ∀ {ε : ℝ}, 0 < ε → ε ≤ ε₁ →
       (∫ θ in (0 : ℝ)..(2 * π),
         |κ (h₁ θ) - stepCurvature c a 0 (π / 2) π (3 * π / 2) θ|) ≤ ε →
       (∀ θ ∈ Set.Icc (π / 2) (3 * π / 4), |κ (h₁ θ) - c| ≤ ε) →
@@ -5978,7 +5978,6 @@ private lemma layout_turning_gap {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   -- box-uniform constants
   obtain ⟨C₁, hC₁0, hclose⟩ :=
     layoutTrajectory_close ha hac hwin hlow hL0 hL hL4 hφe hκc hκper hM
-  replace hclose := hclose h₁ hh₁c hh₁per
   obtain ⟨KF, hKF⟩ := arcField_lipschitz (κ := fun _ : ℝ => c) (M := |c|)
     hR'0 hR'1 (fun _ => le_refl |c|)
   obtain ⟨K₂, hK₂0, hK₂⟩ :=
@@ -6001,6 +6000,8 @@ private lemma layout_turning_gap {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     nlinarith
   refine ⟨C₂, hC₂0, min 1 ((1 - Rcl) / (2 * (C₁ + 1))),
     lt_min one_pos (by positivity), ?_⟩
+  intro h₁ hh₁c hh₁per
+  replace hclose := hclose h₁ hh₁c hh₁per
   intro ε hε0 hεε₁ hL1 hpt w₁ w₂ t t' hw₁ hw₂ ht ht' htt'
   have hε1 : ε ≤ 1 := hεε₁.trans (min_le_left _ _)
   have hεconf : C₁ * ε ≤ (1 - Rcl) / 2 := by
@@ -6476,10 +6477,10 @@ theorem turningResidual_strictMono_t {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
     (hL : L ≤ bicircleBracket a h) (hL4 : L ≤ 4 * π)
     (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
-    {κ h₁ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
-    (hh₁c : Continuous h₁) (hh₁per : ∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π)
+    {κ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
     {M : ℝ} (hM : ∀ θ, |κ θ| ≤ M) :
-    ∃ ε₀ > 0, ∀ {ε : ℝ}, 0 < ε → ε ≤ ε₀ →
+    ∃ ε₀ > 0, ∀ h₁ : ℝ → ℝ, Continuous h₁ →
+      (∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π) → ∀ {ε : ℝ}, 0 < ε → ε ≤ ε₀ →
       (∫ θ in (0 : ℝ)..(2 * π),
         |κ (h₁ θ) - stepCurvature c a 0 (π / 2) π (3 * π / 2) θ|) ≤ ε →
       (∀ θ ∈ Set.Icc (π / 2) (3 * π / 4), |κ (h₁ θ) - c| ≤ ε) →
@@ -6490,9 +6491,11 @@ theorem turningResidual_strictMono_t {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   have hRcl1 : layoutCleanRadius a c < 1 := layoutCleanRadius_lt_one ha hac
   have hm0 : 0 < c - layoutCleanRadius a c := by linarith
   obtain ⟨C₂, hC₂0, ε₁, hε₁0, hgap⟩ :=
-    layout_turning_gap ha hac hwin hlow hL0 hL hL4 hφe hκc hκper hh₁c hh₁per hM
+    layout_turning_gap ha hac hwin hlow hL0 hL hL4 hφe hκc hκper hM
   refine ⟨min ε₁ ((c - layoutCleanRadius a c) / (C₂ + 1)),
     lt_min hε₁0 (by positivity), ?_⟩
+  intro h₁ hh₁c hh₁per
+  replace hgap := fun {ε} => hgap h₁ hh₁c hh₁per (ε := ε)
   intro ε hε0 hεε₀ hL1 hpt w₁ w₂ hw₁ hw₂ t htmem t' ht'mem htt'
   have ht : |t| ≤ L / 16 := abs_le.mpr ⟨htmem.1, htmem.2⟩
   have ht' : |t'| ≤ L / 16 := abs_le.mpr ⟨ht'mem.1, ht'mem.2⟩
@@ -7109,10 +7112,10 @@ theorem turningResidual_bracket {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
     (hL : L ≤ bicircleBracket a h) (hL4 : L ≤ 4 * π)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
-    {κ h₁ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
-    (hh₁c : Continuous h₁) (hh₁per : ∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π)
+    {κ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
     {M : ℝ} (hM : ∀ θ, |κ θ| ≤ M) :
-    ∃ W₀ > 0, W₀ ≤ L / 16 ∧ ∃ ε₀ > 0, ∀ {ε : ℝ}, 0 < ε → ε ≤ ε₀ →
+    ∃ W₀ > 0, W₀ ≤ L / 16 ∧ ∃ ε₀ > 0, ∀ h₁ : ℝ → ℝ, Continuous h₁ →
+      (∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π) → ∀ {ε : ℝ}, 0 < ε → ε ≤ ε₀ →
       (∫ θ in (0 : ℝ)..(2 * π),
         |κ (h₁ θ) - stepCurvature c a 0 (π / 2) π (3 * π / 2) θ|) ≤ ε →
       ∀ {w₁ w₂ : ℝ}, |w₁| ≤ W₀ → |w₂| ≤ W₀ →
@@ -7124,11 +7127,12 @@ theorem turningResidual_bracket {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   have hm0 : 0 < m := by rw [hmdef]; linarith
   obtain ⟨C₁, hC₁0, hclose⟩ :=
     layoutTrajectory_close ha hac hwin hlow hL0 hL hL4 hφe hκc hκper hM
-  replace hclose := hclose h₁ hh₁c hh₁per
   obtain ⟨W₀, hW₀0, hW₀16, hdrift⟩ :=
     exists_cleanTurning_box ha hac hwin hlow hL0 hL him hφe
       (margin := m * (L / 16) / 4) (by positivity)
   refine ⟨W₀, hW₀0, hW₀16, m * (L / 16) / (4 * (C₁ + 1)), by positivity, ?_⟩
+  intro h₁ hh₁c hh₁per
+  replace hclose := hclose h₁ hh₁c hh₁per
   intro ε hε0 hεε₀ hL1 w₁ w₂ hw₁ hw₂
   have hw₁' : |w₁| ≤ L / 16 := hw₁.trans hW₀16
   have hw₂' : |w₂| ≤ L / 16 := hw₂.trans hW₀16
@@ -7228,10 +7232,10 @@ theorem turningRoot_continuous {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
     (hL : L ≤ bicircleBracket a h) (hL4 : L ≤ 4 * π)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
-    {κ h₁ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
-    (hh₁c : Continuous h₁) (hh₁per : ∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π)
+    {κ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
     {M : ℝ} (hM : ∀ θ, |κ θ| ≤ M) :
-    ∃ W₀ > 0, W₀ ≤ L / 16 ∧ ∃ ε₀ > 0, ∀ {ε : ℝ}, 0 < ε → ε ≤ ε₀ →
+    ∃ W₀ > 0, W₀ ≤ L / 16 ∧ ∃ ε₀ > 0, ∀ h₁ : ℝ → ℝ, Continuous h₁ →
+      (∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π) → ∀ {ε : ℝ}, 0 < ε → ε ≤ ε₀ →
       (∫ θ in (0 : ℝ)..(2 * π),
         |κ (h₁ θ) - stepCurvature c a 0 (π / 2) π (3 * π / 2) θ|) ≤ ε →
       (∀ θ ∈ Set.Icc (π / 2) (3 * π / 4), |κ (h₁ θ) - c| ≤ ε) →
@@ -7241,12 +7245,13 @@ theorem turningRoot_continuous {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
           τ w ∈ Set.Ioo (-(L / 16)) (L / 16) ∧
           (layoutResidual κ h₁ a c h L M w.1 w.2 (τ w)).2 = 0 := by
   obtain ⟨ε₁, hε₁0, hmono⟩ :=
-    turningResidual_strictMono_t ha hac hwin hlow hL0 hL hL4 hφe hκc hκper
-      hh₁c hh₁per hM
+    turningResidual_strictMono_t ha hac hwin hlow hL0 hL hL4 hφe hκc hκper hM
   obtain ⟨W₀, hW₀0, hW₀16, ε₂, hε₂0, hbr⟩ :=
-    turningResidual_bracket ha hac hwin hlow hL0 hL hL4 him hφe hκc hκper
-      hh₁c hh₁per hM
+    turningResidual_bracket ha hac hwin hlow hL0 hL hL4 him hφe hκc hκper hM
   refine ⟨W₀, hW₀0, hW₀16, min ε₁ ε₂, lt_min hε₁0 hε₂0, ?_⟩
+  intro h₁ hh₁c hh₁per
+  replace hmono := fun {ε} => hmono h₁ hh₁c hh₁per (ε := ε)
+  replace hbr := fun {ε} => hbr h₁ hh₁c hh₁per (ε := ε)
   intro ε hε0 hεε₀ hL1 hpt
   have hres := layoutResidual_continuousOn ha hac hwin hlow hL0 hL hφe hκc hh₁c hM
   set S : Set (ℝ × ℝ) := {w : ℝ × ℝ | |w.1| ≤ W₀ ∧ |w.2| ≤ W₀} with hSdef
@@ -9673,10 +9678,10 @@ theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
     (hL : L ≤ bicircleBracket a h) (hL4 : L ≤ 4 * π)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
-    {κ h₁ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
-    (hh₁c : Continuous h₁) (hh₁per : ∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π)
+    {κ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
     {M : ℝ} (hM : ∀ θ, |κ θ| ≤ M) :
-    ∃ C₁ > 0, ∃ ε₀ > 0, ∀ {ε : ℝ}, 0 < ε → ε ≤ ε₀ →
+    ∃ C₁ > 0, ∃ ε₀ > 0, ∀ h₁ : ℝ → ℝ, Continuous h₁ →
+      (∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π) → ∀ {ε : ℝ}, 0 < ε → ε ≤ ε₀ →
       (∫ θ in (0 : ℝ)..(2 * π),
         |κ (h₁ θ) - stepCurvature c a 0 (π / 2) π (3 * π / 2) θ|) ≤ ε →
       (∀ θ ∈ Set.Icc (π / 2) (3 * π / 4), |κ (h₁ θ) - c| ≤ ε) →
@@ -9689,10 +9694,8 @@ theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
           ‖(layoutFlow κ h₁ a c h L M w₁ w₂ t σ).1‖ ≤ layoutConfineRadius a c := by
   obtain ⟨C₁, hC₁0, hclose⟩ :=
     layoutTrajectory_close ha hac hwin hlow hL0 hL hL4 hφe hκc hκper hM
-  replace hclose := hclose h₁ hh₁c hh₁per
   obtain ⟨W₀, hW₀0, hW₀16, ε₁, hε₁0, hroot⟩ :=
-    turningRoot_continuous ha hac hwin hlow hL0 hL hL4 him hφe hκc hκper
-      hh₁c hh₁per hM
+    turningRoot_continuous ha hac hwin hlow hL0 hL hL4 him hφe hκc hκper hM
   obtain ⟨A, B, A', B', hdet, W₁, hW₁0, hW₁16, hface⟩ :=
     cleanClosure_face_signs ha hac hwin hlow hL0 hL him hφe
   set W := min W₀ W₁
@@ -9717,6 +9720,9 @@ theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       ((1 - layoutCleanRadius a c) / (2 * C₁)))), lt_min hε₁0 (lt_min
       (div_pos hη0 hC₁0) (lt_min (div_pos hm0 (by positivity))
       (div_pos (by linarith only [hRcl]) (by positivity)))), ?_⟩
+  intro h₁ hh₁c hh₁per
+  replace hclose := hclose h₁ hh₁c hh₁per
+  replace hroot := fun {ε} => hroot h₁ hh₁c hh₁per (ε := ε)
   intro ε hε0 hεε₀ hL1 hpt
   set εI := ∫ θ in (0 : ℝ)..(2 * π),
     |κ (h₁ θ) - stepCurvature c a 0 (π / 2) π (3 * π / 2) θ|
@@ -10879,9 +10885,10 @@ ahead of `C₁`, `ε` so ALM-A12 can fix `ε ≤ μ/C₁`. -/
 theorem layout_chord_ne_zero {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
     (hL : L ≤ bicircleBracket a h) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
-    {κ h₁ : ℝ → ℝ} (hκc : Continuous κ) (hh₁c : Continuous h₁)
+    {κ : ℝ → ℝ} (hκc : Continuous κ)
     {M : ℝ} (hM : ∀ θ, |κ θ| ≤ M) :
-    ∃ μ > 0, ∀ {C₁ ε : ℝ} {w₁ w₂ t : ℝ}, |w₁| ≤ L / 16 → |w₂| ≤ L / 16 →
+    ∃ μ > 0, ∀ h₁ : ℝ → ℝ, Continuous h₁ →
+      ∀ {C₁ ε : ℝ} {w₁ w₂ t : ℝ}, |w₁| ≤ L / 16 → |w₂| ≤ L / 16 →
       |t| ≤ L / 16 → 0 < C₁ → 0 < ε → C₁ * ε ≤ μ →
       (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)).1
           = (layoutStart a c h L).1 →
@@ -10911,6 +10918,7 @@ theorem layout_chord_ne_zero {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   obtain ⟨m₀, hm₀0, η₀, hη₀0, hclean⟩ :=
     layoutClean_chord_lower ha hac hwin hlow hL0 hL hℓ₀0
   refine ⟨min η₀ (m₀ / 4), lt_min hη₀0 (by linarith), ?_⟩
+  intro h₁ hh₁c
   intro C₁ ε w₁ w₂ t hw₁ hw₂ ht hC₁0 hε0 hμ hzcl htcl htrans hconf p q hp hpq hqΛ
   have hμη : C₁ * ε ≤ η₀ := hμ.trans (min_le_left _ _)
   have hμm : C₁ * ε ≤ m₀ / 4 := hμ.trans (min_le_right _ _)
