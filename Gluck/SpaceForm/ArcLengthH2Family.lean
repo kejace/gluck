@@ -9932,4 +9932,130 @@ theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       (htrans w₁ w₂ hw₁ hw₂ t ht16) hεconf
     exact fun σ hσ => (hconf.1 σ hσ).trans hconf.2
 
+/-! ## ALM-A11: simplicity transport (three regimes)
+
+The closed true flow of ALM-A10 has all proper sub-arc chords nonzero.  The
+argument splits by the sub-arc length `d = v − u` against a fixed short scale
+`ℓ₀`:
+
+* **short** (`d ≤ ℓ₀`): the true phase moves at speed `≤ C₂ = 2(M+1)/(1−R'²)`,
+  so the φ-span is `≤ π/3` and the left-endpoint projection
+  `∫ cos(φ − φ(u)) ≥ d/2 > 0` — this regime tolerates the negative dips;
+* **mid** (`ℓ₀ ≤ d ≤ Λ − ℓ₀`): the clean five-leg curve has a *quantitative*
+  chord margin `m₀` on the mid band, uniform over the layout box, whenever its
+  endpoint residuals are `≤ η₀` (`layoutClean_chord_lower`, a three-case
+  projection argument through the clean phase-speed sandwich); the A6/A10
+  transport moves it to the true curve at cost `2b`;
+* **near-full** (`d ≥ Λ − ℓ₀`): the complement `[0, u] ∪ [v, Λ]` is short, and
+  the exact closure `∫₀^Λ e^{iφ} = z(Λ) − z(0) = 0` flips the chord onto the
+  complement's two-piece projection.
+-/
+
+/-- **Short-arc chord non-vanishing** (hypothesis form): if `φ` deviates from
+`φ(u)` by at most `π/3` on `[u, v]`, the chord `∫_u^v e^{iφ} ≠ 0` (left-endpoint
+projection `∫ cos(φ − φ(u)) ≥ (v − u)/2 > 0`).  No monotonicity — the ALM-A11
+short regime runs through the negative dips of the true flow. -/
+private lemma chord_ne_zero_of_small_dev {φ : ℝ → ℝ} {u v : ℝ} (huv : u < v)
+    (hφc : ContinuousOn φ (Set.Icc u v))
+    (hdev : ∀ s ∈ Set.Icc u v, |φ s - φ u| ≤ π / 3) :
+    (∫ s in u..v, Complex.exp ((φ s : ℂ) * Complex.I)) ≠ 0 := by
+  have hπ := Real.pi_pos
+  have hcontφ : ContinuousOn φ (Set.uIcc u v) := by
+    rwa [Set.uIcc_of_le huv.le]
+  have hposcos : ∀ s ∈ Set.Ioo u v, 0 < Real.cos (φ s - φ u) := by
+    intro s hs
+    have h1 := hdev s ⟨hs.1.le, hs.2.le⟩
+    have h2 := abs_le.mp h1
+    refine Real.cos_pos_of_mem_Ioo ⟨by linarith, by linarith⟩
+  have hintcos : IntervalIntegrable (fun s => Real.cos (φ s - φ u))
+      MeasureTheory.volume u v :=
+    (Real.continuous_cos.comp_continuousOn
+      (hcontφ.sub continuousOn_const)).intervalIntegrable
+  have hcospos : (0 : ℝ) < ∫ s in u..v, Real.cos (φ s - φ u) :=
+    intervalIntegral.intervalIntegral_pos_of_pos_on hintcos hposcos huv
+  intro hzero
+  have hproj := anchor_chord_proj_re hcontφ (φ u)
+  rw [hzero, mul_zero, Complex.zero_re] at hproj
+  linarith
+
+/-- **Near-full-arc chord non-vanishing** (hypothesis form): if the loop closes
+(`∫₀^Λ e^{iφ} = 0`), turns by `2π`, and `φ` deviates by `≤ π/3` from `φ(0)` on
+`[0, u]` and from `φ(Λ)` on `[v, Λ]`, then the chord `∫_u^v e^{iφ} ≠ 0`: it
+equals minus the complement chord, whose projection onto `e^{iφ(0)}` is
+`≥ (u + (Λ − v))/2 > 0`. -/
+private lemma chord_ne_zero_of_short_complement {φ : ℝ → ℝ} {Λ u v : ℝ}
+    (hu : 0 ≤ u) (huv : u < v) (hvΛ : v < Λ)
+    (hφc : ContinuousOn φ (Set.Icc 0 Λ))
+    (hturn : φ Λ = φ 0 + 2 * π)
+    (hloop : (∫ s in (0 : ℝ)..Λ, Complex.exp ((φ s : ℂ) * Complex.I)) = 0)
+    (hdev0 : ∀ s ∈ Set.Icc 0 u, |φ s - φ 0| ≤ π / 3)
+    (hdevΛ : ∀ s ∈ Set.Icc v Λ, |φ s - φ Λ| ≤ π / 3) :
+    (∫ s in u..v, Complex.exp ((φ s : ℂ) * Complex.I)) ≠ 0 := by
+  have hπ := Real.pi_pos
+  have hΛ0 : (0 : ℝ) ≤ Λ := hu.trans (huv.le.trans hvΛ.le)
+  have hv0 : (0 : ℝ) ≤ v := hu.trans huv.le
+  have humem : u ∈ Set.Icc (0 : ℝ) Λ := ⟨hu, huv.le.trans hvΛ.le⟩
+  have hvmem : v ∈ Set.Icc (0 : ℝ) Λ := ⟨hv0, hvΛ.le⟩
+  have h0mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) Λ := ⟨le_refl 0, hΛ0⟩
+  have hΛmem : Λ ∈ Set.Icc (0 : ℝ) Λ := ⟨hΛ0, le_refl Λ⟩
+  have hexpc : ContinuousOn (fun s => Complex.exp ((φ s : ℂ) * Complex.I))
+      (Set.Icc 0 Λ) :=
+    Complex.continuous_exp.comp_continuousOn
+      ((Complex.continuous_ofReal.comp_continuousOn hφc).mul continuousOn_const)
+  have hintexp : ∀ p q : ℝ, p ∈ Set.Icc (0 : ℝ) Λ → q ∈ Set.Icc (0 : ℝ) Λ →
+      IntervalIntegrable (fun s => Complex.exp ((φ s : ℂ) * Complex.I))
+        MeasureTheory.volume p q :=
+    fun p q hp hq => (hexpc.mono (Set.uIcc_subset_Icc hp hq)).intervalIntegrable
+  set ψ : ℝ := φ 0 with hψ
+  -- pointwise cosine positivity on the two complement pieces
+  have hcos0 : ∀ s ∈ Set.Icc (0 : ℝ) u, 0 ≤ Real.cos (φ s - ψ) := by
+    intro s hs
+    have h2 := abs_le.mp (hdev0 s hs)
+    exact (Real.cos_pos_of_mem_Ioo ⟨by linarith, by linarith⟩).le
+  have hcosΛ : ∀ s ∈ Set.Ioo v Λ, 0 < Real.cos (φ s - ψ) := by
+    intro s hs
+    have h2 := abs_le.mp (hdevΛ s ⟨hs.1.le, hs.2.le⟩)
+    have hcoseq : Real.cos (φ s - ψ) = Real.cos (φ s - φ Λ) := by
+      rw [show φ s - ψ = (φ s - φ Λ) + 2 * π by rw [hturn]; ring, Real.cos_add_two_pi]
+    rw [hcoseq]
+    exact Real.cos_pos_of_mem_Ioo ⟨by linarith, by linarith⟩
+  have hcontφ0 : ContinuousOn φ (Set.uIcc 0 u) :=
+    hφc.mono (Set.uIcc_subset_Icc h0mem humem)
+  have hcontφΛ : ContinuousOn φ (Set.uIcc v Λ) :=
+    hφc.mono (Set.uIcc_subset_Icc hvmem hΛmem)
+  have hintcos0 : IntervalIntegrable (fun s => Real.cos (φ s - ψ))
+      MeasureTheory.volume 0 u :=
+    (Real.continuous_cos.comp_continuousOn
+      (hcontφ0.sub continuousOn_const)).intervalIntegrable
+  have hintcosΛ : IntervalIntegrable (fun s => Real.cos (φ s - ψ))
+      MeasureTheory.volume v Λ :=
+    (Real.continuous_cos.comp_continuousOn
+      (hcontφΛ.sub continuousOn_const)).intervalIntegrable
+  have hcosnn : (0 : ℝ) ≤ ∫ s in (0 : ℝ)..u, Real.cos (φ s - ψ) :=
+    intervalIntegral.integral_nonneg hu hcos0
+  have hcospos : (0 : ℝ) < ∫ s in v..Λ, Real.cos (φ s - ψ) :=
+    intervalIntegral.intervalIntegral_pos_of_pos_on hintcosΛ hcosΛ hvΛ
+  intro hzero
+  -- the complement chord vanishes with the sub-arc chord
+  have hCzero : (∫ s in v..Λ, Complex.exp ((φ s : ℂ) * Complex.I))
+      + (∫ s in (0 : ℝ)..u, Complex.exp ((φ s : ℂ) * Complex.I)) = 0 := by
+    have hadd1 := intervalIntegral.integral_add_adjacent_intervals
+      (hintexp 0 u h0mem humem) (hintexp u Λ humem hΛmem)
+    have hadd2 := intervalIntegral.integral_add_adjacent_intervals
+      (hintexp u v humem hvmem) (hintexp v Λ hvmem hΛmem)
+    rw [hloop] at hadd1
+    rw [hzero, zero_add] at hadd2
+    rw [← hadd2] at hadd1
+    linear_combination hadd1
+  have hproj0 := anchor_chord_proj_re hcontφ0 ψ
+  have hprojΛ := anchor_chord_proj_re hcontφΛ ψ
+  have hsplit : (Complex.exp (-(ψ : ℂ) * Complex.I)
+        * ((∫ s in v..Λ, Complex.exp ((φ s : ℂ) * Complex.I))
+          + ∫ s in (0 : ℝ)..u, Complex.exp ((φ s : ℂ) * Complex.I))).re
+      = (∫ s in v..Λ, Real.cos (φ s - ψ))
+        + ∫ s in (0 : ℝ)..u, Real.cos (φ s - ψ) := by
+    rw [mul_add, Complex.add_re, hproj0, hprojΛ]
+  rw [hCzero, mul_zero, Complex.zero_re] at hsplit
+  linarith
+
 end Gluck.SpaceForm
