@@ -9932,6 +9932,7 @@ theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       (htrans w₁ w₂ hw₁ hw₂ t ht16) hεconf
     exact fun σ hσ => (hconf.1 σ hσ).trans hconf.2
 
+
 /-! ## ALM-A11: simplicity transport (three regimes)
 
 The closed true flow of ALM-A10 has all proper sub-arc chords nonzero.  The
@@ -10057,5 +10058,1033 @@ private lemma chord_ne_zero_of_short_complement {φ : ℝ → ℝ} {Λ u v : ℝ
     rw [mul_add, Complex.add_re, hproj0, hprojΛ]
   rw [hCzero, mul_zero, Complex.zero_re] at hsplit
   linarith
+
+/-! ### ALM-A11: the clean phase-speed sandwich and the clean unit-speed law
+
+Each layout leg is a level-`K` model arc (`a ≤ K ≤ c`) started at norm
+`≤ layoutCleanRadius a c`, so its Euclidean radius `r` obeys the *uniform*
+two-sided rate bounds `2(a − R_cl) ≤ 1/r ≤ 2(c + R_cl)/(1 − R_cl²)` (the
+generic form of the A8 `leg5_rate_bounds`).  Chaining the exact per-leg affine
+phases through the junctions gives the global phase-speed sandwich; merging the
+per-leg unit-speed laws `z' = e^{iφ}` (two-sidedly at the junctions, where the
+phases agree) gives the clean curve's global `HasDerivAt`. -/
+
+/-- Copy of the engine-private `arcModelConst_hasDerivAt_z`
+(`ArcLengthH2.lean:775`): the model's `z`-component satisfies `z'(σ) = e^{iφ(σ)}`
+whenever the model radius is nonzero. -/
+private lemma arcModelConst_hasDerivAt_fst {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
+    (hr : arcModelRadius K z₀ φ₀ ≠ 0) (σ : ℝ) :
+    HasDerivAt (fun t => (arcModelConst K z₀ φ₀ t).1)
+      (Complex.exp (((arcModelConst K z₀ φ₀ σ).2 : ℂ) * Complex.I)) σ := by
+  set r := arcModelRadius K z₀ φ₀ with hrdef
+  have hrC : (r : ℂ) ≠ 0 := by exact_mod_cast hr
+  have hg : HasDerivAt (fun t : ℝ => Complex.exp (((t / r : ℝ) : ℂ) * Complex.I))
+      (Complex.exp (((σ / r : ℝ) : ℂ) * Complex.I) * (((1 / r : ℝ) : ℂ) * Complex.I)) σ := by
+    have h1 : HasDerivAt (fun t : ℝ => ((t / r : ℝ) : ℂ) * Complex.I)
+        (((1 / r : ℝ) : ℂ) * Complex.I) σ :=
+      (((hasDerivAt_id σ).div_const r).ofReal_comp).mul_const Complex.I
+    exact h1.cexp
+  have hf : HasDerivAt (fun t => (arcModelConst K z₀ φ₀ t).1)
+      (-((r : ℂ) * Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I) *
+        (Complex.exp (((σ / r : ℝ) : ℂ) * Complex.I) * (((1 / r : ℝ) : ℂ) * Complex.I)))) σ := by
+    have := (((hg.sub_const 1).const_mul
+      ((r : ℂ) * Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I))).const_sub z₀)
+    simpa [arcModelConst, hrdef] using this
+  have h2 : ((arcModelConst K z₀ φ₀ σ).2 : ℂ) = (φ₀ : ℂ) + ((σ / r : ℝ) : ℂ) := by
+    simp [arcModelConst, hrdef]
+  have hII : Complex.I * Complex.I = -1 := by rw [← sq]; exact Complex.I_sq
+  have hrr : (r : ℂ) * ((1 / r : ℝ) : ℂ) = 1 := by push_cast; field_simp
+  convert hf using 1
+  rw [h2, add_mul, Complex.exp_add,
+    show -((r : ℂ) * Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I) *
+        (Complex.exp (((σ / r : ℝ) : ℂ) * Complex.I) * (((1 / r : ℝ) : ℂ) * Complex.I)))
+      = -((r : ℂ) * ((1 / r : ℝ) : ℂ) * (Complex.I * Complex.I)) *
+        (Complex.exp ((φ₀ : ℂ) * Complex.I) * Complex.exp (((σ / r : ℝ) : ℂ) * Complex.I)) from
+      by ring, hrr, hII]
+  ring
+
+/-- **Uniform per-leg rate bounds** (generic form of `leg5_rate_bounds`): a
+level-`K` model leg with `a ≤ K ≤ c` started at norm `≤ layoutCleanRadius a c`
+has positive radius and phase rate `1/r ∈ [2(a − R_cl), 2(c + R_cl)/(1 − R_cl²)]`. -/
+private lemma layout_rate_bounds {a c K : ℝ} {z₀ : ℂ} {φ₀ : ℝ} (ha : 1 < a)
+    (hac : a < c) (haK : a ≤ K) (hKc : K ≤ c)
+    (hz : ‖z₀‖ ≤ layoutCleanRadius a c) :
+    0 < arcModelRadius K z₀ φ₀ ∧
+      2 * (a - layoutCleanRadius a c) ≤ (arcModelRadius K z₀ φ₀)⁻¹ ∧
+      (arcModelRadius K z₀ φ₀)⁻¹
+        ≤ 2 * (c + layoutCleanRadius a c) / (1 - layoutCleanRadius a c ^ 2) := by
+  have hRcl0 : 0 ≤ layoutCleanRadius a c := layoutCleanRadius_nonneg ha hac
+  have hRcl1 : layoutCleanRadius a c < 1 := layoutCleanRadius_lt_one ha hac
+  have hin := abs_le.mp (abs_inner_normal_le z₀ φ₀)
+  have hz0 := norm_nonneg z₀
+  have hzsq : ‖z₀‖ ^ 2 ≤ layoutCleanRadius a c ^ 2 := sq_le_sq' (by linarith) hz
+  have hnum : 0 < 1 - ‖z₀‖ ^ 2 := by nlinarith
+  have hden : 0 < K + ⟪z₀, Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I)⟫_ℝ := by
+    nlinarith [hin.1]
+  have hr : arcModelRadius K z₀ φ₀ = (1 - ‖z₀‖ ^ 2)
+      / (2 * (K + ⟪z₀, Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I)⟫_ℝ)) := rfl
+  have hrpos : 0 < arcModelRadius K z₀ φ₀ := by
+    rw [hr]; exact div_pos hnum (by linarith)
+  have hrinv : (arcModelRadius K z₀ φ₀)⁻¹
+      = 2 * (K + ⟪z₀, Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I)⟫_ℝ)
+        / (1 - ‖z₀‖ ^ 2) := by rw [hr, inv_div]
+  refine ⟨hrpos, ?_, ?_⟩
+  · rw [hrinv]
+    calc 2 * (a - layoutCleanRadius a c)
+        ≤ 2 * (K + ⟪z₀, Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I)⟫_ℝ) := by
+          nlinarith [hin.1]
+      _ ≤ 2 * (K + ⟪z₀, Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I)⟫_ℝ)
+          / (1 - ‖z₀‖ ^ 2) := by
+          rw [le_div_iff₀ hnum]
+          nlinarith [hden]
+  · rw [hrinv]
+    have h1 : 2 * (K + ⟪z₀, Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I)⟫_ℝ)
+        ≤ 2 * (c + layoutCleanRadius a c) := by nlinarith [hin.2]
+    have h2 : 1 - layoutCleanRadius a c ^ 2 ≤ 1 - ‖z₀‖ ^ 2 := by nlinarith
+    exact div_le_div₀ (by nlinarith [hin.1]) h1 (by nlinarith) h2
+
+/-- The five layout leg start states are confined in `layoutCleanRadius a c`. -/
+private lemma layout_node_norms {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 ≤ L)
+    (hL : L ≤ bicircleBracket a h) (w₁ w₂ : ℝ) :
+    ‖(layoutStart a c h L).1‖ ≤ layoutCleanRadius a c ∧
+      ‖(layoutNode1 a c h L).1‖ ≤ layoutCleanRadius a c ∧
+      ‖(layoutNode2 a c h L w₁).1‖ ≤ layoutCleanRadius a c ∧
+      ‖(layoutNode3 a c h L w₁).1‖ ≤ layoutCleanRadius a c ∧
+      ‖(layoutNode4 a c h L w₁ w₂).1‖ ≤ layoutCleanRadius a c := by
+  obtain ⟨g1, g2, g3, g4, _⟩ :=
+    layout_legs_norm_le (w₁ := w₁) (w₂ := w₂) ha hac hwin hlow hL0 hL
+  have weaken : ∀ {j : ℕ}, j ≤ 5 → 1 - layoutMargin a c j ≤ layoutCleanRadius a c := by
+    intro j hj
+    rw [← layoutMargin_five]
+    linarith [layoutMargin_antitone ha hac hj]
+  exact ⟨(layoutStart_norm_le ha hac hwin hlow hL0 hL).trans
+      (anchorConfineRadius_le_layoutCleanRadius ha hac),
+    (g1 (L / 8)).trans (weaken (by norm_num)),
+    (g2 (L / 4 + w₁)).trans (weaken (by norm_num)),
+    (g3 (L / 4)).trans (weaken (by norm_num)),
+    (g4 (L / 4 + w₂)).trans (weaken (by norm_num))⟩
+
+/-- Two-sided derivative merge at a junction: if `F` agrees with `f` on a left
+window `[p, x₀]` and with `g` on a right window `[x₀, q]`, and both have the
+same derivative `d` at `x₀`, so does `F`. -/
+private lemma hasDerivAt_of_sides {F f g : ℝ → ℂ} {x₀ p q : ℝ} {d : ℂ}
+    (hp : p < x₀) (hq : x₀ < q)
+    (hf : HasDerivAt f d x₀) (hg : HasDerivAt g d x₀)
+    (hl : ∀ x, p ≤ x → x ≤ x₀ → F x = f x)
+    (hr : ∀ x, x₀ ≤ x → x ≤ q → F x = g x) : HasDerivAt F d x₀ := by
+  have h1 : HasDerivWithinAt F d (Set.Iic x₀) x₀ := by
+    refine (hf.hasDerivWithinAt).congr_of_eventuallyEq ?_ (hl x₀ hp.le le_rfl)
+    filter_upwards [mem_nhdsWithin_of_mem_nhds (Ioi_mem_nhds hp),
+      self_mem_nhdsWithin] with x hx1 hx2
+    exact hl x hx1.le hx2
+  have h2 : HasDerivWithinAt F d (Set.Ici x₀) x₀ := by
+    refine (hg.hasDerivWithinAt).congr_of_eventuallyEq ?_ (hr x₀ le_rfl hq.le)
+    filter_upwards [mem_nhdsWithin_of_mem_nhds (Iio_mem_nhds hq),
+      self_mem_nhdsWithin] with x hx1 hx2
+    exact hr x hx2 hx1.le
+  have h3 := h1.union h2
+  rwa [Set.Iic_union_Ici, hasDerivWithinAt_univ] at h3
+
+/-- **The clean layout curve's unit-speed law**: `z_cl'(σ) = e^{iφ_cl(σ)}` at
+*every* `σ` — the per-leg model laws merge two-sidedly at the junctions because
+the junction phases agree.  Feeds the clean FTC chord identity of the ALM-A11
+mid regime. -/
+private lemma layoutClean_fst_hasDerivAt {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
+    (hL : L ≤ bicircleBracket a h) {w₁ w₂ : ℝ} (hw₁ : |w₁| ≤ L / 16)
+    (hw₂ : |w₂| ≤ L / 16) (σ : ℝ) :
+    HasDerivAt (fun s => (layoutClean a c h L w₁ w₂ s).1)
+      (Complex.exp (((layoutClean a c h L w₁ w₂ σ).2 : ℂ) * Complex.I)) σ := by
+  have hc1 : 1 < c := ha.trans hac
+  have hRcl1 : layoutCleanRadius a c < 1 := layoutCleanRadius_lt_one ha hac
+  obtain ⟨hn0, hn1, hn2, hn3, hn4⟩ := layout_node_norms ha hac hwin hlow hL0.le hL w₁ w₂
+  have hw₁' := abs_le.mp hw₁
+  have hw₂' := abs_le.mp hw₂
+  -- the five nonzero leg radii
+  have hr1 : arcModelRadius c (layoutStart a c h L).1 (layoutStart a c h L).2 ≠ 0 :=
+    (arcModelRadius_pos_of_norm_lt_one hc1.le (lt_of_le_of_lt hn0 hRcl1)).ne'
+  have hr2 : arcModelRadius a (layoutNode1 a c h L).1 (layoutNode1 a c h L).2 ≠ 0 :=
+    (arcModelRadius_pos_of_norm_lt_one ha.le (lt_of_le_of_lt hn1 hRcl1)).ne'
+  have hr3 : arcModelRadius c (layoutNode2 a c h L w₁).1 (layoutNode2 a c h L w₁).2 ≠ 0 :=
+    (arcModelRadius_pos_of_norm_lt_one hc1.le (lt_of_le_of_lt hn2 hRcl1)).ne'
+  have hr4 : arcModelRadius a (layoutNode3 a c h L w₁).1 (layoutNode3 a c h L w₁).2 ≠ 0 :=
+    (arcModelRadius_pos_of_norm_lt_one ha.le (lt_of_le_of_lt hn3 hRcl1)).ne'
+  have hr5 : arcModelRadius c (layoutNode4 a c h L w₁ w₂).1
+      (layoutNode4 a c h L w₁ w₂).2 ≠ 0 :=
+    (arcModelRadius_pos_of_norm_lt_one hc1.le (lt_of_le_of_lt hn4 hRcl1)).ne'
+  -- breakpoint ordering
+  have h01 : (0 : ℝ) < nodeS1 L := by rw [nodeS1]; linarith
+  have h12 : nodeS1 L < nodeS2 L w₁ := by rw [nodeS1, nodeS2]; linarith
+  have h23 : nodeS2 L w₁ < nodeS3 L w₁ := by rw [nodeS2, nodeS3]; linarith
+  have h34 : nodeS3 L w₁ < nodeS4 L w₁ w₂ := by rw [nodeS3, nodeS4]; linarith
+  -- shifted per-leg `z`-derivative laws
+  have hD1 : ∀ x : ℝ, HasDerivAt
+      (fun s => (arcModelConst c (layoutStart a c h L).1 (layoutStart a c h L).2 s).1)
+      (Complex.exp (((arcModelConst c (layoutStart a c h L).1
+        (layoutStart a c h L).2 x).2 : ℂ) * Complex.I)) x :=
+    fun x => arcModelConst_hasDerivAt_fst hr1 x
+  have shift : ∀ {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}, arcModelRadius K z₀ φ₀ ≠ 0 → ∀ b x : ℝ,
+      HasDerivAt (fun s => (arcModelConst K z₀ φ₀ (s - b)).1)
+        (Complex.exp (((arcModelConst K z₀ φ₀ (x - b)).2 : ℂ) * Complex.I)) x := by
+    intro K z₀ φ₀ hr b x
+    exact HasDerivAt.comp_sub_const x b (arcModelConst_hasDerivAt_fst hr (x - b))
+  -- notation for the five (shifted) leg curves
+  set F1 : ℝ → ℂ := fun s =>
+    (arcModelConst c (layoutStart a c h L).1 (layoutStart a c h L).2 s).1
+  set F2 : ℝ → ℂ := fun s =>
+    (arcModelConst a (layoutNode1 a c h L).1 (layoutNode1 a c h L).2 (s - nodeS1 L)).1
+  set F3 : ℝ → ℂ := fun s =>
+    (arcModelConst c (layoutNode2 a c h L w₁).1 (layoutNode2 a c h L w₁).2
+      (s - nodeS2 L w₁)).1
+  set F4 : ℝ → ℂ := fun s =>
+    (arcModelConst a (layoutNode3 a c h L w₁).1 (layoutNode3 a c h L w₁).2
+      (s - nodeS3 L w₁)).1
+  set F5 : ℝ → ℂ := fun s =>
+    (arcModelConst c (layoutNode4 a c h L w₁ w₂).1 (layoutNode4 a c h L w₁ w₂).2
+      (s - nodeS4 L w₁ w₂)).1
+  -- the leg-value equalities, `Prod.fst` level
+  have hE1 : ∀ x, x ≤ nodeS1 L → (layoutClean a c h L w₁ w₂ x).1 = F1 x :=
+    fun x hx => congrArg Prod.fst (layoutClean_leg1 a c h L w₁ w₂ hx)
+  have hE2 : ∀ x, nodeS1 L ≤ x → x ≤ nodeS2 L w₁ →
+      (layoutClean a c h L w₁ w₂ x).1 = F2 x :=
+    fun x hx1 hx2 => congrArg Prod.fst (layoutClean_leg2 a c h w₂ hx1 hx2)
+  have hE3 : ∀ x, nodeS2 L w₁ ≤ x → x ≤ nodeS3 L w₁ →
+      (layoutClean a c h L w₁ w₂ x).1 = F3 x :=
+    fun x hx1 hx2 => congrArg Prod.fst (layoutClean_leg3 a c h w₂ hL0 hw₁ hx1 hx2)
+  have hE4 : ∀ x, nodeS3 L w₁ ≤ x → x ≤ nodeS4 L w₁ w₂ →
+      (layoutClean a c h L w₁ w₂ x).1 = F4 x :=
+    fun x hx1 hx2 => congrArg Prod.fst (layoutClean_leg4 a c h hL0 hw₁ hx1 hx2)
+  have hE5 : ∀ x, nodeS4 L w₁ w₂ ≤ x → (layoutClean a c h L w₁ w₂ x).1 = F5 x :=
+    fun x hx => congrArg Prod.fst (layoutClean_leg5 a c h hL0 hw₁ hw₂ hx)
+  -- the leg-phase equalities
+  have hP1 : ∀ x, x ≤ nodeS1 L → (layoutClean a c h L w₁ w₂ x).2
+      = (arcModelConst c (layoutStart a c h L).1 (layoutStart a c h L).2 x).2 :=
+    fun x hx => congrArg Prod.snd (layoutClean_leg1 a c h L w₁ w₂ hx)
+  have hP2 : ∀ x, nodeS1 L ≤ x → x ≤ nodeS2 L w₁ → (layoutClean a c h L w₁ w₂ x).2
+      = (arcModelConst a (layoutNode1 a c h L).1 (layoutNode1 a c h L).2
+          (x - nodeS1 L)).2 :=
+    fun x hx1 hx2 => congrArg Prod.snd (layoutClean_leg2 a c h w₂ hx1 hx2)
+  have hP3 : ∀ x, nodeS2 L w₁ ≤ x → x ≤ nodeS3 L w₁ → (layoutClean a c h L w₁ w₂ x).2
+      = (arcModelConst c (layoutNode2 a c h L w₁).1 (layoutNode2 a c h L w₁).2
+          (x - nodeS2 L w₁)).2 :=
+    fun x hx1 hx2 => congrArg Prod.snd (layoutClean_leg3 a c h w₂ hL0 hw₁ hx1 hx2)
+  have hP4 : ∀ x, nodeS3 L w₁ ≤ x → x ≤ nodeS4 L w₁ w₂ → (layoutClean a c h L w₁ w₂ x).2
+      = (arcModelConst a (layoutNode3 a c h L w₁).1 (layoutNode3 a c h L w₁).2
+          (x - nodeS3 L w₁)).2 :=
+    fun x hx1 hx2 => congrArg Prod.snd (layoutClean_leg4 a c h hL0 hw₁ hx1 hx2)
+  have hP5 : ∀ x, nodeS4 L w₁ w₂ ≤ x → (layoutClean a c h L w₁ w₂ x).2
+      = (arcModelConst c (layoutNode4 a c h L w₁ w₂).1 (layoutNode4 a c h L w₁ w₂).2
+          (x - nodeS4 L w₁ w₂)).2 :=
+    fun x hx => congrArg Prod.snd (layoutClean_leg5 a c h hL0 hw₁ hw₂ hx)
+  -- case split on the position of `σ`
+  rcases lt_trichotomy σ (nodeS1 L) with hσ1 | hσ1 | hσ1
+  · -- interior of leg 1
+    rw [hP1 σ hσ1.le]
+    refine (hD1 σ).congr_of_eventuallyEq ?_
+    filter_upwards [Iio_mem_nhds hσ1] with x hx
+    exact hE1 x (le_of_lt hx)
+  · -- junction `σ = s₁`
+    subst hσ1
+    rw [hP1 _ le_rfl]
+    refine hasDerivAt_of_sides (show nodeS1 L - 1 < nodeS1 L by linarith) h12
+      (hD1 _) ?_ (fun x _ hx2 => hE1 x hx2) (fun x hx1 hx2 => hE2 x hx1 hx2)
+    have hD := shift hr2 (nodeS1 L) (nodeS1 L)
+    have hval : (arcModelConst a (layoutNode1 a c h L).1 (layoutNode1 a c h L).2
+        (nodeS1 L - nodeS1 L)).2 = (arcModelConst c (layoutStart a c h L).1
+          (layoutStart a c h L).2 (nodeS1 L)).2 := by
+      rw [← hP2 _ le_rfl h12.le, ← hP1 _ le_rfl]
+    rwa [hval] at hD
+  rcases lt_trichotomy σ (nodeS2 L w₁) with hσ2 | hσ2 | hσ2
+  · -- interior of leg 2
+    rw [hP2 σ hσ1.le hσ2.le]
+    refine (shift hr2 (nodeS1 L) σ).congr_of_eventuallyEq ?_
+    filter_upwards [Ioo_mem_nhds hσ1 hσ2] with x hx
+    exact hE2 x hx.1.le hx.2.le
+  · -- junction `σ = s₂`
+    subst hσ2
+    rw [hP2 _ hσ1.le le_rfl]
+    refine hasDerivAt_of_sides hσ1 h23 (shift hr2 (nodeS1 L) _) ?_
+      (fun x hx1 hx2 => hE2 x hx1 hx2) (fun x hx1 hx2 => hE3 x hx1 hx2)
+    have hD := shift hr3 (nodeS2 L w₁) (nodeS2 L w₁)
+    have hval : (arcModelConst c (layoutNode2 a c h L w₁).1 (layoutNode2 a c h L w₁).2
+        (nodeS2 L w₁ - nodeS2 L w₁)).2 = (arcModelConst a (layoutNode1 a c h L).1
+          (layoutNode1 a c h L).2 (nodeS2 L w₁ - nodeS1 L)).2 := by
+      rw [← hP3 _ le_rfl h23.le, ← hP2 _ h12.le le_rfl]
+    rwa [hval] at hD
+  rcases lt_trichotomy σ (nodeS3 L w₁) with hσ3 | hσ3 | hσ3
+  · -- interior of leg 3
+    rw [hP3 σ hσ2.le hσ3.le]
+    refine (shift hr3 (nodeS2 L w₁) σ).congr_of_eventuallyEq ?_
+    filter_upwards [Ioo_mem_nhds hσ2 hσ3] with x hx
+    exact hE3 x hx.1.le hx.2.le
+  · -- junction `σ = s₃`
+    subst hσ3
+    rw [hP3 _ hσ2.le le_rfl]
+    refine hasDerivAt_of_sides hσ2 h34 (shift hr3 (nodeS2 L w₁) _) ?_
+      (fun x hx1 hx2 => hE3 x hx1 hx2) (fun x hx1 hx2 => hE4 x hx1 hx2)
+    have hD := shift hr4 (nodeS3 L w₁) (nodeS3 L w₁)
+    have hval : (arcModelConst a (layoutNode3 a c h L w₁).1 (layoutNode3 a c h L w₁).2
+        (nodeS3 L w₁ - nodeS3 L w₁)).2 = (arcModelConst c (layoutNode2 a c h L w₁).1
+          (layoutNode2 a c h L w₁).2 (nodeS3 L w₁ - nodeS2 L w₁)).2 := by
+      rw [← hP4 _ le_rfl h34.le, ← hP3 _ h23.le le_rfl]
+    rwa [hval] at hD
+  rcases lt_trichotomy σ (nodeS4 L w₁ w₂) with hσ4 | hσ4 | hσ4
+  · -- interior of leg 4
+    rw [hP4 σ hσ3.le hσ4.le]
+    refine (shift hr4 (nodeS3 L w₁) σ).congr_of_eventuallyEq ?_
+    filter_upwards [Ioo_mem_nhds hσ3 hσ4] with x hx
+    exact hE4 x hx.1.le hx.2.le
+  · -- junction `σ = s₄`
+    subst hσ4
+    rw [hP4 _ hσ3.le le_rfl]
+    refine hasDerivAt_of_sides hσ3
+      (show nodeS4 L w₁ w₂ < nodeS4 L w₁ w₂ + 1 by linarith)
+      (shift hr4 (nodeS3 L w₁) _) ?_
+      (fun x hx1 hx2 => hE4 x hx1 hx2) (fun x hx1 _ => hE5 x hx1)
+    have hD := shift hr5 (nodeS4 L w₁ w₂) (nodeS4 L w₁ w₂)
+    have hval : (arcModelConst c (layoutNode4 a c h L w₁ w₂).1
+        (layoutNode4 a c h L w₁ w₂).2 (nodeS4 L w₁ w₂ - nodeS4 L w₁ w₂)).2
+        = (arcModelConst a (layoutNode3 a c h L w₁).1 (layoutNode3 a c h L w₁).2
+            (nodeS4 L w₁ w₂ - nodeS3 L w₁)).2 := by
+      rw [← hP5 _ le_rfl, ← hP4 _ h34.le le_rfl]
+    rwa [hval] at hD
+  · -- interior of leg 5
+    rw [hP5 σ hσ4.le]
+    refine (shift hr5 (nodeS4 L w₁ w₂) σ).congr_of_eventuallyEq ?_
+    filter_upwards [Ioi_mem_nhds hσ4] with x hx
+    exact hE5 x hx.le
+
+/-- **The clean phase-speed sandwich**: for every `u ≤ v`,
+`2(a − R_cl)·(v − u) ≤ φ_cl(v) − φ_cl(u) ≤ 2(c + R_cl)/(1 − R_cl²)·(v − u)` —
+uniform over the layout box.  The per-leg phases are exactly affine at rates
+`1/r_j ∈ [ω_lo, ω_hi]` (`layout_rate_bounds`), and the clamp telescope
+`c_j = min (max u s_j) v` chains the five legs. -/
+private lemma layoutClean_snd_sandwich {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
+    (hL : L ≤ bicircleBracket a h) {w₁ w₂ : ℝ} (hw₁ : |w₁| ≤ L / 16)
+    (hw₂ : |w₂| ≤ L / 16) {u v : ℝ} (huv : u ≤ v) :
+    2 * (a - layoutCleanRadius a c) * (v - u)
+        ≤ (layoutClean a c h L w₁ w₂ v).2 - (layoutClean a c h L w₁ w₂ u).2 ∧
+      (layoutClean a c h L w₁ w₂ v).2 - (layoutClean a c h L w₁ w₂ u).2
+        ≤ 2 * (c + layoutCleanRadius a c) / (1 - layoutCleanRadius a c ^ 2)
+          * (v - u) := by
+  obtain ⟨hn0, hn1, hn2, hn3, hn4⟩ := layout_node_norms ha hac hwin hlow hL0.le hL w₁ w₂
+  have hw₁' := abs_le.mp hw₁
+  have hw₂' := abs_le.mp hw₂
+  set ωlo := 2 * (a - layoutCleanRadius a c) with hωlo
+  set ωhi := 2 * (c + layoutCleanRadius a c) / (1 - layoutCleanRadius a c ^ 2) with hωhi
+  set φf : ℝ → ℝ := fun σ => (layoutClean a c h L w₁ w₂ σ).2 with hφf
+  set S : ℝ → ℝ → Prop :=
+    fun p q => ωlo * (q - p) ≤ φf q - φf p ∧ φf q - φf p ≤ ωhi * (q - p) with hS
+  -- breakpoint ordering
+  have h01 : (0 : ℝ) < nodeS1 L := by rw [nodeS1]; linarith
+  have h12 : nodeS1 L ≤ nodeS2 L w₁ := by rw [nodeS1, nodeS2]; linarith
+  have h23 : nodeS2 L w₁ ≤ nodeS3 L w₁ := by rw [nodeS2, nodeS3]; linarith
+  have h34 : nodeS3 L w₁ ≤ nodeS4 L w₁ w₂ := by rw [nodeS3, nodeS4]; linarith
+  -- the affine-leg step
+  have hstep : ∀ r p q : ℝ, 0 < r → ωlo ≤ r⁻¹ → r⁻¹ ≤ ωhi → p ≤ q →
+      φf q - φf p = (q - p) / r → S p q := by
+    intro r p q hr hlo hhi hpq heq
+    have hq0 : 0 ≤ q - p := sub_nonneg.mpr hpq
+    constructor
+    · rw [heq, div_eq_mul_inv]
+      nlinarith
+    · rw [heq, div_eq_mul_inv]
+      nlinarith
+  have Srefl : ∀ x, S x x := by
+    intro x
+    constructor <;> simp
+  have Strans : ∀ x y z : ℝ, S x y → S y z → S x z := by
+    intro x y z h1 h2
+    have e1 : ωlo * (z - x) = ωlo * (y - x) + ωlo * (z - y) := by ring
+    have e2 : ωhi * (z - x) = ωhi * (y - x) + ωhi * (z - y) := by ring
+    exact ⟨by rw [e1]; linarith [h1.1, h2.1], by rw [e2]; linarith [h1.2, h2.2]⟩
+  -- the five per-leg sandwiches
+  have hb1 := layout_rate_bounds (φ₀ := (layoutStart a c h L).2) ha hac hac.le le_rfl hn0
+  have hb2 := layout_rate_bounds (φ₀ := (layoutNode1 a c h L).2) ha hac le_rfl hac.le hn1
+  have hb3 := layout_rate_bounds (φ₀ := (layoutNode2 a c h L w₁).2) ha hac hac.le le_rfl hn2
+  have hb4 := layout_rate_bounds (φ₀ := (layoutNode3 a c h L w₁).2) ha hac le_rfl hac.le hn3
+  have hb5 := layout_rate_bounds (φ₀ := (layoutNode4 a c h L w₁ w₂).2) ha hac hac.le
+    le_rfl hn4
+  have S1 : ∀ p q : ℝ, p ≤ q → q ≤ nodeS1 L → S p q := by
+    intro p q hpq hq
+    refine hstep _ p q hb1.1 hb1.2.1 hb1.2.2 hpq ?_
+    rw [hφf]
+    simp only [layoutClean_leg1 a c h L w₁ w₂ (hpq.trans hq),
+      layoutClean_leg1 a c h L w₁ w₂ hq, arcModelConst_snd]
+    ring
+  have S2 : ∀ p q : ℝ, nodeS1 L ≤ p → p ≤ q → q ≤ nodeS2 L w₁ → S p q := by
+    intro p q hp hpq hq
+    refine hstep _ p q hb2.1 hb2.2.1 hb2.2.2 hpq ?_
+    rw [hφf]
+    simp only [layoutClean_leg2 a c h w₂ hp (hpq.trans hq),
+      layoutClean_leg2 a c h w₂ (hp.trans hpq) hq, arcModelConst_snd]
+    ring
+  have S3 : ∀ p q : ℝ, nodeS2 L w₁ ≤ p → p ≤ q → q ≤ nodeS3 L w₁ → S p q := by
+    intro p q hp hpq hq
+    refine hstep _ p q hb3.1 hb3.2.1 hb3.2.2 hpq ?_
+    rw [hφf]
+    simp only [layoutClean_leg3 a c h w₂ hL0 hw₁ hp (hpq.trans hq),
+      layoutClean_leg3 a c h w₂ hL0 hw₁ (hp.trans hpq) hq, arcModelConst_snd]
+    ring
+  have S4 : ∀ p q : ℝ, nodeS3 L w₁ ≤ p → p ≤ q → q ≤ nodeS4 L w₁ w₂ → S p q := by
+    intro p q hp hpq hq
+    refine hstep _ p q hb4.1 hb4.2.1 hb4.2.2 hpq ?_
+    rw [hφf]
+    simp only [layoutClean_leg4 a c h hL0 hw₁ hp (hpq.trans hq),
+      layoutClean_leg4 a c h hL0 hw₁ (hp.trans hpq) hq, arcModelConst_snd]
+    ring
+  have S5 : ∀ p q : ℝ, nodeS4 L w₁ w₂ ≤ p → p ≤ q → S p q := by
+    intro p q hp hpq
+    refine hstep _ p q hb5.1 hb5.2.1 hb5.2.2 hpq ?_
+    rw [hφf]
+    simp only [layoutClean_leg5 a c h hL0 hw₁ hw₂ hp,
+      layoutClean_leg5 a c h hL0 hw₁ hw₂ (hp.trans hpq), arcModelConst_snd]
+    ring
+  -- the clamp telescope
+  set c₁ := min (max u (nodeS1 L)) v with hc₁
+  set c₂ := min (max u (nodeS2 L w₁)) v with hc₂
+  set c₃ := min (max u (nodeS3 L w₁)) v with hc₃
+  set c₄ := min (max u (nodeS4 L w₁ w₂)) v with hc₄
+  have hT1 : S u c₁ := by
+    rcases le_total u (nodeS1 L) with hu1 | hu1
+    · refine S1 u c₁ (le_min (le_max_left u _) huv) ?_
+      rw [hc₁, max_eq_right hu1]
+      exact min_le_left _ _
+    · have e1 : c₁ = u := by rw [hc₁, max_eq_left hu1, min_eq_left huv]
+      rw [e1]; exact Srefl u
+  have hT2 : S c₁ c₂ := by
+    have hcc : c₁ ≤ c₂ := min_le_min (max_le_max le_rfl h12) le_rfl
+    rcases le_total v (nodeS1 L) with hv1 | hv1
+    · have e1 : c₁ = v := min_eq_right (hv1.trans (le_max_right u _))
+      have e2 : c₂ = v := min_eq_right ((hv1.trans h12).trans (le_max_right u _))
+      rw [e1, e2]; exact Srefl v
+    rcases le_total (nodeS2 L w₁) u with hu2 | hu2
+    · have e1 : c₁ = u := by rw [hc₁, max_eq_left (h12.trans hu2), min_eq_left huv]
+      have e2 : c₂ = u := by rw [hc₂, max_eq_left hu2, min_eq_left huv]
+      rw [e1, e2]; exact Srefl u
+    · refine S2 c₁ c₂ (le_min (le_max_right u _) hv1) hcc ?_
+      rw [hc₂, max_eq_right hu2]
+      exact min_le_left _ _
+  have hT3 : S c₂ c₃ := by
+    have hcc : c₂ ≤ c₃ := min_le_min (max_le_max le_rfl h23) le_rfl
+    rcases le_total v (nodeS2 L w₁) with hv2 | hv2
+    · have e1 : c₂ = v := min_eq_right (hv2.trans (le_max_right u _))
+      have e2 : c₃ = v := min_eq_right ((hv2.trans h23).trans (le_max_right u _))
+      rw [e1, e2]; exact Srefl v
+    rcases le_total (nodeS3 L w₁) u with hu3 | hu3
+    · have e1 : c₂ = u := by rw [hc₂, max_eq_left (h23.trans hu3), min_eq_left huv]
+      have e2 : c₃ = u := by rw [hc₃, max_eq_left hu3, min_eq_left huv]
+      rw [e1, e2]; exact Srefl u
+    · refine S3 c₂ c₃ (le_min (le_max_right u _) hv2) hcc ?_
+      rw [hc₃, max_eq_right hu3]
+      exact min_le_left _ _
+  have hT4 : S c₃ c₄ := by
+    have hcc : c₃ ≤ c₄ := min_le_min (max_le_max le_rfl h34) le_rfl
+    rcases le_total v (nodeS3 L w₁) with hv3 | hv3
+    · have e1 : c₃ = v := min_eq_right (hv3.trans (le_max_right u _))
+      have e2 : c₄ = v := min_eq_right ((hv3.trans h34).trans (le_max_right u _))
+      rw [e1, e2]; exact Srefl v
+    rcases le_total (nodeS4 L w₁ w₂) u with hu4 | hu4
+    · have e1 : c₃ = u := by rw [hc₃, max_eq_left (h34.trans hu4), min_eq_left huv]
+      have e2 : c₄ = u := by rw [hc₄, max_eq_left hu4, min_eq_left huv]
+      rw [e1, e2]; exact Srefl u
+    · refine S4 c₃ c₄ (le_min (le_max_right u _) hv3) hcc ?_
+      rw [hc₄, max_eq_right hu4]
+      exact min_le_left _ _
+  have hT5 : S c₄ v := by
+    rcases le_total v (nodeS4 L w₁ w₂) with hv4 | hv4
+    · have e1 : c₄ = v := min_eq_right (hv4.trans (le_max_right u _))
+      rw [e1]; exact Srefl v
+    · exact S5 c₄ v (le_min (le_max_right u _) hv4) (min_le_right _ _)
+  exact Strans u c₄ v (Strans u c₃ c₄ (Strans u c₂ c₃ (Strans u c₁ c₂ hT1 hT2) hT3) hT4)
+    hT5
+
+/-! ### ALM-A11: quantitative projection toolkit -/
+
+/-- A complex number whose `e^{-iψ}`-projection is `≥ m` has norm `≥ m`. -/
+private lemma norm_ge_of_proj {w : ℂ} {ψ m : ℝ}
+    (hm : m ≤ (Complex.exp (-(ψ : ℂ) * Complex.I) * w).re) : m ≤ ‖w‖ := by
+  have h1 : (Complex.exp (-(ψ : ℂ) * Complex.I) * w).re
+      ≤ ‖Complex.exp (-(ψ : ℂ) * Complex.I) * w‖ :=
+    (le_abs_self _).trans (Complex.abs_re_le_norm _)
+  have h2 : ‖Complex.exp (-(ψ : ℂ) * Complex.I) * w‖ = ‖w‖ := by
+    rw [norm_mul, show -(ψ : ℂ) = ((-ψ : ℝ) : ℂ) by rw [Complex.ofReal_neg],
+      Complex.norm_exp_ofReal_mul_I, one_mul]
+  linarith
+
+/-- Monotone-in-`[0, π]` cosine floor: `|x| ≤ b ≤ π` and `m ≤ cos b` give
+`m ≤ cos x`. -/
+private lemma cos_ge_of_abs_le {x b m : ℝ} (hb : b ≤ π) (hx : |x| ≤ b)
+    (hm : m ≤ Real.cos b) : m ≤ Real.cos x := by
+  have h := Real.cos_le_cos_of_nonneg_of_le_pi (abs_nonneg x) hb hx
+  rw [← Real.cos_abs x]
+  linarith
+
+/-- Constant floor for a projected-cosine interval integral. -/
+private lemma integral_cos_ge_const {φ : ℝ → ℝ} {p q ψ m : ℝ} (hpq : p ≤ q)
+    (hφc : ContinuousOn φ (Set.uIcc p q))
+    (hm : ∀ s ∈ Set.Icc p q, m ≤ Real.cos (φ s - ψ)) :
+    m * (q - p) ≤ ∫ s in p..q, Real.cos (φ s - ψ) := by
+  have hint : IntervalIntegrable (fun s => Real.cos (φ s - ψ))
+      MeasureTheory.volume p q :=
+    (Real.continuous_cos.comp_continuousOn
+      (hφc.sub continuousOn_const)).intervalIntegrable
+  have h := intervalIntegral.integral_mono_on hpq
+    (intervalIntegrable_const (c := m)) hint hm
+  rwa [intervalIntegral.integral_const, smul_eq_mul, mul_comm] at h
+
+/-- **ALM-A11 mid-regime input: the quantitative clean chord margin.**  For every
+short scale `ℓ₀ > 0` there are `m₀ > 0` and a residual tolerance `η₀ > 0`,
+uniform over the layout box, such that whenever the clean curve's endpoint
+residuals at a window `Λ` are `≤ η₀` (closure defect and `2π`-turning defect),
+every mid-band chord (`ℓ₀ ≤ v − u ≤ Λ − ℓ₀`) of the clean curve has norm
+`≥ m₀`.  Three-case projection argument through the phase-speed sandwich:
+sub-arc turning `≤ 2π/3` (midpoint projection), turning in `[2π/3, π + δ]`
+(midpoint projection with speed-controlled tails), turning `≥ π + δ`
+(two-piece complement projection against the `≤ η₀` closure defect). -/
+private lemma layoutClean_chord_lower {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
+    (hL : L ≤ bicircleBracket a h) {ℓ₀ : ℝ} (hℓ₀ : 0 < ℓ₀) :
+    ∃ m₀ > 0, ∃ η₀ > 0, ∀ w₁ w₂ : ℝ, |w₁| ≤ L / 16 → |w₂| ≤ L / 16 → ∀ Λ : ℝ,
+      ‖(layoutClean a c h L w₁ w₂ Λ).1 - (layoutClean a c h L w₁ w₂ 0).1‖ ≤ η₀ →
+      |(layoutClean a c h L w₁ w₂ Λ).2
+        - ((layoutClean a c h L w₁ w₂ 0).2 + 2 * π)| ≤ η₀ →
+      ∀ u v : ℝ, 0 ≤ u → v ≤ Λ → ℓ₀ ≤ v - u → v - u ≤ Λ - ℓ₀ →
+        m₀ ≤ ‖(layoutClean a c h L w₁ w₂ v).1 - (layoutClean a c h L w₁ w₂ u).1‖ := by
+  have hπ := Real.pi_pos
+  have hπ3 := Real.pi_gt_three
+  have hRcl0 : 0 ≤ layoutCleanRadius a c := layoutCleanRadius_nonneg ha hac
+  have hRcl1 : layoutCleanRadius a c < 1 := layoutCleanRadius_lt_one ha hac
+  set Rcl := layoutCleanRadius a c with hRcl
+  set ωlo : ℝ := 2 * (a - Rcl) with hωlo
+  set ωhi : ℝ := 2 * (c + Rcl) / (1 - Rcl ^ 2) with hωhi
+  have hωlo0 : 0 < ωlo := by rw [hωlo]; linarith
+  have hsq : 0 < 1 - Rcl ^ 2 := by nlinarith
+  have hωhi0 : 0 < ωhi := by
+    rw [hωhi]
+    have hc1 : 1 < c := ha.trans hac
+    exact div_pos (by linarith) hsq
+  have hωle : ωlo ≤ ωhi := by
+    rw [hωlo, hωhi, le_div_iff₀ hsq]
+    nlinarith
+  set δ : ℝ := ωlo / (2 * ωhi) with hδ
+  have hδ0 : 0 < δ := div_pos hωlo0 (by linarith)
+  have hδ2 : δ ≤ 1 / 2 := by
+    rw [hδ, div_le_iff₀ (by linarith)]
+    linarith
+  refine ⟨min (ℓ₀ / 2) (min (π / (6 * ωhi)) (ℓ₀ * δ / (4 * π))),
+    lt_min (by linarith) (lt_min (by positivity) (by positivity)),
+    min (δ / 4) (ℓ₀ * δ / (4 * π)), lt_min (by linarith) (by positivity),
+    fun w₁ w₂ hw₁ hw₂ Λ hZ hT u v hu hvΛ hband1 hband2 => ?_⟩
+  set m₀ : ℝ := min (ℓ₀ / 2) (min (π / (6 * ωhi)) (ℓ₀ * δ / (4 * π))) with hm₀
+  set η₀ : ℝ := min (δ / 4) (ℓ₀ * δ / (4 * π)) with hη₀
+  set zf : ℝ → ℂ := fun σ => (layoutClean a c h L w₁ w₂ σ).1 with hzf
+  set φf : ℝ → ℝ := fun σ => (layoutClean a c h L w₁ w₂ σ).2 with hφf
+  -- the sandwich, monotonicity, Lipschitz continuity, FTC
+  have hSW : ∀ p q : ℝ, p ≤ q →
+      ωlo * (q - p) ≤ φf q - φf p ∧ φf q - φf p ≤ ωhi * (q - p) := by
+    intro p q hpq
+    exact layoutClean_snd_sandwich ha hac hwin hlow hL0 hL hw₁ hw₂ hpq
+  have hmono : ∀ p q : ℝ, p ≤ q → φf p ≤ φf q := by
+    intro p q hpq
+    have h1 := (hSW p q hpq).1
+    nlinarith [sub_nonneg.mpr hpq]
+  have hφfc : Continuous φf := by
+    have hK : (0 : ℝ) ≤ ωhi := hωhi0.le
+    refine LipschitzWith.continuous (K := ⟨ωhi, hK⟩)
+      (LipschitzWith.of_dist_le_mul fun x y => ?_)
+    rcases le_total x y with hxy | hxy
+    · have h1 := hSW x y hxy
+      rw [Real.dist_eq, Real.dist_eq, abs_of_nonpos (by linarith [(h1.1),
+          mul_nonneg hωlo0.le (sub_nonneg.mpr hxy)]), abs_of_nonpos (by linarith)]
+      have := h1.2
+      push_cast
+      linarith
+    · have h1 := hSW y x hxy
+      rw [Real.dist_eq, Real.dist_eq, abs_of_nonneg (by linarith [(h1.1),
+          mul_nonneg hωlo0.le (sub_nonneg.mpr hxy)]), abs_of_nonneg (by linarith)]
+      have := h1.2
+      push_cast
+      linarith
+  have hexpc : Continuous fun s => Complex.exp ((φf s : ℂ) * Complex.I) :=
+    Complex.continuous_exp.comp
+      ((Complex.continuous_ofReal.comp hφfc).mul continuous_const)
+  have hDf : ∀ x : ℝ, HasDerivAt zf (Complex.exp ((φf x : ℂ) * Complex.I)) x :=
+    fun x => layoutClean_fst_hasDerivAt ha hac hwin hlow hL0 hL hw₁ hw₂ x
+  have hFTC : ∀ p q : ℝ,
+      (∫ s in p..q, Complex.exp ((φf s : ℂ) * Complex.I)) = zf q - zf p := by
+    intro p q
+    exact intervalIntegral.integral_eq_sub_of_hasDerivAt (fun x _ => hDf x)
+      (hexpc.intervalIntegrable p q)
+  have huv : u ≤ v := by linarith
+  have hu0Λ : 0 ≤ Λ - v + u := by linarith
+  have hτlo := (hSW u v huv).1
+  have hτpos : 0 < φf v - φf u := by nlinarith
+  set τs : ℝ := φf v - φf u with hτs
+  -- goal in FTC form
+  rw [show (layoutClean a c h L w₁ w₂ v).1 - (layoutClean a c h L w₁ w₂ u).1
+    = zf v - zf u from rfl, ← hFTC u v]
+  rcases le_total τs (2 * π / 3) with hcase1 | hcase1
+  · -- CASE 1: turning ≤ 2π/3, midpoint projection
+    set ψ : ℝ := (φf u + φf v) / 2 with hψ
+    have hcos : ∀ s ∈ Set.Icc u v, (1 : ℝ) / 2 ≤ Real.cos (φf s - ψ) := by
+      intro s hs
+      have h1 := hmono u s hs.1
+      have h2 := hmono s v hs.2
+      refine cos_ge_of_abs_le (by linarith) (abs_le.mpr ⟨?_, ?_⟩) ?_
+      · rw [hψ]; linarith
+      · rw [hψ]; linarith
+      · rw [Real.cos_pi_div_three]
+    have hint := integral_cos_ge_const huv (hφfc.continuousOn) hcos
+    refine norm_ge_of_proj (ψ := ψ) ?_
+    rw [anchor_chord_proj_re (hφfc.continuousOn) ψ]
+    have : m₀ ≤ ℓ₀ / 2 := min_le_left _ _
+    nlinarith [hband1]
+  rcases le_total τs (π + δ) with hcase2 | hcase2
+  · -- CASE 2: turning in [2π/3, π + δ], projection with speed-controlled tails
+    set ψ : ℝ := (φf u + φf v) / 2 with hψ
+    -- the two crossing points of the levels `ψ ∓ π/3`
+    have hIVT1 : ψ - π / 3 ∈ Set.Icc (φf u) (φf v) := by
+      constructor
+      · rw [hψ]; linarith
+      · rw [hψ]; linarith
+    obtain ⟨p, hpmem, hpval⟩ := intermediate_value_Icc huv (hφfc.continuousOn) hIVT1
+    have hIVT2 : ψ + π / 3 ∈ Set.Icc (φf p) (φf v) := by
+      rw [hpval]
+      constructor
+      · linarith
+      · rw [hψ]; linarith
+    obtain ⟨q, hqmem, hqval⟩ :=
+      intermediate_value_Icc hpmem.2 (hφfc.continuousOn) hIVT2
+    have hpq : p ≤ q := hqmem.1
+    have hqv : q ≤ v := hqmem.2
+    have hup : u ≤ p := hpmem.1
+    -- middle window: `cos ≥ 1/2` over length `≥ (2π/3)/ωhi`
+    have hcosmid : ∀ s ∈ Set.Icc p q, (1 : ℝ) / 2 ≤ Real.cos (φf s - ψ) := by
+      intro s hs
+      have h1 := hmono p s hs.1
+      have h2 := hmono s q hs.2
+      refine cos_ge_of_abs_le (by linarith) (abs_le.mpr ⟨?_, ?_⟩) ?_
+      · rw [hpval] at h1; linarith
+      · rw [hqval] at h2; linarith
+      · rw [Real.cos_pi_div_three]
+    have hmidlen : 2 * π / 3 ≤ ωhi * (q - p) := by
+      have := (hSW p q hpq).2
+      rw [hpval, hqval] at this
+      linarith
+    have hintmid := integral_cos_ge_const hpq (hφfc.continuousOn) hcosmid
+    -- tail bound: `cos ≥ −δ/2` on the whole of `[u, v]`
+    have hcosend : ∀ s ∈ Set.Icc u v, -(δ / 2) ≤ Real.cos (φf s - ψ) := by
+      intro s hs
+      have h1 := hmono u s hs.1
+      have h2 := hmono s v hs.2
+      refine cos_ge_of_abs_le (b := (π + δ) / 2) (by linarith)
+        (abs_le.mpr ⟨by rw [hψ]; linarith, by rw [hψ]; linarith⟩) ?_
+      have hval : Real.cos ((π + δ) / 2) = -Real.sin (δ / 2) := by
+        rw [show (π + δ) / 2 = π / 2 + δ / 2 by ring, Real.cos_add,
+          Real.cos_pi_div_two, Real.sin_pi_div_two]
+        ring
+      rw [hval]
+      have := Real.sin_le (by linarith : (0 : ℝ) ≤ δ / 2)
+      linarith
+    -- tail lengths from the speed floor
+    have hplen : ωlo * (p - u) ≤ τs / 2 - π / 3 := by
+      have := (hSW u p hup).1
+      rw [hpval] at this
+      rw [hτs, hψ] at *
+      linarith
+    have hqlen : ωlo * (v - q) ≤ τs / 2 - π / 3 := by
+      have := (hSW q v hqv).1
+      rw [hqval] at this
+      rw [hτs, hψ] at *
+      linarith
+    have hintend1 := integral_cos_ge_const hup (hφfc.continuousOn) fun s hs =>
+      hcosend s ⟨hs.1, hs.2.trans (hpq.trans hqv)⟩
+    have hintend2 := integral_cos_ge_const hqv (hφfc.continuousOn) fun s hs =>
+      hcosend s ⟨(hup.trans hpq).trans hs.1, hs.2⟩
+    -- assemble the split integral
+    have hint : IntervalIntegrable (fun s => Real.cos (φf s - ψ))
+        MeasureTheory.volume u p ∧
+        IntervalIntegrable (fun s => Real.cos (φf s - ψ))
+          MeasureTheory.volume p q ∧
+        IntervalIntegrable (fun s => Real.cos (φf s - ψ))
+          MeasureTheory.volume q v := by
+      refine ⟨?_, ?_, ?_⟩ <;>
+        exact (Real.continuous_cos.comp
+          ((hφfc.sub continuous_const))).intervalIntegrable _ _
+    have hsplit : (∫ s in u..v, Real.cos (φf s - ψ))
+        = (∫ s in u..p, Real.cos (φf s - ψ))
+          + (∫ s in p..q, Real.cos (φf s - ψ))
+          + ∫ s in q..v, Real.cos (φf s - ψ) := by
+      rw [intervalIntegral.integral_add_adjacent_intervals hint.1 hint.2.1,
+        intervalIntegral.integral_add_adjacent_intervals
+          (hint.1.trans hint.2.1) hint.2.2]
+    -- the quantitative floor `π/(6ωhi)`
+    have hτδ : τs / 2 - π / 3 ≤ (π / 6 + δ / 2) := by linarith
+    have htail1 : -(δ / 2) * (p - u) ≥ -(δ / 2 * ((π / 6 + δ / 2) / ωlo)) := by
+      have hp0 : 0 ≤ p - u := by linarith
+      have h1 : p - u ≤ (π / 6 + δ / 2) / ωlo := by
+        rw [le_div_iff₀ hωlo0]
+        nlinarith
+      nlinarith
+    have htail2 : -(δ / 2) * (v - q) ≥ -(δ / 2 * ((π / 6 + δ / 2) / ωlo)) := by
+      have hq0 : 0 ≤ v - q := by linarith
+      have h1 : v - q ≤ (π / 6 + δ / 2) / ωlo := by
+        rw [le_div_iff₀ hωlo0]
+        nlinarith
+      nlinarith
+    have htailval : δ / 2 * ((π / 6 + δ / 2) / ωlo) ≤ π / (12 * ωhi) := by
+      rw [hδ]
+      rw [div_le_div_iff₀ (by positivity) (by positivity)]
+      have hδπ : ωlo / (2 * ωhi) ≤ π / 3 := by
+        have := hδ2
+        rw [hδ] at this
+        nlinarith
+      have hexp : ωlo / (2 * ωhi) / 2 * ((π / 6 + ωlo / (2 * ωhi) / 2) / ωlo)
+          * (12 * ωhi) = (π / 6 + ωlo / (2 * ωhi) / 2) * 3 := by
+        field_simp
+        ring
+      rw [hexp]
+      nlinarith
+    have hmid : π / (3 * ωhi) ≤ ∫ s in p..q, Real.cos (φf s - ψ) := by
+      refine le_trans ?_ hintmid
+      rw [ge_iff_le, div_le_iff₀ (by positivity)] at *
+      have : π / (3 * ωhi) * 2 ≤ (q - p) := by
+        rw [div_mul_eq_mul_div, div_le_iff₀ (by positivity)]
+        nlinarith
+      nlinarith [hcosmid p ⟨le_refl p, hpq⟩]
+    have hfloor : π / (6 * ωhi) ≤ ∫ s in u..v, Real.cos (φf s - ψ) := by
+      rw [hsplit]
+      have e1 : π / (6 * ωhi) = π / (3 * ωhi) - 2 * (π / (12 * ωhi)) := by
+        field_simp
+        ring
+      rw [e1]
+      have t1 : -(π / (12 * ωhi)) ≤ ∫ s in u..p, Real.cos (φf s - ψ) := by
+        refine le_trans ?_ hintend1
+        nlinarith [htail1, htailval]
+      have t2 : -(π / (12 * ωhi)) ≤ ∫ s in q..v, Real.cos (φf s - ψ) := by
+        refine le_trans ?_ hintend2
+        nlinarith [htail2, htailval]
+      linarith
+    refine norm_ge_of_proj (ψ := ψ) ?_
+    rw [anchor_chord_proj_re (hφfc.continuousOn) ψ]
+    exact le_trans ((min_le_right _ _).trans (min_le_left _ _)) hfloor
+  · -- CASE 3: turning ≥ π + δ, complement projection against the closure defect
+    have hη4 : η₀ ≤ δ / 4 := min_le_left _ _
+    have hηm : η₀ ≤ ℓ₀ * δ / (4 * π) := min_le_right _ _
+    -- turning residual
+    have hρT : |φf Λ - (φf 0 + 2 * π)| ≤ η₀ := hT
+    have hρT' := abs_le.mp hρT
+    have hφ0u := hmono 0 u hu
+    have hφvΛ := hmono v Λ hvΛ
+    set ψc : ℝ := (φf v + (φf u + 2 * π)) / 2 with hψc
+    have hBA : φf u + 2 * π - φf v ≤ π - δ := by rw [hτs] at hcase2; linarith
+    -- pointwise floors on the two complement pieces
+    have hcosval : δ / (2 * π) ≤ Real.cos (π / 2 - δ / 4) := by
+      have h1 := Real.one_sub_mul_le_cos (x := π / 2 - δ / 4)
+        (by linarith) (by linarith)
+      have e1 : 1 - 2 / π * (π / 2 - δ / 4) = δ / (2 * π) := by
+        field_simp
+        ring
+      linarith [e1 ▸ h1]
+    have hcosΛ : ∀ s ∈ Set.Icc v Λ, δ / (2 * π) ≤ Real.cos (φf s - ψc) := by
+      intro s hs
+      have h1 := hmono v s hs.1
+      have h2 := hmono s Λ hs.2
+      refine cos_ge_of_abs_le (b := π / 2 - δ / 4) (by linarith)
+        (abs_le.mpr ⟨?_, ?_⟩) hcosval
+      · rw [hψc]; linarith
+      · rw [hψc]; linarith
+    have hcos0 : ∀ s ∈ Set.Icc (0 : ℝ) u, δ / (2 * π) ≤ Real.cos (φf s - ψc) := by
+      intro s hs
+      have h1 := hmono 0 s hs.1
+      have h2 := hmono s u hs.2
+      have hcoseq : Real.cos (φf s - ψc) = Real.cos (φf s + 2 * π - ψc) := by
+        rw [show φf s + 2 * π - ψc = (φf s - ψc) + 2 * π by ring, Real.cos_add_two_pi]
+      rw [hcoseq]
+      refine cos_ge_of_abs_le (b := π / 2 - δ / 4) (by linarith)
+        (abs_le.mpr ⟨?_, ?_⟩) hcosval
+      · rw [hψc]; linarith
+      · rw [hψc]; linarith
+    have hint0 := integral_cos_ge_const hu (hφfc.continuousOn)
+      (ψ := ψc) hcos0
+    have hintΛ := integral_cos_ge_const hvΛ (hφfc.continuousOn)
+      (ψ := ψc) hcosΛ
+    -- the complement sum and its projection
+    set Sc : ℂ := (∫ s in (0 : ℝ)..u, Complex.exp ((φf s : ℂ) * Complex.I))
+      + ∫ s in v..Λ, Complex.exp ((φf s : ℂ) * Complex.I) with hSc
+    have hScproj : ℓ₀ * (δ / (2 * π)) ≤ ‖Sc‖ := by
+      refine norm_ge_of_proj (ψ := ψc) ?_
+      rw [hSc, mul_add, Complex.add_re,
+        anchor_chord_proj_re (hφfc.continuousOn) ψc,
+        anchor_chord_proj_re (hφfc.continuousOn) ψc]
+      have := hint0
+      have := hintΛ
+      nlinarith [hband2]
+    -- the chord equals the closure defect minus the complement sum
+    have hdecomp : zf v - zf u = (zf Λ - zf 0) - Sc := by
+      rw [hSc, hFTC 0 u, hFTC v Λ]
+      ring
+    rw [hFTC u v, hdecomp]
+    have hnorm : ‖Sc‖ - ‖zf Λ - zf 0‖ ≤ ‖(zf Λ - zf 0) - Sc‖ := by
+      have := norm_sub_norm_le Sc (zf Λ - zf 0)
+      rw [show (zf Λ - zf 0) - Sc = -(Sc - (zf Λ - zf 0)) by ring, norm_neg]
+      exact this.trans (le_of_eq rfl)
+    have hZ' : ‖zf Λ - zf 0‖ ≤ η₀ := hZ
+    have hfinal : m₀ ≤ ℓ₀ * (δ / (2 * π)) - η₀ := by
+      have h1 : m₀ ≤ ℓ₀ * δ / (4 * π) :=
+        (min_le_right _ _).trans (min_le_right _ _)
+      have e1 : ℓ₀ * (δ / (2 * π)) = 2 * (ℓ₀ * δ / (4 * π)) := by
+        field_simp
+        ring
+      rw [e1]
+      linarith [hηm]
+    linarith [hScproj, hnorm, hZ', hfinal]
+
+
+/-! ### ALM-A11: the true-flow phase-speed bound and the three-regime assembly -/
+
+/-- **ALM-A11 (`layout_chord_ne_zero`): simplicity transport.**  For the closed
+true flow of ALM-A10 (closure of the `z`-endpoint and `2π`-turning, the A6
+transport `‖flow − clean‖ ≤ C₁ε` and the A6 confinement `‖z‖ ≤ R'`), every proper
+sub-arc chord `∫_p^q e^{iφ_true}` is nonzero, provided the transport budget
+`C₁ε` sits below the exported margin `μ`.  Three regimes against the short scale
+`ℓ₀ = π/(3C₂)` (`C₂ = 2(M+1)/(1−R'²)` the true phase-speed bound):
+short arcs (`q−p ≤ ℓ₀`, φ-deviation `≤ π/3`, midpoint projection — tolerates the
+negative dips), near-full arcs (`q−p ≥ Λ−ℓ₀`, complement + exact closure), and
+mid arcs (`ℓ₀ ≤ q−p ≤ Λ−ℓ₀`, the clean chord margin `m₀` of
+`layoutClean_chord_lower` transported at cost `2C₁ε`).  The margin `μ` is exported
+ahead of `C₁`, `ε` so ALM-A12 can fix `ε ≤ μ/C₁`. -/
+theorem layout_chord_ne_zero {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
+    (hL : L ≤ bicircleBracket a h) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
+    {κ h₁ : ℝ → ℝ} (hκc : Continuous κ) (hh₁c : Continuous h₁)
+    {M : ℝ} (hM : ∀ θ, |κ θ| ≤ M) :
+    ∃ μ > 0, ∀ {C₁ ε : ℝ} {w₁ w₂ t : ℝ}, |w₁| ≤ L / 16 → |w₂| ≤ L / 16 →
+      |t| ≤ L / 16 → 0 < C₁ → 0 < ε → C₁ * ε ≤ μ →
+      (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)).1
+          = (layoutStart a c h L).1 →
+      (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)).2
+          = (layoutStart a c h L).2 + 2 * π →
+      (∀ σ ∈ Set.Icc (0 : ℝ) (nodePeriod L w₁ w₂ t),
+        ‖layoutFlow κ h₁ a c h L M w₁ w₂ t σ - layoutClean a c h L w₁ w₂ σ‖
+          ≤ C₁ * ε) →
+      (∀ σ ∈ Set.Icc (0 : ℝ) (nodePeriod L w₁ w₂ t),
+        ‖(layoutFlow κ h₁ a c h L M w₁ w₂ t σ).1‖ ≤ layoutConfineRadius a c) →
+      ∀ p q : ℝ, 0 ≤ p → p < q → q < nodePeriod L w₁ w₂ t →
+        (∫ s in p..q, Complex.exp
+          (((layoutFlow κ h₁ a c h L M w₁ w₂ t s).2 : ℂ) * Complex.I)) ≠ 0 := by
+  have hπ := Real.pi_pos
+  set R' := layoutConfineRadius a c with hR'
+  have hR0 : 0 ≤ R' := layoutConfineRadius_nonneg ha hac
+  have hR1 : R' < 1 := layoutConfineRadius_lt_one ha hac
+  have hM0 : 0 ≤ M := (abs_nonneg _).trans (hM 0)
+  have hden0 : 0 < 1 - R' ^ 2 := by nlinarith
+  set C₂ : ℝ := 2 * (M + 1) / (1 - R' ^ 2) with hC₂def
+  have hC₂0 : 0 < C₂ := by rw [hC₂def]; positivity
+  set ℓ₀ : ℝ := π / (3 * C₂) with hℓ₀def
+  have hℓ₀0 : 0 < ℓ₀ := by rw [hℓ₀def]; positivity
+  have hne : (1 : ℝ) - R' ^ 2 ≠ 0 := ne_of_gt hden0
+  have hC₂ℓ₀ : C₂ * ℓ₀ = π / 3 := by
+    rw [hℓ₀def]; field_simp
+  obtain ⟨m₀, hm₀0, η₀, hη₀0, hclean⟩ :=
+    layoutClean_chord_lower ha hac hwin hlow hL0 hL hℓ₀0
+  refine ⟨min η₀ (m₀ / 4), lt_min hη₀0 (by linarith), ?_⟩
+  intro C₁ ε w₁ w₂ t hw₁ hw₂ ht hC₁0 hε0 hμ hzcl htcl htrans hconf p q hp hpq hqΛ
+  have hμη : C₁ * ε ≤ η₀ := hμ.trans (min_le_left _ _)
+  have hμm : C₁ * ε ≤ m₀ / 4 := hμ.trans (min_le_right _ _)
+  obtain ⟨hw₁l, hw₁r⟩ := abs_le.mp hw₁
+  obtain ⟨hw₂l, hw₂r⟩ := abs_le.mp hw₂
+  obtain ⟨htl, htr⟩ := abs_le.mp ht
+  set Λ : ℝ := nodePeriod L w₁ w₂ t with hΛdef
+  have hΛ0 : 0 < Λ := by rw [hΛdef, nodePeriod]; linarith
+  have hΛ2L : Λ ≤ 2 * L := by rw [hΛdef, nodePeriod]; linarith
+  -- the flow solves the arc-length ODE on `[0, 2L]`
+  have hκAc : Continuous (kappaArc κ h₁ L w₁ w₂ t) :=
+    continuous_kappaArc hκc hh₁c L w₁ w₂ t
+  have hMabs : ∀ s, |kappaArc κ h₁ L w₁ w₂ t s| ≤ M := kappaArc_abs_le hM h₁ L w₁ w₂ t
+  have hstart := layoutStart_mem_closedBall ha hac hwin hlow hL0.le hL hφe
+  obtain ⟨hf0, hfd⟩ := arcFlow_spec hκAc hR0 hR1 (by linarith : (0 : ℝ) ≤ 2 * L)
+    hMabs 9 hstart
+  -- pointwise `HasDerivWithinAt` on the window `[0, Λ]`
+  have hderivW : ∀ σ ∈ Set.Icc (0 : ℝ) Λ,
+      HasDerivWithinAt (fun s => layoutFlow κ h₁ a c h L M w₁ w₂ t s)
+        (arcField (kappaArc κ h₁ L w₁ w₂ t) R' σ
+          (layoutFlow κ h₁ a c h L M w₁ w₂ t σ)) (Set.Icc 0 Λ) σ := by
+    intro σ hσ
+    exact (hfd σ ⟨hσ.1, hσ.2.trans hΛ2L⟩).mono (Set.Icc_subset_Icc le_rfl hΛ2L)
+  -- flow value at `0` is the start
+  have hflow0 : layoutFlow κ h₁ a c h L M w₁ w₂ t 0 = layoutStart a c h L := hf0
+  -- continuity of the flow, the phase and the exponential integrand on `[0, Λ]`
+  have hΦcont : ContinuousOn (fun s => layoutFlow κ h₁ a c h L M w₁ w₂ t s)
+      (Set.Icc 0 Λ) := fun σ hσ => (hderivW σ hσ).continuousWithinAt
+  have hφTcont : ContinuousOn (fun s => (layoutFlow κ h₁ a c h L M w₁ w₂ t s).2)
+      (Set.Icc 0 Λ) := continuous_snd.comp_continuousOn hΦcont
+  have hzTcont : ContinuousOn (fun s => (layoutFlow κ h₁ a c h L M w₁ w₂ t s).1)
+      (Set.Icc 0 Λ) := continuous_fst.comp_continuousOn hΦcont
+  have hexpcont : ContinuousOn (fun s => Complex.exp
+      (((layoutFlow κ h₁ a c h L M w₁ w₂ t s).2 : ℂ) * Complex.I)) (Set.Icc 0 Λ) :=
+    Complex.continuous_exp.comp_continuousOn
+      ((Complex.continuous_ofReal.comp_continuousOn hφTcont).mul continuousOn_const)
+  -- interior `HasDerivAt` of the flow (used for the FTC chord identity)
+  have hΦat : ∀ σ ∈ Set.Ioo (0 : ℝ) Λ,
+      HasDerivAt (fun s => layoutFlow κ h₁ a c h L M w₁ w₂ t s)
+        (arcField (kappaArc κ h₁ L w₁ w₂ t) R' σ
+          (layoutFlow κ h₁ a c h L M w₁ w₂ t σ)) σ :=
+    fun σ hσ => (hderivW σ ⟨hσ.1.le, hσ.2.le⟩).hasDerivAt (Icc_mem_nhds hσ.1 hσ.2)
+  -- FTC chord identity on any `[p, q] ⊆ [0, Λ]`
+  have hFTC : ∀ p q : ℝ, 0 ≤ p → p ≤ q → q ≤ Λ →
+      (∫ s in p..q, Complex.exp
+          (((layoutFlow κ h₁ a c h L M w₁ w₂ t s).2 : ℂ) * Complex.I))
+        = (layoutFlow κ h₁ a c h L M w₁ w₂ t q).1
+          - (layoutFlow κ h₁ a c h L M w₁ w₂ t p).1 := by
+    intro p q hp hpq hqΛ
+    refine intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hpq
+      (hzTcont.mono (Set.Icc_subset_Icc hp hqΛ)) (fun x hx => ?_)
+      ((hexpcont.mono (Set.uIcc_subset_Icc ⟨hp, hpq.trans hqΛ⟩
+        ⟨hp.trans hpq, hqΛ⟩)).intervalIntegrable)
+    exact (hΦat x ⟨lt_of_le_of_lt hp hx.1, lt_of_lt_of_le hx.2 hqΛ⟩).fst
+  -- the true phase speed bound `|φ'_true| ≤ C₂` and hence the `C₂`-Lipschitz law
+  have hbound : ∀ σ ∈ Set.Icc (0 : ℝ) Λ,
+      ‖(arcField (kappaArc κ h₁ L w₁ w₂ t) R' σ
+        (layoutFlow κ h₁ a c h L M w₁ w₂ t σ)).2‖ ≤ C₂ := by
+    intro σ hσ
+    have hcσ : ‖(layoutFlow κ h₁ a c h L M w₁ w₂ t σ).1‖ ≤ R' := hconf σ hσ
+    have hznsq : ‖(layoutFlow κ h₁ a c h L M w₁ w₂ t σ).1‖ ^ 2 ≤ R' ^ 2 := by
+      nlinarith [norm_nonneg (layoutFlow κ h₁ a c h L M w₁ w₂ t σ).1]
+    have hnum0 : 0 < 1 - ‖(layoutFlow κ h₁ a c h L M w₁ w₂ t σ).1‖ ^ 2 := by nlinarith
+    change ‖truncatedArcAngleSpeed (kappaArc κ h₁ L w₁ w₂ t) R' σ
+      (layoutFlow κ h₁ a c h L M w₁ w₂ t σ).1
+      (layoutFlow κ h₁ a c h L M w₁ w₂ t σ).2‖ ≤ C₂
+    rw [truncatedArcAngleSpeed_eq hcσ]
+    simp only [arcAngleSpeed]
+    rw [Real.norm_eq_abs, abs_div, abs_of_pos hnum0, div_le_iff₀ hnum0]
+    have hin : |⟪(layoutFlow κ h₁ a c h L M w₁ w₂ t σ).1,
+        Complex.I * Complex.exp
+          (((layoutFlow κ h₁ a c h L M w₁ w₂ t σ).2 : ℂ) * Complex.I)⟫_ℝ| ≤ R' :=
+      (abs_inner_normal_le _ _).trans hcσ
+    have hA : |kappaArc κ h₁ L w₁ w₂ t σ| ≤ M := hMabs σ
+    have hnumbd : |2 * (kappaArc κ h₁ L w₁ w₂ t σ
+        + ⟪(layoutFlow κ h₁ a c h L M w₁ w₂ t σ).1,
+          Complex.I * Complex.exp
+            (((layoutFlow κ h₁ a c h L M w₁ w₂ t σ).2 : ℂ) * Complex.I)⟫_ℝ)|
+        ≤ 2 * (M + R') := by
+      rw [abs_mul, abs_two]
+      have hAB := abs_add_le (kappaArc κ h₁ L w₁ w₂ t σ)
+        ⟪(layoutFlow κ h₁ a c h L M w₁ w₂ t σ).1,
+          Complex.I * Complex.exp
+            (((layoutFlow κ h₁ a c h L M w₁ w₂ t σ).2 : ℂ) * Complex.I)⟫_ℝ
+      nlinarith [hAB, hA, hin]
+    have hC₂val : C₂ * (1 - R' ^ 2) = 2 * (M + 1) := by
+      rw [hC₂def]; field_simp
+    calc |2 * (kappaArc κ h₁ L w₁ w₂ t σ
+          + ⟪(layoutFlow κ h₁ a c h L M w₁ w₂ t σ).1,
+            Complex.I * Complex.exp
+              (((layoutFlow κ h₁ a c h L M w₁ w₂ t σ).2 : ℂ) * Complex.I)⟫_ℝ)|
+        ≤ 2 * (M + R') := hnumbd
+      _ ≤ 2 * (M + 1) := by linarith
+      _ = C₂ * (1 - R' ^ 2) := hC₂val.symm
+      _ ≤ C₂ * (1 - ‖(layoutFlow κ h₁ a c h L M w₁ w₂ t σ).1‖ ^ 2) :=
+        mul_le_mul_of_nonneg_left (by linarith) hC₂0.le
+  have hφLip : ∀ x ∈ Set.Icc (0 : ℝ) Λ, ∀ y ∈ Set.Icc (0 : ℝ) Λ,
+      |(layoutFlow κ h₁ a c h L M w₁ w₂ t x).2
+        - (layoutFlow κ h₁ a c h L M w₁ w₂ t y).2| ≤ C₂ * |x - y| := by
+    intro x hx y hy
+    have := (convex_Icc (0 : ℝ) Λ).norm_image_sub_le_of_norm_hasDerivWithin_le
+      (f := fun s => (layoutFlow κ h₁ a c h L M w₁ w₂ t s).2)
+      (f' := fun σ => (arcField (kappaArc κ h₁ L w₁ w₂ t) R' σ
+        (layoutFlow κ h₁ a c h L M w₁ w₂ t σ)).2)
+      (fun σ hσ => (hderivW σ hσ).snd) hbound hx hy
+    rw [Real.norm_eq_abs, Real.norm_eq_abs,
+      abs_sub_comm (layoutFlow κ h₁ a c h L M w₁ w₂ t y).2
+        (layoutFlow κ h₁ a c h L M w₁ w₂ t x).2, abs_sub_comm y x] at this
+    exact this
+  -- the short-arc `π/3` phase-deviation certificate (from the left endpoint)
+  have hdev : ∀ p q : ℝ, 0 ≤ p → q ≤ Λ → q - p ≤ ℓ₀ →
+      ∀ s ∈ Set.Icc p q, |(layoutFlow κ h₁ a c h L M w₁ w₂ t s).2
+        - (layoutFlow κ h₁ a c h L M w₁ w₂ t p).2| ≤ π / 3 := by
+    intro p q hp hqΛ hqp s hs
+    have hsmem : s ∈ Set.Icc (0 : ℝ) Λ := ⟨le_trans hp hs.1, le_trans hs.2 hqΛ⟩
+    have hpmem : p ∈ Set.Icc (0 : ℝ) Λ := ⟨hp, le_trans (hs.1.trans hs.2) hqΛ⟩
+    have h2 : |s - p| ≤ ℓ₀ := by
+      rw [abs_of_nonneg (by linarith [hs.1])]; linarith [hs.2]
+    calc |(layoutFlow κ h₁ a c h L M w₁ w₂ t s).2
+          - (layoutFlow κ h₁ a c h L M w₁ w₂ t p).2|
+        ≤ C₂ * |s - p| := hφLip s hsmem p hpmem
+      _ ≤ C₂ * ℓ₀ := mul_le_mul_of_nonneg_left h2 hC₂0.le
+      _ = π / 3 := hC₂ℓ₀
+  -- the three-regime split on the sub-arc length
+  rcases le_total (q - p) ℓ₀ with hshort | hlong
+  · -- SHORT regime: midpoint projection through the negative dips
+    exact chord_ne_zero_of_small_dev hpq
+      (hφTcont.mono (Set.Icc_subset_Icc hp hqΛ.le)) (hdev p q hp hqΛ.le hshort)
+  · rcases le_total (Λ - ℓ₀) (q - p) with hnear | hmid
+    · -- NEAR-FULL regime: complement + exact closure
+      have hpℓ : p ≤ ℓ₀ := by linarith [hqΛ.le]
+      have hqℓ : Λ - q ≤ ℓ₀ := by linarith
+      have hturn : (layoutFlow κ h₁ a c h L M w₁ w₂ t Λ).2
+          = (layoutFlow κ h₁ a c h L M w₁ w₂ t 0).2 + 2 * π := by
+        rw [hflow0]; exact htcl
+      have hloop : (∫ s in (0 : ℝ)..Λ, Complex.exp
+          (((layoutFlow κ h₁ a c h L M w₁ w₂ t s).2 : ℂ) * Complex.I)) = 0 := by
+        rw [hFTC 0 Λ le_rfl hΛ0.le le_rfl, hflow0, hzcl, sub_self]
+      refine chord_ne_zero_of_short_complement hp hpq hqΛ hφTcont hturn hloop
+        (hdev 0 p le_rfl (hpq.le.trans hqΛ.le) (by linarith)) (fun s hs => ?_)
+      have hsmem : s ∈ Set.Icc (0 : ℝ) Λ := ⟨le_trans hp (hpq.le.trans hs.1), hs.2⟩
+      have hΛmem : Λ ∈ Set.Icc (0 : ℝ) Λ := ⟨hΛ0.le, le_rfl⟩
+      have h2 : |s - Λ| ≤ ℓ₀ := by
+        rw [abs_of_nonpos (by linarith [hs.2])]; linarith [hs.1]
+      calc |(layoutFlow κ h₁ a c h L M w₁ w₂ t s).2
+            - (layoutFlow κ h₁ a c h L M w₁ w₂ t Λ).2|
+          ≤ C₂ * |s - Λ| := hφLip s hsmem Λ hΛmem
+        _ ≤ C₂ * ℓ₀ := mul_le_mul_of_nonneg_left h2 hC₂0.le
+        _ = π / 3 := hC₂ℓ₀
+    · -- MID regime: clean chord margin transported at cost `2C₁ε`
+      have hcl0 : layoutClean a c h L w₁ w₂ 0 = layoutStart a c h L :=
+        layoutClean_zero a c h w₁ w₂ hL0.le
+      have hΛmem : Λ ∈ Set.Icc (0 : ℝ) Λ := ⟨hΛ0.le, le_rfl⟩
+      have hcleanZ : ‖(layoutClean a c h L w₁ w₂ Λ).1
+          - (layoutClean a c h L w₁ w₂ 0).1‖ ≤ η₀ := by
+        rw [hcl0]
+        have heq : (layoutClean a c h L w₁ w₂ Λ).1 - (layoutStart a c h L).1
+            = -((layoutFlow κ h₁ a c h L M w₁ w₂ t Λ).1
+              - (layoutClean a c h L w₁ w₂ Λ).1) := by
+          rw [hzcl]; ring
+        rw [heq, norm_neg]
+        exact (norm_fst_le _).trans ((htrans Λ hΛmem).trans hμη)
+      have hcleanT : |(layoutClean a c h L w₁ w₂ Λ).2
+          - ((layoutClean a c h L w₁ w₂ 0).2 + 2 * π)| ≤ η₀ := by
+        rw [hcl0]
+        have heq : (layoutClean a c h L w₁ w₂ Λ).2
+            - ((layoutStart a c h L).2 + 2 * π)
+            = -((layoutFlow κ h₁ a c h L M w₁ w₂ t Λ).2
+              - (layoutClean a c h L w₁ w₂ Λ).2) := by
+          rw [htcl]; ring
+        rw [heq, abs_neg, ← Real.norm_eq_abs]
+        exact (norm_snd_le _).trans ((htrans Λ hΛmem).trans hμη)
+      have hcleanchord := hclean w₁ w₂ hw₁ hw₂ Λ hcleanZ hcleanT p q hp hqΛ.le hlong hmid
+      rw [hFTC p q hp hpq.le hqΛ.le]
+      intro hzero
+      have hqmem : q ∈ Set.Icc (0 : ℝ) Λ := ⟨hp.trans hpq.le, hqΛ.le⟩
+      have hpmem : p ∈ Set.Icc (0 : ℝ) Λ := ⟨hp, hpq.le.trans hqΛ.le⟩
+      have hgq : ‖(layoutFlow κ h₁ a c h L M w₁ w₂ t q).1
+          - (layoutClean a c h L w₁ w₂ q).1‖ ≤ C₁ * ε :=
+        (norm_fst_le _).trans (htrans q hqmem)
+      have hgp : ‖(layoutFlow κ h₁ a c h L M w₁ w₂ t p).1
+          - (layoutClean a c h L w₁ w₂ p).1‖ ≤ C₁ * ε :=
+        (norm_fst_le _).trans (htrans p hpmem)
+      have hsplit : (layoutClean a c h L w₁ w₂ q).1 - (layoutClean a c h L w₁ w₂ p).1
+          = ((layoutFlow κ h₁ a c h L M w₁ w₂ t p).1
+              - (layoutClean a c h L w₁ w₂ p).1)
+            - ((layoutFlow κ h₁ a c h L M w₁ w₂ t q).1
+              - (layoutClean a c h L w₁ w₂ q).1) := by
+        linear_combination hzero
+      have hchain : ‖(layoutClean a c h L w₁ w₂ q).1
+          - (layoutClean a c h L w₁ w₂ p).1‖ ≤ 2 * (C₁ * ε) := by
+        rw [hsplit]
+        exact (norm_sub_le _ _).trans (by linarith [hgq, hgp])
+      linarith [hcleanchord, hchain, hμm]
 
 end Gluck.SpaceForm
