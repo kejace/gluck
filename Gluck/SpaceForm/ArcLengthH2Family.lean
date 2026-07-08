@@ -10622,7 +10622,7 @@ private lemma layoutClean_chord_lower {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     have hK : (0 : ℝ) ≤ ωhi := hωhi0.le
     refine LipschitzWith.continuous (K := ⟨ωhi, hK⟩)
       (LipschitzWith.of_dist_le_mul fun x y => ?_)
-    show dist (φf x) (φf y) ≤ ωhi * dist x y
+    change dist (φf x) (φf y) ≤ ωhi * dist x y
     rw [Real.dist_eq, Real.dist_eq]
     exact hlip x y
   have hexpc : Continuous fun s => Complex.exp ((φf s : ℂ) * Complex.I) :=
@@ -10918,8 +10918,7 @@ theorem layout_chord_ne_zero {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   obtain ⟨m₀, hm₀0, η₀, hη₀0, hclean⟩ :=
     layoutClean_chord_lower ha hac hwin hlow hL0 hL hℓ₀0
   refine ⟨min η₀ (m₀ / 4), lt_min hη₀0 (by linarith), ?_⟩
-  intro h₁ hh₁c
-  intro C₁ ε w₁ w₂ t hw₁ hw₂ ht hC₁0 hε0 hμ hzcl htcl htrans hconf p q hp hpq hqΛ
+  intro h₁ hh₁c C₁ ε w₁ w₂ t hw₁ hw₂ ht hC₁0 hε0 hμ hzcl htcl htrans hconf p q hp hpq hqΛ
   have hμη : C₁ * ε ≤ η₀ := hμ.trans (min_le_left _ _)
   have hμm : C₁ * ε ≤ m₀ / 4 := hμ.trans (min_le_right _ _)
   obtain ⟨hw₁l, hw₁r⟩ := abs_le.mp hw₁
