@@ -1,0 +1,95 @@
+/-
+Copyright (c) 2026 kejace. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: kejace
+-/
+import Gluck.Hyperbolic
+import Gluck.SpaceForm.ArcLengthH2Family
+
+/-!
+# The hyperbolic mixed (Dahlberg) converse — genuinely-negative curvature (H², K = −1)
+
+The genuinely-negative extension of the hyperbolic four-vertex converse
+`hyperbolicConverse_pos` (`Gluck/Hyperbolic.lean`). Where the positive converse
+requires the escape-velocity bound `κ > 1` *everywhere*, the mixed converse allows
+`κ` to dip **genuinely negative** near its minima: the prescribed geodesic
+curvature may be `≤ 0` on part of the curve, provided the extrema still alternate
+in the value-separated four-vertex pattern with the two maxima above the
+escape-velocity threshold `c > 1`.
+
+This is the `ε = −1` analogue of the spherical mixed converse
+`Gluck.sphericalConverse` and the Euclidean `dahlbergConverse`. It transcribes
+Dahlberg §2–3 onto the H² arc-length engine (`Gluck/SpaceForm/ArcLengthH2*.lean`).
+
+## Main definitions
+
+* `Gluck.MixedHyperbolicFourVertex` — the mixed-sign hyperbolic four-vertex
+  hypothesis: continuous, `2π`-periodic `κ` that is either constant escape
+  (`∃ c, 1 < c ∧ κ ≡ c`) or has the value-separated alternating extrema of the
+  four-vertex condition with both maxima above an escape level `c > 1` and a
+  global lower bound `−(centeredRadius (−1) c) < κ`.  Re-export of
+  `SpaceForm.MixedSignHyperbolicFourVertex`, mirroring `HyperbolicFourVertex`.
+
+## Main results
+
+* `Gluck.hyperbolicMixedConverse` — a mixed-sign hyperbolic four-vertex curvature
+  function is realized, up to an orientation-preserving `C¹` reparametrization
+  `Ψ` (`0 < Ψ'`), as the geodesic curvature of a simple closed curve in the
+  Poincaré disk. Re-export of `SpaceForm.hyperbolicMixedConverse`, with the
+  realization stated through `RealizesHyperbolicCurvature` (= `Realizes (−1)`).
+
+## Floored scope (honest)
+
+The minima are **genuinely negative** — the confinement floor
+`−(centeredRadius (−1) c) = −(c − √(c² − 1)) ∈ (−1, 0)` (with `c → 1⁺ ⇒ −1`,
+`c → ∞ ⇒ 0⁻`), so `κ` reaches down to nearly `−1` — yet **bounded below** by that
+floor. This is the honest, floored scope of the milestone: not the fully
+unrestricted-below regime, but a genuinely mixed-sign one strictly larger than the
+positive `hyperbolicConverse_pos` (which it subsumes via
+`SpaceForm.MixedSignHyperbolicFourVertex.of_escape_positive`).
+
+## Reparametrization (the `H²` co-constructed period)
+
+Unlike the positive spherical/Euclidean converses, the H² conclusion is stated
+*up to reparametrization*: `H²` has no metric rescaling, so the period is
+co-constructed rather than normalized. The witness `Ψ` is `C¹` with strictly
+positive derivative, mirroring the arc-length family results
+`realizesH2_of_reparam` / `exists_gateProfileSmooth_realization`
+(`Gluck/SpaceForm/ArcLengthH2.lean`).
+
+Blueprint: `blueprint/src/chapters/Gluck_HyperbolicMixed.tex`.
+-/
+
+namespace Gluck
+
+open scoped Real
+
+/-- The *mixed-sign hyperbolic four-vertex hypothesis*: continuous, `2π`-periodic
+`κ` that is either constant escape (`∃ c, 1 < c ∧ κ ≡ c`) or has the
+value-separated alternating four-vertex extrema with the two maxima above an
+escape level `c > 1` and the global confinement floor
+`−(centeredRadius (−1) c) < κ`. The genuinely-negative `ε = −1` instantiation:
+the minima may dip below `0` (down to nearly `−1`), distinguishing this from the
+everywhere-escape `HyperbolicFourVertex`. Re-export of
+`SpaceForm.MixedSignHyperbolicFourVertex`. -/
+def MixedHyperbolicFourVertex (κ : ℝ → ℝ) : Prop :=
+  SpaceForm.MixedSignHyperbolicFourVertex κ
+
+/-- The mixed-sign hyperbolic four-vertex hypothesis is exactly the underlying
+space-form predicate at `ε = −1`. -/
+theorem mixedHyperbolicFourVertex_iff_mixedSign {κ : ℝ → ℝ} :
+    MixedHyperbolicFourVertex κ ↔ SpaceForm.MixedSignHyperbolicFourVertex κ := Iff.rfl
+
+/-- **The hyperbolic mixed (Dahlberg) converse to the four-vertex theorem.** A
+genuinely-negative mixed-sign hyperbolic four-vertex curvature function is
+realized, up to an orientation-preserving `C¹` reparametrization `Ψ`
+(`0 < Ψ'`), as the hyperbolic geodesic curvature of a simple closed curve in the
+Poincaré disk. The general-profile `ε = −1` case of the space-form mixed converse
+`SpaceForm.hyperbolicMixedConverse`; genuinely-negative counterpart of the
+everywhere-escape `hyperbolicConverse_pos`. -/
+theorem hyperbolicMixedConverse {κ : ℝ → ℝ} (h : MixedHyperbolicFourVertex κ) :
+    ∃ (z : ℝ → ℂ) (Ψ : ℝ → ℝ), ContDiff ℝ 1 Ψ ∧ (∀ t, 0 < deriv Ψ t) ∧
+      IsSimpleClosed z ∧ RealizesHyperbolicCurvature z (κ ∘ Ψ) :=
+  SpaceForm.hyperbolicMixedConverse h
+
+end Gluck
