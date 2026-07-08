@@ -3379,10 +3379,10 @@ theorem layoutTrajectory_close {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
     (hL : L ≤ bicircleBracket a h) (hL4 : L ≤ 4 * π)
     (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
-    {κ h₁ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
-    (hh₁c : Continuous h₁) (hh₁per : ∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π)
+    {κ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
     {M : ℝ} (hM : ∀ θ, |κ θ| ≤ M) :
-    ∃ C₁ > 0, ∀ w₁ w₂ t : ℝ, |w₁| ≤ L / 16 → |w₂| ≤ L / 16 → |t| ≤ L / 16 →
+    ∃ C₁ > 0, ∀ h₁ : ℝ → ℝ, Continuous h₁ → (∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π) →
+      ∀ w₁ w₂ t : ℝ, |w₁| ≤ L / 16 → |w₂| ≤ L / 16 → |t| ≤ L / 16 →
       ∀ σ ∈ Set.Icc (0 : ℝ) (nodePeriod L w₁ w₂ t),
         ‖layoutFlow κ h₁ a c h L M w₁ w₂ t σ - layoutClean a c h L w₁ w₂ σ‖
           ≤ C₁ * ∫ θ in (0 : ℝ)..(2 * π),
@@ -3400,6 +3400,10 @@ theorem layoutTrajectory_close {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     exact Real.exp_le_exp.mpr (mul_nonneg Lip.coe_nonneg hL0.le)
   set D := 2 / (1 - R ^ 2) with hDdef
   have hD0 : 0 < D := by positivity
+  refine ⟨5 * e ^ 5 * D * (L / π),
+    mul_pos (mul_pos (mul_pos (by norm_num) (pow_pos he0 5)) hD0)
+      (div_pos hL0 Real.pi_pos), ?_⟩
+  intro h₁ hh₁c hh₁per w₁ w₂ t hw₁ hw₂ ht
   set εI := ∫ θ in (0 : ℝ)..(2 * π),
     |κ (h₁ θ) - stepCurvature c a 0 (π / 2) π (3 * π / 2) θ| with hεIdef
   have hεI0 : 0 ≤ εI :=
@@ -3407,9 +3411,6 @@ theorem layoutTrajectory_close {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   set J := L / π * εI with hJdef
   have hJ0 : 0 ≤ J := mul_nonneg (by positivity) hεI0
   have hDJ0 : 0 ≤ D * J := mul_nonneg hD0.le hJ0
-  refine ⟨5 * e ^ 5 * D * (L / π),
-    mul_pos (mul_pos (mul_pos (by norm_num) (pow_pos he0 5)) hD0)
-      (div_pos hL0 Real.pi_pos), fun w₁ w₂ t hw₁ hw₂ ht => ?_⟩
   -- the per-leg cap: every compounded bound is at most `C₁ · εI`
   have hup : ∀ {x : ℝ}, 0 ≤ x → x ≤ e * (x + D * J) := by
     intro x hx
@@ -5976,7 +5977,8 @@ private lemma layout_turning_gap {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     ring
   -- box-uniform constants
   obtain ⟨C₁, hC₁0, hclose⟩ :=
-    layoutTrajectory_close ha hac hwin hlow hL0 hL hL4 hφe hκc hκper hh₁c hh₁per hM
+    layoutTrajectory_close ha hac hwin hlow hL0 hL hL4 hφe hκc hκper hM
+  replace hclose := hclose h₁ hh₁c hh₁per
   obtain ⟨KF, hKF⟩ := arcField_lipschitz (κ := fun _ : ℝ => c) (M := |c|)
     hR'0 hR'1 (fun _ => le_refl |c|)
   obtain ⟨K₂, hK₂0, hK₂⟩ :=
@@ -7121,7 +7123,8 @@ theorem turningResidual_bracket {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   set m : ℝ := 2 * (c - layoutCleanRadius a c) with hmdef
   have hm0 : 0 < m := by rw [hmdef]; linarith
   obtain ⟨C₁, hC₁0, hclose⟩ :=
-    layoutTrajectory_close ha hac hwin hlow hL0 hL hL4 hφe hκc hκper hh₁c hh₁per hM
+    layoutTrajectory_close ha hac hwin hlow hL0 hL hL4 hφe hκc hκper hM
+  replace hclose := hclose h₁ hh₁c hh₁per
   obtain ⟨W₀, hW₀0, hW₀16, hdrift⟩ :=
     exists_cleanTurning_box ha hac hwin hlow hL0 hL him hφe
       (margin := m * (L / 16) / 4) (by positivity)
@@ -9685,7 +9688,8 @@ theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
         ∀ σ ∈ Set.Icc (0 : ℝ) (nodePeriod L w₁ w₂ t),
           ‖(layoutFlow κ h₁ a c h L M w₁ w₂ t σ).1‖ ≤ layoutConfineRadius a c := by
   obtain ⟨C₁, hC₁0, hclose⟩ :=
-    layoutTrajectory_close ha hac hwin hlow hL0 hL hL4 hφe hκc hκper hh₁c hh₁per hM
+    layoutTrajectory_close ha hac hwin hlow hL0 hL hL4 hφe hκc hκper hM
+  replace hclose := hclose h₁ hh₁c hh₁per
   obtain ⟨W₀, hW₀0, hW₀16, ε₁, hε₁0, hroot⟩ :=
     turningRoot_continuous ha hac hwin hlow hL0 hL hL4 him hφe hκc hκper
       hh₁c hh₁per hM
