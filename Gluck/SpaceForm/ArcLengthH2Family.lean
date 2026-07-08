@@ -11201,4 +11201,123 @@ theorem layout_arcLengthH2Curvature {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     rw [hcongr]
     exact hchord p q hp hpq hqΛ
 
+/-- **The hyperbolic mixed (Dahlberg) converse — genuinely-negative four-vertex.**
+A `MixedSignHyperbolicFourVertex` profile (continuous, `2π`-periodic, escape
+velocity at the maxima, genuinely-negative minima) is realized, up to an
+orientation-preserving `C¹` reparametrization `Ψ`, as the geodesic curvature of a
+*simple closed* curve in the hyperbolic plane at `ε = −1`.  The up-to-reparam form
+mirrors `realizesH2_of_reparam`/`exists_gateProfileSmooth_realization`
+(`ArcLengthH2.lean`): `H²` has no metric rescaling, so the period is co-constructed
+rather than normalized (the `AL-6` precedent).
+
+Fork-A assembly (honest Dahlberg §2–3 transcription onto the arc-length engine):
+constant branch → `hyperbolicCircle_realizes`; four-vertex branch → convex clean
+levels `1 < a < b` in the overlap gap (`exists_abab_levels`) → symbolic family
+anchor `exists_bicircle_anchor` → the **reparam-uniform** closing constants
+`exists_layout_closing` (`C₁, ε₀`) and simplicity margin `layout_chord_ne_zero`
+(`μ`) — quantified *ahead of* the reparam so the ε-threshold
+`ε := min ε₀ (μ/C₁)` is chosen first, breaking the reparam/ε fixed point — then the
+`L¹`-plateau reparam `exists_bicircle_L1_reparam_pointwise` at tolerance `ε`,
+Poincaré–Miranda closing (`exists_layout_closing`), simplicity transport
+(`layout_chord_ne_zero`), the window bridge `layout_arcLengthH2Curvature`
+(`arcLengthH2Curvature_of_windowSolution`), `arcLengthH2Converse`, and the composite
+reparam `Ψ = h₁ ∘ g_{w*,t*} ∘ χ` (`nodeMap` `C¹`/positive-density, `χ` the linear
+window reparam of the converse).
+
+Note: the `MixedSignHyperbolicFourVertex` confinement floor
+`−(centeredRadius (−1) c) < κ` is **unused** by this route — the minima may be
+arbitrarily negative (the floor is only load-bearing for the fork-B explicit-witness
+milestone `mixed_chord_ne_zero`).  Relocated here from `ArcLengthH2Mixed.lean` because
+the closing/simplicity ingredients live in this file, which imports that one. -/
+theorem hyperbolicMixedConverse {κ : ℝ → ℝ} (h : MixedSignHyperbolicFourVertex κ) :
+    ∃ (z : ℝ → ℂ) (Ψ : ℝ → ℝ), ContDiff ℝ 1 Ψ ∧ (∀ t, 0 < deriv Ψ t) ∧
+      IsSimpleClosed z ∧ Realizes (-1) z (κ ∘ Ψ) := by
+  obtain ⟨hκc, hκper, hdisj⟩ := h
+  rcases hdisj with ⟨c, hc1, hc⟩ | ⟨p₁, q₁, p₂, q₂, h12, h23, h34, h41,
+      -, -, -, -, hsep, c, hcw₁, hcw₂, hc1, hlow⟩
+  · -- constant branch: the explicit escape-velocity hyperbolic circle.
+    have hκeq : κ = fun _ => c := funext hc
+    obtain ⟨z, hsimple, hreal⟩ := hyperbolicCircle_realizes hc1
+    refine ⟨z, id, contDiff_id, fun t => by simp, hsimple, ?_⟩
+    have : κ ∘ id = fun _ => c := by rw [hκeq]; rfl
+    exact this ▸ hreal
+  · -- four-vertex branch: the fork-A ALM-A1…A12 chain.
+    -- convex clean levels `1 < a < b` interior to the four-vertex overlap gap.
+    set lo : ℝ := max 1 (max (κ q₁) (κ q₂)) with hlodef
+    set hi : ℝ := min (κ p₁) (κ p₂) with hhidef
+    have h1lo : (1 : ℝ) ≤ lo := le_max_left _ _
+    have hloc : lo < c := hcw₁
+    have hchi : c < hi := hcw₂
+    set a : ℝ := (lo + c) / 2 with hadef
+    set b : ℝ := (c + hi) / 2 with hbdef
+    have h1a : 1 < a := by rw [hadef]; linarith
+    have hab : a < b := by rw [hadef, hbdef]; linarith
+    have hqa : max (κ q₁) (κ q₂) < a := by
+      have hle : max (κ q₁) (κ q₂) ≤ lo := le_max_right _ _
+      rw [hadef]; linarith
+    have hbp : b < min (κ p₁) (κ p₂) := by rw [hbdef, ← hhidef]; linarith
+    obtain ⟨θ₁, θ₂, θ₃, θ₄, ht12, ht23, ht34, ht41, hv₁, hv₂, hv₃, hv₄⟩ :=
+      exists_abab_levels hκc hκper h12 h23 h34 h41 hqa hab hbp
+    -- symbolic family anchor `(hh, LL)` for the convex levels `(a, b)`.
+    obtain ⟨hh, LL, hwin, hhmem, hLmem, him, hφe⟩ := exists_bicircle_anchor h1a hab
+    have hL0 : 0 < LL := hLmem.1
+    have hLbr : LL ≤ bicircleBracket a hh := hLmem.2.le
+    have hlowh : 1 / (10 * b) ≤ hh := hhmem.1
+    have hL4 : LL ≤ 4 * π :=
+      hLmem.2.le.trans (bicircleBracket_lt_four_pi h1a hwin.1 hwin.2.1).le
+    -- profile bound `M`.
+    obtain ⟨M, _hM0, hM⟩ := exists_periodic_abs_bound hκc hκper
+    -- reparam-uniform closing/simplicity constants, quantified ahead of the reparam.
+    obtain ⟨μ, hμ0, hchordμ⟩ :=
+      layout_chord_ne_zero h1a hab hwin hlowh hL0 hLbr hφe hκc hM
+    obtain ⟨C₁, hC₁0, ε₀, hε₀0, hclose⟩ :=
+      exists_layout_closing h1a hab hwin hlowh hL0 hLbr hL4 him hφe hκc hκper hM
+    -- the assembled tolerance `ε := min ε₀ (μ/C₁)` (breaks the reparam/ε fixed point).
+    set ε : ℝ := min ε₀ (μ / C₁) with hεdef
+    have hεpos : 0 < ε := lt_min hε₀0 (div_pos hμ0 hC₁0)
+    have hεε₀ : ε ≤ ε₀ := min_le_left _ _
+    have hεμC : C₁ * ε ≤ μ := by
+      have h1 : ε ≤ μ / C₁ := min_le_right _ _
+      calc C₁ * ε ≤ C₁ * (μ / C₁) := mul_le_mul_of_nonneg_left h1 hC₁0.le
+        _ = μ := by field_simp
+    -- the plateau `L¹` reparam at tolerance `ε`.
+    obtain ⟨h₁, _hh₁mono, hh₁c, hh₁per, ⟨vh, hvhc, hvhpos, hvhd⟩, hh₁L1, hh₁plateau⟩ :=
+      exists_bicircle_L1_reparam_pointwise hκc hκper ht12 ht23 ht34 ht41
+        hv₁ hv₂ hv₃ hv₄ hεpos
+    -- Poincaré–Miranda closing of the true layout flow.
+    obtain ⟨w₁, w₂, t, hw₁, hw₂, ht, hresid, htransport, hconfR⟩ :=
+      hclose h₁ hh₁c hh₁per hεpos hεε₀ hh₁L1.le hh₁plateau
+    obtain ⟨hzcl, htcl⟩ := (layoutResidual_eq_zero_iff κ h₁ a b hh LL M w₁ w₂ t).mp hresid
+    -- the reparametrised profile is an H² arc-length curvature function.
+    have hALC : ArcLengthH2Curvature (kappaArc κ h₁ LL w₁ w₂ t) :=
+      layout_arcLengthH2Curvature h1a hab hwin hlowh hL0 hLbr hL4 hφe hκc hκper hh₁c
+        hh₁per hM hw₁ hw₂ ht hzcl htcl hconfR
+        (fun p q hp hpq hqΛ => hchordμ h₁ hh₁c hw₁ hw₂ ht hC₁0 hεpos hεμC hzcl htcl
+          htransport hconfR p q hp hpq hqΛ)
+    -- arc-length converse: a simple closed `z` realizing `κ_arc ∘ χ`.
+    obtain ⟨z, χ, hχC1, hχpos, hZsc, hZreal⟩ :=
+      arcLengthH2Converse (continuous_kappaArc hκc hh₁c LL w₁ w₂ t) hALC
+    -- the composite reparam `Ψ = (h₁ ∘ nodeMap) ∘ χ` is `C¹`, orientation-preserving.
+    have hψd : ∀ s, HasDerivAt (fun s => h₁ (nodeMap LL w₁ w₂ t s))
+        (vh (nodeMap LL w₁ w₂ t s) * nodeDensity LL w₁ w₂ t s) s := fun s =>
+      (hvhd (nodeMap LL w₁ w₂ t s)).comp s (hasDerivAt_nodeMap LL w₁ w₂ t s)
+    have hχd : ∀ u, HasDerivAt χ (deriv χ u) u := fun u =>
+      (hχC1.differentiable (by norm_num)).differentiableAt.hasDerivAt
+    have hΨd : ∀ u, HasDerivAt ((fun s => h₁ (nodeMap LL w₁ w₂ t s)) ∘ χ)
+        ((vh (nodeMap LL w₁ w₂ t (χ u)) * nodeDensity LL w₁ w₂ t (χ u)) * deriv χ u) u :=
+      fun u => (hψd (χ u)).comp u (hχd u)
+    refine ⟨z, (fun s => h₁ (nodeMap LL w₁ w₂ t s)) ∘ χ, ?_, ?_, hZsc, hZreal⟩
+    · rw [contDiff_one_iff_deriv]
+      refine ⟨fun u => (hΨd u).differentiableAt, ?_⟩
+      have hderiv : deriv ((fun s => h₁ (nodeMap LL w₁ w₂ t s)) ∘ χ)
+          = fun u => (vh (nodeMap LL w₁ w₂ t (χ u)) * nodeDensity LL w₁ w₂ t (χ u))
+            * deriv χ u := funext fun u => (hΨd u).deriv
+      rw [hderiv]
+      exact ((hvhc.comp ((continuous_nodeMap LL w₁ w₂ t).comp hχC1.continuous)).mul
+        ((continuous_nodeDensity LL w₁ w₂ t).comp hχC1.continuous)).mul
+        (contDiff_one_iff_deriv.mp hχC1).2
+    · intro u
+      rw [(hΨd u).deriv]
+      exact mul_pos (mul_pos (hvhpos _) (nodeDensity_pos hL0 hw₁ hw₂ ht _)) (hχpos u)
+
 end Gluck.SpaceForm
