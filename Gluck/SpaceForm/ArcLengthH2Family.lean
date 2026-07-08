@@ -7338,30 +7338,202 @@ private noncomputable def a9V2re (C S ra rc D : ℝ) : ℝ :=
 private noncomputable def a9V2im (C S ra rc D : ℝ) : ℝ :=
   (ra - rc) / ra * (S - (ra - rc) * C ^ 2 * S / D)
 
+open Real Set in
+/-- `Real.tan` is convex on `[0, π/4]` (its derivative `1/cos²` is monotone
+there). -/
+private lemma a9_tan_convexOn : ConvexOn ℝ (Icc 0 (π / 4)) tan := by
+  have hpi := pi_pos
+  have hmem : ∀ x ∈ Ioo (0 : ℝ) (π / 4), x ∈ Ioo (-(π / 2)) (π / 2) := by
+    intro x hx; exact ⟨by linarith [hx.1], by linarith [hx.2]⟩
+  apply MonotoneOn.convexOn_of_deriv (convex_Icc _ _)
+  · -- continuity on `[0, π/4]`
+    intro x hx
+    have hx2 : x ∈ Ioo (-(π / 2)) (π / 2) := ⟨by linarith [hx.1], by linarith [hx.2]⟩
+    exact (continuousAt_tan.2 (cos_pos_of_mem_Ioo hx2).ne').continuousWithinAt
+  · -- differentiability on the interior
+    rw [interior_Icc]
+    intro x hx
+    exact (differentiableAt_tan_of_mem_Ioo (hmem x hx)).differentiableWithinAt
+  · -- monotonicity of the derivative
+    rw [interior_Icc]
+    intro x hx y hy hxy
+    have hcx : 0 < cos x := cos_pos_of_mem_Ioo (hmem x hx)
+    have hcy : 0 < cos y := cos_pos_of_mem_Ioo (hmem y hy)
+    have hcyx : cos y ≤ cos x := by
+      rcases eq_or_lt_of_le hxy with h | h
+      · rw [h]
+      · exact (cos_lt_cos_of_nonneg_of_le_pi hx.1.le (by linarith [hy.2]) h).le
+    simp only [deriv_tan]
+    apply one_div_le_one_div_of_le
+    · positivity
+    · nlinarith [hcx, hcy, hcyx]
+
+open Real Set in
+/-- Secant bound from convexity: on `[0, π/4]`, `tan u ≤ (4/π)·u`. -/
+private lemma a9_tan_le {u : ℝ} (h0 : 0 ≤ u) (h1 : u ≤ π / 4) :
+    tan u ≤ 4 / π * u := by
+  have hpi := pi_pos
+  have hpine : π ≠ 0 := hpi.ne'
+  have hx : (0 : ℝ) ∈ Icc (0 : ℝ) (π / 4) := ⟨le_refl _, by linarith⟩
+  have hy : (π / 4 : ℝ) ∈ Icc (0 : ℝ) (π / 4) := ⟨by linarith, le_refl _⟩
+  have hb : 0 ≤ 4 / π * u := by positivity
+  have ha : 0 ≤ 1 - 4 / π * u := by
+    rw [sub_nonneg, div_mul_eq_mul_div, div_le_one hpi]; nlinarith [h1, hpi]
+  have hab : (1 - 4 / π * u) + 4 / π * u = 1 := by ring
+  have key := a9_tan_convexOn.2 hx hy ha hb hab
+  simp only [smul_eq_mul, tan_zero, tan_pi_div_four, mul_zero, zero_add, mul_one] at key
+  have harg : 4 / π * u * (π / 4) = u := by field_simp
+  rwa [harg] at key
+
+open Real Set in
+/-- Cleared-denominator form of the secant bound on `[0, π/4]`. -/
+private lemma a9_piSin_le {u : ℝ} (h0 : 0 ≤ u) (h1 : u ≤ π / 4) :
+    π * Real.sin u ≤ 4 * u * Real.cos u := by
+  have hpi := pi_pos
+  have hpine : π ≠ 0 := hpi.ne'
+  have hcos : 0 < Real.cos u :=
+    cos_pos_of_mem_Ioo ⟨by linarith, by linarith⟩
+  have htan := a9_tan_le h0 h1
+  rw [Real.tan_eq_sin_div_cos, div_le_iff₀ hcos] at htan
+  -- htan : sin u ≤ 4 / π * u * cos u
+  calc π * Real.sin u ≤ π * (4 / π * u * Real.cos u) :=
+        mul_le_mul_of_nonneg_left htan hpi.le
+    _ = 4 * u * Real.cos u := by field_simp
+
 /-- **The angle–radius concavity inequality** `2β·cos β ≤ (π − 2β)·sin β` on
-`(0, π/4]`: `q(β) = (π−2β)sin β − 2β cos β` has `q(0) = q(π/4) = 0` and
-`q″ = −(4−2β)cos β + (4+2β−π)sin β < 0` there (`cos > sin` and
-`4−2β > 4+2β−π`), so `q` is strictly concave with vanishing endpoints.  At the
-anchor angle `θ_a = (π/2)·r_c/(r_a+r_c)` this is exactly `r_c·C ≤ r_a·S`. -/
+`(0, π/4]`: after the substitution `u := π/4 − β` this is the tan-convexity
+secant bound `tan u ≤ (4/π)·u` on `[0, π/4)` (`a9_tan_le`).  At the anchor
+angle `θ_a = (π/2)·r_c/(r_a+r_c)` this is exactly `r_c·C ≤ r_a·S`. -/
 private lemma a9_q_ineq {β : ℝ} (h0 : 0 < β) (h1 : β ≤ π / 4) :
     2 * β * Real.cos β ≤ (π - 2 * β) * Real.sin β := by
-  sorry
+  set u : ℝ := π / 4 - β with hu
+  have hu0 : 0 ≤ u := by rw [hu]; linarith
+  have hu1 : u ≤ π / 4 := by rw [hu]; linarith
+  have hβ : β = π / 4 - u := by rw [hu]; ring
+  have hs2 : (0 : ℝ) < Real.sqrt 2 := by positivity
+  have esin : Real.sin β = Real.sqrt 2 / 2 * (Real.cos u - Real.sin u) := by
+    rw [hβ, Real.sin_sub, Real.sin_pi_div_four, Real.cos_pi_div_four]; ring
+  have ecos : Real.cos β = Real.sqrt 2 / 2 * (Real.cos u + Real.sin u) := by
+    rw [hβ, Real.cos_sub, Real.cos_pi_div_four, Real.sin_pi_div_four]; ring
+  have htan := a9_piSin_le hu0 hu1
+  have key : 0 ≤ Real.sqrt 2 / 2 * (4 * u * Real.cos u - π * Real.sin u) :=
+    mul_nonneg (by positivity) (by linarith)
+  rw [esin, ecos, hβ]
+  nlinarith [key]
+
+/-- Homogeneous "star" polynomial positivity, in the `Q`-form
+`Q = 4m⁴ + π²·rc(4ra−rc)m² − π⁴·ra·rc·w²` (with `m = ra+rc`, `w = ra−rc`),
+valid for all `0 < rc < ra`; the `P < 0` branch certificate of `a9_K0_pos`. -/
+private lemma a9_star {ra rc : ℝ} (hrc : 0 < rc) (hrca : rc < ra) :
+    0 < 4 * (ra + rc) ^ 4 + π ^ 2 * rc * (4 * ra - rc) * (ra + rc) ^ 2
+        - π ^ 4 * ra * rc * (ra - rc) ^ 2 := by
+  have hra : 0 < ra := lt_trans hrc hrca
+  have hac : 0 < ra - rc := by linarith
+  have hm : 0 < ra + rc := by linarith
+  -- Numeric π bounds: 9.8695 < π² < 9.9225 and π⁴ < 98.46.
+  have hπ2_lo : (9.8695 : ℝ) < π ^ 2 := by nlinarith [Real.pi_gt_d6, Real.pi_pos]
+  have hπ2_hi : π ^ 2 < 9.9225 := by nlinarith [Real.pi_lt_d6, Real.pi_pos]
+  have hπ2_pos : (0 : ℝ) < π ^ 2 := pow_pos Real.pi_pos 2
+  have hπ4_hi : π ^ 4 < 98.46 := by nlinarith [hπ2_hi, hπ2_pos]
+  -- Positive geometric coefficients of the π² and π⁴ terms.
+  have hcoef1 : 0 < rc * (4 * ra - rc) * (ra + rc) ^ 2 :=
+    mul_pos (mul_pos hrc (by linarith)) (pow_pos hm 2)
+  have hcoef2 : 0 < ra * rc * (ra - rc) ^ 2 :=
+    mul_pos (mul_pos hra hrc) (pow_pos hac 2)
+  -- Lower-bounding π²/π⁴ by the numeric bounds reduces to a rational SOS
+  -- certificate on the cone `0 < rc < ra`.
+  nlinarith [hπ2_lo, hπ4_hi, hcoef1, hcoef2,
+    sq_nonneg (ra ^ 2 - 12 * ra * rc + 2 * rc ^ 2),
+    sq_nonneg (ra ^ 2 - 12 * ra * rc + 3 * rc ^ 2),
+    sq_nonneg (ra ^ 2 + 3 * rc ^ 2),
+    sq_nonneg (ra ^ 2 + 4 * rc ^ 2),
+    mul_nonneg (mul_nonneg hrc.le hac.le) (sq_nonneg (ra + 8 * rc))]
 
 /-- **The `K₀` inequality** — the value of the `Re`-column quadratic at the
 minimal denominator `D = wC²`, divided by `C²w³`; homogeneous of degree 4 in
-`(ra, rc)`.  Certificate: case split on the signs of `4m² − π²w²` and
-`ra²S² − rc²C²` with the exact cube identity
-`4 − 27t(1−t)² = (3t−1)²(4−3t)`, the positive-definite bound
-`7ra² − 33ra·rc + 40rc² > 0`, and the Jordan/`q` windows. -/
+`(ra, rc)`.  Certificate: `T3 ≥ 0` from the `q`-window; then case split on the
+sign of `P = 4m² − π²w²`, the `P < 0` branch via the squared Jordan bound
+`4m²S² ≤ π²rc²`, the exact identity
+`4m²·inner = rc·star + (π²rc² − 4m²S²)(m²rc − ra·P)`, and `a9_star`. -/
 private lemma a9_K0_pos {C S ra rc : ℝ} (hCS : C ^ 2 + S ^ 2 = 1) (hC : 0 < C)
-    (hS : 0 < S) (hrc : 0 < rc) (hrca : rc < ra) (hSC : S < C)
+    (hS : 0 < S) (hrc : 0 < rc) (hrca : rc < ra) (_hSC : S < C)
     (hJ1 : rc ≤ (ra + rc) * S) (hJ2 : 2 * (ra + rc) * S ≤ π * rc)
     (hq : rc * C ≤ ra * S) :
     0 < C ^ 3 * (ra + rc) ^ 2 * rc ^ 2
       + C * ra * S ^ 2 * rc * (4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2)
       + 2 * π * (ra - rc) * (ra + rc) * S * (ra ^ 2 * S ^ 2 - rc ^ 2 * C ^ 2) := by
-  sorry
+  have hra : 0 < ra := lt_trans hrc hrca
+  have hw : 0 < ra - rc := by linarith
+  have hm : 0 < ra + rc := by linarith
+  have hpi : 0 < π := Real.pi_pos
+  -- Step 1: the winding term `T3` is nonnegative (`R = ra²S² − rc²C² ≥ 0` from `hq`).
+  have h1 : 0 ≤ ra * S - rc * C := by linarith [hq]
+  have h2 : 0 < ra * S + rc * C := by
+    have := mul_pos hra hS; have := mul_pos hrc hC; linarith
+  have hR : 0 ≤ ra ^ 2 * S ^ 2 - rc ^ 2 * C ^ 2 := by nlinarith [mul_nonneg h1 h2.le]
+  have hfront : 0 < 2 * π * (ra - rc) * (ra + rc) * S :=
+    mul_pos (mul_pos (mul_pos (mul_pos (by norm_num) hpi) hw) hm) hS
+  have hT3 : 0 ≤ 2 * π * (ra - rc) * (ra + rc) * S * (ra ^ 2 * S ^ 2 - rc ^ 2 * C ^ 2) :=
+    mul_nonneg hfront.le hR
+  -- Step 2: prove the "inner" positivity `0 < C²m²rc + ra S²·P`.
+  have hinner : 0 < C ^ 2 * (ra + rc) ^ 2 * rc
+      + ra * S ^ 2 * (4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2) := by
+    by_cases hP : 0 ≤ 4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2
+    · -- Case P ≥ 0: both summands nonneg, first strictly positive.
+      have ht1 : 0 < C ^ 2 * (ra + rc) ^ 2 * rc :=
+        mul_pos (mul_pos (pow_pos hC 2) (pow_pos hm 2)) hrc
+      have ht2 : 0 ≤ ra * S ^ 2 * (4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2) :=
+        mul_nonneg (mul_nonneg hra.le (sq_nonneg S)) hP
+      linarith
+    · -- Case P < 0: use the Jordan bound and the star certificate.
+      have hPneg : 4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2 < 0 := not_le.mp hP
+      -- Squared Jordan bound: 4m²S² ≤ π²rc².
+      have hd : 0 ≤ π * rc - 2 * (ra + rc) * S := by linarith [hJ2]
+      have hs : 0 < π * rc + 2 * (ra + rc) * S := by
+        have := mul_pos hpi hrc
+        have := mul_pos (mul_pos (by norm_num : (0:ℝ) < 2) hm) hS
+        linarith
+      have hJ2sq : 4 * (ra + rc) ^ 2 * S ^ 2 ≤ π ^ 2 * rc ^ 2 := by
+        nlinarith [mul_nonneg hd hs.le]
+      have hstar := a9_star hrc hrca
+      have hC2 : C ^ 2 = 1 - S ^ 2 := by linarith [hCS]
+      -- Algebraic identity: 4m²·inner = rc·star + (π²rc² − 4m²S²)(m²rc − ra·P).
+      have hid : 4 * (ra + rc) ^ 2 * (C ^ 2 * (ra + rc) ^ 2 * rc
+            + ra * S ^ 2 * (4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2))
+          = rc * (4 * (ra + rc) ^ 4 + π ^ 2 * rc * (4 * ra - rc) * (ra + rc) ^ 2
+                - π ^ 4 * ra * rc * (ra - rc) ^ 2)
+            + (π ^ 2 * rc ^ 2 - 4 * (ra + rc) ^ 2 * S ^ 2)
+              * ((ra + rc) ^ 2 * rc
+                  - ra * (4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2)) := by
+        rw [hC2]; ring
+      -- Both RHS summands are nonneg / positive.
+      have hfac : 0 ≤ (ra + rc) ^ 2 * rc
+          - ra * (4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2) := by
+        nlinarith [mul_pos (pow_pos hm 2) hrc, mul_pos hra (neg_pos.mpr hPneg)]
+      have hRHSpos : 0 < rc * (4 * (ra + rc) ^ 4
+            + π ^ 2 * rc * (4 * ra - rc) * (ra + rc) ^ 2
+            - π ^ 4 * ra * rc * (ra - rc) ^ 2)
+          + (π ^ 2 * rc ^ 2 - 4 * (ra + rc) ^ 2 * S ^ 2)
+            * ((ra + rc) ^ 2 * rc
+                - ra * (4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2)) := by
+        have t1 : 0 < rc * (4 * (ra + rc) ^ 4
+            + π ^ 2 * rc * (4 * ra - rc) * (ra + rc) ^ 2
+            - π ^ 4 * ra * rc * (ra - rc) ^ 2) := mul_pos hrc hstar
+        have t2 : 0 ≤ (π ^ 2 * rc ^ 2 - 4 * (ra + rc) ^ 2 * S ^ 2)
+            * ((ra + rc) ^ 2 * rc
+                - ra * (4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2)) :=
+          mul_nonneg (by linarith [hJ2sq]) hfac
+        linarith
+      have h4m2 : 0 < 4 * (ra + rc) ^ 2 := by have := pow_pos hm 2; linarith
+      nlinarith [hid, hRHSpos, h4m2]
+  -- Step 3: assemble `T1 + T2 = C·rc·inner > 0`, then add `T3 ≥ 0`.
+  have hfin : 0 < C * rc * (C ^ 2 * (ra + rc) ^ 2 * rc
+      + ra * S ^ 2 * (4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2)) :=
+    mul_pos (mul_pos hC hrc) hinner
+  nlinarith [hfin, hT3]
 
+set_option maxHeartbeats 1000000 in
+-- large `linear_combination` certificate over the unfolded junction chain
 /-- **Numerator identity for `Im ∂₁G`** (modulo `C² + S² = 1`):
 `a9V1im · D³ra m²rc²` equals the manifestly-organized quartic in `D`. -/
 private lemma a9V1im_num_eq {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
@@ -7376,8 +7548,18 @@ private lemma a9V1im_num_eq {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
             * (ra ^ 2 * S ^ 2 - rc ^ 2 * C ^ 2)
         + C ^ 4 * ra * (ra - rc) ^ 4 * S ^ 3 * rc
             * (4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2) := by
-  sorry
+  have hm : ra + rc ≠ 0 := by positivity
+  unfold a9V1im a9dr5 a9ds4 a9dz4re a9dz4im a9dpsi4 a9dr4 a9ds3 a9dpsi3 a9Q
+  field_simp
+  linear_combination (-(C * S * (ra - rc) ^ 3 * (ra + rc)) *
+    (C ^ 3 * ra ^ 3 * rc - C ^ 3 * ra * rc ^ 3 + C ^ 2 * S * π * ra ^ 4
+      - 2 * C ^ 2 * S * π * ra ^ 3 * rc + 2 * C ^ 2 * S * π * ra * rc ^ 3
+      - C ^ 2 * S * π * rc ^ 4 - C * D * ra * rc ^ 2 - C * D * rc ^ 3
+      + C * S ^ 2 * ra ^ 3 * rc - C * S ^ 2 * ra * rc ^ 3 + C * ra ^ 3 * rc
+      - C * ra * rc ^ 3 + D * S * π * ra * rc ^ 2 - D * S * π * rc ^ 3)) * hCS
 
+set_option maxHeartbeats 1000000 in
+-- large `linear_combination` certificate over the unfolded junction chain
 /-- **Numerator factorization for `Re ∂₁G`** (modulo `C² + S² = 1`):
 `−a9V1re · D³ra m²rc² = (D − wS(1−S)) · K` with `K` quadratic in `D`. -/
 private lemma a9V1re_num_eq {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
@@ -7389,8 +7571,23 @@ private lemma a9V1re_num_eq {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
               * (4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2)
           + 2 * π * C ^ 2 * (ra - rc) ^ 4 * (ra + rc) * S
               * (ra ^ 2 * S ^ 2 - rc ^ 2 * C ^ 2)) := by
-  sorry
+  have hm : ra + rc ≠ 0 := by positivity
+  unfold a9V1re a9dr5 a9ds4 a9dz4re a9dz4im a9dpsi4 a9dr4 a9ds3 a9dpsi3 a9Q
+  field_simp
+  linear_combination (-(C * S * (ra - rc) ^ 3 * (ra + rc)) *
+    (C ^ 2 * S * ra ^ 3 * rc - C ^ 2 * S * ra * rc ^ 3 - C ^ 2 * ra ^ 3 * rc
+      + C ^ 2 * ra * rc ^ 3 - C * D * π * ra * rc ^ 2 + C * D * π * rc ^ 3
+      + C * S ^ 2 * π * ra ^ 4 - 2 * C * S ^ 2 * π * ra ^ 3 * rc
+      + 2 * C * S ^ 2 * π * ra * rc ^ 3 - C * S ^ 2 * π * rc ^ 4
+      - C * S * π * ra ^ 4 + 2 * C * S * π * ra ^ 3 * rc
+      - 2 * C * S * π * ra * rc ^ 3 + C * S * π * rc ^ 4
+      + 2 * D * S * ra ^ 2 * rc + D * S * ra * rc ^ 2 - D * S * rc ^ 3
+      + D * ra * rc ^ 2 + D * rc ^ 3 + S ^ 3 * ra ^ 3 * rc
+      - S ^ 3 * ra * rc ^ 3 - S ^ 2 * ra ^ 3 * rc + S ^ 2 * ra * rc ^ 3
+      + S * ra ^ 3 * rc - S * ra * rc ^ 3 - ra ^ 3 * rc + ra * rc ^ 3)) * hCS
 
+set_option maxHeartbeats 1000000 in
+-- six-hint nlinarith over the quartic numerator
 /-- **Column sign 1**: `Im ∂₁G > 0`.  All `D`-blocks of the numerator are
 positive after absorbing `R ≥ −rc²C²` and `P ≥ −π²w²` into the `D¹`-blocks
 via `D ≥ wC²`. -/
@@ -7398,8 +7595,39 @@ private lemma a9V1_im_pos {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
     (hC : 0 < C) (hS : 0 < S) (hrc : 0 < rc) (hrca : rc < ra)
     (hD : (ra - rc) * C ^ 2 < D) :
     0 < a9V1im C S ra rc D := by
-  sorry
+  have hw : 0 < ra - rc := by linarith
+  have hra : 0 < ra := by linarith
+  have hm : 0 < ra + rc := by linarith
+  have hwc : 0 < (ra - rc) * C ^ 2 := mul_pos hw (pow_pos hC 2)
+  have hDpos : 0 < D := lt_trans hwc hD
+  have hDmc : 0 < D - (ra - rc) * C ^ 2 := sub_pos.mpr hD
+  have hnum := a9V1im_num_eq hCS hra hrc hDpos
+  have hX : 0 < D ^ 3 * ra * (ra + rc) ^ 2 * rc ^ 2 :=
+    mul_pos (mul_pos (mul_pos (pow_pos hDpos 3) hra) (pow_pos hm 2)) (pow_pos hrc 2)
+  have hT1 : 0 < S * (ra - rc) * (ra + rc) ^ 2 * rc ^ 2 * D ^ 3 :=
+    mul_pos (mul_pos (mul_pos (mul_pos hS hw) (pow_pos hm 2)) (pow_pos hrc 2))
+      (pow_pos hDpos 3)
+  have hT2 : 0 ≤ ((ra - rc) * (2 * π * C * ra * (ra - rc) ^ 2 * S ^ 2 * (ra + rc) * rc)
+      + 3 * C ^ 2 * (ra - rc) ^ 2 * (ra + rc) ^ 2 * rc ^ 2 * S) * D ^ 2 :=
+    mul_nonneg (add_nonneg (mul_nonneg hw.le (by positivity)) (by positivity))
+      (by positivity)
+  have hA1 : 0 ≤ (2 * π * C ^ 3 * (ra - rc) ^ 4 * S ^ 2 * (ra + rc) * rc ^ 2)
+      * (D - (ra - rc) * C ^ 2) :=
+    mul_nonneg (by positivity) hDmc.le
+  have hA2 : 0 ≤ ((ra - rc) * (π ^ 2 * C ^ 2 * ra * (ra - rc) ^ 4 * S ^ 3 * rc))
+      * (D - (ra - rc) * C ^ 2) :=
+    mul_nonneg (mul_nonneg hw.le (by positivity)) hDmc.le
+  have hL1 : 0 ≤ (ra - rc)
+      * (2 * π * C ^ 3 * ra ^ 2 * (ra - rc) ^ 4 * (ra + rc) * S ^ 4) :=
+    mul_nonneg hw.le (by positivity)
+  have hL2 : 0 ≤ 4 * C ^ 4 * ra * (ra - rc) ^ 4 * rc * (ra + rc) ^ 2 * S ^ 3 := by
+    positivity
+  have key : 0 < a9V1im C S ra rc D * (D ^ 3 * ra * (ra + rc) ^ 2 * rc ^ 2) := by
+    rw [hnum]; nlinarith [hT1, hT2, hA1, hA2, hL1, hL2]
+  exact (mul_pos_iff_of_pos_right hX).mp key
 
+set_option maxHeartbeats 1000000 in
+-- nlinarith assembly of the Δ·K factorization
 /-- **Column sign 2**: `Re ∂₁G < 0`, via `N = Δ·K`, `Δ = D − wS(1−S) > 0`
 (from `C² ≥ S(1−S)`, i.e. `C² − S(1−S) = 1 − S > 0`), `K` increasing in `D`,
 and `K(wC²) > 0` (`a9_K0_pos`). -/
@@ -7408,21 +7636,79 @@ private lemma a9V1_re_neg {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
     (hJ1 : rc ≤ (ra + rc) * S) (hJ2 : 2 * (ra + rc) * S ≤ π * rc)
     (hq : rc * C ≤ ra * S) (hD : (ra - rc) * C ^ 2 < D) :
     a9V1re C S ra rc D < 0 := by
-  sorry
+  have hw : 0 < ra - rc := by linarith
+  have hra : 0 < ra := by linarith
+  have hm : 0 < ra + rc := by linarith
+  have hwc : 0 < (ra - rc) * C ^ 2 := mul_pos hw (pow_pos hC 2)
+  have hDpos : 0 < D := lt_trans hwc hD
+  have hDmc : 0 < D - (ra - rc) * C ^ 2 := sub_pos.mpr hD
+  have hS1 : S < 1 := by nlinarith [hCS, mul_pos hC hC, hS]
+  have hkey : (ra - rc) * C ^ 2 - (ra - rc) * S * (1 - S) = (ra - rc) * (1 - S) := by
+    linear_combination (ra - rc) * hCS
+  have h1S : 0 < (ra - rc) * (1 - S) := mul_pos hw (by linarith)
+  have hDelta : 0 < D - (ra - rc) * S * (1 - S) := by nlinarith [hDmc, h1S, hkey]
+  have hnum := a9V1re_num_eq hCS hra hrc hDpos
+  have hX : 0 < D ^ 3 * ra * (ra + rc) ^ 2 * rc ^ 2 :=
+    mul_pos (mul_pos (mul_pos (pow_pos hDpos 3) hra) (pow_pos hm 2)) (pow_pos hrc 2)
+  have hK0 : 0 < C ^ 3 * (ra + rc) ^ 2 * rc ^ 2
+      + C * ra * S ^ 2 * rc * (4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2)
+      + 2 * π * (ra - rc) * (ra + rc) * S * (ra ^ 2 * S ^ 2 - rc ^ 2 * C ^ 2) :=
+    a9_K0_pos hCS hC hS hrc hrca hSC hJ1 hJ2 hq
+  have hKwc : 0 < C ^ 2 * (ra - rc) ^ 3 * (C ^ 3 * (ra + rc) ^ 2 * rc ^ 2
+      + C * ra * S ^ 2 * rc * (4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2)
+      + 2 * π * (ra - rc) * (ra + rc) * S * (ra ^ 2 * S ^ 2 - rc ^ 2 * C ^ 2)) :=
+    mul_pos (mul_pos (pow_pos hC 2) (pow_pos hw 3)) hK0
+  have hsum2 : 0 < D + (ra - rc) * C ^ 2 := by linarith
+  have hd2 : 0 < D ^ 2 - ((ra - rc) * C ^ 2) ^ 2 := by nlinarith [mul_pos hDmc hsum2]
+  have hincr : 0 < C * (ra - rc) * (ra + rc) ^ 2 * rc ^ 2
+      * (D ^ 2 - ((ra - rc) * C ^ 2) ^ 2) :=
+    mul_pos (mul_pos (mul_pos (mul_pos hC hw) (pow_pos hm 2)) (pow_pos hrc 2)) hd2
+  have hK : 0 < C * (ra - rc) * (ra + rc) ^ 2 * rc ^ 2 * D ^ 2
+      + C ^ 3 * ra * (ra - rc) ^ 3 * S ^ 2 * rc
+          * (4 * (ra + rc) ^ 2 - π ^ 2 * (ra - rc) ^ 2)
+      + 2 * π * C ^ 2 * (ra - rc) ^ 4 * (ra + rc) * S
+          * (ra ^ 2 * S ^ 2 - rc ^ 2 * C ^ 2) := by
+    nlinarith [hKwc, hincr]
+  have key : 0 < -a9V1re C S ra rc D * (D ^ 3 * ra * (ra + rc) ^ 2 * rc ^ 2) := by
+    rw [hnum]; exact mul_pos hDelta hK
+  have hneg : 0 < -a9V1re C S ra rc D := (mul_pos_iff_of_pos_right hX).mp key
+  linarith
 
 /-- **Column sign 3**: `Re ∂₂G > 0` (uses `C² − S(1−S) = 1 − S > 0`). -/
 private lemma a9V2_re_pos {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
     (hC : 0 < C) (hS : 0 < S) (hrc : 0 < rc) (hrca : rc < ra)
     (hD : (ra - rc) * C ^ 2 < D) :
     0 < a9V2re C S ra rc D := by
-  sorry
+  have hw : 0 < ra - rc := by linarith
+  have hra : 0 < ra := by linarith
+  have hwc : 0 < (ra - rc) * C ^ 2 := mul_pos hw (pow_pos hC 2)
+  have hDpos : 0 < D := lt_trans hwc hD
+  have hD0 : D ≠ 0 := ne_of_gt hDpos
+  have hS1 : S < 1 := by nlinarith [hCS, mul_pos hC hC, hS]
+  have hDmc : 0 < D - (ra - rc) * C ^ 2 := sub_pos.mpr hD
+  have hkey : (ra - rc) * C ^ 2 - (ra - rc) * S * (1 - S) = (ra - rc) * (1 - S) := by
+    linear_combination (ra - rc) * hCS
+  have h1S : 0 < (ra - rc) * (1 - S) := mul_pos hw (by linarith)
+  have hDelta : 0 < D - (ra - rc) * S * (1 - S) := by nlinarith [hDmc, h1S, hkey]
+  unfold a9V2re
+  rw [show C - (ra - rc) * C * S * (1 - S) / D
+      = C * (D - (ra - rc) * S * (1 - S)) / D by field_simp]
+  exact mul_pos (div_pos hw hra) (div_pos (mul_pos hC hDelta) hDpos)
 
 /-- **Column sign 4**: `Im ∂₂G > 0` (direct from `D > wC²`). -/
-private lemma a9V2_im_pos {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
+private lemma a9V2_im_pos {C S ra rc D : ℝ} (_hCS : C ^ 2 + S ^ 2 = 1)
     (hC : 0 < C) (hS : 0 < S) (hrc : 0 < rc) (hrca : rc < ra)
     (hD : (ra - rc) * C ^ 2 < D) :
     0 < a9V2im C S ra rc D := by
-  sorry
+  have hw : 0 < ra - rc := by linarith
+  have hra : 0 < ra := by linarith
+  have hwc : 0 < (ra - rc) * C ^ 2 := mul_pos hw (pow_pos hC 2)
+  have hDpos : 0 < D := lt_trans hwc hD
+  have hD0 : D ≠ 0 := ne_of_gt hDpos
+  unfold a9V2im
+  rw [show S - (ra - rc) * C ^ 2 * S / D
+      = S * (D - (ra - rc) * C ^ 2) / D by field_simp]
+  exact mul_pos (div_pos hw hra) (div_pos (mul_pos hS (sub_pos.mpr hD)) hDpos)
 
 /-! ### A9.1 — anchor data: the reduced variables and their windows
 
@@ -7574,8 +7860,8 @@ private noncomputable def a9Residual (a c h L : ℝ) (p : ℝ × ℝ) : ℂ :=
 /-- The residual vanishes at the anchor (the `z`-half of
 `layoutClean_anchor_closes` read through the fixed-phase endpoint). -/
 private lemma a9Residual_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
-    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
-    (hL : L ≤ bicircleBracket a h)
+    (hwin : h ∈ bicircleWindow a) (_hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
+    (_hL : L ≤ bicircleBracket a h)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
     a9Residual a c h L (0, 0) = 0 := by
   -- the exact anchor closure, evaluated on the terminal leg
@@ -7584,7 +7870,7 @@ private lemma a9Residual_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   have hL16 : |(0 : ℝ)| ≤ L / 16 := by rw [abs_zero]; positivity
   rw [layoutClean_leg5 a c h (σ := L) hL0 hL16 hL16 (by rw [hs₄]; linarith), hs₄,
     show L - 7 * L / 8 = L / 8 by ring] at hclose
-  show a9Endpoint c (layoutNode4 a c h L 0 0) - (layoutStart a c h L).1 = 0
+  change a9Endpoint c (layoutNode4 a c h L 0 0) - (layoutStart a c h L).1 = 0
   simp only [a9Endpoint]
   set n4 := layoutNode4 a c h L 0 0 with hn4
   set r₅ := arcModelRadius c n4.1 n4.2 with hr₅
@@ -7617,7 +7903,7 @@ private lemma a9Residual_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   linear_combination (r₅ : ℂ) * Complex.I * hprod + (r₅ : ℂ) * Complex.I_mul_I
 
 /-- **Anchor node identities (bundle)**: the shared preamble and the
-`hnode1`–`hnode3` steps of `layoutClean_anchor_closes`, extracted once. -/
+`hnode1`–`hnode4` steps of `layoutClean_anchor_closes`, extracted once. -/
 private lemma a9_nodes_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
@@ -7627,7 +7913,9 @@ private lemma a9_nodes_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
           = ((qArc1 a (h, L)).1, (qArc1 a (h, L)).2 + 2 * π)
       ∧ layoutNode3 a c h L 0
           = ((starRingEnd ℂ) (qArc1 a (h, L)).1,
-              3 * π - (qArc1 a (h, L)).2 + 2 * π) := by
+              3 * π - (qArc1 a (h, L)).2 + 2 * π)
+      ∧ layoutNode4 a c h L 0 0
+          = (-(qArc1 a (h, L)).1, (qArc1 a (h, L)).2 + π + 2 * π) := by
   have hπ := Real.pi_pos
   obtain ⟨hh0, hh1, -⟩ := hwin
   have hratio0 := layoutMarginRatio_pos ha hac
@@ -7761,7 +8049,19 @@ private lemma a9_nodes_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       show (L / 4 : ℝ) = L / 8 + L / 8 by ring,
       ← arcModelConst_add hrc.ne' (L / 8) (hconfcne (L / 8)) (L / 8),
       ← hW₂, MIc (L / 8), sub_self, arcModelConst_zero]
-  exact ⟨hnode1, hnode2, hnode3⟩
+  -- node 4: `ρ(W₁) + (0, 2π)`
+  have hnode4 : layoutNode4 a c h L 0 0
+      = (-(qArc1 a (h, L)).1, (qArc1 a (h, L)).2 + π + 2 * π) := by
+    rw [layoutNode4, hnode3, add_zero]
+    rw [show (((starRingEnd ℂ) (qArc1 a (h, L)).1,
+        3 * π - (qArc1 a (h, L)).2 + 2 * π) : ℂ × ℝ).1
+      = (starRingEnd ℂ) (qArc1 a (h, L)).1 from rfl,
+      show (((starRingEnd ℂ) (qArc1 a (h, L)).1,
+        3 * π - (qArc1 a (h, L)).2 + 2 * π) : ℂ × ℝ).2
+      = 3 * π - (qArc1 a (h, L)).2 + 2 * π from rfl]
+    rw [arcModelConst_add_two_pi, MIa (L / 4),
+      show L / 8 - L / 4 = -(L / 8) by ring, E2z (L / 8), arcModelConst_neg_pi, ← hW₁]
+  exact ⟨hnode1, hnode2, hnode3, hnode4⟩
 
 /-- **Radius conservation along the first quarter-arc**: the level-`a` radius at
 `W₁ = qArc1` equals the start radius `r_a`. -/
@@ -7793,7 +8093,7 @@ private lemma a9_radius_qArc1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
 /-- **Anchor node 1** `= ρX(W₁)` (extraction of the `hnode1` step of
 `layoutClean_anchor_closes`). -/
 private lemma a9_node1_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
-    (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L)
+    (hwin : h ∈ bicircleWindow a) (_hL0 : 0 < L)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
     layoutNode1 a c h L
       = (-(starRingEnd ℂ) (qArc1 a (h, L)).1, 3 * π - (qArc1 a (h, L)).2 + π) :=
@@ -7801,7 +8101,7 @@ private lemma a9_node1_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
 
 /-- **Anchor node 2** `= W₁ + (0, 2π)` (extraction of the `hnode2` step). -/
 private lemma a9_node2_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
-    (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L)
+    (hwin : h ∈ bicircleWindow a) (_hL0 : 0 < L)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
     layoutNode2 a c h L 0
       = ((qArc1 a (h, L)).1, (qArc1 a (h, L)).2 + 2 * π) :=
@@ -7809,12 +8109,20 @@ private lemma a9_node2_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
 
 /-- **Anchor node 3** `= X(W₁) + (0, 2π)` (extraction of the `hnode3` step). -/
 private lemma a9_node3_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
-    (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L)
+    (hwin : h ∈ bicircleWindow a) (_hL0 : 0 < L)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
     layoutNode3 a c h L 0
       = ((starRingEnd ℂ) (qArc1 a (h, L)).1,
           3 * π - (qArc1 a (h, L)).2 + 2 * π) :=
-  (a9_nodes_anchor ha hac hwin him hφe).2.2
+  (a9_nodes_anchor ha hac hwin him hφe).2.2.1
+
+/-- **Anchor node 4** `= ρ(W₁) + (0, 2π)` (extraction of the `hnode4` step). -/
+private lemma a9_node4_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (_hL0 : 0 < L)
+    (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
+    layoutNode4 a c h L 0 0
+      = (-(qArc1 a (h, L)).1, (qArc1 a (h, L)).2 + π + 2 * π) :=
+  (a9_nodes_anchor ha hac hwin him hφe).2.2.2
 
 /-- The level-`a` radius at anchor node 1 is `r_a` (Klein equivariance +
 conservation). -/
@@ -7852,6 +8160,128 @@ private lemma a9_radius_node3 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   rw [arcModelRadius_add_two_pi, arcModelRadius_conj]
   exact a9_radius_qArc1 ha hac hwin
 
+/-- The level-`c` radius at anchor node 4 is `r_c` (Klein equivariance +
+conservation). -/
+private lemma a9_radius_node4 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L)
+    (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
+    arcModelRadius c (layoutNode4 a c h L 0 0).1 (layoutNode4 a c h L 0 0).2
+      = a9rc a c h L := by
+  rw [a9_node4_anchor ha hac hwin hL0 him hφe]
+  change arcModelRadius c (-(qArc1 a (h, L)).1)
+      ((qArc1 a (h, L)).2 + π + 2 * π) = a9rc a c h L
+  rw [show (qArc1 a (h, L)).2 + π + 2 * π = (qArc1 a (h, L)).2 + 2 * π + π by ring,
+    arcModelRadius_neg_pi, arcModelRadius_add_two_pi]
+  rfl
+
+/-- Derivative of the spaceForm normal vector `u(t) = i·e^{iψ t}` along a moving
+phase. -/
+private lemma a9_hasDerivAt_normal {ψ : ℝ → ℝ} {t₀ : ℝ} {dψ : ℝ}
+    (hψ : HasDerivAt ψ dψ t₀) :
+    HasDerivAt (fun t => Complex.I * Complex.exp ((ψ t : ℂ) * Complex.I))
+      (Complex.I * (Complex.exp ((ψ t₀ : ℂ) * Complex.I) * ((dψ : ℂ) * Complex.I)))
+      t₀ :=
+  ((hψ.ofReal_comp.mul_const Complex.I).cexp).const_mul Complex.I
+
+/-- **Derivative of `arcModelRadius` along a moving state** (raw quotient form;
+algebraic cleanup happens at the use sites). -/
+private lemma a9_hasDerivAt_radius {K : ℝ} {z : ℝ → ℂ} {ψ : ℝ → ℝ} {t₀ : ℝ}
+    {dz : ℂ} {dψ : ℝ} (hz : HasDerivAt z dz t₀) (hψ : HasDerivAt ψ dψ t₀)
+    (hden : K + ⟪z t₀, Complex.I * Complex.exp ((ψ t₀ : ℂ) * Complex.I)⟫_ℝ ≠ 0) :
+    HasDerivAt (fun t => arcModelRadius K (z t) (ψ t))
+      ((-(⟪z t₀, dz⟫_ℝ + ⟪dz, z t₀⟫_ℝ)
+          * (2 * (K + ⟪z t₀, Complex.I * Complex.exp ((ψ t₀ : ℂ) * Complex.I)⟫_ℝ))
+        - (1 - ⟪z t₀, z t₀⟫_ℝ)
+          * (2 * (⟪z t₀, Complex.I * (Complex.exp ((ψ t₀ : ℂ) * Complex.I)
+                * ((dψ : ℂ) * Complex.I))⟫_ℝ
+              + ⟪dz, Complex.I * Complex.exp ((ψ t₀ : ℂ) * Complex.I)⟫_ℝ)))
+        / (2 * (K + ⟪z t₀, Complex.I
+            * Complex.exp ((ψ t₀ : ℂ) * Complex.I)⟫_ℝ)) ^ 2) t₀ := by
+  have hfun : (fun t => arcModelRadius K (z t) (ψ t))
+      = fun t => (1 - ⟪z t, z t⟫_ℝ)
+          / (2 * (K + ⟪z t, Complex.I * Complex.exp ((ψ t : ℂ) * Complex.I)⟫_ℝ)) := by
+    funext t
+    rw [arcModelRadius, real_inner_self_eq_norm_sq]
+  have hnum : HasDerivAt (fun t => 1 - ⟪z t, z t⟫_ℝ)
+      (-(⟪z t₀, dz⟫_ℝ + ⟪dz, z t₀⟫_ℝ)) t₀ := (hz.inner ℝ hz).const_sub 1
+  have hden' : HasDerivAt
+      (fun t => 2 * (K + ⟪z t, Complex.I * Complex.exp ((ψ t : ℂ) * Complex.I)⟫_ℝ))
+      (2 * (⟪z t₀, Complex.I * (Complex.exp ((ψ t₀ : ℂ) * Complex.I)
+            * ((dψ : ℂ) * Complex.I))⟫_ℝ
+          + ⟪dz, Complex.I * Complex.exp ((ψ t₀ : ℂ) * Complex.I)⟫_ℝ)) t₀ :=
+    (((hz.inner ℝ (a9_hasDerivAt_normal hψ)).const_add K)).const_mul 2
+  have hne : (2 : ℝ) * (K + ⟪z t₀, Complex.I
+      * Complex.exp ((ψ t₀ : ℂ) * Complex.I)⟫_ℝ) ≠ 0 := by
+    intro h0
+    rcases mul_eq_zero.mp h0 with h | h
+    · norm_num at h
+    · exact hden h
+  rw [hfun]
+  exact hnum.div hden' hne
+
+/-- **Derivative of the `arcModelConst` z-component with moving initial state**
+(fixed leg length `s`; raw composition shape). -/
+private lemma a9_hasDerivAt_arc_fst {K s : ℝ} {z : ℝ → ℂ} {ψ : ℝ → ℝ} {t₀ : ℝ}
+    {dz : ℂ} {dψ dr : ℝ} (hz : HasDerivAt z dz t₀) (hψ : HasDerivAt ψ dψ t₀)
+    (hr : HasDerivAt (fun t => arcModelRadius K (z t) (ψ t)) dr t₀)
+    (hr0 : arcModelRadius K (z t₀) (ψ t₀) ≠ 0) :
+    HasDerivAt (fun t => (arcModelConst K (z t) (ψ t) s).1)
+      (dz - ((((dr : ℂ) * Complex.I) * Complex.exp ((ψ t₀ : ℂ) * Complex.I)
+            + ((arcModelRadius K (z t₀) (ψ t₀) : ℝ) : ℂ) * Complex.I
+              * (Complex.exp ((ψ t₀ : ℂ) * Complex.I) * ((dψ : ℂ) * Complex.I)))
+          * (Complex.exp (((s / arcModelRadius K (z t₀) (ψ t₀) : ℝ) : ℂ)
+              * Complex.I) - 1)
+        + ((arcModelRadius K (z t₀) (ψ t₀) : ℝ) : ℂ) * Complex.I
+            * Complex.exp ((ψ t₀ : ℂ) * Complex.I)
+          * (Complex.exp (((s / arcModelRadius K (z t₀) (ψ t₀) : ℝ) : ℂ) * Complex.I)
+            * ((((0 * arcModelRadius K (z t₀) (ψ t₀) - s * dr)
+                / arcModelRadius K (z t₀) (ψ t₀) ^ 2 : ℝ) : ℂ) * Complex.I)))) t₀ := by
+  have hsr : HasDerivAt (fun t => s / arcModelRadius K (z t) (ψ t))
+      ((0 * arcModelRadius K (z t₀) (ψ t₀) - s * dr)
+        / arcModelRadius K (z t₀) (ψ t₀) ^ 2) t₀ :=
+    (hasDerivAt_const t₀ s).div hr hr0
+  have hE : HasDerivAt (fun t => Complex.exp ((ψ t : ℂ) * Complex.I))
+      (Complex.exp ((ψ t₀ : ℂ) * Complex.I) * ((dψ : ℂ) * Complex.I)) t₀ :=
+    (hψ.ofReal_comp.mul_const Complex.I).cexp
+  have hF : HasDerivAt
+      (fun t => Complex.exp (((s / arcModelRadius K (z t) (ψ t) : ℝ) : ℂ) * Complex.I))
+      (Complex.exp (((s / arcModelRadius K (z t₀) (ψ t₀) : ℝ) : ℂ) * Complex.I)
+        * ((((0 * arcModelRadius K (z t₀) (ψ t₀) - s * dr)
+            / arcModelRadius K (z t₀) (ψ t₀) ^ 2 : ℝ) : ℂ) * Complex.I)) t₀ :=
+    (hsr.ofReal_comp.mul_const Complex.I).cexp
+  have hA : HasDerivAt (fun t => ((arcModelRadius K (z t) (ψ t) : ℝ) : ℂ) * Complex.I
+        * Complex.exp ((ψ t : ℂ) * Complex.I))
+      (((dr : ℂ) * Complex.I) * Complex.exp ((ψ t₀ : ℂ) * Complex.I)
+        + ((arcModelRadius K (z t₀) (ψ t₀) : ℝ) : ℂ) * Complex.I
+          * (Complex.exp ((ψ t₀ : ℂ) * Complex.I) * ((dψ : ℂ) * Complex.I))) t₀ :=
+    (hr.ofReal_comp.mul_const Complex.I).mul hE
+  exact hz.sub (hA.mul (hF.sub_const 1))
+
+/-- **Derivative of the `arcModelConst` phase component with moving initial
+state** (fixed leg length `s`; raw shape). -/
+private lemma a9_hasDerivAt_arc_snd {K s : ℝ} {z : ℝ → ℂ} {ψ : ℝ → ℝ} {t₀ : ℝ}
+    {dψ dr : ℝ} (hψ : HasDerivAt ψ dψ t₀)
+    (hr : HasDerivAt (fun t => arcModelRadius K (z t) (ψ t)) dr t₀)
+    (hr0 : arcModelRadius K (z t₀) (ψ t₀) ≠ 0) :
+    HasDerivAt (fun t => (arcModelConst K (z t) (ψ t) s).2)
+      (dψ + (0 * arcModelRadius K (z t₀) (ψ t₀) - s * dr)
+        / arcModelRadius K (z t₀) (ψ t₀) ^ 2) t₀ :=
+  hψ.add ((hasDerivAt_const t₀ s).div hr hr0)
+
+/-- **Derivative of the fixed-phase endpoint** `z + r·(1 + i·e^{iψ})` along a
+moving state (raw shape). -/
+private lemma a9_hasDerivAt_endpoint_aux {K : ℝ} {z : ℝ → ℂ} {ψ : ℝ → ℝ} {t₀ : ℝ}
+    {dz : ℂ} {dψ dr : ℝ} (hz : HasDerivAt z dz t₀) (hψ : HasDerivAt ψ dψ t₀)
+    (hr : HasDerivAt (fun t => arcModelRadius K (z t) (ψ t)) dr t₀) :
+    HasDerivAt (fun t => z t + (arcModelRadius K (z t) (ψ t) : ℂ)
+        * (1 + Complex.I * Complex.exp ((ψ t : ℂ) * Complex.I)))
+      (dz + ((dr : ℂ)
+          * (1 + Complex.I * Complex.exp ((ψ t₀ : ℂ) * Complex.I))
+        + ((arcModelRadius K (z t₀) (ψ t₀) : ℝ) : ℂ)
+          * (Complex.I * (Complex.exp ((ψ t₀ : ℂ) * Complex.I)
+              * ((dψ : ℂ) * Complex.I))))) t₀ :=
+  hz.add (hr.ofReal_comp.mul ((a9_hasDerivAt_normal hψ).const_add 1))
+
 /-- **`w₂`-column derivative**: the terminal-leg insertion.  The curve
 `t ↦ G(0, t)` differentiates to the closed junction form `a9V2` at the anchor
 variables. -/
@@ -7864,8 +8294,171 @@ private lemma a9_hasDerivAt_col2 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
           (a9ra a h) (a9rc a c h L) (a9D a c h L)
         + a9V2im (Real.cos (a9theta a h L)) (Real.sin (a9theta a h L))
             (a9ra a h) (a9rc a c h L) (a9D a c h L) * Complex.I) 0 := by
-  sorry
+  obtain ⟨hh0, hh1, hwb⟩ := hwin
+  have hπ := Real.pi_pos
+  -- anchor windows
+  obtain ⟨hS0, hC0, hrc0, hrclt, hDlt, hSC, hJ1, hJ2, hq⟩ :=
+    a9_anchor_facts ha hac ⟨hh0, hh1, hwb⟩ hL0 hL him hφe
+  have hra0 : 0 < a9ra a h := bicircle_ra_pos ha hh0 hh1
+  have hD0 : 0 < a9D a c h L :=
+    lt_trans (mul_pos (sub_pos.mpr hrclt) (pow_pos hC0 2)) hDlt
+  -- abbreviations (anchor scalars)
+  set θ := a9theta a h L with hθdef
+  set C := Real.cos θ with hCdef
+  set S := Real.sin θ with hSdef
+  set ra := a9ra a h with hradef
+  set rc := a9rc a c h L with hrcdef
+  set D := a9D a c h L with hDdef
+  set z₁ := (qArc1 a (h, L)).1 with hz₁def
+  set φ₁ := (qArc1 a (h, L)).2 with hφ₁def
+  set n₃ := layoutNode3 a c h L 0 with hn₃def
+  -- component scalarization of the real inner product on `ℂ`
+  have hip : ∀ x y : ℂ, ⟪x, y⟫_ℝ = x.re * y.re + x.im * y.im := fun x y => by
+    rw [Complex.inner]
+    simp [Complex.mul_re]
+    ring
+  -- the anchor node-4 state
+  have hpt : arcModelConst a n₃.1 n₃.2 (L / 4 + 0) = (-z₁, φ₁ + π + 2 * π) :=
+    a9_node4_anchor ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
+  have hz0 : (arcModelConst a n₃.1 n₃.2 (L / 4 + 0)).1 = -z₁ := by rw [hpt]
+  have hψ0 : (arcModelConst a n₃.1 n₃.2 (L / 4 + 0)).2 = φ₁ + π + 2 * π := by rw [hpt]
+  have hpt' : arcModelConst a n₃.1 n₃.2 (L / 4) = (-z₁, φ₁ + π + 2 * π) := by
+    rw [← hpt, add_zero]
+  -- radii at the anchor
+  have hr4 : arcModelRadius a n₃.1 n₃.2 = ra :=
+    a9_radius_node3 ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
+  have hr4ne : arcModelRadius a n₃.1 n₃.2 ≠ 0 := by rw [hr4]; exact hra0.ne'
+  have hr5 : arcModelRadius c (-z₁) (φ₁ + π + 2 * π) = rc := by
+    rw [← hz0, ← hψ0]
+    exact a9_radius_node4 ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
+  -- confinement of the node-4 state
+  have h016 : |(0 : ℝ)| ≤ L / 16 := by rw [abs_zero]; positivity
+  have hn4norm : ‖(arcModelConst a n₃.1 n₃.2 (L / 4)).1‖ ≤ layoutCleanRadius a c := by
+    rw [← add_zero (L / 4)]
+    exact (layoutNode_norm_le ha hac ⟨hh0, hh1, hwb⟩ hlow hL0 hL h016 h016).2.2.2
+  have hR1 := layoutCleanRadius_lt_one ha hac
+  have hconf : (1 : ℝ) - ‖(arcModelConst a n₃.1 n₃.2 (L / 4)).1‖ ^ 2 ≠ 0 := by
+    have h2 := norm_nonneg (arcModelConst a n₃.1 n₃.2 (L / 4)).1
+    nlinarith
+  -- the reduced-denominator identity `c + s₄ = D`
+  have hDexp : D = c + ⟪z₁, Complex.I * Complex.exp ((φ₁ : ℂ) * Complex.I)⟫_ℝ := by
+    rw [hDdef]
+    simp only [a9D]
+    rw [← hz₁def, ← hφ₁def]
+  have hexpPi : ∀ x : ℝ, Complex.exp (((x + π : ℝ) : ℂ) * Complex.I)
+      = -Complex.exp ((x : ℂ) * Complex.I) := by
+    intro x
+    push_cast
+    rw [add_mul, Complex.exp_add, Complex.exp_pi_mul_I]
+    ring
+  have hE4 : Complex.exp (((φ₁ + π + 2 * π : ℝ) : ℂ) * Complex.I)
+      = -Complex.exp ((φ₁ : ℂ) * Complex.I) := by
+    rw [show (φ₁ + π + 2 * π : ℝ) = (φ₁ + π) + 2 * π by ring, expI_add_two_pi,
+      hexpPi]
+  have hden4 : c + ⟪-z₁, Complex.I
+      * Complex.exp (((φ₁ + π + 2 * π : ℝ) : ℂ) * Complex.I)⟫_ℝ = D := by
+    rw [hE4, mul_neg, inner_neg_neg, ← hDexp]
+  -- the moving node-4 state and its derivatives
+  have hz : HasDerivAt (fun t => (arcModelConst a n₃.1 n₃.2 (L / 4 + t)).1)
+      (Complex.exp (((φ₁ + π + 2 * π : ℝ) : ℂ) * Complex.I)) 0 := by
+    have h1 := (arcModelConst_solves hr4ne (L / 4) hconf).1
+    rw [show (arcModelConst a n₃.1 n₃.2 (L / 4)).2 = φ₁ + π + 2 * π by rw [hpt']] at h1
+    have h2 : HasDerivAt (fun σ => (arcModelConst a n₃.1 n₃.2 σ).1)
+        (Complex.exp (((φ₁ + π + 2 * π : ℝ) : ℂ) * Complex.I)) (L / 4 + 0) := by
+      rw [add_zero]; exact h1
+    exact h2.comp_const_add (L / 4) 0
+  have hψ : HasDerivAt (fun t => (arcModelConst a n₃.1 n₃.2 (L / 4 + t)).2)
+      (1 / ra) 0 := by
+    have hfeq : (fun t => (arcModelConst a n₃.1 n₃.2 (L / 4 + t)).2)
+        = fun t => n₃.2 + (L / 4 + t) / ra := by
+      funext t
+      rw [arcModelConst_snd, hr4]
+    rw [hfeq]
+    exact ((((hasDerivAt_id 0).const_add (L / 4)).div_const ra).const_add n₃.2)
+  have hden : c + ⟪(arcModelConst a n₃.1 n₃.2 (L / 4 + 0)).1, Complex.I
+      * Complex.exp ((((arcModelConst a n₃.1 n₃.2 (L / 4 + 0)).2 : ℝ) : ℂ)
+        * Complex.I)⟫_ℝ ≠ 0 := by
+    rw [hz0, hψ0, hden4]
+    exact hD0.ne'
+  have hr₅d := a9_hasDerivAt_radius hz hψ hden
+  have hend := (a9_hasDerivAt_endpoint_aux hz hψ hr₅d).sub_const (layoutStart a c h L).1
+  -- the residual curve is definitionally the endpoint curve
+  have hfun : (fun t => a9Residual a c h L (0, t))
+      = fun t => ((arcModelConst a n₃.1 n₃.2 (L / 4 + t)).1
+          + (arcModelRadius c ((arcModelConst a n₃.1 n₃.2 (L / 4 + t)).1)
+              ((arcModelConst a n₃.1 n₃.2 (L / 4 + t)).2) : ℂ)
+            * (1 + Complex.I
+              * Complex.exp ((((arcModelConst a n₃.1 n₃.2 (L / 4 + t)).2 : ℝ) : ℂ)
+                * Complex.I)))
+          - (layoutStart a c h L).1 := by
+    funext t
+    simp only [a9Residual, a9Endpoint]
+    rfl
+  -- scalar values of the first-arc endpoint
+  have hz₁re : z₁.re = -(ra * S) := qArc1_fst_re a h L
+  have hz₁im : z₁.im = h - ra * (1 - C) := qArc1_fst_im a h L
+  have hnormz : ‖z₁‖ ^ 2 = z₁.re ^ 2 + z₁.im ^ 2 := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+    ring
+  -- the conserved-radius identity `1 − ‖z₁‖² = 2·rc·D`
+  have hrcD : rc * (2 * D) = 1 - ‖z₁‖ ^ 2 := by
+    rw [hrcdef]
+    change arcModelRadius c z₁ φ₁ * (2 * D) = 1 - ‖z₁‖ ^ 2
+    rw [arcModelRadius, hDexp]
+    exact div_mul_cancel₀ _ (by rw [← hDexp]; positivity)
+  have hrcD2 : rc * (2 * D) = 1 - ((ra * S) ^ 2 + (h - ra * (1 - C)) ^ 2) := by
+    rw [hrcD, hnormz, hz₁re, hz₁im]
+    ring
+  -- the `him`-identity `ra − h = (ra − rc)·C`
+  have hG1 : (0 : ℝ) = h - ra * (1 - C)
+      - rc * (S * Real.sin (L / 8 / rc) + C * (1 - Real.cos (L / 8 / rc))) := by
+    have h1 := bicircle_G1_scalar a c h L
+    rw [him] at h1
+    exact h1
+  have hθc : L / 8 / rc = π / 2 - θ := bicircle_thetaC_of_G2_zero hφe
+  rw [hθc, Real.sin_pi_div_two_sub, Real.cos_pi_div_two_sub, ← hCdef, ← hSdef] at hG1
+  have hrh : ra - h = (ra - rc) * C := by linear_combination hG1
+  have hCS : C ^ 2 + S ^ 2 = 1 := by
+    rw [hCdef, hSdef]
+    exact Real.cos_sq_add_sin_sq θ
+  -- exponential values at the anchor
+  have h1φ : φ₁ = π + θ := qArc1_snd a h L
+  have hexpθ : Complex.exp ((θ : ℂ) * Complex.I) = (C : ℂ) + (S : ℂ) * Complex.I := by
+    rw [Complex.exp_mul_I, hCdef, hSdef, Complex.ofReal_cos, Complex.ofReal_sin]
+  have hexpφ : Complex.exp ((φ₁ : ℂ) * Complex.I)
+      = -((C : ℂ) + (S : ℂ) * Complex.I) := by
+    rw [show (φ₁ : ℂ) = ((θ + π : ℝ) : ℂ) by rw [h1φ]; push_cast; ring,
+      hexpPi, hexpθ]
+  -- assemble: same curve, reduce the raw derivative value
+  rw [hfun]
+  refine hend.congr_deriv ?_
+  rw [hz0, hψ0, hr5, hden4, hE4, hexpφ]
+  rw [Complex.ext_iff]
+  constructor
+  · simp only [hip, Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im,
+      Complex.neg_re, Complex.neg_im, Complex.I_re, Complex.I_im, Complex.one_re,
+      Complex.one_im, Complex.ofReal_re, Complex.ofReal_im,
+      hz₁re, hz₁im, a9V2re, a9V2im]
+    field_simp
+    linear_combination (S * (S - 1) * (C ^ 2 * ra ^ 2 + 2 * C * h * ra - 2 * C * ra ^ 2
+        + 2 * D * ra + S ^ 2 * ra ^ 2 + h ^ 2 - 2 * h * ra + ra ^ 2 - 1)) * hrh
+      + (C * S * (S - 1) * (ra - rc)) * hrcD2
+  · simp only [hip, Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im,
+      Complex.neg_re, Complex.neg_im, Complex.I_re, Complex.I_im, Complex.one_re,
+      Complex.one_im, Complex.ofReal_re, Complex.ofReal_im,
+      hz₁re, hz₁im, a9V2re, a9V2im]
+    field_simp
+    linear_combination (-S * (C ^ 3 * rc ^ 2 + C ^ 2 * h * ra + C ^ 2 * h * rc
+        - C ^ 2 * ra ^ 2 - C ^ 2 * ra * rc + 2 * C * D * ra + C * S ^ 2 * rc ^ 2
+        + C * h ^ 2 - 2 * C * h * ra + 2 * C * ra ^ 2 - C * rc ^ 2 - C
+        - S ^ 2 * h * ra + S ^ 2 * h * rc + S ^ 2 * ra ^ 2 - S ^ 2 * ra * rc
+        + h * ra - h * rc - ra ^ 2 + ra * rc)) * hrh
+      + (-S * (ra - rc) * (C ^ 2 * rc ^ 2 + 2 * D * rc + S ^ 2 * ra ^ 2 - 1)) * hCS
+      + (S * (S - 1) * (S + 1) * (ra - rc)) * hrcD2
 
+set_option maxHeartbeats 4000000 in
+-- three-junction variational chain; the assembled endpoint algebra grinds
+set_option maxRecDepth 10000 in
 /-- **`w₁`-column derivative**: the two-junction variational chain.  The curve
 `t ↦ G(t, 0)` differentiates to the closed junction form `a9V1` at the anchor
 variables. -/
@@ -7878,16 +8471,761 @@ private lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
           (a9ra a h) (a9rc a c h L) (a9D a c h L)
         + a9V1im (Real.cos (a9theta a h L)) (Real.sin (a9theta a h L))
             (a9ra a h) (a9rc a c h L) (a9D a c h L) * Complex.I) 0 := by
-  sorry
+  obtain ⟨hh0, hh1, hwb⟩ := hwin
+  have hπ := Real.pi_pos
+  obtain ⟨hS0, hC0, hrc0, hrclt, hDlt, hSC, hJ1, hJ2, hq⟩ :=
+    a9_anchor_facts ha hac ⟨hh0, hh1, hwb⟩ hL0 hL him hφe
+  have hra0 : 0 < a9ra a h := bicircle_ra_pos ha hh0 hh1
+  have hD0 : 0 < a9D a c h L :=
+    lt_trans (mul_pos (sub_pos.mpr hrclt) (pow_pos hC0 2)) hDlt
+  set θ := a9theta a h L with hθdef
+  set C := Real.cos θ with hCdef
+  set S := Real.sin θ with hSdef
+  set ra := a9ra a h with hradef
+  set rc := a9rc a c h L with hrcdef
+  set D := a9D a c h L with hDdef
+  set z₁ := (qArc1 a (h, L)).1 with hz₁def
+  set φ₁ := (qArc1 a (h, L)).2 with hφ₁def
+  set n₁ := layoutNode1 a c h L with hn₁def
+  have hip : ∀ x y : ℂ, ⟪x, y⟫_ℝ = x.re * y.re + x.im * y.im := fun x y => by
+    rw [Complex.inner]; simp [Complex.mul_re]; ring
+  -- scalar anchor data
+  have hz₁re : z₁.re = -(ra * S) := qArc1_fst_re a h L
+  have hz₁im : z₁.im = h - ra * (1 - C) := qArc1_fst_im a h L
+  have hnormz : ‖z₁‖ ^ 2 = z₁.re ^ 2 + z₁.im ^ 2 := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]; ring
+  have hDexp : D = c + ⟪z₁, Complex.I * Complex.exp ((φ₁ : ℂ) * Complex.I)⟫_ℝ := by
+    rw [hDdef]; simp only [a9D]; rw [← hz₁def, ← hφ₁def]
+  have hrcD : rc * (2 * D) = 1 - ‖z₁‖ ^ 2 := by
+    rw [hrcdef]
+    change arcModelRadius c z₁ φ₁ * (2 * D) = 1 - ‖z₁‖ ^ 2
+    rw [arcModelRadius, hDexp]
+    exact div_mul_cancel₀ _ (by rw [← hDexp]; positivity)
+  have hrcD2 : rc * (2 * D) = 1 - ((ra * S) ^ 2 + (h - ra * (1 - C)) ^ 2) := by
+    rw [hrcD, hnormz, hz₁re, hz₁im]; ring
+  -- the `him`-identity `ra − h = (ra − rc)·C`
+  have hG1 : (0 : ℝ) = h - ra * (1 - C)
+      - rc * (S * Real.sin (L / 8 / rc) + C * (1 - Real.cos (L / 8 / rc))) := by
+    have h1 := bicircle_G1_scalar a c h L; rw [him] at h1; exact h1
+  have hθc : L / 8 / rc = π / 2 - θ := bicircle_thetaC_of_G2_zero hφe
+  rw [hθc, Real.sin_pi_div_two_sub, Real.cos_pi_div_two_sub, ← hCdef, ← hSdef] at hG1
+  have hrh : ra - h = (ra - rc) * C := by linear_combination hG1
+  have hCS : C ^ 2 + S ^ 2 = 1 := by rw [hCdef, hSdef]; exact Real.cos_sq_add_sin_sq θ
+  have h1φ : φ₁ = π + θ := qArc1_snd a h L
+  -- sweep-angle relations
+  have hθa : L / 8 / ra = θ := by rw [hθdef]; rfl
+  have h1L : ra * θ = L / 8 := by rw [← hθa, mul_comm, div_mul_cancel₀ _ hra0.ne']
+  have h2L : rc * (π / 2 - θ) = L / 8 := by
+    rw [← hθc, mul_comm, div_mul_cancel₀ _ hrc0.ne']
+  have hsum : θ * (ra + rc) = π / 2 * rc := by linear_combination h1L - h2L
+  have hLpi : L * (ra + rc) = 4 * π * ra * rc := by
+    linear_combination (-8 * (ra + rc)) * h1L + 8 * ra * hsum
+  -- one-way eliminations of `h`, `L`, `D` (each identity closes by
+  -- `simp only [hh, hLe, hDe]; field_simp; ring` after these)
+  have hh : h = ra - (ra - rc) * C := by linarith [hrh]
+  have hrane : ra ≠ 0 := hra0.ne'
+  have hrcne : rc ≠ 0 := hrc0.ne'
+  have hmne : ra + rc ≠ 0 := (add_pos hra0 hrc0).ne'
+  have hLe : L = 4 * π * ra * rc / (ra + rc) := by
+    rw [eq_div_iff hmne]; linarith [hLpi]
+  have hrcD2sub : rc * (2 * D) = 1 - ((ra * S) ^ 2 + (rc * C) ^ 2) := by
+    have hx := hrcD2; rw [hh] at hx; linear_combination hx
+  have hDe : D = (1 - ((ra * S) ^ 2 + (rc * C) ^ 2)) / (2 * rc) := by
+    rw [eq_div_iff (mul_ne_zero two_ne_zero hrcne)]; linear_combination hrcD2sub
+  have hDden : (1 : ℝ) - ((ra * S) ^ 2 + (rc * C) ^ 2) ≠ 0 := by
+    rw [← hrcD2sub]; exact (mul_pos hrc0 (by linarith)).ne'
+  have hDne : D ≠ 0 := hD0.ne'
+  -- exponential library
+  have hexpR : ∀ x : ℝ, Complex.exp ((x : ℂ) * Complex.I)
+      = (Real.cos x : ℂ) + (Real.sin x : ℂ) * Complex.I := by
+    intro x; rw [Complex.exp_mul_I, ← Complex.ofReal_cos, ← Complex.ofReal_sin]
+  have hexpPi : ∀ x : ℝ, Complex.exp (((x + π : ℝ) : ℂ) * Complex.I)
+      = -Complex.exp ((x : ℂ) * Complex.I) := by
+    intro x; push_cast
+    rw [add_mul, Complex.exp_add, Complex.exp_pi_mul_I]; ring
+  have hexpθ : Complex.exp ((θ : ℂ) * Complex.I) = (C : ℂ) + (S : ℂ) * Complex.I := by
+    rw [hexpR, ← hCdef, ← hSdef]
+  have hexpnegθ : Complex.exp (((-θ : ℝ) : ℂ) * Complex.I) = (C : ℂ) - (S : ℂ) * Complex.I := by
+    rw [hexpR, Real.cos_neg, Real.sin_neg, ← hCdef, ← hSdef]; push_cast; ring
+  have hexpφ : Complex.exp ((φ₁ : ℂ) * Complex.I) = -((C : ℂ) + (S : ℂ) * Complex.I) := by
+    rw [show (φ₁ : ℂ) = ((θ + π : ℝ) : ℂ) by rw [h1φ]; push_cast; ring, hexpPi, hexpθ]
+  have hexpφ2 : Complex.exp (((φ₁ + 2 * π : ℝ) : ℂ) * Complex.I)
+      = -((C : ℂ) + (S : ℂ) * Complex.I) := by rw [expI_add_two_pi, hexpφ]
+  have hexpφ3 : Complex.exp (((3 * π - φ₁ + 2 * π : ℝ) : ℂ) * Complex.I)
+      = (C : ℂ) - (S : ℂ) * Complex.I := by
+    rw [show (3 * π - φ₁ + 2 * π : ℝ) = (3 * π - φ₁) + 2 * π by ring, expI_add_two_pi,
+      expI_three_pi_sub, hexpφ]
+    simp only [map_neg, neg_neg, map_add, map_mul, Complex.conj_ofReal, Complex.conj_I]
+    ring
+  have hexpφ4 : Complex.exp (((φ₁ + π + 2 * π : ℝ) : ℂ) * Complex.I)
+      = (C : ℂ) + (S : ℂ) * Complex.I := by
+    rw [show (φ₁ + π + 2 * π : ℝ) = (φ₁ + π) + 2 * π by ring, expI_add_two_pi, hexpPi, hexpφ]
+    ring
+  have hDval₂ : c + ⟪z₁, Complex.I * Complex.exp (((φ₁ + 2 * π : ℝ) : ℂ) * Complex.I)⟫_ℝ = D := by
+    rw [expI_add_two_pi]; exact hDexp.symm
+  have hDval₄ : c + ⟪-z₁, Complex.I
+      * Complex.exp (((φ₁ + π + 2 * π : ℝ) : ℂ) * Complex.I)⟫_ℝ = D := by
+    rw [show (φ₁ + π + 2 * π : ℝ) = (φ₁ + π) + 2 * π by ring, expI_add_two_pi, hexpPi,
+      mul_neg, inner_neg_neg]
+    exact hDexp.symm
+  have hsw_c : Complex.exp (((L / 4 / rc : ℝ) : ℂ) * Complex.I)
+      = ((S ^ 2 - C ^ 2 : ℝ) : ℂ) + ((2 * S * C : ℝ) : ℂ) * Complex.I := by
+    have harg : L / 4 / rc = π - 2 * θ := by
+      rw [show L / 4 / rc = 2 * (L / 8 / rc) by ring, hθc]; ring
+    rw [hexpR, harg, Real.cos_pi_sub, Real.cos_two_mul', Real.sin_pi_sub,
+      Real.sin_two_mul, ← hCdef, ← hSdef]
+    push_cast; ring
+  have hsw_a : Complex.exp ((((L / 4 + 0) / ra : ℝ) : ℂ) * Complex.I)
+      = ((C ^ 2 - S ^ 2 : ℝ) : ℂ) + ((2 * S * C : ℝ) : ℂ) * Complex.I := by
+    have harg : (L / 4 + 0) / ra = 2 * θ := by
+      rw [add_zero, show L / 4 / ra = 2 * (L / 8 / ra) by ring, hθa]
+    rw [hexpR, harg, Real.cos_two_mul', Real.sin_two_mul, ← hCdef, ← hSdef]
+  -- level-`a` inner-product identity `a + s_a = rc·D/ra`
+  have hsa_ne : (2 : ℝ) * (a + ⟪z₁, Complex.I * Complex.exp ((φ₁ : ℂ) * Complex.I)⟫_ℝ) ≠ 0 := by
+    intro h0
+    have hh : arcModelRadius a z₁ φ₁ = ra := a9_radius_qArc1 ha hac ⟨hh0, hh1, hwb⟩
+    rw [arcModelRadius, h0, div_zero] at hh
+    exact hra0.ne' hh.symm
+  have hraD : ra * (2 * (a + ⟪z₁, Complex.I * Complex.exp ((φ₁ : ℂ) * Complex.I)⟫_ℝ))
+      = 1 - ‖z₁‖ ^ 2 := by
+    have hh : arcModelRadius a z₁ φ₁ = ra := a9_radius_qArc1 ha hac ⟨hh0, hh1, hwb⟩
+    rw [arcModelRadius, div_eq_iff hsa_ne] at hh
+    linarith [hh]
+  have hkey : ra * (a + ⟪z₁, Complex.I * Complex.exp ((φ₁ : ℂ) * Complex.I)⟫_ℝ) = rc * D := by
+    linear_combination hraD / 2 - hrcD / 2
+  have hinner_eq : ⟪(starRingEnd ℂ) z₁,
+        Complex.I * Complex.exp (((3 * π - φ₁ + 2 * π : ℝ) : ℂ) * Complex.I)⟫_ℝ
+      = ⟪z₁, Complex.I * Complex.exp ((φ₁ : ℂ) * Complex.I)⟫_ℝ := by
+    rw [hexpφ3, hexpφ, hip, hip]
+    simp only [Complex.conj_re, Complex.conj_im, Complex.mul_re, Complex.mul_im,
+      Complex.I_re, Complex.I_im, Complex.sub_re, Complex.sub_im, Complex.neg_re,
+      Complex.neg_im, Complex.add_re, Complex.add_im, Complex.ofReal_re, Complex.ofReal_im]
+    ring
+  have hden₃val : a + ⟪(starRingEnd ℂ) z₁,
+        Complex.I * Complex.exp (((3 * π - φ₁ + 2 * π : ℝ) : ℂ) * Complex.I)⟫_ℝ = rc * D / ra := by
+    rw [hinner_eq, eq_div_iff hra0.ne']; linear_combination hkey
+  -- node-1 radius / node-2 anchor
+  have hr1 : arcModelRadius a n₁.1 n₁.2 = ra := a9_radius_node1 ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
+  have hr1ne : arcModelRadius a n₁.1 n₁.2 ≠ 0 := by rw [hr1]; exact hra0.ne'
+  have hpt₂ : arcModelConst a n₁.1 n₁.2 (L / 4 + 0) = (z₁, φ₁ + 2 * π) :=
+    a9_node2_anchor ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
+  have hz2pt : (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1 = z₁ := by rw [hpt₂]
+  have hψ2pt : (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 = φ₁ + 2 * π := by rw [hpt₂]
+  have hpt₂' : arcModelConst a n₁.1 n₁.2 (L / 4) = (z₁, φ₁ + 2 * π) := by rw [← hpt₂, add_zero]
+  have h016 : |(0 : ℝ)| ≤ L / 16 := by rw [abs_zero]; positivity
+  have hconf₂ : (1 : ℝ) - ‖(arcModelConst a n₁.1 n₁.2 (L / 4)).1‖ ^ 2 ≠ 0 := by
+    have hnorm : ‖(arcModelConst a n₁.1 n₁.2 (L / 4)).1‖ ≤ layoutCleanRadius a c := by
+      rw [← add_zero (L / 4)]
+      exact (layoutNode_norm_le ha hac ⟨hh0, hh1, hwb⟩ hlow hL0 hL (w₁ := 0) (w₂ := 0)
+        h016 h016).2.1
+    have hR1 := layoutCleanRadius_lt_one ha hac
+    have h2 := norm_nonneg (arcModelConst a n₁.1 n₁.2 (L / 4)).1
+    nlinarith
+  have hz₂ : HasDerivAt (fun t => (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1)
+      (Complex.exp (((φ₁ + 2 * π : ℝ) : ℂ) * Complex.I)) 0 := by
+    have h1 := (arcModelConst_solves hr1ne (L / 4) hconf₂).1
+    rw [show (arcModelConst a n₁.1 n₁.2 (L / 4)).2 = φ₁ + 2 * π by rw [hpt₂']] at h1
+    have h2 : HasDerivAt (fun σ => (arcModelConst a n₁.1 n₁.2 σ).1)
+        (Complex.exp (((φ₁ + 2 * π : ℝ) : ℂ) * Complex.I)) (L / 4 + 0) := by
+      rw [add_zero]; exact h1
+    exact h2.comp_const_add (L / 4) 0
+  have hψ₂ : HasDerivAt (fun t => (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2) (1 / ra) 0 := by
+    have hfeq : (fun t => (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2)
+        = fun t => n₁.2 + (L / 4 + t) / ra := by
+      funext t; rw [arcModelConst_snd, hr1]
+    rw [hfeq]
+    exact (((hasDerivAt_id 0).const_add (L / 4)).div_const ra).const_add n₁.2
+  have hden₂ : c + ⟪(arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1, Complex.I
+      * Complex.exp ((((arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 : ℝ) : ℂ) * Complex.I)⟫_ℝ ≠ 0 := by
+    rw [hz2pt, hψ2pt, expI_add_two_pi, ← hDexp]; exact hD0.ne'
+  have hr₃0 : arcModelRadius c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 = rc :=
+    a9_radius_node2 ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
+  have hr₃0ne : arcModelRadius c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 ≠ 0 := by rw [hr₃0]; exact hrc0.ne'
+  -- Stage R1 : dr₃ = −a9Q
+  have hr₃d : HasDerivAt (fun t => arcModelRadius c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2) (-(a9Q C S ra rc D)) 0 :=
+    (a9_hasDerivAt_radius hz₂ hψ₂ hden₂).congr_deriv (by
+      rw [hz2pt, hψ2pt, hDval₂, hexpφ2]
+      simp only [hip, Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im,
+        Complex.I_re, Complex.I_im, Complex.neg_re, Complex.neg_im, Complex.ofReal_re,
+        Complex.ofReal_im, hz₁re, hz₁im, a9Q]
+      simp only [hh]
+      linear_combination (norm := (field_simp [hrane, hrcne, hmne, hDne]; ring))
+          (((-C*S*ra + C*S*rc) / (2*D^2*ra)) * hrcD2sub))
+  -- Stage R2 : dψ₃ = a9dpsi3
+  have hψ₃ : HasDerivAt (fun t => (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).2) (a9dpsi3 C S ra rc D) 0 :=
+    (a9_hasDerivAt_arc_snd hψ₂ hr₃d hr₃0ne).congr_deriv (by
+      rw [hr₃0]
+      simp only [a9dpsi3, a9Q]
+      simp only [hLe]
+      field_simp [hrane, hrcne, hmne, hDne]
+      ring)
+  have hz₃ := a9_hasDerivAt_arc_fst (K := c) (s := L / 4) hz₂ hψ₂ hr₃d hr₃0ne
+  -- node-3 anchor
+  have hpt₃ : arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)
+      = ((starRingEnd ℂ) z₁, 3 * π - φ₁ + 2 * π) :=
+    a9_node3_anchor ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
+  have hz3pt : (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1 = (starRingEnd ℂ) z₁ := by rw [hpt₃]
+  have hψ3pt : (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 = 3 * π - φ₁ + 2 * π := by rw [hpt₃]
+  have hr₄0 : arcModelRadius a (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 = ra :=
+    a9_radius_node3 ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
+  have hr₄0ne : arcModelRadius a (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 ≠ 0 := by rw [hr₄0]; exact hra0.ne'
+  have hden₃ : a + ⟪(arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1, Complex.I
+      * Complex.exp ((((arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 : ℝ) : ℂ) * Complex.I)⟫_ℝ ≠ 0 := by
+    rw [hz3pt, hψ3pt, hden₃val]
+    exact (div_pos (mul_pos hrc0 hD0) hra0).ne'
+  -- Stage R3 : dr₄ = a9dr4
+  have hr₄d : HasDerivAt (fun t => arcModelRadius a
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).2) (a9dr4 C S ra rc D) 0 :=
+    (a9_hasDerivAt_radius hz₃ hψ₃ hden₃).congr_deriv (by
+      rw [hz3pt, hψ3pt, hden₃val, hr₃0, hψ2pt, hexpφ2, hexpφ3, hsw_c]
+      simp only [hip, Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im,
+        Complex.I_re, Complex.I_im, Complex.neg_re, Complex.neg_im, Complex.ofReal_re,
+        Complex.ofReal_im, Complex.sub_re, Complex.sub_im, Complex.conj_re, Complex.conj_im,
+        Complex.one_re, Complex.one_im, hz₁re, hz₁im, a9dr4, a9ds3, a9dpsi3, a9Q]
+      simp only [hh, hLe]
+      linear_combination (norm := (field_simp [hrane, hrcne, hmne, hDne]; ring))
+          (((C^5*S*ra^4*rc^3 - C^5*S*ra^3*rc^4 - C^5*S*ra^2*rc^5 + C^5*S*ra*rc^6
+              + 2*C^3*D*S*ra^3*rc^3 - 2*C^3*D*S*ra^2*rc^4 - 2*C^3*D*S*ra*rc^5 + 2*C^3*D*S*rc^6
+              + C^3*S^3*ra^6*rc - C^3*S^3*ra^5*rc^2 - C^3*S^3*ra^2*rc^5 + C^3*S^3*ra*rc^6
+              + 2*C^3*S*ra^4*rc^3 - C^3*S*ra^4*rc - 2*C^3*S*ra^3*rc^4 + C^3*S*ra^3*rc^2
+              - 2*C^3*S*ra^2*rc^5 + C^3*S*ra^2*rc^3 + 2*C^3*S*ra*rc^6 - C^3*S*ra*rc^4
+              + 2*C^2*D*S^2*π*ra^4*rc^2 - 6*C^2*D*S^2*π*ra^3*rc^3 + 6*C^2*D*S^2*π*ra^2*rc^4
+              - 2*C^2*D*S^2*π*ra*rc^5 + C^2*S^2*π*ra^5*rc^2 - 3*C^2*S^2*π*ra^4*rc^3
+              + 3*C^2*S^2*π*ra^3*rc^4 - C^2*S^2*π*ra^2*rc^5 + 2*C*D^2*S*ra^2*rc^3
+              - 2*C*D^2*S*rc^5 + 2*C*D*S^3*ra^4*rc^2 - 2*C*D*S^3*ra^3*rc^3 - 2*C*D*S^3*ra^2*rc^4
+              + 2*C*D*S^3*ra*rc^5 + 2*C*D*S*ra^4*rc^2 - 4*C*D*S*ra^2*rc^4 + 2*C*D*S*rc^6
+              + C*S^5*ra^6*rc - C*S^5*ra^5*rc^2 - C*S^5*ra^4*rc^3 + C*S^5*ra^3*rc^4
+              + 2*C*S^3*ra^6*rc - 2*C*S^3*ra^5*rc^2 - 2*C*S^3*ra^4*rc^3 - C*S^3*ra^4*rc
+              + 2*C*S^3*ra^3*rc^4 + C*S^3*ra^3*rc^2 + C*S^3*ra^2*rc^3 - C*S^3*ra*rc^4
+              - 2*C*S*ra^4*rc + 2*C*S*ra^3*rc^2 + 2*C*S*ra^2*rc^3 - 2*C*S*ra*rc^4
+              + 2*D*S^2*π*ra^5*rc - 6*D*S^2*π*ra^4*rc^2 + 6*D*S^2*π*ra^3*rc^3
+              - 2*D*S^2*π*ra^2*rc^4 + S^4*π*ra^7 - 3*S^4*π*ra^6*rc + 3*S^4*π*ra^5*rc^2
+              - S^4*π*ra^4*rc^3 - S^2*π*ra^5 + 3*S^2*π*ra^4*rc - 3*S^2*π*ra^3*rc^2
+              + S^2*π*ra^2*rc^3) / (2*D^3*rc^3*(ra + rc))) * hCS +
+        ((-C*D*S*ra^3*rc + C*D*S*ra*rc^3 - 2*C*S^3*ra^4*rc + 2*C*S^3*ra^3*rc^2
+            + 2*C*S^3*ra^2*rc^3 - 2*C*S^3*ra*rc^4 + 2*C*S*ra^4*rc - 2*C*S*ra^3*rc^2
+            - 2*C*S*ra^2*rc^3 + 2*C*S*ra*rc^4 - S^4*π*ra^5 + 3*S^4*π*ra^4*rc - 3*S^4*π*ra^3*rc^2
+            + S^4*π*ra^2*rc^3 + S^2*π*ra^5 - 3*S^2*π*ra^4*rc + 3*S^2*π*ra^3*rc^2
+            - S^2*π*ra^2*rc^3) / (2*D^3*rc^3*(ra + rc))) * hrcD2sub))
+  have hz₄ := a9_hasDerivAt_arc_fst (K := a) (s := L / 4 + 0) hz₃ hψ₃ hr₄d hr₄0ne
+  -- Stage R4 : dψ₄ = a9dpsi4
+  have hψ₄ : HasDerivAt (fun t => (arcModelConst a
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).2 (L / 4 + 0)).2)
+      (a9dpsi4 C S ra rc D) 0 :=
+    (a9_hasDerivAt_arc_snd hψ₃ hr₄d hr₄0ne).congr_deriv (by
+      rw [hr₄0]
+      simp only [a9dpsi4, a9dr4, a9ds3, a9dpsi3, a9Q]
+      simp only [hLe]
+      field_simp [hrane, hrcne, hmne, hDne]
+      ring)
+  -- node-4 anchor
+  have hpt₄ : arcModelConst a (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 (L / 4 + 0)
+      = (-z₁, φ₁ + π + 2 * π) :=
+    a9_node4_anchor ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
+  have hz4pt : (arcModelConst a (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 (L / 4 + 0)).1 = -z₁ := by rw [hpt₄]
+  have hψ4pt : (arcModelConst a (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 (L / 4 + 0)).2 = φ₁ + π + 2 * π := by
+    rw [hpt₄]
+  have hr₅0 : arcModelRadius c (arcModelConst a (arcModelConst c
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1 (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 (L / 4 + 0)).1
+      (arcModelConst a (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 (L / 4 + 0)).2 = rc :=
+    a9_radius_node4 ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
+  have hden₄ : c + ⟪(arcModelConst a (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 (L / 4 + 0)).1, Complex.I
+      * Complex.exp ((((arcModelConst a (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 (L / 4 + 0)).2 : ℝ) : ℂ)
+      * Complex.I)⟫_ℝ ≠ 0 := by
+    rw [hz4pt, hψ4pt,
+      show (φ₁ + π + 2 * π : ℝ) = (φ₁ + π) + 2 * π by ring, expI_add_two_pi, hexpPi,
+      mul_neg, inner_neg_neg, ← hDexp]
+    exact hD0.ne'
+  -- Stage R5 : dr₅ = a9dr5
+  have hr₅d : HasDerivAt (fun t => arcModelRadius c
+      (arcModelConst a (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).2 (L / 4 + 0)).1
+      (arcModelConst a (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).2 (L / 4 + 0)).2)
+      (a9dr5 C S ra rc D) 0 :=
+    (a9_hasDerivAt_radius hz₄ hψ₄ hden₄).congr_deriv (by
+      rw [hz4pt, hψ4pt, hDval₄, hexpφ4, hr₄0, hψ3pt, hexpφ3, hr₃0, hψ2pt,
+        hexpφ2, hsw_c, hsw_a]
+      simp only [hip, Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im,
+        Complex.I_re, Complex.I_im, Complex.neg_re, Complex.neg_im, Complex.ofReal_re,
+        Complex.ofReal_im, Complex.sub_re, Complex.sub_im,
+        Complex.one_re, Complex.one_im, hz₁re, hz₁im, a9dr5, a9ds4, a9dz4re, a9dz4im,
+        a9dpsi4, a9dr4, a9ds3, a9dpsi3, a9Q]
+      simp only [hh, hLe]
+      linear_combination (norm := (field_simp [hrane, hrcne, hmne, hDne]; ring))
+          (((C^7*S*ra^7*rc^3 - 3*C^7*S*ra^5*rc^5 + 3*C^7*S*ra^3*rc^7 - C^7*S*ra*rc^9
+              + C^6*S^2*π*ra^8*rc^2 - 2*C^6*S^2*π*ra^7*rc^3 - C^6*S^2*π*ra^6*rc^4
+              + 4*C^6*S^2*π*ra^5*rc^5 - C^6*S^2*π*ra^4*rc^6 - 2*C^6*S^2*π*ra^3*rc^7
+              + C^6*S^2*π*ra^2*rc^8 + 2*C^5*D*S*ra^7*rc^2 - 5*C^5*D*S*ra^5*rc^4
+              + C^5*D*S*ra^4*rc^5 + 4*C^5*D*S*ra^3*rc^6 - 2*C^5*D*S*ra^2*rc^7 - C^5*D*S*ra*rc^8
+              + C^5*D*S*rc^9 + C^5*S^3*ra^9*rc - 3*C^5*S^3*ra^7*rc^3 + 3*C^5*S^3*ra^5*rc^5
+              - C^5*S^3*ra^3*rc^7 + C^5*S*ra^7*rc^3 - C^5*S*ra^7*rc - 3*C^5*S*ra^5*rc^5
+              + 3*C^5*S*ra^5*rc^3 + 3*C^5*S*ra^3*rc^7 - 3*C^5*S*ra^3*rc^5 - C^5*S*ra*rc^9
+              + C^5*S*ra*rc^7 + 2*C^4*D*S^2*π*ra^8*rc - 6*C^4*D*S^2*π*ra^7*rc^2
+              + 2*C^4*D*S^2*π*ra^6*rc^3 + 8*C^4*D*S^2*π*ra^5*rc^4 - 10*C^4*D*S^2*π*ra^4*rc^5
+              + 2*C^4*D*S^2*π*ra^3*rc^6 + 6*C^4*D*S^2*π*ra^2*rc^7 - 4*C^4*D*S^2*π*ra*rc^8
+              + C^4*S^4*π*ra^10 - 2*C^4*S^4*π*ra^9*rc + 2*C^4*S^4*π*ra^7*rc^3
+              - 2*C^4*S^4*π*ra^6*rc^4 + 2*C^4*S^4*π*ra^5*rc^5 - 2*C^4*S^4*π*ra^3*rc^7
+              + C^4*S^4*π*ra^2*rc^8 - C^4*S^2*π*ra^8 + 2*C^4*S^2*π*ra^7*rc - C^4*S^2*π*ra^6*rc^4
+              + C^4*S^2*π*ra^6*rc^2 + 2*C^4*S^2*π*ra^5*rc^5 - 4*C^4*S^2*π*ra^5*rc^3
+              + C^4*S^2*π*ra^4*rc^6 + C^4*S^2*π*ra^4*rc^4 - 4*C^4*S^2*π*ra^3*rc^7
+              + 2*C^4*S^2*π*ra^3*rc^5 + C^4*S^2*π*ra^2*rc^8 - C^4*S^2*π*ra^2*rc^6
+              + 2*C^4*S^2*π*ra*rc^9 - C^4*S^2*π*rc^10 + 2*C^3*D^2*S*ra^5*rc^3
+              + 2*C^3*D^2*S*ra^4*rc^4 - 6*C^3*D^2*S*ra^3*rc^5 - 10*C^3*D^2*S*ra^2*rc^6
+              - 4*C^3*D^2*S*ra*rc^7 - 2*C^3*D*S^3*π^2*ra^8*rc + 8*C^3*D*S^3*π^2*ra^7*rc^2
+              - 10*C^3*D*S^3*π^2*ra^6*rc^3 + 10*C^3*D*S^3*π^2*ra^4*rc^5
+              - 8*C^3*D*S^3*π^2*ra^3*rc^6 + 2*C^3*D*S^3*π^2*ra^2*rc^7 + 2*C^3*D*S^3*ra^8*rc
+              - C^3*D*S^3*ra^7*rc^2 - 5*C^3*D*S^3*ra^6*rc^3 + 3*C^3*D*S^3*ra^5*rc^4
+              + 3*C^3*D*S^3*ra^4*rc^5 - 3*C^3*D*S^3*ra^3*rc^6 + C^3*D*S^3*ra^2*rc^7
+              + C^3*D*S^3*ra*rc^8 - C^3*D*S^3*rc^9 + 2*C^3*D*S*ra^8*rc - 6*C^3*D*S*ra^6*rc^3
+              + 2*C^3*D*S*ra^5*rc^4 - C^3*D*S*ra^5*rc^2 + 8*C^3*D*S*ra^4*rc^5 - C^3*D*S*ra^4*rc^3
+              - 4*C^3*D*S*ra^3*rc^6 + 2*C^3*D*S*ra^3*rc^4 - 6*C^3*D*S*ra^2*rc^7
+              + 2*C^3*D*S*ra^2*rc^5 + 2*C^3*D*S*ra*rc^8 - C^3*D*S*ra*rc^6 + 2*C^3*D*S*rc^9
+              - C^3*D*S*rc^7 - C^3*S^5*ra^7*rc^3 + 3*C^3*S^5*ra^5*rc^5 - 3*C^3*S^5*ra^3*rc^7
+              + C^3*S^5*ra*rc^9 - C^3*S^3*π^2*ra^7*rc^3 + 4*C^3*S^3*π^2*ra^6*rc^4
+              - 5*C^3*S^3*π^2*ra^5*rc^5 + 5*C^3*S^3*π^2*ra^3*rc^7 - 4*C^3*S^3*π^2*ra^2*rc^8
+              + C^3*S^3*π^2*ra*rc^9 + C^3*S^3*ra^9*rc - 6*C^3*S^3*ra^5*rc^5 + 8*C^3*S^3*ra^3*rc^7
+              - 3*C^3*S^3*ra*rc^9 - C^3*S*ra^7*rc + 3*C^3*S*ra^5*rc^3 - 3*C^3*S*ra^3*rc^5
+              + C^3*S*ra*rc^7 - 2*C^2*D^2*S^2*π*ra^7*rc + 2*C^2*D^2*S^2*π*ra^5*rc^3
+              + 2*C^2*D^2*S^2*π*ra^3*rc^5 - 2*C^2*D^2*S^2*π*ra*rc^7 + 2*C^2*D*S^4*π*ra^9
+              - 4*C^2*D*S^4*π*ra^8*rc - 2*C^2*D*S^4*π*ra^7*rc^2 + 4*C^2*D*S^4*π*ra^6*rc^3
+              + 4*C^2*D*S^4*π*ra^4*rc^5 - 2*C^2*D*S^4*π*ra^3*rc^6 - 4*C^2*D*S^4*π*ra^2*rc^7
+              + 2*C^2*D*S^4*π*ra*rc^8 + 2*C^2*D*S^2*π*ra^9 - 6*C^2*D*S^2*π*ra^8*rc
+              + 13*C^2*D*S^2*π*ra^6*rc^3 - 5*C^2*D*S^2*π*ra^5*rc^4 + 2*C^2*D*S^2*π*ra^5*rc^2
+              - 10*C^2*D*S^2*π*ra^4*rc^5 + 2*C^2*D*S^2*π*ra^3*rc^6 - 4*C^2*D*S^2*π*ra^3*rc^4
+              + 5*C^2*D*S^2*π*ra^2*rc^7 + C^2*D*S^2*π*ra*rc^8 + 2*C^2*D*S^2*π*ra*rc^6
+              - 2*C^2*D*S^2*π*rc^9 + C^2*S^6*π*ra^10 - 2*C^2*S^6*π*ra^9*rc - C^2*S^6*π*ra^8*rc^2
+              + 4*C^2*S^6*π*ra^7*rc^3 - C^2*S^6*π*ra^6*rc^4 - 2*C^2*S^6*π*ra^5*rc^5
+              + C^2*S^6*π*ra^4*rc^6 + C^2*S^4*π*ra^8*rc^2 - C^2*S^4*π*ra^8
+              - 2*C^2*S^4*π*ra^7*rc^3 + 2*C^2*S^4*π*ra^7*rc + C^2*S^4*π*ra^6*rc^4
+              + C^2*S^4*π*ra^6*rc^2 - 4*C^2*S^4*π*ra^5*rc^3 - 3*C^2*S^4*π*ra^4*rc^6
+              + C^2*S^4*π*ra^4*rc^4 + 6*C^2*S^4*π*ra^3*rc^7 + 2*C^2*S^4*π*ra^3*rc^5
+              - C^2*S^4*π*ra^2*rc^8 - C^2*S^4*π*ra^2*rc^6 - 4*C^2*S^4*π*ra*rc^9
+              + 2*C^2*S^4*π*rc^10 - 2*C^2*S^2*π*ra^6*rc^4 + C^2*S^2*π*ra^6*rc^2
+              + 4*C^2*S^2*π*ra^5*rc^5 - 2*C^2*S^2*π*ra^5*rc^3 + 2*C^2*S^2*π*ra^4*rc^6
+              - C^2*S^2*π*ra^4*rc^4 - 8*C^2*S^2*π*ra^3*rc^7 + 4*C^2*S^2*π*ra^3*rc^5
+              + 2*C^2*S^2*π*ra^2*rc^8 - C^2*S^2*π*ra^2*rc^6 + 4*C^2*S^2*π*ra*rc^9
+              - 2*C^2*S^2*π*ra*rc^7 - 2*C^2*S^2*π*rc^10 + C^2*S^2*π*rc^8 - 2*C*D^3*S*ra^5*rc^2
+              - 6*C*D^3*S*ra^4*rc^3 - 8*C*D^3*S*ra^3*rc^4 - 8*C*D^3*S*ra^2*rc^5
+              - 6*C*D^3*S*ra*rc^6 - 2*C*D^3*S*rc^7 - 2*C*D^2*S^3*ra^6*rc^2
+              - 4*C*D^2*S^3*ra^5*rc^3 - 2*C*D^2*S^3*ra^4*rc^4 - 2*C*D^2*S^3*ra^3*rc^5
+              - 4*C*D^2*S^3*ra^2*rc^6 - 2*C*D^2*S^3*ra*rc^7 - 2*C*D^2*S*ra^6*rc^2
+              + 4*C*D^2*S*ra^5*rc^3 + 10*C*D^2*S*ra^4*rc^4 - 8*C*D^2*S*ra^3*rc^5
+              + 2*C*D^2*S*ra^3*rc^3 - 14*C*D^2*S*ra^2*rc^6 + 6*C*D^2*S*ra^2*rc^4
+              + 4*C*D^2*S*ra*rc^7 + 6*C*D^2*S*ra*rc^5 + 6*C*D^2*S*rc^8 + 2*C*D^2*S*rc^6
+              - 2*C*D*S^5*ra^8*rc - C*D*S^5*ra^7*rc^2 + 5*C*D*S^5*ra^6*rc^3 + 2*C*D*S^5*ra^5*rc^4
+              - 4*C*D*S^5*ra^4*rc^5 - C*D*S^5*ra^3*rc^6 + C*D*S^5*ra^2*rc^7
+              - 2*C*D*S^3*π^2*ra^7*rc^2 + 8*C*D*S^3*π^2*ra^6*rc^3 - 10*C*D*S^3*π^2*ra^5*rc^4
+              + 10*C*D*S^3*π^2*ra^3*rc^6 - 8*C*D*S^3*π^2*ra^2*rc^7 + 2*C*D*S^3*π^2*ra*rc^8
+              + 8*C*D*S^3*ra^7*rc^2 + 2*C*D*S^3*ra^6*rc^3 - 22*C*D*S^3*ra^5*rc^4
+              + C*D*S^3*ra^5*rc^2 - 4*C*D*S^3*ra^4*rc^5 + C*D*S^3*ra^4*rc^3
+              + 20*C*D*S^3*ra^3*rc^6 - 2*C*D*S^3*ra^3*rc^4 + 2*C*D*S^3*ra^2*rc^7
+              - 2*C*D*S^3*ra^2*rc^5 - 6*C*D*S^3*ra*rc^8 + C*D*S^3*ra*rc^6 + C*D*S^3*rc^7
+              + 2*C*D*S*ra^8*rc - 2*C*D*S*ra^7*rc^2 - 6*C*D*S*ra^6*rc^3 + 6*C*D*S*ra^5*rc^4
+              - 2*C*D*S*ra^5*rc^2 + 6*C*D*S*ra^4*rc^5 - 2*C*D*S*ra^4*rc^3 - 6*C*D*S*ra^3*rc^6
+              + 4*C*D*S*ra^3*rc^4 - 2*C*D*S*ra^2*rc^7 + 4*C*D*S*ra^2*rc^5 + 2*C*D*S*ra*rc^8
+              - 2*C*D*S*ra*rc^6 - 2*C*D*S*rc^7 - C*S^7*ra^9*rc + 3*C*S^7*ra^7*rc^3
+              - 3*C*S^7*ra^5*rc^5 + C*S^7*ra^3*rc^7 - C*S^5*π^2*ra^9*rc + 4*C*S^5*π^2*ra^8*rc^2
+              - 5*C*S^5*π^2*ra^7*rc^3 + 5*C*S^5*π^2*ra^5*rc^5 - 4*C*S^5*π^2*ra^4*rc^6
+              + C*S^5*π^2*ra^3*rc^7 + 3*C*S^5*ra^9*rc - 9*C*S^5*ra^7*rc^3 + C*S^5*ra^7*rc
+              + 9*C*S^5*ra^5*rc^5 - 3*C*S^5*ra^5*rc^3 - 3*C*S^5*ra^3*rc^7 + 3*C*S^5*ra^3*rc^5
+              - C*S^5*ra*rc^7 + C*S^3*π^2*ra^7*rc - 4*C*S^3*π^2*ra^6*rc^2 + 5*C*S^3*π^2*ra^5*rc^3
+              - 5*C*S^3*π^2*ra^3*rc^5 + 4*C*S^3*π^2*ra^2*rc^6 - C*S^3*π^2*ra*rc^7
+              - 3*C*S^3*ra^7*rc + 9*C*S^3*ra^5*rc^3 - 9*C*S^3*ra^3*rc^5 + 3*C*S^3*ra*rc^7
+              + 2*D^2*S^2*π*ra^6*rc^2 - 2*D^2*S^2*π*ra^5*rc^3 - 4*D^2*S^2*π*ra^4*rc^4
+              + 4*D^2*S^2*π*ra^3*rc^5 + 2*D^2*S^2*π*ra^2*rc^6 - 2*D^2*S^2*π*ra*rc^7
+              + 5*D*S^4*π*ra^8*rc - 9*D*S^4*π*ra^7*rc^2 - 2*D*S^4*π*ra^6*rc^3
+              + 10*D*S^4*π*ra^5*rc^4 - 7*D*S^4*π*ra^4*rc^5 + 7*D*S^4*π*ra^3*rc^6
+              - 8*D*S^4*π*ra*rc^8 + 4*D*S^4*π*rc^9 - 4*D*S^2*π*ra^6*rc^3 - D*S^2*π*ra^6*rc
+              + 8*D*S^2*π*ra^5*rc^4 + D*S^2*π*ra^5*rc^2 + 4*D*S^2*π*ra^4*rc^5
+              + 2*D*S^2*π*ra^4*rc^3 - 16*D*S^2*π*ra^3*rc^6 - 2*D*S^2*π*ra^3*rc^4
+              + 4*D*S^2*π*ra^2*rc^7 - D*S^2*π*ra^2*rc^5 + 8*D*S^2*π*ra*rc^8 + D*S^2*π*ra*rc^6
+              - 4*D*S^2*π*rc^9 + 2*S^6*π*ra^10 - 4*S^6*π*ra^9*rc + 4*S^6*π*ra^7*rc^3
+              - 4*S^6*π*ra^6*rc^4 + 4*S^6*π*ra^5*rc^5 - 4*S^6*π*ra^3*rc^7 + 2*S^6*π*ra^2*rc^8
+              - 2*S^4*π*ra^8*rc^2 - 2*S^4*π*ra^8 + 4*S^4*π*ra^7*rc^3 + 4*S^4*π*ra^7*rc
+              + 2*S^4*π*ra^6*rc^4 - 8*S^4*π*ra^5*rc^5 - 4*S^4*π*ra^5*rc^3 + 2*S^4*π*ra^4*rc^6
+              + 4*S^4*π*ra^4*rc^4 + 4*S^4*π*ra^3*rc^7 - 4*S^4*π*ra^3*rc^5 - 2*S^4*π*ra^2*rc^8
+              + 4*S^4*π*ra*rc^7 - 2*S^4*π*rc^8 + 2*S^2*π*ra^6*rc^2 - 4*S^2*π*ra^5*rc^3
+              - 2*S^2*π*ra^4*rc^4 + 8*S^2*π*ra^3*rc^5 - 2*S^2*π*ra^2*rc^6 - 4*S^2*π*ra*rc^7
+              + 2*S^2*π*rc^8) / (2*D^4*ra*rc^2*(ra + rc)*(ra^2 + 2*ra*rc + rc^2))) * hCS +
+        ((C*D^2*S*ra^4*rc^2 + 2*C*D^2*S*ra^3*rc^3 - 2*C*D^2*S*ra*rc^5 - C*D^2*S*rc^6
+            - 2*C*D*S^3*ra^5*rc^2 - 2*C*D*S^3*ra^4*rc^3 + 4*C*D*S^3*ra^3*rc^4
+            + 4*C*D*S^3*ra^2*rc^5 - 2*C*D*S^3*ra*rc^6 - 2*C*D*S^3*rc^7 + 2*C*D*S*ra^5*rc^2
+            + 2*C*D*S*ra^4*rc^3 - 4*C*D*S*ra^3*rc^4 - 4*C*D*S*ra^2*rc^5 + 2*C*D*S*ra*rc^6
+            + 2*C*D*S*rc^7 + C*S^5*π^2*ra^7*rc - 4*C*S^5*π^2*ra^6*rc^2 + 5*C*S^5*π^2*ra^5*rc^3
+            - 5*C*S^5*π^2*ra^3*rc^5 + 4*C*S^5*π^2*ra^2*rc^6 - C*S^5*π^2*ra*rc^7 - 4*C*S^5*ra^7*rc
+            + 12*C*S^5*ra^5*rc^3 - 12*C*S^5*ra^3*rc^5 + 4*C*S^5*ra*rc^7 - C*S^3*π^2*ra^7*rc
+            + 4*C*S^3*π^2*ra^6*rc^2 - 5*C*S^3*π^2*ra^5*rc^3 + 5*C*S^3*π^2*ra^3*rc^5
+            - 4*C*S^3*π^2*ra^2*rc^6 + C*S^3*π^2*ra*rc^7 + 4*C*S^3*ra^7*rc - 12*C*S^3*ra^5*rc^3
+            + 12*C*S^3*ra^3*rc^5 - 4*C*S^3*ra*rc^7 - D*S^4*π*ra^6*rc + D*S^4*π*ra^5*rc^2
+            + 2*D*S^4*π*ra^4*rc^3 - 2*D*S^4*π*ra^3*rc^4 - D*S^4*π*ra^2*rc^5 + D*S^4*π*ra*rc^6
+            + D*S^2*π*ra^6*rc - D*S^2*π*ra^5*rc^2 - 2*D*S^2*π*ra^4*rc^3 + 2*D*S^2*π*ra^3*rc^4
+            + D*S^2*π*ra^2*rc^5 - D*S^2*π*ra*rc^6 - 2*S^6*π*ra^8 + 4*S^6*π*ra^7*rc
+            - 4*S^6*π*ra^5*rc^3 + 4*S^6*π*ra^4*rc^4 - 4*S^6*π*ra^3*rc^5 + 4*S^6*π*ra*rc^7
+            - 2*S^6*π*rc^8 + 2*S^4*π*ra^8 - 4*S^4*π*ra^7*rc + 2*S^4*π*ra^6*rc^2
+            - 6*S^4*π*ra^4*rc^4 + 12*S^4*π*ra^3*rc^5 - 2*S^4*π*ra^2*rc^6 - 8*S^4*π*ra*rc^7
+            + 4*S^4*π*rc^8 - 2*S^2*π*ra^6*rc^2 + 4*S^2*π*ra^5*rc^3 + 2*S^2*π*ra^4*rc^4
+            - 8*S^2*π*ra^3*rc^5 + 2*S^2*π*ra^2*rc^6 + 4*S^2*π*ra*rc^7
+            - 2*S^2*π*rc^8) / (2*D^4*ra*rc^2*(ra + rc)*(ra^2 + 2*ra*rc + rc^2))) * hrcD2sub))
+  have hend := (a9_hasDerivAt_endpoint_aux hz₄ hψ₄ hr₅d).sub_const (layoutStart a c h L).1
+  have hfun : (fun t => a9Residual a c h L (t, 0))
+      = fun t => ((arcModelConst a (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+          (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).1
+          (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+          (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).2 (L / 4 + 0)).1
+        + (arcModelRadius c (arcModelConst a (arcModelConst c
+              (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+              (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).1
+              (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+              (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).2 (L / 4 + 0)).1
+            (arcModelConst a (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+              (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).1
+              (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+              (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).2 (L / 4 + 0)).2 : ℂ)
+          * (1 + Complex.I * Complex.exp ((((arcModelConst a
+              (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+              (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).1
+              (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
+              (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).2 (L / 4 + 0)).2 : ℝ) : ℂ)
+            * Complex.I)))
+        - (layoutStart a c h L).1 := by
+    funext t; simp only [a9Residual, a9Endpoint]; rfl
+  rw [hfun]
+  refine hend.congr_deriv ?_
+  rw [hr₅0, hr₄0, hr₃0, hψ4pt, hexpφ4, hψ3pt, hexpφ3, hψ2pt, hexpφ2, hsw_c, hsw_a]
+  rw [Complex.ext_iff]
+  refine ⟨?_, ?_⟩
+  · simp only [Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im,
+      Complex.I_re, Complex.I_im, Complex.neg_re, Complex.neg_im, Complex.ofReal_re,
+      Complex.ofReal_im, Complex.sub_re, Complex.sub_im,
+      Complex.one_re, Complex.one_im, a9V1re, a9dr5, a9ds4, a9dz4re, a9dz4im,
+      a9dpsi4, a9dr4, a9ds3, a9dpsi3, a9Q]
+    simp only [hLe]
+    linear_combination (norm := (field_simp [hrane, hrcne, hmne, hDne]; ring))
+        (((C^4*S*π*ra^6*rc^2 - C^4*S*π*ra^5*rc^3 - 2*C^4*S*π*ra^4*rc^4 + 2*C^4*S*π*ra^3*rc^5
+            + C^4*S*π*ra^2*rc^6 - C^4*S*π*ra*rc^7 + C^3*S^2*π^2*ra^7*rc - 3*C^3*S^2*π^2*ra^6*rc^2
+            + 2*C^3*S^2*π^2*ra^5*rc^3 + 2*C^3*S^2*π^2*ra^4*rc^4 - 3*C^3*S^2*π^2*ra^3*rc^5
+            + C^3*S^2*π^2*ra^2*rc^6 - C^3*S^2*ra^7*rc + 3*C^3*S^2*ra^5*rc^3 - 3*C^3*S^2*ra^3*rc^5
+            + C^3*S^2*ra*rc^7 + C^2*D*S*π*ra^6*rc + C^2*D*S*π*ra^5*rc^2 - 2*C^2*D*S*π*ra^4*rc^3
+            - 2*C^2*D*S*π*ra^3*rc^4 + C^2*D*S*π*ra^2*rc^5 + C^2*D*S*π*ra*rc^6 - C^2*S^3*π*ra^8
+            + 2*C^2*S^3*π*ra^7*rc - 3*C^2*S^3*π*ra^5*rc^3 + 3*C^2*S^3*π*ra^4*rc^4
+            - 2*C^2*S^3*π*ra^2*rc^6 + C^2*S^3*π*ra*rc^7 + C^2*S*π*ra^6*rc^2 - C^2*S*π*ra^5*rc^3
+            - 2*C^2*S*π*ra^4*rc^4 + 2*C^2*S*π*ra^3*rc^5 + C^2*S*π*ra^2*rc^6 - C^2*S*π*ra*rc^7
+            + C*D^2*ra^4*rc^2 + 4*C*D^2*ra^3*rc^3 + 6*C*D^2*ra^2*rc^4 + 4*C*D^2*ra*rc^5
+            + C*D^2*rc^6 + C*D*S^2*ra^5*rc^2 + C*D*S^2*ra^4*rc^3 - 2*C*D*S^2*ra^3*rc^4
+            - 2*C*D*S^2*ra^2*rc^5 + C*D*S^2*ra*rc^6 + C*D*S^2*rc^7 + C*S^4*ra^7*rc
+            - 3*C*S^4*ra^5*rc^3 + 3*C*S^4*ra^3*rc^5 - C*S^4*ra*rc^7 - C*S^2*ra^7*rc
+            + 3*C*S^2*ra^5*rc^3 - 3*C*S^2*ra^3*rc^5 + C*S^2*ra*rc^7) / (D^2*ra*rc^2*(ra
+            + rc)*(ra^2 + 2*ra*rc + rc^2))) * hCS)
+  · simp only [Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im,
+      Complex.I_re, Complex.I_im, Complex.neg_re, Complex.neg_im, Complex.ofReal_re,
+      Complex.ofReal_im, Complex.sub_re, Complex.sub_im,
+      Complex.one_re, Complex.one_im, a9V1im, a9dr5, a9ds4, a9dz4re, a9dz4im,
+      a9dpsi4, a9dr4, a9ds3, a9dpsi3, a9Q]
+    simp only [hLe]
+    linear_combination (norm := (field_simp [hrane, hrcne, hmne, hDne]; ring))
+        (((C^4*S*ra^7*rc - 3*C^4*S*ra^5*rc^3 + 3*C^4*S*ra^3*rc^5 - C^4*S*ra*rc^7 + C^3*S^2*π*ra^8
+            - 2*C^3*S^2*π*ra^7*rc + 3*C^3*S^2*π*ra^5*rc^3 - 3*C^3*S^2*π*ra^4*rc^4
+            + 2*C^3*S^2*π*ra^2*rc^6 - C^3*S^2*π*ra*rc^7 + C^2*D*S*ra^5*rc^2 + C^2*D*S*ra^4*rc^3
+            - 2*C^2*D*S*ra^3*rc^4 - 2*C^2*D*S*ra^2*rc^5 + C^2*D*S*ra*rc^6 + C^2*D*S*rc^7
+            + C^2*S^3*π^2*ra^7*rc - 3*C^2*S^3*π^2*ra^6*rc^2 + 2*C^2*S^3*π^2*ra^5*rc^3
+            + 2*C^2*S^3*π^2*ra^4*rc^4 - 3*C^2*S^3*π^2*ra^3*rc^5 + C^2*S^3*π^2*ra^2*rc^6
+            - C^2*S^3*ra^7*rc + 3*C^2*S^3*ra^5*rc^3 - 3*C^2*S^3*ra^3*rc^5 + C^2*S^3*ra*rc^7
+            + C^2*S*ra^7*rc - 3*C^2*S*ra^5*rc^3 + 3*C^2*S*ra^3*rc^5 - C^2*S*ra*rc^7
+            + C*D*S^2*π*ra^6*rc - C*D*S^2*π*ra^5*rc^2 - 2*C*D*S^2*π*ra^4*rc^3
+            + 2*C*D*S^2*π*ra^3*rc^4 + C*D*S^2*π*ra^2*rc^5 - C*D*S^2*π*ra*rc^6 - C*S^4*π*ra^6*rc^2
+            + C*S^4*π*ra^5*rc^3 + 2*C*S^4*π*ra^4*rc^4 - 2*C*S^4*π*ra^3*rc^5 - C*S^4*π*ra^2*rc^6
+            + C*S^4*π*ra*rc^7 + C*S^2*π*ra^6*rc^2 - C*S^2*π*ra^5*rc^3 - 2*C*S^2*π*ra^4*rc^4
+            + 2*C*S^2*π*ra^3*rc^5 + C*S^2*π*ra^2*rc^6 - C*S^2*π*ra*rc^7 + D^2*S*ra^4*rc^2
+            + 2*D^2*S*ra^3*rc^3 - 2*D^2*S*ra*rc^5 - D^2*S*rc^6) / (D^2*ra*rc^2*(ra + rc)*(ra^2
+            + 2*ra*rc + rc^2))) * hCS)
+
+/-- Joint differentiability of the real-to-complex coercion composed with a
+differentiable scalar map. -/
+private lemma a9_differentiableAt_ofReal {f : ℝ × ℝ → ℝ} {x : ℝ × ℝ}
+    (hf : DifferentiableAt ℝ f x) :
+    DifferentiableAt ℝ (fun p => ((f p : ℝ) : ℂ)) x :=
+  Complex.ofRealCLM.differentiableAt.comp x hf
+
+/-- Joint differentiability of `p ↦ e^{iψ(p)}`. -/
+private lemma a9_differentiableAt_exp {ψ : ℝ × ℝ → ℝ} {x : ℝ × ℝ}
+    (hψ : DifferentiableAt ℝ ψ x) :
+    DifferentiableAt ℝ (fun p => Complex.exp ((ψ p : ℂ) * Complex.I)) x :=
+  ((a9_differentiableAt_ofReal hψ).mul_const Complex.I).cexp
+
+/-- Joint differentiability of `arcModelRadius` along a moving state. -/
+private lemma a9_differentiableAt_radius {K : ℝ} {z : ℝ × ℝ → ℂ} {ψ : ℝ × ℝ → ℝ}
+    {x : ℝ × ℝ} (hz : DifferentiableAt ℝ z x) (hψ : DifferentiableAt ℝ ψ x)
+    (hden : K + ⟪z x, Complex.I * Complex.exp ((ψ x : ℂ) * Complex.I)⟫_ℝ ≠ 0) :
+    DifferentiableAt ℝ (fun p => arcModelRadius K (z p) (ψ p)) x := by
+  have hfun : (fun p => arcModelRadius K (z p) (ψ p))
+      = fun p => (1 - ⟪z p, z p⟫_ℝ)
+          / (2 * (K + ⟪z p, Complex.I
+              * Complex.exp ((ψ p : ℂ) * Complex.I)⟫_ℝ)) := by
+    funext p
+    rw [arcModelRadius, real_inner_self_eq_norm_sq]
+  rw [hfun]
+  have hnum : DifferentiableAt ℝ (fun p => 1 - ⟪z p, z p⟫_ℝ) x :=
+    (differentiableAt_const 1).sub (hz.inner ℝ hz)
+  have hden' : DifferentiableAt ℝ (fun p => 2 * (K + ⟪z p, Complex.I
+      * Complex.exp ((ψ p : ℂ) * Complex.I)⟫_ℝ)) x :=
+    ((hz.inner ℝ ((a9_differentiableAt_exp hψ).const_mul
+      Complex.I)).const_add K).const_mul 2
+  have hne0 : (2 : ℝ) * (K + ⟪z x, Complex.I
+      * Complex.exp ((ψ x : ℂ) * Complex.I)⟫_ℝ) ≠ 0 := by
+    intro h0
+    rcases mul_eq_zero.mp h0 with h1 | h1
+    · norm_num at h1
+    · exact hden h1
+  simp only [div_eq_mul_inv]
+  exact hnum.mul (hden'.inv hne0)
+
+/-- Joint differentiability of the `arcModelConst` z-component along a moving
+state and moving leg length. -/
+private lemma a9_differentiableAt_arc_fst {K : ℝ} {z : ℝ × ℝ → ℂ}
+    {ψ s : ℝ × ℝ → ℝ} {x : ℝ × ℝ} (hz : DifferentiableAt ℝ z x)
+    (hψ : DifferentiableAt ℝ ψ x) (hs : DifferentiableAt ℝ s x)
+    (hden : K + ⟪z x, Complex.I * Complex.exp ((ψ x : ℂ) * Complex.I)⟫_ℝ ≠ 0)
+    (hr0 : arcModelRadius K (z x) (ψ x) ≠ 0) :
+    DifferentiableAt ℝ (fun p => (arcModelConst K (z p) (ψ p) (s p)).1) x := by
+  have hr := a9_differentiableAt_radius hz hψ hden
+  have hsr : DifferentiableAt ℝ
+      (fun p => s p / arcModelRadius K (z p) (ψ p)) x := by
+    simp only [div_eq_mul_inv]
+    exact hs.mul (hr.inv hr0)
+  have hfun : (fun p => (arcModelConst K (z p) (ψ p) (s p)).1)
+      = fun p => z p - ((arcModelRadius K (z p) (ψ p) : ℝ) : ℂ) * Complex.I
+          * Complex.exp ((ψ p : ℂ) * Complex.I)
+          * (Complex.exp (((s p / arcModelRadius K (z p) (ψ p) : ℝ) : ℂ)
+              * Complex.I) - 1) := rfl
+  rw [hfun]
+  exact hz.sub ((((a9_differentiableAt_ofReal hr).mul_const Complex.I).mul
+    (a9_differentiableAt_exp hψ)).mul
+    ((a9_differentiableAt_exp hsr).sub_const 1))
+
+/-- Joint differentiability of the `arcModelConst` phase component along a
+moving state and moving leg length. -/
+private lemma a9_differentiableAt_arc_snd {K : ℝ} {z : ℝ × ℝ → ℂ}
+    {ψ s : ℝ × ℝ → ℝ} {x : ℝ × ℝ} (hz : DifferentiableAt ℝ z x)
+    (hψ : DifferentiableAt ℝ ψ x) (hs : DifferentiableAt ℝ s x)
+    (hden : K + ⟪z x, Complex.I * Complex.exp ((ψ x : ℂ) * Complex.I)⟫_ℝ ≠ 0)
+    (hr0 : arcModelRadius K (z x) (ψ x) ≠ 0) :
+    DifferentiableAt ℝ (fun p => (arcModelConst K (z p) (ψ p) (s p)).2) x := by
+  have hsr : DifferentiableAt ℝ
+      (fun p => s p / arcModelRadius K (z p) (ψ p)) x := by
+    simp only [div_eq_mul_inv]
+    exact hs.mul ((a9_differentiableAt_radius hz hψ hden).inv hr0)
+  exact hψ.add hsr
 
 /-- Joint differentiability of the clean residual at the anchor (all radii
 positive and denominators nonvanishing there). -/
 private lemma a9Residual_differentiableAt {a c h L : ℝ} (ha : 1 < a)
     (hac : a < c) (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L)
-    (hL : L ≤ bicircleBracket a h) (hlow : 1 / (10 * c) ≤ h)
+    (hL : L ≤ bicircleBracket a h) (_hlow : 1 / (10 * c) ≤ h)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
     DifferentiableAt ℝ (a9Residual a c h L) (0, 0) := by
-  sorry
+  obtain ⟨hh0, hh1, hwb⟩ := hwin
+  have hπ := Real.pi_pos
+  obtain ⟨hS0, hC0, hrc0, hrclt, hDlt, hSC, hJ1, hJ2, hq⟩ :=
+    a9_anchor_facts ha hac ⟨hh0, hh1, hwb⟩ hL0 hL him hφe
+  have hra0 : 0 < a9ra a h := bicircle_ra_pos ha hh0 hh1
+  have hD0 : 0 < a9D a c h L :=
+    lt_trans (mul_pos (sub_pos.mpr hrclt) (pow_pos hC0 2)) hDlt
+  set z₁ := (qArc1 a (h, L)).1 with hz₁def
+  set φ₁ := (qArc1 a (h, L)).2 with hφ₁def
+  set n₁ := layoutNode1 a c h L with hn₁def
+  have hip : ∀ x y : ℂ, ⟪x, y⟫_ℝ = x.re * y.re + x.im * y.im := fun x y => by
+    rw [Complex.inner]
+    simp [Complex.mul_re]
+    ring
+  have hexpPi : ∀ x : ℝ, Complex.exp (((x + π : ℝ) : ℂ) * Complex.I)
+      = -Complex.exp ((x : ℂ) * Complex.I) := by
+    intro x
+    push_cast
+    rw [add_mul, Complex.exp_add, Complex.exp_pi_mul_I]
+    ring
+  have hDexp : a9D a c h L
+      = c + ⟪z₁, Complex.I * Complex.exp ((φ₁ : ℂ) * Complex.I)⟫_ℝ := by
+    simp only [a9D]
+    rw [← hz₁def, ← hφ₁def]
+  -- the level-`a` denominator at the anchor is `rc·D/ra ≠ 0`
+  have hs₁ne : a + ⟪z₁, Complex.I * Complex.exp ((φ₁ : ℂ) * Complex.I)⟫_ℝ ≠ 0 := by
+    intro h0
+    have h1 : arcModelRadius a z₁ φ₁ = a9ra a h :=
+      a9_radius_qArc1 ha hac ⟨hh0, hh1, hwb⟩
+    rw [arcModelRadius, h0, mul_zero, div_zero] at h1
+    exact hra0.ne h1
+  -- base maps: the moving node-2 state (depends on `p.1` only)
+  have hσ₂ : DifferentiableAt ℝ (fun p : ℝ × ℝ => (L / 4 + p.1)
+      / arcModelRadius a n₁.1 n₁.2) (0, 0) := by
+    simp only [div_eq_mul_inv]
+    exact (differentiableAt_fst.const_add (L / 4)).mul_const _
+  have hz₂ : DifferentiableAt ℝ
+      (fun p : ℝ × ℝ => (arcModelConst a n₁.1 n₁.2 (L / 4 + p.1)).1) (0, 0) := by
+    have hfun : (fun p : ℝ × ℝ => (arcModelConst a n₁.1 n₁.2 (L / 4 + p.1)).1)
+        = fun p => n₁.1 - ((arcModelRadius a n₁.1 n₁.2 : ℝ) : ℂ) * Complex.I
+            * Complex.exp ((n₁.2 : ℂ) * Complex.I)
+            * (Complex.exp ((((L / 4 + p.1) / arcModelRadius a n₁.1 n₁.2 : ℝ) : ℂ)
+                * Complex.I) - 1) := rfl
+    rw [hfun]
+    exact (differentiableAt_const n₁.1).sub
+      (((a9_differentiableAt_exp hσ₂).sub_const 1).const_mul _)
+  have hψ₂ : DifferentiableAt ℝ
+      (fun p : ℝ × ℝ => (arcModelConst a n₁.1 n₁.2 (L / 4 + p.1)).2) (0, 0) := by
+    have hfun : (fun p : ℝ × ℝ => (arcModelConst a n₁.1 n₁.2 (L / 4 + p.1)).2)
+        = fun p => n₁.2 + (L / 4 + p.1) / arcModelRadius a n₁.1 n₁.2 := rfl
+    rw [hfun]
+    exact hσ₂.const_add n₁.2
+  -- anchor values of the node-2 state
+  have hpt₂ : arcModelConst a n₁.1 n₁.2 (L / 4 + 0) = (z₁, φ₁ + 2 * π) :=
+    a9_node2_anchor ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
+  have hz₂0 : (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1 = z₁ := by rw [hpt₂]
+  have hψ₂0 : (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 = φ₁ + 2 * π := by rw [hpt₂]
+  have hden₂ : c + ⟪(arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1, Complex.I
+      * Complex.exp ((((arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 : ℝ) : ℂ)
+        * Complex.I)⟫_ℝ ≠ 0 := by
+    rw [hz₂0, hψ₂0, expI_add_two_pi, ← hDexp]
+    exact hD0.ne'
+  have hr₃0 : arcModelRadius c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 ≠ 0 := by
+    have h1 : arcModelRadius c (layoutNode2 a c h L 0).1 (layoutNode2 a c h L 0).2
+        = a9rc a c h L := a9_radius_node2 ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
+    rw [show layoutNode2 a c h L 0 = arcModelConst a n₁.1 n₁.2 (L / 4 + 0)
+      from rfl] at h1
+    rw [h1]
+    exact hrc0.ne'
+  -- node-3 maps
+  have hz₃ := a9_differentiableAt_arc_fst (s := fun _ => L / 4) hz₂ hψ₂
+    (differentiableAt_const _) hden₂ hr₃0
+  have hψ₃ := a9_differentiableAt_arc_snd (s := fun _ => L / 4) hz₂ hψ₂
+    (differentiableAt_const _) hden₂ hr₃0
+  -- anchor values of the node-3 state
+  have hpt₃ : arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+      (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)
+      = ((starRingEnd ℂ) z₁, 3 * π - φ₁ + 2 * π) :=
+    a9_node3_anchor ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
+  have hconjE : Complex.I
+      * Complex.exp (((3 * π - φ₁ + 2 * π : ℝ) : ℂ) * Complex.I)
+      = (starRingEnd ℂ) (Complex.I * Complex.exp ((φ₁ : ℂ) * Complex.I)) := by
+    rw [show (3 * π - φ₁ + 2 * π : ℝ) = (-φ₁ + π) + 2 * π + 2 * π by ring,
+      expI_add_two_pi, expI_add_two_pi, hexpPi, map_mul, Complex.conj_I,
+      ← Complex.exp_conj,
+      show (starRingEnd ℂ) ((φ₁ : ℂ) * Complex.I) = ((-φ₁ : ℝ) : ℂ) * Complex.I by
+        rw [map_mul, Complex.conj_ofReal, Complex.conj_I]; push_cast; ring]
+    ring
+  have hden₃ : a + ⟪(arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+        (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1, Complex.I
+      * Complex.exp ((((arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+          (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 : ℝ) : ℂ)
+        * Complex.I)⟫_ℝ ≠ 0 := by
+    rw [show (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+        (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1
+      = (starRingEnd ℂ) z₁ by rw [hpt₃],
+      show (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+        (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2
+      = 3 * π - φ₁ + 2 * π by rw [hpt₃],
+      hconjE,
+      show ⟪(starRingEnd ℂ) z₁, (starRingEnd ℂ) (Complex.I
+          * Complex.exp ((φ₁ : ℂ) * Complex.I))⟫_ℝ
+        = ⟪z₁, Complex.I * Complex.exp ((φ₁ : ℂ) * Complex.I)⟫_ℝ by
+        rw [hip, hip]
+        simp [Complex.conj_re, Complex.conj_im]]
+    exact hs₁ne
+  have hr₄0 : arcModelRadius a (arcModelConst c (arcModelConst a n₁.1 n₁.2
+        (L / 4 + 0)).1 (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+        (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 ≠ 0 := by
+    have h1 : arcModelRadius a (layoutNode3 a c h L 0).1 (layoutNode3 a c h L 0).2
+        = a9ra a h := a9_radius_node3 ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
+    rw [show layoutNode3 a c h L 0 = arcModelConst c (arcModelConst a n₁.1 n₁.2
+        (L / 4 + 0)).1 (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)
+      from rfl] at h1
+    rw [h1]
+    exact hra0.ne'
+  -- node-4 maps
+  have hz₄ := a9_differentiableAt_arc_fst (s := fun p : ℝ × ℝ => L / 4 + p.2)
+    hz₃ hψ₃ (differentiableAt_snd.const_add (L / 4)) hden₃ hr₄0
+  have hψ₄ := a9_differentiableAt_arc_snd (s := fun p : ℝ × ℝ => L / 4 + p.2)
+    hz₃ hψ₃ (differentiableAt_snd.const_add (L / 4)) hden₃ hr₄0
+  -- anchor values of the node-4 state and the terminal denominator
+  have hpt₄ : arcModelConst a (arcModelConst c (arcModelConst a n₁.1 n₁.2
+        (L / 4 + 0)).1 (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+        (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 (L / 4 + 0)
+      = (-z₁, φ₁ + π + 2 * π) :=
+    a9_node4_anchor ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
+  have hden₄ : c + ⟪(arcModelConst a (arcModelConst c (arcModelConst a n₁.1 n₁.2
+        (L / 4 + 0)).1 (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+        (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 (L / 4 + 0)).1,
+      Complex.I * Complex.exp ((((arcModelConst a (arcModelConst c
+          (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1 (arcModelConst a n₁.1 n₁.2
+            (L / 4 + 0)).2 (L / 4)).1 (arcModelConst c (arcModelConst a n₁.1 n₁.2
+          (L / 4 + 0)).1 (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2
+        (L / 4 + 0)).2 : ℝ) : ℂ) * Complex.I)⟫_ℝ ≠ 0 := by
+    rw [show (arcModelConst a (arcModelConst c (arcModelConst a n₁.1 n₁.2
+        (L / 4 + 0)).1 (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+        (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 (L / 4 + 0)).1
+      = -z₁ by rw [hpt₄],
+      show (arcModelConst a (arcModelConst c (arcModelConst a n₁.1 n₁.2
+        (L / 4 + 0)).1 (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1
+      (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
+        (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 (L / 4 + 0)).2
+      = φ₁ + π + 2 * π by rw [hpt₄],
+      show (φ₁ + π + 2 * π : ℝ) = (φ₁ + π) + 2 * π by ring,
+      expI_add_two_pi, hexpPi, mul_neg, inner_neg_neg, ← hDexp]
+    exact hD0.ne'
+  -- assemble the endpoint map
+  have hr₅ := a9_differentiableAt_radius (K := c) hz₄ hψ₄ hden₄
+  exact DifferentiableAt.sub_const (hz₄.add ((a9_differentiableAt_ofReal hr₅).mul
+    (((a9_differentiableAt_exp hψ₄).const_mul Complex.I).const_add 1)))
+    (layoutStart a c h L).1
 
 /-! ### A9.3 — the phase-closure bridge and the face-sign theorem -/
 
@@ -7904,31 +9242,126 @@ noncomputable def layoutCleanTurnRes (a c h L w₁ w₂ t : ℝ) : ℝ :=
 
 /-- **The phase-closure bridge**: within phase error `η` of clean closure, the
 layout endpoint is within `r₅·η ≤ η/(2(c − R_cl))` of the fixed-phase endpoint,
-uniformly over the box. -/
+uniformly over the box.  (The anchor phase equation `hφe` normalizes the target
+phase of the fixed-phase endpoint to `≡ π/2 (mod 2π)`.) -/
 private lemma a9_phase_bridge {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
-    (hL : L ≤ bicircleBracket a h) {w₁ w₂ t : ℝ} (hw₁ : |w₁| ≤ L / 16)
+    (hL : L ≤ bicircleBracket a h) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
+    {w₁ w₂ t : ℝ} (hw₁ : |w₁| ≤ L / 16)
     (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16) :
     ‖layoutCleanZRes a c h L w₁ w₂ t - a9Residual a c h L (w₁, w₂)‖
       ≤ |layoutCleanTurnRes a c h L w₁ w₂ t|
         / (2 * (c - layoutCleanRadius a c)) := by
-  sorry
+  obtain ⟨hh0, hh1, hwb⟩ := hwin
+  have hπ := Real.pi_pos
+  have hc1 : 1 < c := ha.trans hac
+  have ht' := abs_le.mp ht
+  have hw₁' := abs_le.mp hw₁
+  have hw₂' := abs_le.mp hw₂
+  set n₄ := layoutNode4 a c h L w₁ w₂ with hn₄def
+  set r₅ := arcModelRadius c n₄.1 n₄.2 with hr₅def
+  set σ' := nodePeriod L w₁ w₂ t - nodeS4 L w₁ w₂ with hσ'def
+  -- terminal-leg evaluation of the clean curve
+  have hs4le : nodeS4 L w₁ w₂ ≤ nodePeriod L w₁ w₂ t := by
+    rw [nodeS4, nodePeriod]
+    linarith
+  have hleg5 := layoutClean_leg5 a c h hL0 hw₁ hw₂ hs4le
+  -- the difference is `−r₅·(1 + i·e^{iφ(σ)})`
+  have hτdef : (layoutClean a c h L w₁ w₂ (nodePeriod L w₁ w₂ t)).2
+      = n₄.2 + σ' / r₅ := by
+    rw [hleg5, arcModelConst_snd]
+  have hdiff : layoutCleanZRes a c h L w₁ w₂ t - a9Residual a c h L (w₁, w₂)
+      = -(r₅ : ℂ) * (1 + Complex.I
+          * Complex.exp (((n₄.2 + σ' / r₅ : ℝ) : ℂ) * Complex.I)) := by
+    rw [layoutCleanZRes, hleg5]
+    change (arcModelConst c n₄.1 n₄.2 σ').1 - (layoutStart a c h L).1
+        - (a9Endpoint c n₄ - (layoutStart a c h L).1) = _
+    rw [a9Endpoint]
+    change n₄.1 - (r₅ : ℂ) * Complex.I * Complex.exp ((n₄.2 : ℂ) * Complex.I)
+          * (Complex.exp (((σ' / r₅ : ℝ) : ℂ) * Complex.I) - 1)
+        - (layoutStart a c h L).1
+        - (n₄.1 + (r₅ : ℂ) * (1 + Complex.I
+            * Complex.exp ((n₄.2 : ℂ) * Complex.I))
+          - (layoutStart a c h L).1) = _
+    rw [show ((n₄.2 + σ' / r₅ : ℝ) : ℂ) = (n₄.2 : ℂ) + ((σ' / r₅ : ℝ) : ℂ) by
+        push_cast; ring,
+      add_mul, Complex.exp_add]
+    ring
+  -- the phase drift rewrites the exponential to `i·e^{iτ}`
+  set τ := layoutCleanTurnRes a c h L w₁ w₂ t with hτ
+  have hphase : n₄.2 + σ' / r₅ = 9 * π / 2 + τ := by
+    rw [hτ, layoutCleanTurnRes, hτdef, layoutStart_snd hφe]
+    ring
+  have hexpτ : Complex.exp (((n₄.2 + σ' / r₅ : ℝ) : ℂ) * Complex.I)
+      = Complex.I * Complex.exp ((τ : ℂ) * Complex.I) := by
+    rw [hphase,
+      show ((9 * π / 2 + τ : ℝ) : ℂ) = ((τ : ℝ) : ℂ)
+          + ((π / 2 + 2 * π + 2 * π : ℝ) : ℂ) by push_cast; ring,
+      add_mul, Complex.exp_add,
+      show ((π / 2 + 2 * π + 2 * π : ℝ) : ℂ) * Complex.I
+        = (((π / 2 + 2 * π) + 2 * π : ℝ) : ℂ) * Complex.I by norm_num,
+      expI_add_two_pi, expI_add_two_pi]
+    push_cast
+    rw [Complex.exp_pi_div_two_mul_I]
+    ring
+  have hone : (1 : ℂ) + Complex.I * (Complex.I * Complex.exp ((τ : ℂ) * Complex.I))
+      = -(Complex.exp (Complex.I * (τ : ℂ)) - 1) := by
+    rw [show Complex.I * (Complex.I * Complex.exp ((τ : ℂ) * Complex.I))
+        = (Complex.I * Complex.I) * Complex.exp ((τ : ℂ) * Complex.I) by ring,
+      Complex.I_mul_I, mul_comm ((τ : ℂ)) Complex.I]
+    ring
+  -- the radius window: `0 ≤ r₅ ≤ 1/(2(c − R_cl))`
+  have hn₄norm : ‖n₄.1‖ ≤ layoutCleanRadius a c :=
+    (layoutNode_norm_le ha hac ⟨hh0, hh1, hwb⟩ hlow hL0 hL hw₁ hw₂).2.2.2
+  have hR1 := layoutCleanRadius_lt_one ha hac
+  have hs₄ : |⟪n₄.1, Complex.I
+      * Complex.exp ((n₄.2 : ℂ) * Complex.I)⟫_ℝ| ≤ layoutCleanRadius a c := by
+    have h1 := abs_real_inner_le_norm n₄.1
+      (Complex.I * Complex.exp ((n₄.2 : ℂ) * Complex.I))
+    rw [norm_mul, Complex.norm_I, one_mul, Complex.norm_exp_ofReal_mul_I,
+      mul_one] at h1
+    exact h1.trans hn₄norm
+  have hs₄' := abs_le.mp hs₄
+  have hden : 0 < c + ⟪n₄.1, Complex.I
+      * Complex.exp ((n₄.2 : ℂ) * Complex.I)⟫_ℝ := by linarith
+  have hnum0 : 0 ≤ 1 - ‖n₄.1‖ ^ 2 := by nlinarith [norm_nonneg n₄.1]
+  have hnum1 : 1 - ‖n₄.1‖ ^ 2 ≤ 1 := by nlinarith [norm_nonneg n₄.1]
+  have hr₅0 : 0 ≤ r₅ := by
+    rw [hr₅def, arcModelRadius]
+    positivity
+  have hr₅le : r₅ ≤ 1 / (2 * (c - layoutCleanRadius a c)) := by
+    rw [hr₅def, arcModelRadius]
+    exact div_le_div₀ (by norm_num) hnum1 (by linarith) (by linarith)
+  -- assemble
+  rw [hdiff, hexpτ, hone, norm_mul, norm_neg, norm_neg, Complex.norm_real,
+    Real.norm_eq_abs, abs_of_nonneg hr₅0]
+  have hbound : ‖Complex.exp (Complex.I * (τ : ℂ)) - 1‖ ≤ |τ| := by
+    have := Real.norm_exp_I_mul_ofReal_sub_one_le (x := τ)
+    rwa [Real.norm_eq_abs] at this
+  calc r₅ * ‖Complex.exp (Complex.I * (τ : ℂ)) - 1‖
+      ≤ 1 / (2 * (c - layoutCleanRadius a c)) * |τ| := by
+        apply mul_le_mul hr₅le hbound (norm_nonneg _)
+        exact le_of_lt (div_pos one_pos (by linarith))
+    _ = |τ| / (2 * (c - layoutCleanRadius a c)) := by ring
 
 /-- **ALM-A9 (`cleanClosure_face_signs`): Poincaré–Miranda face signs of the
 clean closure residual over the recombined `w`-box.**  There are components
 `(A, B)`, `(A′, B′)` of the `z`-residual (an invertible linear recombination:
-`AB′ − BA′ ≠ 0`), a box radius `W ≤ L/16` in the recombined dofs
-`u = w₁ + w₂`, `v = w₁ − w₂`, a face margin `m > 0`, and a phase tolerance
-`η > 0`, such that whenever the clean turning residual at `(w, t)` is within
-`η` of closure, the first component is `≥ m` on the `u = W` face and `≤ −m` on
-`u = −W`, and the second likewise in `v` — the sign pattern the A10
-Poincaré–Miranda closing slices along (margins per-`(a, c)`, nonconstructive). -/
+`AB′ − BA′ ≠ 0`) and a box-radius cap `W₁ ≤ L/16` in the recombined dofs
+`u = w₁ + w₂`, `v = w₁ − w₂` such that **every** radius `W ≤ W₁` carries a face
+margin `m > 0` and a phase tolerance `η > 0` (both scaling with `W`): whenever
+the clean turning residual at `(w, t)` is within `η` of closure, the first
+component is `≥ m` on the `u = W` face and `≤ −m` on `u = −W`, and the second
+likewise in `v` — the sign pattern the A10 Poincaré–Miranda closing slices
+along, at the radius A10 intersects with the A8 root box (margins per-`(a, c)`,
+nonconstructive). -/
 theorem cleanClosure_face_signs {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
     (hL : L ≤ bicircleBracket a h)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
     ∃ A B A' B' : ℝ, A * B' - B * A' ≠ 0 ∧
-      ∃ W, 0 < W ∧ W ≤ L / 16 ∧ ∃ m, 0 < m ∧ ∃ η, 0 < η ∧
+      ∃ W₁, 0 < W₁ ∧ W₁ ≤ L / 16 ∧ ∀ W, 0 < W → W ≤ W₁ →
+        ∃ m, 0 < m ∧ ∃ η, 0 < η ∧
         ∀ u v t : ℝ, |u| ≤ W → |v| ≤ W → |t| ≤ L / 16 →
           |layoutCleanTurnRes a c h L ((u + v) / 2) ((u - v) / 2) t| ≤ η →
           ((u = W → m ≤ A * (layoutCleanZRes a c h L ((u + v) / 2) ((u - v) / 2) t).re
@@ -7939,6 +9372,539 @@ theorem cleanClosure_face_signs {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
               + B' * (layoutCleanZRes a c h L ((u + v) / 2) ((u - v) / 2) t).im) ∧
             (v = -W → A' * (layoutCleanZRes a c h L ((u + v) / 2) ((u - v) / 2) t).re
               + B' * (layoutCleanZRes a c h L ((u + v) / 2) ((u - v) / 2) t).im ≤ -m)) := by
+  obtain ⟨hh0, hh1, hwb⟩ := hwin
+  have hπ := Real.pi_pos
+  have hc1 : 1 < c := ha.trans hac
+  obtain ⟨hS0, hC0, hrc0, hrclt, hDlt, hSC, hJ1, hJ2, hq⟩ :=
+    a9_anchor_facts ha hac ⟨hh0, hh1, hwb⟩ hL0 hL him hφe
+  set θ := a9theta a h L with hθdef
+  set C := Real.cos θ with hCdef
+  set S := Real.sin θ with hSdef
+  set ra := a9ra a h with hradef
+  set rc := a9rc a c h L with hrcdef
+  set D := a9D a c h L with hDdef
+  have hCS : C ^ 2 + S ^ 2 = 1 := by
+    rw [hCdef, hSdef]
+    exact Real.cos_sq_add_sin_sq θ
+  -- the four column signs
+  set x₁ := a9V1re C S ra rc D with hx₁def
+  set y₁ := a9V1im C S ra rc D with hy₁def
+  set x₂ := a9V2re C S ra rc D with hx₂def
+  set y₂ := a9V2im C S ra rc D with hy₂def
+  have hx₁ : x₁ < 0 := a9V1_re_neg hCS hC0 hS0 hrc0 hrclt hSC hJ1 hJ2 hq hDlt
+  have hy₁ : 0 < y₁ := a9V1_im_pos hCS hC0 hS0 hrc0 hrclt hDlt
+  have hx₂ : 0 < x₂ := a9V2_re_pos hCS hC0 hS0 hrc0 hrclt hDlt
+  have hy₂ : 0 < y₂ := a9V2_im_pos hCS hC0 hS0 hrc0 hrclt hDlt
+  -- the recombined-face row vectors and the determinant margin
+  set A := (y₁ - y₂) / 2 with hAdef
+  set B := (x₂ - x₁) / 2 with hBdef
+  set A' := -(y₁ + y₂) / 2 with hA'def
+  set B' := (x₁ + x₂) / 2 with hB'def
+  set dT := (x₂ * y₁ - x₁ * y₂) / 2 with hdTdef
+  have hdT : 0 < dT := by
+    rw [hdTdef]
+    nlinarith [mul_pos hx₂ hy₁, mul_pos (neg_pos.mpr hx₁) hy₂]
+  set M := |A| + |B| + |A'| + |B'| + 1 with hMdef
+  have hM : 0 < M := by
+    have := abs_nonneg A
+    have := abs_nonneg B
+    have := abs_nonneg A'
+    have := abs_nonneg B'
+    rw [hMdef]
+    linarith
+  have hMA : |A| + |B| ≤ M := by
+    have := abs_nonneg A'
+    have := abs_nonneg B'
+    rw [hMdef]
+    linarith
+  have hMA' : |A'| + |B'| ≤ M := by
+    have := abs_nonneg A
+    have := abs_nonneg B
+    rw [hMdef]
+    linarith
+  -- the derivative columns of the residual
+  have hdiff := a9Residual_differentiableAt ha hac ⟨hh0, hh1, hwb⟩ hL0 hL hlow him hφe
+  have hF := hdiff.hasFDerivAt
+  set Df := fderiv ℝ (a9Residual a c h L) (0, 0) with hDfdef
+  have hγ1 : HasDerivAt (fun s : ℝ => ((s, 0) : ℝ × ℝ)) ((1 : ℝ), (0 : ℝ)) 0 :=
+    (hasDerivAt_id 0).prodMk (hasDerivAt_const 0 0)
+  have hγ2 : HasDerivAt (fun s : ℝ => ((0, s) : ℝ × ℝ)) ((0 : ℝ), (1 : ℝ)) 0 :=
+    (hasDerivAt_const 0 0).prodMk (hasDerivAt_id 0)
+  have hDf1 : Df ((1 : ℝ), (0 : ℝ)) = (x₁ : ℂ) + (y₁ : ℂ) * Complex.I := by
+    have h1 := HasFDerivAt.comp_hasDerivAt (f := fun s : ℝ => ((s, 0) : ℝ × ℝ)) 0 hF hγ1
+    exact h1.unique (a9_hasDerivAt_col1 ha hac ⟨hh0, hh1, hwb⟩ hlow hL0 hL him hφe)
+  have hDf2 : Df ((0 : ℝ), (1 : ℝ)) = (x₂ : ℂ) + (y₂ : ℂ) * Complex.I := by
+    have h1 := HasFDerivAt.comp_hasDerivAt (f := fun s : ℝ => ((0, s) : ℝ × ℝ)) 0 hF hγ2
+    exact h1.unique (a9_hasDerivAt_col2 ha hac ⟨hh0, hh1, hwb⟩ hlow hL0 hL him hφe)
+  have hDfw : ∀ w : ℝ × ℝ, Df w
+      = ((w.1 : ℂ) * ((x₁ : ℂ) + (y₁ : ℂ) * Complex.I)
+        + (w.2 : ℂ) * ((x₂ : ℂ) + (y₂ : ℂ) * Complex.I)) := by
+    intro w
+    have hw : w = w.1 • ((1 : ℝ), (0 : ℝ)) + w.2 • ((0 : ℝ), (1 : ℝ)) := by
+      ext <;> simp
+    conv_lhs => rw [hw]
+    rw [map_add, map_smul, map_smul, hDf1, hDf2]
+    simp only [Complex.real_smul]
+  have hDfre : ∀ w : ℝ × ℝ, (Df w).re = w.1 * x₁ + w.2 * x₂ := by
+    intro w
+    rw [hDfw]
+    simp [Complex.add_re, Complex.mul_re, Complex.mul_im, Complex.I_re,
+      Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
+  have hDfim : ∀ w : ℝ × ℝ, (Df w).im = w.1 * y₁ + w.2 * y₂ := by
+    intro w
+    rw [hDfw]
+    simp [Complex.add_im, Complex.mul_re, Complex.mul_im, Complex.I_re,
+      Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
+  -- the little-o window at margin `ε = dT/(4M)`
+  have hG0 : a9Residual a c h L (0, 0) = 0 :=
+    a9Residual_anchor ha hac ⟨hh0, hh1, hwb⟩ hlow hL0 hL him hφe
+  have hε : (0 : ℝ) < dT / (4 * M) := by positivity
+  have hlo := hasFDerivAt_iff_isLittleO_nhds_zero.mp hF
+  have hev := hlo.def hε
+  rw [Metric.eventually_nhds_iff] at hev
+  obtain ⟨δ, hδ0, hδ⟩ := hev
+  -- the box-radius cap, margin, and phase tolerance
+  have hRcl := layoutCleanRadius_lt_one ha hac
+  have hcR : 0 < c - layoutCleanRadius a c := by linarith
+  set W₁ := min (δ / 2) (L / 16) with hW₁def
+  have hW₁0 : 0 < W₁ := lt_min (by linarith) (by linarith)
+  have hW₁L : W₁ ≤ L / 16 := min_le_right _ _
+  refine ⟨A, B, A', B', ?_, W₁, hW₁0, hW₁L, ?_⟩
+  · have h1 : A * B' - B * A' = dT := by
+      rw [hAdef, hBdef, hA'def, hB'def, hdTdef]
+      ring
+    rw [h1]
+    exact hdT.ne'
+  intro W hW0 hWW₁
+  have hWL : W ≤ L / 16 := hWW₁.trans hW₁L
+  have hWδ : W < δ := lt_of_le_of_lt (hWW₁.trans (min_le_left _ _)) (by linarith)
+  set m := W * dT / 2 with hmdef
+  have hm0 : 0 < m := by positivity
+  set η := W * dT * (2 * (c - layoutCleanRadius a c)) / (4 * M) with hηdef
+  have hη0 : 0 < η := by positivity
+  refine ⟨m, hm0, η, hη0, ?_⟩
+  intro u v t hu hv ht hτ
+  -- box membership of the recombined dofs
+  have hw₁ : |(u + v) / 2| ≤ W := by
+    rw [abs_div, abs_two]
+    calc |u + v| / 2 ≤ (|u| + |v|) / 2 := by
+          have := abs_add_le u v
+          linarith
+      _ ≤ W := by linarith
+  have hw₂ : |(u - v) / 2| ≤ W := by
+    rw [abs_div, abs_two]
+    calc |u - v| / 2 ≤ (|u| + |v|) / 2 := by
+          have h9 := abs_add_le u (-v)
+          rw [← sub_eq_add_neg, abs_neg] at h9
+          linarith
+      _ ≤ W := by linarith
+  have hw₁L : |(u + v) / 2| ≤ L / 16 := hw₁.trans hWL
+  have hw₂L : |(u - v) / 2| ≤ L / 16 := hw₂.trans hWL
+  set w : ℝ × ℝ := ((u + v) / 2, (u - v) / 2) with hwdef
+  -- the two error contributions
+  have hbridge := a9_phase_bridge ha hac ⟨hh0, hh1, hwb⟩ hlow hL0 hL hφe
+    hw₁L hw₂L ht
+  have hbridge' : ‖layoutCleanZRes a c h L ((u + v) / 2) ((u - v) / 2) t
+      - a9Residual a c h L w‖ ≤ η / (2 * (c - layoutCleanRadius a c)) := by
+    refine hbridge.trans ?_
+    gcongr
+  have hηval : η / (2 * (c - layoutCleanRadius a c)) = W * dT / (4 * M) := by
+    rw [hηdef]
+    field_simp
+  have hwnorm : ‖w‖ ≤ W := by
+    rw [hwdef, Prod.norm_mk]
+    exact max_le (by rwa [Real.norm_eq_abs]) (by rwa [Real.norm_eq_abs])
+  have hlittle : ‖a9Residual a c h L w - Df w‖ ≤ dT / (4 * M) * ‖w‖ := by
+    have hwδ : dist w (0 : ℝ × ℝ) < δ := by
+      rw [dist_zero_right]
+      exact lt_of_le_of_lt hwnorm hWδ
+    have h1 := hδ hwδ
+    rw [hG0, sub_zero, Prod.mk_zero_zero, zero_add] at h1
+    exact h1
+  -- the exact linear identities on the recombined box
+  have hlinU : A * (Df w).re + B * (Df w).im = u * dT := by
+    rw [hDfre, hDfim, hwdef, hAdef, hBdef, hdTdef]
+    ring
+  have hlinV : A' * (Df w).re + B' * (Df w).im = v * dT := by
+    rw [hDfre, hDfim, hwdef, hA'def, hB'def, hdTdef]
+    ring
+  set Z := layoutCleanZRes a c h L ((u + v) / 2) ((u - v) / 2) t with hZdef
+  have hZD : ‖Z - Df w‖ ≤ W * dT / (2 * M) := by
+    have h2 : Z - Df w = (Z - a9Residual a c h L w)
+        + (a9Residual a c h L w - Df w) := by ring
+    have h3 : dT / (4 * M) * ‖w‖ ≤ dT / (4 * M) * W :=
+      mul_le_mul_of_nonneg_left hwnorm hε.le
+    have h4 := hbridge'
+    rw [hηval] at h4
+    have h5 : W * dT / (4 * M) + W * dT / (4 * M) = W * dT / (2 * M) := by
+      field_simp
+      norm_num
+    rw [h2]
+    refine (norm_add_le _ _).trans ?_
+    rw [← h5]
+    have h6 : dT / (4 * M) * W = W * dT / (4 * M) := by ring
+    exact add_le_add h4 ((hlittle.trans h3).trans_eq h6)
+  -- the core face estimates
+  have hMZ : (|A| + |B|) * ‖Z - Df w‖ ≤ W * dT / 2 := by
+    calc (|A| + |B|) * ‖Z - Df w‖ ≤ M * (W * dT / (2 * M)) :=
+          mul_le_mul hMA hZD (norm_nonneg _) hM.le
+      _ = W * dT / 2 := by field_simp
+  have hMZ' : (|A'| + |B'|) * ‖Z - Df w‖ ≤ W * dT / 2 := by
+    calc (|A'| + |B'|) * ‖Z - Df w‖ ≤ M * (W * dT / (2 * M)) :=
+          mul_le_mul hMA' hZD (norm_nonneg _) hM.le
+      _ = W * dT / 2 := by field_simp
+  have hcoreU : |A * Z.re + B * Z.im - u * dT| ≤ W * dT / 2 := by
+    have h5 : A * Z.re + B * Z.im - u * dT
+        = A * (Z - Df w).re + B * (Z - Df w).im := by
+      rw [← hlinU, Complex.sub_re, Complex.sub_im]
+      ring
+    rw [h5]
+    have h7 : |A * (Z - Df w).re| ≤ |A| * ‖Z - Df w‖ := by
+      rw [abs_mul]
+      exact mul_le_mul_of_nonneg_left (Complex.abs_re_le_norm _) (abs_nonneg A)
+    have h8 : |B * (Z - Df w).im| ≤ |B| * ‖Z - Df w‖ := by
+      rw [abs_mul]
+      exact mul_le_mul_of_nonneg_left (Complex.abs_im_le_norm _) (abs_nonneg B)
+    calc |A * (Z - Df w).re + B * (Z - Df w).im|
+        ≤ |A * (Z - Df w).re| + |B * (Z - Df w).im| := abs_add_le _ _
+      _ ≤ |A| * ‖Z - Df w‖ + |B| * ‖Z - Df w‖ := add_le_add h7 h8
+      _ = (|A| + |B|) * ‖Z - Df w‖ := by ring
+      _ ≤ W * dT / 2 := hMZ
+  have hcoreV : |A' * Z.re + B' * Z.im - v * dT| ≤ W * dT / 2 := by
+    have h5 : A' * Z.re + B' * Z.im - v * dT
+        = A' * (Z - Df w).re + B' * (Z - Df w).im := by
+      rw [← hlinV, Complex.sub_re, Complex.sub_im]
+      ring
+    rw [h5]
+    have h7 : |A' * (Z - Df w).re| ≤ |A'| * ‖Z - Df w‖ := by
+      rw [abs_mul]
+      exact mul_le_mul_of_nonneg_left (Complex.abs_re_le_norm _) (abs_nonneg A')
+    have h8 : |B' * (Z - Df w).im| ≤ |B'| * ‖Z - Df w‖ := by
+      rw [abs_mul]
+      exact mul_le_mul_of_nonneg_left (Complex.abs_im_le_norm _) (abs_nonneg B')
+    calc |A' * (Z - Df w).re + B' * (Z - Df w).im|
+        ≤ |A' * (Z - Df w).re| + |B' * (Z - Df w).im| := abs_add_le _ _
+      _ ≤ |A'| * ‖Z - Df w‖ + |B'| * ‖Z - Df w‖ := add_le_add h7 h8
+      _ = (|A'| + |B'|) * ‖Z - Df w‖ := by ring
+      _ ≤ W * dT / 2 := hMZ'
+  obtain ⟨hcU1, hcU2⟩ := abs_le.mp hcoreU
+  obtain ⟨hcV1, hcV2⟩ := abs_le.mp hcoreV
+  have hWdT : 0 < W * dT := mul_pos hW0 hdT
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro huW
+    rw [huW] at hcU1
+    rw [hmdef]
+    linarith
+  · intro huW
+    rw [huW] at hcU2
+    rw [hmdef]
+    linarith
+  · intro hvW
+    rw [hvW] at hcV1
+    rw [hmdef]
+    linarith
+  · intro hvW
+    rw [hvW] at hcV2
+    rw [hmdef]
+    linarith
+
+/-! ## ALM-A10: the Poincaré–Miranda closing of the true flow
+
+The 3-dof closing problem splits.  For each `w` in the intersection of the A8
+root box (radius `W₀`) and the A9 face-sign box (radius cap `W₁`), the turning
+root `t = τ(w)` kills the turning residual; the remaining 2-D `z`-closure
+residual of the **true** flow — recombined through the A9 row vectors `(A, B)`,
+`(A′, B′)` — inherits the clean face signs with margin `m/2`, because the A6
+Grönwall transport bounds the true−clean gap by `C₁·ε` uniformly over the box
+and `ε` is chosen against the A9 margin `m` and phase tolerance `η`.  The
+`poincareMiranda_rect` engine then produces `(u*, v*)` in the recombined
+rectangle where both recombined components vanish; invertibility of the
+recombination (`AB′ − BA′ ≠ 0`) recovers `z`-closure, and `τ` supplies the
+turning closure. -/
+
+set_option maxHeartbeats 400000 in
+set_option diagnostics true in
+/-- **ALM-A10 (`exists_layout_closing`): the true flow closes.**  For anchor
+data `(h, L)` on the window × bracket with both anchor equations, and any
+continuous `2π`-periodic profile `κ` with `|κ| ≤ M` and ALM-2 plateau-pointwise
+reparametrization `h₁` at tolerance `ε` below the assembled threshold `ε₀`
+(the min of the A8 root threshold and the new Grönwall-vs-margin quotas
+`C₁ε ≤ η`, `Mc·C₁ε ≤ m/2`, `C₁ε ≤ (1 − R_cl)/2`), there is a layout point
+`(w₁, w₂, t)` in the box where the true flow **closes with total turning `2π`**
+(`layoutResidual = 0`, see `layoutResidual_eq_zero_iff`).  The transport
+constant `C₁` is exposed ahead of `ε₀`, and the root comes bundled with the
+`C₁·ε` closeness to the clean five-leg curve and the global confinement
+`‖z(σ)‖ ≤ layoutConfineRadius < 1` on the closed period window — the shapes
+the A11 chord transport and the A12 window bridge consume. -/
+theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
+    (hL : L ≤ bicircleBracket a h) (hL4 : L ≤ 4 * π)
+    (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
+    {κ h₁ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
+    (hh₁c : Continuous h₁) (hh₁per : ∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π)
+    {M : ℝ} (hM : ∀ θ, |κ θ| ≤ M) :
+    ∃ C₁ > 0, ∃ ε₀ > 0, ∀ {ε : ℝ}, 0 < ε → ε ≤ ε₀ →
+      (∫ θ in (0 : ℝ)..(2 * π),
+        |κ (h₁ θ) - stepCurvature c a 0 (π / 2) π (3 * π / 2) θ|) ≤ ε →
+      (∀ θ ∈ Set.Icc (π / 2) (3 * π / 4), |κ (h₁ θ) - c| ≤ ε) →
+      ∃ w₁ w₂ t : ℝ, |w₁| ≤ L / 16 ∧ |w₂| ≤ L / 16 ∧ |t| ≤ L / 16 ∧
+        layoutResidual κ h₁ a c h L M w₁ w₂ t = 0 ∧
+        (∀ σ ∈ Set.Icc (0 : ℝ) (nodePeriod L w₁ w₂ t),
+          ‖layoutFlow κ h₁ a c h L M w₁ w₂ t σ - layoutClean a c h L w₁ w₂ σ‖
+            ≤ C₁ * ε) ∧
+        ∀ σ ∈ Set.Icc (0 : ℝ) (nodePeriod L w₁ w₂ t),
+          ‖(layoutFlow κ h₁ a c h L M w₁ w₂ t σ).1‖ ≤ layoutConfineRadius a c := by
+  obtain ⟨C₁, hC₁0, hclose⟩ :=
+    layoutTrajectory_close ha hac hwin hlow hL0 hL hL4 hφe hκc hκper hh₁c hh₁per hM
+  obtain ⟨W₀, hW₀0, hW₀16, ε₁, hε₁0, hroot⟩ :=
+    turningRoot_continuous ha hac hwin hlow hL0 hL hL4 him hφe hκc hκper
+      hh₁c hh₁per hM
+  obtain ⟨A, B, A', B', hdet, W₁, hW₁0, hW₁16, hface⟩ :=
+    cleanClosure_face_signs ha hac hwin hlow hL0 hL him hφe
+  set W := min W₀ W₁ with hWdef
+  have hW0 : 0 < W := lt_min hW₀0 hW₁0
+  have hWW₀ : W ≤ W₀ := min_le_left _ _
+  have hW16 : W ≤ L / 16 := hWW₀.trans hW₀16
+  obtain ⟨m, hm0, η, hη0, hsigns⟩ := hface W hW0 (min_le_right _ _)
+  set Mc := |A| + |B| + |A'| + |B'| + 1 with hMcdef
+  have hMc0 : 0 < Mc := by positivity
+  have hABle : |A| + |B| ≤ Mc := by
+    have := abs_nonneg A'
+    have := abs_nonneg B'
+    rw [hMcdef]
+    linarith
+  have hA'B'le : |A'| + |B'| ≤ Mc := by
+    have := abs_nonneg A
+    have := abs_nonneg B
+    rw [hMcdef]
+    linarith
+  have hRcl := layoutCleanRadius_lt_one ha hac
+  refine ⟨C₁, hC₁0, min ε₁ (min (η / C₁) (min (m / (2 * Mc * C₁))
+      ((1 - layoutCleanRadius a c) / (2 * C₁)))), lt_min hε₁0 (lt_min
+      (div_pos hη0 hC₁0) (lt_min (div_pos hm0 (by positivity))
+      (div_pos (by linarith) (by positivity)))), ?_⟩
+  intro ε hε0 hεε₀ hL1 hpt
+  set εI := ∫ θ in (0 : ℝ)..(2 * π),
+    |κ (h₁ θ) - stepCurvature c a 0 (π / 2) π (3 * π / 2) θ| with hεIdef
+  obtain ⟨τ, hτcont, hτ⟩ := hroot hε0 (hεε₀.trans (min_le_left _ _)) hL1 hpt
+  -- the three `ε`-smallness consequences of the assembled threshold
+  have hεη : C₁ * εI ≤ η := by
+    have h1 := (le_div_iff₀ hC₁0).mp
+      (hεε₀.trans ((min_le_right _ _).trans (min_le_left _ _)))
+    have h2 := mul_le_mul_of_nonneg_left hL1 hC₁0.le
+    nlinarith
+  have hεm : Mc * (C₁ * εI) ≤ m / 2 := by
+    have h1 := (le_div_iff₀ (show (0 : ℝ) < 2 * Mc * C₁ by positivity)).mp
+      (hεε₀.trans ((min_le_right _ _).trans ((min_le_right _ _).trans
+        (min_le_left _ _))))
+    have h2 := mul_le_mul_of_nonneg_left hL1 (mul_nonneg hMc0.le hC₁0.le)
+    nlinarith
+  have hεconf : C₁ * εI ≤ (1 - layoutCleanRadius a c) / 2 := by
+    have h1 := (le_div_iff₀ (show (0 : ℝ) < 2 * C₁ by positivity)).mp
+      (hεε₀.trans ((min_le_right _ _).trans ((min_le_right _ _).trans
+        (min_le_right _ _))))
+    have h2 := mul_le_mul_of_nonneg_left hL1 hC₁0.le
+    nlinarith
+  set S₀ : Set (ℝ × ℝ) := {w : ℝ × ℝ | |w.1| ≤ W₀ ∧ |w.2| ≤ W₀} with hS₀def
+  -- recombined-to-layout box arithmetic
+  have hhalf : ∀ u v : ℝ, |u| ≤ W → |v| ≤ W →
+      |(u + v) / 2| ≤ W ∧ |(u - v) / 2| ≤ W := by
+    intro u v hu hv
+    constructor
+    · rw [abs_div, abs_two]
+      have h9 := abs_add_le u v
+      linarith
+    · rw [abs_div, abs_two]
+      have h9 := abs_add_le u (-v)
+      rw [← sub_eq_add_neg, abs_neg] at h9
+      linarith
+  -- the turning root at a recombined box point
+  have hpoint : ∀ u v : ℝ, |u| ≤ W → |v| ≤ W →
+      |τ ((u + v) / 2, (u - v) / 2)| ≤ L / 16 ∧
+      (layoutResidual κ h₁ a c h L M ((u + v) / 2) ((u - v) / 2)
+        (τ ((u + v) / 2, (u - v) / 2))).2 = 0 := by
+    intro u v hu hv
+    obtain ⟨hw₁, hw₂⟩ := hhalf u v hu hv
+    have hmem : ((u + v) / 2, (u - v) / 2) ∈ S₀ :=
+      ⟨hw₁.trans hWW₀, hw₂.trans hWW₀⟩
+    obtain ⟨hIoo, hzero⟩ := hτ _ hmem
+    exact ⟨(abs_lt.mpr ⟨hIoo.1, hIoo.2⟩).le, hzero⟩
+  -- the A6 transport at box points, specialised to the endpoint residuals
+  have hΛnn : ∀ w₁ w₂ t : ℝ, |w₁| ≤ L / 16 → |w₂| ≤ L / 16 → |t| ≤ L / 16 →
+      0 ≤ nodePeriod L w₁ w₂ t := by
+    intro w₁ w₂ t h1 h2 h3
+    obtain ⟨h1a, h1b⟩ := abs_le.mp h1
+    obtain ⟨h2a, h2b⟩ := abs_le.mp h2
+    obtain ⟨h3a, h3b⟩ := abs_le.mp h3
+    simp only [nodePeriod]
+    linarith
+  have htrans : ∀ w₁ w₂ : ℝ, |w₁| ≤ W → |w₂| ≤ W → ∀ t : ℝ, |t| ≤ L / 16 →
+      ∀ σ ∈ Set.Icc (0 : ℝ) (nodePeriod L w₁ w₂ t),
+        ‖layoutFlow κ h₁ a c h L M w₁ w₂ t σ - layoutClean a c h L w₁ w₂ σ‖
+          ≤ C₁ * εI := fun w₁ w₂ hw₁ hw₂ t ht =>
+    hclose w₁ w₂ t (hw₁.trans hW16) (hw₂.trans hW16) ht
+  have hgap : ∀ w₁ w₂ : ℝ, |w₁| ≤ W → |w₂| ≤ W → ∀ t : ℝ, |t| ≤ L / 16 →
+      ‖(layoutResidual κ h₁ a c h L M w₁ w₂ t).1
+          - layoutCleanZRes a c h L w₁ w₂ t‖ ≤ C₁ * εI ∧
+        |layoutCleanTurnRes a c h L w₁ w₂ t
+          - (layoutResidual κ h₁ a c h L M w₁ w₂ t).2| ≤ C₁ * εI := by
+    intro w₁ w₂ hw₁ hw₂ t ht
+    have hT := htrans w₁ w₂ hw₁ hw₂ t ht (nodePeriod L w₁ w₂ t)
+      ⟨hΛnn w₁ w₂ t (hw₁.trans hW16) (hw₂.trans hW16) ht, le_refl _⟩
+    constructor
+    · have h1 : (layoutResidual κ h₁ a c h L M w₁ w₂ t).1
+          - layoutCleanZRes a c h L w₁ w₂ t
+          = (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)
+              - layoutClean a c h L w₁ w₂ (nodePeriod L w₁ w₂ t)).1 := by
+        simp only [layoutResidual_fst, layoutCleanZRes, Prod.fst_sub]
+        ring
+      rw [h1]
+      exact (norm_fst_le _).trans hT
+    · have h1 : layoutCleanTurnRes a c h L w₁ w₂ t
+          - (layoutResidual κ h₁ a c h L M w₁ w₂ t).2
+          = -(layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)
+              - layoutClean a c h L w₁ w₂ (nodePeriod L w₁ w₂ t)).2 := by
+        simp only [layoutResidual_snd, layoutCleanTurnRes, Prod.snd_sub]
+        ring
+      rw [h1, abs_neg, ← Real.norm_eq_abs]
+      exact (norm_snd_le _).trans hT
+  -- at a turning root, the clean turning residual is within the A9 tolerance
+  have hturnsmall : ∀ w₁ w₂ t : ℝ, |w₁| ≤ W → |w₂| ≤ W → |t| ≤ L / 16 →
+      (layoutResidual κ h₁ a c h L M w₁ w₂ t).2 = 0 →
+      |layoutCleanTurnRes a c h L w₁ w₂ t| ≤ η := by
+    intro w₁ w₂ t hw₁ hw₂ ht hzero
+    obtain ⟨-, hTgap⟩ := hgap w₁ w₂ hw₁ hw₂ t ht
+    rw [hzero, sub_zero] at hTgap
+    exact hTgap.trans hεη
+  -- the true recombined components track the clean ones within half the margin
+  have htransfer : ∀ P Q : ℝ, |P| + |Q| ≤ Mc → ∀ w₁ w₂ : ℝ, |w₁| ≤ W →
+      |w₂| ≤ W → ∀ t : ℝ, |t| ≤ L / 16 →
+      |P * ((layoutResidual κ h₁ a c h L M w₁ w₂ t).1).re
+        + Q * ((layoutResidual κ h₁ a c h L M w₁ w₂ t).1).im
+        - (P * (layoutCleanZRes a c h L w₁ w₂ t).re
+          + Q * (layoutCleanZRes a c h L w₁ w₂ t).im)| ≤ m / 2 := by
+    intro P Q hPQ w₁ w₂ hw₁ hw₂ t ht
+    obtain ⟨hZgap, -⟩ := hgap w₁ w₂ hw₁ hw₂ t ht
+    set Zt := (layoutResidual κ h₁ a c h L M w₁ w₂ t).1 with hZtdef
+    set Zc := layoutCleanZRes a c h L w₁ w₂ t with hZcdef
+    have h5 : P * Zt.re + Q * Zt.im - (P * Zc.re + Q * Zc.im)
+        = P * (Zt - Zc).re + Q * (Zt - Zc).im := by
+      rw [Complex.sub_re, Complex.sub_im]
+      ring
+    rw [h5]
+    have h7 : |P * (Zt - Zc).re| ≤ |P| * ‖Zt - Zc‖ := by
+      rw [abs_mul]
+      exact mul_le_mul_of_nonneg_left (Complex.abs_re_le_norm _) (abs_nonneg P)
+    have h8 : |Q * (Zt - Zc).im| ≤ |Q| * ‖Zt - Zc‖ := by
+      rw [abs_mul]
+      exact mul_le_mul_of_nonneg_left (Complex.abs_im_le_norm _) (abs_nonneg Q)
+    calc |P * (Zt - Zc).re + Q * (Zt - Zc).im|
+        ≤ |P * (Zt - Zc).re| + |Q * (Zt - Zc).im| := abs_add_le _ _
+      _ ≤ (|P| + |Q|) * ‖Zt - Zc‖ := by rw [add_mul]; exact add_le_add h7 h8
+      _ ≤ Mc * (C₁ * εI) := mul_le_mul hPQ hZgap (norm_nonneg _) hMc0.le
+      _ ≤ m / 2 := hεm
+  -- the Poincaré–Miranda data on the recombined rectangle
+  set G : ℝ × ℝ → ℝ × ℝ := fun p =>
+    (A * ((layoutResidual κ h₁ a c h L M ((p.1 + p.2) / 2) ((p.1 - p.2) / 2)
+        (τ ((p.1 + p.2) / 2, (p.1 - p.2) / 2))).1).re
+      + B * ((layoutResidual κ h₁ a c h L M ((p.1 + p.2) / 2) ((p.1 - p.2) / 2)
+        (τ ((p.1 + p.2) / 2, (p.1 - p.2) / 2))).1).im,
+      A' * ((layoutResidual κ h₁ a c h L M ((p.1 + p.2) / 2) ((p.1 - p.2) / 2)
+        (τ ((p.1 + p.2) / 2, (p.1 - p.2) / 2))).1).re
+      + B' * ((layoutResidual κ h₁ a c h L M ((p.1 + p.2) / 2) ((p.1 - p.2) / 2)
+        (τ ((p.1 + p.2) / 2, (p.1 - p.2) / 2))).1).im) with hGdef
+  have hcore : ∀ u v : ℝ, |u| ≤ W → |v| ≤ W →
+      (u = W → m / 2 ≤ (G (u, v)).1) ∧ (u = -W → (G (u, v)).1 ≤ -(m / 2)) ∧
+      (v = W → m / 2 ≤ (G (u, v)).2) ∧ (v = -W → (G (u, v)).2 ≤ -(m / 2)) := by
+    intro u v hu hv
+    obtain ⟨hw₁, hw₂⟩ := hhalf u v hu hv
+    obtain ⟨ht16, hzero⟩ := hpoint u v hu hv
+    have hturn := hturnsmall _ _ _ hw₁ hw₂ ht16 hzero
+    obtain ⟨hf1, hf2, hf3, hf4⟩ :=
+      hsigns u v (τ ((u + v) / 2, (u - v) / 2)) hu hv ht16 hturn
+    obtain ⟨hU1, hU2⟩ := abs_le.mp (htransfer A B hABle _ _ hw₁ hw₂ _ ht16)
+    obtain ⟨hV1, hV2⟩ := abs_le.mp (htransfer A' B' hA'B'le _ _ hw₁ hw₂ _ ht16)
+    simp only [hGdef]
+    exact ⟨fun huW => by have := hf1 huW; linarith,
+      fun huW => by have := hf2 huW; linarith,
+      fun hvW => by have := hf3 hvW; linarith,
+      fun hvW => by have := hf4 hvW; linarith⟩
+  -- continuity of the recombined true residual on the rectangle
+  have hres := layoutResidual_continuousOn ha hac hwin hlow hL0 hL hφe hκc hh₁c hM
+  have hwc : ContinuousOn (fun w : ℝ × ℝ => ((w.1, w.2, τ w) : ℝ × ℝ × ℝ)) S₀ :=
+    continuous_fst.continuousOn.prodMk (continuous_snd.continuousOn.prodMk hτcont)
+  have hwmaps : Set.MapsTo (fun w : ℝ × ℝ => ((w.1, w.2, τ w) : ℝ × ℝ × ℝ)) S₀
+      (layoutBox L) := by
+    intro w hw
+    rw [mem_layoutBox]
+    obtain ⟨hIoo, -⟩ := hτ w hw
+    exact ⟨hw.1.trans hW₀16, hw.2.trans hW₀16, (abs_lt.mpr ⟨hIoo.1, hIoo.2⟩).le⟩
+  have hresτ : ContinuousOn (fun w : ℝ × ℝ =>
+      layoutResidual κ h₁ a c h L M w.1 w.2 (τ w)) S₀ := hres.comp hwc hwmaps
+  have hφc : ContinuousOn
+      (fun p : ℝ × ℝ => (((p.1 + p.2) / 2, (p.1 - p.2) / 2) : ℝ × ℝ))
+      (Set.Icc (-W) W ×ˢ Set.Icc (-W) W) :=
+    (((continuous_fst.add continuous_snd).div_const 2).prodMk
+      ((continuous_fst.sub continuous_snd).div_const 2)).continuousOn
+  have hφmaps : Set.MapsTo
+      (fun p : ℝ × ℝ => (((p.1 + p.2) / 2, (p.1 - p.2) / 2) : ℝ × ℝ))
+      (Set.Icc (-W) W ×ˢ Set.Icc (-W) W) S₀ := by
+    intro p hp
+    obtain ⟨h1, h2⟩ := hhalf p.1 p.2 (abs_le.mpr ⟨hp.1.1, hp.1.2⟩)
+      (abs_le.mpr ⟨hp.2.1, hp.2.2⟩)
+    exact ⟨h1.trans hWW₀, h2.trans hWW₀⟩
+  have hZc : ContinuousOn (fun p : ℝ × ℝ =>
+      (layoutResidual κ h₁ a c h L M ((p.1 + p.2) / 2) ((p.1 - p.2) / 2)
+        (τ ((p.1 + p.2) / 2, (p.1 - p.2) / 2))).1)
+      (Set.Icc (-W) W ×ˢ Set.Icc (-W) W) := (hresτ.comp hφc hφmaps).fst
+  have hGc : ContinuousOn G (Set.Icc (-W) W ×ˢ Set.Icc (-W) W) := by
+    rw [hGdef]
+    exact ((continuousOn_const.mul (Complex.continuous_re.comp_continuousOn hZc)).add
+        (continuousOn_const.mul (Complex.continuous_im.comp_continuousOn hZc))).prodMk
+      ((continuousOn_const.mul (Complex.continuous_re.comp_continuousOn hZc)).add
+        (continuousOn_const.mul (Complex.continuous_im.comp_continuousOn hZc)))
   sorry
+  have hWneg : -W ≤ W := by linarith
+  have huW : |(W : ℝ)| ≤ W := by rw [abs_of_nonneg hW0.le]
+  have huWneg : |(-W : ℝ)| ≤ W := by rw [abs_neg, abs_of_nonneg hW0.le]
+  obtain ⟨p, hpmem, hp0⟩ := poincareMiranda_rect hWneg hWneg G hGc
+    (fun y hy => by
+      have h1 := ((hcore (-W) y huWneg (abs_le.mpr ⟨hy.1, hy.2⟩)).2.1) rfl
+      linarith)
+    (fun y hy => by
+      have h1 := ((hcore W y huW (abs_le.mpr ⟨hy.1, hy.2⟩)).1) rfl
+      linarith)
+    (fun x hx => by
+      have h1 := ((hcore x (-W) (abs_le.mpr ⟨hx.1, hx.2⟩) huWneg).2.2.2) rfl
+      linarith)
+    (fun x hx => by
+      have h1 := ((hcore x W (abs_le.mpr ⟨hx.1, hx.2⟩) huW).2.2.1) rfl
+      linarith)
+  -- extract the closing layout point from the recombined zero
+  obtain ⟨u₀, v₀⟩ := p
+  have hu₀W : |u₀| ≤ W := abs_le.mpr ⟨hpmem.1.1, hpmem.1.2⟩
+  have hv₀W : |v₀| ≤ W := abs_le.mpr ⟨hpmem.2.1, hpmem.2.2⟩
+  obtain ⟨hw₁, hw₂⟩ := hhalf u₀ v₀ hu₀W hv₀W
+  obtain ⟨ht16, hzero⟩ := hpoint u₀ v₀ hu₀W hv₀W
+  simp only [hGdef, Prod.mk_eq_zero] at hp0
+  set w₁ := (u₀ + v₀) / 2 with hw₁def
+  set w₂ := (u₀ - v₀) / 2 with hw₂def
+  set t := τ (w₁, w₂) with htdef
+  set X := (layoutResidual κ h₁ a c h L M w₁ w₂ t).1 with hXdef
+  have hXre : X.re = 0 := by
+    have hd : (A * B' - B * A') * X.re = 0 := by
+      linear_combination B' * hp0.1 - B * hp0.2
+    exact (mul_eq_zero.mp hd).resolve_left hdet
+  have hXim : X.im = 0 := by
+    have hd : (A * B' - B * A') * X.im = 0 := by
+      linear_combination A * hp0.2 - A' * hp0.1
+    exact (mul_eq_zero.mp hd).resolve_left hdet
+  refine ⟨w₁, w₂, t, hw₁.trans hW16, hw₂.trans hW16, ht16,
+    Prod.ext (Complex.ext hXre hXim) hzero, fun σ hσ => ?_, ?_⟩
+  · exact (htrans w₁ w₂ hw₁ hw₂ t ht16 σ hσ).trans
+      (mul_le_mul_of_nonneg_left hL1 hC₁0.le)
+  · have hconf := layoutFlow_confined ha hac hwin hlow hL0.le hL
+      (htrans w₁ w₂ hw₁ hw₂ t ht16) hεconf
+    exact fun σ hσ => (hconf.1 σ hσ).trans hconf.2
 
 end Gluck.SpaceForm
