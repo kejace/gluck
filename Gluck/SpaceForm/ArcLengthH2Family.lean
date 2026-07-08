@@ -10534,4 +10534,329 @@ private lemma integral_cos_ge_const {φ : ℝ → ℝ} {p q ψ m : ℝ} (hpq : p
     (intervalIntegrable_const (c := m)) hint hm
   rwa [intervalIntegral.integral_const, smul_eq_mul, mul_comm] at h
 
+-- Long three-case projection proof (~300 lines, five-leg sandwich + IVT crossings
+-- + complement closure); the cumulative elaboration exceeds the default budget.
+set_option maxHeartbeats 1200000 in
+/-- **ALM-A11 mid-regime input: the quantitative clean chord margin.**  For every
+short scale `ℓ₀ > 0` there are `m₀ > 0` and a residual tolerance `η₀ > 0`,
+uniform over the layout box, such that whenever the clean curve's endpoint
+residuals at a window `Λ` are `≤ η₀` (closure defect and `2π`-turning defect),
+every mid-band chord (`ℓ₀ ≤ v − u ≤ Λ − ℓ₀`) of the clean curve has norm
+`≥ m₀`.  Three-case projection argument through the phase-speed sandwich:
+sub-arc turning `≤ 2π/3` (midpoint projection), turning in `[2π/3, π + δ]`
+(midpoint projection with speed-controlled tails), turning `≥ π + δ`
+(two-piece complement projection against the `≤ η₀` closure defect). -/
+private lemma layoutClean_chord_lower {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
+    (hL : L ≤ bicircleBracket a h) {ℓ₀ : ℝ} (hℓ₀ : 0 < ℓ₀) :
+    ∃ m₀ > 0, ∃ η₀ > 0, ∀ w₁ w₂ : ℝ, |w₁| ≤ L / 16 → |w₂| ≤ L / 16 → ∀ Λ : ℝ,
+      ‖(layoutClean a c h L w₁ w₂ Λ).1 - (layoutClean a c h L w₁ w₂ 0).1‖ ≤ η₀ →
+      |(layoutClean a c h L w₁ w₂ Λ).2
+        - ((layoutClean a c h L w₁ w₂ 0).2 + 2 * π)| ≤ η₀ →
+      ∀ u v : ℝ, 0 ≤ u → v ≤ Λ → ℓ₀ ≤ v - u → v - u ≤ Λ - ℓ₀ →
+        m₀ ≤ ‖(layoutClean a c h L w₁ w₂ v).1 - (layoutClean a c h L w₁ w₂ u).1‖ := by
+  have hπ := Real.pi_pos
+  have hπ3 := Real.pi_gt_three
+  have hRcl0 : 0 ≤ layoutCleanRadius a c := layoutCleanRadius_nonneg ha hac
+  have hRcl1 : layoutCleanRadius a c < 1 := layoutCleanRadius_lt_one ha hac
+  set Rcl := layoutCleanRadius a c with hRcl
+  set ωlo : ℝ := 2 * (a - Rcl) with hωlo
+  set ωhi : ℝ := 2 * (c + Rcl) / (1 - Rcl ^ 2) with hωhi
+  have hωlo0 : 0 < ωlo := by rw [hωlo]; linarith
+  have hsq : 0 < 1 - Rcl ^ 2 := by nlinarith
+  have hωhi0 : 0 < ωhi := by
+    rw [hωhi]
+    have hc1 : 1 < c := ha.trans hac
+    exact div_pos (by linarith) hsq
+  have hωle : ωlo ≤ ωhi := by
+    rw [hωlo, hωhi, le_div_iff₀ hsq]
+    nlinarith
+  set δ : ℝ := ωlo / (2 * ωhi) with hδ
+  have hδ0 : 0 < δ := div_pos hωlo0 (by linarith)
+  have hδ2 : δ ≤ 1 / 2 := by
+    rw [hδ, div_le_iff₀ (by linarith)]
+    linarith
+  refine ⟨min (ℓ₀ / 2) (min (π / (6 * ωhi)) (ℓ₀ * δ / (4 * π))),
+    lt_min (by linarith) (lt_min (by positivity) (by positivity)),
+    min (δ / 4) (ℓ₀ * δ / (4 * π)), lt_min (by linarith) (by positivity),
+    fun w₁ w₂ hw₁ hw₂ Λ hZ hT u v hu hvΛ hband1 hband2 => ?_⟩
+  set m₀ : ℝ := min (ℓ₀ / 2) (min (π / (6 * ωhi)) (ℓ₀ * δ / (4 * π))) with hm₀
+  set η₀ : ℝ := min (δ / 4) (ℓ₀ * δ / (4 * π)) with hη₀
+  set zf : ℝ → ℂ := fun σ => (layoutClean a c h L w₁ w₂ σ).1 with hzf
+  set φf : ℝ → ℝ := fun σ => (layoutClean a c h L w₁ w₂ σ).2 with hφf
+  -- the sandwich, monotonicity, Lipschitz continuity, FTC
+  have hSW : ∀ p q : ℝ, p ≤ q →
+      ωlo * (q - p) ≤ φf q - φf p ∧ φf q - φf p ≤ ωhi * (q - p) := by
+    intro p q hpq
+    exact layoutClean_snd_sandwich ha hac hwin hlow hL0 hL hw₁ hw₂ hpq
+  have hmono : ∀ p q : ℝ, p ≤ q → φf p ≤ φf q := by
+    intro p q hpq
+    have h1 := (hSW p q hpq).1
+    nlinarith [sub_nonneg.mpr hpq]
+  have hφfc : Continuous φf := by
+    have hlip : ∀ x y : ℝ, |φf x - φf y| ≤ ωhi * |x - y| := by
+      intro x y
+      rcases le_total x y with hxy | hxy
+      · have h1 := hSW x y hxy
+        have hle1 : φf x - φf y ≤ 0 := by
+          have := mul_nonneg hωlo0.le (sub_nonneg.mpr hxy)
+          linarith [h1.1]
+        rw [abs_of_nonpos hle1, abs_of_nonpos (by linarith : x - y ≤ 0)]
+        linarith [h1.2]
+      · have h1 := hSW y x hxy
+        have hge1 : 0 ≤ φf x - φf y := by
+          have := mul_nonneg hωlo0.le (sub_nonneg.mpr hxy)
+          linarith [h1.1]
+        rw [abs_of_nonneg hge1, abs_of_nonneg (by linarith : 0 ≤ x - y)]
+        linarith [h1.2]
+    have hK : (0 : ℝ) ≤ ωhi := hωhi0.le
+    refine LipschitzWith.continuous (K := ⟨ωhi, hK⟩)
+      (LipschitzWith.of_dist_le_mul fun x y => ?_)
+    show dist (φf x) (φf y) ≤ ωhi * dist x y
+    rw [Real.dist_eq, Real.dist_eq]
+    exact hlip x y
+  have hexpc : Continuous fun s => Complex.exp ((φf s : ℂ) * Complex.I) :=
+    Complex.continuous_exp.comp
+      ((Complex.continuous_ofReal.comp hφfc).mul continuous_const)
+  have hDf : ∀ x : ℝ, HasDerivAt zf (Complex.exp ((φf x : ℂ) * Complex.I)) x :=
+    fun x => layoutClean_fst_hasDerivAt ha hac hwin hlow hL0 hL hw₁ hw₂ x
+  have hFTC : ∀ p q : ℝ,
+      (∫ s in p..q, Complex.exp ((φf s : ℂ) * Complex.I)) = zf q - zf p := by
+    intro p q
+    exact intervalIntegral.integral_eq_sub_of_hasDerivAt (fun x _ => hDf x)
+      (hexpc.intervalIntegrable p q)
+  have huv : u ≤ v := by linarith
+  have hu0Λ : 0 ≤ Λ - v + u := by linarith
+  have hτlo := (hSW u v huv).1
+  have hτpos : 0 < φf v - φf u := by nlinarith
+  set τs : ℝ := φf v - φf u with hτs
+  -- goal in FTC form
+  rw [show (layoutClean a c h L w₁ w₂ v).1 - (layoutClean a c h L w₁ w₂ u).1
+    = zf v - zf u from rfl, ← hFTC u v]
+  rcases le_total τs (2 * π / 3) with hcase1 | hcase1
+  · -- CASE 1: turning ≤ 2π/3, midpoint projection
+    set ψ : ℝ := (φf u + φf v) / 2 with hψ
+    have hcos : ∀ s ∈ Set.Icc u v, (1 : ℝ) / 2 ≤ Real.cos (φf s - ψ) := by
+      intro s hs
+      have h1 := hmono u s hs.1
+      have h2 := hmono s v hs.2
+      refine cos_ge_of_abs_le (b := π / 3) (by linarith) (abs_le.mpr ⟨?_, ?_⟩) ?_
+      · rw [hψ]; linarith
+      · rw [hψ]; linarith
+      · rw [Real.cos_pi_div_three]
+    have hint := integral_cos_ge_const huv (hφfc.continuousOn) hcos
+    refine norm_ge_of_proj (ψ := ψ) ?_
+    rw [anchor_chord_proj_re (hφfc.continuousOn) ψ]
+    have hm₀2 : m₀ ≤ ℓ₀ / 2 := min_le_left _ _
+    linarith [hband1, hint, hm₀2]
+  rcases le_total τs (π + δ) with hcase2 | hcase2
+  · -- CASE 2: turning in [2π/3, π + δ], projection with speed-controlled tails
+    set ψ : ℝ := (φf u + φf v) / 2 with hψ
+    -- the two crossing points of the levels `ψ ∓ π/3`
+    have hIVT1 : ψ - π / 3 ∈ Set.Icc (φf u) (φf v) := by
+      constructor
+      · rw [hψ]; linarith
+      · rw [hψ]; linarith
+    obtain ⟨p, hpmem, hpval⟩ := intermediate_value_Icc huv (hφfc.continuousOn) hIVT1
+    have hIVT2 : ψ + π / 3 ∈ Set.Icc (φf p) (φf v) := by
+      rw [hpval]
+      constructor
+      · linarith
+      · rw [hψ]; linarith
+    obtain ⟨q, hqmem, hqval⟩ :=
+      intermediate_value_Icc hpmem.2 (hφfc.continuousOn) hIVT2
+    have hpq : p ≤ q := hqmem.1
+    have hqv : q ≤ v := hqmem.2
+    have hup : u ≤ p := hpmem.1
+    -- middle window: `cos ≥ 1/2` over length `≥ (2π/3)/ωhi`
+    have hcosmid : ∀ s ∈ Set.Icc p q, (1 : ℝ) / 2 ≤ Real.cos (φf s - ψ) := by
+      intro s hs
+      have h1 := hmono p s hs.1
+      have h2 := hmono s q hs.2
+      refine cos_ge_of_abs_le (b := π / 3) (by linarith) (abs_le.mpr ⟨?_, ?_⟩) ?_
+      · rw [hpval] at h1; linarith
+      · rw [hqval] at h2; linarith
+      · rw [Real.cos_pi_div_three]
+    have hmidlen : 2 * π / 3 ≤ ωhi * (q - p) := by
+      have := (hSW p q hpq).2
+      rw [hpval, hqval] at this
+      linarith
+    have hintmid := integral_cos_ge_const hpq (hφfc.continuousOn) hcosmid
+    -- tail bound: `cos ≥ −δ/2` on the whole of `[u, v]`
+    have hcosend : ∀ s ∈ Set.Icc u v, -(δ / 2) ≤ Real.cos (φf s - ψ) := by
+      intro s hs
+      have h1 := hmono u s hs.1
+      have h2 := hmono s v hs.2
+      refine cos_ge_of_abs_le (b := (π + δ) / 2) (by linarith)
+        (abs_le.mpr ⟨by rw [hψ]; linarith, by rw [hψ]; linarith⟩) ?_
+      have hval : Real.cos ((π + δ) / 2) = -Real.sin (δ / 2) := by
+        rw [show (π + δ) / 2 = π / 2 + δ / 2 by ring, Real.cos_add,
+          Real.cos_pi_div_two, Real.sin_pi_div_two]
+        ring
+      rw [hval]
+      have := Real.sin_le (by linarith : (0 : ℝ) ≤ δ / 2)
+      linarith
+    -- tail lengths from the speed floor
+    have hplen : ωlo * (p - u) ≤ τs / 2 - π / 3 := by
+      have hpp := (hSW u p hup).1
+      rw [hpval] at hpp
+      simp only [hτs, hψ] at hpp ⊢
+      linarith [hpp]
+    have hqlen : ωlo * (v - q) ≤ τs / 2 - π / 3 := by
+      have hqq := (hSW q v hqv).1
+      rw [hqval] at hqq
+      simp only [hτs, hψ] at hqq ⊢
+      linarith [hqq]
+    have hintend1 := integral_cos_ge_const hup (hφfc.continuousOn) fun s hs =>
+      hcosend s ⟨hs.1, hs.2.trans (hpq.trans hqv)⟩
+    have hintend2 := integral_cos_ge_const hqv (hφfc.continuousOn) fun s hs =>
+      hcosend s ⟨(hup.trans hpq).trans hs.1, hs.2⟩
+    -- assemble the split integral
+    have hint : IntervalIntegrable (fun s => Real.cos (φf s - ψ))
+        MeasureTheory.volume u p ∧
+        IntervalIntegrable (fun s => Real.cos (φf s - ψ))
+          MeasureTheory.volume p q ∧
+        IntervalIntegrable (fun s => Real.cos (φf s - ψ))
+          MeasureTheory.volume q v := by
+      refine ⟨?_, ?_, ?_⟩ <;>
+        exact (Real.continuous_cos.comp
+          ((hφfc.sub continuous_const))).intervalIntegrable _ _
+    have hsplit : (∫ s in u..v, Real.cos (φf s - ψ))
+        = (∫ s in u..p, Real.cos (φf s - ψ))
+          + (∫ s in p..q, Real.cos (φf s - ψ))
+          + ∫ s in q..v, Real.cos (φf s - ψ) := by
+      rw [intervalIntegral.integral_add_adjacent_intervals hint.1 hint.2.1,
+        intervalIntegral.integral_add_adjacent_intervals
+          (hint.1.trans hint.2.1) hint.2.2]
+    -- the quantitative floor `π/(6ωhi)`
+    have hτδ : τs / 2 - π / 3 ≤ (π / 6 + δ / 2) := by linarith
+    have htail1 : -(δ / 2) * (p - u) ≥ -(δ / 2 * ((π / 6 + δ / 2) / ωlo)) := by
+      have h1 : p - u ≤ (π / 6 + δ / 2) / ωlo := by
+        rw [le_div_iff₀ hωlo0]
+        linarith [hplen, hτδ]
+      have h2 := mul_le_mul_of_nonneg_left h1 (by linarith [hδ0] : (0 : ℝ) ≤ δ / 2)
+      linarith [h2]
+    have htail2 : -(δ / 2) * (v - q) ≥ -(δ / 2 * ((π / 6 + δ / 2) / ωlo)) := by
+      have h1 : v - q ≤ (π / 6 + δ / 2) / ωlo := by
+        rw [le_div_iff₀ hωlo0]
+        linarith [hqlen, hτδ]
+      have h2 := mul_le_mul_of_nonneg_left h1 (by linarith [hδ0] : (0 : ℝ) ≤ δ / 2)
+      linarith [h2]
+    have htailval : δ / 2 * ((π / 6 + δ / 2) / ωlo) ≤ π / (12 * ωhi) := by
+      have hlo : ωlo = 2 * ωhi * δ := by rw [hδ]; field_simp
+      rw [show δ / 2 * ((π / 6 + δ / 2) / ωlo) = (π / 6 + δ / 2) / (4 * ωhi) by
+        rw [hlo]; field_simp; ring]
+      rw [div_le_div_iff₀ (by positivity) (by positivity)]
+      have h3δ : 3 * δ ≤ π := by linarith [hδ2, hπ3]
+      have hpos : 0 ≤ ωhi * π - 3 * (ωhi * δ) := by
+        have hmn := mul_nonneg hωhi0.le (sub_nonneg.mpr h3δ)
+        have he : ωhi * (π - 3 * δ) = ωhi * π - 3 * (ωhi * δ) := by ring
+        rw [he] at hmn; exact hmn
+      have hLe : (π / 6 + δ / 2) * (12 * ωhi) = 2 * (ωhi * π) + 6 * (ωhi * δ) := by ring
+      have hRe : π * (4 * ωhi) = 4 * (ωhi * π) := by ring
+      rw [hLe, hRe]
+      linarith [hpos]
+    have hmid : π / (3 * ωhi) ≤ ∫ s in p..q, Real.cos (φf s - ψ) := by
+      refine le_trans ?_ hintmid
+      rw [div_le_iff₀ (by positivity : (0 : ℝ) < 3 * ωhi)]
+      have hk : (1 : ℝ) / 2 * (q - p) * (3 * ωhi) = 3 / 2 * (ωhi * (q - p)) := by ring
+      rw [hk]
+      linarith [hmidlen]
+    have hfloor : π / (6 * ωhi) ≤ ∫ s in u..v, Real.cos (φf s - ψ) := by
+      rw [hsplit]
+      have e1 : π / (6 * ωhi) = π / (3 * ωhi) - 2 * (π / (12 * ωhi)) := by
+        field_simp
+        ring
+      rw [e1]
+      have t1 : -(π / (12 * ωhi)) ≤ ∫ s in u..p, Real.cos (φf s - ψ) := by
+        refine le_trans ?_ hintend1
+        linarith [htail1, htailval]
+      have t2 : -(π / (12 * ωhi)) ≤ ∫ s in q..v, Real.cos (φf s - ψ) := by
+        refine le_trans ?_ hintend2
+        linarith [htail2, htailval]
+      linarith
+    refine norm_ge_of_proj (ψ := ψ) ?_
+    rw [anchor_chord_proj_re (hφfc.continuousOn) ψ]
+    exact le_trans ((min_le_right _ _).trans (min_le_left _ _)) hfloor
+  · -- CASE 3: turning ≥ π + δ, complement projection against the closure defect
+    have hη4 : η₀ ≤ δ / 4 := min_le_left _ _
+    have hηm : η₀ ≤ ℓ₀ * δ / (4 * π) := min_le_right _ _
+    -- turning residual
+    have hρT : |φf Λ - (φf 0 + 2 * π)| ≤ η₀ := hT
+    have hρT' := abs_le.mp hρT
+    have hφ0u := hmono 0 u hu
+    have hφvΛ := hmono v Λ hvΛ
+    set ψc : ℝ := (φf v + (φf u + 2 * π)) / 2 with hψc
+    have hBA : φf u + 2 * π - φf v ≤ π - δ := by rw [hτs] at hcase2; linarith
+    -- pointwise floors on the two complement pieces
+    have hcosval : δ / (2 * π) ≤ Real.cos (π / 2 - δ / 4) := by
+      have h1 := Real.one_sub_mul_le_cos (x := π / 2 - δ / 4)
+        (by linarith) (by linarith)
+      have e1 : 1 - 2 / π * (π / 2 - δ / 4) = δ / (2 * π) := by
+        field_simp
+        ring
+      linarith [e1 ▸ h1]
+    have hcosΛ : ∀ s ∈ Set.Icc v Λ, δ / (2 * π) ≤ Real.cos (φf s - ψc) := by
+      intro s hs
+      have h1 := hmono v s hs.1
+      have h2 := hmono s Λ hs.2
+      refine cos_ge_of_abs_le (b := π / 2 - δ / 4) (by linarith)
+        (abs_le.mpr ⟨?_, ?_⟩) hcosval
+      · rw [hψc]; linarith
+      · rw [hψc]; linarith
+    have hcos0 : ∀ s ∈ Set.Icc (0 : ℝ) u, δ / (2 * π) ≤ Real.cos (φf s - ψc) := by
+      intro s hs
+      have h1 := hmono 0 s hs.1
+      have h2 := hmono s u hs.2
+      have hcoseq : Real.cos (φf s - ψc) = Real.cos (φf s + 2 * π - ψc) := by
+        rw [show φf s + 2 * π - ψc = (φf s - ψc) + 2 * π by ring, Real.cos_add_two_pi]
+      rw [hcoseq]
+      refine cos_ge_of_abs_le (b := π / 2 - δ / 4) (by linarith)
+        (abs_le.mpr ⟨?_, ?_⟩) hcosval
+      · rw [hψc]; linarith
+      · rw [hψc]; linarith
+    have hint0 := integral_cos_ge_const hu (hφfc.continuousOn)
+      (ψ := ψc) hcos0
+    have hintΛ := integral_cos_ge_const hvΛ (hφfc.continuousOn)
+      (ψ := ψc) hcosΛ
+    -- the complement sum and its projection
+    set Sc : ℂ := (∫ s in (0 : ℝ)..u, Complex.exp ((φf s : ℂ) * Complex.I))
+      + ∫ s in v..Λ, Complex.exp ((φf s : ℂ) * Complex.I) with hSc
+    have hScproj : ℓ₀ * (δ / (2 * π)) ≤ ‖Sc‖ := by
+      refine norm_ge_of_proj (ψ := ψc) ?_
+      rw [hSc, mul_add, Complex.add_re,
+        anchor_chord_proj_re (hφfc.continuousOn) ψc,
+        anchor_chord_proj_re (hφfc.continuousOn) ψc]
+      have hd0 : (0 : ℝ) ≤ δ / (2 * π) := div_nonneg hδ0.le (by positivity)
+      have hb : ℓ₀ ≤ Λ - v + u := by linarith
+      have hprod := mul_le_mul_of_nonneg_left hb hd0
+      have hsum : δ / (2 * π) * (Λ - v + u)
+          = δ / (2 * π) * (u - 0) + δ / (2 * π) * (Λ - v) := by ring
+      have hcomm : ℓ₀ * (δ / (2 * π)) = δ / (2 * π) * ℓ₀ := by ring
+      rw [hcomm]
+      calc δ / (2 * π) * ℓ₀ ≤ δ / (2 * π) * (Λ - v + u) := hprod
+        _ = δ / (2 * π) * (u - 0) + δ / (2 * π) * (Λ - v) := hsum
+        _ ≤ (∫ s in (0 : ℝ)..u, Real.cos (φf s - ψc))
+            + ∫ s in v..Λ, Real.cos (φf s - ψc) := by linarith [hint0, hintΛ]
+    -- the chord equals the closure defect minus the complement sum
+    have hdecomp : zf v - zf u = (zf Λ - zf 0) - Sc := by
+      rw [hSc, hFTC 0 u, hFTC v Λ]
+      ring
+    rw [hFTC u v, hdecomp]
+    have hnorm : ‖Sc‖ - ‖zf Λ - zf 0‖ ≤ ‖(zf Λ - zf 0) - Sc‖ := by
+      have := norm_sub_norm_le Sc (zf Λ - zf 0)
+      rw [show (zf Λ - zf 0) - Sc = -(Sc - (zf Λ - zf 0)) by ring, norm_neg]
+      exact this.trans (le_of_eq rfl)
+    have hZ' : ‖zf Λ - zf 0‖ ≤ η₀ := hZ
+    have hfinal : m₀ ≤ ℓ₀ * (δ / (2 * π)) - η₀ := by
+      have h1 : m₀ ≤ ℓ₀ * δ / (4 * π) :=
+        (min_le_right _ _).trans (min_le_right _ _)
+      have e1 : ℓ₀ * (δ / (2 * π)) = 2 * (ℓ₀ * δ / (4 * π)) := by
+        field_simp
+        ring
+      rw [e1]
+      linarith [hηm]
+    linarith [hScproj, hnorm, hZ', hfinal]
+
+
 end Gluck.SpaceForm
