@@ -11102,4 +11102,91 @@ theorem layout_chord_ne_zero {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
         exact (norm_sub_le _ _).trans (by linarith [hgq, hgp])
       linarith [hcleanchord, hchain, hμm]
 
+/-! ## ALM-A12: window-bridge exposure + capstone assembly -/
+
+/-- **ALM-A12 (window-bridge application).**  The closed, confined, simple true
+layout flow of ALM-A10/A11 is fed through the (now public) arc-length window
+bridge `arcLengthH2Curvature_of_windowSolution` to certify that the reparametrised
+profile `κ_arc = κ ∘ h₁ ∘ g_{w,t}` is an H² arc-length curvature function.
+
+The layout flow is defined at horizon `2L` (`layoutFlow = arcFlow κ_arc R' (2L) M 9`),
+whereas the bridge consumes the flow at horizon equal to the profile period
+`Λ = nodePeriod = L + w₁ + w₂ + t ≤ 2L`.  The two arc flows agree on `[0, Λ]` by
+ODE uniqueness (`arcFlow_unique`), so the ALM-A10/A11 closure, confinement and
+chord data transfer verbatim to the period-horizon flow the bridge needs. -/
+theorem layout_arcLengthH2Curvature {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
+    (hL : L ≤ bicircleBracket a h) (hL4 : L ≤ 4 * π)
+    (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
+    {κ h₁ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
+    (hh₁c : Continuous h₁) (hh₁per : ∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π)
+    {M : ℝ} (hM : ∀ θ, |κ θ| ≤ M) {w₁ w₂ t : ℝ}
+    (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16)
+    (hclose1 : (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)).1
+        = (layoutStart a c h L).1)
+    (hclose2 : (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)).2
+        = (layoutStart a c h L).2 + 2 * π)
+    (hconf : ∀ σ ∈ Set.Icc (0 : ℝ) (nodePeriod L w₁ w₂ t),
+        ‖(layoutFlow κ h₁ a c h L M w₁ w₂ t σ).1‖ ≤ layoutConfineRadius a c)
+    (hchord : ∀ p q : ℝ, 0 ≤ p → p < q → q < nodePeriod L w₁ w₂ t →
+        (∫ s in p..q, Complex.exp
+          (((layoutFlow κ h₁ a c h L M w₁ w₂ t s).2 : ℂ) * Complex.I)) ≠ 0) :
+    ArcLengthH2Curvature (kappaArc κ h₁ L w₁ w₂ t) := by
+  set κ' := kappaArc κ h₁ L w₁ w₂ t with hκ'def
+  set R := layoutConfineRadius a c with hRdef
+  set Λ := nodePeriod L w₁ w₂ t with hΛdef
+  set W₀ := layoutStart a c h L with hW₀def
+  have hR0 : 0 ≤ R := layoutConfineRadius_nonneg ha hac
+  have hR1 : R < 1 := layoutConfineRadius_lt_one ha hac
+  have hκ'c : Continuous κ' := continuous_kappaArc hκc hh₁c L w₁ w₂ t
+  have hM' : ∀ σ, |κ' σ| ≤ M := fun σ => kappaArc_abs_le hM h₁ L w₁ w₂ t σ
+  have hκ'per : Function.Periodic κ' Λ :=
+    kappaArc_periodic hκper hh₁per hL0 hL4 hw₁ hw₂ ht
+  have hW₀mem : W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) ((9 : ℝ≥0) : ℝ) :=
+    layoutStart_mem_closedBall ha hac hwin hlow hL0.le hL hφe
+  -- period bounds `0 < Λ ≤ 2L`
+  have hb1 := (abs_le.mp hw₁).1
+  have hb2 := (abs_le.mp hw₂).1
+  have hb3 := (abs_le.mp ht).1
+  have hu1 := (abs_le.mp hw₁).2
+  have hu2 := (abs_le.mp hw₂).2
+  have hu3 := (abs_le.mp ht).2
+  have hΛ0 : 0 < Λ := by rw [hΛdef, nodePeriod]; linarith
+  have hΛ2L : Λ ≤ 2 * L := by rw [hΛdef, nodePeriod]; linarith
+  -- layout flow is the horizon-`2L` arc flow, by definition
+  have hlf : ∀ σ, layoutFlow κ h₁ a c h L M w₁ w₂ t σ
+      = arcFlow κ' R (2 * L) M 9 (W₀, σ) := fun σ => rfl
+  -- reindex: the period-horizon arc flow equals the layout flow on `[0, Λ]`
+  have hreindex : ∀ σ ∈ Set.Icc (0 : ℝ) Λ,
+      arcFlow κ' R Λ M 9 (W₀, σ) = layoutFlow κ h₁ a c h L M w₁ w₂ t σ := by
+    intro σ hσ
+    have hspec2 := arcFlow_spec hκ'c hR0 hR1 (by linarith : (0 : ℝ) ≤ 2 * L) hM' 9 hW₀mem
+    have hg0 : (fun s => arcFlow κ' R (2 * L) M 9 (W₀, s)) 0 = W₀ := hspec2.1
+    have hg : ∀ s ∈ Set.Icc (0 : ℝ) Λ,
+        HasDerivWithinAt (fun s => arcFlow κ' R (2 * L) M 9 (W₀, s))
+          (arcField κ' R s (arcFlow κ' R (2 * L) M 9 (W₀, s))) (Set.Icc 0 Λ) s := by
+      intro s hs
+      exact (hspec2.2 s ⟨hs.1, hs.2.trans hΛ2L⟩).mono (Set.Icc_subset_Icc le_rfl hΛ2L)
+    have heq := arcFlow_unique hκ'c hR0 hR1 hΛ0.le hM' 9 hW₀mem hg hg0 hσ
+    rw [hlf σ]; exact heq.symm
+  refine arcLengthH2Curvature_of_windowSolution hκ'c hR0 hR1 hΛ0 hM' hκ'per hW₀mem
+    ?_ ?_ ?_ ?_
+  · rw [hreindex Λ (Set.right_mem_Icc.mpr hΛ0.le)]
+    exact hclose1
+  · rw [hreindex Λ (Set.right_mem_Icc.mpr hΛ0.le)]
+    exact hclose2
+  · intro σ hσ
+    rw [hreindex σ hσ]
+    exact hconf σ hσ
+  · intro p q hp hpq hqΛ
+    have hcongr : (∫ s in p..q, Complex.exp
+          (((arcFlow κ' R Λ M 9 (W₀, s)).2 : ℂ) * Complex.I))
+        = ∫ s in p..q, Complex.exp
+          (((layoutFlow κ h₁ a c h L M w₁ w₂ t s).2 : ℂ) * Complex.I) := by
+      refine intervalIntegral.integral_congr (fun s hs => ?_)
+      rw [Set.uIcc_of_le hpq.le] at hs
+      rw [hreindex s ⟨hp.trans hs.1, hs.2.trans hqΛ.le⟩]
+    rw [hcongr]
+    exact hchord p q hp hpq hqΛ
+
 end Gluck.SpaceForm
