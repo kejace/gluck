@@ -48,55 +48,55 @@ write `w = ra − rc`, `m = ra + rc`.  Anchor identities used to eliminate the
 levels: `c − a = wD/ra`, `a + s = rcD/ra`, `P₁ = 2θ_c = πra/m`,
 `P₂ = 2θ_a = πrc/m`. -/
 
-private noncomputable def a9Q (C S ra rc D : ℝ) : ℝ :=
+noncomputable def a9Q (C S ra rc D : ℝ) : ℝ :=
   (ra - rc) ^ 2 * C * S / (ra * D)
 
-private noncomputable def a9dpsi3 (C S ra rc D : ℝ) : ℝ :=
+noncomputable def a9dpsi3 (C S ra rc D : ℝ) : ℝ :=
   1 / ra + π * ra / (ra + rc) * a9Q C S ra rc D / rc
 
-private noncomputable def a9ds3 (C S ra rc D : ℝ) : ℝ :=
+noncomputable def a9ds3 (C S ra rc D : ℝ) : ℝ :=
   (C ^ 2 - S ^ 2) * a9Q C S ra rc D - (ra - rc) / ra * (2 * S * C)
     + (ra - rc) * S * C * a9dpsi3 C S ra rc D + a9Q C S ra rc D
 
-private noncomputable def a9dr4 (C S ra rc D : ℝ) : ℝ :=
+noncomputable def a9dr4 (C S ra rc D : ℝ) : ℝ :=
   ra / rc * -a9Q C S ra rc D - ra * (ra - rc) / (D * rc) * a9ds3 C S ra rc D
 
-private noncomputable def a9dz4re (C S ra rc D : ℝ) : ℝ :=
+noncomputable def a9dz4re (C S ra rc D : ℝ) : ℝ :=
   (-S * a9Q C S ra rc D - (ra - rc) / ra * C)
     + (a9dr4 C S ra rc D + a9Q C S ra rc D) * S
     - (ra - rc) * C * a9dpsi3 C S ra rc D
 
-private noncomputable def a9dz4im (C S ra rc D : ℝ) : ℝ :=
+noncomputable def a9dz4im (C S ra rc D : ℝ) : ℝ :=
   (C * a9Q C S ra rc D - (ra - rc) / ra * S)
     + (a9dr4 C S ra rc D + a9Q C S ra rc D) * C
     + (ra - rc) * S * a9dpsi3 C S ra rc D
 
-private noncomputable def a9dpsi4 (C S ra rc D : ℝ) : ℝ :=
+noncomputable def a9dpsi4 (C S ra rc D : ℝ) : ℝ :=
   a9dpsi3 C S ra rc D - π * rc / (ra + rc) / ra * a9dr4 C S ra rc D
 
-private noncomputable def a9ds4 (C S ra rc D : ℝ) : ℝ :=
+noncomputable def a9ds4 (C S ra rc D : ℝ) : ℝ :=
   -S * a9dz4re C S ra rc D + C * a9dz4im C S ra rc D
     - (ra - rc) * C * S * a9dpsi4 C S ra rc D - a9dr4 C S ra rc D
 
-private noncomputable def a9dr5 (C S ra rc D : ℝ) : ℝ :=
+noncomputable def a9dr5 (C S ra rc D : ℝ) : ℝ :=
   rc / ra * a9dr4 C S ra rc D + (ra - rc) / D * a9ds4 C S ra rc D
 
 /-- Real part of the `w₁`-column of the anchor Jacobian (junction chain). -/
-private noncomputable def a9V1re (C S ra rc D : ℝ) : ℝ :=
+noncomputable def a9V1re (C S ra rc D : ℝ) : ℝ :=
   a9dz4re C S ra rc D - (a9dr5 C S ra rc D - a9dr4 C S ra rc D) * S
     + (ra - rc) * C * a9dpsi4 C S ra rc D + a9dr5 C S ra rc D
 
 /-- Imaginary part of the `w₁`-column of the anchor Jacobian. -/
-private noncomputable def a9V1im (C S ra rc D : ℝ) : ℝ :=
+noncomputable def a9V1im (C S ra rc D : ℝ) : ℝ :=
   a9dz4im C S ra rc D + (a9dr5 C S ra rc D - a9dr4 C S ra rc D) * C
     + (ra - rc) * S * a9dpsi4 C S ra rc D
 
 /-- Real part of the `w₂`-column: `X = (w/ra)·(C − wCS(1−S)/D) > 0`. -/
-private noncomputable def a9V2re (C S ra rc D : ℝ) : ℝ :=
+noncomputable def a9V2re (C S ra rc D : ℝ) : ℝ :=
   (ra - rc) / ra * (C - (ra - rc) * C * S * (1 - S) / D)
 
 /-- Imaginary part of the `w₂`-column: `Y = (wS/ra)·(1 − wC²/D) > 0`. -/
-private noncomputable def a9V2im (C S ra rc D : ℝ) : ℝ :=
+noncomputable def a9V2im (C S ra rc D : ℝ) : ℝ :=
   (ra - rc) / ra * (S - (ra - rc) * C ^ 2 * S / D)
 
 open Real Set in
@@ -349,7 +349,7 @@ private lemma a9V1re_num_eq {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
 /-- **Column sign 1**: `Im ∂₁G > 0`.  All `D`-blocks of the numerator are
 positive after absorbing `R ≥ −rc²C²` and `P ≥ −π²w²` into the `D¹`-blocks
 via `D ≥ wC²`. -/
-private lemma a9V1_im_pos {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
+lemma a9V1_im_pos {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
     (hC : 0 < C) (hS : 0 < S) (hrc : 0 < rc) (hrca : rc < ra)
     (hD : (ra - rc) * C ^ 2 < D) :
     0 < a9V1im C S ra rc D := by
@@ -391,7 +391,7 @@ set_option maxHeartbeats 350000 in
 /-- **Column sign 2**: `Re ∂₁G < 0`, via `N = Δ·K`, `Δ = D − wS(1−S) > 0`
 (from `C² ≥ S(1−S)`, i.e. `C² − S(1−S) = 1 − S > 0`), `K` increasing in `D`,
 and `K(wC²) > 0` (`a9_K0_pos`). -/
-private lemma a9V1_re_neg {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
+lemma a9V1_re_neg {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
     (hC : 0 < C) (hS : 0 < S) (hrc : 0 < rc) (hrca : rc < ra) (hSC : S < C)
     (hJ1 : rc ≤ (ra + rc) * S) (hJ2 : 2 * (ra + rc) * S ≤ π * rc)
     (hq : rc * C ≤ ra * S) (hD : (ra - rc) * C ^ 2 < D) :
@@ -435,7 +435,7 @@ private lemma a9V1_re_neg {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
   linarith
 
 /-- **Column sign 3**: `Re ∂₂G > 0` (uses `C² − S(1−S) = 1 − S > 0`). -/
-private lemma a9V2_re_pos {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
+lemma a9V2_re_pos {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
     (hC : 0 < C) (hS : 0 < S) (hrc : 0 < rc) (hrca : rc < ra)
     (hD : (ra - rc) * C ^ 2 < D) :
     0 < a9V2re C S ra rc D := by
@@ -456,7 +456,7 @@ private lemma a9V2_re_pos {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
   exact mul_pos (div_pos hw hra) (div_pos (mul_pos hC hDelta) hDpos)
 
 /-- **Column sign 4**: `Im ∂₂G > 0` (direct from `D > wC²`). -/
-private lemma a9V2_im_pos {C S ra rc D : ℝ} (_hCS : C ^ 2 + S ^ 2 = 1)
+lemma a9V2_im_pos {C S ra rc D : ℝ} (_hCS : C ^ 2 + S ^ 2 = 1)
     (hC : 0 < C) (hS : 0 < S) (hrc : 0 < rc) (hrca : rc < ra)
     (hD : (ra - rc) * C ^ 2 < D) :
     0 < a9V2im C S ra rc D := by
@@ -477,15 +477,15 @@ private lemma a9V2_im_pos {C S ra rc D : ℝ} (_hCS : C ^ 2 + S ^ 2 = 1)
 form: `⟪W₁, ie^{iφ₁}⟫ = (ra − rc)cos²θ − ra` (via `him`) and
 `L/(8ra) + L/(8rc) = π/2` (via `hφe`). -/
 
-private noncomputable def a9ra (a h : ℝ) : ℝ :=
+noncomputable def a9ra (a h : ℝ) : ℝ :=
   arcModelRadius a (Complex.I * (h : ℂ)) π
 
-private noncomputable def a9theta (a h L : ℝ) : ℝ := L / 8 / a9ra a h
+noncomputable def a9theta (a h L : ℝ) : ℝ := L / 8 / a9ra a h
 
-private noncomputable def a9rc (a c h L : ℝ) : ℝ :=
+noncomputable def a9rc (a c h L : ℝ) : ℝ :=
   arcModelRadius c (qArc1 a (h, L)).1 (qArc1 a (h, L)).2
 
-private noncomputable def a9D (a c h L : ℝ) : ℝ :=
+noncomputable def a9D (a c h L : ℝ) : ℝ :=
   c + ⟪(qArc1 a (h, L)).1,
     Complex.I * Complex.exp (((qArc1 a (h, L)).2 : ℂ) * Complex.I)⟫_ℝ
 
@@ -501,7 +501,7 @@ writing `S = sin θ_a`, `C = cos θ_a`, `ra = r_a`, `rc = r_c`, `D = c + s`:
 `2(ra+rc)·S ≤ π·rc` (from `θ_a = (π/2)·rc/(ra+rc)`, i.e. `hφe` plus
 `ra·θ_a = rc·θ_c = L/8`), and the concavity bound `rc·C ≤ ra·S`
 (`a9_q_ineq`). -/
-private lemma a9_anchor_facts {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+lemma a9_anchor_facts {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L) (hL : L ≤ bicircleBracket a h)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
     0 < Real.sin (a9theta a h L) ∧ 0 < Real.cos (a9theta a h L) ∧

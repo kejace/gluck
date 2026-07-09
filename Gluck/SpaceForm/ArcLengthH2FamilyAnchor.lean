@@ -562,7 +562,7 @@ proper sub-arc chord.  For turning `≤ π` the midpoint projection
 /-- **Projection identity for the arc-length chord** (copied from the engine's
 private `arc_chord_proj_re`): the real part of the chord integral rotated by
 `e^{−iψ}` is the projected real integral `∫ cos(φ(s) − ψ)`. -/
-private lemma anchor_chord_proj_re {φ : ℝ → ℝ} {c d : ℝ}
+lemma anchor_chord_proj_re {φ : ℝ → ℝ} {c d : ℝ}
     (hφ : ContinuousOn φ (Set.uIcc c d)) (ψ : ℝ) :
     (Complex.exp (-(ψ : ℂ) * Complex.I)
         * ∫ s in c..d, Complex.exp ((φ s : ℂ) * Complex.I)).re

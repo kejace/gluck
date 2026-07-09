@@ -59,7 +59,7 @@ noncomputable def layoutConfineRadius (a c : ℝ) : ℝ :=
 
 /-- The margin sequence of the five-leg confinement chain: after `j` legs the
 distance to the unit circle is still `≥ layoutMargin a c j = m₀ · ratio^j`. -/
-private noncomputable def layoutMargin (a c : ℝ) (j : ℕ) : ℝ :=
+noncomputable def layoutMargin (a c : ℝ) (j : ℕ) : ℝ :=
   (a - 1) * (c - 1) / (20 * c ^ 2) * layoutMarginRatio a c ^ j
 
 private lemma layoutMargin_pos {a c : ℝ} (ha : 1 < a) (hac : a < c) (j : ℕ) :
@@ -91,10 +91,10 @@ private lemma layoutMargin_zero (a c : ℝ) :
     1 - layoutMargin a c 0 = anchorConfineRadius a c := by
   rw [layoutMargin, anchorConfineRadius, pow_zero, mul_one]
 
-private lemma layoutMargin_five (a c : ℝ) :
+lemma layoutMargin_five (a c : ℝ) :
     1 - layoutMargin a c 5 = layoutCleanRadius a c := rfl
 
-private lemma layoutMargin_antitone {a c : ℝ} (ha : 1 < a) (hac : a < c)
+lemma layoutMargin_antitone {a c : ℝ} (ha : 1 < a) (hac : a < c)
     {j k : ℕ} (hjk : j ≤ k) : layoutMargin a c k ≤ layoutMargin a c j := by
   have hc1 : 1 < c := ha.trans hac
   have h0 := (layoutMarginRatio_pos ha hac).le
@@ -240,7 +240,7 @@ noncomputable def layoutNode4 (a c h L w₁ w₂ : ℝ) : ℂ × ℝ :=
 (as a whole model circle, any window parameter) keeps margin
 `layoutMargin a c j` to the unit circle.  Box-free: the bounds hold for every
 `(w₁, w₂)` since a longer leg sweeps the same circle. -/
-private lemma layout_legs_norm_le {a c h L w₁ w₂ : ℝ} (ha : 1 < a) (hac : a < c)
+lemma layout_legs_norm_le {a c h L w₁ w₂ : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 ≤ L)
     (hL : L ≤ bicircleBracket a h) :
     (∀ σ, ‖(arcModelConst c (layoutStart a c h L).1 (layoutStart a c h L).2 σ).1‖

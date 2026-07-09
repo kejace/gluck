@@ -197,7 +197,7 @@ lemma gateSmoothLanding_close (r₀ : ℝ≥0) (hr₀ : 4 ≤ (r₀ : ℝ)) {δ 
     mul_nonneg (by linarith : (0:ℝ) ≤ E - e) (by linarith : (0:ℝ) ≤ E + e + 1)]
 
 /-- The clamp map `t ↦ min 1 (max 0 t)` is `1`-Lipschitz. -/
-private lemma clamp_lip (a b : ℝ) :
+lemma clamp_lip (a b : ℝ) :
     |min 1 (max 0 a) - min 1 (max 0 b)| ≤ |a - b| := by
   have onesided : ∀ x y : ℝ, min 1 (max 0 x) - min 1 (max 0 y) ≤ |x - y| := by
     intro x y
@@ -222,7 +222,7 @@ profiles differ in `L¹` on `[0, L/4]` by at most a constant times `|L − L₀|
 identity region both equal `4/5 + (6/5)·clamp((σ − ·/8)/δ + 1/2)` (`arcRampProfile_arg_eq`),
 where the clamp is `1`-Lipschitz (`clamp_lip`), giving the `1/δ` gap; the leftover sliver
 `[min L L₀/4, L/4]` has length `≤ |L − L₀|/4` and integrand `≤ 6/5`. -/
-private lemma gate_profile_L1_diff {δ : ℝ} (hδ : 0 < δ) {L L₀ : ℝ}
+lemma gate_profile_L1_diff {δ : ℝ} (hδ : 0 < δ) {L L₀ : ℝ}
     (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5)
     (hL01 : (11 : ℝ) / 5 ≤ L₀) (hL02 : L₀ ≤ 14 / 5) :
     ∫ σ in (0 : ℝ)..(L / 4), |gateProfileSmooth L δ σ - gateProfileSmooth L₀ δ σ|
@@ -784,7 +784,7 @@ private lemma gate_G2_top_margin {h : ℝ} (h1 : (1 : ℝ) / 5 ≤ h) (h2 : h �
   rw [mul_comm, div_mul_cancel₀ _ (gate_ra_pos h1 h2).ne']; norm_num
 
 /-- Sup-norm coordinate projections: a state-gap bound transfers to both residual coordinates. -/
-private lemma gateLanding_coord_le {W Q : ℂ × ℝ} {b : ℝ} (h : ‖W - Q‖ ≤ b) :
+lemma gateLanding_coord_le {W Q : ℂ × ℝ} {b : ℝ} (h : ‖W - Q‖ ≤ b) :
     |W.1.im - Q.1.im| ≤ b ∧ |W.2 - Q.2| ≤ b := by
   rw [Prod.norm_def] at h
   refine ⟨?_, ?_⟩
@@ -1207,7 +1207,7 @@ obligation is the *existence* of such a landing `W₀` — the 2-D Brouwer-degre
 `poincareMiranda_rect` argument over `(b, L)` (four numerically-gated sign faces +
 confinement `arcFlow_confined`, `h2_negative_dev.md §2-D DEGREE GATE`) — honestly
 localised to `hturn`.  See `tickets_h2negative.md` [AL-4]. -/
-private lemma exists_halfPeriodMatch {κ : ℝ → ℝ} {R L M : ℝ}
+lemma exists_halfPeriodMatch {κ : ℝ → ℝ} {R L M : ℝ}
     (hκ : Continuous κ) (hR : 0 < R) (hR1 : R < 1) (hL : 0 < L)
     (hM : ∀ σ, |κ σ| ≤ M) (_hhalf : Function.Periodic κ (L / 2))
     (_hevenO : ∀ σ, κ (-σ) = κ σ) (hevenQ : ∀ σ, κ (L / 2 - σ) = κ σ)

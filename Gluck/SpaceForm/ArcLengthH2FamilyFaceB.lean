@@ -21,18 +21,18 @@ open scoped NNReal Real InnerProductSpace
 /-- **Fixed-phase endpoint of the terminal `c`-leg**: the point of the level-`c`
 circle through the state `P` at phase `≡ π/2 (mod 2π)`, i.e. `ζ₅ + r₅ =
 z + r(1 + ie^{iψ})`.  At clean phase closure the layout endpoint equals this. -/
-private noncomputable def a9Endpoint (c : ℝ) (P : ℂ × ℝ) : ℂ :=
+noncomputable def a9Endpoint (c : ℝ) (P : ℂ × ℝ) : ℂ :=
   P.1 + (arcModelRadius c P.1 P.2 : ℂ)
     * (1 + Complex.I * Complex.exp ((P.2 : ℂ) * Complex.I))
 
 /-- **The clean `z`-closure residual** as an explicit (`τ_clean`-free) map of
 the interior dofs `p = (w₁, w₂)`. -/
-private noncomputable def a9Residual (a c h L : ℝ) (p : ℝ × ℝ) : ℂ :=
+noncomputable def a9Residual (a c h L : ℝ) (p : ℝ × ℝ) : ℂ :=
   a9Endpoint c (layoutNode4 a c h L p.1 p.2) - (layoutStart a c h L).1
 
 /-- The residual vanishes at the anchor (the `z`-half of
 `layoutClean_anchor_closes` read through the fixed-phase endpoint). -/
-private lemma a9Residual_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+lemma a9Residual_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (_hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
     (_hL : L ≤ bicircleBracket a h)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
@@ -458,7 +458,7 @@ private lemma a9_hasDerivAt_endpoint_aux {K : ℝ} {z : ℝ → ℂ} {ψ : ℝ �
 /-- **`w₂`-column derivative**: the terminal-leg insertion.  The curve
 `t ↦ G(0, t)` differentiates to the closed junction form `a9V2` at the anchor
 variables. -/
-private lemma a9_hasDerivAt_col2 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+lemma a9_hasDerivAt_col2 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
     (hL : L ≤ bicircleBracket a h)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
@@ -635,7 +635,7 @@ set_option maxRecDepth 10000 in
 /-- **`w₁`-column derivative**: the two-junction variational chain.  The curve
 `t ↦ G(t, 0)` differentiates to the closed junction form `a9V1` at the anchor
 variables. -/
-private lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
     (hL : L ≤ bicircleBracket a h)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
@@ -1237,7 +1237,7 @@ private lemma a9_differentiableAt_arc_snd {K : ℝ} {z : ℝ × ℝ → ℂ}
 
 /-- Joint differentiability of the clean residual at the anchor (all radii
 positive and denominators nonvanishing there). -/
-private lemma a9Residual_differentiableAt {a c h L : ℝ} (ha : 1 < a)
+lemma a9Residual_differentiableAt {a c h L : ℝ} (ha : 1 < a)
     (hac : a < c) (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L)
     (hL : L ≤ bicircleBracket a h) (_hlow : 1 / (10 * c) ≤ h)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :

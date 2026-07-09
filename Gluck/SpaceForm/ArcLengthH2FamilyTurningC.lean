@@ -34,7 +34,7 @@ private lemma expI_add_pi (φ : ℝ) :
   ring
 
 /-- `e^{i(φ+2π)} = e^{iφ}`. -/
-private lemma expI_add_two_pi (φ : ℝ) :
+lemma expI_add_two_pi (φ : ℝ) :
     Complex.exp (((φ + 2 * π : ℝ) : ℂ) * Complex.I)
       = Complex.exp ((φ : ℂ) * Complex.I) := by
   push_cast
@@ -43,7 +43,7 @@ private lemma expI_add_two_pi (φ : ℝ) :
     Complex.exp_two_pi_mul_I, mul_one]
 
 /-- `e^{i(3π−φ)} = −conj(e^{iφ})`. -/
-private lemma expI_three_pi_sub (φ : ℝ) :
+lemma expI_three_pi_sub (φ : ℝ) :
     Complex.exp (((3 * π - φ : ℝ) : ℂ) * Complex.I)
       = -(starRingEnd ℂ) (Complex.exp ((φ : ℂ) * Complex.I)) := by
   have hconj : (starRingEnd ℂ) (Complex.exp ((φ : ℂ) * Complex.I))
@@ -62,7 +62,7 @@ private lemma expI_three_pi_sub (φ : ℝ) :
 /-- **Radius conservation along the arc**: the model radius re-evaluated at any
 point of the arc equals the arc's radius (derivative uniqueness against the
 affine phase). -/
-private lemma arcModelRadius_conserved {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
+lemma arcModelRadius_conserved {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
     (hr : arcModelRadius K z₀ φ₀ ≠ 0) (σ : ℝ)
     (hconf : (1 : ℝ) - ‖(arcModelConst K z₀ φ₀ σ).1‖ ^ 2 ≠ 0) :
     arcModelRadius K (arcModelConst K z₀ φ₀ σ).1 (arcModelConst K z₀ φ₀ σ).2
@@ -83,7 +83,7 @@ private lemma arcModelRadius_conserved {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
   rw [h4, h3, inv_inv]
 
 /-- Central-reflection invariance of the model radius. -/
-private lemma arcModelRadius_neg_pi (K : ℝ) (z : ℂ) (φ : ℝ) :
+lemma arcModelRadius_neg_pi (K : ℝ) (z : ℂ) (φ : ℝ) :
     arcModelRadius K (-z) (φ + π) = arcModelRadius K z φ := by
   rw [arcModelRadius, arcModelRadius, spaceFormNormal_inner_eq,
     spaceFormNormal_inner_eq, norm_neg, Real.sin_add_pi, Real.cos_add_pi]
@@ -91,13 +91,13 @@ private lemma arcModelRadius_neg_pi (K : ℝ) (z : ℂ) (φ : ℝ) :
   ring_nf
 
 /-- `2π`-phase invariance of the model radius. -/
-private lemma arcModelRadius_add_two_pi (K : ℝ) (z : ℂ) (φ : ℝ) :
+lemma arcModelRadius_add_two_pi (K : ℝ) (z : ℂ) (φ : ℝ) :
     arcModelRadius K z (φ + 2 * π) = arcModelRadius K z φ := by
   rw [arcModelRadius, arcModelRadius, spaceFormNormal_inner_eq,
     spaceFormNormal_inner_eq, Real.sin_add_two_pi, Real.cos_add_two_pi]
 
 /-- Conjugate-mirror invariance of the model radius. -/
-private lemma arcModelRadius_conj (K : ℝ) (z : ℂ) (φ : ℝ) :
+lemma arcModelRadius_conj (K : ℝ) (z : ℂ) (φ : ℝ) :
     arcModelRadius K ((starRingEnd ℂ) z) (3 * π - φ) = arcModelRadius K z φ := by
   rw [arcModelRadius, arcModelRadius, spaceFormNormal_inner_eq,
     spaceFormNormal_inner_eq, RCLike.norm_conj]
@@ -112,7 +112,7 @@ private lemma arcModelRadius_conj (K : ℝ) (z : ℂ) (φ : ℝ) :
   ring_nf
 
 /-- **Central-reflection equivariance**: `Arc_K(ρ W₀, s) = ρ (Arc_K(W₀, s))`. -/
-private lemma arcModelConst_neg_pi (K : ℝ) (z₀ : ℂ) (φ₀ s : ℝ) :
+lemma arcModelConst_neg_pi (K : ℝ) (z₀ : ℂ) (φ₀ s : ℝ) :
     arcModelConst K (-z₀) (φ₀ + π) s
       = (-(arcModelConst K z₀ φ₀ s).1, (arcModelConst K z₀ φ₀ s).2 + π) := by
   unfold arcModelConst
@@ -124,7 +124,7 @@ private lemma arcModelConst_neg_pi (K : ℝ) (z₀ : ℂ) (φ₀ s : ℝ) :
     ring
 
 /-- **`2π`-phase equivariance**: `Arc_K(z, φ+2π, s) = Arc_K(z, φ, s) + (0, 2π)`. -/
-private lemma arcModelConst_add_two_pi (K : ℝ) (z₀ : ℂ) (φ₀ s : ℝ) :
+lemma arcModelConst_add_two_pi (K : ℝ) (z₀ : ℂ) (φ₀ s : ℝ) :
     arcModelConst K z₀ (φ₀ + 2 * π) s
       = ((arcModelConst K z₀ φ₀ s).1, (arcModelConst K z₀ φ₀ s).2 + 2 * π) := by
   unfold arcModelConst
@@ -135,7 +135,7 @@ private lemma arcModelConst_add_two_pi (K : ℝ) (z₀ : ℂ) (φ₀ s : ℝ) :
 
 /-- **Semigroup law**: `Arc_K(Arc_K(W₀, ℓ), s) = Arc_K(W₀, ℓ + s)` (at
 nondegenerate confined data). -/
-private lemma arcModelConst_add {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
+lemma arcModelConst_add {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
     (hr : arcModelRadius K z₀ φ₀ ≠ 0) (ℓ : ℝ)
     (hconf : (1 : ℝ) - ‖(arcModelConst K z₀ φ₀ ℓ).1‖ ^ 2 ≠ 0) (s : ℝ) :
     arcModelConst K (arcModelConst K z₀ φ₀ ℓ).1 (arcModelConst K z₀ φ₀ ℓ).2 s
@@ -190,7 +190,7 @@ private lemma conj_expI (x : ℝ) :
 /-- **Conjugate-mirror equivariance with time reversal**: the level-`K` arc from
 the mirrored endpoint `X(Arc(W₀, ℓ))` runs the mirrored arc backwards,
 `Arc_K(X(Arc(W₀,ℓ)), s) = X(Arc(W₀, ℓ − s))`. -/
-private lemma arcModelConst_conj_reverse {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
+lemma arcModelConst_conj_reverse {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
     (hr : arcModelRadius K z₀ φ₀ ≠ 0) (ℓ : ℝ)
     (hconf : (1 : ℝ) - ‖(arcModelConst K z₀ φ₀ ℓ).1‖ ^ 2 ≠ 0) (s : ℝ) :
     arcModelConst K ((starRingEnd ℂ) (arcModelConst K z₀ φ₀ ℓ).1)
@@ -264,7 +264,7 @@ five-leg clean curve returns to the layout start with phase advanced by exactly
 `node₄ = ρ(W₁) + (0,2π)`, endpoint `ρ(W₂) + (0,2π) = layoutStart + (0,2π)`,
 by the equivariance suite and the anchor equations (`him`, `hφe`) at the
 `Fix(X)`-landing `W₂`. -/
-private lemma layoutClean_anchor_closes {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+lemma layoutClean_anchor_closes {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
     layoutClean a c h L 0 0 L
@@ -432,7 +432,7 @@ private lemma layoutClean_anchor_closes {a c h L : ℝ} (ha : 1 < a) (hac : a < 
 /-! ### A8.6 — the turning bracket and the continuous root selection -/
 
 /-- The layout nodes are the clean curve's breakpoint states, hence confined. -/
-private lemma layoutNode_norm_le {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+lemma layoutNode_norm_le {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
     (hL : L ≤ bicircleBracket a h) {w₁ w₂ : ℝ}
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) :

@@ -650,7 +650,7 @@ on `[0, L/4]`.  Two-leg `L¹`-Grönwall (leg 1 vs `arcModelConst (4/5)`, leg 2 v
 `arcModelConst 2`) transferred to the smooth flow with an `O(δ)` margin: the step models
 are confined to `59/100` (margin lemmas), and `‖smooth − step‖ ≤ gateRobustConst·δ ≤
 1/2000000 < 1/100` by the exposed `δ`-smallness. -/
-private lemma gate_smooth_confined_quarter {δ h L : ℝ}
+lemma gate_smooth_confined_quarter {δ h L : ℝ}
     (hδ : 0 < δ) (hh1 : (1 : ℝ) / 5 ≤ h) (hh2 : h ≤ 2 / 5)
     (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) (hδfit : δ ≤ L / 4)
     (hδC : gateRobustConst * δ ≤ 1 / 2000000) :
@@ -921,7 +921,7 @@ quarter-window bound `gate_smooth_confined_quarter` on `[0, L/4]` with the two s
 extensions: the mirror reversal `arcRev_eqOn` (`‖Φ(σ).1‖ = ‖Φ(L/2 − σ).1‖`) carries it to
 `[L/4, L/2]`, and the central symmetry `arcClosure_eqOn` (`‖Φ(σ).1‖ = ‖Φ(σ − L/2).1‖`)
 carries `[0, L/2]` confinement to `[L/2, L]`.  Both reflections preserve `‖z‖`. -/
-private lemma gate_smooth_confined_full {δ h L : ℝ}
+lemma gate_smooth_confined_full {δ h L : ℝ}
     (hδ : 0 < δ) (hh1 : (1 : ℝ) / 5 ≤ h) (hh2 : h ≤ 2 / 5)
     (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5)
     (hδeq : gateRobustConst * δ = 1 / 2000000)
@@ -1000,7 +1000,7 @@ private lemma gate_smooth_confined_full {δ h L : ℝ}
 integral `∫_c^d e^{iφ(s)} ds` rotated by `e^{-iψ}` is the projected real integral
 `∫_c^d cos(φ(s) − ψ) ds`.  (Arc-length analogue of the midpoint projection in
 `Gluck.chord_integral_ne_zero`.) -/
-private lemma arc_chord_proj_re {φ : ℝ → ℝ} {c d : ℝ}
+lemma arc_chord_proj_re {φ : ℝ → ℝ} {c d : ℝ}
     (hφ : ContinuousOn φ (Set.uIcc c d)) (ψ : ℝ) :
     (Complex.exp (-(ψ : ℂ) * Complex.I) * ∫ s in c..d, Complex.exp ((φ s : ℂ) * Complex.I)).re
       = ∫ s in c..d, Real.cos (φ s - ψ) := by
@@ -1034,7 +1034,7 @@ a sub-arc of turning `≤ π` the midpoint projection `∫ cos(φ − ψ) > 0` g
 for turning `> π` the complementary arc `[τ, L] ∪ [0, t]` has turning `< π`, its chord is
 `0` by closure (`∫_0^L e^{iφ} = z(L) − z(0) = 0`) precisely when the sub-arc chord is `0`,
 and the same projection on the complement gives a contradiction. -/
-private lemma gate_chord_ne_zero {δ h L : ℝ}
+lemma gate_chord_ne_zero {δ h L : ℝ}
     (hh1 : (1 : ℝ) / 5 ≤ h) (hh2 : h ≤ 2 / 5) (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5)
     (hconf : ∀ σ ∈ Set.Icc (0 : ℝ) L,
       ‖(arcFlow (gateProfileSmooth L δ) (3 / 5) L 2 4 ((Complex.I * (h : ℂ), π), σ)).1‖ ≤ 3 / 5)

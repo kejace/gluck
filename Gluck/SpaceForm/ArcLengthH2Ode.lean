@@ -171,7 +171,7 @@ lemma arcField_continuous {κ : ℝ → ℝ} {R : ℝ} (hκ : Continuous κ)
   · exact continuous_const.sub (hcb.norm.pow 2)
 
 /-- **`e^{iφ}` is `1`-Lipschitz in the angle `φ`.** -/
-private lemma expCircle_lipschitz :
+lemma expCircle_lipschitz :
     LipschitzWith 1 (fun φ : ℝ => Complex.exp ((φ : ℂ) * Complex.I)) := by
   refine LipschitzWith.of_dist_le_mul fun a b => ?_
   rw [NNReal.coe_one, one_mul, dist_eq_norm, Real.dist_eq]
@@ -738,7 +738,7 @@ private lemma arcModelConst_hasDerivAt_φ (K : ℝ) (z₀ : ℂ) (φ₀ : ℝ) (
 /-- The model's `z`-component satisfies the unit-Euclidean-speed law
 `z'(σ) = e^{iφ(σ)}` (with `φ(σ) = (arcModelConst …).2`).  Chain rule on the single
 `σ`-dependent factor `e^{i·σ/r}`, using `r·(1/r) = 1` (`hr`) and `i² = −1`. -/
-private lemma arcModelConst_hasDerivAt_z {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
+lemma arcModelConst_hasDerivAt_z {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
     (hr : arcModelRadius K z₀ φ₀ ≠ 0) (σ : ℝ) :
     HasDerivAt (fun t => (arcModelConst K z₀ φ₀ t).1)
       (Complex.exp (((arcModelConst K z₀ φ₀ σ).2 : ℂ) * Complex.I)) σ := by
