@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
 import Gluck.SpaceForm.ArcLengthH2FamilyFaceA
+import Mathlib.Util.CountHeartbeats
 
 /-!
 # Fork A · ALM-A9.2: the clean closure residual and its anchor derivative
@@ -629,9 +630,12 @@ lemma a9_hasDerivAt_col2 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       + (-S * (ra - rc) * (C ^ 2 * rc ^ 2 + 2 * D * rc + S ^ 2 * ra ^ 2 - 1)) * hCS
       + (S * (S - 1) * (S + 1) * (ra - rc)) * hrcD2
 
-set_option maxHeartbeats 4000000 in
--- three-junction variational chain; the assembled endpoint algebra grinds
+-- three-junction variational chain: endpoint algebra over degree-15 polynomials
+-- (raised heartbeats) with deep `HasDerivAt.comp` nesting (raised recursion depth).
+set_option maxHeartbeats 300000 in
 set_option maxRecDepth 10000 in
+set_option Elab.async false in
+#count_heartbeats in
 /-- **`w₁`-column derivative**: the two-junction variational chain.  The curve
 `t ↦ G(t, 0)` differentiates to the closed junction form `a9V1` at the anchor
 variables. -/
