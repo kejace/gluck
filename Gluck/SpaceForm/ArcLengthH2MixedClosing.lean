@@ -59,7 +59,8 @@ lemma neg_G1_scalar (h L : ℝ) :
                     / arcModelRadius 2 (qArc1 (-3 / 10) (h, L)).1 (qArc1 (-3 / 10) (h, L)).2)
             + Real.cos ((L / 8) / arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π)
                 * (1 - Real.cos ((L / 8)
-                    / arcModelRadius 2 (qArc1 (-3 / 10) (h, L)).1 (qArc1 (-3 / 10) (h, L)).2))) := by
+                    / arcModelRadius 2 (qArc1 (-3 / 10) (h, L)).1
+                      (qArc1 (-3 / 10) (h, L)).2))) := by
   rw [show qArc2 (-3 / 10) 2 (h, L)
       = arcModelConst 2 (qArc1 (-3 / 10) (h, L)).1 (qArc1 (-3 / 10) (h, L)).2 (L / 8) from rfl,
     arcModelConst_fst_im, qArc1_fst_im]
@@ -87,7 +88,7 @@ lemma neg_ra_ub' {h : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h ≤ 3 / 20) :
   nlinarith [mul_nonneg (by linarith : (0 : ℝ) ≤ 3 / 20 - h) (by linarith : (0 : ℝ) ≤ h - 1 / 10)]
 
 /-- Tight lower bound `−99/80 ≤ r_a` on `h ∈ [1/10, 3/20]` (attained at `h = 1/10`). -/
-lemma neg_ra_lb' {h : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h ≤ 3 / 20) :
+lemma neg_ra_lb' {h : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (_h2 : h ≤ 3 / 20) :
     -99 / 80 ≤ arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π := by
   rw [arcModelRadius_qArc1, le_div_iff_of_neg (by nlinarith : 2 * (-3 / 10 - h) < 0)]
   nlinarith [mul_nonneg (by linarith : (0 : ℝ) ≤ 3 / 20 - h) (by linarith : (0 : ℝ) ≤ h - 1 / 10)]
@@ -112,7 +113,7 @@ lemma neg_q_lb_quad {x : ℝ} (hx : |x| ≤ 1) (hx2 : x ^ 2 ≤ 96 / 500) :
 `G₂ ≤ −1/1000` on the bottom edge reduces to a pure `(h, r, t, q)` box inequality. -/
 private lemma neg_G2_bottom_key {h r t q : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h ≤ 3 / 20)
     (hr1 : -99 / 80 ≤ r) (hr2 : r ≤ -391 / 360) (hrt : r * t = 157 / 400)
-    (hq0 : 0 ≤ q) (hq2 : q ≤ t ^ 2 / 2)
+    (_hq0 : 0 ≤ q) (hq2 : q ≤ t ^ 2 / 2)
     (hN : 0 < 1 - (h ^ 2 + 2 * r * (r - h) * q)) (hpi : (15707 : ℝ) / 10000 ≤ π / 2) :
     t + 157 / 50 / 8 * (2 * (2 + (-h - (r - h) * q))) / (1 - (h ^ 2 + 2 * r * (r - h) * q))
       - π / 2 ≤ -(1 / 1000) := by
@@ -121,19 +122,20 @@ private lemma neg_G2_bottom_key {h r t q : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 
   have ht_hi : t ≤ -31 / 100 := by
     nlinarith [hrt, mul_nonneg (by linarith : (0 : ℝ) ≤ r + 99 / 80) (by linarith : (0 : ℝ) ≤ -t)]
   have ht_lo : -37 / 100 ≤ t := by
-    nlinarith [hrt, mul_nonneg (by linarith : (0 : ℝ) ≤ -391 / 360 - r) (by linarith : (0 : ℝ) ≤ -t)]
+    nlinarith [hrt,
+      mul_nonneg (by linarith : (0 : ℝ) ≤ -391 / 360 - r) (by linarith : (0 : ℝ) ≤ -t)]
   have hrht : r * (r - h) * t ^ 2 = (157 / 400) ^ 2 - 157 / 400 * (h * t) := by
     have hexp : r * (r - h) * t ^ 2 = (r * t) ^ 2 - r * t * (h * t) := by ring
     rw [hexp, hrt]
   have hcert : 157 / 200 * (2 - h - (r - h) * q)
       ≤ (15697 / 10000 - t) * (1 - h ^ 2 - 2 * r * (r - h) * q) := by
-    nlinarith [hrht, hrt, hq0, hq2, htneg, ht_hi, ht_lo,
+    nlinarith [hrht, hrt, _hq0, hq2, htneg, ht_hi, ht_lo,
       mul_nonneg (by linarith : (0 : ℝ) ≤ 3 / 20 - h) (by linarith : (0 : ℝ) ≤ h - 1 / 10),
       mul_nonneg (by linarith : (0 : ℝ) ≤ -r) (by linarith : (0 : ℝ) ≤ h - r),
       mul_nonneg (mul_nonneg (by linarith : (0 : ℝ) ≤ -r) (by linarith : (0 : ℝ) ≤ h - r))
         (by linarith [hq2] : (0 : ℝ) ≤ t ^ 2 / 2 - q),
       mul_nonneg (by linarith : (0 : ℝ) ≤ -t)
-        (mul_nonneg (mul_nonneg (by linarith : (0 : ℝ) ≤ -r) (by linarith : (0 : ℝ) ≤ h - r)) hq0)]
+        (mul_nonneg (mul_nonneg (by linarith : (0 : ℝ) ≤ -r) (by linarith : (0 : ℝ) ≤ h - r)) _hq0)]
   have hdiv : 157 / 50 / 8 * (2 * (2 + (-h - (r - h) * q))) / (1 - (h ^ 2 + 2 * r * (r - h) * q))
       ≤ 15697 / 10000 - t := (div_le_iff₀ hN).mpr (by nlinarith [hcert])
   linarith [hdiv, hpi]
@@ -142,7 +144,7 @@ private lemma neg_G2_bottom_key {h r t q : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 
 `q`-floor `49/100·t² ≤ q`, `G₂ ≥ 1/1000` on the top edge reduces to a pure box inequality. -/
 private lemma neg_G2_top_key {h r t q : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h ≤ 3 / 20)
     (hr1 : -99 / 80 ≤ r) (hr2 : r ≤ -391 / 360) (hrt : r * t = 161 / 400)
-    (hq0 : 0 ≤ q) (hqlo : 49 / 100 * t ^ 2 ≤ q)
+    (_hq0 : 0 ≤ q) (hqlo : 49 / 100 * t ^ 2 ≤ q)
     (hN : 0 < 1 - (h ^ 2 + 2 * r * (r - h) * q)) (hpi : π / 2 ≤ (15708 : ℝ) / 10000) :
     (1 / 1000 : ℝ) ≤ t + 161 / 50 / 8 * (2 * (2 + (-h - (r - h) * q)))
       / (1 - (h ^ 2 + 2 * r * (r - h) * q)) - π / 2 := by
@@ -151,19 +153,20 @@ private lemma neg_G2_top_key {h r t q : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h
   have ht_hi : t ≤ -31 / 100 := by
     nlinarith [hrt, mul_nonneg (by linarith : (0 : ℝ) ≤ r + 99 / 80) (by linarith : (0 : ℝ) ≤ -t)]
   have ht_lo : -38 / 100 ≤ t := by
-    nlinarith [hrt, mul_nonneg (by linarith : (0 : ℝ) ≤ -391 / 360 - r) (by linarith : (0 : ℝ) ≤ -t)]
+    nlinarith [hrt,
+      mul_nonneg (by linarith : (0 : ℝ) ≤ -391 / 360 - r) (by linarith : (0 : ℝ) ≤ -t)]
   have hrht : r * (r - h) * t ^ 2 = (161 / 400) ^ 2 - 161 / 400 * (h * t) := by
     have hexp : r * (r - h) * t ^ 2 = (r * t) ^ 2 - r * t * (h * t) := by ring
     rw [hexp, hrt]
   have hcert : (15718 / 10000 - t) * (1 - h ^ 2 - 2 * r * (r - h) * q)
       ≤ 161 / 200 * (2 - h - (r - h) * q) := by
-    nlinarith [hrht, hrt, hq0, hqlo, htneg, ht_hi, ht_lo,
+    nlinarith [hrht, hrt, _hq0, hqlo, htneg, ht_hi, ht_lo,
       mul_nonneg (by linarith : (0 : ℝ) ≤ 3 / 20 - h) (by linarith : (0 : ℝ) ≤ h - 1 / 10),
       mul_nonneg (by linarith : (0 : ℝ) ≤ -r) (by linarith : (0 : ℝ) ≤ h - r),
       mul_nonneg (mul_nonneg (by linarith : (0 : ℝ) ≤ -r) (by linarith : (0 : ℝ) ≤ h - r))
         (by linarith [hqlo] : (0 : ℝ) ≤ q - 49 / 100 * t ^ 2),
       mul_nonneg (by linarith : (0 : ℝ) ≤ -t)
-        (mul_nonneg (mul_nonneg (by linarith : (0 : ℝ) ≤ -r) (by linarith : (0 : ℝ) ≤ h - r)) hq0)]
+        (mul_nonneg (mul_nonneg (by linarith : (0 : ℝ) ≤ -r) (by linarith : (0 : ℝ) ≤ h - r)) _hq0)]
   have hdiv : 15718 / 10000 - t ≤ 161 / 50 / 8 * (2 * (2 + (-h - (r - h) * q)))
       / (1 - (h ^ 2 + 2 * r * (r - h) * q)) := (le_div_iff₀ hN).mpr (by nlinarith [hcert])
   linarith [hdiv, hpi]
@@ -199,20 +202,23 @@ private lemma neg_G1_left_key {ra q ca sa rc sc cc : ℝ} (hra : ra = -99 / 80)
     nlinarith [mul_nonneg hsc0 (by linarith : (0 : ℝ) ≤ sa + 161 / 495),
       mul_nonneg (by linarith : (0 : ℝ) ≤ 161 / 495) (by linarith : (0 : ℝ) ≤ 96 / 100 - sc)]
   have hCA : (946 / 1000) * (1291 / 1000) ≤ ca * (1 - cc) := by
-    nlinarith [mul_nonneg (by linarith : (0 : ℝ) ≤ ca - 946 / 1000) (by linarith : (0 : ℝ) ≤ 1 - cc),
-      mul_nonneg (by linarith : (0 : ℝ) ≤ 946 / 1000) (by linarith : (0 : ℝ) ≤ (1 - cc) - 1291 / 1000)]
+    nlinarith [mul_nonneg (by linarith : (0 : ℝ) ≤ ca - 946 / 1000)
+        (by linarith : (0 : ℝ) ≤ 1 - cc),
+      mul_nonneg (by linarith : (0 : ℝ) ≤ 946 / 1000)
+        (by linarith : (0 : ℝ) ≤ (1 - cc) - 1291 / 1000)]
   have hS : (-161 / 495) * (96 / 100) + (946 / 1000) * (1291 / 1000) ≤ sa * sc + ca * (1 - cc) := by
     linarith
   have hrcS : (205 / 1000) * ((-161 / 495) * (96 / 100) + (946 / 1000) * (1291 / 1000))
       ≤ rc * (sa * sc + ca * (1 - cc)) := by
     nlinarith [hS, hrc,
-      mul_nonneg (by linarith : (0 : ℝ) ≤ rc - 205 / 1000) (by linarith [hS] : (0 : ℝ) ≤ sa * sc + ca * (1 - cc))]
+      mul_nonneg (by linarith : (0 : ℝ) ≤ rc - 205 / 1000)
+        (by linarith [hS] : (0 : ℝ) ≤ sa * sc + ca * (1 - cc))]
   nlinarith [hrcS, hq]
 
 /-- **RIGHT `G₁` face polynomial core with margin.**  `G₁ ≥ 1/1000` on the right edge
 `h = 3/20` (concave `r_a = −391/360`). -/
 private lemma neg_G1_right_key {ra q ca sa rc sc cc : ℝ} (hra : ra = -391 / 360)
-    (hq : 643 / 10000 ≤ q) (hca : ca ≤ 9357 / 10000) (hca0 : 0 ≤ ca)
+    (hq : 643 / 10000 ≤ q) (hca : ca ≤ 9357 / 10000) (_hca0 : 0 ≤ ca)
     (hsa : sa ≤ -349 / 1000) (hrc : rc ≤ 2087 / 10000) (hrc0 : 0 ≤ rc)
     (hsc : 919 / 1000 ≤ sc) (hcc : -402 / 1000 ≤ cc) (hcc1 : cc ≤ 1) :
     (1 / 1000 : ℝ) ≤ 3 / 20 - ra * q - rc * (sa * sc + ca * (1 - cc)) := by
@@ -221,7 +227,8 @@ private lemma neg_G1_right_key {ra q ca sa rc sc cc : ℝ} (hra : ra = -391 / 36
     nlinarith [mul_nonneg (by linarith : (0 : ℝ) ≤ -349 / 1000 - sa) (by linarith : (0 : ℝ) ≤ sc),
       mul_nonneg (by linarith : (0 : ℝ) ≤ 349 / 1000) (by linarith : (0 : ℝ) ≤ sc - 919 / 1000)]
   have hCA : ca * (1 - cc) ≤ (9357 / 10000) * (1402 / 1000) := by
-    nlinarith [mul_nonneg (by linarith : (0 : ℝ) ≤ 9357 / 10000 - ca) (by linarith : (0 : ℝ) ≤ 1 - cc),
+    nlinarith [mul_nonneg (by linarith : (0 : ℝ) ≤ 9357 / 10000 - ca)
+        (by linarith : (0 : ℝ) ≤ 1 - cc),
       mul_nonneg (by linarith : (0 : ℝ) ≤ ca) (by linarith : (0 : ℝ) ≤ 1402 / 1000 - (1 - cc))]
   have hSub : sa * sc + ca * (1 - cc)
       ≤ (-349 / 1000) * (919 / 1000) + (9357 / 10000) * (1402 / 1000) := by linarith
@@ -260,7 +267,7 @@ private lemma neg_G1_left_margin {L : ℝ} (hL1 : (157 : ℝ) / 50 ≤ L) (hL2 :
   have hcnp : c ≤ 0 := by linarith
   have hcabs : |c| ≤ 1 := by rw [abs_of_nonpos hcnp]; linarith
   have hc2hi : c ^ 2 ≤ (161 / 495) ^ 2 := sq_le_sq' (by linarith) (by linarith)
-  have hc2lo : (157 / 495) ^ 2 ≤ c ^ 2 := by rw [← neg_sq c]; gcongr <;> linarith
+  have hc2lo : (157 / 495) ^ 2 ≤ c ^ 2 := by rw [← neg_sq c]; gcongr; linarith
   have hc4hi : c ^ 4 ≤ (161 / 495) ^ 4 := by
     have h := pow_le_pow_left₀ (sq_nonneg c) hc2hi 2; norm_num [← pow_mul] at h ⊢; linarith [h]
   have hcb := abs_le.mp (Real.cos_bound hcabs)
@@ -347,7 +354,7 @@ private lemma neg_G1_right_margin {L : ℝ} (hL1 : (157 : ℝ) / 50 ≤ L) (hL2 
   have hcnp : c ≤ 0 := by linarith
   have hcabs : |c| ≤ 1 := by rw [abs_of_nonpos hcnp]; linarith
   have hc2hi : c ^ 2 ≤ (1449 / 3910) ^ 2 := sq_le_sq' (by linarith) (by linarith)
-  have hc2lo : (1413 / 3910) ^ 2 ≤ c ^ 2 := by rw [← neg_sq c]; gcongr <;> linarith
+  have hc2lo : (1413 / 3910) ^ 2 ≤ c ^ 2 := by rw [← neg_sq c]; gcongr; linarith
   have hc4hi : c ^ 4 ≤ (1449 / 3910) ^ 4 := by
     have h := pow_le_pow_left₀ (sq_nonneg c) hc2hi 2; norm_num [← pow_mul] at h ⊢; linarith [h]
   have hcb := abs_le.mp (Real.cos_bound hcabs)
@@ -402,7 +409,8 @@ private lemma neg_G2_bottom_margin {h : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h
   have hrne : arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π ≠ 0 :=
     ne_of_lt (by linarith [neg_ra_ub h1 h2])
   refine neg_G2_bottom_key h1 h2 (neg_ra_lb' h1 h2) (neg_ra_ub' h1 h2) ?_
-    (by linarith [Real.cos_le_one ((157 / 50 / 8) / arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π)])
+    (by linarith [Real.cos_le_one ((157 / 50 / 8) /
+      arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π)])
     (neg_q_le h (157 / 50)) (neg_G2_N_pos h1 h2 (by norm_num) (by norm_num)) ?_
   · rw [mul_comm, div_mul_cancel₀ _ hrne]; norm_num
   · have := Real.pi_gt_d6; norm_num at this ⊢; linarith
@@ -595,7 +603,7 @@ the ramped profiles differ in `L¹` on `[0, L/4]` by at most a constant times `|
 (negative analogue of `gate_profile_L1_diff`, level gap `c − a = 23/10`). -/
 private lemma neg_profile_L1_diff {δ : ℝ} (hδ : 0 < δ) {L L₀ : ℝ}
     (hL1 : (157 : ℝ) / 50 ≤ L) (hL2 : L ≤ 161 / 50)
-    (hL01 : (157 : ℝ) / 50 ≤ L₀) (hL02 : L₀ ≤ 161 / 50) :
+    (hL01 : (157 : ℝ) / 50 ≤ L₀) (_hL02 : L₀ ≤ 161 / 50) :
     ∫ σ in (0 : ℝ)..(L / 4),
         |arcRampProfile (-3 / 10) 2 L δ σ - arcRampProfile (-3 / 10) 2 L₀ δ σ|
       ≤ 23 / 10 * (161 / (1600 * δ) + 1 / 4) * |L - L₀| := by
@@ -620,7 +628,7 @@ private lemma neg_profile_L1_diff {δ : ℝ} (hδ : 0 < δ) {L L₀ : ℝ}
     rw [hmdef]
     have hkey : L - min L L₀ ≤ |L - L₀| := by
       rcases le_total L L₀ with hle | hle
-      · rw [min_eq_left hle]; simpa using abs_nonneg (L - L₀)
+      · rw [min_eq_left hle]; simp
       · rw [min_eq_right hle, abs_of_nonneg (by linarith : (0 : ℝ) ≤ L - L₀)]
     linarith
   have hbdiff : ∀ σ,
@@ -755,7 +763,8 @@ lemma negSmoothResidual_continuousOn (δ : ℝ) (hδ : 0 < δ) :
     have hInner : Filter.Tendsto (fun p : ℝ × ℝ =>
         |p.1 - p₀.1| + 50 / 9 * (23 / 10 * (161 / (1600 * δ) + 1 / 4) * |p.2 - p₀.2|))
         (nhdsWithin p₀ rect) (nhds 0) := by
-      have h := habs1.add ((habs2.const_mul (23 / 10 * (161 / (1600 * δ) + 1 / 4))).const_mul (50 / 9))
+      have h := habs1.add
+        ((habs2.const_mul (23 / 10 * (161 / (1600 * δ) + 1 / 4))).const_mul (50 / 9))
       simpa using h
     have hOuter : Filter.Tendsto (fun p : ℝ × ℝ =>
         Emax * (|p.1 - p₀.1| + 50 / 9 * (23 / 10 * (161 / (1600 * δ) + 1 / 4) * |p.2 - p₀.2|)))

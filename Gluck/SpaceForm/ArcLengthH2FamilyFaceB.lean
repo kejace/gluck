@@ -630,9 +630,9 @@ lemma a9_hasDerivAt_col2 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       + (-S * (ra - rc) * (C ^ 2 * rc ^ 2 + 2 * D * rc + S ^ 2 * ra ^ 2 - 1)) * hCS
       + (S * (S - 1) * (S + 1) * (ra - rc)) * hrcD2
 
+set_option maxHeartbeats 300000 in
 -- three-junction variational chain: endpoint algebra over degree-15 polynomials
 -- (raised heartbeats) with deep `HasDerivAt.comp` nesting (raised recursion depth).
-set_option maxHeartbeats 300000 in
 set_option maxRecDepth 10000 in
 set_option Elab.async false in
 #count_heartbeats in

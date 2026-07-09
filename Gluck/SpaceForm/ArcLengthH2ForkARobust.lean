@@ -224,7 +224,7 @@ where the clamp is `1`-Lipschitz (`clamp_lip`), giving the `1/δ` gap; the lefto
 `[min L L₀/4, L/4]` has length `≤ |L − L₀|/4` and integrand `≤ 6/5`. -/
 lemma gate_profile_L1_diff {δ : ℝ} (hδ : 0 < δ) {L L₀ : ℝ}
     (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5)
-    (hL01 : (11 : ℝ) / 5 ≤ L₀) (hL02 : L₀ ≤ 14 / 5) :
+    (hL01 : (11 : ℝ) / 5 ≤ L₀) (_hL02 : L₀ ≤ 14 / 5) :
     ∫ σ in (0 : ℝ)..(L / 4), |gateProfileSmooth L δ σ - gateProfileSmooth L₀ δ σ|
       ≤ 6 / 5 * (7 / (80 * δ) + 1 / 4) * |L - L₀| := by
   have hδ0 : δ ≠ 0 := hδ.ne'
@@ -249,7 +249,7 @@ lemma gate_profile_L1_diff {δ : ℝ} (hδ : 0 < δ) {L L₀ : ℝ}
     rw [hmdef]
     have hkey : L - min L L₀ ≤ |L - L₀| := by
       rcases le_total L L₀ with hle | hle
-      · rw [min_eq_left hle]; simpa using abs_nonneg (L - L₀)
+      · rw [min_eq_left hle]; simp
       · rw [min_eq_right hle, abs_of_nonneg (by linarith : (0 : ℝ) ≤ L - L₀)]
     linarith
   -- Pointwise bounds.

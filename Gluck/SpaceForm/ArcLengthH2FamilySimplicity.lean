@@ -620,9 +620,9 @@ private lemma integral_cos_ge_const {φ : ℝ → ℝ} {p q ψ m : ℝ} (hpq : p
     (intervalIntegrable_const (c := m)) hint hm
   rwa [intervalIntegral.integral_const, smul_eq_mul, mul_comm] at h
 
+set_option maxHeartbeats 300000 in
 -- Long three-case projection proof (~300 lines, five-leg sandwich + IVT crossings
 -- + complement closure); the cumulative elaboration exceeds the default budget.
-set_option maxHeartbeats 300000 in
 set_option Elab.async false in
 #count_heartbeats in
 /-- **ALM-A11 mid-regime input: the quantitative clean chord margin.**  For every

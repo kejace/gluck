@@ -1035,7 +1035,7 @@ for turning `> π` the complementary arc `[τ, L] ∪ [0, t]` has turning `< π`
 `0` by closure (`∫_0^L e^{iφ} = z(L) − z(0) = 0`) precisely when the sub-arc chord is `0`,
 and the same projection on the complement gives a contradiction. -/
 lemma gate_chord_ne_zero {δ h L : ℝ}
-    (hh1 : (1 : ℝ) / 5 ≤ h) (hh2 : h ≤ 2 / 5) (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5)
+    (hh1 : (1 : ℝ) / 5 ≤ h) (hh2 : h ≤ 2 / 5) (hL1 : (11 : ℝ) / 5 ≤ L) (_hL2 : L ≤ 14 / 5)
     (hconf : ∀ σ ∈ Set.Icc (0 : ℝ) L,
       ‖(arcFlow (gateProfileSmooth L δ) (3 / 5) L 2 4 ((Complex.I * (h : ℂ), π), σ)).1‖ ≤ 3 / 5)
     (hclose1 : (arcFlow (gateProfileSmooth L δ) (3 / 5) L 2 4
@@ -1107,10 +1107,10 @@ lemma gate_chord_ne_zero {δ h L : ℝ}
     exact haps x hxmem
   -- boundary phases and total turning.
   have hφ0 : φ 0 = π := by
-    show (arcFlow κ (3 / 5) L 2 4 (W₀, 0)).2 = π; rw [hf0]
+    change (arcFlow κ (3 / 5) L 2 4 (W₀, 0)).2 = π; rw [hf0]
   have hφL : φ L = φ 0 + 2 * π := by
     have h2 : (arcFlow κ (3 / 5) L 2 4 (W₀, L)).2 = W₀.2 + 2 * π := hclose2
-    show (arcFlow κ (3 / 5) L 2 4 (W₀, L)).2 = φ 0 + 2 * π
+    change (arcFlow κ (3 / 5) L 2 4 (W₀, L)).2 = φ 0 + 2 * π
     rw [h2, hφ0]
   -- integrability of the chord integrand on the window.
   have hexpc : ContinuousOn (fun s => Complex.exp ((φ s : ℂ) * Complex.I)) (Set.Icc 0 L) :=
@@ -1130,7 +1130,7 @@ lemma gate_chord_ne_zero {δ h L : ℝ}
           ⟨L, hx.2, Set.Icc_subset_Icc_left hx.1.le⟩)).mono Set.Ioi_subset_Ici_self
     rw [hFTC]
     have hzL : z L = z 0 := by
-      show (arcFlow κ (3 / 5) L 2 4 (W₀, L)).1 = (arcFlow κ (3 / 5) L 2 4 (W₀, 0)).1
+      change (arcFlow κ (3 / 5) L 2 4 (W₀, L)).1 = (arcFlow κ (3 / 5) L 2 4 (W₀, 0)).1
       rw [hf0]; exact hclose1
     rw [hzL, sub_self]
   -- monotone (nonstrict) helper.
@@ -1168,7 +1168,7 @@ lemma gate_chord_ne_zero {δ h L : ℝ}
     rw [hzero, mul_zero, Complex.zero_re] at hproj
     linarith [hcospos, hproj]
   · -- LONG arc: complement `[τ, L] ∪ [0, t]` has turning `< π`.
-    push_neg at hcase
+    push Not at hcase
     set ψ : ℝ := (φ τ + φ t + 2 * π) / 2 with hψ
     -- positivity on `[τ, L]`.
     have hcontφ1 : ContinuousOn φ (Set.uIcc τ L) := hφcont.mono (Set.uIcc_subset_Icc hτmem hLmem)
@@ -1339,7 +1339,8 @@ theorem exists_gateProfileSmooth_realization :
     simpa using hmx
   have hRe : ((Complex.I * (p.1 : ℂ), π) : ℂ × ℝ).1.re = 0 := by simp [Complex.mul_re]
   have hφ0 : ((Complex.I * (p.1 : ℂ), π) : ℂ × ℝ).2 = π := rfl
-  have hland : arcFlow (gateProfileSmooth p.2 δ) (3 / 5) p.2 2 4 ((Complex.I * (p.1 : ℂ), π), p.2 / 4)
+  have hland : arcFlow (gateProfileSmooth p.2 δ) (3 / 5) p.2 2 4
+      ((Complex.I * (p.1 : ℂ), π), p.2 / 4)
       = ((starRingEnd ℂ (arcFlow (gateProfileSmooth p.2 δ) (3 / 5) p.2 2 4
             ((Complex.I * (p.1 : ℂ), π), p.2 / 4)).1,
           3 * π - (arcFlow (gateProfileSmooth p.2 δ) (3 / 5) p.2 2 4

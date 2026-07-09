@@ -90,7 +90,7 @@ private lemma chord_ne_zero_of_lift {z : ℝ → ℂ} {φ : ℝ → ℝ} {θ : �
   have hgapn : θ τ - θ t = ((-n : ℤ) : ℝ) * (2 * π) := by push_cast; linarith [hreal]
   have hm1 : (1 : ℝ) ≤ ((-n : ℤ) : ℝ) := by
     by_contra h
-    push_neg at h
+    push Not at h
     have hle0 : (-n : ℤ) ≤ 0 := by
       have : (-n : ℤ) < 1 := by exact_mod_cast h
       omega
@@ -154,7 +154,8 @@ private lemma lift_identity_of_deriv {z : ℝ → ℂ} {φ θ : ℝ → ℝ} {L 
     -- rewrite the derivative value to `c σ • m σ`
     have hval : Complex.exp ((φ σ : ℂ) * Complex.I) * Complex.exp ((θ σ : ℂ) * (-Complex.I))
           + z σ * (Complex.exp ((θ σ : ℂ) * (-Complex.I))
-            * (((-(inner ℝ (z σ) (Complex.I * Complex.exp ((φ σ : ℂ) * Complex.I))) / ‖z σ‖ ^ 2 : ℝ))
+            * (((-(inner ℝ (z σ) (Complex.I * Complex.exp ((φ σ : ℂ) * Complex.I)))
+                / ‖z σ‖ ^ 2 : ℝ))
               * (-Complex.I)))
         = (c σ : ℂ) * m σ := by
       rw [hcdef, hmdef]
@@ -250,7 +251,7 @@ private lemma lift_identity_of_deriv {z : ℝ → ℂ} {φ θ : ℝ → ℝ} {L 
   have hnormeq : ‖z σ‖ = (m σ).re := by rw [hzabs σ hσ, abs_of_pos hrpos]
   have hmval : m σ = (‖z σ‖ : ℂ) := by rw [hnormeq]; exact hmreal σ hσ
   have hzeq : z σ = m σ * Complex.exp ((θ σ : ℂ) * Complex.I) := by
-    show z σ = z σ * Complex.exp ((θ σ : ℂ) * (-Complex.I))
+    change z σ = z σ * Complex.exp ((θ σ : ℂ) * (-Complex.I))
         * Complex.exp ((θ σ : ℂ) * Complex.I)
     rw [mul_assoc, ← Complex.exp_add,
       show (θ σ : ℂ) * (-Complex.I) + (θ σ : ℂ) * Complex.I = 0 by ring,
@@ -269,7 +270,7 @@ the single cosine `(r−h)·cos(σ/r) − r`. -/
 model, `⟪z(σ), i e^{iφ(σ)}⟫ = ⟪z_c, u·e^{iσ/r}⟫ − r`, where `u = i e^{iφ₀}` and
 `z_c = z₀ + r·u`. -/
 private lemma arcModelConst_inner_center {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
-    (hr : arcModelRadius K z₀ φ₀ ≠ 0) (σ : ℝ) :
+    (_hr : arcModelRadius K z₀ φ₀ ≠ 0) (σ : ℝ) :
     ⟪(arcModelConst K z₀ φ₀ σ).1,
         Complex.I * Complex.exp (((arcModelConst K z₀ φ₀ σ).2 : ℂ) * Complex.I)⟫_ℝ
       = ⟪z₀ + arcModelRadius K z₀ φ₀ • (Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I)),

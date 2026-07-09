@@ -105,7 +105,7 @@ lemma neg_ra_ub {h : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h ≤ 3 / 20) :
   nlinarith
 
 /-- `−5/4 ≤ r_a` on `h ∈ [1/10, 3/20]`. -/
-lemma neg_ra_lb {h : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h ≤ 3 / 20) :
+lemma neg_ra_lb {h : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (_h2 : h ≤ 3 / 20) :
     -5 / 4 ≤ arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π := by
   rw [arcModelRadius_qArc1, le_div_iff_of_neg (by nlinarith : 2 * (-3 / 10 - h) < 0)]
   nlinarith
@@ -136,8 +136,8 @@ lemma neg_q_ub {h L : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h ≤ 3 / 20) (hL0 
 
 /-- The negative second-arc inner-product denominator `2 − h − (r_a − h)·q` is positive
 (`(r_a − h) < 0`, `q ≥ 0`, so `−(r_a − h)q ≥ 0`). -/
-lemma neg_innerc_pos {h L : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h ≤ 3 / 20) (hL0 : 0 ≤ L)
-    (hL2 : L ≤ 33 / 10) :
+lemma neg_innerc_pos {h L : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h ≤ 3 / 20) (_hL0 : 0 ≤ L)
+    (_hL2 : L ≤ 33 / 10) :
     0 < 2 - h - (arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π - h)
         * (1 - Real.cos ((L / 8) / arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π)) := by
   have hru := neg_ra_ub h1 h2
@@ -366,7 +366,8 @@ lemma neg_smooth_confined_quarter {δ h L : ℝ}
     have hg := arcTrajectory_gronwall hR hR1 hL8 hκc continuous_const hLip hΦderiv1 hM1deriv hσ
     rw [← hedef, hΦ0, hM1_0, sub_self, norm_zero, zero_add, hcoef] at hg
     refine le_trans hg ?_
-    have hmul : (50 : ℝ) / 9 * ∫ σ in (0 : ℝ)..(L / 8), |κ σ - (-3 / 10)| ≤ 50 / 9 * (23 / 20 * δ) :=
+    have hmul : (50 : ℝ) / 9 * ∫ σ in (0 : ℝ)..(L / 8), |κ σ - (-3 / 10)|
+        ≤ 50 / 9 * (23 / 20 * δ) :=
       mul_le_mul_of_nonneg_left hI1 (by norm_num)
     calc e * (50 / 9 * ∫ σ in (0 : ℝ)..(L / 8), |κ σ - (-3 / 10)|)
         ≤ e * (50 / 9 * (23 / 20 * δ)) := mul_le_mul_of_nonneg_left hmul (by linarith)

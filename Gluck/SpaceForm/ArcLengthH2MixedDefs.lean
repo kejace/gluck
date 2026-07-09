@@ -59,7 +59,7 @@ of `MixedSignSphereFourVertex.of_sphereFourVertex`, `SphereMixed.lean:68`, and
 `mixedSignFourVertex_of_isCurvatureFunction`, `DahlbergStep1.lean:68`.) -/
 theorem MixedSignHyperbolicFourVertex.of_escape_positive {κ : ℝ → ℝ}
     (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
-    (hpos : ∀ θ, 1 < κ θ)
+    (_hpos : ∀ θ, 1 < κ θ)
     {p₁ q₁ p₂ q₂ : ℝ} (h12 : p₁ < q₁) (h23 : q₁ < p₂) (h34 : p₂ < q₂)
     (h41 : q₂ < p₁ + 2 * π)
     (hm1 : IsLocalMax κ p₁) (hm2 : IsLocalMax κ p₂)
