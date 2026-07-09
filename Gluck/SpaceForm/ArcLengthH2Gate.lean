@@ -536,9 +536,29 @@ lemma gate_G1_right_key {q ca sa rc sc cc : ℝ}
     mul_le_mul hrc (by linarith) hS0 (by norm_num)
   linarith [hrcS, hq_hi]
 
-set_option maxHeartbeats 800000 in
--- The `G₁` face chains ~25 `nlinarith`/`ring` interval-arithmetic steps, exceeding the default
--- heartbeat budget; the certificate is finite and rational (scratchpad `qland.py`).
+/-- Taylor lower bound `Real.sin c ≥ 33/100` on the left `G₁` arc-a angle range
+`c ∈ [11/32, 7/16]`, via `Real.sin_gt_sub_cube`.  Extracted so its cubic `nlinarith`
+certificate compiles under the default heartbeat budget. -/
+private lemma gate_G1_left_sinArcA_lb {c : ℝ} (hc0 : 0 < c) (hc1 : c ≤ 1)
+    (hc_lo : (11 : ℝ) / 32 ≤ c) (hc3hi : c ^ 3 ≤ ((7 : ℝ) / 16) ^ 3) :
+    (33 : ℝ) / 100 ≤ Real.sin c := by
+  nlinarith [Real.sin_gt_sub_cube hc0 hc1, hc_lo, hc3hi, sq_nonneg c,
+    mul_nonneg hc0.le hc0.le]
+
+/-- Taylor lower bound `Real.sin y ≥ 12/100` on the right `G₁` complementary angle range
+`y ∈ [1237/10000, 1]`, via `Real.sin_gt_sub_cube`.  Extracted so its two cubic `nlinarith`
+certificates compile under the default heartbeat budget. -/
+private lemma gate_G1_right_sinComp_lb {y : ℝ} (hy_lo : (1237 : ℝ) / 10000 ≤ y)
+    (hy1 : y ≤ 1) (hy_pos : 0 < y) :
+    (12 : ℝ) / 100 ≤ Real.sin y := by
+  have hkey : (1237 : ℝ) / 10000 - (1237 / 10000) ^ 3 / 4 ≤ y - y ^ 3 / 4 := by
+    nlinarith [hy_lo, hy1, mul_nonneg (sub_nonneg.2 hy_lo) (sub_nonneg.2 hy1)]
+  nlinarith [Real.sin_gt_sub_cube hy_pos hy1, hkey]
+
+set_option maxHeartbeats 220000 in
+-- Marginally over the default budget: the residual cost is definitional unfolding
+-- (`whnf`/`isDefEq`) of the large `arcModelRadius`/`qArc2` terms via `set`/`rw`, not tactic
+-- search (the cubic `sin` bound is factored into `gate_G1_left_sinArcA_lb`); 210000 fails.
 /-- **TARGET C — LEFT `G₁` face.**  `G₁ ≤ 0` on the left edge `h = 1/5`,
 `L ∈ [11/5, 14/5]` (numerically `G₁ ∈ [−0.168, −0.049]`).  The bespoke sin/cos interval
 certificate: `θ_a ∈ [11/32, 7/16]` and `θ_c ∈ [1.071, 1.423]`, closed by
@@ -569,31 +589,31 @@ lemma gate_G1_left {L : ℝ} (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) :
   rw [abs_of_nonneg hc0] at hcb
   obtain ⟨hcb1, hcb2⟩ := hcb
   -- Arc-a scalar bounds.
-  have hq : (55 : ℝ) / 1000 ≤ 1 - Real.cos c := by nlinarith [hcb2, hc2lo', hc4hi]
-  have hca : (90 : ℝ) / 100 ≤ Real.cos c := by nlinarith [hcb1, hc2hi, hc4hi]
-  have hca_hi : Real.cos c ≤ (944 : ℝ) / 1000 := by nlinarith [hcb2, hc2lo', hc4hi]
+  have hq : (55 : ℝ) / 1000 ≤ 1 - Real.cos c := by linarith [hcb2, hc2lo', hc4hi]
+  have hca : (90 : ℝ) / 100 ≤ Real.cos c := by linarith [hcb1, hc2hi, hc4hi]
+  have hca_hi : Real.cos c ≤ (944 : ℝ) / 1000 := by linarith [hcb2, hc2lo', hc4hi]
   have hsa0 : (0 : ℝ) ≤ Real.sin c :=
     Real.sin_nonneg_of_nonneg_of_le_pi hc0 (by linarith [Real.pi_gt_three])
-  have hsa : (33 : ℝ) / 100 ≤ Real.sin c := by
-    nlinarith [Real.sin_gt_sub_cube (by linarith : (0 : ℝ) < c) hc1, hc_lo, hc3hi]
+  have hsa : (33 : ℝ) / 100 ≤ Real.sin c :=
+    gate_G1_left_sinArcA_lb (by linarith) hc1 hc_lo hc3hi
   -- Second-arc radius `rc = (4/5)·cos c / (2 + cos c)`.
-  have hden : (0 : ℝ) < 2 + Real.cos c := by nlinarith [Real.neg_one_le_cos c]
+  have hden : (0 : ℝ) < 2 + Real.cos c := by linarith [Real.neg_one_le_cos c]
   have hbigpos : (0 : ℝ) < 2 * (2 + (-(1 / 5) - (4 / 5 - 1 / 5) * (1 - Real.cos c))) := by
-    nlinarith [Real.neg_one_le_cos c]
+    linarith [Real.neg_one_le_cos c]
   have hrc_eq : rc = 4 / 5 * Real.cos c / (2 + Real.cos c) := by
     rw [hrcdef, arcModelRadius_qArc2, hra, ← hc, div_eq_div_iff hbigpos.ne' hden.ne']
     ring
   have hrc_lo : (246 : ℝ) / 1000 ≤ rc := by
-    rw [hrc_eq, le_div_iff₀ hden]; nlinarith [hca]
+    rw [hrc_eq, le_div_iff₀ hden]; linarith [hca]
   have hrc_hi : rc ≤ (2566 : ℝ) / 10000 := by
-    rw [hrc_eq, div_le_iff₀ hden]; nlinarith [hca_hi]
+    rw [hrc_eq, div_le_iff₀ hden]; linarith [hca_hi]
   have hrc_pos : (0 : ℝ) < rc := by linarith
   clear_value rc
   -- Second-arc angle `tc = θ_c ∈ [1071/1000, 1423/1000]`.
   have htc_lo : (1071 : ℝ) / 1000 ≤ tc := by
-    rw [htc, le_div_iff₀ hrc_pos]; nlinarith [hrc_hi, hL1]
+    rw [htc, le_div_iff₀ hrc_pos]; linarith [hrc_hi, hL1]
   have htc_hi : tc ≤ (1423 : ℝ) / 1000 := by
-    rw [htc, div_le_iff₀ hrc_pos]; nlinarith [hrc_lo, hL2]
+    rw [htc, div_le_iff₀ hrc_pos]; linarith [hrc_lo, hL2]
   clear_value tc
   -- Complementary angle `y = π/2 − tc ∈ [1477/10000, 4998/10000] ⊂ [0,1]`.
   have hy_hi : π / 2 - tc ≤ (4998 : ℝ) / 10000 := by linarith [gate_pi_hi, htc_lo]
@@ -608,16 +628,17 @@ lemma gate_G1_left {L : ℝ} (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) :
   rw [abs_of_nonneg hy0] at hycb
   -- `sin tc = cos y ≥ 86/100` and `cos tc = sin y ≤ 1/2`.
   have hsc : (86 : ℝ) / 100 ≤ Real.sin tc := by
-    rw [← Real.cos_pi_div_two_sub tc]; nlinarith [hycb.1, hy2hi, hy4hi]
+    rw [← Real.cos_pi_div_two_sub tc]; linarith [hycb.1, hy2hi, hy4hi]
   have hsc0 : (0 : ℝ) ≤ Real.sin tc := by linarith
   have hcc : Real.cos tc ≤ (1 : ℝ) / 2 := by
     rw [← Real.sin_pi_div_two_sub tc]
     linarith [Real.sin_lt (show (0 : ℝ) < π / 2 - tc by linarith), hy_hi]
   exact gate_G1_left_key hq hca hsa hsa0 hrc_lo hrc_pos.le hsc hsc0 hcc
 
-set_option maxHeartbeats 800000 in
--- Same interval-arithmetic certificate as `gate_G1_left`, opposite sign; exceeds the default
--- heartbeat budget (finite rational certificate, scratchpad `qland.py`).
+set_option maxHeartbeats 220000 in
+-- Marginally over the default budget: the residual cost is definitional unfolding
+-- (`whnf`/`isDefEq`) of the large `arcModelRadius`/`qArc2` terms via `set`/`rw`, not tactic
+-- search (the cubic `sin` bound is factored into `gate_G1_right_sinComp_lb`); 210000 fails.
 /-- **TARGET C — RIGHT `G₁` face.**  `G₁ ≥ 0` on the right edge `h = 2/5`,
 `L ∈ [11/5, 14/5]` (numerically `G₁ ∈ [+0.064, +0.175]`).  Here `θ_a ∈ [11/42, 1/3]`,
 `r_a = 21/20`, and `θ_c ∈ [1.057, 1.447]`; the `θ_c` trig is again handled via the
@@ -647,31 +668,31 @@ lemma gate_G1_right {L : ℝ} (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) 
   rw [abs_of_nonneg hc0] at hcb
   obtain ⟨hcb1, hcb2⟩ := hcb
   -- Arc-a scalar bounds.
-  have hq_hi : 1 - Real.cos c ≤ (6 : ℝ) / 100 := by nlinarith [hcb1, hc2hi, hc4hi]
-  have hca : Real.cos c ≤ (97 : ℝ) / 100 := by nlinarith [hcb2, hc2lo', hc4hi]
-  have hca_lo : (94 : ℝ) / 100 ≤ Real.cos c := by nlinarith [hcb1, hc2hi, hc4hi]
+  have hq_hi : 1 - Real.cos c ≤ (6 : ℝ) / 100 := by linarith [hcb1, hc2hi, hc4hi]
+  have hca : Real.cos c ≤ (97 : ℝ) / 100 := by linarith [hcb2, hc2lo', hc4hi]
+  have hca_lo : (94 : ℝ) / 100 ≤ Real.cos c := by linarith [hcb1, hc2hi, hc4hi]
   have hca0 : (0 : ℝ) ≤ Real.cos c := by linarith
   have hsa : Real.sin c ≤ (1 : ℝ) / 3 := by linarith [Real.sin_lt hc_pos]
   have hsa0 : (0 : ℝ) ≤ Real.sin c :=
     Real.sin_nonneg_of_nonneg_of_le_pi hc0 (by linarith [Real.pi_gt_three])
   -- Second-arc radius `rc = (273·cos c − 105)/(380 + 260·cos c)`.
-  have hden : (0 : ℝ) < 380 + 260 * Real.cos c := by nlinarith [Real.neg_one_le_cos c]
+  have hden : (0 : ℝ) < 380 + 260 * Real.cos c := by linarith [Real.neg_one_le_cos c]
   have hbigpos : (0 : ℝ) < 2 * (2 + (-(2 / 5) - (21 / 20 - 2 / 5) * (1 - Real.cos c))) := by
-    nlinarith [Real.neg_one_le_cos c]
+    linarith [Real.neg_one_le_cos c]
   have hrc_eq : rc = (273 * Real.cos c - 105) / (380 + 260 * Real.cos c) := by
     rw [hrcdef, arcModelRadius_qArc2, hra, ← hc, div_eq_div_iff hbigpos.ne' hden.ne']
     ring
   have hrc_lo : (242 : ℝ) / 1000 ≤ rc := by
-    rw [hrc_eq, le_div_iff₀ hden]; nlinarith [hca_lo]
+    rw [hrc_eq, le_div_iff₀ hden]; linarith [hca_lo]
   have hrc_hi : rc ≤ (26 : ℝ) / 100 := by
-    rw [hrc_eq, div_le_iff₀ hden]; nlinarith [hca]
+    rw [hrc_eq, div_le_iff₀ hden]; linarith [hca]
   have hrc_pos : (0 : ℝ) < rc := by linarith
   clear_value rc
   -- Second-arc angle `tc = θ_c ∈ [1057/1000, 1447/1000]`.
   have htc_lo : (1057 : ℝ) / 1000 ≤ tc := by
-    rw [htc, le_div_iff₀ hrc_pos]; nlinarith [hrc_hi, hL1]
+    rw [htc, le_div_iff₀ hrc_pos]; linarith [hrc_hi, hL1]
   have htc_hi : tc ≤ (1447 : ℝ) / 1000 := by
-    rw [htc, div_le_iff₀ hrc_pos]; nlinarith [hrc_lo, hL2]
+    rw [htc, div_le_iff₀ hrc_pos]; linarith [hrc_lo, hL2]
   clear_value tc
   -- Complementary angle `y = π/2 − tc ∈ [1237/10000, 5138/10000] ⊂ (0,1]`.
   have hy_hi : π / 2 - tc ≤ (5138 : ℝ) / 10000 := by linarith [gate_pi_hi, htc_lo]
@@ -685,10 +706,7 @@ lemma gate_G1_right {L : ℝ} (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) 
     Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith [Real.pi_gt_three])
   have hcc : (12 : ℝ) / 100 ≤ Real.cos tc := by
     rw [← Real.sin_pi_div_two_sub tc]
-    have hkey : (1237 : ℝ) / 10000 - (1237 / 10000) ^ 3 / 4
-        ≤ (π / 2 - tc) - (π / 2 - tc) ^ 3 / 4 := by
-      nlinarith [hy_lo, hy1, hy0, mul_nonneg (sub_nonneg.2 hy_lo) (sub_nonneg.2 hy1)]
-    nlinarith [Real.sin_gt_sub_cube hy_pos hy1, hkey]
+    exact gate_G1_right_sinComp_lb hy_lo hy1 hy_pos
   have hcc1 : Real.cos tc ≤ 1 := Real.cos_le_one tc
   exact gate_G1_right_key hq_hi hca hca0 hsa hsa0 hrc_hi hrc_pos.le hsc hsc0 hcc hcc1
 
