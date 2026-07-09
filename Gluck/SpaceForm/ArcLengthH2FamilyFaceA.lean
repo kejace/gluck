@@ -293,7 +293,6 @@ private lemma a9_K0_pos {C S ra rc : ℝ} (hCS : C ^ 2 + S ^ 2 = 1) (hC : 0 < C)
     mul_pos (mul_pos hC hrc) hinner
   nlinarith [hfin, hT3]
 
-set_option maxHeartbeats 1000000 in
 -- large `linear_combination` certificate over the unfolded junction chain
 /-- **Numerator identity for `Im ∂₁G`** (modulo `C² + S² = 1`):
 `a9V1im · D³ra m²rc²` equals the manifestly-organized quartic in `D`. -/
@@ -319,7 +318,6 @@ private lemma a9V1im_num_eq {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
       + C * S ^ 2 * ra ^ 3 * rc - C * S ^ 2 * ra * rc ^ 3 + C * ra ^ 3 * rc
       - C * ra * rc ^ 3 + D * S * π * ra * rc ^ 2 - D * S * π * rc ^ 3)) * hCS
 
-set_option maxHeartbeats 1000000 in
 -- large `linear_combination` certificate over the unfolded junction chain
 /-- **Numerator factorization for `Re ∂₁G`** (modulo `C² + S² = 1`):
 `−a9V1re · D³ra m²rc² = (D − wS(1−S)) · K` with `K` quadratic in `D`. -/
@@ -347,7 +345,6 @@ private lemma a9V1re_num_eq {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
       - S ^ 3 * ra * rc ^ 3 - S ^ 2 * ra ^ 3 * rc + S ^ 2 * ra * rc ^ 3
       + S * ra ^ 3 * rc - S * ra * rc ^ 3 - ra ^ 3 * rc + ra * rc ^ 3)) * hCS
 
-set_option maxHeartbeats 1000000 in
 -- six-hint nlinarith over the quartic numerator
 /-- **Column sign 1**: `Im ∂₁G > 0`.  All `D`-blocks of the numerator are
 positive after absorbing `R ≥ −rc²C²` and `P ≥ −π²w²` into the `D¹`-blocks
@@ -387,7 +384,9 @@ private lemma a9V1_im_pos {C S ra rc D : ℝ} (hCS : C ^ 2 + S ^ 2 = 1)
     rw [hnum]; nlinarith [hT1, hT2, hA1, hA2, hL1, hL2]
   exact (mul_pos_iff_of_pos_right hX).mp key
 
-set_option maxHeartbeats 1000000 in
+-- above default: the `nlinarith [hKwc, hincr]` monotonicity step over the
+-- `Δ·K` factorization needs ~350k (bisected minimum; fails at 300k)
+set_option maxHeartbeats 350000 in
 -- nlinarith assembly of the Δ·K factorization
 /-- **Column sign 2**: `Re ∂₁G < 0`, via `N = Δ·K`, `Δ = D − wS(1−S) > 0`
 (from `C² ≥ S(1−S)`, i.e. `C² − S(1−S) = 1 − S > 0`), `K` increasing in `D`,
@@ -486,13 +485,13 @@ private noncomputable def a9theta (a h L : ℝ) : ℝ := L / 8 / a9ra a h
 private noncomputable def a9rc (a c h L : ℝ) : ℝ :=
   arcModelRadius c (qArc1 a (h, L)).1 (qArc1 a (h, L)).2
 
-set_option maxHeartbeats 1600000 in
--- heavy `qArc` unfolding at `whnf` (WIP A9 salvage; retune at A13 cleanup)
 private noncomputable def a9D (a c h L : ℝ) : ℝ :=
   c + ⟪(qArc1 a (h, L)).1,
     Complex.I * Complex.exp (((qArc1 a (h, L)).2 : ℂ) * Complex.I)⟫_ℝ
 
-set_option maxHeartbeats 1600000 in
+-- above default: the long chain of `qArc`-unfolding `nlinarith` steps in this
+-- bundled anchor lemma needs ~320k (bisected minimum; fails at 300k)
+set_option maxHeartbeats 320000 in
 -- heavy nlinarith/qArc context (WIP A9 salvage; retune at A13 cleanup)
 /-- **Anchor windows and identities** (bundle): under the anchor hypotheses,
 writing `S = sin θ_a`, `C = cos θ_a`, `ra = r_a`, `rc = r_c`, `D = c + s`:
