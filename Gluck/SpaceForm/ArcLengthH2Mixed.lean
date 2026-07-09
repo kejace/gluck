@@ -24,18 +24,21 @@ file is the arc-length (Thread B) counterpart of the flow-based ε-generic
 `Gluck/SpaceForm/MixedConverse.lean` (Thread A, whose floor
 `−(ε·centeredRadius ε c) = +centeredRadius (−1) c > 0` keeps minima *positive*).
 
-## The honest hypothesis and the confinement floor
+## The hypothesis: arbitrarily negative minima (unrestricted below)
 
-`MixedSignHyperbolicFourVertex` (ALM-1) carries a **negative** confinement floor
-`κ θ > −(centeredRadius (−1) c) ∈ (−1, 0)`.  Minima are *genuinely negative*
-(down to `≈ −1` as `c → 1⁺`), but **not unrestricted below**: the confined-disk
-construction realizes minima in `(−(centeredRadius (−1) c), ∞)`, exactly as the
-Euclidean `Gluck.dahlbergConverse` (with `0 ↦ 1`) and the spherical
-`Gluck.sphericalConverse` realize a value-separated four-vertex via a *positive*
-convex clean bicircle plus a small `L¹` perturbation.  Truly-unrestricted-below
-minima (deep, broad concavity) is geometrically true but is a strictly larger
-statement than the confined construction gives — the same limitation as the
-Euclidean and spherical stages.
+`MixedSignHyperbolicFourVertex` (ALM-1) places **no lower bound** on the minima —
+`κ` may be *arbitrarily negative*.  The hypothesis constrains only the maxima
+(value-separation `max 1 (max (κ q₁) (κ q₂)) < min (κ p₁) (κ p₂)` and a window
+level `c > 1`).  An earlier version carried a confinement floor
+`κ θ > −(centeredRadius (−1) c)`, but it was **vestigial** (bound but unused in the
+capstone) and has been removed.  The construction reaches the closed curve through
+a *positive* convex clean bicircle (levels `1 < a < b`) plus a small `L¹`
+perturbation of `κ ∘ h₁` toward it — exactly as the Euclidean
+`Gluck.dahlbergConverse` (with `0 ↦ 1`) and the spherical `Gluck.sphericalConverse`
+do — and the `L¹` squeeze absorbs dips of *any* depth (a deep narrow dip
+contributes small `L¹` measure), confinement being measured against the clean
+bicircle while the true `κ` enters only via `|κ| ≤ M`.  So this is the **full
+genuinely-negative (unrestricted-below)** H² four-vertex converse.
 
 ## Proof structure (mirror `Gluck.dahlbergConverse`, `DahlbergStep2.lean:2861`,
    and `Gluck.sphericalConverse`, `SphereMixed.lean:491`, re-targeted to arc length)
@@ -82,34 +85,35 @@ explicit hyperbolic circle branch), or has value-separated alternating extrema
 `p₁ < q₁ < p₂ < q₂` with the **escape-velocity separation**
 `max 1 (max (κ q₁) (κ q₂)) < min (κ p₁) (κ p₂)` (the H² `coth R > 1`; the
 Euclidean/spherical `max 0` raised to `max 1`) together with a window value `c`
-in the overlap for which the **negative confinement floor**
-`−(centeredRadius (−1) c) < κ θ` holds globally.
+in the overlap gap (`1 < c`).
 
-The floor `−(centeredRadius (−1) c) = −(c − √(c²−1)) ∈ (−1, 0)`, so the minima
-are *genuinely negative* (`c → 1⁺` ⇒ floor `→ −1`; `c → ∞` ⇒ floor `→ 0⁻`) yet
-bounded below — the flow-blocked, arc-length-reachable regime.  Distinct from
+**No lower bound on the minima — the full genuinely-negative regime.**  The
+earlier confinement floor `−(centeredRadius (−1) c) < κ` has been removed: it was
+vestigial.  The fork-A convex-clean-levels route uses only `|κ| ≤ M` and the
+`L¹`-closeness of `κ ∘ h₁` to the convex reference bicircle
+(`exists_bicircle_L1_reparam_pointwise`), which absorbs dips of *any* depth
+(Dahlberg's `L¹` squeeze — a deep narrow dip contributes small `L¹` measure).
+So the minima may be **arbitrarily negative**; this is the unrestricted-below H²
+four-vertex converse, not a floored scope.  Distinct from
 `MixedSignSpaceFormFourVertex (−1)` (`MixedConverse.lean:59`, Thread A), whose
-floor `−(ε·centeredRadius ε c) = +centeredRadius (−1) c > 0` keeps minima
-positive.  (Transport of `MixedSignFourVertex`, `DahlbergStep1.lean:57`, and
-`MixedSignSphereFourVertex`, `SphereMixed.lean:41`, with `0 ↦ 1` and the
-`ε = −1` floor.) -/
+floor keeps minima positive.  (Transport of `MixedSignFourVertex`,
+`DahlbergStep1.lean:57`, and `MixedSignSphereFourVertex`, `SphereMixed.lean:41`,
+with `0 ↦ 1`.) -/
 def MixedSignHyperbolicFourVertex (κ : ℝ → ℝ) : Prop :=
   Continuous κ ∧ Function.Periodic κ (2 * π) ∧
     ((∃ c, 1 < c ∧ ∀ θ, κ θ = c) ∨
       (∃ p₁ q₁ p₂ q₂, p₁ < q₁ ∧ q₁ < p₂ ∧ p₂ < q₂ ∧ q₂ < p₁ + 2 * π ∧
         IsLocalMax κ p₁ ∧ IsLocalMax κ p₂ ∧ IsLocalMin κ q₁ ∧ IsLocalMin κ q₂ ∧
         max 1 (max (κ q₁) (κ q₂)) < min (κ p₁) (κ p₂) ∧
-        ∃ c, max 1 (max (κ q₁) (κ q₂)) < c ∧ c < min (κ p₁) (κ p₂) ∧ 1 < c ∧
-          ∀ θ, -(centeredRadius (-1) c) < κ θ))
+        ∃ c, max 1 (max (κ q₁) (κ q₂)) < c ∧ c < min (κ p₁) (κ p₂) ∧ 1 < c))
 
 /-- **Subsumption of the escape-velocity positive case.**  A continuous,
 `2π`-periodic four-vertex profile all of whose values exceed `1` (`∀ θ, 1 < κ θ`,
 the strict-escape-velocity positive regime realized by the smooth gate profile
-`exists_gateProfileSmooth_realization`) satisfies the mixed hypothesis: any
-window level `c > 1` clears the negative floor since `−(centeredRadius (−1) c) < 0
-< 1 < κ θ`.  (Mirror of `MixedSignSphereFourVertex.of_sphereFourVertex`,
-`SphereMixed.lean:68`, and `mixedSignFourVertex_of_isCurvatureFunction`,
-`DahlbergStep1.lean:68`.) -/
+`exists_gateProfileSmooth_realization`) satisfies the mixed hypothesis: pick any
+window level `c > 1` in the overlap gap (e.g. the midpoint of `(lo, hi)`).  (Mirror
+of `MixedSignSphereFourVertex.of_sphereFourVertex`, `SphereMixed.lean:68`, and
+`mixedSignFourVertex_of_isCurvatureFunction`, `DahlbergStep1.lean:68`.) -/
 theorem MixedSignHyperbolicFourVertex.of_escape_positive {κ : ℝ → ℝ}
     (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
     (hpos : ∀ θ, 1 < κ θ)
@@ -125,9 +129,7 @@ theorem MixedSignHyperbolicFourVertex.of_escape_positive {κ : ℝ → ℝ}
   set hi := min (κ p₁) (κ p₂) with hhi
   have h1lo : (1 : ℝ) ≤ lo := le_max_left _ _
   have hc1 : 1 < (lo + hi) / 2 := by linarith
-  refine ⟨(lo + hi) / 2, by linarith, by linarith, hc1, fun θ => ?_⟩
-  have hr := (centeredRadius_mem_Ioo (-1) ((lo + hi) / 2) (Or.inr rfl) (Or.inr ⟨rfl, hc1⟩)).1
-  linarith [hpos θ]
+  exact ⟨(lo + hi) / 2, by linarith, by linarith, hc1⟩
 
 /-! ## ALM-2 — the convex clean-bicircle `L¹` reparametrization -/
 

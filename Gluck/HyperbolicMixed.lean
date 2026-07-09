@@ -38,14 +38,18 @@ Dahlberg §2–3 onto the H² arc-length engine (`Gluck/SpaceForm/ArcLengthH2*.l
   Poincaré disk. Re-export of `SpaceForm.hyperbolicMixedConverse`, with the
   realization stated through `RealizesHyperbolicCurvature` (= `Realizes (−1)`).
 
-## Floored scope (honest)
+## Scope: arbitrarily negative minima (unrestricted below)
 
-The minima are **genuinely negative** — the confinement floor
-`−(centeredRadius (−1) c) = −(c − √(c² − 1)) ∈ (−1, 0)` (with `c → 1⁺ ⇒ −1`,
-`c → ∞ ⇒ 0⁻`), so `κ` reaches down to nearly `−1` — yet **bounded below** by that
-floor. This is the honest, floored scope of the milestone: not the fully
-unrestricted-below regime, but a genuinely mixed-sign one strictly larger than the
-positive `hyperbolicConverse_pos` (which it subsumes via
+The minima are **arbitrarily negative** — there is **no lower bound** on `κ`.
+The four-vertex hypothesis constrains only the maxima (via the value-separation
+`max 1 (max (κ q₁) (κ q₂)) < min (κ p₁) (κ p₂)` and a window level `c > 1`); the
+minima `κ q₁, κ q₂` may be as negative as one likes. An earlier development
+carried a confinement floor `−(centeredRadius (−1) c) < κ`, but it was vestigial:
+the fork-A route reaches the closed curve through convex clean levels `1 < a < b`
+and the `L¹`-closeness of `κ ∘ h₁` to a convex reference bicircle, which absorbs
+dips of *any* depth (Dahlberg's `L¹` squeeze), so the floor was removed. This is
+therefore the **full genuinely-negative H² four-vertex converse**, strictly
+larger than the positive `hyperbolicConverse_pos` (which it subsumes via
 `SpaceForm.MixedSignHyperbolicFourVertex.of_escape_positive`).
 
 ## Reparametrization (the `H²` co-constructed period)

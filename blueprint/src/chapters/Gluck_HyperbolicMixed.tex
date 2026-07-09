@@ -20,18 +20,19 @@ metric denominator $1-\lVert z\rVert^2>0$ is a confinement condition, not an
 admissibility one, so concave / negative-$\kappa$ arcs are permitted by the
 reconstruction flow without a positive-speed obstruction.
 
-\section{Floored scope}
+\section{Scope: arbitrarily negative minima}
 
-The minima are genuinely negative but \emph{bounded below} by the confinement
-floor
-\[
-  -\bigl(\operatorname{centeredRadius}(-1)\,c\bigr)
-    = -\bigl(c-\sqrt{c^2-1}\bigr)\in(-1,0),
-\]
-which tends to $-1$ as $c\to1^+$ and to $0^-$ as $c\to\infty$. Thus $\kappa$
-reaches down to nearly $-1$. This is the honest floored regime: strictly larger
-than the everywhere-escape positive converse (which it subsumes), but not the
-fully unrestricted-below regime.
+The minima are \emph{arbitrarily negative} --- there is no lower bound on
+$\kappa$. The hypothesis constrains only the maxima, through the value-separation
+$\max(1,\kappa(q_1),\kappa(q_2))<\min(\kappa(p_1),\kappa(p_2))$ and a window level
+$c>1$; the minima $\kappa(q_1),\kappa(q_2)$ may be as negative as one likes. An
+earlier version carried a confinement floor
+$-\bigl(\operatorname{centeredRadius}(-1)\,c\bigr)=-\bigl(c-\sqrt{c^2-1}\bigr)$,
+but it was vestigial: the fork-A route reaches the curve through convex clean
+levels $1<a<b$ and the $L^1$-closeness of $\kappa\circ h_1$ to a convex reference
+bicircle, which absorbs dips of any depth (Dahlberg's $L^1$ squeeze). Removing it
+gives the \emph{full genuinely-negative} converse, strictly larger than the
+everywhere-escape positive converse (which it subsumes).
 
 \begin{definition}[Mixed-sign hyperbolic four-vertex hypothesis]
   \label{def:mixed_hyperbolic_four_vertex}
@@ -39,9 +40,8 @@ fully unrestricted-below regime.
   \leanok
   A continuous, $2\pi$-periodic $\kappa$ that is either constant escape
   ($\exists c,\ 1<c\ \wedge\ \kappa\equiv c$) or has the value-separated
-  alternating four-vertex extrema with both maxima above an escape level $c>1$
-  and the global confinement floor $-\bigl(\operatorname{centeredRadius}(-1)\,
-  c\bigr)<\kappa$.
+  alternating four-vertex extrema with both maxima above an escape level $c>1$.
+  No lower bound on the minima.
 \end{definition}
 
 \section{Assembly}

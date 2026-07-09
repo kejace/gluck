@@ -11202,9 +11202,10 @@ theorem layout_arcLengthH2Curvature {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
 
 /-- **The hyperbolic mixed (Dahlberg) converse — genuinely-negative four-vertex.**
 A `MixedSignHyperbolicFourVertex` profile (continuous, `2π`-periodic, escape
-velocity at the maxima, genuinely-negative minima) is realized, up to an
-orientation-preserving `C¹` reparametrization `Ψ`, as the geodesic curvature of a
-*simple closed* curve in the hyperbolic plane at `ε = −1`.  The up-to-reparam form
+velocity at the maxima, **arbitrarily-negative minima — no lower bound**) is
+realized, up to an orientation-preserving `C¹` reparametrization `Ψ`, as the
+geodesic curvature of a *simple closed* curve in the hyperbolic plane at
+`ε = −1`.  The up-to-reparam form
 mirrors `realizesH2_of_reparam`/`exists_gateProfileSmooth_realization`
 (`ArcLengthH2.lean`): `H²` has no metric rescaling, so the period is co-constructed
 rather than normalized (the `AL-6` precedent).
@@ -11223,17 +11224,18 @@ Poincaré–Miranda closing (`exists_layout_closing`), simplicity transport
 reparam `Ψ = h₁ ∘ g_{w*,t*} ∘ χ` (`nodeMap` `C¹`/positive-density, `χ` the linear
 window reparam of the converse).
 
-Note: the `MixedSignHyperbolicFourVertex` confinement floor
-`−(centeredRadius (−1) c) < κ` is **unused** by this route — the minima may be
-arbitrarily negative (the floor is only load-bearing for the fork-B explicit-witness
-milestone `mixed_chord_ne_zero`).  Relocated here from `ArcLengthH2Mixed.lean` because
-the closing/simplicity ingredients live in this file, which imports that one. -/
+Note: the minima are **unrestricted below**.  An earlier
+`MixedSignHyperbolicFourVertex` confinement floor `−(centeredRadius (−1) c) < κ`
+was vestigial for this route (bound but unused — the `L¹` squeeze absorbs dips of
+any depth) and has been removed from the hypothesis.  Relocated here from
+`ArcLengthH2Mixed.lean` because the closing/simplicity ingredients live in this
+file, which imports that one. -/
 theorem hyperbolicMixedConverse {κ : ℝ → ℝ} (h : MixedSignHyperbolicFourVertex κ) :
     ∃ (z : ℝ → ℂ) (Ψ : ℝ → ℝ), ContDiff ℝ 1 Ψ ∧ (∀ t, 0 < deriv Ψ t) ∧
       IsSimpleClosed z ∧ Realizes (-1) z (κ ∘ Ψ) := by
   obtain ⟨hκc, hκper, hdisj⟩ := h
   rcases hdisj with ⟨c, hc1, hc⟩ | ⟨p₁, q₁, p₂, q₂, h12, h23, h34, h41,
-      -, -, -, -, hsep, c, hcw₁, hcw₂, hc1, hlow⟩
+      -, -, -, -, hsep, c, hcw₁, hcw₂, hc1⟩
   · -- constant branch: the explicit escape-velocity hyperbolic circle.
     have hκeq : κ = fun _ => c := funext hc
     obtain ⟨z, hsimple, hreal⟩ := hyperbolicCircle_realizes hc1
