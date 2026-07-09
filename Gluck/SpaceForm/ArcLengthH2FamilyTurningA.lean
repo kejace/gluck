@@ -130,9 +130,6 @@ private lemma exists_plateau_radius' {η₁ η₂ η₃ η₄ g₁ g₂ g₃ g�
   exact ⟨M / 2, by linarith, by linarith, by linarith, by linarith, by linarith,
     by linarith, by linarith, by linarith, by linarith⟩
 
-set_option maxHeartbeats 1000000 in
--- Same elaboration budget as the frozen original: the measure-bound branch reasons
--- over a large local hypothesis context.
 /-- **Plateau-exporting preliminary reparametrization.**  Re-run of the frozen
 `Gluck.exists_preliminary_reparam` with the reparametrization pre-shifted by half a
 race width (`h₁ := θ ↦ m₀ + ∫₀^{θ+δ/2} w`), so that each plateau is left-aligned
