@@ -147,7 +147,42 @@ private lemma arcField_kappa_diff_norm_le {κ κ' : ℝ → ℝ} {R σ d : ℝ}
       nlinarith [norm_nonneg (clampBall R W.1)]
     exact div_le_div₀ (by positivity) hnum hR2 hden2
 
-set_option maxHeartbeats 2000000 in
+/-- Pure rational identity: the two-term first difference of the metric-factor
+product collapses to `4R/(1−R²)³`. -/
+private lemma metricFactor_diff_sum_identity {R Dd : ℝ} (hR2 : 0 < 1 - R ^ 2) :
+    (1 - R ^ 2)⁻¹ * (2 * R / (1 - R ^ 2) ^ 2 * Dd)
+      + 2 * R / (1 - R ^ 2) ^ 2 * Dd * (1 - R ^ 2)⁻¹
+      = 4 * R / (1 - R ^ 2) ^ 3 * Dd := by
+  have h := hR2.ne'
+  field_simp
+  ring
+
+/-- Pure rational identity: the second-difference metric-factor bound assembles
+into the constant `KM = 2/(1−R²)² + 16R²/(1−R²)³`. -/
+private lemma metricFactor_second_diff_KM_identity {R Q Dd : ℝ} (hR2 : 0 < 1 - R ^ 2) :
+    2 * Dd * Q * ((1 - R ^ 2)⁻¹ * (1 - R ^ 2)⁻¹)
+      + 4 * R * Q * (4 * R / (1 - R ^ 2) ^ 3 * Dd)
+      = (2 / (1 - R ^ 2) ^ 2 + 16 * R ^ 2 / (1 - R ^ 2) ^ 3) * Q * Dd := by
+  have h := hR2.ne'
+  field_simp
+  ring
+
+/-- Pure rational identity: the four speed-slot source bounds sum to `KS·Q·Dd`. -/
+private lemma layout_KS_sum_identity {R c Q Dd : ℝ} (hR2 : 0 < 1 - R ^ 2) :
+    2 * (2 + R) * Q * Dd * (1 - R ^ 2)⁻¹
+      + 2 * (1 + R) * Q * (2 * R / (1 - R ^ 2) ^ 2 * Dd)
+      + 2 * (1 + R) * Dd * (2 * R / (1 - R ^ 2) ^ 2 * Q)
+      + 2 * (c + R) * ((2 / (1 - R ^ 2) ^ 2 + 16 * R ^ 2 / (1 - R ^ 2) ^ 3) * Q * Dd)
+      = (2 * (2 + R) / (1 - R ^ 2) + 8 * (1 + R) * R / (1 - R ^ 2) ^ 2
+          + 2 * (c + R) * (2 / (1 - R ^ 2) ^ 2 + 16 * R ^ 2 / (1 - R ^ 2) ^ 3))
+        * Q * Dd := by
+  have h := hR2.ne'
+  field_simp
+  ring
+
+-- arcField_const_second_diff: four-point Leibniz expansion with ~30 hypotheses
+-- over a large inner-product context; irreducible residual algebra needs >default.
+set_option maxHeartbeats 300000 in
 -- Four-point Leibniz expansion over a large local context.
 /-- **Common-increment second difference of the constant-level field**: at
 confined points, `‖F(C+q) − F(C) − (F(D+q) − F(D))‖ ≤ K₂ ‖q‖ ‖C−D‖` with a
@@ -455,9 +490,7 @@ private lemma arcField_const_second_diff {c R : ℝ} (hc : 0 ≤ c) (hR0 : 0 ≤
           ≤ |MCq * (MC - MD)| + |(MCq - MDq) * MD| := abs_add_le _ _
         _ ≤ (1 - R ^ 2)⁻¹ * (2 * R / (1 - R ^ 2) ^ 2 * Dd)
             + 2 * R / (1 - R ^ 2) ^ 2 * Dd * (1 - R ^ 2)⁻¹ := add_le_add h1 h2
-        _ = 4 * R / (1 - R ^ 2) ^ 3 * Dd := by
-            field_simp
-            ring
+        _ = 4 * R / (1 - R ^ 2) ^ 3 * Dd := metricFactor_diff_sum_identity hR2
     have hkey2 : nC * (MCq * MC) - nD * (MDq * MD)
         = (nC - nD) * (MCq * MC) + nD * (MCq * MC - MDq * MD) := by ring
     rw [hkey2]
@@ -475,9 +508,7 @@ private lemma arcField_const_second_diff {c R : ℝ} (hc : 0 ≤ c) (hR0 : 0 ≤
       _ ≤ 2 * Dd * Q * ((1 - R ^ 2)⁻¹ * (1 - R ^ 2)⁻¹)
           + 4 * R * Q * (4 * R / (1 - R ^ 2) ^ 3 * Dd) := add_le_add h1 h2
       _ = KM * Q * Dd := by
-          rw [hKMdef]
-          field_simp
-          ring
+          rw [hKMdef]; exact metricFactor_second_diff_KM_identity hR2
   -- assemble the two slots
   rw [max_le_iff]
   constructor
@@ -528,8 +559,7 @@ private lemma arcField_const_second_diff {c R : ℝ} (hc : 0 ≤ c) (hR0 : 0 ≤
         + 2 * (1 + R) * Dd * (2 * R / (1 - R ^ 2) ^ 2 * Q)
         + 2 * (c + R) * (KM * Q * Dd) = KS * Q * Dd := by
       rw [hKSdef, hKMdef]
-      field_simp
-      ring
+      exact layout_KS_sum_identity hR2
     have hfinal : KS * Q * Dd ≤ (1 + KS) * Q * Dd := by
       rw [mul_assoc, mul_assoc]
       exact mul_le_mul_of_nonneg_right (by linarith) (mul_nonneg hq0 hCD0)
@@ -796,7 +826,21 @@ private lemma kappaArc_plateau_close {κ h₁ : ℝ → ℝ}
   rw [Set.mem_Icc]
   constructor <;> linarith
 
-set_option maxHeartbeats 1600000 in
+/-- Pure algebraic rearrangement of the rectangle source bound: collect the
+`‖Rf x‖` coefficient and the `ε·(t'−t)` coefficient. -/
+private lemma layout_source_ring (KFc K2 C1 ep Bc tt CG Rp L r : ℝ) :
+    801 * ((KFc * r + K2 * (C1 * ep) * (Bc * (75 * tt)))
+          + ep * CG * (r + Bc * (75 * tt)))
+        + (20000 / L * tt) * (2 * ep / (1 - Rp ^ 2) + KFc * (C1 * ep))
+      = (801 * KFc + 801 * ep * CG) * r
+        + (801 * K2 * C1 * (Bc * 75) + 801 * CG * (Bc * 75)
+          + 20000 / L * (2 / (1 - Rp ^ 2) + KFc * C1))
+          * (ep * tt) := by
+  ring
+
+-- layout_turning_gap: ~500-line four-flow Grönwall argument; a dozen set-bound
+-- constants and many HasDerivAt constructions form an irreducibly large context.
+set_option maxHeartbeats 1200000 in
 -- Four coupled trajectories, a dozen local constants: a large elaboration context.
 /-- **The rectangle gap bound** (ALM-A8 workhorse).  For every box pair `t ≤ t'`,
 the turning residual advances by at least `(2(c − R_cl) − C₂ε)(t' − t)`: the
@@ -1216,24 +1260,18 @@ private lemma layout_turning_gap {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       exact hψ'le x
     have hRf0' : (0:ℝ) ≤ ‖Rf x‖ := norm_nonneg _
     have htt0 : (0:ℝ) ≤ t' - t := by linarith
-    calc ‖ψ' x • ((arcField (fun _ => c) R' x (ΦT' (ψ x))
-            - arcField (fun _ => c) R' x (ΦT x)
-            - arcField (fun _ => c) R' x (Φc (ψ x))
-            + arcField (fun _ => c) R' x (Φc x))
-          + ((arcField κA R' x (ΦT' (ψ x))
-              - arcField (fun _ => c) R' x (ΦT' (ψ x)))
-            - (arcField κA R' x (ΦT x) - arcField (fun _ => c) R' x (ΦT x))))
-        + (ψ' x - 1) • (arcField κA R' x (ΦT x)
-            - arcField (fun _ => c) R' x (Φc x))‖
-        ≤ |ψ' x| * (‖arcField (fun _ => c) R' x (ΦT' (ψ x))
-            - arcField (fun _ => c) R' x (ΦT x)
-            - arcField (fun _ => c) R' x (Φc (ψ x))
-            + arcField (fun _ => c) R' x (Φc x)‖
-          + ‖(arcField κA R' x (ΦT' (ψ x))
-              - arcField (fun _ => c) R' x (ΦT' (ψ x)))
-            - (arcField κA R' x (ΦT x) - arcField (fun _ => c) R' x (ΦT x))‖)
-          + |ψ' x - 1| * ‖arcField κA R' x (ΦT x)
-            - arcField (fun _ => c) R' x (Φc x)‖ := by
+    -- name the three vector pieces so the numeric calc avoids re-elaborating them
+    set T1 : ℂ × ℝ := arcField (fun _ => c) R' x (ΦT' (ψ x))
+        - arcField (fun _ => c) R' x (ΦT x)
+        - arcField (fun _ => c) R' x (Φc (ψ x))
+        + arcField (fun _ => c) R' x (Φc x) with hT1def
+    set T2 : ℂ × ℝ := (arcField κA R' x (ΦT' (ψ x))
+          - arcField (fun _ => c) R' x (ΦT' (ψ x)))
+        - (arcField κA R' x (ΦT x) - arcField (fun _ => c) R' x (ΦT x)) with hT2def
+    set T3 : ℂ × ℝ := arcField κA R' x (ΦT x)
+        - arcField (fun _ => c) R' x (Φc x) with hT3def
+    calc ‖ψ' x • (T1 + T2) + (ψ' x - 1) • T3‖
+        ≤ |ψ' x| * (‖T1‖ + ‖T2‖) + |ψ' x - 1| * ‖T3‖ := by
           refine le_trans (norm_add_le _ _) (add_le_add ?_ ?_)
           · rw [norm_smul, Real.norm_eq_abs]
             exact mul_le_mul_of_nonneg_left (norm_add_le _ _) (abs_nonneg _)
@@ -1257,7 +1295,8 @@ private lemma layout_turning_gap {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
               = (801 * (KF : ℝ) + 801 * ε * CG) * ‖Rf x‖
                 + (801 * K₂ * C₁ * (Bc * 75) + 801 * CG * (Bc * 75)
                   + 20000 / L * (2 / (1 - R' ^ 2) + (KF : ℝ) * C₁))
-                  * (ε * (t' - t)) := by ring
+                  * (ε * (t' - t)) :=
+            layout_source_ring (KF : ℝ) K₂ C₁ ε Bc (t' - t) CG R' L ‖Rf x‖
           rw [hring]
           have hcoef : 801 * (KF : ℝ) + 801 * ε * CG ≤ 801 * ((KF : ℝ) + CG) + 1 := by
             nlinarith [mul_nonneg hCG0 (by linarith : (0:ℝ) ≤ 1 - ε)]
