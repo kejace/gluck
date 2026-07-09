@@ -967,7 +967,25 @@ private lemma theta_pin {x : ℝ} (hsin : Real.sin x = 0) (hcos : Real.cos x < 0
     rw [hval, Real.cos_two_pi] at hcos
     linarith
 
-set_option maxHeartbeats 1600000 in
+/-- Radial angle-speed bound: for a unit direction `b` and a norm floor `c ≤ ‖a‖`,
+the star-shaped speed integrand `-⟪a, b⟫_ℝ / ‖a‖²` is at most `1/c`
+(from `|⟪a,b⟫| ≤ ‖a‖‖b‖ = ‖a‖`, hence `-⟪a,b⟫/‖a‖² ≤ 1/‖a‖ ≤ 1/c`). -/
+private lemma neg_radial_speed_le {a b : ℂ} {c : ℝ} (hb : ‖b‖ = 1) (hc : 0 < c)
+    (hn : c ≤ ‖a‖) : -(inner ℝ a b) / ‖a‖ ^ 2 ≤ 1 / c := by
+  have hapos : (0 : ℝ) < ‖a‖ := lt_of_lt_of_le hc hn
+  have habs := abs_real_inner_le_norm a b
+  rw [hb, mul_one] at habs
+  rw [div_le_div_iff₀ (by positivity) hc]
+  nlinarith [neg_le_abs (inner ℝ a b : ℝ), habs, hn, hapos]
+
+/-- For a unit direction `b`, the anti-radial inner product `-⟪a, b⟫_ℝ` is bounded by
+`‖a‖` (Cauchy–Schwarz `|⟪a,b⟫| ≤ ‖a‖‖b‖ = ‖a‖`); used to floor `‖a‖` from a star
+certificate `⟪a,b⟫ ≤ -d`. -/
+private lemma neg_inner_le_norm {a b : ℂ} (hb : ‖b‖ = 1) : -(inner ℝ a b) ≤ ‖a‖ := by
+  have habs := abs_real_inner_le_norm a b
+  rw [hb, mul_one] at habs
+  linarith [neg_le_abs (inner ℝ a b : ℝ)]
+
 -- the S3–S8 assembly (Klein tiling + FTC lift + residue pinning) is one long
 -- `arcFlow`-plumbing proof; the certificates themselves are in the private lemmas above
 /-- **Route-A concrete input — the radial-argument lift of the confined negative
@@ -1111,14 +1129,13 @@ private lemma mixed_radial_lift {δ h L : ℝ}
     · exact hstarH σ ⟨hσ.1, h2⟩
     · rw [hFcen σ ⟨h2, hσ.2⟩]
       exact hstarH (σ - L / 2) ⟨by linarith, by linarith [hσ.2]⟩
+  -- the star direction is a unit vector (reused at every speed/norm bound)
+  have hbnorm : ∀ x : ℝ, ‖Complex.I * Complex.exp ((x : ℂ) * Complex.I)‖ = 1 := fun x => by
+    rw [norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul]
   -- global norm floor and non-vanishing
   have hnormL : ∀ σ ∈ Set.Icc (0 : ℝ) L, 11 / 1000 ≤ ‖z σ‖ := by
     intro σ hσ
-    have hF := hstarL σ hσ
-    have habs := abs_real_inner_le_norm (z σ)
-      (Complex.I * Complex.exp ((φ σ : ℂ) * Complex.I))
-    rw [norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul, mul_one] at habs
-    linarith [neg_le_abs (⟪z σ, Complex.I * Complex.exp ((φ σ : ℂ) * Complex.I)⟫_ℝ)]
+    linarith [hstarL σ hσ, neg_inner_le_norm (a := z σ) (hbnorm (φ σ))]
   have hne : ∀ σ ∈ Set.Icc (0 : ℝ) L, z σ ≠ 0 := by
     intro σ hσ h0
     have := hnormL σ hσ
@@ -1210,27 +1227,19 @@ private lemma mixed_radial_lift {δ h L : ℝ}
     intro s hs
     have hsmem : s ∈ Set.Icc (0 : ℝ) L := ⟨hs.1, by linarith [hs.2]⟩
     rw [hweq s hsmem]
-    have hn := hn1' s hs
-    have hnpos : (0 : ℝ) < ‖z s‖ := by linarith
-    have habs := abs_real_inner_le_norm (z s)
-      (Complex.I * Complex.exp ((φ s : ℂ) * Complex.I))
-    rw [norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul, mul_one] at habs
     change -(inner ℝ (z s) (Complex.I * Complex.exp ((φ s : ℂ) * Complex.I))) / ‖z s‖ ^ 2
       ≤ 200 / 19
-    rw [div_le_iff₀ (by positivity)]
-    nlinarith [neg_le_abs (⟪z s, Complex.I * Complex.exp ((φ s : ℂ) * Complex.I)⟫_ℝ), habs, hn]
+    calc -(inner ℝ (z s) (Complex.I * Complex.exp ((φ s : ℂ) * Complex.I))) / ‖z s‖ ^ 2
+        ≤ 1 / (19 / 200) := neg_radial_speed_le (hbnorm (φ s)) (by norm_num) (hn1' s hs)
+      _ = 200 / 19 := by norm_num
   have hwub2 : ∀ s ∈ Set.Icc (L / 8) (L / 4), w s ≤ 8 := by
     intro s hs
     have hsmem : s ∈ Set.Icc (0 : ℝ) L := ⟨by linarith [hs.1], by linarith [hs.2]⟩
     rw [hweq s hsmem]
-    have hn := hn2' s hs
-    have hnpos : (0 : ℝ) < ‖z s‖ := by linarith
-    have habs := abs_real_inner_le_norm (z s)
-      (Complex.I * Complex.exp ((φ s : ℂ) * Complex.I))
-    rw [norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul, mul_one] at habs
     change -(inner ℝ (z s) (Complex.I * Complex.exp ((φ s : ℂ) * Complex.I))) / ‖z s‖ ^ 2 ≤ 8
-    rw [div_le_iff₀ (by positivity)]
-    nlinarith [neg_le_abs (⟪z s, Complex.I * Complex.exp ((φ s : ℂ) * Complex.I)⟫_ℝ), habs, hn]
+    calc -(inner ℝ (z s) (Complex.I * Complex.exp ((φ s : ℂ) * Complex.I))) / ‖z s‖ ^ 2
+        ≤ 1 / (1 / 8) := neg_radial_speed_le (hbnorm (φ s)) (by norm_num) (hn2' s hs)
+      _ = 8 := by norm_num
   have hIub : (∫ s in (0 : ℝ)..(L / 4), w s) < 5 * π / 2 := by
     have hsplit : (∫ s in (0 : ℝ)..(L / 4), w s)
         = (∫ s in (0 : ℝ)..(L / 8), w s) + ∫ s in (L / 8)..(L / 4), w s :=
@@ -1246,7 +1255,7 @@ private lemma mixed_radial_lift {δ h L : ℝ}
       rwa [intervalIntegral.integral_const, smul_eq_mul] at hm
     have hπ := Real.pi_gt_three
     rw [hsplit]
-    nlinarith [hI1, hI2, hL2]
+    linarith [hI1, hI2, hL2, hπ]
   have hA0 : 0 < ∫ s in (0 : ℝ)..(L / 4), w s := by
     refine intervalIntegral.intervalIntegral_pos_of_pos_on (hwint 0 (L / 4))
       (fun s hs => ?_) (by linarith)
