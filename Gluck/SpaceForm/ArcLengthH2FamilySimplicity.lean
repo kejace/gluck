@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
 import Gluck.SpaceForm.ArcLengthH2FamilyClosing
+import Mathlib.Util.CountHeartbeats
 
 /-!
 # Fork A · ALM-A11–A12: simplicity transport and the capstone
@@ -621,7 +622,9 @@ private lemma integral_cos_ge_const {φ : ℝ → ℝ} {p q ψ m : ℝ} (hpq : p
 
 -- Long three-case projection proof (~300 lines, five-leg sandwich + IVT crossings
 -- + complement closure); the cumulative elaboration exceeds the default budget.
-set_option maxHeartbeats 1200000 in
+set_option maxHeartbeats 300000 in
+set_option Elab.async false in
+#count_heartbeats in
 /-- **ALM-A11 mid-regime input: the quantitative clean chord margin.**  For every
 short scale `ℓ₀ > 0` there are `m₀ > 0` and a residual tolerance `η₀ > 0`,
 uniform over the layout box, such that whenever the clean curve's endpoint
