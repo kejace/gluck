@@ -232,7 +232,16 @@ private lemma neg_G1_right_key {ra q ca sa rc sc cc : ℝ} (hra : ra = -391 / 36
 
 /-! ### ALM-4 face margins (`a = −3/10`, `c = 2`, rectangle `[1/10,3/20]×[157/50,161/50]`) -/
 
-set_option maxHeartbeats 1600000 in
+/-- Cubic `sin` lower bound on the left-face complementary-angle window
+`y ∈ [2982/10000, 3933/10000]`.  Isolated so the underlying `nlinarith` runs in a
+small context. -/
+private lemma neg_G1_left_sin_lb {y : ℝ} (hy0 : (0 : ℝ) < y) (hy1 : y ≤ 1)
+    (hylo : (2982 : ℝ) / 10000 ≤ y) (hy2hi : y ^ 2 ≤ (3933 / 10000) ^ 2) :
+    (291 : ℝ) / 1000 ≤ Real.sin y := by
+  have hcube := Real.sin_gt_sub_cube hy0 hy1
+  nlinarith [hcube, mul_nonneg (by linarith : (0 : ℝ) ≤ y - 2982 / 10000)
+    (by nlinarith [hy2hi] : (0 : ℝ) ≤ 4 - (y ^ 2 + y * (2982 / 10000) + (2982 / 10000) ^ 2))]
+
 /-- **LEFT `G₁` face with margin.**  `G₁ ≤ −1/1000` on the left edge `h = 1/10`,
 `L ∈ [157/50, 161/50]` (numerically `G₁ ∈ [−0.026, −0.024]`; concave `r_a = −99/80`,
 `θ_c > π/2` via the complementary angle `y = θ_c − π/2 ∈ [0, 1]`). -/
@@ -245,38 +254,39 @@ private lemma neg_G1_left_margin {L : ℝ} (hL1 : (157 : ℝ) / 50 ≤ L) (hL2 :
     with hrcdef
   set c := (L / 8) / arcModelRadius (-3 / 10) (Complex.I * ((1 / 10 : ℝ) : ℂ)) π with hc
   have hc_lo : -161 / 495 ≤ c := by
-    rw [hc, hra, le_div_iff_of_neg (by norm_num : (-99 / 80 : ℝ) < 0)]; nlinarith [hL2]
+    rw [hc, hra, le_div_iff_of_neg (by norm_num : (-99 / 80 : ℝ) < 0)]; linarith [hL2]
   have hc_hi : c ≤ -157 / 495 := by
-    rw [hc, hra, div_le_iff_of_neg (by norm_num : (-99 / 80 : ℝ) < 0)]; nlinarith [hL1]
+    rw [hc, hra, div_le_iff_of_neg (by norm_num : (-99 / 80 : ℝ) < 0)]; linarith [hL1]
   have hcnp : c ≤ 0 := by linarith
   have hcabs : |c| ≤ 1 := by rw [abs_of_nonpos hcnp]; linarith
-  have hc2hi : c ^ 2 ≤ (161 / 495) ^ 2 := by nlinarith [hc_lo, hc_hi]
-  have hc2lo : (157 / 495) ^ 2 ≤ c ^ 2 := by nlinarith [hc_lo, hc_hi]
-  have hc4hi : c ^ 4 ≤ (161 / 495) ^ 4 := by nlinarith [hc2hi, sq_nonneg c]
+  have hc2hi : c ^ 2 ≤ (161 / 495) ^ 2 := sq_le_sq' (by linarith) (by linarith)
+  have hc2lo : (157 / 495) ^ 2 ≤ c ^ 2 := by rw [← neg_sq c]; gcongr <;> linarith
+  have hc4hi : c ^ 4 ≤ (161 / 495) ^ 4 := by
+    have h := pow_le_pow_left₀ (sq_nonneg c) hc2hi 2; norm_num [← pow_mul] at h ⊢; linarith [h]
   have hcb := abs_le.mp (Real.cos_bound hcabs)
   have habs4 : |c| ^ 4 = c ^ 4 := by rw [← abs_pow]; exact abs_of_nonneg (by positivity)
-  have hca : (946 : ℝ) / 1000 ≤ Real.cos c := by nlinarith [hcb.1, hc2hi, hc4hi, habs4]
-  have hcaU : Real.cos c ≤ 9503 / 10000 := by nlinarith [hcb.2, hc2lo, hc4hi, habs4]
+  have hca : (946 : ℝ) / 1000 ≤ Real.cos c := by linarith [hcb.1, hc2hi, hc4hi, habs4]
+  have hcaU : Real.cos c ≤ 9503 / 10000 := by linarith [hcb.2, hc2lo, hc4hi, habs4]
   have hq : 1 - Real.cos c ≤ 53 / 1000 := by
-    nlinarith [Real.one_sub_sq_div_two_le_cos (x := c), hc2hi]
+    linarith [Real.one_sub_sq_div_two_le_cos (x := c), hc2hi]
   have hsa : -161 / 495 ≤ Real.sin c := by
     have hlt := Real.sin_lt (show (0 : ℝ) < -c by linarith)
     rw [Real.sin_neg] at hlt; linarith [hc_lo]
-  have hden : (0 : ℝ) < 20720 - 8560 * Real.cos c := by nlinarith [Real.cos_le_one c]
+  have hden : (0 : ℝ) < 20720 - 8560 * Real.cos c := by linarith [Real.cos_le_one c]
   have hbigpos : (0 : ℝ) < 2 * (2 + (-(1 / 10) - (-99 / 80 - 1 / 10) * (1 - Real.cos c))) := by
-    nlinarith [Real.neg_one_le_cos c]
+    linarith [Real.neg_one_le_cos c]
   have hrc_eq : rc = (10593 * Real.cos c - 7425) / (20720 - 8560 * Real.cos c) := by
     rw [hrcdef, arcModelRadius_qArc2, ← hc, hra, div_eq_div_iff hbigpos.ne' hden.ne']; ring
   have hrc_lo : (205 : ℝ) / 1000 ≤ rc := by
-    rw [hrc_eq, le_div_iff₀ hden]; nlinarith [hca]
+    rw [hrc_eq, le_div_iff₀ hden]; linarith [hca]
   have hrc_hi : rc ≤ 2099 / 10000 := by
-    rw [hrc_eq, div_le_iff₀ hden]; nlinarith [hcaU]
+    rw [hrc_eq, div_le_iff₀ hden]; linarith [hcaU]
   have hrc_pos : (0 : ℝ) < rc := by linarith
   set tc := (L / 8) / rc with htc
   have htc_lo : (1869 : ℝ) / 1000 ≤ tc := by
-    rw [htc, le_div_iff₀ hrc_pos]; nlinarith [hrc_hi, hL1]
+    rw [htc, le_div_iff₀ hrc_pos]; linarith [hrc_hi, hL1]
   have htc_hi : tc ≤ 1964 / 1000 := by
-    rw [htc, div_le_iff₀ hrc_pos]; nlinarith [hrc_lo, hL2]
+    rw [htc, div_le_iff₀ hrc_pos]; linarith [hrc_lo, hL2]
   have hpiL : (15707 : ℝ) / 10000 ≤ π / 2 := by
     have := Real.pi_gt_d6; norm_num at this ⊢; linarith
   have hpiU : π / 2 ≤ (15708 : ℝ) / 10000 := by
@@ -286,11 +296,10 @@ private lemma neg_G1_left_margin {L : ℝ} (hL1 : (157 : ℝ) / 50 ≤ L) (hL2 :
   have hy_hi : y ≤ 3933 / 10000 := by rw [hy]; linarith [htc_hi, hpiL]
   have hy0 : (0 : ℝ) ≤ y := by linarith
   have hy1 : y ≤ 1 := by linarith
-  have hy2hi : y ^ 2 ≤ (3933 / 10000) ^ 2 := by nlinarith [hy_lo, hy_hi]
-  have hy2lo : (2982 / 10000 : ℝ) ^ 2 ≤ y ^ 2 := by nlinarith [hy_lo, hy_hi]
+  have hy2hi : y ^ 2 ≤ (3933 / 10000) ^ 2 := pow_le_pow_left₀ hy0 hy_hi 2
+  have hy2lo : (2982 / 10000 : ℝ) ^ 2 ≤ y ^ 2 := pow_le_pow_left₀ (by norm_num) hy_lo 2
   have hy4hi : y ^ 4 ≤ (3933 / 10000) ^ 4 := by
-    nlinarith [hy2hi, mul_nonneg (by linarith [hy2hi] : (0 : ℝ) ≤ (3933 / 10000) ^ 2 - y ^ 2)
-      (sq_nonneg y)]
+    have h := pow_le_pow_left₀ (sq_nonneg y) hy2hi 2; norm_num [← pow_mul] at h ⊢; linarith [h]
   have hyabs : |y| ≤ 1 := by rw [abs_of_nonneg hy0]; exact hy1
   have hycb := abs_le.mp (Real.cos_bound hyabs)
   have habsy4 : |y| ^ 4 = y ^ 4 := by rw [← abs_pow]; exact abs_of_nonneg (by positivity)
@@ -302,17 +311,24 @@ private lemma neg_G1_left_margin {L : ℝ} (hL1 : (157 : ℝ) / 50 ≤ L) (hL2 :
     have := hycb.2; rw [habsy4] at this; linarith
   have hcosL : 1 - y ^ 2 / 2 - y ^ 4 * (5 / 96) ≤ Real.cos y := by
     have := hycb.1; rw [habsy4] at this; linarith
-  have hsc : Real.sin tc ≤ 96 / 100 := by rw [hsintc]; nlinarith [hcosU, hy2lo, hy4hi]
-  have hsc0 : (0 : ℝ) ≤ Real.sin tc := by rw [hsintc]; nlinarith [hcosL, hy2hi, hy4hi]
+  have hsc : Real.sin tc ≤ 96 / 100 := by rw [hsintc]; linarith [hcosU, hy2lo, hy4hi]
+  have hsc0 : (0 : ℝ) ≤ Real.sin tc := by rw [hsintc]; linarith [hcosL, hy2hi, hy4hi]
   have hcc : Real.cos tc ≤ -291 / 1000 := by
     rw [hcostc]
-    have hcube := Real.sin_gt_sub_cube (show (0 : ℝ) < y by linarith) hy1
-    nlinarith [hcube, mul_nonneg (by linarith : (0 : ℝ) ≤ y - 2982 / 10000)
-      (by nlinarith [hy2hi] : (0 : ℝ) ≤ 4 - (y ^ 2 + y * (2982 / 10000) + (2982 / 10000) ^ 2))]
+    linarith [neg_G1_left_sin_lb (show (0 : ℝ) < y by linarith) hy1 hy_lo hy2hi]
   clear_value rc c tc y
   exact neg_G1_left_key hra hq hca hsa hsc hsc0 hrc_lo hcc
 
-set_option maxHeartbeats 1600000 in
+/-- Cubic `sin` upper bound on the right-face angle window `c ∈ [-1449/3910, -1413/3910]`.
+Isolated so the underlying `nlinarith` runs in a small context. -/
+private lemma neg_G1_right_sin_ub {c : ℝ} (hclo : (-1449 : ℝ) / 3910 ≤ c)
+    (hchi : c ≤ -1413 / 3910) : Real.sin c ≤ -349 / 1000 := by
+  have hlt := Real.sin_gt_sub_cube (show (0 : ℝ) < -c by linarith) (show -c ≤ 1 by
+    rw [neg_le]; linarith)
+  rw [Real.sin_neg] at hlt
+  nlinarith [hlt, mul_nonneg (by linarith : (0 : ℝ) ≤ -c - 1413 / 3910)
+    (by linarith : (0 : ℝ) ≤ 1449 / 3910 + c)]
+
 /-- **RIGHT `G₁` face with margin.**  `G₁ ≥ 1/1000` on the right edge `h = 3/20`,
 `L ∈ [157/50, 161/50]` (numerically `G₁ ∈ [+0.019, +0.020]`; concave `r_a = −391/360`,
 `θ_c > π/2` via the complementary angle `y = θ_c − π/2 ∈ [0, 1]`). -/
@@ -325,41 +341,37 @@ private lemma neg_G1_right_margin {L : ℝ} (hL1 : (157 : ℝ) / 50 ≤ L) (hL2 
     with hrcdef
   set c := (L / 8) / arcModelRadius (-3 / 10) (Complex.I * ((3 / 20 : ℝ) : ℂ)) π with hc
   have hc_lo : -1449 / 3910 ≤ c := by
-    rw [hc, hra, le_div_iff_of_neg (by norm_num : (-391 / 360 : ℝ) < 0)]; nlinarith [hL2]
+    rw [hc, hra, le_div_iff_of_neg (by norm_num : (-391 / 360 : ℝ) < 0)]; linarith [hL2]
   have hc_hi : c ≤ -1413 / 3910 := by
-    rw [hc, hra, div_le_iff_of_neg (by norm_num : (-391 / 360 : ℝ) < 0)]; nlinarith [hL1]
+    rw [hc, hra, div_le_iff_of_neg (by norm_num : (-391 / 360 : ℝ) < 0)]; linarith [hL1]
   have hcnp : c ≤ 0 := by linarith
   have hcabs : |c| ≤ 1 := by rw [abs_of_nonpos hcnp]; linarith
-  have hc2hi : c ^ 2 ≤ (1449 / 3910) ^ 2 := by nlinarith [hc_lo, hc_hi]
-  have hc2lo : (1413 / 3910) ^ 2 ≤ c ^ 2 := by nlinarith [hc_lo, hc_hi]
-  have hc4hi : c ^ 4 ≤ (1449 / 3910) ^ 4 := by nlinarith [hc2hi, sq_nonneg c]
+  have hc2hi : c ^ 2 ≤ (1449 / 3910) ^ 2 := sq_le_sq' (by linarith) (by linarith)
+  have hc2lo : (1413 / 3910) ^ 2 ≤ c ^ 2 := by rw [← neg_sq c]; gcongr <;> linarith
+  have hc4hi : c ^ 4 ≤ (1449 / 3910) ^ 4 := by
+    have h := pow_le_pow_left₀ (sq_nonneg c) hc2hi 2; norm_num [← pow_mul] at h ⊢; linarith [h]
   have hcb := abs_le.mp (Real.cos_bound hcabs)
   have habs4 : |c| ^ 4 = c ^ 4 := by rw [← abs_pow]; exact abs_of_nonneg (by positivity)
-  have hcaU : Real.cos c ≤ 9357 / 10000 := by nlinarith [hcb.2, hc2lo, hc4hi, habs4]
-  have hcaL : (9303 : ℝ) / 10000 ≤ Real.cos c := by nlinarith [hcb.1, hc2hi, hc4hi, habs4]
+  have hcaU : Real.cos c ≤ 9357 / 10000 := by linarith [hcb.2, hc2lo, hc4hi, habs4]
+  have hcaL : (9303 : ℝ) / 10000 ≤ Real.cos c := by linarith [hcb.1, hc2hi, hc4hi, habs4]
   have hca0 : (0 : ℝ) ≤ Real.cos c := by linarith
   have hq : (643 : ℝ) / 10000 ≤ 1 - Real.cos c := by linarith
-  have hsa : Real.sin c ≤ -349 / 1000 := by
-    have hlt := Real.sin_gt_sub_cube (show (0 : ℝ) < -c by linarith) (show -c ≤ 1 by
-      rw [neg_le]; linarith)
-    rw [Real.sin_neg] at hlt
-    nlinarith [hlt, hc_lo, hc_hi, mul_nonneg (by linarith : (0 : ℝ) ≤ -c - 1413 / 3910)
-      (by linarith : (0 : ℝ) ≤ 1449 / 3910 + c)]
-  have hden : (0 : ℝ) < 399960 - 160200 * Real.cos c := by nlinarith [Real.cos_le_one c]
+  have hsa : Real.sin c ≤ -349 / 1000 := neg_G1_right_sin_ub hc_lo hc_hi
+  have hden : (0 : ℝ) < 399960 - 160200 * Real.cos c := by linarith [Real.cos_le_one c]
   have hbigpos : (0 : ℝ) < 2 * (2 + (-(3 / 20) - (-391 / 360 - 3 / 20) * (1 - Real.cos c))) := by
-    nlinarith [Real.neg_one_le_cos c]
+    linarith [Real.neg_one_le_cos c]
   have hrc_eq : rc = (173995 * Real.cos c - 110653) / (399960 - 160200 * Real.cos c) := by
     rw [hrcdef, arcModelRadius_qArc2, ← hc, hra, div_eq_div_iff hbigpos.ne' hden.ne']; ring
   have hrc_hi : rc ≤ 2087 / 10000 := by
-    rw [hrc_eq, div_le_iff₀ hden]; nlinarith [hcaU]
+    rw [hrc_eq, div_le_iff₀ hden]; linarith [hcaU]
   have hrc_lo : (20411 : ℝ) / 100000 ≤ rc := by
-    rw [hrc_eq, le_div_iff₀ hden]; nlinarith [hcaL]
+    rw [hrc_eq, le_div_iff₀ hden]; linarith [hcaL]
   have hrc_pos : (0 : ℝ) < rc := by linarith
   set tc := (L / 8) / rc with htc
   have htc_lo : (1880 : ℝ) / 1000 ≤ tc := by
-    rw [htc, le_div_iff₀ hrc_pos]; nlinarith [hrc_hi, hL1]
+    rw [htc, le_div_iff₀ hrc_pos]; linarith [hrc_hi, hL1]
   have htc_hi : tc ≤ 1972 / 1000 := by
-    rw [htc, div_le_iff₀ hrc_pos]; nlinarith [hrc_lo, hL2]
+    rw [htc, div_le_iff₀ hrc_pos]; linarith [hrc_lo, hL2]
   have hpiL : (15707 : ℝ) / 10000 ≤ π / 2 := by
     have := Real.pi_gt_d6; norm_num at this ⊢; linarith
   have hpiU : π / 2 ≤ (15708 : ℝ) / 10000 := by
@@ -369,15 +381,15 @@ private lemma neg_G1_right_margin {L : ℝ} (hL1 : (157 : ℝ) / 50 ≤ L) (hL2 
   have hy_hi : y ≤ 4013 / 10000 := by rw [hy]; linarith [htc_hi, hpiL]
   have hy0 : (0 : ℝ) ≤ y := by linarith
   have hy1 : y ≤ 1 := by linarith
-  have hy2hi : y ^ 2 ≤ (4013 / 10000) ^ 2 := by nlinarith [hy_lo, hy_hi]
+  have hy2hi : y ^ 2 ≤ (4013 / 10000) ^ 2 := pow_le_pow_left₀ hy0 hy_hi 2
   have hsintc : Real.sin tc = Real.cos y := by
     rw [hy, Real.cos_sub, Real.cos_pi_div_two, Real.sin_pi_div_two]; ring
   have hcostc : Real.cos tc = -Real.sin y := by
     rw [hy, Real.sin_sub, Real.cos_pi_div_two, Real.sin_pi_div_two]; ring
   have hsc : (919 : ℝ) / 1000 ≤ Real.sin tc := by
-    rw [hsintc]; nlinarith [Real.one_sub_sq_div_two_le_cos (x := y), hy2hi]
+    rw [hsintc]; linarith [Real.one_sub_sq_div_two_le_cos (x := y), hy2hi]
   have hcc : -402 / 1000 ≤ Real.cos tc := by
-    rw [hcostc]; nlinarith [Real.sin_lt (show (0 : ℝ) < y by linarith), hy_hi]
+    rw [hcostc]; linarith [Real.sin_lt (show (0 : ℝ) < y by linarith), hy_hi]
   have hcc1 : Real.cos tc ≤ 1 := Real.cos_le_one tc
   clear_value rc c tc y
   exact neg_G1_right_key hra hq hcaU hca0 hsa hrc_hi hrc_pos.le hsc hcc hcc1
