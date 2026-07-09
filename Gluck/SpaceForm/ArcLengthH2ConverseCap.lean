@@ -212,7 +212,7 @@ profile), giving the **first hypothesis-free negative-curvature-admitting H²
 four-vertex closing state**.  (The landing chooses `(h, L)` via
 `poincareMiranda_rect`; `hturn`'s `Fix(X)` equation follows from the landing's
 `Im z(L/4) = 0` and `φ(L/4) = 3π/2`.) -/
-theorem exists_gateProfileSmooth_closing :
+private theorem exists_gateProfileSmooth_closing :
     ∃ (δ L : ℝ) (W₀ : ℂ × ℝ), 0 < δ ∧ (11 : ℝ) / 5 ≤ L ∧ L ≤ 14 / 5 ∧
       W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) 4 ∧
       (arcFlow (gateProfileSmooth L δ) (3 / 5) L 2 4 (W₀, L)).1 = W₀.1 ∧
@@ -550,12 +550,12 @@ discharged here for the concrete smooth gate profile, yielding the fully
 hypothesis-free simple-closed negative-`κ`-admitting H² realization. -/
 
 /-- The gate profile is bounded below by its floor value `4/5`. -/
-lemma gateProfileSmooth_ge (L δ σ : ℝ) : 4 / 5 ≤ gateProfileSmooth L δ σ :=
+private lemma gateProfileSmooth_ge (L δ σ : ℝ) : 4 / 5 ≤ gateProfileSmooth L δ σ :=
   (arcRampProfile_mem (by norm_num) σ).1
 
 /-- Lower bound on the robustness constant (`E·(E+1) ≥ 2` since `E = exp(9513/1280) ≥ 1`);
 used to convert the exposed `gateRobustConst·δ = 1/2000000` into `δ`-smallness. -/
-lemma gateRobustConst_ge : (15 : ℝ) / 4 ≤ gateRobustConst := by
+private lemma gateRobustConst_ge : (15 : ℝ) / 4 ≤ gateRobustConst := by
   unfold gateRobustConst
   have he1 : (1 : ℝ) ≤ Real.exp (9513 / 1280) := by
     rw [← Real.exp_zero]; exact Real.exp_le_exp.2 (by positivity)
@@ -1244,7 +1244,7 @@ solution, and the chord condition makes it injective.  The two remaining hypothe
 `hconf`, `hchord` are the *gate-specific* analytic obligations (window confinement via
 the two-leg L¹-Grönwall + reflection symmetry; simplicity via the convexity
 `arcAngleSpeed > 0`); discharging them removes all hypotheses. -/
-theorem realizes_gateProfileSmooth_of_confined_simple {δ h L : ℝ}
+private theorem realizes_gateProfileSmooth_of_confined_simple {δ h L : ℝ}
     (_hh1 : (1 : ℝ) / 5 ≤ h) (_hh2 : h ≤ 2 / 5) (hL1 : (11 : ℝ) / 5 ≤ L) (_hL2 : L ≤ 14 / 5)
     (him : (gateSmoothLandingState δ 4 h L).1.im = 0)
     (hφe : (gateSmoothLandingState δ 4 h L).2 = 3 * π / 2)

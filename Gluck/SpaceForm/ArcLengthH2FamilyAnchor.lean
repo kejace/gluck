@@ -34,7 +34,7 @@ lemma arcModelConst_snd (K : ℝ) (z₀ : ℂ) (φ₀ σ : ℝ) :
 /-- **The anchor quarter curve** on `[0, L/4]`: the `a`-level model arc from
 `(i·h, π)` for `σ ≤ L/8`, then the `c`-level model arc from the first-arc endpoint
 `W₁ = qArc1 a (h, L)`.  The branches agree at the joint `σ = L/8`. -/
-noncomputable def anchorQuarter (a c h L σ : ℝ) : ℂ × ℝ :=
+private noncomputable def anchorQuarter (a c h L σ : ℝ) : ℂ × ℝ :=
   if σ ≤ L / 8 then arcModelConst a (Complex.I * (h : ℂ)) π σ
   else arcModelConst c (qArc1 a (h, L)).1 (qArc1 a (h, L)).2 (σ - L / 8)
 
@@ -54,12 +54,12 @@ noncomputable def anchorCurve (a c h L σ : ℝ) : ℂ × ℝ :=
   if σ ≤ L / 2 then anchorHalf a c h L σ
   else (-(anchorHalf a c h L (σ - L / 2)).1, (anchorHalf a c h L (σ - L / 2)).2 + π)
 
-lemma anchorQuarter_of_le (a c h : ℝ) {L σ : ℝ} (hσ : σ ≤ L / 8) :
+private lemma anchorQuarter_of_le (a c h : ℝ) {L σ : ℝ} (hσ : σ ≤ L / 8) :
     anchorQuarter a c h L σ = arcModelConst a (Complex.I * (h : ℂ)) π σ := if_pos hσ
 
 /-- On `σ ≥ L/8` the quarter is the second model arc; at `σ = L/8` exactly, the two
 branches agree (`arcModelConst_zero`), so the closed form is two-sided. -/
-lemma anchorQuarter_of_ge (a c h : ℝ) {L σ : ℝ} (hσ : L / 8 ≤ σ) :
+private lemma anchorQuarter_of_ge (a c h : ℝ) {L σ : ℝ} (hσ : L / 8 ≤ σ) :
     anchorQuarter a c h L σ
       = arcModelConst c (qArc1 a (h, L)).1 (qArc1 a (h, L)).2 (σ - L / 8) := by
   rcases eq_or_lt_of_le hσ with heq | hlt
@@ -67,7 +67,7 @@ lemma anchorQuarter_of_ge (a c h : ℝ) {L σ : ℝ} (hσ : L / 8 ≤ σ) :
     rfl
   · rw [anchorQuarter, if_neg (not_le.mpr hlt)]
 
-lemma anchorQuarter_zero (a c h : ℝ) {L : ℝ} (hL : 0 ≤ L) :
+private lemma anchorQuarter_zero (a c h : ℝ) {L : ℝ} (hL : 0 ≤ L) :
     anchorQuarter a c h L 0 = (Complex.I * (h : ℂ), π) := by
   rw [anchorQuarter_of_le a c h (by linarith), arcModelConst_zero]
 
@@ -83,7 +83,7 @@ lemma anchorHalf_of_le (a c h : ℝ) {L σ : ℝ} (hσ : σ ≤ L / 4) :
 /-- On `σ ≥ L/4` the half curve is the reflected quarter; at `σ = L/4` exactly the
 two branches agree **because the quarter lands on `Fix(X)`** (the anchor equations
 `him`/`hφe`), so the reflected description is two-sided. -/
-lemma anchorHalf_of_ge (a c h : ℝ) {L σ : ℝ} (hL : 0 < L)
+private lemma anchorHalf_of_ge (a c h : ℝ) {L σ : ℝ} (hL : 0 < L)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
     (hσ : L / 4 ≤ σ) :
     anchorHalf a c h L σ
@@ -97,12 +97,12 @@ lemma anchorHalf_of_ge (a c h : ℝ) {L σ : ℝ} (hL : 0 < L)
     rw [hφe]; ring
   · rw [anchorHalf, if_neg (not_le.mpr hlt)]
 
-lemma anchorHalf_zero (a c h : ℝ) {L : ℝ} (hL : 0 ≤ L) :
+private lemma anchorHalf_zero (a c h : ℝ) {L : ℝ} (hL : 0 ≤ L) :
     anchorHalf a c h L 0 = (Complex.I * (h : ℂ), π) := by
   rw [anchorHalf_of_le a c h (by linarith), anchorQuarter_zero a c h hL]
 
 /-- The half-period endpoint is the centrally-symmetric start `ρ(i·h, π) = (−i·h, 2π)`. -/
-lemma anchorHalf_half (a c h : ℝ) {L : ℝ} (hL : 0 < L) :
+private lemma anchorHalf_half (a c h : ℝ) {L : ℝ} (hL : 0 < L) :
     anchorHalf a c h L (L / 2) = (-(Complex.I * (h : ℂ)), 2 * π) := by
   rw [anchorHalf, if_neg (by intro hc; linarith), sub_self, anchorQuarter_zero a c h hL.le]
   refine Prod.ext ?_ ?_
@@ -111,7 +111,7 @@ lemma anchorHalf_half (a c h : ℝ) {L : ℝ} (hL : 0 < L) :
   · change 3 * π - π = 2 * π
     ring
 
-lemma anchorCurve_of_le (a c h : ℝ) {L σ : ℝ} (hσ : σ ≤ L / 2) :
+private lemma anchorCurve_of_le (a c h : ℝ) {L σ : ℝ} (hσ : σ ≤ L / 2) :
     anchorCurve a c h L σ = anchorHalf a c h L σ := if_pos hσ
 
 /-- On `σ ≥ L/2` the anchor curve is the centrally-reflected half; at `σ = L/2`
@@ -125,7 +125,7 @@ lemma anchorCurve_of_ge (a c h : ℝ) {L σ : ℝ} (hL : 0 < L) (hσ : L / 2 ≤
     exact Prod.ext rfl (by change (2 : ℝ) * π = π + π; ring)
   · rw [anchorCurve, if_neg (not_le.mpr hlt)]
 
-lemma anchorCurve_zero (a c h : ℝ) {L : ℝ} (hL : 0 ≤ L) :
+private lemma anchorCurve_zero (a c h : ℝ) {L : ℝ} (hL : 0 ≤ L) :
     anchorCurve a c h L 0 = (Complex.I * (h : ℂ), π) := by
   rw [anchorCurve_of_le a c h (by linarith), anchorHalf_zero a c h hL]
 
@@ -134,7 +134,7 @@ lemma anchorCurve_zero (a c h : ℝ) {L : ℝ} (hL : 0 ≤ L) :
 alone: `Φ(L) = ρ(Φ(L/2)) = ρ(X(Φ(0))) = (i·h, 3π)`.  (The anchor equations are *not*
 needed for the endpoint match — they enter the `L/4`-junction continuity,
 `anchorCurve_continuous`.) -/
-theorem anchorCurve_closes (a c h : ℝ) {L : ℝ} (hL : 0 < L) :
+private theorem anchorCurve_closes (a c h : ℝ) {L : ℝ} (hL : 0 < L) :
     (anchorCurve a c h L L).1 = (anchorCurve a c h L 0).1 ∧
       (anchorCurve a c h L L).2 = (anchorCurve a c h L 0).2 + 2 * π := by
   rw [anchorCurve_of_ge a c h hL (by linarith), anchorCurve_zero a c h hL.le,
@@ -158,7 +158,7 @@ private lemma arcModelConst_continuous (K : ℝ) (z₀ : ℂ) (φ₀ : ℝ) :
   unfold arcModelConst
   fun_prop
 
-lemma anchorQuarter_continuous (a c h L : ℝ) : Continuous (anchorQuarter a c h L) := by
+private lemma anchorQuarter_continuous (a c h L : ℝ) : Continuous (anchorQuarter a c h L) := by
   unfold anchorQuarter
   refine Continuous.if_le (arcModelConst_continuous a _ π)
     ((arcModelConst_continuous c _ _).comp (continuous_id.sub continuous_const))
@@ -166,7 +166,7 @@ lemma anchorQuarter_continuous (a c h L : ℝ) : Continuous (anchorQuarter a c h
   rw [hσ, sub_self, arcModelConst_zero]
   rfl
 
-lemma anchorHalf_continuous (a c h : ℝ) {L : ℝ} (hL : 0 < L)
+private lemma anchorHalf_continuous (a c h : ℝ) {L : ℝ} (hL : 0 < L)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
     Continuous (anchorHalf a c h L) := by
   have hQ := anchorQuarter_continuous a c h L
@@ -186,7 +186,7 @@ lemma anchorHalf_continuous (a c h : ℝ) {L : ℝ} (hL : 0 < L)
 exactly where the anchor equations enter: the quarter endpoint lies on `Fix(X)`, so
 the conjugate reflection glues continuously; the `L/8` and `L/2` junctions match by
 construction. -/
-theorem anchorCurve_continuous (a c h : ℝ) {L : ℝ} (hL : 0 < L)
+private theorem anchorCurve_continuous (a c h : ℝ) {L : ℝ} (hL : 0 < L)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
     Continuous (anchorCurve a c h L) := by
   have hH := anchorHalf_continuous a c h hL him hφe
@@ -280,7 +280,7 @@ private lemma anchor_arc1_inner (h : ℝ) :
 
 /-- **First-arc confinement** with the explicit margin: on the anchor window the
 `a`-level arc satisfies `‖z(σ)‖ ≤ 1 − r_a(a−1) ≤ R(a, c)` (using `r_a ≥ h ≥ 1/(10c)`). -/
-lemma anchor_arc1_confined {a c h : ℝ} (ha : 1 < a) (hac : a < c) (hh0 : 0 < h)
+private lemma anchor_arc1_confined {a c h : ℝ} (ha : 1 < a) (hac : a < c) (hh0 : 0 < h)
     (hh1 : h < 1) (hwin : 2 * a * h ≤ 1 + h ^ 2) (hlow : 1 / (10 * c) ≤ h) (σ : ℝ) :
     ‖(arcModelConst a (Complex.I * (h : ℂ)) π σ).1‖ ≤ anchorConfineRadius a c := by
   have hc1 : 1 < c := ha.trans hac
@@ -367,7 +367,7 @@ explicit symbolic radius `R = anchorConfineRadius a c`.  The per-arc whole-circl
 bounds cover the quarter; both Klein reflections preserve `‖z‖`
 (`‖conj z‖ = ‖−z‖ = ‖z‖`), so the bound extends to the full period (indeed to every
 `σ`). -/
-theorem anchorCurve_confined {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+private theorem anchorCurve_confined {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h)
     (hL0 : 0 ≤ L) (hL : L ≤ bicircleBracket a h) (σ : ℝ) :
     ‖(anchorCurve a c h L σ).1‖ ≤ anchorConfineRadius a c := by
@@ -398,7 +398,7 @@ theorem anchorCurve_confined {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
 /-- **Escape lower bound for the arc angle speed**: if `κ σ ≥ a` and `‖z‖ ≤ R` with
 `R < a` and `R < 1`, then `arcAngleSpeed κ σ z φ ≥ 2(a − R)`.  (The numerator is
 `≥ a − R` by Cauchy–Schwarz and the denominator lies in `(0, 1]`.) -/
-lemma le_arcAngleSpeed_of_escape {κ : ℝ → ℝ} {a R σ : ℝ} {z : ℂ} {φ : ℝ}
+private lemma le_arcAngleSpeed_of_escape {κ : ℝ → ℝ} {a R σ : ℝ} {z : ℂ} {φ : ℝ}
     (hκ : a ≤ κ σ) (hz : ‖z‖ ≤ R) (hRa : R < a) (hR1 : R < 1) :
     2 * (a - R) ≤ arcAngleSpeed κ σ z φ := by
   have hR0 : 0 ≤ R := (norm_nonneg z).trans hz
@@ -417,7 +417,7 @@ lemma le_arcAngleSpeed_of_escape {κ : ℝ → ℝ} {a R σ : ℝ} {z : ℂ} {φ
 positive on the confined disk** whenever the curvature level clears the confinement
 radius (`κ σ ≥ a > R ≥ ‖z‖`, `R < 1`) — the convex clean curve turns strictly
 monotonically. -/
-lemma arcAngleSpeed_pos_of_escape {κ : ℝ → ℝ} {a R σ : ℝ} {z : ℂ} {φ : ℝ}
+private lemma arcAngleSpeed_pos_of_escape {κ : ℝ → ℝ} {a R σ : ℝ} {z : ℂ} {φ : ℝ}
     (hκ : a ≤ κ σ) (hz : ‖z‖ ≤ R) (hRa : R < a) (hR1 : R < 1) :
     0 < arcAngleSpeed κ σ z φ :=
   lt_of_lt_of_le (by linarith) (le_arcAngleSpeed_of_escape hκ hz hRa hR1)
@@ -449,7 +449,7 @@ private lemma strictMonoOn_Icc_glue {f : ℝ → ℝ} {x y z : ℝ} (hxy : x ≤
 
 /-- The quarter phase `π + σ/r_a`, then `φ₁ + (σ − L/8)/r_c`, is strictly increasing
 on `[0, L/4]` (positive radii on the window × bracket). -/
-lemma anchorQuarter_phase_strictMonoOn {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+private lemma anchorQuarter_phase_strictMonoOn {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hh0 : 0 < h) (hh1 : h < 1) (hwin : 2 * a * h ≤ 1 + h ^ 2)
     (hL0 : 0 ≤ L) (hL : L ≤ bicircleBracket a h) :
     StrictMonoOn (fun σ => (anchorQuarter a c h L σ).2) (Set.Icc 0 (L / 4)) := by
@@ -471,7 +471,7 @@ lemma anchorQuarter_phase_strictMonoOn {a c h L : ℝ} (ha : 1 < a) (hac : a < c
 /-- The half phase is strictly increasing on `[0, L/2]`: the reflected piece is
 `3π − φ_Q(L/2 − σ)`, increasing since `φ_Q` is; the junction at `L/4` glues via the
 anchor equations. -/
-lemma anchorHalf_phase_strictMonoOn {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+private lemma anchorHalf_phase_strictMonoOn {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hh0 : 0 < h) (hh1 : h < 1) (hwin : 2 * a * h ≤ 1 + h ^ 2)
     (hL0 : 0 < L) (hL : L ≤ bicircleBracket a h)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
@@ -493,7 +493,7 @@ lemma anchorHalf_phase_strictMonoOn {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
 
 /-- **ALM-A4: the anchor phase is strictly increasing over the full period** — the
 computational form of "the convex clean curve turns strictly monotonically". -/
-theorem anchorCurve_phase_strictMonoOn {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+private theorem anchorCurve_phase_strictMonoOn {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hh0 : 0 < h) (hh1 : h < 1) (hwin : 2 * a * h ≤ 1 + h ^ 2)
     (hL0 : 0 < L) (hL : L ≤ bicircleBracket a h)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
@@ -514,7 +514,7 @@ theorem anchorCurve_phase_strictMonoOn {a c h L : ℝ} (ha : 1 < a) (hac : a < c
 /-- **The anchor loop integral vanishes**: `∫₀^L e^{iφ(s)} ds = 0`, purely from the
 central symmetry `φ(σ + L/2) = φ(σ) + π` — the second half-integrand is the negative
 of the first, no fundamental theorem of calculus needed. -/
-lemma anchorCurve_loop_integral_zero (a c h : ℝ) {L : ℝ} (hL : 0 < L)
+private lemma anchorCurve_loop_integral_zero (a c h : ℝ) {L : ℝ} (hL : 0 < L)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
     (∫ s in (0 : ℝ)..L, Complex.exp (((anchorCurve a c h L s).2 : ℂ) * Complex.I))
       = 0 := by
@@ -598,7 +598,7 @@ with total turn `φ(L) = φ(0) + 2π`, and the loop integral `∫₀^L e^{iφ}` 
 (closure), then every proper sub-arc chord `∫_t^τ e^{iφ}` (`0 ≤ t < τ < L`) is
 nonzero.  Extraction of the engine's `gate_chord_ne_zero` proof, modular over the
 monotonicity input; applies to the anchor curve and to every clean layout curve. -/
-theorem chord_ne_zero_of_strictMono_phi {φ : ℝ → ℝ} {L : ℝ} (hL : 0 < L)
+private theorem chord_ne_zero_of_strictMono_phi {φ : ℝ → ℝ} {L : ℝ} (hL : 0 < L)
     (hφc : ContinuousOn φ (Set.Icc 0 L)) (hmono : StrictMonoOn φ (Set.Icc 0 L))
     (hturn : φ L = φ 0 + 2 * π)
     (hloop : (∫ s in (0 : ℝ)..L, Complex.exp ((φ s : ℂ) * Complex.I)) = 0)
@@ -717,7 +717,7 @@ theorem chord_ne_zero_of_strictMono_phi {φ : ℝ → ℝ} {L : ℝ} (hL : 0 < L
 /-- **ALM-A4: simplicity of the anchor curve** — every proper sub-arc chord of the
 anchor curve is nonzero (instance of `chord_ne_zero_of_strictMono_phi` at the
 anchor's strictly monotone phase, turn `2π`, and vanishing loop integral). -/
-theorem anchorCurve_chord_ne_zero {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+private theorem anchorCurve_chord_ne_zero {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L) (hL : L ≤ bicircleBracket a h)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
     {t τ : ℝ} (ht : 0 ≤ t) (htτ : t < τ) (hτL : τ < L) :
@@ -740,7 +740,7 @@ continuous and nonvanishing on the compact band (`anchorCurve_chord_ne_zero`; at
 `IsCompact.exists_isMinOn` yields the margin.  Stated for the anchor curve — the
 A6-box parameterised version slides to A5 once the layout family exists (this proof
 is the template: only the continuity input changes). -/
-theorem layout_chord_margin {a c h L ℓ₀ : ℝ} (ha : 1 < a) (hac : a < c)
+private theorem layout_chord_margin {a c h L ℓ₀ : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hL0 : 0 < L) (hL : L ≤ bicircleBracket a h)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
     (hℓ : 0 < ℓ₀) (hℓL : 2 * ℓ₀ ≤ L) :

@@ -459,7 +459,7 @@ private lemma nodeMap_add_nat_period {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L
 
 /-- **The node map is surjective** (strictly monotone, continuous, quasi-periodic —
 so unbounded in both directions; intermediate value). -/
-lemma nodeMap_surjective {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
+private lemma nodeMap_surjective {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16) :
     Function.Surjective (nodeMap L w₁ w₂ t) := by
   intro y
@@ -494,23 +494,23 @@ lemma nodeMap_surjective {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
 /-- **The global inverse of the node map** (junk `Function.invFun` off the layout
 box; on the box it is the two-sided inverse).  The A8 coupling `ψ` and the A12
 window bridge consume it. -/
-noncomputable def nodeMapInv (L w₁ w₂ t : ℝ) : ℝ → ℝ :=
+private noncomputable def nodeMapInv (L w₁ w₂ t : ℝ) : ℝ → ℝ :=
   Function.invFun (nodeMap L w₁ w₂ t)
 
 /-- Right inverse: `g (g⁻¹ u) = u` on the layout box. -/
-lemma nodeMap_nodeMapInv {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
+private lemma nodeMap_nodeMapInv {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16) (u : ℝ) :
     nodeMap L w₁ w₂ t (nodeMapInv L w₁ w₂ t u) = u :=
   Function.rightInverse_invFun (nodeMap_surjective hL hL4 hw₁ hw₂ ht) u
 
 /-- Left inverse: `g⁻¹ (g s) = s` on the layout box. -/
-lemma nodeMapInv_nodeMap {L w₁ w₂ t : ℝ} (hL : 0 < L)
+private lemma nodeMapInv_nodeMap {L w₁ w₂ t : ℝ} (hL : 0 < L)
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16) (s : ℝ) :
     nodeMapInv L w₁ w₂ t (nodeMap L w₁ w₂ t s) = s :=
   Function.leftInverse_invFun (strictMono_nodeMap hL hw₁ hw₂ ht).injective s
 
 /-- The inverse node map is strictly monotone. -/
-lemma strictMono_nodeMapInv {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
+private lemma strictMono_nodeMapInv {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16) :
     StrictMono (nodeMapInv L w₁ w₂ t) := by
   intro u v huv
@@ -522,7 +522,7 @@ lemma strictMono_nodeMapInv {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * 
 
 /-- The inverse node map is continuous (inverse of a strictly monotone continuous
 surjection of `ℝ`). -/
-lemma continuous_nodeMapInv {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
+private lemma continuous_nodeMapInv {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16) :
     Continuous (nodeMapInv L w₁ w₂ t) := by
   have hiso := ((strictMono_nodeMap hL hw₁ hw₂ ht).orderIsoOfSurjective _
@@ -534,7 +534,7 @@ lemma continuous_nodeMapInv {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * 
     StrictMono.orderIsoOfSurjective_symm_apply_self]
 
 /-- **Derivative of the inverse node map**: `(g⁻¹)'(u) = 1/ρ(g⁻¹ u)`. -/
-lemma hasDerivAt_nodeMapInv {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
+private lemma hasDerivAt_nodeMapInv {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16) (u : ℝ) :
     HasDerivAt (nodeMapInv L w₁ w₂ t)
       (nodeDensity L w₁ w₂ t (nodeMapInv L w₁ w₂ t u))⁻¹ u :=

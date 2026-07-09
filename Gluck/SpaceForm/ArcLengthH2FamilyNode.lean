@@ -38,11 +38,11 @@ lemma periodTent_nonneg (Λ η ℓ C s : ℝ) : 0 ≤ periodTent Λ η ℓ C s :
 lemma periodTent_le_one (Λ η ℓ C s : ℝ) : periodTent Λ η ℓ C s ≤ 1 :=
   clampTent_le_one _ _ _ _
 
-lemma continuous_periodTent (Λ η ℓ C : ℝ) : Continuous (periodTent Λ η ℓ C) :=
+private lemma continuous_periodTent (Λ η ℓ C : ℝ) : Continuous (periodTent Λ η ℓ C) :=
   (continuous_clampTent_theta _ _ _).comp (continuous_const.mul continuous_id)
 
 /-- The pulse is `Λ`-periodic (the rescaled argument advances by exactly `2π`). -/
-lemma periodTent_periodic {Λ : ℝ} (hΛ : Λ ≠ 0) (η ℓ C : ℝ) :
+private lemma periodTent_periodic {Λ : ℝ} (hΛ : Λ ≠ 0) (η ℓ C : ℝ) :
     Function.Periodic (periodTent Λ η ℓ C) Λ := by
   intro s
   unfold periodTent
@@ -73,7 +73,7 @@ private lemma half_le_arccos_cos_wide {L y : ℝ} (hL0 : 0 < L) (n : ℤ)
 /-- **On-support evaluation**: for `|s − C| ≤ Λ/2` and `|s − C| ≤ π` the
 `Λ`-periodic pulse equals the plain (unscaled) `clampTent` trapezoid — both
 rescalings of the periodic distance collapse to `|s − C|`. -/
-lemma periodTent_eq_clampTent {Λ s C : ℝ} (hΛ : 0 < Λ) (η : ℝ)
+private lemma periodTent_eq_clampTent {Λ s C : ℝ} (hΛ : 0 < Λ) (η : ℝ)
     (hd : |s - C| ≤ Λ / 2) (hdπ : |s - C| ≤ π) (ℓ : ℝ) :
     periodTent Λ η ℓ C s = clampTent η ℓ C s := by
   have hρ : 0 < 2 * π / Λ := by positivity
@@ -97,7 +97,7 @@ lemma periodTent_eq_clampTent {Λ s C : ℝ} (hΛ : 0 < Λ) (η : ℝ)
 
 /-- **Off-support vanishing**: the pulse is zero at every `s` whose `Λ`-translate
 `s − C + nΛ` lands in the complementary window `[ℓ/2, Λ − ℓ/2]`. -/
-lemma periodTent_eq_zero {Λ η ℓ C s : ℝ} (hΛ : 0 < Λ) (hη : 0 < η) (hℓ0 : 0 < ℓ)
+private lemma periodTent_eq_zero {Λ η ℓ C s : ℝ} (hΛ : 0 < Λ) (hη : 0 < η) (hℓ0 : 0 < ℓ)
     (n : ℤ) (h1 : ℓ / 2 ≤ s - C + n * Λ) (h2 : s - C + n * Λ ≤ Λ - ℓ / 2) :
     periodTent Λ η ℓ C s = 0 := by
   have hρ : 0 < 2 * π / Λ := by positivity
@@ -244,7 +244,7 @@ lemma continuous_nodeDensity (L w₁ w₂ t : ℝ) : Continuous (nodeDensity L w
     (continuous_nodePulse _ _ _ _ _)).add (continuous_nodePulse _ _ _ _ _)
 
 /-- **`Λ`-periodicity of the node density.** -/
-lemma nodeDensity_periodic {L w₁ w₂ t : ℝ} (hΛ : nodePeriod L w₁ w₂ t ≠ 0) :
+private lemma nodeDensity_periodic {L w₁ w₂ t : ℝ} (hΛ : nodePeriod L w₁ w₂ t ≠ 0) :
     Function.Periodic (nodeDensity L w₁ w₂ t) (nodePeriod L w₁ w₂ t) := by
   intro s
   unfold nodeDensity
@@ -487,7 +487,7 @@ private lemma nodeDensity_integral_of_eq {L w₁ w₂ t u v w : ℝ} (hη : 0 < 
   linarith
 
 /-- **Leg-1 integral**: `∫₀^{s₁} w_{w,t} = π/4`. -/
-lemma nodeDensity_integral_leg1 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
+private lemma nodeDensity_integral_leg1 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16) :
     (∫ s in (0 : ℝ)..(nodeS1 L), nodeDensity L w₁ w₂ t s) = π / 4 := by
   have hπ := Real.pi_pos
@@ -497,7 +497,7 @@ lemma nodeDensity_integral_leg1 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 
   · rw [nodeS1_sub_zero]; linarith
 
 /-- **Leg-2 integral**: `∫_{s₁}^{s₂} w_{w,t} = π/2`. -/
-lemma nodeDensity_integral_leg2 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
+private lemma nodeDensity_integral_leg2 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16) :
     (∫ s in (nodeS1 L)..(nodeS2 L w₁), nodeDensity L w₁ w₂ t s) = π / 2 := by
   have hπ := Real.pi_pos
@@ -508,7 +508,7 @@ lemma nodeDensity_integral_leg2 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 
   · rw [nodeS2_sub_nodeS1]; linarith
 
 /-- **Leg-3 integral**: `∫_{s₂}^{s₃} w_{w,t} = π/2`. -/
-lemma nodeDensity_integral_leg3 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
+private lemma nodeDensity_integral_leg3 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16) :
     (∫ s in (nodeS2 L w₁)..(nodeS3 L w₁), nodeDensity L w₁ w₂ t s) = π / 2 := by
   have hπ := Real.pi_pos
@@ -518,7 +518,7 @@ lemma nodeDensity_integral_leg3 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 
   · rw [nodeS3_sub_nodeS2]; linarith
 
 /-- **Leg-4 integral**: `∫_{s₃}^{s₄} w_{w,t} = π/2`. -/
-lemma nodeDensity_integral_leg4 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
+private lemma nodeDensity_integral_leg4 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16) :
     (∫ s in (nodeS3 L w₁)..(nodeS4 L w₁ w₂), nodeDensity L w₁ w₂ t s) = π / 2 := by
   have hπ := Real.pi_pos
@@ -529,7 +529,7 @@ lemma nodeDensity_integral_leg4 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 
   · rw [nodeS4_sub_nodeS3]; linarith
 
 /-- **Leg-5 (terminal) integral**: `∫_{s₄}^{Λ} w_{w,t} = π/4`. -/
-lemma nodeDensity_integral_leg5 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
+private lemma nodeDensity_integral_leg5 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16) :
     (∫ s in (nodeS4 L w₁ w₂)..(nodePeriod L w₁ w₂ t), nodeDensity L w₁ w₂ t s)
       = π / 4 := by
@@ -550,7 +550,7 @@ carrying the five layout legs onto the `θ`-quarters of
 noncomputable def nodeMap (L w₁ w₂ t : ℝ) : ℝ → ℝ :=
   integralReparam (nodeDensity L w₁ w₂ t) (3 * π / 4)
 
-lemma nodeMap_zero (L w₁ w₂ t : ℝ) : nodeMap L w₁ w₂ t 0 = 3 * π / 4 := by
+private lemma nodeMap_zero (L w₁ w₂ t : ℝ) : nodeMap L w₁ w₂ t 0 = 3 * π / 4 := by
   simp [nodeMap, integralReparam]
 
 lemma continuous_nodeMap (L w₁ w₂ t : ℝ) : Continuous (nodeMap L w₁ w₂ t) :=
@@ -574,14 +574,14 @@ lemma nodeMap_eq_add_integral (L w₁ w₂ t x : ℝ) :
     nodeMap L w₁ w₂ t x = 3 * π / 4 + ∫ s in (0 : ℝ)..x, nodeDensity L w₁ w₂ t s := rfl
 
 /-- **Node landing `g(s₁) = π`** (first step breakpoint). -/
-lemma nodeMap_S1 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
+private lemma nodeMap_S1 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16) :
     nodeMap L w₁ w₂ t (nodeS1 L) = π := by
   rw [nodeMap_eq_add_integral, nodeDensity_integral_leg1 hL hL4 hw₁ hw₂ ht]
   ring
 
 /-- **Node landing `g(s₂) = 3π/2`.** -/
-lemma nodeMap_S2 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
+private lemma nodeMap_S2 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16) :
     nodeMap L w₁ w₂ t (nodeS2 L w₁) = 3 * π / 2 := by
   have hii : ∀ p q : ℝ, IntervalIntegrable (nodeDensity L w₁ w₂ t)
@@ -595,7 +595,7 @@ lemma nodeMap_S2 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
   ring
 
 /-- **Node landing `g(s₃) = 2π`.** -/
-lemma nodeMap_S3 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
+private lemma nodeMap_S3 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16) :
     nodeMap L w₁ w₂ t (nodeS3 L w₁) = 2 * π := by
   have hii : ∀ p q : ℝ, IntervalIntegrable (nodeDensity L w₁ w₂ t)
@@ -656,7 +656,7 @@ lemma nodeMap_period {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
   ring
 
 /-- The full-period density integral is `2π`. -/
-lemma nodeDensity_integral_period {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
+private lemma nodeDensity_integral_period {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16) :
     (∫ s in (0 : ℝ)..(nodePeriod L w₁ w₂ t), nodeDensity L w₁ w₂ t s) = 2 * π := by
   have h := nodeMap_period hL hL4 hw₁ hw₂ ht
@@ -707,7 +707,7 @@ lemma nodeDensity_eq_of_le_S4 {L w₁ w₂ t t' : ℝ} (hL : 0 < L) (hL4 : L ≤
 
 /-- **Terminal-dof locality of the node map**: on `[0, s₄]` the node map does not
 depend on `t`. -/
-lemma nodeMap_eq_of_le_S4 {L w₁ w₂ t t' : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
+private lemma nodeMap_eq_of_le_S4 {L w₁ w₂ t t' : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16)
     (ht' : |t'| ≤ L / 16) {s : ℝ} (hs0 : 0 ≤ s) (hs4 : s ≤ nodeS4 L w₁ w₂) :
     nodeMap L w₁ w₂ t s = nodeMap L w₁ w₂ t' s := by
@@ -932,7 +932,7 @@ private lemma nodeMap_changeOfVar {L w₁ w₂ t : ℝ} (hL : 0 < L) (hw₁ : |w
 `2π`-periodic `e` interval-integrable on one period, `e ∘ g_{w,t}` is
 interval-integrable on the layout window and
 `∫₀^Λ |e ∘ g_{w,t}| ≤ (L/π) · ∫₀^{2π} |e|`. -/
-theorem nodeMap_comp_L1 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
+private theorem nodeMap_comp_L1 {L w₁ w₂ t : ℝ} (hL : 0 < L) (hL4 : L ≤ 4 * π)
     (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16)
     {e : ℝ → ℝ} (he : IntervalIntegrable e MeasureTheory.volume 0 (2 * π))
     (heper : Function.Periodic e (2 * π)) :

@@ -117,7 +117,7 @@ lemma layoutCleanRadius_nonneg {a c : ℝ} (ha : 1 < a) (hac : a < c) :
   (anchorConfineRadius_nonneg ha hac).trans
     (anchorConfineRadius_le_layoutCleanRadius ha hac)
 
-lemma layoutCleanRadius_lt_layoutConfineRadius {a c : ℝ} (ha : 1 < a) (hac : a < c) :
+private lemma layoutCleanRadius_lt_layoutConfineRadius {a c : ℝ} (ha : 1 < a) (hac : a < c) :
     layoutCleanRadius a c < layoutConfineRadius a c := by
   have := layoutCleanRadius_lt_one ha hac
   rw [layoutConfineRadius]
@@ -198,7 +198,7 @@ the quarter endpoint `qArc2`, i.e. the anchor curve's mid-`c` point
 noncomputable def layoutStart (a c h L : ℝ) : ℂ × ℝ :=
   (-(qArc2 a c (h, L)).1, (qArc2 a c (h, L)).2 + π)
 
-lemma layoutStart_eq_anchorCurve (a c h : ℝ) {L : ℝ} (hL : 0 < L) :
+private lemma layoutStart_eq_anchorCurve (a c h : ℝ) {L : ℝ} (hL : 0 < L) :
     layoutStart a c h L = anchorCurve a c h L (3 * L / 4) := by
   have h1 : anchorHalf a c h L (3 * L / 4 - L / 2) = qArc2 a c (h, L) := by
     rw [show 3 * L / 4 - L / 2 = L / 4 by ring, anchorHalf_of_le a c h le_rfl,
@@ -853,7 +853,7 @@ lemma mem_layoutBox {L : ℝ} {p : ℝ × ℝ × ℝ} :
   Iff.rfl
 
 /-- The layout box is compact (A10 pre-payment: the Poincaré–Miranda domain). -/
-lemma isCompact_layoutBox (L : ℝ) : IsCompact (layoutBox L) := by
+private lemma isCompact_layoutBox (L : ℝ) : IsCompact (layoutBox L) := by
   have heq : layoutBox L = Set.Icc (-(L / 16)) (L / 16)
       ×ˢ (Set.Icc (-(L / 16)) (L / 16) ×ˢ Set.Icc (-(L / 16)) (L / 16)) := by
     ext p
@@ -898,7 +898,7 @@ private lemma nodePulse_continuousAt_param {X : Type*} [TopologicalSpace X]
 /-- **ALM-A7: joint parameter continuity of the node density** at every dof
 point with nonvanishing period (in particular on the layout box, where
 `Λ ≥ 13L/16 > 0`) — the joint-`(w, t)`-continuity lemma A5 deferred here. -/
-lemma nodeDensity_continuousAt_param {L : ℝ} (hL : 0 < L) {p₀ : ℝ × ℝ × ℝ}
+private lemma nodeDensity_continuousAt_param {L : ℝ} (hL : 0 < L) {p₀ : ℝ × ℝ × ℝ}
     (hΛ0 : nodePeriod L p₀.1 p₀.2.1 p₀.2.2 ≠ 0) (s : ℝ) :
     ContinuousAt (fun p : ℝ × ℝ × ℝ => nodeDensity L p.1 p.2.1 p.2.2 s) p₀ := by
   have hw₁c : ContinuousAt (fun p : ℝ × ℝ × ℝ => p.1) p₀ := continuous_fst.continuousAt
@@ -1009,7 +1009,7 @@ lemma nodeDensity_abs_le {L w₁ w₂ t : ℝ} (hL : 0 < L) (hw₁ : |w₁| ≤ 
 /-- **ALM-A7: joint parameter continuity of the node map** on the layout box:
 dominated convergence of the running density integral under the crude uniform
 bound `nodeDensity_abs_le` on the enlarged open box. -/
-lemma nodeMap_continuousAt_param {L : ℝ} (hL : 0 < L) {p₀ : ℝ × ℝ × ℝ}
+private lemma nodeMap_continuousAt_param {L : ℝ} (hL : 0 < L) {p₀ : ℝ × ℝ × ℝ}
     (hw₁ : |p₀.1| ≤ L / 16) (hw₂ : |p₀.2.1| ≤ L / 16) (ht : |p₀.2.2| ≤ L / 16)
     (x : ℝ) :
     ContinuousAt (fun p : ℝ × ℝ × ℝ => nodeMap L p.1 p.2.1 p.2.2 x) p₀ := by
@@ -1041,7 +1041,7 @@ lemma nodeMap_continuousAt_param {L : ℝ} (hL : 0 < L) {p₀ : ℝ × ℝ × �
 
 /-- **ALM-A7: joint parameter continuity of the arc-length profile** `κ_arc` on
 the layout box (at each fixed arc-length position `s`). -/
-lemma kappaArc_continuousAt_param {κ h₁ : ℝ → ℝ} (hκc : Continuous κ)
+private lemma kappaArc_continuousAt_param {κ h₁ : ℝ → ℝ} (hκc : Continuous κ)
     (hh₁c : Continuous h₁) {L : ℝ} (hL : 0 < L) {p₀ : ℝ × ℝ × ℝ}
     (hw₁ : |p₀.1| ≤ L / 16) (hw₂ : |p₀.2.1| ≤ L / 16) (ht : |p₀.2.2| ≤ L / 16)
     (s : ℝ) :
@@ -1101,7 +1101,7 @@ The endpoint state of the true layout flow at the layout period,
 `‖Φ^p(Λ_p) − Φ^{p₀}(Λ_p)‖ ≤ e^{Lip·2L}·(2/(1−R²))·∫₀^{2L}|κ_arc^p − κ_arc^{p₀}|`
 (same start, same horizon — only the profile varies) plus the continuity of
 `σ ↦ Φ^{p₀}(σ)` at `Λ_{p₀}` squeeze the endpoint distance to `0`. -/
-theorem layoutFlow_period_continuousOn {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+private theorem layoutFlow_period_continuousOn {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
     (hL : L ≤ bicircleBracket a h) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
     {κ h₁ : ℝ → ℝ} (hκc : Continuous κ) (hh₁c : Continuous h₁)
@@ -1231,7 +1231,7 @@ lemma layoutResidual_snd (κ h₁ : ℝ → ℝ) (a c h L M w₁ w₂ t : ℝ) :
 
 /-- On the anchor locus (`G₂ = 0`, start phase `5π/2`) the turning target is
 `9π/2`. -/
-lemma layoutResidual_snd_eq {a c h L : ℝ} (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
+private lemma layoutResidual_snd_eq {a c h L : ℝ} (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
     (κ h₁ : ℝ → ℝ) (M w₁ w₂ t : ℝ) :
     (layoutResidual κ h₁ a c h L M w₁ w₂ t).2
       = (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)).2 - 9 * π / 2 := by

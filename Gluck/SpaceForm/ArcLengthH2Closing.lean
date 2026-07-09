@@ -29,7 +29,7 @@ minus the expected closed state `(z₀, φ₀ + 2π)`. Closing means this vanish
 some initial `(z₀, φ₀)`. Only the `z`-component and the `φ`-component mod `2π`
 matter geometrically. (Analogue of `Gluck.SpaceForm.spaceFormEndpoint`,
 `Flow.lean:285`; Dahlberg closure (1.2) `γ_K(2π) = 0`, `ArcLength.lean:58`.) -/
-noncomputable def arcEndpoint (κ : ℝ → ℝ) (R L M : ℝ) (r₀ : ℝ≥0) (W₀ : ℂ × ℝ) :
+private noncomputable def arcEndpoint (κ : ℝ → ℝ) (R L M : ℝ) (r₀ : ℝ≥0) (W₀ : ℂ × ℝ) :
     ℂ × ℝ :=
   arcFlow κ R L M r₀ (W₀, L) - (W₀ + (0, 2 * π))
 
@@ -161,7 +161,7 @@ vanishes for some `W₀` (`arcClosure_of_halfPeriodMatch`).  (Arc-length analogu
 the closure `∫₀^{2π} e^{iα}=0` split by the π-symmetry in `Gluck.arcLengthConverse`,
 `ArcLength.lean:212`; `ρ_π = R_π` is the model-circle central symmetry of
 `Gluck.SpaceForm.spaceFormSpeed_circle`, `Defs.lean:169`.) -/
-noncomputable def arcHalfPeriodDefect (κ : ℝ → ℝ) (R L M : ℝ) (r₀ : ℝ≥0)
+private noncomputable def arcHalfPeriodDefect (κ : ℝ → ℝ) (R L M : ℝ) (r₀ : ℝ≥0)
     (W₀ : ℂ × ℝ) : ℂ × ℝ :=
   arcFlow κ R L M r₀ (W₀, L / 2) - (-W₀.1, W₀.2 + π)
 

@@ -607,7 +607,7 @@ continuity at the exact anchor closure) and for `ε` below an explicit threshold
 `∓(L/16)/r₄ ∈ ∓[m, M]·L/16` from the `w`-drifted anchor value, and the Grönwall
 gap `C₁ε` plus the drift are dominated by the margin `m·L/16 = 2(c−R_cl)·L/16`.
 Smallness shape: `W₀` nonconstructive (continuity), `ε₀ = m·L/(64·(C₁+1))`. -/
-theorem turningResidual_bracket {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+private theorem turningResidual_bracket {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
     (hL : L ≤ bicircleBracket a h) (hL4 : L ≤ 4 * π)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)

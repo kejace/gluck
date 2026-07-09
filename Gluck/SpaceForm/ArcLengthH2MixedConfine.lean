@@ -73,7 +73,7 @@ lemma negRobustConst_ge : (115 : ℝ) / 9 ≤ negRobustConst := by
 /-! ### Generic flat-region lemmas for `arcRampProfile` (any `a`, `c`) -/
 
 /-- On the flat head `[0, L/8 − δ/2]` the ramp profile equals its lower level `a`. -/
-lemma arcRampProfile_eq_a {a c L δ σ : ℝ} (hL : 0 < L) (hδ : 0 < δ)
+private lemma arcRampProfile_eq_a {a c L δ σ : ℝ} (hL : 0 < L) (hδ : 0 < δ)
     (h0 : 0 ≤ σ) (h : σ ≤ L / 8 - δ / 2) : arcRampProfile a c L δ σ = a := by
   have h4 : σ ≤ L / 4 := by nlinarith
   unfold arcRampProfile
@@ -85,7 +85,7 @@ lemma arcRampProfile_eq_a {a c L δ σ : ℝ} (hL : 0 < L) (hδ : 0 < δ)
   ring
 
 /-- On the flat region `[L/8 + δ/2, L/4]` the ramp profile equals its upper level `c`. -/
-lemma arcRampProfile_eq_c {a c L δ σ : ℝ} (hL : 0 < L) (hδ : 0 < δ)
+private lemma arcRampProfile_eq_c {a c L δ σ : ℝ} (hL : 0 < L) (hδ : 0 < δ)
     (h1 : L / 8 + δ / 2 ≤ σ) (h2 : σ ≤ L / 4) : arcRampProfile a c L δ σ = c := by
   have h0 : 0 ≤ σ := by nlinarith
   unfold arcRampProfile

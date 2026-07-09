@@ -74,7 +74,7 @@ lemma neg_G1_scalar (h L : ℝ) :
 
 /-- The smooth negative-`κ` `arcFlow` quarter endpoint at `σ = L/4` shot from the
 mirror-axis start `W₀ = (i·h, π)` (`R = 4/5`, `M = 2`, `r₀ = 4`). -/
-noncomputable def negSmoothLandingState (δ h L : ℝ) : ℂ × ℝ :=
+private noncomputable def negSmoothLandingState (δ h L : ℝ) : ℂ × ℝ :=
   arcFlow (arcRampProfile (-3 / 10) 2 L δ) (4 / 5) L 2 4 ((Complex.I * (h : ℂ), π), L / 4)
 
 /-! ### ALM-4 tight scalar bounds (concave `r_a`, negative first-arc angle) -/
@@ -94,7 +94,7 @@ lemma neg_ra_lb' {h : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h ≤ 3 / 20) :
 
 /-- Taylor lower bound `x²/2 − x⁴·(5/96) ≤ 1 − cos x` (`|x| ≤ 1`; the concave `G₂` top face
 needs a *lower* bound on `q = 1 − cos θ_a`, unlike the positive gate). -/
-lemma neg_q_lb (x : ℝ) (hx : |x| ≤ 1) : x ^ 2 / 2 - x ^ 4 * (5 / 96) ≤ 1 - Real.cos x := by
+private lemma neg_q_lb (x : ℝ) (hx : |x| ≤ 1) : x ^ 2 / 2 - x ^ 4 * (5 / 96) ≤ 1 - Real.cos x := by
   have h := abs_le.mp (Real.cos_bound hx)
   have hx4 : |x| ^ 4 = x ^ 4 := by rw [← abs_pow]; exact abs_of_nonneg (by positivity)
   nlinarith [h.1, h.2, hx4]
@@ -236,7 +236,7 @@ set_option maxHeartbeats 1600000 in
 /-- **LEFT `G₁` face with margin.**  `G₁ ≤ −1/1000` on the left edge `h = 1/10`,
 `L ∈ [157/50, 161/50]` (numerically `G₁ ∈ [−0.026, −0.024]`; concave `r_a = −99/80`,
 `θ_c > π/2` via the complementary angle `y = θ_c − π/2 ∈ [0, 1]`). -/
-lemma neg_G1_left_margin {L : ℝ} (hL1 : (157 : ℝ) / 50 ≤ L) (hL2 : L ≤ 161 / 50) :
+private lemma neg_G1_left_margin {L : ℝ} (hL1 : (157 : ℝ) / 50 ≤ L) (hL2 : L ≤ 161 / 50) :
     (qArc2 (-3 / 10) 2 (1 / 10, L)).1.im ≤ -(1 / 1000) := by
   rw [neg_G1_scalar]
   have hra : arcModelRadius (-3 / 10) (Complex.I * ((1 / 10 : ℝ) : ℂ)) π = -99 / 80 := by
@@ -316,7 +316,7 @@ set_option maxHeartbeats 1600000 in
 /-- **RIGHT `G₁` face with margin.**  `G₁ ≥ 1/1000` on the right edge `h = 3/20`,
 `L ∈ [157/50, 161/50]` (numerically `G₁ ∈ [+0.019, +0.020]`; concave `r_a = −391/360`,
 `θ_c > π/2` via the complementary angle `y = θ_c − π/2 ∈ [0, 1]`). -/
-lemma neg_G1_right_margin {L : ℝ} (hL1 : (157 : ℝ) / 50 ≤ L) (hL2 : L ≤ 161 / 50) :
+private lemma neg_G1_right_margin {L : ℝ} (hL1 : (157 : ℝ) / 50 ≤ L) (hL2 : L ≤ 161 / 50) :
     (1 / 1000 : ℝ) ≤ (qArc2 (-3 / 10) 2 (3 / 20, L)).1.im := by
   rw [neg_G1_scalar]
   have hra : arcModelRadius (-3 / 10) (Complex.I * ((3 / 20 : ℝ) : ℂ)) π = -391 / 360 := by
@@ -384,7 +384,7 @@ lemma neg_G1_right_margin {L : ℝ} (hL1 : (157 : ℝ) / 50 ≤ L) (hL2 : L ≤ 
 
 /-- **BOTTOM `G₂` face with margin.**  `G₂ ≤ −1/1000` on the bottom edge `L = 157/50`,
 `h ∈ [1/10, 3/20]` (numerically `G₂ ∈ [−0.048, −0.016]`). -/
-lemma neg_G2_bottom_margin {h : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h ≤ 3 / 20) :
+private lemma neg_G2_bottom_margin {h : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h ≤ 3 / 20) :
     (qArc2 (-3 / 10) 2 (h, 157 / 50)).2 - 3 * π / 2 ≤ -(1 / 1000) := by
   rw [neg_G2_scalar]
   have hrne : arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π ≠ 0 :=
@@ -397,7 +397,7 @@ lemma neg_G2_bottom_margin {h : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h ≤ 3 /
 
 /-- **TOP `G₂` face with margin.**  `G₂ ≥ 1/1000` on the top edge `L = 161/50`,
 `h ∈ [1/10, 3/20]` (numerically `G₂ ∈ [+0.016, +0.046]`). -/
-lemma neg_G2_top_margin {h : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h ≤ 3 / 20) :
+private lemma neg_G2_top_margin {h : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 : h ≤ 3 / 20) :
     (1 / 1000 : ℝ) ≤ (qArc2 (-3 / 10) 2 (h, 161 / 50)).2 - 3 * π / 2 := by
   rw [neg_G2_scalar]
   set r := arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π with hr
@@ -435,7 +435,7 @@ lemma neg_coord_le {W Q : ℂ × ℝ} {b : ℝ} (h : ‖W - Q‖ ≤ b) :
 stays within `negRobustConst·δ` of the closed-form step endpoint `qArc2 (−3/10) 2 (h, L)`.
 The negative analogue of `gateSmoothLanding_close`; same two-leg structure as the confinement
 lemma `neg_smooth_confined_quarter`, terminating at the endpoint gap. -/
-lemma negSmoothLanding_close {δ h L : ℝ}
+private lemma negSmoothLanding_close {δ h L : ℝ}
     (hδ : 0 < δ) (hh1 : (1 : ℝ) / 10 ≤ h) (hh2 : h ≤ 3 / 20)
     (hL1 : (3 : ℝ) ≤ L) (hL2 : L ≤ 33 / 10) (hδfit : δ ≤ L / 4) :
     ‖negSmoothLandingState δ h L - qArc2 (-3 / 10) 2 (h, L)‖ ≤ negRobustConst * δ := by
@@ -843,7 +843,7 @@ arc-length analogue of `exists_quarterLanding_smooth` (`ArcLengthH2.lean:3976`),
 robustness `negSmoothLanding_close`.  Produces the `(δ, h, L)` + landing that ALM-3
 `mixedProfile_confined` consumes and that `exists_closing_arcState` (`ArcLengthH2.lean:4423`)
 requires. -/
-theorem exists_quarterLanding_mixed :
+private theorem exists_quarterLanding_mixed :
     ∃ δ : ℝ, 0 < δ ∧ negRobustConst * δ ≤ 1 / 20 ∧
       ∃ p ∈ Set.Icc ((1 : ℝ) / 10) (3 / 20) ×ˢ Set.Icc ((157 : ℝ) / 50) (161 / 50),
         (arcFlow (arcRampProfile (-3 / 10) 2 p.2 δ) (4 / 5) p.2 2 4

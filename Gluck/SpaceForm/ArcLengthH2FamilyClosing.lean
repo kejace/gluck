@@ -20,12 +20,12 @@ open scoped NNReal Real InnerProductSpace
 
 /-- **The clean `z`-closure residual at the turning dof** (public interface for
 ALM-A10): the layout-endpoint `z`-drift at window parameter `Λ = nodePeriod`. -/
-noncomputable def layoutCleanZRes (a c h L w₁ w₂ t : ℝ) : ℂ :=
+private noncomputable def layoutCleanZRes (a c h L w₁ w₂ t : ℝ) : ℂ :=
   (layoutClean a c h L w₁ w₂ (nodePeriod L w₁ w₂ t)).1 - (layoutStart a c h L).1
 
 /-- **The clean turning residual at the turning dof** (public interface for
 ALM-A10): the phase drift from the `2π`-advanced start. -/
-noncomputable def layoutCleanTurnRes (a c h L w₁ w₂ t : ℝ) : ℝ :=
+private noncomputable def layoutCleanTurnRes (a c h L w₁ w₂ t : ℝ) : ℝ :=
   (layoutClean a c h L w₁ w₂ (nodePeriod L w₁ w₂ t)).2
     - ((layoutStart a c h L).2 + 2 * π)
 
@@ -144,7 +144,7 @@ component is `≥ m` on the `u = W` face and `≤ −m` on `u = −W`, and the s
 likewise in `v` — the sign pattern the A10 Poincaré–Miranda closing slices
 along, at the radius A10 intersects with the A8 root box (margins per-`(a, c)`,
 nonconstructive). -/
-theorem cleanClosure_face_signs {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+private theorem cleanClosure_face_signs {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
     (hL : L ≤ bicircleBracket a h)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :

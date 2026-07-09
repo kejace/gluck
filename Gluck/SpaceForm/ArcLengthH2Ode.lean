@@ -144,7 +144,7 @@ lemma truncatedArcAngleSpeed_eq {κ : ℝ → ℝ} {R σ : ℝ} {z : ℂ} {φ : 
 denominator `1 − ‖clampBall R z‖²` is `≥ 1 − R² > 0`. (Mirror of
 `Gluck.SpaceForm.truncatedNum_pos`, `Flow.lean:43`; the H² metric factor is the
 `ε = −1` case of `Gluck.SpaceForm.one_add_mul_normSq_pos`, `Defs.lean:122`.) -/
-lemma truncatedArcDenom_pos {R : ℝ} (hR : 0 ≤ R) (hR1 : R < 1) (z : ℂ) :
+private lemma truncatedArcDenom_pos {R : ℝ} (hR : 0 ≤ R) (hR1 : R < 1) (z : ℂ) :
     0 < 1 - ‖clampBall R z‖ ^ 2 := by
   have h := norm_clampBall_le hR z
   have h0 := norm_nonneg (clampBall R z)
@@ -332,7 +332,7 @@ under a curvature bound `|κ| ≤ M`: the `e^{iφ}` component has norm `1`, and 
 clamped angle speed is `≤ 2(M + R)/(1 − R²)` (numerator `≤ 2(M + R)`, denominator
 `≥ 1 − R²`). Uses `‖(a, b)‖ = max ‖a‖ ‖b‖` on `ℂ × ℝ`. (Mirror of
 `Gluck.SpaceForm.truncatedSpeed_le`, `Flow.lean:63`.) -/
-lemma arcField_norm_le {κ : ℝ → ℝ} {R M : ℝ} (hR : 0 ≤ R) (hR1 : R < 1)
+private lemma arcField_norm_le {κ : ℝ → ℝ} {R M : ℝ} (hR : 0 ≤ R) (hR1 : R < 1)
     (hM : ∀ σ, |κ σ| ≤ M) (σ : ℝ) (W : ℂ × ℝ) :
     ‖arcField κ R σ W‖ ≤ max 1 (2 * (M + R) / (1 - R ^ 2)) := by
   rw [arcField, Prod.norm_def]
@@ -367,7 +367,7 @@ from Picard–Lindelöf (`arcField_lipschitz` + `arcField_norm_le` + a budget
 `L·B ≤ a − r₀`). (Mirror of `Gluck.SpaceForm.exists_spaceFormFlow`,
 `Flow.lean:260`; internally `IsPicardLindelof`, cf.
 `truncatedField_isPicardLindelof`, `Flow.lean:232`.) -/
-lemma exists_arcFlow {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuous κ)
+private lemma exists_arcFlow {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuous κ)
     (hR : 0 ≤ R) (hR1 : R < 1) (hL : 0 ≤ L) (hM : ∀ σ, |κ σ| ≤ M) (r₀ : ℝ≥0) :
     ∃ α : (ℂ × ℝ) × ℝ → ℂ × ℝ,
       (∀ W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀,
@@ -462,7 +462,7 @@ lemma arcFlow_unique {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuous κ) (hR 
 clean provable core of confinement: `d/dσ ‖z‖² = 2⟨z, z'⟩ = 2⟨z, e^{iφ}⟩ ≤ 2‖z‖`.
 (No Euclidean template — new H² work; the Grönwall pattern mirrors the confinement
 estimates in `Gluck/SpaceForm/Flow.lean`.) -/
-lemma norm_le_of_unit_speed {z : ℝ → ℂ} {φ : ℝ → ℝ}
+private lemma norm_le_of_unit_speed {z : ℝ → ℂ} {φ : ℝ → ℝ}
     (hz : ∀ σ, HasDerivAt z (Complex.exp ((φ σ : ℂ) * Complex.I)) σ) {σ : ℝ}
     (hσ : 0 ≤ σ) :
     ‖z σ‖ ≤ ‖z 0‖ + σ := by

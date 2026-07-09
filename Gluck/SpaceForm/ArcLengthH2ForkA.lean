@@ -39,22 +39,22 @@ landing. -/
 the identity on `[0, π]`, with values in `[0, π]`.  Building block for the ramp: it
 is genuinely piecewise-linear, so the composed profile is piecewise-linear (giving
 continuous `κ`, hence `C¹` `φ`). -/
-noncomputable def triWave (x : ℝ) : ℝ := Real.arccos (Real.cos x)
+private noncomputable def triWave (x : ℝ) : ℝ := Real.arccos (Real.cos x)
 
-lemma triWave_continuous : Continuous triWave :=
+private lemma triWave_continuous : Continuous triWave :=
   Real.continuous_arccos.comp Real.continuous_cos
 
-lemma triWave_even (x : ℝ) : triWave (-x) = triWave x := by
+private lemma triWave_even (x : ℝ) : triWave (-x) = triWave x := by
   simp only [triWave, Real.cos_neg]
 
-lemma triWave_periodic (x : ℝ) : triWave (x + 2 * π) = triWave x := by
+private lemma triWave_periodic (x : ℝ) : triWave (x + 2 * π) = triWave x := by
   simp only [triWave]; rw [Real.cos_periodic x]
 
-lemma triWave_nonneg (x : ℝ) : 0 ≤ triWave x := Real.arccos_nonneg _
+private lemma triWave_nonneg (x : ℝ) : 0 ≤ triWave x := Real.arccos_nonneg _
 
-lemma triWave_le_pi (x : ℝ) : triWave x ≤ π := Real.arccos_le_pi _
+private lemma triWave_le_pi (x : ℝ) : triWave x ≤ π := Real.arccos_le_pi _
 
-lemma triWave_eq_on_Icc {x : ℝ} (h0 : 0 ≤ x) (hπ : x ≤ π) : triWave x = x :=
+private lemma triWave_eq_on_Icc {x : ℝ} (h0 : 0 ≤ x) (hπ : x ≤ π) : triWave x = x :=
   Real.arccos_cos h0 hπ
 
 /-- **Smooth ramped bicircle curvature profile.** Curvature `a` on the flat parts,
@@ -81,7 +81,7 @@ lemma arcRampProfile_continuous (a c L δ : ℝ) : Continuous (arcRampProfile a 
   exact continuous_const.add
     (continuous_const.mul (continuous_const.min (continuous_const.max hX)))
 
-lemma arcRampProfile_even (a c L δ σ : ℝ) :
+private lemma arcRampProfile_even (a c L δ σ : ℝ) :
     arcRampProfile a c L δ (-σ) = arcRampProfile a c L δ σ := by
   unfold arcRampProfile
   rw [show 4 * π / L * (-σ) = -(4 * π / L * σ) by ring, triWave_even]
@@ -118,7 +118,7 @@ lemma arcRampProfile_arg_eq {L δ σ : ℝ} (hL : 0 < L) (hδ : 0 < δ)
   field_simp
   ring
 
-lemma gateProfileSmooth_eq_a {L δ σ : ℝ} (hL : 0 < L) (hδ : 0 < δ)
+private lemma gateProfileSmooth_eq_a {L δ σ : ℝ} (hL : 0 < L) (hδ : 0 < δ)
     (h0 : 0 ≤ σ) (h : σ ≤ L / 8 - δ / 2) : gateProfileSmooth L δ σ = 4 / 5 := by
   have h4 : σ ≤ L / 4 := by nlinarith
   unfold gateProfileSmooth arcRampProfile
@@ -129,7 +129,7 @@ lemma gateProfileSmooth_eq_a {L δ σ : ℝ} (hL : 0 < L) (hδ : 0 < δ)
   rw [max_eq_left harg, min_eq_right (by norm_num)]
   ring
 
-lemma gateProfileSmooth_eq_c {L δ σ : ℝ} (hL : 0 < L) (hδ : 0 < δ)
+private lemma gateProfileSmooth_eq_c {L δ σ : ℝ} (hL : 0 < L) (hδ : 0 < δ)
     (h1 : L / 8 + δ / 2 ≤ σ) (h2 : σ ≤ L / 4) : gateProfileSmooth L δ σ = 2 := by
   have h0 : 0 ≤ σ := by nlinarith
   unfold gateProfileSmooth arcRampProfile
