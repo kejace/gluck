@@ -202,51 +202,10 @@ lemma realizesSphericalCurvature_comp {z : ℝ → ℂ} {μ : ℝ → ℝ} {ψ :
     (hz : RealizesSphericalCurvature z μ) (hψ : ContDiff ℝ 1 ψ)
     (hψpos : ∀ t, 0 < deriv ψ t) :
     RealizesSphericalCurvature (z ∘ ψ) (μ ∘ ψ) := by
-  obtain ⟨hz1, hreg, hconf, φ, hφ, htan, hcurv⟩ := hz
-  have hzdiff : ∀ x, HasDerivAt z (deriv z x) x :=
-    fun x => (hz1.differentiable (by norm_num)).differentiableAt.hasDerivAt
-  have hψdiff : ∀ t, HasDerivAt ψ (deriv ψ t) t :=
-    fun t => (hψ.differentiable (by norm_num)).differentiableAt.hasDerivAt
-  have hcomp : ∀ t, HasDerivAt (z ∘ ψ) (deriv ψ t • deriv z (ψ t)) t :=
-    fun t => (hzdiff (ψ t)).scomp t (hψdiff t)
-  have hd : ∀ t, deriv (z ∘ ψ) t = deriv ψ t • deriv z (ψ t) :=
-    fun t => (hcomp t).deriv
-  have hnorm : ∀ t, ‖deriv (z ∘ ψ) t‖ = deriv ψ t * ‖deriv z (ψ t)‖ := by
-    intro t
-    rw [hd, norm_smul, Real.norm_eq_abs, abs_of_pos (hψpos t)]
-  have hz'cont : Continuous (deriv z) := (contDiff_one_iff_deriv.mp hz1).2
-  have hψ'cont : Continuous (deriv ψ) := (contDiff_one_iff_deriv.mp hψ).2
-  have hψcont : Continuous ψ := hψ.continuous
-  refine ⟨?_, ?_, ?_, φ ∘ ψ, ?_, ?_, ?_⟩
-  · -- `C¹`
-    refine contDiff_one_iff_deriv.mpr ⟨fun t => (hcomp t).differentiableAt, ?_⟩
-    have heq : deriv (z ∘ ψ) = fun t => deriv ψ t • deriv z (ψ t) := funext hd
-    rw [heq]
-    exact hψ'cont.smul (hz'cont.comp hψcont)
-  · -- regular
-    intro t
-    rw [hd]
-    exact smul_ne_zero (hψpos t).ne' (hreg (ψ t))
-  · -- confined to the open disk (pointwise in the curve value)
-    intro t
-    exact hconf (ψ t)
-  · -- tangent angle `φ ∘ ψ` is differentiable
-    exact hφ.comp (hψ.differentiable (by norm_num))
-  · -- tangent equation
-    intro t
-    rw [hnorm, hd, Complex.real_smul]
-    conv_lhs => rw [htan (ψ t)]
-    simp only [Function.comp_apply]
-    push_cast
-    ring
-  · -- spherical speed relation: multiply the relation at `ψ t` through by `ψ'`
-    intro t
-    have hφψ : deriv (φ ∘ ψ) t = deriv φ (ψ t) * deriv ψ t :=
-      ((hφ (ψ t)).hasDerivAt.comp t (hψdiff t)).deriv
-    have h := hcurv (ψ t)
-    simp only [Function.comp_apply]
-    rw [hφψ, hnorm]
-    linear_combination deriv ψ t * h
+  have hz' : SpaceForm.Realizes 1 z μ := by
+    simpa only [RealizesSphericalCurvature, SpaceForm.Realizes, one_mul] using hz
+  simpa only [RealizesSphericalCurvature, SpaceForm.Realizes, one_mul] using
+    SpaceForm.spaceFormRealizes_comp hz' hψ hψpos
 
 /-- **Trajectory speed of an admissible closed trajectory.** In the hypothesis
 form of `reconstruction_ode`, the speed `ρ(t) = q_κ(t, z̃(t))` along the
@@ -313,11 +272,7 @@ Euclidean files are frozen): adding a constant to a simple closed curve gives
 a simple closed curve. (Blueprint `lem:is_simple_closed_const_add`.) -/
 lemma isSimpleClosed_const_add {γ : ℝ → ℂ} (hγ : IsSimpleClosed γ) (w : ℂ) :
     IsSimpleClosed fun t => w + γ t := by
-  obtain ⟨hper, hinj⟩ := hγ
-  refine ⟨fun t => ?_, fun a ha b hb hab => hinj ha hb ?_⟩
-  · change w + γ (t + 2 * π) = w + γ t
-    rw [hper t]
-  · exact add_left_cancel hab
+  exact SpaceForm.isSimpleClosed_const_add hγ w
 
 /-- **The closing trajectory is a translated reconstruction curve.** In the
 hypothesis form of `reconstruction_ode`, the periodic extension equals

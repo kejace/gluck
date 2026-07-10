@@ -480,7 +480,7 @@ private lemma spaceFormTrajectory_eq_reconstruct {ε : ℝ} (hε : |ε| ≤ 1) {
   linear_combination h
 
 /-- Simplicity is translation-invariant. -/
-private lemma isSimpleClosed_const_add {γ : ℝ → ℂ} (hγ : IsSimpleClosed γ) (w : ℂ) :
+lemma isSimpleClosed_const_add {γ : ℝ → ℂ} (hγ : IsSimpleClosed γ) (w : ℂ) :
     IsSimpleClosed fun t => w + γ t := by
   obtain ⟨hper, hinj⟩ := hγ
   refine ⟨fun t => ?_, fun a ha b hb hab => hinj ha hb ?_⟩
