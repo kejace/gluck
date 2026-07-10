@@ -76,26 +76,26 @@ lemma truncatedSpeed_le {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ} {R δ �
   exact div_le_div₀ (by positivity) hnum (by positivity) hden
 
 /-- Quotient-difference bound used for the Lipschitz estimate: if two quotients
-have numerators in `[0, B]` differing by at most `dn` and denominators `≥ δ > 0`
+have first numerator bounded in norm by `B`, differ by at most `dn`, and have
+denominators `≥ δ > 0`
 differing by at most `dd`, the quotients differ by at most `dn/δ + B·dd/δ²`.
-Model-agnostic real-analysis helper (duplicated from `Gluck.abs_div_sub_div_le`;
-relocate to a shared layer in the S²-first dedup ticket). -/
-private lemma abs_div_sub_div_le {n₁ n₂ d₁ d₂ δ B dn dd : ℝ} (hδ : 0 < δ)
-    (hd₁ : δ ≤ d₁) (hd₂ : δ ≤ d₂) (hn₁0 : 0 ≤ n₁) (hn₁B : n₁ ≤ B)
+Model-agnostic real-analysis helper shared by the reconstruction flows. -/
+lemma abs_div_sub_div_le {n₁ n₂ d₁ d₂ δ B dn dd : ℝ} (hδ : 0 < δ)
+    (hd₁ : δ ≤ d₁) (hd₂ : δ ≤ d₂) (hn₁B : |n₁| ≤ B)
     (hn : |n₁ - n₂| ≤ dn) (hd : |d₁ - d₂| ≤ dd) :
     |n₁ / d₁ - n₂ / d₂| ≤ dn / δ + B * dd / δ ^ 2 := by
   have h₁ : 0 < d₁ := hδ.trans_le hd₁
   have h₂ : 0 < d₂ := hδ.trans_le hd₂
   have hdn0 : 0 ≤ dn := (abs_nonneg _).trans hn
   have hdd0 : 0 ≤ dd := (abs_nonneg _).trans hd
-  have hB0 : 0 ≤ B := hn₁0.trans hn₁B
+  have hB0 : 0 ≤ B := (abs_nonneg _).trans hn₁B
   have key : n₁ / d₁ - n₂ / d₂ = (n₁ - n₂) / d₂ + n₁ * (d₂ - d₁) / (d₁ * d₂) := by
     field_simp; ring
   rw [key]
   refine (abs_add_le _ _).trans (add_le_add ?_ ?_)
   · rw [abs_div, abs_of_pos h₂]
     exact div_le_div₀ hdn0 hn hδ hd₂
-  · rw [abs_div, abs_mul, abs_of_nonneg hn₁0, abs_of_pos (mul_pos h₁ h₂)]
+  · rw [abs_div, abs_mul, abs_of_pos (mul_pos h₁ h₂)]
     refine div_le_div₀ (mul_nonneg hB0 hdd0) ?_ (by positivity) ?_
     · exact mul_le_mul hn₁B (by rw [abs_sub_comm]; exact hd) (abs_nonneg _) hB0
     · rw [sq]; exact mul_le_mul hd₁ hd₂ hδ.le h₁.le
@@ -160,9 +160,10 @@ lemma truncatedSpeed_lipschitz {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ} 
   have hdenw : 2 * δ ≤ 2 * max (κ θ - ε * ⟪w, v⟫_ℝ) δ := by
     have := le_max_right (κ θ - ε * ⟪w, v⟫_ℝ) δ; linarith
   have hkey := abs_div_sub_div_le (by positivity : (0 : ℝ) < 2 * δ) hdenz hdenw
-    (truncatedNum_pos hε hR hR1 z).le
-    (by have hεhi : ε ≤ 1 := (abs_le.mp hε).2;
-        nlinarith [sq_nonneg (min ‖z‖ R)] : 1 + ε * (min ‖z‖ R) ^ 2 ≤ 1 + R ^ 2)
+    (show |1 + ε * (min ‖z‖ R) ^ 2| ≤ 1 + R ^ 2 by
+      rw [abs_of_nonneg (truncatedNum_pos hε hR hR1 z).le]
+      have hεhi : ε ≤ 1 := (abs_le.mp hε).2
+      nlinarith [sq_nonneg (min ‖z‖ R)])
     hnum_diff hden_diff
   refine hkey.trans (le_of_eq ?_)
   rw [Real.coe_toNNReal _ (by positivity)]

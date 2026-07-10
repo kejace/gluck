@@ -128,20 +128,9 @@ private lemma abs_sub_le_of_le {x y C b : ℝ}
     |x - y| ≤ C + b := by
   rw [abs_le]; constructor <;> linarith
 
-/-- Integrability on a finite-measure set from a global norm bound. -/
-private lemma integrableOn_of_norm_le_const {f : ℝ → ℝ} {s : Set ℝ} {B : ℝ}
-    (hs : MeasureTheory.volume s ≠ ⊤) (hmeas : Measurable f)
-    (hbd : ∀ x, ‖f x‖ ≤ B) :
-    MeasureTheory.IntegrableOn f s MeasureTheory.volume := by
-  refine MeasureTheory.Integrable.mono'
-    (MeasureTheory.integrableOn_const (C := B) hs)
-    hmeas.aestronglyMeasurable.restrict ?_
-  filter_upwards with x
-  exact hbd x
-
 /-- Set integral of `|f|` bounded by `C · D` from a pointwise bound `‖|f|‖ ≤ C`
 on the set of finite real measure `≤ D`. -/
-private lemma setIntegral_abs_le_mul {f : ℝ → ℝ} {s : Set ℝ} {C D : ℝ}
+lemma setIntegral_abs_le_mul {f : ℝ → ℝ} {s : Set ℝ} {C D : ℝ}
     (hs : MeasureTheory.volume s < ⊤)
     (hbd : ∀ x ∈ s, ‖|f x|‖ ≤ C) (hC0 : 0 ≤ C)
     (hμ : MeasureTheory.volume.real s ≤ D) :
@@ -198,9 +187,12 @@ lemma exists_step_L1_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
     rw [Real.volume_Ico]
     exact ENNReal.ofReal_lt_top
   have hint : MeasureTheory.IntegrableOn (fun θ : ℝ => |κ (h₁ θ) - κs θ|)
-      (Set.Ico (0 : ℝ) (2 * π)) MeasureTheory.volume :=
-    integrableOn_of_norm_le_const hIcofin.ne hfmeas
-      (fun x => by rw [Real.norm_eq_abs, abs_abs]; exact hfB x)
+      (Set.Ico (0 : ℝ) (2 * π)) MeasureTheory.volume := by
+    refine MeasureTheory.Measure.integrableOn_of_bounded (M := B) hIcofin.ne
+      hfmeas.aestronglyMeasurable ?_
+    filter_upwards with x
+    rw [Real.norm_eq_abs, abs_abs]
+    exact hfB x
   set bad : Set ℝ := {θ : ℝ | θ ∈ Set.Ico (0 : ℝ) (2 * π)
       ∧ ε' < |κ (h₁ θ) - κs θ|} with hbaddef
   have hbadmeas : MeasurableSet bad :=

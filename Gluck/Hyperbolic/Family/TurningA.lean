@@ -298,33 +298,6 @@ private lemma exists_preliminary_reparam_plateau {κ : ℝ → ℝ} (hcont : Con
     have := hm2 (h₁ θ) (le_trans (hP2 θ hθ.1 (by linarith [hθ.2])) hηle₂)
     rw [← hc₂]; exact this
 
-/-- Integrability on a finite-measure set from a global norm bound (copy of the
-`private` helper of `Gluck/Sphere/StepReparam.lean`). -/
-private lemma integrableOn_of_norm_le_const' {f : ℝ → ℝ} {s : Set ℝ} {B : ℝ}
-    (hs : MeasureTheory.volume s ≠ ⊤) (hmeas : Measurable f)
-    (hbd : ∀ x, ‖f x‖ ≤ B) :
-    MeasureTheory.IntegrableOn f s MeasureTheory.volume := by
-  refine MeasureTheory.Integrable.mono'
-    (MeasureTheory.integrableOn_const (C := B) hs)
-    hmeas.aestronglyMeasurable.restrict ?_
-  filter_upwards with x
-  exact hbd x
-
-/-- Set integral of `|f|` bounded by `C · D` from a pointwise bound on a set of
-finite measure `≤ D` (copy of the `private` helper of
-`Gluck/Sphere/StepReparam.lean`). -/
-private lemma setIntegral_abs_le_mul' {f : ℝ → ℝ} {s : Set ℝ} {C D : ℝ}
-    (hs : MeasureTheory.volume s < ⊤)
-    (hbd : ∀ x ∈ s, ‖|f x|‖ ≤ C) (hC0 : 0 ≤ C)
-    (hμ : MeasureTheory.volume.real s ≤ D) :
-    (∫ x in s, |f x|) ≤ C * D := by
-  have h := MeasureTheory.norm_setIntegral_le_of_norm_le_const
-    (μ := MeasureTheory.volume) (C := C) hs hbd
-  calc (∫ x in s, |f x|)
-      ≤ ‖∫ x in s, |f x|‖ := Real.le_norm_self _
-    _ ≤ C * MeasureTheory.volume.real s := h
-    _ ≤ C * D := mul_le_mul_of_nonneg_left hμ hC0
-
 /-- **ALM-A8 deliverable 0 (`exists_bicircle_L1_reparam_pointwise`): the
 plateau-pointwise `L¹` step reparametrization.**  The ALM-2 conclusion — an
 orientation-preserving circle reparametrization `h₁` (strictly monotone, `C¹`
@@ -385,9 +358,12 @@ theorem exists_bicircle_L1_reparam_pointwise {κ : ℝ → ℝ} (hκc : Continuo
     rw [Real.volume_Ico]
     exact ENNReal.ofReal_lt_top
   have hint : MeasureTheory.IntegrableOn (fun θ : ℝ => |κ (h₁ θ) - κs θ|)
-      (Set.Ico (0 : ℝ) (2 * π)) MeasureTheory.volume :=
-    integrableOn_of_norm_le_const' hIcofin.ne hfmeas
-      (fun x => by rw [Real.norm_eq_abs, abs_abs]; exact hfB x)
+      (Set.Ico (0 : ℝ) (2 * π)) MeasureTheory.volume := by
+    refine MeasureTheory.Measure.integrableOn_of_bounded (M := B) hIcofin.ne
+      hfmeas.aestronglyMeasurable ?_
+    filter_upwards with x
+    rw [Real.norm_eq_abs, abs_abs]
+    exact hfB x
   -- the bad set of the preliminary reparametrization
   set bad : Set ℝ := {θ : ℝ | θ ∈ Set.Ico (0 : ℝ) (2 * π)
       ∧ ε' < |κ (h₁ θ) - κs θ|} with hbaddef
@@ -407,7 +383,7 @@ theorem exists_bicircle_L1_reparam_pointwise {κ : ℝ → ℝ} (hκc : Continuo
       rw [MeasureTheory.measureReal_def]
       exact ENNReal.toReal_le_of_le_ofReal hε'.le (le_of_lt (lt_of_le_of_lt
         (MeasureTheory.measure_mono Set.inter_subset_right) hbad))
-    exact setIntegral_abs_le_mul' hvol
+    exact Gluck.setIntegral_abs_le_mul hvol
       (fun x _ => by rw [Real.norm_eq_abs, abs_abs]; exact hfB x) hB0.le hμ
   -- good part: integrand `≤ ε'`, measure `≤ 2π`
   have hbound2 : (∫ θ in Set.Ico (0 : ℝ) (2 * π) \ bad, |κ (h₁ θ) - κs θ|)
@@ -426,7 +402,7 @@ theorem exists_bicircle_L1_reparam_pointwise {κ : ℝ → ℝ} (hκc : Continuo
       refine ENNReal.toReal_le_of_le_ofReal (by linarith) ?_
       refine le_trans (MeasureTheory.measure_mono Set.sdiff_subset) ?_
       rw [Real.volume_Ico, sub_zero]
-    exact setIntegral_abs_le_mul' hvol hgood hε'.le hμ
+    exact Gluck.setIntegral_abs_le_mul hvol hgood hε'.le hμ
   -- assemble: `(B + 2π)·ε' < (B + 2π + 1)·ε' ≤ ε`
   have hε'mul : ε' * (B + 2 * π + 1) ≤ ε := by
     rw [← le_div_iff₀ hden]
@@ -551,36 +527,6 @@ box-uniform constants: the calibrated height moves by `O((t'−t)/L²)` and the
 trapezoid by `O((t'−t)/L)`.  These bounds drive the mass-matching coupling `ψ`
 below (`|ψσ − σ|`, `|ψ' − 1| = O(t'−t)`), the source terms of the A8 rectangle. -/
 
-/-- Quotient-difference bound (copy of the `private` helper of
-`Gluck/Hyperbolic/ArcLength.lean`): numerators bounded by `B` differing by
-`≤ dn`, denominators `≥ δ > 0` differing by `≤ dd` give quotients differing by
-`≤ dn/δ + B·dd/δ²`. -/
-private lemma abs_div_sub_div_le'' {n₁ n₂ d₁ d₂ δ B dn dd : ℝ} (hδ : 0 < δ)
-    (hd₁ : δ ≤ d₁) (hd₂ : δ ≤ d₂) (hn₁B : |n₁| ≤ B)
-    (hn : |n₁ - n₂| ≤ dn) (hd : |d₁ - d₂| ≤ dd) :
-    |n₁ / d₁ - n₂ / d₂| ≤ dn / δ + B * dd / δ ^ 2 := by
-  have h₁ : 0 < d₁ := hδ.trans_le hd₁
-  have h₂ : 0 < d₂ := hδ.trans_le hd₂
-  have key : n₁ / d₁ - n₂ / d₂ = (n₁ - n₂) / d₂ + n₁ * (d₂ - d₁) / (d₁ * d₂) := by
-    field_simp
-    ring
-  rw [key]
-  have hb1 : |(n₁ - n₂) / d₂| ≤ dn / δ := by
-    rw [abs_div, abs_of_pos h₂]
-    exact div_le_div₀ (le_trans (abs_nonneg _) hn) hn hδ hd₂
-  have hb2 : |n₁ * (d₂ - d₁) / (d₁ * d₂)| ≤ B * dd / δ ^ 2 := by
-    rw [abs_div, abs_mul, abs_mul, abs_of_pos h₁, abs_of_pos h₂]
-    have hnum : |n₁| * |d₂ - d₁| ≤ B * dd := by
-      have h := hd
-      rw [abs_sub_comm] at h
-      exact mul_le_mul hn₁B h (abs_nonneg _) (le_trans (abs_nonneg _) hn₁B)
-    have hden : δ ^ 2 ≤ d₁ * d₂ := by nlinarith
-    exact div_le_div₀ ((mul_nonneg (abs_nonneg _) (abs_nonneg _)).trans hnum) hnum
-      (by positivity) hden
-  calc |(n₁ - n₂) / d₂ + n₁ * (d₂ - d₁) / (d₁ * d₂)|
-      ≤ |(n₁ - n₂) / d₂| + |n₁ * (d₂ - d₁) / (d₁ * d₂)| := abs_add_le _ _
-    _ ≤ dn / δ + B * dd / δ ^ 2 := add_le_add hb1 hb2
-
 /-- The `[0,1]`-clamp `x ↦ min 1 (max 0 x)` is `1`-Lipschitz. -/
 private lemma abs_clamp01_sub_le (x y : ℝ) :
     |min 1 (max 0 x) - min 1 (max 0 y)| ≤ |x - y| := by
@@ -650,7 +596,7 @@ private lemma leg5_height_diff {L t t' : ℝ} (hL : 0 < L) (ht : |t| ≤ L / 16)
   have hd : |(L / 8 + t' - nodeRamp L) - (L / 8 + t - nodeRamp L)| ≤ |t' - t| := by
     rw [show (L / 8 + t' - nodeRamp L) - (L / 8 + t - nodeRamp L) = t' - t by ring]
   rw [nodeHeight, nodeHeight, hmax, hmax']
-  refine le_trans (abs_div_sub_div_le'' hδ hd₁ hd₂ hnB hn hd) ?_
+  refine le_trans (SpaceForm.abs_div_sub_div_le hδ hd₁ hd₂ hnB hn hd) ?_
   have habs : 0 ≤ |t' - t| := abs_nonneg _
   have hX : 0 ≤ π * |t' - t| / L ^ 2 := by positivity
   have e1 : π / L * |t' - t| / (3 * L / 64) = 64 / 3 * (π * |t' - t| / L ^ 2) := by

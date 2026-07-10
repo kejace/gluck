@@ -94,9 +94,10 @@ private lemma truncatedSpeed_lipschitz_uniform {ε R δ : ℝ} (hε : |ε| ≤ 1
   have hdenw : 2 * δ ≤ 2 * max (κ θ - ε * ⟪w, v⟫_ℝ) δ := by
     have := le_max_right (κ θ - ε * ⟪w, v⟫_ℝ) δ; linarith
   have hkey := abs_div_sub_div_le (by positivity : (0 : ℝ) < 2 * δ) hdenz hdenw
-    (truncatedNum_pos hε hR hR1 z).le
-    (by have hεhi : ε ≤ 1 := (abs_le.mp hε).2;
-        nlinarith [sq_nonneg (min ‖z‖ R)] : 1 + ε * (min ‖z‖ R) ^ 2 ≤ 1 + R ^ 2)
+    (show |1 + ε * (min ‖z‖ R) ^ 2| ≤ 1 + R ^ 2 by
+      rw [abs_of_nonneg (truncatedNum_pos hε hR hR1 z).le]
+      have hεhi : ε ≤ 1 := (abs_le.mp hε).2
+      nlinarith [sq_nonneg (min ‖z‖ R)])
     hnum_diff hden_diff
   refine hkey.trans (le_of_eq ?_)
   rw [Real.coe_toNNReal _ (by positivity)]
