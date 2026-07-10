@@ -3,35 +3,34 @@ Copyright (c) 2026 kejace. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
-import Gluck.SpaceForm.Converse
+import Gluck.SphereMixed
+import Gluck.SpaceForm.ArcLengthH2Exact
 
 /-!
 # The space-form converse, mixed-sign stage (`ε`-generic Dahlberg converse)
 
-Stage 2 of the space-form development removes global positivity from
-`Gluck.SpaceForm.spaceFormConverse_pos`: the prescribed geodesic curvature `κ`
-may be `≤ 0` (or, at `ε = −1`, `≤ 1`) on part of the circle, provided the
-position-dependent admissibility `κ(θ) − ε⟪z(θ), i·e^{iθ}⟫_ℝ > 0` can be
-maintained. Quantitatively this is the confinement lower bound
-`κ > −r*(ε, c)` for a window value `c`, where `r*(ε, c) = centeredRadius ε c`
-is the model-circle radius.
+The `ε`-generic mixed-sign converse `spaceFormMixedConverse`: a curvature profile
+satisfying the mixed-sign four-vertex hypothesis `MixedSignSpaceFormFourVertex ε`
+is realized exactly as the space-form geodesic curvature of a simple closed curve
+at ambient sign `ε ∈ {+1, −1}`, unifying the spherical and hyperbolic Dahlberg
+converses in one statement.
+
+The proof is by **reduction to the two completed per-space developments** — no
+flow transport of its own.  At `ε = +1` the hypothesis strengthens the spherical
+`Gluck.MixedSignSphereFourVertex` (separation raised from `max 0` to `max 1`,
+same confinement floor via `centeredRadius_one`), so `Gluck.sphericalConverse`
+applies.  At `ε = −1` it strengthens the hyperbolic
+`MixedSignHyperbolicFourVertex` (identical four-vertex package plus a positive
+floor the arc-length route proved unnecessary), so the exact-profile capstone
+`hyperbolicMixedConverse_exact` applies.  An earlier plan proved this theorem by
+an `ε`-generic transport of the S² flow development (relaxed `L¹` reparam,
+invariant admissible domain, mixed endpoint winding); that route was superseded
+by the H² arc-length engine and the reduction below.
 
 The `ε = −1` instance is the **hyperbolic (H²) Dahlberg converse**
 (`hyperbolicDahlbergConverse`), the geodesic-curvature converse of the four
-vertex theorem in the hyperbolic plane. This file is the `ε`-generic transport
-of the S² stage-2 development `Gluck/SphereMixed.lean`
-(`Gluck.sphericalConverse`, `Gluck.mixed_spherical_endpoint_winding`,
-`Gluck.exists_step_L1_reparam_relaxed`), which itself formalizes the
-flow-based reconstruction replacing the flat arc-length reduction of
-Dahlberg 2005, *Converse of the Four Vertex Theorem*, Proc. AMS 133.
-
-The genuinely new surfaces beyond the sign-agnostic positive stage are the
-hypothesis definition `MixedSignSpaceFormFourVertex` (L1), the relaxed `L¹`
-reparametrization `exists_step_L1_reparam_relaxed_generic` (L2), the invariant
-admissible-domain / denominator-avoidance lemma `invariant_admissible_domain_mixed`
-(L3, the crux where the H² boundary degeneration concentrates), the mixed
-winding assembly `mixed_spaceForm_endpoint_winding` (L4), and the capstone
-`spaceFormMixedConverse` (L5).
+vertex theorem in the hyperbolic plane (Dahlberg 2005, *Converse of the Four
+Vertex Theorem*, Proc. AMS 133, hyperbolic transport).
 
 Blueprint: `blueprint/src/chapters/Gluck_SpaceFormMixed.tex` (planned).
 -/
@@ -40,7 +39,7 @@ namespace Gluck.SpaceForm
 
 open scoped Real InnerProductSpace NNReal
 
-/-! ## L1 — the mixed-sign hypothesis -/
+/-! ## The mixed-sign hypothesis -/
 
 /-- **The `ε`-generic mixed-sign four-vertex hypothesis.** Transport of
 `Gluck.MixedSignSphereFourVertex` (`SphereMixed.lean:41`): `κ` is continuous,
@@ -50,12 +49,14 @@ window requirement), or has value-separated alternating extrema with the
 escape-velocity separation `max 1 (max (κ q₁) (κ q₂)) < min (κ p₁) (κ p₂)`
 (the S² `max 0` raised to `max 1` for the ε-generic / hyperbolic escape
 velocity `coth R > 1`) together with a window value `c` in the overlap for
-which the global confinement floor `κ(θ) > −(centeredRadius ε c)` holds.
+which the global confinement floor `κ(θ) > −(ε·centeredRadius ε c)` holds.
 
 No global positivity: `κ` may be `≤ 0` (`ε = +1`) resp. dip into `(−1, 0)`
-(`ε = −1`) around the minima. The floor `−(centeredRadius ε c)` keeps the
+(`ε = −1`) around the minima. The floor `−(ε·centeredRadius ε c)` keeps the
 position-dependent denominator `κ − ε⟪z, i·e^{iθ}⟫_ℝ` positive along
-trajectories confined to the model radius. -/
+trajectories confined to the model radius.  (At `ε = −1` the floor is *not*
+needed for realization — `hyperbolicMixedConverse_exact` has none — so this
+hypothesis is strictly stronger than `MixedSignHyperbolicFourVertex`.) -/
 def MixedSignSpaceFormFourVertex (ε : ℝ) (κ : ℝ → ℝ) : Prop :=
   Continuous κ ∧ Function.Periodic κ (2 * π) ∧
     ((∃ c, ((ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c)) ∧ ∀ θ, κ θ = c) ∨
@@ -66,104 +67,75 @@ def MixedSignSpaceFormFourVertex (ε : ℝ) (κ : ℝ → ℝ) : Prop :=
           ((ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c)) ∧
           ∀ θ, -(ε * centeredRadius ε c) < κ θ))
 
-/-! ## L2 — the relaxed `L¹` step reparametrization (constant-shift reduction) -/
+/-! ## Reduction lemmas to the per-space hypotheses -/
 
-/-- **`L¹` step reparametrization without positivity** (`ε`-generic restatement
-of `Gluck.exists_step_L1_reparam_relaxed`, `SphereMixed.lean:104`). The
-statement is model-agnostic — a pure reparametrization of the curvature profile
-on `S¹`, no ambient `ε` and no geometry; the tolerance parameter here (also
-written `ε`) is the `L¹` bound. Constant-shift reduction: `κ + M` is a positive
-curvature function for large `M`, and the `L¹` integrand is shift-invariant by
-`stepCurvature_add_const`. -/
-lemma exists_step_L1_reparam_relaxed_generic {κ : ℝ → ℝ} (hκc : Continuous κ)
-    (hκper : Function.Periodic κ (2 * π))
-    {a b θ₁ θ₂ θ₃ θ₄ : ℝ} (ha : 0 < a) (hab : a < b)
-    (h12 : θ₁ < θ₂) (h23 : θ₂ < θ₃) (h34 : θ₃ < θ₄) (h41 : θ₄ < θ₁ + 2 * π)
-    (hv₁ : κ θ₁ = a) (hv₂ : κ θ₂ = b) (hv₃ : κ θ₃ = a) (hv₄ : κ θ₄ = b)
-    {ε : ℝ} (hε : 0 < ε) :
-    ∃ h₁ : ℝ → ℝ, StrictMono h₁ ∧ Continuous h₁ ∧
-      (∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π) ∧
-      (∃ v : ℝ → ℝ, Continuous v ∧ (∀ θ, 0 < v θ) ∧ ∀ θ, HasDerivAt h₁ (v θ) θ) ∧
-      (∫ θ in (0 : ℝ)..(2 * π),
-        |κ (h₁ θ) - stepCurvature b a 0 (π / 2) π (3 * π / 2) θ|) < ε := by
-  sorry
+/-- At `ε = +1` the space-form mixed hypothesis strengthens the spherical one:
+the separation `max 1 ≥ max 0` weakens pointwise and the confinement floor is
+the S² floor via `centeredRadius_one`. -/
+theorem mixedSignSphereFourVertex_of_spaceForm {κ : ℝ → ℝ}
+    (hκ : MixedSignSpaceFormFourVertex 1 κ) : Gluck.MixedSignSphereFourVertex κ := by
+  obtain ⟨hκc, hκper, hdisj⟩ := hκ
+  refine ⟨hκc, hκper, ?_⟩
+  have hfloor : ∀ {c : ℝ}, (∀ θ, -(1 * centeredRadius 1 c) < κ θ) →
+      ∀ θ, -(Real.sqrt (1 + c ^ 2) - c) < κ θ := by
+    intro c hlow θ
+    have h := hlow θ
+    rw [one_mul, centeredRadius_one] at h
+    rwa [show (1 : ℝ) + c ^ 2 = c ^ 2 + 1 from add_comm 1 _]
+  rcases hdisj with ⟨c, hor, hconst⟩ | ⟨p₁, q₁, p₂, q₂, h12, h23, h34, h41,
+      hm₁, hm₂, hn₁, hn₂, hsep, c, hcw₁, hcw₂, hor, hlow⟩
+  · rcases hor with ⟨-, hc0⟩ | ⟨habs, -⟩
+    · exact Or.inl ⟨c, hc0, hconst⟩
+    · exact absurd habs (by norm_num)
+  · have hmax : max 0 (max (κ q₁) (κ q₂)) ≤ max 1 (max (κ q₁) (κ q₂)) :=
+      max_le_max zero_le_one le_rfl
+    exact Or.inr ⟨p₁, q₁, p₂, q₂, h12, h23, h34, h41, hm₁, hm₂, hn₁, hn₂,
+      hmax.trans_lt hsep, c, hmax.trans_lt hcw₁, hcw₂, hfloor hlow⟩
 
-/-! ## L3 — the invariant admissible-domain lemma (denominator avoidance) -/
+/-- At `ε = −1` the space-form mixed hypothesis strengthens the hyperbolic one:
+the four-vertex package is identical and the confinement floor is discarded
+(the arc-length route needs none). -/
+theorem mixedSignHyperbolicFourVertex_of_spaceForm {κ : ℝ → ℝ}
+    (hκ : MixedSignSpaceFormFourVertex (-1) κ) : MixedSignHyperbolicFourVertex κ := by
+  obtain ⟨hκc, hκper, hdisj⟩ := hκ
+  refine ⟨hκc, hκper, ?_⟩
+  rcases hdisj with ⟨c, hor, hconst⟩ | ⟨p₁, q₁, p₂, q₂, h12, h23, h34, h41,
+      hm₁, hm₂, hn₁, hn₂, hsep, c, hcw₁, hcw₂, hor, -⟩
+  · rcases hor with ⟨habs, -⟩ | ⟨-, hc1⟩
+    · exact absurd habs (by norm_num)
+    · exact Or.inl ⟨c, hc1, hconst⟩
+  · rcases hor with ⟨habs, -⟩ | ⟨-, hc1⟩
+    · exact absurd habs (by norm_num)
+    · exact Or.inr ⟨p₁, q₁, p₂, q₂, h12, h23, h34, h41, hm₁, hm₂, hn₁, hn₂,
+        hsep, c, hcw₁, hcw₂, hc1⟩
 
-/-- **Invariant admissible domain (REUSE, denominator avoidance).** Under
-the mixed confinement floor `κ > −(ε·centeredRadius ε c)`, a `spaceFormFlow ε`
-trajectory that stays inside the model-radius ball
-`‖z θ‖ ≤ centeredRadius ε c` stays off the degeneration locus
-`κ − ε⟪z, i·e^{iθ}⟫_ℝ = 0`, i.e. inside the admissible slab where the
-denominator is strictly positive. DISCHARGED BY REUSE: this is exactly what the ε-generic `invariant_admissible_domain`
-(`Admissible.lean:402`) + `stepModel_margins` (`Margins.lean:379`, floor
-`−(ε·centeredRadius ε c) < κ₀`) already prove. For `ε = −1` the floor
-`−(ε·centeredRadius (−1) c) = +centeredRadius (−1) c > 0` is POSITIVE, so
-`κ + ⟨z,n⟩ ≥ κ − ‖z‖ > 0` directly; for `ε = +1` the floor is negative and the
-alignment hypothesis `hzsinner` in `invariant_admissible_domain` carries it. -/
-theorem invariant_admissible_domain_mixed {ε : ℝ} (hε : ε = 1 ∨ ε = -1)
-    {κ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
-    {c : ℝ} (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c))
-    (hlow : ∀ θ, -(ε * centeredRadius ε c) < κ θ)
-    {R δ : ℝ} {r₀ : ℝ≥0} {z₀ : ℂ}
-    (hR0 : 0 < R) (hR1 : R < 1) (hδ0 : 0 < δ)
-    (hz₀mem : z₀ ∈ Metric.closedBall (0 : ℂ) r₀)
-    (hconf : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
-      ‖spaceFormFlow ε κ R δ r₀ (z₀, θ)‖ ≤ centeredRadius ε c) :
-    ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
-      0 < κ θ - ε * ⟪spaceFormFlow ε κ R δ r₀ (z₀, θ),
-        Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ := by
-  sorry
+/-- `Realizes` at `ε = +1` is the spherical realization predicate
+(`Gluck.RealizesSphericalCurvature`): the two definitions coincide up to
+`one_mul` in the metric factor and the inner-product coefficient. -/
+theorem realizes_one_iff_spherical {z : ℝ → ℂ} {κ : ℝ → ℝ} :
+    Realizes 1 z κ ↔ Gluck.RealizesSphericalCurvature z κ := by
+  unfold Realizes Gluck.RealizesSphericalCurvature
+  simp only [one_mul]
 
-/-! ## L4 — the mixed-sign endpoint winding assembly -/
+/-! ## The capstone: the mixed-sign space-form converse -/
 
-/-- **Mixed-sign endpoint winding: a closed admissible trajectory without
-global positivity** (`ε`-generic transport of
-`Gluck.mixed_spherical_endpoint_winding`, `SphereMixed.lean:169`). The window
-value `c` is supplied by hypothesis (its midpoint may be `≤ 0` at `ε = +1`
-resp. dip below `1` at `ε = −1`), the curvature floor may be admissible for the
-re-signed margins through the confinement bound `κ > −(centeredRadius ε c)`
-(L3), and the step levels stay in the positive part of the overlap window.
-Produces a reparametrization `h₁` and admissible flow parameters for which the
-truncated `spaceFormFlow ε` of `κ ∘ h₁` closes up. -/
-theorem mixed_spaceForm_endpoint_winding {ε : ℝ} (hε : ε = 1 ∨ ε = -1)
-    {κ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
-    {p₁ q₁ p₂ q₂ : ℝ} (h12 : p₁ < q₁) (h23 : q₁ < p₂) (h34 : p₂ < q₂)
-    (h41 : q₂ < p₁ + 2 * π)
-    {c : ℝ} (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c))
-    (hcw₁ : max 1 (max (κ q₁) (κ q₂)) < c)
-    (hcw₂ : c < min (κ p₁) (κ p₂))
-    (hlow : ∀ θ, -(ε * centeredRadius ε c) < κ θ) :
-    ∃ (R δ : ℝ) (h₁ : ℝ → ℝ) (r₀ : ℝ≥0) (z₀ : ℂ),
-      0 < R ∧ R < 1 ∧ 0 < δ ∧
-      StrictMono h₁ ∧ Continuous h₁ ∧
-      (∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π) ∧
-      (∃ v : ℝ → ℝ, Continuous v ∧ (∀ θ, 0 < v θ) ∧ ∀ θ, HasDerivAt h₁ (v θ) θ) ∧
-      z₀ ∈ Metric.closedBall (0 : ℂ) r₀ ∧
-      spaceFormFlow ε (κ ∘ h₁) R δ r₀ (z₀, 2 * π) = z₀ ∧
-      ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
-        ‖spaceFormFlow ε (κ ∘ h₁) R δ r₀ (z₀, θ)‖ ≤ R ∧
-        δ ≤ (κ ∘ h₁) θ - ε * ⟪spaceFormFlow ε (κ ∘ h₁) R δ r₀ (z₀, θ),
-          Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ := by
-  sorry
-
-/-! ## L5 — the capstone: mixed-sign space-form converse -/
-
-/-- **Space-form converse, mixed sign** (`ε`-generic transport of
-`Gluck.sphericalConverse`, `SphereMixed.lean:491`). If `κ` satisfies the
-mixed-sign four-vertex hypothesis, there is a simple closed curve confined to
-the open disk realizing `κ` as its space-form geodesic curvature at ambient
-sign `ε ∈ {+1, −1}`. Subsumes `spaceFormConverse_pos`; the constant branch is
-the explicit model circle (`spaceFormCircle_realizes`), the non-constant branch
-runs the mixed winding lemma (L4) into reconstruction and simplicity
-(`spaceForm_simplicity`, `reconstruction_realizes`), pulled back along the `C¹`
-reparametrization inverse. -/
+/-- **Space-form converse, mixed sign.** If `κ` satisfies the mixed-sign
+four-vertex hypothesis, there is a simple closed curve confined to the open disk
+realizing `κ` exactly as its space-form geodesic curvature at ambient sign
+`ε ∈ {+1, −1}`. Subsumes `spaceFormConverse_pos`. Proved by reduction: the
+`ε = +1` branch is the spherical Dahlberg converse `Gluck.sphericalConverse`,
+the `ε = −1` branch the exact-profile hyperbolic capstone
+`hyperbolicMixedConverse_exact`. -/
 theorem spaceFormMixedConverse {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {κ : ℝ → ℝ}
     (hκ : MixedSignSpaceFormFourVertex ε κ) :
     ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes ε z κ := by
-  sorry
+  rcases hε with rfl | rfl
+  · obtain ⟨z, hsc, hreal⟩ :=
+      Gluck.sphericalConverse (mixedSignSphereFourVertex_of_spaceForm hκ)
+    exact ⟨z, hsc, realizes_one_iff_spherical.mpr hreal⟩
+  · exact hyperbolicMixedConverse_exact (mixedSignHyperbolicFourVertex_of_spaceForm hκ)
 
-/-! ## L6 — the hyperbolic (H²) Dahlberg instance -/
+/-! ## The hyperbolic (H²) Dahlberg instance -/
 
 /-- **The hyperbolic Dahlberg converse (H², `ε = −1`).** The `ε = −1` instance
 of `spaceFormMixedConverse`: a mixed-sign / sub-escape-velocity four-vertex

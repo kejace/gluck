@@ -6,6 +6,7 @@ Authors: kejace
 import Gluck.Hyperbolic
 import Gluck.SpaceForm.ArcLengthH2Family
 import Gluck.SpaceForm.ArcLengthH2Exact
+import Gluck.SpaceForm.MixedConverse
 
 /-!
 # The hyperbolic mixed (Dahlberg) converse — genuinely-negative curvature (H², K = −1)
