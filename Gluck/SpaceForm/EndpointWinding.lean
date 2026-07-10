@@ -171,7 +171,7 @@ private lemma flow_admissible_and_endpoint_estimate
     linarith
   obtain ⟨hz0, hzode⟩ := spaceFormFlow_spec hεabs hκ'c hR0.le hR1 hδ0 r₀ hz₀mem
   obtain ⟨hm0, hm1, hm2, hm3⟩ := hmarg z₀ (le_trans hd hρρ₀)
-  have htrans := stepModel_transport hεabs hκ'c hκ'₀ hR0.le hR1 hδ0 hLuni hzode hz0
+  have htrans := stepModel_transport hεabs hκ'c hκ'₀ hR0.le hδ0 hLuni hzode hz0
     hm0 hm1 hm2 hm3 hIμ
   refine ⟨htrans.1, ?_⟩
   have hend := htrans.2

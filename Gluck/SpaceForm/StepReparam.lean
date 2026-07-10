@@ -191,10 +191,9 @@ trajectory of the `κ`-truncated flow with the constant-level-`K` model arc thro
 `(t₁, p)`. Under the arc margins and the smallness condition, the trajectory is
 admissible on the quarter and its endpoint lands within the Grönwall bound of the
 arc-map image `A_{ε,K,t₁,t₂−t₁}(p)`. Combines `constant_arc_solves_truncated` with
-`invariant_admissible_arc`. (Transport of `Gluck.quarter_step_transport`; gains
-`hε : |ε| ≤ 1` and `hR1 : R < 1`, needed by the `ε`-generic `invariant_admissible_arc`.) -/
+`invariant_admissible_arc`. (Transport of `Gluck.quarter_step_transport`.) -/
 lemma quarter_step_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : ℝ} {L : ℝ≥0}
-    (hε : |ε| ≤ 1) (hκ : Continuous κ) (hκ₀ : ∀ θ, κ₀ ≤ κ θ) (hR : 0 ≤ R) (hR1 : R < 1)
+    (hε : |ε| ≤ 1) (hκ : Continuous κ) (hκ₀ : ∀ θ, κ₀ ≤ κ θ) (hR : 0 ≤ R)
     (hδ : 0 < δ) (ht : t₁ ≤ t₂)
     (hL : ∀ θ, LipschitzWith L (fun w => truncatedField ε κ R δ θ w))
     {z : ℝ → ℂ} {p : ℂ}
@@ -244,7 +243,7 @@ lemma quarter_step_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ K t₁
       + (1 + R ^ 2) / (2 * δ ^ 2) * ∫ θ in t₁..t₂, |κ θ - K|) ≤ μ := by
     rw [hpt1]
     exact hsmall
-  have htrans := invariant_admissible_arc hε hκ hκ₀ hR hR1 hδ ht hL hz hzsode
+  have htrans := invariant_admissible_arc hε hκ hκ₀ hR hδ ht hL hz hzsode
     hzsR hzsinner hsmall'
   refine ⟨fun θ hθ => ⟨(htrans θ hθ).2.1, (htrans θ hθ).2.2⟩, ?_⟩
   have h := (htrans t₂ ⟨ht, le_refl t₂⟩).1
@@ -261,7 +260,7 @@ image. Packages `chain_bound`, the exponential collapse, and one call to
 private lemma stepModel_transport_quarter
     {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ M Sprev Jcur t₁ t₂ K : ℝ} {L : ℝ≥0} {z : ℝ → ℂ}
     {pprev : ℂ}
-    (hε : |ε| ≤ 1) (hκ : Continuous κ) (hκ₀ : ∀ θ, κ₀ ≤ κ θ) (hR : 0 ≤ R) (hR1 : R < 1)
+    (hε : |ε| ≤ 1) (hκ : Continuous κ) (hκ₀ : ∀ θ, κ₀ ≤ κ θ) (hR : 0 ≤ R)
     (hδ : 0 < δ)
     (hL : ∀ θ, LipschitzWith L (fun w => truncatedField ε κ R δ θ w))
     (hMeq : M = (1 + R ^ 2) / (2 * δ ^ 2)) (hM0 : 0 ≤ M) (hJ0 : 0 ≤ Jcur)
@@ -289,7 +288,7 @@ private lemma stepModel_transport_quarter
       + (1 + R ^ 2) / (2 * δ ^ 2) * ∫ θ in t₁..t₂, |κ θ - K|) ≤ μ := by
     rw [← hMeq, hJcur]
     exact le_trans hbound hbudget
-  have hstep := quarter_step_transport hε hκ hκ₀ hR hR1 hδ ht12 hL hz hmarg hsmall
+  have hstep := quarter_step_transport hε hκ hκ₀ hR hδ ht12 hL hz hmarg hsmall
   refine ⟨hstep.1, le_trans hstep.2 ?_⟩
   rw [← hMeq, hJcur]
   exact hbound
@@ -303,10 +302,9 @@ quarter arc carries the margins of `arcMargins` and
 `[0, 2π]` and its endpoint satisfies
 `‖(z(2π) − z₀) − E*_{a,b}(z₀)‖ ≤ e^{2πL}·M·∫₀^{2π}|κ − κ*|`. Four chained
 applications of `quarter_step_transport`; the model endpoint is the four-arc
-composite via `stepErrorMap_four_arc`. (Transport of `Gluck.stepModel_transport`;
-gains `hε : |ε| ≤ 1` and `hR1 : R < 1`.) -/
+composite via `stepErrorMap_four_arc`. (Transport of `Gluck.stepModel_transport`.) -/
 lemma stepModel_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ} {L : ℝ≥0}
-    (hε : |ε| ≤ 1) (hκ : Continuous κ) (hκ₀ : ∀ θ, κ₀ ≤ κ θ) (hR : 0 ≤ R) (hR1 : R < 1)
+    (hε : |ε| ≤ 1) (hκ : Continuous κ) (hκ₀ : ∀ θ, κ₀ ≤ κ θ) (hR : 0 ≤ R)
     (hδ : 0 < δ)
     (hL : ∀ θ, LipschitzWith L (fun w => truncatedField ε κ R δ θ w))
     {z : ℝ → ℂ} {z₀ : ℂ}
@@ -390,7 +388,7 @@ lemma stepModel_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ
   set p₃ : ℂ := spaceFormArcMap ε a π (π / 2) p₂ with hp₃def
   have hD₀ : ‖z 0 - z₀‖ ≤ Real.exp ((L : ℝ) * 0) * (M * 0) := by
     rw [hz0, sub_self, norm_zero]; positivity
-  have hstep0 := stepModel_transport_quarter hε hκ hκ₀ hR hR1 hδ hL hMdef hM0 hJ₀0
+  have hstep0 := stepModel_transport_quarter hε hκ hκ₀ hR hδ hL hMdef hM0 hJ₀0
     le_rfl (by linarith) (hzq 0 (π / 2) le_rfl (by linarith)) hm0 hK₀ hD₀ (hcol 0 (π / 2))
     (by rw [zero_add]
         exact le_trans
@@ -399,7 +397,7 @@ lemma stepModel_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ
     have h := hstep0.2
     rw [sub_zero, zero_add, ← hp₁def] at h
     exact h
-  have hstep1 := stepModel_transport_quarter hε hκ hκ₀ hR hR1 hδ hL hMdef hM0 hJ₁0
+  have hstep1 := stepModel_transport_quarter hε hκ hκ₀ hR hδ hL hMdef hM0 hJ₁0
     (by linarith) (by linarith) (hzq (π / 2) π (by linarith) (by linarith)) hm1 hK₁ hD₁
     (hcol (π / 2) π)
     (le_trans (htot π (J₀ + J₁) (by nlinarith [L.coe_nonneg]) (by linarith) (by linarith)) hsmall)
@@ -407,7 +405,7 @@ lemma stepModel_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ
     have h := hstep1.2
     rw [show π - π / 2 = π / 2 from by ring, ← hp₂def] at h
     exact h
-  have hstep2 := stepModel_transport_quarter hε hκ hκ₀ hR hR1 hδ hL hMdef hM0 hJ₂0
+  have hstep2 := stepModel_transport_quarter hε hκ hκ₀ hR hδ hL hMdef hM0 hJ₂0
     (by linarith) (by linarith) (hzq π (3 * π / 2) (by linarith) (by linarith)) hm2 hK₂ hD₂
     (hcol π (3 * π / 2))
     (le_trans (htot (3 * π / 2) (J₀ + J₁ + J₂) (by nlinarith [L.coe_nonneg])
@@ -417,7 +415,7 @@ lemma stepModel_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ
     have h := hstep2.2
     rw [show 3 * π / 2 - π = π / 2 from by ring, ← hp₃def] at h
     exact h
-  have hstep3 := stepModel_transport_quarter hε hκ hκ₀ hR hR1 hδ hL hMdef hM0 hJ₃0
+  have hstep3 := stepModel_transport_quarter hε hκ hκ₀ hR hδ hL hMdef hM0 hJ₃0
     (by linarith) (by linarith) (hzq (3 * π / 2) (2 * π) (by linarith) le_rfl) hm3 hK₃ hD₃
     (hcol (3 * π / 2) (2 * π))
     (le_trans (htot (2 * π) (J₀ + J₁ + J₂ + J₃) (by nlinarith [L.coe_nonneg])

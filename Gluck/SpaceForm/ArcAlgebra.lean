@@ -413,7 +413,7 @@ private lemma continuousOn_truncatedField_comp_shift {ε : ℝ} {κ' : ℝ → �
 difference, bounded pointwise by `truncatedField_sub_le`. (Transport of
 `Gluck.arc_trajectory_diff_integral_bound`.) -/
 private lemma arc_trajectory_diff_integral_bound {ε : ℝ} {κ κ' : ℝ → ℝ} {R δ t₁ T : ℝ}
-    {L : ℝ≥0} (hε : |ε| ≤ 1) (hR : 0 ≤ R) (hR1 : R < 1) (hδ : 0 < δ)
+    {L : ℝ≥0} (hε : |ε| ≤ 1) (hR : 0 ≤ R) (hδ : 0 < δ)
     (hL : ∀ θ, LipschitzWith L (fun z => truncatedField ε κ R δ θ z))
     (hκc : Continuous fun u => κ (t₁ + u)) (hκ'c : Continuous fun u => κ' (t₁ + u))
     {z zs : ℝ → ℂ}
@@ -470,7 +470,7 @@ private lemma arc_trajectory_diff_integral_bound {ε : ℝ} {κ κ' : ℝ → �
           + (1 + R ^ 2) / (2 * δ ^ 2) * |κ (t₁ + u) - κ' (t₁ + u)|) := by
     refine intervalIntegral.integral_mono_on hs.1 hint.norm hint2 ?_
     intro x _
-    exact truncatedField_sub_le hε hR hR1 hδ hL (t₁ + x) (z (t₁ + x)) (zs (t₁ + x))
+    exact truncatedField_sub_le hε hR hδ hL (t₁ + x) (z (t₁ + x)) (zs (t₁ + x))
   have hsplit : z (t₁ + s) - zs (t₁ + s) = (z t₁ - zs t₁)
       + ((z (t₁ + s) - zs (t₁ + s)) - (z t₁ - zs t₁)) := by ring
   calc ‖z (t₁ + s) - zs (t₁ + s)‖
@@ -523,7 +523,7 @@ continuous because the model level is constant. (Transport of
 `Gluck.invariant_admissible_arc`.) -/
 lemma invariant_admissible_arc {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : ℝ} {L : ℝ≥0}
     (hε : |ε| ≤ 1) (hκ : Continuous κ) (hκ₀ : ∀ θ, κ₀ ≤ κ θ) (hR : 0 ≤ R)
-    (hR1 : R < 1) (hδ : 0 < δ) (ht : t₁ ≤ t₂)
+    (hδ : 0 < δ) (ht : t₁ ≤ t₂)
     (hL : ∀ θ, LipschitzWith L (fun z => truncatedField ε κ R δ θ z))
     {z zs : ℝ → ℂ}
     (hz : ∀ θ ∈ Set.Icc t₁ t₂,
@@ -566,7 +566,7 @@ lemma invariant_admissible_arc {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ K t�
       ‖z (t₁ + s) - zs (t₁ + s)‖ ≤ ‖z t₁ - zs t₁‖
         + ∫ u in (0 : ℝ)..s, ((L : ℝ) * ‖z (t₁ + u) - zs (t₁ + u)‖
             + M * |κ (t₁ + u) - K|) :=
-    fun s hs => arc_trajectory_diff_integral_bound hε hR hR1 hδ hL hκc continuous_const
+    fun s hs => arc_trajectory_diff_integral_bound hε hR hδ hL hκc continuous_const
       hZc hZsc hFz hFzs hZ hZs hs
   have hgronwall := gronwall_L1_drive
     (d := fun s => ‖z (t₁ + s) - zs (t₁ + s)‖)
