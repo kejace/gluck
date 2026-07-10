@@ -140,6 +140,8 @@ $|\alpha-\alpha^*|\le C\varepsilon$ estimate). The simplicity transport
 \end{definition}
 
 \begin{lemma}
+
+\leanok
 [The closing family is a running-integral reparametrisation]
   \label{lem:closing_family_eq}
   \lean{Gluck.closingFamily_eq}
@@ -154,6 +156,7 @@ $|\alpha-\alpha^*|\le C\varepsilon$ estimate). The simplicity transport
 \end{lemma}
 \begin{proof}
   \uses{def:closing_family, def:integral_reparam}
+  \leanok
   Both sides are by definition the map
   $s\mapsto\int_0^s\mathrm{closingDensity}\,a\,b\,\delta\,z$: the generic
   reparametrisation $\mathrm{integralReparam}\,w\,c$ is the running integral of $w$
@@ -577,6 +580,8 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
 \end{proof}
 
 \begin{lemma}
+
+\leanok
 [A $2\pi$-periodic bound on $[0,2\pi]$ holds everywhere]
   \label{lem:abs_le_of_periodic_two_pi}
   \lean{Gluck.abs_le_of_periodic_two_pi}
@@ -584,6 +589,8 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
   $|D(s)|\le B$ for all $s\in[0,2\pi]$. Then $|D(s)|\le B$ for every real $s$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Reduce $s$ to its representative $s_0\in[0,2\pi)$ modulo $2\pi$, i.e.\
   $s_0=s-k\,2\pi$ for the integer $k$ with $s_0\in[0,2\pi)$. Periodicity gives
   $D(s)=D(s_0)$, and since $s_0\in[0,2\pi]$ the hypothesis bounds $|D(s_0)|\le B$.
@@ -732,6 +739,8 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
 \section{Simplicity transport and the converse}
 
 \begin{lemma}
+
+\leanok
 [Chord of the reconstructed curve $=$ integral of its unit tangent]
   \label{lem:dahlberg_curve_sub}
   \lean{Gluck.dahlbergCurve_sub}
@@ -746,6 +755,7 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
 \end{lemma}
 \begin{proof}
   \uses{def:dahlberg_curve, def:dahlberg_angle}
+  \leanok
   By \cref{def:dahlberg_curve}, $\mathrm{dahlbergCurve}\,K\,(t)=\int_0^t
   e^{i\alpha_K(s)}\,ds$. Subtracting the values at $w$ and $u$ and using additivity
   of the integral over the adjacent intervals $[0,u]$ and $[u,w]$
@@ -754,6 +764,8 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
 \end{proof}
 
 \begin{lemma}
+
+\leanok
 [Two-sided bounds on the normalised clean-bicircle curvature]
   \label{lem:clean_bicircle_arclength_norm_bounds}
   \lean{Gluck.cleanBicircle_arcLengthNorm_bounds}
@@ -768,6 +780,7 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
 \end{lemma}
 \begin{proof}
   \uses{def:arclength_norm, def:clean_bicircle, lem:closing_lambda_pos, lem:closing_len_bounds}
+  \leanok
   By \cref{def:arclength_norm} and the clean total curvature $I_z=2\pi/\lambda(z)$,
   the normalised weight equals $\lambda(z)\,(k_{a,b}\circ g_z)(s)$, where
   $\lambda(z)=\mathrm{closingLambda}\,a\,b\,\delta\,z>0$
@@ -949,6 +962,8 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
 \end{proof}
 
 \begin{theorem}
+
+\leanok
 [Gluck converse, non-constant strictly-positive case]
   \label{thm:gluck_converse_nonconstant}
   \lean{Gluck.gluck_converse_nonconstant}
@@ -961,6 +976,7 @@ avoids it entirely (no $\alpha_{K_z}^{-1}$).
 \end{theorem}
 \begin{proof}
   \uses{thm:dahlberg_converse, lem:mixed_sign_four_vertex_of_is_curvature_function}
+  \leanok
   A strictly positive four-vertex $\kappa$ satisfies the mixed-sign four-vertex
   hypothesis of \cref{def:mixed_sign_four_vertex}, by
   \cref{lem:mixed_sign_four_vertex_of_is_curvature_function}. Applying

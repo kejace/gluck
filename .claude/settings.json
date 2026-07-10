@@ -1,6 +1,8 @@
 {
   "enabledPlugins": {
     "lean4@archon-local": true,
-    "mathlib-quality@mathlib-quality-plugins": true
+    "mathlib-quality@mathlib-quality-plugins": true,
+    "mqslim@mqslim-plugins": true,
+    "lean4-contribute@lean4-skills": true
   }
 }

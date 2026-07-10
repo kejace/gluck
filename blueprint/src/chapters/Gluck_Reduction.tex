@@ -169,6 +169,8 @@ exact corner positions on the map itself.)
 \end{proof}
 
 \begin{lemma}
+
+\leanok
 [Disk smallness of the breakpoint shifts]
   \label{lem:align_delta_bounds}
   \lean{Gluck.align_delta_bounds}
@@ -178,6 +180,7 @@ exact corner positions on the map itself.)
 \end{lemma}
 \begin{proof}
   \uses{def:align_density}
+  \leanok
   $|z.\mathrm{re}|,\,|z.\mathrm{im}|\le\|z\|\le1$, so
   $|\delta\,z.\mathrm{re}|,\,|\delta\,z.\mathrm{im}|\le\delta\le\pi/8$.
 \end{proof}
@@ -213,6 +216,8 @@ $2\pi$-periodic) weight. We isolate them once on a generic family
 $\mathrm{integralReparam}$ and let the $g_z$ lemmas delegate to them.
 
 \begin{definition}
+
+\leanok
 [Running-integral reparametrization]
   \label{def:integral_reparam}
   \lean{Gluck.integralReparam}
@@ -224,6 +229,8 @@ $\mathrm{integralReparam}$ and let the $g_z$ lemmas delegate to them.
 \end{definition}
 
 \begin{lemma}
+
+\leanok
 [FTC derivative of the running integral]
   \label{lem:has_deriv_integral_reparam}
   \lean{Gluck.hasDerivAt_integralReparam}
@@ -233,12 +240,15 @@ $\mathrm{integralReparam}$ and let the $g_z$ lemmas delegate to them.
 \end{lemma}
 \begin{proof}
   \uses{def:integral_reparam}
+  \leanok
   By the fundamental theorem of calculus the derivative of the primitive
   $s\mapsto\int_0^{s}w$ of the continuous integrand $w$ is $w(s)$; adding the
   constant $c$ does not change the derivative.
 \end{proof}
 
 \begin{lemma}
+
+\leanok
 [Continuity of the running integral]
   \label{lem:continuous_integral_reparam}
   \lean{Gluck.continuous_integralReparam}
@@ -247,11 +257,14 @@ $\mathrm{integralReparam}$ and let the $g_z$ lemmas delegate to them.
 \end{lemma}
 \begin{proof}
   \uses{def:integral_reparam}
+  \leanok
   The primitive of a continuous (hence locally interval-integrable) function is
   continuous, and adding the constant $c$ preserves continuity.
 \end{proof}
 
 \begin{lemma}
+
+\leanok
 [Strict monotonicity from a positive density]
   \label{lem:strict_mono_integral_reparam}
   \lean{Gluck.strictMono_integralReparam}
@@ -261,6 +274,7 @@ $\mathrm{integralReparam}$ and let the $g_z$ lemmas delegate to them.
 \end{lemma}
 \begin{proof}
   \uses{def:integral_reparam}
+  \leanok
   For $x<y$,
   $\mathrm{integralReparam}\,w\,c\,(y)-\mathrm{integralReparam}\,w\,c\,(x)
   =\int_x^y w>0$, since the integrand is strictly positive on the nondegenerate
@@ -268,6 +282,8 @@ $\mathrm{integralReparam}$ and let the $g_z$ lemmas delegate to them.
 \end{proof}
 
 \begin{lemma}
+
+\leanok
 [Quasi-periodicity of the running integral]
   \label{lem:integral_reparam_add_two_pi}
   \lean{Gluck.integralReparam_add_two_pi}
@@ -278,11 +294,14 @@ $\mathrm{integralReparam}$ and let the $g_z$ lemmas delegate to them.
 \end{lemma}
 \begin{proof}
   \uses{def:integral_reparam}
+  \leanok
   Split $\int_0^{s+2\pi}=\int_0^{s}+\int_{s}^{s+2\pi}$; by $2\pi$-periodicity of $w$
   the second integral equals the full-period integral $\int_0^{2\pi} w = 2\pi$.
 \end{proof}
 
 \begin{lemma}
+
+\leanok
 [Change of variables for the running integral]
   \label{lem:integral_reparam_change_of_var}
   \lean{Gluck.integralReparam_changeOfVar}
@@ -297,6 +316,7 @@ $\mathrm{integralReparam}$ and let the $g_z$ lemmas delegate to them.
 \begin{proof}
   \uses{lem:has_deriv_integral_reparam, lem:continuous_integral_reparam,
         lem:strict_mono_integral_reparam}
+        \leanok
   $g$ is strictly monotone (\cref{lem:strict_mono_integral_reparam}), hence
   injective, and $C^1$ with derivative $w$ (\cref{lem:has_deriv_integral_reparam});
   being continuous (\cref{lem:continuous_integral_reparam}) and monotone it maps
@@ -336,6 +356,8 @@ $\mathrm{integralReparam}$ and let the $g_z$ lemmas delegate to them.
 \end{definition}
 
 \begin{lemma}
+
+\leanok
 [$g_z$ is an instance of the generic family]
   \label{lem:align_reparam_eq}
   \lean{Gluck.alignReparam_eq}
@@ -349,6 +371,7 @@ $\mathrm{integralReparam}$ and let the $g_z$ lemmas delegate to them.
 \end{lemma}
 \begin{proof}
   \uses{def:align_reparam, def:integral_reparam, def:align_density}
+  \leanok
   By definition $g_z(\theta)=\tfrac\pi2+\int_{\theta_1}^{\theta} w_z$, and
   $\int_{\theta_1}^{\theta} w_z = \int_0^{\theta} w_z - \int_0^{\theta_1} w_z$, so the
   anchor $\theta_1$ folds into the additive constant

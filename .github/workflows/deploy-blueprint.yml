@@ -1,15 +1,17 @@
 name: Deploy Blueprint
 
-# Publishes the prebuilt leanblueprint site (`blueprint/web/`) to GitHub Pages.
-# The HTML is committed to the repo, so this only uploads and deploys it — it
-# does not rebuild the blueprint or the Lean project.
+# Builds the leanblueprint site from source (`blueprint/src/`) with plasTeX and
+# publishes it to GitHub Pages. Web-only: the Lean project is NOT built here
+# (`lean_action_ci.yml` does that on every push); plasTeX generates the site,
+# including the dependency graph, directly from the LaTeX sources, so this
+# workflow runs in a few minutes.
+#
+# The generated site (`blueprint/web/`) is no longer committed to the repo —
+# this workflow is the single source of the published pages.
 
 on:
   push:
     branches: [main]
-    paths:
-      - 'blueprint/web/**'
-      - '.github/workflows/deploy-blueprint.yml'
   workflow_dispatch:
 
 # Allow deploying to GitHub Pages.
@@ -31,6 +33,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install graphviz (needed by the dependency-graph plugin)
+        run: sudo apt-get update && sudo apt-get install -y graphviz libgraphviz-dev
+      - name: Install leanblueprint
+        run: pip install leanblueprint
+      - name: Build the blueprint site
+        run: leanblueprint web
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

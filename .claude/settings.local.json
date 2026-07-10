@@ -1,5 +1,13 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(codex exec *)",
+      "mcp__chatgpt-math__ask_chatgpt_math",
+      "Bash(rm -f /tmp/claude-1000/-workspace-gluck/1049dc4f-7a7f-4bf8-b6bf-00131b54e276/scratchpad/codex-test3.txt)"
+    ]
+  },
   "enabledMcpjsonServers": [
-    "archon-lean-lsp"
+    "archon-lean-lsp",
+    "chatgpt-math"
   ]
 }

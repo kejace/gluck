@@ -1,6 +1,16 @@
-import Mathlib
-import Gluck.Closure
-import Gluck.Bicircle
+import Mathlib.Analysis.SpecialFunctions.Complex.Circle
+import Mathlib.Topology.ContinuousMap.Basic
+import Mathlib.Topology.Order.IntermediateValue
+import Mathlib.Analysis.Normed.Group.Basic
+import Mathlib.Topology.MetricSpace.Basic
+import Mathlib.Analysis.Complex.RealDeriv
+import Mathlib.Analysis.Calculus.Deriv.Basic
+import Mathlib.Analysis.Calculus.ContDiff.Basic
+import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Topology.Homotopy.Lifting
+import Mathlib.Tactic
+import Gluck.Euclidean.Closure
+import Gluck.Euclidean.Bicircle
 
 /-!
 # The winding-number argument (topological core)
@@ -360,7 +370,8 @@ private theorem negCircleExpLoop_ne (t : I) : negCircleExpLoop t ≠ 0 := by
 
 /-- The reverse unit-circle parametrization, viewed as a nonvanishing `ℂ`-loop,
 has winding number `-1`. -/
-private theorem windingNumberC_negCircleExp : windingNumberC negCircleExpLoop negCircleExpLoop_ne = -1 := by
+private theorem windingNumberC_negCircleExp :
+    windingNumberC negCircleExpLoop negCircleExpLoop_ne = -1 := by
   have hnl : normLoop negCircleExpLoop negCircleExpLoop_ne = negStandardLoop := by
     apply ContinuousMap.ext
     intro t
@@ -835,7 +846,7 @@ compared, via the perturbation-stability of the winding number, to its invertibl
 linear model `L|_{∂D} = δ·e^{-iπ/4}·e^{-2π i t}`: on `∂D` the remainder
 `V − L` has norm `≤ δ² < δ = ‖L‖`, so `W(E) = W(V) = W(L) = -1` (the reverse
 once-around loop). -/
-theorem errorMap_winding_eq_one (a b δ : ℝ) (ha : 0 < a) (hb : 0 < b) (hab : a ≠ b)
+theorem errorMap_winding_eq_one (a b δ : ℝ) (_ha : 0 < a) (_hb : 0 < b) (hab : a ≠ b)
     (hδ : 0 < δ) (hδ' : δ ≤ π / 8) :
     ∃ (hF : ContinuousOn (errorMap a b δ) (Metric.closedBall 0 1))
       (hbd : ∀ z ∈ Metric.sphere (0 : ℂ) 1, errorMap a b δ z ≠ 0),

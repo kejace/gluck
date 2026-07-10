@@ -1,0 +1,377 @@
+\chapter{Spherical converse, stage 2: mixed-sign curvature}
+\label{chap:sphere_mixed}
+
+% Chapter for Gluck/SphereMixed.lean (Stage 2 of the S² extension).
+% Rewritten iter-053 to dispatch-ready detail against the LANDED stage-1
+% interfaces (Sphere.lean, 0 sorries): the S2-E chain (reconstruction_ode,
+% sphericalTrajectory_speed, sphericalTrajectory_eq_reconstruct,
+% spherical_simplicity) landed with hypotheses (Continuous κ, Periodic κ 2π)
+% only — fully sign-agnostic — so the iter-048 design's variant blocks
+% (mixed_spherical_simplicity, spherical_admissible_profile,
+% mixed_sphere_margin_transport) are OBSOLETE and were removed: the mixed
+% stage consumes the stage-1 declarations verbatim. What remains genuinely
+% new: the hypothesis definition, the relaxed L¹ reparametrization, the mixed
+% winding assembly, and the capstone.
+%
+% SOURCE background: references/spaceform_notes.md, sections "THE CRUX AND ITS
+% RESOLUTION", "H² vs S²" (read iter-048). Key asymmetry: on S² hemisphere
+% confinement does the topology job but NOT the positive-speed job; the true
+% admissible range allows κ_S ≤ 0 where ⟨z,n⟩ > 0, quantitatively κ_S > −R on
+% the confinement disk |z| ≤ R. This chapter states the mixed-sign converse
+% through that mechanism.
+
+\section{Overview}
+
+Stage 2 removes global positivity from \cref{thm:spherical_converse_pos}: the
+prescribed geodesic curvature $\kappa$ may be $\le0$ on part of the circle,
+provided the position-dependent admissibility $\kappa(\theta)-\langle
+z(\theta),ie^{i\theta}\rangle>0$ can be maintained. The pivotal observation
+(iter-048, sharpened iter-053 against the landed code) is that essentially the
+\emph{entire} stage-1 machinery of \cref{chap:sphere} is already sign-agnostic:
+
+\begin{itemize}
+\item The four-vertex overlap window
+  $\bigl(\max(\kappa(q_1),\kappa(q_2)),\,\min(\kappa(p_1),\kappa(p_2))\bigr)$
+  has a \emph{positive} upper part whenever the two maxima are positive — even
+  when the minima are $\le0$. The small-contrast step levels
+  $a=c-h/2$, $b=c+h/2$ are chosen inside that positive part, so the step
+  model, the arc algebra, the first-variation expansion
+  (\cref{lem:step_error_expansion}) and the boundary winding are literally the
+  positive-stage objects. \cref{lem:exists_abab_levels} landed with hypotheses
+  (Continuous, Periodic) only.
+\item The transport layer (\cref{lem:invariant_admissible_arc},
+  \cref{lem:step_model_transport}) takes the curvature only through a
+  pointwise lower bound $\kappa\ge\kappa_0$ \emph{with no sign assumption on
+  $\kappa_0$}. The margins lemma \cref{lem:step_model_margins} is relaxed
+  in place from $0<\kappa_0$ to $-r^\ast(c)<\kappa_0$ (see the re-sign note
+  there: positivity entered its landed proof only through positivity of the
+  slack $m=\min(1-r^\ast,\kappa_0+r^\ast)$) — the quantitative version of the
+  notes' ``$\kappa_S>-R$'' lower range.
+\item The whole S2-E chain — \cref{lem:reconstruction_ode},
+  \cref{lem:spherical_trajectory_speed},
+  \cref{lem:spherical_trajectory_eq_reconstruct},
+  \cref{lem:spherical_simplicity} — landed in stage 1 with hypotheses
+  (Continuous $\kappa$, $2\pi$-periodic $\kappa$, admissible closed
+  trajectory) only: trajectory-speed positivity comes from the admissibility
+  margin $\ge\delta$, never from $\kappa>0$. Stage 2 consumes these four
+  declarations verbatim; no variant blocks exist or are needed.
+\end{itemize}
+
+\paragraph{Stage-2 prerequisites inside \cref{chap:sphere} (Sphere.lean).}
+Two mechanical edits to the completed stage-1 file, both recorded as re-sign /
+visibility notes in the affected blocks: (i) relax the hypothesis of
+\cref{lem:step_model_margins} from $0<\kappa_0$ to $-r^\ast(c)<\kappa_0$ (sole
+stage-1 consumer fixed up trivially); (ii) de-privatize
+\cref{lem:truncated_speed_lipschitz_uniform} and
+\cref{lem:truncated_field_lipschitz_uniform} so the mixed assembly can use the
+same uniform-in-$\kappa$ Lipschitz witnesses that broke the
+$\varepsilon$/$L$/$h_1$ quantifier circularity in the positive assembly.
+Everything else in this chapter lives in the new file
+\texttt{Gluck/SphereMixed.lean}. The genuinely new Lean surface is:
+\cref{def:mixed_sign_sphere_four_vertex},
+\cref{lem:step_L1_reparam_relaxed} (constant-shift reduction; the frozen
+Euclidean plateau engine \cref{lem:exists_preliminary_reparam} keeps its
+positive hypothesis), \cref{lem:mixed_spherical_endpoint_winding} (the
+assembly, mirroring the landed positive proof with a mixed-sign data step),
+and the capstone \cref{thm:spherical_converse}.
+
+\section{Declarations}
+
+\begin{definition}\leanok
+[mixed-sign spherical four-vertex hypothesis]
+  \label{def:mixed_sign_sphere_four_vertex}
+  \lean{Gluck.MixedSignSphereFourVertex}
+  \uses{def:four_vertex_condition, def:sphere_four_vertex}
+  A function $\kappa:\mathbb R\to\mathbb R$ satisfies the \emph{mixed-sign
+  spherical four-vertex hypothesis} if it is continuous, $2\pi$-periodic, and
+  either constant positive, or has the value-separated alternating extrema of
+  \cref{def:four_vertex_condition} — four points $p_1<q_1<p_2<q_2<p_1+2\pi$
+  with $p_1,p_2$ local maxima, $q_1,q_2$ local minima, and
+  $\max(\kappa(q_1),\kappa(q_2))<\min(\kappa(p_1),\kappa(p_2))$ — with both
+  maxima positive, and moreover for some $c$ in the positive part of the
+  overlap window
+  ($\max\bigl(0,\kappa(q_1),\kappa(q_2)\bigr)<c<\min(\kappa(p_1),\kappa(p_2))$)
+  the global lower bound
+  \[
+    \kappa(\theta)\;>\;-\bigl(\sqrt{1+c^2}-c\bigr)\qquad\text{for all }\theta
+  \]
+  holds. (No global positivity: $\kappa$ may be $\le0$ at and around the
+  minima. The lower bound is the confinement-forcing condition:
+  $r^\ast(c)=\sqrt{1+c^2}-c$ is the model-circle radius, and
+  $\kappa>-r^\ast$ is what keeps the position-dependent denominator
+  $\kappa-\langle z,ie^{i\theta}\rangle$ positive along trajectories near the
+  model. Compare \texttt{MixedSignFourVertex} in the Euclidean Dahlberg
+  extension, where the analogous package is positivity at the two maxima
+  only. Lean shape: mirror \texttt{SphereFourVertex} — a conjunction of
+  Continuous, Periodic, and a disjunction whose non-constant branch bundles
+  the four points, the two \texttt{IsLocalMax} / two \texttt{IsLocalMin}
+  facts, the value separation with the extra $0$ inside the $\max$, and the
+  existential $c$ with the window membership and the global lower bound.
+  Note $\mathrm{SphereFourVertex}\;\kappa\to
+  \mathrm{MixedSignSphereFourVertex}\;\kappa$: for positive $\kappa$ any
+  window midpoint works since $-r^\ast<0<\kappa$; this implication is a cheap
+  sanity lemma worth stating.)
+\end{definition}
+
+\begin{lemma}\leanok
+[positivity of the model-circle radius]
+  \label{lem:centered_radius_pos}
+  \lean{Gluck.centeredRadius_pos}
+  For every real $c$ the model-circle radius is positive:
+  $r^\ast(c)=\sqrt{1+c^2}-c>0$. (Project-local restatement: the stage-1
+  \texttt{centeredRadius\_facts} is private to \texttt{Sphere.lean} and
+  carries a positivity hypothesis on $c$ that this version drops.)
+\end{lemma}
+
+\begin{proof}
+
+\leanok
+  If $c\le0$ this is immediate from $\sqrt{1+c^2}>0$. If $c\ge0$ then
+  $c=\sqrt{c^2}<\sqrt{c^2+1}=\sqrt{1+c^2}$ by strict monotonicity of the
+  square root.
+\end{proof}
+
+\begin{lemma}\leanok
+[positive stage implies mixed stage]
+  \label{lem:mixed_of_sphere_four_vertex}
+  \lean{Gluck.MixedSignSphereFourVertex.of_sphereFourVertex}
+  \uses{def:sphere_four_vertex, def:mixed_sign_sphere_four_vertex,
+        lem:centered_radius_pos}
+  If $\kappa$ satisfies the positive-stage hypothesis
+  \cref{def:sphere_four_vertex}, it satisfies the mixed-sign hypothesis
+  \cref{def:mixed_sign_sphere_four_vertex}. Sanity lemma: the stage-2
+  capstone subsumes the stage-1 statement.
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:centered_radius_pos}
+  \leanok
+  The constant branch carries over verbatim. In the non-constant branch the
+  value separation gains the extra $0$ inside the $\max$ from global
+  positivity ($\min(\kappa(p_1),\kappa(p_2))>0$), and the window midpoint
+  $c=\tfrac12\bigl(\max(0,\kappa(q_1),\kappa(q_2))+\min(\kappa(p_1),
+  \kappa(p_2))\bigr)$ lies in the (positive part of the) overlap window; the
+  global lower bound holds since $-r^\ast(c)<0<\kappa(\theta)$ by
+  \cref{lem:centered_radius_pos} and positivity.
+\end{proof}
+
+\begin{lemma}\leanok
+[constant shift of the step curvature]
+  \label{lem:step_curvature_add_const}
+  \lean{Gluck.stepCurvature_add_const}
+  \uses{def:four_arc_step_function}
+  For all levels $a,b$, breakpoints $\theta_1,\dots,\theta_4$, constants $M$
+  and angles $\theta$:
+  \[
+    \texttt{stepCurvature}\,(a+M)\,(b+M)\,\theta_1\,\theta_2\,\theta_3\,
+    \theta_4\,\theta \;=\;
+    \texttt{stepCurvature}\,a\,b\,\theta_1\,\theta_2\,\theta_3\,\theta_4\,
+    \theta + M.
+  \]
+  The single Lean fact behind the constant-shift reduction of
+  \cref{lem:step_L1_reparam_relaxed}.
+\end{lemma}
+
+\begin{proof}
+
+\leanok
+  The step function takes only the two level values, each shifted by $M$;
+  unfold and check both branches of the case split.
+\end{proof}
+
+\begin{lemma}\leanok
+[$L^1$ step reparametrization without positivity]
+  \label{lem:step_L1_reparam_relaxed}
+  \lean{Gluck.exists_step_L1_reparam_relaxed}
+  \uses{lem:step_L1_reparam, def:four_arc_step_function,
+        lem:step_curvature_add_const}
+  Let $\kappa$ be continuous and $2\pi$-periodic (no positivity), $0<a<b$, and
+  $\theta_1<\theta_2<\theta_3<\theta_4<\theta_1+2\pi$ with
+  $\kappa(\theta_1,\theta_2,\theta_3,\theta_4)=(a,b,a,b)$. For every
+  $\varepsilon>0$ there is an orientation-preserving circle reparametrization
+  $h_1$ ($\mathrm{StrictMono}$, continuous, $C^1$ with continuous positive
+  derivative, $h_1(\theta+2\pi)=h_1(\theta)+2\pi$) such that
+  \[
+    \int_0^{2\pi}\bigl|\kappa(h_1(\theta))-\kappa^\ast(\theta)\bigr|\,d\theta
+    \;<\;\varepsilon,
+    \qquad \kappa^\ast=\texttt{stepCurvature } b\,a\,0\,(\pi/2)\,\pi\,(3\pi/2).
+  \]
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:step_L1_reparam, lem:step_curvature_add_const}
+  \leanok
+  Constant-shift reduction to the positive-stage lemma; the frozen Euclidean
+  plateau engine is applied only to a positive function. Pick
+  $M>\max\bigl(0,-\min_{[0,2\pi]}\kappa\bigr)$ (finite by compactness and
+  periodicity), so $\kappa+M$ is a curvature function
+  (continuous, $2\pi$-periodic, $>0$). The crossing data shifts to
+  $(\kappa+M)(\theta_k)=(a+M,b+M,a+M,b+M)$ with $0<a+M<b+M$, so
+  \cref{lem:step_L1_reparam} applied to $\kappa+M$ with levels $a+M,b+M$
+  yields $h_1$ with
+  $\int_0^{2\pi}|(\kappa+M)\circ h_1-\kappa^\ast_M|<\varepsilon$, where
+  $\kappa^\ast_M=\texttt{stepCurvature}\,(b+M)\,(a+M)\,0\,(\pi/2)\,\pi\,
+  (3\pi/2)$. Pointwise $\kappa^\ast_M=\kappa^\ast+M$ (the step function takes
+  only the two level values, each shifted by $M$), so the integrand equals
+  $|\kappa\circ h_1-\kappa^\ast|$ pointwise and the same $h_1$ witnesses the
+  claim. ($\sim$30--60 LOC; the only Lean content beyond the application is
+  the pointwise shift identity for \texttt{stepCurvature}.)
+\end{proof}
+
+\begin{lemma}\leanok
+[mixed-sign endpoint winding]
+  \label{lem:mixed_spherical_endpoint_winding}
+  \lean{Gluck.mixed_spherical_endpoint_winding}
+  \uses{def:mixed_sign_sphere_four_vertex, def:spherical_endpoint,
+        lem:spherical_endpoint_continuousOn,
+        def:step_error_map, lem:step_model_transport,
+        lem:step_model_margins, lem:step_error_expansion,
+        lem:exists_abab_levels, lem:step_L1_reparam_relaxed,
+        thm:existence_of_zero, lem:winding_conj_loop,
+        lem:winding_number_c_perturb, lem:truncated_field_lipschitz_uniform,
+        lem:centered_radius_pos}
+  Let $\kappa$ be continuous and $2\pi$-periodic with the non-constant
+  mixed-sign four-vertex data of
+  \cref{def:mixed_sign_sphere_four_vertex}: four points
+  $p_1<q_1<p_2<q_2<p_1+2\pi$ with
+  $\max\bigl(0,\kappa(q_1),\kappa(q_2)\bigr)<c<
+  \min(\kappa(p_1),\kappa(p_2))$ for some $c$ satisfying
+  $\kappa(\theta)>-r^\ast(c)$ for all $\theta$, where
+  $r^\ast(c)=\sqrt{1+c^2}-c$. Then there exist $R<1$, $\delta>0$, an
+  orientation-preserving circle reparametrization $h_1$
+  ($\mathrm{StrictMono}$, continuous, $C^1$ with continuous positive
+  derivative witness, $h_1(\theta+2\pi)=h_1(\theta)+2\pi$), a radius
+  parameter $r_0:\mathbb R_{\ge0}$, and $z_0\in\overline{B}(0,r_0)$, such
+  that the trajectory of the $(\kappa\circ h_1,R,\delta)$-truncated flow
+  through $z_0$ is \emph{closed} ($\Phi(z_0,2\pi)=z_0$) and \emph{admissible}
+  on $[0,2\pi]$: $\|z(\theta)\|\le R$ and
+  $(\kappa\circ h_1)(\theta)-\langle z(\theta),ie^{i\theta}\rangle\ge\delta$.
+  (The Lean statement mirrors the landed
+  \texttt{Gluck.spherical\_endpoint\_winding} conclusion verbatim — including
+  the derivative-witness conjunct for $h_1$ and the quantified $r_0$ with
+  $z_0\in\overline{B}(0,r_0)$ — and takes the destructured hypothesis data:
+  continuity, periodicity, the four ordered points, and the existential-$c$
+  clause. The capstone destructures the definition itself.)
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:step_model_margins, lem:step_L1_reparam_relaxed,
+        lem:step_error_expansion, lem:exists_abab_levels,
+        thm:existence_of_zero, lem:step_model_transport,
+        lem:truncated_field_lipschitz_uniform, lem:winding_conj_loop,
+        lem:winding_number_c_perturb}
+        \leanok
+  The six-step assembly of the landed positive proof
+  (\cref{lem:spherical_endpoint_winding}: Data $\to$ boundary margin $\to$
+  reparametrization $\to$ winding $\to$ zero $\to$ admissibility), with a
+  mixed-sign Data step and two substitutions; every later step consumes the
+  curvature only through $\kappa\ge\kappa_0$, the margins package, and the
+  $L^1$ bound, so it transfers verbatim.
+
+  \emph{Data (mixed).} The window value $c$ is given by hypothesis (not the
+  window midpoint, which may be $\le0$ in the mixed regime). Let
+  $\kappa_0=\min_{[0,2\pi]}\kappa$ (attained by compactness; by
+  $2\pi$-periodicity $\kappa\ge\kappa_0$ globally); the hypothesis gives
+  $\kappa_0>-r^\ast(c)$. Let
+  $w=\min\bigl(c-\max(0,\kappa(q_1),\kappa(q_2)),\,
+  \min(\kappa(p_1),\kappa(p_2))-c\bigr)>0$ be the distance from $c$ to the
+  ends of the positive window part. The relaxed
+  \cref{lem:step_model_margins} at $(c,\kappa_0)$ — this is where the
+  stage-2 re-sign is consumed — fixes $R,\delta,\mu,\rho_0,h_0$;
+  \cref{lem:step_error_expansion} at $c$ fixes $\rho_1,\bar h,C,\eta$
+  (unchanged: the expansion is a statement about the step model at positive
+  levels near $c>0$, blind to $\kappa$). Choose
+  $\rho=\min\bigl(\rho_0,\rho_1,\tfrac{\eta}{4C}\bigr)$, then
+  $h=\min\bigl(h_0,\bar h,\tfrac{\eta\rho}{4C},w\bigr)$, and set
+  $a=c-h/2$, $b=c+h/2$: then
+  $0\le\max(0,\kappa(q_1),\kappa(q_2))<a<b<\min(\kappa(p_1),\kappa(p_2))$,
+  so the levels are \emph{positive} and interior to the window — the step
+  model is the positive-stage object even though $\kappa$ is not positive.
+
+  \emph{Boundary margin of the model.} Verbatim: on
+  $\|z_0-z_0^\ast\|=\rho$, \cref{lem:step_error_expansion} gives
+  $\|E^\ast_{a,b}(z_0)+\eta h\overline{(z_0-z_0^\ast)}\|\le
+  Ch(\rho^2+h)\le\tfrac{\eta h\rho}{2}$, so
+  $\|E^\ast_{a,b}\|\ge\tfrac{\eta h\rho}{2}$ there.
+
+  \emph{Reparametrization.} \cref{lem:exists_abab_levels} (continuity and
+  periodicity suffice) supplies the $(a,b,a,b)$ crossing data at
+  $a>\max(\kappa(q_1),\kappa(q_2))$, $b<\min(\kappa(p_1),\kappa(p_2))$;
+  \cref{lem:step_L1_reparam_relaxed} — the second substitution — supplies
+  $h_1$ with $\int_0^{2\pi}|\kappa\circ h_1-\kappa^\ast|<\varepsilon$, where
+  $\varepsilon>0$ is chosen with
+  $e^{2\pi L}M\varepsilon\le\min\bigl(\mu,\tfrac{\eta h\rho}{8}\bigr)$, $L$
+  the uniform-in-$\kappa$ Lipschitz witness of
+  \cref{lem:truncated_field_lipschitz_uniform} (de-privatized for exactly
+  this use) and $M=\tfrac{1+R^2}{2\delta^2}$. Note $\kappa\circ h_1$ is
+  continuous, $2\pi$-periodic, and $\ge\kappa_0$ (a global bound survives
+  composition).
+
+  \emph{Winding, zero, admissibility.} Verbatim from the positive assembly:
+  the master estimate (margins from the relaxed \cref{lem:step_model_margins},
+  transport \cref{lem:step_model_transport}, expansion) makes the endpoint
+  loop over $\|z_0-z_0^\ast\|=\rho$ a ${}<\eta h\rho$ perturbation of the
+  conjugate loop of winding $-1$ (\cref{lem:winding_conj_loop});
+  \cref{lem:winding_number_c_perturb} and \cref{thm:existence_of_zero} give an
+  interior zero $z_0$ of the endpoint map
+  (\cref{def:spherical_endpoint}, continuity by
+  \cref{lem:spherical_endpoint_continuousOn}), i.e.\ a closed trajectory; the
+  master estimate at that $z_0$ gives admissibility on $[0,2\pi]$. Take
+  $r_0=(r^\ast+\rho)^{+}$ as in the landed positive statement, covering the
+  boundary disk and the produced zero. Elaboration hazards and the quantifier
+  order are exactly those recorded at \cref{lem:spherical_endpoint_winding}
+  (uniform-$L$ first, $\rho$ before $h$ before $\varepsilon$;
+  \texttt{maxHeartbeats} budget; \texttt{linarith only [...]}).
+\end{proof}
+
+\begin{theorem}\leanok
+[spherical converse, mixed sign]
+  \label{thm:spherical_converse}
+  \lean{Gluck.sphericalConverse}
+  \uses{def:mixed_sign_sphere_four_vertex, def:realizes_spherical_curvature,
+        lem:mixed_spherical_endpoint_winding, lem:reconstruction_ode,
+        lem:spherical_simplicity, lem:realizes_spherical_comp,
+        lem:spherical_circle_realizes}
+  If $\kappa$ satisfies the mixed-sign spherical four-vertex hypothesis
+  (\cref{def:mixed_sign_sphere_four_vertex}), then there is a simple closed
+  curve $z$ confined to the open disk realizing $\kappa$ as its spherical
+  geodesic curvature:
+  \[
+    \texttt{MixedSignSphereFourVertex }\kappa\;\Longrightarrow\;
+    \exists\,z,\ \texttt{IsSimpleClosed }z\ \wedge\
+    \texttt{RealizesSphericalCurvature }z\,\kappa .
+  \]
+  This subsumes \cref{thm:spherical_converse_pos} (positive $\kappa$
+  satisfies the mixed hypothesis trivially) and is the S² analogue of the
+  Euclidean \texttt{dahlbergConverse}.
+\end{theorem}
+
+\begin{proof}
+  \uses{lem:mixed_spherical_endpoint_winding, lem:reconstruction_ode,
+        lem:spherical_simplicity, lem:spherical_circle_realizes,
+        lem:realizes_spherical_comp, lem:exists_c1_circle_inverse,
+        lem:is_simple_closed_comp, lem:spherical_flow_spec}
+        \leanok
+  The landed positive capstone proof (\texttt{sphericalConverse\_pos}, end of
+  Sphere.lean) with the mixed winding lemma substituted; every downstream
+  ingredient landed sign-agnostic. Split the mixed-sign disjunction. The
+  \emph{constant} branch is constant \emph{positive} by hypothesis:
+  \cref{lem:spherical_circle_realizes} plus \texttt{funext}, no flow
+  machinery. For the non-constant branch:
+  \cref{lem:mixed_spherical_endpoint_winding} supplies $R<1$, $\delta>0$,
+  $h_1$ (with derivative witness), and a closed admissible trajectory of the
+  $(\kappa\circ h_1,R,\delta)$-truncated flow; the flow specification
+  (\cref{lem:spherical_flow_spec}) turns the flow value into the
+  $\mathrm{HasDerivWithinAt}$ trajectory hypotheses;
+  \cref{lem:reconstruction_ode} (hypotheses: $\kappa\circ h_1$ continuous and
+  $2\pi$-periodic — exactly what the mixed data gives; positivity of the
+  speed comes from the admissibility margin $\delta$) upgrades the periodic
+  extension to a closed $C^1$ curve confined to
+  $\{|z|\le R\}\subset\{|z|<1\}$ realizing $\kappa\circ h_1$ in the gauge
+  $\varphi(\theta)=\theta$, and \cref{lem:spherical_simplicity} makes it
+  simple. Pull back along $\psi=h_1^{-1}$ from
+  \cref{lem:exists_c1_circle_inverse} ($C^1$ from the $1/v(H\,t)$ derivative):
+  \cref{lem:realizes_spherical_comp} transfers realization with
+  $(\kappa\circ h_1)\circ H=\kappa$ by the left-inverse identity, and
+  \cref{lem:is_simple_closed_comp} transfers simplicity.
+\end{proof}
