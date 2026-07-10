@@ -1,0 +1,435 @@
+\chapter{The spherical truncated flow}
+\label{chap:sphere_flow}
+
+% Split from the original Gluck_Sphere.tex (stage sections preserved verbatim;
+% all labels and \lean pins unchanged).
+
+\paragraph{Formalization map.}
+This chapter corresponds primarily to \texttt{Gluck/Sphere/Flow.lean}, \texttt{Gluck/Sphere/StepReparam.lean} and \texttt{Gluck/Sphere/ArcAlgebra.lean}.
+
+\section{Truncated flow layer (S2-B)}
+\label{sec:sphere_flow}
+
+\emph{Design decision (iter-046).} The reconstruction field is truncated
+\emph{algebraically} — the norm clamped in the numerator, the denominator clamped from
+below — so that it becomes globally defined, bounded, and globally Lipschitz in $z$. All
+flow machinery (existence on $[0,2\pi]$, uniqueness, continuous dependence, the endpoint
+map) is then \emph{unconditional}: no confinement lemma is needed to run the degree
+argument. Admissibility is re-imposed a posteriori, only on the single closed trajectory
+the winding argument produces (\cref{sec:sphere_admissible}). This removes the
+continuation/stitching bookkeeping entirely: one Picard--Lindel\"of application on a
+large ball covers $[0,2\pi]$.
+
+\begin{definition}
+
+\leanok
+[truncated gauge speed]
+  \label{def:truncated_speed}
+  \lean{Gluck.truncatedSpeed}
+  \uses{def:spherical_speed}
+  For parameters $R,\delta$ set
+  \[
+    \hat q_{\kappa,R,\delta}(\theta,z)\;=\;
+      \frac{1+\min(\|z\|,R)^2}
+        {2\,\max\bigl(\kappa(\theta)-\langle z,\,i\,e^{i\theta}\rangle_{\mathbb R},\ \delta\bigr)}.
+  \]
+  On the \emph{admissible set}
+  $\{(\theta,z):\|z\|\le R\ \wedge\ \kappa(\theta)-\langle z,i e^{i\theta}\rangle\ge\delta\}$
+  both clamps are inactive and $\hat q=q_\kappa$; off it, $\hat q$ is a globally tame
+  surrogate.
+\end{definition}
+
+\begin{lemma}
+
+\leanok
+[truncated speed agrees on the admissible set]
+  \label{lem:truncated_speed_eq}
+  \lean{Gluck.truncatedSpeed_eq}
+  \uses{def:truncated_speed, def:spherical_speed}
+  If $\|z\|\le R$ and $\kappa(\theta)-\langle z,i e^{i\theta}\rangle_{\mathbb R}\ge\delta$,
+  then $\hat q_{\kappa,R,\delta}(\theta,z)=q_\kappa(\theta,z)$.
+\end{lemma}
+
+\begin{proof}
+
+\leanok
+  $\min(\|z\|,R)=\|z\|$ by the first hypothesis and
+  $\max(\kappa(\theta)-\langle z,i e^{i\theta}\rangle,\delta)
+   =\kappa(\theta)-\langle z,i e^{i\theta}\rangle$ by the second; the two formulas
+  coincide.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[truncated speed is positive]
+  \label{lem:truncated_speed_pos}
+  \lean{Gluck.truncatedSpeed_pos}
+  \uses{def:truncated_speed}
+  If $\delta>0$ then $\hat q_{\kappa,R,\delta}(\theta,z)>0$ for all $\theta,z$.
+\end{lemma}
+
+\begin{proof}
+
+\leanok
+  The numerator is $\ge 1>0$ (a square plus one) and the denominator is
+  $\ge 2\delta>0$; a quotient of positives is positive.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[truncated speed is bounded]
+  \label{lem:truncated_speed_le}
+  \lean{Gluck.truncatedSpeed_le}
+  \uses{def:truncated_speed}
+  If $0\le R$ and $0<\delta$ then
+  $\hat q_{\kappa,R,\delta}(\theta,z)\le B:=\dfrac{1+R^2}{2\delta}$ for all $\theta,z$.
+\end{lemma}
+
+\begin{proof}
+
+\leanok
+  $\min(\|z\|,R)\le R$ bounds the numerator by $1+R^2$, and the denominator is
+  $\ge 2\delta$; divide.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[truncated speed is Lipschitz in $z$, uniformly in $\theta$]
+  \label{lem:truncated_speed_lipschitz}
+  \lean{Gluck.truncatedSpeed_lipschitz}
+  \uses{def:truncated_speed}
+  If $0\le R$ and $0<\delta$ there is $L\ge 0$ (explicitly
+  $L=\tfrac{R}{\delta}+\tfrac{1+R^2}{2\delta^2}$ works) such that for every $\theta$ the
+  map $z\mapsto\hat q_{\kappa,R,\delta}(\theta,z)$ is $L$-Lipschitz on all of $\mathbb C$.
+\end{lemma}
+
+\begin{proof}
+
+\leanok
+  Write $\hat q=N/D$ with $N(z)=1+\min(\|z\|,R)^2$ and
+  $D(z)=2\max(\kappa(\theta)-\langle z,i e^{i\theta}\rangle,\delta)$. The norm is
+  $1$-Lipschitz, the clamp $x\mapsto\min(x,R)$ is $1$-Lipschitz and bounded by $R$ (for
+  $x\ge0$), so $N$ is $2R$-Lipschitz (difference of squares of clamped values, both
+  $\le R$) and $1\le N\le 1+R^2$. The linear functional
+  $z\mapsto\langle z,i e^{i\theta}\rangle$ is $1$-Lipschitz (Cauchy--Schwarz against a unit
+  vector) and $x\mapsto\max(x,\delta)$ is $1$-Lipschitz, so $D$ is $2$-Lipschitz and
+  $D\ge 2\delta$. Then
+  \[
+    \Bigl|\frac{N(z)}{D(z)}-\frac{N(w)}{D(w)}\Bigr|
+    \le\frac{|N(z)-N(w)|}{D(w)}+N(z)\,\frac{|D(z)-D(w)|}{D(z)D(w)}
+    \le\Bigl(\frac{2R}{2\delta}+\frac{(1+R^2)\cdot2}{4\delta^2}\Bigr)|z-w| .
+  \]
+  (Formalization route: reciprocal is $\tfrac1{(2\delta)^2}$-Lipschitz on
+  $[2\delta,\infty)$ by the mean value inequality; compose and multiply
+  bounded-Lipschitz factors.)
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[truncated speed is jointly continuous]
+  \label{lem:truncated_speed_continuous}
+  \lean{Gluck.truncatedSpeed_continuous}
+  \uses{def:truncated_speed}
+  If $\kappa$ is continuous and $0<\delta$, then
+  $(\theta,z)\mapsto\hat q_{\kappa,R,\delta}(\theta,z)$ is continuous on
+  $\mathbb R\times\mathbb C$.
+\end{lemma}
+
+\begin{proof}
+
+\leanok
+  Numerator and denominator are continuous ($\min$, $\max$, the norm, $\kappa$, the inner
+  product against the continuous unit field $\theta\mapsto i e^{i\theta}$), and the
+  denominator never vanishes (it is $\ge 2\delta>0$), so the quotient is continuous
+  everywhere — no slab restriction, unlike \cref{lem:spherical_speed_continuous}.
+\end{proof}
+
+\begin{definition}
+
+\leanok
+[truncated reconstruction field]
+  \label{def:truncated_field}
+  \lean{Gluck.truncatedField}
+  \uses{def:truncated_speed}
+  $F_{\kappa,R,\delta}(\theta,z)=\hat q_{\kappa,R,\delta}(\theta,z)\,e^{i\theta}
+   \in\mathbb C$. Since $\|e^{i\theta}\|=1$, the field inherits the bound
+  $\|F\|\le B$ of \cref{lem:truncated_speed_le} and the Lipschitz constant $L$ of
+  \cref{lem:truncated_speed_lipschitz} (the difference at fixed $\theta$ is
+  $(\hat q(z)-\hat q(w))\,e^{i\theta}$).
+\end{definition}
+
+\begin{lemma}\leanok
+[field norm equals speed]
+  \label{lem:norm_truncated_field}
+  \lean{Gluck.norm_truncatedField}
+  \uses{def:truncated_field, lem:truncated_speed_pos}
+  For $0<\delta$,
+  $\|F_{\kappa,R,\delta}(\theta,z)\|=\hat q_{\kappa,R,\delta}(\theta,z)$ for all
+  $\theta,z$.
+\end{lemma}
+
+\begin{proof}
+
+\leanok
+  $\|\hat q\,e^{i\theta}\|=|\hat q|\,\|e^{i\theta}\|=|\hat q|=\hat q$, since the unit
+  field has norm one and $\hat q>0$ by \cref{lem:truncated_speed_pos}.
+\end{proof}
+
+\begin{lemma}\leanok
+[field Lipschitz bound]
+  \label{lem:truncated_field_lipschitz}
+  \lean{Gluck.truncatedField_lipschitz}
+  \uses{def:truncated_field, lem:truncated_speed_lipschitz}
+  For $0\le R$, $0<\delta$ there is a constant $L$ (the one of
+  \cref{lem:truncated_speed_lipschitz}) such that for every $\theta$ the map
+  $z\mapsto F_{\kappa,R,\delta}(\theta,z)$ is $L$-Lipschitz.
+\end{lemma}
+
+\begin{proof}
+
+\leanok
+  At fixed $\theta$,
+  $F(\theta,z)-F(\theta,w)=(\hat q(\theta,z)-\hat q(\theta,w))\,e^{i\theta}$, whose norm
+  is $|\hat q(\theta,z)-\hat q(\theta,w)|\le L\|z-w\|$ by
+  \cref{lem:truncated_speed_lipschitz}.
+\end{proof}
+
+\begin{lemma}\leanok
+[speed Lipschitz bound, uniform in the curvature]
+  \label{lem:truncated_speed_lipschitz_uniform}
+  % Lean: private `truncatedSpeed_lipschitz_uniform` in Gluck/Sphere/EndpointWinding.lean (private declarations are not pinned)
+  \uses{def:truncated_speed, lem:truncated_speed_lipschitz}
+  For $0\le R$, $0<\delta$ there is a single $L\ge0$ such that for \emph{every}
+  curvature function $\kappa$ and every $\theta$ the map
+  $z\mapsto\hat q_{\kappa,R,\delta}(\theta,z)$ is $L$-Lipschitz. (The explicit
+  constant of \cref{lem:truncated_speed_lipschitz} depends only on $(R,\delta)$,
+  never on $\kappa$; this uniform form breaks the quantifier circularity of the
+  winding assembly, where the $L^1$ tolerance $\varepsilon$ must be fixed
+  \emph{before} the reparametrized curvature $\kappa\circ h_1$ exists. Landed
+  \texttt{private} in stage 1; stage 2 de-privatizes it so the mixed-sign
+  assembly in \cref{chap:sphere_mixed} can consume the same witness.)
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:truncated_speed_lipschitz}
+  \leanok
+  The proof of \cref{lem:truncated_speed_lipschitz} verbatim, with the constant
+  $L=\tfrac{R}{\delta}+\tfrac{1+R^2}{2\delta^2}$ quantified before $\kappa$:
+  no step of the numerator/denominator estimate inspects $\kappa$ beyond the
+  clamp $\max(\cdot,\delta)$, which is $1$-Lipschitz regardless of its argument.
+\end{proof}
+
+\begin{lemma}\leanok
+[field Lipschitz bound, uniform in the curvature]
+  \label{lem:truncated_field_lipschitz_uniform}
+  \lean{Gluck.truncatedField_lipschitz_uniform}
+  \uses{def:truncated_field, lem:truncated_speed_lipschitz_uniform}
+  For $0\le R$, $0<\delta$ there is a single $L\ge0$ such that for every
+  curvature function $\kappa$ and every $\theta$ the map
+  $z\mapsto F_{\kappa,R,\delta}(\theta,z)$ is $L$-Lipschitz. (Same
+  de-privatization note as \cref{lem:truncated_speed_lipschitz_uniform}.)
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:truncated_speed_lipschitz_uniform}
+  \leanok
+  The witness of \cref{lem:truncated_speed_lipschitz_uniform} works: the unit
+  frame factor $e^{i\theta}$ has norm one, as in
+  \cref{lem:truncated_field_lipschitz}.
+\end{proof}
+
+\begin{lemma}\leanok
+[field joint continuity]
+  \label{lem:truncated_field_continuous}
+  \lean{Gluck.truncatedField_continuous}
+  \uses{def:truncated_field, lem:truncated_speed_continuous}
+  If $\kappa$ is continuous and $0<\delta$, then
+  $(\theta,z)\mapsto F_{\kappa,R,\delta}(\theta,z)$ is continuous on
+  $\mathbb R\times\mathbb C$.
+\end{lemma}
+
+\begin{proof}
+
+\leanok
+  Scalar multiplication of the jointly continuous truncated speed
+  (\cref{lem:truncated_speed_continuous}) by the continuous unit field
+  $\theta\mapsto e^{i\theta}$.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[Picard--Lindel\"of package for the truncated field]
+  \label{lem:truncated_field_picard}
+  \lean{Gluck.truncatedField_isPicardLindelof}
+  \uses{def:truncated_field, lem:truncated_speed_le, lem:truncated_speed_lipschitz,
+        lem:truncated_speed_continuous, lem:norm_truncated_field,
+        lem:truncated_field_lipschitz, lem:truncated_field_continuous}
+  Let $\kappa$ be continuous, $0\le R$, $0<\delta$, and fix an initial-disk radius
+  $r_0\ge0$. With $a=r_0+2\pi B+1$, the field $F_{\kappa,R,\delta}$ satisfies the
+  Picard--Lindel\"of hypothesis package on the time interval $[0,2\pi]$ with initial time
+  $t_0=0$, center $x_0=0$, inner radius $r_0$ and outer radius $a$: it is Lipschitz in the
+  space variable with a constant uniform in $\theta$, jointly continuous, norm-bounded by
+  $B$, and satisfies the budget condition $B\cdot 2\pi\le a-r_0$.
+\end{lemma}
+
+\begin{proof}
+
+\leanok
+  All four items are \cref{lem:truncated_speed_lipschitz},
+  \cref{lem:truncated_speed_continuous}, \cref{lem:truncated_speed_le}, and the arithmetic
+  choice of $a$ respectively. Because the truncated field is bounded and Lipschitz on all
+  of $\mathbb C$, restriction to the working ball loses nothing and the budget can always
+  be met by enlarging $a$ — this is the payoff of truncation: one application covers
+  $[0,2\pi]$ with no continuation argument.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[global flow with continuous dependence]
+  \label{lem:spherical_flow_exists}
+  \lean{Gluck.exists_sphericalFlow}
+  \uses{lem:truncated_field_picard}
+  Under the hypotheses of \cref{lem:truncated_field_picard} there is a map
+  $\alpha:\mathbb C\times\mathbb R\to\mathbb C$ such that for every $z_0$ in the closed
+  disk $\|z_0\|\le r_0$: $\alpha(z_0,0)=z_0$; $\theta\mapsto\alpha(z_0,\theta)$ has on
+  $[0,2\pi]$ the derivative $F_{\kappa,R,\delta}(\theta,\alpha(z_0,\theta))$ (within the
+  interval); and $\alpha$ is continuous on
+  $\{\|z_0\|\le r_0\}\times[0,2\pi]$.
+\end{lemma}
+
+\begin{proof}
+
+\leanok
+  This is the flow form of the Picard--Lindel\"of theorem
+  (in Mathlib:
+  \texttt{IsPicardLindelof.exists\_forall\_mem\_closedBall\_eq\_hasDerivWithinAt\_continuousOn}),
+  applied to the package of \cref{lem:truncated_field_picard}. It returns a single
+  $\alpha$ defined on the product with exactly the three listed properties.
+\end{proof}
+
+\begin{definition}
+
+\leanok
+[spherical flow]
+  \label{def:spherical_flow}
+  \lean{Gluck.sphericalFlow}
+  \uses{lem:spherical_flow_exists}
+  Fix, once per parameter tuple $(\kappa,R,\delta,r_0)$, a choice
+  $\Phi=\Phi_{\kappa,R,\delta,r_0}:\mathbb C\times\mathbb R\to\mathbb C$ of the map
+  supplied by \cref{lem:spherical_flow_exists}. (The whole flow is chosen at once — not a
+  separate choice per initial point — so downstream continuity statements can consume it.)
+\end{definition}
+
+\begin{lemma}
+
+\leanok
+[flow specification]
+  \label{lem:spherical_flow_spec}
+  \lean{Gluck.sphericalFlow_spec}
+  \uses{def:spherical_flow}
+  For $\|z_0\|\le r_0$: $\Phi(z_0,0)=z_0$ and $\theta\mapsto\Phi(z_0,\theta)$ solves
+  $z'=F_{\kappa,R,\delta}(\theta,z)$ on $[0,2\pi]$ (derivative within the interval).
+\end{lemma}
+
+\begin{proof}
+
+\leanok
+  Unfold the choice of \cref{def:spherical_flow}.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[flow continuity]
+  \label{lem:spherical_flow_continuousOn}
+  \lean{Gluck.sphericalFlow_continuousOn}
+  \uses{def:spherical_flow}
+  $\Phi$ is continuous on $\{\|z_0\|\le r_0\}\times[0,2\pi]$.
+\end{lemma}
+
+\begin{proof}
+
+\leanok
+  Unfold the choice of \cref{def:spherical_flow}.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[flow uniqueness]
+  \label{lem:spherical_flow_unique}
+  \lean{Gluck.sphericalFlow_unique}
+  \uses{def:spherical_flow, lem:truncated_speed_lipschitz, lem:spherical_flow_spec}
+  If $g:[0,2\pi]\to\mathbb C$ solves $g'=F_{\kappa,R,\delta}(\theta,g(\theta))$ on
+  $[0,2\pi]$ with $g(0)=z_0$, $\|z_0\|\le r_0$, then $g=\Phi(z_0,\cdot)$ on $[0,2\pi]$.
+\end{lemma}
+
+\begin{proof}
+
+\leanok
+  Both solve the same ODE with the same initial value; the field is Lipschitz in the space
+  variable uniformly in time (\cref{lem:truncated_speed_lipschitz}), so the standard
+  uniqueness theorem for ODEs (Gr\"onwall; in Mathlib
+  \texttt{ODE\_solution\_unique\_of\_mem\_Icc}) applies. Uniqueness is what later
+  identifies explicitly constructed trajectories — circular arcs, reflected trajectories —
+  with the flow.
+\end{proof}
+
+\begin{lemma}\leanok
+[two-solution uniqueness on a subinterval]
+  \label{lem:truncated_field_solution_unique}
+  \lean{Gluck.truncatedField_solution_unique}
+  \uses{def:truncated_field, lem:truncated_field_lipschitz}
+  Let $0\le R$, $0<\delta$ and $0\le T$. If $g_1,g_2:[0,T]\to\mathbb C$ both solve
+  $g'=F_{\kappa,R,\delta}(\theta,g(\theta))$ on $[0,T]$ and $g_1(0)=g_2(0)$, then
+  $g_1=g_2$ on $[0,T]$. (Unlike \cref{lem:spherical_flow_unique} this compares two
+  arbitrary solutions, on an arbitrary compact interval $[0,T]$ — not necessarily
+  $[0,2\pi]$ — and makes no reference to the chosen flow $\Phi$; the field is defined
+  and Lipschitz for all times, so no time restriction is needed.)
+\end{lemma}
+
+\begin{proof}
+
+\leanok
+  The field is Lipschitz in the space variable uniformly in time
+  (\cref{lem:truncated_field_lipschitz}) and each $g_i$ is continuous on $[0,T]$ (it has
+  a derivative there), so the standard two-solution uniqueness theorem applies on
+  $[0,T]$ with initial time at the left endpoint — the same Gr\"onwall-type argument as
+  \cref{lem:spherical_flow_unique}, with $2\pi$ replaced by $T$.
+\end{proof}
+
+\begin{definition}
+
+\leanok
+[spherical endpoint map]
+  \label{def:spherical_endpoint}
+  \lean{Gluck.sphericalEndpoint}
+  \uses{def:spherical_flow}
+  $E(z_0)=\Phi(z_0,2\pi)-z_0$. A zero of $E$ is a closed trajectory of the truncated
+  flow.
+\end{definition}
+
+\begin{lemma}
+
+\leanok
+[endpoint map continuity]
+  \label{lem:spherical_endpoint_continuousOn}
+  \lean{Gluck.sphericalEndpoint_continuousOn}
+  \uses{def:spherical_endpoint, lem:spherical_flow_continuousOn}
+  $E$ is continuous on the closed disk $\{\|z_0\|\le r_0\}$.
+\end{lemma}
+
+\begin{proof}
+
+\leanok
+  $z_0\mapsto\Phi(z_0,2\pi)$ is continuous by \cref{lem:spherical_flow_continuousOn}
+  (restriction of a jointly continuous map to a time slice), and subtracting the identity
+  preserves continuity.
+\end{proof}
+
