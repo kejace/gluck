@@ -77,6 +77,48 @@ def ArcLengthH2Curvature (κ : ℝ → ℝ) : Prop :=
     Function.Periodic z L ∧
     Set.InjOn z (Set.Ico 0 L)
 
+/-- **The H² arc-length converse at an explicit window `L` (exposing the window
+shift law).**  Given a confined, closing, simple arc-length window solution `(z, φ)`
+of period `L`, the linear window reparam `ψ(t) = (L/2π)·t` produces a simple closed
+curve `z ∘ ψ` realizing `κ ∘ ψ`, and additionally exposes `ψ(t+2π) = ψ(t) + L` — the
+window-conjugation datum the degree-one reparam analysis needs.  (Explicit-window
+core of `arcLengthH2Converse`.) -/
+theorem arcLengthH2Converse_at {κ : ℝ → ℝ} {L : ℝ} (hκ : Continuous κ) (hL : 0 < L)
+    {z : ℝ → ℂ} {φ : ℝ → ℝ}
+    (hz : ∀ σ, HasDerivAt z (Complex.exp ((φ σ : ℂ) * Complex.I)) σ)
+    (hφ : ∀ σ, HasDerivAt φ (arcAngleSpeed κ σ (z σ) (φ σ)) σ)
+    (hconf : ∀ σ, ‖z σ‖ < 1)
+    (hzper : Function.Periodic z L) (hinj : Set.InjOn z (Set.Ico 0 L)) :
+    ∃ (Z : ℝ → ℂ) (ψ : ℝ → ℝ), ContDiff ℝ 1 ψ ∧ (∀ t, 0 < deriv ψ t) ∧
+      (∀ t, ψ (t + 2 * π) = ψ t + L) ∧
+      IsSimpleClosed Z ∧ Realizes (-1) Z (κ ∘ ψ) := by
+  set c : ℝ := L / (2 * π) with hc_def
+  have hc : 0 < c := div_pos hL (by positivity)
+  set ψ : ℝ → ℝ := fun t => c * t with hψ_def
+  have hψhd : ∀ t, HasDerivAt ψ c t := fun t => by
+    simpa using (hasDerivAt_id t).const_mul c
+  have hψC1 : ContDiff ℝ 1 ψ := by fun_prop
+  have hψpos : ∀ t, 0 < deriv ψ t := fun t => by rw [(hψhd t).deriv]; exact hc
+  have hReal : Realizes (-1) z κ := arcSolution_realizes hκ hz hφ hconf
+  have hc2 : c * (2 * π) = L := by rw [hc_def]; field_simp
+  refine ⟨z ∘ ψ, ψ, hψC1, hψpos, ?_, ⟨?_, ?_⟩,
+    spaceFormRealizes_comp hReal hψC1 hψpos⟩
+  · intro t; simp only [hψ_def]; rw [mul_add, hc2]
+  · intro t
+    simp only [Function.comp_apply, hψ_def]
+    have hstep : c * (t + 2 * π) = c * t + L := by rw [mul_add, hc2]
+    rw [hstep]; exact hzper (c * t)
+  · have hmem : ∀ x, x ∈ Set.Ico (0 : ℝ) (2 * π) → ψ x ∈ Set.Ico (0 : ℝ) L := by
+      intro x hx
+      refine ⟨mul_nonneg hc.le hx.1, ?_⟩
+      calc ψ x = c * x := rfl
+        _ < c * (2 * π) := mul_lt_mul_of_pos_left hx.2 hc
+        _ = L := hc2
+    intro a ha b hb hab
+    simp only [Function.comp_apply] at hab
+    have hψeq : ψ a = ψ b := hinj (hmem a ha) (hmem b hb) hab
+    exact mul_left_cancel₀ hc.ne' hψeq
+
 /-- **The H² arc-length converse (RESTATED: realize `κ` UP TO REPARAM with a
 co-constructed length).**  If `κ` is continuous, `2π`-periodic and an H²
 arc-length curvature function (so its reconstruction closes at the *co-constructed*
@@ -112,43 +154,10 @@ theorem arcLengthH2Converse {κ : ℝ → ℝ} (hκ : Continuous κ)
     ∃ (z : ℝ → ℂ) (ψ : ℝ → ℝ),
       ContDiff ℝ 1 ψ ∧ (∀ t, 0 < deriv ψ t) ∧
       IsSimpleClosed z ∧ Realizes (-1) z (κ ∘ ψ) := by
-  obtain ⟨L, hL, z, φ, hz, hφ, hconf, hzclose, hφclose, hzper, hinj⟩ := hALC
-  -- Linear window reparametrisation `ψ(t) = (L/2π)·t : [0,2π] ↠ [0,L]`.
-  set c : ℝ := L / (2 * π) with hc_def
-  have hc : 0 < c := div_pos hL (by positivity)
-  set ψ : ℝ → ℝ := fun t => c * t with hψ_def
-  have hψhd : ∀ t, HasDerivAt ψ c t := fun t => by
-    simpa using (hasDerivAt_id t).const_mul c
-  have hψC1 : ContDiff ℝ 1 ψ := by fun_prop
-  have hψpos : ∀ t, 0 < deriv ψ t := fun t => by rw [(hψhd t).deriv]; exact hc
-  -- `z` realizes `κ` on the window (leaf 3), then reparametrise (no-rescaling
-  -- transport): `z ∘ ψ` realizes `κ ∘ ψ`.
-  have hReal : Realizes (-1) z κ := arcSolution_realizes hκ hz hφ hconf
-  refine ⟨z ∘ ψ, ψ, hψC1, hψpos, ?_, spaceFormRealizes_comp hReal hψC1 hψpos⟩
-  -- `IsSimpleClosed (z ∘ ψ)`: the linear window reparam `ψ(t) = c·t` sends the
-  -- `2π`-window bijectively onto the `L`-window (`ψ(t+2π) = ψ(t) + L`, `c·2π = L`),
-  -- so periodicity transfers from `Function.Periodic z L` (`hzper`) and injectivity
-  -- from `Set.InjOn z [0,L)` (`hinj`) along `ψ` strictly monotone.
-  have hc2 : c * (2 * π) = L := by rw [hc_def]; field_simp
-  constructor
-  · -- *Closed:* `(z∘ψ)(t+2π) = z(ψ t + L) = z(ψ t) = (z∘ψ)(t)`.
-    intro t
-    simp only [Function.comp_apply, hψ_def]
-    have hstep : c * (t + 2 * π) = c * t + L := by rw [mul_add, hc2]
-    rw [hstep]
-    exact hzper (c * t)
-  · -- *Injective on `[0,2π)`:* `ψ` maps `[0,2π)` into `[0,L)`, then `hinj` and `c > 0`.
-    have hmem : ∀ x, x ∈ Set.Ico (0 : ℝ) (2 * π) → ψ x ∈ Set.Ico (0 : ℝ) L := by
-      intro x hx
-      refine ⟨mul_nonneg hc.le hx.1, ?_⟩
-      calc ψ x = c * x := rfl
-        _ < c * (2 * π) := mul_lt_mul_of_pos_left hx.2 hc
-        _ = L := hc2
-    intro a ha b hb hab
-    simp only [Function.comp_apply] at hab
-    have hψeq : ψ a = ψ b := hinj (hmem a ha) (hmem b hb) hab
-    have : c * a = c * b := hψeq
-    exact mul_left_cancel₀ hc.ne' this
+  obtain ⟨L, hL, z, φ, hz, hφ, hconf, _hzclose, _hφclose, hzper, hinj⟩ := hALC
+  obtain ⟨Z, ψ, hψC1, hψpos, _hshift, hsc, hreal⟩ :=
+    arcLengthH2Converse_at hκ hL hz hφ hconf hzper hinj
+  exact ⟨Z, ψ, hψC1, hψpos, hsc, hreal⟩
 
 /-- **Realization up to reparametrization (no rescaling in H²) — honest form.**
 Given a `C¹` orientation-preserving `2π`-circle map `ψ` such that `κ ∘ ψ` is an H²
@@ -424,7 +433,7 @@ non-zero on every proper sub-arc), the floor-glued periodic extension
 `Z = gext L Φ (0, 2π)` witnesses `ArcLengthH2Curvature κ`: it is a genuine *global*
 solution of the H² arc-length system, `L`-periodic in `z`, confined to the open disk,
 closes with total turning `2π`, and is injective on `[0, L)`. -/
-lemma arcLengthH2Curvature_of_windowSolution {κ : ℝ → ℝ} {R L M : ℝ} {r₀ : ℝ≥0}
+lemma windowSolution_exposed {κ : ℝ → ℝ} {R L M : ℝ} {r₀ : ℝ≥0}
     {W₀ : ℂ × ℝ} (hκc : Continuous κ) (hR : 0 ≤ R) (hR1 : R < 1) (hL : 0 < L)
     (hM : ∀ σ, |κ σ| ≤ M) (hκL : Function.Periodic κ L)
     (hW₀ : W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀)
@@ -433,7 +442,12 @@ lemma arcLengthH2Curvature_of_windowSolution {κ : ℝ → ℝ} {R L M : ℝ} {r
     (hconf : ∀ σ ∈ Set.Icc (0 : ℝ) L, ‖(arcFlow κ R L M r₀ (W₀, σ)).1‖ ≤ R)
     (hchord : ∀ t τ : ℝ, 0 ≤ t → t < τ → τ < L →
       (∫ s in t..τ, Complex.exp (((arcFlow κ R L M r₀ (W₀, s)).2 : ℂ) * Complex.I)) ≠ 0) :
-    ArcLengthH2Curvature κ := by
+    ∃ (z : ℝ → ℂ) (φ : ℝ → ℝ),
+      (∀ σ, HasDerivAt z (Complex.exp ((φ σ : ℂ) * Complex.I)) σ) ∧
+      (∀ σ, HasDerivAt φ (arcAngleSpeed κ σ (z σ) (φ σ)) σ) ∧
+      (∀ σ, ‖z σ‖ < 1) ∧
+      z L = z 0 ∧ φ L = φ 0 + 2 * π ∧
+      Function.Periodic z L ∧ Set.InjOn z (Set.Ico 0 L) := by
   set Φ : ℝ → ℂ × ℝ := fun σ => arcFlow κ R L M r₀ (W₀, σ) with hΦdef
   obtain ⟨hΦ0, hΦd⟩ := arcFlow_spec hκc hR hR1 hL.le hM r₀ hW₀
   have hΦ0' : Φ 0 = W₀ := hΦ0
@@ -540,7 +554,22 @@ lemma arcLengthH2Curvature_of_windowSolution {κ : ℝ → ℝ} {R L M : ℝ} {r
       rw [Set.uIcc_of_le htτ.le] at hs
       rw [hφwin s ⟨le_trans ht hs.1, lt_of_le_of_lt hs.2 hτL⟩]
     rw [hcongr]; exact hchord t τ ht htτ hτL
-  exact ⟨L, hL, z, φ, hzd, hφd, hconfLt, hzclose, hφclose, hzper, hinj⟩
+  exact ⟨z, φ, hzd, hφd, hconfLt, hzclose, hφclose, hzper, hinj⟩
+
+/-- The floor-glued periodic extension of a closed, confined, simple arc-length
+window solution witnesses `ArcLengthH2Curvature κ` (packages `windowSolution_exposed`
+into the window-existential). -/
+lemma arcLengthH2Curvature_of_windowSolution {κ : ℝ → ℝ} {R L M : ℝ} {r₀ : ℝ≥0}
+    {W₀ : ℂ × ℝ} (hκc : Continuous κ) (hR : 0 ≤ R) (hR1 : R < 1) (hL : 0 < L)
+    (hM : ∀ σ, |κ σ| ≤ M) (hκL : Function.Periodic κ L)
+    (hW₀ : W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀)
+    (hclose1 : (arcFlow κ R L M r₀ (W₀, L)).1 = W₀.1)
+    (hclose2 : (arcFlow κ R L M r₀ (W₀, L)).2 = W₀.2 + 2 * π)
+    (hconf : ∀ σ ∈ Set.Icc (0 : ℝ) L, ‖(arcFlow κ R L M r₀ (W₀, σ)).1‖ ≤ R)
+    (hchord : ∀ t τ : ℝ, 0 ≤ t → t < τ → τ < L →
+      (∫ s in t..τ, Complex.exp (((arcFlow κ R L M r₀ (W₀, s)).2 : ℂ) * Complex.I)) ≠ 0) :
+    ArcLengthH2Curvature κ :=
+  ⟨L, hL, windowSolution_exposed hκc hR hR1 hL hM hκL hW₀ hclose1 hclose2 hconf hchord⟩
 
 /-! ### A4-REMAINING — discharge of the two gate-specific analytic leaves
 

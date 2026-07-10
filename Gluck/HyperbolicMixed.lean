@@ -5,6 +5,7 @@ Authors: kejace
 -/
 import Gluck.Hyperbolic
 import Gluck.SpaceForm.ArcLengthH2Family
+import Gluck.SpaceForm.ArcLengthH2Exact
 
 /-!
 # The hyperbolic mixed (Dahlberg) converse — genuinely-negative curvature (H², K = −1)
@@ -95,5 +96,16 @@ theorem hyperbolicMixedConverse {κ : ℝ → ℝ} (h : MixedHyperbolicFourVerte
     ∃ (z : ℝ → ℂ) (Ψ : ℝ → ℝ), ContDiff ℝ 1 Ψ ∧ (∀ t, 0 < deriv Ψ t) ∧
       IsSimpleClosed z ∧ RealizesHyperbolicCurvature z (κ ∘ Ψ) :=
   SpaceForm.hyperbolicMixedConverse h
+
+/-- **The exact-profile hyperbolic mixed (Dahlberg) converse.**  A genuinely-negative
+mixed-sign hyperbolic four-vertex curvature function is realized **exactly** — with
+*no* reparametrisation — as the hyperbolic geodesic curvature of a simple closed curve
+in the Poincaré disk.  The exact-profile strengthening of `hyperbolicMixedConverse`:
+the fork-A reparam `Ψ` is a degree-one circle map, so it is removed
+(`SpaceForm.realizes_of_reparam_degree_one`).  Re-export of
+`SpaceForm.hyperbolicMixedConverse_exact`. -/
+theorem hyperbolicMixedConverse_exact {κ : ℝ → ℝ} (h : MixedHyperbolicFourVertex κ) :
+    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ RealizesHyperbolicCurvature z κ :=
+  SpaceForm.hyperbolicMixedConverse_exact h
 
 end Gluck

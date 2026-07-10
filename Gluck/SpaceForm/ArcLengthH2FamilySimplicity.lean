@@ -1203,7 +1203,7 @@ whereas the bridge consumes the flow at horizon equal to the profile period
 `Λ = nodePeriod = L + w₁ + w₂ + t ≤ 2L`.  The two arc flows agree on `[0, Λ]` by
 ODE uniqueness (`arcFlow_unique`), so the ALM-A10/A11 closure, confinement and
 chord data transfer verbatim to the period-horizon flow the bridge needs. -/
-theorem layout_arcLengthH2Curvature {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+theorem layout_windowSolution_exposed {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
     (hL : L ≤ bicircleBracket a h) (hL4 : L ≤ 4 * π)
     (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
@@ -1220,7 +1220,15 @@ theorem layout_arcLengthH2Curvature {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (hchord : ∀ p q : ℝ, 0 ≤ p → p < q → q < nodePeriod L w₁ w₂ t →
         (∫ s in p..q, Complex.exp
           (((layoutFlow κ h₁ a c h L M w₁ w₂ t s).2 : ℂ) * Complex.I)) ≠ 0) :
-    ArcLengthH2Curvature (kappaArc κ h₁ L w₁ w₂ t) := by
+    ∃ (z : ℝ → ℂ) (φ : ℝ → ℝ),
+      (∀ σ, HasDerivAt z (Complex.exp ((φ σ : ℂ) * Complex.I)) σ) ∧
+      (∀ σ, HasDerivAt φ
+        (arcAngleSpeed (kappaArc κ h₁ L w₁ w₂ t) σ (z σ) (φ σ)) σ) ∧
+      (∀ σ, ‖z σ‖ < 1) ∧
+      z (nodePeriod L w₁ w₂ t) = z 0 ∧
+      φ (nodePeriod L w₁ w₂ t) = φ 0 + 2 * π ∧
+      Function.Periodic z (nodePeriod L w₁ w₂ t) ∧
+      Set.InjOn z (Set.Ico 0 (nodePeriod L w₁ w₂ t)) := by
   set κ' := kappaArc κ h₁ L w₁ w₂ t with hκ'def
   set R := layoutConfineRadius a c with hRdef
   set Λ := nodePeriod L w₁ w₂ t with hΛdef
@@ -1258,7 +1266,7 @@ theorem layout_arcLengthH2Curvature {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       exact (hspec2.2 s ⟨hs.1, hs.2.trans hΛ2L⟩).mono (Set.Icc_subset_Icc le_rfl hΛ2L)
     have heq := arcFlow_unique hκ'c hR0 hR1 hΛ0.le hM' 9 hW₀mem hg hg0 hσ
     rw [hlf σ]; exact heq.symm
-  refine arcLengthH2Curvature_of_windowSolution hκ'c hR0 hR1 hΛ0 hM' hκ'per hW₀mem
+  refine windowSolution_exposed hκ'c hR0 hR1 hΛ0 hM' hκ'per hW₀mem
     ?_ ?_ ?_ ?_
   · rw [hreindex Λ (Set.right_mem_Icc.mpr hΛ0.le)]
     exact hclose1
@@ -1277,6 +1285,36 @@ theorem layout_arcLengthH2Curvature {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       rw [hreindex s ⟨hp.trans hs.1, hs.2.trans hqΛ.le⟩]
     rw [hcongr]
     exact hchord p q hp hpq hqΛ
+
+/-- The layout window solution packages into `ArcLengthH2Curvature` at window
+`Λ = nodePeriod` (wrapper around `layout_windowSolution_exposed`). -/
+theorem layout_arcLengthH2Curvature {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
+    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
+    (hL : L ≤ bicircleBracket a h) (hL4 : L ≤ 4 * π)
+    (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
+    {κ h₁ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
+    (hh₁c : Continuous h₁) (hh₁per : ∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π)
+    {M : ℝ} (hM : ∀ θ, |κ θ| ≤ M) {w₁ w₂ t : ℝ}
+    (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16)
+    (hclose1 : (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)).1
+        = (layoutStart a c h L).1)
+    (hclose2 : (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)).2
+        = (layoutStart a c h L).2 + 2 * π)
+    (hconf : ∀ σ ∈ Set.Icc (0 : ℝ) (nodePeriod L w₁ w₂ t),
+        ‖(layoutFlow κ h₁ a c h L M w₁ w₂ t σ).1‖ ≤ layoutConfineRadius a c)
+    (hchord : ∀ p q : ℝ, 0 ≤ p → p < q → q < nodePeriod L w₁ w₂ t →
+        (∫ s in p..q, Complex.exp
+          (((layoutFlow κ h₁ a c h L M w₁ w₂ t s).2 : ℂ) * Complex.I)) ≠ 0) :
+    ArcLengthH2Curvature (kappaArc κ h₁ L w₁ w₂ t) := by
+  have hΛ0 : 0 < nodePeriod L w₁ w₂ t := by
+    rw [nodePeriod]
+    have hb1 := (abs_le.mp hw₁).1
+    have hb2 := (abs_le.mp hw₂).1
+    have hb3 := (abs_le.mp ht).1
+    linarith
+  exact ⟨nodePeriod L w₁ w₂ t, hΛ0,
+    layout_windowSolution_exposed ha hac hwin hlow hL0 hL hL4 hφe hκc hκper hh₁c
+      hh₁per hM hw₁ hw₂ ht hclose1 hclose2 hconf hchord⟩
 
 /-- **The hyperbolic mixed (Dahlberg) converse — genuinely-negative four-vertex.**
 A `MixedSignHyperbolicFourVertex` profile (continuous, `2π`-periodic, escape
@@ -1308,8 +1346,10 @@ was vestigial for this route (bound but unused — the `L¹` squeeze absorbs dip
 any depth) and has been removed from the hypothesis.  Relocated here from
 `ArcLengthH2Mixed.lean` because the closing/simplicity ingredients live in this
 file, which imports that one. -/
-theorem hyperbolicMixedConverse {κ : ℝ → ℝ} (h : MixedSignHyperbolicFourVertex κ) :
+theorem hyperbolicMixedConverse_reparam_deg1 {κ : ℝ → ℝ}
+    (h : MixedSignHyperbolicFourVertex κ) :
     ∃ (z : ℝ → ℂ) (Ψ : ℝ → ℝ), ContDiff ℝ 1 Ψ ∧ (∀ t, 0 < deriv Ψ t) ∧
+      (∀ t, Ψ (t + 2 * π) = Ψ t + 2 * π) ∧
       IsSimpleClosed z ∧ Realizes (-1) z (κ ∘ Ψ) := by
   obtain ⟨hκc, hκper, hdisj⟩ := h
   rcases hdisj with ⟨c, hc1, hc⟩ | ⟨p₁, q₁, p₂, q₂, h12, h23, h34, h41,
@@ -1317,7 +1357,7 @@ theorem hyperbolicMixedConverse {κ : ℝ → ℝ} (h : MixedSignHyperbolicFourV
   · -- constant branch: the explicit escape-velocity hyperbolic circle.
     have hκeq : κ = fun _ => c := funext hc
     obtain ⟨z, hsimple, hreal⟩ := hyperbolicCircle_realizes hc1
-    refine ⟨z, id, contDiff_id, fun t => by simp, hsimple, ?_⟩
+    refine ⟨z, id, contDiff_id, fun t => by simp, fun t => rfl, hsimple, ?_⟩
     have : κ ∘ id = fun _ => c := by rw [hκeq]; rfl
     exact this ▸ hreal
   · -- four-vertex branch: the fork-A ALM-A1…A12 chain.
@@ -1367,15 +1407,23 @@ theorem hyperbolicMixedConverse {κ : ℝ → ℝ} (h : MixedSignHyperbolicFourV
     obtain ⟨w₁, w₂, t, hw₁, hw₂, ht, hresid, htransport, hconfR⟩ :=
       hclose h₁ hh₁c hh₁per hεpos hεε₀ hh₁L1.le hh₁plateau
     obtain ⟨hzcl, htcl⟩ := (layoutResidual_eq_zero_iff κ h₁ a b hh LL M w₁ w₂ t).mp hresid
-    -- the reparametrised profile is an H² arc-length curvature function.
-    have hALC : ArcLengthH2Curvature (kappaArc κ h₁ LL w₁ w₂ t) :=
-      layout_arcLengthH2Curvature h1a hab hwin hlowh hL0 hLbr hL4 hφe hκc hκper hh₁c
+    -- expose the window solution at the node period `Λ`.
+    have hΛ0 : 0 < nodePeriod LL w₁ w₂ t := by
+      rw [nodePeriod]
+      have hb1 := (abs_le.mp hw₁).1
+      have hb2 := (abs_le.mp hw₂).1
+      have hb3 := (abs_le.mp ht).1
+      linarith
+    obtain ⟨zsol, φsol, hzs, hφs, hconfs, _hzcl2, _hφcl2, hzper, hinj⟩ :=
+      layout_windowSolution_exposed h1a hab hwin hlowh hL0 hLbr hL4 hφe hκc hκper hh₁c
         hh₁per hM hw₁ hw₂ ht hzcl htcl hconfR
         (fun p q hp hpq hqΛ => hchordμ h₁ hh₁c hw₁ hw₂ ht hC₁0 hεpos hεμC hzcl htcl
           htransport hconfR p q hp hpq hqΛ)
-    -- arc-length converse: a simple closed `z` realizing `κ_arc ∘ χ`.
-    obtain ⟨z, χ, hχC1, hχpos, hZsc, hZreal⟩ :=
-      arcLengthH2Converse (continuous_kappaArc hκc hh₁c LL w₁ w₂ t) hALC
+    -- arc-length converse at explicit window `Λ`: simple closed `z` realizing
+    -- `κ_arc ∘ χ`, exposing the window shift law `χ(t+2π) = χ(t) + Λ`.
+    obtain ⟨z, χ, hχC1, hχpos, hχshift, hZsc, hZreal⟩ :=
+      arcLengthH2Converse_at (continuous_kappaArc hκc hh₁c LL w₁ w₂ t) hΛ0
+        hzs hφs hconfs hzper hinj
     -- the composite reparam `Ψ = (h₁ ∘ nodeMap) ∘ χ` is `C¹`, orientation-preserving.
     have hψd : ∀ s, HasDerivAt (fun s => h₁ (nodeMap LL w₁ w₂ t s))
         (vh (nodeMap LL w₁ w₂ t s) * nodeDensity LL w₁ w₂ t s) s := fun s =>
@@ -1385,7 +1433,13 @@ theorem hyperbolicMixedConverse {κ : ℝ → ℝ} (h : MixedSignHyperbolicFourV
     have hΨd : ∀ u, HasDerivAt ((fun s => h₁ (nodeMap LL w₁ w₂ t s)) ∘ χ)
         ((vh (nodeMap LL w₁ w₂ t (χ u)) * nodeDensity LL w₁ w₂ t (χ u)) * deriv χ u) u :=
       fun u => (hψd (χ u)).comp u (hχd u)
-    refine ⟨z, (fun s => h₁ (nodeMap LL w₁ w₂ t s)) ∘ χ, ?_, ?_, hZsc, hZreal⟩
+    -- degree-one: `Ψ(u+2π) = Ψ(u) + 2π` — `nodeMap` conjugates the `Λ`-shift of `χ`
+    -- to `2π`, then `h₁` conjugates `2π` to `2π` (the AL-6 linchpin).
+    have hΨdeg : ∀ u, ((fun s => h₁ (nodeMap LL w₁ w₂ t s)) ∘ χ) (u + 2 * π)
+        = ((fun s => h₁ (nodeMap LL w₁ w₂ t s)) ∘ χ) u + 2 * π := fun u => by
+      simp only [Function.comp_apply, hχshift u,
+        nodeMap_add_period hL0 hL4 hw₁ hw₂ ht, hh₁per]
+    refine ⟨z, (fun s => h₁ (nodeMap LL w₁ w₂ t s)) ∘ χ, ?_, ?_, hΨdeg, hZsc, hZreal⟩
     · rw [contDiff_one_iff_deriv]
       refine ⟨fun u => (hΨd u).differentiableAt, ?_⟩
       have hderiv : deriv ((fun s => h₁ (nodeMap LL w₁ w₂ t s)) ∘ χ)
@@ -1398,5 +1452,19 @@ theorem hyperbolicMixedConverse {κ : ℝ → ℝ} (h : MixedSignHyperbolicFourV
     · intro u
       rw [(hΨd u).deriv]
       exact mul_pos (mul_pos (hvhpos _) (nodeDensity_pos hL0 hw₁ hw₂ ht _)) (hχpos u)
+
+/-- **The hyperbolic mixed (Dahlberg) converse — genuinely-negative four-vertex.**
+A `MixedSignHyperbolicFourVertex` profile is realized, up to an orientation-
+preserving `C¹` reparametrization `Ψ`, as the geodesic curvature of a simple
+closed curve in the hyperbolic plane (`ε = −1`).  Weakening of
+`hyperbolicMixedConverse_reparam_deg1` that forgets the degree-one datum
+`Ψ(t+2π) = Ψ(t)+2π`; the latter is what upgrades this to the exact-profile
+`hyperbolicMixedConverse_exact` (`ArcLengthH2Exact.lean`). -/
+theorem hyperbolicMixedConverse {κ : ℝ → ℝ} (h : MixedSignHyperbolicFourVertex κ) :
+    ∃ (z : ℝ → ℂ) (Ψ : ℝ → ℝ), ContDiff ℝ 1 Ψ ∧ (∀ t, 0 < deriv Ψ t) ∧
+      IsSimpleClosed z ∧ Realizes (-1) z (κ ∘ Ψ) := by
+  obtain ⟨z, Ψ, hΨC1, hΨpos, _hΨdeg, hsc, hreal⟩ :=
+    hyperbolicMixedConverse_reparam_deg1 h
+  exact ⟨z, Ψ, hΨC1, hΨpos, hsc, hreal⟩
 
 end Gluck.SpaceForm
