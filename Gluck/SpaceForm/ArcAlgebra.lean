@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
 import Gluck.SpaceForm.Admissible
+import Gluck.Internal.ComplexExp
 
 /-!
 # Constant-curvature circular arcs (`ε`-generic)
@@ -70,13 +71,6 @@ lemma constant_arc_norm_sq (r : ℝ) (w : ℂ) (θ : ℝ) :
   rw [hsm, norm_sub_sq_real, real_inner_smul_right, norm_smul, hvnorm, mul_one,
     Real.norm_eq_abs, sq_abs]
   ring
-
-/-- Half-turn of the unit tangent: `e^{i(θ+π)} = −e^{iθ}`. Model-agnostic. -/
-private lemma expI_add_pi (θ : ℝ) :
-    Complex.exp (((θ + π : ℝ) : ℂ) * Complex.I)
-      = -Complex.exp ((θ : ℂ) * Complex.I) := by
-  push_cast
-  rw [add_mul, Complex.exp_add, Complex.exp_pi_mul_I, mul_neg_one]
 
 /-- Splitting the unit tangent over a sum of angles:
 `e^{i(x+y)} = e^{ix}·e^{iy}`. Model-agnostic. -/
@@ -157,7 +151,7 @@ lemma truncatedSpeed_half_turn {ε : ℝ} {κ : ℝ → ℝ} {R δ : ℝ}
     (hπ : ∀ θ, κ (θ + π) = κ θ) (θ : ℝ) (z : ℂ) :
     truncatedSpeed ε κ R δ (θ + π) (-z) = truncatedSpeed ε κ R δ θ z := by
   unfold truncatedSpeed
-  rw [norm_neg, hπ θ, expI_add_pi θ, mul_neg, inner_neg_neg]
+  rw [norm_neg, hπ θ, Internal.expI_add_pi θ, mul_neg, inner_neg_neg]
 
 /-- **Half-turn equivariance of the truncated field** for `π`-periodic `κ`
 (`ε`-generic): `F(θ+π, −z) = −F(θ, z)`. (Transport of
@@ -166,7 +160,7 @@ lemma truncatedField_half_turn {ε : ℝ} {κ : ℝ → ℝ} {R δ : ℝ}
     (hπ : ∀ θ, κ (θ + π) = κ θ) (θ : ℝ) (z : ℂ) :
     truncatedField ε κ R δ (θ + π) (-z) = -truncatedField ε κ R δ θ z := by
   unfold truncatedField
-  rw [truncatedSpeed_half_turn hπ, expI_add_pi, smul_neg]
+  rw [truncatedSpeed_half_turn hπ, Internal.expI_add_pi, smul_neg]
 
 /-- **Half-turn equivariance of trajectories** (`ε`-generic). For `π`-periodic
 `κ`, if `z` solves the truncated ODE on `[0, 2π]` and `z(π) = −z(0)`, then
@@ -276,7 +270,7 @@ lemma spaceFormSpeed_half_turn {ε : ℝ} {κ : ℝ → ℝ} (hπ : ∀ θ, κ (
     (θ : ℝ) (z : ℂ) :
     spaceFormSpeed ε κ (θ + π) (-z) = spaceFormSpeed ε κ θ z := by
   unfold spaceFormSpeed
-  rw [norm_neg, hπ θ, expI_add_pi θ, mul_neg, inner_neg_neg]
+  rw [norm_neg, hπ θ, Internal.expI_add_pi θ, mul_neg, inner_neg_neg]
 
 /-- **Arc-endpoint map.** The endpoint of the constant-`K` model arc of angular
 extent `Δ` starting at `z` with initial tangent angle `θ₀`:
@@ -294,7 +288,7 @@ lemma spaceFormArcMap_half_turn (ε K θ₀ Δ : ℝ) (z : ℂ) :
       = spaceFormSpeed ε (fun _ => K) θ₀ z :=
     spaceFormSpeed_half_turn (fun _ => rfl) θ₀ z
   unfold spaceFormArcMap
-  rw [hq, expI_add_pi θ₀]
+  rw [hq, Internal.expI_add_pi θ₀]
   ring
 
 /-- **Arc concatenation** (`ε`-generic). If the bracket stays positive along the
@@ -413,7 +407,7 @@ private lemma continuousOn_truncatedField_comp_shift {ε : ℝ} {κ' : ℝ → �
 difference, bounded pointwise by `truncatedField_sub_le`. (Transport of
 `Gluck.arc_trajectory_diff_integral_bound`.) -/
 private lemma arc_trajectory_diff_integral_bound {ε : ℝ} {κ κ' : ℝ → ℝ} {R δ t₁ T : ℝ}
-    {L : ℝ≥0} (hε : |ε| ≤ 1) (hR : 0 ≤ R) (hR1 : R < 1) (hδ : 0 < δ)
+    {L : ℝ≥0} (hε : |ε| ≤ 1) (hR : 0 ≤ R) (hδ : 0 < δ)
     (hL : ∀ θ, LipschitzWith L (fun z => truncatedField ε κ R δ θ z))
     (hκc : Continuous fun u => κ (t₁ + u)) (hκ'c : Continuous fun u => κ' (t₁ + u))
     {z zs : ℝ → ℂ}
@@ -470,7 +464,7 @@ private lemma arc_trajectory_diff_integral_bound {ε : ℝ} {κ κ' : ℝ → �
           + (1 + R ^ 2) / (2 * δ ^ 2) * |κ (t₁ + u) - κ' (t₁ + u)|) := by
     refine intervalIntegral.integral_mono_on hs.1 hint.norm hint2 ?_
     intro x _
-    exact truncatedField_sub_le hε hR hR1 hδ hL (t₁ + x) (z (t₁ + x)) (zs (t₁ + x))
+    exact truncatedField_sub_le hε hR hδ hL (t₁ + x) (z (t₁ + x)) (zs (t₁ + x))
   have hsplit : z (t₁ + s) - zs (t₁ + s) = (z t₁ - zs t₁)
       + ((z (t₁ + s) - zs (t₁ + s)) - (z t₁ - zs t₁)) := by ring
   calc ‖z (t₁ + s) - zs (t₁ + s)‖
@@ -523,7 +517,7 @@ continuous because the model level is constant. (Transport of
 `Gluck.invariant_admissible_arc`.) -/
 lemma invariant_admissible_arc {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : ℝ} {L : ℝ≥0}
     (hε : |ε| ≤ 1) (hκ : Continuous κ) (hκ₀ : ∀ θ, κ₀ ≤ κ θ) (hR : 0 ≤ R)
-    (hR1 : R < 1) (hδ : 0 < δ) (ht : t₁ ≤ t₂)
+    (hδ : 0 < δ) (ht : t₁ ≤ t₂)
     (hL : ∀ θ, LipschitzWith L (fun z => truncatedField ε κ R δ θ z))
     {z zs : ℝ → ℂ}
     (hz : ∀ θ ∈ Set.Icc t₁ t₂,
@@ -566,7 +560,7 @@ lemma invariant_admissible_arc {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ K t�
       ‖z (t₁ + s) - zs (t₁ + s)‖ ≤ ‖z t₁ - zs t₁‖
         + ∫ u in (0 : ℝ)..s, ((L : ℝ) * ‖z (t₁ + u) - zs (t₁ + u)‖
             + M * |κ (t₁ + u) - K|) :=
-    fun s hs => arc_trajectory_diff_integral_bound hε hR hR1 hδ hL hκc continuous_const
+    fun s hs => arc_trajectory_diff_integral_bound hε hR hδ hL hκc continuous_const
       hZc hZsc hFz hFzs hZ hZs hs
   have hgronwall := gronwall_L1_drive
     (d := fun s => ‖z (t₁ + s) - zs (t₁ + s)‖)

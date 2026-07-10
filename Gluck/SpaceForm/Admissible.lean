@@ -20,32 +20,6 @@ namespace Gluck.SpaceForm
 
 open scoped Real InnerProductSpace NNReal
 
-/-- Quotient-difference bound used for the curvature-sensitivity estimate: if two
-quotients have numerators in `[0, B]` differing by at most `dn` and denominators
-`≥ δ > 0` differing by at most `dd`, the quotients differ by at most
-`dn/δ + B·dd/δ²`. Model-agnostic real-analysis helper (private copy of the
-identically-named helper in `Gluck.SpaceForm.Flow`; relocate to a shared layer in
-the S²-first dedup ticket). -/
-private lemma abs_div_sub_div_le {n₁ n₂ d₁ d₂ δ B dn dd : ℝ} (hδ : 0 < δ)
-    (hd₁ : δ ≤ d₁) (hd₂ : δ ≤ d₂) (hn₁0 : 0 ≤ n₁) (hn₁B : n₁ ≤ B)
-    (hn : |n₁ - n₂| ≤ dn) (hd : |d₁ - d₂| ≤ dd) :
-    |n₁ / d₁ - n₂ / d₂| ≤ dn / δ + B * dd / δ ^ 2 := by
-  have h₁ : 0 < d₁ := hδ.trans_le hd₁
-  have h₂ : 0 < d₂ := hδ.trans_le hd₂
-  have hdn0 : 0 ≤ dn := (abs_nonneg _).trans hn
-  have hdd0 : 0 ≤ dd := (abs_nonneg _).trans hd
-  have hB0 : 0 ≤ B := hn₁0.trans hn₁B
-  have key : n₁ / d₁ - n₂ / d₂ = (n₁ - n₂) / d₂ + n₁ * (d₂ - d₁) / (d₁ * d₂) := by
-    field_simp; ring
-  rw [key]
-  refine (abs_add_le _ _).trans (add_le_add ?_ ?_)
-  · rw [abs_div, abs_of_pos h₂]
-    exact div_le_div₀ hdn0 hn hδ hd₂
-  · rw [abs_div, abs_mul, abs_of_nonneg hn₁0, abs_of_pos (mul_pos h₁ h₂)]
-    refine div_le_div₀ (mul_nonneg hB0 hdd0) ?_ (by positivity) ?_
-    · exact mul_le_mul hn₁B (by rw [abs_sub_comm]; exact hd) (abs_nonneg _) hB0
-    · rw [sq]; exact mul_le_mul hd₁ hd₂ hδ.le h₁.le
-
 /-- **Curvature sensitivity of the truncated speed.** Two truncated speeds
 with the same clamps `R, δ` but different curvatures differ by at most
 `M·|κ(θ) − κ*(θ)|` with `M = (1 + R²)/(2δ²)`: they share the numerator
@@ -53,13 +27,14 @@ with the same clamps `R, δ` but different curvatures differ by at most
 the denominators (both `≥ 2δ`) differ by at most `2·|κ(θ) − κ*(θ)|`.
 (Blueprint `lem:truncated_speed_sub_le`.) -/
 lemma truncatedSpeed_sub_le {ε : ℝ} {κ κ' : ℝ → ℝ} {R δ : ℝ} (hε : |ε| ≤ 1)
-    (hR : 0 ≤ R) (hR1 : R < 1) (hδ : 0 < δ) (θ : ℝ) (z : ℂ) :
+    (hR : 0 ≤ R) (hδ : 0 < δ) (θ : ℝ) (z : ℂ) :
     |truncatedSpeed ε κ R δ θ z - truncatedSpeed ε κ' R δ θ z|
       ≤ (1 + R ^ 2) / (2 * δ ^ 2) * |κ θ - κ' θ| := by
   simp only [truncatedSpeed]
   set c := ε * ⟪z, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ with hc
   have hminz : (0 : ℝ) ≤ min ‖z‖ R := le_min (norm_nonneg _) hR
   have hminzR : min ‖z‖ R ≤ R := min_le_right _ _
+  have hminz_sq : (min ‖z‖ R) ^ 2 ≤ R ^ 2 := by nlinarith
   have hdenz : 2 * δ ≤ 2 * max (κ θ - c) δ := by
     have := le_max_right (κ θ - c) δ; linarith
   have hdenw : 2 * δ ≤ 2 * max (κ' θ - c) δ := by
@@ -76,10 +51,13 @@ lemma truncatedSpeed_sub_le {ε : ℝ} {κ κ' : ℝ → ℝ} {R δ : ℝ} (hε 
           rw [← mul_sub, abs_mul, abs_two]
       _ ≤ 2 * |κ θ - κ' θ| := by linarith
   have hkey := abs_div_sub_div_le (by positivity : (0 : ℝ) < 2 * δ) hdenz hdenw
-    (truncatedNum_pos hε hR hR1 z).le
-    (by have hεhi : ε ≤ 1 := (abs_le.mp hε).2
-        nlinarith [sq_nonneg (min ‖z‖ R), mul_le_mul hminzR hminzR hminz hR] :
-      1 + ε * (min ‖z‖ R) ^ 2 ≤ 1 + R ^ 2)
+    (calc
+      |1 + ε * (min ‖z‖ R) ^ 2| ≤ |(1 : ℝ)| + |ε * (min ‖z‖ R) ^ 2| := abs_add_le _ _
+      _ = 1 + |ε| * (min ‖z‖ R) ^ 2 := by rw [abs_one, abs_mul, abs_sq]
+      _ ≤ 1 + 1 * R ^ 2 := by
+        simpa only [add_comm] using
+          add_le_add_left (mul_le_mul hε hminz_sq (sq_nonneg _) (by norm_num)) 1
+      _ = 1 + R ^ 2 := by ring)
     (le_of_eq (by rw [sub_self, abs_zero]) :
       |(1 + ε * (min ‖z‖ R) ^ 2) - (1 + ε * (min ‖z‖ R) ^ 2)| ≤ 0)
     hden_diff
@@ -94,7 +72,7 @@ Lipschitz constant is consumed as a hypothesis (any witness of
 `truncatedField_lipschitz` qualifies) so downstream users can carry one fixed
 `L`. (Blueprint `lem:truncated_field_sub_le`.) -/
 lemma truncatedField_sub_le {ε : ℝ} {κ κ' : ℝ → ℝ} {R δ : ℝ} (hε : |ε| ≤ 1)
-    (hR : 0 ≤ R) (hR1 : R < 1) (hδ : 0 < δ)
+    (hR : 0 ≤ R) (hδ : 0 < δ)
     {L : ℝ≥0} (hL : ∀ θ, LipschitzWith L (fun z => truncatedField ε κ R δ θ z))
     (θ : ℝ) (z z' : ℂ) :
     ‖truncatedField ε κ R δ θ z - truncatedField ε κ' R δ θ z'‖
@@ -106,7 +84,7 @@ lemma truncatedField_sub_le {ε : ℝ} {κ κ' : ℝ → ℝ} {R δ : ℝ} (hε 
       ≤ (1 + R ^ 2) / (2 * δ ^ 2) * |κ θ - κ' θ| := by
     rw [truncatedField, truncatedField, ← sub_smul, norm_smul, Real.norm_eq_abs,
       Complex.norm_exp_ofReal_mul_I, mul_one]
-    exact truncatedSpeed_sub_le hε hR hR1 hδ θ z'
+    exact truncatedSpeed_sub_le hε hR hδ θ z'
   have tri : truncatedField ε κ R δ θ z - truncatedField ε κ' R δ θ z'
       = (truncatedField ε κ R δ θ z - truncatedField ε κ R δ θ z')
         + (truncatedField ε κ R δ θ z' - truncatedField ε κ' R δ θ z') := by ring
@@ -305,7 +283,7 @@ its initial value plus `∫₀ᵗ (L·gap + M·|κ − κ'|)` with `M = (1 + R²
 on `z − zs` writes the increment as an integral of the field difference, whose
 norm is bounded pointwise by `truncatedField_sub_le`. -/
 private lemma trajectory_diff_integral_bound {ε : ℝ} {κ κ' : ℝ → ℝ} {R δ T : ℝ}
-    {L : ℝ≥0} (hε : |ε| ≤ 1) (hR : 0 ≤ R) (hR1 : R < 1) (hδ : 0 < δ)
+    {L : ℝ≥0} (hε : |ε| ≤ 1) (hR : 0 ≤ R) (hδ : 0 < δ)
     (hκ : Continuous κ) (hκ' : Continuous κ')
     (hL : ∀ θ, LipschitzWith L (fun z => truncatedField ε κ R δ θ z))
     {z zs : ℝ → ℂ} (hzc : ContinuousOn z (Set.Icc 0 T))
@@ -352,7 +330,7 @@ private lemma trajectory_diff_integral_bound {ε : ℝ} {κ κ' : ℝ → ℝ} {
           + (1 + R ^ 2) / (2 * δ ^ 2) * |κ s - κ' s|) := by
     refine intervalIntegral.integral_mono_on hθ.1 hint.norm hint2 ?_
     intro x _
-    exact truncatedField_sub_le hε hR hR1 hδ hL x (z x) (zs x)
+    exact truncatedField_sub_le hε hR hδ hL x (z x) (zs x)
   have hsplit : z θ - zs θ = (z 0 - zs 0) + ((z θ - zs θ) - (z 0 - zs 0)) := by ring
   calc ‖z θ - zs θ‖
       = ‖(z 0 - zs 0) + ((z θ - zs θ) - (z 0 - zs 0))‖ := by rw [← hsplit]
@@ -399,7 +377,7 @@ slab (`‖zs‖ ≤ R − μ`, inner product bounded away from the floor), and t
 curvatures are `L¹`-close, then `z` stays in the slab: `‖z θ‖ ≤ R` and
 `δ ≤ κ θ − ε⟪z θ, i·e^{iθ}⟫`. (Transport of `invariant_admissible_domain`.) -/
 lemma invariant_admissible_domain {ε : ℝ} {κ κ' : ℝ → ℝ} {κ₀ R δ μ : ℝ}
-    {L : ℝ≥0} (hε : |ε| ≤ 1) (hR1 : R < 1) (hκ : Continuous κ) (hκ' : Continuous κ')
+    {L : ℝ≥0} (hε : |ε| ≤ 1) (hκ : Continuous κ) (hκ' : Continuous κ')
     (hκ₀ : ∀ θ, κ₀ ≤ κ θ) (hR : 0 ≤ R) (hδ : 0 < δ)
     (hL : ∀ θ, LipschitzWith L (fun z => truncatedField ε κ R δ θ z))
     {z zs : ℝ → ℂ}
@@ -425,7 +403,7 @@ lemma invariant_admissible_domain {ε : ℝ} {κ κ' : ℝ → ℝ} {κ₀ R δ 
   have key : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
       ‖z θ - zs θ‖ ≤ ‖z 0 - zs 0‖
         + ∫ s in (0 : ℝ)..θ, ((L : ℝ) * ‖z s - zs s‖ + M * |κ s - κ' s|) :=
-    fun θ hθ => trajectory_diff_integral_bound hε hR hR1 hδ hκ hκ' hL hzc hzsc hFz hFzs hz hzs hθ
+    fun θ hθ => trajectory_diff_integral_bound hε hR hδ hκ hκ' hL hzc hzsc hFz hFzs hz hzs hθ
   have hgronwall := gronwall_L1_drive h2π L.coe_nonneg
     (norm_nonneg (z 0 - zs 0)) (hzc.sub hzsc).norm
     (continuous_const.mul (hκ.sub hκ').abs).continuousOn

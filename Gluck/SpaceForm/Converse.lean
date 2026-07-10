@@ -154,18 +154,30 @@ private lemma spaceFormCircle_speed {ε c r : ℝ} (hr0 : 0 < r)
 /-- **Constant branch.** The model geodesic circle of constant admissible
 curvature `c` is a simple closed curve realizing the constant curvature
 function `κ ≡ c`. (Transport of `sphericalCircle_realizes`.) -/
-lemma spaceFormCircle_realizes {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
+lemma spaceFormCircle_realizes_explicit {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
     (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c)) :
-    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes ε z (fun _ => c) := by
+    IsSimpleClosed
+        (fun θ : ℝ => (-centeredRadius ε c) •
+          (Complex.I * Complex.exp ((θ : ℂ) * Complex.I))) ∧
+      Realizes ε
+        (fun θ : ℝ => (-centeredRadius ε c) •
+          (Complex.I * Complex.exp ((θ : ℂ) * Complex.I)))
+        (fun _ => c) := by
   obtain ⟨hr0, hr1⟩ := centeredRadius_mem_Ioo ε c hε hc
   have hsolve := centeredRadius_solves ε c hε hc
   set r : ℝ := centeredRadius ε c with hrdef
   have hcirc : 1 + ε * r ^ 2 = 2 * r * (c + ε * r) := by linear_combination -hsolve
-  refine ⟨fun θ : ℝ => (-r) • (Complex.I * Complex.exp ((θ : ℂ) * Complex.I)),
-    ⟨spaceFormCircle_periodic r, spaceFormCircle_injOn hr0⟩,
+  exact ⟨⟨spaceFormCircle_periodic r, spaceFormCircle_injOn hr0⟩,
     spaceFormCircle_contDiff r, fun t => spaceFormCircle_deriv_ne_zero hr0 t,
     fun t => spaceFormCircle_norm_lt_one hr0 hr1 t, id, differentiable_id,
     fun t => spaceFormCircle_tangent hr0 t, fun t => spaceFormCircle_speed hr0 hcirc t⟩
+
+/-- **Constant branch.** The model geodesic circle of constant admissible
+curvature `c` is a simple closed curve realizing the constant curvature function. -/
+lemma spaceFormCircle_realizes {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
+    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c)) :
+    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes ε z (fun _ => c) := by
+  exact ⟨_, spaceFormCircle_realizes_explicit hε hc⟩
 
 /-! ## Realization transfers under `C¹` reparametrization -/
 
@@ -400,7 +412,7 @@ private lemma re_hZderiv {ε : ℝ} {κ : ℝ → ℝ} {R δ : ℝ}
 
 /-- Trajectory speed of a closed admissible trajectory: continuous,
 `2π`-periodic and strictly positive. -/
-private lemma spaceFormTrajectory_speed {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ} {R δ : ℝ}
+lemma spaceFormTrajectory_speed {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ} {R δ : ℝ}
     (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π)) (hR1 : R < 1) (hδ : 0 < δ)
     {z : ℝ → ℂ}
     (hz : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
@@ -445,7 +457,7 @@ private lemma spaceFormTrajectory_speed {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ 
     exact div_pos hnum (by linarith)
 
 /-- The closing trajectory is a translated reconstruction curve. -/
-private lemma spaceFormTrajectory_eq_reconstruct {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ}
+lemma spaceFormTrajectory_eq_reconstruct {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ}
     {R δ : ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π)) (hR1 : R < 1)
     (hδ : 0 < δ) {z : ℝ → ℂ}
     (hz : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
@@ -480,7 +492,7 @@ private lemma spaceFormTrajectory_eq_reconstruct {ε : ℝ} (hε : |ε| ≤ 1) {
   linear_combination h
 
 /-- Simplicity is translation-invariant. -/
-private lemma isSimpleClosed_const_add {γ : ℝ → ℂ} (hγ : IsSimpleClosed γ) (w : ℂ) :
+lemma isSimpleClosed_const_add {γ : ℝ → ℂ} (hγ : IsSimpleClosed γ) (w : ℂ) :
     IsSimpleClosed fun t => w + γ t := by
   obtain ⟨hper, hinj⟩ := hγ
   refine ⟨fun t => ?_, fun a ha b hb hab => hinj ha hb ?_⟩
@@ -491,7 +503,7 @@ private lemma isSimpleClosed_const_add {γ : ℝ → ℂ} (hγ : IsSimpleClosed 
 /-- **Simplicity of the closing trajectory.** The periodic extension of a
 closed admissible truncated-field trajectory is a simple closed curve.
 (Transport of `spherical_simplicity`.) -/
-private lemma spaceForm_simplicity {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ} {R δ : ℝ}
+lemma spaceForm_simplicity {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ} {R δ : ℝ}
     (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π)) (hR1 : R < 1)
     (hδ : 0 < δ) {z : ℝ → ℂ}
     (hz : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),

@@ -94,9 +94,10 @@ private lemma truncatedSpeed_lipschitz_uniform {ε R δ : ℝ} (hε : |ε| ≤ 1
   have hdenw : 2 * δ ≤ 2 * max (κ θ - ε * ⟪w, v⟫_ℝ) δ := by
     have := le_max_right (κ θ - ε * ⟪w, v⟫_ℝ) δ; linarith
   have hkey := abs_div_sub_div_le (by positivity : (0 : ℝ) < 2 * δ) hdenz hdenw
-    (truncatedNum_pos hε hR hR1 z).le
-    (by have hεhi : ε ≤ 1 := (abs_le.mp hε).2;
-        nlinarith [sq_nonneg (min ‖z‖ R)] : 1 + ε * (min ‖z‖ R) ^ 2 ≤ 1 + R ^ 2)
+    (show |1 + ε * (min ‖z‖ R) ^ 2| ≤ 1 + R ^ 2 by
+      rw [abs_of_nonneg (truncatedNum_pos hε hR hR1 z).le]
+      have hεhi : ε ≤ 1 := (abs_le.mp hε).2
+      nlinarith [sq_nonneg (min ‖z‖ R)])
     hnum_diff hden_diff
   refine hkey.trans (le_of_eq ?_)
   rw [Real.coe_toNNReal _ (by positivity)]
@@ -170,7 +171,7 @@ private lemma flow_admissible_and_endpoint_estimate
     linarith
   obtain ⟨hz0, hzode⟩ := spaceFormFlow_spec hεabs hκ'c hR0.le hR1 hδ0 r₀ hz₀mem
   obtain ⟨hm0, hm1, hm2, hm3⟩ := hmarg z₀ (le_trans hd hρρ₀)
-  have htrans := stepModel_transport hεabs hκ'c hκ'₀ hR0.le hR1 hδ0 hLuni hzode hz0
+  have htrans := stepModel_transport hεabs hκ'c hκ'₀ hR0.le hδ0 hLuni hzode hz0
     hm0 hm1 hm2 hm3 hIμ
   refine ⟨htrans.1, ?_⟩
   have hend := htrans.2

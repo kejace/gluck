@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
 import Gluck.Sphere.Admissible
+import Gluck.Internal.ComplexExp
+import Gluck.SpaceForm.ArcAlgebra
 
 /-!
 # Arc algebra for the endpoint winding frontier (S2-D)
@@ -145,13 +147,6 @@ lemma constant_curvature_arc {K r : ℝ} {w : ℂ}
   rw [Complex.real_smul]
   exact h
 
-/-- Half-turn of the unit tangent: `e^{i(θ+π)} = −e^{iθ}`. -/
-private lemma expI_add_pi (θ : ℝ) :
-    Complex.exp (((θ + π : ℝ) : ℂ) * Complex.I)
-      = -Complex.exp ((θ : ℂ) * Complex.I) := by
-  push_cast
-  rw [add_mul, Complex.exp_add, Complex.exp_pi_mul_I, mul_neg_one]
-
 /-- **Half-turn invariance of the truncated speed** for `π`-periodic `κ`:
 `q̂(θ+π, −z) = q̂(θ, z)`. Every ingredient is unchanged: `‖−z‖ = ‖z‖`,
 `⟪−z, i·e^{i(θ+π)}⟫ = ⟪z, i·e^{iθ}⟫`, and `κ(θ+π) = κ(θ)`.
@@ -160,7 +155,7 @@ lemma truncatedSpeed_half_turn {κ : ℝ → ℝ} {R δ : ℝ}
     (hπ : ∀ θ, κ (θ + π) = κ θ) (θ : ℝ) (z : ℂ) :
     truncatedSpeed κ R δ (θ + π) (-z) = truncatedSpeed κ R δ θ z := by
   unfold truncatedSpeed
-  rw [norm_neg, hπ θ, expI_add_pi θ, mul_neg, inner_neg_neg]
+  rw [norm_neg, hπ θ, Internal.expI_add_pi θ, mul_neg, inner_neg_neg]
 
 /-- **Half-turn equivariance of the truncated field** for `π`-periodic `κ`:
 `F(θ+π, −z) = −F(θ, z)` — the speed is invariant and the tangent flips sign.
@@ -169,7 +164,7 @@ lemma truncatedField_half_turn {κ : ℝ → ℝ} {R δ : ℝ}
     (hπ : ∀ θ, κ (θ + π) = κ θ) (θ : ℝ) (z : ℂ) :
     truncatedField κ R δ (θ + π) (-z) = -truncatedField κ R δ θ z := by
   unfold truncatedField
-  rw [truncatedSpeed_half_turn hπ, expI_add_pi, smul_neg]
+  rw [truncatedSpeed_half_turn hπ, Internal.expI_add_pi, smul_neg]
 
 /-- **Half-turn equivariance of trajectories.** For `π`-periodic `κ`, if `z`
 solves the truncated ODE on `[0, 2π]` and satisfies the anti-periodic seed
@@ -296,7 +291,7 @@ lemma sphericalSpeed_half_turn {κ : ℝ → ℝ} (hπ : ∀ θ, κ (θ + π) = 
     (θ : ℝ) (z : ℂ) :
     sphericalSpeed κ (θ + π) (-z) = sphericalSpeed κ θ z := by
   unfold sphericalSpeed
-  rw [norm_neg, hπ θ, expI_add_pi θ, mul_neg, inner_neg_neg]
+  rw [norm_neg, hπ θ, Internal.expI_add_pi θ, mul_neg, inner_neg_neg]
 
 /-- **Half-turn anti-equivariance of the arc map**:
 `A_{K,θ₀+π,Δ}(−z) = −A_{K,θ₀,Δ}(z)` — the speed is half-turn invariant and
@@ -308,7 +303,7 @@ lemma sphericalArcMap_half_turn (K θ₀ Δ : ℝ) (z : ℂ) :
       = sphericalSpeed (fun _ => K) θ₀ z :=
     sphericalSpeed_half_turn (fun _ => rfl) θ₀ z
   unfold sphericalArcMap
-  rw [hq, expI_add_pi θ₀]
+  rw [hq, Internal.expI_add_pi θ₀]
   ring
 
 /-- Splitting the unit tangent over a sum of angles:
@@ -429,145 +424,6 @@ lemma constant_arc_solves_truncated {K r R δ t₁ t₂ : ℝ} {w : ℂ}
   rw [truncatedField, truncatedSpeed_eq hRθ hbr]
   exact (constant_curvature_arc hcons hpos).2.hasDerivWithinAt
 
-/-- Transfer a truncated-flow solution on `[t₁, t₂]` to the shifted window
-`[0, t₂ − t₁]`: the reparametrized trajectory `u ↦ w(t₁ + u)` solves the same
-ODE with the time argument advanced by `t₁`. Chain rule against the shift
-`u ↦ t₁ + u`, whose derivative is `1`. -/
-private lemma hasDerivWithinAt_comp_shift {κ' : ℝ → ℝ} {R δ t₁ t₂ : ℝ} {w : ℝ → ℂ}
-    (hw : ∀ θ ∈ Set.Icc t₁ t₂,
-      HasDerivWithinAt w (truncatedField κ' R δ θ (w θ)) (Set.Icc t₁ t₂) θ) :
-    ∀ s ∈ Set.Icc (0 : ℝ) (t₂ - t₁),
-      HasDerivWithinAt (fun u => w (t₁ + u))
-        (truncatedField κ' R δ (t₁ + s) (w (t₁ + s))) (Set.Icc 0 (t₂ - t₁)) s := by
-  intro s hs
-  have hmaps : Set.MapsTo (fun u : ℝ => t₁ + u) (Set.Icc (0 : ℝ) (t₂ - t₁))
-      (Set.Icc t₁ t₂) :=
-    fun u hu => ⟨by linarith [hu.1], by have := hu.2; linarith⟩
-  have hshiftD : HasDerivWithinAt (fun u : ℝ => t₁ + u) 1 (Set.Icc 0 (t₂ - t₁)) s :=
-    ((hasDerivAt_id s).const_add t₁).hasDerivWithinAt
-  have h := HasDerivWithinAt.scomp s (hw (t₁ + s) (hmaps hs)) hshiftD hmaps
-  rwa [one_smul] at h
-
-/-- Continuity of the shifted composed field `s ↦ F(κ', t₁ + s, w(t₁ + s))`
-from joint continuity of the truncated field, along a continuous shifted
-trajectory. Time-translated analogue of `continuousOn_truncatedField_comp`. -/
-private lemma continuousOn_truncatedField_comp_shift {κ' : ℝ → ℝ} {R δ t₁ T : ℝ}
-    (hκ' : Continuous κ') (hδ : 0 < δ) {w : ℝ → ℂ}
-    (hwc : ContinuousOn (fun u => w (t₁ + u)) (Set.Icc 0 T)) :
-    ContinuousOn (fun s => truncatedField κ' R δ (t₁ + s) (w (t₁ + s)))
-      (Set.Icc 0 T) :=
-  Continuous.comp_continuousOn'
-    (f := fun s : ℝ => ((t₁ + s : ℝ), w (t₁ + s)))
-    (truncatedField_continuous hκ' hδ)
-    ((continuous_const.add continuous_id).continuousOn.prodMk hwc)
-
-/-- Shifted-window trajectory-gap integral bound. The same estimate as
-`trajectory_diff_integral_bound`, but along the *time-translated* fields
-`s ↦ F(κ, t₁ + s, ·)`: FTC on `s ↦ z(t₁+s) − zs(t₁+s)` writes the increment as
-the integral of the field difference, whose norm is bounded pointwise by
-`truncatedField_sub_le`. The phase advances with the true time `t₁ + s`, so this
-cannot be folded into a single reparametrized curvature. -/
-private lemma arc_trajectory_diff_integral_bound {κ κ' : ℝ → ℝ} {R δ t₁ T : ℝ}
-    {L : ℝ≥0} (hR : 0 ≤ R) (hδ : 0 < δ)
-    (hL : ∀ θ, LipschitzWith L (fun z => truncatedField κ R δ θ z))
-    (hκc : Continuous fun u => κ (t₁ + u)) (hκ'c : Continuous fun u => κ' (t₁ + u))
-    {z zs : ℝ → ℂ}
-    (hZc : ContinuousOn (fun u => z (t₁ + u)) (Set.Icc 0 T))
-    (hZsc : ContinuousOn (fun u => zs (t₁ + u)) (Set.Icc 0 T))
-    (hFz : ContinuousOn (fun s => truncatedField κ R δ (t₁ + s) (z (t₁ + s)))
-      (Set.Icc 0 T))
-    (hFzs : ContinuousOn (fun s => truncatedField κ' R δ (t₁ + s) (zs (t₁ + s)))
-      (Set.Icc 0 T))
-    (hZ : ∀ s ∈ Set.Icc (0 : ℝ) T, HasDerivWithinAt (fun u => z (t₁ + u))
-      (truncatedField κ R δ (t₁ + s) (z (t₁ + s))) (Set.Icc 0 T) s)
-    (hZs : ∀ s ∈ Set.Icc (0 : ℝ) T, HasDerivWithinAt (fun u => zs (t₁ + u))
-      (truncatedField κ' R δ (t₁ + s) (zs (t₁ + s))) (Set.Icc 0 T) s)
-    {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) T) :
-    ‖z (t₁ + s) - zs (t₁ + s)‖ ≤ ‖z t₁ - zs t₁‖
-      + ∫ u in (0 : ℝ)..s, ((L : ℝ) * ‖z (t₁ + u) - zs (t₁ + u)‖
-          + (1 + R ^ 2) / (2 * δ ^ 2) * |κ (t₁ + u) - κ' (t₁ + u)|) := by
-  have hIccsub : Set.Icc (0 : ℝ) s ⊆ Set.Icc 0 T := Set.Icc_subset_Icc_right hs.2
-  have hwc : ContinuousOn (fun u => z (t₁ + u) - zs (t₁ + u)) (Set.Icc 0 s) :=
-    (hZc.mono hIccsub).sub (hZsc.mono hIccsub)
-  have hderiv : ∀ x ∈ Set.Ioo (0 : ℝ) s,
-      HasDerivAt (fun u => z (t₁ + u) - zs (t₁ + u))
-        (truncatedField κ R δ (t₁ + x) (z (t₁ + x))
-          - truncatedField κ' R δ (t₁ + x) (zs (t₁ + x))) x := by
-    intro x hx
-    have hx2 : x < T := lt_of_lt_of_le hx.2 hs.2
-    have hxmem : x ∈ Set.Icc (0 : ℝ) T := ⟨hx.1.le, hx2.le⟩
-    exact ((hZ x hxmem).hasDerivAt (Icc_mem_nhds hx.1 hx2)).sub
-      ((hZs x hxmem).hasDerivAt (Icc_mem_nhds hx.1 hx2))
-  have hint : IntervalIntegrable
-      (fun u => truncatedField κ R δ (t₁ + u) (z (t₁ + u))
-        - truncatedField κ' R δ (t₁ + u) (zs (t₁ + u)))
-      MeasureTheory.volume 0 s := by
-    apply ContinuousOn.intervalIntegrable
-    rw [Set.uIcc_of_le hs.1]
-    exact (hFz.mono hIccsub).sub (hFzs.mono hIccsub)
-  have hFTC : (∫ u in (0 : ℝ)..s, (truncatedField κ R δ (t₁ + u) (z (t₁ + u))
-        - truncatedField κ' R δ (t₁ + u) (zs (t₁ + u))))
-      = (z (t₁ + s) - zs (t₁ + s)) - (z t₁ - zs t₁) := by
-    have h := intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hs.1 hwc hderiv hint
-    simpa using h
-  have hint2 : IntervalIntegrable
-      (fun u => (L : ℝ) * ‖z (t₁ + u) - zs (t₁ + u)‖
-        + (1 + R ^ 2) / (2 * δ ^ 2) * |κ (t₁ + u) - κ' (t₁ + u)|)
-      MeasureTheory.volume 0 s := by
-    apply ContinuousOn.intervalIntegrable
-    rw [Set.uIcc_of_le hs.1]
-    exact (continuousOn_const.mul hwc.norm).add
-      (continuousOn_const.mul (hκc.sub hκ'c).abs.continuousOn)
-  have step3 : (∫ u in (0 : ℝ)..s,
-        ‖truncatedField κ R δ (t₁ + u) (z (t₁ + u))
-          - truncatedField κ' R δ (t₁ + u) (zs (t₁ + u))‖)
-      ≤ ∫ u in (0 : ℝ)..s, ((L : ℝ) * ‖z (t₁ + u) - zs (t₁ + u)‖
-          + (1 + R ^ 2) / (2 * δ ^ 2) * |κ (t₁ + u) - κ' (t₁ + u)|) := by
-    refine intervalIntegral.integral_mono_on hs.1 hint.norm hint2 ?_
-    intro x _
-    exact truncatedField_sub_le hR hδ hL (t₁ + x) (z (t₁ + x)) (zs (t₁ + x))
-  have hsplit : z (t₁ + s) - zs (t₁ + s) = (z t₁ - zs t₁)
-      + ((z (t₁ + s) - zs (t₁ + s)) - (z t₁ - zs t₁)) := by ring
-  calc ‖z (t₁ + s) - zs (t₁ + s)‖
-      = ‖(z t₁ - zs t₁) + ((z (t₁ + s) - zs (t₁ + s)) - (z t₁ - zs t₁))‖ := by
-        rw [← hsplit]
-    _ ≤ ‖z t₁ - zs t₁‖ + ‖(z (t₁ + s) - zs (t₁ + s)) - (z t₁ - zs t₁)‖ :=
-        norm_add_le _ _
-    _ = ‖z t₁ - zs t₁‖ + ‖∫ u in (0 : ℝ)..s,
-          (truncatedField κ R δ (t₁ + u) (z (t₁ + u))
-            - truncatedField κ' R δ (t₁ + u) (zs (t₁ + u)))‖ := by rw [hFTC]
-    _ ≤ ‖z t₁ - zs t₁‖ + ∫ u in (0 : ℝ)..s,
-          ‖truncatedField κ R δ (t₁ + u) (z (t₁ + u))
-            - truncatedField κ' R δ (t₁ + u) (zs (t₁ + u))‖ :=
-        add_le_add le_rfl (intervalIntegral.norm_integral_le_integral_norm hs.1)
-    _ ≤ ‖z t₁ - zs t₁‖ + ∫ u in (0 : ℝ)..s,
-          ((L : ℝ) * ‖z (t₁ + u) - zs (t₁ + u)‖
-            + (1 + R ^ 2) / (2 * δ ^ 2) * |κ (t₁ + u) - κ' (t₁ + u)|) :=
-        add_le_add le_rfl step3
-
-/-- Margin propagation (local copy of the `private`
-`Gluck.Sphere.Admissible.admissible_margin_of_norm_le`). If a comparison point
-`ws` has norm `≤ R − μ` and bracket `⟪ws, e⟫ ≤ κ₀ − δ − μ` against a unit vector
-`e`, and the actual point is within `μ` of it (`‖w − ws‖ ≤ μ`), then `w` is
-admissible: `‖w‖ ≤ R` and `δ ≤ c − ⟪w, e⟫` for any `c ≥ κ₀`. -/
-private lemma admissible_of_dist_le_margin {κ₀ c R δ μ : ℝ} {w ws e : ℂ}
-    (hκ₀ : κ₀ ≤ c) (he : ‖e‖ = 1) (hwsR : ‖ws‖ ≤ R - μ)
-    (hwsinner : ⟪ws, e⟫_ℝ ≤ κ₀ - δ - μ) (hd : ‖w - ws‖ ≤ μ) :
-    ‖w‖ ≤ R ∧ δ ≤ c - ⟪w, e⟫_ℝ := by
-  refine ⟨?_, ?_⟩
-  · have hw : w = ws + (w - ws) := by ring
-    calc ‖w‖ = ‖ws + (w - ws)‖ := by rw [← hw]
-      _ ≤ ‖ws‖ + ‖w - ws‖ := norm_add_le _ _
-      _ ≤ (R - μ) + μ := add_le_add hwsR hd
-      _ = R := by ring
-  · have hinner : |⟪w - ws, e⟫_ℝ| ≤ ‖w - ws‖ := by
-      have h := abs_real_inner_le_norm (w - ws) e
-      rwa [he, mul_one] at h
-    have hsplit : ⟪w, e⟫_ℝ = ⟪ws, e⟫_ℝ + ⟪w - ws, e⟫_ℝ := by
-      rw [inner_sub_left]; ring
-    have h3 := le_abs_self ⟪w - ws, e⟫_ℝ
-    linarith
-
 /-- **Single-arc margin transport (shifted interval, constant model level).**
 The `invariant_admissible_domain` argument, run on `[t₁, t₂]` against a model
 trajectory of the *constant*-level-`K` truncated flow: the drive `M·|κ − K|`
@@ -596,65 +452,14 @@ lemma invariant_admissible_arc {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : �
         + (1 + R ^ 2) / (2 * δ ^ 2) * ∫ θ in t₁..t₂, |κ θ - K|) ∧
       ‖z θ‖ ≤ R ∧
       δ ≤ κ θ - ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ := by
-  set T : ℝ := t₂ - t₁ with hTdef
-  have hT0 : 0 ≤ T := by rw [hTdef]; linarith
-  set M : ℝ := (1 + R ^ 2) / (2 * δ ^ 2) with hMdef
-  have hM0 : 0 ≤ M := by positivity
-  have hκc : Continuous fun u : ℝ => κ (t₁ + u) :=
-    hκ.comp (continuous_const.add continuous_id)
-  have hZ : ∀ s ∈ Set.Icc (0 : ℝ) T,
-      HasDerivWithinAt (fun u => z (t₁ + u))
-        (truncatedField κ R δ (t₁ + s) (z (t₁ + s))) (Set.Icc 0 T) s :=
-    hasDerivWithinAt_comp_shift hz
-  have hZs : ∀ s ∈ Set.Icc (0 : ℝ) T,
-      HasDerivWithinAt (fun u => zs (t₁ + u))
-        (truncatedField (fun _ => K) R δ (t₁ + s) (zs (t₁ + s))) (Set.Icc 0 T) s :=
-    hasDerivWithinAt_comp_shift hzs
-  have hZc : ContinuousOn (fun u => z (t₁ + u)) (Set.Icc 0 T) :=
-    HasDerivWithinAt.continuousOn hZ
-  have hZsc : ContinuousOn (fun u => zs (t₁ + u)) (Set.Icc 0 T) :=
-    HasDerivWithinAt.continuousOn hZs
-  have hFz := continuousOn_truncatedField_comp_shift (R := R) hκ hδ hZc
-  have hFzs := continuousOn_truncatedField_comp_shift (κ' := fun _ => K) (R := R)
-    continuous_const hδ hZsc
-  have key : ∀ s ∈ Set.Icc (0 : ℝ) T,
-      ‖z (t₁ + s) - zs (t₁ + s)‖ ≤ ‖z t₁ - zs t₁‖
-        + ∫ u in (0 : ℝ)..s, ((L : ℝ) * ‖z (t₁ + u) - zs (t₁ + u)‖
-            + M * |κ (t₁ + u) - K|) :=
-    fun s hs => arc_trajectory_diff_integral_bound hR hδ hL hκc continuous_const
-      hZc hZsc hFz hFzs hZ hZs hs
-  have hgronwall := gronwall_L1_drive
-    (d := fun s => ‖z (t₁ + s) - zs (t₁ + s)‖)
-    (g := fun u => M * |κ (t₁ + u) - K|)
-    hT0 L.coe_nonneg (norm_nonneg (z t₁ - zs t₁)) (hZc.sub hZsc).norm
-    (continuous_const.mul (hκc.sub continuous_const).abs).continuousOn
-    (fun t _ => norm_nonneg _)
-    (fun t _ => mul_nonneg hM0 (abs_nonneg _)) key
-  have hdrive : (∫ u in (0 : ℝ)..T, M * |κ (t₁ + u) - K|)
-      = M * ∫ θ in t₁..t₂, |κ θ - K| := by
-    rw [intervalIntegral.integral_const_mul]
-    congr 1
-    have h := intervalIntegral.integral_comp_add_left (a := (0 : ℝ)) (b := T)
-      (fun θ => |κ θ - K|) t₁
-    have hends : t₁ + T = t₂ := by rw [hTdef]; ring
-    rw [h, add_zero, hends]
-  have hbound : ∀ s ∈ Set.Icc (0 : ℝ) T, ‖z (t₁ + s) - zs (t₁ + s)‖
-      ≤ Real.exp ((L : ℝ) * T)
-        * (‖z t₁ - zs t₁‖ + M * ∫ θ in t₁..t₂, |κ θ - K|) := by
-    intro s hs
-    have h := hgronwall s hs
-    rwa [hdrive] at h
-  intro θ hθ
-  have hs : θ - t₁ ∈ Set.Icc (0 : ℝ) T :=
-    ⟨by linarith [hθ.1], by rw [hTdef]; linarith [hθ.2]⟩
-  have hd : ‖z θ - zs θ‖ ≤ Real.exp ((L : ℝ) * T)
-      * (‖z t₁ - zs t₁‖ + M * ∫ θ in t₁..t₂, |κ θ - K|) := by
-    have h := hbound (θ - t₁) hs
-    rwa [show t₁ + (θ - t₁) = θ by ring] at h
-  have hvnorm : ‖Complex.I * Complex.exp ((θ : ℂ) * Complex.I)‖ = 1 := by
-    rw [norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul]
-  obtain ⟨hnorm, hbr⟩ := admissible_of_dist_le_margin (hκ₀ θ) hvnorm
-    (hzsR θ hθ) (hzsinner θ hθ) (hd.trans hsmall)
-  exact ⟨hd, hnorm, hbr⟩
+  have hfield (η : ℝ → ℝ) (θ : ℝ) (w : ℂ) :
+      SpaceForm.truncatedField 1 η R δ θ w = truncatedField η R δ θ w := by
+    simp [SpaceForm.truncatedField, SpaceForm.truncatedSpeed, truncatedField, truncatedSpeed]
+  have hL' : ∀ θ, LipschitzWith L (fun w => SpaceForm.truncatedField 1 κ R δ θ w) := by
+    simpa only [hfield] using hL
+  simpa only [one_mul] using
+    (SpaceForm.invariant_admissible_arc (ε := 1) (z := z) (zs := zs) (by norm_num) hκ hκ₀
+      hR hδ ht hL' (by simpa only [hfield] using hz) (by simpa only [hfield] using hzs)
+      hzsR (by simpa only [one_mul] using hzsinner) hsmall)
 
 end Gluck

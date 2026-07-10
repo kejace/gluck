@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
 import Gluck.SpaceForm.ArcAlgebra
+import Gluck.Internal.FrameBounds
 
 /-! # Step-model margins near the centered circle (`ε`-generic)
 
@@ -50,18 +51,6 @@ lemma centeredRadius_facts {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
     rcases hc with ⟨h, hcc⟩ | ⟨h, hcc⟩ <;> subst h <;> nlinarith
   exact ⟨h0, h1, hbr, Real.sqrt_pos.mpr hpos⟩
 
-/-- **Frame inner-product bound.** If `p` lies within `d` of `−rs·v` for a unit
-vector `v`, then `⟪p, v⟫ ≤ d − rs`. Model-agnostic; copied verbatim. -/
-private lemma real_inner_frame_le {v p : ℂ} {rs d : ℝ} (hv : ‖v‖ = 1)
-    (hdev : ‖p + rs • v‖ ≤ d) : ⟪p, v⟫_ℝ ≤ d - rs := by
-  have h1 : ⟪p + rs • v, v⟫_ℝ = ⟪p, v⟫_ℝ + rs := by
-    rw [inner_add_left, real_inner_smul_left, real_inner_self_eq_norm_sq, hv]; ring
-  have h2 : |⟪p + rs • v, v⟫_ℝ| ≤ ‖p + rs • v‖ := by
-    have h := abs_real_inner_le_norm (p + rs • v) v
-    rwa [hv, mul_one] at h
-  have h3 := le_trans (le_abs_self _) (le_trans h2 hdev)
-  rw [h1] at h3; linarith
-
 /-- **Two-sided frame inner-product bound.** If `p` lies within `d` of `−rs·v`
 for a unit vector `v`, then `|⟪p, v⟫ + rs| ≤ d`. The symmetric companion of
 `real_inner_frame_le`; supplies the *lower* bound on `⟪p, v⟫` needed to floor the
@@ -74,15 +63,6 @@ private lemma abs_inner_frame_le {v p : ℂ} {rs d : ℝ} (hv : ‖v‖ = 1)
     have h := abs_real_inner_le_norm (p + rs • v) v
     rwa [hv, mul_one] at h
   rw [← h1]; exact le_trans h2 hdev
-
-/-- **Norm bound from a frame deviation.** If `p` lies within `d` of `−rs·v` for
-a unit vector `v` and `0 ≤ rs`, then `‖p‖ ≤ d + rs`. Model-agnostic; verbatim. -/
-private lemma norm_le_of_frame_dev {v p : ℂ} {rs d : ℝ} (hv : ‖v‖ = 1)
-    (hrs : 0 ≤ rs) (hdev : ‖p + rs • v‖ ≤ d) : ‖p‖ ≤ d + rs := by
-  have h1 : ‖p‖ ≤ ‖p + rs • v‖ + ‖rs • v‖ := by
-    have h := norm_sub_le (p + rs • v) (rs • v); simpa using h
-  rw [norm_smul, hv, mul_one, Real.norm_eq_abs, abs_of_nonneg hrs] at h1
-  linarith
 
 /-- **Signed frame inner-product bound.** If `p` lies within `d` of `−rs·v` and
 `|ε| ≤ 1`, then `ε·⟪p, v⟫ ≤ d − ε·rs`. The `ε`-generic upper bound on the signed
@@ -167,7 +147,7 @@ private lemma spaceFormSpeed_near_circle {ε c K t₁ h d : ℝ} {p : ℂ}
   have hDc : c - ε * β ≠ 0 := ne_of_gt (by linarith)
   have hDK : K - ε * β ≠ 0 := ne_of_gt (by linarith)
   have hp32 : ‖p‖ ≤ 3 / 2 := by
-    have := norm_le_of_frame_dev hv hrs0.le hdev; linarith
+    have := Internal.norm_le_of_frame_dev hv hrs0.le hdev; linarith
   have hp2 : 1 + ‖p‖ ^ 2 ≤ 4 := by nlinarith [norm_nonneg p]
   have hlevel := spaceFormSpeed_sub_level (ε := ε) (K := K) (K' := c) (θ := t₁)
     (z := p) (by rw [← hvdef, ← hβdef]; exact hDK) (by rw [← hvdef, ← hβdef]; exact hDc)
@@ -327,7 +307,7 @@ private lemma arcMargins_of_dev {ε c κ₀ R δ μ K t₁ t₂ h Dv : ℝ} {p :
   set v : ℂ := Complex.I * Complex.exp ((θ : ℂ) * Complex.I) with hvdef
   have hv : ‖v‖ = 1 := norm_I_expI θ
   have hx : ‖x + rs • v‖ ≤ Dv := hdev θ
-  have hxn : ‖x‖ ≤ Dv + rs := norm_le_of_frame_dev hv hrs0.le hx
+  have hxn : ‖x‖ ≤ Dv + rs := Internal.norm_le_of_frame_dev hv hrs0.le hx
   have hxi : ε * ⟪x, v⟫_ℝ ≤ Dv - ε * rs := eps_inner_frame_le hεabs hv hx
   exact ⟨by linarith, by linarith, by linarith⟩
 

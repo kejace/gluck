@@ -186,29 +186,6 @@ lemma expCircle_lipschitz :
   rw [mul_comm ((a - b : ℝ) : ℂ) Complex.I]
   exact h
 
-/-- Quotient-difference bound (absolute-value numerator version): if two quotients
-have numerators bounded by `|n₁| ≤ B` differing by `≤ dn`, and denominators `≥ δ > 0`
-differing by `≤ dd`, the quotients differ by `≤ dn/δ + B·dd/δ²`. -/
-private lemma abs_div_sub_div_le' {n₁ n₂ d₁ d₂ δ B dn dd : ℝ} (hδ : 0 < δ)
-    (hd₁ : δ ≤ d₁) (hd₂ : δ ≤ d₂) (hn₁B : |n₁| ≤ B)
-    (hn : |n₁ - n₂| ≤ dn) (hd : |d₁ - d₂| ≤ dd) :
-    |n₁ / d₁ - n₂ / d₂| ≤ dn / δ + B * dd / δ ^ 2 := by
-  have h₁ : 0 < d₁ := hδ.trans_le hd₁
-  have h₂ : 0 < d₂ := hδ.trans_le hd₂
-  have hdn0 : 0 ≤ dn := (abs_nonneg _).trans hn
-  have hdd0 : 0 ≤ dd := (abs_nonneg _).trans hd
-  have hB0 : 0 ≤ B := (abs_nonneg _).trans hn₁B
-  have key : n₁ / d₁ - n₂ / d₂ = (n₁ - n₂) / d₂ + n₁ * (d₂ - d₁) / (d₁ * d₂) := by
-    field_simp; ring
-  rw [key]
-  refine (abs_add_le _ _).trans (add_le_add ?_ ?_)
-  · rw [abs_div, abs_of_pos h₂]
-    exact div_le_div₀ hdn0 hn hδ hd₂
-  · rw [abs_div, abs_of_pos (mul_pos h₁ h₂), abs_mul]
-    refine div_le_div₀ (mul_nonneg hB0 hdd0) ?_ (by positivity) ?_
-    · exact mul_le_mul hn₁B (by rw [abs_sub_comm]; exact hd) (abs_nonneg _) hB0
-    · rw [sq]; exact mul_le_mul hd₁ hd₂ hδ.le h₁.le
-
 /-- **The reconstruction field is globally Lipschitz in the state `W = (z, φ)`,
 uniformly in `σ`** (under a curvature bound `|κ| ≤ M`). The `e^{iφ}` component is
 `1`-Lipschitz in `φ`; the `truncatedArcAngleSpeed` component is Lipschitz in `z`
@@ -294,7 +271,7 @@ lemma arcField_lipschitzWith {κ : ℝ → ℝ} {R M : ℝ} (hR : 0 ≤ R) (hR1 
       calc |⟪clampBall R z, v φ⟫_ℝ| ≤ ‖clampBall R z‖ * ‖v φ‖ := abs_real_inner_le_norm _ _
         _ = ‖clampBall R z‖ := by rw [hvnorm, mul_one]
         _ ≤ R := hcbz
-    have hmain := abs_div_sub_div_le' hδ hd₁ hd₂ hnB hnum hden
+    have hmain := SpaceForm.abs_div_sub_div_le hδ hd₁ hd₂ hnB hnum hden
     simp only [truncatedArcAngleSpeed]
     refine hmain.trans ?_
     have e1 : 2 * (‖z - z'‖ + R * |φ - φ'|) / δ ≤ 2 * (1 + R) / δ * dist W W' := by
