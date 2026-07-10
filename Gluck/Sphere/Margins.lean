@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
 import Gluck.Sphere.StepReparam
+import Gluck.Internal.FrameBounds
 
 /-! # Step-model margins near the centered circle (S2-D tranche 2)
 
@@ -39,28 +40,6 @@ lemma centeredRadius_facts {c : ℝ} (hc : 0 < c) :
   · nlinarith [sq_nonneg (Real.sqrt (1 + c ^ 2) + c)]
   · nlinarith [sq_nonneg (Real.sqrt (1 + c ^ 2) + 1 + c)]
   · nlinarith [sq_nonneg (Real.sqrt (1 + c ^ 2) - 1)]
-
-/-- **Frame inner-product bound.** If `p` lies within `d` of `−rs·v` for a unit
-vector `v`, then `⟪p, v⟫ ≤ d − rs`. The one-sided companion of the norm bound,
-used for both the level-shift setup and the arc frame margin. -/
-private lemma real_inner_frame_le {v p : ℂ} {rs d : ℝ} (hv : ‖v‖ = 1)
-    (hdev : ‖p + rs • v‖ ≤ d) : ⟪p, v⟫_ℝ ≤ d - rs := by
-  have h1 : ⟪p + rs • v, v⟫_ℝ = ⟪p, v⟫_ℝ + rs := by
-    rw [inner_add_left, real_inner_smul_left, real_inner_self_eq_norm_sq, hv]; ring
-  have h2 : |⟪p + rs • v, v⟫_ℝ| ≤ ‖p + rs • v‖ := by
-    have h := abs_real_inner_le_norm (p + rs • v) v
-    rwa [hv, mul_one] at h
-  have h3 := le_trans (le_abs_self _) (le_trans h2 hdev)
-  rw [h1] at h3; linarith
-
-/-- **Norm bound from a frame deviation.** If `p` lies within `d` of `−rs·v` for
-a unit vector `v` and `0 ≤ rs`, then `‖p‖ ≤ d + rs`. -/
-private lemma norm_le_of_frame_dev {v p : ℂ} {rs d : ℝ} (hv : ‖v‖ = 1)
-    (hrs : 0 ≤ rs) (hdev : ‖p + rs • v‖ ≤ d) : ‖p‖ ≤ d + rs := by
-  have h1 : ‖p‖ ≤ ‖p + rs • v‖ + ‖rs • v‖ := by
-    have h := norm_sub_le (p + rs • v) (rs • v); simpa using h
-  rw [norm_smul, hv, mul_one, Real.norm_eq_abs, abs_of_nonneg hrs] at h1
-  linarith
 
 /-- **Level-shift quotient bound.** The exact level-sensitivity quotient of the
 gauge speed is `≤ 8h`: the numerator `(1+P)(c−K)` is `≤ 4h` (since `1+P ≤ 4` and
@@ -111,12 +90,12 @@ private lemma sphericalSpeed_near_circle {c K t₁ h d : ℝ} {p : ℂ}
   have hd0 : 0 ≤ d := le_trans (norm_nonneg _) hdev
   have hh0 : 0 ≤ h := le_trans (abs_nonneg _) hK
   obtain ⟨hKlo, hKhi⟩ := abs_le.mp hK
-  have hβle : β ≤ d - rs := by rw [hβdef]; exact real_inner_frame_le hv hdev
+  have hβle : β ≤ d - rs := by rw [hβdef]; exact Internal.real_inner_frame_le hv hdev
   have hDc : 1 / 2 ≤ c - β := by linarith
   have hDK : 1 / 2 ≤ K - β := by linarith
   have hp2 : 1 + ‖p‖ ^ 2 ≤ 4 := by
     have h1 : ‖p‖ ≤ 3 / 2 := by
-      have := norm_le_of_frame_dev hv hrs0.le hdev; linarith
+      have := Internal.norm_le_of_frame_dev hv hrs0.le hdev; linarith
     nlinarith [norm_nonneg p]
   have hlevel := sphericalSpeed_sub_level (K := K) (K' := c) (θ := t₁) (z := p)
     (by rw [← hvdef, ← hβdef]; intro hcon; linarith)
@@ -238,8 +217,8 @@ private lemma arcMargins_of_dev {c κ₀ R δ μ K t₁ t₂ h Dv : ℝ} {p : �
   set v : ℂ := Complex.I * Complex.exp ((θ : ℂ) * Complex.I) with hvdef
   have hv : ‖v‖ = 1 := norm_I_expI θ
   have hx : ‖x + rs • v‖ ≤ Dv := hdev θ
-  have hxn : ‖x‖ ≤ Dv + rs := norm_le_of_frame_dev hv hrs0.le hx
-  have hxi : ⟪x, v⟫_ℝ ≤ Dv - rs := real_inner_frame_le hv hx
+  have hxn : ‖x‖ ≤ Dv + rs := Internal.norm_le_of_frame_dev hv hrs0.le hx
+  have hxi : ⟪x, v⟫_ℝ ≤ Dv - rs := Internal.real_inner_frame_le hv hx
   exact ⟨by linarith, by linarith, by linarith⟩
 
 /-- **One quarter-arc margin step.** From a start point `p` within `d` of the
