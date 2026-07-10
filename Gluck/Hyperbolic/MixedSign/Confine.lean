@@ -14,7 +14,9 @@ bound against a confined reference (the arc-length analogue of
 `gate_smooth_confined_full`).
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped Real InnerProductSpace NNReal
 
@@ -549,4 +551,4 @@ lemma mixedProfile_confined {δ h L : ℝ}
     exact hhalf (σ - L / 2) ⟨by linarith [h2], by linarith [hσ.2]⟩
 
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

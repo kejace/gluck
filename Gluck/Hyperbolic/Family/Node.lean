@@ -13,7 +13,9 @@ integrals and node map `g_{w,t}`, the arc-length curvature profile `κ_arc`, the
 layout profile, and the comp-`L¹` estimate (ALM-A5).
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped NNReal Real InnerProductSpace
 
@@ -1120,4 +1122,4 @@ theorem kappaArc_comp_L1 {κ h₁ : ℝ → ℝ} (hκc : Continuous κ)
     rw [hh₁per θ, hκper (h₁ θ), stepCurvature_periodic c a 0 (π / 2) π (3 * π / 2) θ]
   exact nodeMap_comp_L1 hL hL4 hw₁ hw₂ ht he heper
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

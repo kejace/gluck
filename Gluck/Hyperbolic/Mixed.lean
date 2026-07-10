@@ -30,14 +30,14 @@ Dahlberg §2–3 onto the H² arc-length engine (`Gluck/Hyperbolic/ArcLength*.le
   (`∃ c, 1 < c ∧ κ ≡ c`) or has the value-separated alternating extrema of the
   four-vertex condition with both maxima above an escape level `c > 1` and a
   global lower bound `−(centeredRadius (−1) c) < κ`.  Re-export of
-  `SpaceForm.MixedSignHyperbolicFourVertex`, mirroring `HyperbolicFourVertex`.
+  `Hyperbolic.MixedSignHyperbolicFourVertex`, mirroring `HyperbolicFourVertex`.
 
 ## Main results
 
 * `Gluck.hyperbolicMixedConverse` — a mixed-sign hyperbolic four-vertex curvature
   function is realized, up to an orientation-preserving `C¹` reparametrization
   `Ψ` (`0 < Ψ'`), as the geodesic curvature of a simple closed curve in the
-  Poincaré disk. Re-export of `SpaceForm.hyperbolicMixedConverse`, with the
+  Poincaré disk. Re-export of `Hyperbolic.hyperbolicMixedConverse`, with the
   realization stated through `RealizesHyperbolicCurvature` (= `Realizes (−1)`).
 
 ## Scope: arbitrarily negative minima (unrestricted below)
@@ -52,7 +52,7 @@ and the `L¹`-closeness of `κ ∘ h₁` to a convex reference bicircle, which a
 dips of *any* depth (Dahlberg's `L¹` squeeze), so the floor was removed. This is
 therefore the **full genuinely-negative H² four-vertex converse**, strictly
 larger than the positive `hyperbolicConverse_pos` (which it subsumes via
-`SpaceForm.MixedSignHyperbolicFourVertex.of_escape_positive`).
+`Hyperbolic.MixedSignHyperbolicFourVertex.of_escape_positive`).
 
 ## Reparametrization (the `H²` co-constructed period)
 
@@ -77,36 +77,36 @@ escape level `c > 1` and the global confinement floor
 `−(centeredRadius (−1) c) < κ`. The genuinely-negative `ε = −1` instantiation:
 the minima may dip below `0` (down to nearly `−1`), distinguishing this from the
 everywhere-escape `HyperbolicFourVertex`. Re-export of
-`SpaceForm.MixedSignHyperbolicFourVertex`. -/
+`Hyperbolic.MixedSignHyperbolicFourVertex`. -/
 def MixedHyperbolicFourVertex (κ : ℝ → ℝ) : Prop :=
-  SpaceForm.MixedSignHyperbolicFourVertex κ
+  Hyperbolic.MixedSignHyperbolicFourVertex κ
 
 /-- The mixed-sign hyperbolic four-vertex hypothesis is exactly the underlying
 space-form predicate at `ε = −1`. -/
 theorem mixedHyperbolicFourVertex_iff_mixedSign {κ : ℝ → ℝ} :
-    MixedHyperbolicFourVertex κ ↔ SpaceForm.MixedSignHyperbolicFourVertex κ := Iff.rfl
+    MixedHyperbolicFourVertex κ ↔ Hyperbolic.MixedSignHyperbolicFourVertex κ := Iff.rfl
 
 /-- **The hyperbolic mixed (Dahlberg) converse to the four-vertex theorem.** A
 genuinely-negative mixed-sign hyperbolic four-vertex curvature function is
 realized, up to an orientation-preserving `C¹` reparametrization `Ψ`
 (`0 < Ψ'`), as the hyperbolic geodesic curvature of a simple closed curve in the
 Poincaré disk. The general-profile `ε = −1` case of the space-form mixed converse
-`SpaceForm.hyperbolicMixedConverse`; genuinely-negative counterpart of the
+`Hyperbolic.hyperbolicMixedConverse`; genuinely-negative counterpart of the
 everywhere-escape `hyperbolicConverse_pos`. -/
 theorem hyperbolicMixedConverse {κ : ℝ → ℝ} (h : MixedHyperbolicFourVertex κ) :
     ∃ (z : ℝ → ℂ) (Ψ : ℝ → ℝ), ContDiff ℝ 1 Ψ ∧ (∀ t, 0 < deriv Ψ t) ∧
       IsSimpleClosed z ∧ RealizesHyperbolicCurvature z (κ ∘ Ψ) :=
-  SpaceForm.hyperbolicMixedConverse h
+  Hyperbolic.hyperbolicMixedConverse h
 
 /-- **The exact-profile hyperbolic mixed (Dahlberg) converse.**  A genuinely-negative
 mixed-sign hyperbolic four-vertex curvature function is realized **exactly** — with
 *no* reparametrisation — as the hyperbolic geodesic curvature of a simple closed curve
 in the Poincaré disk.  The exact-profile strengthening of `hyperbolicMixedConverse`:
 the fork-A reparam `Ψ` is a degree-one circle map, so it is removed
-(`SpaceForm.realizes_of_reparam_degree_one`).  Re-export of
-`SpaceForm.hyperbolicMixedConverse_exact`. -/
+(`Hyperbolic.realizes_of_reparam_degree_one`).  Re-export of
+`Hyperbolic.hyperbolicMixedConverse_exact`. -/
 theorem hyperbolicMixedConverse_exact {κ : ℝ → ℝ} (h : MixedHyperbolicFourVertex κ) :
     ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ RealizesHyperbolicCurvature z κ :=
-  SpaceForm.hyperbolicMixedConverse_exact h
+  Hyperbolic.hyperbolicMixedConverse_exact h
 
 end Gluck

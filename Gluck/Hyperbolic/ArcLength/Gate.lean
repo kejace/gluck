@@ -17,7 +17,9 @@ The GATE scalar closed-form reduction of the 2-arc quarter residual and its
 numeric sign bounds (`G₁`, `G₂`).
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped Real InnerProductSpace NNReal
 
@@ -738,4 +740,4 @@ lemma exists_quarterLanding_gate :
     rw [Set.mem_Icc] at hh
     exact gate_G2_top hh.1 hh.2
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

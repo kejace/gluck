@@ -14,7 +14,9 @@ witness / constant-branch realization consumed by the capstone assembly in
 `Gluck.SpaceForm.ArcLengthH2Family`.
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped Real InnerProductSpace NNReal
 
@@ -1447,4 +1449,4 @@ The public H² statement `RealizesHyperbolicCurvature z κ = Realizes (-1) z κ`
 four-vertex theorem in the hyperbolic plane for genuinely-negative four-vertex
 profiles; a thin wrapper file will re-export it. -/
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

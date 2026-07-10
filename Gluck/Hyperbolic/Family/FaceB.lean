@@ -13,7 +13,9 @@ The clean `z`-closure residual `a9Residual`, its vanishing at the anchor, and th
 exact derivative columns at `w = 0` (A9.2).
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped NNReal Real InnerProductSpace
 
@@ -1404,4 +1406,4 @@ lemma a9Residual_differentiableAt {a c h L : ℝ} (ha : 1 < a)
     (((a9_differentiableAt_exp hψ₄).const_mul Complex.I).const_add 1)))
     (layoutStart a c h L).1
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

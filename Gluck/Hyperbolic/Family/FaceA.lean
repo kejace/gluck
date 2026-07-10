@@ -12,7 +12,9 @@ Clean face signs, part one: the junction-chain column values in circle coordinat
 (A9.0) and the reduced anchor data with their windows (A9.1).
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped NNReal Real InnerProductSpace
 
@@ -603,4 +605,4 @@ lemma a9_anchor_facts {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     nlinarith [hrhC2]
   exact ⟨hS, hC, hrc0, hrc_lt, hDlt, hSC, hJ1, hJ2, hqb⟩
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

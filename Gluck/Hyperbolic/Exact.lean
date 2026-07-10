@@ -22,7 +22,9 @@ so the composite shifts by exactly `2π` per period.  This closes the AL-6 gap.
 * `realizes_of_reparam_degree_one` — the general reparam-removal lemma.
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped Real
 open Set Filter Topology
@@ -176,4 +178,4 @@ theorem hyperbolicMixedConverse_exact {κ : ℝ → ℝ}
     hyperbolicMixedConverse_reparam_deg1 h
   exact realizes_of_reparam_degree_one hΨC1 hΨpos hΨdeg hsc hreal
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

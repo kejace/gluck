@@ -17,7 +17,9 @@ The Fork-A smooth ramped bicircle profile (A1) and the model-arc leg-confinement
 helpers.
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped Real InnerProductSpace NNReal
 
@@ -471,4 +473,4 @@ lemma gateProfileSmooth_evenQ {L : ℝ} (hL : L ≠ 0) (δ σ : ℝ) :
     gateProfileSmooth L δ (L / 2 - σ) = gateProfileSmooth L δ σ :=
   arcRampProfile_evenQ hL _ _ _ _
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

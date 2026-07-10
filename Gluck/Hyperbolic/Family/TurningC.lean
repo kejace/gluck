@@ -12,7 +12,9 @@ Klein-reflection equivariance of the constant-curvature model (A8.5), and the tu
 bracket with the continuous root selection `turningRoot_continuous` (A8.6).
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped NNReal Real InnerProductSpace
 
@@ -794,4 +796,4 @@ theorem turningRoot_continuous {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   obtain ⟨τ, hτcont, hτ⟩ := hroot
   exact ⟨τ, hτcont, fun w hw => ⟨(hτ w hw).1, (hτ w hw).2⟩⟩
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

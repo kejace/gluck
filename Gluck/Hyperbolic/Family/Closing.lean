@@ -12,7 +12,9 @@ The phase-closure bridge and the face-sign theorem `cleanClosure_face_signs` (A9
 the Poincaré–Miranda closing of the true flow `exists_layout_closing` (ALM-A10).
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped NNReal Real InnerProductSpace
 
@@ -691,4 +693,4 @@ theorem exists_layout_closing {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       (htrans w₁ w₂ hw₁ hw₂ t ht16) hεconf
     exact fun σ hσ => (hconf.1 σ hσ).trans hconf.2
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

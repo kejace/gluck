@@ -14,7 +14,9 @@ the capstone assembly `hyperbolicMixedConverse` and `layout_arcLengthH2Curvature
 (ALM-A12).
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped NNReal Real InnerProductSpace
 
@@ -1467,4 +1469,4 @@ theorem hyperbolicMixedConverse {κ : ℝ → ℝ} (h : MixedSignHyperbolicFourV
     hyperbolicMixedConverse_reparam_deg1 h
   exact ⟨z, Ψ, hΨC1, hΨpos, hsc, hreal⟩
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

@@ -14,7 +14,9 @@ continuous root `L*(h)`, and the nested-IVT anchor existence `exists_bicircle_an
 (ALM-A1 – ALM-A3).
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped NNReal Real InnerProductSpace
 
@@ -752,4 +754,4 @@ theorem exists_bicircle_anchor {a c : ℝ} (ha : 1 < a) (hac : a < c) :
   obtain ⟨hmem, hroot⟩ := hρ x hxW
   exact ⟨x, ρ x, hxW, hxIcc, hmem, hx0, hroot⟩
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

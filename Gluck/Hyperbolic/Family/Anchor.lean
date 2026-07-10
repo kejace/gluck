@@ -13,7 +13,9 @@ confinement in the explicit disk `R(a, c) < 1`, strict phase monotonicity, chord
 non-vanishing (simplicity), and the nonconstructive compact chord margin (ALM-A4).
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped NNReal Real InnerProductSpace
 
@@ -807,4 +809,4 @@ private theorem layout_chord_margin {a c h L ℓ₀ : ℝ} (ha : 1 < a) (hac : a
     _ = ‖F p₀.2 - F p₀.1‖ := div_mul_cancel₀ _ hL0.ne'
     _ ≤ ‖F τ - F t‖ := hm
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

@@ -18,7 +18,9 @@ conjugation-reflection reversibility infrastructure, and the AL4-c decisive
 finding.
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped Real InnerProductSpace NNReal
 
@@ -1268,4 +1270,4 @@ lemma exists_closing_arcState {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuous
   exact ⟨W₀, hW₀,
     arcClosure_of_halfPeriodMatch hκ hR.le hR1 hL.le hM hhalf r₀ hW₀ hmatch⟩
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

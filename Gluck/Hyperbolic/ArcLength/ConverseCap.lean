@@ -18,7 +18,9 @@ Leaf groups 5 and 6 (simplicity and the arc-length converse
 negative-`κ` realizations (A4 / A4-REMAINING).
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped Real InnerProductSpace NNReal
 
@@ -1391,4 +1393,4 @@ theorem exists_gateProfileSmooth_realization :
     realizes_gateProfileSmooth_of_confined_simple hh1 hh2 hL1 hL2 him hφe hconf hchord
   exact ⟨z, ψ, δ, p.2, hC, hd, hsc, hreal⟩
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

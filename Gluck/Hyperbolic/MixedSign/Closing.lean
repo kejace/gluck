@@ -14,7 +14,9 @@ degree `+1` for concave levels (`a = −3/10`, `c = 2`), closed via
 after transferring the face margins to the smooth `arcFlow`.
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped Real InnerProductSpace NNReal
 
@@ -936,4 +938,4 @@ private theorem exists_quarterLanding_mixed :
     linarith [this]
 
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

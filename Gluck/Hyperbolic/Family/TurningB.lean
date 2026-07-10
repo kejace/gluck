@@ -12,7 +12,9 @@ The turning-nest rectangle: field estimates for the second-order Grönwall recta
 (A8.3) and the supporting flow facts (A8.4).
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped NNReal Real InnerProductSpace
 
@@ -1414,4 +1416,4 @@ theorem turningResidual_strictMono_t {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   simp only
   linarith only [hgap', hpos]
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

@@ -12,7 +12,9 @@ Opening of the turning nest: the node-map inverse and leg-5 density Lipschitz al
 (A8.1), and the mass-matching coupling `ψ = g_{t'}⁻¹ ∘ g_t` (A8.2).
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped NNReal Real InnerProductSpace
 
@@ -1069,4 +1071,4 @@ lemma legCoupling_deriv_le {L w₁ w₂ t t' : ℝ} (hL : 0 < L)
     _ ≤ 801 * nodeDensity L w₁ w₂ t' (legCoupling L w₁ w₂ t t' σ) :=
         mul_le_mul_of_nonneg_left hbase (by norm_num)
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

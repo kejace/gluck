@@ -173,7 +173,7 @@ lemma spaceFormCircle_realizes {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
 reparametrization**: if `z` realizes `μ` and `ψ` is `C¹` with `ψ' > 0`, then
 `z ∘ ψ` realizes `μ ∘ ψ`. (`ε`-generic transport of
 `realizesSphericalCurvature_comp`.)  Un-privatised for the no-rescaling reparam
-step of the H² arc-length capstone (`Gluck.SpaceForm.arcLengthH2Converse`,
+step of the H² arc-length capstone (`Gluck.Hyperbolic.arcLengthH2Converse`,
 `ArcLengthH2.lean`). -/
 lemma spaceFormRealizes_comp {ε : ℝ} {z : ℝ → ℂ} {μ : ℝ → ℝ} {ψ : ℝ → ℝ}
     (hz : Realizes ε z μ) (hψ : ContDiff ℝ 1 ψ) (hψpos : ∀ t, 0 < deriv ψ t) :

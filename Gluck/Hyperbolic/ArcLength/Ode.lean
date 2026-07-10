@@ -17,7 +17,9 @@ flow, the confinement (boundary-degeneration) estimate, the `Realizes (-1)` lemm
 and the closed-form constant-curvature arc model.
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped Real InnerProductSpace NNReal
 
@@ -883,4 +885,4 @@ lemma arcModelConst_eq_arcFlow {K R L M : ℝ} {z₀ : ℂ} {φ₀ : ℝ} (r₀ 
   rw [harc]
   exact hpair.hasDerivWithinAt
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

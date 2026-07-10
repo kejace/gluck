@@ -18,7 +18,9 @@ half-period closing, the quarter-period Poincaré–Miranda residual, and the
 winding / square-chart infrastructure.
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped Real InnerProductSpace NNReal
 
@@ -1168,4 +1170,4 @@ lemma exists_quarterLanding_of_faces (a c : ℝ) {h₁ h₂ L₁ L₂ : ℝ}
     simp only [quarterResidual, Prod.snd_zero] at h2
     linarith
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

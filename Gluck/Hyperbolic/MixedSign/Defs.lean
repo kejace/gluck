@@ -16,7 +16,9 @@ reparametrization `exists_hyperbolic_bicircle_L1_reparam` (ALM-2).  See
 `Gluck.SpaceForm.ArcLengthH2Mixed` for the overview docstring.
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped Real InnerProductSpace NNReal
 
@@ -127,4 +129,4 @@ lemma exists_hyperbolic_bicircle_L1_reparam {κ : ℝ → ℝ}
   exact ⟨a, b, h₁, h1a, hab, hmono, hh₁c, hh₁per, hh₁v, hL1⟩
 
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic

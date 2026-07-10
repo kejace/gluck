@@ -13,7 +13,9 @@ five-leg Grönwall transport and global confinement (ALM-A6); the layout paramet
 the joint `(w, t)`-continuity ladder, and residual continuity (ALM-A7).
 -/
 
-namespace Gluck.SpaceForm
+namespace Gluck.Hyperbolic
+
+open Gluck.SpaceForm
 
 open scoped NNReal Real InnerProductSpace
 
@@ -1265,4 +1267,4 @@ theorem layoutResidual_continuousOn {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   exact (layoutFlow_period_continuousOn ha hac hwin hlow hL0 hL hφe hκc hh₁c hM).sub
     continuousOn_const
 
-end Gluck.SpaceForm
+end Gluck.Hyperbolic
