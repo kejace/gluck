@@ -2,22 +2,35 @@
 % It will be used both by the web and the print version.
 % It should *not* include the \begin{document}
 %
-% If you want to split the blueprint content into several files then
-% the current file can be a simple sequence of \input. Otherwise It
-% can start with a \section or \chapter for instance.
+% Structure: an architectural overview followed by five parts mirroring the
+% source tree (see chapters/Gluck_Overview.tex and Gluck/Basic.lean):
+%   1. Common foundations        -- Gluck/{Curve,Curvature,Winding}.lean
+%   2. The Euclidean converse    -- Gluck/Euclidean/
+%   3. Spherical geometry        -- Gluck/Sphere/
+%   4. The space-form layer      -- Gluck/SpaceForm/
+%   5. Hyperbolic geometry       -- Gluck/Hyperbolic/
 
+\input{chapters/Gluck_Overview}
+
+\part{Common foundations}
 \input{chapters/Gluck_Curve}
 \input{chapters/Gluck_Curvature}
+\input{chapters/Gluck_Winding}
+
+\part{The Euclidean converse}
 \input{chapters/Gluck_Closure}
 \input{chapters/Gluck_StepReduction}
 \input{chapters/Gluck_Bicircle}
-\input{chapters/Gluck_Winding}
 \input{chapters/Gluck_Reduction}
 \input{chapters/Gluck_Simplicity}
 \input{chapters/Gluck_FourVertex}
 \input{chapters/Gluck_ArcLength}
 \input{chapters/Gluck_DahlbergStep1}
 \input{chapters/Gluck_DahlbergStep2}
+
+\part{Spherical geometry}
 \input{chapters/Gluck_Sphere}
 \input{chapters/Gluck_SphereMixed}
+
+\part{Hyperbolic geometry}
 \input{chapters/Gluck_HyperbolicMixed}

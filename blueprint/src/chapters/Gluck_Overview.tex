@@ -1,0 +1,102 @@
+\chapter{Overview: three geometries, one method}
+\label{chap:overview}
+
+% Architectural overview of the whole development. No formal statements are
+% made here (no \lean pins); every result named below is stated and proved in
+% its own chapter. Formalization map: Gluck/Basic.lean (umbrella import).
+
+This blueprint documents a complete, axiom-clean formalization of the
+\emph{converse to the four-vertex theorem} on the three two-dimensional space
+forms: the Euclidean plane $\mathbb{E}^2$ ($K=0$), the round sphere
+$\mathbb{S}^2$ ($K=+1$), and the hyperbolic plane $\mathbb{H}^2$ ($K=-1$).
+In each geometry the converse takes the same shape: a prescribed curvature
+profile $\kappa\colon\mathbb{R}\to\mathbb{R}$ satisfying a four-vertex-type
+hypothesis is realized \emph{exactly} as the (geodesic) curvature of a simple
+closed curve.
+
+\section{The capstone theorems}
+
+Each geometry carries a \emph{positive} converse (curvature bounded below by
+the geometry's escape threshold) and a \emph{mixed-sign} (Dahlberg) converse
+in which the minima are unconstrained:
+
+\begin{center}
+\begin{tabular}{lll}
+ & positive curvature & mixed-sign curvature \\
+\hline
+$\mathbb{E}^2$ & \texttt{Gluck.gluck\_converse} & \texttt{Gluck.dahlbergConverse} \\
+$\mathbb{S}^2$ & \texttt{Gluck.sphericalConverse\_pos} & \texttt{Gluck.sphericalConverse} \\
+$\mathbb{H}^2$ & \texttt{Gluck.hyperbolicConverse\_pos} & \texttt{Gluck.hyperbolicMixedConverse\_exact} \\
+\end{tabular}
+\end{center}
+
+All six conclusions are \emph{exact}: the witness curve realizes $\kappa$ on
+the nose, with no reparametrization. In addition the $\varepsilon$-generic
+space-form layer states the unified capstones
+\texttt{Gluck.SpaceForm.spaceFormConverse\_pos} and
+\texttt{Gluck.SpaceForm.spaceFormMixedConverse} (with the $\mathbb{H}^2$
+instance \texttt{Gluck.SpaceForm.hyperbolicDahlbergConverse}), and the
+Euclidean development also proves the arc-length converse
+\texttt{Gluck.arcLengthConverse}.
+
+The geometry enters through the escape threshold: in $\mathbb{E}^2$ positivity
+suffices; in $\mathbb{H}^2$ closed curves require geodesic curvature above the
+horocycle value, so the positive converse assumes $\kappa>1$ and the mixed
+converse requires the two maxima (only) to exceed an escape level $c>1$, while
+the minima may be arbitrarily negative.
+
+\section{Architecture}
+
+Everything is modeled on plane curves: $\mathbb{S}^2$ and $\mathbb{H}^2$ are
+realized on the open unit disk $\{\lVert z\rVert<1\}\subset\mathbb{C}$
+(stereographic and Poincar\'e models), and the geometries differ only in the
+\emph{realization predicate} coupling the tangent angle to the prescribed
+curvature. Consequently the Euclidean chord, step-profile and winding
+machinery is shared substrate for all three geometries --- embeddedness is a
+property of the plane curve, independent of the ambient metric.
+
+\begin{verbatim}
+Common foundations (curves, curvature, winding)
+        |
+        v
+Euclidean closing, simplicity, step machinery
+        |
+        +--------------> Sphere pipeline (flow engine)
+        |                       |
+        |                       v
+        +--------------> SpaceForm reuse layer (epsilon-generic)
+        |                       |
+        |                       v
+        +--------------> Hyperbolic pipeline (arc-length engine)
+\end{verbatim}
+
+The reuse is genuinely cross-cutting rather than tree-shaped, and this
+blueprint states it as the implementation has it:
+\begin{itemize}
+\item the \emph{SpaceForm} layer (Part~4) is the spherical flow engine
+  transported to a curvature parameter $\varepsilon\in\{+1,-1\}$, re-deriving
+  the positive spherical converse and producing the positive hyperbolic one;
+\item the \emph{Hyperbolic} pipeline (Part~5) is a separate arc-length
+  reconstruction engine built on the SpaceForm definitions --- $\mathbb{H}^2$
+  has no metric rescaling, so the period of the reconstruction is
+  co-constructed and the engine works in Euclidean arc length;
+\item the mixed space-form capstone
+  \texttt{Gluck.SpaceForm.spaceFormMixedConverse} \emph{assembles} the
+  spherical and hyperbolic mixed capstones by reduction, rather than proving a
+  third independent construction.
+\end{itemize}
+
+\section{Formalization map}
+
+The source tree mirrors the part structure of this blueprint:
+\texttt{Gluck/Curve.lean}, \texttt{Gluck/Curvature.lean},
+\texttt{Gluck/Winding.lean} (Part~1);
+\texttt{Gluck/Euclidean/} (Part~2);
+\texttt{Gluck/Sphere/} (Part~3);
+\texttt{Gluck/SpaceForm/} (Part~4);
+\texttt{Gluck/Hyperbolic/} with its \texttt{ArcLength/}, \texttt{MixedSign/}
+and \texttt{Family/} sub-developments (Part~5).
+The umbrella module \texttt{Gluck/Basic.lean} imports all four geometries, so
+\texttt{import Gluck} provides every capstone and \texttt{lake build} verifies
+the entire development. All capstones depend only on the three standard axioms
+(\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}).
