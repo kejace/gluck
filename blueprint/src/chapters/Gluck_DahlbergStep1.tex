@@ -1,7 +1,7 @@
 \chapter{Dahlberg Step 1: the preliminary diffeomorphism (Phase D-B)}
 \label{chap:dahlberg_step1}
 
-% archon:covers Gluck/DahlbergStep1.lean
+% archon:covers Gluck/Euclidean/DahlbergStep1.lean
 
 This chapter formalises Step~1 of Dahlberg's proof of the plane case
 (\cref{thm:dahlberg_converse}): from the mixed-sign four-vertex hypothesis we
@@ -62,7 +62,8 @@ two maxima.
 
 [Periodicity and integrability of $f$ and $k_{a,b}$]
   \label{lem:clean_bicircle_basic}
-  \lean{Gluck.dahlbergF_periodic, Gluck.dahlbergF_intervalIntegrable, Gluck.cleanBicircle_periodic, Gluck.cleanBicircle_intervalIntegrable, Gluck.cleanBicircle_bounds}
+  \lean{Gluck.cleanBicircle_periodic, Gluck.cleanBicircle_bounds}
+  % Lean (private, not pinned): dahlbergF_periodic, dahlbergF_intervalIntegrable, cleanBicircle_intervalIntegrable
   \uses{def:dahlberg_f, def:clean_bicircle}
   The indicator $f$ is $2\pi$-periodic and interval-integrable on every $[c,d]$;
   consequently the clean bicircle $k_{a,b}=a(1-f)+bf$ is $2\pi$-periodic and
@@ -83,7 +84,7 @@ two maxima.
 
 [On-period value of $f$ and the period integrals]
   \label{lem:clean_bicircle_integral}
-  \lean{Gluck.integral_cleanBicircle, Gluck.dahlbergF_on_period, Gluck.integral_dahlbergF}
+  % Lean (private, not pinned): integral_cleanBicircle, dahlbergF_on_period, integral_dahlbergF
   \uses{def:dahlberg_f, def:clean_bicircle}
   On $[0,2\pi]$, $f$ is the indicator of the two base arcs
   $(\tfrac{\pi}{4},\tfrac{3\pi}{4})\cup(\tfrac{5\pi}{4},\tfrac{7\pi}{4})$, so
@@ -102,7 +103,7 @@ two maxima.
 \leanok
 [Uniform bound of a continuous periodic curvature]
   \label{lem:exists_kappa_bound}
-  \lean{Gluck.exists_kappa_bound}
+  % Lean (private, not pinned): exists_kappa_bound
   A continuous $2\pi$-periodic $\kappa:\mathbb{R}\to\mathbb{R}$ is uniformly bounded:
   there is $N$ with $|\kappa(\theta)|\le N$ for all $\theta$.
 \end{lemma}
@@ -203,7 +204,7 @@ positivity-at-the-maxima hypothesis is used.
 \leanok
 [Mixed-sign level extraction]
   \label{lem:dahlberg_alignment_data}
-  \lean{Gluck.exists_alignmentData}
+  % Lean (private, not pinned): exists_alignmentData
   \uses{def:mixed_sign_four_vertex, lem:ivt_hits}
   \textit{Source: Dahlberg, §3, ``by continuity there are points $r_j$\ldots''.}
   Let $\kappa$ satisfy the mixed-sign four-vertex condition
@@ -314,7 +315,7 @@ positivity-at-the-maxima hypothesis is used.
 \leanok
 [Analytic core: the $L^1$ $\eta$-construction]
   \label{lem:exists_eta_clean_L1}
-  \lean{Gluck.exists_eta_clean_L1}
+  % Lean (private, not pinned): exists_eta_clean_L1
   \uses{lem:dahlberg_alignment_data, def:clean_bicircle, lem:clean_bicircle_integral, lem:exists_kappa_bound}
   The genuinely-new analytic content of \cref{thm:exists_preliminary_diffeo},
   isolated: for $\kappa$ continuous $2\pi$-periodic and the levels/crossing points

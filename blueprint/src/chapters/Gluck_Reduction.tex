@@ -1,7 +1,7 @@
-\chapter{Closing the $\kappa$-curve: the reduction is justified}
+\chapter{Closing the \texorpdfstring{$\kappa$}{kappa}-curve: the reduction is justified}
 \label{chap:reduction}
 
-% archon:covers Gluck/Reduction.lean
+% archon:covers Gluck/Euclidean/Reduction.lean
 
 This chapter assembles the winding-number argument (\cref{chap:winding}) and the
 preliminary reparametrization (\cref{chap:stepreduction}) into the load-bearing
@@ -34,7 +34,7 @@ winding). The robustness is exactly the $L^1$/measure continuity of the error
 vector (\cref{lem:error_vector_lipschitz}), \emph{not} the false ``$C^1$-close
 curves'' claim the survey uses (see \cref{chap:stepreduction}'s departure note).
 
-\section{The breakpoint-aligning reparametrization family $g_z$}
+\section{The breakpoint-aligning reparametrization family \texorpdfstring{$g_z$}{g\_z}}
 
 Recall the centred bicircle configuration $\mathrm{configSpace}(\delta)(z) =
 (\tfrac{\pi}{4}+\delta\,z.\mathrm{re},\ \tfrac{3\pi}{4}+\delta\,z.\mathrm{im},\
@@ -80,11 +80,8 @@ exact corner positions on the map itself.)
 \begin{definition}
 [Calibrated speed density $w_z$]
   \label{def:align_density}
-  \lean{Gluck.alignDensity, Gluck.clampTent, Gluck.arccos_cos_abs,
-        Gluck.alignN1, Gluck.alignN2, Gluck.alignN3, Gluck.alignN4,
-        Gluck.alignL1, Gluck.alignL2, Gluck.alignL3, Gluck.alignL4,
-        Gluck.alignC1, Gluck.alignC2, Gluck.alignC3, Gluck.alignC4,
-        Gluck.alignHt, Gluck.alignHt_eq}
+  \lean{Gluck.clampTent}
+  % Lean (private, not pinned): alignDensity, arccos_cos_abs, alignN1, alignN2, alignN3, alignN4, alignL1, alignL2, alignL3, alignL4, alignC1, alignC2, alignC3, alignC4, alignHt, alignHt_eq
   \uses{def:configuration_space}
   Project-bespoke. Fix the ramp half-width $\eta=\pi/16$ (so $2\eta=\pi/8$ is
   strictly less than the minimal arc length $\pi/4$, hence the four node windows
@@ -140,16 +137,8 @@ exact corner positions on the map itself.)
 \begin{lemma}
 [Density is well-behaved]
   \label{lem:align_density_props}
-  \lean{Gluck.continuous_uncurry_alignDensity, Gluck.continuous_alignDensity_theta,
-        Gluck.alignDensity_periodic, Gluck.alignDensity_ge, Gluck.alignHt_bounds,
-        Gluck.alignL_bounds, Gluck.continuous_alignHt,
-        Gluck.continuous_alignN1, Gluck.continuous_alignN2, Gluck.continuous_alignN3,
-        Gluck.continuous_alignN4, Gluck.continuous_alignL1, Gluck.continuous_alignL2,
-        Gluck.continuous_alignL3, Gluck.continuous_alignL4, Gluck.continuous_alignC1,
-        Gluck.continuous_alignC2, Gluck.continuous_alignC3, Gluck.continuous_alignC4,
-        Gluck.continuous_clampTent, Gluck.continuous_clampTent_theta,
-        Gluck.clampTent_nonneg, Gluck.clampTent_le_one, Gluck.clampTent_periodic,
-        Gluck.alignDensity_le, Gluck.alignHt_le, Gluck.alignHt_nonneg}
+  \lean{Gluck.continuous_clampTent, Gluck.continuous_clampTent_theta, Gluck.clampTent_nonneg, Gluck.clampTent_le_one, Gluck.clampTent_periodic}
+  % Lean (private, not pinned): continuous_uncurry_alignDensity, continuous_alignDensity_theta, alignDensity_periodic, alignDensity_ge, alignHt_bounds, alignL_bounds, continuous_alignHt, continuous_alignN1, continuous_alignN2, continuous_alignN3, continuous_alignN4, continuous_alignL1, continuous_alignL2, continuous_alignL3, continuous_alignL4, continuous_alignC1, continuous_alignC2, continuous_alignC3, continuous_alignC4, alignDensity_le, alignHt_le, alignHt_nonneg
   \uses{def:align_density}
   For $0<\delta\le\pi/8$ and $z\in\overline{\mathbb D}$: $w_z$ is continuous,
   $2\pi$-periodic, the joint map $(z,\theta)\mapsto w_z(\theta)$ is continuous on
@@ -173,7 +162,7 @@ exact corner positions on the map itself.)
 \leanok
 [Disk smallness of the breakpoint shifts]
   \label{lem:align_delta_bounds}
-  \lean{Gluck.align_delta_bounds}
+  % Lean (private, not pinned): align_delta_bounds
   \uses{def:align_density}
   For $0<\delta\le\pi/8$ and $\|z\|\le1$, the two varying breakpoint shifts satisfy
   $\delta\,z.\mathrm{re},\ \delta\,z.\mathrm{im}\in[-\tfrac\pi8,\tfrac\pi8]$.
@@ -188,11 +177,8 @@ exact corner positions on the map itself.)
 \begin{lemma}
 [Exact arc integrals]
   \label{lem:align_density_arc_integral}
-  \lean{Gluck.alignDensity_arc1, Gluck.alignDensity_arc2, Gluck.alignDensity_arc3,
-        Gluck.alignDensity_arc4, Gluck.alignDensity_period_integral,
-        Gluck.alignDensity_integral_split, Gluck.clampTent_centered_integral,
-        Gluck.clampTent_integral_support, Gluck.clampTent_integral_eq_zero,
-        Gluck.clampTent_eq_zero, Gluck.half_le_arccos_cos}
+  \lean{Gluck.clampTent_integral_support, Gluck.clampTent_eq_zero, Gluck.half_le_arccos_cos}
+  % Lean (private, not pinned): alignDensity_arc1, alignDensity_arc2, alignDensity_arc3, alignDensity_arc4, alignDensity_period_integral, alignDensity_integral_split, clampTent_centered_integral, clampTent_integral_eq_zero
   \uses{def:align_density, lem:align_delta_bounds}
   For each arc $k\in\{1,2,3,4\}$, $\int_{\theta_k}^{\theta_{k+1}}w_z=\tfrac\pi2$,
   and hence the full-period integral $\int_{\theta_1}^{\theta_1+2\pi}w_z=2\pi$.
@@ -330,7 +316,7 @@ $\mathrm{integralReparam}$ and let the $g_z$ lemmas delegate to them.
 \leanok
 [Breakpoint-aligning reparametrization family]
   \label{def:align_reparam}
-  \lean{Gluck.alignReparam}
+  % Lean (private, not pinned): alignReparam
   \uses{def:align_density, def:configuration_space, def:four_arc_step_function}
   Project-bespoke. For $0<\delta\le\pi/8$ and $z\in\overline{\mathbb{D}}$ define
   $g_z := \mathrm{alignReparam}(\delta)(z) : \mathbb{R}\to\mathbb{R}$ as the running
@@ -360,7 +346,7 @@ $\mathrm{integralReparam}$ and let the $g_z$ lemmas delegate to them.
 \leanok
 [$g_z$ is an instance of the generic family]
   \label{lem:align_reparam_eq}
-  \lean{Gluck.alignReparam_eq}
+  % Lean (private, not pinned): alignReparam_eq
   \uses{def:align_reparam, def:integral_reparam, def:align_density}
   For every $\delta,z$,
   \[
@@ -387,7 +373,7 @@ These structural properties are recorded as separate Lean lemmas (used by
 \leanok
 [Node values of $g_z$]
   \label{lem:align_reparam_node_values}
-  \lean{Gluck.alignReparam_node_values}
+  % Lean (private, not pinned): alignReparam_node_values
   \uses{def:align_reparam, lem:align_density_arc_integral}
   $g_z(\theta_1)=\tfrac\pi2$, $g_z(\theta_2)=\pi$, $g_z(\theta_3)=\tfrac{3\pi}2$,
   $g_z(\theta_4)=2\pi$; i.e.\ $g_z(\theta_k)=k\cdot\tfrac\pi2$.
@@ -406,7 +392,7 @@ These structural properties are recorded as separate Lean lemmas (used by
 \leanok
 [Quasi-periodicity of $g_z$]
   \label{lem:align_reparam_add_two_pi}
-  \lean{Gluck.alignReparam_add_two_pi}
+  % Lean (private, not pinned): alignReparam_add_two_pi
   \uses{def:align_reparam, lem:align_density_arc_integral,
         lem:integral_reparam_add_two_pi, lem:align_reparam_eq}
   $g_z(\theta+2\pi)=g_z(\theta)+2\pi$ for all $\theta$.
@@ -425,7 +411,7 @@ These structural properties are recorded as separate Lean lemmas (used by
 \leanok
 [Continuity of $g_z$ in $\theta$]
   \label{lem:continuous_align_reparam}
-  \lean{Gluck.continuous_alignReparam}
+  % Lean (private, not pinned): continuous_alignReparam
   \uses{def:align_reparam, lem:align_density_props,
         lem:continuous_integral_reparam, lem:align_reparam_eq}
   $g_z$ is continuous for each fixed $\delta,z$.
@@ -442,7 +428,7 @@ These structural properties are recorded as separate Lean lemmas (used by
 \leanok
 [Joint continuity of $(z,\theta)\mapsto g_z(\theta)$]
   \label{lem:continuous_uncurry_align_reparam}
-  \lean{Gluck.continuous_uncurry_alignReparam}
+  % Lean (private, not pinned): continuous_uncurry_alignReparam
   \uses{def:align_reparam, lem:align_density_props}
   The map $(z,\theta)\mapsto g_z(\theta)$ is jointly continuous on
   $\overline{\mathbb D}\times\mathbb R$. This is the load-bearing input to
@@ -464,7 +450,7 @@ These structural properties are recorded as separate Lean lemmas (used by
 \leanok
 [Strict monotonicity of $g_z$ on the disk]
   \label{lem:strict_mono_align_reparam}
-  \lean{Gluck.strictMono_alignReparam}
+  % Lean (private, not pinned): strictMono_alignReparam
   \uses{def:align_reparam, lem:align_density_props,
         lem:strict_mono_integral_reparam, lem:align_reparam_eq}
   For $0<\delta\le\pi/8$ and $\|z\|\le1$, $g_z$ is strictly increasing.
@@ -481,7 +467,7 @@ These structural properties are recorded as separate Lean lemmas (used by
 \leanok
 [$g_z$ aligns the step functions]
   \label{lem:align_reparam_matches}
-  \lean{Gluck.kappaZero_comp_alignReparam}
+  % Lean (private, not pinned): kappaZero_comp_alignReparam
   \uses{def:align_reparam, lem:align_reparam_node_values,
         lem:strict_mono_align_reparam, def:four_arc_step_function,
         def:configuration_space}
@@ -513,7 +499,7 @@ These structural properties are recorded as separate Lean lemmas (used by
   stated identity of error vectors follows.
 \end{proof}
 
-\section{The $\kappa$-error map over the disk}
+\section{The \texorpdfstring{$\kappa$}{kappa}-error map over the disk}
 
 \begin{definition}
 
@@ -521,7 +507,7 @@ These structural properties are recorded as separate Lean lemmas (used by
 \leanok
 [The $\kappa$-error map]
   \label{def:kappa_error_map}
-  \lean{Gluck.kappaErrorMap}
+  % Lean (private, not pinned): kappaErrorMap
   \uses{def:align_reparam, def:error_vector, def:radius}
   Project-bespoke. For a curvature function $\kappa$, the reparametrization $h_1$,
   and $0<\delta\le\pi/8$,
@@ -541,7 +527,7 @@ These structural properties are recorded as separate Lean lemmas (used by
 \leanok
 [$E_\kappa$ is continuous on the disk]
   \label{lem:kappa_error_map_continuous}
-  \lean{Gluck.continuous_kappaErrorMap}
+  % Lean (private, not pinned): continuous_kappaErrorMap
   \uses{def:kappa_error_map, def:align_reparam}
   $E_\kappa : \overline{\mathbb{D}}\to\mathbb{C}$ is continuous.
 \end{lemma}
@@ -556,7 +542,7 @@ These structural properties are recorded as separate Lean lemmas (used by
   over a fixed compact interval gives continuity of $z\mapsto E_\kappa(z)$.
 \end{proof}
 
-\section{Change-of-variables keystones for the $L^1$ estimate}
+\section{Change-of-variables keystones for the \texorpdfstring{$L^1$}{L1} estimate}
 
 The closeness estimate \cref{lem:kappa_error_map_close} and its existence form
 \cref{lem:exists_reparam_close} both pull an integral over $\theta$ back to the
@@ -568,7 +554,7 @@ analytic facts about $g_z$ carry this; both are proved.
 \leanok
 [FTC derivative of $g_z$]
   \label{lem:has_deriv_align_reparam}
-  \lean{Gluck.hasDerivAt_alignReparam}
+  % Lean (private, not pinned): hasDerivAt_alignReparam
   \uses{def:align_reparam, lem:align_density_props,
         lem:has_deriv_integral_reparam, lem:align_reparam_eq}
   $g_z$ is differentiable with $g_z'(\theta)=w_z(\theta)$ for every $\theta$.
@@ -612,7 +598,7 @@ analytic facts about $g_z$ carry this; both are proved.
 \leanok
 [$E_\kappa$ is uniformly close to $E_{\mathrm{bi}}$]
   \label{lem:kappa_error_map_close}
-  \lean{Gluck.kappaErrorMap_sub_errorMap_le}
+  % Lean (private, not pinned): kappaErrorMap_sub_errorMap_le
   \uses{def:kappa_error_map, def:error_map, lem:error_vector_lipschitz,
         lem:exists_preliminary_reparam, def:align_reparam,
         lem:align_reparam_matches, lem:strict_mono_align_reparam,
@@ -656,9 +642,7 @@ analytic facts about $g_z$ carry this; both are proved.
 
 [Existence of a preconditioning reparametrization]
   \label{lem:exists_reparam_close}
-  \lean{Gluck.exists_reparam_kappaErrorMap_close, Gluck.curvature_bounds,
-        Gluck.recip_diff_abs_le, Gluck.integrableOn_of_measurable_bounded,
-        Gluck.measurable_stepCurvature_canonical}
+  % Lean (private, not pinned): exists_reparam_kappaErrorMap_close, curvature_bounds, recip_diff_abs_le, integrableOn_of_measurable_bounded, measurable_stepCurvature_canonical
   \uses{def:kappa_error_map, def:error_map, lem:kappa_error_map_close,
         lem:exists_preliminary_reparam, lem:align_reparam_matches,
         lem:has_deriv_align_reparam, lem:align_reparam_change_of_var}

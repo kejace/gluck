@@ -1,7 +1,7 @@
 \chapter{Gluck's converse to the four vertex theorem}
 \label{chap:fourvertex}
 
-% archon:covers Gluck/FourVertex.lean
+% archon:covers Gluck/Euclidean/FourVertex.lean
 
 We assemble the pieces into Gluck's converse for strictly positive curvature.
 
@@ -118,12 +118,12 @@ We assemble the pieces into Gluck's converse for strictly positive curvature.
 
 These four project-bespoke lemmas turn the closure result
 \cref{lem:reduction_justified} into the realization statement of
-\cref{thm:gluck_converse}. They live in \texttt{Gluck/FourVertex.lean}.
+\cref{thm:gluck_converse}. They live in \texttt{Gluck/Euclidean/FourVertex.lean}.
 
 \begin{lemma}\leanok
 [The reconstruction realizes its curvature]
   \label{lem:realizes_curvature_reconstruct}
-  \lean{Gluck.realizesCurvature_reconstruct}
+  % Lean (private, not pinned): realizesCurvature_reconstruct
   \uses{def:reconstruct, def:realizes_curvature, def:radius}
   Let $\mu:\mathbb{R}\to\mathbb{R}$ be continuous and strictly positive. Then the
   inclination-parametrized reconstruction $\mathrm{reconstruct}(\mathrm{radius}\,
@@ -173,7 +173,8 @@ These four project-bespoke lemmas turn the closure result
 
 \begin{lemma}[Simplicity transfers under an orientation-preserving circle reparametrization]
   \label{lem:is_simple_closed_comp}
-  \lean{Gluck.isSimpleClosed_comp, Gluck.periodic_eq_imp_sub_zsmul, Gluck.psi_add_int_period, Gluck.eq_zero_of_window_sub_eq_zsmul}
+  \lean{Gluck.isSimpleClosed_comp, Gluck.psi_add_int_period}
+  % Lean (private, not pinned): periodic_eq_imp_sub_zsmul, eq_zero_of_window_sub_eq_zsmul
   \uses{def:is_simple_closed}
   Let $\Gamma:\mathbb{R}\to\mathbb{C}$ be a simple closed curve
   (\cref{def:is_simple_closed}) and let $\psi:\mathbb{R}\to\mathbb{R}$ be

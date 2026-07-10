@@ -1,7 +1,7 @@
 \chapter{Reduction to a four-arc step function}
 \label{chap:stepreduction}
 
-% archon:covers Gluck/StepReduction.lean
+% archon:covers Gluck/Euclidean/StepReduction.lean
 
 This chapter carries out the first move of Gluck's argument (\S5--6 of the
 source): replace the general continuous curvature function $\kappa$ by a
@@ -82,7 +82,7 @@ robust winding argument transfer from $\kappa_0$ to $\kappa$.
 \begin{lemma}\leanok
 [Canonical step-curvature values on the four arcs]
   \label{lem:step_curvature_canonical_values}
-  \lean{Gluck.stepCurvature_canonical_values}
+  % Lean (private, not pinned): stepCurvature_canonical_values
   \uses{def:four_arc_step_function}
   Project-bespoke. The canonical four-arc step curvature with breakpoints
   $0 < \pi/2 < \pi < 3\pi/2$ and values arranged so that it reads $a, b, a, b$
@@ -152,7 +152,7 @@ robust winding argument transfer from $\kappa_0$ to $\kappa$.
   contributing $\le 2M\varepsilon$).
 \end{proof}
 
-\section{The preliminary reparametrization $h_1$ (project-bespoke construction)}
+\section{The preliminary reparametrization \texorpdfstring{$h_1$}{h1} (project-bespoke construction)}
 
 \noindent\emph{Why this section exists.} The survey
 (DeTurck--Gluck, §5--6) asserts the existence of a preliminary
@@ -207,15 +207,8 @@ $<4\delta$. Choosing $\eta,\delta$ small makes this $\varepsilon$-close in measu
 
 [Calibrated continuous plateau density]
   \label{lem:plateau_density}
-  \lean{Gluck.exists_plateau_density, Gluck.integral_affine, Gluck.tentBump,
-        Gluck.tentBump_nonneg, Gluck.tentBump_continuous, Gluck.tentBump_periodic,
-        Gluck.cos_le_cos_half, Gluck.cos_le_cos_half_shift,
-        Gluck.tentBump_eq_zero_of_cos_le, Gluck.tentBump_affine_zero,
-        Gluck.tentBump_integral_right, Gluck.tentBump_integral_left,
-        Gluck.tentBump_integral_center, Gluck.tentBump_integral_support,
-        Gluck.tentBump_integral_zero_of_forall, Gluck.tentBump_integral_full,
-        Gluck.tentBump_integral_none, Gluck.tentBump_integral_boundary,
-        Gluck.tentBump_integral_period, Gluck.tentBump_integral_two_pi}
+  \lean{Gluck.exists_plateau_density, Gluck.integral_affine, Gluck.tentBump, Gluck.cos_le_cos_half_shift, Gluck.tentBump_eq_zero_of_cos_le}
+  % Lean (private, not pinned): tentBump_nonneg, tentBump_continuous, tentBump_periodic, cos_le_cos_half, tentBump_affine_zero, tentBump_integral_right, tentBump_integral_left, tentBump_integral_center, tentBump_integral_support, tentBump_integral_zero_of_forall, tentBump_integral_full, tentBump_integral_none, tentBump_integral_boundary, tentBump_integral_period, tentBump_integral_two_pi
   Project-bespoke. The explicit density is built from a base level plus four
   periodic unit triangular ``tent'' bumps $\mathrm{tentBump}$ (realised as
   $\arccos(\cos(\theta-\tau))$, giving $2\pi$-periodicity and continuity for free);
@@ -255,7 +248,7 @@ $<4\delta$. Choosing $\eta,\delta$ small makes this $\varepsilon$-close in measu
 \begin{lemma}\leanok
 [Existence of a common plateau radius]
   \label{lem:exists_plateau_radius}
-  \lean{Gluck.exists_plateau_radius}
+  % Lean (private, not pinned): exists_plateau_radius
   Project-bespoke. Given four positive moduli $\eta_1,\eta_2,\eta_3,\eta_4>0$ and
   four positive gaps $g_1,g_2,g_3,g_4>0$, there is a single positive radius
   $\eta>0$ with $\eta\le\eta_i$ for every $i$ and $\eta<g_j$ for every $j$.
@@ -274,7 +267,7 @@ $<4\delta$. Choosing $\eta,\delta$ small makes this $\varepsilon$-close in measu
 \begin{lemma}\leanok
 [Total measure of the four plateau intervals]
   \label{lem:plateau_union_measure}
-  \lean{Gluck.plateau_union_measure}
+  % Lean (private, not pinned): plateau_union_measure
   Project-bespoke. For $0<\delta<\pi/2$ the four flanking plateau intervals
   \[
     \Bigl[\tfrac{\delta}{2},\,\tfrac{\pi}{2}-\tfrac{\delta}{2}\Bigr],\quad

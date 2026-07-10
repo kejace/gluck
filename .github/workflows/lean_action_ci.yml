@@ -16,3 +16,14 @@ jobs:
           # Fetch the prebuilt Mathlib oleans (`lake exe cache get`) instead of
           # recompiling Mathlib from source on every run.
           use-mathlib-cache: true
+      # Blueprint pin gate: every \lean{...} pin in blueprint/src must name a
+      # declaration in the built environment. blueprint/lean_decls is generated
+      # (gitignored), so regenerate it from source first.
+      - name: Install leanblueprint (for the declaration list)
+        run: |
+          sudo apt-get update && sudo apt-get install -y graphviz libgraphviz-dev
+          pip install leanblueprint
+      - name: Generate blueprint declaration list
+        run: leanblueprint web
+      - name: Check blueprint pins against the Lean environment
+        run: lake exe checkdecls blueprint/lean_decls
