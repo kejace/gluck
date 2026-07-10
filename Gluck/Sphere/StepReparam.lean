@@ -48,21 +48,17 @@ lemma exists_abab_levels {κ : ℝ → ℝ} (hcont : Continuous κ)
   have hq2a : κ q₂ < a := lt_of_le_of_lt (le_max_right _ _) ha
   have hbp1 : b < κ p₁ := lt_of_lt_of_le hb (min_le_left _ _)
   have hbp2 : b < κ p₂ := lt_of_lt_of_le hb (min_le_right _ _)
-  -- `θ₁ ∈ [q₁, p₂]` with value `a`
   obtain ⟨θ₁, hθ₁mem, hθ₁⟩ := ivt_hits hcont hq1p2.le (by
     rw [Set.mem_Icc]
     exact ⟨(min_le_left _ _).trans hq1a.le,
       ((hab.le.trans hbp2.le)).trans (le_max_right _ _)⟩)
-  -- `θ₂ ∈ [θ₁, p₂]` with value `b`
   obtain ⟨θ₂, hθ₂mem, hθ₂⟩ := ivt_hits hcont hθ₁mem.2 (by
     rw [Set.mem_Icc, hθ₁]
     exact ⟨(min_le_left _ _).trans hab.le, hbp2.le.trans (le_max_right _ _)⟩)
-  -- `θ₃ ∈ [p₂, q₂]` with value `a`
   obtain ⟨θ₃, hθ₃mem, hθ₃⟩ := ivt_hits hcont hp2q2.le (by
     rw [Set.mem_Icc]
     exact ⟨(min_le_right _ _).trans hq2a.le,
       (hab.le.trans hbp2.le).trans (le_max_left _ _)⟩)
-  -- `θ₄ ∈ [q₂, p₁ + 2π]` with value `b` (periodicity feeds `κ p₁` in)
   obtain ⟨θ₄, hθ₄mem, hθ₄⟩ := ivt_hits hcont hq2p1.le (by
     rw [Set.mem_Icc, hper p₁]
     exact ⟨(min_le_left _ _).trans (hq2a.le.trans hab.le),
@@ -191,7 +187,6 @@ lemma exists_step_L1_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
     exists_preliminary_reparam hκ ha hab h12 h23 h34 h41 hv₁ hv₂ hv₃ hv₄ hε'
   refine ⟨h₁, hmono, hh₁cont, hqper, hv, ?_⟩
   set κs : ℝ → ℝ := stepCurvature b a 0 (π / 2) π (3 * π / 2) with hκsdef
-  -- measurability and pointwise bounds of the integrand
   have hκsmeas : Measurable κs := measurable_stepCurvature_canonical b a
   have hfmeas : Measurable (fun θ : ℝ => |κ (h₁ θ) - κs θ|) :=
     ((hcont.comp hh₁cont).measurable.sub hκsmeas).abs
@@ -199,7 +194,6 @@ lemma exists_step_L1_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
     abs_sub_le_of_le (hCglob (h₁ θ)) (hpos (h₁ θ))
       (stepCurvature_canonical_mem ha.le hab.le θ).1
       (stepCurvature_canonical_mem ha.le hab.le θ).2
-  -- integrability over the fundamental window
   have hIcofin : MeasureTheory.volume (Set.Ico (0 : ℝ) (2 * π)) < ⊤ := by
     rw [Real.volume_Ico]
     exact ENNReal.ofReal_lt_top
@@ -207,17 +201,14 @@ lemma exists_step_L1_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
       (Set.Ico (0 : ℝ) (2 * π)) MeasureTheory.volume :=
     integrableOn_of_norm_le_const hIcofin.ne hfmeas
       (fun x => by rw [Real.norm_eq_abs, abs_abs]; exact hfB x)
-  -- the bad set of the preliminary reparametrization
   set bad : Set ℝ := {θ : ℝ | θ ∈ Set.Ico (0 : ℝ) (2 * π)
       ∧ ε' < |κ (h₁ θ) - κs θ|} with hbaddef
   have hbadmeas : MeasurableSet bad :=
     measurableSet_Ico.inter (measurableSet_lt measurable_const hfmeas)
-  -- pass to the set integral over `Ico 0 (2π)` and split along the bad set
   rw [intervalIntegral.integral_of_le h2π.le,
     MeasureTheory.integral_Ioc_eq_integral_Ioo,
     ← MeasureTheory.integral_Ico_eq_integral_Ioo,
     ← MeasureTheory.integral_inter_add_sdiff (t := bad) hbadmeas hint]
-  -- bad part: integrand `≤ B`, measure `< ε'`
   have hbound1 : (∫ θ in Set.Ico (0 : ℝ) (2 * π) ∩ bad, |κ (h₁ θ) - κs θ|)
       ≤ B * ε' := by
     have hvol : MeasureTheory.volume (Set.Ico (0 : ℝ) (2 * π) ∩ bad) < ⊤ :=
@@ -228,7 +219,6 @@ lemma exists_step_L1_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
         (MeasureTheory.measure_mono Set.inter_subset_right) hbad))
     exact setIntegral_abs_le_mul hvol
       (fun x _ => by rw [Real.norm_eq_abs, abs_abs]; exact hfB x) hB0.le hμ
-  -- good part: integrand `≤ ε'`, measure `≤ 2π`
   have hbound2 : (∫ θ in Set.Ico (0 : ℝ) (2 * π) \ bad, |κ (h₁ θ) - κs θ|)
       ≤ ε' * (2 * π) := by
     have hvol : MeasureTheory.volume (Set.Ico (0 : ℝ) (2 * π) \ bad) < ⊤ :=
@@ -246,7 +236,6 @@ lemma exists_step_L1_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
       refine le_trans (MeasureTheory.measure_mono Set.sdiff_subset) ?_
       rw [Real.volume_Ico, sub_zero]
     exact setIntegral_abs_le_mul hvol hgood hε'.le hμ
-  -- assemble: `(B + 2π)·ε' < (B + 2π + 1)·ε' = ε`
   have hε'mul : ε' * (B + 2 * π + 1) = ε := by
     rw [hε'def]
     field_simp
@@ -329,7 +318,6 @@ lemma quarter_step_transport {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : ℝ
   set zs : ℝ → ℂ :=
     fun θ => W - Complex.I * (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)
     with hzsdef
-  -- unpack the margin package along the model arc
   have hzsR : ∀ θ ∈ Set.Icc t₁ t₂, ‖zs θ‖ ≤ R - μ := fun θ hθ => (hmarg θ hθ).1
   have hzsinner : ∀ θ ∈ Set.Icc t₁ t₂,
       ⟪zs θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ ≤ κ₀ - δ - μ :=
@@ -337,7 +325,6 @@ lemma quarter_step_transport {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : ℝ
   have hzsK : ∀ θ ∈ Set.Icc t₁ t₂,
       δ ≤ K - ⟪zs θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ :=
     fun θ hθ => (hmarg θ hθ).2.2
-  -- the arc starts at `p`, and `μ ≥ 0` from the smallness inequality
   have hpt1 : zs t₁ = p := by
     simp only [hzsdef, hWdef]
     ring
@@ -347,19 +334,16 @@ lemma quarter_step_transport {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : ℝ
       intervalIntegral.integral_nonneg ht (fun x _ => abs_nonneg _)
     exact mul_nonneg (Real.exp_nonneg _) (add_nonneg (norm_nonneg _)
       (mul_nonneg (by positivity) hint_nonneg))
-  -- the bracket is positive at the start, giving the consistency identity
   have hp0 : 0 < K - ⟪p, Complex.I * Complex.exp ((t₁ : ℂ) * Complex.I)⟫_ℝ := by
     have h := hzsK t₁ ⟨le_refl t₁, ht⟩
     rw [hpt1] at h
     linarith
   have hcons : 1 + ‖W‖ ^ 2 = 2 * r * K + r ^ 2 := constant_arc_consistency hp0
-  -- the model arc solves the truncated ODE on the quarter
   have hzsode : ∀ θ ∈ Set.Icc t₁ t₂,
       HasDerivWithinAt zs (truncatedField (fun _ => K) R δ θ (zs θ))
         (Set.Icc t₁ t₂) θ :=
     constant_arc_solves_truncated hcons hδ
       (fun θ hθ => ⟨le_trans (hzsR θ hθ) (by linarith), hzsK θ hθ⟩)
-  -- transport the margins along the quarter
   have hsmall' : Real.exp ((L : ℝ) * (t₂ - t₁)) * (‖z t₁ - zs t₁‖
       + (1 + R ^ 2) / (2 * δ ^ 2) * ∫ θ in t₁..t₂, |κ θ - K|) ≤ μ := by
     rw [hpt1]
@@ -367,7 +351,6 @@ lemma quarter_step_transport {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : ℝ
   have htrans := invariant_admissible_arc hκ hκ₀ hR hδ ht hL hz hzsode
     hzsR hzsinner hsmall'
   refine ⟨fun θ hθ => ⟨(htrans θ hθ).2.1, (htrans θ hθ).2.2⟩, ?_⟩
-  -- the arc-map image is exactly the model endpoint at `t₂`
   have h := (htrans t₂ ⟨ht, le_refl t₂⟩).1
   rw [hpt1] at h
   rw [sphericalArcMap_eq_sub K t₁ t₂ p, ← hrdef, ← hWdef]
@@ -537,7 +520,6 @@ lemma stepModel_transport {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ} {L : ℝ�
   set M : ℝ := (1 + R ^ 2) / (2 * δ ^ 2) with hMdef
   have hM0 : 0 ≤ M := by positivity
   set κs : ℝ → ℝ := stepCurvature b a 0 (π / 2) π (3 * π / 2) with hκsdef
-  -- measurability, integrability, and the quarter/total `L¹` splitting
   have hκsmeas : Measurable κs := measurable_stepCurvature_canonical b a
   have hκs_vals : ∀ x, κs x = a ∨ κs x = b := by
     intro x
@@ -575,9 +557,7 @@ lemma stepModel_transport {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ} {L : ℝ�
   have hK₃ : (∫ θ in (3 * π / 2 : ℝ)..(2 * π), |κ θ - b|) = J₃ :=
     integral_abs_sub_eq_of_eqOn_Ioo (by linarith)
       (fun θ h1 h2 => stepCurvature_canonical_fourth_quarter b a h1 h2)
-  -- fold the smallness hypothesis onto the quarter sum
   rw [hStot] at hsmall
-  -- generic tail comparison against the total bound
   have htot : ∀ x y : ℝ, (L : ℝ) * x ≤ 2 * π * (L : ℝ) → 0 ≤ y →
       y ≤ J₀ + J₁ + J₂ + J₃ →
       Real.exp ((L : ℝ) * x) * (M * y)
@@ -586,7 +566,6 @@ lemma stepModel_transport {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ} {L : ℝ�
     refine mul_le_mul (Real.exp_le_exp.mpr hx) ?_
       (mul_nonneg hM0 hy) (Real.exp_nonneg _)
     exact mul_le_mul_of_nonneg_left hyle hM0
-  -- restriction of the trajectory to a quarter, exponential collapse, arc starts
   have hzq : ∀ c d : ℝ, 0 ≤ c → d ≤ 2 * π → ∀ θ ∈ Set.Icc c d,
       HasDerivWithinAt z (truncatedField κ R δ θ (z θ)) (Set.Icc c d) θ :=
     fun c d hc hd θ hθ => (hz θ ⟨hc.trans hθ.1, hθ.2.trans hd⟩).mono
@@ -596,7 +575,6 @@ lemma stepModel_transport {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ} {L : ℝ�
   set p₁ : ℂ := sphericalArcMap a 0 (π / 2) z₀ with hp₁def
   set p₂ : ℂ := sphericalArcMap b (π / 2) (π / 2) p₁ with hp₂def
   set p₃ : ℂ := sphericalArcMap a π (π / 2) p₂ with hp₃def
-  -- quarter 0: `[0, π/2]`, level `a`, start `z₀`
   have hD₀ : ‖z 0 - z₀‖ ≤ Real.exp ((L : ℝ) * 0) * (M * 0) := by
     rw [hz0, sub_self, norm_zero]; positivity
   have hstep0 := stepModel_transport_quarter hκ hκ₀ hR hδ hL hMdef hM0 hJ₀0
@@ -608,7 +586,6 @@ lemma stepModel_transport {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ} {L : ℝ�
     have h := hstep0.2
     rw [sub_zero, zero_add, ← hp₁def] at h
     exact h
-  -- quarter 1: `[π/2, π]`, level `b`, start `p₁`
   have hstep1 := stepModel_transport_quarter hκ hκ₀ hR hδ hL hMdef hM0 hJ₁0
     (by linarith) (by linarith) (hzq (π / 2) π (by linarith) (by linarith)) hm1 hK₁ hD₁
     (hcol (π / 2) π)
@@ -617,7 +594,6 @@ lemma stepModel_transport {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ} {L : ℝ�
     have h := hstep1.2
     rw [show π - π / 2 = π / 2 from by ring, ← hp₂def] at h
     exact h
-  -- quarter 2: `[π, 3π/2]`, level `a`, start `p₂`
   have hstep2 := stepModel_transport_quarter hκ hκ₀ hR hδ hL hMdef hM0 hJ₂0
     (by linarith) (by linarith) (hzq π (3 * π / 2) (by linarith) (by linarith)) hm2 hK₂ hD₂
     (hcol π (3 * π / 2))
@@ -628,7 +604,6 @@ lemma stepModel_transport {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ} {L : ℝ�
     have h := hstep2.2
     rw [show 3 * π / 2 - π = π / 2 from by ring, ← hp₃def] at h
     exact h
-  -- quarter 3: `[3π/2, 2π]`, level `b`, start `p₃`
   have hstep3 := stepModel_transport_quarter hκ hκ₀ hR hδ hL hMdef hM0 hJ₃0
     (by linarith) (by linarith) (hzq (3 * π / 2) (2 * π) (by linarith) le_rfl) hm3 hK₃ hD₃
     (hcol (3 * π / 2) (2 * π))
@@ -640,7 +615,6 @@ lemma stepModel_transport {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ} {L : ℝ�
     rw [show (2 : ℝ) * π - 3 * π / 2 = π / 2 from by ring,
       show (L : ℝ) * (2 * π) = 2 * π * (L : ℝ) from by ring] at h
     exact h
-  -- assemble: admissibility quarter by quarter, endpoint via the composite
   constructor
   · intro θ hθ
     rcases le_or_gt θ (π / 2) with h | h

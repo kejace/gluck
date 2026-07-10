@@ -99,7 +99,7 @@ private lemma spaceFormCircle_injOn {r : ℝ} (hr0 : 0 < r) :
   have hn2 : (-1 : ℝ) < (n : ℝ) := by nlinarith [ha.1, ha.2, hb.1, hb.2]
   have ha' : n < 1 := by exact_mod_cast hn1
   have hb' : -1 < n := by exact_mod_cast hn2
-  have hn0 : n = 0 := by omega
+  have hn0 : n = 0 := by lia
   rw [hn0] at hreal
   simpa using hreal
 
@@ -561,9 +561,7 @@ private theorem spaceFormConverse_pos_nonconst {ε : ℝ} (hε : ε = 1 ∨ ε =
   obtain ⟨hz0, hzode⟩ := spaceFormFlow_spec hεabs hκ'c hR0.le hR1 hδ0 r₀ hz₀mem
   have hclosed : spaceFormFlow ε (κ ∘ h₁) R δ r₀ (z₀, 2 * π)
       = spaceFormFlow ε (κ ∘ h₁) R δ r₀ (z₀, 0) := hflow_closed.trans hz0.symm
-  -- simplicity of the periodic extension
   have hsimple := spaceForm_simplicity hεabs hκ'c hκ'per hR1 hδ0 hzode hadm hclosed
-  -- realization of `κ ∘ h₁` by the periodic extension
   obtain ⟨Z, hZclosed, hZeqOn, hZreal⟩ :=
     reconstruction_realizes hεabs hκ'c hκ'per hR1 hδ0 hzode hadm hclosed
   have hZeq : Z = periodicExtension
@@ -575,7 +573,6 @@ private theorem spaceFormConverse_pos_nonconst {ε : ℝ} (hε : ε = 1 ∨ ε =
     rw [← hZper.sub_int_mul_eq (x := t) ⌊t / (2 * π)⌋]
     exact hzy
   rw [hZeq] at hZreal
-  -- the `C¹` inverse of the circle reparametrization
   obtain ⟨H, hHc, hHmono, hh₁H, hHh₁, hHper, hHd⟩ :=
     exists_C1_circle_inverse hvc hvpos hvd hh₁per
   have hHdiff : Differentiable ℝ H := fun t => (hHd t).differentiableAt
@@ -589,7 +586,6 @@ private theorem spaceFormConverse_pos_nonconst {ε : ℝ} (hε : ε = 1 ∨ ε =
     intro t
     rw [hHderiv t]
     exact one_div_pos.mpr (hvpos (H t))
-  -- pull the realization of `κ ∘ h₁` back to a realization of `κ`
   have hcomp := spaceFormRealizes_comp hZreal hHC1 hHpos
   have hμeq : (κ ∘ h₁) ∘ H = κ := by
     funext t

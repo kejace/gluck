@@ -153,7 +153,6 @@ private lemma spaceFormSpeed_near_circle {ε c K t₁ h d : ℝ} {p : ℂ}
   have hd0 : 0 ≤ d := le_trans (norm_nonneg _) hdev
   have hh0 : 0 ≤ h := le_trans (abs_nonneg _) hK
   obtain ⟨hKlo, hKhi⟩ := abs_le.mp hK
-  -- two-sided frame bound and bracket floors
   have habs : |β + rs| ≤ d := abs_inner_frame_le hv hdev
   have hεbr : ε * (β + rs) ≤ d :=
     calc ε * (β + rs) ≤ |ε * (β + rs)| := le_abs_self _
@@ -167,19 +166,15 @@ private lemma spaceFormSpeed_near_circle {ε c K t₁ h d : ℝ} {p : ℂ}
     rw [this]; linarith [hcεβ]
   have hDc : c - ε * β ≠ 0 := ne_of_gt (by linarith)
   have hDK : K - ε * β ≠ 0 := ne_of_gt (by linarith)
-  -- norm bound on the start point
   have hp32 : ‖p‖ ≤ 3 / 2 := by
     have := norm_le_of_frame_dev hv hrs0.le hdev; linarith
   have hp2 : 1 + ‖p‖ ^ 2 ≤ 4 := by nlinarith [norm_nonneg p]
-  -- exact level shift
   have hlevel := spaceFormSpeed_sub_level (ε := ε) (K := K) (K' := c) (θ := t₁)
     (z := p) (by rw [← hvdef, ← hβdef]; exact hDK) (by rw [← hvdef, ← hβdef]; exact hDc)
   rw [← hvdef, ← hβdef] at hlevel
-  -- exact quadratic deviation
   have hquad := spaceFormSpeed_sub_radius (ε := ε) (c := c) (θ := t₁) (z := p) hε hc
     (by rw [← hvdef, ← hβdef]; exact hDc)
   rw [← hvdef, ← hβdef, ← hrsdef] at hquad
-  -- bound the level shift by `8h/B²`
   have hNumbd : |(1 + ε * ‖p‖ ^ 2) * (c - K)| ≤ 4 * h := by
     rw [abs_mul]
     have ha : |1 + ε * ‖p‖ ^ 2| ≤ 4 := by
@@ -190,7 +185,6 @@ private lemma spaceFormSpeed_near_circle {ε c K t₁ h d : ℝ} {p : ℂ}
       - spaceFormSpeed ε (fun _ => c) t₁ p| ≤ 8 * h / B ^ 2 := by
     rw [hlevel]
     exact level_quotient_bound hBpos hNumbd hKεβ hcεβ
-  -- bound the quadratic deviation by `d²/B`
   have hNnorm : ‖p + rs • v‖ ^ 2 ≤ d ^ 2 := by
     have := pow_le_pow_left₀ (norm_nonneg _) hdev 2; simpa using this
   have hquadbound : |spaceFormSpeed ε (fun _ => c) t₁ p - rs| ≤ d ^ 2 / B := by
@@ -243,7 +237,6 @@ private lemma arcDeviation_bound {ε c K t₁ h d : ℝ} {p : ℂ}
   set rs : ℝ := centeredRadius ε c with hrsdef
   set B : ℝ := Real.sqrt (c ^ 2 + ε) with hBdef
   set q : ℝ := spaceFormSpeed ε (fun _ => K) t₁ p with hqdef
-  -- split off the start deviation and the two speed-deviation terms
   have hsplit : (p + Complex.I * (q : ℂ) * Complex.exp ((t₁ : ℂ) * Complex.I)
         - Complex.I * (q : ℂ) * Complex.exp ((θ : ℂ) * Complex.I))
       + rs • (Complex.I * Complex.exp ((θ : ℂ) * Complex.I))
@@ -273,7 +266,6 @@ private lemma arcDeviation_bound {ε c K t₁ h d : ℝ} {p : ℂ}
     rw [hterm θ]
     exact add_le_add hX le_rfl
   refine le_trans htri ?_
-  -- reduce `d + 2|q − rs| ≤ 2d + 16h/B²` to `2d²/B ≤ d`
   have hdBhalf : d ≤ B / 2 := by linarith [hdhB, hh0]
   have hDstep : d ^ 2 / B ≤ d / 2 := by
     rw [div_le_iff₀ hBpos]
@@ -410,21 +402,17 @@ lemma stepModel_margins {ε c κ₀ : ℝ} (hε : ε = 1 ∨ ε = -1)
     rw [hh₀def]; exact lt_min (by positivity) (by linarith)
   have hh₀1 : h₀ ≤ σ * B ^ 2 / 512 := min_le_left _ _
   have hh₀B : h₀ ≤ B / 4 := min_le_right _ _
-  -- the per-arc additive constant `G = 16 h₀ / B²` is `≤ σ/32`
   have hG : 16 * h₀ / B ^ 2 ≤ σ / 32 := by
     rw [div_le_iff₀ (by positivity)]
     nlinarith [hh₀1, hBpos, hσ0]
   refine ⟨(1 + rs) / 2, m / 8, m / 8, ρ₀, h₀, by linarith, by linarith,
     by linarith, by linarith, hρ₀0, hh₀0, ?_⟩
   intro a b ha hb z₀ hz₀
-  -- the three slack inequalities of `arcMargins_step`, uniform over arcs (Dv = σ)
   have h1σ : rs + σ ≤ (1 + rs) / 2 - m / 8 := by linarith [hσm, hm1]
   have h2σ : σ - ε * rs ≤ κ₀ - m / 8 - m / 8 := by linarith [hσm, hm2]
   have h3σ : m / 8 ≤ c - h₀ + ε * rs - σ := by linarith [hbr, hm3, hh₀B, hσB]
-  -- start deviation of the first arc
   have hz₀' : ‖z₀ + rs • (Complex.I
       * Complex.exp (((0 : ℝ) : ℂ) * Complex.I))‖ ≤ ρ₀ := by simpa using hz₀
-  -- cumulative-deviation caps: each stays `≤ σ`, hence `≤ rs/2` and `+ h₀ ≤ B/2`
   have hcap0 : ρ₀ ≤ σ := by rw [hρ₀def]; linarith
   have hd0rs : ρ₀ ≤ rs / 2 := by linarith [hcap0, hσrs]
   have hd0B : ρ₀ + h₀ ≤ B / 2 := by linarith [hcap0, hσB, hh₀B]
@@ -446,7 +434,6 @@ lemma stepModel_margins {ε c κ₀ : ℝ} (hε : ε = 1 ∨ ε = -1)
       + 16 * h₀ / B ^ 2) + h₀ ≤ B / 2 := by linarith [hD2, hσB, hh₀B]
   have hD3 : 2 * (2 * (2 * (2 * ρ₀ + 16 * h₀ / B ^ 2) + 16 * h₀ / B ^ 2)
       + 16 * h₀ / B ^ 2) + 16 * h₀ / B ^ 2 ≤ σ := by rw [hρ₀def]; linarith [hG]
-  -- chain the four quarter arcs, each feeding the next its start deviation
   obtain ⟨hmarg₀, hdev₁⟩ := arcMargins_step (t₁ := 0) (t₂ := π / 2) (θ₂ := π / 2)
     hε hc ha hz₀' hd0rs hd0B hD0 h1σ h2σ h3σ (by ring)
   obtain ⟨hmarg₁, hdev₂⟩ := arcMargins_step (t₁ := π / 2) (t₂ := π) (θ₂ := π)

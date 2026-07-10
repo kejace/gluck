@@ -84,11 +84,9 @@ theorem bicircleErrorVector_eq (a b θ₁ θ₂ θ₃ θ₄ : ℝ)
       = (1 / (Complex.I * (b : ℂ)) - 1 / (Complex.I * (a : ℂ)))
         * ((Complex.exp ((θ₂ : ℂ) * Complex.I) - Complex.exp ((θ₁ : ℂ) * Complex.I))
           + (Complex.exp ((θ₄ : ℂ) * Complex.I) - Complex.exp ((θ₃ : ℂ) * Complex.I))) := by
-  -- `toIcoMod θ₁ θ = θ` for `θ ∈ [θ₁, θ₁ + 2π)`.
   have htm : ∀ θ : ℝ, θ₁ ≤ θ → θ < θ₁ + 2 * π →
       toIcoMod Real.two_pi_pos θ₁ θ = θ :=
     fun θ hl hr => (toIcoMod_eq_self Real.two_pi_pos).mpr ⟨hl, hr⟩
-  -- Step-curvature value on each of the five arcs of `[0, 2π)`.
   have hvP0 : ∀ θ ∈ Set.Ioo (0 : ℝ) θ₁, stepCurvature a b θ₁ θ₂ θ₃ θ₄ θ = a := by
     intro θ hθ; obtain ⟨hl, hr⟩ := hθ
     have htm0 : toIcoMod Real.two_pi_pos θ₁ θ = θ + 2 * π := by
@@ -116,34 +114,28 @@ theorem bicircleErrorVector_eq (a b θ₁ θ₂ θ₃ θ₄ : ℝ)
     have h := htm θ (by linarith) (by linarith)
     simp only [stepCurvature, h]
     rw [if_neg (by push Not; exact ⟨by linarith, fun _ => by linarith⟩)]
-  -- Interval-integrability on each arc.
   have hi0 := bicircle_arc_integrable a b θ₁ θ₂ θ₃ θ₄ a 0 θ₁ h1 hvP0
   have hi1 := bicircle_arc_integrable a b θ₁ θ₂ θ₃ θ₄ b θ₁ θ₂ (le_of_lt h12) hvP1
   have hi2 := bicircle_arc_integrable a b θ₁ θ₂ θ₃ θ₄ a θ₂ θ₃ (le_of_lt h23) hvP2
   have hi3 := bicircle_arc_integrable a b θ₁ θ₂ θ₃ θ₄ b θ₃ θ₄ (le_of_lt h34) hvP3
   have hi4 := bicircle_arc_integrable a b θ₁ θ₂ θ₃ θ₄ a θ₄ (2 * π) (le_of_lt h4) hvP4
-  -- Unfold the error vector to the integral over `[0, 2π)`.
   rw [bicircleErrorVector, errorVector, reconstruct]
-  -- Split the period integral into the four/five constant arcs.
   rw [← intervalIntegral.integral_add_adjacent_intervals hi0
         (((hi1.trans hi2).trans hi3).trans hi4),
       ← intervalIntegral.integral_add_adjacent_intervals hi1 ((hi2.trans hi3).trans hi4),
       ← intervalIntegral.integral_add_adjacent_intervals hi2 (hi3.trans hi4),
       ← intervalIntegral.integral_add_adjacent_intervals hi3 hi4]
-  -- Evaluate each arc integral.
   rw [bicircle_arc_integral a b θ₁ θ₂ θ₃ θ₄ a 0 θ₁ h1 hvP0,
       bicircle_arc_integral a b θ₁ θ₂ θ₃ θ₄ b θ₁ θ₂ (le_of_lt h12) hvP1,
       bicircle_arc_integral a b θ₁ θ₂ θ₃ θ₄ a θ₂ θ₃ (le_of_lt h23) hvP2,
       bicircle_arc_integral a b θ₁ θ₂ θ₃ θ₄ b θ₃ θ₄ (le_of_lt h34) hvP3,
       bicircle_arc_integral a b θ₁ θ₂ θ₃ θ₄ a θ₄ (2 * π) (le_of_lt h4) hvP4]
-  -- Reduce the boundary exponentials `e^{i·0} = e^{i·2π} = 1`.
   have e0 : Complex.exp (((0 : ℝ) : ℂ) * Complex.I) = 1 := by simp
   have e2pi : Complex.exp (((2 * π : ℝ) : ℂ) * Complex.I) = 1 := by
     have hc : ((2 * π : ℝ) : ℂ) * Complex.I = 2 * (Real.pi : ℂ) * Complex.I := by
       push_cast; ring
     rw [hc, Complex.exp_two_pi_mul_I]
   rw [e0, e2pi]
-  -- Convert the source-form scalar to `-i(1/b - 1/a)` and finish algebraically.
   have hkey : (1 : ℂ) / (Complex.I * (b : ℂ)) - 1 / (Complex.I * (a : ℂ))
       = -Complex.I * (1 / (b : ℂ) - 1 / (a : ℂ)) := by
     rw [one_div, one_div, mul_inv, mul_inv, Complex.inv_I]; ring

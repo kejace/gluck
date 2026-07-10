@@ -106,7 +106,7 @@ private lemma sphericalCircle_injOn {r : ℝ} (hr0 : 0 < r) :
   have hn2 : (-1 : ℝ) < (n : ℝ) := by nlinarith [ha.1, ha.2, hb.1, hb.2]
   have ha' : n < 1 := by exact_mod_cast hn1
   have hb' : -1 < n := by exact_mod_cast hn2
-  have hn0 : n = 0 := by omega
+  have hn0 : n = 0 := by lia
   rw [hn0] at hreal
   simpa using hreal
 
@@ -203,7 +203,6 @@ lemma realizesSphericalCurvature_comp {z : ℝ → ℂ} {μ : ℝ → ℝ} {ψ :
     (hψpos : ∀ t, 0 < deriv ψ t) :
     RealizesSphericalCurvature (z ∘ ψ) (μ ∘ ψ) := by
   obtain ⟨hz1, hreg, hconf, φ, hφ, htan, hcurv⟩ := hz
-  -- pointwise `HasDerivAt` data and the chain rule
   have hzdiff : ∀ x, HasDerivAt z (deriv z x) x :=
     fun x => (hz1.differentiable (by norm_num)).differentiableAt.hasDerivAt
   have hψdiff : ∀ t, HasDerivAt ψ (deriv ψ t) t :=
@@ -267,7 +266,6 @@ lemma sphericalTrajectory_speed {κ : ℝ → ℝ} {R δ : ℝ} (hκc : Continuo
       ∀ t, 0 < sphericalSpeed κ t (periodicExtension z t) := by
   obtain ⟨-, -, -, hZderiv⟩ :=
     reconstruction_ode hκc hκper hR1 hδ hz hadm hclosed
-  -- extended admissibility along the periodic extension
   have hadmZ : ∀ t : ℝ, ‖periodicExtension z t‖ ≤ R ∧
       δ ≤ κ t - ⟪periodicExtension z t,
         Complex.I * Complex.exp ((t : ℂ) * Complex.I)⟫_ℝ := by

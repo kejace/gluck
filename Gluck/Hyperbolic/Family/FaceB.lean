@@ -40,7 +40,6 @@ lemma a9Residual_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     (_hL : L ≤ bicircleBracket a h)
     (him : (qArc2 a c (h, L)).1.im = 0) (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
     a9Residual a c h L (0, 0) = 0 := by
-  -- the exact anchor closure, evaluated on the terminal leg
   have hclose := layoutClean_anchor_closes ha hac hwin hL0 him hφe
   have hs₄ : nodeS4 L 0 0 = 7 * L / 8 := by rw [nodeS4]; ring
   have hL16 : |(0 : ℝ)| ≤ L / 16 := by rw [abs_zero]; positivity
@@ -50,7 +49,6 @@ lemma a9Residual_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   simp only [a9Endpoint]
   set n4 := layoutNode4 a c h L 0 0 with hn4
   set r₅ := arcModelRadius c n4.1 n4.2 with hr₅
-  -- the two components of the closure equation
   have hA : n4.2 + L / 8 / r₅ = (layoutStart a c h L).2 + 2 * π := by
     rw [hr₅]
     exact congrArg Prod.snd hclose
@@ -59,7 +57,6 @@ lemma a9Residual_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       = (layoutStart a c h L).1 := by
     rw [hr₅]
     exact congrArg Prod.fst hclose
-  -- total phase `n4.2 + θ₅ = 5π/2 + 2π = 9π/2`, and `e^{i·9π/2} = i`
   have hstart2 : (layoutStart a c h L).2 = 5 * π / 2 := layoutStart_snd hφe
   have hx : L / 8 / r₅ = 9 * π / 2 - n4.2 := by
     rw [hstart2] at hA
@@ -96,13 +93,11 @@ private lemma a9_nodes_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   obtain ⟨hh0, hh1, -⟩ := hwin
   have hratio0 := layoutMarginRatio_pos ha hac
   have hratio1 := layoutMarginRatio_lt_one ha hac
-  -- start data and nondegeneracy of the two anchor arcs
   have hz₀norm : ‖Complex.I * (h : ℂ)‖ = h := by
     rw [norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Real.norm_eq_abs,
       abs_of_pos hh0]
   have hra : 0 < arcModelRadius a (Complex.I * (h : ℂ)) π :=
     arcModelRadius_pos_of_norm_lt_one ha.le (by rw [hz₀norm]; exact hh1)
-  -- whole-circle confinement of the `a`-arc from `W₀ = (i·h, π)`
   have hconfa : ∀ σ : ℝ,
       ‖(arcModelConst a (Complex.I * (h : ℂ)) π σ).1‖
         ≤ 1 - (1 - h) * layoutMarginRatio a c := by
@@ -120,7 +115,6 @@ private lemma a9_nodes_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     have h1 := hconfa1 σ
     have h2 := norm_nonneg (arcModelConst a (Complex.I * (h : ℂ)) π σ).1
     nlinarith
-  -- `W₁ = qArc1` and the `c`-arc through it
   have hW₁ : qArc1 a (h, L) = arcModelConst a (Complex.I * (h : ℂ)) π (L / 8) := rfl
   have hW₁norm : ‖(qArc1 a (h, L)).1‖ < 1 := by
     rw [hW₁]
@@ -145,7 +139,6 @@ private lemma a9_nodes_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     have h1 := hconfc σ
     have h2 := norm_nonneg (arcModelConst c (qArc1 a (h, L)).1 (qArc1 a (h, L)).2 σ).1
     nlinarith
-  -- `W₂ = qArc2` sits on `Fix(X)`
   have hW₂ : qArc2 a c (h, L)
       = arcModelConst c (qArc1 a (h, L)).1 (qArc1 a (h, L)).2 (L / 8) := rfl
   have hfix1 : (starRingEnd ℂ) (qArc2 a c (h, L)).1 = (qArc2 a c (h, L)).1 :=
@@ -153,7 +146,6 @@ private lemma a9_nodes_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   have hfix2 : 3 * π - (qArc2 a c (h, L)).2 = (qArc2 a c (h, L)).2 := by
     rw [hφe]
     ring
-  -- the mirrored `c`-arc: `Arc_c(W₂, s) = X(Arc_c(W₁, L/8 − s))`
   have MIc : ∀ s : ℝ, arcModelConst c (qArc2 a c (h, L)).1 (qArc2 a c (h, L)).2 s
       = ((starRingEnd ℂ)
           (arcModelConst c (qArc1 a (h, L)).1 (qArc1 a (h, L)).2 (L / 8 - s)).1,
@@ -162,7 +154,6 @@ private lemma a9_nodes_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     have h1 := arcModelConst_conj_reverse hrc.ne' (L / 8) (hconfcne (L / 8)) s
     rw [← hW₂, hfix1, hfix2] at h1
     exact h1
-  -- the mirrored `a`-arc: `Arc_a(X(W₁), s) = X(Arc_a(W₀, L/8 − s))`
   have MIa : ∀ s : ℝ, arcModelConst a ((starRingEnd ℂ) (qArc1 a (h, L)).1)
       (3 * π - (qArc1 a (h, L)).2) s
       = ((starRingEnd ℂ)
@@ -172,7 +163,6 @@ private lemma a9_nodes_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     have h1 := arcModelConst_conj_reverse hra.ne' (L / 8) (hconfane (L / 8)) s
     rw [← hW₁] at h1
     exact h1
-  -- the reversed base `a`-arc: `X(Arc_a(W₀, −s)) = Arc_a(ρ(W₀), s)`
   have E2z : ∀ s : ℝ,
       ((starRingEnd ℂ) (arcModelConst a (Complex.I * (h : ℂ)) π (-s)).1,
         3 * π - (arcModelConst a (Complex.I * (h : ℂ)) π (-s)).2)
@@ -189,14 +179,12 @@ private lemma a9_nodes_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     rw [← h1, show (starRingEnd ℂ) (Complex.I * (h : ℂ)) = -(Complex.I * (h : ℂ)) by
       rw [map_mul, Complex.conj_I, Complex.conj_ofReal]; ring,
       show 3 * π - π = π + π by ring]
-  -- node 1: `ρ X (W₁)`
   have hnode1 : layoutNode1 a c h L
       = (-(starRingEnd ℂ) (qArc1 a (h, L)).1, 3 * π - (qArc1 a (h, L)).2 + π) := by
     rw [layoutNode1,
       show (layoutStart a c h L).1 = -(qArc2 a c (h, L)).1 from rfl,
       show (layoutStart a c h L).2 = (qArc2 a c (h, L)).2 + π from rfl,
       arcModelConst_neg_pi, MIc (L / 8), sub_self, arcModelConst_zero]
-  -- node 2: `W₁ + (0, 2π)`
   have hnode2 : layoutNode2 a c h L 0
       = ((qArc1 a (h, L)).1, (qArc1 a (h, L)).2 + 2 * π) := by
     rw [layoutNode2, hnode1, add_zero]
@@ -212,7 +200,6 @@ private lemma a9_nodes_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     · simp only [neg_neg]
     · simp only
       ring
-  -- node 3: `X(W₁) + (0, 2π)`
   have hnode3 : layoutNode3 a c h L 0
       = ((starRingEnd ℂ) (qArc1 a (h, L)).1,
           3 * π - (qArc1 a (h, L)).2 + 2 * π) := by
@@ -225,7 +212,6 @@ private lemma a9_nodes_anchor {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       show (L / 4 : ℝ) = L / 8 + L / 8 by ring,
       ← arcModelConst_add hrc.ne' (L / 8) (hconfcne (L / 8)) (L / 8),
       ← hW₂, MIc (L / 8), sub_self, arcModelConst_zero]
-  -- node 4: `ρ(W₁) + (0, 2π)`
   have hnode4 : layoutNode4 a c h L 0 0
       = (-(qArc1 a (h, L)).1, (qArc1 a (h, L)).2 + π + 2 * π) := by
     rw [layoutNode4, hnode3, add_zero]
@@ -472,13 +458,11 @@ lemma a9_hasDerivAt_col2 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
             (a9ra a h) (a9rc a c h L) (a9D a c h L) * Complex.I) 0 := by
   obtain ⟨hh0, hh1, hwb⟩ := hwin
   have hπ := Real.pi_pos
-  -- anchor windows
   obtain ⟨hS0, hC0, hrc0, hrclt, hDlt, hSC, hJ1, hJ2, hq⟩ :=
     a9_anchor_facts ha hac ⟨hh0, hh1, hwb⟩ hL0 hL him hφe
   have hra0 : 0 < a9ra a h := bicircle_ra_pos ha hh0 hh1
   have hD0 : 0 < a9D a c h L :=
     lt_trans (mul_pos (sub_pos.mpr hrclt) (pow_pos hC0 2)) hDlt
-  -- abbreviations (anchor scalars)
   set θ := a9theta a h L with hθdef
   set C := Real.cos θ with hCdef
   set S := Real.sin θ with hSdef
@@ -488,26 +472,22 @@ lemma a9_hasDerivAt_col2 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   set z₁ := (qArc1 a (h, L)).1 with hz₁def
   set φ₁ := (qArc1 a (h, L)).2 with hφ₁def
   set n₃ := layoutNode3 a c h L 0 with hn₃def
-  -- component scalarization of the real inner product on `ℂ`
   have hip : ∀ x y : ℂ, ⟪x, y⟫_ℝ = x.re * y.re + x.im * y.im := fun x y => by
     rw [Complex.inner]
     simp [Complex.mul_re]
     ring
-  -- the anchor node-4 state
   have hpt : arcModelConst a n₃.1 n₃.2 (L / 4 + 0) = (-z₁, φ₁ + π + 2 * π) :=
     a9_node4_anchor ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
   have hz0 : (arcModelConst a n₃.1 n₃.2 (L / 4 + 0)).1 = -z₁ := by rw [hpt]
   have hψ0 : (arcModelConst a n₃.1 n₃.2 (L / 4 + 0)).2 = φ₁ + π + 2 * π := by rw [hpt]
   have hpt' : arcModelConst a n₃.1 n₃.2 (L / 4) = (-z₁, φ₁ + π + 2 * π) := by
     rw [← hpt, add_zero]
-  -- radii at the anchor
   have hr4 : arcModelRadius a n₃.1 n₃.2 = ra :=
     a9_radius_node3 ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
   have hr4ne : arcModelRadius a n₃.1 n₃.2 ≠ 0 := by rw [hr4]; exact hra0.ne'
   have hr5 : arcModelRadius c (-z₁) (φ₁ + π + 2 * π) = rc := by
     rw [← hz0, ← hψ0]
     exact a9_radius_node4 ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
-  -- confinement of the node-4 state
   have h016 : |(0 : ℝ)| ≤ L / 16 := by rw [abs_zero]; positivity
   have hn4norm : ‖(arcModelConst a n₃.1 n₃.2 (L / 4)).1‖ ≤ layoutCleanRadius a c := by
     rw [← add_zero (L / 4)]
@@ -516,7 +496,6 @@ lemma a9_hasDerivAt_col2 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   have hconf : (1 : ℝ) - ‖(arcModelConst a n₃.1 n₃.2 (L / 4)).1‖ ^ 2 ≠ 0 := by
     have h2 := norm_nonneg (arcModelConst a n₃.1 n₃.2 (L / 4)).1
     nlinarith
-  -- the reduced-denominator identity `c + s₄ = D`
   have hDexp : D = c + ⟪z₁, Complex.I * Complex.exp ((φ₁ : ℂ) * Complex.I)⟫_ℝ := by
     rw [hDdef]
     simp only [a9D]
@@ -534,7 +513,6 @@ lemma a9_hasDerivAt_col2 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   have hden4 : c + ⟪-z₁, Complex.I
       * Complex.exp (((φ₁ + π + 2 * π : ℝ) : ℂ) * Complex.I)⟫_ℝ = D := by
     rw [hE4, mul_neg, inner_neg_neg, ← hDexp]
-  -- the moving node-4 state and its derivatives
   have hz : HasDerivAt (fun t => (arcModelConst a n₃.1 n₃.2 (L / 4 + t)).1)
       (Complex.exp (((φ₁ + π + 2 * π : ℝ) : ℂ) * Complex.I)) 0 := by
     have h1 := (arcModelConst_solves hr4ne (L / 4) hconf).1
@@ -558,7 +536,6 @@ lemma a9_hasDerivAt_col2 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     exact hD0.ne'
   have hr₅d := a9_hasDerivAt_radius hz hψ hden
   have hend := (a9_hasDerivAt_endpoint_aux hz hψ hr₅d).sub_const (layoutStart a c h L).1
-  -- the residual curve is definitionally the endpoint curve
   have hfun : (fun t => a9Residual a c h L (0, t))
       = fun t => ((arcModelConst a n₃.1 n₃.2 (L / 4 + t)).1
           + (arcModelRadius c ((arcModelConst a n₃.1 n₃.2 (L / 4 + t)).1)
@@ -570,13 +547,11 @@ lemma a9_hasDerivAt_col2 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     funext t
     simp only [a9Residual, a9Endpoint]
     rfl
-  -- scalar values of the first-arc endpoint
   have hz₁re : z₁.re = -(ra * S) := qArc1_fst_re a h L
   have hz₁im : z₁.im = h - ra * (1 - C) := qArc1_fst_im a h L
   have hnormz : ‖z₁‖ ^ 2 = z₁.re ^ 2 + z₁.im ^ 2 := by
     rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
     ring
-  -- the conserved-radius identity `1 − ‖z₁‖² = 2·rc·D`
   have hrcD : rc * (2 * D) = 1 - ‖z₁‖ ^ 2 := by
     rw [hrcdef]
     change arcModelRadius c z₁ φ₁ * (2 * D) = 1 - ‖z₁‖ ^ 2
@@ -585,7 +560,6 @@ lemma a9_hasDerivAt_col2 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   have hrcD2 : rc * (2 * D) = 1 - ((ra * S) ^ 2 + (h - ra * (1 - C)) ^ 2) := by
     rw [hrcD, hnormz, hz₁re, hz₁im]
     ring
-  -- the `him`-identity `ra − h = (ra − rc)·C`
   have hG1 : (0 : ℝ) = h - ra * (1 - C)
       - rc * (S * Real.sin (L / 8 / rc) + C * (1 - Real.cos (L / 8 / rc))) := by
     have h1 := bicircle_G1_scalar a c h L
@@ -597,7 +571,6 @@ lemma a9_hasDerivAt_col2 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   have hCS : C ^ 2 + S ^ 2 = 1 := by
     rw [hCdef, hSdef]
     exact Real.cos_sq_add_sin_sq θ
-  -- exponential values at the anchor
   have h1φ : φ₁ = π + θ := qArc1_snd a h L
   have hexpθ : Complex.exp ((θ : ℂ) * Complex.I) = (C : ℂ) + (S : ℂ) * Complex.I := by
     rw [Complex.exp_mul_I, hCdef, hSdef, Complex.ofReal_cos, Complex.ofReal_sin]
@@ -605,7 +578,6 @@ lemma a9_hasDerivAt_col2 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       = -((C : ℂ) + (S : ℂ) * Complex.I) := by
     rw [show (φ₁ : ℂ) = ((θ + π : ℝ) : ℂ) by rw [h1φ]; push_cast; ring,
       hexpPi, hexpθ]
-  -- assemble: same curve, reduce the raw derivative value
   rw [hfun]
   refine hend.congr_deriv ?_
   rw [hz0, hψ0, hr5, hden4, hE4, hexpφ]
@@ -632,12 +604,10 @@ lemma a9_hasDerivAt_col2 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       + (-S * (ra - rc) * (C ^ 2 * rc ^ 2 + 2 * D * rc + S ^ 2 * ra ^ 2 - 1)) * hCS
       + (S * (S - 1) * (S + 1) * (ra - rc)) * hrcD2
 
-set_option maxHeartbeats 300000 in
--- three-junction variational chain: endpoint algebra over degree-15 polynomials
--- (raised heartbeats) with deep `HasDerivAt.comp` nesting (raised recursion depth).
+set_option maxHeartbeats 2000000 in
+-- The degree-15 endpoint polynomial normalization uses about 1.8M heartbeats.
 set_option maxRecDepth 10000 in
 set_option Elab.async false in
-#count_heartbeats in
 /-- **`w₁`-column derivative**: the two-junction variational chain.  The curve
 `t ↦ G(t, 0)` differentiates to the closed junction form `a9V1` at the anchor
 variables. -/
@@ -668,7 +638,6 @@ lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   set n₁ := layoutNode1 a c h L with hn₁def
   have hip : ∀ x y : ℂ, ⟪x, y⟫_ℝ = x.re * y.re + x.im * y.im := fun x y => by
     rw [Complex.inner]; simp [Complex.mul_re]; ring
-  -- scalar anchor data
   have hz₁re : z₁.re = -(ra * S) := qArc1_fst_re a h L
   have hz₁im : z₁.im = h - ra * (1 - C) := qArc1_fst_im a h L
   have hnormz : ‖z₁‖ ^ 2 = z₁.re ^ 2 + z₁.im ^ 2 := by
@@ -682,7 +651,6 @@ lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     exact div_mul_cancel₀ _ (by rw [← hDexp]; positivity)
   have hrcD2 : rc * (2 * D) = 1 - ((ra * S) ^ 2 + (h - ra * (1 - C)) ^ 2) := by
     rw [hrcD, hnormz, hz₁re, hz₁im]; ring
-  -- the `him`-identity `ra − h = (ra − rc)·C`
   have hG1 : (0 : ℝ) = h - ra * (1 - C)
       - rc * (S * Real.sin (L / 8 / rc) + C * (1 - Real.cos (L / 8 / rc))) := by
     have h1 := bicircle_G1_scalar a c h L; rw [him] at h1; exact h1
@@ -691,7 +659,6 @@ lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   have hrh : ra - h = (ra - rc) * C := by linear_combination hG1
   have hCS : C ^ 2 + S ^ 2 = 1 := by rw [hCdef, hSdef]; exact Real.cos_sq_add_sin_sq θ
   have h1φ : φ₁ = π + θ := qArc1_snd a h L
-  -- sweep-angle relations
   have hθa : L / 8 / ra = θ := by rw [hθdef]; rfl
   have h1L : ra * θ = L / 8 := by rw [← hθa, mul_comm, div_mul_cancel₀ _ hra0.ne']
   have h2L : rc * (π / 2 - θ) = L / 8 := by
@@ -699,8 +666,6 @@ lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   have hsum : θ * (ra + rc) = π / 2 * rc := by linear_combination h1L - h2L
   have hLpi : L * (ra + rc) = 4 * π * ra * rc := by
     linear_combination (-8 * (ra + rc)) * h1L + 8 * ra * hsum
-  -- one-way eliminations of `h`, `L`, `D` (each identity closes by
-  -- `simp only [hh, hLe, hDe]; field_simp; ring` after these)
   have hh : h = ra - (ra - rc) * C := by linarith [hrh]
   have hrane : ra ≠ 0 := hra0.ne'
   have hrcne : rc ≠ 0 := hrc0.ne'
@@ -714,7 +679,6 @@ lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   have hDden : (1 : ℝ) - ((ra * S) ^ 2 + (rc * C) ^ 2) ≠ 0 := by
     rw [← hrcD2sub]; exact (mul_pos hrc0 (by linarith)).ne'
   have hDne : D ≠ 0 := hD0.ne'
-  -- exponential library
   have hexpR : ∀ x : ℝ, Complex.exp ((x : ℂ) * Complex.I)
       = (Real.cos x : ℂ) + (Real.sin x : ℂ) * Complex.I := by
     intro x; rw [Complex.exp_mul_I, ← Complex.ofReal_cos, ← Complex.ofReal_sin]
@@ -724,7 +688,8 @@ lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     rw [add_mul, Complex.exp_add, Complex.exp_pi_mul_I]; ring
   have hexpθ : Complex.exp ((θ : ℂ) * Complex.I) = (C : ℂ) + (S : ℂ) * Complex.I := by
     rw [hexpR, ← hCdef, ← hSdef]
-  have hexpnegθ : Complex.exp (((-θ : ℝ) : ℂ) * Complex.I) = (C : ℂ) - (S : ℂ) * Complex.I := by
+  have hexpnegθ : Complex.exp (((-θ : ℝ) : ℂ) * Complex.I) =
+      (C : ℂ) - (S : ℂ) * Complex.I := by
     rw [hexpR, Real.cos_neg, Real.sin_neg, ← hCdef, ← hSdef]; push_cast; ring
   have hexpφ : Complex.exp ((φ₁ : ℂ) * Complex.I) = -((C : ℂ) + (S : ℂ) * Complex.I) := by
     rw [show (φ₁ : ℂ) = ((θ + π : ℝ) : ℂ) by rw [h1φ]; push_cast; ring, hexpPi, hexpθ]
@@ -738,9 +703,11 @@ lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     ring
   have hexpφ4 : Complex.exp (((φ₁ + π + 2 * π : ℝ) : ℂ) * Complex.I)
       = (C : ℂ) + (S : ℂ) * Complex.I := by
-    rw [show (φ₁ + π + 2 * π : ℝ) = (φ₁ + π) + 2 * π by ring, expI_add_two_pi, hexpPi, hexpφ]
+    rw [show (φ₁ + π + 2 * π : ℝ) = (φ₁ + π) + 2 * π by ring, expI_add_two_pi,
+      hexpPi, hexpφ]
     ring
-  have hDval₂ : c + ⟪z₁, Complex.I * Complex.exp (((φ₁ + 2 * π : ℝ) : ℂ) * Complex.I)⟫_ℝ = D := by
+  have hDval₂ :
+      c + ⟪z₁, Complex.I * Complex.exp (((φ₁ + 2 * π : ℝ) : ℂ) * Complex.I)⟫_ℝ = D := by
     rw [expI_add_two_pi]; exact hDexp.symm
   have hDval₄ : c + ⟪-z₁, Complex.I
       * Complex.exp (((φ₁ + π + 2 * π : ℝ) : ℂ) * Complex.I)⟫_ℝ = D := by
@@ -759,8 +726,8 @@ lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     have harg : (L / 4 + 0) / ra = 2 * θ := by
       rw [add_zero, show L / 4 / ra = 2 * (L / 8 / ra) by ring, hθa]
     rw [hexpR, harg, Real.cos_two_mul', Real.sin_two_mul, ← hCdef, ← hSdef]
-  -- level-`a` inner-product identity `a + s_a = rc·D/ra`
-  have hsa_ne : (2 : ℝ) * (a + ⟪z₁, Complex.I * Complex.exp ((φ₁ : ℂ) * Complex.I)⟫_ℝ) ≠ 0 := by
+  have hsa_ne :
+      (2 : ℝ) * (a + ⟪z₁, Complex.I * Complex.exp ((φ₁ : ℂ) * Complex.I)⟫_ℝ) ≠ 0 := by
     intro h0
     have hh : arcModelRadius a z₁ φ₁ = ra := a9_radius_qArc1 ha hac ⟨hh0, hh1, hwb⟩
     rw [arcModelRadius, h0, div_zero] at hh
@@ -770,7 +737,8 @@ lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     have hh : arcModelRadius a z₁ φ₁ = ra := a9_radius_qArc1 ha hac ⟨hh0, hh1, hwb⟩
     rw [arcModelRadius, div_eq_iff hsa_ne] at hh
     linarith [hh]
-  have hkey : ra * (a + ⟪z₁, Complex.I * Complex.exp ((φ₁ : ℂ) * Complex.I)⟫_ℝ) = rc * D := by
+  have hkey : ra * (a + ⟪z₁, Complex.I * Complex.exp ((φ₁ : ℂ) * Complex.I)⟫_ℝ) =
+      rc * D := by
     linear_combination hraD / 2 - hrcD / 2
   have hinner_eq : ⟪(starRingEnd ℂ) z₁,
         Complex.I * Complex.exp (((3 * π - φ₁ + 2 * π : ℝ) : ℂ) * Complex.I)⟫_ℝ
@@ -783,14 +751,15 @@ lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
   have hden₃val : a + ⟪(starRingEnd ℂ) z₁,
         Complex.I * Complex.exp (((3 * π - φ₁ + 2 * π : ℝ) : ℂ) * Complex.I)⟫_ℝ = rc * D / ra := by
     rw [hinner_eq, eq_div_iff hra0.ne']; linear_combination hkey
-  -- node-1 radius / node-2 anchor
-  have hr1 : arcModelRadius a n₁.1 n₁.2 = ra := a9_radius_node1 ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
+  have hr1 : arcModelRadius a n₁.1 n₁.2 = ra :=
+    a9_radius_node1 ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
   have hr1ne : arcModelRadius a n₁.1 n₁.2 ≠ 0 := by rw [hr1]; exact hra0.ne'
   have hpt₂ : arcModelConst a n₁.1 n₁.2 (L / 4 + 0) = (z₁, φ₁ + 2 * π) :=
     a9_node2_anchor ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
   have hz2pt : (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1 = z₁ := by rw [hpt₂]
   have hψ2pt : (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 = φ₁ + 2 * π := by rw [hpt₂]
-  have hpt₂' : arcModelConst a n₁.1 n₁.2 (L / 4) = (z₁, φ₁ + 2 * π) := by rw [← hpt₂, add_zero]
+  have hpt₂' : arcModelConst a n₁.1 n₁.2 (L / 4) = (z₁, φ₁ + 2 * π) := by
+    rw [← hpt₂, add_zero]
   have h016 : |(0 : ℝ)| ≤ L / 16 := by rw [abs_zero]; positivity
   have hconf₂ : (1 : ℝ) - ‖(arcModelConst a n₁.1 n₁.2 (L / 4)).1‖ ^ 2 ≠ 0 := by
     have hnorm : ‖(arcModelConst a n₁.1 n₁.2 (L / 4)).1‖ ≤ layoutCleanRadius a c := by
@@ -822,7 +791,6 @@ lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     a9_radius_node2 ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
   have hr₃0ne : arcModelRadius c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
       (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 ≠ 0 := by rw [hr₃0]; exact hrc0.ne'
-  -- Stage R1 : dr₃ = −a9Q
   have hr₃d : HasDerivAt (fun t => arcModelRadius c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
       (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2) (-(a9Q C S ra rc D)) 0 :=
     (a9_hasDerivAt_radius hz₂ hψ₂ hden₂).congr_deriv (by
@@ -833,7 +801,6 @@ lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       simp only [hh]
       linear_combination (norm := (field_simp [hrane, hrcne, hmne, hDne]; ring))
           (((-C*S*ra + C*S*rc) / (2*D^2*ra)) * hrcD2sub))
-  -- Stage R2 : dψ₃ = a9dpsi3
   have hψ₃ : HasDerivAt (fun t => (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
       (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).2) (a9dpsi3 C S ra rc D) 0 :=
     (a9_hasDerivAt_arc_snd hψ₂ hr₃d hr₃0ne).congr_deriv (by
@@ -843,7 +810,6 @@ lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       field_simp [hrane, hrcne, hmne, hDne]
       ring)
   have hz₃ := a9_hasDerivAt_arc_fst (K := c) (s := L / 4) hz₂ hψ₂ hr₃d hr₃0ne
-  -- node-3 anchor
   have hpt₃ : arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
       (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)
       = ((starRingEnd ℂ) z₁, 3 * π - φ₁ + 2 * π) :=
@@ -867,7 +833,6 @@ lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).2 : ℝ) : ℂ) * Complex.I)⟫_ℝ ≠ 0 := by
     rw [hz3pt, hψ3pt, hden₃val]
     exact (div_pos (mul_pos hrc0 hD0) hra0).ne'
-  -- Stage R3 : dr₄ = a9dr4
   have hr₄d : HasDerivAt (fun t => arcModelRadius a
       (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
       (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).1
@@ -905,7 +870,6 @@ lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
             + S^4*π*ra^2*rc^3 + S^2*π*ra^5 - 3*S^2*π*ra^4*rc + 3*S^2*π*ra^3*rc^2
             - S^2*π*ra^2*rc^3) / (2*D^3*rc^3*(ra + rc))) * hrcD2sub))
   have hz₄ := a9_hasDerivAt_arc_fst (K := a) (s := L / 4 + 0) hz₃ hψ₃ hr₄d hr₄0ne
-  -- Stage R4 : dψ₄ = a9dpsi4
   have hψ₄ : HasDerivAt (fun t => (arcModelConst a
       (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
       (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).1
@@ -918,7 +882,6 @@ lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       simp only [hLe]
       field_simp [hrane, hrcne, hmne, hDne]
       ring)
-  -- node-4 anchor
   have hpt₄ : arcModelConst a (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
       (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1
       (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
@@ -956,7 +919,6 @@ lemma a9_hasDerivAt_col1 {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
       show (φ₁ + π + 2 * π : ℝ) = (φ₁ + π) + 2 * π by ring, expI_add_two_pi, hexpPi,
       mul_neg, inner_neg_neg, ← hDexp]
     exact hD0.ne'
-  -- Stage R5 : dr₅ = a9dr5
   have hr₅d : HasDerivAt (fun t => arcModelRadius c
       (arcModelConst a (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).1
       (arcModelConst a n₁.1 n₁.2 (L / 4 + t)).2 (L / 4)).1
@@ -1178,7 +1140,8 @@ private lemma a9_differentiableAt_exp {ψ : ℝ × ℝ → ℝ} {x : ℝ × ℝ}
   ((a9_differentiableAt_ofReal hψ).mul_const Complex.I).cexp
 
 /-- Joint differentiability of `arcModelRadius` along a moving state. -/
-private lemma a9_differentiableAt_radius {K : ℝ} {z : ℝ × ℝ → ℂ} {ψ : ℝ × ℝ → ℝ}
+private lemma a9_differentiableAt_radius {K : ℝ} {z : ℝ × ℝ → ℂ}
+    {ψ : ℝ × ℝ → ℝ}
     {x : ℝ × ℝ} (hz : DifferentiableAt ℝ z x) (hψ : DifferentiableAt ℝ ψ x)
     (hden : K + ⟪z x, Complex.I * Complex.exp ((ψ x : ℂ) * Complex.I)⟫_ℝ ≠ 0) :
     DifferentiableAt ℝ (fun p => arcModelRadius K (z p) (ψ p)) x := by
@@ -1272,14 +1235,12 @@ lemma a9Residual_differentiableAt {a c h L : ℝ} (ha : 1 < a)
       = c + ⟪z₁, Complex.I * Complex.exp ((φ₁ : ℂ) * Complex.I)⟫_ℝ := by
     simp only [a9D]
     rw [← hz₁def, ← hφ₁def]
-  -- the level-`a` denominator at the anchor is `rc·D/ra ≠ 0`
   have hs₁ne : a + ⟪z₁, Complex.I * Complex.exp ((φ₁ : ℂ) * Complex.I)⟫_ℝ ≠ 0 := by
     intro h0
     have h1 : arcModelRadius a z₁ φ₁ = a9ra a h :=
       a9_radius_qArc1 ha hac ⟨hh0, hh1, hwb⟩
     rw [arcModelRadius, h0, mul_zero, div_zero] at h1
     exact hra0.ne h1
-  -- base maps: the moving node-2 state (depends on `p.1` only)
   have hσ₂ : DifferentiableAt ℝ (fun p : ℝ × ℝ => (L / 4 + p.1)
       / arcModelRadius a n₁.1 n₁.2) (0, 0) := by
     simp only [div_eq_mul_inv]
@@ -1300,7 +1261,6 @@ lemma a9Residual_differentiableAt {a c h L : ℝ} (ha : 1 < a)
         = fun p => n₁.2 + (L / 4 + p.1) / arcModelRadius a n₁.1 n₁.2 := rfl
     rw [hfun]
     exact hσ₂.const_add n₁.2
-  -- anchor values of the node-2 state
   have hpt₂ : arcModelConst a n₁.1 n₁.2 (L / 4 + 0) = (z₁, φ₁ + 2 * π) :=
     a9_node2_anchor ha hac ⟨hh0, hh1, hwb⟩ hL0 him hφe
   have hz₂0 : (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1 = z₁ := by rw [hpt₂]
@@ -1318,12 +1278,10 @@ lemma a9Residual_differentiableAt {a c h L : ℝ} (ha : 1 < a)
       from rfl] at h1
     rw [h1]
     exact hrc0.ne'
-  -- node-3 maps
   have hz₃ := a9_differentiableAt_arc_fst (s := fun _ => L / 4) hz₂ hψ₂
     (differentiableAt_const _) hden₂ hr₃0
   have hψ₃ := a9_differentiableAt_arc_snd (s := fun _ => L / 4) hz₂ hψ₂
     (differentiableAt_const _) hden₂ hr₃0
-  -- anchor values of the node-3 state
   have hpt₃ : arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
       (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)
       = ((starRingEnd ℂ) z₁, 3 * π - φ₁ + 2 * π) :=
@@ -1366,12 +1324,10 @@ lemma a9Residual_differentiableAt {a c h L : ℝ} (ha : 1 < a)
       from rfl] at h1
     rw [h1]
     exact hra0.ne'
-  -- node-4 maps
   have hz₄ := a9_differentiableAt_arc_fst (s := fun p : ℝ × ℝ => L / 4 + p.2)
     hz₃ hψ₃ (differentiableAt_snd.const_add (L / 4)) hden₃ hr₄0
   have hψ₄ := a9_differentiableAt_arc_snd (s := fun p : ℝ × ℝ => L / 4 + p.2)
     hz₃ hψ₃ (differentiableAt_snd.const_add (L / 4)) hden₃ hr₄0
-  -- anchor values of the node-4 state and the terminal denominator
   have hpt₄ : arcModelConst a (arcModelConst c (arcModelConst a n₁.1 n₁.2
         (L / 4 + 0)).1 (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).2 (L / 4)).1
       (arcModelConst c (arcModelConst a n₁.1 n₁.2 (L / 4 + 0)).1
@@ -1400,7 +1356,6 @@ lemma a9Residual_differentiableAt {a c h L : ℝ} (ha : 1 < a)
       show (φ₁ + π + 2 * π : ℝ) = (φ₁ + π) + 2 * π by ring,
       expI_add_two_pi, hexpPi, mul_neg, inner_neg_neg, ← hDexp]
     exact hD0.ne'
-  -- assemble the endpoint map
   have hr₅ := a9_differentiableAt_radius (K := c) hz₄ hψ₄ hden₄
   exact DifferentiableAt.sub_const (hz₄.add ((a9_differentiableAt_ofReal hr₅).mul
     (((a9_differentiableAt_exp hψ₄).const_mul Complex.I).const_add 1)))

@@ -342,7 +342,6 @@ lemma neg_smooth_confined_quarter {δ h L : ℝ}
     rw [hedef, ← Real.exp_zero]; apply Real.exp_le_exp.mpr; rw [hLgval]; positivity
   have hEpos : (0 : ℝ) < E := Real.exp_pos _
   have hcoef : (2 : ℝ) / (1 - (4 / 5 : ℝ) ^ 2) = 50 / 9 := by norm_num
-  -- LEG 1 pointwise: `Φ` vs the confined constant-`(−3/10)` model, same start `W₀`.
   set M1 : ℝ → ℂ × ℝ := fun σ => arcModelConst (-3 / 10) W₀.1 π σ with hM1def
   have hra_ne : arcModelRadius (-3 / 10) W₀.1 π ≠ 0 := by
     rw [hW₀def]; exact ne_of_lt (by linarith [neg_ra_ub hh1 hh2])
@@ -376,7 +375,6 @@ lemma neg_smooth_confined_quarter {δ h L : ℝ}
       _ = e * (115 / 18 * δ) := by ring
   have hb1 : ‖Φ (L / 8) - qArc1 (-3 / 10) (h, L)‖ ≤ e * (115 / 18 * δ) := by
     have := hb1σ (L / 8) (Set.right_mem_Icc.mpr hL8); rwa [hM1_L8] at this
-  -- LEG 2 pointwise: shifted `Φ(L/8 + ·)` vs the confined constant-`2` model.
   set M2 : ℝ → ℂ × ℝ :=
     fun σ => arcModelConst 2 (qArc1 (-3 / 10) (h, L)).1 (qArc1 (-3 / 10) (h, L)).2 σ with hM2def
   have hrc_ne : arcModelRadius 2 (qArc1 (-3 / 10) (h, L)).1 (qArc1 (-3 / 10) (h, L)).2 ≠ 0 :=
@@ -418,7 +416,6 @@ lemma neg_smooth_confined_quarter {δ h L : ℝ}
       nlinarith [mul_le_mul_of_nonneg_left hI2 (by norm_num : (0 : ℝ) ≤ 50 / 9)]
     have hposE : (0 : ℝ) ≤ e := by linarith
     exact mul_le_mul_of_nonneg_left (by linarith [hb1, hstep]) hposE
-  -- `‖·.1‖ ≤ ‖·‖` projection and the margin bound.
   have hfst : ∀ w : ℂ × ℝ, ‖w.1‖ ≤ ‖w‖ := fun w => by rw [Prod.norm_def]; exact le_max_left _ _
   have hδe : e * (e * (115 / 18 * δ)) + e * (115 / 18 * δ) ≤ 1 / 20 := by
     have hGRC : negRobustConst = 115 / 18 * E * (E + 1) := by rw [negRobustConst, hEdef]
@@ -434,7 +431,6 @@ lemma neg_smooth_confined_quarter {δ h L : ℝ}
   have hδe1 : e * (115 / 18 * δ) ≤ 1 / 20 := by
     have hnn : (0 : ℝ) ≤ e * (e * (115 / 18 * δ)) := by positivity
     linarith [hδe, hnn]
-  -- Assemble confinement on `[0, L/4]`.
   intro σ hσ
   change ‖(Φ σ).1‖ ≤ 4 / 5
   rcases le_total σ (L / 8) with hσ8 | hσ8
@@ -514,9 +510,7 @@ lemma mixedProfile_confined {δ h L : ℝ}
     have hstep : (115 : ℝ) / 9 * δ ≤ 1 / 20 := by
       nlinarith [mul_le_mul_of_nonneg_right hlb hδ.le]
     nlinarith [hstep, hL1, hδ.le]
-  -- quarter-window confinement.
   have hquarter := neg_smooth_confined_quarter hδ hh1 hh2 hL1 hL2 hδfit hδC
-  -- the landing `Φ(L/4) ∈ Fix(X)`.
   have hland : arcFlow κ (4 / 5) L 2 4 (W₀, L / 4)
       = ((starRingEnd ℂ (arcFlow κ (4 / 5) L 2 4 (W₀, L / 4)).1,
           3 * π - (arcFlow κ (4 / 5) L 2 4 (W₀, L / 4)).2) : ℂ × ℝ) := by
@@ -526,7 +520,6 @@ lemma mixedProfile_confined {δ h L : ℝ}
     rw [hφe]; ring
   have hevenQ : ∀ σ, κ (L / 2 - σ) = κ σ := fun σ =>
     arcRampProfile_evenQ hLpos.ne' (-3 / 10) 2 δ σ
-  -- confinement on `[0, L/2]` via the mirror reversal.
   have hrev := arcRev_eqOn hκc (by norm_num) hR1 hLpos hκabs hevenQ 4 hW₀mem hland
   have hhalf : ∀ σ ∈ Set.Icc (0 : ℝ) (L / 2), ‖(Φ σ).1‖ ≤ 4 / 5 := by
     intro σ hσ
@@ -536,7 +529,6 @@ lemma mixedProfile_confined {δ h L : ℝ}
       have h1 : (Φ σ).1 = starRingEnd ℂ (Φ (L / 2 - σ)).1 := congrArg Prod.fst heq
       rw [h1, Complex.norm_conj]
       exact hquarter (L / 2 - σ) ⟨by linarith [hσ.2], by linarith [h4]⟩
-  -- half-period match, then confinement on `[L/2, L]` via central symmetry.
   have hmatch := exists_halfPeriodMatch_zmatch hκc (by norm_num) hR1 hLpos hκabs hevenQ 4
     hW₀mem hRe hφ0 hland
   have hcentral := arcClosure_eqOn hκc hR hR1 hL0 hκabs

@@ -89,7 +89,6 @@ private lemma exists_alignmentData {κ : ℝ → ℝ} (h : MixedSignFourVertex �
       κ r₁ = a ∧ κ r₂ = b ∧ κ r₃ = a ∧ κ r₄ = b := by
   obtain ⟨hcont, hper, p₁, q₁, p₂, q₂, hp1q1, hq1p2, hp2q2, hq2p1,
     _hmax1, _hmax2, _hmin1, _hmin2, hsep, hMpos⟩ := h
-  -- The two value-levels: `m` = larger minimum value, `M` = smaller maximum value.
   set m := max (κ q₁) (κ q₂) with hm
   set M := min (κ p₁) (κ p₂) with hMdef
   have hmM : m < M := hsep
@@ -98,7 +97,6 @@ private lemma exists_alignmentData {κ : ℝ → ℝ} (h : MixedSignFourVertex �
   have hcm : m ≤ max 0 m := le_max_right _ _
   have hcM : max 0 m < M := max_lt hM hmM
   have hg : 0 < M - max 0 m := by linarith
-  -- Pick two interior levels `a < b` in the (nonempty) gap `(max 0 m, M)`.
   set a := max 0 m + (M - max 0 m) / 3 with hadef
   set b := max 0 m + 2 * (M - max 0 m) / 3 with hbdef
   have ha_pos : 0 < a := by rw [hadef]; linarith
@@ -106,7 +104,6 @@ private lemma exists_alignmentData {κ : ℝ → ℝ} (h : MixedSignFourVertex �
   have hab : a < b := by rw [hadef, hbdef]; linarith
   have haM : a < M := by rw [hadef]; linarith
   have hbM : b < M := by rw [hbdef]; linarith
-  -- One-sided value bounds at the four extrema.
   have hq1c : κ q₁ ≤ max 0 m := le_trans (le_max_left _ _) hcm
   have hq2c : κ q₂ ≤ max 0 m := le_trans (le_max_right _ _) hcm
   have hMp1 : M ≤ κ p₁ := min_le_left _ _
@@ -124,7 +121,6 @@ private lemma exists_alignmentData {κ : ℝ → ℝ} (h : MixedSignFourVertex �
   have h2 : q₁ ≤ p₂ := hq1p2.le
   have h3 : p₂ ≤ q₂ := hp2q2.le
   have h4 : q₂ ≤ p₁ + 2 * π := hq2p1.le
-  -- Four IVT invocations on the four flanks.
   obtain ⟨r₁, hr1mem, hr1⟩ := ivt_hits hcont h1 (by
     rw [Set.mem_Icc]
     exact ⟨(min_le_right _ _).trans hq1a, hap1.trans (le_max_left _ _)⟩)
@@ -383,21 +379,16 @@ private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ
   intro ε hε
   have hκcont : Continuous κ := h.1
   have hπ : 0 < π := Real.pi_pos
-  -- Tolerance `ε'` for the modulus of continuity: the plateaus contribute
-  -- `≤ ε' · 2π` to the `L¹` integral, so we will need `ε' · 2π ≤ ε/2`.
   set ε' : ℝ := ε / (4 * π) with hε'def
   have hε' : 0 < ε' := by rw [hε'def]; positivity
-  -- The four pointwise moduli of continuity at the crossing points `rⱼ`.
   obtain ⟨ρ₁, hρ₁, hm1⟩ := kappa_modulus_at hκcont r₁ hε'
   obtain ⟨ρ₂, hρ₂, hm2⟩ := kappa_modulus_at hκcont r₂ hε'
   obtain ⟨ρ₃, hρ₃, hm3⟩ := kappa_modulus_at hκcont r₃ hε'
   obtain ⟨ρ₄, hρ₄, hm4⟩ := kappa_modulus_at hκcont r₄ hε'
-  -- Half-gaps between successive crossing points.
   have hgap₁ : 0 < (r₂ - r₁) / 2 := by linarith
   have hgap₂ : 0 < (r₃ - r₂) / 2 := by linarith
   have hgap₃ : 0 < (r₄ - r₃) / 2 := by linarith
   have hgap₄ : 0 < (r₁ + 2 * π - r₄) / 2 := by linarith
-  -- A single positive lower bound `M` for all four moduli and half-gaps.
   set M : ℝ := min (min (min ρ₁ ρ₂) (min ρ₃ ρ₄))
       (min (min ((r₂ - r₁) / 2) ((r₃ - r₂) / 2))
            (min ((r₄ - r₃) / 2) ((r₁ + 2 * π - r₄) / 2))) with hMdef
@@ -417,16 +408,10 @@ private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ
     rw [hMdef]
     exact lt_min (lt_min (lt_min hρ₁ hρ₂) (lt_min hρ₃ hρ₄))
       (lt_min (lt_min hgap₁ hgap₂) (lt_min hgap₃ hgap₄))
-  -- A uniform bound `N` on `|κ|` (continuous, `2π`-periodic), used to control the
-  -- integrand on the transition gaps in the `L¹` estimate.
   obtain ⟨N, hN⟩ := exists_kappa_bound hκcont h.2.1
   have hNnn : 0 ≤ N := le_trans (abs_nonneg _) (hN 0)
   have hNb1 : 0 < N + b + 1 := by linarith [ha, hab]
-  -- Plateau radius: half of `M`, so strictly below every half-gap and modulus.
   set ρ : ℝ := M / 2 with hρdef
-  -- Flank width parameter `δ`: small enough that `δ < π/2`, that the plateau
-  -- estimate gives `ε'·2π ≤ ε/2`, AND that the four gaps contribute
-  -- `(N+b)·4δ < ε/2` to the integral.
   set δ : ℝ := min (min (ε' / 8) (π / 4)) (ε / (8 * (N + b + 1))) with hδdef
   have hρpos : 0 < ρ := by rw [hρdef]; linarith
   have hδpos : 0 < δ := by
@@ -445,19 +430,16 @@ private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ
   have hρle₂ : ρ ≤ ρ₂ := by rw [hρdef]; linarith
   have hρle₃ : ρ ≤ ρ₃ := by rw [hρdef]; linarith
   have hρle₄ : ρ ≤ ρ₄ := by rw [hρdef]; linarith
-  -- The calibrated continuous plateau density `w` (needs only the crossing data).
   obtain ⟨w, hw, hwpos, hwper, hwint, hpl1, hpl2, hpl3, hpl4⟩ :=
     exists_plateau_density (m₀ := (r₁ + r₄) / 2 - π) h12 h23 h34 h41 rfl
       hρpos hδpos hδlt hfit₁ hfit₂ hfit₃ hfit₄
   set m₀ : ℝ := (r₁ + r₄) / 2 - π with hm₀def
-  -- The cumulative reparametrisation `h₁` and its derivative (FTC).
   set h₁ : ℝ → ℝ := fun θ => m₀ + ∫ s in (0:ℝ)..θ, w s with hh₁def
   have hh₁deriv : ∀ θ, HasDerivAt h₁ (w θ) θ := fun θ => by
     have hd : HasDerivAt (fun θ : ℝ => ∫ s in (0:ℝ)..θ, w s) (w θ) θ :=
       intervalIntegral.integral_hasDerivAt_right (hw.intervalIntegrable 0 θ)
         (hw.stronglyMeasurableAtFilter _ _) hw.continuousAt
     simpa only [hh₁def] using hd.const_add m₀
-  -- `h₁` is orientation-preserving and quasi-periodic.
   have hh₁per : ∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π := by
     intro θ
     have hadd : (∫ s in (0:ℝ)..θ, w s) + (∫ s in θ..(θ + 2 * π), w s)
@@ -469,7 +451,6 @@ private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ
     rw [zero_add] at hshift
     simp only [hh₁def]
     rw [← hadd, hshift, hwint]; ring
-  -- The diffeomorphism `η = h₁(· + π/4)` and its derivative `v = w(· + π/4)`.
   refine ⟨fun θ => h₁ (θ + π / 4), ⟨fun θ => w (θ + π / 4), ?_, ?_, ?_⟩, ?_, ?_⟩
   · -- continuity of `v`
     exact hw.comp (continuous_id.add continuous_const)
@@ -487,7 +468,6 @@ private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ
     have : t + 2 * π + π / 4 = (t + π / 4) + 2 * π := by ring
     rw [this, hh₁per (t + π / 4)]
   · -- The `L¹` estimate: `∫₀²π |κ(h₁(t+π/4)) - cleanBicircle a b t| dt < ε`.
-    -- Beta-reduce the composite `η = h₁(· + π/4)` in the goal.
     change (∫ t in (0:ℝ)..(2 * π),
         |κ (h₁ (t + π / 4)) - cleanBicircle a b t|) < ε
     have hπne : π ≠ 0 := hπ.ne'
@@ -496,7 +476,6 @@ private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ
     have hh₁cont : Continuous h₁ := hh₁diff.continuous
     have hcompcont : Continuous (fun t => κ (h₁ (t + π / 4))) :=
       hκcont.comp (hh₁cont.comp (continuous_id.add continuous_const))
-    -- The integrand `F`.
     set F : ℝ → ℝ := fun t => |κ (h₁ (t + π / 4)) - cleanBicircle a b t| with hFdef
     change (∫ t in (0:ℝ)..(2 * π), F t) < ε
     have hFii_all : ∀ p q, IntervalIntegrable F volume p q := by
@@ -504,9 +483,7 @@ private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ
       simp only [hFdef]
       exact ((hcompcont.intervalIntegrable p q).sub
         (cleanBicircle_intervalIntegrable a b p q)).abs
-    -- Triangle inequality `|x - y| ≤ |x| + |y|`.
     have htri : ∀ x y : ℝ, |x - y| ≤ |x| + |y| := fun x y => abs_sub x y
-    -- Universal bound `N + b` on the integrand (used on the four transition gaps).
     have hFle : ∀ t, F t ≤ N + b := by
       intro t
       simp only [hFdef]
@@ -514,7 +491,6 @@ private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ
         have hb := cleanBicircle_bounds a b t hab.le
         rw [abs_le]; exact ⟨by linarith [hb.1, ha], hb.2⟩
       exact (htri _ _).trans (by linarith [hN (h₁ (t + π / 4))])
-    -- The clean-bicircle value: `b` on the two `b`-arcs, `a` elsewhere on `[0,2π]`.
     have hclean_b : ∀ t : ℝ, 0 ≤ t → t ≤ 2 * π →
         t ∈ Set.Ioo (π / 4) (3 * π / 4) ∪ Set.Ioo (5 * π / 4) (7 * π / 4) →
         cleanBicircle a b t = b := by
@@ -525,13 +501,11 @@ private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ
         cleanBicircle a b t = a := by
       intro t h0 h2 hmem
       simp only [cleanBicircle, dahlbergF_on_period h0 h2, Set.indicator_of_notMem hmem]; ring
-    -- `κ X` is within `ε'` of a crossing value, given `X` close to the crossing point.
     have kappa_close : ∀ (X rk ρk val : ℝ),
         (∀ s, |s - rk| ≤ ρk → |κ s - κ rk| ≤ ε') →
         |X - rk| ≤ ρk → κ rk = val → |κ X - val| ≤ ε' := by
       intro X rk ρk val hmod hclose hval
       rw [← hval]; exact hmod X hclose
-    -- The eight interior breakpoints.
     set s1 := π / 4 - δ / 2 with hs1
     set s2 := π / 4 + δ / 2 with hs2
     set s3 := 3 * π / 4 - δ / 2 with hs3
@@ -549,7 +523,6 @@ private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ
     have o6 : s6 < s7 := by rw [hs6, hs7]; linarith
     have o7 : s7 < s8 := by rw [hs7, hs8]; linarith
     have o8 : s8 < 2 * π := by rw [hs8]; linarith
-    -- Length identities for the nine pieces.
     have l_p1 : s1 - 0 = π / 4 - δ / 2 := by rw [hs1]; ring
     have l_p2 : s3 - s2 = π / 2 - δ := by rw [hs2, hs3]; ring
     have l_p3 : s5 - s4 = π / 2 - δ := by rw [hs4, hs5]; ring
@@ -559,7 +532,6 @@ private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ
     have l_g2 : s4 - s3 = δ := by rw [hs3, hs4]; ring
     have l_g3 : s6 - s5 = δ := by rw [hs5, hs6]; ring
     have l_g4 : s8 - s7 = δ := by rw [hs7, hs8]; ring
-    -- Constant-integral evaluations.
     have cp1 : (∫ _t in (0:ℝ)..s1, ε') = (π / 4 - δ / 2) * ε' := by
       rw [intervalIntegral.integral_const, smul_eq_mul, l_p1]
     have cp2 : (∫ _t in s2..s3, ε') = (π / 2 - δ) * ε' := by
@@ -578,7 +550,6 @@ private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ
       rw [intervalIntegral.integral_const, smul_eq_mul, l_g3]
     have cg4 : (∫ _t in s7..s8, (N + b)) = δ * (N + b) := by
       rw [intervalIntegral.integral_const, smul_eq_mul, l_g4]
-    -- Plateau bounds (integrand `≤ ε'`).
     have bQ1a : (∫ t in (0:ℝ)..s1, F t) ≤ (π / 4 - δ / 2) * ε' := by
       rw [← cp1]
       apply intervalIntegral.integral_mono_on o0.le (hFii_all 0 s1) intervalIntegrable_const
@@ -622,7 +593,6 @@ private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ
       simp only [hFdef]
       rw [hclean_a t (by linarith) (by linarith)
         (by rintro (⟨hh1, hh2⟩ | ⟨hh1, hh2⟩) <;> linarith)]
-      -- The first plateau wraps around `2π`: use periodicity of `h₁` and `κ`.
       have hper_eq : κ (h₁ (t + π / 4)) = κ (h₁ (t + π / 4 - 2 * π)) := by
         have hpe : h₁ (t + π / 4 - 2 * π + 2 * π) = h₁ (t + π / 4 - 2 * π) + 2 * π :=
           hh₁per (t + π / 4 - 2 * π)
@@ -631,7 +601,6 @@ private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ
       rw [hper_eq]
       exact kappa_close _ r₁ ρ₁ a hm1
         (le_trans (hpl1 (t + π / 4 - 2 * π) (by linarith) (by linarith)) hρle₁) hr1
-    -- Gap bounds (integrand `≤ N + b`).
     have bg1 : (∫ t in s1..s2, F t) ≤ δ * (N + b) := by
       rw [← cg1]
       exact intervalIntegral.integral_mono_on o1.le (hFii_all s1 s2)
@@ -648,7 +617,6 @@ private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ
       rw [← cg4]
       exact intervalIntegral.integral_mono_on o7.le (hFii_all s7 s8)
         intervalIntegrable_const (fun t _ => hFle t)
-    -- The nine-piece split.
     have hsplit9 :
         (∫ t in (0:ℝ)..s1, F t) + (∫ t in s1..s2, F t) + (∫ t in s2..s3, F t) +
         (∫ t in s3..s4, F t) + (∫ t in s4..s5, F t) + (∫ t in s5..s6, F t) +
@@ -662,13 +630,11 @@ private lemma exists_eta_clean_L1 {κ : ℝ → ℝ} (h : MixedSignFourVertex κ
           intervalIntegral.integral_add_adjacent_intervals (hFii_all 0 s6) (hFii_all s6 s7),
           intervalIntegral.integral_add_adjacent_intervals (hFii_all 0 s7) (hFii_all s7 s8),
           intervalIntegral.integral_add_adjacent_intervals (hFii_all 0 s8) (hFii_all s8 (2 * π))]
-    -- The final arithmetic: plateaus contribute `≤ ε'·(2π) = ε/2`, gaps `< ε/2`.
     have hε'2pi : ε' * (2 * π) = ε / 2 := by rw [hε'def]; field_simp; ring
     have hK1' : (0:ℝ) < 8 * (N + b + 1) := by linarith
     have hδgap' : δ * (8 * (N + b + 1)) ≤ ε := (le_div_iff₀ hK1').1 hδgap
     have hgap_lt : 4 * (N + b) * δ < ε / 2 := by nlinarith [hδgap', hδpos, hNnn, ha, hab]
     rw [← hsplit9]
-    -- Sum the nine piece-bounds, then close arithmetically.
     have hsum : (∫ t in (0:ℝ)..s1, F t) + (∫ t in s1..s2, F t) + (∫ t in s2..s3, F t) +
         (∫ t in s3..s4, F t) + (∫ t in s4..s5, F t) + (∫ t in s5..s6, F t) +
         (∫ t in s6..s7, F t) + (∫ t in s7..s8, F t) + (∫ t in s8..(2 * π), F t)
@@ -708,12 +674,10 @@ theorem exists_preliminaryDiffeo {κ : ℝ → ℝ} (h : MixedSignFourVertex κ)
       (∀ θ, κ (η θ) = cleanBicircle a b θ + e θ) ∧
       (∫ t in (0 : ℝ)..(2 * π), |e t|) < C * ε ∧
       |(∫ t in (0 : ℝ)..(2 * π), κ (η t)) - (a + b) * π| < C * ε := by
-  -- The constant `C = 1` works: the core lemma already delivers `∫|e| < ε`.
   obtain ⟨a, b, ha, hab, hcore⟩ := exists_eta_clean_L1 h
   refine ⟨a, b, ha, hab, 1, one_pos, ?_⟩
   intro ε hε
   obtain ⟨η, ⟨v, hvc, hvpos, hvderiv⟩, hηper, hL1⟩ := hcore ε hε
-  -- Define the error `e = κ∘η - cleanBicircle a b`.
   have hκcont : Continuous κ := h.1
   have hκper : Function.Periodic κ (2 * π) := h.2.1
   have hηdiff : Differentiable ℝ η := fun θ => (hvderiv θ).differentiableAt

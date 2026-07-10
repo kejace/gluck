@@ -4,11 +4,11 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
 import Gluck.Hyperbolic.ArcLength
-import Gluck.Hyperbolic.MixedSign
-import Gluck.Hyperbolic.Family
-import Gluck.Hyperbolic.Exact
 import Gluck.Hyperbolic.Converse
+import Gluck.Hyperbolic.Exact
+import Gluck.Hyperbolic.Family
 import Gluck.Hyperbolic.Mixed
+import Gluck.Hyperbolic.MixedSign
 
 /-!
 # The hyperbolic converse to the four-vertex theorem (H², K = −1) — aggregator

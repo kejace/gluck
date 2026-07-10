@@ -77,18 +77,13 @@ theorem signedCurvature_of_realizesCurvature {γ : ℝ → ℂ} {κ : ℝ → �
     ∀ t, signedCurvature γ t = κ t := by
   obtain ⟨_, _, φ, hφ, htan, hcurv⟩ := hrc
   intro t
-  -- the velocity speed `v = ‖γ'‖`
   set v : ℝ → ℝ := fun s => ‖deriv γ s‖ with hv_def
   have hv_pos : 0 < v t := norm_pos_iff.mpr (hreg t)
-  -- the velocity in the explicit form `v t · e^{iφ t}`
   have hd1 : deriv γ t = (↑(v t) : ℂ) * Complex.exp (↑(φ t) * Complex.I) := htan t
-  -- `deriv γ` as a function, for differentiation
   have hgeq : deriv γ = fun s => (↑(v s) : ℂ) * Complex.exp (↑(φ s) * Complex.I) := by
     funext s; exact htan s
-  -- differentiability of the speed at `t`
   have hdγ_diff : DifferentiableAt ℝ (deriv γ) t := hγ2.differentiable_deriv_two t
   have hv_diff : DifferentiableAt ℝ v t := hdγ_diff.norm ℂ (hreg t)
-  -- `HasDerivAt` facts (the explicit values of the derivatives cancel later)
   set vd : ℝ := deriv v t with hvd_def
   have hv_hd : HasDerivAt v vd t := hv_diff.hasDerivAt
   have hvc : HasDerivAt (fun s => (↑(v s) : ℂ)) (↑vd : ℂ) t := hv_hd.ofReal_comp
@@ -98,7 +93,6 @@ theorem signedCurvature_of_realizesCurvature {γ : ℝ → ℂ} {κ : ℝ → �
     hφ_hd.ofReal_comp.mul_const Complex.I
   have hexp : HasDerivAt (fun s => Complex.exp ((↑(φ s) : ℂ) * Complex.I))
       (Complex.exp ((↑(φ t) : ℂ) * Complex.I) * ((↑pd : ℂ) * Complex.I)) t := hI.cexp
-  -- the second derivative via the product rule
   have hprod : HasDerivAt (deriv γ)
       ((↑vd : ℂ) * Complex.exp ((↑(φ t) : ℂ) * Complex.I)
         + (↑(v t) : ℂ) *
@@ -108,12 +102,10 @@ theorem signedCurvature_of_realizesCurvature {γ : ℝ → ℂ} {κ : ℝ → �
       (↑vd : ℂ) * Complex.exp ((↑(φ t) : ℂ) * Complex.I)
         + (↑(v t) : ℂ) *
             (Complex.exp ((↑(φ t) : ℂ) * Complex.I) * ((↑pd : ℂ) * Complex.I)) := hprod.deriv
-  -- real/imaginary parts of `e^{iφ}`
   have he_re : (Complex.exp (↑(φ t) * Complex.I)).re = Real.cos (φ t) :=
     Complex.exp_ofReal_mul_I_re _
   have he_im : (Complex.exp (↑(φ t) * Complex.I)).im = Real.sin (φ t) :=
     Complex.exp_ofReal_mul_I_im _
-  -- real/imaginary parts of the velocity and the second derivative
   have hvel_re : (deriv γ t).re = v t * Real.cos (φ t) := by
     rw [hd1]; simp [Complex.mul_re, he_re, he_im]
   have hvel_im : (deriv γ t).im = v t * Real.sin (φ t) := by
@@ -128,9 +120,7 @@ theorem signedCurvature_of_realizesCurvature {γ : ℝ → ℂ} {κ : ℝ → �
     rw [hsecond]
     simp [Complex.add_im, Complex.mul_re, Complex.mul_im, he_re, he_im]
     ring
-  -- `φ'(t) = κ(t) · v(t)`
   have hpd : pd = κ t * v t := hcurv t
-  -- assemble
   have hnorm : ‖deriv γ t‖ = v t := rfl
   have hcs : Real.cos (φ t) ^ 2 + Real.sin (φ t) ^ 2 = 1 := Real.cos_sq_add_sin_sq _
   unfold signedCurvature

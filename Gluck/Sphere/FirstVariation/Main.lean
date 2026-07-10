@@ -581,7 +581,6 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
   have hσ1 : ‖δ‖ ≤ 1 / 4096 := le_trans hz₀ (by linarith)
   have hh1' : h ≤ 1 / 4096 := le_trans hh1 (by linarith)
   have hσsq : ‖δ‖ ^ 2 ≤ ‖δ‖ * (1 / 4096) := by nlinarith
-  -- frame values at the four quarter angles
   have hV0 : Complex.I * Complex.exp (((0 : ℝ) : ℂ) * Complex.I) = Complex.I :=
     I_mul_expI_zero
   have hV1 : Complex.I * Complex.exp (((π / 2 : ℝ) : ℂ) * Complex.I) = -1 :=
@@ -590,14 +589,12 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
     I_mul_expI_pi
   have hV3 : Complex.I * Complex.exp (((3 * π / 2 : ℝ) : ℂ) * Complex.I) = 1 :=
     I_mul_expI_three_pi_div_two
-  -- inner products of the deviation against the frame values
   have hi0 : ⟪δ, Complex.I⟫_ℝ = δ.im := real_inner_I' δ
   have hi1 : ⟪δ, (-1 : ℂ)⟫_ℝ = -δ.re := real_inner_neg_one δ
   have hi2 : ⟪δ, -Complex.I⟫_ℝ = -δ.im := real_inner_neg_I δ
   have hi3 : ⟪δ, (1 : ℂ)⟫_ℝ = δ.re := real_inner_one' δ
   have hδre : |δ.re| ≤ ‖δ‖ := Complex.abs_re_le_norm δ
   have hδim : |δ.im| ≤ ‖δ‖ := Complex.abs_im_le_norm δ
-  -- bracket at the start and the circle radius `r`
   have hz₀eq : z₀ = δ - (s - c) • Complex.I := by rw [hδdef]; abel
   have hz₀I : ⟪z₀, Complex.I⟫_ℝ = ⟪δ, Complex.I⟫_ℝ - (s - c) := by
     rw [hz₀eq, inner_sub_left, real_inner_smul_left, real_inner_self_eq_norm_sq,
@@ -625,7 +622,6 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
       _ = ‖δ‖ ^ 2 := div_one _
   obtain ⟨hrs_rlo, hrs_rhi⟩ := abs_le.mp hrs_r
   have hr_pos : 0 < r := by nlinarith
-  -- the reference circle through `z₀`
   set W : ℂ := z₀ + Complex.I * (r : ℂ) with hWdef
   have hWδ : W = δ + Complex.I * ((r - (s - c) : ℝ) : ℂ) := by
     rw [hWdef, hδdef, Complex.real_smul]
@@ -638,7 +634,6 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
     linarith only [hrs_r]
   have hcons0 := constant_arc_consistency (K := c) (θ₀ := 0) (z₀ := z₀) hbr0
   rw [← hrdef, expI_zero, mul_one, ← hWdef] at hcons0
-  -- bracket positivity along the whole reference circle
   have hposθ : ∀ φ : ℝ, 0 < c - ⟪W - Complex.I * (r : ℂ)
       * Complex.exp ((φ : ℂ) * Complex.I),
       Complex.I * Complex.exp ((φ : ℂ) * Complex.I)⟫_ℝ := by
@@ -650,11 +645,9 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
       rwa [norm_I_expI, mul_one] at h2
     have h3 := (abs_le.mp h1).2
     nlinarith [hσsq]
-  -- gauge speed along the reference circle is constant `r`
   have hsp : ∀ φ : ℝ, sphericalSpeed (fun _ => c) φ
       (W - Complex.I * (r : ℂ) * Complex.exp ((φ : ℂ) * Complex.I)) = r :=
     fun φ => (constant_curvature_arc hcons0 (hposθ φ)).1
-  -- the circle points at the quarter angles
   have hy₁eq : W - Complex.I * (r : ℂ)
       * Complex.exp (((π / 2 : ℝ) : ℂ) * Complex.I) = W + (r : ℂ) :=
     circlePoint_pi_div_two W r
@@ -673,7 +666,6 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
   have hsp₃ : sphericalSpeed (fun _ => c) (3 * π / 2) (W - (r : ℂ)) = r := by
     have h1 := hsp (3 * π / 2)
     rwa [hy₃eq] at h1
-  -- the perturbed trajectory: speeds and step identities
   set Q₀ : ℝ := sphericalSpeed (fun _ => c - h / 2) 0 z₀ with hQ₀def
   set z₁ : ℂ := sphericalArcMap (c - h / 2) 0 (π / 2) z₀ with hz₁def
   set Q₁ : ℝ := sphericalSpeed (fun _ => c + h / 2) (π / 2) z₁ with hQ₁def
@@ -696,7 +688,6 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
     have h4 := stepErrorMap_four_arc (c - h / 2) (c + h / 2) z₀
     rw [← hz₁def, ← hz₂def, ← hz₃def, hstep₃, hstep₂, hstep₁, hstep₀] at h4
     linear_combination h4
-  -- zeroth-order trajectory difference and its inner products
   set κ : ℝ := (s - c) * h / (2 * s) with hκdef
   have hκ0 : 0 ≤ κ := by
     rw [hκdef]
@@ -709,7 +700,6 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
   have hig2 : ⟪δ, (κ : ℂ) * 2⟫_ℝ = 2 * κ * δ.re := real_inner_kappa_two δ κ
   have hig3 : ⟪δ, (κ : ℂ) * (1 - Complex.I)⟫_ℝ = κ * (δ.re - δ.im) :=
     real_inner_kappa_one_sub_I δ κ
-  -- norms of the constant directions
   have hn1I : ‖(1 : ℂ) + Complex.I‖ ≤ 2 := norm_one_add_I_le_two
   have hn1I' : ‖(1 : ℂ) - Complex.I‖ ≤ 2 := norm_one_sub_I_le_two
   have hnm1I : ‖(-1 : ℂ) + Complex.I‖ ≤ 2 := norm_neg_one_add_I_le_two
@@ -739,7 +729,6 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
     have h4 : fr * (h / 2) ≤ h / 2 := by nlinarith only [hx2, hh0.le]
     exact mul_le_mul h4 hx3 (abs_nonneg x)
       (by linarith)
-  -- error-budget smallness and the κ-quotient bound, shared by the arc lemmas
   have hEBh : 3200 * h * ‖δ‖ ^ 2 + 60 * h ^ 2 ≤ h / 8 := by
     have e1 : 3200 * h * ‖δ‖ ^ 2 ≤ h * (3200 / 4096 / 4096) := by
       nlinarith only [hσsq, hσ1, hσ0, hh0.le]
@@ -757,23 +746,18 @@ lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
         (by norm_num) hs1
     rw [div_one] at h6
     nlinarith only [h5, h6]
-  -- ARC 0: level `c − h/2` at angle `0`, actual = reference = `z₀`, `G = 0`
   obtain ⟨harc₀, hQ₀r, hQ₀κ⟩ := stepError_arc0 hc hh0 hεpos hz₀ hh1 hsdef hs2
     hσ1 hδdef hV0 hi0 hrdef hQ₀def hκdef hEBh hδim habs_split hfr1 hfr2 hfrmul
-  -- ARC 1: level `c + h/2` at angle `π/2`, reference `W + r`, `G = κ(1+i)`
   obtain ⟨harc₁, hQ₁r, hQ₁κ⟩ := stepError_arc1 hc hh0 hεneg hz₀ hh1 hsdef hs2
     hσ0 hσ1 hδdef hWdef hV1 hi1 hig1 hsp₁ hrs_r hκ0 hκh hκdef hδre hEBh hthird
     habs_split hσ2h hstep₀ hQ₁def hcmul hn1I hfr1 hfr2 hfrmul hQ₀r hQ₀κ
-  -- ARC 2: level `c − h/2` at angle `π`, reference `W + i·r`, `G = 2κ`
   obtain ⟨harc₂, hQ₂r, hQ₂κ⟩ := stepError_arc2 hc hh0 hεpos hz₀ hh1 hsdef hs2
     hσ0 hσ1 hδdef hWdef hV2 hi2 hig2 hsp₂ hrs_r hκ0 hκh hκdef hδim hEBh hthird
     hσ2h hstep₀ hstep₁ hQ₂def hcmul hn1I hnm1I hn2I hfr1 hfr2 hfrmul hQ₀r hQ₁r
     hQ₀κ hQ₁κ
-  -- ARC 3: level `c + h/2` at angle `3π/2`, reference `W − r`, `G = κ(1−i)`
   have harc₃ := stepError_arc3 hc hh0 hεneg hz₀ hh1 hsdef hs2 hσ0 hδdef hWdef
     hV3 hi3 hig3 hsp₃ hrs_r hκ0 hκh hσ2h hstep₀ hstep₁ hstep₂ hQ₃def hcmul
     hn1I hnm1I hnm1I' hn1I' hQ₀r hQ₁r hQ₂r hQ₀κ hQ₁κ hQ₂κ
-  -- assemble: the four main terms collapse to the conjugation
   have hsum := stepError_assembly_identity δ
     (stepErrorMap (c - h / 2) (c + h / 2) z₀) Q₀ Q₁ Q₂ Q₃ r s c h κ
     (by linarith : (0 : ℝ) < s).ne' hκdef hE
