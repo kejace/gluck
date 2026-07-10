@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
 import Gluck.Sphere.Admissible
+import Gluck.Internal.ComplexExp
 
 /-!
 # Arc algebra for the endpoint winding frontier (S2-D)
@@ -145,13 +146,6 @@ lemma constant_curvature_arc {K r : ℝ} {w : ℂ}
   rw [Complex.real_smul]
   exact h
 
-/-- Half-turn of the unit tangent: `e^{i(θ+π)} = −e^{iθ}`. -/
-private lemma expI_add_pi (θ : ℝ) :
-    Complex.exp (((θ + π : ℝ) : ℂ) * Complex.I)
-      = -Complex.exp ((θ : ℂ) * Complex.I) := by
-  push_cast
-  rw [add_mul, Complex.exp_add, Complex.exp_pi_mul_I, mul_neg_one]
-
 /-- **Half-turn invariance of the truncated speed** for `π`-periodic `κ`:
 `q̂(θ+π, −z) = q̂(θ, z)`. Every ingredient is unchanged: `‖−z‖ = ‖z‖`,
 `⟪−z, i·e^{i(θ+π)}⟫ = ⟪z, i·e^{iθ}⟫`, and `κ(θ+π) = κ(θ)`.
@@ -160,7 +154,7 @@ lemma truncatedSpeed_half_turn {κ : ℝ → ℝ} {R δ : ℝ}
     (hπ : ∀ θ, κ (θ + π) = κ θ) (θ : ℝ) (z : ℂ) :
     truncatedSpeed κ R δ (θ + π) (-z) = truncatedSpeed κ R δ θ z := by
   unfold truncatedSpeed
-  rw [norm_neg, hπ θ, expI_add_pi θ, mul_neg, inner_neg_neg]
+  rw [norm_neg, hπ θ, Internal.expI_add_pi θ, mul_neg, inner_neg_neg]
 
 /-- **Half-turn equivariance of the truncated field** for `π`-periodic `κ`:
 `F(θ+π, −z) = −F(θ, z)` — the speed is invariant and the tangent flips sign.
@@ -169,7 +163,7 @@ lemma truncatedField_half_turn {κ : ℝ → ℝ} {R δ : ℝ}
     (hπ : ∀ θ, κ (θ + π) = κ θ) (θ : ℝ) (z : ℂ) :
     truncatedField κ R δ (θ + π) (-z) = -truncatedField κ R δ θ z := by
   unfold truncatedField
-  rw [truncatedSpeed_half_turn hπ, expI_add_pi, smul_neg]
+  rw [truncatedSpeed_half_turn hπ, Internal.expI_add_pi, smul_neg]
 
 /-- **Half-turn equivariance of trajectories.** For `π`-periodic `κ`, if `z`
 solves the truncated ODE on `[0, 2π]` and satisfies the anti-periodic seed
@@ -296,7 +290,7 @@ lemma sphericalSpeed_half_turn {κ : ℝ → ℝ} (hπ : ∀ θ, κ (θ + π) = 
     (θ : ℝ) (z : ℂ) :
     sphericalSpeed κ (θ + π) (-z) = sphericalSpeed κ θ z := by
   unfold sphericalSpeed
-  rw [norm_neg, hπ θ, expI_add_pi θ, mul_neg, inner_neg_neg]
+  rw [norm_neg, hπ θ, Internal.expI_add_pi θ, mul_neg, inner_neg_neg]
 
 /-- **Half-turn anti-equivariance of the arc map**:
 `A_{K,θ₀+π,Δ}(−z) = −A_{K,θ₀,Δ}(z)` — the speed is half-turn invariant and
@@ -308,7 +302,7 @@ lemma sphericalArcMap_half_turn (K θ₀ Δ : ℝ) (z : ℂ) :
       = sphericalSpeed (fun _ => K) θ₀ z :=
     sphericalSpeed_half_turn (fun _ => rfl) θ₀ z
   unfold sphericalArcMap
-  rw [hq, expI_add_pi θ₀]
+  rw [hq, Internal.expI_add_pi θ₀]
   ring
 
 /-- Splitting the unit tangent over a sum of angles:

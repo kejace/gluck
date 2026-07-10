@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
 import Gluck.Hyperbolic.Family.TurningB
+import Gluck.Internal.ComplexExp
 
 /-!
 # Fork A · ALM-A8.5–A8.6: Klein equivariance and the turning root selection
@@ -26,14 +27,6 @@ are reflected/translated images of the two anchor quarter-arcs, so the closure
 follows from four equivariance identities of `arcModelConst` (central reflection
 `ρ`, conjugate mirror `X` with time reversal, phase period `2π`, and the
 semigroup law) — no ODE and no new anchor equations. -/
-
-/-- `e^{i(φ+π)} = −e^{iφ}`. -/
-private lemma expI_add_pi (φ : ℝ) :
-    Complex.exp (((φ + π : ℝ) : ℂ) * Complex.I)
-      = -Complex.exp ((φ : ℂ) * Complex.I) := by
-  push_cast
-  rw [add_mul, Complex.exp_add, Complex.exp_pi_mul_I]
-  ring
 
 /-- `e^{i(φ+2π)} = e^{iφ}`. -/
 lemma expI_add_two_pi (φ : ℝ) :
@@ -118,7 +111,7 @@ lemma arcModelConst_neg_pi (K : ℝ) (z₀ : ℂ) (φ₀ s : ℝ) :
     arcModelConst K (-z₀) (φ₀ + π) s
       = (-(arcModelConst K z₀ φ₀ s).1, (arcModelConst K z₀ φ₀ s).2 + π) := by
   unfold arcModelConst
-  rw [arcModelRadius_neg_pi, expI_add_pi]
+  rw [arcModelRadius_neg_pi, Internal.expI_add_pi]
   refine Prod.ext ?_ ?_
   · simp only
     ring

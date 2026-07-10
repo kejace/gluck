@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
 import Gluck.SpaceForm.Admissible
+import Gluck.Internal.ComplexExp
 
 /-!
 # Constant-curvature circular arcs (`ε`-generic)
@@ -70,13 +71,6 @@ lemma constant_arc_norm_sq (r : ℝ) (w : ℂ) (θ : ℝ) :
   rw [hsm, norm_sub_sq_real, real_inner_smul_right, norm_smul, hvnorm, mul_one,
     Real.norm_eq_abs, sq_abs]
   ring
-
-/-- Half-turn of the unit tangent: `e^{i(θ+π)} = −e^{iθ}`. Model-agnostic. -/
-private lemma expI_add_pi (θ : ℝ) :
-    Complex.exp (((θ + π : ℝ) : ℂ) * Complex.I)
-      = -Complex.exp ((θ : ℂ) * Complex.I) := by
-  push_cast
-  rw [add_mul, Complex.exp_add, Complex.exp_pi_mul_I, mul_neg_one]
 
 /-- Splitting the unit tangent over a sum of angles:
 `e^{i(x+y)} = e^{ix}·e^{iy}`. Model-agnostic. -/
@@ -157,7 +151,7 @@ lemma truncatedSpeed_half_turn {ε : ℝ} {κ : ℝ → ℝ} {R δ : ℝ}
     (hπ : ∀ θ, κ (θ + π) = κ θ) (θ : ℝ) (z : ℂ) :
     truncatedSpeed ε κ R δ (θ + π) (-z) = truncatedSpeed ε κ R δ θ z := by
   unfold truncatedSpeed
-  rw [norm_neg, hπ θ, expI_add_pi θ, mul_neg, inner_neg_neg]
+  rw [norm_neg, hπ θ, Internal.expI_add_pi θ, mul_neg, inner_neg_neg]
 
 /-- **Half-turn equivariance of the truncated field** for `π`-periodic `κ`
 (`ε`-generic): `F(θ+π, −z) = −F(θ, z)`. (Transport of
@@ -166,7 +160,7 @@ lemma truncatedField_half_turn {ε : ℝ} {κ : ℝ → ℝ} {R δ : ℝ}
     (hπ : ∀ θ, κ (θ + π) = κ θ) (θ : ℝ) (z : ℂ) :
     truncatedField ε κ R δ (θ + π) (-z) = -truncatedField ε κ R δ θ z := by
   unfold truncatedField
-  rw [truncatedSpeed_half_turn hπ, expI_add_pi, smul_neg]
+  rw [truncatedSpeed_half_turn hπ, Internal.expI_add_pi, smul_neg]
 
 /-- **Half-turn equivariance of trajectories** (`ε`-generic). For `π`-periodic
 `κ`, if `z` solves the truncated ODE on `[0, 2π]` and `z(π) = −z(0)`, then
@@ -276,7 +270,7 @@ lemma spaceFormSpeed_half_turn {ε : ℝ} {κ : ℝ → ℝ} (hπ : ∀ θ, κ (
     (θ : ℝ) (z : ℂ) :
     spaceFormSpeed ε κ (θ + π) (-z) = spaceFormSpeed ε κ θ z := by
   unfold spaceFormSpeed
-  rw [norm_neg, hπ θ, expI_add_pi θ, mul_neg, inner_neg_neg]
+  rw [norm_neg, hπ θ, Internal.expI_add_pi θ, mul_neg, inner_neg_neg]
 
 /-- **Arc-endpoint map.** The endpoint of the constant-`K` model arc of angular
 extent `Δ` starting at `z` with initial tangent angle `θ₀`:
@@ -294,7 +288,7 @@ lemma spaceFormArcMap_half_turn (ε K θ₀ Δ : ℝ) (z : ℂ) :
       = spaceFormSpeed ε (fun _ => K) θ₀ z :=
     spaceFormSpeed_half_turn (fun _ => rfl) θ₀ z
   unfold spaceFormArcMap
-  rw [hq, expI_add_pi θ₀]
+  rw [hq, Internal.expI_add_pi θ₀]
   ring
 
 /-- **Arc concatenation** (`ε`-generic). If the bracket stays positive along the
