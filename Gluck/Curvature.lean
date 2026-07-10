@@ -93,62 +93,45 @@ lemma exists_abab_of_fourVertex {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ
       θ₁ < θ₂ ∧ θ₂ < θ₃ ∧ θ₃ < θ₄ ∧ θ₄ < θ₁ + 2 * Real.pi ∧
       κ θ₁ = a ∧ κ θ₂ = b ∧ κ θ₃ = a ∧ κ θ₄ = b := by
   obtain ⟨hcont, hper, hpos⟩ := hκ
-  -- Non-constancy rules out the constant disjunct of the four-vertex condition,
-  -- leaving the value-separated alternating-extrema disjunct.
   rcases hfv with hconst |
     ⟨p₁, q₁, p₂, q₂, hp1q1, hq1p2, hp2q2, hq2p1, _hmaxp1, _hmaxp2, _hminq1, _hminq2, hsep⟩
   · exact absurd hconst hnc
-  -- Step 1: the two levels. `a` = larger minimum value, `b` = smaller maximum value.
   set a := max (κ q₁) (κ q₂) with ha
   set b := min (κ p₁) (κ p₂) with hb
-  -- The value-separation hypothesis is exactly `a < b`; `a > 0` since `κ > 0`.
   have hab : a < b := hsep
   have ha_pos : 0 < a := lt_of_lt_of_le (hpos q₁) (le_max_left _ _)
-  -- One-sided bounds on the levels relative to the four extreme values.
   have hq1a : κ q₁ ≤ a := le_max_left _ _
   have hq2a : κ q₂ ≤ a := le_max_right _ _
   have hbp1 : b ≤ κ p₁ := min_le_left _ _
   have hbp2 : b ≤ κ p₂ := min_le_right _ _
-  -- `κ(p₁ + 2π) = κ(p₁)` by periodicity, used for the fourth sub-arc.
   have hperp1 : κ (p₁ + 2 * Real.pi) = κ p₁ := hper p₁
-  -- Endpoint orderings of the four closed sub-arcs.
   have h1 : p₁ ≤ q₁ := hp1q1.le
   have h2 : q₁ ≤ p₂ := hq1p2.le
   have h3 : p₂ ≤ q₂ := hp2q2.le
   have h4 : q₂ ≤ p₁ + 2 * Real.pi := hq2p1.le
-  -- Step 2 + 3: on each sub-arc the IVT supplies a point with the chosen value.
-  -- Sub-arc `[p₁, q₁]` carries value `a` (between `κ q₁ ≤ a` and `a < b ≤ κ p₁`).
   obtain ⟨θ₁, hθ₁mem, hθ₁⟩ := ivt_hits hcont h1 (by
     rw [Set.mem_Icc]
     exact ⟨(min_le_right _ _).trans hq1a,
            (hab.le.trans hbp1).trans (le_max_left _ _)⟩)
-  -- Sub-arc `[q₁, p₂]` carries value `b` (between `κ q₁ ≤ a < b` and `b ≤ κ p₂`).
   obtain ⟨θ₂, hθ₂mem, hθ₂⟩ := ivt_hits hcont h2 (by
     rw [Set.mem_Icc]
     exact ⟨(min_le_left _ _).trans (hq1a.trans hab.le),
            hbp2.trans (le_max_right _ _)⟩)
-  -- Sub-arc `[p₂, q₂]` carries value `a` (between `κ q₂ ≤ a` and `a < b ≤ κ p₂`).
   obtain ⟨θ₃, hθ₃mem, hθ₃⟩ := ivt_hits hcont h3 (by
     rw [Set.mem_Icc]
     exact ⟨(min_le_right _ _).trans hq2a,
            (hab.le.trans hbp2).trans (le_max_left _ _)⟩)
-  -- Sub-arc `[q₂, p₁+2π]` carries value `b` (between `κ q₂ ≤ a < b` and
-  -- `b ≤ κ p₁ = κ(p₁+2π)` by periodicity).
   obtain ⟨θ₄, hθ₄mem, hθ₄⟩ := ivt_hits hcont h4 (by
     rw [Set.mem_Icc]
     exact ⟨(min_le_left _ _).trans (hq2a.trans hab.le),
            (hbp1.trans (le_of_eq hperp1.symm)).trans (le_max_right _ _)⟩)
   refine ⟨a, b, ha_pos, hab, θ₁, θ₂, θ₃, θ₄, ?_, ?_, ?_, ?_, hθ₁, hθ₂, hθ₃, hθ₄⟩
-  -- Step 3 (strict chain). The weak chain from the endpoint inclusions, upgraded
-  -- to strict because consecutive points carry the distinct values `a ≠ b`.
   · refine lt_of_le_of_ne (hθ₁mem.2.trans hθ₂mem.1) ?_
     intro h; apply (ne_of_lt hab); rw [← hθ₁, ← hθ₂, h]
   · refine lt_of_le_of_ne (hθ₂mem.2.trans hθ₃mem.1) ?_
     intro h; apply (ne_of_lt hab); rw [← hθ₃, ← hθ₂, h]
   · refine lt_of_le_of_ne (hθ₃mem.2.trans hθ₄mem.1) ?_
     intro h; apply (ne_of_lt hab); rw [← hθ₃, ← hθ₄, h]
-  -- Step 4 (one period). `θ₁ > p₁` since `κ θ₁ = a < b ≤ κ p₁` forces `θ₁ ≠ p₁`;
-  -- with `θ₄ ≤ p₁ + 2π` this gives `θ₄ < θ₁ + 2π`.
   · have hp1θ1 : p₁ < θ₁ := by
       refine lt_of_le_of_ne hθ₁mem.1 ?_
       intro h; rw [← h] at hθ₁

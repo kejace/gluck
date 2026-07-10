@@ -334,7 +334,6 @@ theorem spherical_endpoint_winding {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
   have hκc := hκ.1
   have hκper := hκ.2.1
   have hκpos := hκ.2.2
-  -- ### Data: the overlap window, its midpoint, the curvature floor
   set c : ℝ := (max (κ q₁) (κ q₂) + min (κ p₁) (κ p₂)) / 2 with hcdef
   set w : ℝ := (min (κ p₁) (κ p₂) - max (κ q₁) (κ q₂)) / 2 with hwdef
   have hw0 : 0 < w := by rw [hwdef]; linarith
@@ -345,14 +344,10 @@ theorem spherical_endpoint_winding {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
     have h2 : κ q₁ ≤ max (κ q₁) (κ q₂) := le_max_left _ _
     rw [hcdef]; linarith
   obtain ⟨κ₀, hκ₀0, -, hκ₀κ⟩ := exists_curvature_lower_bound hκ
-  -- ### Margins and expansion packages at `(c, κ₀)`
-  -- (Stage-2 re-sign: `stepModel_margins` now asks only `−r* < κ₀`, which the
-  -- positive floor `0 < κ₀` supplies via `r* > 0`.)
   have hrsc0 : 0 < Real.sqrt (1 + c ^ 2) - c := (centeredRadius_facts hc).1
   obtain ⟨R, δ, μ, ρ₀, h₀, hR0, hR1, hδ0, hμ0, hρ₀0, hh₀0, hmarg⟩ :=
     stepModel_margins (κ₀ := κ₀) hc (by linarith)
   obtain ⟨ρ₁, hbar, C, hρ₁0, hbar0, hC0, hexp⟩ := stepError_expansion hc
-  -- centered radius `r* = √(1+c²) − c` and conjugation coefficient `η`
   have h1c : (0 : ℝ) < 1 + c ^ 2 := by positivity
   have hs2 : Real.sqrt (1 + c ^ 2) ^ 2 = 1 + c ^ 2 := Real.sq_sqrt h1c.le
   have hs0 : 0 < Real.sqrt (1 + c ^ 2) := Real.sqrt_pos.mpr h1c
@@ -360,7 +355,6 @@ theorem spherical_endpoint_winding {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
   have hrs0 : 0 < rs := by rw [hrsdef]; nlinarith [hs2, hs0, hc]
   set η : ℝ := 2 * rs / (1 + c ^ 2) with hηdef
   have hη0 : 0 < η := by rw [hηdef]; exact div_pos (by linarith) h1c
-  -- ### Quantifier order: `ρ`, then `h`, then the levels `a < b`
   set ρ : ℝ := min ρ₀ (min ρ₁ (η / (4 * C))) with hρdef
   have hρ0 : 0 < ρ := by
     rw [hρdef]
@@ -395,10 +389,8 @@ theorem spherical_endpoint_winding {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
   have hbC : |b - c| ≤ h₀ := by
     rw [hbdef, show c + h / 2 - c = h / 2 by ring, abs_of_pos (by linarith)]
     linarith
-  -- ### Crossing data at the levels `(a, b, a, b)`
   obtain ⟨θ₁, θ₂, θ₃, θ₄, ht12, ht23, ht34, ht41, hv₁, hv₂, hv₃, hv₄⟩ :=
     exists_abab_levels hκc hκper h12 h23 h34 h41 haKq hab hbKp
-  -- ### Uniform Lipschitz witness, `L¹` tolerance, reparametrization
   obtain ⟨L, hLuni⟩ := truncatedField_lipschitz_uniform hR0.le hδ0
   have hEM0 : 0 < Real.exp (2 * π * (L : ℝ)) * ((1 + R ^ 2) / (2 * δ ^ 2)) := by
     positivity
@@ -413,7 +405,6 @@ theorem spherical_endpoint_winding {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
     exists_step_L1_reparam hκ ha0 hab ht12 ht23 ht34 ht41 hv₁ hv₂ hv₃ hv₄ hε0
   have hκ'c : Continuous (κ ∘ h₁) := hκc.comp hh₁c
   have hκ'₀ : ∀ θ, κ₀ ≤ (κ ∘ h₁) θ := fun θ => (hκ₀κ (h₁ θ)).le
-  -- ### The `L¹` drive is below both smallness thresholds
   have hIbound : Real.exp (2 * π * (L : ℝ)) * ((1 + R ^ 2) / (2 * δ ^ 2)
       * ∫ θ in (0 : ℝ)..(2 * π),
           |(κ ∘ h₁) θ - stepCurvature b a 0 (π / 2) π (3 * π / 2) θ|)
@@ -434,7 +425,6 @@ theorem spherical_endpoint_winding {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
           exact div_mul_cancel₀ _ hEM0.ne'
   have hIμ := hIbound.trans (min_le_left _ _)
   have hI8 := hIbound.trans (min_le_right _ _)
-  -- ### Flow radius `r₀ = r* + ρ` and the model start `zs = −r*·i`
   set r₀ : ℝ≥0 := (rs + ρ).toNNReal with hr₀def
   have hr₀coe : (r₀ : ℝ) = rs + ρ := Real.coe_toNNReal _ (by linarith)
   set zs : ℂ := -(rs • Complex.I) with hzsdef
@@ -445,7 +435,6 @@ theorem spherical_endpoint_winding {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
     intro u
     rw [hzsdef, Complex.real_smul]
     ring
-  -- ### Master estimate: margins + transport + expansion at any near start
   have hexpm : ∀ z₀ : ℂ, ‖z₀ + rs • Complex.I‖ ≤ ρ₁ →
       ‖stepErrorMap a b z₀
           + ((η * h : ℝ) : ℂ) * (starRingEnd ℂ) (z₀ + rs • Complex.I)‖
@@ -456,8 +445,6 @@ theorem spherical_endpoint_winding {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
   have main := flow_admissible_and_endpoint_estimate hκ'c hκ'₀ hR0 hδ0
     (fun θ => hLuni (κ ∘ h₁) θ) hrs0 hr₀coe hρρ₀ hρρ₁ (hmarg a b haC hbC) hexpm
     hIμ hI8
-  -- ### Boundary comparison: the flow endpoint loop is a small perturbation
-  -- of the conjugate-linear model loop `−ηhρ·conj`
   have hwR0 : 0 < η * h * ρ := mul_pos (mul_pos hη0 hh0) hρ0
   have hCρ : C * ρ ≤ η / 4 := by
     rw [le_div_iff₀ (by linarith : (0 : ℝ) < 4 * C)] at hρη
@@ -467,7 +454,6 @@ theorem spherical_endpoint_winding {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
     linarith
   have key := endpoint_conj_dominant_on_circle hρ0 hh0 hwR0 hδvec hCρ hCh
     (fun z₀ hz => (main z₀ hz).2)
-  -- the affine chart of the `ρ`-disk of initial points
   have hmemball : ∀ u : ℂ, ‖u‖ ≤ 1 →
       zs + (ρ : ℂ) * u ∈ Metric.closedBall (0 : ℂ) r₀ := by
     intro u hu
@@ -486,13 +472,11 @@ theorem spherical_endpoint_winding {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
     (sphericalEndpoint_continuousOn hκ'c hR0.le hδ0 r₀).comp haff.continuousOn
       (fun u hu => hmemball u
         (by rwa [Metric.mem_closedBall, dist_zero_right] at hu))
-  -- winding `−1` and the interior zero
   obtain ⟨u, humem, hFu⟩ :=
     exists_interior_zero_of_conj_dominant hFc hwR0 key
   have hu1 : ‖u‖ ≤ 1 := by
     rw [Metric.mem_ball, dist_zero_right] at humem
     exact humem.le
-  -- ### Conclusion: the zero start gives the closed admissible trajectory
   refine ⟨R, δ, h₁, r₀, zs + (ρ : ℂ) * u, hR0, hR1, hδ0, hmono, hh₁c, hh₁per,
     hh₁v, hmemball u hu1, ?_, ?_⟩
   · have h0 : sphericalFlow (κ ∘ h₁) R δ r₀ (zs + (ρ : ℂ) * u, 2 * π)

@@ -133,7 +133,6 @@ private lemma clampTent_centered_integral {η L : ℝ} (hη : 0 < η) (hLη : 2 
   have hb1 : -(L / 2) ≤ η - L / 2 := by linarith
   have hb2 : η - L / 2 ≤ L / 2 - η := by linarith
   have hb3 : L / 2 - η ≤ L / 2 := by linarith
-  -- Piece 1: rising ramp `f u = L/2/η + 1/η * u` on `[-(L/2), η-L/2]`.
   have hc1 : (∫ u in (-(L / 2))..(η - L / 2), f u)
       = ∫ u in (-(L / 2))..(η - L / 2), (L / 2 / η + 1 / η * u) := by
     apply intervalIntegral.integral_congr
@@ -153,7 +152,6 @@ private lemma clampTent_centered_integral {η L : ℝ} (hη : 0 < η) (hLη : 2 
     have hle : L / 2 / η + 1 / η * u ≤ 1 := by
       rw [← hval, div_le_one hη]; linarith
     rw [max_eq_right hge, min_eq_right hle]
-  -- Piece 2: plateau `f u = 1` on `[η-L/2, L/2-η]`.
   have hc2 : (∫ u in (η - L / 2)..(L / 2 - η), f u)
       = ∫ u in (η - L / 2)..(L / 2 - η), (1 : ℝ) := by
     apply intervalIntegral.integral_congr
@@ -168,7 +166,6 @@ private lemma clampTent_centered_integral {η L : ℝ} (hη : 0 < η) (hLη : 2 
     rw [habs]
     have hge1 : (1 : ℝ) ≤ (L / 2 - |u|) / η := by rw [le_div_iff₀ hη]; linarith
     rw [max_eq_right (by linarith), min_eq_left hge1]
-  -- Piece 3: falling ramp `f u = L/2/η + (-(1/η)) * u` on `[L/2-η, L/2]`.
   have hc3 : (∫ u in (L / 2 - η)..(L / 2), f u)
       = ∫ u in (L / 2 - η)..(L / 2), (L / 2 / η + (-(1 / η)) * u) := by
     apply intervalIntegral.integral_congr
@@ -188,7 +185,6 @@ private lemma clampTent_centered_integral {η L : ℝ} (hη : 0 < η) (hLη : 2 
     have hle : L / 2 / η + (-(1 / η)) * u ≤ 1 := by
       rw [← hval, div_le_one hη]; linarith
     rw [max_eq_right hge, min_eq_right hle]
-  -- Assemble the three adjacent pieces.
   rw [← intervalIntegral.integral_add_adjacent_intervals (b := η - L / 2)
         (hint _ _) (hint _ _),
       ← intervalIntegral.integral_add_adjacent_intervals (a := η - L / 2) (b := L / 2 - η)
@@ -452,14 +448,12 @@ private lemma alignDensity_arc1 (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
   obtain ⟨⟨hL1a, hL1b⟩, ⟨hL2a, hL2b⟩, ⟨hL3a, hL3b⟩, ⟨hL4a, hL4b⟩⟩ :=
     alignL_bounds δ hδ hδ' hz
   obtain ⟨hdx2, hdx1, hdy2, hdy1⟩ := align_delta_bounds δ hδ hδ' hz
-  -- support pulse 1
   have hs1 : (∫ θ in (alignN1 δ z)..(alignN2 δ z),
       clampTent (π / 16) (alignL1 δ z) (alignC1 δ z) θ) = alignL1 δ z - π / 16 := by
     have e1 : alignN1 δ z = alignC1 δ z - alignL1 δ z / 2 := by simp only [alignC1]; ring
     have e2 : alignN2 δ z = alignC1 δ z + alignL1 δ z / 2 := by simp only [alignC1, alignL1]; ring
     rw [e1, e2]
     exact clampTent_integral_support (by positivity) (by linarith) (by linarith)
-  -- cross pulses 2,3,4 (all shift n = 1)
   have hle12 : alignN1 δ z ≤ alignN2 δ z := by
     simp only [alignN1, alignN2]; linarith
   have hs2 : (∫ θ in (alignN1 δ z)..(alignN2 δ z),
@@ -821,10 +815,8 @@ parametrised interval integral gives continuity of `z ↦ E_κ(z)`. -/
 private theorem continuous_kappaErrorMap {κ h₁ : ℝ → ℝ} (hκ : Continuous κ)
     (hpos : ∀ θ, 0 < κ θ) (hh₁ : Continuous h₁) (δ : ℝ) :
     Continuous (kappaErrorMap κ h₁ δ) := by
-  -- Joint continuity of the reparametrization family.
   have hg : Continuous (fun p : ℂ × ℝ => alignReparam δ p.1 p.2) :=
     continuous_uncurry_alignReparam δ
-  -- Joint continuity of the integrand `f z θ = e^{iθ} · (radius (κ∘h₁∘g_z) θ : ℂ)`.
   have key : Continuous (Function.uncurry
       (fun (z : ℂ) (θ : ℝ) => Complex.exp ((θ : ℂ) * Complex.I)
         * ((radius (κ ∘ h₁ ∘ alignReparam δ z) θ : ℝ) : ℂ))) := by
@@ -834,7 +826,6 @@ private theorem continuous_kappaErrorMap {κ h₁ : ℝ → ℝ} (hκ : Continuo
         ((Complex.continuous_ofReal.comp continuous_snd).mul continuous_const)
     · refine Complex.continuous_ofReal.comp ?_
       exact continuous_const.div (hκ.comp (hh₁.comp hg)) (fun p => (hpos _).ne')
-  -- `E_κ(z)` is exactly that parametric interval integral over `[0, 2π]`.
   have heq : kappaErrorMap κ h₁ δ = fun z : ℂ => ∫ θ in (0 : ℝ)..(2 * π),
       Complex.exp ((θ : ℂ) * Complex.I)
         * ((radius (κ ∘ h₁ ∘ alignReparam δ z) θ : ℝ) : ℂ) := by
@@ -870,9 +861,7 @@ private theorem kappaZero_comp_alignReparam (a b δ : ℝ) (hδ : 0 < δ) (hδ' 
   have hpi : 0 < π := Real.pi_pos
   obtain ⟨hn1, hn2, hn3, hn4⟩ := alignReparam_node_values δ hδ hδ' hz
   have hmono := strictMono_alignReparam δ hδ hδ' hz
-  -- breakpoint values / ordering
   obtain ⟨hdx2, hdx1, hdy2, hdy1⟩ := align_delta_bounds δ hδ hδ' hz
-  -- `κ₀ ∘ g` is `2π`-periodic.
   have hper : Function.Periodic
       (fun θ => stepCurvature b a 0 (π / 2) π (3 * π / 2) (alignReparam δ z θ)) (2 * π) := by
     intro θ
@@ -880,7 +869,6 @@ private theorem kappaZero_comp_alignReparam (a b δ : ℝ) (hδ : 0 < δ) (hδ' 
         = stepCurvature b a 0 (π / 2) π (3 * π / 2) (alignReparam δ z θ)
     rw [alignReparam_add_two_pi δ hδ hδ' hz]
     exact stepCurvature_periodic b a 0 (π / 2) π (3 * π / 2) (alignReparam δ z θ)
-  -- pointwise equality of the two base step functions.
   have hpt : ∀ θ, stepCurvature a b (alignN1 δ z) (alignN2 δ z) (alignN3 δ z) (alignN4 δ z) θ
       = stepCurvature b a 0 (π / 2) π (3 * π / 2) (alignReparam δ z θ) := by
     intro θ
@@ -888,7 +876,6 @@ private theorem kappaZero_comp_alignReparam (a b δ : ℝ) (hδ : 0 < δ) (hδ' 
     have hmem := toIcoMod_mem_Ico Real.two_pi_pos (alignN1 δ z) θ
     have htic : toIcoMod Real.two_pi_pos (alignN1 δ z) t₀ = t₀ :=
       (toIcoMod_eq_self Real.two_pi_pos).mpr hmem
-    -- reduce both sides to `t₀`
     have hscθ : stepCurvature a b (alignN1 δ z) (alignN2 δ z) (alignN3 δ z) (alignN4 δ z) θ
         = stepCurvature a b (alignN1 δ z) (alignN2 δ z) (alignN3 δ z) (alignN4 δ z) t₀ := by
       simp only [stepCurvature, htic, ← ht₀def]
@@ -903,7 +890,6 @@ private theorem kappaZero_comp_alignReparam (a b δ : ℝ) (hδ : 0 < δ) (hδ' 
       rw [hθ]
       exact hsub
     rw [hscθ, hgθ]
-    -- now `t₀ ∈ [θ₁, θ₁ + 2π)`; case-split on the four arcs.
     obtain ⟨hlo, hhi⟩ := hmem
     have e1 : alignN1 δ z = π / 4 + δ * z.re := rfl
     have e2 : alignN2 δ z = 3 * π / 4 + δ * z.im := rfl
@@ -968,7 +954,6 @@ private theorem kappaZero_comp_alignReparam (a b δ : ℝ) (hδ : 0 < δ) (hδ' 
         simp only [stepCurvature, htoIco]
         exact if_pos (Or.inl (by linarith))
       rw [hLHS, hRHS]
-  -- assemble the error vectors
   have hfun : radius (stepCurvature a b (alignN1 δ z) (alignN2 δ z) (alignN3 δ z) (alignN4 δ z))
       = radius ((stepCurvature b a 0 (π / 2) π (3 * π / 2)) ∘ alignReparam δ z) := by
     funext θ; simp only [radius, Function.comp, hpt θ]
@@ -994,18 +979,14 @@ private theorem kappaErrorMap_sub_errorMap_le {κ h₁ : ℝ → ℝ} (hκ : IsC
           |radius (fun t => κ (h₁ t)) (alignReparam δ z θ)
             - radius (stepCurvature b a 0 (π / 2) π (3 * π / 2)) (alignReparam δ z θ)| := by
   obtain ⟨hκcont, hκper, hκpos⟩ := hκ
-  -- The two reconstruction weights.
   set g := alignReparam δ z with hgdef
   set ρ : ℝ → ℝ := fun θ => radius (fun t => κ (h₁ t)) (g θ) with hρdef
   set ρ₀ : ℝ → ℝ := fun θ => radius (stepCurvature b a 0 (π / 2) π (3 * π / 2)) (g θ) with hρ₀def
-  -- `kappaErrorMap κ h₁ δ z = errorVector ρ`.
   have hkeq : kappaErrorMap κ h₁ δ z = errorVector ρ := by
     rw [kappaErrorMap]; congr 1
-  -- `errorMap a b δ z = errorVector ρ₀` by the matching identity.
   have heeq : errorMap a b δ z = errorVector ρ₀ := by
     rw [kappaZero_comp_alignReparam a b δ hδ hδ' hz]; congr 1
   rw [hkeq, heeq]
-  -- `ρ` is continuous (`κ, h₁, g` continuous, `κ > 0`), hence interval-integrable.
   have hgcont : Continuous g := by rw [hgdef]; exact continuous_alignReparam δ z
   have hρcont : Continuous ρ := by
     rw [hρdef]
@@ -1013,11 +994,7 @@ private theorem kappaErrorMap_sub_errorMap_le {κ h₁ : ℝ → ℝ} (hκ : IsC
     exact (continuous_const.div ((hκcont.comp hcont).comp hgcont)
       (fun θ => (hκpos _).ne'))
   have hρi : IntervalIntegrable ρ volume 0 (2 * π) := hρcont.intervalIntegrable _ _
-  -- `ρ₀` is bounded and measurable, hence interval-integrable.
   have hρ₀i : IntervalIntegrable ρ₀ volume 0 (2 * π) := by
-    -- `stepCurvature` is measurable (it is a `2π`-periodic two-valued step), and
-    -- `g` is continuous, so `ρ₀ = (1/κ₀) ∘ g` is bounded measurable.
-    -- Measurability of `toIcoMod` at base `0` via its floor form.
     have hmtic : Measurable (toIcoMod Real.two_pi_pos (0 : ℝ)) := by
       have heq : (toIcoMod Real.two_pi_pos (0 : ℝ))
           = fun x => x - (toIcoDiv Real.two_pi_pos 0 x : ℝ) * (2 * π) := by
@@ -1036,20 +1013,17 @@ private theorem kappaErrorMap_sub_errorMap_le {κ h₁ : ℝ → ℝ} (hκ : IsC
         exact hcastm.comp
           (Int.measurable_floor.comp ((measurable_id.sub measurable_const).div_const _))
       exact measurable_id.sub (hfloor.mul measurable_const)
-    -- Measurability of `stepCurvature` (two-valued `ite` over a measurable set).
     have hstepmeas : Measurable (stepCurvature b a 0 (π / 2) π (3 * π / 2)) := by
       unfold stepCurvature
       apply Measurable.ite ?_ measurable_const measurable_const
       exact (measurableSet_lt hmtic measurable_const).union
         ((measurableSet_le measurable_const hmtic).inter
           (measurableSet_lt hmtic measurable_const))
-    -- `ρ₀ = (1/κ₀) ∘ g` is measurable.
     have hρ₀meas : Measurable ρ₀ := by
       rw [hρ₀def]
       have hrad : Measurable (radius (stepCurvature b a 0 (π / 2) π (3 * π / 2))) :=
         measurable_const.div hstepmeas
       exact hrad.comp hgcont.measurable
-    -- `ρ₀` is bounded by `1/a` (the step values are `≥ a`).
     have hbdd : ∀ θ, |ρ₀ θ| ≤ 1 / a := by
       intro θ
       have hge : a ≤ stepCurvature b a 0 (π / 2) π (3 * π / 2) (g θ) := by
@@ -1082,7 +1056,6 @@ private lemma curvature_bounds {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
   obtain ⟨xm, _, hmin⟩ := hcpt.exists_isMinOn hne hcont.continuousOn
   obtain ⟨xM, _, hmax⟩ := hcpt.exists_isMaxOn hne hcont.continuousOn
   refine ⟨κ xm, κ xM, hpos xm, fun θ => ?_⟩
-  -- Reduce `θ` to `y ∈ [0, 2π)` via `toIcoMod`, using periodicity.
   have hymem : toIcoMod Real.two_pi_pos 0 θ ∈ Set.Ico (0:ℝ) (2 * π) := by
     have := toIcoMod_mem_Ico Real.two_pi_pos 0 θ; rwa [zero_add] at this
   have hyIcc : toIcoMod Real.two_pi_pos 0 θ ∈ Set.Icc (0:ℝ) (2 * π) :=
@@ -1200,11 +1173,6 @@ private theorem exists_reparam_kappaErrorMap_close {κ : ℝ → ℝ} (hκ : IsC
       (∃ v₁ : ℝ → ℝ, Continuous v₁ ∧ (∀ θ, 0 < v₁ θ) ∧
         ∀ θ, HasDerivAt h₁ (v₁ θ) θ) := by
   obtain ⟨hκcont, hκper, hκpos⟩ := hκ
-  -- By `kappaErrorMap_sub_errorMap_le` the error-vector gap is bounded by the `L¹`
-  -- weight difference, so it suffices to make THAT integral `< μ` uniformly in `z`.
-  -- The `C¹` derivative-witness `v₁` of `h₁` is forwarded verbatim from
-  -- `exists_preliminary_reparam` (the sole downstream consumer is `reduction_justified`,
-  -- which composes it through the chain rule with `g_z`).
   suffices h : ∃ h₁ : ℝ → ℝ, StrictMono h₁ ∧ Continuous h₁ ∧
       (∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π) ∧
       (∀ z : ℂ, ‖z‖ ≤ 1 → (∫ θ in (0 : ℝ)..(2 * π),
@@ -1217,45 +1185,32 @@ private theorem exists_reparam_kappaErrorMap_close {κ : ℝ → ℝ} (hκ : IsC
     exact lt_of_le_of_lt
       (kappaErrorMap_sub_errorMap_le ⟨hκcont, hκper, hκpos⟩ ha hab δ hδ hδ' hmono hcont hper hz)
       (hint z hz)
-  -- The remaining `L¹` estimate (the genuine analytic core).  Compactness gives
-  -- bounds `cmin ≤ κ ≤ cmax`; the common reciprocal lower bound `m = min cmin a`
-  -- controls both weights.  Pulling the bad set back through the slope-bounded
-  -- `g_z` (change of variables, `w_z ≥ 2/3`) and the `< ε`-measure bound of
-  -- `exists_preliminary_reparam` gives the integral `≤ C·ε`, with `ε` chosen so
-  -- `C·ε < μ`.
   obtain ⟨cmin, cmax, hcminpos, hbnd⟩ := curvature_bounds ⟨hκcont, hκper, hκpos⟩
   have hcmaxpos : 0 < cmax := lt_of_lt_of_le (hκpos 0) (hbnd 0).2
   have hbpos : 0 < b := lt_trans ha hab
-  -- Common positive lower bound `m` for both reconstruction-weight denominators.
   set m : ℝ := min cmin a with hmdef
   have hmpos : 0 < m := lt_min hcminpos ha
   have hma : m ≤ a := min_le_right _ _
   have hκm : ∀ φ, m ≤ κ φ := fun φ => le_trans (min_le_left _ _) (hbnd φ).1
-  -- The constant `C` multiplying the tolerance `ε`.
   set C : ℝ := (3 / (2 * m ^ 2)) * (2 * π + cmax + b) with hCdef
   have hCpos : 0 < C := by
     have hπ : 0 < π := Real.pi_pos
     apply mul_pos (by positivity)
     linarith
-  -- Choose the tolerance `ε` so that `C·ε < μ`.
   set ε : ℝ := μ / (2 * C) with hεdef
   have hεpos : 0 < ε := by rw [hεdef]; positivity
   have hCε : C * ε < μ := by
     have h2C : (0:ℝ) < 2 * C := by positivity
     rw [hεdef, mul_div_assoc', div_lt_iff₀ h2C]
     nlinarith [mul_pos hμ hCpos]
-  -- Apply the preliminary reparametrization with this tolerance.
   obtain ⟨h₁, h1mono, h1cont, h1per, hbad, hv1⟩ :=
     exists_preliminary_reparam ⟨hκcont, hκper, hκpos⟩ ha hab h12 h23 h34 h41
       hc₁ hc₂ hc₃ hc₄ hεpos
   refine ⟨h₁, h1mono, h1cont, h1per, fun z hz => ?_, hv1⟩
-  -- The canonical four-arc step function and the "numerator" difference `F`.
   set κ₀ : ℝ → ℝ := stepCurvature b a 0 (π / 2) π (3 * π / 2) with hκ₀
   set F : ℝ → ℝ := fun φ => |κ (h₁ φ) - κ₀ φ| with hFdef
-  -- Bad-set measure bound restated through `F`.
   have hbadvol : volume {θ : ℝ | θ ∈ Set.Ico (0:ℝ) (2 * π) ∧ ε < F θ}
       < ENNReal.ofReal ε := by simpa only [hFdef] using hbad
-  -- Facts about `κ₀`.
   have hκ₀ge : ∀ φ, a ≤ κ₀ φ := by
     intro φ; rw [hκ₀]; simp only [stepCurvature]
     split <;> first | exact le_refl a | exact hab.le
@@ -1266,7 +1221,6 @@ private theorem exists_reparam_kappaErrorMap_close {κ : ℝ → ℝ} (hκ : IsC
   have hκ₀meas : Measurable κ₀ := by rw [hκ₀]; exact measurable_stepCurvature_canonical b a
   have hκ₀per : Function.Periodic κ₀ (2 * π) := by
     rw [hκ₀]; exact stepCurvature_periodic b a 0 (π / 2) π (3 * π / 2)
-  -- Facts about `κ ∘ h₁` and `F`.
   have hκh_cont : Continuous (fun φ => κ (h₁ φ)) := hκcont.comp h1cont
   have hκh_meas : Measurable (fun φ => κ (h₁ φ)) := hκh_cont.measurable
   have hF_meas : Measurable F := by rw [hFdef]; exact measurable_abs.comp (hκh_meas.sub hκ₀meas)
@@ -1283,19 +1237,16 @@ private theorem exists_reparam_kappaErrorMap_close {κ : ℝ → ℝ} (hκ : IsC
   have hFper : Function.Periodic F (2 * π) := by
     intro φ; simp only [hFdef]
     rw [h1per, hκper (h₁ φ), hκ₀per φ]
-  -- Measurability of the relevant compositions.
   have hgmeas : Measurable (alignReparam δ z) := (continuous_alignReparam δ z).measurable
   have hFg_meas : Measurable (fun θ => F (alignReparam δ z θ)) := hF_meas.comp hgmeas
   have hwFg_meas : Measurable (fun θ => alignDensity δ z θ * F (alignReparam δ z θ)) :=
     (continuous_alignDensity_theta δ z).measurable.mul hFg_meas
-  -- The κ-error integrand `Φ`.
   set Φ : ℝ → ℝ := fun θ => |radius (fun t => κ (h₁ t)) (alignReparam δ z θ)
       - radius κ₀ (alignReparam δ z θ)| with hΦdef
   have hΦ_meas : Measurable Φ := by
     rw [hΦdef]; simp only [radius]
     exact measurable_abs.comp ((measurable_const.div (hκh_meas.comp hgmeas)).sub
       (measurable_const.div (hκ₀meas.comp hgmeas)))
-  -- Pointwise bounds.
   have hpt1 : ∀ θ, Φ θ ≤ (1 / m ^ 2) * F (alignReparam δ z θ) := by
     intro θ
     simp only [hΦdef, hFdef, radius]
@@ -1324,7 +1275,6 @@ private theorem exists_reparam_kappaErrorMap_close {κ : ℝ → ℝ} (hκ : IsC
           · rw [abs_of_pos (div_pos one_pos (hκ₀pos _))]
             exact one_div_le_one_div_of_le hmpos (le_trans hma (hκ₀ge _))
       _ = 2 / m := by ring
-  -- Integrability facts on `[0, 2π]`.
   have hIcc_fin : volume (Set.Icc (0:ℝ) (2 * π)) ≠ ⊤ := measure_Icc_lt_top.ne
   have hIco_fin : volume (Set.Ico (0:ℝ) (2 * π)) ≠ ⊤ := measure_Ico_lt_top.ne
   have hΦ_int : IntegrableOn Φ (Set.Icc (0:ℝ) (2 * π)) :=
@@ -1342,17 +1292,14 @@ private theorem exists_reparam_kappaErrorMap_close {κ : ℝ → ℝ} (hκ : IsC
     exact mul_le_mul (alignDensity_le δ z x) (hF_abs_le _) (abs_nonneg _) (by norm_num)
   have hF_int_Ico : IntegrableOn F (Set.Ico (0:ℝ) (2 * π)) :=
     integrableOn_of_measurable_bounded hF_meas hIco_fin hF_abs_le
-  -- Nonnegativity of the intermediate integrals.
   have hIFg_nonneg : 0 ≤ ∫ θ in Set.Icc (0:ℝ) (2 * π), F (alignReparam δ z θ) :=
     setIntegral_nonneg measurableSet_Icc (fun x _ => hF_nonneg _)
   have hIF_nonneg : 0 ≤ ∫ φ in Set.Ico (0:ℝ) (2 * π), F φ :=
     setIntegral_nonneg measurableSet_Ico (fun x _ => hF_nonneg _)
-  -- Step A: `∫ Φ ≤ (1/m²)·∫ F∘g`.
   have hA : (∫ θ in Set.Icc (0:ℝ) (2 * π), Φ θ)
       ≤ (1 / m ^ 2) * ∫ θ in Set.Icc (0:ℝ) (2 * π), F (alignReparam δ z θ) := by
     rw [← integral_const_mul]
     exact setIntegral_mono_on hΦ_int (hFg_int.const_mul _) measurableSet_Icc (fun θ _ => hpt1 θ)
-  -- Step B: `∫ F∘g ≤ (3/2)·∫_{[0,2π)} F` (change of variables + periodicity).
   have hB : (∫ θ in Set.Icc (0:ℝ) (2 * π), F (alignReparam δ z θ))
       ≤ (3 / 2) * ∫ φ in Set.Ico (0:ℝ) (2 * π), F φ := by
     have hC1 : (∫ θ in Set.Icc (0:ℝ) (2 * π), F (alignReparam δ z θ))
@@ -1377,7 +1324,6 @@ private theorem exists_reparam_kappaErrorMap_close {κ : ℝ → ℝ} (hκ : IsC
       rw [← hcov, hshift, integral_Icc_eq_integral_Ico]
     rw [integral_const_mul, hwFg_eq] at hC1
     exact hC1
-  -- Step D: bad-set split of `∫_{[0,2π)} F`.
   have hD : (∫ φ in Set.Ico (0:ℝ) (2 * π), F φ) ≤ ε * (2 * π + cmax + b) := by
     set bad : Set ℝ := {θ : ℝ | θ ∈ Set.Ico (0:ℝ) (2 * π) ∧ ε < F θ} with hbadset
     set good : Set ℝ := {θ : ℝ | θ ∈ Set.Ico (0:ℝ) (2 * π) ∧ F θ ≤ ε} with hgoodset
@@ -1430,7 +1376,6 @@ private theorem exists_reparam_kappaErrorMap_close {κ : ℝ → ℝ} (hκ : IsC
     calc (∫ φ in good, F φ) + ∫ φ in bad, F φ
         ≤ ε * (2 * π) + ε * (cmax + b) := add_le_add hgood_bd hbad_bd
       _ = ε * (2 * π + cmax + b) := by ring
-  -- Assemble the chain and convert the goal interval integral to the set integral.
   have hbound : (∫ θ in Set.Icc (0:ℝ) (2 * π), Φ θ) ≤ C * ε := by
     have hm2 : (0:ℝ) ≤ 1 / m ^ 2 := div_nonneg zero_le_one (sq_nonneg m)
     calc (∫ θ in Set.Icc (0:ℝ) (2 * π), Φ θ)
@@ -1473,18 +1418,14 @@ theorem reduction_justified {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
       (∃ v : ℝ → ℝ, Continuous v ∧ (∀ θ, 0 < v θ) ∧
         ∀ θ, HasDerivAt h (v θ) θ) := by
   obtain ⟨hκcont, hκper, hκpos⟩ := hκ
-  -- Step 0: the value-separated crossing data `0 < a < b`, `θ₁ < θ₂ < θ₃ < θ₄`.
   obtain ⟨a, b, ha, hab, θ₁, θ₂, θ₃, θ₄, h12, h23, h34, h41, hc₁, hc₂, hc₃, hc₄⟩ :=
     exists_abab_of_fourVertex ⟨hκcont, hκper, hκpos⟩ hnc hfv
   have hb : 0 < b := lt_trans ha hab
   have hab' : a ≠ b := ne_of_lt hab
-  -- Fix the configuration-disk radius `δ = π/8`.
   set δ : ℝ := π / 8 with hδdef
   have hδ : 0 < δ := by rw [hδdef]; positivity
   have hδ' : δ ≤ π / 8 := le_of_eq hδdef
-  -- Step 1: the bicircle error map winds `-1` on the boundary.
   obtain ⟨hF, hbd, hw⟩ := errorMap_winding_eq_one a b δ ha hb hab' hδ hδ'
-  -- The positive winding margin `μ = min_{∂D} ‖E_bi‖`.
   have hsc : IsCompact (Metric.sphere (0 : ℂ) 1) := isCompact_sphere 0 1
   have hsne : (Metric.sphere (0 : ℂ) 1).Nonempty := by
     rw [NormedSpace.sphere_nonempty]; norm_num
@@ -1497,11 +1438,9 @@ theorem reduction_justified {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
   have hμ : 0 < μ := by rw [hμdef]; exact norm_pos_iff.mpr (hbd zm hzm_mem)
   have hμle : ∀ z ∈ Metric.sphere (0 : ℂ) 1, μ ≤ ‖errorMap a b δ z‖ := by
     intro z hz; exact isMinOn_iff.mp hzm_min z hz
-  -- Step 2: the preliminary reparametrization making `E_κ` within `μ` of `E_bi`.
   obtain ⟨h₁, h1mono, h1cont, h1per, hclose, hv1⟩ :=
     exists_reparam_kappaErrorMap_close ⟨hκcont, hκper, hκpos⟩ ha hab h12 h23 h34 h41
       hc₁ hc₂ hc₃ hc₄ δ hδ hδ' hμ
-  -- `E_κ` is continuous and nonzero on the boundary.
   have hkcont : Continuous (kappaErrorMap κ h₁ δ) :=
     continuous_kappaErrorMap hκcont hκpos h1cont δ
   have hkF : ContinuousOn (kappaErrorMap κ h₁ δ) (Metric.closedBall 0 1) := hkcont.continuousOn
@@ -1518,7 +1457,6 @@ theorem reduction_justified {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
     have h2 := hμle z hz
     have : 0 < ‖kappaErrorMap κ h₁ δ z‖ := by linarith
     exact norm_pos_iff.mp this
-  -- Step 3: transfer the boundary winding from `E_bi` to `E_κ`.
   set γE : C(I, ℂ) := diskBoundaryLoop (errorMap a b δ) hF with hγEdef
   set γK : C(I, ℂ) := diskBoundaryLoop (kappaErrorMap κ h₁ δ) hkF with hγKdef
   have hγEne : ∀ t, γE t ≠ 0 := diskBoundaryLoop_ne_zero (errorMap a b δ) hF hbd
@@ -1548,13 +1486,11 @@ theorem reduction_justified {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
     windingNumberC_eq_of_perturb γE γK hγEne hγKne hloopE hloopK hpert
   have hwE : windingNumberC γE hγEne = -1 := hw
   have hwne : windingNumberC γK hγKne ≠ 0 := by rw [← hwind, hwE]; norm_num
-  -- Step 4: extract the interior zero of `E_κ`.
   obtain ⟨z₀, hz₀ball, hz₀zero⟩ :=
     exists_zero_of_boundary_winding (kappaErrorMap κ h₁ δ) hkF hkbd hwne
   have hz0le : ‖z₀‖ ≤ 1 := by
     have : ‖z₀‖ < 1 := by simpa [Metric.mem_ball, dist_zero_right] using hz₀ball
     linarith
-  -- Assemble `h = h₁ ∘ g_{z₀}`.
   refine ⟨fun θ => h₁ (alignReparam δ z₀ θ), ?_, ?_, ?_, ?_, ?_⟩
   · exact h1mono.comp (strictMono_alignReparam δ hδ hδ' hz0le)
   · exact h1cont.comp (continuous_alignReparam δ z₀)
@@ -1564,9 +1500,6 @@ theorem reduction_justified {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
   · change errorVector (radius (fun θ => κ (h₁ (alignReparam δ z₀ θ)))) = 0
     exact hz₀zero
   · -- `C¹` regularity of `h = h₁ ∘ g_{z₀}` via the chain rule.  The derivative is
-    -- `v θ = v₁(g_{z₀} θ) · w_{z₀}(θ)`, a product of two continuous strictly positive
-    -- functions (`v₁ > 0` forwarded from `exists_preliminary_reparam`,
-    -- `w_{z₀} = alignDensity ≥ 2/3 > 0`).
     obtain ⟨v₁, hv1cont, hv1pos, hv1deriv⟩ := hv1
     refine ⟨fun θ => v₁ (alignReparam δ z₀ θ) * alignDensity δ z₀ θ, ?_, ?_, ?_⟩
     · exact (hv1cont.comp (continuous_alignReparam δ z₀)).mul
@@ -1610,16 +1543,13 @@ lemma exists_C1_circle_inverse {h : ℝ → ℝ} {v : ℝ → ℝ}
       (∀ t, H (h t) = t) ∧ (∀ t, H (t + 2 * π) = H t + 2 * π) ∧
       (∀ t, HasDerivAt H (1 / v (H t)) t) := by
   have hpi : 0 < (2 : ℝ) * π := by positivity
-  -- `h` strictly increasing (positive derivative) and continuous (differentiable).
   have hmono : StrictMono h := strictMono_of_hasDerivAt_pos hvd hvp
   have hhdiff : Differentiable ℝ h := fun θ => (hvd θ).differentiableAt
   have hhcont : Continuous h := hhdiff.continuous
-  -- `h(n·2π) = h 0 + n·2π`.
   have hshift : ∀ n : ℤ, h (n • (2 * π)) = h 0 + n • (2 * π) := by
     intro n
     have := psi_add_int_period hper n 0
     rwa [zero_add] at this
-  -- `h` is surjective: unbounded above and below by the shift relation.
   have hsurj : Function.Surjective h := by
     refine hhcont.surjective ?_ ?_
     · apply hmono.monotone.tendsto_atTop_atTop
@@ -1636,7 +1566,6 @@ lemma exists_C1_circle_inverse {h : ℝ → ℝ} {v : ℝ → ℝ}
       rw [hshift n, zsmul_eq_mul]
       rw [lt_div_iff₀ hpi] at hn
       linarith [hn]
-  -- The order isomorphism induced by `h`; `H := e.symm`.
   obtain ⟨e, hecoe⟩ : ∃ e : ℝ ≃o ℝ, ⇑e = h :=
     ⟨StrictMono.orderIsoOfSurjective h hmono hsurj,
       StrictMono.coe_orderIsoOfSurjective h hmono hsurj⟩

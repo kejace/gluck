@@ -270,12 +270,10 @@ lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
   set u : ℂ := z + (s - c) • v with hudef
   set uy : ℂ := y + (s - c) • v with huydef
   set g : ℂ := z - y with hgGdef
-  -- numeric smallness
   have hσ0 : 0 ≤ ‖δ‖ := norm_nonneg δ
   have hσ1 : ‖δ‖ ≤ 1 / 4096 := le_trans hσ (by linarith)
   have hh1 : h ≤ 1 / 4096 := le_trans hh (by linarith)
   obtain ⟨hεlo, hεhi⟩ := abs_le.mp hε
-  -- norm bounds on the three basic vectors
   have hun : ‖u‖ ≤ 2 * ‖δ‖ + 5 * h := by
     have h1 : ‖u‖ ≤ ‖u - δ‖ + ‖δ‖ := by simpa using norm_add_le (u - δ) δ
     nlinarith [hzu]
@@ -286,7 +284,6 @@ lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
     have h1 : ‖g‖ ≤ ‖g - G‖ + ‖G‖ := by simpa using norm_add_le (g - G) G
     nlinarith [hgG, hσ0, hh0.le, mul_le_mul_of_nonneg_left hσ1 hh0.le,
       mul_le_mul_of_nonneg_left hh1 hh0.le]
-  -- frame inner products
   set β : ℝ := ⟪u, v⟫_ℝ with hβdef
   set βy : ℝ := ⟪uy, v⟫_ℝ with hβydef
   have hβabs : |β| ≤ ‖u‖ := by
@@ -303,7 +300,6 @@ lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
     linarith
   obtain ⟨hβlo, hβhi⟩ := abs_le.mp hβsmall
   obtain ⟨hβylo, hβyhi⟩ := abs_le.mp hβysmall
-  -- the base points in terms of the deviations
   have hzu' : z = u - (s - c) • v := by rw [hudef]; abel
   have hyu' : y = uy - (s - c) • v := by rw [huydef]; abel
   have hzv : ⟪z, v⟫_ℝ = β - (s - c) := by
@@ -314,7 +310,6 @@ lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
     rw [hyu', inner_sub_left, real_inner_smul_left, real_inner_self_eq_norm_sq,
       hv, ← hβydef]
     ring
-  -- denominator lower bounds
   have hDz : 1 / 2 ≤ s - β := by linarith
   have hDzK : 1 / 2 ≤ s - β - ε := by linarith
   have hDy : 1 / 2 ≤ s - βy := by linarith
@@ -322,21 +317,18 @@ lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
   have hDz0 : s - β ≠ 0 := by linarith
   have hDzK0 : s - β - ε ≠ 0 := by linarith
   have hDy0 : s - βy ≠ 0 := by linarith
-  -- exact level-shift identity
   have hLeq := sphericalSpeed_sub_level (K := c - ε) (K' := c) (θ := θ) (z := z)
     (by rw [← hvdef, hzv]; intro hcon; linarith)
     (by rw [← hvdef, hzv]; intro hcon; linarith)
   rw [← hvdef, hzv, show c - (c - ε) = ε by ring,
     show c - ε - (β - (s - c)) = s - β - ε by ring,
     show c - (β - (s - c)) = s - β by ring] at hLeq
-  -- exact quadratic identities at `z` and `y`
   have hqz := sphericalSpeed_sub_radius (c := c) (θ := θ) (z := z)
     (by rw [← hvdef, hzv]; intro hcon; linarith)
   rw [← hvdef, hzv, ← hudef, show c - (β - (s - c)) = s - β by ring] at hqz
   have hqy := sphericalSpeed_sub_radius (c := c) (θ := θ) (z := y)
     (by rw [← hvdef, hyv]; intro hcon; linarith)
   rw [← hvdef, hyv, ← huydef, show c - (βy - (s - c)) = s - βy by ring] at hqy
-  -- polarization: `1 + ‖z‖² = 2(s−c)(s−β) + ‖u‖²`
   have hz2 : ‖z‖ ^ 2 = ‖u‖ ^ 2 - 2 * (s - c) * β + (s - c) ^ 2 := by
     rw [hzu', norm_sub_sq_real, real_inner_smul_right, norm_smul, hv, mul_one,
       Real.norm_eq_abs, sq_abs, ← hβdef]
@@ -345,7 +337,6 @@ lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
     rw [hz2]
     linear_combination -hs2
   rw [hpol] at hLeq
-  -- vector decomposition `u = uy + g` and its polarization
   have huuy : u = uy + g := by rw [hudef, huydef, hgGdef]; abel
   have hnorm : ‖u‖ ^ 2 = ‖uy‖ ^ 2 + 2 * ⟪uy, g⟫_ℝ + ‖g‖ ^ 2 := by
     rw [huuy, norm_add_sq_real]
@@ -354,7 +345,6 @@ lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
     congr 1
     rw [hudef, huydef, hgGdef]
     abel
-  -- the X-identity (level part): reduce to the closed-form algebraic identity
   have hXeq : sphericalSpeed (fun _ => c - ε) θ z - sphericalSpeed (fun _ => c) θ z
       - ((s - c) / s * ε + (s - c) / s ^ 2 * ε * β)
       = (s - c) * ε ^ 2 / (s * (s - β - ε))
@@ -362,7 +352,6 @@ lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
         + (s - c) * ε ^ 2 * β / (s ^ 2 * (s - β - ε))
         + ‖u‖ ^ 2 * ε / (2 * (s - β - ε) * (s - β)) := by
     rw [hLeq]; exact arcSpeed_level_identity hs0 hDz0 hDzK0
-  -- the Y-identity (base-point part): reduce to the closed-form algebraic identity
   have hYeq : sphericalSpeed (fun _ => c) θ z - sphericalSpeed (fun _ => c) θ y
       - ⟪uy, g⟫_ℝ / s
       = ⟪uy, g⟫_ℝ * β / (s * (s - β))
@@ -374,10 +363,8 @@ lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
         = (s - c) + ‖uy‖ ^ 2 / (2 * (s - βy)) := by linear_combination hqy
     rw [hPz, hPy, hnorm, ← hβg]
     exact arcSpeed_basepoint_identity hs0 hDz0 hDy0
-  -- swap identity for the frame deviation term
   have hβδ : β - ⟪δ, v⟫_ℝ = ⟪u - δ, v⟫_ℝ := by
     rw [hβdef, ← inner_sub_left]
-  -- decompose the target quantity
   have hkey : sphericalSpeed (fun _ => c - ε) θ z
       - sphericalSpeed (fun _ => c) θ y
       - ((s - c) / s * ε + (s - c) / s ^ 2 * ε * ⟪δ, v⟫_ℝ + ⟪δ, G⟫_ℝ / s)
@@ -396,7 +383,6 @@ lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
   clear_value s v u uy g β βy
   clear hkey hXeq hYeq hLeq hqz hqy hz2 hpol huuy hnorm hβg hzu' hyu' hzv hyv
     hudef huydef hgGdef hvdef hsdef hβdef hβydef
-  -- bound the individual remainder terms
   have hrs01 : 0 ≤ s - c := le_of_lt hrs0
   have hε2 : ε ^ 2 ≤ (h / 2) ^ 2 := by
     rw [← sq_abs]
@@ -409,7 +395,6 @@ lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
     rw [← sq_abs]
     exact pow_le_pow_left₀ (abs_nonneg β) hβabs 2
   have hnum1 : (s - c) * ε ^ 2 ≤ h ^ 2 / 4 := by nlinarith [sq_nonneg ε]
-  -- the nine per-term remainder bounds
   have hT1 := arcSpeed_epsSq_term_bound hs1 hDzK hrs01 hnum1
   have hT2 := arcSpeed_epsBetaSq_term_bound hh0 hs1 hDzK hrs01 hrs1.le hε hβ2
   have hT3 := arcSpeed_epsSqBeta_term_bound hs1 hDzK hrs01 hnum1 hβsmall
@@ -419,7 +404,6 @@ lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
   have hY3 := arcSpeed_uyNormSqInner_term_bound (uy := uy) (g := g) hv hDz hDy
   have hW1 := arcSpeed_frameDeviation_swap_bound hc hh0 hs1 hrs01 hε hv hβδ hzu
   have hW2 := arcSpeed_inner_swap_bound hs1 hyu hgG
-  -- assemble: triangle inequality over the nine terms
   have habs4 : ∀ p q r t : ℝ, |p + q + r + t| ≤ |p| + |q| + |r| + |t| := by
     intro p q r t
     calc |p + q + r + t| ≤ |p + q + r| + |t| := abs_add_le _ _
@@ -447,7 +431,6 @@ lemma arcSpeed_decomp {c h ε θ : ℝ} {δ z y G : ℂ} (hc : 0 < c)
   have htotal := le_trans (habs4 _ _ _ _)
     (add_le_add (add_le_add (add_le_add hTsum hYsum) hW1) hW2)
   refine le_trans htotal ?_
-  -- final numeric absorption (isolated lemma over the abstract frame norms)
   exact arcSpeed_remainder_absorption hh0 hu0 huy0 hg0 hσ0 hun huyn hgn hσ1 hh1
 
 end Gluck

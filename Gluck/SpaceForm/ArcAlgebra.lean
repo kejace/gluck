@@ -547,7 +547,6 @@ lemma invariant_admissible_arc {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ K t�
   have hM0 : 0 ≤ M := by positivity
   have hκc : Continuous fun u : ℝ => κ (t₁ + u) :=
     hκ.comp (continuous_const.add continuous_id)
-  -- transfer both solutions (and their composed fields) to the window `[0, T]`
   have hZ : ∀ s ∈ Set.Icc (0 : ℝ) T,
       HasDerivWithinAt (fun u => z (t₁ + u))
         (truncatedField ε κ R δ (t₁ + s) (z (t₁ + s))) (Set.Icc 0 T) s :=
@@ -563,14 +562,12 @@ lemma invariant_admissible_arc {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ K t�
   have hFz := continuousOn_truncatedField_comp_shift (ε := ε) (R := R) hκ hδ hZc
   have hFzs := continuousOn_truncatedField_comp_shift (ε := ε) (κ' := fun _ => K) (R := R)
     continuous_const hδ hZsc
-  -- the Grönwall integral inequality for the shifted distance
   have key : ∀ s ∈ Set.Icc (0 : ℝ) T,
       ‖z (t₁ + s) - zs (t₁ + s)‖ ≤ ‖z t₁ - zs t₁‖
         + ∫ u in (0 : ℝ)..s, ((L : ℝ) * ‖z (t₁ + u) - zs (t₁ + u)‖
             + M * |κ (t₁ + u) - K|) :=
     fun s hs => arc_trajectory_diff_integral_bound hε hR hR1 hδ hL hκc continuous_const
       hZc hZsc hFz hFzs hZ hZs hs
-  -- Grönwall with `L¹` drive on the shifted window
   have hgronwall := gronwall_L1_drive
     (d := fun s => ‖z (t₁ + s) - zs (t₁ + s)‖)
     (g := fun u => M * |κ (t₁ + u) - K|)
@@ -578,7 +575,6 @@ lemma invariant_admissible_arc {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ K t�
     (continuous_const.mul (hκc.sub continuous_const).abs).continuousOn
     (fun t _ => norm_nonneg _)
     (fun t _ => mul_nonneg hM0 (abs_nonneg _)) key
-  -- convert the drive integral back to the original window
   have hdrive : (∫ u in (0 : ℝ)..T, M * |κ (t₁ + u) - K|)
       = M * ∫ θ in t₁..t₂, |κ θ - K| := by
     rw [intervalIntegral.integral_const_mul]
@@ -593,7 +589,6 @@ lemma invariant_admissible_arc {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ K t�
     intro s hs
     have h := hgronwall s hs
     rwa [hdrive] at h
-  -- unshift and propagate the margins
   intro θ hθ
   have hs : θ - t₁ ∈ Set.Icc (0 : ℝ) T :=
     ⟨by linarith [hθ.1], by rw [hTdef]; linarith [hθ.2]⟩

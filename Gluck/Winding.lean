@@ -270,7 +270,6 @@ theorem exists_zero_of_boundary_winding (F : ℂ → ℂ)
     ∃ z ∈ Metric.ball (0 : ℂ) 1, F z = 0 := by
   by_contra hcon
   simp only [not_exists, not_and] at hcon
-  -- `F` is nowhere zero on the whole closed disk.
   have hne : ∀ z ∈ Metric.closedBall (0 : ℂ) 1, F z ≠ 0 := by
     intro z hz
     have hnorm : ‖z‖ ≤ 1 := by simpa [dist_zero_right] using Metric.mem_closedBall.1 hz
@@ -278,7 +277,6 @@ theorem exists_zero_of_boundary_winding (F : ℂ → ℂ)
     · exact hcon z (by simpa [Metric.mem_ball, dist_zero_right] using h)
     · exact hbd z (by rw [mem_sphere_zero_iff_norm]; exact h)
   have hF0 : F 0 ≠ 0 := hne 0 (by simp)
-  -- The radial parametrisation of the closed disk, `(s,t) ↦ s · e^{2π i t}`.
   set pt : I × I → ℂ :=
     fun st => ((st.1 : ℝ) : ℂ) * (Circle.exp (2 * π * (st.2 : ℝ)) : ℂ) with hptdef
   have hptcont : Continuous pt := by
@@ -294,20 +292,17 @@ theorem exists_zero_of_boundary_winding (F : ℂ → ℂ)
     exact st.1.2.2
   have hFptcont : Continuous fun st => F (pt st) := hF.comp_continuous hptcont hptmem
   have hFptne : ∀ st, F (pt st) ≠ 0 := fun st => hne _ (hptmem st)
-  -- The radial null-homotopy of loops, normalised onto `S¹`.
   set Hmap : C(I × I, Circle) :=
     ⟨fun st => circleProj (F (pt st)) (hFptne st), by
       apply Continuous.subtype_mk
       exact hFptcont.div (Complex.continuous_ofReal.comp (continuous_norm.comp hFptcont))
         (fun st => Complex.ofReal_ne_zero.2 (norm_ne_zero_iff.2 (hFptne st)))⟩ with hHmapdef
-  -- At `s = 0` the homotopy is the constant loop at `F(0)/‖F(0)‖`.
   have h0 : ∀ t, Hmap (0, t) = (ContinuousMap.const I (circleProj (F 0) hF0)) t := by
     intro t
     change circleProj (F (pt (0, t))) (hFptne (0, t)) = circleProj (F 0) hF0
     apply circleProj_congr
     have hpt0 : pt (0, t) = 0 := by rw [hptdef]; simp
     rw [hpt0]
-  -- At `s = 1` the homotopy is the (normalised) boundary loop.
   have h1 : ∀ t, Hmap (1, t) =
       (normLoop (diskBoundaryLoop F hF) (diskBoundaryLoop_ne_zero F hF hbd)) t := by
     intro t
@@ -317,7 +312,6 @@ theorem exists_zero_of_boundary_winding (F : ℂ → ℂ)
     change F (pt (1, t)) = F (Circle.exp (2 * π * (t : ℝ)))
     congr 1
     rw [hptdef]; simp
-  -- Each slice is a loop, since `e^{2π i·0} = e^{2π i·1} = 1`.
   have hloop : ∀ s, Hmap (s, 0) = Hmap (s, 1) := by
     intro s
     change circleProj (F (pt (s, 0))) (hFptne (s, 0)) =
@@ -326,7 +320,6 @@ theorem exists_zero_of_boundary_winding (F : ℂ → ℂ)
     congr 1
     rw [hptdef]
     simp [Circle.exp_two_pi]
-  -- Homotopy invariance: boundary winding = winding of a constant = 0.
   have hinv := windingNumber_eq_of_homotopy Hmap h0 h1 hloop
   rw [windingNumber_const] at hinv
   exact hw hinv.symm
@@ -441,14 +434,12 @@ theorem windingNumberC_eq_of_perturb (γ γ' : C(I, ℂ))
     (hloopγ : γ 0 = γ 1) (hloopγ' : γ' 0 = γ' 1)
     (hpert : ∀ t, ‖γ' t - γ t‖ < ‖γ t‖) :
     windingNumberC γ hγ = windingNumberC γ' hγ' := by
-  -- Straight-line homotopy in `ℂ`.
   set Hc : I × I → ℂ := fun st => γ st.2 + (st.1 : ℝ) • (γ' st.2 - γ st.2) with hHcdef
   have hHccont : Continuous Hc := by
     rw [hHcdef]
     exact (γ.continuous.comp continuous_snd).add
       ((continuous_subtype_val.comp continuous_fst).smul
         ((γ'.continuous.comp continuous_snd).sub (γ.continuous.comp continuous_snd)))
-  -- Each slice is nowhere zero by the reverse triangle inequality.
   have hHcne : ∀ st : I × I, Hc st ≠ 0 := by
     intro st
     have hs0 : (0 : ℝ) ≤ (st.1 : ℝ) := st.1.2.1
@@ -466,27 +457,23 @@ theorem windingNumberC_eq_of_perturb (γ γ' : C(I, ℂ))
     have hHval : Hc st = γ st.2 + v := rfl
     rw [hHval]
     exact norm_pos_iff.1 hpos
-  -- Normalise onto `S¹`.
   set H : C(I × I, Circle) :=
     ⟨fun st => circleProj (Hc st) (hHcne st), by
       apply Continuous.subtype_mk
       exact hHccont.div (Complex.continuous_ofReal.comp (continuous_norm.comp hHccont))
         (fun st => Complex.ofReal_ne_zero.2 (norm_ne_zero_iff.2 (hHcne st)))⟩ with hHdef
-  -- At `s = 0` the homotopy is the normalised `γ`.
   have h0 : ∀ t : I, H (0, t) = normLoop γ hγ t := by
     intro t
     change circleProj (Hc (0, t)) (hHcne (0, t)) = circleProj (γ t) (hγ t)
     apply circleProj_congr
     change γ t + ((0 : I) : ℝ) • (γ' t - γ t) = γ t
     rw [Set.Icc.coe_zero, zero_smul, add_zero]
-  -- At `s = 1` the homotopy is the normalised `γ'`.
   have h1 : ∀ t : I, H (1, t) = normLoop γ' hγ' t := by
     intro t
     change circleProj (Hc (1, t)) (hHcne (1, t)) = circleProj (γ' t) (hγ' t)
     apply circleProj_congr
     change γ t + ((1 : I) : ℝ) • (γ' t - γ t) = γ' t
     rw [Set.Icc.coe_one, one_smul, add_sub_cancel]
-  -- Each slice is a loop, from the loop hypotheses on `γ` and `γ'`.
   have hloop : ∀ s : I, H (s, 0) = H (s, 1) := by
     intro s
     change circleProj (Hc (s, 0)) (hHcne (s, 0)) = circleProj (Hc (s, 1)) (hHcne (s, 1))
@@ -514,7 +501,6 @@ theorem windingNumberC_posScalarField (c : C(I, ℝ)) (hc : ∀ t, 0 < c t)
     windingNumberC ⟨fun t => (c t : ℂ) * γ t,
         (Complex.continuous_ofReal.comp c.continuous).mul γ.continuous⟩
       (fun t => mul_ne_zero (by exact_mod_cast (hc t).ne') (hγ t)) = windingNumberC γ hγ := by
-  -- Scalar factor `f(s,t) = (1−s) + s·c t`, strictly positive on `I × I`.
   set f : I × I → ℝ := fun st => (1 - (st.1 : ℝ)) + (st.1 : ℝ) * c st.2 with hfdef
   have hfpos : ∀ st : I × I, 0 < f st := by
     intro st
@@ -523,7 +509,6 @@ theorem windingNumberC_posScalarField (c : C(I, ℝ)) (hc : ∀ t, 0 < c t)
     have hct := hc st.2
     rw [hfdef]
     nlinarith [mul_nonneg hs0 hct.le, mul_nonneg (sub_nonneg.2 hs1) hct.le]
-  -- Straight-line scalar homotopy in `ℂ`.
   set Hc : I × I → ℂ := fun st => (f st : ℂ) * γ st.2 with hHcdef
   have hHccont : Continuous Hc := by
     rw [hHcdef]
@@ -535,13 +520,11 @@ theorem windingNumberC_posScalarField (c : C(I, ℝ)) (hc : ∀ t, 0 < c t)
     intro st
     rw [hHcdef]
     exact mul_ne_zero (by exact_mod_cast (hfpos st).ne') (hγ st.2)
-  -- Normalise onto `S¹`.
   set H : C(I × I, Circle) :=
     ⟨fun st => circleProj (Hc st) (hHcne st), by
       apply Continuous.subtype_mk
       exact hHccont.div (Complex.continuous_ofReal.comp (continuous_norm.comp hHccont))
         (fun st => Complex.ofReal_ne_zero.2 (norm_ne_zero_iff.2 (hHcne st)))⟩ with hHdef
-  -- At `s = 0` the scalar factor is `1`, so `H` is the normalised `γ`.
   have h0 : ∀ t : I, H (0, t) = normLoop γ hγ t := by
     intro t
     change circleProj (Hc (0, t)) (hHcne (0, t)) = circleProj (γ t) (hγ t)
@@ -549,7 +532,6 @@ theorem windingNumberC_posScalarField (c : C(I, ℝ)) (hc : ∀ t, 0 < c t)
     simp only [hHcdef, hfdef]
     push_cast [Set.Icc.coe_zero]
     ring
-  -- At `s = 1` the scalar factor is `c t`, so `H` is the normalised `c·γ`.
   have h1 : ∀ t : I, H (1, t) =
       normLoop ⟨fun t => (c t : ℂ) * γ t,
         (Complex.continuous_ofReal.comp c.continuous).mul γ.continuous⟩
@@ -561,7 +543,6 @@ theorem windingNumberC_posScalarField (c : C(I, ℝ)) (hc : ∀ t, 0 < c t)
     simp only [hHcdef, hfdef]
     push_cast [Set.Icc.coe_one]
     ring
-  -- Each slice is a loop, from the loop hypotheses on `γ` and `c`.
   have hloop : ∀ s : I, H (s, 0) = H (s, 1) := by
     intro s
     change circleProj (Hc (s, 0)) (hHcne (s, 0)) = circleProj (Hc (s, 1)) (hHcne (s, 1))
@@ -594,7 +575,6 @@ private theorem configSpace_ordered (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π 
   have hpi : 0 < π := Real.pi_pos
   obtain ⟨hx1, hx2⟩ := abs_le.mp hx
   obtain ⟨hy1, hy2⟩ := abs_le.mp hy
-  -- `δ·x, δ·y ∈ [-π/8, π/8]` from `0 < δ ≤ π/8` and `|x|, |y| ≤ 1`.
   have hdx2 : δ * p.1 ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - p.1)]
   have hdx1 : -(π / 8) ≤ δ * p.1 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ p.1 + 1)]
   have hdy2 : δ * p.2 ≤ π / 8 := by nlinarith [mul_nonneg hδ.le (by linarith : (0:ℝ) ≤ 1 - p.2)]
@@ -636,7 +616,6 @@ private theorem errorMap_eq (a b δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8)
   obtain ⟨h1, h12, h23, h34, h4⟩ := errorMap_order δ hδ hδ' hz
   rw [errorMap, bicircleErrorVector_eq a b _ _ _ _ h1 h12 h23 h34 h4]
   congr 1
-  -- the trailing exponential difference is `√2`
   have hpin : Complex.exp (((7 * π / 4 : ℝ) : ℂ) * Complex.I)
       - Complex.exp (((5 * π / 4 : ℝ) : ℂ) * Complex.I) = (Real.sqrt 2 : ℂ) := by
     apply Complex.ext
@@ -852,7 +831,6 @@ theorem errorMap_winding_eq_one (a b δ : ℝ) (_ha : 0 < a) (_hb : 0 < b) (hab 
       (hbd : ∀ z ∈ Metric.sphere (0 : ℂ) 1, errorMap a b δ z ≠ 0),
       windingNumberC (diskBoundaryLoop (errorMap a b δ) hF)
         (diskBoundaryLoop_ne_zero (errorMap a b δ) hF hbd) = -1 := by
-  -- the nonzero scalar `s = 1/(ib) − 1/(ia)`
   have hs : (1 / (Complex.I * (b : ℂ)) - 1 / (Complex.I * (a : ℂ))) ≠ 0 := by
     have hkey : (1 : ℂ) / (Complex.I * (b : ℂ)) - 1 / (Complex.I * (a : ℂ))
         = -Complex.I * (1 / (b : ℂ) - 1 / (a : ℂ)) := by
@@ -861,16 +839,13 @@ theorem errorMap_winding_eq_one (a b δ : ℝ) (_ha : 0 < a) (_hb : 0 < b) (hab 
     apply mul_ne_zero (neg_ne_zero.mpr Complex.I_ne_zero)
     rw [sub_ne_zero, one_div, one_div, ne_eq, inv_inj]
     intro h; exact hab (by exact_mod_cast h.symm)
-  -- the nonzero constant `cc = δ·e^{-iπ/4}`
   have hcc : ((δ : ℂ) * Complex.exp ((↑(-(π / 4)) : ℂ) * Complex.I)) ≠ 0 :=
     mul_ne_zero (by exact_mod_cast hδ.ne') (Complex.exp_ne_zero _)
-  -- the boundary point `e^{2π i t}` and its facts
   have hztcs : ∀ t : I, (((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)).re ^ 2
       + (((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)).im ^ 2 = 1 := by
     intro t
     have h2 := Complex.sq_norm ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)
     rw [Circle.norm_coe, Complex.normSq_apply] at h2; nlinarith [h2]
-  -- nonvanishing of the chord-sum loop and the error map on the sphere
   have hV : ∀ t : I, errVloop δ t ≠ 0 := fun t => Vpart_ne δ hδ hδ' (hztcs t)
   have hbd : ∀ z ∈ Metric.sphere (0 : ℂ) 1, errorMap a b δ z ≠ 0 := by
     intro z hz
@@ -881,7 +856,6 @@ theorem errorMap_winding_eq_one (a b δ : ℝ) (_ha : 0 < a) (_hb : 0 < b) (hab 
     rw [errorMap_eq a b δ hδ hδ' (le_of_eq hz)]
     exact mul_ne_zero hs (Vpart_ne δ hδ hδ' hcs)
   refine ⟨continuousOn_errorMap a b δ hδ hδ', hbd, ?_⟩
-  -- the winding chain `W(E|∂) = W(sV) = W(V) = W(L) = -1`
   have hloopL : errLloop δ 0 = errLloop δ 1 := by
     change ((δ : ℂ) * _) * negCircleExpLoop 0 = ((δ : ℂ) * _) * negCircleExpLoop 1
     have e0 : negCircleExpLoop 0 = 1 := by

@@ -34,7 +34,6 @@ contributes exactly the error vector `E(ρ) = 0`. (Helper for
 theorem reconstruct_periodic {ρ : ℝ → ℝ} (hcont : Continuous ρ)
     (hper : Function.Periodic ρ (2 * π)) (hE : errorVector ρ = 0) :
     Function.Periodic (reconstruct ρ) (2 * π) := by
-  -- The integrand `g φ = e^{iφ} ρ(φ)` is continuous and `2π`-periodic.
   have hg : Continuous fun φ : ℝ => Complex.exp ((φ : ℂ) * Complex.I) * (ρ φ : ℂ) := by
     fun_prop
   have hgper : Function.Periodic
@@ -47,7 +46,6 @@ theorem reconstruct_periodic {ρ : ℝ → ℝ} (hcont : Continuous ρ)
         = (φ : ℂ) * Complex.I + 2 * (π : ℂ) * Complex.I := by push_cast; ring
     rw [h2, Complex.exp_add, Complex.exp_two_pi_mul_I, mul_one]
   intro x
-  -- Advancing by a full period adds the error vector, which is zero.
   have h1 : reconstruct ρ x
       + (∫ φ in x..(x + 2 * π), Complex.exp ((φ : ℂ) * Complex.I) * (ρ φ : ℂ))
       = reconstruct ρ (x + 2 * π) := by
@@ -69,10 +67,8 @@ theorem chord_integral_ne_zero {ρ : ℝ → ℝ} (hcont : Continuous ρ)
     (hpos : ∀ θ, 0 < ρ θ) {c d : ℝ} (hcd : c < d) (hlen : d - c ≤ π) :
     (∫ φ in c..d, Complex.exp ((φ : ℂ) * Complex.I) * (ρ φ : ℂ)) ≠ 0 := by
   set ψ : ℝ := (c + d) / 2 with hψ
-  -- Continuity of the projected real integrands.
   have hcos : Continuous fun φ : ℝ => Real.cos (φ - ψ) * ρ φ := by fun_prop
   have hsin : Continuous fun φ : ℝ => Real.sin (φ - ψ) * ρ φ := by fun_prop
-  -- The projected real integral is strictly positive.
   have hint : IntervalIntegrable (fun φ : ℝ => Real.cos (φ - ψ) * ρ φ)
       MeasureTheory.volume c d := hcos.intervalIntegrable c d
   have hppos : ∀ φ ∈ Set.Ioo c d, 0 < Real.cos (φ - ψ) * ρ φ := by
@@ -82,7 +78,6 @@ theorem chord_integral_ne_zero {ρ : ℝ → ℝ} (hcont : Continuous ρ)
     exact mul_pos (Real.cos_pos_of_mem_Ioo ⟨hc1, hc2⟩) (hpos φ)
   have hcospos : (0 : ℝ) < ∫ φ in c..d, Real.cos (φ - ψ) * ρ φ :=
     intervalIntegral.intervalIntegral_pos_of_pos_on hint hppos hcd
-  -- Project the complex chord integral onto `e^{iψ}`.
   intro hzero
   have hpt : (fun φ : ℝ => Complex.exp (-(↑ψ : ℂ) * Complex.I)
         * (Complex.exp ((φ : ℂ) * Complex.I) * (ρ φ : ℂ)))
@@ -122,13 +117,10 @@ theorem injOn_reconstruct_of_closed {ρ : ℝ → ℝ} (hcont : Continuous ρ)
     (hper : Function.Periodic ρ (2 * π)) (hpos : ∀ θ, 0 < ρ θ)
     (hE : errorVector ρ = 0) :
     Set.InjOn (reconstruct ρ) (Set.Ico 0 (2 * π)) := by
-  -- The integrand `g φ = e^{iφ} ρ(φ)` is continuous.
   have hg : Continuous fun φ : ℝ => Complex.exp ((φ : ℂ) * Complex.I) * (ρ φ : ℂ) := by
     fun_prop
-  -- `α_ρ` is `2π`-periodic.
   have hαper : Function.Periodic (reconstruct ρ) (2 * π) :=
     reconstruct_periodic hcont hper hE
-  -- Chord integral over `[a, b]` equals `α_ρ b − α_ρ a`.
   have hchord : ∀ a b : ℝ,
       (∫ φ in a..b, Complex.exp ((φ : ℂ) * Complex.I) * (ρ φ : ℂ))
         = reconstruct ρ b - reconstruct ρ a := by
@@ -138,14 +130,11 @@ theorem injOn_reconstruct_of_closed {ρ : ℝ → ℝ} (hcont : Continuous ρ)
       (hg.intervalIntegrable (μ := MeasureTheory.volume) a b)
     rw [reconstruct, reconstruct]
     exact (eq_sub_of_add_eq' hadj)
-  -- Core: for `0 ≤ a < b < 2π`, `α_ρ a ≠ α_ρ b`.
   have main : ∀ a b : ℝ, 0 ≤ a → a < b → b < 2 * π →
       reconstruct ρ a ≠ reconstruct ρ b := by
     intro a b ha hab hb heq2
-    -- Arc A = [a, b]: chord integral 0.
     have hA : (∫ φ in a..b, Complex.exp ((φ : ℂ) * Complex.I) * (ρ φ : ℂ)) = 0 := by
       rw [hchord a b, heq2, sub_self]
-    -- Arc B = [b, a + 2π]: chord integral 0.
     have hB : (∫ φ in b..(a + 2 * π), Complex.exp ((φ : ℂ) * Complex.I) * (ρ φ : ℂ)) = 0 := by
       rw [hchord b (a + 2 * π)]
       have : reconstruct ρ (a + 2 * π) = reconstruct ρ a := hαper a
@@ -158,7 +147,6 @@ theorem injOn_reconstruct_of_closed {ρ : ℝ → ℝ} (hcont : Continuous ρ)
       have hcd : b < a + 2 * π := by linarith
       have hlen : (a + 2 * π) - b ≤ π := by linarith
       exact chord_integral_ne_zero hcont hpos hcd hlen hB
-  -- Conclude injectivity.
   intro θ₁ hθ₁ θ₂ hθ₂ heq
   rcases lt_trichotomy θ₁ θ₂ with h | h | h
   · exact absurd heq (main θ₁ θ₂ hθ₁.1 h hθ₂.2)

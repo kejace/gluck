@@ -497,7 +497,6 @@ private lemma negSmoothLanding_close {δ h L : ℝ}
     rw [hedef, ← Real.exp_zero]; apply Real.exp_le_exp.mpr; rw [hLgval]; positivity
   have hEpos : (0 : ℝ) < E := Real.exp_pos _
   have hcoef : (2 : ℝ) / (1 - (4 / 5 : ℝ) ^ 2) = 50 / 9 := by norm_num
-  -- LEG 1: `Φ` vs the confined constant-`(−3/10)` model, same start `W₀`.
   set M1 : ℝ → ℂ × ℝ := fun σ => arcModelConst (-3 / 10) W₀.1 π σ with hM1def
   have hra_ne : arcModelRadius (-3 / 10) W₀.1 π ≠ 0 := by
     rw [hW₀def]; exact ne_of_lt (by linarith [neg_ra_ub hh1 hh2])
@@ -528,7 +527,6 @@ private lemma negSmoothLanding_close {δ h L : ℝ}
     calc e * (50 / 9 * ∫ σ in (0 : ℝ)..(L / 8), |κ σ - (-3 / 10)|)
         ≤ e * (50 / 9 * (23 / 20 * δ)) := mul_le_mul_of_nonneg_left hmul (by linarith)
       _ = e * (115 / 18 * δ) := by ring
-  -- LEG 2: shifted `Φ(L/8 + ·)` vs the confined constant-`2` model started at `qArc1`.
   set M2 : ℝ → ℂ × ℝ :=
     fun σ => arcModelConst 2 (qArc1 (-3 / 10) (h, L)).1 (qArc1 (-3 / 10) (h, L)).2 σ with hM2def
   have hrc_ne : arcModelRadius 2 (qArc1 (-3 / 10) (h, L)).1 (qArc1 (-3 / 10) (h, L)).2 ≠ 0 :=
@@ -569,7 +567,6 @@ private lemma negSmoothLanding_close {δ h L : ℝ}
       nlinarith [mul_le_mul_of_nonneg_left hI2 (by norm_num : (0 : ℝ) ≤ 50 / 9)]
     have hposE : (0 : ℝ) ≤ e := by linarith
     exact mul_le_mul_of_nonneg_left (by linarith [hstep]) hposE
-  -- Compose the two legs and dominate by `negRobustConst·δ`.
   rw [hgoal_eq]
   have hGRC : negRobustConst = 115 / 18 * E * (E + 1) := by rw [negRobustConst, hEdef]
   rw [hGRC]
@@ -879,21 +876,17 @@ private theorem exists_quarterLanding_mixed :
   set δ : ℝ := 1 / (2000 * C) with hδdef
   have hδpos : 0 < δ := by rw [hδdef]; exact div_pos one_pos (by positivity)
   have hCδ : C * δ = 1 / 2000 := by rw [hδdef]; field_simp
-  -- `negRobustConst·δ = 1/2000 ≤ 1/20`.
   have hδC : C * δ ≤ 1 / 20 := by rw [hCδ]; norm_num
   refine ⟨δ, hδpos, hδC, ?_⟩
-  -- `δ` is tiny, comfortably below `L/4 ≥ 157/200` (ramp fits each leg).
   have hδsmall : δ ≤ 1 / 25000 := by
     rw [hδdef]
     exact one_div_le_one_div_of_le (by norm_num) (by nlinarith [hClb])
-  -- The smooth residual as a `ℝ × ℝ`-valued map.
   set G : ℝ × ℝ → ℝ × ℝ := fun p =>
     ((negSmoothLandingState δ p.1 p.2).1.im,
       (negSmoothLandingState δ p.1 p.2).2 - 3 * π / 2) with hGdef
   have hcont : ContinuousOn G
       (Set.Icc ((1 : ℝ) / 10) (3 / 20) ×ˢ Set.Icc ((157 : ℝ) / 50) (161 / 50)) :=
     negSmoothResidual_continuousOn δ hδpos
-  -- Face transfers: robustness `1/2000` below the closed-form margins `1/1000`.
   have hfit : ∀ y ∈ Set.Icc ((157 : ℝ) / 50) (161 / 50), δ ≤ y / 4 :=
     fun y hy => le_trans hδsmall (by linarith [hy.1])
   have hrob_coord : ∀ h L, (1 : ℝ) / 10 ≤ h → h ≤ 3 / 20 → (157 : ℝ) / 50 ≤ L → L ≤ 161 / 50 →

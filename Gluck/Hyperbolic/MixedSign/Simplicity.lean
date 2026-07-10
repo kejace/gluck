@@ -137,11 +137,9 @@ private lemma lift_identity_of_deriv {z : ℝ → ℂ} {φ θ : ℝ → ℝ} {L 
       (Set.Icc 0 L) σ)
     (hθ0 : Complex.exp ((θ 0 : ℂ) * Complex.I) = z 0 / (‖z 0‖ : ℂ)) :
     ∀ σ ∈ Set.Icc (0 : ℝ) L, z σ = (‖z σ‖ : ℂ) * Complex.exp ((θ σ : ℂ) * Complex.I) := by
-  -- the "unrotated" curve
   set m : ℝ → ℂ := fun σ => z σ * Complex.exp ((θ σ : ℂ) * (-Complex.I)) with hmdef
   set c : ℝ → ℝ := fun σ => (inner ℝ (z σ) (Complex.exp ((φ σ : ℂ) * Complex.I))) / ‖z σ‖ ^ 2
     with hcdef
-  -- m solves m' = c·m
   have hmd : ∀ σ ∈ Set.Icc (0 : ℝ) L,
       HasDerivWithinAt m ((c σ : ℂ) * m σ) (Set.Icc 0 L) σ := by
     intro σ hσ
@@ -153,7 +151,6 @@ private lemma lift_identity_of_deriv {z : ℝ → ℂ} {φ θ : ℝ → ℝ} {L 
       hθ'.mul_const (-Complex.I)
     have hEm := hg.cexp
     have hprod := hz'.mul hEm
-    -- rewrite the derivative value to `c σ • m σ`
     have hval : Complex.exp ((φ σ : ℂ) * Complex.I) * Complex.exp ((θ σ : ℂ) * (-Complex.I))
           + z σ * (Complex.exp ((θ σ : ℂ) * (-Complex.I))
             * (((-(inner ℝ (z σ) (Complex.I * Complex.exp ((φ σ : ℂ) * Complex.I)))
@@ -166,7 +163,6 @@ private lemma lift_identity_of_deriv {z : ℝ → ℂ} {φ θ : ℝ → ℝ} {L 
       linear_combination Complex.exp ((θ σ : ℂ) * (-Complex.I)) * hid
     rw [← hval]
     exact hprod
-  -- imaginary part J solves J' = c·J, J 0 = 0 ⟹ J ≡ 0
   set J : ℝ → ℝ := fun σ => (m σ).im with hJdef
   have hJd : ∀ σ ∈ Set.Ico (0 : ℝ) L, HasDerivWithinAt J (c σ * J σ) (Set.Ici σ) σ := by
     intro σ hσ
@@ -181,12 +177,10 @@ private lemma lift_identity_of_deriv {z : ℝ → ℂ} {φ θ : ℝ → ℝ} {L 
     rw [hJeq] at h
     exact h.mono_of_mem_nhdsWithin
       (mem_nhdsGE_iff_exists_Icc_subset.mpr ⟨L, hσ.2, Set.Icc_subset_Icc_left hσ.1⟩)
-  -- ‖m σ‖ = ‖z σ‖
   have hmnorm : ∀ σ, ‖m σ‖ = ‖z σ‖ := fun σ => by
     rw [hmdef, norm_mul,
       show (θ σ : ℂ) * (-Complex.I) = ((-θ σ : ℝ) : ℂ) * Complex.I by push_cast; ring,
       Complex.norm_exp_ofReal_mul_I, mul_one]
-  -- initial value m 0 = ‖z 0‖ (real)
   have hz0 : z 0 ≠ 0 := hne 0 ⟨le_refl 0, hL0⟩
   have hm0 : m 0 = (‖z 0‖ : ℂ) := by
     change z 0 * Complex.exp ((θ 0 : ℂ) * (-Complex.I)) = (‖z 0‖ : ℂ)
@@ -194,7 +188,6 @@ private lemma lift_identity_of_deriv {z : ℝ → ℂ} {φ θ : ℝ → ℝ} {L 
       Complex.exp_neg, hθ0, inv_div]
     field_simp
   have hJ0 : J 0 = 0 := by change (m 0).im = 0; rw [hm0, Complex.ofReal_im]
-  -- continuity of c on the window
   have hexpc : ContinuousOn (fun σ => Complex.exp ((φ σ : ℂ) * Complex.I)) (Set.Icc 0 L) :=
     Complex.continuous_exp.comp_continuousOn
       ((Complex.continuous_ofReal.comp_continuousOn hφc).mul continuousOn_const)
@@ -202,7 +195,6 @@ private lemma lift_identity_of_deriv {z : ℝ → ℂ} {φ θ : ℝ → ℝ} {L 
     refine ContinuousOn.div (hzc.inner hexpc) (hzc.norm.pow 2) (fun σ hσ => ?_)
     have := hne σ hσ; positivity
   obtain ⟨K, hK⟩ := (isCompact_Icc (a := (0 : ℝ)) (b := L)).exists_bound_of_continuousOn hcont_c
-  -- J ≡ 0
   have hJcont : ContinuousOn J (Set.Icc 0 L) :=
     (Complex.continuous_im.comp_continuousOn
       (hzc.mul (Complex.continuous_exp.comp_continuousOn
@@ -215,7 +207,6 @@ private lemma lift_identity_of_deriv {z : ℝ → ℂ} {φ θ : ℝ → ℝ} {L 
     calc |c σ| * |J σ| ≤ K * |J σ| :=
           mul_le_mul_of_nonneg_right (by simpa [Real.norm_eq_abs] using hK σ hσ') (abs_nonneg _)
       _ = K * ‖J σ‖ := by rw [Real.norm_eq_abs]
-  -- m σ is real (im = 0), and ‖z σ‖ = |Re m σ|
   have hmreal : ∀ σ ∈ Set.Icc (0 : ℝ) L, m σ = ((m σ).re : ℂ) := fun σ hσ => by
     have him0 : (m σ).im = 0 := hJzero σ hσ
     apply Complex.ext
@@ -225,7 +216,6 @@ private lemma lift_identity_of_deriv {z : ℝ → ℂ} {φ θ : ℝ → ℝ} {L 
     rw [← hmnorm σ]
     nth_rewrite 1 [hmreal σ hσ]
     rw [Complex.norm_real, Real.norm_eq_abs]
-  -- Re m σ is never zero and positive at 0, hence positive throughout
   have hRe_ne : ∀ σ ∈ Set.Icc (0 : ℝ) L, (m σ).re ≠ 0 := by
     intro σ hσ h0
     have hzn : ‖z σ‖ = 0 := by rw [hzabs σ hσ, h0, abs_zero]
@@ -247,7 +237,6 @@ private lemma lift_identity_of_deriv {z : ℝ → ℂ} {φ θ : ℝ → ℝ} {L 
         Set.mem_uIcc.mpr (Or.inl ⟨h.le, hRe0.le⟩)
       obtain ⟨s, hs, hs0⟩ := intermediate_value_uIcc (hRecont.mono hsub) hmem
       exact hRe_ne s (hsub hs) hs0
-  -- conclude
   intro σ hσ
   have hrpos : 0 < (m σ).re := hRepos σ hσ
   have hnormeq : ‖z σ‖ = (m σ).re := by rw [hzabs σ hσ, abs_of_pos hrpos]
@@ -368,7 +357,6 @@ private lemma neg_arc1_inner_ub {h L σ : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 :
   have hr_ne : r ≠ 0 := ne_of_lt hrneg
   rw [hr] at hr_ne
   rw [neg_arc1_inner hr_ne, ← hr]
-  -- monotone cosine: `cos((L/8)/r) ≤ cos(σ/r)` (sign-flipped, `cos` antitone on `[0,π]`)
   set sp := -r with hsp
   have hsp1 : (1 : ℝ) ≤ sp := by rw [hsp]; linarith
   have hsppos : 0 < sp := by linarith
@@ -383,20 +371,17 @@ private lemma neg_arc1_inner_ub {h L σ : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 :
     rw [hsp, div_neg, Real.cos_neg]
   have hcos : Real.cos ((L / 8) / r) ≤ Real.cos (σ / r) := by
     rw [hcos_eq (L / 8), hcos_eq σ]; exact hcosmono
-  -- `(r−h)·cos(σ/r) − r ≤ (r−h)·cos((L/8)/r) − r` (coefficient `r−h < 0`)
   have hstep : (r - h) * Real.cos (σ / r) - r
       ≤ (r - h) * Real.cos ((L / 8) / r) - r := by
     have := mul_le_mul_of_nonpos_left hcos (by linarith : r - h ≤ 0)
     linarith
   refine le_trans hstep ?_
-  -- join bound: `(r−h)cos((L/8)/r) − r ≤ −1/50` via `q ≤ (L/8)²/(2r²)`
   have hr2pos : (0 : ℝ) < r ^ 2 := by positivity
   have hql : 1 - Real.cos ((L / 8) / r) ≤ (L / 8) ^ 2 / (2 * r ^ 2) := by
     have h0 := neg_q_le h L
     rw [← hr] at h0
     have heq : ((L / 8) / r) ^ 2 / 2 = (L / 8) ^ 2 / (2 * r ^ 2) := by rw [div_pow]; ring
     rw [heq] at h0; exact h0
-  -- the defining relation `2(−3/10 − h)r = 1 − h²`
   have hden : (2 : ℝ) * (-3 / 10 - h) ≠ 0 := ne_of_lt (by nlinarith)
   have hrel : 2 * (-3 / 10 - h) * r = 1 - h ^ 2 := by
     rw [hr, arcModelRadius_qArc1, ← mul_div_assoc, mul_div_cancel_left₀ _ hden]
@@ -518,7 +503,6 @@ private lemma neg_arc2_inner_ub {h L σ : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 :
     lt_of_lt_of_le (by norm_num) hrc_lo
   rw [arcModelConst_inner_PQ (ne_of_gt hrc0) σ]
   set rc := arcModelRadius 2 (qArc1 (-3 / 10) (h, L)).1 (qArc1 (-3 / 10) (h, L)).2 with hrc
-  -- the join value bounds
   have hjoin : ⟪(qArc1 (-3 / 10) (h, L)).1,
       Complex.I * Complex.exp (((qArc1 (-3 / 10) (h, L)).2 : ℂ) * Complex.I)⟫_ℝ ≤ -1 / 50 := by
     simpa [qArc1] using neg_arc1_inner_ub h1 h2 hL1 hL2 (by linarith) (le_refl (L / 8))
@@ -530,7 +514,6 @@ private lemma neg_arc2_inner_ub {h L σ : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 :
       linarith [Real.cos_le_one ((L / 8) / arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π)]
     nlinarith [mul_nonneg
       (by linarith : (0 : ℝ) ≤ h - arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π) hqn]
-  -- the tangential coefficient is nonnegative
   have htan : 0 ≤ ⟪(qArc1 (-3 / 10) (h, L)).1,
       Complex.exp (((qArc1 (-3 / 10) (h, L)).2 : ℂ) * Complex.I)⟫_ℝ := by
     rw [qArc1_tangent_inner]
@@ -549,7 +532,6 @@ private lemma neg_arc2_inner_ub {h L σ : ℝ} (h1 : (1 : ℝ) / 10 ≤ h) (h2 :
       linarith
     nlinarith [mul_nonneg (by linarith : (0 : ℝ) ≤ h - ra)
       (by linarith : (0 : ℝ) ≤ -Real.sin ((L / 8) / ra))]
-  -- the sweep angle stays in `[0, π]`
   have ht0 : 0 ≤ σ / rc := div_nonneg hσ0 hrc0.le
   have htπ : σ / rc ≤ π := by
     have hle : σ / rc ≤ (161 / 400 : ℝ) / (19 / 100) :=
@@ -681,7 +663,6 @@ private lemma neg_model_gap {δ h L : ℝ}
     rw [hedef, ← Real.exp_zero]; apply Real.exp_le_exp.mpr; rw [hLgval]; positivity
   have hEpos : (0 : ℝ) < E := Real.exp_pos _
   have hcoef : (2 : ℝ) / (1 - (4 / 5 : ℝ) ^ 2) = 50 / 9 := by norm_num
-  -- LEG 1: `Φ` vs the confined constant-`(−3/10)` model, same start `W₀`.
   set M1 : ℝ → ℂ × ℝ := fun σ => arcModelConst (-3 / 10) (Complex.I * (h : ℂ)) π σ with hM1def
   have hra_ne : arcModelRadius (-3 / 10) (Complex.I * (h : ℂ)) π ≠ 0 :=
     ne_of_lt (by linarith [neg_ra_ub hh1 hh2])
@@ -715,7 +696,6 @@ private lemma neg_model_gap {δ h L : ℝ}
     have hM1_L8 : M1 (L / 8) = qArc1 (-3 / 10) (h, L) := by rw [hM1def]; rfl
     have := hb1σ (L / 8) (Set.right_mem_Icc.mpr hL8)
     rwa [hM1_L8] at this
-  -- LEG 2: shifted `Φ(L/8 + ·)` vs the confined constant-`2` model.
   set M2 : ℝ → ℂ × ℝ :=
     fun σ => arcModelConst 2 (qArc1 (-3 / 10) (h, L)).1 (qArc1 (-3 / 10) (h, L)).2 σ with hM2def
   have hrc_ne : arcModelRadius 2 (qArc1 (-3 / 10) (h, L)).1 (qArc1 (-3 / 10) (h, L)).2 ≠ 0 :=
@@ -757,7 +737,6 @@ private lemma neg_model_gap {δ h L : ℝ}
       nlinarith [mul_le_mul_of_nonneg_left hI2 (by norm_num : (0 : ℝ) ≤ 50 / 9)]
     have hposE : (0 : ℝ) ≤ e := by linarith
     exact mul_le_mul_of_nonneg_left (by linarith [hb1, hstep]) hposE
-  -- the composed margin `≤ negRobustConst·δ`
   have hEkey : e * (e * (115 / 18 * δ)) + e * (115 / 18 * δ) ≤ negRobustConst * δ := by
     have hGRC : negRobustConst = 115 / 18 * E * (E + 1) := by rw [negRobustConst, hEdef]
     rw [hGRC]
@@ -1056,7 +1035,6 @@ private lemma mixed_radial_lift {δ h L : ℝ}
   set Φ : ℝ → ℂ × ℝ := fun σ => arcFlow κ (4 / 5) L 2 4 (W₀, σ) with hΦdef
   set z : ℝ → ℂ := fun σ => (Φ σ).1 with hzdef
   set φ : ℝ → ℝ := fun σ => (Φ σ).2 with hφdef
-  -- derivatives and continuity of the window curve
   have hzd : ∀ σ ∈ Set.Icc (0 : ℝ) L,
       HasDerivWithinAt z (Complex.exp ((φ σ : ℂ) * Complex.I)) (Set.Icc 0 L) σ := by
     intro σ hσ
@@ -1069,7 +1047,6 @@ private lemma mixed_radial_lift {δ h L : ℝ}
     simpa only [arcField, ContinuousLinearMap.coe_snd', Function.comp_def] using h
   have hzc : ContinuousOn z (Set.Icc 0 L) := HasDerivWithinAt.continuousOn hzd
   have hφc : ContinuousOn φ (Set.Icc 0 L) := HasDerivWithinAt.continuousOn hφd
-  -- the Klein-symmetry state identities (mirror reversal + central symmetry)
   have hland : arcFlow κ (4 / 5) L 2 4 (W₀, L / 4)
       = ((starRingEnd ℂ (arcFlow κ (4 / 5) L 2 4 (W₀, L / 4)).1,
           3 * π - (arcFlow κ (4 / 5) L 2 4 (W₀, L / 4)).2) : ℂ × ℝ) := by
@@ -1086,13 +1063,11 @@ private lemma mixed_radial_lift {δ h L : ℝ}
     hW₀mem hRe hφ0W hland
   have hcen := arcClosure_eqOn hκc hR hR1 hL0 hκabs
     (arcRampProfile_periodic hLpos.ne' (-3 / 10) 2 δ) 4 hW₀mem hmatch
-  -- the transported star certificate and norm floors on the quarter
   obtain ⟨hstar4, hn1, hn2⟩ := neg_smooth_star_quarter hδ hh1 hh2 hL1 hL2 hδC
   have hstar4' : ∀ σ ∈ Set.Icc (0 : ℝ) (L / 4),
       ⟪z σ, Complex.I * Complex.exp ((φ σ : ℂ) * Complex.I)⟫_ℝ ≤ -11 / 1000 := hstar4
   have hn1' : ∀ σ ∈ Set.Icc (0 : ℝ) (L / 8), 19 / 200 ≤ ‖z σ‖ := hn1
   have hn2' : ∀ σ ∈ Set.Icc (L / 8) (L / 4), 1 / 8 ≤ ‖z σ‖ := hn2
-  -- pointwise invariance of the radial inner product and the norm
   have hFrev : ∀ σ ∈ Set.Icc (0 : ℝ) (L / 2),
       ⟪z σ, Complex.I * Complex.exp ((φ σ : ℂ) * Complex.I)⟫_ℝ
         = ⟪z (L / 2 - σ), Complex.I * Complex.exp ((φ (L / 2 - σ) : ℂ) * Complex.I)⟫_ℝ := by
@@ -1117,7 +1092,6 @@ private lemma mixed_radial_lift {δ h L : ℝ}
     intro σ hσ
     have h1 : z σ = -z (σ - L / 2) := congrArg Prod.fst (hcen hσ)
     rw [h1, norm_neg]
-  -- star certificate on the full window
   have hstarH : ∀ σ ∈ Set.Icc (0 : ℝ) (L / 2),
       ⟪z σ, Complex.I * Complex.exp ((φ σ : ℂ) * Complex.I)⟫_ℝ ≤ -11 / 1000 := by
     intro σ hσ
@@ -1132,10 +1106,8 @@ private lemma mixed_radial_lift {δ h L : ℝ}
     · exact hstarH σ ⟨hσ.1, h2⟩
     · rw [hFcen σ ⟨h2, hσ.2⟩]
       exact hstarH (σ - L / 2) ⟨by linarith, by linarith [hσ.2]⟩
-  -- the star direction is a unit vector (reused at every speed/norm bound)
   have hbnorm : ∀ x : ℝ, ‖Complex.I * Complex.exp ((x : ℂ) * Complex.I)‖ = 1 := fun x => by
     rw [norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul]
-  -- global norm floor and non-vanishing
   have hnormL : ∀ σ ∈ Set.Icc (0 : ℝ) L, 11 / 1000 ≤ ‖z σ‖ := by
     intro σ hσ
     linarith [hstarL σ hσ, neg_inner_le_norm (a := z σ) (hbnorm (φ σ))]
@@ -1144,7 +1116,6 @@ private lemma mixed_radial_lift {δ h L : ℝ}
     have := hnormL σ hσ
     rw [h0, norm_zero] at this
     linarith
-  -- the argument-speed integrand `G = −⟪z, i e^{iφ}⟫/‖z‖²`, clamped for global continuity
   have hexpc : ContinuousOn (fun σ => Complex.exp ((φ σ : ℂ) * Complex.I)) (Set.Icc 0 L) :=
     Complex.continuous_exp.comp_continuousOn
       ((Complex.continuous_ofReal.comp_continuousOn hφc).mul continuousOn_const)
@@ -1178,7 +1149,6 @@ private lemma mixed_radial_lift {δ h L : ℝ}
     rw [hclampeq σ hσ]
   have hwint : ∀ a b : ℝ, IntervalIntegrable w MeasureTheory.volume a b := fun a b =>
     hwc.intervalIntegrable a b
-  -- the lift `θ = π/2 + ∫₀^σ w`
   set θ : ℝ → ℝ := fun σ => π / 2 + ∫ s in (0 : ℝ)..σ, w s with hθdef
   have hθd : ∀ σ ∈ Set.Icc (0 : ℝ) L, HasDerivWithinAt θ
       (-(inner ℝ (z σ) (Complex.I * Complex.exp ((φ σ : ℂ) * Complex.I))) / ‖z σ‖ ^ 2)
@@ -1195,7 +1165,6 @@ private lemma mixed_radial_lift {δ h L : ℝ}
   have hθ0 : θ 0 = π / 2 := by
     change π / 2 + ∫ s in (0 : ℝ)..(0 : ℝ), w s = π / 2
     rw [intervalIntegral.integral_same, add_zero]
-  -- initial phase `e^{iθ(0)} = i = z(0)/‖z(0)‖`
   have hz0 : z 0 = Complex.I * (h : ℂ) := congrArg Prod.fst hf0
   have hnz0 : ‖z 0‖ = h := by
     rw [hz0, norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Real.norm_eq_abs,
@@ -1208,9 +1177,7 @@ private lemma mixed_radial_lift {δ h L : ℝ}
     apply Complex.ext
     · rw [Complex.exp_ofReal_mul_I_re, Real.cos_pi_div_two, Complex.I_re]
     · rw [Complex.exp_ofReal_mul_I_im, Real.sin_pi_div_two, Complex.I_im]
-  -- the lift identity `z = ‖z‖·e^{iθ}` (Abstract core B)
   have hlift := lift_identity_of_deriv hL0 hzd hzc hφc hθc hne hθd hθinit
-  -- strict monotonicity from `w > 0`
   have hθdiff : ∀ a b : ℝ, θ b - θ a = ∫ s in a..b, w s := by
     intro a b
     change (π / 2 + ∫ s in (0 : ℝ)..b, w s) - (π / 2 + ∫ s in (0 : ℝ)..a, w s) = _
@@ -1225,7 +1192,6 @@ private lemma mixed_radial_lift {δ h L : ℝ}
       exact hGpos s hsmem
     have := hθdiff x y
     linarith
-  -- crude quarter bound `∫₀^{L/4} w < 5π/2`
   have hwub1 : ∀ s ∈ Set.Icc (0 : ℝ) (L / 8), w s ≤ 200 / 19 := by
     intro s hs
     have hsmem : s ∈ Set.Icc (0 : ℝ) L := ⟨hs.1, by linarith [hs.2]⟩
@@ -1267,7 +1233,6 @@ private lemma mixed_radial_lift {δ h L : ℝ}
     exact hGpos s hsmem
   have hθ4val : θ (L / 4) = π / 2 + ∫ s in (0 : ℝ)..(L / 4), w s := rfl
   have hquarter : L / 4 ∈ Set.Icc (0 : ℝ) L := ⟨by linarith, by linarith⟩
-  -- `θ(L/4) = π`: the landing pins the quarter increment to exactly `π/2`
   have hnz4 : 0 < ‖z (L / 4)‖ := lt_of_lt_of_le (by norm_num) (hnormL (L / 4) hquarter)
   have hlift4 := hlift (L / 4) hquarter
   have hsin4 : Real.sin (θ (L / 4)) = 0 := by
@@ -1298,7 +1263,6 @@ private lemma mixed_radial_lift {δ h L : ℝ}
     have := hθ4val
     rw [hθ4] at this
     linarith [this.symm]
-  -- fold the full-window increment by the Klein symmetry: `∫₀^L w = 4·(π/2) = 2π`
   have hwrev : Set.EqOn w (fun σ => w (L / 2 - σ)) (Set.uIcc (L / 4) (L / 2)) := by
     intro σ hσ
     rw [Set.uIcc_of_le (by linarith : L / 4 ≤ L / 2)] at hσ

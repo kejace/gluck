@@ -53,7 +53,6 @@ theorem dist_errorVector_le {ρ ρ' : ℝ → ℝ}
     (hρ : IntervalIntegrable ρ volume 0 (2 * π))
     (hρ' : IntervalIntegrable ρ' volume 0 (2 * π)) :
     ‖errorVector ρ - errorVector ρ'‖ ≤ ∫ θ in (0 : ℝ)..(2 * π), |ρ θ - ρ' θ| := by
-  -- The complex exponential weight is continuous, hence integrable against ρ, ρ'.
   have hexp : Continuous fun φ : ℝ => Complex.exp ((φ : ℂ) * Complex.I) :=
     Complex.continuous_exp.comp (Complex.continuous_ofReal.mul continuous_const)
   have hρC : IntervalIntegrable (fun φ : ℝ => (ρ φ : ℂ)) volume 0 (2 * π) :=
@@ -66,7 +65,6 @@ theorem dist_errorVector_le {ρ ρ' : ℝ → ℝ}
   have hI' : IntervalIntegrable
       (fun φ : ℝ => Complex.exp ((φ : ℂ) * Complex.I) * (ρ' φ : ℂ)) volume 0 (2 * π) :=
     hρ'C.continuousOn_mul hexp.continuousOn
-  -- Combine the two error vectors into a single integral of the difference.
   have hsub : errorVector ρ - errorVector ρ'
       = ∫ φ in (0 : ℝ)..(2 * π),
           Complex.exp ((φ : ℂ) * Complex.I) * ((ρ φ - ρ' φ : ℝ) : ℂ) := by
@@ -77,7 +75,6 @@ theorem dist_errorVector_le {ρ ρ' : ℝ → ℝ}
     push_cast
     ring
   rw [hsub]
-  -- ‖∫ g‖ ≤ ∫ ‖g‖ (since 0 ≤ 2π), and ‖e^{iφ}(ρ-ρ')‖ = |ρ - ρ'|.
   have hpi : (0 : ℝ) ≤ 2 * π := by positivity
   calc ‖∫ φ in (0 : ℝ)..(2 * π),
             Complex.exp ((φ : ℂ) * Complex.I) * ((ρ φ - ρ' φ : ℝ) : ℂ)‖
@@ -368,7 +365,6 @@ lemma exists_plateau_density {c₁ c₂ c₃ c₄ m₀ η δ : ℝ}
   have hδπ : δ < π := by linarith
   have hδne : δ ≠ 0 := hδ.ne'
   have hπne : π ≠ 0 := hπ.ne'
-  -- Plateau slope and the four positive race-bump areas.
   set p : ℝ := 4 * η / π with hp
   set A₀ : ℝ := c₁ + 2 * π - c₄ - 2 * η with hA0
   set A₁ : ℝ := c₂ - c₁ - 2 * η with hA1
@@ -379,14 +375,12 @@ lemma exists_plateau_density {c₁ c₂ c₃ c₄ m₀ η δ : ℝ}
   have hA2pos : 0 < A₂ := by rw [hA2]; linarith
   have hA3pos : 0 < A₃ := by rw [hA3]; linarith
   have hppos : 0 < p := by rw [hp]; exact div_pos (by linarith) hπ
-  -- The continuous trapezoidal density: constant plus four triangular race bumps.
   set w : ℝ → ℝ := fun θ => p + (2 * A₀ / δ) * tentBump δ 0 θ
       + (2 * A₁ / δ) * tentBump δ (π / 2) θ + (2 * A₂ / δ) * tentBump δ π θ
       + (2 * A₃ / δ) * tentBump δ (3 * π / 2) θ with hwdef
   have ii : ∀ (k τ θ : ℝ), IntervalIntegrable (fun s => k * tentBump δ τ s)
       MeasureTheory.volume 0 θ :=
     fun k τ θ => ((tentBump_continuous δ τ).intervalIntegrable _ _).const_mul k
-  -- Cumulative integral split into the constant part plus the four bump integrals.
   have hsplit : ∀ θ : ℝ, (∫ s in (0:ℝ)..θ, w s)
       = p * θ + (2 * A₀ / δ) * (∫ s in (0:ℝ)..θ, tentBump δ 0 s)
         + (2 * A₁ / δ) * (∫ s in (0:ℝ)..θ, tentBump δ (π / 2) s)
@@ -416,7 +410,6 @@ lemma exists_plateau_density {c₁ c₂ c₃ c₄ m₀ η δ : ℝ}
         intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul,
         intervalIntegral.integral_const]
     simp only [smul_eq_mul]; ring
-  -- Tail lemma: `|η·X/π| ≤ η` whenever `|X| ≤ π`.
   have hfinal : ∀ X : ℝ, |X| ≤ π → |η * X / π| ≤ η := by
     intro X hX
     rw [abs_div, abs_of_pos hπ, abs_mul, abs_of_pos hη, div_le_iff₀ hπ]
@@ -638,12 +631,10 @@ theorem exists_preliminary_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
       (∃ v₁ : ℝ → ℝ, Continuous v₁ ∧ (∀ θ, 0 < v₁ θ) ∧
         ∀ θ, HasDerivAt h₁ (v₁ θ) θ) := by
   obtain ⟨hcont, hper, hpos⟩ := hκ
-  -- The four pointwise moduli of continuity at the crossing points.
   obtain ⟨η₁, hη₁, hm1⟩ := kappa_modulus_at hcont c₁ hε
   obtain ⟨η₂, hη₂, hm2⟩ := kappa_modulus_at hcont c₂ hε
   obtain ⟨η₃, hη₃, hm3⟩ := kappa_modulus_at hcont c₃ hε
   obtain ⟨η₄, hη₄, hm4⟩ := kappa_modulus_at hcont c₄ hε
-  -- Plateau radius `η`: small enough for all four moduli AND to fit each arc.
   have hπ : 0 < π := Real.pi_pos
   have hgap₁ : 0 < (c₂ - c₁) / 2 := by linarith
   have hgap₂ : 0 < (c₃ - c₂) / 2 := by linarith
@@ -655,21 +646,17 @@ theorem exists_preliminary_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
   have hδpos : 0 < δ := by rw [hδdef]; exact lt_min (by linarith) (by linarith)
   have hδlt : δ < π / 2 := by
     rw [hδdef]; exact lt_of_le_of_lt (min_le_right _ _) (by linarith)
-  -- The calibrated continuous plateau density.
   obtain ⟨w, hw, hwpos, hwper, hwint, hpl1, hpl2, hpl3, hpl4⟩ :=
     exists_plateau_density (m₀ := (c₁ + c₄) / 2 - π) h12 h23 h34 h41 rfl
       hηpos hδpos hδlt hfit₁ hfit₂ hfit₃ hfit₄
   set m₀ : ℝ := (c₁ + c₄) / 2 - π with hm₀def
-  -- The reparametrization.
   set h₁ : ℝ → ℝ := fun θ => m₀ + ∫ s in (0:ℝ)..θ, w s with hh₁def
-  -- `h₁` is differentiable everywhere (FTC), hence continuous.
   have hh₁diff : Differentiable ℝ h₁ := by
     have hd : Differentiable ℝ (fun θ : ℝ => ∫ s in (0:ℝ)..θ, w s) := fun θ =>
       (intervalIntegral.integral_hasDerivAt_right (hw.intervalIntegrable 0 θ)
         (hw.stronglyMeasurableAtFilter _ _) hw.continuousAt).differentiableAt
     simpa only [hh₁def] using hd.const_add m₀
   have hh₁cont : Continuous h₁ := hh₁diff.continuous
-  -- The derivative witness: `h₁' = w`, the continuous strictly positive density.
   have hh₁deriv : ∀ θ, HasDerivAt h₁ (w θ) θ := fun θ => by
     have hd : HasDerivAt (fun θ : ℝ => ∫ s in (0:ℝ)..θ, w s) (w θ) θ :=
       intervalIntegral.integral_hasDerivAt_right (hw.intervalIntegrable 0 θ)
@@ -696,16 +683,12 @@ theorem exists_preliminary_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
     simp only [hh₁def]
     rw [← hadd, hshift, hwint]; ring
   · -- Measure bound: the bad set avoids all four plateaus, hence sits in the
-    -- complement of the plateaus inside one period, of measure `4δ < ε`.
-    -- Value of the canonical step curvature on the four arcs.
     obtain ⟨hstep1, hstep2, hstep3, hstep4⟩ := stepCurvature_canonical_values a b
-    -- The four plateaus and the ambient period.
     set U := Set.Ico (0 : ℝ) (2 * π) with hUdef
     set P₁ := Set.Icc (δ / 2) (π / 2 - δ / 2) with hP1def
     set P₂ := Set.Icc (π / 2 + δ / 2) (π - δ / 2) with hP2def
     set P₃ := Set.Icc (π + δ / 2) (3 * π / 2 - δ / 2) with hP3def
     set P₄ := Set.Icc (3 * π / 2 + δ / 2) (2 * π - δ / 2) with hP4def
-    -- On each plateau, `κ ∘ h₁` is within `ε` of the step value.
     have hgood : ∀ θ, θ ∈ P₁ ∪ P₂ ∪ P₃ ∪ P₄ →
         |κ (h₁ θ) - stepCurvature b a 0 (π / 2) π (3 * π / 2) θ| ≤ ε := by
       intro θ hmem
@@ -727,7 +710,6 @@ theorem exists_preliminary_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
         have hb : |h₁ θ - c₄| ≤ η := by simp only [hh₁def]; exact hpl4 θ hl hr
         have := hm4 (h₁ θ) (le_trans hb hηle₄)
         rw [hstep4 θ (by linarith) (by linarith), ← hc₄]; exact this
-    -- The bad set is contained in `U` minus the plateaus.
     have hBsub : {θ : ℝ | θ ∈ Set.Ico (0 : ℝ) (2 * π) ∧
         ε < |κ (h₁ θ) - stepCurvature b a 0 (π / 2) π (3 * π / 2) θ|}
         ⊆ U \ (P₁ ∪ P₂ ∪ P₃ ∪ P₄) := by
@@ -735,7 +717,6 @@ theorem exists_preliminary_reparam {κ : ℝ → ℝ} (hκ : IsCurvatureFunction
       obtain ⟨hU, hbad⟩ := hθ
       refine ⟨hU, fun hP => ?_⟩
       exact absurd (hgood θ hP) (not_le.mpr hbad)
-    -- Measures.
     have hδle : δ ≤ π / 4 := by rw [hδdef]; exact min_le_right _ _
     have h4δlt : 4 * δ < ε := by
       rw [hδdef]; have := min_le_left (ε / 8) (π / 4); linarith

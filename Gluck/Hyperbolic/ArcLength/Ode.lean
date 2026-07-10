@@ -110,7 +110,6 @@ lemma clampBall_lipschitz {R : ℝ} (hR : 0 ≤ R) :
   have hlwt : lw * t = min t R := min_one_div_mul hR ht0
   set c := ⟪z, w⟫_ℝ with hc
   have hcle : c ≤ s * t := real_inner_le_norm z w
-  -- Reduce to the squared inequality.
   have expand : ‖clampBall R z - clampBall R w‖ ^ 2
       = lz ^ 2 * s ^ 2 - 2 * (lz * lw) * c + lw ^ 2 * t ^ 2 := by
     change ‖lz • z - lw • w‖ ^ 2 = _
@@ -231,7 +230,6 @@ lemma arcField_lipschitzWith {κ : ℝ → ℝ} {R M : ℝ} (hR : 0 ≤ R) (hR1 
   have hB0 : 0 ≤ B := by positivity
   set K2r : ℝ := 2 * (1 + R) / δ + 2 * R * B / δ ^ 2 with hK2r
   have hK2r0 : 0 ≤ K2r := by positivity
-  -- speed component is Lipschitz
   have speedLip : ∀ σ, LipschitzWith K2r.toNNReal
       (fun W : ℂ × ℝ => truncatedArcAngleSpeed κ R σ W.1 W.2) := by
     intro σ
@@ -245,7 +243,6 @@ lemma arcField_lipschitzWith {κ : ℝ → ℝ} {R M : ℝ} (hR : 0 ≤ R) (hR1 
     have hcbz' : ‖clampBall R z'‖ ≤ R := norm_clampBall_le hR z'
     have hd₁ : δ ≤ 1 - ‖clampBall R z‖ ^ 2 := by nlinarith [norm_nonneg (clampBall R z)]
     have hd₂ : δ ≤ 1 - ‖clampBall R z'‖ ^ 2 := by nlinarith [norm_nonneg (clampBall R z')]
-    -- state distance bounds
     have hzd : ‖z - z'‖ ≤ dist W W' := by
       rw [← dist_eq_norm, Prod.dist_eq]; exact le_max_left _ _
     have hφd : |φ - φ'| ≤ dist W W' := by
@@ -260,7 +257,6 @@ lemma arcField_lipschitzWith {κ : ℝ → ℝ} {R M : ℝ} (hR : 0 ≤ R) (hR1 
           = ‖Complex.exp ((φ : ℂ) * Complex.I) - Complex.exp ((φ' : ℂ) * Complex.I)‖ := by
             rw [hvdef]; rw [← mul_sub, norm_mul, Complex.norm_I, one_mul]
         _ ≤ |φ - φ'| := this
-    -- numerator difference bound
     have hnum : |2 * (κ σ + ⟪clampBall R z, v φ⟫_ℝ) - 2 * (κ σ + ⟪clampBall R z', v φ'⟫_ℝ)|
         ≤ 2 * (‖z - z'‖ + R * |φ - φ'|) := by
       have hsplit : 2 * (κ σ + ⟪clampBall R z, v φ⟫_ℝ) - 2 * (κ σ + ⟪clampBall R z', v φ'⟫_ℝ)
@@ -277,7 +273,6 @@ lemma arcField_lipschitzWith {κ : ℝ → ℝ} {R M : ℝ} (hR : 0 ≤ R) (hR1 
       · calc |⟪clampBall R z', v φ - v φ'⟫_ℝ|
             ≤ ‖clampBall R z'‖ * ‖v φ - v φ'‖ := abs_real_inner_le_norm _ _
           _ ≤ R * |φ - φ'| := mul_le_mul hcbz' hvd (norm_nonneg _) hR
-    -- denominator difference bound
     have hden : |(1 - ‖clampBall R z‖ ^ 2) - (1 - ‖clampBall R z'‖ ^ 2)|
         ≤ 2 * R * ‖z - z'‖ := by
       have heq : (1 - ‖clampBall R z‖ ^ 2) - (1 - ‖clampBall R z'‖ ^ 2)
@@ -292,7 +287,6 @@ lemma arcField_lipschitzWith {κ : ℝ → ℝ} {R M : ℝ} (hR : 0 ≤ R) (hR1 
       calc |‖clampBall R z'‖ - ‖clampBall R z‖| * |‖clampBall R z'‖ + ‖clampBall R z‖|
           ≤ ‖z - z'‖ * (2 * R) := mul_le_mul h1 h2 (abs_nonneg _) (norm_nonneg _)
         _ = 2 * R * ‖z - z'‖ := by ring
-    -- numerator bound
     have hnB : |2 * (κ σ + ⟪clampBall R z, v φ⟫_ℝ)| ≤ B := by
       rw [abs_mul, abs_two, hBdef]
       refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
@@ -300,7 +294,6 @@ lemma arcField_lipschitzWith {κ : ℝ → ℝ} {R M : ℝ} (hR : 0 ≤ R) (hR1 
       calc |⟪clampBall R z, v φ⟫_ℝ| ≤ ‖clampBall R z‖ * ‖v φ‖ := abs_real_inner_le_norm _ _
         _ = ‖clampBall R z‖ := by rw [hvnorm, mul_one]
         _ ≤ R := hcbz
-    -- assemble via quotient bound
     have hmain := abs_div_sub_div_le' hδ hd₁ hd₂ hnB hnum hden
     simp only [truncatedArcAngleSpeed]
     refine hmain.trans ?_
@@ -313,7 +306,6 @@ lemma arcField_lipschitzWith {κ : ℝ → ℝ} {R M : ℝ} (hR : 0 ≤ R) (hR1 
     calc 2 * (‖z - z'‖ + R * |φ - φ'|) / δ + B * (2 * R * ‖z - z'‖) / δ ^ 2
         ≤ 2 * (1 + R) / δ * dist W W' + 2 * R * B / δ ^ 2 * dist W W' := add_le_add e1 e2
       _ = K2r * dist W W' := by rw [hK2r]; ring
-  -- combine exp and speed components
   intro σ
   have hf1 : LipschitzWith 1 (fun W : ℂ × ℝ => Complex.exp ((W.2 : ℂ) * Complex.I)) := by
     refine LipschitzWith.of_dist_le_mul fun W W' => ?_
@@ -746,21 +738,18 @@ lemma arcModelConst_hasDerivAt_z {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
       (Complex.exp (((arcModelConst K z₀ φ₀ σ).2 : ℂ) * Complex.I)) σ := by
   set r := arcModelRadius K z₀ φ₀ with hrdef
   have hrC : (r : ℂ) ≠ 0 := by exact_mod_cast hr
-  -- derivative of the inner exponential `t ↦ e^{i·t/r}`
   have hg : HasDerivAt (fun t : ℝ => Complex.exp (((t / r : ℝ) : ℂ) * Complex.I))
       (Complex.exp (((σ / r : ℝ) : ℂ) * Complex.I) * (((1 / r : ℝ) : ℂ) * Complex.I)) σ := by
     have h1 : HasDerivAt (fun t : ℝ => ((t / r : ℝ) : ℂ) * Complex.I)
         (((1 / r : ℝ) : ℂ) * Complex.I) σ :=
       (((hasDerivAt_id σ).div_const r).ofReal_comp).mul_const Complex.I
     exact h1.cexp
-  -- assemble the full `z`-component derivative
   have hf : HasDerivAt (fun t => (arcModelConst K z₀ φ₀ t).1)
       (-((r : ℂ) * Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I) *
         (Complex.exp (((σ / r : ℝ) : ℂ) * Complex.I) * (((1 / r : ℝ) : ℂ) * Complex.I)))) σ := by
     have := (((hg.sub_const 1).const_mul
       ((r : ℂ) * Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I))).const_sub z₀)
     simpa [arcModelConst, hrdef] using this
-  -- the derivative value is `e^{iφ(σ)}`
   have h2 : ((arcModelConst K z₀ φ₀ σ).2 : ℂ) = (φ₀ : ℂ) + ((σ / r : ℝ) : ℂ) := by
     simp [arcModelConst, hrdef]
   have hII : Complex.I * Complex.I = -1 := by rw [← sq]; exact Complex.I_sq
@@ -791,18 +780,15 @@ private lemma arcModelConst_angleSpeed {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
   set z := (arcModelConst K z₀ φ₀ σ).1 with hz_def
   set p := Complex.I * Complex.exp (((arcModelConst K z₀ φ₀ σ).2 : ℂ) * Complex.I) with hp_def
   have hrC : (r : ℂ) ≠ 0 := by exact_mod_cast hr
-  -- the denominator of `arcModelRadius` is nonzero
   have hD : K + ⟪z₀, u⟫_ℝ ≠ 0 := by
     intro h
     apply hr
     rw [hrdef]
     simp only [arcModelRadius, ← hu_def, h, mul_zero, div_zero]
-  -- the defining relation of the radius
   have h2rD : 2 * r * (K + ⟪z₀, u⟫_ℝ) = 1 - ‖z₀‖ ^ 2 := by
     rw [hrdef]
     simp only [arcModelRadius, ← hu_def]
     field_simp
-  -- `‖p‖ = 1` and the centre-constraint
   have hpnorm : ‖p‖ ^ 2 = 1 := by
     rw [hp_def]; simp [Complex.norm_I, Complex.norm_exp_ofReal_mul_I]
   have hunorm : ‖u‖ = 1 := by
@@ -811,7 +797,6 @@ private lemma arcModelConst_angleSpeed {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
     rw [norm_add_sq_real, real_inner_smul_right, norm_smul, Real.norm_eq_abs, hunorm,
       mul_one, sq_abs]
     linear_combination h2rD
-  -- the circle representation `z = z_c − r·p`
   have hpq : p = u * Complex.exp (((σ / r : ℝ) : ℂ) * Complex.I) := by
     rw [hp_def, hu_def, show ((arcModelConst K z₀ φ₀ σ).2 : ℂ) = (φ₀ : ℂ) + ((σ / r : ℝ) : ℂ)
         from by simp [arcModelConst, hrdef], add_mul, Complex.exp_add]
@@ -820,7 +805,6 @@ private lemma arcModelConst_angleSpeed {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
     rw [hz_def, hpq, hu_def, Complex.real_smul]
     simp only [arcModelConst, ← hrdef]
     ring
-  -- decompose inner product and norm of `z` around the centre
   have hinner : ⟪z, p⟫_ℝ = ⟪z₀ + r • u, p⟫_ℝ - r := by
     rw [hzrep, show (r : ℂ) * p = r • p from Complex.real_smul.symm,
       inner_sub_left, real_inner_smul_left, real_inner_self_eq_norm_sq, hpnorm]
@@ -830,10 +814,8 @@ private lemma arcModelConst_angleSpeed {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
       real_inner_smul_right]
     simp only [norm_smul, Real.norm_eq_abs, mul_pow, sq_abs, hpnorm]
     ring
-  -- the conserved radius identity: the `⟪z_c, p⟫` cross term cancels
   have hmain : 2 * r * (K + ⟪z, p⟫_ℝ) = 1 - ‖z‖ ^ 2 := by
     rw [hinner, hnorm, hzc]; ring
-  -- conclude
   simp only [arcAngleSpeed, ← hp_def]
   rw [div_eq_div_iff hconf hr]
   linear_combination hmain

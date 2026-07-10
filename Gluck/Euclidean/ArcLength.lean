@@ -140,7 +140,6 @@ theorem eiAngle_periodic {K : ℝ → ℝ} (hK : Continuous K)
     Function.Periodic
       (fun s => Complex.exp ((dahlbergAngle K s : ℂ) * Complex.I)) (2 * π) := by
   intro s
-  -- α_K(s+2π) − α_K(s) = ∫_s^{s+2π} K = ∫_0^{2π} K = 2π
   have hadj : dahlbergAngle K s + (∫ t in s..(s + 2 * π), K t) = dahlbergAngle K (s + 2 * π) := by
     rw [dahlbergAngle, dahlbergAngle]
     exact intervalIntegral.integral_add_adjacent_intervals
@@ -268,11 +267,9 @@ theorem realizesCurvature_of_nonNormalised {κ φ ψ : ℝ → ℝ}
     (hNN : NonNormalisedCurvature (κ ∘ φ))
     (hIpos : 0 < ∫ t in (0 : ℝ)..(2 * π), (κ ∘ φ) t) :
     ∃ γ : ℝ → ℂ, IsSimpleClosed γ ∧ RealizesCurvature γ κ := by
-  -- Unfold the non-normalised hypothesis, then name `I` and the normalised `K`.
   obtain ⟨hI0, hNN12, hNN13⟩ := hNN
   set I := ∫ t in (0 : ℝ)..(2 * π), (κ ∘ φ) t with hIdef
   set K : ℝ → ℝ := fun s => (2 * π / I) * (κ ∘ φ) s with hKdef
-  -- `κ ∘ φ` is continuous and `2π`-periodic, hence so is `K`.
   have hφcont : Continuous φ := hφ.continuous
   have hκφcont : Continuous (κ ∘ φ) := hκ.comp hφcont
   have hKcont : Continuous K := continuous_const.mul hκφcont
@@ -282,36 +279,26 @@ theorem realizesCurvature_of_nonNormalised {κ φ ψ : ℝ → ℝ}
     intro t
     simp only [hKdef, Function.comp]
     rw [hφper t, hκper (φ t)]
-  -- (1.1) holds: `∫₀^{2π} K = (2π/I)·I = 2π`.
   have h11 : (∫ s in (0 : ℝ)..(2 * π), K s) = 2 * π := by
     simp only [hKdef]
     rw [intervalIntegral.integral_const_mul, ← hIdef]
     field_simp
-  -- `K` is therefore an arc-length curvature function (1.1)–(1.3).
   have hALC : ArcLengthCurvature K := ⟨h11, hNN12, hNN13⟩
-  -- The arc-length curve `γ_K` is simple closed and realizes `K`.
   have hsc : IsSimpleClosed (dahlbergCurve K) :=
     isSimpleClosed_dahlbergCurve hKcont hKper hALC
   have hrc : RealizesCurvature (dahlbergCurve K) K :=
     realizesCurvature_dahlbergCurve hKcont
-  -- Scaling by `c = 2π/I > 0`: `c·γ_K` realizes `K/c = κ∘φ` and stays simple closed.
   have hrc_scaled :
       RealizesCurvature (fun t => ((2 * π / I : ℝ) : ℂ) * dahlbergCurve K t)
         (fun t => K t / (2 * π / I)) := realizesCurvature_smul hcpos hrc
   have hsc_scaled :
       IsSimpleClosed (fun t => ((2 * π / I : ℝ) : ℂ) * dahlbergCurve K t) :=
     isSimpleClosed_smul (by exact_mod_cast hcne) hsc
-  -- `K/c = κ∘φ` pointwise (the normalisation cancels).
   have hfun : (fun t => K t / (2 * π / I)) = (κ ∘ φ) := by
     funext t
     simp only [hKdef]
     field_simp
   rw [hfun] at hrc_scaled
-  -- At this point `c·γ_K` realizes `κ∘φ` and is simple closed. Reparametrising by
-  -- `ψ = φ⁻¹` transfers these to `κ` via `realizesCurvature_comp` and
-  -- `isSimpleClosed_comp` (public in `Gluck/FourVertex.lean`).
-  -- Witness: `Γ(t) = (2π/I)·γ_K(ψ(t))`.
-  -- `ψ` is strictly increasing (positive `C¹` derivative).
   have hψderiv : ∀ t, HasDerivAt ψ (deriv ψ t) t :=
     fun t => (hψ.differentiable (by norm_num)).differentiableAt.hasDerivAt
   have hψmono : StrictMono ψ := strictMono_of_hasDerivAt_pos hψderiv hψpos
@@ -319,7 +306,6 @@ theorem realizesCurvature_of_nonNormalised {κ φ ψ : ℝ → ℝ}
   · -- IsSimpleClosed ((c·γ_K) ∘ ψ) via `isSimpleClosed_comp`.
     exact isSimpleClosed_comp hsc_scaled hψ.continuous hψmono hψper
   · -- RealizesCurvature ((c·γ_K) ∘ ψ) κ via `realizesCurvature_comp`, then rewrite
-    -- `(κ∘φ)∘ψ = κ` pointwise using `hright : RightInverse ψ φ` (`φ (ψ t) = t`).
     have hcomp := realizesCurvature_comp hrc_scaled hψ hψpos
     have hkeq : (κ ∘ φ) ∘ ψ = κ := by
       funext t

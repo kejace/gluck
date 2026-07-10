@@ -34,7 +34,6 @@ fundamental interval `[c, c+T)` for a `T`-periodic function. -/
 lemma injOn_Ico_shift_of_periodic {f : ℝ → ℂ} {T : ℝ} (hT : 0 < T)
     (hper : Function.Periodic f T) (hinj : Set.InjOn f (Set.Ico 0 T)) (c : ℝ) :
     Set.InjOn f (Set.Ico c (c + T)) := by
-  -- reduce every point into `[0,T)` by subtracting `⌊x/T⌋·T`
   have hred : ∀ x : ℝ, f (x - (⌊x / T⌋ : ℝ) * T) = f x :=
     fun x => hper.sub_int_mul_eq (x := x) ⌊x / T⌋
   have hmem : ∀ x : ℝ, x - (⌊x / T⌋ : ℝ) * T ∈ Set.Ico (0 : ℝ) T := by
@@ -49,7 +48,6 @@ lemma injOn_Ico_shift_of_periodic {f : ℝ → ℂ} {T : ℝ} (hT : 0 < T)
     rw [hred x, hred y, hxy]
   have heq : x - (⌊x / T⌋ : ℝ) * T = y - (⌊y / T⌋ : ℝ) * T :=
     hinj (hmem x) (hmem y) hx'
-  -- `x - y = (⌊x/T⌋ - ⌊y/T⌋)·T` and `|x - y| < T` force the integer to vanish.
   set k : ℤ := ⌊x / T⌋ - ⌊y / T⌋ with hkdef
   have hxyk : x - y = (k : ℝ) * T := by push_cast [hkdef]; linarith [heq]
   have hbound : |x - y| < T := by
@@ -77,7 +75,6 @@ theorem realizes_of_reparam_degree_one {ε : ℝ} {z : ℝ → ℂ} {κ Ψ : ℝ
   have hcont : Continuous Ψ := hΨC1.continuous
   have hΨhd : ∀ x, HasDerivAt Ψ (deriv Ψ x) x :=
     fun x => (hΨC1.differentiable (by norm_num)).differentiableAt.hasDerivAt
-  -- `Ψ(x + 2π·n) = Ψ x + 2π·n` for `n : ℕ`, giving unboundedness both ways.
   have hstep : ∀ (n : ℕ) (x : ℝ), Ψ (x + 2 * π * n) = Ψ x + 2 * π * n := by
     intro n
     induction n with
@@ -105,7 +102,6 @@ theorem realizes_of_reparam_degree_one {ε : ℝ} {z : ℝ → ℂ} {κ Ψ : ℝ
     rw [div_le_iff₀ h2pi] at hn
     nlinarith [hs, hn]
   have hsurj : Function.Surjective Ψ := hcont.surjective htop hbot
-  -- package `Ψ` as an order-isomorphism / homeomorphism and take its inverse `Φ`.
   set oi : ℝ ≃o ℝ := hmono.orderIsoOfSurjective Ψ hsurj with hoidef
   set e : ℝ ≃ₜ ℝ := oi.toHomeomorph with hedef
   have hecoe : ⇑e = Ψ := by
@@ -117,14 +113,12 @@ theorem realizes_of_reparam_degree_one {ε : ℝ} {z : ℝ → ℂ} {κ Ψ : ℝ
   have hΦΨ : ∀ t, Φ (Ψ t) = t := by
     intro t; rw [hΦdef, hedef, OrderIso.coe_toHomeomorph_symm, hoidef]
     exact StrictMono.orderIsoOfSurjective_symm_apply_self Ψ hmono hsurj t
-  -- `Φ` is `C¹` (global inverse-function theorem for a degree-one diffeo).
   have hΦC1 : ContDiff ℝ 1 Φ := by
     have h1 : ∀ x, HasDerivAt (⇑e) (deriv Ψ x) x := by rw [hecoe]; exact hΨhd
     have h2 : ContDiff ℝ 1 (⇑e) := by rw [hecoe]; exact hΨC1
     rw [hΦdef]
     exact e.contDiff_symm_deriv (fun x => (hΨpos x).ne') h1 h2
   have hΦcont : Continuous Φ := hΦC1.continuous
-  -- `deriv Φ t = (Ψ' (Φ t))⁻¹ > 0`.
   have hΦhd : ∀ t, HasDerivAt Φ (deriv Ψ (Φ t))⁻¹ t := by
     intro t
     refine HasDerivAt.of_local_left_inverse hΦcont.continuousAt (hΨhd (Φ t))
@@ -132,12 +126,10 @@ theorem realizes_of_reparam_degree_one {ε : ℝ} {z : ℝ → ℂ} {κ Ψ : ℝ
     exact Filter.Eventually.of_forall hΨΦ
   have hΦpos : ∀ t, 0 < deriv Φ t := by
     intro t; rw [(hΦhd t).deriv]; exact inv_pos.mpr (hΨpos (Φ t))
-  -- `Φ` is degree-one: `Φ(t+2π) = Φ(t) + 2π`.
   have hΦdeg : ∀ t, Φ (t + 2 * π) = Φ t + 2 * π := by
     intro t
     apply hmono.injective
     rw [hΨΦ, hΨdeg, hΨΦ]
-  -- assemble `w = z ∘ Φ`.
   refine ⟨z ∘ Φ, ⟨?_, ?_⟩, ?_⟩
   · -- closed: `2π`-periodic
     intro t

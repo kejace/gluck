@@ -3,17 +3,17 @@ Copyright (c) 2026 kejace. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
-import Gluck.Hyperbolic.Family.Bicircle
 import Gluck.Hyperbolic.Family.Anchor
+import Gluck.Hyperbolic.Family.Bicircle
+import Gluck.Hyperbolic.Family.Closing
+import Gluck.Hyperbolic.Family.FaceA
+import Gluck.Hyperbolic.Family.FaceB
 import Gluck.Hyperbolic.Family.Node
+import Gluck.Hyperbolic.Family.Simplicity
 import Gluck.Hyperbolic.Family.Transport
 import Gluck.Hyperbolic.Family.TurningA
 import Gluck.Hyperbolic.Family.TurningB
 import Gluck.Hyperbolic.Family.TurningC
-import Gluck.Hyperbolic.Family.FaceA
-import Gluck.Hyperbolic.Family.FaceB
-import Gluck.Hyperbolic.Family.Closing
-import Gluck.Hyperbolic.Family.Simplicity
 
 /-!
 # Fork A: the symbolic `(a, c)`-family bicircle layer (ALM-A1 – ALM-A12) — aggregator

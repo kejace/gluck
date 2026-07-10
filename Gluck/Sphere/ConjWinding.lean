@@ -105,7 +105,7 @@ private theorem int_valued_eqS {q : C(I, ℝ)} (hq : ∀ t, ∃ m : ℤ, q t = (
     have hcontra : (2 * mt : ℤ) = 2 * ma + 1 := by
       have h2 : (2 : ℝ) * (mt : ℝ) = 2 * (ma : ℝ) + 1 := by linarith
       exact_mod_cast h2
-    omega
+    lia
   · exact h
   · exfalso
     obtain ⟨ma, hma⟩ := hq a
@@ -123,7 +123,7 @@ private theorem int_valued_eqS {q : C(I, ℝ)} (hq : ∀ t, ∃ m : ℤ, q t = (
     have hcontra : (2 * mt : ℤ) = 2 * mb + 1 := by
       have h2 : (2 : ℝ) * (mt : ℝ) = 2 * (mb : ℝ) + 1 := by linarith
       exact_mod_cast h2
-    omega
+    lia
 
 /-- Local replica of the private `windingNumber_eq_div_of_lift`: the winding
 number can be computed from *any* continuous angle lift — two lifts differ by
@@ -189,11 +189,9 @@ lemma windingNumberC_conj_loop {w : ℂ} (hw : w ≠ 0) :
   have h2pi : (2 * π : ℝ) ≠ 0 := by positivity
   have hnw : (‖w‖ : ℂ) ≠ 0 := by
     exact_mod_cast norm_ne_zero_iff.2 hw
-  -- the unit direction of `w` is `e^{i·arg w}`
   have hargw : Complex.exp ((Complex.arg w : ℂ) * Complex.I) = w / (‖w‖ : ℂ) := by
     rw [eq_div_iff hnw, mul_comm]
     exact Complex.norm_mul_exp_arg_mul_I w
-  -- the explicit lift of the normalised loop
   have hφcont : Continuous fun t : I => Complex.arg w - 2 * π * (t : ℝ) :=
     continuous_const.sub (continuous_const.mul continuous_subtype_val)
   have hlift : ∀ t : I,

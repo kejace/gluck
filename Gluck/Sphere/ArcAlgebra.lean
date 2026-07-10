@@ -185,7 +185,6 @@ lemma flow_half_turn_equivariance {κ : ℝ → ℝ} {R δ : ℝ} (hR : 0 ≤ R)
     (hhalf : z π = -z 0) :
     (∀ θ ∈ Set.Icc (0 : ℝ) π, z (θ + π) = -z θ) ∧ z (2 * π) = z 0 := by
   have hπpos := Real.pi_pos
-  -- `y θ = −z(θ+π)` solves the truncated ODE on `[0, π]`
   have hy : ∀ θ ∈ Set.Icc (0 : ℝ) π,
       HasDerivWithinAt (fun t => -z (t + π))
         (truncatedField κ R δ θ (-z (θ + π))) (Set.Icc 0 π) θ := by
@@ -204,7 +203,6 @@ lemma flow_half_turn_equivariance {κ : ℝ → ℝ} {R δ : ℝ} (hR : 0 ≤ R)
       rw [neg_neg] at h
       rw [one_smul, h, neg_neg]
     rwa [hval] at hneg
-  -- `z` itself solves on the subinterval `[0, π]`
   have hzres : ∀ θ ∈ Set.Icc (0 : ℝ) π,
       HasDerivWithinAt z (truncatedField κ R δ θ (z θ)) (Set.Icc 0 π) θ :=
     fun θ hθ => (hz θ ⟨hθ.1, by linarith [hθ.2]⟩).mono
@@ -343,24 +341,19 @@ lemma sphericalArcMap_concat {K θ₀ Δ₁ Δ₂ : ℝ} {z : ℂ} (hΔ₁ : 0 �
   set r : ℝ := sphericalSpeed (fun _ => K) θ₀ z with hrdef
   set w : ℂ := z + Complex.I * (r : ℂ) * Complex.exp ((θ₀ : ℂ) * Complex.I)
     with hwdef
-  -- bracket positivity at the start point itself
   have h0 : 0 < K - ⟪z, Complex.I * Complex.exp ((θ₀ : ℂ) * Complex.I)⟫_ℝ := by
     have h := hpos θ₀ ⟨le_rfl, by linarith⟩
     have hzpt : w - Complex.I * (r : ℂ) * Complex.exp ((θ₀ : ℂ) * Complex.I)
         = z := by
       rw [hwdef]; ring
     rwa [hzpt] at h
-  -- consistency identity of the circle through `(θ₀, z)`
   have hcons : 1 + ‖w‖ ^ 2 = 2 * r * K + r ^ 2 := constant_arc_consistency h0
-  -- the first arc lands on the same circle at angle `θ₀ + Δ₁`
   have hz₁ : sphericalArcMap K θ₀ Δ₁ z
       = w - Complex.I * (r : ℂ) * Complex.exp (((θ₀ + Δ₁ : ℝ) : ℂ) * Complex.I) := by
     unfold sphericalArcMap
     rw [← hrdef, hwdef, expI_add θ₀ Δ₁]
     ring
-  -- bracket positivity at the intermediate configuration
   have hpos1 := hpos (θ₀ + Δ₁) ⟨by linarith, by linarith⟩
-  -- the gauge speed is still `r` there
   have hq1 : sphericalSpeed (fun _ => K) (θ₀ + Δ₁)
       (w - Complex.I * (r : ℝ) * Complex.exp (((θ₀ + Δ₁ : ℝ) : ℂ) * Complex.I))
       = r := (constant_curvature_arc hcons hpos1).1
@@ -609,7 +602,6 @@ lemma invariant_admissible_arc {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : �
   have hM0 : 0 ≤ M := by positivity
   have hκc : Continuous fun u : ℝ => κ (t₁ + u) :=
     hκ.comp (continuous_const.add continuous_id)
-  -- transfer both solutions (and their composed fields) to the window `[0, T]`
   have hZ : ∀ s ∈ Set.Icc (0 : ℝ) T,
       HasDerivWithinAt (fun u => z (t₁ + u))
         (truncatedField κ R δ (t₁ + s) (z (t₁ + s))) (Set.Icc 0 T) s :=
@@ -625,14 +617,12 @@ lemma invariant_admissible_arc {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : �
   have hFz := continuousOn_truncatedField_comp_shift (R := R) hκ hδ hZc
   have hFzs := continuousOn_truncatedField_comp_shift (κ' := fun _ => K) (R := R)
     continuous_const hδ hZsc
-  -- the Grönwall integral inequality for the shifted distance
   have key : ∀ s ∈ Set.Icc (0 : ℝ) T,
       ‖z (t₁ + s) - zs (t₁ + s)‖ ≤ ‖z t₁ - zs t₁‖
         + ∫ u in (0 : ℝ)..s, ((L : ℝ) * ‖z (t₁ + u) - zs (t₁ + u)‖
             + M * |κ (t₁ + u) - K|) :=
     fun s hs => arc_trajectory_diff_integral_bound hR hδ hL hκc continuous_const
       hZc hZsc hFz hFzs hZ hZs hs
-  -- Grönwall with `L¹` drive on the shifted window
   have hgronwall := gronwall_L1_drive
     (d := fun s => ‖z (t₁ + s) - zs (t₁ + s)‖)
     (g := fun u => M * |κ (t₁ + u) - K|)
@@ -640,7 +630,6 @@ lemma invariant_admissible_arc {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : �
     (continuous_const.mul (hκc.sub continuous_const).abs).continuousOn
     (fun t _ => norm_nonneg _)
     (fun t _ => mul_nonneg hM0 (abs_nonneg _)) key
-  -- convert the drive integral back to the original window
   have hdrive : (∫ u in (0 : ℝ)..T, M * |κ (t₁ + u) - K|)
       = M * ∫ θ in t₁..t₂, |κ θ - K| := by
     rw [intervalIntegral.integral_const_mul]
@@ -655,7 +644,6 @@ lemma invariant_admissible_arc {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : �
     intro s hs
     have h := hgronwall s hs
     rwa [hdrive] at h
-  -- unshift and propagate the margins
   intro θ hθ
   have hs : θ - t₁ ∈ Set.Icc (0 : ℝ) T :=
     ⟨by linarith [hθ.1], by rw [hTdef]; linarith [hθ.2]⟩

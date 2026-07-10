@@ -272,7 +272,6 @@ lemma gronwall_L1_drive {T L d₀ : ℝ} (hT : 0 ≤ T) (hL : 0 ≤ L) (hd₀ : 
   have hvc : ContinuousOn v (Set.Icc 0 T) := by
     refine ContinuousOn.sub (ContinuousOn.mul ?_ huc) hGc
     exact (Real.continuous_exp.comp (continuous_const.mul continuous_id).neg).continuousOn
-  -- derivative of `v` at interior points, then antitonicity, then the unwind
   have hvderiv : ∀ t ∈ Set.Ioo (0 : ℝ) T,
       HasDerivAt v (Real.exp (-(L * t)) * (-L) * u t
         + Real.exp (-(L * t)) * (L * d t + g t) - g t) t := fun t ht =>
@@ -419,17 +418,14 @@ lemma invariant_admissible_domain {ε : ℝ} {κ κ' : ℝ → ℝ} {κ₀ R δ 
   have h2π : (0 : ℝ) ≤ 2 * π := by positivity
   set M : ℝ := (1 + R ^ 2) / (2 * δ ^ 2) with hM
   have hM0 : 0 ≤ M := by positivity
-  -- continuity of the trajectories and the composed fields
   have hzc : ContinuousOn z (Set.Icc 0 (2 * π)) := HasDerivWithinAt.continuousOn hz
   have hzsc : ContinuousOn zs (Set.Icc 0 (2 * π)) := HasDerivWithinAt.continuousOn hzs
   have hFz := continuousOn_truncatedField_comp (ε := ε) (R := R) hκ hδ hzc
   have hFzs := continuousOn_truncatedField_comp (ε := ε) (R := R) hκ' hδ hzsc
-  -- the Grönwall integral inequality for `d θ = ‖z θ − zs θ‖`
   have key : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
       ‖z θ - zs θ‖ ≤ ‖z 0 - zs 0‖
         + ∫ s in (0 : ℝ)..θ, ((L : ℝ) * ‖z s - zs s‖ + M * |κ s - κ' s|) :=
     fun θ hθ => trajectory_diff_integral_bound hε hR hR1 hδ hκ hκ' hL hzc hzsc hFz hFzs hz hzs hθ
-  -- Grönwall with `L¹` drive
   have hgronwall := gronwall_L1_drive h2π L.coe_nonneg
     (norm_nonneg (z 0 - zs 0)) (hzc.sub hzsc).norm
     (continuous_const.mul (hκ.sub hκ').abs).continuousOn
@@ -444,7 +440,6 @@ lemma invariant_admissible_domain {ε : ℝ} {κ κ' : ℝ → ℝ} {κ₀ R δ 
     exact hsmall
   have hdμ : ∀ t ∈ Set.Icc (0 : ℝ) (2 * π), ‖z t - zs t‖ ≤ μ :=
     fun t ht => (hgronwall t ht).trans hbound
-  -- margin propagation
   intro θ hθ
   have hvnorm : ‖Complex.I * Complex.exp ((θ:ℂ) * Complex.I)‖ = 1 := by
     rw [norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul]

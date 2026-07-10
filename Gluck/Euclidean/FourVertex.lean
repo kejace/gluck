@@ -25,8 +25,6 @@ Obtained by the fundamental theorem of calculus with antiderivative
 theorem reconstruct_const (r : ℝ) (θ : ℝ) :
     reconstruct (fun _ => r) θ
       = (r : ℂ) * Complex.I * (1 - Complex.exp (θ * Complex.I)) := by
-  -- Pull out the constant `r`, apply the closed-form interval integral of
-  -- `x ↦ e^{cx}` (`integral_exp_mul_complex` with `c = I`), then simplify.
   rw [reconstruct, intervalIntegral.integral_mul_const]
   simp_rw [mul_comm (_ : ℂ) Complex.I]
   rw [integral_exp_mul_complex Complex.I_ne_zero]
@@ -83,21 +81,17 @@ lemma realizesCurvature_comp {Γ : ℝ → ℂ} {μ : ℝ → ℝ} {ψ : ℝ →
     (hΓ : RealizesCurvature Γ μ) (hψ : ContDiff ℝ 1 ψ) (hψpos : ∀ t, 0 < deriv ψ t) :
     RealizesCurvature (Γ ∘ ψ) (μ ∘ ψ) := by
   obtain ⟨hΓ1, hreg, φ, hφ, htan, hcurv⟩ := hΓ
-  -- Pointwise `HasDerivAt` data for `Γ` and `ψ`.
   have hΓdiff : ∀ x, HasDerivAt Γ (deriv Γ x) x :=
     fun x => (hΓ1.differentiable (by norm_num)).differentiableAt.hasDerivAt
   have hψdiff : ∀ t, HasDerivAt ψ (deriv ψ t) t :=
     fun t => (hψ.differentiable (by norm_num)).differentiableAt.hasDerivAt
-  -- Chain rule: `(Γ∘ψ)'(t) = ψ'(t) • Γ'(ψ t)`.
   have hcomp : ∀ t, HasDerivAt (Γ ∘ ψ) (deriv ψ t • deriv Γ (ψ t)) t :=
     fun t => (hΓdiff (ψ t)).scomp t (hψdiff t)
   have hd : ∀ t, deriv (Γ ∘ ψ) t = deriv ψ t • deriv Γ (ψ t) :=
     fun t => (hcomp t).deriv
-  -- Norm of the composed velocity: `‖(Γ∘ψ)'(t)‖ = ψ'(t)·‖Γ'(ψ t)‖`.
   have hnorm : ∀ t, ‖deriv (Γ ∘ ψ) t‖ = deriv ψ t * ‖deriv Γ (ψ t)‖ := by
     intro t
     rw [hd, norm_smul, Real.norm_eq_abs, abs_of_pos (hψpos t)]
-  -- Continuity of the velocity functions.
   have hΓ'cont : Continuous (deriv Γ) := (contDiff_one_iff_deriv.mp hΓ1).2
   have hψ'cont : Continuous (deriv ψ) := (contDiff_one_iff_deriv.mp hψ).2
   have hψcont : Continuous ψ := hψ.continuous
@@ -136,7 +130,6 @@ private lemma periodic_eq_imp_sub_zsmul {f : ℝ → ℂ}
     (hf : Function.Periodic f (2 * π)) (hinj : Set.InjOn f (Set.Ico 0 (2 * π)))
     {u w : ℝ} (h : f u = f w) : ∃ n : ℤ, u - w = n • (2 * π) := by
   have hp : (0 : ℝ) < 2 * π := by positivity
-  -- Reducing into `[0, 2π)` preserves the value of `f`.
   have key : ∀ x : ℝ, f (toIcoMod hp 0 x) = f x := by
     intro x
     have hx : toIcoMod hp 0 x = x - toIcoDiv hp 0 x • (2 * π) :=
@@ -186,11 +179,9 @@ lemma isSimpleClosed_comp {Γ : ℝ → ℂ} {ψ : ℝ → ℝ}
     intro x hx y hy hxy
     simp only [Function.comp_apply] at hxy
     obtain ⟨n, hn⟩ := periodic_eq_imp_sub_zsmul hΓper hΓinj hxy
-    -- `ψ x = ψ y + n·2π = ψ(y + n·2π)`; `ψ` injective gives `x = y + n·2π`.
     have hψint : ψ (y + n • (2 * π)) = ψ y + n • (2 * π) := psi_add_int_period hper n y
     have hψeq : ψ x = ψ (y + n • (2 * π)) := by rw [hψint]; linarith [hn]
     have hxe : x = y + n • (2 * π) := hmono.injective hψeq
-    -- Bounds `x, y ∈ [0,2π)` force `n = 0`.
     simp only [zsmul_eq_mul] at hxe
     have hn0 : n = 0 := eq_zero_of_window_sub_eq_zsmul n hx.1 hx.2 hy.1 hy.2 hxe
     rw [hn0] at hxe
@@ -220,13 +211,10 @@ theorem gluck_converse (κ : ℝ → ℝ) (hκ : IsCurvatureFunction κ)
   obtain ⟨hcont, hper, hpos⟩ := hκ
   rcases h4 with ⟨c, hc⟩ | hnc
   · -- **Constant case.** `κ ≡ c > 0`, so `ρ = 1/c` is constant and the
-    -- reconstruction curve is the circle of radius `r = 1/c`, which closes up,
-    -- is simple, and realizes `κ` intrinsically (tangent angle `φ(θ) = θ`).
     have hc0 : 0 < c := by have := hpos 0; rwa [hc 0] at this
     set r : ℝ := 1 / c with hr
     have hr0 : 0 < r := by rw [hr]; positivity
     have hrne : (r : ℂ) ≠ 0 := by exact_mod_cast hr0.ne'
-    -- The derivative of the curve is `θ ↦ e^{iθ} r`, of constant norm `r`.
     have hdg : ∀ t, deriv (reconstruct (fun _ => r)) t
         = Complex.exp (↑t * Complex.I) * (r : ℂ) :=
       fun t => (hasDerivAt_reconstruct continuous_const t).deriv
@@ -246,20 +234,17 @@ theorem gluck_converse (κ : ℝ → ℝ) (hκ : IsCurvatureFunction κ)
     · -- *Simple:* `θ ↦ e^{iθ}` is injective on `[0, 2π)`.
       intro a ha b hb hab
       rw [reconstruct_const, reconstruct_const] at hab
-      -- Cancel the nonzero factor `r·i`, then `1 - e^{ia} = 1 - e^{ib}` ⟹ `e^{ia} = e^{ib}`.
       have hcancel : (1 : ℂ) - Complex.exp (↑a * Complex.I)
           = 1 - Complex.exp (↑b * Complex.I) :=
         mul_left_cancel₀ (mul_ne_zero hrne Complex.I_ne_zero) hab
       have hexp_eq : Complex.exp (↑a * Complex.I) = Complex.exp (↑b * Complex.I) := by
         linear_combination -hcancel
-      -- `e^{ia} = e^{ib}` ⟹ `a = b + 2πn` for some integer `n`; bounds force `n = 0`.
       rw [Complex.exp_eq_exp_iff_exists_int] at hexp_eq
       obtain ⟨n, hn⟩ := hexp_eq
       have h2 : (↑a : ℂ) * Complex.I = (↑b + ↑n * (2 * ↑π)) * Complex.I := by
         rw [hn]; ring
       have h3 : (↑a : ℂ) = ↑b + ↑n * (2 * ↑π) := mul_right_cancel₀ Complex.I_ne_zero h2
       have hreal : a = b + (n : ℝ) * (2 * π) := by exact_mod_cast h3
-      -- Bounds: `a, b ∈ [0, 2π)` force the integer `n` to be `0`.
       have hn0 : n = 0 := eq_zero_of_window_sub_eq_zsmul n ha.1 ha.2 hb.1 hb.2 hreal
       rw [hn0] at hreal
       simpa using hreal
@@ -291,16 +276,11 @@ theorem gluck_converse (κ : ℝ → ℝ) (hκ : IsCurvatureFunction κ)
       rw [hid]
       field_simp
   · -- **Non-constant case (winding number argument).** The closure result
-    -- `reduction_justified` (P2/P3) yields a `C¹` reparametrization `g`; we
-    -- reconstruct, then reparametrize back by `g⁻¹` to realize `κ`.
-    -- `κ` is genuinely non-constant: the value-separated extrema rule it out.
     have hncc : ¬ ∃ c, ∀ θ, κ θ = c := by
       obtain ⟨_, _, _, _, _, _, _, _, _, _, _, _, hsep⟩ := hnc
       exact not_constant_of_separation hsep
-    -- The reduction: a `C¹` circle reparametrization `g` closing the reconstruction.
     obtain ⟨g, hgmono, hgcont, hgper, hgE, v, hvc, hvp, hvd⟩ :=
       reduction_justified ⟨hcont, hper, hpos⟩ hncc (Or.inr hnc)
-    -- (1) `κ ∘ g` is a curvature function; `ρ = 1/(κ∘g)` is its radius.
     have hκgcont : Continuous (fun θ => κ (g θ)) := hcont.comp hgcont
     have hκgpos : ∀ θ, 0 < κ (g θ) := fun θ => hpos (g θ)
     set ρ : ℝ → ℝ := radius (fun θ => κ (g θ)) with hρdef
@@ -309,12 +289,10 @@ theorem gluck_converse (κ : ℝ → ℝ) (hκ : IsCurvatureFunction κ)
       intro θ; simp only [hρdef, radius]; rw [hgper θ, hper (g θ)]
     have hρpos : ∀ θ, 0 < ρ θ := fun θ => by
       simp only [hρdef, radius]; exact one_div_pos.mpr (hκgpos θ)
-    -- (2) `Γ = reconstruct ρ` closes, is simple, and realizes `κ ∘ g`.
     have hΓsimple : IsSimpleClosed (reconstruct ρ) :=
       isSimpleClosed_reconstruct hρcont hρper hρpos hgE
     have hΓrc : RealizesCurvature (reconstruct ρ) (fun θ => κ (g θ)) :=
       realizesCurvature_reconstruct hκgcont hκgpos
-    -- (3) the `C¹` inverse `H = g⁻¹`.
     obtain ⟨H, hHcont, hHmono, hHh, hhH, hHper, hHderiv⟩ :=
       exists_C1_circle_inverse hvc hvp hvd hgper
     have hderivH : ∀ t, deriv H t = 1 / v (H t) := fun t => (hHderiv t).deriv
@@ -325,7 +303,6 @@ theorem gluck_converse (κ : ℝ → ℝ) (hκ : IsCurvatureFunction κ)
       exact continuous_const.div (hvc.comp hHcont) (fun t => (hvp (H t)).ne')
     have hHderivpos : ∀ t, 0 < deriv H t := fun t => by
       rw [hderivH t]; exact div_pos one_pos (hvp (H t))
-    -- (4) `γ = Γ ∘ H` realizes `κ` and is a simple closed curve.
     have hkeq : (fun θ => κ (g θ)) ∘ H = κ := by
       funext t; simp only [Function.comp_apply]; rw [hHh t]
     have hγrc : RealizesCurvature (reconstruct ρ ∘ H) κ := by

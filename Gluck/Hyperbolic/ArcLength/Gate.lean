@@ -275,7 +275,6 @@ private lemma quarterResidual_continuousOn_gate :
     intro p hp
     rw [hU, Set.mem_prod, Set.mem_Icc, Set.mem_Icc] at hp
     exact ⟨hp.1.1, hp.1.2, hp.2.1, hp.2.2⟩
-  -- First arc endpoint is continuous on the rectangle.
   have hqArc1 : ContinuousOn (fun p : ℝ × ℝ => qArc1 (4 / 5) p) U := by
     simp only [qArc1]
     apply arcModelConst_continuousOn
@@ -292,7 +291,6 @@ private lemma quarterResidual_continuousOn_gate :
       have hnrm : ‖Complex.I * (p.1 : ℂ)‖ ^ 2 = p.1 ^ 2 := by
         rw [Complex.norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Real.norm_eq_abs, sq_abs]
       rw [hnrm]; intro hc; nlinarith
-  -- Quarter endpoint (second arc from the first) is continuous on the rectangle.
   have hqArc2 : ContinuousOn (fun p : ℝ × ℝ => qArc2 (4 / 5) 2 p) U := by
     simp only [qArc2]
     apply arcModelConst_continuousOn
@@ -309,7 +307,6 @@ private lemma quarterResidual_continuousOn_gate :
       obtain ⟨h, L⟩ := p
       rw [qArc1_fst_normSq]
       intro hc; linarith [gate_N_pos hh1 hh2 (by linarith) hL2]
-  -- Assemble the residual.
   change ContinuousOn
     (fun p : ℝ × ℝ => ((qArc2 (4 / 5) 2 p).1.im, (qArc2 (4 / 5) 2 p).2 - 3 * π / 2)) U
   refine ContinuousOn.prodMk ?_ ?_
@@ -356,11 +353,9 @@ lemma gate_G2_bottom_key {h r t q : ℝ} (h1 : (1 : ℝ) / 5 ≤ h) (h2 : h ≤ 
     nlinarith [hrt, mul_nonneg ht0.le (by linarith : (0 : ℝ) ≤ r - 4 / 5)]
   have ht_low : 11 / 42 ≤ t := by
     nlinarith [hrt, mul_nonneg ht0.le (by linarith : (0 : ℝ) ≤ 21 / 20 - r)]
-  -- eliminate r via r·t = 11/40:  r(r-h)t² = (11/40)² - (11/40)ht
   have hrht : r * (r - h) * t ^ 2 = (11 / 40) ^ 2 - 11 / 40 * (h * t) := by
     have : r * (r - h) * t ^ 2 = (r * t) ^ 2 - r * t * (h * t) := by ring
     rw [this, hrt]
-  -- pure (h,t) certificate
   have hcert : 11 / 20 * (2 - h)
       ≤ ((15707 : ℝ) / 10000 - t) * (1 - h ^ 2 - r * (r - h) * t ^ 2) := by
     rw [hrht]
@@ -373,7 +368,6 @@ lemma gate_G2_bottom_key {h r t q : ℝ} (h1 : (1 : ℝ) / 5 ≤ h) (h2 : h ≤ 
       mul_nonneg (by linarith : (0 : ℝ) ≤ 2 / 5 - h) (by linarith : (0 : ℝ) ≤ 11 / 32 - t),
       mul_nonneg (mul_nonneg (by linarith : (0 : ℝ) ≤ h) (by linarith : (0 : ℝ) ≤ t - 11 / 42))
         (by linarith : (0 : ℝ) ≤ 11 / 32 - t)]
-  -- bridge back to the q-form and the true π/2
   have hM_ub : 11 / 5 / 8 * (2 * (2 + (-h - (r - h) * q))) ≤ 11 / 20 * (2 - h) := by
     nlinarith [mul_nonneg hrh hq0]
   have hN_lb : 1 - h ^ 2 - r * (r - h) * t ^ 2 ≤ 1 - (h ^ 2 + 2 * r * (r - h) * q) := by
@@ -403,11 +397,9 @@ private lemma gate_G2_top_key {h r t q : ℝ} (h1 : (1 : ℝ) / 5 ≤ h) (h2 : h
     nlinarith [hrt, mul_nonneg ht0.le (by linarith : (0 : ℝ) ≤ r - 4 / 5)]
   have ht_low : 1 / 3 ≤ t := by
     nlinarith [hrt, mul_nonneg ht0.le (by linarith : (0 : ℝ) ≤ 21 / 20 - r)]
-  -- eliminate r via r·t = 7/20:  (r-h)t² = (7/20)t - ht²
   have hrht : (r - h) * t ^ 2 = 7 / 20 * t - h * t ^ 2 := by
     have : (r - h) * t ^ 2 = r * t * t - h * t ^ 2 := by ring
     rw [this, hrt]
-  -- pure (h,t) certificate:  (7/10)·ic_lb ≥ (Q - t)(1 - h²)
   have hcert : ((15708 : ℝ) / 10000 - t) * (1 - h ^ 2)
       ≤ 7 / 10 * (2 - h - (r - h) * t ^ 2 / 2) := by
     rw [hrht]
@@ -420,7 +412,6 @@ private lemma gate_G2_top_key {h r t q : ℝ} (h1 : (1 : ℝ) / 5 ≤ h) (h2 : h
       mul_nonneg (by linarith : (0 : ℝ) ≤ 2 / 5 - h) (by linarith : (0 : ℝ) ≤ 7 / 16 - t),
       mul_nonneg (mul_nonneg (by linarith : (0 : ℝ) ≤ h) (by linarith : (0 : ℝ) ≤ t - 1 / 3))
         (by linarith : (0 : ℝ) ≤ 7 / 16 - t)]
-  -- bridge: ic ≥ ic_lb, N ≤ 1 - h²
   have hM_lb : 7 / 10 * (2 - h - (r - h) * t ^ 2 / 2)
       ≤ 14 / 5 / 8 * (2 * (2 + (-h - (r - h) * q))) := by
     nlinarith [mul_nonneg hrh (by linarith [hq2] : (0 : ℝ) ≤ t ^ 2 / 2 - q)]
@@ -575,7 +566,6 @@ lemma gate_G1_left {L : ℝ} (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) :
   set c := L / 8 / (4 / 5) with hc
   set rc := arcModelRadius 2 (qArc1 (4 / 5) (1 / 5, L)).1 (qArc1 (4 / 5) (1 / 5, L)).2 with hrcdef
   set tc := L / 8 / rc with htc
-  -- Arc-a angle `c = θ_a ∈ [11/32, 7/16]`.
   have hc0 : (0 : ℝ) ≤ c := hc ▸ div_nonneg (by linarith) (by norm_num)
   have h45 : (0 : ℝ) < 4 / 5 := by norm_num
   have hc_lo : (11 : ℝ) / 32 ≤ c := by rw [hc, le_div_iff₀ h45]; linarith
@@ -590,7 +580,6 @@ lemma gate_G1_left {L : ℝ} (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) :
   have hcb := abs_le.mp (Real.cos_bound habs)
   rw [abs_of_nonneg hc0] at hcb
   obtain ⟨hcb1, hcb2⟩ := hcb
-  -- Arc-a scalar bounds.
   have hq : (55 : ℝ) / 1000 ≤ 1 - Real.cos c := by linarith [hcb2, hc2lo', hc4hi]
   have hca : (90 : ℝ) / 100 ≤ Real.cos c := by linarith [hcb1, hc2hi, hc4hi]
   have hca_hi : Real.cos c ≤ (944 : ℝ) / 1000 := by linarith [hcb2, hc2lo', hc4hi]
@@ -598,7 +587,6 @@ lemma gate_G1_left {L : ℝ} (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) :
     Real.sin_nonneg_of_nonneg_of_le_pi hc0 (by linarith [Real.pi_gt_three])
   have hsa : (33 : ℝ) / 100 ≤ Real.sin c :=
     gate_G1_left_sinArcA_lb (by linarith) hc1 hc_lo hc3hi
-  -- Second-arc radius `rc = (4/5)·cos c / (2 + cos c)`.
   have hden : (0 : ℝ) < 2 + Real.cos c := by linarith [Real.neg_one_le_cos c]
   have hbigpos : (0 : ℝ) < 2 * (2 + (-(1 / 5) - (4 / 5 - 1 / 5) * (1 - Real.cos c))) := by
     linarith [Real.neg_one_le_cos c]
@@ -611,13 +599,11 @@ lemma gate_G1_left {L : ℝ} (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) :
     rw [hrc_eq, div_le_iff₀ hden]; linarith [hca_hi]
   have hrc_pos : (0 : ℝ) < rc := by linarith
   clear_value rc
-  -- Second-arc angle `tc = θ_c ∈ [1071/1000, 1423/1000]`.
   have htc_lo : (1071 : ℝ) / 1000 ≤ tc := by
     rw [htc, le_div_iff₀ hrc_pos]; linarith [hrc_hi, hL1]
   have htc_hi : tc ≤ (1423 : ℝ) / 1000 := by
     rw [htc, div_le_iff₀ hrc_pos]; linarith [hrc_lo, hL2]
   clear_value tc
-  -- Complementary angle `y = π/2 − tc ∈ [1477/10000, 4998/10000] ⊂ [0,1]`.
   have hy_hi : π / 2 - tc ≤ (4998 : ℝ) / 10000 := by linarith [gate_pi_hi, htc_lo]
   have hy_lo : (1477 : ℝ) / 10000 ≤ π / 2 - tc := by linarith [gate_pi_lo, htc_hi]
   have hy0 : (0 : ℝ) ≤ π / 2 - tc := by linarith
@@ -628,7 +614,6 @@ lemma gate_G1_left {L : ℝ} (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) :
   have hyabs : |π / 2 - tc| ≤ 1 := by rw [abs_of_nonneg hy0]; exact hy1
   have hycb := abs_le.mp (Real.cos_bound hyabs)
   rw [abs_of_nonneg hy0] at hycb
-  -- `sin tc = cos y ≥ 86/100` and `cos tc = sin y ≤ 1/2`.
   have hsc : (86 : ℝ) / 100 ≤ Real.sin tc := by
     rw [← Real.cos_pi_div_two_sub tc]; linarith [hycb.1, hy2hi, hy4hi]
   have hsc0 : (0 : ℝ) ≤ Real.sin tc := by linarith
@@ -654,7 +639,6 @@ lemma gate_G1_right {L : ℝ} (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) 
   set c := L / 8 / (21 / 20) with hc
   set rc := arcModelRadius 2 (qArc1 (4 / 5) (2 / 5, L)).1 (qArc1 (4 / 5) (2 / 5, L)).2 with hrcdef
   set tc := L / 8 / rc with htc
-  -- Arc-a angle `c = θ_a ∈ [11/42, 1/3]`.
   have hc0 : (0 : ℝ) ≤ c := hc ▸ div_nonneg (by linarith) (by norm_num)
   have h2120 : (0 : ℝ) < 21 / 20 := by norm_num
   have hc_lo : (11 : ℝ) / 42 ≤ c := by rw [hc, le_div_iff₀ h2120]; linarith
@@ -669,7 +653,6 @@ lemma gate_G1_right {L : ℝ} (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) 
   have hcb := abs_le.mp (Real.cos_bound habs)
   rw [abs_of_nonneg hc0] at hcb
   obtain ⟨hcb1, hcb2⟩ := hcb
-  -- Arc-a scalar bounds.
   have hq_hi : 1 - Real.cos c ≤ (6 : ℝ) / 100 := by linarith [hcb1, hc2hi, hc4hi]
   have hca : Real.cos c ≤ (97 : ℝ) / 100 := by linarith [hcb2, hc2lo', hc4hi]
   have hca_lo : (94 : ℝ) / 100 ≤ Real.cos c := by linarith [hcb1, hc2hi, hc4hi]
@@ -677,7 +660,6 @@ lemma gate_G1_right {L : ℝ} (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) 
   have hsa : Real.sin c ≤ (1 : ℝ) / 3 := by linarith [Real.sin_lt hc_pos]
   have hsa0 : (0 : ℝ) ≤ Real.sin c :=
     Real.sin_nonneg_of_nonneg_of_le_pi hc0 (by linarith [Real.pi_gt_three])
-  -- Second-arc radius `rc = (273·cos c − 105)/(380 + 260·cos c)`.
   have hden : (0 : ℝ) < 380 + 260 * Real.cos c := by linarith [Real.neg_one_le_cos c]
   have hbigpos : (0 : ℝ) < 2 * (2 + (-(2 / 5) - (21 / 20 - 2 / 5) * (1 - Real.cos c))) := by
     linarith [Real.neg_one_le_cos c]
@@ -690,19 +672,16 @@ lemma gate_G1_right {L : ℝ} (hL1 : (11 : ℝ) / 5 ≤ L) (hL2 : L ≤ 14 / 5) 
     rw [hrc_eq, div_le_iff₀ hden]; linarith [hca]
   have hrc_pos : (0 : ℝ) < rc := by linarith
   clear_value rc
-  -- Second-arc angle `tc = θ_c ∈ [1057/1000, 1447/1000]`.
   have htc_lo : (1057 : ℝ) / 1000 ≤ tc := by
     rw [htc, le_div_iff₀ hrc_pos]; linarith [hrc_hi, hL1]
   have htc_hi : tc ≤ (1447 : ℝ) / 1000 := by
     rw [htc, div_le_iff₀ hrc_pos]; linarith [hrc_lo, hL2]
   clear_value tc
-  -- Complementary angle `y = π/2 − tc ∈ [1237/10000, 5138/10000] ⊂ (0,1]`.
   have hy_hi : π / 2 - tc ≤ (5138 : ℝ) / 10000 := by linarith [gate_pi_hi, htc_lo]
   have hy_lo : (1237 : ℝ) / 10000 ≤ π / 2 - tc := by linarith [gate_pi_lo, htc_hi]
   have hy0 : (0 : ℝ) ≤ π / 2 - tc := by linarith
   have hy1 : π / 2 - tc ≤ 1 := by linarith
   have hy_pos : (0 : ℝ) < π / 2 - tc := by linarith
-  -- `sin tc ∈ [0, 1]` and `cos tc = sin y ≥ 12/100`.
   have hsc : Real.sin tc ≤ 1 := Real.sin_le_one tc
   have hsc0 : (0 : ℝ) ≤ Real.sin tc :=
     Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith [Real.pi_gt_three])

@@ -109,12 +109,10 @@ lemma truncatedSpeed_lipschitz {κ : ℝ → ℝ} {R δ : ℝ} (hR : 0 ≤ R) (h
   have hminw : (0 : ℝ) ≤ min ‖w‖ R := le_min (norm_nonneg _) hR
   have hminzR : min ‖z‖ R ≤ R := min_le_right _ _
   have hminwR : min ‖w‖ R ≤ R := min_le_right _ _
-  -- the clamped norm is 1-Lipschitz
   have hmin_diff : |min ‖z‖ R - min ‖w‖ R| ≤ ‖z - w‖ := by
     refine (abs_min_sub_min_le_max _ _ _ _).trans ?_
     rw [sub_self, abs_zero, max_eq_left (abs_nonneg _)]
     exact abs_norm_sub_norm_le z w
-  -- numerator: 2R-Lipschitz (difference of squares of values in [0, R])
   have hnum_diff : |(1 + (min ‖z‖ R) ^ 2) - (1 + (min ‖w‖ R) ^ 2)|
       ≤ 2 * R * ‖z - w‖ := by
     have expand : (1 + (min ‖z‖ R) ^ 2) - (1 + (min ‖w‖ R) ^ 2)
@@ -124,12 +122,10 @@ lemma truncatedSpeed_lipschitz {κ : ℝ → ℝ} {R δ : ℝ} (hR : 0 ≤ R) (h
       rw [abs_of_nonneg (by linarith)]
       linarith
     exact mul_le_mul h1 hmin_diff (abs_nonneg _) (by linarith)
-  -- the linear functional `z ↦ ⟪z, v⟫` is 1-Lipschitz (Cauchy–Schwarz)
   have hinner : |⟪z, v⟫_ℝ - ⟪w, v⟫_ℝ| ≤ ‖z - w‖ := by
     rw [← inner_sub_left]
     have h := abs_real_inner_le_norm (z - w) v
     rwa [hvnorm, mul_one] at h
-  -- denominator: 2-Lipschitz (clamp is 1-Lipschitz, factor 2)
   have hden_diff : |2 * max (κ θ - ⟪z, v⟫_ℝ) δ - 2 * max (κ θ - ⟪w, v⟫_ℝ) δ|
       ≤ 2 * ‖z - w‖ := by
     have hmax : |max (κ θ - ⟪z, v⟫_ℝ) δ - max (κ θ - ⟪w, v⟫_ℝ) δ|
@@ -145,14 +141,12 @@ lemma truncatedSpeed_lipschitz {κ : ℝ → ℝ} {R δ : ℝ} (hR : 0 ≤ R) (h
       _ ≤ 2 * ‖z - w‖ := by
           have := hmax.trans hinner
           linarith
-  -- denominators bounded below by 2δ
   have hdenz : 2 * δ ≤ 2 * max (κ θ - ⟪z, v⟫_ℝ) δ := by
     have := le_max_right (κ θ - ⟪z, v⟫_ℝ) δ
     linarith
   have hdenw : 2 * δ ≤ 2 * max (κ θ - ⟪w, v⟫_ℝ) δ := by
     have := le_max_right (κ θ - ⟪w, v⟫_ℝ) δ
     linarith
-  -- assemble via the quotient-difference bound
   have hkey := abs_div_sub_div_le (by positivity : (0 : ℝ) < 2 * δ) hdenz hdenw
     (by positivity : (0 : ℝ) ≤ 1 + (min ‖z‖ R) ^ 2)
     (by nlinarith : 1 + (min ‖z‖ R) ^ 2 ≤ 1 + R ^ 2) hnum_diff hden_diff
@@ -323,8 +317,6 @@ lemma sphericalFlow_unique {κ : ℝ → ℝ} {R δ : ℝ} (hκ : Continuous κ)
       (Set.Icc 0 (2 * π)) := by
   obtain ⟨K, hK⟩ := truncatedField_lipschitz (κ := κ) hR hδ
   obtain ⟨hf0, hfderiv⟩ := sphericalFlow_spec hκ hR hδ r₀ hz₀
-  -- upgrade `Icc`-derivatives to `Ici`-derivatives at interior-from-the-right
-  -- times: `Icc 0 (2π)` is a right-neighborhood of every `θ ∈ Ico 0 (2π)`
   have upgrade : ∀ {u : ℝ → ℂ},
       (∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), HasDerivWithinAt u
         (truncatedField κ R δ θ (u θ)) (Set.Icc 0 (2 * π)) θ) →

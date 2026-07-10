@@ -102,8 +102,6 @@ lemma exists_hyperbolic_bicircle_L1_reparam {κ : ℝ → ℝ}
       (∃ v : ℝ → ℝ, Continuous v ∧ (∀ θ, 0 < v θ) ∧ ∀ θ, HasDerivAt h₁ (v θ) θ) ∧
       (∫ θ in (0 : ℝ)..(2 * π),
         |κ (h₁ θ) - stepCurvature b a 0 (π / 2) π (3 * π / 2) θ|) < tol := by
-  -- Extract convex clean levels `1 < a < b` interior to the overlap gap
-  -- `(max 1 (max κq), min κp)` straddling the window value `c`.
   set lo : ℝ := max 1 (max (κ q₁) (κ q₂)) with hlodef
   set hi : ℝ := min (κ p₁) (κ p₂) with hhidef
   have h1lo : (1 : ℝ) ≤ lo := le_max_left _ _
@@ -114,15 +112,12 @@ lemma exists_hyperbolic_bicircle_L1_reparam {κ : ℝ → ℝ}
   have h1a : 1 < a := by rw [hadef]; linarith
   have hab : a < b := by rw [hadef, hbdef]; linarith
   have ha0 : 0 < a := by linarith
-  -- level ordering vs the extrema
   have hqa : max (κ q₁) (κ q₂) < a := by
     have : max (κ q₁) (κ q₂) ≤ lo := le_max_right _ _
     rw [hadef]; linarith
   have hbp : b < min (κ p₁) (κ p₂) := by rw [hbdef, ← hhidef]; linarith
-  -- crossing data at levels `(a, b, a, b)`
   obtain ⟨θ₁, θ₂, θ₃, θ₄, ht12, ht23, ht34, ht41, hv₁, hv₂, hv₃, hv₄⟩ :=
     exists_abab_levels hκc hκper h12 h23 h34 h41 hqa hab hbp
-  -- REUSE the model-agnostic relaxed reparametrization
   obtain ⟨h₁, hmono, hh₁c, hh₁per, hh₁v, hL1⟩ :=
     exists_step_L1_reparam_relaxed hκc hκper ha0 hab ht12 ht23 ht34 ht41
       hv₁ hv₂ hv₃ hv₄ htol

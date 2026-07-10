@@ -280,7 +280,6 @@ private lemma sf_bnd_Y1 {s ε IuyG β U Uy Gn D h dz0 : ℝ} (hs0 : 0 < s)
     mul_le_mul hUy hU hU0 (by linarith)
   have hb3 : 80 * (Uy * U) * h ≤ 80 * (2 * D * (2 * D + 40 * h / s)) * h :=
     by nlinarith [mul_le_mul_of_nonneg_right hb2 (show (0:ℝ) ≤ 80 * h by linarith)]
-  -- 80·2D·(2D+40h/s)·h = 320 D²h + 6400 D h²/s
   have hexp : 80 * (2 * D * (2 * D + 40 * h / s)) * h
       = 320 * (D ^ 2 * h) + 6400 * (D / s * h ^ 2) := by field_simp; ring
   rw [hexp] at hb3
@@ -349,7 +348,6 @@ private lemma sf_bnd_FR {s R ε η h D β IδV Nud : ℝ} (hs0 : 0 < s) (hR0 : 0
       mul_nonneg (show (0:ℝ) ≤ h / 2 - |η| by linarith) (abs_nonneg (β - IδV)),
       mul_nonneg (show (0:ℝ) ≤ h / 2 by linarith) (show (0:ℝ) ≤ Nud - |β - IδV| by linarith),
       hR0]
-  -- (h/2)·Nud·s ≤ (h/2)(2D²s+40h) = D²h·s + 20h²
   nlinarith [hNb, mul_le_mul_of_nonneg_left hud_s (show (0:ℝ) ≤ h / 2 by linarith),
     mul_nonneg (mul_nonneg hh0 (sq_nonneg D)) (sq_nonneg (s - 1)),
     mul_nonneg (mul_nonneg hh0 (sq_nonneg D)) (sq_nonneg s), mul_nonneg hh0 (sq_nonneg D),
@@ -427,14 +425,12 @@ private lemma sf_arcSpeed_decomp {ε c h η θ : ℝ} {δ z y G : ℂ} {Ag : ℝ
   set u : ℂ := z + R • v with hudef
   set uy : ℂ := y + R • v with huydef
   set g : ℂ := z - y with hgdef
-  -- fold checks
   have hzu' : ‖u - δ‖ ≤ 2 * ‖δ‖ ^ 2 / s + 40 * h / s := hzu
   have hyu' : ‖uy - δ‖ ≤ 2 * ‖δ‖ ^ 2 / s := hyu
   have hgn' : ‖g‖ ≤ 40 * h / s := hgn
   have hgG' : ‖g - G‖ ≤ Ag := hgG
   have hGn' : ‖G‖ ≤ 40 * h / s := hGn
   rw [← hs2]
-  -- smallness
   have hδ0 : 0 ≤ ‖δ‖ := norm_nonneg δ
   have hδ1 : ‖δ‖ ≤ 1/8192 := le_trans hσ (by have := min_le_left (1:ℝ) (c^2+ε); linarith)
   have hh1 : h ≤ 1/8192 := le_trans hh (by have := min_le_left (1:ℝ) (c^2+ε); linarith)
@@ -445,17 +441,14 @@ private lemma sf_arcSpeed_decomp {ε c h η θ : ℝ} {δ z y G : ℂ} {Ag : ℝ
   have hη2 : η^2 ≤ h^2/4 := by
     have h1 : η^2 ≤ (h/2)^2 := by rw [← sq_abs]; exact pow_le_pow_left₀ (abs_nonneg η) hη 2
     nlinarith [h1]
-  -- cleared norm bounds
   have hzuc : ‖u - δ‖ * s ≤ 2 * ‖δ‖ ^ 2 + 40 * h := by
     have h1 : ‖u - δ‖ ≤ (2 * ‖δ‖ ^ 2 + 40 * h) / s := by rw [add_div]; exact hzu'
     exact (le_div_iff₀ hs0).mp h1
   have hyuc : ‖uy - δ‖ * s ≤ 2 * ‖δ‖ ^ 2 := (le_div_iff₀ hs0).mp hyu'
   have hgc : ‖g‖ * s ≤ 40 * h := (le_div_iff₀ hs0).mp hgn'
   have hGc : ‖G‖ * s ≤ 40 * h := (le_div_iff₀ hs0).mp hGn'
-  -- triangle bounds
   have hu1z : ‖u‖ ≤ ‖u - δ‖ + ‖δ‖ := by simpa using norm_add_le (u - δ) δ
   have huy1 : ‖uy‖ ≤ ‖uy - δ‖ + ‖δ‖ := by simpa using norm_add_le (uy - δ) δ
-  -- smallness clears
   have h8δs : 8 * ‖δ‖ ≤ s := by
     rcases lt_or_ge s 1 with hsle | hsgt
     · nlinarith [hδs2, hs0, mul_nonneg hs0.le (show (0:ℝ) ≤ 1 - s by linarith)]
@@ -482,7 +475,6 @@ private lemma sf_arcSpeed_decomp {ε c h η θ : ℝ} {δ z y G : ℂ} {Ag : ℝ
       · nlinarith [hun_s, hδ1, hh1, hsgt, hs0, hδ0, hh0.le]
     exact le_of_mul_le_mul_right key hs0
   have huysmall : ‖uy‖ ≤ s / 4 := by linarith [huyn, h8δs]
-  -- frame inner products
   set β : ℝ := ⟪u, v⟫_ℝ with hβdef
   set βuy : ℝ := ⟪uy, v⟫_ℝ with hβuydef
   have hβU : |β| ≤ ‖u‖ := by have h := abs_real_inner_le_norm u v; rwa [hv, mul_one] at h
@@ -499,7 +491,6 @@ private lemma sf_arcSpeed_decomp {ε c h η θ : ℝ} {δ z y G : ℂ} {Ag : ℝ
     have h1 : ε * β ≤ ‖u‖ := le_trans (le_abs_self _) hεβabs
     have h2 : η ≤ h / 2 := le_trans (le_abs_self _) hη
     linarith [husmall, h1, h2, h4hs]
-  -- squared bounds
   have hβ2 : β ^ 2 ≤ ‖u‖ ^ 2 := by
     rw [← sq_abs]; exact pow_le_pow_left₀ (abs_nonneg β) hβU 2
   have hUy2 : ‖uy‖ ^ 2 ≤ 4 * ‖δ‖ ^ 2 := by nlinarith [huyn, norm_nonneg uy, hδ0]
@@ -527,7 +518,6 @@ private lemma sf_arcSpeed_decomp {ε c h η θ : ℝ} {δ z y G : ℂ} {Ag : ℝ
   have hβby : |β - βuy| ≤ ‖g‖ := by
     rw [hβg]; have h := abs_real_inner_le_norm g v; rwa [hv, mul_one] at h
   have hIuyGb : |⟪uy, g⟫_ℝ| ≤ ‖uy‖ * ‖g‖ := abs_real_inner_le_norm uy g
-  -- base-point inner products in terms of β
   have hzv : ⟪z, v⟫_ℝ = β - R := by
     have hzu2 : z = u - R • v := by rw [hudef]; abel
     rw [hzu2, inner_sub_left, real_inner_smul_left, real_inner_self_eq_norm_sq, hv, ← hβdef]
@@ -539,21 +529,18 @@ private lemma sf_arcSpeed_decomp {ε c h η θ : ℝ} {δ z y G : ℂ} {Ag : ℝ
   have hDzKpos : (0:ℝ) < s - ε * β - η := by linarith [hdzKf, hs0]
   have hDz0pos : (0:ℝ) < s - ε * β := by linarith [hdz0f, hs0]
   have hDyypos : (0:ℝ) < s - ε * βuy := by linarith [hdyf, hs0]
-  -- level identity
   have hLeq := spaceFormSpeed_sub_level (ε := ε) (K := c-η) (K' := c) (θ := θ) (z := z)
     (by rw [← hvdef, hzv, show (c-η)-ε*(β-R) = s-ε*β-η from by rw [← hbr]; ring]; exact hDzKpos.ne')
     (by rw [← hvdef, hzv, show c-ε*(β-R) = s-ε*β from by rw [← hbr]; ring]; exact hDz0pos.ne')
   rw [← hvdef, hzv, show c-(c-η) = η from by ring,
       show (c-η)-ε*(β-R) = s-ε*β-η from by rw [← hbr]; ring,
       show c-ε*(β-R) = s-ε*β from by rw [← hbr]; ring] at hLeq
-  -- quadratic identities
   have hqz := spaceFormSpeed_sub_radius (ε := ε) (c := c) (θ := θ) (z := z) hε hc
     (by rw [← hvdef, hzv, show c-ε*(β-R) = s-ε*β from by rw [← hbr]; ring]; exact hDz0pos.ne')
   rw [← hRdef, ← hvdef, ← hudef, hzv, show c-ε*(β-R) = s-ε*β from by rw [← hbr]; ring] at hqz
   have hqy := spaceFormSpeed_sub_radius (ε := ε) (c := c) (θ := θ) (z := y) hε hc
     (by rw [← hvdef, hyv, show c-ε*(βuy-R) = s-ε*βuy from by rw [← hbr]; ring]; exact hDyypos.ne')
   rw [← hRdef, ← hvdef, ← huydef, hyv, show c-ε*(βuy-R) = s-ε*βuy from by rw [← hbr]; ring] at hqy
-  -- polarization
   have hz2 : ‖z‖^2 = ‖u‖^2 - 2*R*β + R^2 := by
     have hzu2 : z = u - R • v := by rw [hudef]; abel
     rw [hzu2, norm_sub_sq_real, real_inner_smul_right, norm_smul, hv, mul_one,
@@ -562,10 +549,8 @@ private lemma sf_arcSpeed_decomp {ε c h η θ : ℝ} {δ z y G : ℂ} {Ag : ℝ
   have hsolve : ε * R^2 + 2*c*R - 1 = 0 := centeredRadius_solves ε c hε hc
   have hpol : 1 + ε*‖z‖^2 = 2*R*(s - ε*β) + ε*‖u‖^2 := by
     rw [hz2]; linear_combination (-1 : ℝ) * hsolve + (2*R) * hbr
-  -- vector decomposition
   have huuy : u = uy + g := by rw [hudef, huydef, hgdef]; abel
   have hnorm : ‖u‖^2 = ‖uy‖^2 + 2*⟪uy,g⟫_ℝ + ‖g‖^2 := by rw [huuy, norm_add_sq_real]
-  -- X identity
   have hXeq : spaceFormSpeed ε (fun _=>c-η) θ z - spaceFormSpeed ε (fun _=>c) θ z
       - ((s-(s-R))/s*η + (s-(s-R))/s^2*η*(ε*β))
       = (s-(s-R))*η^2/(s*(s-ε*β-η)) + (s-(s-R))*η*(ε*β)^2/(s^2*(s-ε*β-η))
@@ -574,7 +559,6 @@ private lemma sf_arcSpeed_decomp {ε c h η θ : ℝ} {δ z y G : ℂ} {Ag : ℝ
     exact sf_arcSpeed_level_identity (s := s) (c := s-R) (ε := η) (β := ε*β) (N := ε*‖u‖^2)
       hs0.ne' hDz0pos.ne' hDzKpos.ne'
   rw [show (s:ℝ)-(s-R) = R from by ring] at hXeq
-  -- Y identity
   have hYeq : spaceFormSpeed ε (fun _=>c) θ z - spaceFormSpeed ε (fun _=>c) θ y
       - ε*⟪uy,g⟫_ℝ/s
       = ε*⟪uy,g⟫_ℝ*(ε*β)/(s*(s-ε*β)) + ε*‖g‖^2/(2*(s-ε*β))
@@ -586,7 +570,6 @@ private lemma sf_arcSpeed_decomp {ε c h η θ : ℝ} {δ z y G : ℂ} {Ag : ℝ
     rw [hPz, hPy, show ε*‖u‖^2 = ε*‖uy‖^2 + 2*(ε*⟪uy,g⟫_ℝ) + ε*‖g‖^2 from by rw [hnorm]; ring]
     exact sf_arcSpeed_basepoint_identity (s := s) (c := s-R) (β := ε*β) (βy := ε*βuy)
       (M := ε*‖uy‖^2) (I1 := ε*⟪uy,g⟫_ℝ) (P := ε*‖g‖^2) hs0.ne' hDz0pos.ne' hDyypos.ne'
-  -- FR term (inline)
   have hFR : |R*ε/s^2*η*(β - ⟪δ,v⟫_ℝ)| ≤ 400*((1/s+1/s^3)*(h*(‖δ‖^2+h))) := by
     rw [show R*ε/s^2*η*(β-⟪δ,v⟫_ℝ) = R*ε*η*(β-⟪δ,v⟫_ℝ)/s^2 from by ring]
     refine sf_term_bound (B := s^2) (DEN := s) hs0 (pow_pos hs0 2) (le_refl _) hs0 (by ring) ?_
@@ -607,7 +590,6 @@ private lemma sf_arcSpeed_decomp {ε c h η θ : ℝ} {δ z y G : ℂ} {Ag : ℝ
       mul_nonneg (mul_nonneg hh0.le (sq_nonneg ‖δ‖)) (sq_nonneg s),
       mul_nonneg (sq_nonneg h) (sq_nonneg s), mul_nonneg hh0.le (sq_nonneg ‖δ‖),
       sq_nonneg h, hh0.le, hδ0]
-  -- IS term
   have hIS : |(ε*⟪uy,g⟫_ℝ - ε*⟪δ,G⟫_ℝ)/s| ≤ 100*((1/s+1/s^3)*(h*(‖δ‖^2+h))) + ‖δ‖*Ag/s := by
     refine sf_bnd_IS (D := ‖δ‖) (Gn := ‖g‖) (Ag := Ag) hs0 hh0.le hδ0 (norm_nonneg g)
       (le_trans (norm_nonneg _) hgG') ?_ hgc
@@ -625,7 +607,6 @@ private lemma sf_arcSpeed_decomp {ε c h η θ : ℝ} {δ z y G : ℂ} {Ag : ℝ
       linarith [h6, h7]
     calc |⟪uy-δ,g⟫_ℝ + ⟪δ,g-G⟫_ℝ| ≤ |⟪uy-δ,g⟫_ℝ| + |⟪δ,g-G⟫_ℝ| := abs_add_le _ _
       _ ≤ 2*‖δ‖^2/s*‖g‖ + ‖δ‖*Ag := add_le_add h2 h5
-  -- per-term bounds
   have hT1 := sf_bnd_T1 (D := ‖δ‖) hs0 hrs0 hrs1 hη2 hh0.le hδ0 hdzKf
   have hT2 := sf_bnd_T2 hs0 hrs0 hrs1 hη hε2 hβ2 hhU2 hh0.le hδ0 (norm_nonneg u) hdzKf
   have hT3 := sf_bnd_T3 hs0 hrs0 hrs1 hη2 hεβabs (by linarith [husmall]) hh0.le hδ0 (norm_nonneg u)
@@ -635,7 +616,6 @@ private lemma sf_arcSpeed_decomp {ε c h η θ : ℝ} {δ z y G : ℂ} {Ag : ℝ
     (norm_nonneg g) (norm_nonneg u) (norm_nonneg uy) hdz0f
   have hY2 := sf_bnd_Y2 (D := ‖δ‖) hs0 hεabs1 hgc (norm_nonneg g) hh0.le hδ0 hdz0f
   have hY3 := sf_bnd_Y3 hs0 hεabs1 hβby hUy2 hgc (norm_nonneg g) hh0.le hδ0 hdz0f hdyf
-  -- assembly
   have hkey : spaceFormSpeed ε (fun _=>c-η) θ z - spaceFormSpeed ε (fun _=>c) θ y
       - (R/s*η + R*ε/s^2*η*⟪δ,v⟫_ℝ + ε*⟪δ,G⟫_ℝ/s)
       = R*η^2/(s*(s-ε*β-η)) + R*η*(ε*β)^2/(s^2*(s-ε*β-η))
@@ -776,7 +756,6 @@ private lemma sf_stepError_arc1 {ε c h : ℝ} {δ z₁ W : ℂ} {Q₀ Q₁ r s 
         + ε * κ * (δ.re + δ.im) / s)| ≤ 2 * Bres)
       ∧ |Q₁ - r| ≤ 6 * h / s
       ∧ |Q₁ - r + κ| ≤ 2 * Bres + 2 * h * ‖δ‖ / s ^ 2 := by
-  -- ARC 1: level c+h/2, angle π/2, v=-1, η=-h/2, reference W+r, G=κ(1+I)
   have hyu₁ : ‖(W + (r : ℂ)) + R • (Complex.I * Complex.exp (((π / 2 : ℝ) : ℂ) * Complex.I)) - δ‖
       ≤ 2 * ‖δ‖ ^ 2 / s := by
     rw [hV1]
@@ -1109,7 +1088,6 @@ lemma stepError_expansion {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
   have hhρ : h ≤ min 1 (c ^ 2 + ε) / 67108864 := hh1
   have hhdec : h ≤ min 1 (c ^ 2 + ε) / 8192 :=
     le_trans hhρ (div_le_div_of_nonneg_left hmin0 (by norm_num) (by norm_num))
-  -- derived smallness facts
   have hεabs1 : |ε| = 1 := by rcases hε with h' | h' <;> subst h' <;> norm_num
   have hmin1 : min 1 (c ^ 2 + ε) ≤ 1 := min_le_left _ _
   have hmins : min 1 (c ^ 2 + ε) ≤ s := by
@@ -1120,7 +1098,6 @@ lemma stepError_expansion {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
   have hhss : h ≤ s / 8192 := le_trans hhdec (by gcongr)
   have hσ1 : ‖δ‖ ≤ 1 / 8192 := le_trans hσdec (by gcongr)
   have hh1' : h ≤ 1 / 8192 := le_trans hhdec (by gcongr)
-  -- frame values at the four quarter angles
   have hV0 : Complex.I * Complex.exp (((0 : ℝ) : ℂ) * Complex.I) = Complex.I :=
     Gluck.I_mul_expI_zero
   have hV1 : Complex.I * Complex.exp (((π / 2 : ℝ) : ℂ) * Complex.I) = -1 :=
@@ -1135,7 +1112,6 @@ lemma stepError_expansion {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
   have hi3 : ⟪δ, (1 : ℂ)⟫_ℝ = δ.re := Gluck.real_inner_one' δ
   have hδre : |δ.re| ≤ ‖δ‖ := Complex.abs_re_le_norm δ
   have hδim : |δ.im| ≤ ‖δ‖ := Complex.abs_im_le_norm δ
-  -- the reference-circle radius `r` and its deviation from `R`
   have hz₀eq : z₀ = δ - R • Complex.I := by rw [hδdef]; abel
   have hz₀I : ⟪z₀, Complex.I⟫_ℝ = δ.im - R := by
     rw [hz₀eq, inner_sub_left, real_inner_smul_left, real_inner_self_eq_norm_sq,
@@ -1162,7 +1138,6 @@ lemma stepError_expansion {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
       abs_of_pos hden]
     exact div_le_div_of_nonneg_left (sq_nonneg _) hs0 hdens
   have hrR := abs_le.mp hrs_r
-  -- the reference circle through `z₀`
   set W : ℂ := z₀ + Complex.I * (r : ℂ) with hWdef
   have hWδ : W = δ + Complex.I * ((r - R : ℝ) : ℂ) := by
     rw [hWdef, hδdef, Complex.real_smul]
@@ -1216,7 +1191,6 @@ lemma stepError_expansion {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
     have h1 := hsp π; rwa [hy₂eq] at h1
   have hsp₃ : spaceFormSpeed ε (fun _ => c) (3 * π / 2) (W - (r : ℂ)) = r := by
     have h1 := hsp (3 * π / 2); rwa [hy₃eq] at h1
-  -- perturbed trajectory speeds and step identities
   set Q₀ : ℝ := spaceFormSpeed ε (fun _ => c - h / 2) 0 z₀ with hQ₀def
   set z₁ : ℂ := spaceFormArcMap ε (c - h / 2) 0 (π / 2) z₀ with hz₁def
   set Q₁ : ℝ := spaceFormSpeed ε (fun _ => c + h / 2) (π / 2) z₁ with hQ₁def
@@ -1239,7 +1213,6 @@ lemma stepError_expansion {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
     have h4 := stepErrorMap_four_arc ε (c - h / 2) (c + h / 2) z₀
     rw [← hz₁def, ← hz₂def, ← hz₃def, hstep₃, hstep₂, hstep₁, hstep₀] at h4
     linear_combination h4
-  -- the conjugation-coefficient bookkeeping
   set κ : ℝ := R * h / (2 * s) with hκdef
   have hκ0 : 0 ≤ κ := by rw [hκdef]; positivity
   have hκs : κ ≤ h / (2 * s) := by
@@ -1253,11 +1226,9 @@ lemma stepError_expansion {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
   have hig2 : ⟪δ, (κ : ℂ) * 2⟫_ℝ = 2 * κ * δ.re := Gluck.real_inner_kappa_two δ κ
   have hig3 : ⟪δ, (κ : ℂ) * (1 - Complex.I)⟫_ℝ = κ * (δ.re - δ.im) :=
     Gluck.real_inner_kappa_one_sub_I δ κ
-  -- reusable smallness/main-term budgets
   have hδs2 : ‖δ‖ / s ≤ 1 / 8192 := by
     rw [div_le_iff₀ hs0]; linarith [hδs]
   have hη0 : |h / 2| ≤ h / 2 := by rw [abs_of_pos (by linarith)]
-  -- shared per-arc residue budget `Bres` and the two crux polynomial bounds
   have hsne : s ≠ 0 := hs0.ne'
   have hσ_abs : ‖δ‖ ≤ 1 / 67108864 :=
     le_trans hσρ (div_le_div_of_nonneg_right (min_le_left _ _) (by positivity))
@@ -1298,7 +1269,6 @@ lemma stepError_expansion {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
     have hb1 : 12 * (‖δ‖ / s) * Bres ≤ 12 * (1 / 8192) * Bres := by
       have := mul_le_mul_of_nonneg_right hδs2 hBresnn; linarith
     linarith [hb1, hbfact, hBresnn]
-  -- ARC 0: level `c − h/2`, angle `0`, reference = `z₀`, `G = 0`, `Ag = 0`
   have hzu₀ : ‖z₀ + R • (Complex.I * Complex.exp (((0 : ℝ) : ℂ) * Complex.I)) - δ‖
       ≤ 2 * ‖δ‖ ^ 2 / s + 40 * h / s := by
     rw [hV0, show z₀ + R • Complex.I - δ = 0 by rw [hδdef]; abel, norm_zero]
@@ -1315,7 +1285,6 @@ lemma stepError_expansion {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
     hε hc hh0 hη0 hσdec hhdec hzu₀ hyu₀ hgn₀ hgG₀ hGn₀
   rw [← hsdef, ← hQ₀def, ← hrdef, hV0, hi0, ← hs2, inner_zero_right,
     mul_zero, zero_div, add_zero, mul_zero, zero_div, add_zero, ← hBresdef] at harc₀
-  -- harc₀ : |Q₀ - r - (R/s*(h/2) + R*ε/s^2*(h/2)*δ.im)| ≤ Bres
   have hmain₀ : |R / s * (h / 2) + R * ε / s ^ 2 * (h / 2) * δ.im| ≤ h / s := by
     have hz := sf_mainbnd (g := (0 : ℝ)) hs0 hrs0 hrs1 hh0.le hεabs1 hη0 hδim
       (by rw [abs_zero]; exact div_nonneg (mul_nonneg hh0.le hσ0) (by positivity)) hδs
@@ -1331,7 +1300,6 @@ lemma stepError_expansion {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
     have h6 : |Q₀ - r| ≤ Bres + h / s := le_trans h1 (add_le_add harc₀ hmain₀)
     rw [show 6 * h / s = 6 * (h / s) by ring]
     linarith [h6, hBres1, div_nonneg hh0.le hs0.le]
-  -- κ-shift: |Q₀ - r - κ| ≤ 2·Bres + 2·h·‖δ‖/s²  (main₀ − κ = R·ε/s²·(h/2)·δ.im leftover)
   have hXnn : 0 ≤ h * ‖δ‖ / s ^ 2 := div_nonneg (mul_nonneg hh0.le hσ0) (sq_nonneg s)
   have hleft₀ : |R * ε / s ^ 2 * (h / 2) * δ.im| ≤ h * ‖δ‖ / (2 * s ^ 2) :=
     sf_absR2 hs0 hrs0 hrs1 hh0.le hεabs1 hη0 hδim
@@ -1344,7 +1312,6 @@ lemma stepError_expansion {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
         + R * ε / s ^ 2 * (h / 2) * δ.im := by rw [hκdef]; ring
     rw [he]
     exact le_trans (abs_add_le _ _) (by linarith [harc₀, hleft₀, hBresnn, hleftle])
-  -- direction norms and the remaining three arcs
   have hn1I : ‖(1 : ℂ) + Complex.I‖ ≤ 2 := Gluck.norm_one_add_I_le_two
   have hnm1I : ‖(-1 : ℂ) + Complex.I‖ ≤ 2 := Gluck.norm_neg_one_add_I_le_two
   have hnm1I' : ‖(-1 : ℂ) - Complex.I‖ ≤ 2 := Gluck.norm_neg_one_sub_I_le_two
@@ -1368,7 +1335,6 @@ lemma stepError_expansion {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
   have hres₃ := sf_stepError_arc3 hε hc hh0 hσdec hhdec hsdef hs2 hs0 hrs0 hrs1 hεabs1
     hV3 hi3 hig3 hWδ hg₃ hrs_r hsp₃ hQ₀r hQ₁r hQ₂r hQ₀κ hQ₁κ hQ₂κ hκ0 hκs hκdef hδre hη1
     hQ₃def hBresdef hBresnn hAgfold hXnn hn1I hnm1I hnm1I' hn1I' hδs hσ0 hRdef
-  -- assemble: the four main terms collapse to the conjugation
   rw [show (c ^ 2 + ε : ℝ) = s ^ 2 from hs2.symm]
   have hsum := sf_stepError_assembly_identity δ (stepErrorMap ε (c - h / 2) (c + h / 2) z₀)
     Q₀ Q₁ Q₂ Q₃ r s R ε h κ hsne hκdef hE

@@ -214,7 +214,6 @@ lemma quarter_step_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ K t₁
   set zs : ℝ → ℂ :=
     fun θ => W - Complex.I * (r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)
     with hzsdef
-  -- unpack the margin package along the model arc
   have hzsR : ∀ θ ∈ Set.Icc t₁ t₂, ‖zs θ‖ ≤ R - μ := fun θ hθ => (hmarg θ hθ).1
   have hzsinner : ∀ θ ∈ Set.Icc t₁ t₂,
       ε * ⟪zs θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ ≤ κ₀ - δ - μ :=
@@ -222,7 +221,6 @@ lemma quarter_step_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ K t₁
   have hzsK : ∀ θ ∈ Set.Icc t₁ t₂,
       δ ≤ K - ε * ⟪zs θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ :=
     fun θ hθ => (hmarg θ hθ).2.2
-  -- the arc starts at `p`, and `μ ≥ 0` from the smallness inequality
   have hpt1 : zs t₁ = p := by
     simp only [hzsdef, hWdef]
     ring
@@ -232,19 +230,16 @@ lemma quarter_step_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ K t₁
       intervalIntegral.integral_nonneg ht (fun x _ => abs_nonneg _)
     exact mul_nonneg (Real.exp_nonneg _) (add_nonneg (norm_nonneg _)
       (mul_nonneg (by positivity) hint_nonneg))
-  -- the bracket is positive at the start, giving the consistency identity
   have hp0 : 0 < K - ε * ⟪p, Complex.I * Complex.exp ((t₁ : ℂ) * Complex.I)⟫_ℝ := by
     have h := hzsK t₁ ⟨le_refl t₁, ht⟩
     rw [hpt1] at h
     linarith
   have hcons : 1 + ε * ‖W‖ ^ 2 = 2 * r * K + ε * r ^ 2 := constant_arc_consistency hp0
-  -- the model arc solves the truncated ODE on the quarter
   have hzsode : ∀ θ ∈ Set.Icc t₁ t₂,
       HasDerivWithinAt zs (truncatedField ε (fun _ => K) R δ θ (zs θ))
         (Set.Icc t₁ t₂) θ :=
     constant_arc_solves_truncated hcons hδ
       (fun θ hθ => ⟨le_trans (hzsR θ hθ) (by linarith), hzsK θ hθ⟩)
-  -- transport the margins along the quarter
   have hsmall' : Real.exp ((L : ℝ) * (t₂ - t₁)) * (‖z t₁ - zs t₁‖
       + (1 + R ^ 2) / (2 * δ ^ 2) * ∫ θ in t₁..t₂, |κ θ - K|) ≤ μ := by
     rw [hpt1]
@@ -252,7 +247,6 @@ lemma quarter_step_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ K t₁
   have htrans := invariant_admissible_arc hε hκ hκ₀ hR hR1 hδ ht hL hz hzsode
     hzsR hzsinner hsmall'
   refine ⟨fun θ hθ => ⟨(htrans θ hθ).2.1, (htrans θ hθ).2.2⟩, ?_⟩
-  -- the arc-map image is exactly the model endpoint at `t₂`
   have h := (htrans t₂ ⟨ht, le_refl t₂⟩).1
   rw [hpt1] at h
   rw [spaceFormArcMap_eq_sub ε K t₁ t₂ p, ← hrdef, ← hWdef]
@@ -339,7 +333,6 @@ lemma stepModel_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ
   set M : ℝ := (1 + R ^ 2) / (2 * δ ^ 2) with hMdef
   have hM0 : 0 ≤ M := by positivity
   set κs : ℝ → ℝ := stepCurvature b a 0 (π / 2) π (3 * π / 2) with hκsdef
-  -- measurability, integrability, and the quarter/total `L¹` splitting
   have hκsmeas : Measurable κs := measurable_stepCurvature_canonical b a
   have hκs_vals : ∀ x, κs x = a ∨ κs x = b := by
     intro x
@@ -377,9 +370,7 @@ lemma stepModel_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ
   have hK₃ : (∫ θ in (3 * π / 2 : ℝ)..(2 * π), |κ θ - b|) = J₃ :=
     integral_abs_sub_eq_of_eqOn_Ioo (by linarith)
       (fun θ h1 h2 => stepCurvature_canonical_fourth_quarter b a h1 h2)
-  -- fold the smallness hypothesis onto the quarter sum
   rw [hStot] at hsmall
-  -- generic tail comparison against the total bound
   have htot : ∀ x y : ℝ, (L : ℝ) * x ≤ 2 * π * (L : ℝ) → 0 ≤ y →
       y ≤ J₀ + J₁ + J₂ + J₃ →
       Real.exp ((L : ℝ) * x) * (M * y)
@@ -388,7 +379,6 @@ lemma stepModel_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ
     refine mul_le_mul (Real.exp_le_exp.mpr hx) ?_
       (mul_nonneg hM0 hy) (Real.exp_nonneg _)
     exact mul_le_mul_of_nonneg_left hyle hM0
-  -- restriction of the trajectory to a quarter, exponential collapse, arc starts
   have hzq : ∀ c d : ℝ, 0 ≤ c → d ≤ 2 * π → ∀ θ ∈ Set.Icc c d,
       HasDerivWithinAt z (truncatedField ε κ R δ θ (z θ)) (Set.Icc c d) θ :=
     fun c d hc hd θ hθ => (hz θ ⟨hc.trans hθ.1, hθ.2.trans hd⟩).mono
@@ -398,7 +388,6 @@ lemma stepModel_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ
   set p₁ : ℂ := spaceFormArcMap ε a 0 (π / 2) z₀ with hp₁def
   set p₂ : ℂ := spaceFormArcMap ε b (π / 2) (π / 2) p₁ with hp₂def
   set p₃ : ℂ := spaceFormArcMap ε a π (π / 2) p₂ with hp₃def
-  -- quarter 0: `[0, π/2]`, level `a`, start `z₀`
   have hD₀ : ‖z 0 - z₀‖ ≤ Real.exp ((L : ℝ) * 0) * (M * 0) := by
     rw [hz0, sub_self, norm_zero]; positivity
   have hstep0 := stepModel_transport_quarter hε hκ hκ₀ hR hR1 hδ hL hMdef hM0 hJ₀0
@@ -410,7 +399,6 @@ lemma stepModel_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ
     have h := hstep0.2
     rw [sub_zero, zero_add, ← hp₁def] at h
     exact h
-  -- quarter 1: `[π/2, π]`, level `b`, start `p₁`
   have hstep1 := stepModel_transport_quarter hε hκ hκ₀ hR hR1 hδ hL hMdef hM0 hJ₁0
     (by linarith) (by linarith) (hzq (π / 2) π (by linarith) (by linarith)) hm1 hK₁ hD₁
     (hcol (π / 2) π)
@@ -419,7 +407,6 @@ lemma stepModel_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ
     have h := hstep1.2
     rw [show π - π / 2 = π / 2 from by ring, ← hp₂def] at h
     exact h
-  -- quarter 2: `[π, 3π/2]`, level `a`, start `p₂`
   have hstep2 := stepModel_transport_quarter hε hκ hκ₀ hR hR1 hδ hL hMdef hM0 hJ₂0
     (by linarith) (by linarith) (hzq π (3 * π / 2) (by linarith) (by linarith)) hm2 hK₂ hD₂
     (hcol π (3 * π / 2))
@@ -430,7 +417,6 @@ lemma stepModel_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ
     have h := hstep2.2
     rw [show 3 * π / 2 - π = π / 2 from by ring, ← hp₃def] at h
     exact h
-  -- quarter 3: `[3π/2, 2π]`, level `b`, start `p₃`
   have hstep3 := stepModel_transport_quarter hε hκ hκ₀ hR hR1 hδ hL hMdef hM0 hJ₃0
     (by linarith) (by linarith) (hzq (3 * π / 2) (2 * π) (by linarith) le_rfl) hm3 hK₃ hD₃
     (hcol (3 * π / 2) (2 * π))
@@ -442,7 +428,6 @@ lemma stepModel_transport {ε : ℝ} {κ : ℝ → ℝ} {κ₀ R δ μ a b : ℝ
     rw [show (2 : ℝ) * π - 3 * π / 2 = π / 2 from by ring,
       show (L : ℝ) * (2 * π) = 2 * π * (L : ℝ) from by ring] at h
     exact h
-  -- assemble: admissibility quarter by quarter, endpoint via the composite
   constructor
   · intro θ hθ
     rcases le_or_gt θ (π / 2) with h | h
