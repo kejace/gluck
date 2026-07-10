@@ -1,0 +1,372 @@
+\chapter{Genuinely negative curvature: the mixed-sign chain}
+\label{chap:hyperbolic_mixedsign}
+
+% Chapter for Gluck/Hyperbolic/MixedSign.lean (aggregator) and its sub-modules
+% Gluck/Hyperbolic/MixedSign/{Defs,Confine,Closing,Simplicity}.lean — the ALM
+% chain (ALM-1/2 -> ALM-3 -> ALM-4 -> ALM-5) of the genuinely-negative
+% (unrestricted-below) H^2 four-vertex converse, Thread B on the arc-length
+% engine of chap:hyperbolic_arclength. All declarations landed sorry-free.
+% The capstone assembly (hyperbolicMixedConverse) lives in
+% Gluck/Hyperbolic/Family.lean (chap:hyperbolic_family), which consumes
+% def:mixed_sign_hyperbolic_four_vertex and thm:hyperbolic_circle_realizes.
+
+\section{Overview}
+
+This chapter states the mixed-sign chain of the hyperbolic (Dahlberg) converse:
+the realization of a \emph{genuinely negative} curvature profile — concave
+arcs, $\kappa_g<0$ — as the geodesic curvature of a simple closed curve in
+$\mathbb H^2$, by the Dahlberg bicircle-plus-degree method run on the
+sorry-free arc-length engine of \cref{chap:hyperbolic_arclength}. The decisive
+structural fact: the arc-length engine has \emph{no admissibility denominator}
+— the only positivity in sight is the metric factor $1-\|z\|^2>0$ — so, unlike
+the projective-gauge flows of the Euclidean and spherical chapters, it
+tolerates negative dips of \emph{any} depth. Every estimate consumes $\kappa$
+only through a uniform bound $|\kappa|\le M$ and $L^1$-closeness to a
+\emph{convex} reference bicircle, and a deep narrow dip contributes small
+$L^1$ measure: Dahlberg's $L^1$ squeeze. Consequently
+\cref{def:mixed_sign_hyperbolic_four_vertex} places \textbf{no lower bound on
+the minima}: an earlier confinement floor
+$-\,\mathrm{centeredRadius}(-1,c)<\kappa$ was found vestigial and removed, so
+the minima may be \emph{arbitrarily negative} — the unrestricted-below
+$\mathbb H^2$ four-vertex converse, not a floored scope. (Contrast Thread~A's
+\texttt{MixedSignSpaceFormFourVertex}\,$(-1)$, whose floor keeps minima
+positive.)
+
+The chain runs ALM-1/2 $\to$ ALM-3 $\to$ ALM-4 $\to$ ALM-5 across four files.
+\textbf{Defs}: the hypothesis — the Euclidean/spherical four-vertex package
+with the threshold $0$ raised to the escape-velocity threshold $1$
+($\coth R>1$ in $\mathbb H^2$) — its positive-case subsumption, and the convex
+clean-bicircle $L^1$ reparametrization at levels $1<a<b$, through which alone
+the negativity of $\kappa$ enters. \textbf{Confine}: two-leg $L^1$-Grönwall
+confinement of the negative ramped bicircle
+$\texttt{arcRampProfile}\,(-3/10)\;2\;L\;\delta$ to $\|z\|\le4/5<1$; the new
+content is a sign flip — the concave model-arc radius $r_a=(1-h^2)/(2(a-h))$
+is \emph{negative}. \textbf{Closing}: the 2-D degree closing — the quarter
+residual has a Poincaré–Miranda sign pattern of degree $+1$, and
+\texttt{poincareMiranda\_rect} produces the landing that survives
+genuinely-negative minima. \textbf{Simplicity}: simplicity via the
+\emph{non-convex chord} — the monotone-tangent projection of the convex theory
+fails along concave arcs and is replaced by a radial-argument lift (the
+confined curve is star-shaped about the origin) — plus the constant-branch
+witness \cref{thm:hyperbolic_circle_realizes}. The capstone assembly
+\texttt{hyperbolicMixedConverse} is \emph{not} here: it lives in
+\texttt{Gluck/Hyperbolic/Family.lean} (\cref{chap:hyperbolic_family},
+\cref{thm:hyperbolic_mixed_converse_reparam_deg1}), which imports this chain.
+
+\section{Declarations}
+
+\begin{definition}\leanok
+[mixed-sign hyperbolic four-vertex hypothesis]
+  \label{def:mixed_sign_hyperbolic_four_vertex}
+  \lean{Gluck.Hyperbolic.MixedSignHyperbolicFourVertex}
+  \uses{def:four_vertex_condition, def:mixed_sign_four_vertex,
+        def:mixed_sign_sphere_four_vertex}
+  A function $\kappa:\mathbb R\to\mathbb R$ satisfies the
+  \emph{genuinely-negative $\mathbb H^2$ four-vertex hypothesis} if it is
+  continuous, $2\pi$-periodic, and either constant at an escape-velocity level
+  ($\exists c>1$, $\kappa\equiv c$), or has value-separated alternating
+  extrema: four points $p_1<q_1<p_2<q_2<p_1+2\pi$ with $p_1,p_2$ local maxima,
+  $q_1,q_2$ local minima, the \emph{escape-velocity separation}
+  \[
+    \max\bigl(1,\kappa(q_1),\kappa(q_2)\bigr)\;<\;
+    \min\bigl(\kappa(p_1),\kappa(p_2)\bigr),
+  \]
+  and a window value $c>1$ in the overlap gap
+  ($\max(1,\kappa(q_1),\kappa(q_2))<c<\min(\kappa(p_1),\kappa(p_2))$). This is
+  the transport of \cref{def:mixed_sign_four_vertex} and
+  \cref{def:mixed_sign_sphere_four_vertex} with the threshold $0\mapsto1$.
+  \textbf{There is no lower bound on the minima}: the earlier confinement
+  floor $-\,\mathrm{centeredRadius}(-1,c)<\kappa$ was vestigial and has been
+  removed — the route uses only $|\kappa|\le M$ and $L^1$-closeness of
+  $\kappa\circ h_1$ to the convex reference bicircle, which absorbs dips of
+  any depth, so the minima may be arbitrarily negative.
+\end{definition}
+
+\begin{lemma}\leanok
+[subsumption of the escape-velocity positive case]
+  \label{lem:mixed_hyperbolic_of_escape_positive}
+  \lean{Gluck.Hyperbolic.MixedSignHyperbolicFourVertex.of_escape_positive}
+  \uses{def:mixed_sign_hyperbolic_four_vertex}
+  A continuous, $2\pi$-periodic four-vertex profile with $1<\kappa(\theta)$
+  everywhere and the escape-velocity separation of
+  \cref{def:mixed_sign_hyperbolic_four_vertex} satisfies the mixed hypothesis.
+  Sanity lemma: the mixed converse subsumes the positive case. (Mirror of
+  \cref{lem:mixed_of_sphere_four_vertex} and
+  \cref{lem:mixed_sign_four_vertex_of_is_curvature_function}.)
+\end{lemma}
+
+\begin{proof}\leanok
+  Take the non-constant branch and as window value the midpoint
+  $c=\tfrac12(\mathrm{lo}+\mathrm{hi})$ of the overlap gap
+  $\mathrm{lo}=\max(1,\kappa(q_1),\kappa(q_2))<
+  \mathrm{hi}=\min(\kappa(p_1),\kappa(p_2))$; since $1\le\mathrm{lo}$ the
+  midpoint lies strictly inside the gap and exceeds $1$.
+\end{proof}
+
+\begin{lemma}\leanok
+[$L^1$ reparametrization to a convex clean bicircle]
+  \label{lem:hyperbolic_bicircle_L1_reparam}
+  \lean{Gluck.Hyperbolic.exists_hyperbolic_bicircle_L1_reparam}
+  \uses{def:mixed_sign_hyperbolic_four_vertex, def:four_arc_step_function,
+        lem:exists_abab_levels, lem:step_L1_reparam_relaxed}
+  Let $\kappa$ be continuous and $2\pi$-periodic with the four-vertex overlap
+  data of \cref{def:mixed_sign_hyperbolic_four_vertex} (four ordered points
+  and a window value $c$), and let $\mathrm{tol}>0$. Then there are levels
+  $1<a<b$ interior to the overlap gap and an orientation-preserving circle
+  reparametrization $h_1$ ($\mathrm{StrictMono}$, continuous, $C^1$ with
+  continuous positive derivative witness,
+  $h_1(\theta+2\pi)=h_1(\theta)+2\pi$) with
+  \[
+    \int_0^{2\pi}\bigl|\kappa(h_1(\theta))
+      -\kappa^\ast(\theta)\bigr|\,d\theta\;<\;\mathrm{tol},
+    \qquad
+    \kappa^\ast=\texttt{stepCurvature }b\,a\,0\,(\pi/2)\,\pi\,(3\pi/2).
+  \]
+  The clean levels are $>1$ (convex, escape-velocity), so the reference
+  bicircle's tangent angle is strictly monotone — the property the non-convex
+  simplicity transport ultimately rests on; the genuine negativity of $\kappa$
+  enters only through the $L^1$ error, absorbed by $h_1$.
+\end{lemma}
+
+\begin{proof}\leanok
+  \uses{lem:exists_abab_levels, lem:step_L1_reparam_relaxed}
+  Set $a=\tfrac12(\mathrm{lo}+c)$, $b=\tfrac12(c+\mathrm{hi})$: then $1<a<b$,
+  $\max(\kappa(q_1),\kappa(q_2))<a$ and $b<\min(\kappa(p_1),\kappa(p_2))$.
+  \cref{lem:exists_abab_levels} (continuity and periodicity suffice) supplies
+  crossing data $\kappa(\theta_1,\theta_2,\theta_3,\theta_4)=(a,b,a,b)$, and
+  the model-agnostic relaxed reparametrization
+  \cref{lem:step_L1_reparam_relaxed} — a pure profile statement on $S^1$ with
+  no ambient geometry, hence directly reusable — produces $h_1$.
+\end{proof}
+
+\begin{definition}\leanok
+[negative-profile robustness constant]
+  \label{def:neg_robust_const}
+  \lean{Gluck.Hyperbolic.negRobustConst}
+  The Grönwall robustness constant of the negative bicircle,
+  $\texttt{negRobustConst}=\tfrac{115}{18}\,e^{33}\,(e^{33}+1)$, packaging the
+  two-leg $L^1$-Grönwall transfer data for the fixed parameters $R=4/5$,
+  $M=2$, $L/8\le 33/80$ (Lipschitz constant $6410/81$, exponent
+  $\mathrm{Lip}\cdot L/8\le 33$, drive coefficient
+  $\tfrac{2}{1-R^2}\cdot\tfrac{c-a}{2}=\tfrac{115}{18}$). It is positive and
+  $\ge 115/9$; every $\delta$-smallness hypothesis in ALM-3/4/5 is exposed
+  through it.
+\end{definition}
+
+\begin{lemma}\leanok
+[confinement of the two constant-curvature model arcs]
+  \label{lem:neg_model_arcs_confined}
+  \lean{Gluck.Hyperbolic.neg_arc1_confined, Gluck.Hyperbolic.neg_arc2_confined}
+  \uses{def:arclength_h2_curvature}
+  For the concrete negative parameters $a=-3/10$, $c=2$, $h\in[1/10,3/20]$,
+  $L\in[3,33/10]$: the concave first model arc through $W_0=(ih,\pi)$ and the
+  convex second model arc through the first-arc endpoint both stay within
+  $\|z(\sigma)\|\le 3/4$ on their legs.
+\end{lemma}
+
+\begin{proof}\leanok
+  \emph{Sign flip} (the new content vs.\ the positive gate): for $a<0$ the
+  model radius $r_a=(1-h^2)/(2(a-h))$ is negative, $r_a\in[-5/4,-1]$; the
+  squared norm $\|z(\sigma)\|^2=h^2+2r_a(r_a-h)(1-\cos(\sigma/r_a))$ still has
+  positive coefficient $2r_a(r_a-h)>0$ (both factors negative), and
+  monotonicity to the endpoint $\sigma=L/8$ is recovered via
+  $\cos(\sigma/r_a)=\cos(\sigma/(-r_a))$ and antitonicity of $\cos$ on
+  $[0,\pi]$. The convex second arc ($r_c\in[19/100,27/100]$) is bounded by the
+  whole-circle estimate $\|z\|\le\|c_2\|+r_c\le 3/4$ using
+  $\|c_2\|^2=1+r_c^2-4r_c$.
+\end{proof}
+
+\begin{lemma}\leanok
+[negative-profile quarter confinement]
+  \label{lem:neg_smooth_confined_quarter}
+  \lean{Gluck.Hyperbolic.neg_smooth_confined_quarter}
+  \uses{def:neg_robust_const, def:arclength_h2_curvature,
+        lem:neg_model_arcs_confined}
+  Let $\delta>0$, $h\in[1/10,3/20]$, $L\in[3,33/10]$, $\delta\le L/4$, and
+  assume the exposed $\delta$-smallness
+  $\texttt{negRobustConst}\cdot\delta\le 1/20$. Then the smooth
+  \texttt{arcFlow} trajectory of $\texttt{arcRampProfile}\,(-3/10)\;2\;L\;
+  \delta$ (radius clamp $R=4/5$, curvature bound $M=2$, ball radius $r_0=4$)
+  from the mirror-axis start $W_0=(ih,\pi)$ satisfies $\|z(\sigma)\|\le 4/5$
+  for all $\sigma\in[0,L/4]$.
+\end{lemma}
+
+\begin{proof}\leanok
+  \uses{lem:neg_model_arcs_confined, def:neg_robust_const}
+  Two-leg $L^1$-Grönwall: compare the smooth flow on $[0,L/8]$ with
+  $\texttt{arcModelConst}\,(-3/10)$ and on $[L/8,L/4]$ with
+  $\texttt{arcModelConst}\,2$ restarted at the leg-1 model endpoint; both
+  models are confined to $3/4$ by \cref{lem:neg_model_arcs_confined}, and the
+  ramp differs from each level only on a width-$\delta$ window
+  ($L^1$ drive $\le\tfrac{23}{20}\delta$ per leg). The engine's Grönwall
+  transport (\texttt{arcTrajectory\_gronwall}) converts the drive into a sup
+  deviation $\le\texttt{negRobustConst}\cdot\delta\le 1/20$, whence
+  $\|z\|\le 3/4+1/20=4/5$.
+\end{proof}
+
+\begin{lemma}\leanok
+[the negative ramped bicircle stays confined (ALM-3)]
+  \label{lem:mixed_profile_confined}
+  \lean{Gluck.Hyperbolic.mixedProfile_confined}
+  \uses{lem:neg_smooth_confined_quarter, def:neg_robust_const,
+        def:arclength_h2_curvature}
+  Under the hypotheses of \cref{lem:neg_smooth_confined_quarter}, if in
+  addition the trajectory lands on the second mirror axis $\mathrm{Fix}(X)$ at
+  the quarter period — $\operatorname{Im}z(L/4)=0$ and $\varphi(L/4)=3\pi/2$ —
+  then $\|z(\sigma)\|\le 4/5$ for all $\sigma\in[0,L]$. (The former statement,
+  with arbitrary $R\in(0,1)$ and no $\delta$-smallness, was false: confinement
+  is \emph{not} structural; the restatement mirrors the engine's proven
+  positive template \texttt{gate\_smooth\_confined\_full}.)
+\end{lemma}
+
+\begin{proof}\leanok
+  \uses{lem:neg_smooth_confined_quarter}
+  Quarter confinement is \cref{lem:neg_smooth_confined_quarter}. The mirror
+  landing makes the flow $\mathrm{Fix}(X)$-symmetric: \texttt{arcRev\_eqOn}
+  gives $z(\sigma)=\overline{z(L/2-\sigma)}$ on $[L/4,L/2]$ (the ramp is even
+  about $L/4$ on the half-window), and the half-period match plus
+  \texttt{arcClosure\_eqOn} gives $z(\sigma)=-z(\sigma-L/2)$ on $[L/2,L]$;
+  both preserve $\|z\|$.
+\end{proof}
+
+\begin{lemma}\leanok
+[closed-form quarter residual at the concave levels]
+  \label{lem:neg_gate_scalars}
+  \lean{Gluck.Hyperbolic.neg_G1_scalar, Gluck.Hyperbolic.neg_G2_scalar}
+  \uses{def:arclength_h2_curvature}
+  Scalar closed forms, at the concave levels $a=-3/10$, $c=2$, of the two
+  coordinates of the two-arc model quarter residual: $G_1=\operatorname{Im}W_2$
+  (the two-arc composition endpoint height) and
+  $G_2=\varphi(L/4)-3\pi/2=\theta_a+\theta_c-\pi/2$ (the angle residual), as
+  explicit expressions in $h$, $L$, the model radii $r_a,r_c$ and
+  $\cos/\sin$ of the arc angles. Here $r_a<0$ (concave first arc) and
+  $\theta_c>\pi/2$ (handled via the complementary angle
+  $y=\theta_c-\pi/2\in[0,1]$).
+\end{lemma}
+
+\begin{proof}\leanok
+  Unfold the two-arc composition \texttt{qArc2} and the model-arc formulas;
+  both identities are \texttt{ring}-level rearrangements of the engine's
+  closed-form arc endpoints.
+\end{proof}
+
+\begin{lemma}\leanok
+[joint continuity of the smooth quarter residual]
+  \label{lem:neg_smooth_residual_continuous}
+  \lean{Gluck.Hyperbolic.negSmoothResidual_continuousOn}
+  \uses{def:neg_robust_const, def:arclength_h2_curvature}
+  For every $\delta>0$ the negative smooth quarter-residual
+  $(h,L)\mapsto\bigl(\operatorname{Im}z_\delta(L/4),\
+  \varphi_\delta(L/4)-3\pi/2\bigr)$ of the ramped-bicircle \texttt{arcFlow} is
+  jointly continuous on the ALM-4 shooting rectangle
+  $[1/10,3/20]\times[157/50,161/50]$.
+\end{lemma}
+
+\begin{proof}\leanok
+  \uses{def:neg_robust_const}
+  Continuity in $L$ is the delicate half — the profile itself depends on $L$.
+  Grönwall squeeze: for $(h,L)\to(h_0,L_0)$ the flows differ by an
+  initial-condition term $O(|h-h_0|)$ plus an $L^1$ profile-drive term
+  $\le\tfrac{23}{10}\bigl(\tfrac{161}{1600\delta}+\tfrac14\bigr)|L-L_0|$ (the
+  two ramps disagree on windows of total measure $O(|L-L_0|/\delta)$); the
+  exponential factor is uniform over the rectangle, and
+  \texttt{squeeze\_zero} finishes.
+\end{proof}
+
+\begin{theorem}\leanok
+[quarter-landing existence for the negative bicircle: degree $+1$ (ALM-4)]
+  \label{thm:exists_quarter_landing_mixed}
+  \uses{lem:neg_gate_scalars, lem:neg_smooth_residual_continuous,
+        def:neg_robust_const, def:arclength_h2_curvature}
+  There exist a ramp width $\delta>0$ with
+  $\texttt{negRobustConst}\cdot\delta\le 1/20$ (as ALM-3 requires) and a pair
+  $(h,L)\in[1/10,3/20]\times[157/50,161/50]$ at which the smooth arc-length
+  flow from $W_0=(ih,\pi)$ lands on the second mirror axis at the quarter
+  period: $\operatorname{Im}z(L/4)=0$ and $\varphi(L/4)=3\pi/2$. This is the
+  2-D degree closing that survives genuinely-negative minima: the quarter
+  residual has a clean Poincaré–Miranda sign pattern of degree $+1$ for the
+  concave levels. (Lean note: \texttt{private} to \texttt{Closing.lean}; its
+  output $(\delta,h,L)$ plus landing is what \cref{lem:mixed_profile_confined}
+  consumes. The shooting rectangle is the sub-rectangle of ALM-3's $L$-range
+  $[3,33/10]$ on which all four sign faces are provable on a single
+  $L$-interval; it contains the negative landing
+  $(h^\ast,L^\ast)\approx(0.127,\,3.185)$.)
+\end{theorem}
+
+\begin{proof}\leanok
+  \uses{lem:neg_gate_scalars, lem:neg_smooth_residual_continuous,
+        def:neg_robust_const}
+  Choose $\delta=1/(2000\cdot\texttt{negRobustConst})$. The four faces of the
+  rectangle carry strict signs of the \emph{model} residual
+  (\cref{lem:neg_gate_scalars}): $G_1\le-1/1000$ at $h=1/10$, $G_1\ge1/1000$
+  at $h=3/20$, and $G_2$ likewise at $L=157/50,\ 161/50$ — decoupling
+  estimates in which the concave cross-term $\sin\theta_a\sin\theta_c<0$ is
+  controlled on the single $L$-interval (margin $\ge1/60$ before gating at
+  $1/1000$). The smooth-flow robustness (\texttt{negSmoothLanding\_close}, a
+  Grönwall transfer at rate $\texttt{negRobustConst}\cdot\delta=1/2000<
+  1/1000$) moves the face signs to the smooth residual, continuous by
+  \cref{lem:neg_smooth_residual_continuous}; \texttt{poincareMiranda\_rect}
+  (sorry-free) then produces an interior zero, i.e.\ the landing.
+\end{proof}
+
+\begin{lemma}\leanok
+[non-convex chord: the mixed trajectory has no self-chords (ALM-5)]
+  \label{lem:mixed_chord_ne_zero}
+  \uses{lem:mixed_profile_confined, def:neg_robust_const,
+        def:arclength_h2_curvature}
+  Let $\delta>0$ with $\texttt{negRobustConst}\cdot\delta\le 1/200$,
+  $(h,L)\in[1/10,3/20]\times[157/50,161/50]$, and suppose the ramped-bicircle
+  trajectory has the quarter landing of
+  \cref{thm:exists_quarter_landing_mixed}, the full-window confinement of
+  \cref{lem:mixed_profile_confined}, and closes up ($z(L)=z(0)$,
+  $\varphi(L)=\varphi(0)+2\pi$). Then every proper sub-arc chord is nonzero:
+  $\int_t^\tau e^{i\varphi(s)}\,ds\ne0$ for $0\le t<\tau<L$; consequently the
+  arc-length curve is simple. (Lean note: \texttt{private} to
+  \texttt{Simplicity.lean}, with its ingredients
+  \texttt{chord\_ne\_zero\_of\_lift} and \texttt{mixed\_radial\_lift}; the
+  monotone-tangent chord projection of the convex theory is inapplicable
+  because the tangent angle decreases along the concave arcs.)
+\end{lemma}
+
+\begin{proof}\leanok
+  \uses{lem:mixed_profile_confined, def:neg_robust_const}
+  Route A: \emph{radial monotonicity}. The confined curve is star-shaped about
+  the origin: $\langle z(\sigma),\,ie^{i\varphi(\sigma)}\rangle<0$ and
+  $z(\sigma)\ne0$ for all $\sigma$, so $\arg z$ admits a continuous lift
+  $\theta$ with $z=\|z\|e^{i\theta}$, strictly increasing with total increment
+  exactly $2\pi$. The inner-product sign is Klein-symmetric — invariant under
+  the mirror conjugation $(z,\varphi)\mapsto(\bar z,3\pi-\varphi)$ and the
+  central symmetry $(z,\varphi)\mapsto(-z,\varphi+\pi)$ — so it reduces to the
+  quarter window, where a two-arc $L^1$-Grönwall transport from the
+  constant-curvature model (whose inner product peaks at the join
+  $\sigma=L/8$ at $\le-1/50$ over the rectangle) plus the tightened
+  $\delta$-smallness keeps the sign for the smooth flow. Injectivity follows
+  from the abstract $\mathbb C$-core: $z(t)=z(\tau)$ would force
+  $\theta(\tau)-\theta(t)\in2\pi\mathbb Z$, but strict monotonicity and total
+  increment $2\pi$ pin it to $(0,2\pi)$ — a contradiction; the same lift rules
+  out a vanishing chord integral. The argument is a $\mathbb C$-property,
+  independent of the $\mathbb H^2$ metric.
+\end{proof}
+
+\begin{theorem}\leanok
+[the constant escape-velocity hyperbolic circle]
+  \label{thm:hyperbolic_circle_realizes}
+  \lean{Gluck.Hyperbolic.hyperbolicCircle_realizes}
+  \uses{def:is_simple_closed, def:spaceform_realizes}
+  For every $c>1$ there is a simple closed curve $z$ realizing the constant
+  profile $\kappa\equiv c$ as its $\mathbb H^2$ geodesic curvature:
+  $\texttt{IsSimpleClosed }z$ and $\texttt{Realizes }(-1)\;z\;(\lambda\_,c)$.
+  This is the constant-branch witness of
+  \cref{def:mixed_sign_hyperbolic_four_vertex}, consumed verbatim by the
+  fork-A capstone \cref{thm:hyperbolic_mixed_converse_reparam_deg1} in
+  \cref{chap:hyperbolic_family}. (Arc-length analogue of
+  \cref{lem:spherical_circle_realizes}.)
+\end{theorem}
+
+\begin{proof}\leanok
+  The explicit origin-centred hyperbolic circle of geodesic curvature $c$: the
+  space-form model circle (\texttt{spaceFormCircle\_realizes} at
+  $\varepsilon=-1$) is simple, closed, and has constant geodesic curvature
+  $c$; the escape-velocity condition $c>1$ is exactly what makes the
+  Euclidean-radius equation solvable inside the disk.
+\end{proof}

@@ -1,0 +1,649 @@
+\chapter{Fork A: the symbolic $(a,c)$-family and the up-to-reparam capstone}
+\label{chap:hyperbolic_family}
+
+% Chapter for Gluck/Hyperbolic/Family.lean (aggregator) and its sub-modules
+% Gluck/Hyperbolic/Family/{Bicircle, Anchor, Node, Transport, TurningA,
+% TurningB, TurningC, FaceA, FaceB, Closing, Simplicity}.lean — the
+% ALM-A1 … ALM-A12 chain.  Fork A realizes a general mixed-sign H² curvature
+% profile through a convex clean bicircle with symbolic levels 1 < a < c
+% chosen per κ, culminating in hyperbolicMixedConverse_reparam_deg1:
+% realization up to an orientation-preserving C¹ DEGREE-ONE circle
+% reparametrization; the degree-one datum is consumed by
+% chap:hyperbolic_converse to remove the reparametrization.
+
+\section{Overview}
+
+Fork A proves the genuinely-negative $H^2$ four-vertex converse for a
+\emph{general} profile: a $\kappa$ satisfying
+\cref{def:mixed_sign_hyperbolic_four_vertex} (continuous, $2\pi$-periodic,
+escape velocity $>1$ at the maxima, minima \emph{arbitrarily negative}) is
+realized, up to an orientation-preserving $C^1$ circle reparametrization, as
+the geodesic curvature of a simple closed curve in $H^2$ ($\varepsilon=-1$).
+Unlike the Euclidean and spherical forks the clean model is not a perturbed
+circle but a \emph{convex clean bicircle} — arcs of constant curvature at two
+symbolic levels $1<a<c$ chosen per $\kappa$ inside the four-vertex overlap gap
+above $\max 1$ — and the whole chain runs in \emph{arc length}, on the engine
+of \cref{chap:hyperbolic_arclength}.  The stages, one section per Lean
+sub-module group:
+\begin{enumerate}
+\item \textbf{A1--A3 (Bicircle).}  Symbolic quarter residual $(G_1,G_2)$,
+  monotonicity and sign brackets, nested-IVT anchor existence
+  (\cref{thm:exists_bicircle_anchor}).
+\item \textbf{A4 (Anchor).}  The closed-form anchor curve: closure,
+  continuity, confinement, phase monotonicity, chord margin.
+\item \textbf{A5 (Node).}  The node layout: period $\Lambda=L+w_1+w_2+t$,
+  node map $g_{w,t}$ with quasi-periodicity $g(s+\Lambda)=g(s)+2\pi$
+  (\cref{lem:node_map_add_period} — the conjugation that later makes the
+  composite reparametrization degree one), the arc-length profile
+  $\kappa_{\mathrm{arc}}=\kappa\circ h_1\circ g_{w,t}$.
+\item \textbf{A6--A7 (Transport).}  Five-leg Grönwall transport, global
+  confinement, residual continuity in the layout dofs.
+\item \textbf{A8 (Turning A/B/C).}  Node-map inverse and coupling, field
+  estimates, the continuous turning root $t=\tau(w)$.
+\item \textbf{A9--A10 (Faces + Closing).}  Junction-chain columns, the
+  face-sign theorem, the Poincaré--Miranda closing
+  (\cref{thm:layout_closing}).
+\item \textbf{A11--A12 (Simplicity + capstone).}  Chord non-vanishing, the
+  window bridge into \cref{def:arclength_h2_curvature}, and the capstone
+  \cref{thm:hyperbolic_mixed_converse_reparam_deg1} with
+  $\Psi=(h_1\circ g_{w^*,t^*})\circ\chi$.
+\end{enumerate}
+A structural point shaping every statement below: the closing constants
+$C_1,\varepsilon_0$ and the simplicity margin $\mu$ are quantified
+\emph{ahead of} the reparametrization $h_1$; the capstone fixes
+$\varepsilon=\min(\varepsilon_0,\mu/C_1)$ first and only then builds $h_1$,
+breaking the reparam/$\varepsilon$ fixed point.
+
+\section{The symbolic bicircle anchor (ALM-A1--A3)}
+
+The bicircle quarter is a 2-arc composition: a level-$a$ model arc of length
+$L/8$ from the start state $(ih,\pi)$, then a level-$c$ model arc of length
+$L/8$.  With $W_2$ the quarter endpoint and $\varphi(L/4)$ the quarter phase,
+the \emph{quarter residual} is $G_1=\operatorname{Im}W_2$,
+$G_2=\varphi(L/4)-3\pi/2$; the quarter closes onto the Klein symmetry axes
+exactly when $G_1=G_2=0$.  The free data are the start height $h$ and the
+length $L$.
+
+\begin{definition}\leanok
+[the convex $h$-window]
+  \label{def:bicircle_window}
+  \lean{Gluck.Hyperbolic.bicircleWindow}
+  For $a>1$ the \emph{$h$-window} is $\{h\mid 0<h<1,\ 2ah\le 1+h^2\}$, i.e.\
+  $h\le r_a=(1-h^2)/(2(a-h))$ (the first-arc radius), equivalently
+  $h\le a-\sqrt{a^2-1}$; on it every term of the $G_2$ monotone-difference
+  factoring is nonnegative.  The accompanying \emph{$L$-bracket} is
+  $\bar L(a,h)=4\pi r_a$ (\texttt{Gluck.Hyperbolic.bicircleBracket}): at
+  $L=\bar L$ the first arc sweeps exactly $\pi/2$, so $G_2(h,\bar L)>0$ while
+  $G_2(h,0)=-\pi/2$; moreover $\bar L<4\pi$, discharging the $L\le4\pi$
+  hypothesis of the node layout.
+\end{definition}
+
+\begin{lemma}\leanok
+[parametric IVT with continuous root selection]
+  \label{lem:continuous_root_of_strict_mono}
+  \lean{Gluck.Hyperbolic.continuous_root_of_strictMono}
+  If on a parameter set $S$ the bracket endpoints $l\le u$ move continuously,
+  $F\,x$ is continuous and strictly monotone on $[l\,x,u\,x]$ with locked
+  endpoint signs $F\,x\,(l\,x)<0<F\,x\,(u\,x)$, and $F\,\cdot\,y$ is
+  continuous on $S$ at each interior height $y$, then some $\rho$ continuous
+  on $S$ selects the interior root: $\rho\,x\in(l\,x,u\,x)$,
+  $F\,x\,(\rho\,x)=0$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  IVT gives the root at each $x$; strict monotonicity makes it unique, and
+  continuity of the selection follows by trapping $\rho$ between level sets
+  of $F$ near each parameter, using continuity of $F\,\cdot\,y$ at interior
+  heights.  Used twice: for the root $L^*(h)$ of $G_2$ here and for the
+  turning root in \cref{lem:turning_root_continuous}.
+\end{proof}
+
+\begin{theorem}\leanok
+[ALM-A3: symbolic anchor existence]
+  \label{thm:exists_bicircle_anchor}
+  \lean{Gluck.Hyperbolic.exists_bicircle_anchor}
+  \uses{def:bicircle_window, lem:continuous_root_of_strict_mono}
+  For every convex pair $1<a<c$ there are $h^*$ interior to the window, with
+  $h^*\in[1/(10c),\,a-\sqrt{a^2-1}\,]$, and $L^*\in(0,\bar L(a,h^*))$ at
+  which the quarter residual vanishes:
+  $\operatorname{Im}W_2=0$ and $\varphi(L^*/4)=3\pi/2$.
+\end{theorem}
+
+\begin{proof}
+  \uses{def:bicircle_window, lem:continuous_root_of_strict_mono}
+  \leanok
+  Nested IVT.  Inner: for each window $h$, $G_2(h,\cdot)$ is strictly
+  increasing on $[0,\bar L]$ with $G_2(h,0)<0<G_2(h,\bar L)$, so
+  \cref{lem:continuous_root_of_strict_mono} yields a \emph{continuous} root
+  $L^*(h)$.  Outer: $h\mapsto G_1(h,L^*(h))$ is continuous on
+  $[1/(10c),\,a-\sqrt{a^2-1}\,]$, negative at the left endpoint and positive
+  at the right (at the boundary $r_a=h$ the $G_1>0$ endpoint sign fires
+  exactly); an ordinary IVT gives $h^*$.
+\end{proof}
+
+\section{The anchor curve (ALM-A4)}
+
+\begin{definition}\leanok
+[the anchor curve]
+  \label{def:anchor_curve}
+  \lean{Gluck.Hyperbolic.anchorCurve}
+  \uses{thm:exists_bicircle_anchor}
+  The closed-form clean bicircle curve on $[0,L]$ at anchor data $(h,L)$: the
+  quarter is the explicit two-arc constant-curvature composition; the half
+  extends it by the conjugate Klein reflection
+  $X(z,\varphi)=(\bar z,3\pi-\varphi)$; the full period by the central
+  symmetry $\rho(z,\varphi)=(-z,\varphi+\pi)$.  The branch joints agree
+  exactly because of the anchor equations of
+  \cref{thm:exists_bicircle_anchor}, so the curve is closed, globally
+  continuous, and has strictly increasing phase (file-private
+  \texttt{anchorCurve\_continuous}, \texttt{anchorCurve\_phase\_strictMonoOn}).
+\end{definition}
+
+\begin{definition}\leanok
+[the anchor confinement radius]
+  \label{def:anchor_confine_radius}
+  \lean{Gluck.Hyperbolic.anchorConfineRadius}
+  \uses{def:anchor_curve}
+  The explicit radius $R(a,c)=1-(a-1)(c-1)/(20c^2)<1$ confining the anchor
+  curve strictly inside the Poincaré disk (file-private
+  \texttt{anchorCurve\_confined}).  Two further A4 exports feed later stages:
+  chord non-vanishing of every proper sub-arc, and the nonconstructive
+  \emph{compact chord margin} — for each band width $\ell_0\in(0,L/2]$ a
+  margin $m>0$ with $m(\tau-t)\le\|\int_t^\tau e^{i\varphi}\|$ whenever
+  $\ell_0\le\tau-t\le L-\ell_0$ (compactness minimum of the nonvanishing
+  chord; file-private \texttt{layout\_chord\_margin}).  The same template,
+  with only the continuity input changed, gives the clean-layout chord margin
+  consumed by \cref{lem:layout_chord_ne_zero}.
+\end{definition}
+
+\section{The node layout (ALM-A5)}
+
+The anchor curve is a $(c,a,c,a,c)$ pattern of constant-curvature legs.  To
+run a genuine profile on it, arc length is laid out by a \emph{node layout}:
+interior widths $w_1,w_2$ and a terminal width $t$ deform the leg lengths,
+giving the three degrees of freedom the closing needs ($2$ for $z$-closure
+$+$ $1$ for turning).
+
+\begin{definition}\leanok
+[node density, breakpoints and period]
+  \label{def:node_density}
+  \lean{Gluck.Hyperbolic.nodeDensity}
+  The \emph{node density} $\rho_{w,t}$ is a sum of $\Lambda$-periodic
+  trapezoidal pulses (rescaled \texttt{clampTent}s of the Euclidean closing
+  family) over the five layout legs, with breakpoints $s_1=\tfrac L8$,
+  $s_2=\tfrac{3L}8+w_1$, $s_3=\tfrac{5L}8+w_1$, $s_4=\tfrac{7L}8+w_1+w_2$ and
+  period $\Lambda=\texttt{nodePeriod}=L+w_1+w_2+t$
+  (\texttt{Gluck.Hyperbolic.nodePeriod}).  On the layout box
+  $|w_1|,|w_2|,|t|\le L/16$ it is continuous, strictly positive,
+  $\Lambda$-periodic, with full-period integral exactly $2\pi$.
+\end{definition}
+
+\begin{definition}\leanok
+[the node map $g_{w,t}$]
+  \label{def:node_map}
+  \lean{Gluck.Hyperbolic.nodeMap}
+  \uses{def:node_density, def:integral_reparam}
+  The running integral of the node density (an \texttt{integralReparam},
+  \cref{def:integral_reparam}) anchored at $g(0)=3\pi/4$, the mid-$c$-arc
+  point of the reference step.  On the box it is a $C^1$, strictly increasing
+  reparametrization carrying the five layout legs onto the $\theta$-quarters
+  of the canonical step
+  $\kappa^*=\texttt{stepCurvature}\,c\,a\,0\,(\pi/2)\,\pi\,(3\pi/2)$
+  (\cref{def:four_arc_step_function}).
+\end{definition}
+
+\begin{lemma}\leanok
+[quasi-periodicity of the node map]
+  \label{lem:node_map_add_period}
+  \lean{Gluck.Hyperbolic.nodeMap_add_period}
+  \uses{def:node_map, def:node_density}
+  On the layout box ($0<L\le4\pi$, $|w_1|,|w_2|,|t|\le L/16$), for all $s$:
+  \[
+    g_{w,t}(s+\Lambda)\;=\;g_{w,t}(s)+2\pi .
+  \]
+  This conjugation law — period $\Lambda$ in arc length maps to period $2\pi$
+  in step angle — is what makes the composite reparametrization of the
+  capstone a \emph{degree-one} circle map: it composes with the shift laws of
+  $h_1$ and of the linear window map $\chi$ in
+  \cref{thm:hyperbolic_mixed_converse_reparam_deg1}.
+\end{lemma}
+
+\begin{proof}
+  \uses{def:node_density}
+  \leanok
+  Split $\int_0^{s+\Lambda}\rho$ at $s$; the piece $\int_s^{s+\Lambda}\rho$
+  equals the full-period integral by $\Lambda$-periodicity of the density,
+  and the per-leg support integrals sum to exactly $2\pi$.
+\end{proof}
+
+\begin{definition}\leanok
+[the arc-length curvature profile]
+  \label{def:kappa_arc}
+  \lean{Gluck.Hyperbolic.kappaArc}
+  \uses{def:node_map}
+  $\kappa_{\mathrm{arc}}=(\kappa\circ h_1)\circ g_{w,t}$: the four-vertex
+  profile, pre-composed with the $L^1$-reparametrization $h_1$ (which makes
+  $\kappa\circ h_1$ $L^1$-close to the clean step) and laid out in arc length
+  by the node map.  Continuous, $\Lambda$-periodic
+  (\cref{lem:node_map_add_period} composed with the shift law of $h_1$ and
+  the periodicity of $\kappa$), bounded by any global bound of $\kappa$ —
+  the profile the A6 true flow runs on.  Its clean counterpart is
+  $\kappa^*\circ g_{w,t}$, the piecewise-constant $(c,a,c,a,c)$ profile.
+\end{definition}
+
+\begin{lemma}\leanok
+[ALM-A5 capstone: comp-$L^1$ estimate]
+  \label{lem:kappa_arc_comp_L1}
+  \lean{Gluck.Hyperbolic.kappaArc_comp_L1}
+  \uses{def:kappa_arc, def:node_map, def:four_arc_step_function,
+        lem:node_map_add_period}
+  On the layout box,
+  \[
+    \int_0^{\Lambda}\bigl|\kappa_{\mathrm{arc}}-\kappa^*\!\circ g_{w,t}\bigr|
+    \;\le\;\frac L\pi\int_0^{2\pi}\bigl|\kappa\circ h_1-\kappa^*\bigr| .
+  \]
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:node_map_add_period}
+  \leanok
+  Change of variables $\theta=g_{w,t}(s)$: the density is bounded below by
+  $\pi/L$ on the box, so $ds\le(L/\pi)\,d\theta$, and one arc-length period
+  maps onto one $\theta$-period by \cref{lem:node_map_add_period}.
+\end{proof}
+
+\section{Five-leg transport and residual continuity (ALM-A6--A7)}
+
+\begin{definition}\leanok
+[the true layout flow]
+  \label{def:layout_flow}
+  \lean{Gluck.Hyperbolic.layoutFlow}
+  \uses{def:kappa_arc, def:anchor_curve, def:anchor_confine_radius}
+  The \texttt{arcFlow} of $\kappa_{\mathrm{arc}}$ from the anchor mid-$c$
+  start (state \texttt{layoutStart}, phase $5\pi/2$), at truncation radius
+  $R'=\texttt{layoutConfineRadius}=(1+R_{\mathrm{clean}})/2$, horizon $2L$
+  (covering every box period $\Lambda\le2L$ uniformly), curvature bound $M$.
+  Its comparison object is the five-leg \texttt{layoutClean} curve — the
+  anchor legs re-cut at the node breakpoints — confined in the disk of radius
+  $R_{\mathrm{clean}}(a,c)=1-m_0\bigl((a-1)/(2(c+1))\bigr)^5<1$, the anchor
+  margin $m_0$ of \cref{def:anchor_confine_radius} decayed by the per-leg
+  escape ratio five times (\texttt{layoutClean\_confined}).
+\end{definition}
+
+\begin{lemma}\leanok
+[ALM-A6: five-leg Grönwall transport]
+  \label{lem:layout_trajectory_close}
+  \lean{Gluck.Hyperbolic.layoutTrajectory_close}
+  \uses{def:layout_flow, lem:kappa_arc_comp_L1}
+  For anchor data on the window $\times$ bracket with the phase anchor
+  equation, and continuous $2\pi$-periodic $\kappa$ with $|\kappa|\le M$:
+  there is $C_1=C_1(a,c,L,M)>0$, uniform over the layout box and over $h_1$,
+  with
+  \[
+    \bigl\|\Phi_{\mathrm{true}}(\sigma)-\Phi_{\mathrm{clean}}(\sigma)\bigr\|
+    \;\le\;C_1\int_0^{2\pi}\bigl|\kappa\circ h_1-\kappa^*\bigr|
+    \qquad(\sigma\in[0,\Lambda]).
+  \]
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:kappa_arc_comp_L1}
+  \leanok
+  Chain the arc-flow Grönwall inequality across the five legs, each against
+  the exact constant-level model-arc solution, with per-leg $L^1$ errors
+  restricted from \cref{lem:kappa_arc_comp_L1}.  The constant —
+  $5\,e^{5\,\mathrm{Lip}\,L}\cdot\frac2{1-R'^2}\cdot\frac L\pi$, with
+  $\mathrm{Lip}$ the arc-field Lipschitz constant at radius $R'$, bound $M$
+  — is explicit in the proof but exported existentially.
+\end{proof}
+
+\begin{lemma}\leanok
+[ALM-A6: global confinement of the true flow]
+  \label{lem:layout_flow_confined}
+  \lean{Gluck.Hyperbolic.layoutFlow_confined}
+  \uses{def:layout_flow, lem:layout_trajectory_close}
+  If the true flow stays $b$-close to the clean curve on $[0,\Lambda]$ and
+  $b\le(1-R_{\mathrm{clean}})/2$, then
+  $\|z_{\mathrm{true}}\|\le R_{\mathrm{clean}}+b\le R'<1$ there; in
+  particular the flow never reaches its truncation radius, so the clamped
+  field equals the true field along the trajectory (the A12 window-bridge
+  input).
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  Triangle inequality from per-leg clean confinement plus the Grönwall gap
+  $b$, and $R_{\mathrm{clean}}+b\le(1+R_{\mathrm{clean}})/2=R'$.
+\end{proof}
+
+\begin{definition}\leanok
+[the layout closure residual]
+  \label{def:layout_residual}
+  \lean{Gluck.Hyperbolic.layoutResidual}
+  \uses{def:layout_flow}
+  $\mathcal R(w_1,w_2,t)
+    =\Phi_{\mathrm{true}}(\Lambda)-\bigl(z(0),\varphi(0)+2\pi\bigr)$:
+  endpoint state minus the one-full-turn closure target.  The first component
+  is the $z$-closure residual (A10 consumes its real and imaginary parts);
+  the second is the turning residual (the A8 root variable; on the anchor
+  locus the turning target is $9\pi/2$).  $\mathcal R=0$ iff the true flow
+  closes with total turning $2\pi$.
+\end{definition}
+
+\begin{lemma}\leanok
+[ALM-A7: residual continuity on the layout box]
+  \label{lem:layout_residual_continuous}
+  \lean{Gluck.Hyperbolic.layoutResidual_continuousOn}
+  \uses{def:layout_residual, lem:layout_trajectory_close}
+  $(w_1,w_2,t)\mapsto\mathcal R(w_1,w_2,t)$ is jointly continuous on the
+  layout box $|w_1|,|w_2|,|t|\le L/16$.
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:layout_trajectory_close}
+  \leanok
+  The endpoint state is continuous in the box dofs by the parametric
+  Grönwall squeeze (the joint $(w,t)$-continuity ladder of the Transport
+  module); the target is constant.
+\end{proof}
+
+\section{The turning nest (ALM-A8)}
+
+The 3-dof closing is solved nested: first a continuous root $t=\tau(w)$ of
+the turning residual, then a 2-D Poincaré--Miranda argument in
+$w=(w_1,w_2)$.  Turning monotonicity needs the reparametrized profile
+\emph{pointwise} close to $c$ on the terminal plateau — a strengthening of
+the $L^1$ conclusion.
+
+\begin{lemma}\leanok
+[ALM-A8.0: plateau-pointwise $L^1$ reparametrization]
+  \label{lem:bicircle_L1_reparam_pointwise}
+  \lean{Gluck.Hyperbolic.exists_bicircle_L1_reparam_pointwise}
+  \uses{lem:exists_preliminary_reparam, def:four_arc_step_function}
+  For $\kappa$ continuous and $2\pi$-periodic (no positivity) with crossing
+  data $\kappa(\theta_1,\ldots,\theta_4)=(a,c,a,c)$ at ordered points within
+  one period, and every $\varepsilon>0$: there is an orientation-preserving
+  circle reparametrization $h_1$ (strictly monotone, $C^1$ with continuous
+  positive derivative witness, $h_1(\theta+2\pi)=h_1(\theta)+2\pi$) with
+  \[
+    \int_0^{2\pi}\bigl|\kappa\circ h_1-\kappa^*\bigr|<\varepsilon
+    \quad\text{and}\quad
+    \bigl|\kappa(h_1(\theta))-c\bigr|\le\varepsilon
+    \ \text{on }[\tfrac\pi2,\tfrac{3\pi}4].
+  \]
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:exists_preliminary_reparam}
+  \leanok
+  A re-run of the frozen Euclidean plateau construction
+  (\cref{lem:exists_preliminary_reparam}, plateau variant), the
+  half-race-width shift left-aligning the plateaus with the left-closed step
+  quarters; the pointwise clause is the plateau value on the closed
+  second-quarter window.  No positivity is needed: the construction uses
+  continuity only, and the $L^1$ upgrade replaces the positive global bound
+  by a two-sided compactness bound.
+\end{proof}
+
+\begin{lemma}\leanok
+[ALM-A8: strict monotonicity of the turning residual in $t$]
+  \label{lem:turning_residual_strict_mono}
+  \lean{Gluck.Hyperbolic.turningResidual_strictMono_t}
+  \uses{def:layout_residual, def:node_map, lem:bicircle_L1_reparam_pointwise,
+        lem:layout_trajectory_close}
+  For every anchor datum there is $\varepsilon_0>0$, uniform over the box,
+  such that whenever $h_1$ satisfies the $L^1$ tolerance \emph{and} the
+  plateau clause at level $\varepsilon\le\varepsilon_0$, the map
+  $t\mapsto\mathcal R(w_1,w_2,t)_2$ is strictly increasing on
+  $[-L/16,L/16]$, for every fixed box $(w_1,w_2)$.
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:bicircle_L1_reparam_pointwise, lem:layout_trajectory_close}
+  \leanok
+  Extending the terminal plateau inserts flow time at level $c$ with no
+  downstream legs (terminal-dof locality of the node map).  The flows at
+  $t<t'$ are coupled by the mass-matching coupling
+  $\psi=g_{t'}^{-1}\circ g_t$ — fixing $s_4$, carrying $\Lambda_t$ to
+  $\Lambda_{t'}$, $O(t'-t)$-close to the identity in value and derivative —
+  and a second-order rectangle Grönwall estimate bounds the coupled
+  difference by $C_2\,\varepsilon\,(t'-t)$, while the clean turning gain is
+  $\ge 2(c-R_{\mathrm{clean}})(t'-t)$ (the plateau clause keeps the true
+  terminal curvature within $\varepsilon$ of $c$).  Take
+  $\varepsilon_0=\min(\varepsilon_1,(c-R_{\mathrm{clean}})/(C_2+1))$.
+\end{proof}
+
+\begin{lemma}\leanok
+[ALM-A8: the continuous turning root $\tau(w)$]
+  \label{lem:turning_root_continuous}
+  \lean{Gluck.Hyperbolic.turningRoot_continuous}
+  \uses{lem:turning_residual_strict_mono, lem:layout_residual_continuous,
+        lem:continuous_root_of_strict_mono}
+  There are a root-box radius $W_0\in(0,L/16]$ and $\varepsilon_0>0$ such
+  that for every admissible $h_1$ at tolerance $\varepsilon\le\varepsilon_0$
+  there is a continuous $\tau$ on $\{|w_1|,|w_2|\le W_0\}$ with
+  $\tau(w)\in(-L/16,L/16)$ and $\mathcal R(w_1,w_2,\tau(w))_2=0$.
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:turning_residual_strict_mono, lem:layout_residual_continuous,
+        lem:continuous_root_of_strict_mono}
+  \leanok
+  Strict monotonicity (\cref{lem:turning_residual_strict_mono}), a sign
+  bracket at $t=\pm L/16$ (clean turning gain minus transported error), and
+  joint continuity (\cref{lem:layout_residual_continuous}) feed
+  \cref{lem:continuous_root_of_strict_mono}.
+\end{proof}
+
+\section{Face signs and the Poincaré--Miranda closing (ALM-A9--A10)}
+
+\begin{definition}\leanok
+[the clean $z$-closure residual]
+  \label{def:a9_residual}
+  \lean{Gluck.Hyperbolic.a9Residual}
+  \uses{def:anchor_curve, def:layout_flow}
+  The clean closure residual as an explicit, $\tau_{\mathrm{clean}}$-free map
+  of the interior dofs $(w_1,w_2)$: the fixed-phase endpoint
+  $z+r(1+ie^{i\psi})$ of the terminal $c$-leg through the fourth layout node,
+  minus the layout start point.  It vanishes at the anchor $(0,0)$; its two
+  exact derivative columns at $w=0$ are computed through the junction-chain
+  columns of the FaceA module (the A9.0 circle-coordinate transfer matrices
+  and the A9.1 reduced anchor data).
+\end{definition}
+
+\begin{theorem}\leanok
+[ALM-A10: the true flow closes]
+  \label{thm:layout_closing}
+  \lean{Gluck.Hyperbolic.exists_layout_closing}
+  \uses{def:a9_residual, lem:turning_root_continuous,
+        lem:layout_trajectory_close, lem:layout_flow_confined,
+        def:layout_residual, lem:layout_residual_continuous}
+  For anchor data $(h,L)$ with both anchor equations, and continuous
+  $2\pi$-periodic $\kappa$ with $|\kappa|\le M$: there are $C_1>0$ (the
+  transport constant, exposed ahead of the threshold) and $\varepsilon_0>0$
+  such that for every admissible plateau-pointwise $h_1$ at tolerance
+  $\varepsilon\le\varepsilon_0$ there is a box point $(w_1,w_2,t)$ where the
+  true flow \emph{closes with total turning $2\pi$}
+  ($\mathcal R(w_1,w_2,t)=0$), bundled with the $C_1\varepsilon$-closeness to
+  the clean curve and the confinement $\|z(\sigma)\|\le R'<1$ on the closed
+  period window — the shapes A11 and A12 consume.
+\end{theorem}
+
+\begin{proof}
+  \uses{def:a9_residual, lem:turning_root_continuous,
+        lem:layout_trajectory_close, lem:layout_flow_confined,
+        lem:layout_residual_continuous}
+  \leanok
+  The face-sign theorem (file-private \texttt{cleanClosure\_face\_signs},
+  A9.3) supplies an invertible linear recombination $(A,B)$, $(A',B')$ of
+  \cref{def:a9_residual} and a box cap $W_1\le L/16$ in the recombined dofs
+  $u=w_1+w_2$, $v=w_1-w_2$: every radius $W\le W_1$ carries a face margin
+  $m>0$ and phase tolerance $\eta>0$ such that near turning closure the first
+  recombined component is $\ge m$ on the $u=W$ face and $\le-m$ on $u=-W$,
+  likewise the second in $v$.  Intersect with the A8 root box
+  ($W=\min(W_0,W_1)$) and slice along $t=\tau(w)$
+  (\cref{lem:turning_root_continuous}): the turning residual vanishes, and
+  the $z$-residual of the \emph{true} flow inherits the clean face signs with
+  margin $m/2$, since \cref{lem:layout_trajectory_close} bounds the
+  true$-$clean gap by $C_1\varepsilon$ and $\varepsilon_0$ is assembled from
+  the A8 threshold and the quotas $C_1\varepsilon\le\eta$,
+  $M_c\,C_1\varepsilon\le m/2$,
+  $C_1\varepsilon\le(1-R_{\mathrm{clean}})/2$.  The Poincaré--Miranda
+  rectangle engine yields $(u^*,v^*)$ where both recombined components
+  vanish; invertibility ($AB'-BA'\ne0$) recovers $z$-closure, $\tau$ the
+  turning closure, and \cref{lem:layout_flow_confined} the confinement.
+\end{proof}
+
+\section{Simplicity and the up-to-reparam capstone (ALM-A11--A12)}
+
+\begin{lemma}\leanok
+[ALM-A11: simplicity transport]
+  \label{lem:layout_chord_ne_zero}
+  \lean{Gluck.Hyperbolic.layout_chord_ne_zero}
+  \uses{def:layout_flow, def:anchor_confine_radius, thm:layout_closing}
+  There is a margin $\mu>0$, exported ahead of $C_1$ and $\varepsilon$, such
+  that for the closed true flow of \cref{thm:layout_closing} with
+  $C_1\varepsilon\le\mu$, every proper sub-arc chord is nonzero:
+  $\int_p^q e^{i\varphi_{\mathrm{true}}(s)}\,ds\ne0$ for
+  $0\le p<q<\Lambda$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  Three regimes against the short scale $\ell_0=\pi/(3C_2)$, with
+  $C_2=2(M+1)/(1-R'^2)$ the true phase-speed bound: \emph{short} arcs
+  ($q-p\le\ell_0$; phase deviation $\le\pi/3$, midpoint projection of the
+  chord positive — this tolerates the negative dips of $\kappa$);
+  \emph{near-full} arcs (complement short, exact closure flips the chord);
+  \emph{mid} arcs (the clean-layout chord margin $m_0$ — the A4 template of
+  \cref{def:anchor_confine_radius} with the layout continuity input —
+  transported at cost $2C_1\varepsilon\le2\mu$).  $\mu$ is exported first so
+  A12 can fix $\varepsilon\le\mu/C_1$.
+\end{proof}
+
+\begin{lemma}\leanok
+[ALM-A12: window-solution exposure]
+  \label{lem:layout_window_solution}
+  \lean{Gluck.Hyperbolic.layout_windowSolution_exposed}
+  \uses{def:layout_flow, def:kappa_arc, thm:layout_closing,
+        lem:layout_chord_ne_zero}
+  From the closed, confined, chord-nonvanishing true flow: there are
+  $z:\mathbb R\to\mathbb C$, $\varphi:\mathbb R\to\mathbb R$ with
+  $z'=e^{i\varphi}$, $\varphi'$ the arc-length angular speed of
+  $\kappa_{\mathrm{arc}}$, $\|z\|<1$, $z(\Lambda)=z(0)$,
+  $\varphi(\Lambda)=\varphi(0)+2\pi$, and all proper sub-arc chords nonzero —
+  the window-solution package at window $\Lambda$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  The layout flow runs at horizon $2L$, the bridge consumes horizon
+  $\Lambda\le2L$; the two arc flows agree on $[0,\Lambda]$ by ODE uniqueness
+  (\texttt{arcFlow\_unique}), so the A10/A11 closure, confinement and chord
+  data transfer verbatim.  Strict confinement is
+  \cref{lem:layout_flow_confined} plus $R'<1$.
+\end{proof}
+
+\begin{lemma}\leanok
+[ALM-A12: $\kappa_{\mathrm{arc}}$ is an $H^2$ arc-length curvature]
+  \label{lem:layout_arclength_h2}
+  \lean{Gluck.Hyperbolic.layout_arcLengthH2Curvature}
+  \uses{lem:layout_window_solution, def:arclength_h2_curvature,
+        def:kappa_arc}
+  Under the hypotheses of \cref{lem:layout_window_solution},
+  $\kappa_{\mathrm{arc}}=\kappa\circ h_1\circ g_{w,t}$ satisfies
+  $\texttt{ArcLengthH2Curvature}$ (\cref{def:arclength_h2_curvature}) at
+  window $\Lambda=\texttt{nodePeriod}$.
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:layout_window_solution}
+  \leanok
+  Package the window solution through the (public) arc-length window bridge
+  \texttt{arcLengthH2Curvature\_of\_windowSolution} of
+  \cref{chap:hyperbolic_arclength}.
+\end{proof}
+
+\begin{theorem}\leanok
+[capstone: hyperbolic mixed converse, up to a degree-one reparametrization]
+  \label{thm:hyperbolic_mixed_converse_reparam_deg1}
+  \lean{Gluck.Hyperbolic.hyperbolicMixedConverse_reparam_deg1}
+  \uses{def:mixed_sign_hyperbolic_four_vertex, def:spaceform_realizes,
+        def:is_simple_closed, lem:exists_abab_levels,
+        thm:exists_bicircle_anchor, lem:bicircle_L1_reparam_pointwise,
+        thm:layout_closing, lem:layout_chord_ne_zero,
+        lem:layout_arclength_h2, lem:node_map_add_period,
+        thm:arclength_h2_converse, lem:arclength_h2_converse_at}
+  Let $\kappa$ satisfy \cref{def:mixed_sign_hyperbolic_four_vertex} — in
+  particular the minima may be \emph{arbitrarily negative}.  Then there are
+  $z$ and $\Psi$ with
+  \[
+    \Psi\in C^1,\quad \Psi'>0,\quad
+    \Psi(t+2\pi)=\Psi(t)+2\pi,\quad
+    \texttt{IsSimpleClosed}\;z,\quad
+    \texttt{Realizes}\,(-1)\;z\;(\kappa\circ\Psi).
+  \]
+  The third conjunct — $\Psi$ is a \emph{degree-one} circle map — is the
+  datum \cref{chap:hyperbolic_converse} consumes
+  (\cref{thm:realizes_of_reparam_degree_one}) to remove the
+  reparametrization.  Since $H^2$ has no metric rescaling, the period is
+  co-constructed rather than normalized (mirroring
+  \cref{lem:realizes_h2_of_reparam}).
+\end{theorem}
+
+\begin{proof}
+  \uses{lem:exists_abab_levels, thm:exists_bicircle_anchor,
+        lem:bicircle_L1_reparam_pointwise, thm:layout_closing,
+        lem:layout_chord_ne_zero, lem:layout_arclength_h2,
+        lem:node_map_add_period, thm:arclength_h2_converse,
+        lem:arclength_h2_converse_at}
+  \leanok
+  Split the hypothesis disjunction.  \emph{Constant branch}:
+  $\kappa\equiv c>1$; the explicit escape-velocity hyperbolic circle
+  (\texttt{hyperbolicCircle\_realizes}) with $\Psi=\mathrm{id}$.
+  \emph{Four-vertex branch}: choose convex clean levels $1<a<b$ interior to
+  the overlap gap above $\max 1$ (midpoints of the window halves around the
+  hypothesis value $c$) and $(a,b,a,b)$ crossing data by
+  \cref{lem:exists_abab_levels}; fix the symbolic anchor $(h^*,L^*)$ by
+  \cref{thm:exists_bicircle_anchor} and a global bound $M$.  Quantify the
+  reparam-uniform constants \emph{first}: the margin $\mu$
+  (\cref{lem:layout_chord_ne_zero}) and $C_1,\varepsilon_0$
+  (\cref{thm:layout_closing}); set
+  $\varepsilon=\min(\varepsilon_0,\mu/C_1)$ — breaking the
+  reparam/$\varepsilon$ fixed point.  Build the plateau-pointwise $h_1$ at
+  tolerance $\varepsilon$ (\cref{lem:bicircle_L1_reparam_pointwise}), close
+  the flow at some $(w_1^*,w_2^*,t^*)$ (\cref{thm:layout_closing}), transport
+  simplicity (\cref{lem:layout_chord_ne_zero}, since
+  $C_1\varepsilon\le\mu$), and certify
+  $\texttt{ArcLengthH2Curvature}\,(\kappa\circ h_1\circ g_{w^*,t^*})$
+  (\cref{lem:layout_arclength_h2}).  The arc-length converse
+  (\cref{thm:arclength_h2_converse}, at-window form
+  \cref{lem:arclength_h2_converse_at}) produces a simple closed curve
+  realizing $\kappa\circ h_1\circ g_{w^*,t^*}\circ\chi$ with
+  $\chi(u)=(\Lambda/2\pi)u$ the linear window reparametrization.  Set
+  $\Psi=(h_1\circ g_{w^*,t^*})\circ\chi$: it is $C^1$ with positive
+  derivative ($h_1$'s positive derivative witness, positive node density,
+  $\chi'=\Lambda/2\pi>0$), and the three shift laws compose to degree one:
+  $\chi(u+2\pi)=\chi(u)+\Lambda$, then $g(s+\Lambda)=g(s)+2\pi$
+  (\cref{lem:node_map_add_period}), then
+  $h_1(\theta+2\pi)=h_1(\theta)+2\pi$, giving
+  $\Psi(u+2\pi)=\Psi(u)+2\pi$.
+\end{proof}
+
+\begin{corollary}\leanok
+[up-to-reparam form, degree-one datum forgotten]
+  \label{cor:hyperbolic_mixed_converse_family}
+  \lean{Gluck.Hyperbolic.hyperbolicMixedConverse}
+  \uses{thm:hyperbolic_mixed_converse_reparam_deg1}
+  A $\texttt{MixedSignHyperbolicFourVertex}$ profile is realized, up to an
+  orientation-preserving $C^1$ reparametrization, as the geodesic curvature
+  of a simple closed curve in the hyperbolic plane.
+\end{corollary}
+
+\begin{proof}
+  \uses{thm:hyperbolic_mixed_converse_reparam_deg1}
+  \leanok
+  Weakening of \cref{thm:hyperbolic_mixed_converse_reparam_deg1} forgetting
+  the degree-one conjunct.
+\end{proof}
