@@ -9,8 +9,8 @@ import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Analysis.Real.Pi.Bounds
 import Mathlib.Topology.Homotopy.Lifting
 import Mathlib.Tactic
-import Gluck.Closure
-import Gluck.Bicircle
+import Gluck.Euclidean.Closure
+import Gluck.Euclidean.Bicircle
 
 /-!
 # The winding-number argument (topological core)

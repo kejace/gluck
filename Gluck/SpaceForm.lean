@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
 import Gluck.SpaceForm.Converse
+import Gluck.SpaceForm.MixedConverse
 
 /-!
 # The space-form converse to the four-vertex theorem

@@ -3,8 +3,8 @@ Copyright (c) 2026 kejace. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
-import Gluck.SphereMixed
-import Gluck.SpaceForm.ArcLengthH2Exact
+import Gluck.Sphere.Mixed
+import Gluck.Hyperbolic.Exact
 
 /-!
 # The space-form converse, mixed-sign stage (`ε`-generic Dahlberg converse)

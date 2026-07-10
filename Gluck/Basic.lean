@@ -3,21 +3,28 @@ Copyright (c) 2026 kejace. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
-import Gluck.Curve
-import Gluck.Curvature
-import Gluck.Closure
-import Gluck.FourVertex
-import Gluck.ArcLength
-import Gluck.DahlbergStep2
+import Gluck.Euclidean
 import Gluck.Sphere
-import Gluck.SphereMixed
+import Gluck.SpaceForm
+import Gluck.Hyperbolic
 
 /-!
 # Gluck: umbrella import
 
-This file has no content of its own: it re-exports the full `Gluck` development,
-so that `import Gluck` provides every capstone theorem — the Euclidean converses
-to the four vertex theorem `Gluck.gluck_converse` and `Gluck.dahlbergConverse`,
-and the spherical converses `Gluck.sphericalConverse_pos` (positive curvature,
-stage 1) and `Gluck.sphericalConverse` (mixed-sign curvature, stage 2).
+This file has no content of its own: it re-exports the full `Gluck` development
+across all three space forms, so that `import Gluck` provides every capstone
+theorem.
+
+## The converse four-vertex theorems
+
+* **E²** (`Gluck/Euclidean/`): `Gluck.gluck_converse` (positive),
+  `Gluck.dahlbergConverse` (mixed-sign).
+* **S²** (`Gluck/Sphere/`): `Gluck.sphericalConverse_pos` (positive),
+  `Gluck.sphericalConverse` (mixed-sign).
+* **H²** (`Gluck/Hyperbolic/`): `Gluck.hyperbolicConverse_pos` (positive),
+  `Gluck.hyperbolicMixedConverse_exact` (mixed-sign, exact profile).
+
+plus the `ε`-generic unifications (`Gluck/SpaceForm/`):
+`Gluck.SpaceForm.spaceFormConverse_pos` and
+`Gluck.SpaceForm.spaceFormMixedConverse`.
 -/

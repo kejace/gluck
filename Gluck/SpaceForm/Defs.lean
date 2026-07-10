@@ -5,10 +5,10 @@ Authors: kejace
 -/
 import Gluck.Curvature
 import Gluck.Curve
-import Gluck.FourVertex
-import Gluck.Reduction
-import Gluck.Simplicity
-import Gluck.StepReduction
+import Gluck.Euclidean.FourVertex
+import Gluck.Euclidean.Reduction
+import Gluck.Euclidean.Simplicity
+import Gluck.Euclidean.StepReduction
 import Gluck.Winding
 import Mathlib.Analysis.ODE.ExistUnique
 import Mathlib.MeasureTheory.Function.Floor

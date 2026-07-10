@@ -5,10 +5,10 @@ Authors: kejace
 -/
 import Gluck.Curvature
 import Gluck.Curve
-import Gluck.FourVertex
-import Gluck.Reduction
-import Gluck.Simplicity
-import Gluck.StepReduction
+import Gluck.Euclidean.FourVertex
+import Gluck.Euclidean.Reduction
+import Gluck.Euclidean.Simplicity
+import Gluck.Euclidean.StepReduction
 import Gluck.Winding
 import Mathlib.Analysis.ODE.ExistUnique
 import Mathlib.MeasureTheory.Function.Floor
@@ -26,7 +26,7 @@ spherical flow) through the step model, its transport and margin estimates, the
 first-variation expansion of the step error map, the endpoint-winding assembly
 (`spherical_endpoint_winding`), reconstruction and simplicity, to the capstone
 `sphericalConverse_pos` — axiom-clean, no `sorry`. Stage 2 (mixed sign,
-`Gluck/SphereMixed.lean`) consumes the re-signed `stepModel_margins` and the
+`Gluck/Sphere/Mixed.lean`) consumes the re-signed `stepModel_margins` and the
 uniform-in-`κ` Lipschitz witnesses exported here.
 
 The conformal geodesic-curvature law (see the blueprint chapter `Gluck_Sphere.tex`,
