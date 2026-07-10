@@ -82,49 +82,18 @@ lemma sphericalTrajectory_speed {κ : ℝ → ℝ} {R δ : ℝ} (hκc : Continuo
       Function.Periodic
         (fun t => sphericalSpeed κ t (periodicExtension z t)) (2 * π) ∧
       ∀ t, 0 < sphericalSpeed κ t (periodicExtension z t) := by
-  obtain ⟨-, -, -, hZderiv⟩ :=
-    reconstruction_ode hκc hκper hR1 hδ hz hadm hclosed
-  have hadmZ : ∀ t : ℝ, ‖periodicExtension z t‖ ≤ R ∧
-      δ ≤ κ t - ⟪periodicExtension z t,
-        Complex.I * Complex.exp ((t : ℂ) * Complex.I)⟫_ℝ := by
-    intro t
-    have hmem := frac_mem_Ico t
-    have h := hadm _ ⟨hmem.1, hmem.2.le⟩
-    unfold periodicExtension
-    refine ⟨h.1, ?_⟩
-    have hbr := h.2
-    rw [hκper.sub_int_mul_eq, expI_sub_int_mul] at hbr
-    exact hbr
-  have hZdiff : Differentiable ℝ (periodicExtension z) :=
-    fun t => (hZderiv t).differentiableAt
-  have hZc : Continuous (periodicExtension z) := hZdiff.continuous
-  refine ⟨?_, ?_, fun t => ?_⟩
-  · -- continuity: quotient with denominator ≥ 2δ > 0
-    have hexpc : Continuous fun t : ℝ =>
-        Complex.I * Complex.exp ((t : ℂ) * Complex.I) :=
-      continuous_const.mul (Complex.continuous_exp.comp
-        (Complex.continuous_ofReal.mul continuous_const))
-    have hnum : Continuous fun t : ℝ => 1 + ‖periodicExtension z t‖ ^ 2 :=
-      continuous_const.add (hZc.norm.pow 2)
-    have hden : Continuous fun t : ℝ => 2 * (κ t - ⟪periodicExtension z t,
-        Complex.I * Complex.exp ((t : ℂ) * Complex.I)⟫_ℝ) :=
-      continuous_const.mul (hκc.sub (hZc.inner hexpc))
-    unfold sphericalSpeed
-    exact hnum.div hden fun t =>
-      ne_of_gt (by have := (hadmZ t).2; linarith)
-  · -- periodicity: all three inputs are `2π`-periodic
-    intro t
-    change sphericalSpeed κ (t + 2 * π) (periodicExtension z (t + 2 * π))
-      = sphericalSpeed κ t (periodicExtension z t)
-    have h := sphericalSpeed_sub_int_mul hκper 1 (t + 2 * π)
-      (periodicExtension z t)
-    rw [show t + 2 * π - ((1 : ℤ) : ℝ) * (2 * π) = t by push_cast; ring] at h
-    rw [periodicExtension_periodic z t]
-    exact h.symm
-  · -- positivity: numerator ≥ 1, denominator ≥ 2δ
-    have h := (hadmZ t).2
-    unfold sphericalSpeed
-    exact div_pos (by positivity) (by linarith)
+  have hz' : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
+      HasDerivWithinAt z (SpaceForm.truncatedField 1 κ R δ θ (z θ))
+        (Set.Icc 0 (2 * π)) θ := by
+    simpa only [truncatedField, SpaceForm.truncatedField, truncatedSpeed,
+      SpaceForm.truncatedSpeed, one_mul] using hz
+  have hadm' : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖z θ‖ ≤ R ∧
+      δ ≤ κ θ - 1 * ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ := by
+    simpa only [one_mul] using hadm
+  simpa only [sphericalSpeed, SpaceForm.spaceFormSpeed, one_mul, periodicExtension,
+    SpaceForm.periodicExtension] using
+    SpaceForm.spaceFormTrajectory_speed (ε := 1) (by norm_num) hκc hκper hR1 hδ hz' hadm'
+      hclosed
 
 /-- **Simplicity is translation-invariant.** Project-local mirror lemma (the
 Euclidean files are frozen): adding a constant to a simple closed curve gives
@@ -148,30 +117,18 @@ lemma sphericalTrajectory_eq_reconstruct {κ : ℝ → ℝ} {R δ : ℝ}
     (hclosed : z (2 * π) = z 0) :
     ∀ t, periodicExtension z t = periodicExtension z 0
       + reconstruct (fun s => sphericalSpeed κ s (periodicExtension z s)) t := by
-  obtain ⟨-, -, -, hZderiv⟩ :=
-    reconstruction_ode hκc hκper hR1 hδ hz hadm hclosed
-  obtain ⟨hρc, -, -⟩ :=
-    sphericalTrajectory_speed hκc hκper hR1 hδ hz hadm hclosed
-  set ρ : ℝ → ℝ := fun s => sphericalSpeed κ s (periodicExtension z s) with hρ
-  have h0 : reconstruct ρ 0 = 0 := by
-    unfold reconstruct
-    exact intervalIntegral.integral_same
-  have hdiff : ∀ t, HasDerivAt
-      (fun u => periodicExtension z u - reconstruct ρ u) 0 t := by
-    intro t
-    have h := (hZderiv t).sub (hasDerivAt_reconstruct hρc t)
-    have hval : ρ t • Complex.exp ((t : ℂ) * Complex.I)
-        - Complex.exp ((t : ℂ) * Complex.I) * (ρ t : ℂ) = 0 := by
-      rw [Complex.real_smul]; ring
-    rwa [hval] at h
-  have hconst : ∀ t, periodicExtension z t - reconstruct ρ t
-      = periodicExtension z 0 - reconstruct ρ 0 := fun t =>
-    is_const_of_deriv_eq_zero (fun u => (hdiff u).differentiableAt)
-      (fun u => (hdiff u).deriv) t 0
-  intro t
-  have h := hconst t
-  rw [h0] at h
-  linear_combination h
+  have hz' : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
+      HasDerivWithinAt z (SpaceForm.truncatedField 1 κ R δ θ (z θ))
+        (Set.Icc 0 (2 * π)) θ := by
+    simpa only [truncatedField, SpaceForm.truncatedField, truncatedSpeed,
+      SpaceForm.truncatedSpeed, one_mul] using hz
+  have hadm' : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖z θ‖ ≤ R ∧
+      δ ≤ κ θ - 1 * ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ := by
+    simpa only [one_mul] using hadm
+  simpa only [sphericalSpeed, SpaceForm.spaceFormSpeed, one_mul, periodicExtension,
+    SpaceForm.periodicExtension] using
+    SpaceForm.spaceFormTrajectory_eq_reconstruct (ε := 1) (by norm_num) hκc hκper hR1 hδ
+      hz' hadm' hclosed
 
 /-- **Simplicity of the closing trajectory.** In the hypothesis form of
 `reconstruction_ode`, the periodic extension of an admissible closed
@@ -189,24 +146,17 @@ lemma spherical_simplicity {κ : ℝ → ℝ} {R δ : ℝ}
       δ ≤ κ θ - ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
     (hclosed : z (2 * π) = z 0) :
     IsSimpleClosed (periodicExtension z) := by
-  obtain ⟨hρc, hρper, hρpos⟩ :=
-    sphericalTrajectory_speed hκc hκper hR1 hδ hz hadm hclosed
-  have heq :=
-    sphericalTrajectory_eq_reconstruct hκc hκper hR1 hδ hz hadm hclosed
-  set ρ : ℝ → ℝ := fun s => sphericalSpeed κ s (periodicExtension z s) with hρ
-  have hE : errorVector ρ = 0 := by
-    have h2 := heq (2 * π)
-    have hp : periodicExtension z (2 * π) = periodicExtension z 0 := by
-      have h := periodicExtension_periodic z 0
-      rwa [zero_add] at h
-    rw [hp] at h2
-    change reconstruct ρ (2 * π) = 0
-    linear_combination -h2
-  have hsimple := isSimpleClosed_reconstruct hρc hρper hρpos hE
-  have hfun : periodicExtension z
-      = fun t => periodicExtension z 0 + reconstruct ρ t := funext heq
-  rw [hfun]
-  exact isSimpleClosed_const_add hsimple _
+  have hz' : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
+      HasDerivWithinAt z (SpaceForm.truncatedField 1 κ R δ θ (z θ))
+        (Set.Icc 0 (2 * π)) θ := by
+    simpa only [truncatedField, SpaceForm.truncatedField, truncatedSpeed,
+      SpaceForm.truncatedSpeed, one_mul] using hz
+  have hadm' : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖z θ‖ ≤ R ∧
+      δ ≤ κ θ - 1 * ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ := by
+    simpa only [one_mul] using hadm
+  change IsSimpleClosed (SpaceForm.periodicExtension z)
+  exact SpaceForm.spaceForm_simplicity (ε := 1) (by norm_num) hκc hκper hR1 hδ hz' hadm'
+    hclosed
 
 /-- The spherical realization predicate is the `ε = +1` instance of the
 `ε`-generic space-form predicate (the metric factor `1 + ε‖z‖²` becomes `1 + ‖z‖²`). -/

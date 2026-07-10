@@ -412,7 +412,7 @@ private lemma re_hZderiv {ε : ℝ} {κ : ℝ → ℝ} {R δ : ℝ}
 
 /-- Trajectory speed of a closed admissible trajectory: continuous,
 `2π`-periodic and strictly positive. -/
-private lemma spaceFormTrajectory_speed {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ} {R δ : ℝ}
+lemma spaceFormTrajectory_speed {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ} {R δ : ℝ}
     (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π)) (hR1 : R < 1) (hδ : 0 < δ)
     {z : ℝ → ℂ}
     (hz : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
@@ -457,7 +457,7 @@ private lemma spaceFormTrajectory_speed {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ 
     exact div_pos hnum (by linarith)
 
 /-- The closing trajectory is a translated reconstruction curve. -/
-private lemma spaceFormTrajectory_eq_reconstruct {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ}
+lemma spaceFormTrajectory_eq_reconstruct {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ}
     {R δ : ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π)) (hR1 : R < 1)
     (hδ : 0 < δ) {z : ℝ → ℂ}
     (hz : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
@@ -503,7 +503,7 @@ lemma isSimpleClosed_const_add {γ : ℝ → ℂ} (hγ : IsSimpleClosed γ) (w :
 /-- **Simplicity of the closing trajectory.** The periodic extension of a
 closed admissible truncated-field trajectory is a simple closed curve.
 (Transport of `spherical_simplicity`.) -/
-private lemma spaceForm_simplicity {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ} {R δ : ℝ}
+lemma spaceForm_simplicity {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ} {R δ : ℝ}
     (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π)) (hR1 : R < 1)
     (hδ : 0 < δ) {z : ℝ → ℂ}
     (hz : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
