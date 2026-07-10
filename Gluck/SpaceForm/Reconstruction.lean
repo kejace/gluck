@@ -348,10 +348,31 @@ private lemma reconstruction_eqOn {z : ℝ → ℂ}
     · push_cast; linarith [ht.2])
   simpa using h
 
-/-- **Reconstruction.** A closed (`z(2π) = z(0)`) trajectory of the truncated
-field `F_{ε,κ,R,δ}` that stays admissible (`‖z θ‖ ≤ R`, `δ ≤ κ θ − ε⟪z θ, …⟫`)
-extends periodically to a closed curve realizing `κ`. (`ε`-generic transport of
-`reconstruction_ode`, stated at the consumed-interface level.) -/
+/-- **Strong reconstruction.** The periodic extension of an admissible closed trajectory realizes
+`κ`, agrees with the original trajectory, and satisfies the true reconstruction ODE globally. -/
+lemma reconstruction_ode {ε : ℝ} {κ : ℝ → ℝ} {R δ : ℝ} (hε : |ε| ≤ 1)
+    (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
+    (hR1 : R < 1) (hδ : 0 < δ) {z : ℝ → ℂ}
+    (hz : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
+      HasDerivWithinAt z (truncatedField ε κ R δ θ (z θ)) (Set.Icc 0 (2 * π)) θ)
+    (hadm : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖z θ‖ ≤ R ∧
+      δ ≤ κ θ - ε * ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
+    (hclosed : z (2 * π) = z 0) :
+    Set.EqOn (periodicExtension z) z (Set.Icc 0 (2 * π)) ∧
+      IsClosedCurve (periodicExtension z) ∧ Realizes ε (periodicExtension z) κ ∧
+      ∀ t, HasDerivAt (periodicExtension z)
+        (spaceFormSpeed ε κ t (periodicExtension z t) •
+          Complex.exp ((t : ℂ) * Complex.I)) t := by
+  have hadmZ := reconstruction_extended_admissible hκper hadm
+  have hztrue := reconstruction_hasDerivWithinAt_true hz hadm
+  have hshifted := reconstruction_shifted_hasDerivWithinAt hκper hztrue
+  have hZeq := reconstruction_extension_eq_shifted hclosed
+  have hZderiv := reconstruction_hasDerivAt hshifted hZeq
+  have hspeed_pos := reconstruction_speed_pos hε hR1 hδ hadmZ
+  exact ⟨reconstruction_eqOn hZeq, periodicExtension_periodic z,
+    reconstruction_realizes_aux hκc hR1 hδ hadmZ hspeed_pos hZderiv, hZderiv⟩
+
+/-- **Reconstruction.** A closed admissible trajectory extends to a closed curve realizing `κ`. -/
 lemma reconstruction_realizes {ε : ℝ} {κ : ℝ → ℝ} {R δ : ℝ} (hε : |ε| ≤ 1)
     (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
     (hR1 : R < 1) (hδ : 0 < δ) {z : ℝ → ℂ}
@@ -361,14 +382,8 @@ lemma reconstruction_realizes {ε : ℝ} {κ : ℝ → ℝ} {R δ : ℝ} (hε : 
       δ ≤ κ θ - ε * ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
     (hclosed : z (2 * π) = z 0) :
     ∃ Z : ℝ → ℂ, IsClosedCurve Z ∧ Set.EqOn Z z (Set.Icc 0 (2 * π)) ∧ Realizes ε Z κ := by
-  have hadmZ := reconstruction_extended_admissible hκper hadm
-  have hztrue := reconstruction_hasDerivWithinAt_true hz hadm
-  have hshifted := reconstruction_shifted_hasDerivWithinAt hκper hztrue
-  have hZeq := reconstruction_extension_eq_shifted hclosed
-  have hZderiv := reconstruction_hasDerivAt hshifted hZeq
-  have hspeed_pos := reconstruction_speed_pos hε hR1 hδ hadmZ
-  exact ⟨periodicExtension z, periodicExtension_periodic z,
-    reconstruction_eqOn hZeq,
-    reconstruction_realizes_aux hκc hR1 hδ hadmZ hspeed_pos hZderiv⟩
+  obtain ⟨hEq, hclosedZ, hreal, -⟩ :=
+    reconstruction_ode hε hκc hκper hR1 hδ hz hadm hclosed
+  exact ⟨periodicExtension z, hclosedZ, hEq, hreal⟩
 
 end Gluck.SpaceForm
