@@ -21,9 +21,16 @@ jobs:
       # (gitignored), so regenerate it from source first.
       - name: Install leanblueprint (for the declaration list)
         run: |
-          sudo apt-get update && sudo apt-get install -y graphviz libgraphviz-dev
+          # texlive-binaries provides kpsewhich: without it plasTeX silently
+          # drops the chapter \input's and lean_decls comes out near-empty,
+          # making the checkdecls gate pass vacuously.
+          sudo apt-get update && sudo apt-get install -y graphviz libgraphviz-dev texlive-binaries
           pip install leanblueprint
       - name: Generate blueprint declaration list
-        run: leanblueprint web
+        run: |
+          leanblueprint web
+          n=$(wc -l < blueprint/lean_decls)
+          echo "blueprint pins: $n"
+          test "$n" -ge 200 || { echo "::error::lean_decls has only $n entries — blueprint build under-produced"; exit 1; }
       - name: Check blueprint pins against the Lean environment
         run: lake exe checkdecls blueprint/lean_decls
