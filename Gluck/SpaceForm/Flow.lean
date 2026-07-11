@@ -3,6 +3,7 @@ Copyright (c) 2026 kejace. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
+import ForMathlib.Analysis.Normed.Field.DivSubDiv
 import Gluck.SpaceForm.Defs
 
 /-!
@@ -79,26 +80,13 @@ lemma truncatedSpeed_le {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ} {R δ �
 have first numerator bounded in norm by `B`, differ by at most `dn`, and have
 denominators `≥ δ > 0`
 differing by at most `dd`, the quotients differ by at most `dn/δ + B·dd/δ²`.
-Model-agnostic real-analysis helper shared by the reconstruction flows. -/
+Model-agnostic real-analysis helper shared by the reconstruction flows;
+this is `_root_.abs_div_sub_div_le` (`ForMathlib/Analysis/Normed/Field/DivSubDiv.lean`). -/
 lemma abs_div_sub_div_le {n₁ n₂ d₁ d₂ δ B dn dd : ℝ} (hδ : 0 < δ)
     (hd₁ : δ ≤ d₁) (hd₂ : δ ≤ d₂) (hn₁B : |n₁| ≤ B)
     (hn : |n₁ - n₂| ≤ dn) (hd : |d₁ - d₂| ≤ dd) :
-    |n₁ / d₁ - n₂ / d₂| ≤ dn / δ + B * dd / δ ^ 2 := by
-  have h₁ : 0 < d₁ := hδ.trans_le hd₁
-  have h₂ : 0 < d₂ := hδ.trans_le hd₂
-  have hdn0 : 0 ≤ dn := (abs_nonneg _).trans hn
-  have hdd0 : 0 ≤ dd := (abs_nonneg _).trans hd
-  have hB0 : 0 ≤ B := (abs_nonneg _).trans hn₁B
-  have key : n₁ / d₁ - n₂ / d₂ = (n₁ - n₂) / d₂ + n₁ * (d₂ - d₁) / (d₁ * d₂) := by
-    field_simp; ring
-  rw [key]
-  refine (abs_add_le _ _).trans (add_le_add ?_ ?_)
-  · rw [abs_div, abs_of_pos h₂]
-    exact div_le_div₀ hdn0 hn hδ hd₂
-  · rw [abs_div, abs_mul, abs_of_pos (mul_pos h₁ h₂)]
-    refine div_le_div₀ (mul_nonneg hB0 hdd0) ?_ (by positivity) ?_
-    · exact mul_le_mul hn₁B (by rw [abs_sub_comm]; exact hd) (abs_nonneg _) hB0
-    · rw [sq]; exact mul_le_mul hd₁ hd₂ hδ.le h₁.le
+    |n₁ / d₁ - n₂ / d₂| ≤ dn / δ + B * dd / δ ^ 2 :=
+  _root_.abs_div_sub_div_le hδ hd₁ hd₂ hn₁B hn hd
 
 /-- **Truncated speed is Lipschitz in `z`, uniformly in `θ`** — the key
 unconditional estimate powering one global Picard–Lindelöf application on

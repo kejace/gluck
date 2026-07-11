@@ -3,6 +3,7 @@ Copyright (c) 2026 kejace. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
+import ForMathlib.Analysis.ODE.GronwallL1
 import Gluck.SpaceForm.Flow
 
 /-!
@@ -124,60 +125,6 @@ lemma truncatedField_solution_unique {ε : ℝ} {κ : ℝ → ℝ} {R δ T : ℝ
     (HasDerivWithinAt.continuousOn hg₂) (upgrade hg₂)
     (fun t _ => Set.mem_univ _) h0
 
-/-- FTC-1 for a primitive with base point `0` and an integrand merely
-continuous on `Icc 0 T`: at every interior time the primitive differentiates
-to the integrand. Project-local packaging of
-`intervalIntegral.integral_hasDerivAt_right` (which needs the measurability
-and continuity data at the point). -/
-private lemma hasDerivAt_primitive_of_continuousOn {T : ℝ} {f : ℝ → ℝ}
-    (hf : ContinuousOn f (Set.Icc 0 T)) {t : ℝ} (ht : t ∈ Set.Ioo (0 : ℝ) T) :
-    HasDerivAt (fun x => ∫ s in (0 : ℝ)..x, f s) (f t) t := by
-  have hint : IntervalIntegrable f MeasureTheory.volume 0 t :=
-    (hf.mono (by
-      rw [Set.uIcc_of_le ht.1.le]
-      exact Set.Icc_subset_Icc_right ht.2.le)).intervalIntegrable
-  have hmeas : StronglyMeasurableAtFilter f (nhds t) :=
-    (hf.mono Set.Ioo_subset_Icc_self).stronglyMeasurableAtFilter isOpen_Ioo t ht
-  have hcont : ContinuousAt f t :=
-    (hf t (Set.Ioo_subset_Icc_self ht)).continuousAt (Icc_mem_nhds ht.1 ht.2)
-  exact intervalIntegral.integral_hasDerivAt_right hint hmeas hcont
-
-/-- The primitive of a function continuous on `Icc 0 T` is continuous there.
-Project-local packaging of `intervalIntegral.continuousOn_primitive_interval`. -/
-private lemma continuousOn_primitive_Icc {T : ℝ} (hT : 0 ≤ T) {f : ℝ → ℝ}
-    (hf : ContinuousOn f (Set.Icc 0 T)) :
-    ContinuousOn (fun x => ∫ s in (0 : ℝ)..x, f s) (Set.Icc 0 T) := by
-  have h : MeasureTheory.IntegrableOn f (Set.uIcc 0 T) := by
-    rw [Set.uIcc_of_le hT]
-    exact hf.integrableOn_compact isCompact_Icc
-  have h2 := intervalIntegral.continuousOn_primitive_interval h
-  rwa [Set.uIcc_of_le hT] at h2
-
-/-- Derivative of the Grönwall weight `t ↦ exp(−L·t)·u t − G t` from the
-derivatives of `u` and `G`. Pure product/chain rule, isolated from the
-primitive data of `u`, `G`. -/
-private lemma gronwall_weight_hasDerivAt {L : ℝ} {u G : ℝ → ℝ} {du dG t : ℝ}
-    (hu : HasDerivAt u du t) (hG : HasDerivAt G dG t) :
-    HasDerivAt (fun s => Real.exp (-(L * s)) * u s - G s)
-      (Real.exp (-(L * t)) * (-L) * u t + Real.exp (-(L * t)) * du - dG) t := by
-  have hexp : HasDerivAt (fun x : ℝ => Real.exp (-(L * x)))
-      (Real.exp (-(L * t)) * (-L)) t := by
-    have h1 : HasDerivAt (fun x : ℝ => -(L * x)) (-L) t := by
-      simpa [neg_mul] using (hasDerivAt_id t).const_mul (-L)
-    exact h1.exp
-  exact (hexp.mul hu).sub hG
-
-/-- The Grönwall weight has nonpositive derivative: `exp(−L·t)·(−L)·u + exp(−L·t)·(L·d + g) − g ≤ 0`
-whenever `d t ≤ u t`, `0 ≤ g t`, `0 ≤ L` and `0 ≤ t`. Because `exp(−L·t) ≤ 1`
-the surviving `g`-term is `−(1 − exp)·g ≤ 0` and the `L`-term is `−exp·L·(u − d) ≤ 0`. -/
-private lemma gronwall_weight_deriv_nonpos {L t T : ℝ} {d u g : ℝ → ℝ}
-    (hL : 0 ≤ L) (ht : t ∈ Set.Ioo (0 : ℝ) T) (hdle : d t ≤ u t) (hgt : 0 ≤ g t) :
-    Real.exp (-(L * t)) * (-L) * u t + Real.exp (-(L * t)) * (L * d t + g t) - g t ≤ 0 := by
-  have hexp_pos : 0 < Real.exp (-(L * t)) := Real.exp_pos _
-  have hexp_le : Real.exp (-(L * t)) ≤ 1 := Real.exp_le_one_iff.mpr (by nlinarith [ht.1])
-  nlinarith [mul_nonneg (mul_nonneg hexp_pos.le hL) (sub_nonneg.mpr hdle),
-    mul_nonneg (sub_nonneg.mpr hexp_le) hgt]
-
 /-- Monotonicity of the primitive of a nonnegative continuous integrand:
 `∫₀ᵗ g ≤ ∫₀ᵀ g` for `t ∈ [0, T]`, since the tail `∫ₜᵀ g ≥ 0`. -/
 private lemma intervalIntegral_le_integral_Icc_of_nonneg {T : ℝ} {g : ℝ → ℝ}
@@ -193,43 +140,15 @@ private lemma intervalIntegral_le_integral_Icc_of_nonneg {T : ℝ} {g : ℝ → 
     intervalIntegral.integral_nonneg ht.2 (fun s hs => hg0 s ⟨ht.1.trans hs.1, hs.2⟩)
   linarith [hsplit.symm.le]
 
-/-- Final unwind of the `L¹` Grönwall argument: from antitonicity of the weight
-`v = exp(−L·t)·u − G` and `v 0 = d₀` one gets `exp(−L·t)·u t ≤ d₀ + ∫₀ᵀ g`, and
-clearing the exponential and monotone-bounding `t ≤ T` gives the stated bound. -/
-private lemma gronwall_L1_unwind {T L d₀ : ℝ} (hT : 0 ≤ T) (hL : 0 ≤ L) (hd₀ : 0 ≤ d₀)
-    {d g u G v : ℝ → ℝ}
-    (hu : u = fun t => d₀ + ∫ s in (0 : ℝ)..t, (L * d s + g s))
-    (hG : G = fun t => ∫ s in (0 : ℝ)..t, g s)
-    (hv : v = fun t => Real.exp (-(L * t)) * u t - G t)
-    (hgc : ContinuousOn g (Set.Icc 0 T)) (hg0 : ∀ t ∈ Set.Icc (0 : ℝ) T, 0 ≤ g t)
-    (hineq : ∀ t ∈ Set.Icc (0 : ℝ) T, d t ≤ u t) (hmono : AntitoneOn v (Set.Icc 0 T))
-    {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) T) :
-    d t ≤ Real.exp (L * T) * (d₀ + ∫ s in (0 : ℝ)..T, g s) := by
-  have hv0 : v t ≤ v 0 := hmono (Set.left_mem_Icc.mpr hT) ht ht.1
-  have hv0eq : v 0 = d₀ := by simp [hv, hu, hG]
-  have hGle := intervalIntegral_le_integral_Icc_of_nonneg hgc hg0 ht
-  have hGT0 : 0 ≤ ∫ s in (0 : ℝ)..T, g s := intervalIntegral.integral_nonneg hT hg0
-  have h1 : Real.exp (-(L * t)) * u t ≤ d₀ + ∫ s in (0 : ℝ)..T, g s := by
-    have h := hv0
-    rw [hv0eq] at h
-    simp only [hv, hG] at h
-    linarith
-  have h2 : u t ≤ Real.exp (L * t) * (d₀ + ∫ s in (0 : ℝ)..T, g s) := by
-    have h3 := mul_le_mul_of_nonneg_left h1 (Real.exp_nonneg (L * t))
-    rwa [← mul_assoc, ← Real.exp_add, add_neg_cancel, Real.exp_zero, one_mul] at h3
-  have h4 : Real.exp (L * t) ≤ Real.exp (L * T) :=
-    Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left ht.2 hL)
-  calc d t ≤ u t := hineq t ht
-    _ ≤ Real.exp (L * t) * (d₀ + ∫ s in (0 : ℝ)..T, g s) := h2
-    _ ≤ Real.exp (L * T) * (d₀ + ∫ s in (0 : ℝ)..T, g s) :=
-        mul_le_mul_of_nonneg_right h4 (by linarith)
-
 /-- **Grönwall with `L¹` drive.** If a nonnegative continuous `d` satisfies
 the integral inequality `d t ≤ d₀ + ∫₀ᵗ (L·d + g)` on `[0, T]` with `g ≥ 0`
 continuous, then `d t ≤ exp(L·T)·(d₀ + ∫₀ᵀ g)` on `[0, T]`. Project-local
 because Mathlib's `gronwallBound` lemmas take a *constant* drive `ε`, while
 here the drive is only small in `L¹` — exactly the regime of the
-Dahlberg-style reparametrization. (Blueprint `lem:gronwall_L1_drive`.) -/
+Dahlberg-style reparametrization. (Blueprint `lem:gronwall_L1_drive`.)
+
+Uniform-in-`t` specialisation of the pointwise Grönwall–Bellman inequality
+`le_exp_mul_of_le_add_intervalIntegral` (`ForMathlib/Analysis/ODE/GronwallL1.lean`). -/
 lemma gronwall_L1_drive {T L d₀ : ℝ} (hT : 0 ≤ T) (hL : 0 ≤ L) (hd₀ : 0 ≤ d₀)
     {d g : ℝ → ℝ} (hdc : ContinuousOn d (Set.Icc 0 T))
     (hgc : ContinuousOn g (Set.Icc 0 T))
@@ -239,33 +158,17 @@ lemma gronwall_L1_drive {T L d₀ : ℝ} (hT : 0 ≤ T) (hL : 0 ≤ L) (hd₀ : 
       d t ≤ d₀ + ∫ s in (0 : ℝ)..t, (L * d s + g s)) :
     ∀ t ∈ Set.Icc (0 : ℝ) T,
       d t ≤ Real.exp (L * T) * (d₀ + ∫ s in (0 : ℝ)..T, g s) := by
-  have hhc : ContinuousOn (fun s => L * d s + g s) (Set.Icc 0 T) :=
-    (continuousOn_const.mul hdc).add hgc
-  set u : ℝ → ℝ := fun t => d₀ + ∫ s in (0 : ℝ)..t, (L * d s + g s) with hu
-  set G : ℝ → ℝ := fun t => ∫ s in (0 : ℝ)..t, g s with hG
-  set v : ℝ → ℝ := fun t => Real.exp (-(L * t)) * u t - G t with hv
-  have huc : ContinuousOn u (Set.Icc 0 T) :=
-    continuousOn_const.add (continuousOn_primitive_Icc hT hhc)
-  have hGc : ContinuousOn G (Set.Icc 0 T) := continuousOn_primitive_Icc hT hgc
-  have hvc : ContinuousOn v (Set.Icc 0 T) := by
-    refine ContinuousOn.sub (ContinuousOn.mul ?_ huc) hGc
-    exact (Real.continuous_exp.comp (continuous_const.mul continuous_id).neg).continuousOn
-  have hvderiv : ∀ t ∈ Set.Ioo (0 : ℝ) T,
-      HasDerivAt v (Real.exp (-(L * t)) * (-L) * u t
-        + Real.exp (-(L * t)) * (L * d t + g t) - g t) t := fun t ht =>
-    gronwall_weight_hasDerivAt ((hasDerivAt_primitive_of_continuousOn hhc ht).const_add d₀)
-      (hasDerivAt_primitive_of_continuousOn hgc ht)
-  have hmono : AntitoneOn v (Set.Icc 0 T) := by
-    refine antitoneOn_of_deriv_nonpos (convex_Icc 0 T) hvc ?_ ?_
-    · intro t ht
-      rw [interior_Icc] at ht
-      exact (hvderiv t ht).differentiableAt.differentiableWithinAt
-    · intro t ht
-      rw [interior_Icc] at ht
-      rw [(hvderiv t ht).deriv]
-      exact gronwall_weight_deriv_nonpos hL ht (hineq t ⟨ht.1.le, ht.2.le⟩)
-        (hg0 t ⟨ht.1.le, ht.2.le⟩)
-  exact fun t ht => gronwall_L1_unwind hT hL hd₀ hu hG hv hgc hg0 hineq hmono ht
+  intro t ht
+  have h1 := le_exp_mul_of_le_add_intervalIntegral hT hL hdc hgc hg0 hineq t ht
+  have hGle := intervalIntegral_le_integral_Icc_of_nonneg hgc hg0 ht
+  have hGt0 : 0 ≤ ∫ s in (0 : ℝ)..t, g s :=
+    intervalIntegral.integral_nonneg ht.1 fun s hs => hg0 s ⟨hs.1, hs.2.trans ht.2⟩
+  have hexp : Real.exp (L * (t - 0)) ≤ Real.exp (L * T) := by
+    rw [sub_zero]
+    exact Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left ht.2 hL)
+  calc d t ≤ Real.exp (L * (t - 0)) * (d₀ + ∫ s in (0 : ℝ)..t, g s) := h1
+    _ ≤ Real.exp (L * T) * (d₀ + ∫ s in (0 : ℝ)..T, g s) :=
+        mul_le_mul hexp (by linarith) (by linarith) (Real.exp_nonneg _)
 
 /-- Continuity of the composed field `s ↦ F(κ, s, z s)` along a continuous
 trajectory `z`, from joint continuity of the truncated field. The base function
