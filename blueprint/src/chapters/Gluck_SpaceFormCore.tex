@@ -14,8 +14,9 @@
 %   Gluck/SpaceForm/FirstVariation.lean — stepError_expansion, stepError_coeff_ne_zero
 %
 % This is the spherical flow engine of chap:sphere transported to a sign
-% parameter ε ∈ {+1, −1} (ambient curvature K = ε): ε = +1 recovers S²
-% verbatim, ε = −1 is the Poincaré-disk model of H². The model-agnostic step
+% parameter ε ∈ {+1, −1, 0} (ambient curvature K = ε): ε = +1 recovers S²
+% verbatim, ε = −1 is the Poincaré-disk model of H², and ε = 0 is the flat
+% Euclidean plane in the conformal gauge λ = 2. The model-agnostic step
 % machinery (stepCurvature, exists_step_L1_reparam, the FirstVariation frame)
 % is REUSED from Gluck/Sphere/* via imports; only the metric-carrying layers
 % are re-derived with the ε parameter.
@@ -24,12 +25,14 @@
 
 This chapter generalizes the spherical engine of \cref{chap:sphere} over the
 \emph{ambient curvature sign} $\varepsilon = \operatorname{sign} K \in
-\{+1,-1\}$. Both constant-curvature models live in the open unit disk
+\{+1,-1,0\}$. All three constant-curvature models live in the open unit disk
 $\{|z|<1\}\subseteq\mathbb C$ in the tangent-angle gauge: the sphere
-$S^2$ ($K=+1$, round metric $4/(1+|z|^2)^2$) is $\varepsilon=+1$, and the
+$S^2$ ($K=+1$, round metric $4/(1+|z|^2)^2$) is $\varepsilon=+1$, the
 hyperbolic plane $H^2$ ($K=-1$, Poincar\'e metric $4/(1-|z|^2)^2$) is
-$\varepsilon=-1$. The single unifying object is the \emph{space-form gauge
-speed}
+$\varepsilon=-1$, and the Euclidean plane $E^2$ ($K=0$, flat conformal
+metric $\lambda=2$, so that the disk-gauge curvature is half the Euclidean
+one) is $\varepsilon=0$. The single unifying object is the \emph{space-form
+gauge speed}
 \[
   q_{\varepsilon,\kappa}(\theta,z)
   \;=\;\frac{1+\varepsilon\|z\|^2}
@@ -67,12 +70,18 @@ Three $\varepsilon$-specific phenomena organize the transport:
   (\cref{lem:spaceform_denom_pos}) — most of the flow layer needs only
   $|\varepsilon|\le1$, not the sign. The truncated flow clamps this
   denominator at $\delta$ and the norm at $R$, exactly as on the sphere.
-\item \emph{The escape threshold.} Where the admissibility lower bound is
-  \emph{established} per model, the sign enters: for $\varepsilon=+1$
-  positivity of $\kappa$ suffices, while for $\varepsilon=-1$ the four-vertex
-  hypothesis (\cref{def:spaceform_four_vertex}) demands the escape-velocity
-  bound $\kappa>1$ — geodesic circles in $H^2$ have curvature
-  $\coth\rho>1$, and curves with $\kappa\le1$ never close.
+\item \emph{The confinement threshold.} Where the admissibility lower bound
+  is \emph{established} per model, the sign enters, through the single
+  uniform threshold $(1-\varepsilon)/2$: for $\varepsilon=+1$ it is $0$
+  (positivity of $\kappa$ suffices), for $\varepsilon=-1$ it is $1$ (the
+  escape-velocity bound — geodesic circles in $H^2$ have curvature
+  $\coth\rho>1$, and curves with $\kappa\le1$ never close), and for
+  $\varepsilon=0$ it is $1/2$ (the Euclidean circle of disk-gauge curvature
+  $c$ has coordinate radius $1/(2c)$, which fits in the unit disk exactly
+  when $c>1/2$). The four-vertex hypothesis
+  (\cref{def:spaceform_four_vertex}) carries this threshold, and the
+  centered radius clears the disk precisely above it
+  (\cref{lem:centered_radius_spaceform_props}).
 \item \emph{No absolute floor on the bracket scale.} The bracket value at the
   level-$c$ model circle is $B=c+\varepsilon r^\ast=\sqrt{c^2+\varepsilon}$
   (\cref{lem:centered_radius_spaceform_props}). For $S^2$ this is
@@ -84,7 +93,12 @@ Three $\varepsilon$-specific phenomena organize the transport:
   coefficient $\eta(\varepsilon)=2\varepsilon r^\ast/(c^2+\varepsilon)$
   is positive for $\varepsilon=+1$ but \emph{negative} for
   $\varepsilon=-1$; the winding argument downstream consumes only
-  $\eta\ne0$ (\cref{lem:spaceform_step_error_coeff_ne_zero}).
+  $\eta\ne0$ (\cref{lem:spaceform_step_error_coeff_ne_zero}). At
+  $\varepsilon=0$ the coefficient \emph{vanishes} — the flat gauge field is
+  position-independent, so the start-point degree of freedom is dead — and
+  the flat member exits the endpoint-winding pipeline there, closing instead
+  through the classical alignment winding
+  (\cref{lem:reduction_justified_L1}; see \cref{chap:spaceform_converse}).
 \end{itemize}
 
 The declarations below live in \texttt{namespace Gluck.SpaceForm}. The
@@ -125,12 +139,16 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   converse: $\kappa$ is a curvature function
   (\cref{def:is_curvature_function}: continuous, $2\pi$-periodic, strictly
   positive), satisfies the value-separated four-vertex condition
-  \cref{def:four_vertex_condition}, and — only in the hyperbolic branch
-  $\varepsilon<0$ — the escape-velocity bound $\kappa(\theta)>1$ for all
-  $\theta$. At $\varepsilon=+1$ the last clause is vacuous and this is
-  \cref{def:sphere_four_vertex} (with a trivially true extra conjunct); at
-  $\varepsilon=-1$ it adds $\kappa>1$, the threshold below which curves in
-  $H^2$ cannot close.
+  \cref{def:four_vertex_condition}, and — for the non-spherical members
+  $\varepsilon\le0$ — the uniform confinement floor
+  $\kappa(\theta)>(1-\varepsilon)/2$ for all $\theta$. At $\varepsilon=+1$
+  the last clause is vacuous and this is \cref{def:sphere_four_vertex} (with
+  a trivially true extra conjunct); at $\varepsilon=-1$ it is the
+  escape-velocity bound $\kappa>1$, the threshold below which curves in
+  $H^2$ cannot close; at $\varepsilon=0$ it is the flat threshold
+  $\kappa>1/2$, which makes the model circle of any level in the range of
+  $\kappa$ fit inside the open unit disk
+  (\cref{lem:centered_radius_spaceform_props}).
 \end{definition}
 
 \begin{definition}\leanok
@@ -198,16 +216,20 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \label{def:centered_radius}
   \lean{Gluck.SpaceForm.centeredRadius}
   \uses{lem:centered_radius_pos}
-  The \emph{space-form centered radius}
+  The \emph{space-form centered radius}, in the rationalized uniform form
   \[
     r^\ast(\varepsilon,c)\;=\;
-    \varepsilon\bigl(\sqrt{c^2+\varepsilon}-c\bigr),
+    \frac{1}{\sqrt{c^2+\varepsilon}+c},
   \]
   the root in $(0,1)$ of $\varepsilon r^2+2cr-1=0$, i.e.\ the Euclidean radius
   of the model geodesic circle of constant curvature $c$. The single closed
   form recovers the sphere radius $\sqrt{1+c^2}-c$ of
-  \cref{lem:centered_radius_pos} ($\varepsilon=1$) and the hyperbolic radius
-  $c-\sqrt{c^2-1}$ ($\varepsilon=-1$, defined for $c>1$).
+  \cref{lem:centered_radius_pos} ($\varepsilon=1$), the hyperbolic radius
+  $c-\sqrt{c^2-1}$ ($\varepsilon=-1$, for $c>1$), and — unlike the legacy
+  unrationalized form $\varepsilon(\sqrt{c^2+\varepsilon}-c)$, which
+  vanishes identically at $\varepsilon=0$ — the flat radius $1/(2c)$
+  ($\varepsilon=0$, for $c>1/2$). The two forms agree at
+  $\varepsilon=\pm1$ (\texttt{centeredRadius\_eq}).
 \end{definition}
 
 \begin{lemma}\leanok
@@ -216,10 +238,12 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \lean{Gluck.SpaceForm.centeredRadius_solves,
         Gluck.SpaceForm.centeredRadius_mem_Ioo,
         Gluck.SpaceForm.centeredRadius_bracket,
-        Gluck.SpaceForm.centeredRadius_facts}
+        Gluck.SpaceForm.centeredRadius_facts,
+        Gluck.SpaceForm.centeredRadius_lt_one_iff}
   \uses{def:centered_radius}
-  For $\varepsilon\in\{+1,-1\}$ and an admissible level $c$ (meaning $c>0$
-  when $\varepsilon=1$, $c>1$ when $\varepsilon=-1$), the centered radius
+  For $\varepsilon\in\{+1,-1,0\}$ and an admissible level $c$ (meaning
+  $c>0$ when $\varepsilon=1$, $c>1$ when $\varepsilon=-1$, $c>1/2$ when
+  $\varepsilon=0$), the centered radius
   $r^\ast=r^\ast(\varepsilon,c)$ satisfies:
   (i) the model quadratic $\varepsilon (r^\ast)^2+2c\,r^\ast-1=0$, hence
   $(1-\varepsilon (r^\ast)^2)/(2r^\ast)=c$;
@@ -230,18 +254,29 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   $B=\sqrt{1+c^2}\ge1$ is an absolute lower bound; for the hyperbolic plane
   $B=\sqrt{c^2-1}$ is positive but tends to $0$ as $c\to1^{+}$ (the
   escape-velocity boundary), so downstream margin constants scaled by $B$ are
-  $c$-dependent, not absolute.
+  $c$-dependent, not absolute; for the flat plane $B=c$. Moreover the
+  admissible windows themselves are captured by one identity
+  (\texttt{centeredRadius\_lt\_one\_iff}): for any $c>0$,
+  \[
+    r^\ast(\varepsilon,c)<1
+    \iff
+    c>\frac{1-\varepsilon}{2},
+  \]
+  the uniform confinement threshold ($0$ at $S^2$, $1$ at $H^2$, $1/2$ flat)
+  carried by \cref{def:spaceform_four_vertex}.
 \end{lemma}
 
 \begin{proof}
   \leanok
-  All four are elementary $\sqrt{\phantom{x}}$-algebra: square out
-  $r^\ast=\varepsilon(\sqrt{c^2+\varepsilon}-c)$ using $\varepsilon^2=1$ and
-  $(\sqrt{c^2+\varepsilon})^2=c^2+\varepsilon$ (positive in both admissible
-  branches), then \texttt{nlinarith}; the membership bounds compare
-  $\sqrt{c^2+\varepsilon}$ against $c$ and $c\pm1$ by strict monotonicity of
-  the square root. \texttt{centeredRadius\_facts} packages (ii)--(iii) for the
-  margins file.
+  All are elementary $\sqrt{\phantom{x}}$-algebra on the rationalized form:
+  clear the denominator $\sqrt{c^2+\varepsilon}+c>1$ (positive in all three
+  admissible windows, \texttt{window\_pos}) and use
+  $(\sqrt{c^2+\varepsilon})^2=c^2+\varepsilon$, then
+  \texttt{linear\_combination}/\texttt{nlinarith}; the membership bounds
+  compare $\sqrt{c^2+\varepsilon}$ against $c$ and the threshold by strict
+  monotonicity of the square root, and the threshold identity is a per-sign
+  case split (at $\varepsilon=0$, $r^\ast=1/(2c)<1\iff c>1/2$).
+  \texttt{centeredRadius\_facts} packages (ii)--(iii) for the margins file.
 \end{proof}
 
 \begin{lemma}\leanok
@@ -516,7 +551,7 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \uses{def:spaceform_arc_margins, def:spaceform_arc_map,
         def:centered_radius, lem:centered_radius_spaceform_props,
         lem:spaceform_speed_sub_radius, lem:step_model_margins}
-  For $\varepsilon\in\{+1,-1\}$, an admissible level $c$, and any
+  For $\varepsilon\in\{+1,-1,0\}$, an admissible level $c$, and any
   $\kappa_0>-\varepsilon r^\ast$ ($r^\ast=r^\ast(\varepsilon,c)$), there are
   explicit $0<R<1$ and $\delta,\mu,\rho_0,h_0>0$ (functions of
   $c,\kappa_0,\varepsilon$ only) such that for all levels $a,b$ within $h_0$
@@ -622,11 +657,17 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
     \qquad
     \eta(\varepsilon)=\frac{2\,\varepsilon\, r^\ast}{c^2+\varepsilon}.
   \]
-  The linear-in-$h$ term is an anti-holomorphic conjugation with the
-  \emph{nonzero} coefficient $\eta(\varepsilon)$. The $\varepsilon$ factor is
-  mandatory — it descends from the $\varepsilon$ on the right-hand side of
-  \cref{lem:spaceform_speed_sub_radius} — so $\eta>0$ for the sphere but
-  $\eta<0$ for the hyperbolic plane.
+  The linear-in-$h$ term is an anti-holomorphic conjugation with coefficient
+  $\eta(\varepsilon)$. The $\varepsilon$ factor is mandatory — it descends
+  from the $\varepsilon$ on the right-hand side of
+  \cref{lem:spaceform_speed_sub_radius} — so $\eta>0$ for the sphere,
+  $\eta<0$ for the hyperbolic plane, and $\eta=0$ for the flat plane
+  ($\varepsilon=0$, where the four-arc error map is identically zero and the
+  statement degenerates to the true bound
+  $\|E^\ast\|\le Ch(\|\delta\|^2+h)$). The winding argument needs
+  $\eta\ne0$ (\cref{lem:spaceform_step_error_coeff_ne_zero}) — which is
+  where, and only where, the flat member leaves the endpoint-winding
+  pipeline.
 \end{lemma}
 
 \begin{proof}
@@ -650,6 +691,8 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \lean{Gluck.SpaceForm.stepError_coeff_ne_zero}
   \uses{def:centered_radius, lem:centered_radius_spaceform_props,
         lem:spaceform_step_error_expansion}
+  For $\varepsilon\in\{+1,-1\}$ (genuinely two-sign: the flat coefficient
+  vanishes),
   $\eta(\varepsilon)=2\varepsilon r^\ast(\varepsilon,c)/(c^2+\varepsilon)
   \ne0$ for every admissible level $c$. Nonvanishing — \emph{not}
   positivity — is the property the winding argument of

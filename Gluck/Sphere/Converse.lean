@@ -166,12 +166,13 @@ theorem realizesSphericalCurvature_iff_realizes_one (z : ℝ → ℂ) (κ : ℝ 
   simp only [one_mul]
 
 /-- The spherical four-vertex hypothesis is the `ε = +1` instance of the
-`ε`-generic one (whose extra `ε < 0 → 1 < κ` escape-velocity clause is vacuous at `ε = +1`). -/
+`ε`-generic one (whose extra `ε ≤ 0 → κ > (1−ε)/2` confinement-floor clause is
+vacuous at `ε = +1`). -/
 theorem sphereFourVertex_iff_spaceFormFourVertex_one (κ : ℝ → ℝ) :
     SphereFourVertex κ ↔ SpaceForm.SpaceFormFourVertex 1 κ := by
   unfold SphereFourVertex SpaceForm.SpaceFormFourVertex
   constructor
-  · rintro ⟨h1, h2⟩; exact ⟨h1, h2, by norm_num⟩
+  · rintro ⟨h1, h2⟩; exact ⟨h1, h2, fun hle => absurd hle (by norm_num)⟩
   · rintro ⟨h1, h2, _⟩; exact ⟨h1, h2⟩
 
 /-- The spherical geodesic speed is the `ε = +1` instance of the `ε`-generic space-form speed. -/

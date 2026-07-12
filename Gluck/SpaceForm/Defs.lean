@@ -73,12 +73,15 @@ def Realizes (ε : ℝ) (z : ℝ → ℂ) (κ : ℝ → ℝ) : Prop :=
 
 /-- The `ε`-generic four-vertex admissibility hypothesis. `IsCurvatureFunction`
 (continuous, `2π`-periodic, strictly positive) plus the value-separated
-`FourVertexCondition`, plus — only in the hyperbolic branch `ε < 0` — the
-escape-velocity bound `κ > 1`. At `ε = +1` the last clause is vacuous, so this
-is `Gluck.SphereFourVertex` (with a trivially-true extra conjunct); at
-`ε = −1` it adds `κ > 1`, giving the hyperbolic four-vertex hypothesis. -/
+`FourVertexCondition`, plus — for the non-spherical members `ε ≤ 0` — the
+uniform confinement floor `κ > (1 − ε)/2`. At `ε = +1` the last clause is
+vacuous, so this is `Gluck.SphereFourVertex` (with a trivially-true extra
+conjunct); at `ε = −1` it is the hyperbolic escape-velocity bound `κ > 1`; at
+`ε = 0` it is the flat threshold `κ > 1/2`, exactly what makes the model circle
+of curvature level `c` (coordinate radius `centeredRadius 0 c = 1/(2c)`) fit in
+the open unit disk (`centeredRadius_lt_one_iff`). -/
 def SpaceFormFourVertex (ε : ℝ) (κ : ℝ → ℝ) : Prop :=
-  IsCurvatureFunction κ ∧ FourVertexCondition κ ∧ (ε < 0 → ∀ θ, 1 < κ θ)
+  IsCurvatureFunction κ ∧ FourVertexCondition κ ∧ (ε ≤ 0 → ∀ θ, (1 - ε) / 2 < κ θ)
 
 /-- The *space-form gauge speed*
 `q_{ε,κ}(θ, z) = (1 + ε‖z‖²) / (2(κ(θ) − ε⟪z, i·e^{iθ}⟫_ℝ))`. Junk-value total
@@ -282,6 +285,44 @@ lemma centeredRadius_mem_Ioo (ε c : ℝ) (_hε : ε = 1 ∨ ε = -1 ∨ ε = 0)
   have h0 : (0 : ℝ) < Real.sqrt (c ^ 2 + ε) + c := by linarith
   exact ⟨inv_pos.mpr h0, inv_lt_one_of_one_lt₀ hlt⟩
 
+/-- **Uniform confinement threshold.** For a positive level `c`, the centered
+radius fits in the open unit disk iff the level clears the uniform threshold
+`(1 − ε)/2`: `0` on the sphere (`ε = 1`), `1` on the hyperbolic plane
+(`ε = −1`, the escape velocity), `1/2` on the flat plane (`ε = 0`). This single
+inequality is the `ε`-generic form of the window clauses of `window_pos` and of
+the floor conjunct of `SpaceFormFourVertex`. -/
+lemma centeredRadius_lt_one_iff {ε : ℝ} (hε : ε = 1 ∨ ε = -1 ∨ ε = 0) {c : ℝ}
+    (hc : 0 < c) : centeredRadius ε c < 1 ↔ (1 - ε) / 2 < c := by
+  rcases hε with rfl | rfl | rfl
+  · rw [centeredRadius_one]
+    have hs : Real.sqrt (c ^ 2 + 1) ^ 2 = c ^ 2 + 1 := Real.sq_sqrt (by positivity)
+    have hs0 : 0 < Real.sqrt (c ^ 2 + 1) := Real.sqrt_pos.mpr (by positivity)
+    constructor
+    · intro _; linarith
+    · intro _
+      nlinarith [hs, hs0, sq_nonneg (Real.sqrt (c ^ 2 + 1) - c - 1)]
+  · constructor
+    · intro h
+      by_contra hle
+      push Not at hle
+      have hc1 : c ≤ 1 := by linarith
+      have hzero : Real.sqrt (c ^ 2 + -1) = 0 :=
+        Real.sqrt_eq_zero'.mpr (by nlinarith)
+      rw [centeredRadius, hzero, zero_add] at h
+      have := (inv_lt_one_iff₀).mp h
+      rcases this with h' | h'
+      · linarith
+      · linarith
+    · intro h
+      have h1c : 1 < c := by linarith
+      exact (centeredRadius_mem_Ioo (-1) c (Or.inr (Or.inl rfl))
+        (Or.inr (Or.inl ⟨rfl, h1c⟩))).2
+  · rw [centeredRadius_zero hc.le, sub_zero]
+    rw [inv_lt_one_iff₀]
+    constructor
+    · rintro (h | h) <;> linarith
+    · intro h; right; linarith
+
 /-- **Bracket value at the centered circle.** `c + ε·r*(ε, c) = √(c² + ε)`
 (uniform in `ε ∈ {+1,−1,0}`): the denominator `κ − ε⟪z, i·e^{iθ}⟫` evaluated at
 the level-`c` model circle `z = −r*·i·e^{iθ}` (where `⟪z, i·e^{iθ}⟫ = −r*`).
@@ -300,8 +341,9 @@ lemma centeredRadius_bracket (ε c : ℝ) (_hε : ε = 1 ∨ ε = -1 ∨ ε = 0)
   field_simp
   linear_combination -hs
 
-/-- **Admissible uniform lower bound.** From `SpaceFormFourVertex ε κ` (with
-`ε ∈ {+1,−1}`) there is a confinement radius `R` with `0 < R < 1` and
+/-- **Admissible uniform lower bound.** From `SpaceFormFourVertex ε κ` (any
+`ε`; only the `IsCurvatureFunction` conjunct is used) there is a confinement
+radius `R` with `0 < R < 1` and
 `R < κ(θ)` for all `θ`. Sphere: the minimum of the strictly positive `κ` over
 the compact period, clipped below `1`. Hyperbolic: the centered radius
 `r*(−1, min κ)` of the escape-velocity bound `κ > 1`. This `R` makes the

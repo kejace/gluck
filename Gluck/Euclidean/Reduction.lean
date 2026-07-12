@@ -1151,40 +1151,31 @@ private lemma integrableOn_of_measurable_bounded {f : ℝ → ℝ} {s : Set ℝ}
   exact Measure.integrableOn_of_bounded hfin hmeas.aestronglyMeasurable
     (MeasureTheory.ae_of_all _ fun x => by rw [Real.norm_eq_abs]; exact hb x)
 
-/-- **There is a preliminary reparametrization making `E_κ` uniformly close to
-`E_bi`** (blueprint `lem:kappa_error_map_close`, existence form).  For any target
-margin `μ > 0` there is an orientation-preserving circle reparametrization `h₁`
-(`StrictMono`, `Continuous`, quasi-periodic) such that the κ-error map is within
-`μ` of the bicircle error map at every point of the closed unit disk.
+/-- **There is a preliminary reparametrization making the reconstruction weight
+`L¹`-close to the step weight, uniformly over the alignment disk** (the `L¹` core
+of blueprint `lem:kappa_error_map_close`).  For any tolerance `μ > 0` there is an
+orientation-preserving circle reparametrization `h₁` (`StrictMono`, `Continuous`,
+quasi-periodic, with a continuous positive derivative) such that for *every* `z`
+in the closed unit disk the aligned weight difference
+`∫₀^{2π} |ρ(κ∘h₁)(g_z θ) − ρ(κ₀)(g_z θ)| dθ` is `< μ`.
 
 The proof chooses the tolerance `ε` of `exists_preliminary_reparam` small enough
 that `K·M²·ε < μ` (with `M = 1/min κ` the radius bound and `K` the slope bound of
-`g_z`), then estimates the `L¹` weight difference of `kappaErrorMap_sub_errorMap_le`
-by splitting `[0,2π]` over the `< ε`-measure bad set (pulled back through the
-slope-bounded `g_z`). -/
-private theorem exists_reparam_kappaErrorMap_close {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
+`g_z`), then splits `[0,2π]` over the `< ε`-measure bad set (pulled back through
+the slope-bounded `g_z`). -/
+private theorem exists_reparam_kappaErrorMap_L1 {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
     {a b θ₁ θ₂ θ₃ θ₄ : ℝ} (ha : 0 < a) (hab : a < b)
     (h12 : θ₁ < θ₂) (h23 : θ₂ < θ₃) (h34 : θ₃ < θ₄) (h41 : θ₄ < θ₁ + 2 * π)
     (hc₁ : κ θ₁ = a) (hc₂ : κ θ₂ = b) (hc₃ : κ θ₃ = a) (hc₄ : κ θ₄ = b)
     (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {μ : ℝ} (hμ : 0 < μ) :
     ∃ h₁ : ℝ → ℝ, StrictMono h₁ ∧ Continuous h₁ ∧
       (∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π) ∧
-      (∀ z : ℂ, ‖z‖ ≤ 1 → ‖kappaErrorMap κ h₁ δ z - errorMap a b δ z‖ < μ) ∧
-      (∃ v₁ : ℝ → ℝ, Continuous v₁ ∧ (∀ θ, 0 < v₁ θ) ∧
-        ∀ θ, HasDerivAt h₁ (v₁ θ) θ) := by
-  obtain ⟨hκcont, hκper, hκpos⟩ := hκ
-  suffices h : ∃ h₁ : ℝ → ℝ, StrictMono h₁ ∧ Continuous h₁ ∧
-      (∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π) ∧
       (∀ z : ℂ, ‖z‖ ≤ 1 → (∫ θ in (0 : ℝ)..(2 * π),
           |radius (fun t => κ (h₁ t)) (alignReparam δ z θ)
             - radius (stepCurvature b a 0 (π / 2) π (3 * π / 2)) (alignReparam δ z θ)|) < μ) ∧
       (∃ v₁ : ℝ → ℝ, Continuous v₁ ∧ (∀ θ, 0 < v₁ θ) ∧
-        ∀ θ, HasDerivAt h₁ (v₁ θ) θ) by
-    obtain ⟨h₁, hmono, hcont, hper, hint, hv1⟩ := h
-    refine ⟨h₁, hmono, hcont, hper, fun z hz => ?_, hv1⟩
-    exact lt_of_le_of_lt
-      (kappaErrorMap_sub_errorMap_le ⟨hκcont, hκper, hκpos⟩ ha hab δ hδ hδ' hmono hcont hper hz)
-      (hint z hz)
+        ∀ θ, HasDerivAt h₁ (v₁ θ) θ) := by
+  obtain ⟨hκcont, hκper, hκpos⟩ := hκ
   obtain ⟨cmin, cmax, hcminpos, hbnd⟩ := curvature_bounds ⟨hκcont, hκper, hκpos⟩
   have hcmaxpos : 0 < cmax := lt_of_lt_of_le (hκpos 0) (hbnd 0).2
   have hbpos : 0 < b := lt_trans ha hab
@@ -1391,6 +1382,30 @@ private theorem exists_reparam_kappaErrorMap_close {κ : ℝ → ℝ} (hκ : IsC
   rw [hgoal_eq]
   exact lt_of_le_of_lt hbound hCε
 
+/-- **There is a preliminary reparametrization making `E_κ` uniformly close to
+`E_bi`** (blueprint `lem:kappa_error_map_close`, existence form).  For any target
+margin `μ > 0` there is an orientation-preserving circle reparametrization `h₁`
+(`StrictMono`, `Continuous`, quasi-periodic) such that the κ-error map is within
+`μ` of the bicircle error map at every point of the closed unit disk.  Derived
+from the `L¹` core `exists_reparam_kappaErrorMap_L1` via the `L¹`-Lipschitz
+bound `kappaErrorMap_sub_errorMap_le`. -/
+private theorem exists_reparam_kappaErrorMap_close {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
+    {a b θ₁ θ₂ θ₃ θ₄ : ℝ} (ha : 0 < a) (hab : a < b)
+    (h12 : θ₁ < θ₂) (h23 : θ₂ < θ₃) (h34 : θ₃ < θ₄) (h41 : θ₄ < θ₁ + 2 * π)
+    (hc₁ : κ θ₁ = a) (hc₂ : κ θ₂ = b) (hc₃ : κ θ₃ = a) (hc₄ : κ θ₄ = b)
+    (δ : ℝ) (hδ : 0 < δ) (hδ' : δ ≤ π / 8) {μ : ℝ} (hμ : 0 < μ) :
+    ∃ h₁ : ℝ → ℝ, StrictMono h₁ ∧ Continuous h₁ ∧
+      (∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π) ∧
+      (∀ z : ℂ, ‖z‖ ≤ 1 → ‖kappaErrorMap κ h₁ δ z - errorMap a b δ z‖ < μ) ∧
+      (∃ v₁ : ℝ → ℝ, Continuous v₁ ∧ (∀ θ, 0 < v₁ θ) ∧
+        ∀ θ, HasDerivAt h₁ (v₁ θ) θ) := by
+  obtain ⟨h₁, hmono, hcont, hper, hint, hv1⟩ :=
+    exists_reparam_kappaErrorMap_L1 hκ ha hab h12 h23 h34 h41 hc₁ hc₂ hc₃ hc₄ δ hδ hδ' hμ
+  refine ⟨h₁, hmono, hcont, hper, fun z hz => ?_, hv1⟩
+  exact lt_of_le_of_lt
+    (kappaErrorMap_sub_errorMap_le hκ ha hab δ hδ hδ' hmono hcont hper hz)
+    (hint z hz)
+
 /-! ## The reduction is justified -/
 
 /-- **The reduction is justified** (blueprint `lem:reduction_justified`).  For a
@@ -1510,6 +1525,147 @@ theorem reduction_justified {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
     · intro θ
       exact (hv1deriv (alignReparam δ z₀ θ)).comp θ (hasDerivAt_alignReparam δ z₀ θ)
 
+
+/-- **The reduction is justified, `L¹`-quantitative form.** Same winding argument
+as `reduction_justified`, but with the intermediate levels supplied by the caller
+(four points `θ₁ < θ₂ < θ₃ < θ₄` in one period where `κ` takes the values
+`a, b, a, b` with `0 < a < b`) and with the closing reparametrization `h`
+additionally certified to keep the reconstruction weight `radius (κ ∘ h) = 1/(κ∘h)`
+within any prescribed `L¹` tolerance `τ` of a **two-valued step weight**
+`radius σ` (`σ` measurable with values in `{a, b}`; concretely
+`σ = κ₀ ∘ g_{z₀}`, the canonical bicircle profile pulled back along the
+alignment map of the winding zero `z₀`).
+
+This is the closing input of the *flat* (`ε = 0`) branch of the space-form
+converse (`Gluck.SpaceForm.spaceFormConverse_pos`): at `ε = 0` the disk-model
+gauge field is independent of the position, so the endpoint map of the flow is
+constant in the start point and the first-variation endpoint winding of the
+curved members degenerates (`stepError_expansion` has conjugation coefficient
+`η(0) = 0`); closure must instead come from the classical alignment winding —
+this lemma — while the `L¹` step-closeness bound substitutes for the flow
+margins in confining the reconstructed curve near the model circle. -/
+theorem reduction_justified_L1 {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
+    {a b θ₁ θ₂ θ₃ θ₄ : ℝ} (ha : 0 < a) (hab : a < b)
+    (h12 : θ₁ < θ₂) (h23 : θ₂ < θ₃) (h34 : θ₃ < θ₄) (h41 : θ₄ < θ₁ + 2 * π)
+    (hc₁ : κ θ₁ = a) (hc₂ : κ θ₂ = b) (hc₃ : κ θ₃ = a) (hc₄ : κ θ₄ = b)
+    {τ : ℝ} (hτ : 0 < τ) :
+    ∃ h : ℝ → ℝ, StrictMono h ∧ Continuous h ∧
+      (∀ θ, h (θ + 2 * π) = h θ + 2 * π) ∧
+      errorVector (radius (fun θ => κ (h θ))) = 0 ∧
+      (∃ stp : ℝ → ℝ, Measurable stp ∧ (∀ θ, stp θ = a ∨ stp θ = b) ∧
+        (∫ θ in (0 : ℝ)..(2 * π),
+          |radius (fun t => κ (h t)) θ - radius stp θ|) < τ) ∧
+      (∃ v : ℝ → ℝ, Continuous v ∧ (∀ θ, 0 < v θ) ∧
+        ∀ θ, HasDerivAt h (v θ) θ) := by
+  obtain ⟨hκcont, hκper, hκpos⟩ := hκ
+  have hb : 0 < b := lt_trans ha hab
+  have hab' : a ≠ b := ne_of_lt hab
+  set δ : ℝ := π / 8 with hδdef
+  have hδ : 0 < δ := by rw [hδdef]; positivity
+  have hδ' : δ ≤ π / 8 := le_of_eq hδdef
+  obtain ⟨hF, hbd, hw⟩ := errorMap_winding_eq_one a b δ ha hb hab' hδ hδ'
+  have hsc : IsCompact (Metric.sphere (0 : ℂ) 1) := isCompact_sphere 0 1
+  have hsne : (Metric.sphere (0 : ℂ) 1).Nonempty := by
+    rw [NormedSpace.sphere_nonempty]; norm_num
+  have hsubset : Metric.sphere (0 : ℂ) 1 ⊆ Metric.closedBall 0 1 :=
+    Metric.sphere_subset_closedBall
+  have hcontnorm : ContinuousOn (fun z => ‖errorMap a b δ z‖) (Metric.sphere (0 : ℂ) 1) :=
+    (hF.mono hsubset).norm
+  obtain ⟨zm, hzm_mem, hzm_min⟩ := hsc.exists_isMinOn hsne hcontnorm
+  set μ : ℝ := ‖errorMap a b δ zm‖ with hμdef
+  have hμ : 0 < μ := by rw [hμdef]; exact norm_pos_iff.mpr (hbd zm hzm_mem)
+  have hμle : ∀ z ∈ Metric.sphere (0 : ℂ) 1, μ ≤ ‖errorMap a b δ z‖ := by
+    intro z hz; exact isMinOn_iff.mp hzm_min z hz
+  have hμτ : 0 < min μ τ := lt_min hμ hτ
+  obtain ⟨h₁, h1mono, h1cont, h1per, hL1, hv1⟩ :=
+    exists_reparam_kappaErrorMap_L1 ⟨hκcont, hκper, hκpos⟩ ha hab h12 h23 h34 h41
+      hc₁ hc₂ hc₃ hc₄ δ hδ hδ' hμτ
+  have hclose : ∀ z : ℂ, ‖z‖ ≤ 1 →
+      ‖kappaErrorMap κ h₁ δ z - errorMap a b δ z‖ < μ := fun z hz =>
+    lt_of_le_of_lt
+      (kappaErrorMap_sub_errorMap_le ⟨hκcont, hκper, hκpos⟩ ha hab δ hδ hδ' h1mono
+        h1cont h1per hz)
+      ((hL1 z hz).trans_le (min_le_left _ _))
+  have hkcont : Continuous (kappaErrorMap κ h₁ δ) :=
+    continuous_kappaErrorMap hκcont hκpos h1cont δ
+  have hkF : ContinuousOn (kappaErrorMap κ h₁ δ) (Metric.closedBall 0 1) := hkcont.continuousOn
+  have hkbd : ∀ z ∈ Metric.sphere (0 : ℂ) 1, kappaErrorMap κ h₁ δ z ≠ 0 := by
+    intro z hz
+    have hznorm : ‖z‖ = 1 := mem_sphere_zero_iff_norm.mp hz
+    have hd : ‖kappaErrorMap κ h₁ δ z - errorMap a b δ z‖ < μ := hclose z hznorm.le
+    have hdrev : ‖errorMap a b δ z - kappaErrorMap κ h₁ δ z‖ < μ := by
+      rw [norm_sub_rev]; exact hd
+    have htri : ‖errorMap a b δ z‖
+        ≤ ‖kappaErrorMap κ h₁ δ z‖ + ‖errorMap a b δ z - kappaErrorMap κ h₁ δ z‖ := by
+      have h := norm_add_le (kappaErrorMap κ h₁ δ z) (errorMap a b δ z - kappaErrorMap κ h₁ δ z)
+      simpa using h
+    have h2 := hμle z hz
+    have : 0 < ‖kappaErrorMap κ h₁ δ z‖ := by linarith
+    exact norm_pos_iff.mp this
+  set γE : C(I, ℂ) := diskBoundaryLoop (errorMap a b δ) hF with hγEdef
+  set γK : C(I, ℂ) := diskBoundaryLoop (kappaErrorMap κ h₁ δ) hkF with hγKdef
+  have hγEne : ∀ t, γE t ≠ 0 := diskBoundaryLoop_ne_zero (errorMap a b δ) hF hbd
+  have hγKne : ∀ t, γK t ≠ 0 := diskBoundaryLoop_ne_zero (kappaErrorMap κ h₁ δ) hkF hkbd
+  have hexp0 : ((Circle.exp (2 * π * ((0 : I) : ℝ)) : Circle) : ℂ) = 1 := by norm_num
+  have hexp1 : ((Circle.exp (2 * π * ((1 : I) : ℝ)) : Circle) : ℂ) = 1 := by
+    rw [Set.Icc.coe_one, mul_one, Circle.exp_two_pi]; norm_num
+  have hloopE : γE 0 = γE 1 := by
+    simp only [hγEdef, diskBoundaryLoop, ContinuousMap.coe_mk]
+    rw [hexp0, hexp1]
+  have hloopK : γK 0 = γK 1 := by
+    simp only [hγKdef, diskBoundaryLoop, ContinuousMap.coe_mk]
+    rw [hexp0, hexp1]
+  have hpert : ∀ t : I, ‖γK t - γE t‖ < ‖γE t‖ := by
+    intro t
+    have hwnorm : ‖((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)‖ = 1 := Circle.norm_coe _
+    have hwsph : ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ) ∈ Metric.sphere (0 : ℂ) 1 := by
+      rw [mem_sphere_zero_iff_norm]; exact hwnorm
+    change ‖kappaErrorMap κ h₁ δ ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)
+        - errorMap a b δ ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)‖
+      < ‖errorMap a b δ ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)‖
+    calc ‖kappaErrorMap κ h₁ δ ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)
+            - errorMap a b δ ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)‖
+        < μ := hclose _ hwnorm.le
+      _ ≤ ‖errorMap a b δ ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ)‖ := hμle _ hwsph
+  have hwind : windingNumberC γE hγEne = windingNumberC γK hγKne :=
+    windingNumberC_eq_of_perturb γE γK hγEne hγKne hloopE hloopK hpert
+  have hwE : windingNumberC γE hγEne = -1 := hw
+  have hwne : windingNumberC γK hγKne ≠ 0 := by rw [← hwind, hwE]; norm_num
+  obtain ⟨z₀, hz₀ball, hz₀zero⟩ :=
+    exists_zero_of_boundary_winding (kappaErrorMap κ h₁ δ) hkF hkbd hwne
+  have hz0le : ‖z₀‖ ≤ 1 := by
+    have : ‖z₀‖ < 1 := by simpa [Metric.mem_ball, dist_zero_right] using hz₀ball
+    linarith
+  refine ⟨fun θ => h₁ (alignReparam δ z₀ θ), ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · exact h1mono.comp (strictMono_alignReparam δ hδ hδ' hz0le)
+  · exact h1cont.comp (continuous_alignReparam δ z₀)
+  · intro θ
+    change h₁ (alignReparam δ z₀ (θ + 2 * π)) = h₁ (alignReparam δ z₀ θ) + 2 * π
+    rw [alignReparam_add_two_pi δ hδ hδ' hz0le, h1per]
+  · change errorVector (radius (fun θ => κ (h₁ (alignReparam δ z₀ θ)))) = 0
+    exact hz₀zero
+  · -- The two-valued step weight: the canonical bicircle profile pulled back
+    -- along the alignment map of the winding zero.
+    refine ⟨fun θ => stepCurvature b a 0 (π / 2) π (3 * π / 2) (alignReparam δ z₀ θ),
+      ?_, ?_, ?_⟩
+    · exact (measurable_stepCurvature_canonical b a).comp
+        (continuous_alignReparam δ z₀).measurable
+    · intro θ
+      simp only [stepCurvature]
+      split_ifs
+      · exact Or.inl rfl
+      · exact Or.inr rfl
+    · exact (hL1 z₀ hz0le).trans_le (min_le_right _ _)
+  · -- `C¹` regularity of `h = h₁ ∘ g_{z₀}` via the chain rule.
+    obtain ⟨v₁, hv1cont, hv1pos, hv1deriv⟩ := hv1
+    refine ⟨fun θ => v₁ (alignReparam δ z₀ θ) * alignDensity δ z₀ θ, ?_, ?_, ?_⟩
+    · exact (hv1cont.comp (continuous_alignReparam δ z₀)).mul
+        (continuous_alignDensity_theta δ z₀)
+    · intro θ
+      exact mul_pos (hv1pos _)
+        (lt_of_lt_of_le (by norm_num) (alignDensity_ge δ hδ hδ' hz0le θ))
+    · intro θ
+      exact (hv1deriv (alignReparam δ z₀ θ)).comp θ (hasDerivAt_alignReparam δ z₀ θ)
 
 /-! ## Shared circle-reparametrisation lemmas
 

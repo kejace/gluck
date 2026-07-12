@@ -92,6 +92,6 @@ constant branch of the capstone `hyperbolicMixedConverse`
 (`Gluck/Hyperbolic/Family/Simplicity.lean`). -/
 theorem hyperbolicCircle_realizes {c : ℝ} (hc : 1 < c) :
     ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes (-1) z (fun _ => c) :=
-  spaceFormCircle_realizes (Or.inr rfl) (Or.inr ⟨rfl, hc⟩)
+  spaceFormCircle_realizes (Or.inr (Or.inl rfl)) (Or.inr (Or.inl ⟨rfl, hc⟩))
 
 end Gluck.Hyperbolic

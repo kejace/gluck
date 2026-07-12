@@ -752,3 +752,49 @@ analytic facts about $g_z$ carry this; both are proved.
   \emph{The robustness is exactly $L^1$/measure continuity of $E$
   (\cref{lem:error_vector_lipschitz}), not $C^1$-closeness of curves.}
 \end{proof}
+
+\begin{lemma}\leanok
+[Reduction is justified, $L^1$-quantitative form]
+  \label{lem:reduction_justified_L1}
+  \lean{Gluck.reduction_justified_L1}
+  \uses{lem:reduction_justified, lem:exists_reparam_close,
+        def:kappa_error_map, lem:error_map_winds_boundary,
+        thm:existence_of_zero, def:four_arc_step_function,
+        lem:align_reparam_matches}
+  The winding argument of \cref{lem:reduction_justified}, re-run with the
+  intermediate levels supplied by the caller — four points
+  $\theta_1<\theta_2<\theta_3<\theta_4$ in one period where $\kappa$ takes the
+  values $a,b,a,b$ with $0<a<b$ — and with the closing reparametrization $h$
+  additionally certified to keep the reconstruction weight
+  $\rho=1/(\kappa\circ h)$ within any prescribed $L^1$ tolerance $\tau>0$ of a
+  \emph{two-valued step weight}: there is a measurable $\sigma$ with values in
+  $\{a,b\}$ (concretely $\sigma=\kappa_0\circ g_{z_0}$, the canonical bicircle
+  profile of \cref{def:four_arc_step_function} pulled back along the alignment
+  map of the winding zero $z_0$) such that
+  $\int_0^{2\pi}\bigl|\rho(\theta)-1/\sigma(\theta)\bigr|\,d\theta<\tau$,
+  alongside $E(\rho)=0$ and the $C^1$ regularity of $h$. This is the closing
+  input of the \emph{flat} branch of the space-form converse
+  (\cref{thm:spaceform_converse_pos} at $\varepsilon=0$): there the endpoint
+  map of the disk-model flow is constant in the start point, so closure must
+  come from this alignment winding, while the $L^1$ step-closeness substitutes
+  for the flow margins in confining the reconstructed curve near the model
+  circle.
+\end{lemma}
+\begin{proof}
+  \uses{lem:exists_reparam_close, lem:error_map_winds_boundary,
+        thm:existence_of_zero, lem:align_reparam_matches,
+        lem:has_deriv_align_reparam, lem:align_density_props}
+  \leanok
+  Steps 1--4 of \cref{lem:reduction_justified} verbatim, with two refinements:
+  the preconditioning tolerance of \cref{lem:exists_reparam_close} is taken at
+  $\min(\mu,\tau)$, and the $L^1$ core of that lemma (the uniform-in-$z$ bound
+  $\int_0^{2\pi}|\rho(\kappa\circ h_1)(g_z\theta)-\rho(\kappa_0)(g_z\theta)|
+  \,d\theta<\min(\mu,\tau)$, factored out in Lean as
+  \texttt{exists\_reparam\_kappaErrorMap\_L1}) is \emph{kept} rather than
+  discarded after deriving the error-map closeness. Evaluating it at the winding
+  zero $z_0$ and reading $\rho(\kappa\circ h_1)\circ g_{z_0}=
+  \rho(\kappa\circ h_1\circ g_{z_0})$ gives the $L^1$ clause with
+  $\sigma=\kappa_0\circ g_{z_0}$; measurability of $\sigma$ is the canonical
+  step's measurability composed with the continuous alignment map, and the
+  two-valuedness is immediate from the definition of the step.
+\end{proof}

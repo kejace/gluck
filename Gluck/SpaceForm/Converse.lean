@@ -154,8 +154,8 @@ private lemma spaceFormCircle_speed {ε c r : ℝ} (hr0 : 0 < r)
 /-- **Constant branch.** The model geodesic circle of constant admissible
 curvature `c` is a simple closed curve realizing the constant curvature
 function `κ ≡ c`. (Transport of `sphericalCircle_realizes`.) -/
-lemma spaceFormCircle_realizes_explicit {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
-    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c)) :
+lemma spaceFormCircle_realizes_explicit {ε c : ℝ} (hε : ε = 1 ∨ ε = -1 ∨ ε = 0)
+    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c) ∨ (ε = 0 ∧ 1 / 2 < c)) :
     IsSimpleClosed
         (fun θ : ℝ => (-centeredRadius ε c) •
           (Complex.I * Complex.exp ((θ : ℂ) * Complex.I))) ∧
@@ -163,9 +163,8 @@ lemma spaceFormCircle_realizes_explicit {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
         (fun θ : ℝ => (-centeredRadius ε c) •
           (Complex.I * Complex.exp ((θ : ℂ) * Complex.I)))
         (fun _ => c) := by
-  obtain ⟨hr0, hr1⟩ :=
-    centeredRadius_mem_Ioo ε c (hε.imp_right Or.inl) (hc.imp_right Or.inl)
-  have hsolve := centeredRadius_solves ε c (hε.imp_right Or.inl) (hc.imp_right Or.inl)
+  obtain ⟨hr0, hr1⟩ := centeredRadius_mem_Ioo ε c hε hc
+  have hsolve := centeredRadius_solves ε c hε hc
   set r : ℝ := centeredRadius ε c with hrdef
   have hcirc : 1 + ε * r ^ 2 = 2 * r * (c + ε * r) := by linear_combination -hsolve
   exact ⟨⟨spaceFormCircle_periodic r, spaceFormCircle_injOn hr0⟩,
@@ -175,8 +174,8 @@ lemma spaceFormCircle_realizes_explicit {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
 
 /-- **Constant branch.** The model geodesic circle of constant admissible
 curvature `c` is a simple closed curve realizing the constant curvature function. -/
-lemma spaceFormCircle_realizes {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
-    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c)) :
+lemma spaceFormCircle_realizes {ε c : ℝ} (hε : ε = 1 ∨ ε = -1 ∨ ε = 0)
+    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c) ∨ (ε = 0 ∧ 1 / 2 < c)) :
     ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes ε z (fun _ => c) := by
   exact ⟨_, spaceFormCircle_realizes_explicit hε hc⟩
 
@@ -535,28 +534,39 @@ lemma spaceForm_simplicity {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ} {R �
 /-! ## The two branches and the capstone -/
 
 /-- **Constant branch of the space-form converse.** If `κ ≡ c`, the explicit
-model circle realizes it. (Transport of `sphericalConverse_pos_const`.) -/
-private theorem spaceFormConverse_pos_const {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {κ : ℝ → ℝ}
-    (hκcf : IsCurvatureFunction κ) (hfloor : ε < 0 → ∀ θ, 1 < κ θ)
+model circle realizes it. (Transport of `sphericalConverse_pos_const`; at
+`ε = 0` the circle is the Euclidean circle of coordinate radius `1/(2c) < 1`.) -/
+private theorem spaceFormConverse_pos_const {ε : ℝ} (hε : ε = 1 ∨ ε = -1 ∨ ε = 0)
+    {κ : ℝ → ℝ} (hκcf : IsCurvatureFunction κ)
+    (hfloor : ε ≤ 0 → ∀ θ, (1 - ε) / 2 < κ θ)
     {c : ℝ} (hc : ∀ θ, κ θ = c) :
     ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes ε z κ := by
-  have hadm : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c) := by
-    rcases hε with h | h
+  have hadm : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c) ∨ (ε = 0 ∧ 1 / 2 < c) := by
+    rcases hε with h | h | h
     · exact Or.inl ⟨h, by have := hκcf.2.2 0; rwa [hc 0] at this⟩
-    · refine Or.inr ⟨h, ?_⟩
+    · refine Or.inr (Or.inl ⟨h, ?_⟩)
       have hlt := hfloor (by rw [h]; norm_num) 0
-      rwa [hc 0] at hlt
+      rw [hc 0, h] at hlt
+      linarith
+    · refine Or.inr (Or.inr ⟨h, ?_⟩)
+      have hlt := hfloor (le_of_eq h) 0
+      rw [hc 0, h] at hlt
+      linarith
   have hκeq : κ = fun _ => c := funext hc
   obtain ⟨z, hsimple, hreal⟩ := spaceFormCircle_realizes hε hadm
   rw [hκeq]
   exact ⟨z, hsimple, hreal⟩
 
-/-- **Non-constant branch of the space-form converse.** From value-separated
-alternating extrema, endpoint winding produces a closed admissible trajectory
-for `κ ∘ h₁`; reconstruction realizes `κ ∘ h₁`, `spaceForm_simplicity` gives
-simplicity, and pulling back along the `C¹` inverse `H = h₁⁻¹` yields a simple
-closed realization of `κ`. (Transport of `sphericalConverse_pos_nonconst`.) -/
-private theorem spaceFormConverse_pos_nonconst {ε : ℝ} (hε : ε = 1 ∨ ε = -1)
+/-- **Non-constant branch of the space-form converse, curved members
+`ε = ±1`.** From value-separated alternating extrema, endpoint winding produces
+a closed admissible trajectory for `κ ∘ h₁`; reconstruction realizes `κ ∘ h₁`,
+`spaceForm_simplicity` gives simplicity, and pulling back along the `C¹`
+inverse `H = h₁⁻¹` yields a simple closed realization of `κ`. (Transport of
+`sphericalConverse_pos_nonconst`.) The winding degree of freedom is the flow's
+start point, available only for `ε ≠ 0` (the conjugation coefficient
+`η(ε) = 2εr*/(c²+ε)` of `stepError_expansion` vanishes at `ε = 0`); the flat
+member has its own branch `spaceFormConverse_pos_nonconst_flat`. -/
+private theorem spaceFormConverse_pos_nonconst_curved {ε : ℝ} (hε : ε = 1 ∨ ε = -1)
     {κ : ℝ → ℝ} (hκcf : IsCurvatureFunction κ) (hfloor : ε < 0 → ∀ θ, 1 < κ θ)
     {p₁ q₁ p₂ q₂ : ℝ} (h12 : p₁ < q₁) (h23 : q₁ < p₂)
     (h34 : p₂ < q₂) (h41 : q₂ < p₁ + 2 * π)
@@ -607,12 +617,379 @@ private theorem spaceFormConverse_pos_nonconst {ε : ℝ} (hε : ε = 1 ∨ ε =
   rw [hμeq] at hcomp
   exact ⟨_, isSimpleClosed_comp hsimple hHc hHmono hHper, hcomp⟩
 
+/-! ## The flat branch (`ε = 0`)
+
+At `ε = 0` the gauge speed `q_{0,κ}(θ, z) = 1/(2κ(θ))` does not depend on the
+position, so the flow endpoint map is *constant* in the start point: the
+first-variation endpoint winding of the curved members degenerates (the
+conjugation coefficient `η(0) = 0` in `stepError_expansion`). Closure instead
+comes from the classical alignment winding, in the `L¹`-quantitative form
+`reduction_justified_L1`; the `L¹` step-closeness bound then confines the
+explicit reconstruction curve within `1/(2c) + O(τ + h)` of the model-circle
+center — inside the open unit disk, thanks to the flat floor `κ > 1/2`. -/
+
+/-- Pointwise flat step-radius comparison: for levels `x, c > 1/2` with
+`|x − c| ≤ h/2`, the halved radii satisfy `|1/(2x) − 1/(2c)| ≤ h` (the
+denominator `4xc > 1` absorbs the halving). Stated outside the main proof so
+that plain hypotheses (not `set`-bound local definitions) feed `nlinarith`. -/
+private lemma flat_half_radius_close {x c h : ℝ} (hc : 1 / 2 < c) (hx : 1 / 2 < x)
+    (hh0 : 0 < h) (hxc : |x - c| ≤ h / 2) : |1 / (2 * x) - 1 / (2 * c)| ≤ h := by
+  have hx0 : 0 < x := by linarith
+  have hc0 : 0 < c := by linarith
+  have hd : 1 / (2 * x) - 1 / (2 * c) = (c - x) / (2 * x * c) := by
+    field_simp
+  have hcx : |c - x| ≤ h / 2 := by rwa [abs_sub_comm]
+  have h2xc : (0 : ℝ) < 2 * x * c :=
+    mul_pos (mul_pos (by norm_num : (0 : ℝ) < 2) hx0) hc0
+  have hx2 : (0 : ℝ) < x - 1 / 2 := by linarith
+  have hc2 : (0 : ℝ) < c - 1 / 2 := by linarith
+  have hhalf_le : (1 : ℝ) / 2 ≤ 2 * x * c := by nlinarith [mul_pos hx2 hc2]
+  rw [hd, abs_div, abs_of_pos h2xc, div_le_iff₀ h2xc]
+  calc |c - x| ≤ h / 2 := hcx
+    _ = h * (1 / 2) := by ring
+    _ ≤ h * (2 * x * c) := mul_le_mul_of_nonneg_left hhalf_le hh0.le
+
+/-- **Flat realization from a positive weight.** At `ε = 0` the gauge equation
+in the tangent-angle gauge `φ = id` reads `‖z'(θ)‖ = ρ(θ)` with the halved
+radius `ρ = 1/(2κ)` (`κ·ρ = 1/2`); any translate of the Euclidean
+reconstruction curve of `ρ` that stays in the open unit disk realizes `κ` at
+`ε = 0`. -/
+private lemma flat_realizes_reconstruct {κ' ρ : ℝ → ℝ} (hρc : Continuous ρ)
+    (hρpos : ∀ s, 0 < ρ s) (hspeed : ∀ s, κ' s * ρ s = 1 / 2) (w : ℂ)
+    (hconf : ∀ t, ‖w + reconstruct ρ t‖ < 1) :
+    Realizes 0 (fun t => w + reconstruct ρ t) κ' := by
+  have hd : ∀ t : ℝ, HasDerivAt (fun t => w + reconstruct ρ t)
+      (Complex.exp ((t : ℂ) * Complex.I) * (ρ t : ℂ)) t := fun t =>
+    (hasDerivAt_reconstruct hρc t).const_add w
+  have hderiv : ∀ t : ℝ, deriv (fun t => w + reconstruct ρ t) t
+      = Complex.exp ((t : ℂ) * Complex.I) * (ρ t : ℂ) := fun t => (hd t).deriv
+  have hnorm : ∀ t : ℝ, ‖deriv (fun t => w + reconstruct ρ t) t‖ = ρ t := by
+    intro t
+    rw [hderiv, norm_mul, Complex.norm_exp_ofReal_mul_I, one_mul,
+      Complex.norm_real, Real.norm_eq_abs, abs_of_pos (hρpos t)]
+  refine ⟨?_, ?_, hconf, id, differentiable_id, ?_, ?_⟩
+  · refine contDiff_one_iff_deriv.mpr ⟨fun t => (hd t).differentiableAt, ?_⟩
+    have heq : deriv (fun t => w + reconstruct ρ t)
+        = fun t : ℝ => Complex.exp ((t : ℂ) * Complex.I) * (ρ t : ℂ) := funext hderiv
+    rw [heq]
+    exact (Complex.continuous_exp.comp
+      (Complex.continuous_ofReal.mul continuous_const)).mul
+      (Complex.continuous_ofReal.comp hρc)
+  · intro t
+    rw [hderiv]
+    exact mul_ne_zero (Complex.exp_ne_zero _)
+      (by exact_mod_cast (hρpos t).ne')
+  · intro t
+    simp only [id_eq]
+    rw [hnorm t, hderiv t, mul_comm]
+  · intro t
+    have hid : deriv (id : ℝ → ℝ) t = 1 := by simp
+    rw [hid, hnorm t]
+    simp only [zero_mul, sub_zero, add_zero, mul_one]
+    linarith [hspeed t]
+
+/-- **Non-constant branch of the space-form converse, flat member `ε = 0`.**
+The alignment winding (`reduction_justified_L1`) produces a reparametrization
+`h` with `errorVector (1/(κ∘h)) = 0` — the flow of `κ ∘ h` closes exactly,
+since at `ε = 0` the flow is the explicit translate of the reconstruction
+curve of the halved radius `ρ = 1/(2(κ∘h))` — together with an `L¹` bound
+against a two-valued step weight at levels `c ∓ h/2`. The step weight is
+pointwise within `O(h)` of the model radius `1/(2c)`, so the curve stays within
+`1/(2c) + s₀/2 < 1` of the model-circle center: confinement from the flat floor
+`κ > 1/2` alone, with no flow margins. Simplicity is
+`isSimpleClosed_reconstruct`, and pulling back along the `C¹` inverse of `h`
+realizes `κ` itself. -/
+private theorem spaceFormConverse_pos_nonconst_flat {κ : ℝ → ℝ}
+    (hκcf : IsCurvatureFunction κ) (hfloor : ∀ θ, 1 / 2 < κ θ)
+    {p₁ q₁ p₂ q₂ : ℝ} (h12 : p₁ < q₁) (h23 : q₁ < p₂)
+    (h34 : p₂ < q₂) (h41 : q₂ < p₁ + 2 * π)
+    (hsep : max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂)) :
+    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes 0 z κ := by
+  obtain ⟨hκc, hκper, hκpos⟩ := hκcf
+  have hπ := Real.pi_pos
+  -- The mid level `c`, the value gap `w`, and the flat model radius `1/(2c)`.
+  set c : ℝ := (max (κ q₁) (κ q₂) + min (κ p₁) (κ p₂)) / 2 with hcdef
+  set w : ℝ := (min (κ p₁) (κ p₂) - max (κ q₁) (κ q₂)) / 2 with hwdef
+  have hw0 : 0 < w := by rw [hwdef]; linarith
+  have hKq : 1 / 2 < max (κ q₁) (κ q₂) :=
+    lt_of_lt_of_le (hfloor q₁) (le_max_left _ _)
+  have hcKq : max (κ q₁) (κ q₂) = c - w := by rw [hcdef, hwdef]; ring
+  have hcKp : min (κ p₁) (κ p₂) = c + w := by rw [hcdef, hwdef]; ring
+  have hcw12 : 1 / 2 < c - w := by rw [← hcKq]; exact hKq
+  have hc12 : 1 / 2 < c := by linarith
+  have hc0 : 0 < c := by linarith
+  set rs : ℝ := 1 / (2 * c) with hrsdef
+  have h2c0 : (0 : ℝ) < 2 * c := by linarith
+  have hrs0 : 0 < rs := by rw [hrsdef]; exact one_div_pos.mpr h2c0
+  have hrs1 : rs < 1 := by
+    rw [hrsdef, div_lt_one h2c0]; linarith
+  set s₀ : ℝ := 1 - rs with hs₀def
+  have hs₀ : 0 < s₀ := by rw [hs₀def]; linarith
+  -- The step height `h` and the levels `a = c − h/2 < b = c + h/2`.
+  set h : ℝ := min w (s₀ / (8 * π)) with hhdef
+  have hh0 : 0 < h := lt_min hw0 (div_pos hs₀ (by positivity))
+  have hhw : h ≤ w := min_le_left _ _
+  have hh8π : h ≤ s₀ / (8 * π) := min_le_right _ _
+  set a : ℝ := c - h / 2 with hadef
+  set b : ℝ := c + h / 2 with hbdef
+  have hab : a < b := by rw [hadef, hbdef]; linarith
+  have haKq : max (κ q₁) (κ q₂) < a := by rw [hadef, hcKq]; linarith
+  have hbKp : b < min (κ p₁) (κ p₂) := by rw [hbdef, hcKp]; linarith
+  have ha12 : 1 / 2 < a := lt_trans hKq haKq
+  have hb12 : 1 / 2 < b := by rw [hbdef]; linarith
+  have ha0 : 0 < a := by linarith
+  obtain ⟨θ₁, θ₂, θ₃, θ₄, ht12, ht23, ht34, ht41, hval₁, hval₂, hval₃, hval₄⟩ :=
+    exists_abab_levels hκc hκper h12 h23 h34 h41 haKq hab hbKp
+  -- The closing reparametrization with `L¹` step control.
+  obtain ⟨g, hmono, hcont, hper, hE0, ⟨sw, hswm, hswab, hswL1⟩, v, hvc, hvpos, hvd⟩ :=
+    reduction_justified_L1 ⟨hκc, hκper, hκpos⟩ ha0 hab ht12 ht23 ht34 ht41
+      hval₁ hval₂ hval₃ hval₄ (by linarith : (0 : ℝ) < s₀ / 2)
+  set κ' : ℝ → ℝ := fun θ => κ (g θ) with hκ'def
+  have hκ'c : Continuous κ' := hκc.comp hcont
+  have hκ'pos : ∀ θ, 0 < κ' θ := fun θ => hκpos _
+  have hκ'per : Function.Periodic κ' (2 * π) := by
+    intro θ
+    simp only [hκ'def]
+    rw [hper θ, hκper (g θ)]
+  -- The halved radius weight `ρ = 1/(2κ')` and its closure.
+  set ρ : ℝ → ℝ := fun s => 1 / (2 * κ' s) with hρdef
+  have hρc : Continuous ρ :=
+    continuous_const.div (continuous_const.mul hκ'c) fun s =>
+      ne_of_gt (by linarith [hκ'pos s])
+  have hρpos : ∀ s, 0 < ρ s := fun s => by
+    rw [hρdef]
+    exact one_div_pos.mpr (by linarith [hκ'pos s])
+  have hρper : Function.Periodic ρ (2 * π) := by
+    intro s
+    simp only [hρdef]
+    rw [hκ'per s]
+  have hρeq : ∀ s, ρ s = radius κ' s / 2 := by
+    intro s
+    have hne := (hκ'pos s).ne'
+    simp only [hρdef, radius]
+    field_simp
+  have hEρ : errorVector ρ = 0 := by
+    have hlin : errorVector ρ = errorVector (radius κ') / 2 := by
+      unfold errorVector reconstruct
+      rw [← intervalIntegral.integral_div]
+      refine intervalIntegral.integral_congr fun s _ => ?_
+      rw [hρeq s]
+      push_cast
+      ring
+    rw [hlin, hE0, zero_div]
+  -- Pointwise: the halved step weight is within `h` of the model radius.
+  have hhalf : ∀ x : ℝ, 1 / 2 < x → |x - c| ≤ h / 2 → |1 / (2 * x) - rs| ≤ h := by
+    intro x hx hxc
+    rw [hrsdef]
+    exact flat_half_radius_close hc12 hx hh0 hxc
+  have haC : |a - c| ≤ h / 2 := by
+    rw [hadef, show c - h / 2 - c = -(h / 2) by ring, abs_neg,
+      abs_of_pos (by linarith)]
+  have hbC : |b - c| ≤ h / 2 := by
+    rw [hbdef, show c + h / 2 - c = h / 2 by ring, abs_of_pos (by linarith)]
+  have hswrs : ∀ s, |1 / (2 * sw s) - rs| ≤ h := by
+    intro s
+    rcases hswab s with hs | hs <;> rw [hs]
+    · exact hhalf a ha12 haC
+    · exact hhalf b hb12 hbC
+  -- The `L¹` deviation of `ρ` from the model radius is at most `s₀/2`.
+  have hsw0 : ∀ s, 0 < sw s := fun s => by
+    rcases hswab s with hs | hs <;> rw [hs] <;> linarith
+  have hradc : Continuous (radius κ') :=
+    continuous_const.div hκ'c fun s => (hκ'pos s).ne'
+  have hswint : IntervalIntegrable (radius sw) MeasureTheory.volume 0 (2 * π) := by
+    rw [intervalIntegrable_iff]
+    apply MeasureTheory.Integrable.mono' (g := fun _ => 1 / a)
+    · rw [Set.uIoc_of_le (by positivity)]
+      exact MeasureTheory.integrableOn_const measure_Ioc_lt_top.ne
+    · exact (measurable_const.div hswm).aestronglyMeasurable
+    · refine MeasureTheory.ae_of_all _ fun s => ?_
+      rw [Real.norm_eq_abs]
+      rcases hswab s with hs | hs <;> simp only [radius, hs]
+      · rw [abs_of_pos (one_div_pos.mpr ha0)]
+      · rw [abs_of_pos (one_div_pos.mpr (lt_trans ha0 hab))]
+        exact one_div_le_one_div_of_le ha0 hab.le
+  have hdiffint : IntervalIntegrable (fun s => |radius κ' s - radius sw s|)
+      MeasureTheory.volume 0 (2 * π) :=
+    ((hradc.intervalIntegrable _ _).sub hswint).abs
+  have hint : (∫ s in (0 : ℝ)..(2 * π), |ρ s - rs|) ≤ s₀ / 2 := by
+    have hpt : ∀ s, |ρ s - rs| ≤ |radius κ' s - radius sw s| / 2 + h := by
+      intro s
+      have h2 : radius sw s / 2 = 1 / (2 * sw s) := by
+        have := (hsw0 s).ne'
+        simp only [radius]
+        field_simp
+      have h1 : ρ s - rs
+          = (radius κ' s - radius sw s) / 2 + (1 / (2 * sw s) - rs) := by
+        rw [hρeq s, ← h2]
+        ring
+      calc |ρ s - rs|
+          = |(radius κ' s - radius sw s) / 2 + (1 / (2 * sw s) - rs)| := by rw [h1]
+        _ ≤ |(radius κ' s - radius sw s) / 2| + |1 / (2 * sw s) - rs| :=
+            abs_add_le _ _
+        _ ≤ |radius κ' s - radius sw s| / 2 + h := by
+            rw [abs_div, abs_two]
+            exact add_le_add le_rfl (hswrs s)
+    have hi1 : IntervalIntegrable (fun s => |ρ s - rs|)
+        MeasureTheory.volume 0 (2 * π) :=
+      ((hρc.sub continuous_const).abs).intervalIntegrable _ _
+    have hi2 : IntervalIntegrable (fun s => |radius κ' s - radius sw s| / 2 + h)
+        MeasureTheory.volume 0 (2 * π) :=
+      (hdiffint.div_const 2).add intervalIntegrable_const
+    calc (∫ s in (0 : ℝ)..(2 * π), |ρ s - rs|)
+        ≤ ∫ s in (0 : ℝ)..(2 * π), (|radius κ' s - radius sw s| / 2 + h) :=
+          intervalIntegral.integral_mono_on (by positivity) hi1 hi2
+            fun s _ => hpt s
+      _ = (∫ s in (0 : ℝ)..(2 * π), |radius κ' s - radius sw s|) / 2
+            + (2 * π) * h := by
+          rw [intervalIntegral.integral_add (hdiffint.div_const 2)
+            intervalIntegrable_const, intervalIntegral.integral_div,
+            intervalIntegral.integral_const, smul_eq_mul, sub_zero]
+      _ ≤ (s₀ / 2) / 2 + (2 * π) * (s₀ / (8 * π)) := by
+          have h2 : (2 * π) * h ≤ (2 * π) * (s₀ / (8 * π)) :=
+            mul_le_mul_of_nonneg_left hh8π (by positivity)
+          linarith [hswL1]
+      _ ≤ s₀ / 2 := by
+          have h3 : (2 * π) * (s₀ / (8 * π)) = s₀ / 4 := by
+            field_simp
+            ring
+          rw [h3]
+          linarith
+  -- The realized curve: the translate of the reconstruction of `ρ` centered
+  -- at the model-circle center `-rs·i`.
+  set Z : ℝ → ℂ := fun t => -((rs : ℝ) • Complex.I) + reconstruct ρ t with hZdef
+  have hsimple0 : IsSimpleClosed (reconstruct ρ) :=
+    isSimpleClosed_reconstruct hρc hρper hρpos hEρ
+  have hZsimple : IsSimpleClosed Z := by
+    rw [hZdef]
+    exact isSimpleClosed_const_add hsimple0 _
+  have hZper : Function.Periodic Z (2 * π) := hZsimple.1
+  -- Confinement: `‖Z‖ ≤ rs + s₀/2 < 1`, first on `[0, 2π]`, then by periodicity.
+  have hconfIcc : ∀ t ∈ Set.Icc (0 : ℝ) (2 * π), ‖Z t‖ < 1 := by
+    intro t ht
+    have hexpc : Continuous fun s : ℝ =>
+        Complex.exp ((s : ℂ) * Complex.I) :=
+      Complex.continuous_exp.comp (Complex.continuous_ofReal.mul continuous_const)
+    have hcont1 : Continuous fun s : ℝ =>
+        Complex.exp ((s : ℂ) * Complex.I) * ((ρ s : ℝ) : ℂ) :=
+      hexpc.mul (Complex.continuous_ofReal.comp hρc)
+    have hcont2 : Continuous fun s : ℝ =>
+        Complex.exp ((s : ℂ) * Complex.I) * ((rs : ℝ) : ℂ) :=
+      hexpc.mul continuous_const
+    have hdiff : reconstruct ρ t - reconstruct (fun _ => rs) t
+        = ∫ s in (0 : ℝ)..t,
+            Complex.exp ((s : ℂ) * Complex.I) * ((ρ s - rs : ℝ) : ℂ) := by
+      have h1 : (∫ s in (0 : ℝ)..t,
+            Complex.exp ((s : ℂ) * Complex.I) * ((ρ s - rs : ℝ) : ℂ))
+          = (∫ s in (0 : ℝ)..t,
+              (Complex.exp ((s : ℂ) * Complex.I) * ((ρ s : ℝ) : ℂ)
+                - Complex.exp ((s : ℂ) * Complex.I) * ((rs : ℝ) : ℂ))) := by
+        refine intervalIntegral.integral_congr fun s _ => ?_
+        push_cast
+        ring
+      rw [h1, intervalIntegral.integral_sub (hcont1.intervalIntegrable _ _)
+        (hcont2.intervalIntegrable _ _)]
+      rfl
+    have hnormdiff : ‖reconstruct ρ t - reconstruct (fun _ => rs) t‖ ≤ s₀ / 2 := by
+      rw [hdiff]
+      calc ‖∫ s in (0 : ℝ)..t,
+            Complex.exp ((s : ℂ) * Complex.I) * ((ρ s - rs : ℝ) : ℂ)‖
+          ≤ ∫ s in (0 : ℝ)..t,
+              ‖Complex.exp ((s : ℂ) * Complex.I) * ((ρ s - rs : ℝ) : ℂ)‖ :=
+            intervalIntegral.norm_integral_le_integral_norm ht.1
+        _ = ∫ s in (0 : ℝ)..t, |ρ s - rs| := by
+            refine intervalIntegral.integral_congr fun s _ => ?_
+            rw [norm_mul, Complex.norm_exp_ofReal_mul_I, one_mul,
+              Complex.norm_real, Real.norm_eq_abs]
+        _ ≤ ∫ s in (0 : ℝ)..(2 * π), |ρ s - rs| := by
+            refine intervalIntegral.integral_mono_interval le_rfl ht.1 ht.2
+              (MeasureTheory.ae_of_all _ fun s => abs_nonneg _) ?_
+            exact ((hρc.sub continuous_const).abs).intervalIntegrable _ _
+        _ ≤ s₀ / 2 := hint
+    have hbase : ‖-((rs : ℝ) • Complex.I) + reconstruct (fun _ => rs) t‖ = rs := by
+      rw [reconstruct_const]
+      have heq : -((rs : ℝ) • Complex.I)
+            + (rs : ℂ) * Complex.I * (1 - Complex.exp ((t : ℂ) * Complex.I))
+          = -((rs : ℂ) * Complex.I * Complex.exp ((t : ℂ) * Complex.I)) := by
+        rw [Complex.real_smul]
+        ring
+      rw [heq, norm_neg, norm_mul, norm_mul, Complex.norm_I,
+        Complex.norm_exp_ofReal_mul_I, Complex.norm_real, Real.norm_eq_abs,
+        abs_of_pos hrs0, mul_one, mul_one]
+    have hsplit : Z t = (-((rs : ℝ) • Complex.I) + reconstruct (fun _ => rs) t)
+        + (reconstruct ρ t - reconstruct (fun _ => rs) t) := by
+      rw [hZdef]
+      ring
+    calc ‖Z t‖ ≤ rs + s₀ / 2 := by
+          rw [hsplit]
+          exact le_trans (norm_add_le _ _) (add_le_add hbase.le hnormdiff)
+      _ < 1 := by rw [hs₀def]; linarith
+  have hconf : ∀ t, ‖Z t‖ < 1 := by
+    intro t
+    obtain ⟨y, hy, hyt⟩ := hZper.exists_mem_Ico₀ Real.two_pi_pos t
+    rw [hyt]
+    exact hconfIcc y ⟨hy.1, hy.2.le⟩
+  -- The realization of `κ' = κ ∘ g` at `ε = 0`, then pullback along `H = g⁻¹`.
+  have hspeed : ∀ s, κ' s * ρ s = 1 / 2 := by
+    intro s
+    have hne := (hκ'pos s).ne'
+    rw [hρdef]
+    field_simp
+  have hZreal : Realizes 0 Z κ' := by
+    rw [hZdef]
+    exact flat_realizes_reconstruct hρc hρpos hspeed _ hconf
+  obtain ⟨H, hHc, hHmono, hh₁H, hHh₁, hHper, hHd⟩ :=
+    exists_C1_circle_inverse hvc hvpos hvd hper
+  have hHdiff : Differentiable ℝ H := fun t => (hHd t).differentiableAt
+  have hHderiv : ∀ t, deriv H t = 1 / v (H t) := fun t => (hHd t).deriv
+  have hHC1 : ContDiff ℝ 1 H := by
+    refine contDiff_one_iff_deriv.mpr ⟨hHdiff, ?_⟩
+    have hde : deriv H = fun t => 1 / v (H t) := funext hHderiv
+    rw [hde]
+    exact continuous_const.div (hvc.comp hHc) fun t => (hvpos (H t)).ne'
+  have hHpos : ∀ t, 0 < deriv H t := by
+    intro t
+    rw [hHderiv t]
+    exact one_div_pos.mpr (hvpos (H t))
+  have hcomp := spaceFormRealizes_comp hZreal hHC1 hHpos
+  have hμeq : κ' ∘ H = κ := by
+    funext t
+    simp only [Function.comp_apply, hκ'def]
+    rw [hh₁H t]
+  rw [hμeq] at hcomp
+  exact ⟨_, isSimpleClosed_comp hZsimple hHc hHmono hHper, hcomp⟩
+
+/-- **Non-constant branch of the space-form converse, all three members.**
+Dispatches the curved members `ε = ±1` to the endpoint-winding branch and the
+flat member `ε = 0` to the alignment-winding branch. -/
+private theorem spaceFormConverse_pos_nonconst {ε : ℝ} (hε : ε = 1 ∨ ε = -1 ∨ ε = 0)
+    {κ : ℝ → ℝ} (hκcf : IsCurvatureFunction κ)
+    (hfloor : ε ≤ 0 → ∀ θ, (1 - ε) / 2 < κ θ)
+    {p₁ q₁ p₂ q₂ : ℝ} (h12 : p₁ < q₁) (h23 : q₁ < p₂)
+    (h34 : p₂ < q₂) (h41 : q₂ < p₁ + 2 * π)
+    (hsep : max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂)) :
+    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes ε z κ := by
+  rcases hε with rfl | rfl | rfl
+  · exact spaceFormConverse_pos_nonconst_curved (Or.inl rfl) hκcf
+      (fun hlt => absurd hlt (by norm_num)) h12 h23 h34 h41 hsep
+  · refine spaceFormConverse_pos_nonconst_curved (Or.inr rfl) hκcf
+      (fun _ θ => ?_) h12 h23 h34 h41 hsep
+    have := hfloor (by norm_num) θ
+    linarith
+  · refine spaceFormConverse_pos_nonconst_flat hκcf (fun θ => ?_)
+      h12 h23 h34 h41 hsep
+    have := hfloor le_rfl θ
+    linarith
+
 /-- **Space-form converse, positive stage.** If `κ` satisfies the `ε`-generic
-four-vertex admissibility hypothesis (`ε ∈ {+1, −1}`), there is a simple closed
-curve confined to the open disk realizing `κ` as its space-form geodesic
-curvature. `ε = +1` is `Gluck.sphericalConverse_pos`; `ε = −1` is the hyperbolic
-converse. (Transport of `sphericalConverse_pos`.) -/
-theorem spaceFormConverse_pos {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {κ : ℝ → ℝ}
+four-vertex admissibility hypothesis (`ε ∈ {+1, −1, 0}`), there is a simple
+closed curve confined to the open disk realizing `κ` as its space-form geodesic
+curvature. `ε = +1` is `Gluck.sphericalConverse_pos`; `ε = −1` is the
+hyperbolic converse; `ε = 0` is the flat member, which — dilated out of the
+disk gauge by `Gluck.gluck_converse_spaceForm` — gives a second proof of
+Gluck's Euclidean converse `Gluck.gluck_converse`.
+(Transport of `sphericalConverse_pos`.) -/
+theorem spaceFormConverse_pos {ε : ℝ} (hε : ε = 1 ∨ ε = -1 ∨ ε = 0) {κ : ℝ → ℝ}
     (hκ : SpaceFormFourVertex ε κ) :
     ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes ε z κ := by
   obtain ⟨hκcf, hfv, hfloor⟩ := hκ

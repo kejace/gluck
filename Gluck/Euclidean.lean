@@ -6,6 +6,7 @@ Authors: kejace
 import Gluck.Euclidean.FourVertex
 import Gluck.Euclidean.ArcLength
 import Gluck.Euclidean.DahlbergStep2
+import Gluck.Euclidean.SpaceFormInstance
 
 /-!
 # The Euclidean converse to the four-vertex theorem (E², K = 0) — aggregator

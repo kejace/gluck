@@ -16,11 +16,15 @@
 \section{Overview}
 
 This chapter assembles the $\varepsilon$-generic \emph{space-form converse}: for
-ambient sign $\varepsilon\in\{+1,-1\}$ (the disk model of $S^2$ at $\varepsilon=+1$,
-of $H^2$ at $\varepsilon=-1$), a curvature profile satisfying the appropriate
-four-vertex admissibility hypothesis is realized as the space-form geodesic
-curvature (\cref{def:spaceform_realizes}) of a simple closed curve confined to the
-open unit disk. There are two stages.
+ambient sign $\varepsilon\in\{+1,-1,0\}$ (the disk model of $S^2$ at
+$\varepsilon=+1$, of $H^2$ at $\varepsilon=-1$, and the flat plane in the
+conformal gauge $\lambda=2$ at $\varepsilon=0$), a curvature profile
+satisfying the appropriate four-vertex admissibility hypothesis is realized as
+the space-form geodesic curvature (\cref{def:spaceform_realizes}) of a simple
+closed curve confined to the open unit disk. There are two stages, plus the
+Euclidean instance of the positive stage
+(\cref{thm:gluck_converse_spaceForm}), which yields a second proof of Gluck's
+theorem.
 
 \paragraph{Positive stage (\texttt{Reconstruction.lean},
 \texttt{EndpointWinding.lean}, \texttt{Converse.lean}).}
@@ -32,20 +36,33 @@ heart (\cref{thm:spaceform_endpoint_winding}) only through the conjugation
 coefficient
 \[
   \eta(\varepsilon)\;=\;\frac{2\,r^\ast(\varepsilon,c)\,\varepsilon}{c^2+\varepsilon},
-  \qquad r^\ast(\varepsilon,c)=\varepsilon\bigl(\sqrt{c^2+\varepsilon}-c\bigr)
+  \qquad r^\ast(\varepsilon,c)=\frac{1}{\sqrt{c^2+\varepsilon}+c}
   \ \text{(\cref{def:centered_radius})},
 \]
-positive for $\varepsilon=+1$, negative for $\varepsilon=-1$, but always
-\emph{nonzero} (\texttt{stepError\_coeff\_ne\_zero}); since the winding replica
+positive for $\varepsilon=+1$, negative for $\varepsilon=-1$, and
+\emph{nonzero} at both curved signs (\texttt{stepError\_coeff\_ne\_zero});
+since the winding replica
 (\cref{lem:winding_conj_loop}) and the perturbation lemma
 (\cref{lem:winding_number_c_perturb}) only see the \emph{norm} of the
-conjugate-dominant term, the spherical winding argument transfers verbatim. The
-new hyperbolic phenomenon is the \emph{escape-velocity floor}: at
+conjugate-dominant term, the spherical winding argument transfers verbatim
+across $\varepsilon=\pm1$. The
+hyperbolic phenomenon is the \emph{escape-velocity floor}: at
 $\varepsilon=-1$ the hypothesis carries $\kappa>1$ (curvature above a horocycle,
 matching $\operatorname{coth}R>1$ for hyperbolic circles), which makes
-$r^\ast(-1,c)=c-\sqrt{c^2-1}$ real and in $(0,1)$. Instantiating
+$r^\ast(-1,c)=c-\sqrt{c^2-1}$ real and in $(0,1)$. The flat member
+$\varepsilon=0$ is different in kind: the gauge field
+$q_{0,\kappa}(\theta,z)=1/(2\kappa(\theta))$ is independent of the position,
+so the endpoint map is \emph{constant} in the start point, $\eta(0)=0$, and
+the endpoint winding degenerates. Its non-constant branch instead closes by
+the classical alignment winding in the $L^1$-quantitative form
+\cref{lem:reduction_justified_L1}, with confinement supplied by an explicit
+comparison of the reconstruction curve with the model circle of radius
+$1/(2c)<1$ (the flat floor $\kappa>1/2$) — no flow, margins, or Gr\"onwall
+transport needed: the flat case is the easy member. Instantiating
 $\varepsilon=+1$ recovers \cref{thm:spherical_converse_pos}; $\varepsilon=-1$
-yields the positive hyperbolic converse \cref{thm:hyperbolic_converse_pos}.
+yields the positive hyperbolic converse \cref{thm:hyperbolic_converse_pos};
+$\varepsilon=0$ feeds the second proof of Gluck's Euclidean theorem
+(\cref{sec:two_proofs}).
 
 \paragraph{Mixed stage (\texttt{MixedConverse.lean}).}
 \cref{thm:spaceform_mixed_converse} removes global positivity, replacing the
@@ -129,8 +146,11 @@ hyperbolic transport).
         lem:sphere_curvature_lower_bound, lem:exists_abab_levels,
         lem:step_L1_reparam, lem:winding_conj_loop,
         lem:winding_number_c_perturb, thm:existence_of_zero}
-  Let $\varepsilon\in\{+1,-1\}$, let $\kappa$ be a curvature function
-  (\cref{def:is_curvature_function}) with the escape-velocity floor
+  Let $\varepsilon\in\{+1,-1\}$ (genuinely two-sign: at $\varepsilon=0$ the
+  endpoint map is constant in $z_0$ and the winding degree of freedom is dead,
+  $\eta(0)=0$ — the flat member closes through
+  \cref{lem:reduction_justified_L1} instead), let $\kappa$ be a curvature
+  function (\cref{def:is_curvature_function}) with the escape-velocity floor
   $\kappa>1$ when $\varepsilon<0$, and let $p_1<q_1<p_2<q_2<p_1+2\pi$ satisfy the
   value separation
   $\max(\kappa(q_1),\kappa(q_2))<\min(\kappa(p_1),\kappa(p_2))$. Then there exist
@@ -187,8 +207,10 @@ hyperbolic transport).
   \label{lem:spaceform_circle_realizes}
   \lean{Gluck.SpaceForm.spaceFormCircle_realizes}
   \uses{def:spaceform_realizes, def:centered_radius, def:is_simple_closed}
-  Let $\varepsilon\in\{+1,-1\}$ and let $c$ be admissible for $\varepsilon$
-  ($0<c$ if $\varepsilon=+1$; $1<c$ if $\varepsilon=-1$). Then the centered
+  Let $\varepsilon\in\{+1,-1,0\}$ and let $c$ be admissible for $\varepsilon$
+  ($0<c$ if $\varepsilon=+1$; $1<c$ if $\varepsilon=-1$; $1/2<c$ if
+  $\varepsilon=0$, where the circle is the Euclidean circle of coordinate
+  radius $1/(2c)$). Then the centered
   circle $z(\theta)=(-r)\,ie^{i\theta}$ of radius $r=r^\ast(\varepsilon,c)$
   (\cref{def:centered_radius}) is a simple closed curve with
   $\mathrm{Realizes}\;\varepsilon\;z\;(\kappa\equiv c)$. (Transport of
@@ -232,35 +254,69 @@ hyperbolic transport).
   \label{thm:spaceform_converse_pos}
   \lean{Gluck.SpaceForm.spaceFormConverse_pos}
   \uses{def:is_curvature_function, def:four_vertex_condition,
-        def:spaceform_realizes, def:is_simple_closed,
+        def:spaceform_realizes, def:is_simple_closed, def:spaceform_four_vertex,
         thm:spaceform_endpoint_winding, lem:spaceform_reconstruction,
-        lem:spaceform_circle_realizes, lem:spaceform_realizes_comp}
-  Let $\varepsilon\in\{+1,-1\}$ and let $\kappa$ satisfy the $\varepsilon$-generic
+        lem:spaceform_circle_realizes, lem:spaceform_realizes_comp,
+        lem:reduction_justified_L1}
+  Let $\varepsilon\in\{+1,-1,0\}$ and let $\kappa$ satisfy the $\varepsilon$-generic
   four-vertex admissibility hypothesis
   $\mathrm{SpaceFormFourVertex}\;\varepsilon\;\kappa$: $\kappa$ is a curvature
   function (\cref{def:is_curvature_function}: continuous, $2\pi$-periodic,
   strictly positive) satisfying the four-vertex condition
-  (\cref{def:four_vertex_condition}), together with the escape-velocity floor
-  $\kappa>1$ when $\varepsilon<0$. Then there is a simple closed curve $z$
-  confined to the open unit disk with
+  (\cref{def:four_vertex_condition}), together with the uniform confinement
+  floor $\kappa>(1-\varepsilon)/2$ when $\varepsilon\le0$ ($\kappa>1$ at
+  $\varepsilon=-1$, $\kappa>1/2$ at $\varepsilon=0$). Then there is a simple
+  closed curve $z$ confined to the open unit disk with
   \[
     \mathrm{IsSimpleClosed}\;z\ \wedge\ \mathrm{Realizes}\;\varepsilon\;z\;\kappa.
   \]
   At $\varepsilon=+1$ this recovers \cref{thm:spherical_converse_pos}; at
   $\varepsilon=-1$ it yields the positive hyperbolic converse
-  \cref{thm:hyperbolic_converse_pos}.
+  \cref{thm:hyperbolic_converse_pos}; at $\varepsilon=0$, dilated out of the
+  disk gauge, it yields the second proof of Gluck's Euclidean converse
+  (\cref{thm:gluck_converse_spaceForm}).
 \end{theorem}
 
 \begin{proof}
   \uses{thm:spaceform_endpoint_winding, lem:spaceform_reconstruction,
         lem:spaceform_circle_realizes, lem:spaceform_realizes_comp,
         lem:exists_c1_circle_inverse, lem:is_simple_closed_comp,
-        def:spaceform_flow}
+        def:spaceform_flow, lem:reduction_justified_L1,
+        cor:positive_curvature_implies_simple, lem:exists_abab_levels,
+        def:reconstruct, def:error_vector}
   \leanok
   Split the four-vertex disjunction. \emph{Constant branch:} $\kappa\equiv c$
-  with $c>0$ (and $c>1$ from the floor if $\varepsilon=-1$), so
+  with $c>0$ (and $c$ above the threshold $(1-\varepsilon)/2$ from the floor if
+  $\varepsilon\le0$), so
   \cref{lem:spaceform_circle_realizes} produces the model circle directly.
-  \emph{Non-constant branch:} \cref{thm:spaceform_endpoint_winding} supplies
+
+  \emph{Non-constant branch, flat member $\varepsilon=0$
+  (\texttt{spaceFormConverse\_pos\_nonconst\_flat}):} let $c$ be the
+  midpoint of the value-separation window and $r^\ast=1/(2c)<1$ (the floor
+  $\kappa>1/2$ gives $c>1/2$); put $s_0=1-r^\ast>0$, pick the step contrast
+  $h\le\min(w,\,s_0/8\pi)$ and levels $a=c-h/2$, $b=c+h/2$ inside the
+  window (\cref{lem:exists_abab_levels}). The alignment winding
+  \cref{lem:reduction_justified_L1} at tolerance $\tau=s_0/2$ returns a $C^1$
+  circle reparametrization $g$ with $E(1/(\kappa\circ g))=0$ and a
+  two-valued step weight $\sigma\in\{a,b\}$ with
+  $\int_0^{2\pi}|1/(\kappa\circ g)-1/\sigma|<s_0/2$. The realized curve is
+  the explicit translate $Z=-ir^\ast+\alpha_{\rho}$ of the reconstruction
+  curve (\cref{def:reconstruct}) of the halved weight
+  $\rho=1/(2(\kappa\circ g))$: it closes because $E(\rho)=E(1/(\kappa\circ
+  g))/2=0$, it is simple by \cref{cor:positive_curvature_implies_simple}
+  (plus translation invariance), it realizes $\kappa\circ g$ at
+  $\varepsilon=0$ because the flat gauge law is exactly
+  $\|Z'\|=1/(2\kappa)$, and it is \emph{confined}: pointwise
+  $|1/(2\sigma)-r^\ast|\le h$, so
+  $\int_0^{2\pi}|\rho-r^\ast|\le s_0/4+2\pi h\le s_0/2$, and comparing
+  $Z$ with the model circle $-ir^\ast e^{i\theta}$ (norm $r^\ast$) gives
+  $\|Z\|\le r^\ast+s_0/2<1$ on a period, hence everywhere by periodicity.
+  Pull back along the $C^1$ inverse of $g$ as below. No flow, margins, or
+  Gr\"onwall transport enter.
+
+  \emph{Non-constant branch, curved members $\varepsilon=\pm1$
+  (\texttt{spaceFormConverse\_pos\_nonconst\_curved}):}
+  \cref{thm:spaceform_endpoint_winding} supplies
   $R<1$, $\delta>0$, $h_1$ (with derivative witness $v>0$) and a closed
   admissible trajectory of the truncated flow for $\kappa\circ h_1$; the flow
   specification (\cref{def:spaceform_flow}) converts the flow value into
@@ -450,3 +506,112 @@ hyperbolic transport).
   Specialize \cref{thm:spaceform_mixed_converse} at $\varepsilon=-1$ (the sign
   disjunction is discharged by \texttt{Or.inr rfl}).
 \end{proof}
+
+\section{Two proofs of Gluck's theorem}
+\label{sec:two_proofs}
+
+The flat member $\varepsilon=0$ of \cref{thm:spaceform_converse_pos} lives in
+the open unit disk with the conformal gauge $\lambda=2$, so its realization
+predicate is the Euclidean one up to a factor $2$ and a confinement clause.
+Undoing both by a dilation — the symmetry of $E^2$ that $S^2$ and $H^2$ lack —
+produces a \emph{second, flow-route proof} of Gluck's converse to the
+four-vertex theorem, with statement identical to the 1971-route capstone
+\cref{thm:gluck_converse}.
+
+\begin{lemma}\leanok
+[the flat space form is the Euclidean plane]
+  \label{lem:realizes_curvature_of_realizes_zero}
+  \lean{Gluck.realizesCurvature_of_realizes_zero}
+  \uses{def:spaceform_realizes, def:realizes_curvature}
+  If $\mathrm{Realizes}\;0\;z\;\kappa$ (\cref{def:spaceform_realizes}) then
+  $\mathrm{RealizesCurvature}\;z\;(2\kappa)$
+  (\cref{def:realizes_curvature}): at $\varepsilon=0$ the space-form gauge law
+  $\tfrac{1+0\cdot\|z\|^2}{2}\varphi'=(\kappa-0)\|z'\|$ is exactly
+  $\varphi'=(2\kappa)\|z'\|$. The factor $2$ is the flat conformal gauge
+  $\lambda=2$ of the disk model; the confinement clause $\|z\|<1$ is simply
+  dropped.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  Unfold both predicates; the $C^1$, regularity and tangent-angle clauses
+  coincide, and the curvature identity is the space-form one multiplied by
+  $2$.
+\end{proof}
+
+\begin{theorem}\leanok
+[Gluck's converse, the flow proof]
+  \label{thm:gluck_converse_spaceForm}
+  \lean{Gluck.gluck_converse_spaceForm}
+  \uses{def:is_curvature_function, def:four_vertex_condition,
+        def:is_simple_closed, def:realizes_curvature,
+        thm:spaceform_converse_pos, lem:realizes_curvature_of_realizes_zero,
+        lem:realizes_curvature_smul, lem:issimpleclosed_smul,
+        lem:sphere_curvature_lower_bound, def:spaceform_four_vertex}
+  Let $\kappa$ be a curvature function satisfying the four-vertex condition.
+  Then there is a simple closed curve $\gamma$ with
+  $\mathrm{RealizesCurvature}\;\gamma\;\kappa$ — the statement of
+  \cref{thm:gluck_converse}, proved by the space-form flow route at
+  $\varepsilon=0$ plus a dilation.
+\end{theorem}
+
+\begin{proof}
+  \uses{thm:spaceform_converse_pos, lem:realizes_curvature_of_realizes_zero,
+        lem:realizes_curvature_smul, lem:issimpleclosed_smul,
+        lem:sphere_curvature_lower_bound}
+  \leanok
+  The dilation argument. Let $m>0$ be a uniform lower bound for $\kappa$
+  (\cref{lem:sphere_curvature_lower_bound}) and set $\mu=\kappa/m$, a
+  curvature function with $\mu>1>1/2$ pointwise whose four-vertex data
+  transport along the positive scaling (extrema and strict value separation
+  are preserved by $x\mapsto x/m$). Thus
+  $\mathrm{SpaceFormFourVertex}\;0\;\mu$ holds and
+  \cref{thm:spaceform_converse_pos} at $\varepsilon=0$ yields a simple closed
+  $z$ in the open unit disk with $\mathrm{Realizes}\;0\;z\;\mu$; by
+  \cref{lem:realizes_curvature_of_realizes_zero}, $z$ realizes the Euclidean
+  curvature $2\mu=(2/m)\kappa$. Dilating by $2/m$ — curvature scales by the
+  reciprocal (\cref{lem:realizes_curvature_smul}), simplicity is preserved
+  (\cref{lem:issimpleclosed_smul}) — the curve $\gamma=(2/m)\,z$ realizes
+  $\bigl((2/m)\kappa\bigr)\big/(2/m)=\kappa$.
+\end{proof}
+
+\paragraph{Comparison of the two proofs.} Both capstones prove the same
+statement, from the same hypotheses, by genuinely different routes.
+
+\emph{The 1971/classical route} (\cref{chap:reduction},
+\cref{chap:fourvertex}; \cref{thm:gluck_converse}) works in the tangent-angle
+parametrization with radius of curvature $\rho=1/\kappa$ and rests on the
+\emph{linear structure of the closure conditions}: a curve closes iff
+$\oint\rho e^{i\theta}\,d\theta=0$, an $L^1$-continuous linear functional of
+the profile. Its heart is an alignment argument: a two-parameter family of
+breakpoint-aligning reparametrizations, the explicit bicircle error map on the
+configuration square, and the winding number $-1$ of that error map
+(\cref{lem:reduction_justified}). It needs the exact-profile alignment of the
+four-vertex data with the reference bicircle, and its degree argument runs
+over a \emph{configuration} space.
+
+\emph{The flow route} (\cref{chap:spaceform_core}, this chapter;
+\cref{thm:gluck_converse_spaceForm}) reconstructs the curve by an ODE in the
+conformal disk model, uniformly in the ambient curvature $\varepsilon$:
+truncation and the Picard--Lindel\"of flow, step-model margins and Gr\"onwall
+$L^1$-transport, and the first-variation endpoint winding over the
+\emph{start point} of the flow. Confinement is intrinsic, coming from the
+curvature lower bound (the model circle of level $c$ has coordinate radius
+$1/(2c)$ — the curvature floor bounds the curve's size), and no alignment of
+the profile with a reference shape is required at the curved signs. What it
+needs that the classical route does not is the dilation post-processing to
+remove the disk confinement — a symmetry available only in $E^2$, which is
+exactly why the $H^2$ converse was hard: there no dilation can trade a
+stronger floor for confinement, and the escape-velocity threshold $\kappa>1$
+is genuinely part of the statement.
+
+At the crossing point $\varepsilon=0$ the two routes touch: the flat gauge
+field is position-independent, the endpoint winding degenerates
+($\eta(0)=0$), and the flat branch of \cref{thm:spaceform_converse_pos}
+borrows the classical alignment winding for \emph{closure}
+(\cref{lem:reduction_justified_L1}) while keeping the space-form
+reconstruction, simplicity and confinement analysis. The second proof is thus
+independent of the first in every ingredient except the closure degree
+argument, which is shared infrastructure — and it adds what the first proof
+cannot state: the same engine, at $\varepsilon=\pm1$, proves the spherical
+and hyperbolic converses with no change to the argument.

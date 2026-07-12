@@ -38,7 +38,13 @@ theorem hyperbolicFourVertex_iff {κ : ℝ → ℝ} :
       IsCurvatureFunction κ ∧ FourVertexCondition κ ∧ ∀ θ, 1 < κ θ := by
   unfold HyperbolicFourVertex SpaceForm.SpaceFormFourVertex
   refine and_congr_right fun _ => and_congr_right fun _ => ?_
-  exact ⟨fun h => h (by norm_num), fun h _ => h⟩
+  constructor
+  · intro h θ
+    have := h (by norm_num) θ
+    linarith
+  · intro h _ θ
+    have := h θ
+    linarith
 
 /-- The hyperbolic realization predicate is the `ε = -1` space-form predicate. -/
 theorem realizesHyperbolicCurvature_iff_realizes_neg_one (z : ℝ → ℂ) (κ : ℝ → ℝ) :
@@ -47,6 +53,6 @@ theorem realizesHyperbolicCurvature_iff_realizes_neg_one (z : ℝ → ℂ) (κ :
 /-- A hyperbolic four-vertex curvature function is realized by a simple closed curve. -/
 theorem hyperbolicConverse_pos {κ : ℝ → ℝ} (hκ : HyperbolicFourVertex κ) :
     ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ RealizesHyperbolicCurvature z κ :=
-  SpaceForm.spaceFormConverse_pos (Or.inr rfl) hκ
+  SpaceForm.spaceFormConverse_pos (Or.inr (Or.inl rfl)) hκ
 
 end Gluck
