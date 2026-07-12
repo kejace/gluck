@@ -59,9 +59,8 @@ larger than the positive `hyperbolicConverse_pos` (which it subsumes via
 Unlike the positive spherical/Euclidean converses, the H² conclusion is stated
 *up to reparametrization*: `H²` has no metric rescaling, so the period is
 co-constructed rather than normalized. The witness `Ψ` is `C¹` with strictly
-positive derivative, mirroring the arc-length family results
-`realizesH2_of_reparam` / `exists_gateProfileSmooth_realization`
-(`Gluck/Hyperbolic/ArcLength.lean`).
+positive derivative, mirroring the arc-length family result
+`realizesH2_of_reparam` (`Gluck/Hyperbolic/ArcLength.lean`).
 
 Blueprint: `blueprint/src/chapters/Gluck_HyperbolicMixed.tex`.
 -/

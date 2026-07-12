@@ -428,25 +428,6 @@ lemma arcFlow_unique {κ : ℝ → ℝ} {R L M : ℝ} (hκ : Continuous κ) (hR 
 
 /-! ## Leaf group 2 — confinement (the H² boundary-degeneration crux) -/
 
-/-- **Radial growth is at most unit speed.** For a solution `z` of `z' = e^{iφ}`
-(unit Euclidean speed), `d/dσ ‖z σ‖ ≤ 1`, hence `‖z σ‖ ≤ ‖z 0‖ + σ`. This is the
-clean provable core of confinement: `d/dσ ‖z‖² = 2⟨z, z'⟩ = 2⟨z, e^{iφ}⟩ ≤ 2‖z‖`.
-(No Euclidean template — new H² work; the Grönwall pattern mirrors the confinement
-estimates in `Gluck/SpaceForm/Flow.lean`.) -/
-private lemma norm_le_of_unit_speed {z : ℝ → ℂ} {φ : ℝ → ℝ}
-    (hz : ∀ σ, HasDerivAt z (Complex.exp ((φ σ : ℂ) * Complex.I)) σ) {σ : ℝ}
-    (hσ : 0 ≤ σ) :
-    ‖z σ‖ ≤ ‖z 0‖ + σ := by
-  have hbound : ‖z σ - z 0‖ ≤ σ := by
-    have h := (convex_Icc (0 : ℝ) σ).norm_image_sub_le_of_norm_hasDerivWithin_le
-      (f := z) (f' := fun t => Complex.exp ((φ t : ℂ) * Complex.I)) (C := 1)
-      (fun x _ => (hz x).hasDerivWithinAt)
-      (fun x _ => by rw [Complex.norm_exp_ofReal_mul_I])
-      (Set.left_mem_Icc.mpr hσ) (Set.right_mem_Icc.mpr hσ)
-    simpa [abs_of_nonneg hσ] using h
-  have h2 := norm_sub_norm_le (z σ) (z 0)
-  linarith
-
 /-- **Curvature-difference bound for the reconstruction field.** The two fields
 `arcField κ` and `arcField κ'` at states `W`, `W'` differ by at most the state
 Lipschitz term `Lip·‖W − W'‖` plus a curvature term `2/(1 − R²)·|κ σ − κ' σ|`: the
@@ -555,95 +536,6 @@ lemma arcTrajectory_diff_bound {κ κ' : ℝ → ℝ} {R L : ℝ} {Lip : ℝ≥0
     _ ≤ ‖W 0 - Ws 0‖ + ∫ s in (0 : ℝ)..σ,
           ((Lip : ℝ) * ‖W s - Ws s‖ + 2 / (1 - R ^ 2) * |κ s - κ' s|) :=
         add_le_add le_rfl step3
-
-/-- **Reference-model confinement of the reconstruction (the sharp, non-vacuous
-form).** *There is no a-priori confinement for arbitrary `κ`*: since the `z`-speed
-is a genuine unit-Euclidean speed (`z' = e^{iφ}` is untruncated), a geodesic
-profile (`κ = 0`) has `d‖z‖/dσ = 1` and the hyperbolic radius `ρ = artanh‖z‖`
-obeys `dρ/dσ = ‖z‖'/(1 − ‖z‖²) → ∞`, so `z` reaches the boundary in finite length
-— confinement is *false* for a general curvature (and, since a four-vertex profile
-crosses every value between its negative minimum and positive maximum, no pointwise
-`|κ| > 1` "more curved than a horocycle" bound can hold either). Confinement is
-therefore **relative to a bounded reference reconstruction** `Ws = (zs, φs)` (the
-bicircle model, `‖zs‖ ≤ R − μ`): if the reference curvature `κ'` is `L¹`-close to
-`κ` and the two reconstructions start close, then the perturbed reconstruction `W`
-stays `‖z‖ ≤ R < 1` by `L¹`-Grönwall continuous dependence. Direct transport of
-`Gluck.SpaceForm.invariant_admissible_domain` (`Admissible.lean:402`), with the
-projection `‖W.1‖ ≤ ‖W‖` in place of the admissible-bracket margin. -/
-lemma arcConfined_of_reference {κ κ' : ℝ → ℝ} {R L μ : ℝ} {Lip : ℝ≥0}
-    (hR : 0 ≤ R) (hR1 : R < 1) (hL : 0 ≤ L) (hκ : Continuous κ) (hκ' : Continuous κ')
-    (hLip : ∀ σ, LipschitzWith Lip (fun W : ℂ × ℝ => arcField κ R σ W))
-    {W Ws : ℝ → ℂ × ℝ}
-    (hW : ∀ σ ∈ Set.Icc (0 : ℝ) L,
-      HasDerivWithinAt W (arcField κ R σ (W σ)) (Set.Icc 0 L) σ)
-    (hWs : ∀ σ ∈ Set.Icc (0 : ℝ) L,
-      HasDerivWithinAt Ws (arcField κ' R σ (Ws σ)) (Set.Icc 0 L) σ)
-    (hWsR : ∀ σ ∈ Set.Icc (0 : ℝ) L, ‖(Ws σ).1‖ ≤ R - μ)
-    (hsmall : Real.exp ((Lip : ℝ) * L) * (‖W 0 - Ws 0‖
-        + 2 / (1 - R ^ 2) * ∫ σ in (0 : ℝ)..L, |κ σ - κ' σ|) ≤ μ) :
-    ∀ σ ∈ Set.Icc (0 : ℝ) L, ‖(W σ).1‖ ≤ R := by
-  have hd : 0 < 1 - R ^ 2 := by nlinarith
-  have hM0 : (0 : ℝ) ≤ 2 / (1 - R ^ 2) := by positivity
-  have hWc : ContinuousOn W (Set.Icc 0 L) := HasDerivWithinAt.continuousOn hW
-  have hWsc : ContinuousOn Ws (Set.Icc 0 L) := HasDerivWithinAt.continuousOn hWs
-  have hFW : ContinuousOn (fun s => arcField κ R s (W s)) (Set.Icc 0 L) :=
-    Continuous.comp_continuousOn' (arcField_continuous hκ hR hR1)
-      (continuousOn_id.prodMk hWc)
-  have hFWs : ContinuousOn (fun s => arcField κ' R s (Ws s)) (Set.Icc 0 L) :=
-    Continuous.comp_continuousOn' (arcField_continuous hκ' hR hR1)
-      (continuousOn_id.prodMk hWsc)
-  have key : ∀ σ ∈ Set.Icc (0 : ℝ) L,
-      ‖W σ - Ws σ‖ ≤ ‖W 0 - Ws 0‖
-        + ∫ s in (0 : ℝ)..σ, ((Lip : ℝ) * ‖W s - Ws s‖
-            + 2 / (1 - R ^ 2) * |κ s - κ' s|) :=
-    fun σ hσ => arcTrajectory_diff_bound hR hR1 hκ hκ' hLip hWc hWsc hFW hFWs hW hWs hσ
-  have hgronwall := gronwall_L1_drive hL Lip.coe_nonneg
-    (norm_nonneg (W 0 - Ws 0)) (hWc.sub hWsc).norm
-    (continuous_const.mul (hκ.sub hκ').abs).continuousOn
-    (fun t _ => norm_nonneg _)
-    (fun t _ => mul_nonneg hM0 (abs_nonneg _)) key
-  have hdrive_eq : (∫ s in (0 : ℝ)..L, 2 / (1 - R ^ 2) * |κ s - κ' s|)
-      = 2 / (1 - R ^ 2) * ∫ s in (0 : ℝ)..L, |κ s - κ' s| :=
-    intervalIntegral.integral_const_mul _ _
-  have hbound : Real.exp ((Lip : ℝ) * L) * (‖W 0 - Ws 0‖
-      + ∫ s in (0 : ℝ)..L, 2 / (1 - R ^ 2) * |κ s - κ' s|) ≤ μ := by
-    rw [hdrive_eq]; exact hsmall
-  have hdμ : ∀ t ∈ Set.Icc (0 : ℝ) L, ‖W t - Ws t‖ ≤ μ :=
-    fun t ht => (hgronwall t ht).trans hbound
-  intro σ hσ
-  have hproj : ‖(W σ - Ws σ).1‖ ≤ ‖W σ - Ws σ‖ := by
-    rw [Prod.norm_def]; exact le_max_left _ _
-  have h1 : ‖(W σ).1 - (Ws σ).1‖ ≤ μ := by
-    rw [← Prod.fst_sub]; exact hproj.trans (hdμ σ hσ)
-  have h2 := norm_sub_norm_le (W σ).1 (Ws σ).1
-  have h3 := hWsR σ hσ
-  linarith
-
-/-- **Confinement (crux, sharp reference-model form).** The a-priori Euclidean /
-hyperbolic-radius confinement of the reconstruction is *vacuous / false* for
-arbitrary `κ` (a geodesic escapes at unit `z`-speed; see `arcConfined_of_reference`
-and `norm_le_of_unit_speed`). The correct, non-vacuous hypothesis is confinement
-**relative to a bounded reference reconstruction** `Ws = (zs, φs)` — the clean
-bicircle model with `‖zs‖ ≤ R − μ` — whose curvature `κ'` is `L¹`-close to `κ`: the
-truncated flow `arcFlow` from `W₀` then stays `‖z‖ ≤ R < 1` by `L¹`-Grönwall
-continuous dependence on the curvature (`Real.exp(Lip·L)·(‖W₀ − Ws 0‖ +
-2/(1 − R²)·∫|κ − κ'|) ≤ μ`). Bicircle four-vertex profiles satisfy this; it mirrors
-`Gluck.SpaceForm.invariant_admissible_domain` (`Admissible.lean:402`). -/
-lemma arcFlow_confined {κ κ' : ℝ → ℝ} {R L M μ : ℝ} {Lip : ℝ≥0}
-    (hκ : Continuous κ) (hκ' : Continuous κ') (hR : 0 ≤ R) (hR1 : R < 1)
-    (hL : 0 ≤ L) (hM : ∀ σ, |κ σ| ≤ M) (r₀ : ℝ≥0) {W₀ : ℂ × ℝ}
-    (hW₀ : W₀ ∈ Metric.closedBall (0 : ℂ × ℝ) r₀)
-    (hLip : ∀ σ, LipschitzWith Lip (fun W : ℂ × ℝ => arcField κ R σ W))
-    {Ws : ℝ → ℂ × ℝ}
-    (hWs : ∀ σ ∈ Set.Icc (0 : ℝ) L,
-      HasDerivWithinAt Ws (arcField κ' R σ (Ws σ)) (Set.Icc 0 L) σ)
-    (hWsR : ∀ σ ∈ Set.Icc (0 : ℝ) L, ‖(Ws σ).1‖ ≤ R - μ)
-    (hsmall : Real.exp ((Lip : ℝ) * L) * (‖W₀ - Ws 0‖
-        + 2 / (1 - R ^ 2) * ∫ σ in (0 : ℝ)..L, |κ σ - κ' σ|) ≤ μ) :
-    ∀ σ ∈ Set.Icc (0 : ℝ) L, ‖(arcFlow κ R L M r₀ (W₀, σ)).1‖ ≤ R := by
-  obtain ⟨hstart, hderiv⟩ := arcFlow_spec hκ hR hR1 hL hM r₀ hW₀
-  refine arcConfined_of_reference hR hR1 hL hκ hκ' hLip hderiv hWs hWsR ?_
-  rw [hstart]; exact hsmall
 
 /-! ## Leaf group 3 — the `Realizes (-1)` lemma -/
 
@@ -815,33 +707,111 @@ lemma arcModelConst_solves {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
   rw [arcModelConst_angleSpeed hr σ hconf]
   exact arcModelConst_hasDerivAt_φ K z₀ φ₀ σ
 
-/-- **The model *is* the arc-length flow for constant curvature.**  By ODE
-uniqueness (`arcFlow_unique`), on any window `[0, L]` where the explicit Euclidean
-circular arc stays confined in the truncation disk (`‖z(σ)‖ ≤ R`), it coincides
-with `arcFlow (fun _ => K) …` started at `arcModelConst K z₀ φ₀ 0`.  This is the
-bridge that lets the four-vertex composition be evaluated in closed form. -/
-lemma arcModelConst_eq_arcFlow {K R L M : ℝ} {z₀ : ℂ} {φ₀ : ℝ} (r₀ : ℝ≥0)
-    (hr : arcModelRadius K z₀ φ₀ ≠ 0) (hR : 0 ≤ R) (hR1 : R < 1) (hL : 0 ≤ L)
-    (hKM : |K| ≤ M)
-    (hstart : arcModelConst K z₀ φ₀ 0 ∈ Metric.closedBall (0 : ℂ × ℝ) r₀)
+/-! ## Model-arc estimates and the `L¹`-Grönwall trajectory bound
+
+Generic estimates on the constant-curvature model `arcModelConst` (whole-circle
+confinement bound, centre-norm identity, window-derivative form) and the
+exponential `L¹`-Grönwall bound for two `arcField` trajectories with `L¹`-close
+curvatures — the transport inputs of the fork-A family layer
+(`Gluck/Hyperbolic/Family/`). -/
+
+/-- **Whole-circle norm bound.**  With centre `c = z₀ + r·i·e^{iφ₀}` and radius `r`,
+`z(σ) = c − r·i·e^{iφ₀}·e^{iσ/r}` and `‖i·e^{iφ₀}·e^{iσ/r}‖ = 1`, so the reconstruction
+stays within `‖c‖ + |r|` of the origin. -/
+lemma arcModelConst_norm_le_center (K : ℝ) (z₀ : ℂ) (φ₀ σ : ℝ) :
+    ‖(arcModelConst K z₀ φ₀ σ).1‖
+      ≤ ‖z₀ + (arcModelRadius K z₀ φ₀ : ℂ) * Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I)‖
+        + |arcModelRadius K z₀ φ₀| := by
+  set r := arcModelRadius K z₀ φ₀ with hr
+  have hz : (arcModelConst K z₀ φ₀ σ).1
+      = (z₀ + (r : ℂ) * Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I))
+          - (r : ℂ) * Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I)
+            * Complex.exp (((σ / r : ℝ) : ℂ) * Complex.I) := by
+    simp only [arcModelConst, ← hr]; ring
+  rw [hz]
+  refine (norm_sub_le _ _).trans ?_
+  gcongr
+  rw [norm_mul, norm_mul, norm_mul, Complex.norm_I, Complex.norm_real,
+    Complex.norm_exp_ofReal_mul_I, Complex.norm_exp_ofReal_mul_I, Real.norm_eq_abs]
+  exact le_of_eq (by ring)
+
+/-- **Centre-norm identity.**  For the model radius `r = (1 − ‖z₀‖²)/(2(K + ⟪z₀, i·e^{iφ₀}⟫))`
+(denominator nonzero) the Euclidean centre satisfies `‖z₀ + r·i·e^{iφ₀}‖² = 1 + r² − 2rK`
+(the doc's `|z_c|² = 1 + r² − 2rK`). -/
+lemma arcModelConst_center_normSq {K : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
+    (hden : K + ⟪z₀, Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I)⟫_ℝ ≠ 0) :
+    ‖z₀ + (arcModelRadius K z₀ φ₀ : ℂ) * Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I)‖ ^ 2
+      = 1 + arcModelRadius K z₀ φ₀ ^ 2 - 2 * arcModelRadius K z₀ φ₀ * K := by
+  set v : ℂ := Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I) with hv
+  set r := arcModelRadius K z₀ φ₀ with hr
+  have hvnorm : ‖v‖ = 1 := by
+    rw [hv, norm_mul, Complex.norm_I, Complex.norm_exp_ofReal_mul_I, one_mul]
+  have hrv : (r : ℂ) * Complex.I * Complex.exp ((φ₀ : ℂ) * Complex.I) = (r : ℂ) * v := by
+    rw [hv]; ring
+  have hrdef : r * (2 * (K + ⟪z₀, v⟫_ℝ)) = 1 - ‖z₀‖ ^ 2 := by
+    have hne : 2 * (K + ⟪z₀, v⟫_ℝ) ≠ 0 := mul_ne_zero two_ne_zero hden
+    rw [hr, arcModelRadius, hv, div_mul_cancel₀ _ hne]
+  have hexpand : ‖z₀ + (r : ℂ) * v‖ ^ 2
+      = ‖z₀‖ ^ 2 + 2 * (r * ⟪z₀, v⟫_ℝ) + r ^ 2 * ‖v‖ ^ 2 := by
+    rw [← Complex.real_smul, norm_add_sq_real, real_inner_smul_right, norm_smul]
+    simp only [Real.norm_eq_abs, mul_pow, sq_abs]
+  rw [hrv, hexpand, hvnorm]
+  nlinarith [hrdef]
+
+/-- **`L¹`-Grönwall trajectory bound (exponential form).**  Two `arcField` solutions with
+`L¹`-close curvatures `κ, κ'` stay close: `‖W t − Ws t‖ ≤ exp(Lip·L)·(‖W 0 − Ws 0‖ +
+2/(1−R²)·∫₀^L |κ − κ'|)`.  Direct combination of `arcTrajectory_diff_bound` with the
+`gronwall_L1_drive` continuous-dependence estimate. -/
+lemma arcTrajectory_gronwall {κ κ' : ℝ → ℝ} {R L : ℝ} {Lip : ℝ≥0}
+    (hR : 0 ≤ R) (hR1 : R < 1) (hL : 0 ≤ L) (hκ : Continuous κ) (hκ' : Continuous κ')
+    (hLip : ∀ σ, LipschitzWith Lip (fun W : ℂ × ℝ => arcField κ R σ W))
+    {W Ws : ℝ → ℂ × ℝ}
+    (hW : ∀ σ ∈ Set.Icc (0 : ℝ) L, HasDerivWithinAt W (arcField κ R σ (W σ)) (Set.Icc 0 L) σ)
+    (hWs : ∀ σ ∈ Set.Icc (0 : ℝ) L, HasDerivWithinAt Ws (arcField κ' R σ (Ws σ)) (Set.Icc 0 L) σ)
+    {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) L) :
+    ‖W t - Ws t‖ ≤ Real.exp ((Lip : ℝ) * L) *
+      (‖W 0 - Ws 0‖ + 2 / (1 - R ^ 2) * ∫ σ in (0 : ℝ)..L, |κ σ - κ' σ|) := by
+  have hd : 0 < 1 - R ^ 2 := by nlinarith
+  have hM0 : (0 : ℝ) ≤ 2 / (1 - R ^ 2) := by positivity
+  have hWc := HasDerivWithinAt.continuousOn hW
+  have hWsc := HasDerivWithinAt.continuousOn hWs
+  have hFW : ContinuousOn (fun s => arcField κ R s (W s)) (Set.Icc 0 L) :=
+    Continuous.comp_continuousOn' (arcField_continuous hκ hR hR1) (continuousOn_id.prodMk hWc)
+  have hFWs : ContinuousOn (fun s => arcField κ' R s (Ws s)) (Set.Icc 0 L) :=
+    Continuous.comp_continuousOn' (arcField_continuous hκ' hR hR1) (continuousOn_id.prodMk hWsc)
+  have key : ∀ σ ∈ Set.Icc (0 : ℝ) L, ‖W σ - Ws σ‖ ≤ ‖W 0 - Ws 0‖
+      + ∫ s in (0 : ℝ)..σ, ((Lip : ℝ) * ‖W s - Ws s‖ + 2 / (1 - R ^ 2) * |κ s - κ' s|) :=
+    fun σ hσ => arcTrajectory_diff_bound hR hR1 hκ hκ' hLip hWc hWsc hFW hFWs hW hWs hσ
+  have hgronwall := gronwall_L1_drive hL Lip.coe_nonneg (norm_nonneg (W 0 - Ws 0))
+    (hWc.sub hWsc).norm (continuous_const.mul (hκ.sub hκ').abs).continuousOn
+    (fun t _ => norm_nonneg _) (fun t _ => mul_nonneg hM0 (abs_nonneg _)) key t ht
+  simp only [Pi.mul_apply] at hgronwall
+  rwa [intervalIntegral.integral_const_mul] at hgronwall
+
+/-- The constant-curvature model is an `arcField (fun _ => K)` solution on any confined
+window (`HasDerivWithinAt` form, the derivative input required by `arcTrajectory_gronwall`).
+Packages `arcModelConst_solves` with the confinement untruncation. -/
+lemma arcModelConst_hasDerivWithinAt {K R L : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
+    (hr : arcModelRadius K z₀ φ₀ ≠ 0) (hR1 : R < 1)
     (hconf : ∀ σ ∈ Set.Icc (0 : ℝ) L, ‖(arcModelConst K z₀ φ₀ σ).1‖ ≤ R) :
-    Set.EqOn (fun σ => arcModelConst K z₀ φ₀ σ)
-      (fun σ => arcFlow (fun _ => K) R L M r₀ (arcModelConst K z₀ φ₀ 0, σ)) (Set.Icc 0 L) := by
-  have hκ : Continuous (fun _ : ℝ => K) := continuous_const
-  refine arcFlow_unique hκ hR hR1 hL (fun _ => hKM) r₀ hstart ?_ rfl
+    ∀ σ ∈ Set.Icc (0 : ℝ) L, HasDerivWithinAt (fun t => arcModelConst K z₀ φ₀ t)
+      (arcField (fun _ => K) R σ (arcModelConst K z₀ φ₀ σ)) (Set.Icc 0 L) σ := by
   intro σ hσ
-  have hle : ‖(arcModelConst K z₀ φ₀ σ).1‖ ≤ R := hconf σ hσ
+  have hle := hconf σ hσ
   have hconfσ : (1 : ℝ) - ‖(arcModelConst K z₀ φ₀ σ).1‖ ^ 2 ≠ 0 := by
-    have h0 : (0 : ℝ) ≤ ‖(arcModelConst K z₀ φ₀ σ).1‖ := norm_nonneg _
-    nlinarith [hle, h0, hR1]
+    nlinarith [norm_nonneg (arcModelConst K z₀ φ₀ σ).1, hle, hR1]
   obtain ⟨hz, hφ⟩ := arcModelConst_solves hr σ hconfσ
-  have hpair := hz.prodMk hφ
   have harc : arcField (fun _ => K) R σ (arcModelConst K z₀ φ₀ σ)
       = (Complex.exp (((arcModelConst K z₀ φ₀ σ).2 : ℂ) * Complex.I),
           arcAngleSpeed (fun _ => K) σ (arcModelConst K z₀ φ₀ σ).1
             (arcModelConst K z₀ φ₀ σ).2) := by
     simp only [arcField, truncatedArcAngleSpeed_eq hle]
   rw [harc]
-  exact hpair.hasDerivWithinAt
+  exact (hz.prodMk hφ).hasDerivWithinAt
+
+/-- The model at window `0` is its start point `(z₀, φ₀)`. -/
+lemma arcModelConst_zero (K : ℝ) (z₀ : ℂ) (φ₀ : ℝ) :
+    arcModelConst K z₀ φ₀ 0 = (z₀, φ₀) := by
+  simp [arcModelConst]
 
 end Gluck.Hyperbolic

@@ -5,9 +5,6 @@ Authors: kejace
 -/
 import Gluck.Hyperbolic.ArcLength.Ode
 import Gluck.Hyperbolic.ArcLength.Closing
-import Gluck.Hyperbolic.ArcLength.Gate
-import Gluck.Hyperbolic.ArcLength.ForkA
-import Gluck.Hyperbolic.ArcLength.ForkARobust
 import Gluck.Hyperbolic.ArcLength.ConverseCap
 
 /-!
@@ -33,21 +30,27 @@ already parametrization-flexible: `φ` may be non-monotone, `D` may be `< 0`, so
 no new predicate is needed). Confinement `‖z‖ < 1` is **not** automatic (unit
 Euclidean speed can reach the boundary) and is the crux estimate.
 
-This file mirrors the *Euclidean* arc-length engine `Gluck/ArcLength.lean`
+This engine mirrors the *Euclidean* arc-length engine `Gluck/Euclidean/ArcLength.lean`
 (Dahlberg §1, conditions (1.1)–(1.3), `references/dahlberg.pdf`), adapted to the
 coupled `(z, φ)` system and the H² metric factor. The Picard–Lindelöf and
 truncation scaffolding mirrors `Gluck/SpaceForm/Flow.lean`; the simplicity input
-reuses the Euclidean-in-disk chord machinery of `Gluck/Simplicity.lean`.  The
-closing (Leaf group 4′) uses the **central-symmetry half-period** route (Dahlberg
-§1 symmetric closing, `Gluck.dahlbergCurve_periodic`): for a half-periodic `κ`,
-`arcFlow` is `ρ_π`-equivariant, so closing reduces to a half-period matching solved
-by a 2-D shooting/degree argument.  (The earlier fixed-`φ₀` `z`-winding closing is
-**B2/DEAD** — arc length fixes the Euclidean length, not the turning — see
-`.mathlib-quality/decomposition_al4_v2.md`.)
+reuses the Euclidean-in-disk chord machinery of `Gluck/Euclidean/Simplicity.lean`.
 
-Groups 1–3 and 5 are proven sorry-free; Leaf group 4′ (closing) and Leaf group 6
-(the AL-6 `L=2π` capstone statement gap) carry the remaining `sorry`s.  See
-`.mathlib-quality/decomposition_h2arclength.md` and `decomposition_al4_v2.md`.
+## Sub-modules
 
-Blueprint: `blueprint/src/chapters/Gluck_ArcLengthH2.tex` (planned).
+* `Ode` — the reconstruction ODE field, its Picard–Lindelöf flow `arcFlow`, the
+  `Realizes (-1)` lemma `arcSolution_realizes`, the closed-form constant-curvature
+  model `arcModelConst`, and the `L¹`-Grönwall trajectory bound
+  `arcTrajectory_gronwall`.
+* `Closing` — the 2-D degree engine `poincareMiranda_rect` and the two-arc
+  quarter-period model endpoints `qArc1` / `qArc2` with their scalar reductions.
+* `ConverseCap` — simplicity (`injOn_arcCurve`), the floor-glued periodic window
+  assembly `windowSolution_exposed`, and the arc-length converse capstone
+  `ArcLengthH2Curvature` / `arcLengthH2Converse` / `realizesH2_of_reparam`.
+
+The general-profile consumers (bicircle family, transport, turning, closing,
+simplicity, and the capstone `hyperbolicMixedConverse`) live in
+`Gluck/Hyperbolic/Family/`.
+
+Blueprint: `blueprint/src/chapters/Gluck_HyperbolicArcLength.tex`.
 -/

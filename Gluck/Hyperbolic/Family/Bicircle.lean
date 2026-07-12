@@ -36,11 +36,6 @@ lemma bicircle_ra_lt {a h : ℝ} (ha : 1 < a) (hh0 : 0 < h) (hh1 : h < 1) :
   nlinarith [mul_pos (by linarith [hh0] : (0 : ℝ) < 1 + h)
     (by linarith : (0 : ℝ) < a - 1)]
 
-/-- `r_a ≤ (1 + h)/2` (ticket form `ra_le`). -/
-private lemma bicircle_ra_le {a h : ℝ} (ha : 1 < a) (hh0 : 0 < h) (hh1 : h < 1) :
-    arcModelRadius a (Complex.I * (h : ℂ)) π ≤ (1 + h) / 2 :=
-  (bicircle_ra_lt ha hh0 hh1).le
-
 /-- On the `h`-window `2ah ≤ 1 + h²` the first-arc radius clears the start height:
 `h ≤ r_a` (the window is *equivalent* to this; it is what keeps every term of the
 `G₂` monotone-difference factoring nonnegative). -/
@@ -179,13 +174,6 @@ lemma bicircle_rc_pos {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     linarith [bicircle_ra_lt ha hh0 hh1]
   have hD := bicircle_D_pos (by linarith : 1 < c) hh1 hrh hr2 hq1
   exact div_pos (bicircle_N_pos hh0 hrh hr2 hq1) (by linarith)
-
-/-- The second-arc angle `θ_c = (L/8)/r_c` is nonnegative on the window × bracket. -/
-private lemma bicircle_thetaC_nonneg {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
-    (hh0 : 0 < h) (hh1 : h < 1) (hwin : 2 * a * h ≤ 1 + h ^ 2)
-    (hL0 : 0 ≤ L) (hL : L ≤ bicircleBracket a h) :
-    0 ≤ (L / 8) / arcModelRadius c (qArc1 a (h, L)).1 (qArc1 a (h, L)).2 :=
-  div_nonneg (by linarith) (bicircle_rc_pos ha hac hh0 hh1 hwin hL0 hL).le
 
 /-- On the `G₂ = 0` locus the second angle is complementary: `θ_c = π/2 − θ_a`
 (so both angles lie in `[0, π/2]` there — the angle window of the ticket). -/
@@ -396,9 +384,6 @@ theorem continuous_root_of_strictMono {X : Type*} [TopologicalSpace X]
 `2ah ≤ 1 + h²` (equivalently `h ≤ r_a`, i.e. `h ≤ a − √(a² − 1)`).  The closed right
 endpoint is the `r_a = h` boundary, where the `G₁ > 0` endpoint sign fires exactly. -/
 def bicircleWindow (a : ℝ) : Set ℝ := {h : ℝ | 0 < h ∧ h < 1 ∧ 2 * a * h ≤ 1 + h ^ 2}
-
-private lemma mem_bicircleWindow {a h : ℝ} :
-    h ∈ bicircleWindow a ↔ 0 < h ∧ h < 1 ∧ 2 * a * h ≤ 1 + h ^ 2 := Iff.rfl
 
 /-- Scalar first-arc radius `r_a(h)` (continuity scaffolding). -/
 private noncomputable def braAux (a x : ℝ) : ℝ := (1 - x ^ 2) / (2 * (a - x))

@@ -2,11 +2,13 @@
 \label{chap:hyperbolic_arclength}
 
 % Chapter for Gluck/Hyperbolic/ArcLength.lean (aggregator) and its modules
-% Gluck/Hyperbolic/ArcLength/{Ode, Closing, Gate, ForkA, ForkARobust,
-% ConverseCap}.lean. All declarations are landed and sorry-free. The engine
-% realizes genuinely-negative-curvature H^2 four-vertex profiles in the
-% Poincare disk, unreachable by the convex-only flow of chap:spaceform_core.
-% Gate/ForkA/ForkARobust are summarized as one mathematical stage.
+% Gluck/Hyperbolic/ArcLength/{Ode, Closing, ConverseCap}.lean. All
+% declarations are landed and sorry-free. The engine realizes
+% genuinely-negative-curvature H^2 four-vertex profiles in the Poincare
+% disk, unreachable by the convex-only flow of chap:spaceform_core. An
+% earlier concrete gate-profile showcase (Gate/ForkA/ForkARobust and its
+% hypothesis-free realization) was superseded by the general fork-A family
+% chain of chap:hyperbolic_family and removed.
 
 \section{Overview}
 
@@ -30,7 +32,8 @@ system is well-posed for \emph{any} continuous $\kappa$, including
 genuinely-negative values, and $\varphi$ may be non-monotone. Confinement
 $\|z\|<1$ is not automatic (unit Euclidean speed can reach the boundary) and is
 the crux estimate, handled relative to a bounded reference reconstruction by
-$L^1$-Grönwall continuous dependence.
+$L^1$-Grönwall continuous dependence (\cref{lem:arc_trajectory_diff_bound},
+\cref{lem:arc_trajectory_gronwall}).
 
 Second asymmetry against the Euclidean engine of \cref{chap:arclength}:
 H\textsuperscript{2} has \emph{no metric rescaling}, so the window length $L$
@@ -44,23 +47,20 @@ $\chi(t+2\pi)=\chi(t)+L$ — the conjugation datum the degree-one analysis of
 \cref{chap:hyperbolic_converse} consumes to remove the reparametrization for
 the concrete construction.
 
-Four stages. \emph{ODE} (\texttt{Ode.lean}): truncated field, Picard--Lindelöf
-flow, reference-model confinement, the $\mathrm{Realizes}(-1)$ lemma, and the
-closed-form constant-curvature arc model. \emph{Closing}
-(\texttt{Closing.lean}): for even, $L/2$-periodic $\kappa$ the flow is
-$\rho_\pi$-equivariant, so closure reduces to a half-period match, and by
-reversible shooting to a \emph{quarter-period landing}; the topological engine
-is a project-proved Poincaré--Miranda theorem. \emph{Gate}
-(\texttt{Gate}/\texttt{ForkA}/\texttt{ForkARobust}, one stage): the concrete
-smooth ramped bicircle profile oscillating between $4/5$ and $2$, whose
-quarter-arc residual has four sign-definite faces on the shooting rectangle
-$[1/5,2/5]\times[11/5,14/5]$, certified in closed form with margin and
-transported to the genuine flow by a quantitative robustness bound.
-\emph{Capstone} (\texttt{ConverseCap.lean}): floor-glued periodic extension of
-a closing window solution, chord-condition simplicity (reusing the
-Euclidean-in-disk chord machinery of \cref{chap:simplicity} — embeddedness is a
-$\mathbb C$-property, blind to the metric), the arc-length converse, and the
-hypothesis-free realization of the gate profile.
+Three stages. \emph{ODE} (\texttt{Ode.lean}): truncated field,
+Picard--Lindelöf flow, the $L^1$-Grönwall trajectory bounds, the
+$\mathrm{Realizes}(-1)$ lemma, and the closed-form constant-curvature arc
+model. \emph{Closing} (\texttt{Closing.lean}): the project-proved
+Poincaré--Miranda theorem — the topological engine of the 2-D closing
+shooting problems — and the two-arc quarter-period model endpoints with
+their scalar closed-form reductions. \emph{Capstone}
+(\texttt{ConverseCap.lean}): floor-glued periodic extension of a closing
+window solution, chord-condition simplicity (reusing the Euclidean-in-disk
+chord machinery of \cref{chap:simplicity} — embeddedness is a
+$\mathbb C$-property, blind to the metric), and the arc-length converse.
+The consumers — bicircle family, transport, turning, closing, simplicity and
+the capstone realization — are the fork-A family chain of
+\cref{chap:hyperbolic_family}.
 
 \section{Declarations}
 
@@ -112,8 +112,9 @@ hypothesis-free realization of the gate profile.
     + \int_0^{\sigma}\Bigl(\mathrm{Lip}\,\|W-W_s\|
       + \tfrac{2}{1-R^2}\,|\kappa-\kappa'|\Bigr).
   \]
-  The curvature enters only through the $L^1$ distance — the workhorse of both
-  the confinement estimate and the gate robustness bound.
+  The curvature enters only through the $L^1$ distance — the workhorse of the
+  family chain's confinement and robustness estimates
+  (\cref{chap:hyperbolic_family}).
 \end{lemma}
 
 \begin{proof}
@@ -125,24 +126,26 @@ hypothesis-free realization of the gate profile.
 \end{proof}
 
 \begin{lemma}\leanok
-[confinement relative to a reference model]
-  \label{lem:arc_flow_confined}
-  \lean{Gluck.Hyperbolic.arcFlow_confined}
+[$L^1$-Grönwall trajectory bound, exponential form]
+  \label{lem:arc_trajectory_gronwall}
+  \lean{Gluck.Hyperbolic.arcTrajectory_gronwall}
   \uses{lem:arc_trajectory_diff_bound, def:arc_flow, lem:gronwall_L1_drive}
-  A-priori confinement is \emph{false} for general $\kappa$ (a geodesic escapes
-  at unit speed). The correct hypothesis is relative: if a reference
-  reconstruction $W_s$ with curvature $\kappa'$ stays $\|z_s\|\le R-\mu$ on
-  $[0,L]$ and $e^{\mathrm{Lip}\cdot L}\bigl(\|W_0-W_s(0)\|
-  +\tfrac{2}{1-R^2}\int_0^L|\kappa-\kappa'|\bigr)\le\mu$, then
-  $\Psi(W_0,\cdot)$ stays $\|z\|\le R<1$ on $[0,L]$.
+  For solutions $W$, $W_s$ of the $\kappa$- and $\kappa'$-arc-length ODEs on
+  $[0,L]$,
+  \[
+    \|W(t)-W_s(t)\| \le e^{\mathrm{Lip}\cdot L}\Bigl(\|W(0)-W_s(0)\|
+      + \tfrac{2}{1-R^2}\int_0^{L}|\kappa-\kappa'|\Bigr).
+  \]
+  Two trajectories with $L^1$-close curvatures and close starts stay close —
+  the transport input of the fork-A family layer
+  (\cref{chap:hyperbolic_family}).
 \end{lemma}
 
 \begin{proof}
   \uses{lem:arc_trajectory_diff_bound, lem:gronwall_L1_drive}
   \leanok
-  \cref{lem:arc_trajectory_diff_bound} feeds \cref{lem:gronwall_L1_drive},
-  giving $\|W-W_s\|\le\mu$ on $[0,L]$; project onto the $z$-coordinate and add
-  $\|z_s\|\le R-\mu$.
+  \cref{lem:arc_trajectory_diff_bound} feeds the Grönwall drive lemma
+  \cref{lem:gronwall_L1_drive}.
 \end{proof}
 
 \begin{lemma}\leanok
@@ -175,39 +178,11 @@ hypothesis-free realization of the gate profile.
   $z(\sigma)=z_0-r\,ie^{i\varphi_0}(e^{i\sigma/r}-1)$,
   $\varphi(\sigma)=\varphi_0+\sigma/r$, of radius
   $r=(1-\|z_0\|^2)/\bigl(2(K+\langle z_0,ie^{i\varphi_0}\rangle)\bigr)$
-  (\texttt{arcModelRadius}). While confined it coincides with
-  \texttt{arcFlow} (\texttt{arcModelConst\_solves} +
-  \texttt{arcModelConst\_eq\_arcFlow}, via flow uniqueness); this closed form
-  powers all gate-stage computations.
+  (\texttt{arcModelRadius}). While confined it solves the true
+  system (\texttt{arcModelConst\_solves}), hence coincides with
+  \texttt{arcFlow} via flow uniqueness; this closed form powers all
+  family-stage computations.
 \end{definition}
-
-\begin{lemma}\leanok
-[closure from the half-period match ($\rho_\pi$-squaring)]
-  \label{lem:arc_closure_of_half_period_match}
-  \lean{Gluck.Hyperbolic.arcClosure_of_halfPeriodMatch}
-  \uses{def:arc_flow}
-  If $\kappa$ is $L/2$-periodic and the half-period endpoint is the
-  $\rho_\pi$-image of the start —
-  $\Psi(W_0,L/2)=(-W_{0,z},\,W_{0,\varphi}+\pi)$, where
-  $\rho_\pi(z,\varphi)=(-z,\varphi+\pi)$ — then the full monodromy closes with
-  total turning $2\pi$: $\Psi(W_0,L)_z=W_{0,z}$ and
-  $\Psi(W_0,L)_\varphi=W_{0,\varphi}+2\pi$. The curve closes centrally
-  symmetrically ($z(\sigma+L/2)=-z(\sigma)$) — the H\textsuperscript{2}
-  analogue of Dahlberg's symmetric closing in \cref{chap:arclength}.
-\end{lemma}
-
-\begin{proof}
-  \uses{def:arc_flow}
-  \leanok
-  $\rho_\pi$ conjugates the field into its linearization
-  (\texttt{arcField\_reflect}: the clamp is odd, the metric denominator even,
-  the two inner-product sign flips cancel), so the flow is
-  $\rho_\pi$-equivariant (\texttt{arcFlow\_central\_symmetry}, via
-  \texttt{arcFlow\_unique}). By $L/2$-periodicity of $\kappa$, ODE
-  concatenation gives $\Psi(\cdot,L)=H\circ H$ with $H=\Psi(\cdot,L/2)$; then
-  $H(H(W_0))=H(\rho_\pi W_0)=\rho_\pi H(W_0)=\rho_\pi^2 W_0
-  =(W_{0,z},W_{0,\varphi}+2\pi)$.
-\end{proof}
 
 \begin{theorem}\leanok
 [Poincaré--Miranda on a rectangle]
@@ -237,92 +212,6 @@ hypothesis-free realization of the gate profile.
   winding number $1$; \cref{thm:existence_of_zero} supplies the interior zero.
   Strict faces first (\texttt{poincareMiranda\_rect\_strict}), then a
   compactness limit.
-\end{proof}
-
-\begin{definition}\leanok
-[the smooth gate profile]
-  \label{def:gate_profile_smooth}
-  \lean{Gluck.Hyperbolic.gateProfileSmooth}
-  \uses{def:arc_model_const}
-  The concrete driving profile: $\texttt{gateProfileSmooth}\,L\,\delta =
-  \texttt{arcRampProfile}\,(4/5)\,2\,L\,\delta$, a piecewise-linear ``ramped
-  bicircle'' equal to $a=4/5$ on flat parts and ramping linearly to $c=2$
-  across width-$\delta$ windows at the joins $\sigma\equiv L/8\pmod{L/4}$
-  (built from the triangle wave $\arccos\circ\cos$). Continuous, even about
-  $0$ and $L/4$ (palindrome), $L/2$-periodic, $|\kappa|\le2$. Its
-  $\delta\to0$ limit is the exact 2-arc step model whose quarter window is two
-  constant-curvature arcs (\texttt{qArc1}, \texttt{qArc2}, in the closed form
-  of \cref{def:arc_model_const}); the realized H\textsuperscript{2} curve has
-  genuinely mixed-sign geodesic curvature — the target the flow engine of
-  \cref{chap:spaceform_core} cannot reach.
-\end{definition}
-
-\begin{lemma}\leanok
-[the smooth quarter landing (gate stage)]
-  \label{lem:exists_quarter_landing_smooth}
-  \lean{Gluck.Hyperbolic.exists_quarterLanding_smooth}
-  \uses{def:gate_profile_smooth, def:arc_flow, thm:poincare_miranda_rect,
-        def:arc_model_const, lem:arc_trajectory_diff_bound}
-  There are a ramp width $\delta>0$ (with exposed smallness
-  $C\delta=1/2000000$ for the explicit robustness constant $C$) and an interior
-  point $(h,L)\in[1/5,2/5]\times[11/5,14/5]$ at which the genuine
-  \texttt{arcFlow} of $\texttt{gateProfileSmooth}\,L\,\delta$, shot from the
-  mirror-axis start $W_0=(ih,\pi)$, \emph{lands} on the second mirror axis at
-  the quarter period: $\operatorname{Im}z(L/4)=0$ and $\varphi(L/4)=3\pi/2$.
-  This statement summarizes the entire
-  \texttt{Gate}/\texttt{ForkA}/\texttt{ForkARobust} stage.
-\end{lemma}
-
-\begin{proof}
-  \uses{thm:poincare_miranda_rect, def:arc_model_const,
-        lem:arc_trajectory_diff_bound}
-  \leanok
-  Three moves. (i) \emph{Closed form} (\texttt{Gate.lean}): while confined the
-  step-model quarter residual
-  $G(h,L)=(\operatorname{Im}z(L/4),\varphi(L/4)-3\pi/2)$ reduces via
-  \cref{def:arc_model_const} to explicit scalars in
-  $r_a=(1-h^2)/(2(a-h))$, $\theta_a=(L/8)/r_a$, \dots; the four face signs are
-  certified by elementary $\sin$/$\cos$ interval enclosures
-  (\texttt{gate\_G1\_left/right}, \texttt{gate\_G2\_bottom/top}), re-proved
-  with quantitative margin $\ge1/100$ in \texttt{ForkARobust.lean}. (ii)
-  \emph{Robustness}: the smooth profile differs from the step only on the
-  ramps, so $\int|\kappa_\delta-\kappa_{\mathrm{step}}|\le(6/5)\delta$; two
-  legs of \cref{lem:arc_trajectory_diff_bound} (one per constant-curvature arc)
-  compose to $\|\Psi_{\kappa_\delta}(W_0,L/4)-\texttt{qArc2}\|\le C\delta$ with
-  explicit $C=\tfrac{15}{8}e^{9513/1280}(e^{9513/1280}+1)$
-  (\texttt{gateSmoothLanding\_close}). With $C\delta=1/2000000$, below every
-  face margin, the faces transfer to the genuine flow residual, jointly
-  continuous in $(h,L)$ (\texttt{gateSmoothResidual\_continuousOn}). (iii)
-  \emph{Degree}: \cref{thm:poincare_miranda_rect} fires.
-\end{proof}
-
-\begin{lemma}\leanok
-[existence of a closing state]
-  \label{lem:exists_closing_arc_state}
-  \lean{Gluck.Hyperbolic.exists_closing_arcState}
-  \uses{lem:arc_closure_of_half_period_match, def:arc_flow}
-  For $\kappa$ continuous, $L/2$-periodic, even about $0$ and about $L/4$, and
-  a mirror-axis start $W_0=(ib,\pi)$ whose quarter endpoint lands on the second
-  mirror axis ($\Psi(W_0,L/4)\in\mathrm{Fix}(X)$ for
-  $X(z,\varphi)=(\bar z,3\pi-\varphi)$), there is $W_0$ in the flow ball whose
-  full-period endpoint closes with total turning $2\pi$:
-  $\Psi(W_0,L)_z=W_{0,z}$, $\Psi(W_0,L)_\varphi=W_{0,\varphi}+2\pi$.
-\end{lemma}
-
-\begin{proof}
-  \uses{lem:arc_closure_of_half_period_match, def:arc_flow}
-  \leanok
-  Reversible shooting (\texttt{exists\_halfPeriodMatch\_zmatch}): with $\kappa$
-  even about $L/4$, the conjugate--time-reversed trajectory
-  $V(\sigma)=X(\Psi(W_0,L/2-\sigma))$ solves the same ODE
-  (\texttt{arcRev\_solves}) and agrees with $\Psi(W_0,\cdot)$ at $L/4$ —
-  precisely the landing — so two-sided ODE uniqueness gives $V\equiv\Psi$;
-  at $\sigma=0$ this is the full half-period match
-  $\Psi(W_0,L/2)=(-W_{0,z},W_{0,\varphi}+\pi)$ (using
-  $\operatorname{Re}z_0=0$, $\varphi_0=\pi$). Then the $\rho_\pi$-squaring
-  \cref{lem:arc_closure_of_half_period_match} closes the full window. $L$
-  stays a parameter — the free-$L$ degree of freedom is packaged as the window
-  existential of \cref{def:arclength_h2_curvature}.
 \end{proof}
 
 \begin{definition}\leanok
@@ -376,22 +265,6 @@ hypothesis-free realization of the gate profile.
 \end{proof}
 
 \begin{lemma}\leanok
-[window solution witnesses the curvature predicate]
-  \label{lem:arclength_h2_curvature_of_window_solution}
-  \lean{Gluck.Hyperbolic.arcLengthH2Curvature_of_windowSolution}
-  \uses{lem:window_solution_exposed, def:arclength_h2_curvature}
-  Under the hypotheses of \cref{lem:window_solution_exposed},
-  $\texttt{ArcLengthH2Curvature}\,\kappa$ holds.
-\end{lemma}
-
-\begin{proof}
-  \uses{lem:window_solution_exposed}
-  \leanok
-  Package \cref{lem:window_solution_exposed} into the window existential with
-  witness $L$.
-\end{proof}
-
-\begin{lemma}\leanok
 [the converse at an explicit window, with the shift law]
   \label{lem:arclength_h2_converse_at}
   \lean{Gluck.Hyperbolic.arcLengthH2Converse_at}
@@ -440,7 +313,7 @@ hypothesis-free realization of the gate profile.
   conclusion was unsound); the reparametrization is removed later, for the
   concrete construction, by the degree-one analysis of
   \cref{chap:hyperbolic_converse}. No $2\pi$-periodicity of $\kappa$ is
-  assumed — for the co-constructed gate profile it would be false.
+  assumed — for a co-constructed arc-length profile it can fail.
 \end{theorem}
 
 \begin{proof}
@@ -478,47 +351,4 @@ hypothesis-free realization of the gate profile.
   internal window reparametrization $\chi$; take $\Psi=\psi\circ\chi$, $C^1$
   with $\Psi'=(\psi'\circ\chi)\cdot\chi'>0$, and
   $(\kappa\circ\psi)\circ\chi=\kappa\circ\Psi$ definitionally.
-\end{proof}
-
-\begin{theorem}\leanok
-[hypothesis-free realization of the smooth gate profile]
-  \label{thm:gate_profile_smooth_realization}
-  \lean{Gluck.Hyperbolic.exists_gateProfileSmooth_realization}
-  \uses{lem:exists_quarter_landing_smooth, lem:exists_closing_arc_state,
-        lem:arclength_h2_curvature_of_window_solution,
-        thm:arclength_h2_converse, def:gate_profile_smooth,
-        def:is_simple_closed}
-  There exist a window length $L$, a ramp width $\delta$, an
-  orientation-preserving $C^1$ reparametrization $\psi$, and a genuinely simple
-  closed curve $z$ in the Poincaré disk with
-  \[
-    \texttt{IsSimpleClosed}\,z \;\wedge\;
-    \mathrm{Realizes}\,(-1)\,z\,
-    \bigl(\texttt{gateProfileSmooth}\,L\,\delta\circ\psi\bigr).
-  \]
-  The first fully hypothesis-free H\textsuperscript{2} realization of a
-  four-vertex profile with genuinely negative geodesic curvature on part of the
-  circle — the concrete payload of the engine, refined by the exact-profile
-  analysis of \cref{chap:hyperbolic_converse}.
-\end{theorem}
-
-\begin{proof}
-  \uses{lem:exists_quarter_landing_smooth, lem:exists_closing_arc_state,
-        lem:arc_flow_confined, lem:arclength_h2_curvature_of_window_solution,
-        thm:arclength_h2_converse, lem:chord_integral_ne_zero}
-  \leanok
-  The smooth landing \cref{lem:exists_quarter_landing_smooth} supplies
-  $(\delta,h,L)$; \cref{lem:exists_closing_arc_state} (via the palindrome
-  symmetries of the gate profile) closes the full window with turning $2\pi$.
-  Two gate-specific analytic targets are then discharged: full-window
-  confinement (\texttt{gate\_smooth\_confined\_full} — quarter-window
-  confinement by the two-leg $L^1$-Grönwall comparison with margin against the
-  constant-curvature legs, in the style of \cref{lem:arc_flow_confined},
-  extended to $[0,L]$ by the mirror and central symmetries) and the chord
-  condition (\texttt{gate\_chord\_ne\_zero} — on short arcs $\varphi$ is
-  strictly monotone since $\texttt{arcAngleSpeed}>0$ along the confined gate
-  trajectory, in the spirit of \cref{lem:chord_integral_ne_zero}; on long arcs
-  project the complementary chord). Feed everything into
-  \cref{lem:arclength_h2_curvature_of_window_solution} and finish with
-  \cref{thm:arclength_h2_converse}.
 \end{proof}
