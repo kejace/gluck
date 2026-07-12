@@ -176,7 +176,7 @@ $\langle z, i\,e^{i\varphi}\rangle_{\mathbb R}=-(\operatorname{Re}z)\sin\varphi
   \lean{Gluck.sphericalConverse_pos}
   \uses{def:realizes_spherical_curvature, def:sphere_four_vertex,
         lem:spherical_speed_solve, lem:reconstruction_ode,
-        lem:spherical_endpoint_winding, lem:realizes_spherical_comp,
+        thm:spaceform_endpoint_winding, lem:realizes_spherical_comp,
         lem:spherical_simplicity, lem:spherical_circle_realizes}
   If $\kappa$ satisfies the positive-stage spherical four-vertex condition
   (\cref{def:sphere_four_vertex}), then there is a simple closed curve $z$ confined to the
@@ -190,7 +190,7 @@ $\langle z, i\,e^{i\varphi}\rangle_{\mathbb R}=-(\operatorname{Re}z)\sin\varphi
 \end{theorem}
 
 \begin{proof}
-  \uses{lem:reconstruction_ode, lem:spherical_endpoint_winding,
+  \uses{lem:reconstruction_ode, thm:spaceform_endpoint_winding,
         lem:spherical_simplicity, lem:spherical_circle_realizes,
         lem:realizes_spherical_comp, lem:exists_c1_circle_inverse,
         lem:is_simple_closed_comp}
@@ -198,7 +198,7 @@ $\langle z, i\,e^{i\varphi}\rangle_{\mathbb R}=-(\operatorname{Re}z)\sin\varphi
   Split on the four-vertex disjunction (\cref{def:four_vertex_condition}). The
   \emph{constant} branch is discharged directly by the explicit centered circle
   (\cref{lem:spherical_circle_realizes}), with no flow machinery. For the value-separated
-  (non-constant) branch: \cref{lem:spherical_endpoint_winding} supplies $R<1$,
+  (non-constant) branch: \cref{thm:spaceform_endpoint_winding} supplies $R<1$,
   $\delta>0$, a circle reparametrization $h_1$, and a \emph{closed, admissible}
   trajectory $z$ of the $(\kappa\circ h_1,R,\delta)$-truncated flow.
   \cref{lem:reconstruction_ode} (with curvature function $\kappa\circ h_1$) upgrades its
@@ -244,11 +244,11 @@ replaced by a reconstruction ODE. The architecture was pinned at iteration 046
   (\cref{lem:flow_half_turn_equivariance}). The constant-curvature model is
   \emph{unusable}: for constant $\kappa$ every admissible trajectory closes (all
   spherical circles), so the endpoint error vanishes identically and carries no degree
-  — see the DO-NOT recorded in \cref{lem:spherical_endpoint_winding}.
+  — see the DO-NOT recorded in \cref{thm:spaceform_endpoint_winding}.
 \end{enumerate}
 The speed, flow, transport, and step-model layers (S2-A through S2-D except the final
 assembly) are formalized axiom-clean; what remains is the assembly
-\cref{lem:spherical_endpoint_winding}, the S2-E simplicity chain, and the capstone.
+\cref{thm:spaceform_endpoint_winding}, the S2-E simplicity chain, and the capstone.
 
 \begin{definition}\leanok
 [gauge speed]

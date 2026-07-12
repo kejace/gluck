@@ -154,7 +154,7 @@ set_option maxHeartbeats 1600000 in
 -- Same elaboration budget as the landed positive assembly: the transport
 -- instantiation threads four nested arc-map start points.
 /-- **Mixed-sign endpoint winding: a closed admissible trajectory without
-global positivity.** Mirror of the landed `spherical_endpoint_winding` with
+global positivity.** Mirror of the (ε-generic) landed endpoint winding with
 the mixed-sign Data step: the window value `c` is supplied by hypothesis (the
 window midpoint may be `≤ 0` in the mixed regime), the curvature floor
 `κ₀ = min_{[0,2π]} κ` may be `≤ 0` and is admissible for the re-signed

@@ -21,7 +21,7 @@ sphere `ε=+1`, negative for the hyperbolic plane `ε=−1`, but always nonzero,
 (reused verbatim from `Gluck/Sphere/ConjWinding`, which is model-agnostic). The
 base degree lemma `exists_zero_of_boundary_winding` then forces an interior zero:
 a closed admissible trajectory. `ε`-generic transport of
-`spherical_endpoint_winding`.
+the historical S² assembly `spherical_endpoint_winding` (since retired in its favour).
 -/
 
 namespace Gluck.SpaceForm
@@ -302,7 +302,7 @@ four-vertex condition (plus the hyperbolic escape-velocity floor `1 < κ` when
 `ε < 0`), there is a reparametrization `h₁` and admissible flow parameters for
 which the truncated-field flow of `κ ∘ h₁` closes up:
 `Φ(z₀, 2π) = z₀` with the whole trajectory admissible.
-(Transport of `spherical_endpoint_winding`.) -/
+(ε-generic form of the historical S² endpoint-winding assembly.) -/
 theorem spaceForm_endpoint_winding {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {κ : ℝ → ℝ}
     (hκ : IsCurvatureFunction κ) (hfloor : ε < 0 → ∀ θ, 1 < κ θ)
     {p₁ q₁ p₂ q₂ : ℝ} (h12 : p₁ < q₁) (h23 : q₁ < p₂) (h34 : p₂ < q₂)

@@ -22,8 +22,8 @@ curvature function. This breaks the quantifier circularity of the winding assemb
 
 * `truncatedField_lipschitz_uniform`: a single Lipschitz constant works for the truncated
   field of every curvature function.
-* `spherical_endpoint_winding`: existence of a closed admissible trajectory for the
-  reparametrized curvature (Blueprint `lem:spherical_endpoint_winding`).
+* (historical) the spherical endpoint-winding assembly now lives ε-generically as
+  `SpaceForm.spaceForm_endpoint_winding`; this file keeps the uniform Lipschitz witnesses.
 -/
 
 namespace Gluck
@@ -128,65 +128,6 @@ lemma truncatedField_lipschitz_uniform {R δ : ℝ} (hR : 0 ≤ R)
   unfold truncatedField
   rwa [← sub_smul, norm_smul, Real.norm_eq_abs, Complex.norm_exp_ofReal_mul_I,
     mul_one]
-
-/-- **Spherical endpoint winding: a closed admissible trajectory for the
-reparametrized curvature.** Given the value-separated four-point data of the
-non-constant four-vertex branch, there are `0 < R < 1`, `δ > 0`, an
-orientation-preserving circle reparametrization `h₁`, a flow radius `r₀`, and
-an initial point `z₀` in the `r₀`-disk such that the trajectory of the
-`(κ ∘ h₁, R, δ)`-truncated flow through `z₀` is **closed**
-(`Φ(z₀, 2π) = z₀`) and **admissible** on `[0, 2π]` (both truncations
-inactive). Proof: the symmetric-step degree argument — margins
-(`stepModel_margins`) + transport (`stepModel_transport`) compare the endpoint
-error of the flow with the step model `E*_{a,b}` on a `ρ`-circle of initial
-points; the first-variation expansion (`stepError_expansion`) identifies the
-model boundary loop as a small perturbation of the conjugate-linear loop
-`−ηh·conj`, of winding `−1` (`windingNumberC_conj_loop`,
-`windingNumberC_eq_of_perturb`); `exists_zero_of_boundary_winding` then
-produces an interior zero, and one more transport application makes the
-resulting closed trajectory admissible.
-(Blueprint `lem:spherical_endpoint_winding`.) -/
-theorem spherical_endpoint_winding {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
-    {p₁ q₁ p₂ q₂ : ℝ} (h12 : p₁ < q₁) (h23 : q₁ < p₂) (h34 : p₂ < q₂)
-    (h41 : q₂ < p₁ + 2 * π)
-    (hsep : max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂)) :
-    ∃ (R δ : ℝ) (h₁ : ℝ → ℝ) (r₀ : ℝ≥0) (z₀ : ℂ),
-      0 < R ∧ R < 1 ∧ 0 < δ ∧
-      StrictMono h₁ ∧ Continuous h₁ ∧
-      (∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π) ∧
-      (∃ v : ℝ → ℝ, Continuous v ∧ (∀ θ, 0 < v θ) ∧ ∀ θ, HasDerivAt h₁ (v θ) θ) ∧
-      z₀ ∈ Metric.closedBall (0 : ℂ) r₀ ∧
-      sphericalFlow (κ ∘ h₁) R δ r₀ (z₀, 2 * π) = z₀ ∧
-      ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
-        ‖sphericalFlow (κ ∘ h₁) R δ r₀ (z₀, θ)‖ ≤ R ∧
-        δ ≤ (κ ∘ h₁) θ - ⟪sphericalFlow (κ ∘ h₁) R δ r₀ (z₀, θ),
-          Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ := by
-  obtain ⟨R, δ, h₁, r₀, z₀, hR0, hR1, hδ0, hmono, hh₁c, hh₁per, hh₁v, hz₀mem,
-      hclosedSF, hadmSF⟩ := SpaceForm.spaceForm_endpoint_winding (ε := 1) (Or.inl rfl) hκ
-    (by intro h; norm_num at h) h12 h23 h34 h41 hsep
-  have hκ'c : Continuous (κ ∘ h₁) := hκ.1.comp hh₁c
-  obtain ⟨hstart, hsphere⟩ := sphericalFlow_spec hκ'c hR0.le hδ0 r₀ hz₀mem
-  obtain ⟨hstartSF, hspace⟩ :=
-    SpaceForm.spaceFormFlow_spec (ε := 1) (by norm_num) hκ'c hR0.le hR1 hδ0 r₀ hz₀mem
-  have hfield (θ : ℝ) (w : ℂ) :
-      SpaceForm.truncatedField 1 (κ ∘ h₁) R δ θ w =
-        truncatedField (κ ∘ h₁) R δ θ w := by
-    simp [SpaceForm.truncatedField, SpaceForm.truncatedSpeed, truncatedField, truncatedSpeed]
-  have hEq : Set.EqOn
-      (fun θ => sphericalFlow (κ ∘ h₁) R δ r₀ (z₀, θ))
-      (fun θ => SpaceForm.spaceFormFlow 1 (κ ∘ h₁) R δ r₀ (z₀, θ))
-      (Set.Icc 0 (2 * π)) := by
-    apply truncatedField_solution_unique hR0.le hδ0 hsphere
-      (by simpa only [hfield] using hspace)
-    exact hstart.trans hstartSF.symm
-  refine ⟨R, δ, h₁, r₀, z₀, hR0, hR1, hδ0, hmono, hh₁c, hh₁per, hh₁v, hz₀mem, ?_, ?_⟩
-  · exact (hEq ⟨by positivity, le_rfl⟩).trans hclosedSF
-  · intro θ hθ
-    have heq := hEq hθ
-    change sphericalFlow (κ ∘ h₁) R δ r₀ (z₀, θ) =
-      SpaceForm.spaceFormFlow 1 (κ ∘ h₁) R δ r₀ (z₀, θ) at heq
-    rw [heq]
-    simpa only [one_mul] using hadmSF θ hθ
 
 end EndpointWindingAssembly
 

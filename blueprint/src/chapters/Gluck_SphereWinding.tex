@@ -874,7 +874,7 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   $m=\min(1-r^\ast,\ \kappa_0+r^\ast)$, which holds exactly when
   $\kappa_0>-r^\ast$; the three slack inequalities fed to the per-arc margin
   step use only $m\le\kappa_0+r^\ast$ and $m>0$, never the sign of $\kappa_0$.
-  The sole stage-1 consumer, \cref{lem:spherical_endpoint_winding}, supplies
+  The stage-1 consumer (now the ε-generic \cref{thm:spaceform_endpoint_winding}) supplies
   $-r^\ast<\kappa_0$ trivially from $0<\kappa_0$ and $r^\ast>0$. Fallback if the
   relaxation surfaces a genuine positivity use: keep the positive form and add a
   separate relaxed variant, recording the obstacle in the task result.)
@@ -1100,65 +1100,4 @@ last (it is free, \cref{lem:step_L1_reparam}). The Euclidean
   $\int\le\varepsilon' B+2\pi\varepsilon'<\varepsilon$.
 \end{proof}
 
-\begin{lemma}\leanok
-[spherical endpoint winding: closed admissible trajectory for the
-reparametrized curvature]
-  \label{lem:spherical_endpoint_winding}
-  \lean{Gluck.spherical_endpoint_winding}
-  \uses{def:spherical_endpoint, lem:spherical_endpoint_continuousOn,
-        def:step_error_map, lem:step_model_transport, lem:step_model_margins,
-        lem:step_error_expansion, lem:winding_conj_loop,
-        lem:winding_number_c_perturb, lem:exists_abab_levels, lem:step_L1_reparam,
-        thm:existence_of_zero, def:sphere_four_vertex,
-        lem:sphere_curvature_lower_bound}
-  Let $\kappa$ satisfy \cref{def:sphere_four_vertex} and be non-constant. Then there
-  exist $R<1$, $\delta>0$, an orientation-preserving circle reparametrization $h_1$
-  ($\mathrm{StrictMono}$, $C^1$ with continuous positive derivative,
-  $h_1(\theta+2\pi)=h_1(\theta)+2\pi$), and $z_0\in\mathbb C$, such that the trajectory
-  of the $(\kappa\circ h_1,R,\delta)$-truncated flow through $z_0$ is \emph{closed}
-  ($\Phi(z_0,2\pi)=z_0$, i.e.\ the endpoint map of \cref{def:spherical_endpoint}
-  vanishes at $z_0$) and \emph{admissible} on $[0,2\pi]$:
-  $\|z(\theta)\|\le R$ and
-  $(\kappa\circ h_1)(\theta)-\langle z(\theta),ie^{i\theta}\rangle\ge\delta$.
-\end{lemma}
-
-\begin{proof}
-
-\leanok
-  \emph{Data.} From the non-constant four-vertex branch take the alternating extrema and
-  the overlap window; let $c$ be its midpoint and $\kappa_0=\min_{[0,2\pi]}\kappa>0$
-  ($\le c$, shrinking $\kappa_0$ if necessary). \cref{lem:step_model_margins} for
-  $(c,\kappa_0)$ fixes $R,\delta,\mu,\rho_0,h_0$; \cref{lem:step_error_expansion} fixes
-  $\rho_1,h_1',C,\eta$. Choose
-  $\rho=\min\bigl(\rho_0,\rho_1,\tfrac{\eta}{4C}\bigr)$ and then
-  $h=\min\bigl(h_0,h_1',\tfrac{\eta\rho}{4C},\tfrac{w}{2}\bigr)$ where $w$ is the
-  half-width of the overlap window; set $a=c-h/2$, $b=c+h/2$.
-  \emph{Boundary margin of the model.} On the circle $\|z_0-z_0^\ast\|=\rho$,
-  \cref{lem:step_error_expansion} gives
-  $\|E^\ast_{a,b}(z_0)+\eta h\overline{(z_0-z_0^\ast)}\|\le Ch(\rho^2+h)\le
-  \tfrac{\eta h\rho}{2}$, so $\|E^\ast_{a,b}\|\ge\tfrac{\eta h\rho}{2}$ there.
-  \emph{Reparametrization.} \cref{lem:exists_abab_levels} supplies the $(a,b,a,b)$
-  crossing data; \cref{lem:step_L1_reparam} then supplies $h_1$ with
-  $\int_0^{2\pi}|\kappa\circ h_1-\kappa^\ast|<\varepsilon$, where $\varepsilon>0$ is
-  chosen with $e^{2\pi L}M\varepsilon\le\min\bigl(\mu,\tfrac{\eta h\rho}{8}\bigr)$
-  ($L$ a Lipschitz witness for the truncated field, $M=\tfrac{1+R^2}{2\delta^2}$). Note
-  $\kappa\circ h_1$ is continuous, $2\pi$-periodic, and $\ge\kappa_0$.
-  \emph{Winding.} For $z_0$ on the boundary circle, \cref{lem:step_model_transport}
-  (margins from \cref{lem:step_model_margins}) bounds
-  $\|E_{\kappa\circ h_1}(z_0)-E^\ast_{a,b}(z_0)\|\le e^{2\pi L}M\varepsilon\le
-  \tfrac{\eta h\rho}{8}$, where $E_{\kappa\circ h_1}$ is the truncated endpoint map of
-  \cref{def:spherical_endpoint}. Combining with the boundary margin and the expansion,
-  the loop of $E_{\kappa\circ h_1}$ around $\partial B(z_0^\ast,\rho)$ is a
-  perturbation, of size $<$ the model's norm, of the conjugate-linear loop
-  $t\mapsto-\eta h\,\rho\,\overline{e^{2\pi it}}$; by
-  \cref{lem:winding_number_c_perturb} and \cref{lem:winding_conj_loop} its winding is
-  $-1\ne0$, and it is nowhere zero on the boundary.
-  \emph{Zero.} $E_{\kappa\circ h_1}$ is continuous on the closed ball
-  (\cref{lem:spherical_endpoint_continuousOn}); after the affine chart
-  $w\mapsto z_0^\ast+\rho w$ of the unit disk, \cref{thm:existence_of_zero} yields an
-  interior $z_0$ with $E_{\kappa\circ h_1}(z_0)=0$: the trajectory closes.
-  \emph{Admissibility.} Apply \cref{lem:step_model_transport} once more at this interior
-  $z_0$ (its model margins hold since $\|z_0-z_0^\ast\|<\rho\le\rho_0$), with the same
-  $\varepsilon$-smallness: the closed trajectory is admissible on $[0,2\pi]$.
-\end{proof}
 
