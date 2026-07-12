@@ -163,8 +163,9 @@ lemma spaceFormCircle_realizes_explicit {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
         (fun θ : ℝ => (-centeredRadius ε c) •
           (Complex.I * Complex.exp ((θ : ℂ) * Complex.I)))
         (fun _ => c) := by
-  obtain ⟨hr0, hr1⟩ := centeredRadius_mem_Ioo ε c hε hc
-  have hsolve := centeredRadius_solves ε c hε hc
+  obtain ⟨hr0, hr1⟩ :=
+    centeredRadius_mem_Ioo ε c (hε.imp_right Or.inl) (hc.imp_right Or.inl)
+  have hsolve := centeredRadius_solves ε c (hε.imp_right Or.inl) (hc.imp_right Or.inl)
   set r : ℝ := centeredRadius ε c with hrdef
   have hcirc : 1 + ε * r ^ 2 = 2 * r * (c + ε * r) := by linear_combination -hsolve
   exact ⟨⟨spaceFormCircle_periodic r, spaceFormCircle_injOn hr0⟩,

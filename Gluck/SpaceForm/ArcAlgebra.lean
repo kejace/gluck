@@ -209,8 +209,8 @@ centered circle** (`ε`-generic, sign-critical). For the constant level `c`,
 `q_c(θ, z) − r* = ε · ‖z + r*·(i·e^{iθ})‖² / (2D)`. (Transport of
 `Gluck.sphericalSpeed_sub_radius`; the extra `ε` factor on the RHS makes the
 sign of `q_c − r*` follow `sign ε`.) -/
-lemma spaceFormSpeed_sub_radius {ε c θ : ℝ} {z : ℂ} (hε : ε = 1 ∨ ε = -1)
-    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c))
+lemma spaceFormSpeed_sub_radius {ε c θ : ℝ} {z : ℂ} (hε : ε = 1 ∨ ε = -1 ∨ ε = 0)
+    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c) ∨ (ε = 0 ∧ 1 / 2 < c))
     (hD : c - ε * ⟪z, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ ≠ 0) :
     spaceFormSpeed ε (fun _ => c) θ z - centeredRadius ε c
       = ε * ‖z + centeredRadius ε c •
@@ -234,16 +234,17 @@ lemma spaceFormSpeed_sub_radius {ε c θ : ℝ} {z : ℂ} (hε : ε = 1 ∨ ε =
 /-- **Sign-honest gauge-speed / centered-radius comparison** (`ε`-generic).
 `0 ≤ ε · (q_c(θ, z) − r*)` wherever `D = c − ε⟪z, i·e^{iθ}⟫ > 0`. For `ε = +1`
 this is `r* ≤ q_c` (model arcs stay outside the centered circle); for `ε = −1`
-it is `q_c ≤ r*`. (Transport of `Gluck.sphericalSpeed_radius_le`; uniform signed
-form since the RHS of `spaceFormSpeed_sub_radius` changes sign with `ε`.) -/
-lemma spaceFormSpeed_radius_le {ε c θ : ℝ} {z : ℂ} (hε : ε = 1 ∨ ε = -1)
-    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c))
+it is `q_c ≤ r*`; for `ε = 0` both sides vanish (flat model arcs have constant
+speed exactly `r*`). (Transport of `Gluck.sphericalSpeed_radius_le`; uniform
+signed form since the RHS of `spaceFormSpeed_sub_radius` changes sign with
+`ε`.) -/
+lemma spaceFormSpeed_radius_le {ε c θ : ℝ} {z : ℂ} (hε : ε = 1 ∨ ε = -1 ∨ ε = 0)
+    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c) ∨ (ε = 0 ∧ 1 / 2 < c))
     (hD : 0 < c - ε * ⟪z, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ) :
     0 ≤ ε * (spaceFormSpeed ε (fun _ => c) θ z - centeredRadius ε c) := by
   have h := spaceFormSpeed_sub_radius hε hc (ne_of_gt hD)
-  have he2 : ε * ε = 1 := by rcases hε with h' | h' <;> subst h' <;> norm_num
-  rw [h, ← mul_div_assoc, ← mul_assoc, he2, one_mul]
-  exact div_nonneg (by positivity) (by linarith)
+  rw [h, ← mul_div_assoc, ← mul_assoc]
+  exact div_nonneg (mul_nonneg (mul_self_nonneg ε) (sq_nonneg _)) (by linarith)
 
 /-- **Exact level sensitivity of the gauge speed** (`ε`-generic): for two levels
 `K, K'` with nonvanishing brackets,

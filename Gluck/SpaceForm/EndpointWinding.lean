@@ -338,22 +338,25 @@ theorem spaceForm_endpoint_winding {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {κ : �
       have h1 : 1 < κ q₁ := hfloor (by norm_num) q₁
       have h2 : κ q₁ ≤ max (κ q₁) (κ q₂) := le_max_left _ _
       rw [hcdef]; linarith [hsep]
+  have hε3 : ε = 1 ∨ ε = -1 ∨ ε = 0 := hε.imp_right Or.inl
+  have hc3 : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c) ∨ (ε = 0 ∧ 1 / 2 < c) :=
+    hc.imp_right Or.inl
   obtain ⟨κ₀, hκ₀κ, hκ₀m⟩ :
       ∃ κ₀ : ℝ, (∀ θ, κ₀ ≤ κ θ) ∧ -(ε * centeredRadius ε c) < κ₀ := by
     rcases hε with rfl | rfl
     · obtain ⟨κ₀', hκ₀'0, -, hκ₀'κ⟩ := exists_curvature_lower_bound hκ
       refine ⟨κ₀', fun θ => (hκ₀'κ θ).le, ?_⟩
       have hcr : 0 < centeredRadius 1 c :=
-        (centeredRadius_mem_Ioo 1 c (Or.inl rfl) hc).1
+        (centeredRadius_mem_Ioo 1 c (Or.inl rfl) (hc.imp_right Or.inl)).1
       nlinarith [hcr, hκ₀'0]
     · refine ⟨1, fun θ => (hfloor (by norm_num) θ).le, ?_⟩
       have hcr : centeredRadius (-1) c < 1 :=
-        (centeredRadius_mem_Ioo (-1) c (Or.inr rfl) hc).2
+        (centeredRadius_mem_Ioo (-1) c (Or.inr (Or.inl rfl)) (hc.imp_right Or.inl)).2
       nlinarith [hcr]
   obtain ⟨R, δ, μ, ρ₀, h₀, hR0, hR1, hδ0, hμ0, hρ₀0, hh₀0, hmarg⟩ :=
-    stepModel_margins hε hc hκ₀m
-  obtain ⟨ρ₁, hbar, C, hρ₁0, hbar0, hC0, hexp⟩ := stepError_expansion hε hc
-  obtain ⟨hrs0', hrs1', hbracket, hBpos⟩ := centeredRadius_facts hε hc
+    stepModel_margins hε3 hc3 hκ₀m
+  obtain ⟨ρ₁, hbar, C, hρ₁0, hbar0, hC0, hexp⟩ := stepError_expansion hε3 hc3
+  obtain ⟨hrs0', hrs1', hbracket, hBpos⟩ := centeredRadius_facts hε3 hc3
   set rs : ℝ := centeredRadius ε c with hrsdef
   have hrs0 : 0 < rs := hrs0'
   set η : ℝ := 2 * rs * ε / (c ^ 2 + ε) with hηdef

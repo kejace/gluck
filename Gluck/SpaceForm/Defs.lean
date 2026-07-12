@@ -184,80 +184,121 @@ lemma spaceFormSpeed_circle (ε : ℝ) {r : ℝ} (hr : 0 < r)
   rw [hden, div_div_eq_mul_div, mul_comm (1 + ε * r ^ 2) r, mul_div_assoc,
     div_self hne, mul_one]
 
-/-- The **space-form centered radius** `r*(ε, c) = ε(√(c² + ε) − c)`: the root
+/-- The **space-form centered radius** `r*(ε, c) = 1/(√(c² + ε) + c)`: the root
 in `(0, 1)` of `ε r² + 2c r − 1 = 0`, i.e. the Euclidean radius of the model
-geodesic circle of constant curvature `c`. The single closed form recovers the
-sphere radius `√(1 + c²) − c` (ε=1) and the hyperbolic radius `c − √(c² − 1)`
-(ε=−1, defined for `c > 1`). -/
+geodesic circle of constant curvature `c`. The single rationalized closed form
+recovers the sphere radius `√(1 + c²) − c` (ε=1), the hyperbolic radius
+`c − √(c² − 1)` (ε=−1, for `c > 1`), and — unlike the unrationalized form
+`ε(√(c²+ε) − c)`, which vanishes identically at `ε = 0` — the flat radius
+`1/(2c)` (ε=0, for `c > 1/2`). -/
 noncomputable def centeredRadius (ε c : ℝ) : ℝ :=
-  ε * (Real.sqrt (c ^ 2 + ε) - c)
+  (Real.sqrt (c ^ 2 + ε) + c)⁻¹
+
+/-- For `ε ∈ {1, -1, 0}`, `|ε| ≤ 1`: the `ε`-generic replacement for the
+`|ε| = 1` facts of the two-sign engine. -/
+lemma eps_abs_le_one {ε : ℝ} (hε : ε = 1 ∨ ε = -1 ∨ ε = 0) : |ε| ≤ 1 := by
+  rcases hε with h | h | h <;> subst h <;> norm_num
+
+/-- `|ε·x| ≤ |x|` for `|ε| ≤ 1`: the workhorse inequality replacing the
+`|ε| = 1`-based `rw`s of the two-sign engine. -/
+lemma abs_eps_mul_le {ε : ℝ} (hε : |ε| ≤ 1) (x : ℝ) : |ε * x| ≤ |x| := by
+  rw [abs_mul]
+  exact mul_le_of_le_one_left (abs_nonneg x) hε
+
+/-- **Window facts.** For an admissible level `c` — `c > 0` at `ε = 1`,
+`c > 1` at `ε = −1`, `c > 1/2` at `ε = 0` (the flat threshold making
+`r*(0, c) = 1/(2c) < 1`) — the level is positive, the discriminant `c² + ε` is
+strictly positive, and the rationalizing denominator `√(c² + ε) + c` exceeds
+`1`. -/
+lemma window_pos {ε c : ℝ}
+    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c) ∨ (ε = 0 ∧ 1 / 2 < c)) :
+    0 < c ∧ 0 < c ^ 2 + ε ∧ 1 < Real.sqrt (c ^ 2 + ε) + c := by
+  obtain ⟨h, hc⟩ | ⟨h, hc⟩ | ⟨h, hc⟩ := hc <;> subst h
+  · have h1 : Real.sqrt 1 ≤ Real.sqrt (c ^ 2 + 1) := Real.sqrt_le_sqrt (by nlinarith)
+    rw [Real.sqrt_one] at h1
+    exact ⟨hc, by positivity, by linarith⟩
+  · exact ⟨by linarith, by nlinarith,
+      by linarith [Real.sqrt_nonneg (c ^ 2 + (-1 : ℝ))]⟩
+  · refine ⟨by linarith, by nlinarith, ?_⟩
+    rw [add_zero, Real.sqrt_sq (by linarith : (0 : ℝ) ≤ c)]
+    linarith
+
+/-- **Rationalized form agrees with the legacy form at `ε = ±1`.**
+`1/(√(c²+ε) + c) = ε(√(c²+ε) − c)`, since
+`(√(c²+ε) − c)(√(c²+ε) + c) = ε` and `ε² = 1`. This is the patch lemma for
+proofs written against the old definition; it is genuinely `|ε| = 1`-only (the
+right-hand side vanishes at `ε = 0` while the left is `1/(2c) ≠ 0`). -/
+lemma centeredRadius_eq {ε c : ℝ} (hε : ε = 1 ∨ ε = -1)
+    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c)) :
+    centeredRadius ε c = ε * (Real.sqrt (c ^ 2 + ε) - c) := by
+  obtain ⟨-, hpos, hlt⟩ := window_pos (hc.imp_right Or.inl)
+  have hs : Real.sqrt (c ^ 2 + ε) ^ 2 = c ^ 2 + ε := Real.sq_sqrt hpos.le
+  have he2 : ε * ε = 1 := by rcases hε with h | h <;> subst h <;> norm_num
+  rw [centeredRadius]
+  refine (inv_eq_of_mul_eq_one_right ?_)
+  linear_combination ε * hs + he2
 
 /-- Recovers the sphere centered radius `√(1 + c²) − c`. -/
 lemma centeredRadius_one (c : ℝ) : centeredRadius 1 c = Real.sqrt (c ^ 2 + 1) - c := by
-  unfold centeredRadius; ring
+  have hs : Real.sqrt (c ^ 2 + 1) ^ 2 = c ^ 2 + 1 := Real.sq_sqrt (by positivity)
+  rw [centeredRadius]
+  exact inv_eq_of_mul_eq_one_right (by linear_combination hs)
 
-/-- Recovers the hyperbolic centered radius `c − √(c² − 1)`. -/
-lemma centeredRadius_neg_one (c : ℝ) :
+/-- Recovers the hyperbolic centered radius `c − √(c² − 1)` (for `c ≥ 1`; below
+the escape threshold the two sides are genuinely different junk values). -/
+lemma centeredRadius_neg_one {c : ℝ} (hc : 1 ≤ c) :
     centeredRadius (-1) c = c - Real.sqrt (c ^ 2 - 1) := by
-  unfold centeredRadius; rw [show c ^ 2 + (-1 : ℝ) = c ^ 2 - 1 by ring]; ring
+  have hs : Real.sqrt (c ^ 2 - 1) ^ 2 = c ^ 2 - 1 := Real.sq_sqrt (by nlinarith)
+  rw [centeredRadius, show c ^ 2 + (-1 : ℝ) = c ^ 2 - 1 from by ring]
+  exact inv_eq_of_mul_eq_one_right (by linear_combination -hs)
+
+/-- The flat centered radius: `centeredRadius 0 c = 1/(2c)`, the coordinate
+radius of the Euclidean circle of geodesic curvature `c` in the flat conformal
+metric `λ = 2` (where `κ_euclidean = 2·κ_g`). -/
+lemma centeredRadius_zero {c : ℝ} (hc : 0 ≤ c) :
+    centeredRadius 0 c = (2 * c)⁻¹ := by
+  rw [centeredRadius, add_zero, Real.sqrt_sq hc, two_mul]
 
 /-- **Centered-radius solves the model quadratic.** `r = centeredRadius ε c`
 satisfies `ε r² + 2c r − 1 = 0`, hence `(1 − εr²)/(2r) = c`: the model circle of
-radius `r` has curvature exactly `c`. (`ε ∈ {+1,−1}`, `c` admissible.) -/
-lemma centeredRadius_solves (ε c : ℝ) (hε : ε = 1 ∨ ε = -1)
-    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c)) :
+radius `r` has curvature exactly `c`. (`ε ∈ {+1,−1,0}`, `c` admissible.) -/
+lemma centeredRadius_solves (ε c : ℝ) (_hε : ε = 1 ∨ ε = -1 ∨ ε = 0)
+    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c) ∨ (ε = 0 ∧ 1 / 2 < c)) :
     ε * centeredRadius ε c ^ 2 + 2 * c * centeredRadius ε c - 1 = 0 := by
-  have hpos : 0 < c ^ 2 + ε := by
-    rcases hc with ⟨h, hc⟩ | ⟨h, hc⟩ <;> subst h <;> nlinarith
+  obtain ⟨-, hpos, hlt⟩ := window_pos hc
   have hs : Real.sqrt (c ^ 2 + ε) ^ 2 = c ^ 2 + ε := Real.sq_sqrt hpos.le
-  have he2 : ε ^ 2 = 1 := by rcases hε with h | h <;> rw [h] <;> norm_num
-  have hcr2 : centeredRadius ε c ^ 2 = (Real.sqrt (c ^ 2 + ε) - c) ^ 2 := by
-    unfold centeredRadius; rw [mul_pow, he2]; ring
-  rw [hcr2]; unfold centeredRadius; nlinarith [hs, he2]
+  have hne : Real.sqrt (c ^ 2 + ε) + c ≠ 0 := by linarith
+  rw [centeredRadius]
+  field_simp
+  linear_combination -hs
 
 /-- **Centered-radius lies in the open disk.** For an admissible curvature level
 `c`, `0 < r*(ε, c) < 1`. Sphere: `0 < √(1+c²) − c < 1` for `c > 0`. Hyperbolic:
-`0 < c − √(c²−1) < 1` for `c > 1`. -/
-lemma centeredRadius_mem_Ioo (ε c : ℝ) (hε : ε = 1 ∨ ε = -1)
-    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c)) :
+`0 < c − √(c²−1) < 1` for `c > 1`. Flat: `0 < 1/(2c) < 1` for `c > 1/2`. -/
+lemma centeredRadius_mem_Ioo (ε c : ℝ) (_hε : ε = 1 ∨ ε = -1 ∨ ε = 0)
+    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c) ∨ (ε = 0 ∧ 1 / 2 < c)) :
     0 < centeredRadius ε c ∧ centeredRadius ε c < 1 := by
-  rcases hc with ⟨h, hc⟩ | ⟨h, hc⟩
-  · subst h
-    rw [centeredRadius_one]
-    have hlt : c < Real.sqrt (c ^ 2 + 1) := by
-      have := Real.sqrt_lt_sqrt (sq_nonneg c) (show c ^ 2 < c ^ 2 + 1 by linarith)
-      rwa [Real.sqrt_sq hc.le] at this
-    have hub : Real.sqrt (c ^ 2 + 1) < c + 1 := by
-      have := Real.sqrt_lt_sqrt (by positivity : (0:ℝ) ≤ c ^ 2 + 1)
-        (show c ^ 2 + 1 < (c + 1) ^ 2 by nlinarith)
-      rwa [Real.sqrt_sq (by linarith)] at this
-    constructor <;> linarith
-  · subst h
-    rw [centeredRadius_neg_one]
-    have hnn : (0:ℝ) ≤ c ^ 2 - 1 := by nlinarith
-    have h2 : Real.sqrt (c ^ 2 - 1) < c := by
-      have := Real.sqrt_lt_sqrt hnn (show c ^ 2 - 1 < c ^ 2 by linarith)
-      rwa [Real.sqrt_sq (by linarith : (0:ℝ) ≤ c)] at this
-    have h3 : c - 1 < Real.sqrt (c ^ 2 - 1) := by
-      have := Real.sqrt_lt_sqrt (by positivity : (0:ℝ) ≤ (c - 1) ^ 2)
-        (show (c - 1) ^ 2 < c ^ 2 - 1 by nlinarith)
-      rwa [Real.sqrt_sq (by linarith : (0:ℝ) ≤ c - 1)] at this
-    constructor <;> linarith
+  obtain ⟨-, -, hlt⟩ := window_pos hc
+  have h0 : (0 : ℝ) < Real.sqrt (c ^ 2 + ε) + c := by linarith
+  exact ⟨inv_pos.mpr h0, inv_lt_one_of_one_lt₀ hlt⟩
 
 /-- **Bracket value at the centered circle.** `c + ε·r*(ε, c) = √(c² + ε)`
-(uniform in `ε ∈ {+1,−1}`, since `ε·r* = √(c²+ε) − c`): the denominator
-`κ − ε⟪z, i·e^{iθ}⟫` evaluated at the level-`c` model circle `z = −r*·i·e^{iθ}`
-(where `⟪z, i·e^{iθ}⟫ = −r*`). For the sphere (`ε=+1`) this is `√(1+c²) ≥ 1` — an
-absolute lower bound; for the hyperbolic plane (`ε=−1`) it is `√(c²−1)`, positive
-for `c > 1` but tending to `0` as `c → 1⁺` (the escape-velocity boundary), so
-margin constants scaled by this bracket are `c`-dependent, not absolute. -/
-lemma centeredRadius_bracket (ε c : ℝ) (hε : ε = 1 ∨ ε = -1) :
+(uniform in `ε ∈ {+1,−1,0}`): the denominator `κ − ε⟪z, i·e^{iθ}⟫` evaluated at
+the level-`c` model circle `z = −r*·i·e^{iθ}` (where `⟪z, i·e^{iθ}⟫ = −r*`).
+For the sphere (`ε=+1`) this is `√(1+c²) ≥ 1` — an absolute lower bound; for
+the hyperbolic plane (`ε=−1`) it is `√(c²−1)`, positive for `c > 1` but tending
+to `0` as `c → 1⁺` (the escape-velocity boundary); for the flat plane (`ε=0`)
+it is `c` itself. Margin constants scaled by this bracket are therefore
+`c`-dependent, not absolute. -/
+lemma centeredRadius_bracket (ε c : ℝ) (_hε : ε = 1 ∨ ε = -1 ∨ ε = 0)
+    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c) ∨ (ε = 0 ∧ 1 / 2 < c)) :
     c + ε * centeredRadius ε c = Real.sqrt (c ^ 2 + ε) := by
-  have he2 : ε ^ 2 = 1 := by rcases hε with h | h <;> rw [h] <;> norm_num
-  unfold centeredRadius
-  have h : ε * (ε * (Real.sqrt (c ^ 2 + ε) - c))
-      = ε ^ 2 * (Real.sqrt (c ^ 2 + ε) - c) := by ring
-  rw [h, he2]; ring
+  obtain ⟨-, hpos, hlt⟩ := window_pos hc
+  have hs : Real.sqrt (c ^ 2 + ε) ^ 2 = c ^ 2 + ε := Real.sq_sqrt hpos.le
+  have hne : Real.sqrt (c ^ 2 + ε) + c ≠ 0 := by linarith
+  rw [centeredRadius]
+  field_simp
+  linear_combination -hs
 
 /-- **Admissible uniform lower bound.** From `SpaceFormFourVertex ε κ` (with
 `ε ∈ {+1,−1}`) there is a confinement radius `R` with `0 < R < 1` and
