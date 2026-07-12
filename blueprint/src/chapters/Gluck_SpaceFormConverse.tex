@@ -9,8 +9,9 @@
 % ArcAlgebra.lean) are covered in \cref{chap:spaceform_core}; this chapter states
 % the endpoint-winding heart, the reconstruction (truncation-removal) step, the
 % positive-stage capstone spaceFormConverse_pos, and the mixed-sign capstone
-% spaceFormMixedConverse, whose proof is a REDUCTION to the two completed
-% per-geometry capstones (sphericalConverse, hyperbolicMixedConverse_exact) —
+% spaceFormMixedConverse, whose proof is a REDUCTION to the completed
+% per-geometry capstones (sphericalConverse, hyperbolicMixedConverse_exact,
+% and — for the flat instance spaceFormMixedConverse_flat — dahlbergConverse) —
 % stated honestly as such below. All declarations are landed and sorry-free.
 
 \section{Overview}
@@ -66,23 +67,31 @@ $\varepsilon=0$ feeds the second proof of Gluck's Euclidean theorem
 
 \paragraph{Mixed stage (\texttt{MixedConverse.lean}).}
 \cref{thm:spaceform_mixed_converse} removes global positivity, replacing the
-hypothesis by \cref{def:mixed_sign_spaceform_four_vertex}. Unlike the positive
-stage, its proof is \emph{not} an independent $\varepsilon$-generic construction:
-it is proved \textbf{by reduction to the two completed per-geometry capstones}.
-At $\varepsilon=+1$ the hypothesis strengthens the spherical
-\cref{def:mixed_sign_sphere_four_vertex} (separation threshold
-$\max(1,\cdot)\ge\max(0,\cdot)$; identical confinement floor via
+hypothesis by \cref{def:mixed_sign_spaceform_four_vertex}, whose branches are
+uniform in $\varepsilon$ through the confinement threshold
+$(1-\varepsilon)/2$. Unlike the positive stage, its proof is \emph{not} an
+independent $\varepsilon$-generic construction: it is proved \textbf{by
+reduction to the completed per-geometry capstones}. At $\varepsilon=+1$ the
+hypothesis \emph{is} the spherical \cref{def:mixed_sign_sphere_four_vertex}
+(threshold $0$; identical confinement floor via
 $r^\ast(1,c)=\sqrt{c^2+1}-c$, \texttt{centeredRadius\_one}), so
-\cref{thm:spherical_converse} applies. At $\varepsilon=-1$ it strengthens the
-hyperbolic \cref{def:mixed_sign_hyperbolic_four_vertex} (identical four-vertex
-package; the floor is simply \emph{discarded} — the $H^2$ arc-length route needs
-none), so the exact-profile capstone \cref{thm:hyperbolic_mixed_converse_exact}
-applies. An earlier plan proved the mixed statement by an $\varepsilon$-generic
-transport of the $S^2$ mixed flow development; that route was superseded by the
-$H^2$ arc-length engine and the reduction recorded here. The $\varepsilon=-1$
-instance is packaged separately as \cref{thm:hyperbolic_dahlberg_converse}, the
-hyperbolic Dahlberg converse of the four vertex theorem (Dahlberg 2005,
-hyperbolic transport).
+\cref{thm:spherical_converse} applies. At $\varepsilon=-1$ it is the
+hyperbolic \cref{def:mixed_sign_hyperbolic_four_vertex} (threshold $1$, the
+escape velocity; the guarded floor is vacuous — the $H^2$ arc-length route
+needs none), so the exact-profile capstone
+\cref{thm:hyperbolic_mixed_converse_exact} applies. At $\varepsilon=0$
+(threshold $1/2$) the non-constant branch strengthens the Euclidean mixed-sign
+hypothesis \cref{def:mixed_sign_four_vertex}, and the flat instance
+\cref{thm:spaceform_mixed_converse_flat} concludes in the \emph{dilation-free}
+Euclidean predicate via the Dahlberg converse \cref{thm:dahlberg_converse} —
+the confined flat statement is false in general (scale rigidity; see the
+paragraph after \cref{thm:hyperbolic_dahlberg_converse}). An earlier plan
+proved the mixed statement by an $\varepsilon$-generic transport of the $S^2$
+mixed flow development; that route was superseded by the $H^2$ arc-length
+engine and the reductions recorded here. The $\varepsilon=-1$ instance is
+packaged separately as \cref{thm:hyperbolic_dahlberg_converse}, the hyperbolic
+Dahlberg converse of the four vertex theorem (Dahlberg 2005, hyperbolic
+transport).
 
 \section{Declarations}
 
@@ -337,40 +346,57 @@ hyperbolic transport).
   \label{def:mixed_sign_spaceform_four_vertex}
   \lean{Gluck.SpaceForm.MixedSignSpaceFormFourVertex}
   \uses{def:four_vertex_condition, def:centered_radius,
-        def:mixed_sign_sphere_four_vertex}
+        def:mixed_sign_sphere_four_vertex, def:mixed_sign_hyperbolic_four_vertex,
+        def:mixed_sign_four_vertex}
   A function $\kappa:\mathbb R\to\mathbb R$ satisfies the \emph{mixed-sign
   space-form four-vertex hypothesis} at ambient sign $\varepsilon$ if it is
   continuous, $2\pi$-periodic, and either
   \begin{itemize}
-  \item constant at an admissible level $c$ ($\varepsilon=1\wedge0<c$, or
-    $\varepsilon=-1\wedge1<c$, matching the window requirement of
-    \cref{thm:spaceform_converse_pos}); or
-  \item has value-separated alternating extrema
-    $p_1<q_1<p_2<q_2<p_1+2\pi$ ($p_i$ local maxima, $q_i$ local minima) with the
-    escape-velocity separation
+  \item constant at a level $c$ above the \emph{uniform confinement threshold}
     \[
-      \max\bigl(1,\kappa(q_1),\kappa(q_2)\bigr)<\min\bigl(\kappa(p_1),\kappa(p_2)\bigr)
+      \frac{1-\varepsilon}{2}\;=\;
+      \begin{cases}
+        0 & \varepsilon=+1\ (S^2),\\
+        1/2 & \varepsilon=0\ (E^2),\\
+        1 & \varepsilon=-1\ (H^2,\ \text{the escape velocity}),
+      \end{cases}
     \]
-    (the $S^2$ threshold $\max(0,\cdot)$ of
-    \cref{def:mixed_sign_sphere_four_vertex} raised to $\max(1,\cdot)$ for the
-    $\varepsilon$-generic / hyperbolic escape velocity $\operatorname{coth}R>1$),
-    together with a window value $c$ —
-    $\max(1,\kappa(q_1),\kappa(q_2))<c<\min(\kappa(p_1),\kappa(p_2))$, admissible
-    for $\varepsilon$ as above — for which the global confinement floor
+    the level above which the model circle of curvature $c$ fits in the open
+    unit disk ($r^\ast(\varepsilon,c)<1\iff c>(1-\varepsilon)/2$,
+    \texttt{centeredRadius\_lt\_one\_iff}); or
+  \item has value-separated alternating extrema
+    $p_1<q_1<p_2<q_2<p_1+2\pi$ ($p_i$ local maxima, $q_i$ local minima) whose
+    separation clears the same threshold,
     \[
-      \kappa(\theta)\;>\;-\varepsilon\,r^\ast(\varepsilon,c)
+      \max\Bigl(\tfrac{1-\varepsilon}{2},\kappa(q_1),\kappa(q_2)\Bigr)
+      <\min\bigl(\kappa(p_1),\kappa(p_2)\bigr),
+    \]
+    together with a window value $c$ in the overlap —
+    $\max(\tfrac{1-\varepsilon}{2},\kappa(q_1),\kappa(q_2))<c<
+    \min(\kappa(p_1),\kappa(p_2))$, so in particular $c>(1-\varepsilon)/2$ and
+    the window level is admissible — for which the global confinement floor
+    \[
+      \kappa(\theta)\;>\;-r^\ast(\varepsilon,c)
       \qquad\text{for all }\theta
     \]
-    holds, $r^\ast$ the centered radius of \cref{def:centered_radius}.
+    is demanded \emph{at positive ambient sign only} (guard $0<\varepsilon$),
+    $r^\ast$ the centered radius of \cref{def:centered_radius}.
   \end{itemize}
-  No global positivity: $\kappa$ may be $\le0$ (at $\varepsilon=+1$), resp.\ dip
-  into $(-1,0)$ (at $\varepsilon=-1$), around the minima. The floor keeps the
-  position-dependent denominator
+  No global positivity: $\kappa$ may be $\le0$ (at $\varepsilon=+1$), cross $0$
+  (at $\varepsilon=0$), resp.\ dip into $(-1,0)$ (at $\varepsilon=-1$) around
+  the minima. The floor keeps the position-dependent denominator
   $\kappa-\varepsilon\langle z,ie^{i\theta}\rangle$ positive along trajectories
-  confined to the model radius. At $\varepsilon=-1$ the floor is \emph{not}
-  needed for realization — \cref{thm:hyperbolic_mixed_converse_exact} carries
-  none — so at that sign this hypothesis is strictly stronger than
-  \cref{def:mixed_sign_hyperbolic_four_vertex}.
+  confined to the model radius; its sole consumer is the $S^2$ flow reduction,
+  which is why it is guarded to $\varepsilon>0$ — the $H^2$ arc-length capstone
+  \cref{thm:hyperbolic_mixed_converse_exact} carries none, and the flat
+  instance reduces to the dilation-free Euclidean
+  \cref{thm:dahlberg_converse}, which needs none either. At $\varepsilon=+1$
+  the hypothesis is exactly \cref{def:mixed_sign_sphere_four_vertex}
+  (threshold $0$); at $\varepsilon=-1$ it is
+  \cref{def:mixed_sign_hyperbolic_four_vertex} (threshold $1$, floor vacuous);
+  at $\varepsilon=0$ its non-constant branch strengthens the Euclidean
+  \cref{def:mixed_sign_four_vertex} (threshold $1/2$ against the
+  maxima-positivity clause $0<\min(\kappa(p_1),\kappa(p_2))$).
 \end{definition}
 
 \begin{lemma}\leanok
@@ -382,19 +408,17 @@ hyperbolic transport).
   $\mathrm{MixedSignSpaceFormFourVertex}\;1\;\kappa\Longrightarrow
   \mathrm{MixedSignSphereFourVertex}\;\kappa$
   (\cref{def:mixed_sign_sphere_four_vertex}): at $\varepsilon=+1$ the space-form
-  mixed hypothesis strengthens the spherical one.
+  mixed hypothesis is the spherical one, and the reduction is a near-identity.
 \end{lemma}
 
 \begin{proof}
   \leanok
-  The separation weakens pointwise:
-  $\max(0,\max(\kappa(q_1),\kappa(q_2)))\le\max(1,\max(\kappa(q_1),\kappa(q_2)))$,
-  so the raised threshold implies the spherical one for both the separation and
-  the window membership of $c$. The confinement floor is literally the $S^2$
-  floor: $-\bigl(1\cdot r^\ast(1,c)\bigr)=-(\sqrt{c^2+1}-c)$ by
-  \texttt{centeredRadius\_one} (plus $1+c^2=c^2+1$). The constant branch selects
-  the $\varepsilon=1$ disjunct ($0<c$); the $\varepsilon=-1$ disjuncts are
-  refuted by $1\ne-1$.
+  The \texttt{norm\_num} bridge $(1-1)/2=0$ rewrites the threshold in the
+  constant branch, the separation and the window membership of $c$ into their
+  spherical forms verbatim. The confinement floor (guard $0<1$ discharged by
+  \texttt{one\_pos}) is literally the $S^2$ floor:
+  $-r^\ast(1,c)=-(\sqrt{c^2+1}-c)$ by \texttt{centeredRadius\_one} (plus
+  $1+c^2=c^2+1$).
 \end{proof}
 
 \begin{lemma}\leanok
@@ -406,16 +430,17 @@ hyperbolic transport).
   $\mathrm{MixedSignSpaceFormFourVertex}\;(-1)\;\kappa\Longrightarrow
   \mathrm{MixedSignHyperbolicFourVertex}\;\kappa$
   (\cref{def:mixed_sign_hyperbolic_four_vertex}): at $\varepsilon=-1$ the
-  space-form mixed hypothesis strengthens the hyperbolic one.
+  space-form mixed hypothesis is the hyperbolic one.
 \end{lemma}
 
 \begin{proof}
   \leanok
-  The four-vertex package (ordering, extrema, separation
-  $\max(1,\cdot)<\min(\cdot)$, window value $c$ with $1<c$) is identical, and the
-  confinement floor is simply \emph{discarded} — the hyperbolic arc-length route
-  needs none. The constant branch selects the $\varepsilon=-1$ disjunct
-  ($1<c$); the $\varepsilon=1$ disjuncts are refuted by $-1\ne1$.
+  The \texttt{norm\_num} bridge $(1-(-1))/2=1$ rewrites the threshold into the
+  hyperbolic escape velocity: the four-vertex package (ordering, extrema,
+  separation $\max(1,\cdot)<\min(\cdot)$, window value $c$) is then identical,
+  the hyperbolic window clause $1<c$ follows from $1\le\max(1,\cdot)<c$, and
+  the guarded confinement floor is vacuous at $\varepsilon=-1$ — the
+  hyperbolic arc-length route needs none.
 \end{proof}
 
 \begin{lemma}\leanok
@@ -457,13 +482,19 @@ hyperbolic transport).
     \exists\,z,\ \mathrm{IsSimpleClosed}\;z\ \wedge\
     \mathrm{Realizes}\;\varepsilon\;z\;\kappa.
   \]
-  Subsumes \cref{thm:spaceform_converse_pos}, and unifies the spherical and
-  hyperbolic Dahlberg converses in one $\varepsilon$-generic statement.
+  Subsumes \cref{thm:spaceform_converse_pos} at the curved signs, and unifies
+  the spherical and hyperbolic Dahlberg converses in one $\varepsilon$-generic
+  statement.
   \emph{Honest accounting:} this theorem is proved by \textbf{reduction to the
   two completed per-geometry capstones} — \cref{thm:spherical_converse} at
   $\varepsilon=+1$ and \cref{thm:hyperbolic_mixed_converse_exact} at
   $\varepsilon=-1$ — not by an independent $\varepsilon$-generic mixed
-  construction.
+  construction. The two-way sign hypothesis is genuine even though
+  \cref{def:mixed_sign_spaceform_four_vertex} makes sense at $\varepsilon=0$:
+  the confined flat statement is false in general (scale rigidity — see the
+  paragraph after \cref{thm:hyperbolic_dahlberg_converse}), and the flat member
+  of the mixed table is the dilation-free
+  \cref{thm:spaceform_mixed_converse_flat}.
 \end{theorem}
 
 \begin{proof}
@@ -505,6 +536,87 @@ hyperbolic transport).
   \leanok
   Specialize \cref{thm:spaceform_mixed_converse} at $\varepsilon=-1$ (the sign
   disjunction is discharged by \texttt{Or.inr rfl}).
+\end{proof}
+
+\paragraph{The flat member and scale rigidity.} Why does
+\cref{thm:spaceform_mixed_converse} keep the two-way sign hypothesis
+$\varepsilon\in\{+1,-1\}$ when \cref{def:mixed_sign_spaceform_four_vertex}
+makes sense at $\varepsilon=0$? Its conclusion
+$\mathrm{Realizes}\;\varepsilon$ is \emph{confined}: it contains
+$\|z(t)\|<1$. At $\varepsilon=\pm1$ the open disk is the geometry itself (the
+conformal model of $S^2$ resp.\ $H^2$), but at $\varepsilon=0$ confinement is
+a genuine restriction: $\mathrm{Realizes}\;0$ pins the scale of the curve — a
+dilation multiplies the realized Euclidean curvature by the reciprocal factor,
+so there is no rescaling freedom inside the predicate — and with unrestricted
+minima a realizing curve can be forced arbitrarily large, so the confined flat
+statement is false in general. (Contrast the positive stage: there the global
+floor $\kappa>1/2$ bounds the whole profile, and the flat branch of
+\cref{thm:spaceform_converse_pos} squeezes the curve against the model circle
+of radius $1/(2c)<1$; the mixed hypothesis bounds only the maxima.) The flat
+member of the mixed table therefore concludes in the dilation-free Euclidean
+predicate (\cref{thm:spaceform_mixed_converse_flat} below); a confined flat
+version under the window floor $\kappa>-r^\ast(0,c)$ would need the flat
+$L^1$-squeeze construction of the positive stage transported to mixed sign
+(the flat fork-A port) — future work. With this reading the uniform threshold
+row $(1-\varepsilon)/2=(0,\,1/2,\,1)$ of the positive stage now covers the
+mixed table too: sphere \cref{thm:spherical_converse}, plane
+\cref{thm:spaceform_mixed_converse_flat}, hyperbolic plane
+\cref{thm:hyperbolic_dahlberg_converse}.
+
+\begin{lemma}\leanok
+[reduction at $\varepsilon=0$: to the Euclidean mixed-sign hypothesis]
+  \label{lem:mixed_sign_four_vertex_of_spaceform_flat}
+  \lean{Gluck.SpaceForm.mixedSignFourVertex_of_spaceForm_flat}
+  \uses{def:mixed_sign_spaceform_four_vertex, def:mixed_sign_four_vertex}
+  If $\kappa$ satisfies $\mathrm{MixedSignSpaceFormFourVertex}\;0\;\kappa$ and
+  is non-constant, it satisfies the Euclidean mixed-sign hypothesis
+  $\mathrm{MixedSignFourVertex}$ (\cref{def:mixed_sign_four_vertex}) of the
+  Dahlberg converse.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  Non-constancy refutes the constant branch. In the four-vertex branch the
+  package transfers verbatim: the separation
+  $\max(\kappa(q_1),\kappa(q_2))<\min(\kappa(p_1),\kappa(p_2))$ weakens from
+  the thresholded
+  $\max(\tfrac12,\kappa(q_1),\kappa(q_2))<\min(\kappa(p_1),\kappa(p_2))$, and
+  the maxima-positivity clause $0<\min(\kappa(p_1),\kappa(p_2))$ follows from
+  $0<\tfrac12\le\max(\tfrac12,\cdot)<\min(\cdot)$. The guarded floor is
+  vacuous at $\varepsilon=0$.
+\end{proof}
+
+\begin{theorem}\leanok
+[space-form mixed converse, flat member]
+  \label{thm:spaceform_mixed_converse_flat}
+  \lean{Gluck.SpaceForm.spaceFormMixedConverse_flat}
+  \uses{def:mixed_sign_spaceform_four_vertex, thm:dahlberg_converse,
+        lem:mixed_sign_four_vertex_of_spaceform_flat, thm:gluck_converse,
+        def:is_simple_closed, def:realizes_curvature}
+  A profile satisfying the mixed-sign space-form hypothesis at $\varepsilon=0$
+  (threshold $1/2$) is realized as the Euclidean curvature of a simple closed
+  curve, in the \emph{dilation-free} predicate:
+  \[
+    \mathrm{MixedSignSpaceFormFourVertex}\;0\;\kappa
+    \;\Longrightarrow\;
+    \exists\,\gamma,\ \mathrm{IsSimpleClosed}\;\gamma\ \wedge\
+    \mathrm{RealizesCurvature}\;\gamma\;\kappa.
+  \]
+  The conclusion is deliberately \emph{not} the confined $\mathrm{Realizes}\;0$
+  — see the scale-rigidity paragraph above.
+\end{theorem}
+
+\begin{proof}
+  \uses{lem:mixed_sign_four_vertex_of_spaceform_flat, thm:dahlberg_converse,
+        thm:gluck_converse}
+  \leanok
+  Constant branch: $\kappa\equiv c$ with $c>1/2>0$, so the round circle of
+  radius $1/c$ realizes it (the constant case of \cref{thm:gluck_converse}).
+  Non-constant branch: the strict value separation makes $\kappa$ non-constant
+  (\texttt{not\_constant\_of\_separation}), so
+  \cref{lem:mixed_sign_four_vertex_of_spaceform_flat} strengthens the
+  hypothesis to \cref{def:mixed_sign_four_vertex} and the Euclidean Dahlberg
+  converse \cref{thm:dahlberg_converse} applies.
 \end{proof}
 
 \section{Two proofs of Gluck's theorem}
