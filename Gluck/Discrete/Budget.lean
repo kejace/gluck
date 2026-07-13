@@ -1,7 +1,4 @@
-import Mathlib.Analysis.SpecialFunctions.Trigonometric.Inverse
-import Mathlib.Analysis.SpecialFunctions.Complex.Circle
-import Mathlib.Data.ZMod.Basic
-import Mathlib.Tactic
+import Gluck.Discrete.Defs
 
 /-!
 # The discrete obstruction zoo
@@ -259,5 +256,265 @@ theorem killerProfile_reflected_pos_card {M ε : ℝ} (hM : 0 < M) (hε : 0 < ε
     (Finset.univ.filter fun i : ZMod 4 => 0 < -killerProfile M ε (-i)).card = 2 := by
   rw [killerProfile_reflected_pos_filter hM hε]
   decide
+
+/-! ## The Menger chord identity -/
+
+variable {n : ℕ}
+
+/-- The vertex chord at `i` for data `(κ, ℓ)` at `K = 0`: the length of the
+chord from `P (i-1)` to `P (i+1)` in any development, expressed through the
+law of cosines at the exterior angle `θ i`. -/
+noncomputable def vertexChord (κ ℓ : ZMod n → ℝ) (i : ZMod n) : ℝ :=
+  sqrt (ℓ (i - 1) ^ 2 + ℓ i ^ 2 + 2 * ℓ (i - 1) * ℓ i * cos (turningAngle 0 κ ℓ i))
+
+/-- **Menger chord identity**: on the Euclidean moderate-arc domain,
+`κ i · m i = 2 sin θ i` for every vertex `i`. -/
+theorem menger_chord_identity {κ ℓ : ZMod n → ℝ} (h : ModerateArc 0 κ ℓ)
+    (i : ZMod n) :
+    κ i * vertexChord κ ℓ i = 2 * sin (turningAngle 0 κ ℓ i) := by
+  have w₀ := h.wall_left i
+  have w₁ := h.wall_right i
+  rw [tK_zero] at w₀ w₁
+  have key := mul_sqrt_chord_eq_two_sin (κ := κ i)
+    (h.length_pos (i - 1)) (h.length_pos i) w₀ w₁
+  simpa only [vertexChord, turningAngle, tK_zero] using key
+
+/-! ## N1: positive-turning support -/
+
+/-- **N1, turning form**: closed positively-oriented moderate-arc data has at
+least three vertices of positive curvature. -/
+theorem three_le_card_pos_of_turningSum [NeZero n] {κ ℓ : ZMod n → ℝ}
+    (h : ModerateArc 0 κ ℓ) (hT : turningSum κ ℓ = 2 * π) :
+    3 ≤ (Finset.univ.filter fun i : ZMod n => 0 < κ i).card := by
+  apply three_le_card_of_two_pi_le_sum (θ := turningAngle 0 κ ℓ)
+  · intro i hi
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, not_lt] at hi
+    rcases hi.lt_or_eq with hlt | heq
+    · exact (turningAngle_neg_of_neg h hlt).le
+    · exact le_of_eq (turningAngle_eq_zero heq)
+  · intro i _
+    exact lt_of_abs_lt (abs_turningAngle_lt_pi h i)
+  · rw [← hT]
+    rfl
+
+/-- **N1 for realizable profiles**: a realizable profile has at least three
+indices of positive curvature. -/
+theorem three_le_card_pos_of_realizes [NeZero n] {κ : ZMod n → ℝ}
+    (h : RealizesR2 κ) :
+    3 ≤ (Finset.univ.filter fun i : ZMod n => 0 < κ i).card := by
+  obtain ⟨ℓ, hMA, -, hT, -⟩ := h
+  exact three_le_card_pos_of_turningSum hMA hT
+
+/-- **N1, reflected gauge**: closed negatively-oriented moderate-arc data has
+at least three vertices of negative curvature. -/
+theorem three_le_card_neg_of_turningSum_neg [NeZero n] {κ ℓ : ZMod n → ℝ}
+    (h : ModerateArc 0 κ ℓ) (hT : turningSum κ ℓ = -(2 * π)) :
+    3 ≤ (Finset.univ.filter fun i : ZMod n => κ i < 0).card := by
+  have hMA : ModerateArc 0 (-κ) ℓ := by
+    intro i
+    obtain ⟨h1, h2, h3, h4, h5⟩ := h i
+    exact ⟨h1, h2, h3, by simpa using h4, by simpa using h5⟩
+  have hT' : turningSum (-κ) ℓ = 2 * π := by
+    unfold turningSum
+    simp only [turningAngle_neg, Finset.sum_neg_distrib]
+    rw [show (∑ i : ZMod n, turningAngle 0 κ ℓ i) = turningSum κ ℓ from rfl, hT]
+    ring
+  have h3 := three_le_card_pos_of_turningSum hMA hT'
+  have hfilter : (Finset.univ.filter fun i : ZMod n => 0 < (-κ) i) =
+      (Finset.univ.filter fun i : ZMod n => κ i < 0) := by
+    ext i
+    simp
+  rwa [hfilter] at h3
+
+/-! ## The killer profile is unrealizable -/
+
+/-- **The killer profile is unrealizable**: for all `M, ε > 0` the profile
+`(M, -ε, M, -ε)` is unrealizable, and likewise its reflected orientation
+`i ↦ -killer M ε (-i)` — despite satisfying the discrete transport of the
+smooth four-vertex window. -/
+theorem killerProfile_not_realizes {M ε : ℝ} (hM : 0 < M) (hε : 0 < ε) :
+    ¬RealizesR2 (killerProfile M ε) ∧
+      ¬RealizesR2 (fun i => -killerProfile M ε (-i)) := by
+  constructor
+  · intro h
+    have h3 := three_le_card_pos_of_realizes h
+    rw [killerProfile_pos_card hM hε] at h3
+    omega
+  · intro h
+    have h3 := three_le_card_pos_of_realizes h
+    rw [killerProfile_reflected_pos_card hM hε] at h3
+    omega
+
+/-! ## N0: rigidity at `n = 3` -/
+
+private lemma zmod3_cases (j : ZMod 3) : j = 0 ∨ j = 1 ∨ j = 2 := by
+  revert j; decide
+
+private lemma sum_zmod3 (f : ZMod 3 → ℝ) : ∑ i : ZMod 3, f i = f 0 + f 1 + f 2 := by
+  have h : (Finset.univ : Finset (ZMod 3)) = {0, 1, 2} := by decide
+  rw [h, Finset.sum_insert (by decide), Finset.sum_insert (by decide),
+    Finset.sum_singleton]
+  ring
+
+/-- The three-term closure equation of a triangle development, with
+explicit headings `θ₀`, `θ₀+θ₁`, `θ₀+θ₁+θ₂`. -/
+private lemma triangle_closure {κ ℓ : ZMod 3 → ℝ} (hE : closureGap κ ℓ = 0) :
+    (ℓ 0 : ℂ) * Complex.exp ((turningAngle 0 κ ℓ 0 : ℝ) * Complex.I) +
+      (ℓ 1 : ℂ) * Complex.exp
+        ((turningAngle 0 κ ℓ 0 + turningAngle 0 κ ℓ 1 : ℝ) * Complex.I) +
+      (ℓ 2 : ℂ) * Complex.exp
+        ((turningAngle 0 κ ℓ 0 + turningAngle 0 κ ℓ 1 + turningAngle 0 κ ℓ 2 : ℝ) *
+          Complex.I) = 0 := by
+  have h0 : heading κ ℓ 0 = turningAngle 0 κ ℓ 0 := by
+    simp [heading]
+  have h1 : heading κ ℓ 1 = turningAngle 0 κ ℓ 0 + turningAngle 0 κ ℓ 1 := by
+    simp [heading, Finset.sum_range_succ]
+  have h2 : heading κ ℓ 2 =
+      turningAngle 0 κ ℓ 0 + turningAngle 0 κ ℓ 1 + turningAngle 0 κ ℓ 2 := by
+    simp [heading, Finset.sum_range_succ]
+  have hE' : vertexR2 κ ℓ 3 = 0 := hE
+  have e3 : vertexR2 κ ℓ 3 = vertexR2 κ ℓ 2 +
+      (ℓ ((2 : ℕ) : ZMod 3) : ℂ) * Complex.exp ((heading κ ℓ 2 : ℂ) * Complex.I) :=
+    vertexR2_succ κ ℓ 2
+  have e2 : vertexR2 κ ℓ 2 = vertexR2 κ ℓ 1 +
+      (ℓ ((1 : ℕ) : ZMod 3) : ℂ) * Complex.exp ((heading κ ℓ 1 : ℂ) * Complex.I) :=
+    vertexR2_succ κ ℓ 1
+  have e1 : vertexR2 κ ℓ 1 = vertexR2 κ ℓ 0 +
+      (ℓ ((0 : ℕ) : ZMod 3) : ℂ) * Complex.exp ((heading κ ℓ 0 : ℂ) * Complex.I) :=
+    vertexR2_succ κ ℓ 0
+  have e0 : vertexR2 κ ℓ 0 = 0 := Finset.sum_range_zero _
+  rw [e3, e2, e1, e0, zero_add, h0, h1, h2] at hE'
+  simpa using hE'
+
+/-- **All three turning angles are interior**: at `n = 3` with total turning
+`2π`, each `θ i ∈ (0, π)`. -/
+theorem triangle_turning_mem_Ioo {κ ℓ : ZMod 3 → ℝ} (h : ModerateArc 0 κ ℓ)
+    (hT : turningSum κ ℓ = 2 * π) (i : ZMod 3) :
+    turningAngle 0 κ ℓ i ∈ Set.Ioo 0 π := by
+  have hsum : turningAngle 0 κ ℓ 0 + turningAngle 0 κ ℓ 1 + turningAngle 0 κ ℓ 2 =
+      2 * π := by
+    rw [← sum_zmod3 (turningAngle 0 κ ℓ)]
+    exact hT
+  have h0 := abs_lt.mp (abs_turningAngle_lt_pi h 0)
+  have h1 := abs_lt.mp (abs_turningAngle_lt_pi h 1)
+  have h2 := abs_lt.mp (abs_turningAngle_lt_pi h 2)
+  rcases zmod3_cases i with rfl | rfl | rfl <;>
+    exact ⟨by linarith, by linarith⟩
+
+/-- **Discrete law of sines at `n = 3`**: from a closed, `2π`-turning
+development, `ℓ₀ sin θ₀ = ℓ₁ sin θ₂`, `ℓ₁ sin θ₁ = ℓ₂ sin θ₀` and
+`ℓ₂ sin θ₂ = ℓ₀ sin θ₁`. -/
+theorem triangle_law_of_sines {κ ℓ : ZMod 3 → ℝ} (hE : closureGap κ ℓ = 0)
+    (hT : turningSum κ ℓ = 2 * π) :
+    ℓ 0 * sin (turningAngle 0 κ ℓ 0) = ℓ 1 * sin (turningAngle 0 κ ℓ 2) ∧
+      ℓ 1 * sin (turningAngle 0 κ ℓ 1) = ℓ 2 * sin (turningAngle 0 κ ℓ 0) ∧
+      ℓ 2 * sin (turningAngle 0 κ ℓ 2) = ℓ 0 * sin (turningAngle 0 κ ℓ 1) := by
+  set θ0 := turningAngle 0 κ ℓ 0 with hθ0
+  set θ1 := turningAngle 0 κ ℓ 1 with hθ1
+  set θ2 := turningAngle 0 κ ℓ 2 with hθ2
+  have hsum : θ0 + θ1 + θ2 = 2 * π := by
+    rw [hθ0, hθ1, hθ2, ← sum_zmod3 (turningAngle 0 κ ℓ)]
+    exact hT
+  have hcl := triangle_closure hE
+  refine ⟨?_, ?_, ?_⟩
+  · -- rotate by ψ₂ = θ0+θ1+θ2 = 2π
+    have hs := sum_sin_of_closure hcl (θ0 + θ1 + θ2)
+    rw [show θ0 - (θ0 + θ1 + θ2) = θ0 - 2 * π from by rw [hsum],
+      show θ0 + θ1 - (θ0 + θ1 + θ2) = (θ0 + θ1 + θ2) - θ2 - (θ0 + θ1 + θ2) from by ring,
+      show (θ0 + θ1 + θ2) - θ2 - (θ0 + θ1 + θ2) = -θ2 from by ring,
+      show θ0 + θ1 + θ2 - (θ0 + θ1 + θ2) = 0 from by ring,
+      Real.sin_sub_two_pi, Real.sin_neg, Real.sin_zero] at hs
+    linarith
+  · -- rotate by ψ₀ = θ0
+    have hs := sum_sin_of_closure hcl θ0
+    rw [show θ0 - θ0 = 0 from by ring,
+      show θ0 + θ1 - θ0 = θ1 from by ring,
+      show θ0 + θ1 + θ2 - θ0 = 2 * π - θ0 from by linarith,
+      Real.sin_zero, Real.sin_two_pi_sub] at hs
+    linarith
+  · -- rotate by ψ₁ = θ0 + θ1
+    have hs := sum_sin_of_closure hcl (θ0 + θ1)
+    rw [show θ0 - (θ0 + θ1) = -θ1 from by ring,
+      show θ0 + θ1 - (θ0 + θ1) = 0 from by ring,
+      show θ0 + θ1 + θ2 - (θ0 + θ1) = θ2 from by ring,
+      Real.sin_neg, Real.sin_zero] at hs
+    linarith
+
+/-- **The vertex chord is the opposite edge**: at `n = 3`, `m i = ℓ (i+1)`
+for every `i`. -/
+theorem triangle_chord_eq_opposite {κ ℓ : ZMod 3 → ℝ} (h : ModerateArc 0 κ ℓ)
+    (hE : closureGap κ ℓ = 0) (hT : turningSum κ ℓ = 2 * π) (i : ZMod 3) :
+    vertexChord κ ℓ i = ℓ (i + 1) := by
+  set θ0 := turningAngle 0 κ ℓ 0 with hθ0
+  set θ1 := turningAngle 0 κ ℓ 1 with hθ1
+  set θ2 := turningAngle 0 κ ℓ 2 with hθ2
+  have hsum : θ0 + θ1 + θ2 = 2 * π := by
+    rw [hθ0, hθ1, hθ2, ← sum_zmod3 (turningAngle 0 κ ℓ)]
+    exact hT
+  have hcl := triangle_closure hE
+  have key : ∀ j : ZMod 3,
+      ℓ (j - 1) ^ 2 + ℓ j ^ 2 + 2 * ℓ (j - 1) * ℓ j * cos (turningAngle 0 κ ℓ j) =
+        ℓ (j + 1) ^ 2 := by
+    intro j
+    rcases zmod3_cases j with rfl | rfl | rfl
+    · -- vertex 0: chord ℓ₂,ℓ₀ ↦ opposite ℓ₁
+      have hsq := sq_eq_of_closure hcl
+      rw [show θ0 - (θ0 + θ1 + θ2) = θ0 - 2 * π from by rw [hsum],
+        Real.cos_sub_two_pi] at hsq
+      rw [show (0 : ZMod 3) - 1 = 2 from by decide,
+        show (0 : ZMod 3) + 1 = 1 from by decide, ← hθ0]
+      linarith [hsq]
+    · -- vertex 1: chord ℓ₀,ℓ₁ ↦ opposite ℓ₂
+      have hcl' : (ℓ 1 : ℂ) *
+          Complex.exp ((θ0 + θ1 : ℝ) * Complex.I) +
+          (ℓ 2 : ℂ) * Complex.exp ((θ0 + θ1 + θ2 : ℝ) * Complex.I) +
+          (ℓ 0 : ℂ) * Complex.exp ((θ0 : ℝ) * Complex.I) = 0 := by
+        linear_combination hcl
+      have hsq := sq_eq_of_closure hcl'
+      rw [show θ0 + θ1 - θ0 = θ1 from by ring] at hsq
+      rw [show (1 : ZMod 3) - 1 = 0 from by decide,
+        show (1 : ZMod 3) + 1 = 2 from by decide, ← hθ1]
+      linarith [hsq]
+    · -- vertex 2: chord ℓ₁,ℓ₂ ↦ opposite ℓ₀
+      have hcl' : (ℓ 2 : ℂ) *
+          Complex.exp ((θ0 + θ1 + θ2 : ℝ) * Complex.I) +
+          (ℓ 0 : ℂ) * Complex.exp ((θ0 : ℝ) * Complex.I) +
+          (ℓ 1 : ℂ) * Complex.exp ((θ0 + θ1 : ℝ) * Complex.I) = 0 := by
+        linear_combination hcl
+      have hsq := sq_eq_of_closure hcl'
+      rw [show θ0 + θ1 + θ2 - (θ0 + θ1) = θ2 from by ring] at hsq
+      rw [show (2 : ZMod 3) - 1 = 1 from by decide,
+        show (2 : ZMod 3) + 1 = 0 from by decide, ← hθ2]
+      linarith [hsq]
+  rw [vertexChord, key i, sqrt_sq (h.length_pos (i + 1)).le]
+
+/-- **N0: `n = 3` rigidity** — closed, `2π`-turning moderate-arc data at
+`n = 3` forces a constant curvature profile. -/
+theorem triangle_rigidity {κ ℓ : ZMod 3 → ℝ} (h : ModerateArc 0 κ ℓ)
+    (hE : closureGap κ ℓ = 0) (hT : turningSum κ ℓ = 2 * π) :
+    κ 0 = κ 1 ∧ κ 1 = κ 2 := by
+  have hm : ∀ i : ZMod 3, κ i * ℓ (i + 1) = 2 * sin (turningAngle 0 κ ℓ i) := by
+    intro i
+    rw [← triangle_chord_eq_opposite h hE hT i]
+    exact menger_chord_identity h i
+  have hm0 := hm 0
+  have hm1 := hm 1
+  have hm2 := hm 2
+  rw [show (0 : ZMod 3) + 1 = 1 from by decide] at hm0
+  rw [show (1 : ZMod 3) + 1 = 2 from by decide] at hm1
+  rw [show (2 : ZMod 3) + 1 = 0 from by decide] at hm2
+  obtain ⟨-, hlos2, hlos3⟩ := triangle_law_of_sines hE hT
+  have hl0 := h.length_pos 0
+  have hl1 := h.length_pos 1
+  have hl2 := h.length_pos 2
+  constructor
+  · -- κ0 ℓ1 ℓ2 = 2 sinθ0 ℓ2 = 2 ℓ1 sinθ1 = κ1 ℓ2 ℓ1
+    have : κ 0 * (ℓ 1 * ℓ 2) = κ 1 * (ℓ 1 * ℓ 2) := by
+      nlinarith [hm0, hm1, hlos2]
+    exact mul_right_cancel₀ (by positivity) this
+  · -- κ1 ℓ2 ℓ0 = 2 sinθ1 ℓ0 = 2 ℓ2 sinθ2 = κ2 ℓ0 ℓ2
+    have : κ 1 * (ℓ 2 * ℓ 0) = κ 2 * (ℓ 2 * ℓ 0) := by
+      nlinarith [hm1, hm2, hlos3]
+    exact mul_right_cancel₀ (by positivity) this
 
 end Gluck.Discrete
