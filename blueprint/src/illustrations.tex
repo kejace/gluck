@@ -1,0 +1,51 @@
+% A printable figure deck: exactly one blueprint illustration per A4 page.
+% latexmkrc builds this alongside print.tex as blueprint/print/illustrations.pdf.
+\documentclass[a4paper]{article}
+
+\usepackage[margin=18mm]{geometry}
+\usepackage{amssymb, amsmath}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,decorations.markings}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\input{figures/generated/figure-params}
+
+\newcommand{\illustrationpage}[3]{%
+  \begin{center}
+    \vspace*{\fill}
+    {\LARGE\bfseries #2\par}
+    \vspace{1.25cm}
+    \resizebox{0.98\textwidth}{!}{\input{figures/#1.tikz}}%
+    \vspace{1.1cm}
+
+    \begin{minipage}{0.86\textwidth}
+      \centering\large #3
+    \end{minipage}
+    \vspace*{\fill}
+  \end{center}%
+}
+
+\begin{document}
+
+\illustrationpage{euclidean-closure}
+  {Euclidean closure defect}
+  {The first Fourier mode of the radius-of-curvature weight is the
+   translational closure defect. Removing it changes the displayed
+   reconstruction from open to closed.}
+
+\newpage
+\illustrationpage{sphere-stereographic}
+  {Spherical stereographic curvature}
+  {The conformal-curvature law and its centered-circle sign check at
+   $r=1/2$, where $\kappa_S=3/4$ and the tangent-angle gauge speed is $q=r$.}
+
+\newpage
+\illustrationpage{hyperbolic-escape}
+  {Hyperbolic escape threshold}
+  {Centered hyperbolic circles approach the ideal boundary as
+   $c\downarrow1$, while the admissibility bracket
+   $\sqrt{c^2-1}$ collapses to zero.}
+
+\end{document}

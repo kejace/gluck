@@ -70,7 +70,9 @@ one folder, and multi-file proof developments get their own subfolder:
   capstone wrappers
 - `blueprint/` — leanblueprint source; the site is built from source and
   deployed to GitHub Pages by CI (`.github/workflows/deploy-blueprint.yml`);
-  build locally with `leanblueprint web` / `leanblueprint pdf`
+  build locally with `leanblueprint web` / `leanblueprint pdf`; the PDF command
+  produces both `blueprint/print/print.pdf` and the one-illustration-per-page
+  companion `blueprint/print/illustrations.pdf`
 - `references/` — PDFs, papers, and informal notes backing the formalization
 - `archon-protected.yaml` — declarations agents must not modify
 - `.archon/` — agent state (not committed)
