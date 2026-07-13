@@ -1,0 +1,12 @@
+<gluck-curve-figure figure="{{ obj.attributes.figureId }}" data-mode="static">
+  <figure id="{{ obj.id }}">
+    <div class="gluck-figure-image">
+      <img src="figures/{{ obj.attributes.figureId }}.svg"
+           alt="{{ obj.attributes.alt }}" loading="lazy" decoding="async" />
+    </div>
+    <figcaption>
+      <span class="caption_title">{{ obj.captionName }} {{ obj.ref }}.</span>
+      <span class="caption_text">{{ obj.attributes.caption }}</span>
+    </figcaption>
+  </figure>
+</gluck-curve-figure>

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "figures": [
+    {
+      "id": "euclidean-closure",
+      "parameters": { "openA": 0.25, "closedA": 0, "b": 0.1666666667 }
+    },
+    {
+      "id": "sphere-stereographic",
+      "parameters": { "radius": 0.5, "curvature": 0.75 }
+    },
+    {
+      "id": "hyperbolic-escape",
+      "parameters": { "curvatureLevels": [2, 1.2, 1.02] }
+    }
+  ]
+}

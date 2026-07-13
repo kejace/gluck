@@ -13,5 +13,7 @@ MATHLIBABLE_REPORT.md
 # Generated blueprint output — built and deployed from source by
 # .github/workflows/deploy-blueprint.yml (leanblueprint web); not committed.
 blueprint/web/
+blueprint/print/
 blueprint/src/web.paux
+blueprint/src/plastex_packages/__pycache__/
 blueprint/lean_decls

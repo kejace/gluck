@@ -1,0 +1,49 @@
+#!/usr/bin/env sh
+set -eu
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+src="$repo_root/blueprint/src"
+generated="$src/figures/generated"
+mode=${1:-build}
+
+if [ "$mode" != build ] && [ "$mode" != --check ]; then
+  echo "usage: scripts/build-figures [--check]" >&2
+  exit 2
+fi
+
+for tool in lake xelatex dvisvgm; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    echo "scripts/build-figures: required tool not found: $tool" >&2
+    exit 127
+  fi
+done
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT HUP INT TERM
+mkdir -p "$generated" "$tmp/data" "$tmp/svg"
+export TEXMFVAR=${TEXMFVAR:-"$tmp/texmf-var"}
+export TEXMFCONFIG=${TEXMFCONFIG:-"$tmp/texmf-config"}
+export TEXMFHOME=${TEXMFHOME:-"$tmp/texmf-home"}
+mkdir -p "$TEXMFVAR" "$TEXMFCONFIG" "$TEXMFHOME"
+
+if [ "$mode" = --check ]; then
+  (cd "$repo_root" && lake exe gluckFigures "$tmp/data")
+  cmp "$tmp/data/figure-params.tex" "$generated/figure-params.tex"
+  cmp "$tmp/data/figures.json" "$generated/figures.json"
+else
+  (cd "$repo_root" && lake exe gluckFigures "$generated")
+fi
+
+for id in euclidean-closure sphere-stereographic hyperbolic-escape; do
+  (cd "$src" && xelatex -interaction=batchmode -halt-on-error -no-pdf \
+    -output-directory="$tmp" "figures/standalone/$id.tex" >/dev/null)
+  dvisvgm --no-fonts --exact --bbox=papersize \
+    --output="$tmp/svg/$id.svg" "$tmp/$id.xdv" >/dev/null
+  if [ "$mode" = --check ]; then
+    cmp "$tmp/svg/$id.svg" "$generated/$id.svg"
+  else
+    cp "$tmp/svg/$id.svg" "$generated/$id.svg"
+  fi
+done
+
+echo "figure artifacts are up to date"

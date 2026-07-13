@@ -24,13 +24,18 @@ jobs:
           # texlive-binaries provides kpsewhich: without it plasTeX silently
           # drops the chapter \input's and lean_decls comes out near-empty,
           # making the checkdecls gate pass vacuously.
-          sudo apt-get update && sudo apt-get install -y graphviz libgraphviz-dev texlive-binaries
+          sudo apt-get update && sudo apt-get install -y graphviz libgraphviz-dev \
+            dvisvgm latexmk texlive-binaries texlive-latex-extra texlive-pictures texlive-xetex
           pip install leanblueprint
+      - name: Check generated figure assets
+        run: scripts/build-figures --check
       - name: Generate blueprint declaration list
         run: |
           leanblueprint web
           n=$(wc -l < blueprint/lean_decls)
           echo "blueprint pins: $n"
           test "$n" -ge 200 || { echo "::error::lean_decls has only $n entries — blueprint build under-produced"; exit 1; }
+      - name: Build printable blueprint
+        run: leanblueprint pdf
       - name: Check blueprint pins against the Lean environment
         run: lake exe checkdecls blueprint/lean_decls

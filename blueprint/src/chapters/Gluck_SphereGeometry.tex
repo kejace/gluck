@@ -72,6 +72,15 @@ equator $\rho=\pi/2$). The gauge speed is then $q=r$. The opposite sign choice w
 $(1+3r^2)/(2r)\ne\cot\rho$, so \emph{the outward normal with a minus sign is the correct
 convention}; any Lean formalization must reproduce $q(\text{circle }r)=r$.
 
+\gluckfigure{sphere-stereographic}
+  {The spherical conformal-curvature law in the stereographic disk. The centered
+   circle of radius $r=1/2$ realizes the sign-check value
+   $\kappa_S=(1-r^2)/(2r)=3/4$ and has gauge speed $q=r$.}
+  {A circle inside the stereographic unit disk with a marked point, tangent
+   arrow, and outward normal. Beside it are the conformal metric, curvature law,
+   and the evaluated curvature three quarters.}
+  {fig:spherical_stereographic_sign_check}
+
 \paragraph{Lean encoding of the normal term.}
 In Lean the left normal $iT$ is the natural object: $\langle z,iT\rangle=\langle z,
 i\,e^{i\varphi}\rangle=-x\sin\varphi+y\cos\varphi=-\langle z,n\rangle$. Hence the speed
@@ -368,4 +377,3 @@ assembly) are formalized axiom-clean; what remains is the assembly
   denominator is $2(\kappa+r)=2\bigl(\tfrac{1-r^2}{2r}+r\bigr)=\tfrac{1+r^2}{r}$ and
   $q=\dfrac{1+r^2}{(1+r^2)/r}=r$.
 \end{proof}
-

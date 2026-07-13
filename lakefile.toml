@@ -29,3 +29,7 @@ rev = "v4.31.0"
 
 [[lean_lib]]
 name = "Gluck"
+
+[[lean_exe]]
+name = "gluckFigures"
+root = "Gluck.Figures.Export"

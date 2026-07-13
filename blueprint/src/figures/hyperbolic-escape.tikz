@@ -1,0 +1,36 @@
+\begin{tikzpicture}[>=Stealth]
+  \pgfmathsetmacro{\diskR}{2.75}
+  \pgfmathsetmacro{\rOne}{\HyperbolicCOne-sqrt(\HyperbolicCOne^2-1)}
+  \pgfmathsetmacro{\rTwo}{\HyperbolicCTwo-sqrt(\HyperbolicCTwo^2-1)}
+  \pgfmathsetmacro{\rThree}{\HyperbolicCThree-sqrt(\HyperbolicCThree^2-1)}
+
+  \fill[red!2] (0,0) circle (\diskR);
+  \draw[black!65, dashed, line width=1pt] (0,0) circle (\diskR);
+  \node[font=\small, text=black!70, align=center] at (0,-3.2)
+    {ideal boundary $|z|=1$\\(not part of $H^2$)};
+
+  \draw[purple!75!black, line width=1.15pt] (0,0) circle ({\diskR*\rOne});
+  \draw[blue!75!black, line width=1.15pt] (0,0) circle ({\diskR*\rTwo});
+  \draw[orange!90!black, line width=1.25pt, ->]
+    (0:{\diskR*\rThree}) arc[start angle=0,end angle=355,radius={\diskR*\rThree}];
+  \fill (0,0) circle (1.4pt);
+
+  \draw[purple!75!black] (18:{\diskR*\rOne}) -- ++(1.15,.35)
+    node[right, font=\small] {$c=2$};
+  \draw[blue!75!black] (26:{\diskR*\rTwo}) -- ++(1.05,.62)
+    node[right, font=\small] {$c=\tfrac65$};
+  \draw[orange!90!black] (42:{\diskR*\rThree}) -- ++(.8,.95)
+    node[right, font=\small] {$c=\tfrac{51}{50}$};
+
+  \node[anchor=west, align=left, text width=6.2cm] at (3.7,1.45) {
+    \textbf{Constant-curvature circles in the Poincar\'e disk}\\[5pt]
+    $\displaystyle r(c)=c-\sqrt{c^2-1},\qquad c>1.$\\[8pt]
+    As $c\downarrow1$, the Euclidean radius tends to the ideal boundary:
+    $r(c)\uparrow1$.
+  };
+  \node[anchor=west, rounded corners=2pt, draw=orange!55!black, fill=orange!7,
+        inner sep=7pt, align=left] at (3.7,-1.25) {
+    $\displaystyle B(c)=c-r(c)=\sqrt{c^2-1}\longrightarrow0$\\[3pt]
+    \small The admissibility margin degenerates at the escape threshold.
+  };
+\end{tikzpicture}

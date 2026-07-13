@@ -23,3 +23,43 @@ div.corollary_thmcontent {
 div.proof_content {
 	border-left: .08rem solid grey;
 }
+gluck-curve-figure {
+  display: block;
+  margin: 1.75rem auto;
+  max-width: 72rem;
+}
+
+gluck-curve-figure figure {
+  margin: 0;
+}
+
+.gluck-figure-image {
+  overflow-x: auto;
+  text-align: center;
+}
+
+.gluck-figure-image img {
+  display: block;
+  height: auto;
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+gluck-curve-figure figcaption {
+  color: var(--bs-secondary-color, #555);
+  font-size: 0.94rem;
+  margin: 0.65rem auto 0;
+  max-width: 62rem;
+  text-align: center;
+}
+
+gluck-curve-figure .caption_title {
+  color: var(--bs-body-color, #222);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  gluck-curve-figure * {
+    scroll-behavior: auto !important;
+  }
+}

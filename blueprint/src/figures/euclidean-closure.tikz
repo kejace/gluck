@@ -1,0 +1,48 @@
+\begin{tikzpicture}[
+  >=Stealth,
+  curve/.style={line width=1.15pt},
+  tangent arrows/.style={
+    postaction={decorate},
+    decoration={markings,
+      mark=at position .16 with {\arrow{Stealth}},
+      mark=at position .58 with {\arrow{Stealth}}}}
+]
+  \begin{scope}
+    \pgfmathsetmacro{\a}{\EuclideanOpenA}
+    \pgfmathsetmacro{\b}{\EuclideanB}
+    \draw[gray!30] (-.35,0) -- (3.15,0);
+    \draw[curve, blue!75!black, tangent arrows, variable=\t, domain=0:360, samples=241]
+      plot
+      ({sin(\t)+\a*(rad(\t)/2+sin(2*\t)/4)+\b/2*(sin(\t)+sin(3*\t)/3)},
+       {1-cos(\t)+\a/2*sin(\t)^2+\b/2*(cos(\t)-cos(3*\t)/3-2/3)});
+    \fill[blue!75!black] (0,0) circle (1.7pt) node[below left=-1pt] {$\alpha(0)$};
+    \fill[orange!85!black] ({\a*pi},0) circle (1.7pt)
+      node[below right=-1pt] {$\alpha(2\pi)$};
+    \draw[orange!85!black, line width=1pt, ->] (0,-.22) -- ({\a*pi},-.22)
+      node[midway, below=4pt] {$E(\rho)=\pi a$};
+    \node[font=\small\bfseries, align=center] at (1.35,2.55)
+      {first harmonic present\\closure defect $\ne 0$};
+    \node[font=\small, align=center, text=black!70] at (1.35,-1.02)
+      {$a=\tfrac14,\ b=\tfrac16$};
+  \end{scope}
+
+  \begin{scope}[xshift=7.1cm]
+    \pgfmathsetmacro{\a}{0}
+    \pgfmathsetmacro{\b}{\EuclideanB}
+    \draw[gray!30] (-.35,0) -- (2.65,0);
+    \draw[curve, teal!70!black, tangent arrows, variable=\t, domain=0:360, samples=241]
+      plot
+      ({sin(\t)+\a*(rad(\t)/2+sin(2*\t)/4)+\b/2*(sin(\t)+sin(3*\t)/3)},
+       {1-cos(\t)+\a/2*sin(\t)^2+\b/2*(cos(\t)-cos(3*\t)/3-2/3)});
+    \fill[teal!70!black] (0,0) circle (1.7pt)
+      node[below left=-1pt] {$\alpha(0)=\alpha(2\pi)$};
+    \node[font=\small\bfseries, align=center] at (1.08,2.55)
+      {first harmonic removed\\closure defect $=0$};
+    \node[font=\small, align=center, text=black!70] at (1.08,-1.02)
+      {$a=0,\ b=\tfrac16$};
+  \end{scope}
+
+  \node[font=\small, align=center, text=black!72] at (4.85,-1.55)
+    {$\rho_{a,b}(\theta)=1+a\cos\theta+b\cos2\theta$,\quad
+     $\alpha'(\theta)=e^{i\theta}\rho_{a,b}(\theta)$};
+\end{tikzpicture}
