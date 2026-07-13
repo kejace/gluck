@@ -13,24 +13,24 @@
 \section{Overview}
 
 The tangent-angle flow engine of \cref{chap:spaceform_core} is
-\emph{convex-only} for $\varepsilon=-1$: its trajectories have monotone tangent
+\emph{convex-only} for $K=-1$: its trajectories have monotone tangent
 angle and force the admissibility bracket
-$\kappa-\varepsilon\langle z,ie^{i\theta}\rangle>0$, so negative geodesic
+$\kappa-K\langle z,ie^{i\theta}\rangle>0$, so negative geodesic
 curvature is unreachable. This chapter builds the complementary engine:
 parametrize by \emph{Euclidean arc length} $\sigma$ and drive the tangent angle
 $\varphi$ by a first-order ODE,
 \[
-  z'(\sigma) = e^{i\varphi(\sigma)}, \qquad
+  \gamma'(\sigma) = e^{i\varphi(\sigma)}, \qquad
   \varphi'(\sigma) =
-  \frac{2\bigl(\kappa(\sigma) + \langle z(\sigma),
-    i e^{i\varphi(\sigma)}\rangle\bigr)}{1 - \|z(\sigma)\|^{2}},
+  \frac{2\bigl(\kappa(\sigma) + \langle \gamma(\sigma),
+    i e^{i\varphi(\sigma)}\rangle\bigr)}{1 - \|\gamma(\sigma)\|^{2}},
 \]
-a coupled system in $W=(z,\varphi)\in\{\|z\|<1\}\times\mathbb R$. The
+a coupled system in $W=(\gamma,\varphi)\in\{\|z\|<1\}\times\mathbb R$. The
 denominator $1-\|z\|^2>0$ is the \emph{metric factor} of the Poincar\'e disk —
 a confinement condition, \emph{not} an admissibility denominator — so the
 system is well-posed for \emph{any} continuous $\kappa$, including
 genuinely-negative values, and $\varphi$ may be non-monotone. Confinement
-$\|z\|<1$ is not automatic (unit Euclidean speed can reach the boundary) and is
+$\|\gamma\|<1$ is not automatic (unit Euclidean speed can reach the boundary) and is
 the crux estimate, handled relative to a bounded reference reconstruction by
 $L^1$-Grönwall continuous dependence (\cref{lem:arc_trajectory_diff_bound},
 \cref{lem:arc_trajectory_gronwall}).
@@ -149,13 +149,13 @@ the capstone realization — are the fork-A family chain of
 \end{proof}
 
 \begin{lemma}\leanok
-[a confined solution realizes $\kappa$ at $\varepsilon=-1$]
+[a confined solution realizes $\kappa$ at $K=-1$]
   \label{lem:arc_solution_realizes}
   \lean{Gluck.Hyperbolic.arcSolution_realizes}
   \uses{def:arc_angle_speed, def:spaceform_realizes}
-  If $(z,\varphi)$ solves the \emph{true} (unclamped) system and stays confined
-  ($\|z(\sigma)\|<1$ for all $\sigma$), then
-  $\mathrm{Realizes}\,(-1)\,z\,\kappa$ with tangent angle $\varphi$. No new
+  If $(\gamma,\varphi)$ solves the \emph{true} (unclamped) system and stays confined
+  ($\|\gamma(\sigma)\|<1$ for all $\sigma$), then
+  $\mathrm{Realizes}\,(-1)\,\gamma\,\kappa$ with tangent angle $\varphi$. No new
   predicate is needed: the space-form realization predicate of
   \cref{chap:spaceform_core} is already parametrization-flexible ($\varphi$ may
   be non-monotone, the bracket may be negative).
@@ -163,7 +163,7 @@ the capstone realization — are the fork-A family chain of
 
 \begin{proof}
 \leanok
-  $z$ is $C^1$ with $\|z'\|=1\ne0$, confined by hypothesis, and the gauge-speed
+  $\gamma$ is $C^1$ with $\|\gamma'\|=1\ne0$, confined by hypothesis, and the gauge-speed
   relation is exactly the $\varphi$-ODE after clearing the positive metric
   factor.
 \end{proof}
@@ -175,7 +175,7 @@ the capstone realization — are the fork-A family chain of
   \uses{def:arc_angle_speed}
   For $\kappa\equiv K$ the reconstruction through $(z_0,\varphi_0)$ is the
   explicit Euclidean circular arc
-  $z(\sigma)=z_0-r\,ie^{i\varphi_0}(e^{i\sigma/r}-1)$,
+  $\gamma(\sigma)=z_0-r\,ie^{i\varphi_0}(e^{i\sigma/r}-1)$,
   $\varphi(\sigma)=\varphi_0+\sigma/r$, of radius
   $r=(1-\|z_0\|^2)/\bigl(2(K+\langle z_0,ie^{i\varphi_0}\rangle)\bigr)$
   (\texttt{arcModelRadius}). While confined it solves the true
@@ -221,9 +221,9 @@ the capstone realization — are the fork-A family chain of
   \uses{def:arc_angle_speed, def:arclength_curvature}
   $\kappa:\mathbb R\to\mathbb R$ is an \emph{H\textsuperscript{2} arc-length
   curvature function} if there are a window length $L>0$ and a pair
-  $(z,\varphi)$ globally solving the H\textsuperscript{2} arc-length system,
-  confined ($\|z\|<1$), closing ($z(L)=z(0)$) with total turning $2\pi$
-  ($\varphi(L)=\varphi(0)+2\pi$), $L$-periodic in $z$, and injective on
+  $(\gamma,\varphi)$ globally solving the H\textsuperscript{2} arc-length system,
+  confined ($\|\gamma\|<1$), closing ($\gamma(L)=\gamma(0)$) with total turning $2\pi$
+  ($\varphi(L)=\varphi(0)+2\pi$), $L$-periodic in $\gamma$, and injective on
   $[0,L)$. Coupled H\textsuperscript{2} analogue of the Euclidean
   \cref{def:arclength_curvature} (Dahlberg's (1.1)--(1.3)); the essential
   difference is that $L$ is existentially quantified — co-constructed with the
@@ -244,7 +244,7 @@ the capstone realization — are the fork-A family chain of
   periodic extension
   $Z(\sigma)=\Phi(\sigma-L\lfloor\sigma/L\rfloor)
   +\lfloor\sigma/L\rfloor\,(0,2\pi)$
-  is a global solution of the true system, $L$-periodic in $z$, confined,
+  is a global solution of the true system, $L$-periodic in $\gamma$, confined,
   closing with total turning $2\pi$, injective on $[0,L)$ — all the data of
   \cref{def:arclength_h2_curvature} at window $L$.
 \end{lemma}
@@ -258,7 +258,7 @@ the capstone realization — are the fork-A family chain of
   one-sided derivatives, and $L$-periodicity of $\kappa$ transports the field
   along the floor shift. Confinement deactivates the clamp, so $Z$ solves the
   \emph{true} system. Injectivity is the chord argument
-  (\texttt{injOn\_arcCurve}): the FTC bridge $z(b)-z(a)=\int_a^b e^{i\varphi}$
+  (\texttt{injOn\_arcCurve}): the FTC bridge $\gamma(b)-\gamma(a)=\int_a^b e^{i\varphi}$
   turns equal values into a vanishing chord — a direct reuse of the
   Euclidean-in-disk argument (\cref{lem:injon_dahlberg_curve}), embeddedness
   being independent of the H\textsuperscript{2} metric.
@@ -270,10 +270,10 @@ the capstone realization — are the fork-A family chain of
   \lean{Gluck.Hyperbolic.arcLengthH2Converse_at}
   \uses{lem:arc_solution_realizes, def:is_simple_closed,
         def:spaceform_realizes}
-  Given a confined, $L$-periodic-in-$z$, simple global solution $(z,\varphi)$
+  Given a confined, $L$-periodic-in-$\gamma$, simple global solution $(\gamma,\varphi)$
   of the H\textsuperscript{2} arc-length system for continuous $\kappa$ and
   window $L>0$, the linear window reparametrization $\chi(t)=(L/2\pi)t$
-  produces $Z=z\circ\chi$ with: $\chi$ is $C^1$ with $\chi'>0$, the
+  produces $Z=\gamma\circ\chi$ with: $\chi$ is $C^1$ with $\chi'>0$, the
   \emph{window shift law} $\chi(t+2\pi)=\chi(t)+L$, $Z$ is simple closed, and
   $\mathrm{Realizes}\,(-1)\,Z\,(\kappa\circ\chi)$. The shift law is the
   window-conjugation datum consumed by the degree-one analysis of
@@ -283,13 +283,13 @@ the capstone realization — are the fork-A family chain of
 \begin{proof}
   \uses{lem:arc_solution_realizes}
   \leanok
-  \cref{lem:arc_solution_realizes} gives $\mathrm{Realizes}\,(-1)\,z\,\kappa$;
+  \cref{lem:arc_solution_realizes} gives $\mathrm{Realizes}\,(-1)\,\gamma\,\kappa$;
   the no-rescaling transport \texttt{spaceFormRealizes\_comp}
   (\cref{chap:spaceform_converse} infrastructure) carries it along $\chi$ to
   $\kappa\circ\chi$ — \emph{not} $\kappa$: there is no scaling step, unlike the
   Euclidean \cref{thm:arclength_converse}. The shift law is
   $\chi(t+2\pi)=(L/2\pi)t+L$. Simplicity: $\chi$ maps $[0,2\pi)$ bijectively
-  onto $[0,L)$, transporting $L$-periodicity of $z$ to $2\pi$-periodicity of
+  onto $[0,L)$, transporting $L$-periodicity of $\gamma$ to $2\pi$-periodicity of
   $Z$ and injectivity on $[0,L)$ to injectivity on $[0,2\pi)$.
 \end{proof}
 
@@ -300,11 +300,11 @@ the capstone realization — are the fork-A family chain of
   \uses{def:arclength_h2_curvature, lem:arclength_h2_converse_at,
         def:is_simple_closed, thm:arclength_converse}
   If $\kappa$ is continuous and an H\textsuperscript{2} arc-length curvature
-  function, there are a simple closed curve $z$ and an orientation-preserving
+  function, there are a simple closed curve $\gamma$ and an orientation-preserving
   $C^1$ reparametrization $\psi$ with
   \[
-    \texttt{IsSimpleClosed}\,z \;\wedge\;
-    \mathrm{Realizes}\,(-1)\,z\,(\kappa\circ\psi).
+    \texttt{IsSimpleClosed}\,\gamma \;\wedge\;
+    \mathrm{Realizes}\,(-1)\,\gamma\,(\kappa\circ\psi).
   \]
   Honest H\textsuperscript{2} analogue of \cref{thm:arclength_converse}, with
   the metric-rescaling step replaced by the window reparametrization: $L$ is
@@ -334,7 +334,7 @@ the capstone realization — are the fork-A family chain of
   $\kappa\circ\psi$ is an H\textsuperscript{2} arc-length curvature function.
   Then $\kappa$ is realized \emph{up to a further orientation-preserving $C^1$
   reparametrization} $\Psi$ by a simple closed H\textsuperscript{2} curve:
-  $\texttt{IsSimpleClosed}\,z\wedge\mathrm{Realizes}\,(-1)\,z\,(\kappa\circ\Psi)$.
+  $\texttt{IsSimpleClosed}\,\gamma\wedge\mathrm{Realizes}\,(-1)\,\gamma\,(\kappa\circ\Psi)$.
   Honestly up-to-reparam: the base converse closes at the co-constructed window
   $L'$, and an exact $2\pi$-realization would need $\psi$ to conjugate the
   $L'$-shift to the $2\pi$-shift, which the available $2\pi$-shift law cannot

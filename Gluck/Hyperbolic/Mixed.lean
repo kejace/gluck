@@ -19,7 +19,7 @@ curvature may be `≤ 0` on part of the curve, provided the extrema still altern
 in the value-separated four-vertex pattern with the two maxima above the
 escape-velocity threshold `c > 1`.
 
-This is the `ε = −1` analogue of the spherical mixed converse
+This is the `K = −1` analogue of the spherical mixed converse
 `Gluck.sphericalConverse` and the Euclidean `dahlbergConverse`. It transcribes
 Dahlberg §2–3 onto the H² arc-length engine (`Gluck/Hyperbolic/ArcLength*.lean`).
 
@@ -73,7 +73,7 @@ open scoped Real
 `κ` that is either constant escape (`∃ c, 1 < c ∧ κ ≡ c`) or has the
 value-separated alternating four-vertex extrema with the two maxima above an
 escape level `c > 1` and the global confinement floor
-`−(centeredRadius (−1) c) < κ`. The genuinely-negative `ε = −1` instantiation:
+`−(centeredRadius (−1) c) < κ`. The genuinely-negative `K = −1` instantiation:
 the minima may dip below `0` (down to nearly `−1`), distinguishing this from the
 everywhere-escape `HyperbolicFourVertex`. Re-export of
 `Hyperbolic.MixedSignHyperbolicFourVertex`. -/
@@ -81,7 +81,7 @@ def MixedHyperbolicFourVertex (κ : ℝ → ℝ) : Prop :=
   Hyperbolic.MixedSignHyperbolicFourVertex κ
 
 /-- The mixed-sign hyperbolic four-vertex hypothesis is exactly the underlying
-space-form predicate at `ε = −1`. -/
+space-form predicate at `K = −1`. -/
 theorem mixedHyperbolicFourVertex_iff_mixedSign {κ : ℝ → ℝ} :
     MixedHyperbolicFourVertex κ ↔ Hyperbolic.MixedSignHyperbolicFourVertex κ := Iff.rfl
 
@@ -89,7 +89,7 @@ theorem mixedHyperbolicFourVertex_iff_mixedSign {κ : ℝ → ℝ} :
 genuinely-negative mixed-sign hyperbolic four-vertex curvature function is
 realized, up to an orientation-preserving `C¹` reparametrization `Ψ`
 (`0 < Ψ'`), as the hyperbolic geodesic curvature of a simple closed curve in the
-Poincaré disk. The general-profile `ε = −1` case of the space-form mixed converse
+Poincaré disk. The general-profile `K = −1` case of the space-form mixed converse
 `Hyperbolic.hyperbolicMixedConverse`; genuinely-negative counterpart of the
 everywhere-escape `hyperbolicConverse_pos`. -/
 theorem hyperbolicMixedConverse {κ : ℝ → ℝ} (h : MixedHyperbolicFourVertex κ) :

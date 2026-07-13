@@ -108,7 +108,7 @@ lemma reconstruction_ode {κ : ℝ → ℝ} {R δ : ℝ} (hκc : Continuous κ)
   have hadm' : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖z θ‖ ≤ R ∧
       δ ≤ κ θ - 1 * ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ := by
     simpa only [one_mul] using hadm
-  obtain ⟨hEq, hClosed, hReal, hDeriv⟩ := SpaceForm.reconstruction_ode (ε := 1)
+  obtain ⟨hEq, hClosed, hReal, hDeriv⟩ := SpaceForm.reconstruction_ode (K := 1)
     (by norm_num) hκc hκper hR1 hδ hz' hadm' hclosed
   refine ⟨?_, ?_, ?_, ?_⟩
   · simpa only [hext] using hEq

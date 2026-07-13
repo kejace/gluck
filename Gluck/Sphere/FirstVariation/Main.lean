@@ -559,7 +559,7 @@ its gauge speed is constant `constant_curvature_arc`), to four
 by a closed-form algebraic identity. The linear part is a *negative real
 multiple of complex conjugation* — orientation-reversing and nondegenerate —
 which is what drives the `−1` boundary winding in
-the ε-generic endpoint winding. (Blueprint `lem:step_error_expansion`.) -/
+the K-generic endpoint winding. (Blueprint `lem:step_error_expansion`.) -/
 lemma stepError_expansion {c : ℝ} (hc : 0 < c) :
     ∃ ρ₁ h₁ C : ℝ, 0 < ρ₁ ∧ 0 < h₁ ∧ 0 < C ∧
       ∀ h : ℝ, 0 < h → h ≤ h₁ → ∀ z₀ : ℂ,

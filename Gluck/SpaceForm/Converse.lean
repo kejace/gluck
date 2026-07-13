@@ -6,13 +6,13 @@ Authors: kejace
 import Gluck.SpaceForm.EndpointWinding
 
 /-!
-# The space-form converse, positive stage (`ε`-generic capstone)
+# The space-form converse, positive stage (`K`-generic capstone)
 
 Assembly of the constant branch (the model geodesic circle) and the
 non-constant branch (endpoint-winding → reconstruction → simplicity, pulled
-back along the reparametrization inverse). `ε`-generic transport of
-`Gluck/Sphere/Converse.lean`; instantiating `ε = +1` recovers
-`Gluck.sphericalConverse_pos`, and `ε = −1` gives the hyperbolic converse
+back along the reparametrization inverse). `K`-generic transport of
+`Gluck/Sphere/Converse.lean`; instantiating `K = +1` recovers
+`Gluck.sphericalConverse_pos`, and `K = −1` gives the hyperbolic converse
 (`Gluck.hyperbolicConverse_pos`, in `Gluck/Hyperbolic.lean`).
 -/
 
@@ -22,8 +22,8 @@ open scoped Real InnerProductSpace NNReal
 
 /-! ## Constant branch: the model geodesic circle -/
 
-/-- Velocity of the centered circle `z(θ) = (-r)·(i·e^{iθ})`: the chain rule
-gives `z'(θ) = r·e^{iθ}`. (Model-agnostic geometry, no `ε`.) -/
+/-- Velocity of the centered circle `γ(θ) = (-r)·(i·e^{iθ})`: the chain rule
+gives `γ'(θ) = r·e^{iθ}`. (Model-agnostic geometry, no `K`.) -/
 private lemma spaceFormCircle_hasDerivAt (r θ : ℝ) :
     HasDerivAt (fun t : ℝ => (-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I)))
       ((r : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)) θ := by
@@ -41,7 +41,7 @@ private lemma spaceFormCircle_hasDerivAt (r θ : ℝ) :
   rw [hval] at h
   exact h
 
-/-- The centered circle of radius `r > 0` has constant modulus `‖z(θ)‖ = r`. -/
+/-- The centered circle of radius `r > 0` has constant modulus `‖γ(θ)‖ = r`. -/
 private lemma spaceFormCircle_norm_z {r : ℝ} (hr0 : 0 < r) (θ : ℝ) :
     ‖(-r) • (Complex.I * Complex.exp ((θ : ℂ) * Complex.I))‖ = r := by
   rw [norm_smul, Real.norm_eq_abs, abs_neg, abs_of_pos hr0, norm_mul, Complex.norm_I,
@@ -54,7 +54,7 @@ private lemma spaceFormCircle_norm_velocity {r : ℝ} (hr0 : 0 < r) (θ : ℝ) :
     Real.norm_eq_abs, abs_of_pos hr0]
 
 /-- Position–tangent inner product for the centered circle:
-`⟪z(θ), i·e^{iθ}⟫ = -r`. -/
+`⟪γ(θ), i·e^{iθ}⟫ = -r`. -/
 private lemma spaceFormCircle_inner (r θ : ℝ) :
     ⟪(-r) • (Complex.I * Complex.exp ((θ : ℂ) * Complex.I)),
       Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ = -r := by
@@ -115,7 +115,7 @@ private lemma spaceFormCircle_contDiff (r : ℝ) :
   exact continuous_const.mul (Complex.continuous_exp.comp
     (Complex.continuous_ofReal.mul continuous_const))
 
-/-- The centered circle of radius `r > 0` is regular: `z'(θ) = r·e^{iθ} ≠ 0`. -/
+/-- The centered circle of radius `r > 0` is regular: `γ'(θ) = r·e^{iθ} ≠ 0`. -/
 private lemma spaceFormCircle_deriv_ne_zero {r : ℝ} (hr0 : 0 < r) (t : ℝ) :
     deriv (fun t : ℝ => (-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I))) t ≠ 0 := by
   rw [(spaceFormCircle_hasDerivAt r t).deriv]
@@ -127,7 +127,7 @@ private lemma spaceFormCircle_norm_lt_one {r : ℝ} (hr0 : 0 < r) (hr1 : r < 1) 
   rw [spaceFormCircle_norm_z hr0 t]; exact hr1
 
 /-- Tangent-angle equation for the centered circle in the gauge `φ = id`:
-`z'(t) = ‖z'(t)‖·e^{it}`. -/
+`γ'(t) = ‖γ'(t)‖·e^{it}`. -/
 private lemma spaceFormCircle_tangent {r : ℝ} (hr0 : 0 < r) (t : ℝ) :
     deriv (fun t : ℝ => (-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I))) t
       = (↑‖deriv (fun t : ℝ => (-r) •
@@ -136,13 +136,13 @@ private lemma spaceFormCircle_tangent {r : ℝ} (hr0 : 0 < r) (t : ℝ) :
   rw [(spaceFormCircle_hasDerivAt r t).deriv, spaceFormCircle_norm_velocity hr0 t]
 
 /-- Space-form speed relation for the centered circle in the gauge `φ = id`: the
-circle identity `1 + εr² = 2r(c + εr)` is exactly
-`(1 + ε‖z‖²)/2 · φ' = (c − ε⟪z, i·e^{iφ}⟫)·‖z'‖`. -/
-private lemma spaceFormCircle_speed {ε c r : ℝ} (hr0 : 0 < r)
-    (hcirc : 1 + ε * r ^ 2 = 2 * r * (c + ε * r)) (t : ℝ) :
-    (1 + ε * ‖(-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I))‖ ^ 2) / 2
+circle identity `1 + Kr² = 2r(c + Kr)` is exactly
+`(1 + K‖γ‖²)/2 · φ' = (c − K⟪γ, i·e^{iφ}⟫)·‖γ'‖`. -/
+private lemma spaceFormCircle_speed {K c r : ℝ} (hr0 : 0 < r)
+    (hcirc : 1 + K * r ^ 2 = 2 * r * (c + K * r)) (t : ℝ) :
+    (1 + K * ‖(-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I))‖ ^ 2) / 2
         * deriv (id : ℝ → ℝ) t
-      = (c - ε * ⟪(-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I)),
+      = (c - K * ⟪(-r) • (Complex.I * Complex.exp ((t : ℂ) * Complex.I)),
           Complex.I * Complex.exp ((t : ℂ) * Complex.I)⟫_ℝ)
         * ‖deriv (fun t : ℝ => (-r) •
             (Complex.I * Complex.exp ((t : ℂ) * Complex.I))) t‖ := by
@@ -154,19 +154,19 @@ private lemma spaceFormCircle_speed {ε c r : ℝ} (hr0 : 0 < r)
 /-- **Constant branch.** The model geodesic circle of constant admissible
 curvature `c` is a simple closed curve realizing the constant curvature
 function `κ ≡ c`. (Transport of `sphericalCircle_realizes`.) -/
-lemma spaceFormCircle_realizes_explicit {ε c : ℝ} (hε : ε = 1 ∨ ε = -1 ∨ ε = 0)
-    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c) ∨ (ε = 0 ∧ 1 / 2 < c)) :
+lemma spaceFormCircle_realizes_explicit {K c : ℝ} (hK : K = 1 ∨ K = -1 ∨ K = 0)
+    (hc : (K = 1 ∧ 0 < c) ∨ (K = -1 ∧ 1 < c) ∨ (K = 0 ∧ 1 / 2 < c)) :
     IsSimpleClosed
-        (fun θ : ℝ => (-centeredRadius ε c) •
+        (fun θ : ℝ => (-centeredRadius K c) •
           (Complex.I * Complex.exp ((θ : ℂ) * Complex.I))) ∧
-      Realizes ε
-        (fun θ : ℝ => (-centeredRadius ε c) •
+      Realizes K
+        (fun θ : ℝ => (-centeredRadius K c) •
           (Complex.I * Complex.exp ((θ : ℂ) * Complex.I)))
         (fun _ => c) := by
-  obtain ⟨hr0, hr1⟩ := centeredRadius_mem_Ioo ε c hε hc
-  have hsolve := centeredRadius_solves ε c hε hc
-  set r : ℝ := centeredRadius ε c with hrdef
-  have hcirc : 1 + ε * r ^ 2 = 2 * r * (c + ε * r) := by linear_combination -hsolve
+  obtain ⟨hr0, hr1⟩ := centeredRadius_mem_Ioo K c hK hc
+  have hsolve := centeredRadius_solves K c hK hc
+  set r : ℝ := centeredRadius K c with hrdef
+  have hcirc : 1 + K * r ^ 2 = 2 * r * (c + K * r) := by linear_combination -hsolve
   exact ⟨⟨spaceFormCircle_periodic r, spaceFormCircle_injOn hr0⟩,
     spaceFormCircle_contDiff r, fun t => spaceFormCircle_deriv_ne_zero hr0 t,
     fun t => spaceFormCircle_norm_lt_one hr0 hr1 t, id, differentiable_id,
@@ -174,42 +174,42 @@ lemma spaceFormCircle_realizes_explicit {ε c : ℝ} (hε : ε = 1 ∨ ε = -1 �
 
 /-- **Constant branch.** The model geodesic circle of constant admissible
 curvature `c` is a simple closed curve realizing the constant curvature function. -/
-lemma spaceFormCircle_realizes {ε c : ℝ} (hε : ε = 1 ∨ ε = -1 ∨ ε = 0)
-    (hc : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c) ∨ (ε = 0 ∧ 1 / 2 < c)) :
-    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes ε z (fun _ => c) := by
-  exact ⟨_, spaceFormCircle_realizes_explicit hε hc⟩
+lemma spaceFormCircle_realizes {K c : ℝ} (hK : K = 1 ∨ K = -1 ∨ K = 0)
+    (hc : (K = 1 ∧ 0 < c) ∨ (K = -1 ∧ 1 < c) ∨ (K = 0 ∧ 1 / 2 < c)) :
+    ∃ γ : ℝ → ℂ, IsSimpleClosed γ ∧ Realizes K γ (fun _ => c) := by
+  exact ⟨_, spaceFormCircle_realizes_explicit hK hc⟩
 
 /-! ## Realization transfers under `C¹` reparametrization -/
 
 /-- **Space-form realization transfers under orientation-preserving `C¹`
-reparametrization**: if `z` realizes `μ` and `ψ` is `C¹` with `ψ' > 0`, then
-`z ∘ ψ` realizes `μ ∘ ψ`. (`ε`-generic transport of
+reparametrization**: if `γ` realizes `μ` and `ψ` is `C¹` with `ψ' > 0`, then
+`γ ∘ ψ` realizes `μ ∘ ψ`. (`K`-generic transport of
 `realizesSphericalCurvature_comp`.)  Un-privatised for the no-rescaling reparam
 step of the H² arc-length capstone (`Gluck.Hyperbolic.arcLengthH2Converse`,
 `ArcLengthH2.lean`). -/
-lemma spaceFormRealizes_comp {ε : ℝ} {z : ℝ → ℂ} {μ : ℝ → ℝ} {ψ : ℝ → ℝ}
-    (hz : Realizes ε z μ) (hψ : ContDiff ℝ 1 ψ) (hψpos : ∀ t, 0 < deriv ψ t) :
-    Realizes ε (z ∘ ψ) (μ ∘ ψ) := by
-  obtain ⟨hz1, hreg, hconf, φ, hφ, htan, hcurv⟩ := hz
-  have hzdiff : ∀ x, HasDerivAt z (deriv z x) x :=
+lemma spaceFormRealizes_comp {K : ℝ} {γ : ℝ → ℂ} {μ : ℝ → ℝ} {ψ : ℝ → ℝ}
+    (hγ : Realizes K γ μ) (hψ : ContDiff ℝ 1 ψ) (hψpos : ∀ t, 0 < deriv ψ t) :
+    Realizes K (γ ∘ ψ) (μ ∘ ψ) := by
+  obtain ⟨hz1, hreg, hconf, φ, hφ, htan, hcurv⟩ := hγ
+  have hγdiff : ∀ x, HasDerivAt γ (deriv γ x) x :=
     fun x => (hz1.differentiable (by norm_num)).differentiableAt.hasDerivAt
   have hψdiff : ∀ t, HasDerivAt ψ (deriv ψ t) t :=
     fun t => (hψ.differentiable (by norm_num)).differentiableAt.hasDerivAt
-  have hcomp : ∀ t, HasDerivAt (z ∘ ψ) (deriv ψ t • deriv z (ψ t)) t :=
-    fun t => (hzdiff (ψ t)).scomp t (hψdiff t)
-  have hd : ∀ t, deriv (z ∘ ψ) t = deriv ψ t • deriv z (ψ t) :=
+  have hcomp : ∀ t, HasDerivAt (γ ∘ ψ) (deriv ψ t • deriv γ (ψ t)) t :=
+    fun t => (hγdiff (ψ t)).scomp t (hψdiff t)
+  have hd : ∀ t, deriv (γ ∘ ψ) t = deriv ψ t • deriv γ (ψ t) :=
     fun t => (hcomp t).deriv
-  have hnorm : ∀ t, ‖deriv (z ∘ ψ) t‖ = deriv ψ t * ‖deriv z (ψ t)‖ := by
+  have hnorm : ∀ t, ‖deriv (γ ∘ ψ) t‖ = deriv ψ t * ‖deriv γ (ψ t)‖ := by
     intro t
     rw [hd, norm_smul, Real.norm_eq_abs, abs_of_pos (hψpos t)]
-  have hz'cont : Continuous (deriv z) := (contDiff_one_iff_deriv.mp hz1).2
+  have hγ'cont : Continuous (deriv γ) := (contDiff_one_iff_deriv.mp hz1).2
   have hψ'cont : Continuous (deriv ψ) := (contDiff_one_iff_deriv.mp hψ).2
   have hψcont : Continuous ψ := hψ.continuous
   refine ⟨?_, ?_, ?_, φ ∘ ψ, ?_, ?_, ?_⟩
   · refine contDiff_one_iff_deriv.mpr ⟨fun t => (hcomp t).differentiableAt, ?_⟩
-    have heq : deriv (z ∘ ψ) = fun t => deriv ψ t • deriv z (ψ t) := funext hd
+    have heq : deriv (γ ∘ ψ) = fun t => deriv ψ t • deriv γ (ψ t) := funext hd
     rw [heq]
-    exact hψ'cont.smul (hz'cont.comp hψcont)
+    exact hψ'cont.smul (hγ'cont.comp hψcont)
   · intro t
     rw [hd]
     exact smul_ne_zero (hψpos t).ne' (hreg (ψ t))
@@ -233,12 +233,12 @@ lemma spaceFormRealizes_comp {ε : ℝ} {z : ℝ → ℂ} {μ : ℝ → ℝ} {ψ
 /-! ## Reconstruction seam machinery (transport, exposing the true-ODE derivative) -/
 
 /-- Extended admissibility for the `2π`-periodic extension. -/
-private lemma re_extended_admissible {ε : ℝ} {κ : ℝ → ℝ} {R δ : ℝ}
-    (hκper : Function.Periodic κ (2 * π)) {z : ℝ → ℂ}
-    (hadm : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖z θ‖ ≤ R ∧
-      δ ≤ κ θ - ε * ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
-    (t : ℝ) : ‖periodicExtension z t‖ ≤ R ∧
-      δ ≤ κ t - ε * ⟪periodicExtension z t,
+private lemma re_extended_admissible {K : ℝ} {κ : ℝ → ℝ} {R δ : ℝ}
+    (hκper : Function.Periodic κ (2 * π)) {γ : ℝ → ℂ}
+    (hadm : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖γ θ‖ ≤ R ∧
+      δ ≤ κ θ - K * ⟪γ θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
+    (t : ℝ) : ‖periodicExtension γ t‖ ≤ R ∧
+      δ ≤ κ t - K * ⟪periodicExtension γ t,
         Complex.I * Complex.exp ((t : ℂ) * Complex.I)⟫_ℝ := by
   have hmem := frac_mem_Ico t
   have h := hadm _ ⟨hmem.1, hmem.2.le⟩
@@ -249,29 +249,29 @@ private lemma re_extended_admissible {ε : ℝ} {κ : ℝ → ℝ} {R δ : ℝ}
   exact hbr
 
 /-- True-ODE on the window. -/
-private lemma re_hasDerivWithinAt_true {ε : ℝ} {κ : ℝ → ℝ} {R δ : ℝ}
-    {z : ℝ → ℂ}
-    (hz : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
-      HasDerivWithinAt z (truncatedField ε κ R δ θ (z θ)) (Set.Icc 0 (2 * π)) θ)
-    (hadm : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖z θ‖ ≤ R ∧
-      δ ≤ κ θ - ε * ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
+private lemma re_hasDerivWithinAt_true {K : ℝ} {κ : ℝ → ℝ} {R δ : ℝ}
+    {γ : ℝ → ℂ}
+    (hγ : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
+      HasDerivWithinAt γ (truncatedField K κ R δ θ (γ θ)) (Set.Icc 0 (2 * π)) θ)
+    (hadm : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖γ θ‖ ≤ R ∧
+      δ ≤ κ θ - K * ⟪γ θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
     (θ : ℝ) (hθ : θ ∈ Set.Icc (0 : ℝ) (2 * π)) :
-    HasDerivWithinAt z
-      (spaceFormSpeed ε κ θ (z θ) • Complex.exp ((θ : ℂ) * Complex.I))
+    HasDerivWithinAt γ
+      (spaceFormSpeed K κ θ (γ θ) • Complex.exp ((θ : ℂ) * Complex.I))
       (Set.Icc 0 (2 * π)) θ := by
-  have h := hz θ hθ
+  have h := hγ θ hθ
   rwa [truncatedField, truncatedSpeed_eq (hadm θ hθ).1 (hadm θ hθ).2] at h
 
 /-- Shifted-window derivative. -/
-private lemma re_shifted_hasDerivWithinAt {ε : ℝ} {κ : ℝ → ℝ}
-    (hκper : Function.Periodic κ (2 * π)) {z : ℝ → ℂ}
-    (hztrue : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), HasDerivWithinAt z
-      (spaceFormSpeed ε κ θ (z θ) • Complex.exp ((θ : ℂ) * Complex.I))
+private lemma re_shifted_hasDerivWithinAt {K : ℝ} {κ : ℝ → ℝ}
+    (hκper : Function.Periodic κ (2 * π)) {γ : ℝ → ℂ}
+    (hγtrue : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), HasDerivWithinAt γ
+      (spaceFormSpeed K κ θ (γ θ) • Complex.exp ((θ : ℂ) * Complex.I))
       (Set.Icc 0 (2 * π)) θ)
     (n : ℤ) (u : ℝ)
     (hu : u ∈ Set.Icc ((n : ℝ) * (2 * π)) ((n : ℝ) * (2 * π) + 2 * π)) :
-    HasDerivWithinAt (fun t : ℝ => z (t - (n : ℝ) * (2 * π)))
-      (spaceFormSpeed ε κ u (z (u - (n : ℝ) * (2 * π))) •
+    HasDerivWithinAt (fun t : ℝ => γ (t - (n : ℝ) * (2 * π)))
+      (spaceFormSpeed K κ u (γ (u - (n : ℝ) * (2 * π))) •
         Complex.exp ((u : ℂ) * Complex.I))
       (Set.Icc ((n : ℝ) * (2 * π)) ((n : ℝ) * (2 * π) + 2 * π)) u := by
   have humem : u - (n : ℝ) * (2 * π) ∈ Set.Icc (0 : ℝ) (2 * π) :=
@@ -284,16 +284,16 @@ private lemma re_shifted_hasDerivWithinAt {ε : ℝ} {κ : ℝ → ℝ}
       (Set.Icc (0 : ℝ) (2 * π)) :=
     fun t ht => ⟨by linarith [ht.1], by linarith [ht.2]⟩
   have hcomp := HasDerivWithinAt.scomp u
-    (hztrue (u - (n : ℝ) * (2 * π)) humem) hshift hmaps
+    (hγtrue (u - (n : ℝ) * (2 * π)) humem) hshift hmaps
   rw [one_smul, spaceFormSpeed_sub_int_mul hκper, expI_sub_int_mul] at hcomp
   exact hcomp
 
 /-- Extension agrees with the shifted trajectory. -/
-private lemma re_extension_eq_shifted {z : ℝ → ℂ}
-    (hclosed : z (2 * π) = z 0)
+private lemma re_extension_eq_shifted {γ : ℝ → ℂ}
+    (hclosed : γ (2 * π) = γ 0)
     (n : ℤ) (u : ℝ)
     (hu : u ∈ Set.Icc ((n : ℝ) * (2 * π)) ((n : ℝ) * (2 * π) + 2 * π)) :
-    periodicExtension z u = z (u - (n : ℝ) * (2 * π)) := by
+    periodicExtension γ u = γ (u - (n : ℝ) * (2 * π)) := by
   have h2π := Real.two_pi_pos
   rcases lt_or_eq_of_le hu.2 with h2 | h2
   · have hfl : ⌊u / (2 * π)⌋ = n := by
@@ -319,22 +319,22 @@ private lemma re_extension_eq_shifted {z : ℝ → ℂ}
     exact hclosed.symm
 
 /-- Seam derivative. -/
-private lemma re_hasDerivAt_seam {ε : ℝ} {κ : ℝ → ℝ} {z : ℝ → ℂ}
+private lemma re_hasDerivAt_seam {K : ℝ} {κ : ℝ → ℝ} {γ : ℝ → ℂ}
     (hshifted : ∀ n : ℤ, ∀ u ∈ Set.Icc ((n : ℝ) * (2 * π))
         ((n : ℝ) * (2 * π) + 2 * π),
-      HasDerivWithinAt (fun t : ℝ => z (t - (n : ℝ) * (2 * π)))
-        (spaceFormSpeed ε κ u (z (u - (n : ℝ) * (2 * π))) •
+      HasDerivWithinAt (fun t : ℝ => γ (t - (n : ℝ) * (2 * π)))
+        (spaceFormSpeed K κ u (γ (u - (n : ℝ) * (2 * π))) •
           Complex.exp ((u : ℂ) * Complex.I))
         (Set.Icc ((n : ℝ) * (2 * π)) ((n : ℝ) * (2 * π) + 2 * π)) u)
     (hZeq : ∀ n : ℤ, ∀ u ∈ Set.Icc ((n : ℝ) * (2 * π))
         ((n : ℝ) * (2 * π) + 2 * π),
-      periodicExtension z u = z (u - (n : ℝ) * (2 * π)))
+      periodicExtension γ u = γ (u - (n : ℝ) * (2 * π)))
     (n : ℤ) (t : ℝ)
     (htmem : t ∈ Set.Icc ((n : ℝ) * (2 * π)) ((n : ℝ) * (2 * π) + 2 * π))
     (ht2 : t < (n : ℝ) * (2 * π) + 2 * π)
     (heq : (n : ℝ) * (2 * π) = t) :
-    HasDerivAt (periodicExtension z)
-      (spaceFormSpeed ε κ t (periodicExtension z t) •
+    HasDerivAt (periodicExtension γ)
+      (spaceFormSpeed K κ t (periodicExtension γ t) •
         Complex.exp ((t : ℂ) * Complex.I)) t := by
   have hmem' : t ∈ Set.Icc (((n - 1 : ℤ) : ℝ) * (2 * π))
       (((n - 1 : ℤ) : ℝ) * (2 * π) + 2 * π) := by
@@ -349,13 +349,13 @@ private lemma re_hasDerivAt_seam {ε : ℝ} {κ : ℝ → ℝ} {z : ℝ → ℂ}
   have hend : ((n - 1 : ℤ) : ℝ) * (2 * π) + 2 * π = t := by
     push_cast; linarith
   rw [hend] at hL'
-  have hRici : HasDerivWithinAt (periodicExtension z)
-      (spaceFormSpeed ε κ t (periodicExtension z t) •
+  have hRici : HasDerivWithinAt (periodicExtension γ)
+      (spaceFormSpeed K κ t (periodicExtension γ t) •
         Complex.exp ((t : ℂ) * Complex.I)) (Set.Ici t) t :=
     hR'.mono_of_mem_nhdsWithin (mem_nhdsGE_iff_exists_Icc_subset.mpr
       ⟨(n : ℝ) * (2 * π) + 2 * π, ht2, by rw [heq]⟩)
-  have hLiic : HasDerivWithinAt (periodicExtension z)
-      (spaceFormSpeed ε κ t (periodicExtension z t) •
+  have hLiic : HasDerivWithinAt (periodicExtension γ)
+      (spaceFormSpeed K κ t (periodicExtension γ t) •
         Complex.exp ((t : ℂ) * Complex.I)) (Set.Iic t) t :=
     hL'.mono_of_mem_nhdsWithin (mem_nhdsLE_iff_exists_Icc_subset.mpr
       ⟨((n - 1 : ℤ) : ℝ) * (2 * π), by push_cast; linarith, by rfl⟩)
@@ -364,19 +364,19 @@ private lemma re_hasDerivAt_seam {ε : ℝ} {κ : ℝ → ℝ} {z : ℝ → ℂ}
   exact hasDerivWithinAt_univ.mp hu
 
 /-- Global derivative of the extension: it solves the true ODE everywhere. -/
-private lemma re_hasDerivAt {ε : ℝ} {κ : ℝ → ℝ} {z : ℝ → ℂ}
+private lemma re_hasDerivAt {K : ℝ} {κ : ℝ → ℝ} {γ : ℝ → ℂ}
     (hshifted : ∀ n : ℤ, ∀ u ∈ Set.Icc ((n : ℝ) * (2 * π))
         ((n : ℝ) * (2 * π) + 2 * π),
-      HasDerivWithinAt (fun t : ℝ => z (t - (n : ℝ) * (2 * π)))
-        (spaceFormSpeed ε κ u (z (u - (n : ℝ) * (2 * π))) •
+      HasDerivWithinAt (fun t : ℝ => γ (t - (n : ℝ) * (2 * π)))
+        (spaceFormSpeed K κ u (γ (u - (n : ℝ) * (2 * π))) •
           Complex.exp ((u : ℂ) * Complex.I))
         (Set.Icc ((n : ℝ) * (2 * π)) ((n : ℝ) * (2 * π) + 2 * π)) u)
     (hZeq : ∀ n : ℤ, ∀ u ∈ Set.Icc ((n : ℝ) * (2 * π))
         ((n : ℝ) * (2 * π) + 2 * π),
-      periodicExtension z u = z (u - (n : ℝ) * (2 * π)))
+      periodicExtension γ u = γ (u - (n : ℝ) * (2 * π)))
     (t : ℝ) :
-    HasDerivAt (periodicExtension z)
-      (spaceFormSpeed ε κ t (periodicExtension z t) •
+    HasDerivAt (periodicExtension γ)
+      (spaceFormSpeed K κ t (periodicExtension γ t) •
         Complex.exp ((t : ℂ) * Complex.I)) t := by
   set n : ℤ := ⌊t / (2 * π)⌋ with hn
   have h2π := Real.two_pi_pos
@@ -385,7 +385,7 @@ private lemma re_hasDerivAt {ε : ℝ} {κ : ℝ → ℝ} {z : ℝ → ℂ}
   have ht2 : t < (n : ℝ) * (2 * π) + 2 * π := by have := hmem.2; linarith
   have htmem : t ∈ Set.Icc ((n : ℝ) * (2 * π)) ((n : ℝ) * (2 * π) + 2 * π) :=
     ⟨ht1, ht2.le⟩
-  have hZt : periodicExtension z t = z (t - (n : ℝ) * (2 * π)) := rfl
+  have hZt : periodicExtension γ t = γ (t - (n : ℝ) * (2 * π)) := rfl
   rcases eq_or_lt_of_le ht1 with heq | hlt
   · exact re_hasDerivAt_seam hshifted hZeq n t htmem ht2 heq
   · have h := (hshifted n t htmem).congr (hZeq n) (hZeq n t htmem)
@@ -393,97 +393,97 @@ private lemma re_hasDerivAt {ε : ℝ} {κ : ℝ → ℝ} {z : ℝ → ℂ}
     exact h.hasDerivAt (Icc_mem_nhds hlt ht2)
 
 /-- The periodic extension of a closed admissible truncated-field trajectory
-solves the true reconstruction ODE `z' = q_{ε,κ}(t, z)·e^{it}` globally. -/
-private lemma re_hZderiv {ε : ℝ} {κ : ℝ → ℝ} {R δ : ℝ}
-    (hκper : Function.Periodic κ (2 * π)) {z : ℝ → ℂ}
-    (hz : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
-      HasDerivWithinAt z (truncatedField ε κ R δ θ (z θ)) (Set.Icc 0 (2 * π)) θ)
-    (hadm : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖z θ‖ ≤ R ∧
-      δ ≤ κ θ - ε * ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
-    (hclosed : z (2 * π) = z 0) (t : ℝ) :
-    HasDerivAt (periodicExtension z)
-      (spaceFormSpeed ε κ t (periodicExtension z t) •
+solves the true reconstruction ODE `γ' = q_{K,κ}(t, γ)·e^{it}` globally. -/
+private lemma re_hZderiv {K : ℝ} {κ : ℝ → ℝ} {R δ : ℝ}
+    (hκper : Function.Periodic κ (2 * π)) {γ : ℝ → ℂ}
+    (hγ : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
+      HasDerivWithinAt γ (truncatedField K κ R δ θ (γ θ)) (Set.Icc 0 (2 * π)) θ)
+    (hadm : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖γ θ‖ ≤ R ∧
+      δ ≤ κ θ - K * ⟪γ θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
+    (hclosed : γ (2 * π) = γ 0) (t : ℝ) :
+    HasDerivAt (periodicExtension γ)
+      (spaceFormSpeed K κ t (periodicExtension γ t) •
         Complex.exp ((t : ℂ) * Complex.I)) t :=
   re_hasDerivAt (fun _ _ hu =>
-      re_shifted_hasDerivWithinAt hκper (re_hasDerivWithinAt_true hz hadm) _ _ hu)
+      re_shifted_hasDerivWithinAt hκper (re_hasDerivWithinAt_true hγ hadm) _ _ hu)
     (fun _ _ hu => re_extension_eq_shifted hclosed _ _ hu) t
 
 /-! ## Simplicity of the closing trajectory -/
 
 /-- Trajectory speed of a closed admissible trajectory: continuous,
 `2π`-periodic and strictly positive. -/
-lemma spaceFormTrajectory_speed {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ} {R δ : ℝ}
+lemma spaceFormTrajectory_speed {K : ℝ} (hK : |K| ≤ 1) {κ : ℝ → ℝ} {R δ : ℝ}
     (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π)) (hR1 : R < 1) (hδ : 0 < δ)
-    {z : ℝ → ℂ}
-    (hz : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
-      HasDerivWithinAt z (truncatedField ε κ R δ θ (z θ)) (Set.Icc 0 (2 * π)) θ)
-    (hadm : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖z θ‖ ≤ R ∧
-      δ ≤ κ θ - ε * ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
-    (hclosed : z (2 * π) = z 0) :
-    Continuous (fun t => spaceFormSpeed ε κ t (periodicExtension z t)) ∧
+    {γ : ℝ → ℂ}
+    (hγ : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
+      HasDerivWithinAt γ (truncatedField K κ R δ θ (γ θ)) (Set.Icc 0 (2 * π)) θ)
+    (hadm : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖γ θ‖ ≤ R ∧
+      δ ≤ κ θ - K * ⟪γ θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
+    (hclosed : γ (2 * π) = γ 0) :
+    Continuous (fun t => spaceFormSpeed K κ t (periodicExtension γ t)) ∧
       Function.Periodic
-        (fun t => spaceFormSpeed ε κ t (periodicExtension z t)) (2 * π) ∧
-      ∀ t, 0 < spaceFormSpeed ε κ t (periodicExtension z t) := by
-  have hZderiv := re_hZderiv hκper hz hadm hclosed
+        (fun t => spaceFormSpeed K κ t (periodicExtension γ t)) (2 * π) ∧
+      ∀ t, 0 < spaceFormSpeed K κ t (periodicExtension γ t) := by
+  have hZderiv := re_hZderiv hκper hγ hadm hclosed
   have hadmZ := re_extended_admissible hκper hadm
-  have hZdiff : Differentiable ℝ (periodicExtension z) :=
+  have hZdiff : Differentiable ℝ (periodicExtension γ) :=
     fun t => (hZderiv t).differentiableAt
-  have hZc : Continuous (periodicExtension z) := hZdiff.continuous
+  have hZc : Continuous (periodicExtension γ) := hZdiff.continuous
   refine ⟨?_, ?_, fun t => ?_⟩
   · have hexpc : Continuous fun t : ℝ =>
         Complex.I * Complex.exp ((t : ℂ) * Complex.I) :=
       continuous_const.mul (Complex.continuous_exp.comp
         (Complex.continuous_ofReal.mul continuous_const))
-    have hnum : Continuous fun t : ℝ => 1 + ε * ‖periodicExtension z t‖ ^ 2 :=
+    have hnum : Continuous fun t : ℝ => 1 + K * ‖periodicExtension γ t‖ ^ 2 :=
       continuous_const.add (continuous_const.mul (hZc.norm.pow 2))
-    have hden : Continuous fun t : ℝ => 2 * (κ t - ε * ⟪periodicExtension z t,
+    have hden : Continuous fun t : ℝ => 2 * (κ t - K * ⟪periodicExtension γ t,
         Complex.I * Complex.exp ((t : ℂ) * Complex.I)⟫_ℝ) :=
       continuous_const.mul (hκc.sub (continuous_const.mul (hZc.inner hexpc)))
     unfold spaceFormSpeed
     exact hnum.div hden fun t =>
       ne_of_gt (by have := (hadmZ t).2; linarith)
   · intro t
-    change spaceFormSpeed ε κ (t + 2 * π) (periodicExtension z (t + 2 * π))
-      = spaceFormSpeed ε κ t (periodicExtension z t)
-    have h := spaceFormSpeed_sub_int_mul (ε := ε) hκper 1 (t + 2 * π)
-      (periodicExtension z t)
+    change spaceFormSpeed K κ (t + 2 * π) (periodicExtension γ (t + 2 * π))
+      = spaceFormSpeed K κ t (periodicExtension γ t)
+    have h := spaceFormSpeed_sub_int_mul (K := K) hκper 1 (t + 2 * π)
+      (periodicExtension γ t)
     rw [show t + 2 * π - ((1 : ℤ) : ℝ) * (2 * π) = t by push_cast; ring] at h
-    rw [periodicExtension_periodic z t]
+    rw [periodicExtension_periodic γ t]
     exact h.symm
   · have h := (hadmZ t).2
-    have hnum : 0 < 1 + ε * ‖periodicExtension z t‖ ^ 2 :=
-      one_add_mul_normSq_pos hε (lt_of_le_of_lt (hadmZ t).1 hR1)
+    have hnum : 0 < 1 + K * ‖periodicExtension γ t‖ ^ 2 :=
+      one_add_mul_normSq_pos hK (lt_of_le_of_lt (hadmZ t).1 hR1)
     unfold spaceFormSpeed
     exact div_pos hnum (by linarith)
 
 /-- The closing trajectory is a translated reconstruction curve. -/
-lemma spaceFormTrajectory_eq_reconstruct {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ}
+lemma spaceFormTrajectory_eq_reconstruct {K : ℝ} (hK : |K| ≤ 1) {κ : ℝ → ℝ}
     {R δ : ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π)) (hR1 : R < 1)
-    (hδ : 0 < δ) {z : ℝ → ℂ}
-    (hz : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
-      HasDerivWithinAt z (truncatedField ε κ R δ θ (z θ)) (Set.Icc 0 (2 * π)) θ)
-    (hadm : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖z θ‖ ≤ R ∧
-      δ ≤ κ θ - ε * ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
-    (hclosed : z (2 * π) = z 0) :
-    ∀ t, periodicExtension z t = periodicExtension z 0
-      + reconstruct (fun s => spaceFormSpeed ε κ s (periodicExtension z s)) t := by
-  have hZderiv := re_hZderiv hκper hz hadm hclosed
+    (hδ : 0 < δ) {γ : ℝ → ℂ}
+    (hγ : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
+      HasDerivWithinAt γ (truncatedField K κ R δ θ (γ θ)) (Set.Icc 0 (2 * π)) θ)
+    (hadm : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖γ θ‖ ≤ R ∧
+      δ ≤ κ θ - K * ⟪γ θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
+    (hclosed : γ (2 * π) = γ 0) :
+    ∀ t, periodicExtension γ t = periodicExtension γ 0
+      + reconstruct (fun s => spaceFormSpeed K κ s (periodicExtension γ s)) t := by
+  have hZderiv := re_hZderiv hκper hγ hadm hclosed
   obtain ⟨hρc, -, -⟩ :=
-    spaceFormTrajectory_speed hε hκc hκper hR1 hδ hz hadm hclosed
-  set ρ : ℝ → ℝ := fun s => spaceFormSpeed ε κ s (periodicExtension z s) with hρ
+    spaceFormTrajectory_speed hK hκc hκper hR1 hδ hγ hadm hclosed
+  set ρ : ℝ → ℝ := fun s => spaceFormSpeed K κ s (periodicExtension γ s) with hρ
   have h0 : reconstruct ρ 0 = 0 := by
     unfold reconstruct
     exact intervalIntegral.integral_same
   have hdiff : ∀ t, HasDerivAt
-      (fun u => periodicExtension z u - reconstruct ρ u) 0 t := by
+      (fun u => periodicExtension γ u - reconstruct ρ u) 0 t := by
     intro t
     have h := (hZderiv t).sub (hasDerivAt_reconstruct hρc t)
     have hval : ρ t • Complex.exp ((t : ℂ) * Complex.I)
         - Complex.exp ((t : ℂ) * Complex.I) * (ρ t : ℂ) = 0 := by
       rw [Complex.real_smul]; ring
     rwa [hval] at h
-  have hconst : ∀ t, periodicExtension z t - reconstruct ρ t
-      = periodicExtension z 0 - reconstruct ρ 0 := fun t =>
+  have hconst : ∀ t, periodicExtension γ t - reconstruct ρ t
+      = periodicExtension γ 0 - reconstruct ρ 0 := fun t =>
     is_const_of_deriv_eq_zero (fun u => (hdiff u).differentiableAt)
       (fun u => (hdiff u).deriv) t 0
   intro t
@@ -503,31 +503,31 @@ lemma isSimpleClosed_const_add {γ : ℝ → ℂ} (hγ : IsSimpleClosed γ) (w :
 /-- **Simplicity of the closing trajectory.** The periodic extension of a
 closed admissible truncated-field trajectory is a simple closed curve.
 (Transport of `spherical_simplicity`.) -/
-lemma spaceForm_simplicity {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ} {R δ : ℝ}
+lemma spaceForm_simplicity {K : ℝ} (hK : |K| ≤ 1) {κ : ℝ → ℝ} {R δ : ℝ}
     (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π)) (hR1 : R < 1)
-    (hδ : 0 < δ) {z : ℝ → ℂ}
-    (hz : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
-      HasDerivWithinAt z (truncatedField ε κ R δ θ (z θ)) (Set.Icc 0 (2 * π)) θ)
-    (hadm : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖z θ‖ ≤ R ∧
-      δ ≤ κ θ - ε * ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
-    (hclosed : z (2 * π) = z 0) :
-    IsSimpleClosed (periodicExtension z) := by
+    (hδ : 0 < δ) {γ : ℝ → ℂ}
+    (hγ : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π),
+      HasDerivWithinAt γ (truncatedField K κ R δ θ (γ θ)) (Set.Icc 0 (2 * π)) θ)
+    (hadm : ∀ θ ∈ Set.Icc (0 : ℝ) (2 * π), ‖γ θ‖ ≤ R ∧
+      δ ≤ κ θ - K * ⟪γ θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ)
+    (hclosed : γ (2 * π) = γ 0) :
+    IsSimpleClosed (periodicExtension γ) := by
   obtain ⟨hρc, hρper, hρpos⟩ :=
-    spaceFormTrajectory_speed hε hκc hκper hR1 hδ hz hadm hclosed
+    spaceFormTrajectory_speed hK hκc hκper hR1 hδ hγ hadm hclosed
   have heq :=
-    spaceFormTrajectory_eq_reconstruct hε hκc hκper hR1 hδ hz hadm hclosed
-  set ρ : ℝ → ℝ := fun s => spaceFormSpeed ε κ s (periodicExtension z s) with hρ
+    spaceFormTrajectory_eq_reconstruct hK hκc hκper hR1 hδ hγ hadm hclosed
+  set ρ : ℝ → ℝ := fun s => spaceFormSpeed K κ s (periodicExtension γ s) with hρ
   have hE : errorVector ρ = 0 := by
     have h2 := heq (2 * π)
-    have hp : periodicExtension z (2 * π) = periodicExtension z 0 := by
-      have h := periodicExtension_periodic z 0
+    have hp : periodicExtension γ (2 * π) = periodicExtension γ 0 := by
+      have h := periodicExtension_periodic γ 0
       rwa [zero_add] at h
     rw [hp] at h2
     change reconstruct ρ (2 * π) = 0
     linear_combination -h2
   have hsimple := isSimpleClosed_reconstruct hρc hρper hρpos hE
-  have hfun : periodicExtension z
-      = fun t => periodicExtension z 0 + reconstruct ρ t := funext heq
+  have hfun : periodicExtension γ
+      = fun t => periodicExtension γ 0 + reconstruct ρ t := funext heq
   rw [hfun]
   exact isSimpleClosed_const_add hsimple _
 
@@ -535,14 +535,14 @@ lemma spaceForm_simplicity {ε : ℝ} (hε : |ε| ≤ 1) {κ : ℝ → ℝ} {R �
 
 /-- **Constant branch of the space-form converse.** If `κ ≡ c`, the explicit
 model circle realizes it. (Transport of `sphericalConverse_pos_const`; at
-`ε = 0` the circle is the Euclidean circle of coordinate radius `1/(2c) < 1`.) -/
-private theorem spaceFormConverse_pos_const {ε : ℝ} (hε : ε = 1 ∨ ε = -1 ∨ ε = 0)
+`K = 0` the circle is the Euclidean circle of coordinate radius `1/(2c) < 1`.) -/
+private theorem spaceFormConverse_pos_const {K : ℝ} (hK : K = 1 ∨ K = -1 ∨ K = 0)
     {κ : ℝ → ℝ} (hκcf : IsCurvatureFunction κ)
-    (hfloor : ε ≤ 0 → ∀ θ, (1 - ε) / 2 < κ θ)
+    (hfloor : K ≤ 0 → ∀ θ, (1 - K) / 2 < κ θ)
     {c : ℝ} (hc : ∀ θ, κ θ = c) :
-    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes ε z κ := by
-  have hadm : (ε = 1 ∧ 0 < c) ∨ (ε = -1 ∧ 1 < c) ∨ (ε = 0 ∧ 1 / 2 < c) := by
-    rcases hε with h | h | h
+    ∃ γ : ℝ → ℂ, IsSimpleClosed γ ∧ Realizes K γ κ := by
+  have hadm : (K = 1 ∧ 0 < c) ∨ (K = -1 ∧ 1 < c) ∨ (K = 0 ∧ 1 / 2 < c) := by
+    rcases hK with h | h | h
     · exact Or.inl ⟨h, by have := hκcf.2.2 0; rwa [hc 0] at this⟩
     · refine Or.inr (Or.inl ⟨h, ?_⟩)
       have hlt := hfloor (by rw [h]; norm_num) 0
@@ -553,48 +553,48 @@ private theorem spaceFormConverse_pos_const {ε : ℝ} (hε : ε = 1 ∨ ε = -1
       rw [hc 0, h] at hlt
       linarith
   have hκeq : κ = fun _ => c := funext hc
-  obtain ⟨z, hsimple, hreal⟩ := spaceFormCircle_realizes hε hadm
+  obtain ⟨γ, hsimple, hreal⟩ := spaceFormCircle_realizes hK hadm
   rw [hκeq]
-  exact ⟨z, hsimple, hreal⟩
+  exact ⟨γ, hsimple, hreal⟩
 
 /-- **Non-constant branch of the space-form converse, curved members
-`ε = ±1`.** From value-separated alternating extrema, endpoint winding produces
+`K = ±1`.** From value-separated alternating extrema, endpoint winding produces
 a closed admissible trajectory for `κ ∘ h₁`; reconstruction realizes `κ ∘ h₁`,
 `spaceForm_simplicity` gives simplicity, and pulling back along the `C¹`
 inverse `H = h₁⁻¹` yields a simple closed realization of `κ`. (Transport of
 `sphericalConverse_pos_nonconst`.) The winding degree of freedom is the flow's
-start point, available only for `ε ≠ 0` (the conjugation coefficient
-`η(ε) = 2εr*/(c²+ε)` of `stepError_expansion` vanishes at `ε = 0`); the flat
+start point, available only for `K ≠ 0` (the conjugation coefficient
+`η(K) = 2Kr*/(c²+K)` of `stepError_expansion` vanishes at `K = 0`); the flat
 member has its own branch `spaceFormConverse_pos_nonconst_flat`. -/
-private theorem spaceFormConverse_pos_nonconst_curved {ε : ℝ} (hε : ε = 1 ∨ ε = -1)
-    {κ : ℝ → ℝ} (hκcf : IsCurvatureFunction κ) (hfloor : ε < 0 → ∀ θ, 1 < κ θ)
+private theorem spaceFormConverse_pos_nonconst_curved {K : ℝ} (hK : K = 1 ∨ K = -1)
+    {κ : ℝ → ℝ} (hκcf : IsCurvatureFunction κ) (hfloor : K < 0 → ∀ θ, 1 < κ θ)
     {p₁ q₁ p₂ q₂ : ℝ} (h12 : p₁ < q₁) (h23 : q₁ < p₂)
     (h34 : p₂ < q₂) (h41 : q₂ < p₁ + 2 * π)
     (hsep : max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂)) :
-    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes ε z κ := by
-  have hεabs : |ε| ≤ 1 := by rcases hε with h | h <;> rw [h] <;> norm_num
-  obtain ⟨R, δ, h₁, r₀, z₀, hR0, hR1, hδ0, hmono, hh₁c, hh₁per,
-      ⟨v, hvc, hvpos, hvd⟩, hz₀mem, hflow_closed, hadm⟩ :=
-    spaceForm_endpoint_winding hε hκcf hfloor h12 h23 h34 h41 hsep
+    ∃ γ : ℝ → ℂ, IsSimpleClosed γ ∧ Realizes K γ κ := by
+  have hKabs : |K| ≤ 1 := by rcases hK with h | h <;> rw [h] <;> norm_num
+  obtain ⟨R, δ, h₁, r₀, γ₀, hR0, hR1, hδ0, hmono, hh₁c, hh₁per,
+      ⟨v, hvc, hvpos, hvd⟩, hγ₀mem, hflow_closed, hadm⟩ :=
+    spaceForm_endpoint_winding hK hκcf hfloor h12 h23 h34 h41 hsep
   have hκ'c : Continuous (κ ∘ h₁) := hκcf.1.comp hh₁c
   have hκ'per : Function.Periodic (κ ∘ h₁) (2 * π) := by
     intro θ
     simp only [Function.comp_apply]
     rw [hh₁per θ, hκcf.2.1 (h₁ θ)]
-  obtain ⟨hz0, hzode⟩ := spaceFormFlow_spec hεabs hκ'c hR0.le hR1 hδ0 r₀ hz₀mem
-  have hclosed : spaceFormFlow ε (κ ∘ h₁) R δ r₀ (z₀, 2 * π)
-      = spaceFormFlow ε (κ ∘ h₁) R δ r₀ (z₀, 0) := hflow_closed.trans hz0.symm
-  have hsimple := spaceForm_simplicity hεabs hκ'c hκ'per hR1 hδ0 hzode hadm hclosed
+  obtain ⟨hγ0, hγode⟩ := spaceFormFlow_spec hKabs hκ'c hR0.le hR1 hδ0 r₀ hγ₀mem
+  have hclosed : spaceFormFlow K (κ ∘ h₁) R δ r₀ (γ₀, 2 * π)
+      = spaceFormFlow K (κ ∘ h₁) R δ r₀ (γ₀, 0) := hflow_closed.trans hγ0.symm
+  have hsimple := spaceForm_simplicity hKabs hκ'c hκ'per hR1 hδ0 hγode hadm hclosed
   obtain ⟨Z, hZclosed, hZeqOn, hZreal⟩ :=
-    reconstruction_realizes hεabs hκ'c hκ'per hR1 hδ0 hzode hadm hclosed
+    reconstruction_realizes hKabs hκ'c hκ'per hR1 hδ0 hγode hadm hclosed
   have hZeq : Z = periodicExtension
-      (fun t => spaceFormFlow ε (κ ∘ h₁) R δ r₀ (z₀, t)) := by
+      (fun t => spaceFormFlow K (κ ∘ h₁) R δ r₀ (γ₀, t)) := by
     funext t
     have hZper : Function.Periodic Z (2 * π) := hZclosed
     have hymem := frac_mem_Ico t
-    have hzy := hZeqOn (Set.mem_Icc.mpr ⟨hymem.1, hymem.2.le⟩)
+    have hγy := hZeqOn (Set.mem_Icc.mpr ⟨hymem.1, hymem.2.le⟩)
     rw [← hZper.sub_int_mul_eq (x := t) ⌊t / (2 * π)⌋]
-    exact hzy
+    exact hγy
   rw [hZeq] at hZreal
   obtain ⟨H, hHc, hHmono, hh₁H, hHh₁, hHper, hHd⟩ :=
     exists_C1_circle_inverse hvc hvpos hvd hh₁per
@@ -617,9 +617,9 @@ private theorem spaceFormConverse_pos_nonconst_curved {ε : ℝ} (hε : ε = 1 �
   rw [hμeq] at hcomp
   exact ⟨_, isSimpleClosed_comp hsimple hHc hHmono hHper, hcomp⟩
 
-/-! ## The flat branch (`ε = 0`)
+/-! ## The flat branch (`K = 0`)
 
-At `ε = 0` the gauge speed `q_{0,κ}(θ, z) = 1/(2κ(θ))` does not depend on the
+At `K = 0` the gauge speed `q_{0,κ}(θ, γ) = 1/(2κ(θ))` does not depend on the
 position, so the flow endpoint map is *constant* in the start point: the
 first-variation endpoint winding of the curved members degenerates (the
 conjugation coefficient `η(0) = 0` in `stepError_expansion`). Closure instead
@@ -649,11 +649,11 @@ private lemma flat_half_radius_close {x c h : ℝ} (hc : 1 / 2 < c) (hx : 1 / 2 
     _ = h * (1 / 2) := by ring
     _ ≤ h * (2 * x * c) := mul_le_mul_of_nonneg_left hhalf_le hh0.le
 
-/-- **Flat realization from a positive weight.** At `ε = 0` the gauge equation
-in the tangent-angle gauge `φ = id` reads `‖z'(θ)‖ = ρ(θ)` with the halved
+/-- **Flat realization from a positive weight.** At `K = 0` the gauge equation
+in the tangent-angle gauge `φ = id` reads `‖γ'(θ)‖ = ρ(θ)` with the halved
 radius `ρ = 1/(2κ)` (`κ·ρ = 1/2`); any translate of the Euclidean
 reconstruction curve of `ρ` that stays in the open unit disk realizes `κ` at
-`ε = 0`. -/
+`K = 0`. -/
 private lemma flat_realizes_reconstruct {κ' ρ : ℝ → ℝ} (hρc : Continuous ρ)
     (hρpos : ∀ s, 0 < ρ s) (hspeed : ∀ s, κ' s * ρ s = 1 / 2) (w : ℂ)
     (hconf : ∀ t, ‖w + reconstruct ρ t‖ < 1) :
@@ -688,10 +688,10 @@ private lemma flat_realizes_reconstruct {κ' ρ : ℝ → ℝ} (hρc : Continuou
     simp only [zero_mul, sub_zero, add_zero, mul_one]
     linarith [hspeed t]
 
-/-- **Non-constant branch of the space-form converse, flat member `ε = 0`.**
+/-- **Non-constant branch of the space-form converse, flat member `K = 0`.**
 The alignment winding (`reduction_justified_L1`) produces a reparametrization
 `h` with `errorVector (1/(κ∘h)) = 0` — the flow of `κ ∘ h` closes exactly,
-since at `ε = 0` the flow is the explicit translate of the reconstruction
+since at `K = 0` the flow is the explicit translate of the reconstruction
 curve of the halved radius `ρ = 1/(2(κ∘h))` — together with an `L¹` bound
 against a two-valued step weight at levels `c ∓ h/2`. The step weight is
 pointwise within `O(h)` of the model radius `1/(2c)`, so the curve stays within
@@ -704,7 +704,7 @@ private theorem spaceFormConverse_pos_nonconst_flat {κ : ℝ → ℝ}
     {p₁ q₁ p₂ q₂ : ℝ} (h12 : p₁ < q₁) (h23 : q₁ < p₂)
     (h34 : p₂ < q₂) (h41 : q₂ < p₁ + 2 * π)
     (hsep : max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂)) :
-    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes 0 z κ := by
+    ∃ γ : ℝ → ℂ, IsSimpleClosed γ ∧ Realizes 0 γ κ := by
   obtain ⟨hκc, hκper, hκpos⟩ := hκcf
   have hπ := Real.pi_pos
   -- The mid level `c`, the value gap `w`, and the flat model radius `1/(2c)`.
@@ -929,7 +929,7 @@ private theorem spaceFormConverse_pos_nonconst_flat {κ : ℝ → ℝ}
     obtain ⟨y, hy, hyt⟩ := hZper.exists_mem_Ico₀ Real.two_pi_pos t
     rw [hyt]
     exact hconfIcc y ⟨hy.1, hy.2.le⟩
-  -- The realization of `κ' = κ ∘ g` at `ε = 0`, then pullback along `H = g⁻¹`.
+  -- The realization of `κ' = κ ∘ g` at `K = 0`, then pullback along `H = g⁻¹`.
   have hspeed : ∀ s, κ' s * ρ s = 1 / 2 := by
     intro s
     have hne := (hκ'pos s).ne'
@@ -960,16 +960,16 @@ private theorem spaceFormConverse_pos_nonconst_flat {κ : ℝ → ℝ}
   exact ⟨_, isSimpleClosed_comp hZsimple hHc hHmono hHper, hcomp⟩
 
 /-- **Non-constant branch of the space-form converse, all three members.**
-Dispatches the curved members `ε = ±1` to the endpoint-winding branch and the
-flat member `ε = 0` to the alignment-winding branch. -/
-private theorem spaceFormConverse_pos_nonconst {ε : ℝ} (hε : ε = 1 ∨ ε = -1 ∨ ε = 0)
+Dispatches the curved members `K = ±1` to the endpoint-winding branch and the
+flat member `K = 0` to the alignment-winding branch. -/
+private theorem spaceFormConverse_pos_nonconst {K : ℝ} (hK : K = 1 ∨ K = -1 ∨ K = 0)
     {κ : ℝ → ℝ} (hκcf : IsCurvatureFunction κ)
-    (hfloor : ε ≤ 0 → ∀ θ, (1 - ε) / 2 < κ θ)
+    (hfloor : K ≤ 0 → ∀ θ, (1 - K) / 2 < κ θ)
     {p₁ q₁ p₂ q₂ : ℝ} (h12 : p₁ < q₁) (h23 : q₁ < p₂)
     (h34 : p₂ < q₂) (h41 : q₂ < p₁ + 2 * π)
     (hsep : max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂)) :
-    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes ε z κ := by
-  rcases hε with rfl | rfl | rfl
+    ∃ γ : ℝ → ℂ, IsSimpleClosed γ ∧ Realizes K γ κ := by
+  rcases hK with rfl | rfl | rfl
   · exact spaceFormConverse_pos_nonconst_curved (Or.inl rfl) hκcf
       (fun hlt => absurd hlt (by norm_num)) h12 h23 h34 h41 hsep
   · refine spaceFormConverse_pos_nonconst_curved (Or.inr rfl) hκcf
@@ -981,20 +981,20 @@ private theorem spaceFormConverse_pos_nonconst {ε : ℝ} (hε : ε = 1 ∨ ε =
     have := hfloor le_rfl θ
     linarith
 
-/-- **Space-form converse, positive stage.** If `κ` satisfies the `ε`-generic
-four-vertex admissibility hypothesis (`ε ∈ {+1, −1, 0}`), there is a simple
+/-- **Space-form converse, positive stage.** If `κ` satisfies the `K`-generic
+four-vertex admissibility hypothesis (`K ∈ {+1, −1, 0}`), there is a simple
 closed curve confined to the open disk realizing `κ` as its space-form geodesic
-curvature. `ε = +1` is `Gluck.sphericalConverse_pos`; `ε = −1` is the
-hyperbolic converse; `ε = 0` is the flat member, which — dilated out of the
+curvature. `K = +1` is `Gluck.sphericalConverse_pos`; `K = −1` is the
+hyperbolic converse; `K = 0` is the flat member, which — dilated out of the
 disk gauge by `Gluck.gluck_converse_spaceForm` — gives a second proof of
 Gluck's Euclidean converse `Gluck.gluck_converse`.
 (Transport of `sphericalConverse_pos`.) -/
-theorem spaceFormConverse_pos {ε : ℝ} (hε : ε = 1 ∨ ε = -1 ∨ ε = 0) {κ : ℝ → ℝ}
-    (hκ : SpaceFormFourVertex ε κ) :
-    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes ε z κ := by
+theorem spaceFormConverse_pos {K : ℝ} (hK : K = 1 ∨ K = -1 ∨ K = 0) {κ : ℝ → ℝ}
+    (hκ : SpaceFormFourVertex K κ) :
+    ∃ γ : ℝ → ℂ, IsSimpleClosed γ ∧ Realizes K γ κ := by
   obtain ⟨hκcf, hfv, hfloor⟩ := hκ
   rcases hfv with ⟨c, hc⟩ | ⟨p₁, q₁, p₂, q₂, h12, h23, h34, h41, -, -, -, -, hsep⟩
-  · exact spaceFormConverse_pos_const hε hκcf hfloor hc
-  · exact spaceFormConverse_pos_nonconst hε hκcf hfloor h12 h23 h34 h41 hsep
+  · exact spaceFormConverse_pos_const hK hκcf hfloor hc
+  · exact spaceFormConverse_pos_nonconst hK hκcf hfloor h12 h23 h34 h41 hsep
 
 end Gluck.SpaceForm

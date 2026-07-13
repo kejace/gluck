@@ -206,7 +206,7 @@ is only `C¹`, so the `signedCurvature` formula (and with it the `C²` predicate
 
 A second, independent-route proof of this exact statement —
 `Gluck.gluck_converse_spaceForm` (`Gluck/Euclidean/SpaceFormInstance.lean`) —
-runs the space-form flow engine at ambient sign `ε = 0` and removes the disk
+runs the space-form flow engine at ambient curvature `K = 0` and removes the disk
 confinement by a dilation.
 
 Blueprint: `thm:gluck_converse`. -/

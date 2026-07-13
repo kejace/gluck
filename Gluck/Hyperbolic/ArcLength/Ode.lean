@@ -144,7 +144,7 @@ lemma truncatedArcAngleSpeed_eq {κ : ℝ → ℝ} {R σ : ℝ} {z : ℂ} {φ : 
 /-- **Truncated metric-factor positivity.** For `0 ≤ R < 1` the clamped
 denominator `1 − ‖clampBall R z‖²` is `≥ 1 − R² > 0`. (Mirror of
 `Gluck.SpaceForm.truncatedNum_pos`, `Flow.lean:43`; the H² metric factor is the
-`ε = −1` case of `Gluck.SpaceForm.one_add_mul_normSq_pos`, `Defs.lean:122`.) -/
+`K = −1` case of `Gluck.SpaceForm.one_add_mul_normSq_pos`, `Defs.lean:122`.) -/
 private lemma truncatedArcDenom_pos {R : ℝ} (hR : 0 ≤ R) (hR1 : R < 1) (z : ℂ) :
     0 < 1 - ‖clampBall R z‖ ^ 2 := by
   have h := norm_clampBall_le hR z
@@ -539,7 +539,7 @@ lemma arcTrajectory_diff_bound {κ κ' : ℝ → ℝ} {R L : ℝ} {Lip : ℝ≥0
 
 /-! ## Leaf group 3 — the `Realizes (-1)` lemma -/
 
-/-- **A confined solution realizes `κ` at `ε = −1`.** If `(z, φ)` solves the
+/-- **A confined solution realizes `κ` at `K = −1`.** If `(z, φ)` solves the
 *true* H² arc-length system `z' = e^{iφ}`, `φ' = arcAngleSpeed κ σ z φ` and stays
 confined (`‖z σ‖ < 1`), then `z` satisfies `Realizes (-1) z κ` with tangent angle
 `φ`: it is `C¹`, regular (`‖z'‖ = 1 ≠ 0`), confined, and the gauge-speed relation

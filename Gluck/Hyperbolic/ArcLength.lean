@@ -10,11 +10,11 @@ import Gluck.Hyperbolic.ArcLength.ConverseCap
 /-!
 # The H² arc-length conformal reconstruction
 
-The **hyperbolic (`ε = −1`) arc-length reconstruction**: the foundation for
+The **hyperbolic (`K = −1`) arc-length reconstruction**: the foundation for
 realizing genuinely-negative-curvature (non-convex) four-vertex profiles in the
 Poincaré disk. The tangent-angle flow `spaceFormFlow` (`Gluck/SpaceForm/Flow.lean`)
 is *convex-only* for H² — every trajectory has turning `+1` and forces the
-admissibility bracket `D = κ − ε⟪z, n⟫ > 0`, so `κ_g < 0` is unreachable (see
+admissibility bracket `D = κ − K⟪z, n⟫ > 0`, so `κ_g < 0` is unreachable (see
 `.mathlib-quality/h2_negative_dev.md`, STEP-1 verdict). Negative geodesic
 curvature requires a *non-monotone-`φ`* construction: parametrize by **Euclidean
 arc length** `σ` and drive the tangent angle `φ` by a first-order ODE whose

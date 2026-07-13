@@ -24,7 +24,7 @@ metric `g_{S²} = 4 / (1 + |z|²)² · |dz|²`. It runs from the definition laye
 (`RealizesSphericalCurvature`, `SphereFourVertex`, the truncated field and the
 spherical flow) through the step model, its transport and margin estimates, the
 first-variation expansion of the step error map, the endpoint-winding assembly
-(now the ε-generic `SpaceForm.spaceForm_endpoint_winding`), reconstruction and
+(now the K-generic `SpaceForm.spaceForm_endpoint_winding`), reconstruction and
 simplicity, to the capstone `sphericalConverse_pos` — axiom-clean, no `sorry`. Stage 2 (mixed sign,
 `Gluck/Sphere/Mixed.lean`) consumes the re-signed `stepModel_margins` and the
 uniform-in-`κ` Lipschitz witnesses exported here.

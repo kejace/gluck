@@ -9,7 +9,7 @@ import Gluck.Euclidean.ArcLength
 /-!
 # The Euclidean plane as the flat space form: a second proof of Gluck's theorem
 
-The flat member `ε = 0` of the space-form family *is* the Euclidean plane, in
+The flat member `K = 0` of the space-form family *is* the Euclidean plane, in
 the conformal gauge `λ = 2` on the open unit disk: `Realizes 0 z κ` unfolds to
 the ordinary Euclidean realization law `φ' = (2κ)·‖z'‖` plus confinement
 `‖z‖ < 1` (`realizesCurvature_of_realizes_zero`). Composing the flat instance
@@ -29,8 +29,8 @@ namespace Gluck
 open scoped Real
 
 /-- **The flat space form is the Euclidean plane (bridge).** A curve realizing
-`κ` at ambient sign `ε = 0` (`Gluck.SpaceForm.Realizes`) realizes the Euclidean
-curvature `2κ` in the sense of `RealizesCurvature`: at `ε = 0` the space-form
+`κ` at ambient curvature `K = 0` (`Gluck.SpaceForm.Realizes`) realizes the Euclidean
+curvature `2κ` in the sense of `RealizesCurvature`: at `K = 0` the space-form
 law `(1 + 0·‖z‖²)/2 · φ' = (κ − 0)·‖z'‖` is exactly `φ' = (2κ)·‖z'‖`. The
 factor `2` is the flat conformal gauge `λ = 2` of the disk model; the
 confinement clause `‖z‖ < 1` is simply dropped. -/
@@ -65,13 +65,13 @@ private lemma fourVertexCondition_div_const {κ : ℝ → ℝ} {m : ℝ} (hm : 0
 /-- **Gluck's converse to the four-vertex theorem — the flow proof.** Statement
 identical to the 1971-route capstone `Gluck.gluck_converse`
 (`Gluck/Euclidean/FourVertex.lean`), proved instead through the space-form flow
-engine at `ε = 0` plus a dilation.
+engine at `K = 0` plus a dilation.
 
 The dilation argument (where the Euclidean plane's scaling symmetry — absent in
 `S²` and `H²` — re-enters): let `m > 0` be a positive lower bound for `κ`
 (`exists_curvature_lower_bound`), and set `μ := κ/m`. Then `μ > 1 > 1/2`
 pointwise, so `μ` satisfies the flat four-vertex hypothesis
-`SpaceFormFourVertex 0 μ`, and `spaceFormConverse_pos` at `ε = 0` produces a
+`SpaceFormFourVertex 0 μ`, and `spaceFormConverse_pos` at `K = 0` produces a
 simple closed curve `z` in the open unit disk with `SpaceForm.Realizes 0 z μ`.
 By the bridge `realizesCurvature_of_realizes_zero`, `z` realizes the Euclidean
 curvature `2μ = (2/m)·κ`; the dilation `γ := (2/m)·z` rescales curvature by

@@ -127,7 +127,7 @@ co-constructed length).**  If `κ` is continuous, `2π`-periodic and an H²
 arc-length curvature function (so its reconstruction closes at the *co-constructed*
 Euclidean window `[0, L]` with total turning `2π`), then there is a simple closed
 curve `z` and an orientation-preserving `C¹` reparametrisation `ψ` such that `z`
-realizes `κ ∘ ψ` at `ε = −1`.
+realizes `κ ∘ ψ` at `K = −1`.
 
 **Why up-to-reparam (the AL-6 `L = 2π` gap, closed honestly).**  The old
 conclusion `∃ z, IsSimpleClosed z ∧ Realizes (-1) z κ` silently assumed the

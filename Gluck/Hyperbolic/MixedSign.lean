@@ -48,7 +48,7 @@ So the minima may be **arbitrarily negative**; this is the unrestricted-below H�
 four-vertex converse, not a floored scope.  Matched verbatim by
 `MixedSignSpaceFormFourVertex (−1)` (`MixedConverse.lean:88`, Thread A), whose
 uniform threshold is `(1 − (−1))/2 = 1` and whose confinement floor is guarded
-to positive ambient sign, hence vacuous there.  (Transport of `MixedSignFourVertex`,
+to positive ambient curvature, hence vacuous there.  (Transport of `MixedSignFourVertex`,
 `DahlbergStep1.lean:57`, and `MixedSignSphereFourVertex`, `SphereMixed.lean:41`,
 with `0 ↦ 1`.) -/
 def MixedSignHyperbolicFourVertex (κ : ℝ → ℝ) : Prop :=
@@ -86,7 +86,7 @@ theorem MixedSignHyperbolicFourVertex.of_escape_positive {κ : ℝ → ℝ}
 
 /-- **The constant escape-velocity hyperbolic circle realizes `κ ≡ c`.**  For
 `c > 1` the explicit origin-centred hyperbolic circle of geodesic curvature `c`
-is a simple closed curve realizing the constant profile at `ε = −1`.  (Arc-length
+is a simple closed curve realizing the constant profile at `K = −1`.  (Arc-length
 analogue of `sphericalCircle_realizes`, `SphereMixed`; the H² model circle of
 `Gluck.SpaceForm.spaceFormSpeed_circle`, `Defs.lean:169`.)  Consumed by the
 constant branch of the capstone `hyperbolicMixedConverse`

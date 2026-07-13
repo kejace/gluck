@@ -458,7 +458,7 @@ lemma invariant_admissible_arc {κ : ℝ → ℝ} {κ₀ R δ μ K t₁ t₂ : �
   have hL' : ∀ θ, LipschitzWith L (fun w => SpaceForm.truncatedField 1 κ R δ θ w) := by
     simpa only [hfield] using hL
   simpa only [one_mul] using
-    (SpaceForm.invariant_admissible_arc (ε := 1) (z := z) (zs := zs) (by norm_num) hκ hκ₀
+    (SpaceForm.invariant_admissible_arc (K := 1) (γ := z) (γs := zs) (by norm_num) hκ hκ₀
       hR hδ ht hL' (by simpa only [hfield] using hz) (by simpa only [hfield] using hzs)
       hzsR (by simpa only [one_mul] using hzsinner) hsmall)
 

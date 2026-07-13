@@ -24,7 +24,7 @@ theorem.
 * **H²** (`Gluck/Hyperbolic/`): `Gluck.hyperbolicConverse_pos` (positive),
   `Gluck.hyperbolicMixedConverse_exact` (mixed-sign, exact profile).
 
-plus the `ε`-generic unifications (`Gluck/SpaceForm/`):
+plus the `K`-generic unifications (`Gluck/SpaceForm/`):
 `Gluck.SpaceForm.spaceFormConverse_pos` and
 `Gluck.SpaceForm.spaceFormMixedConverse`.
 -/

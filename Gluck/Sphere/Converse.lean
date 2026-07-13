@@ -44,7 +44,7 @@ lemma sphericalCircle_realizes {c : ℝ} (hc : 0 < c) :
       (fun _ => c) := by
   simpa only [SpaceForm.centeredRadius_one, add_comm, RealizesSphericalCurvature,
     SpaceForm.Realizes, one_mul] using
-    SpaceForm.spaceFormCircle_realizes_explicit (ε := 1) (c := c) (Or.inl rfl)
+    SpaceForm.spaceFormCircle_realizes_explicit (K := 1) (c := c) (Or.inl rfl)
       (Or.inl ⟨rfl, hc⟩)
 
 /-- **Spherical realization transfers under orientation-preserving `C¹`
@@ -92,7 +92,7 @@ lemma sphericalTrajectory_speed {κ : ℝ → ℝ} {R δ : ℝ} (hκc : Continuo
     simpa only [one_mul] using hadm
   simpa only [sphericalSpeed, SpaceForm.spaceFormSpeed, one_mul, periodicExtension,
     SpaceForm.periodicExtension] using
-    SpaceForm.spaceFormTrajectory_speed (ε := 1) (by norm_num) hκc hκper hR1 hδ hz' hadm'
+    SpaceForm.spaceFormTrajectory_speed (K := 1) (by norm_num) hκc hκper hR1 hδ hz' hadm'
       hclosed
 
 /-- **Simplicity is translation-invariant.** Project-local mirror lemma (the
@@ -127,7 +127,7 @@ lemma sphericalTrajectory_eq_reconstruct {κ : ℝ → ℝ} {R δ : ℝ}
     simpa only [one_mul] using hadm
   simpa only [sphericalSpeed, SpaceForm.spaceFormSpeed, one_mul, periodicExtension,
     SpaceForm.periodicExtension] using
-    SpaceForm.spaceFormTrajectory_eq_reconstruct (ε := 1) (by norm_num) hκc hκper hR1 hδ
+    SpaceForm.spaceFormTrajectory_eq_reconstruct (K := 1) (by norm_num) hκc hκper hR1 hδ
       hz' hadm' hclosed
 
 /-- **Simplicity of the closing trajectory.** In the hypothesis form of
@@ -155,19 +155,19 @@ lemma spherical_simplicity {κ : ℝ → ℝ} {R δ : ℝ}
       δ ≤ κ θ - 1 * ⟪z θ, Complex.I * Complex.exp ((θ : ℂ) * Complex.I)⟫_ℝ := by
     simpa only [one_mul] using hadm
   change IsSimpleClosed (SpaceForm.periodicExtension z)
-  exact SpaceForm.spaceForm_simplicity (ε := 1) (by norm_num) hκc hκper hR1 hδ hz' hadm'
+  exact SpaceForm.spaceForm_simplicity (K := 1) (by norm_num) hκc hκper hR1 hδ hz' hadm'
     hclosed
 
-/-- The spherical realization predicate is the `ε = +1` instance of the
-`ε`-generic space-form predicate (the metric factor `1 + ε‖z‖²` becomes `1 + ‖z‖²`). -/
+/-- The spherical realization predicate is the `K = +1` instance of the
+`K`-generic space-form predicate (the metric factor `1 + K‖z‖²` becomes `1 + ‖z‖²`). -/
 theorem realizesSphericalCurvature_iff_realizes_one (z : ℝ → ℂ) (κ : ℝ → ℝ) :
     RealizesSphericalCurvature z κ ↔ SpaceForm.Realizes 1 z κ := by
   unfold RealizesSphericalCurvature SpaceForm.Realizes
   simp only [one_mul]
 
-/-- The spherical four-vertex hypothesis is the `ε = +1` instance of the
-`ε`-generic one (whose extra `ε ≤ 0 → κ > (1−ε)/2` confinement-floor clause is
-vacuous at `ε = +1`). -/
+/-- The spherical four-vertex hypothesis is the `K = +1` instance of the
+`K`-generic one (whose extra `K ≤ 0 → κ > (1−K)/2` confinement-floor clause is
+vacuous at `K = +1`). -/
 theorem sphereFourVertex_iff_spaceFormFourVertex_one (κ : ℝ → ℝ) :
     SphereFourVertex κ ↔ SpaceForm.SpaceFormFourVertex 1 κ := by
   unfold SphereFourVertex SpaceForm.SpaceFormFourVertex
@@ -175,7 +175,7 @@ theorem sphereFourVertex_iff_spaceFormFourVertex_one (κ : ℝ → ℝ) :
   · rintro ⟨h1, h2⟩; exact ⟨h1, h2, fun hle => absurd hle (by norm_num)⟩
   · rintro ⟨h1, h2, _⟩; exact ⟨h1, h2⟩
 
-/-- The spherical geodesic speed is the `ε = +1` instance of the `ε`-generic space-form speed. -/
+/-- The spherical geodesic speed is the `K = +1` instance of the `K`-generic space-form speed. -/
 theorem sphericalSpeed_eq_spaceFormSpeed_one (κ : ℝ → ℝ) (θ : ℝ) (z : ℂ) :
     sphericalSpeed κ θ z = SpaceForm.spaceFormSpeed 1 κ θ z := by
   unfold sphericalSpeed SpaceForm.spaceFormSpeed
@@ -186,7 +186,7 @@ spherical four-vertex condition, then there is a simple closed curve `z` confine
 to the open disk that realizes `κ` as its spherical geodesic curvature. This is
 the same conclusion shape as the Euclidean `gluck_converse`, with
 `RealizesCurvature` replaced by its spherical analogue. Now derived from the
-`ε`-generic `SpaceForm.spaceFormConverse_pos` at `ε = +1`.
+`K`-generic `SpaceForm.spaceFormConverse_pos` at `K = +1`.
 (Blueprint `thm:spherical_converse_pos`.) -/
 theorem sphericalConverse_pos {κ : ℝ → ℝ} (hκ : SphereFourVertex κ) :
     ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ RealizesSphericalCurvature z κ := by

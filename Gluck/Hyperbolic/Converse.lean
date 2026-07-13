@@ -8,7 +8,7 @@ import Gluck.SpaceForm.Converse
 /-!
 # The hyperbolic converse to the four-vertex theorem (H², K = −1)
 
-The `ε = −1` instantiation of the space-form converse. In the Poincaré-disk
+The `K = −1` instantiation of the space-form converse. In the Poincaré-disk
 model `{|z| < 1} ⊆ ℂ` with metric `g = 4/(1 − |z|²)²·|dz|²`, a continuous,
 `2π`-periodic curvature function `κ` with the escape-velocity bound `κ > 1`
 satisfying the four-vertex condition is the geodesic curvature (against the
@@ -46,7 +46,7 @@ theorem hyperbolicFourVertex_iff {κ : ℝ → ℝ} :
     have := h θ
     linarith
 
-/-- The hyperbolic realization predicate is the `ε = -1` space-form predicate. -/
+/-- The hyperbolic realization predicate is the `K = -1` space-form predicate. -/
 theorem realizesHyperbolicCurvature_iff_realizes_neg_one (z : ℝ → ℂ) (κ : ℝ → ℝ) :
     RealizesHyperbolicCurvature z κ ↔ SpaceForm.Realizes (-1) z κ := Iff.rfl
 

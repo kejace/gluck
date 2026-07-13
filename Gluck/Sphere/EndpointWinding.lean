@@ -22,7 +22,7 @@ curvature function. This breaks the quantifier circularity of the winding assemb
 
 * `truncatedField_lipschitz_uniform`: a single Lipschitz constant works for the truncated
   field of every curvature function.
-* (historical) the spherical endpoint-winding assembly now lives ε-generically as
+* (historical) the spherical endpoint-winding assembly now lives K-generically as
   `SpaceForm.spaceForm_endpoint_winding`; this file keeps the uniform Lipschitz witnesses.
 -/
 

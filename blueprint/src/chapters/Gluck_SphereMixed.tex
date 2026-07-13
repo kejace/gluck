@@ -25,7 +25,7 @@
 Stage 2 removes global positivity from \cref{thm:spherical_converse_pos}: the
 prescribed geodesic curvature $\kappa$ may be $\le0$ on part of the circle,
 provided the position-dependent admissibility $\kappa(\theta)-\langle
-z(\theta),ie^{i\theta}\rangle>0$ can be maintained. The pivotal observation
+\gamma(\theta),ie^{i\theta}\rangle>0$ can be maintained. The pivotal observation
 (iter-048, sharpened iter-053 against the landed code) is that essentially the
 \emph{entire} stage-1 machinery of \cref{chap:sphere} is already sign-agnostic:
 
@@ -99,7 +99,7 @@ and the capstone \cref{thm:spherical_converse}.
   minima. The lower bound is the confinement-forcing condition:
   $r^\ast(c)=\sqrt{1+c^2}-c$ is the model-circle radius, and
   $\kappa>-r^\ast$ is what keeps the position-dependent denominator
-  $\kappa-\langle z,ie^{i\theta}\rangle$ positive along trajectories near the
+  $\kappa-\langle \gamma,ie^{i\theta}\rangle$ positive along trajectories near the
   model. Compare \texttt{MixedSignFourVertex} in the Euclidean Dahlberg
   extension, where the analogous package is positivity at the two maxima
   only. Lean shape: mirror \texttt{SphereFourVertex} — a conjunction of
@@ -244,8 +244,8 @@ and the capstone \cref{thm:spherical_converse}.
   parameter $r_0:\mathbb R_{\ge0}$, and $z_0\in\overline{B}(0,r_0)$, such
   that the trajectory of the $(\kappa\circ h_1,R,\delta)$-truncated flow
   through $z_0$ is \emph{closed} ($\Phi(z_0,2\pi)=z_0$) and \emph{admissible}
-  on $[0,2\pi]$: $\|z(\theta)\|\le R$ and
-  $(\kappa\circ h_1)(\theta)-\langle z(\theta),ie^{i\theta}\rangle\ge\delta$.
+  on $[0,2\pi]$: $\|\gamma(\theta)\|\le R$ and
+  $(\kappa\circ h_1)(\theta)-\langle \gamma(\theta),ie^{i\theta}\rangle\ge\delta$.
   (The Lean statement mirrors the landed
   \texttt{Gluck.spherical\_endpoint\_winding} conclusion verbatim — including
   the derivative-witness conjunct for $h_1$ and the quantified $r_0$ with
@@ -334,12 +334,12 @@ and the capstone \cref{thm:spherical_converse}.
         lem:spherical_circle_realizes}
   If $\kappa$ satisfies the mixed-sign spherical four-vertex hypothesis
   (\cref{def:mixed_sign_sphere_four_vertex}), then there is a simple closed
-  curve $z$ confined to the open disk realizing $\kappa$ as its spherical
+  curve $\gamma$ confined to the open disk realizing $\kappa$ as its spherical
   geodesic curvature:
   \[
     \texttt{MixedSignSphereFourVertex }\kappa\;\Longrightarrow\;
-    \exists\,z,\ \texttt{IsSimpleClosed }z\ \wedge\
-    \texttt{RealizesSphericalCurvature }z\,\kappa .
+    \exists\,\gamma,\ \texttt{IsSimpleClosed }\gamma\ \wedge\
+    \texttt{RealizesSphericalCurvature }\gamma\,\kappa .
   \]
   This subsumes \cref{thm:spherical_converse_pos} (positive $\kappa$
   satisfies the mixed hypothesis trivially) and is the S² analogue of the
