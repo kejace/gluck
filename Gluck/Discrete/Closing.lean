@@ -153,4 +153,161 @@ theorem umlauf_scale_unique [NeZero n] {κ ℓ₀ : ZMod n → ℝ}
   · exact h
   · exact absurd hST.symm (ne_of_lt (turningSum_smul_lt hκ hℓ ht h hMAs))
 
+/-! ## Section 4 — single-edge turning tune (`sec:edge_tune`)
+
+Unlike the *ray* retraction of Section 1 (which scales all edges together and is
+obstructed), the turning sum is monotone in *one* edge with the others held
+fixed — the discrete `∂θ/∂ℓ_k > 0` fact — and this single-edge dependence is not
+obstructed. The edge value `ℓ_k` enters `turningAngle 0 κ ℓ i` at exactly the
+two vertices `i = k` (right summand) and `i = k+1` (left summand). We record the
+strict monotonicity (`turningSum_update_lt`) and its IVT tune to `2π`
+(`exists_edge_turning_scale`), the route-shared inner solve. -/
+
+/-- `Function.update` is monotone in its value slot: if `a ≤ b` then the updated
+base is pointwise `≤` (the two functions agree off `k`, and at `k` we have
+`a ≤ b`). -/
+private lemma update_mono {ℓ : ZMod n → ℝ} {k : ZMod n} {a b : ℝ} (hab : a ≤ b)
+    (j : ZMod n) : Function.update ℓ k a j ≤ Function.update ℓ k b j := by
+  by_cases h : j = k
+  · subst h; simp [Function.update_self, hab]
+  · simp [Function.update_of_ne h]
+
+/-- Each Euclidean turning angle is monotone under raising a single edge value:
+both `arcsin` arguments only grow (`κ i > 0`, and `update ℓ k a ≤ update ℓ k b`
+pointwise), and `arcsin` is monotone (`Real.arcsin_le_arcsin`). -/
+private lemma turningAngle_update_le {κ ℓ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i)
+    {k : ZMod n} {a b : ℝ} (hab : a ≤ b) (i : ZMod n) :
+    turningAngle 0 κ (Function.update ℓ k a) i
+      ≤ turningAngle 0 κ (Function.update ℓ k b) i := by
+  simp only [turningAngle, tK_zero]
+  apply add_le_add
+  · exact Real.arcsin_le_arcsin
+      (mul_le_mul_of_nonneg_left
+        (by linarith [update_mono (ℓ := ℓ) (k := k) hab (i - 1)]) (hκ i).le)
+  · exact Real.arcsin_le_arcsin
+      (mul_le_mul_of_nonneg_left
+        (by linarith [update_mono (ℓ := ℓ) (k := k) hab i]) (hκ i).le)
+
+/-- **`lem:turningSum_edge_mono`.** For a positive profile `κ`, raising a single
+edge `ℓ_k` from `a` to `b` (`0 < a < b`, moderate-arc at the larger value)
+strictly increases the total turning. Termwise `≤` everywhere
+(`turningAngle_update_le`) with one strict term at the vertex `i = k` (via
+`arcsin_arg_lt`, its argument below the wall at `b`); `Finset.sum_lt_sum`. -/
+theorem turningSum_update_lt [NeZero n] {κ ℓ : ZMod n → ℝ}
+    (hκ : ∀ i, 0 < κ i) (k : ZMod n) {a b : ℝ} (ha : 0 < a) (hab : a < b)
+    (hMA : ModerateArc 0 κ (Function.update ℓ k b)) :
+    turningSum κ (Function.update ℓ k a) < turningSum κ (Function.update ℓ k b) := by
+  apply Finset.sum_lt_sum
+  · intro i _
+    exact turningAngle_update_le hκ hab.le i
+  · refine ⟨k, Finset.mem_univ k, ?_⟩
+    simp only [turningAngle, tK_zero]
+    apply add_lt_add_of_le_of_lt
+    · exact Real.arcsin_le_arcsin
+        (mul_le_mul_of_nonneg_left
+          (by linarith [update_mono (ℓ := ℓ) (k := k) hab.le (k - 1)]) (hκ k).le)
+    · simp only [Function.update_self]
+      refine arcsin_arg_lt (mul_pos (hκ k) (div_pos ha two_pos))
+        (mul_lt_mul_of_pos_left (by linarith) (hκ k)) ?_
+      have hw := (moderateArc_zero_iff.mp hMA k).2.2
+      rw [Function.update_self, abs_of_pos (hκ k)] at hw
+      exact hw
+
+/-- Moderate-arcness is inherited by smaller single-edge values: if
+`update ℓ k b` is moderate-arc and `0 < a ≤ b`, then `update ℓ k a` is
+moderate-arc (every `arcsin` argument only shrinks; the updated `k`-th edge
+stays positive because `a > 0`). -/
+private lemma moderateArc_update_le {κ ℓ : ZMod n → ℝ} {k : ZMod n}
+    {a b : ℝ} (ha : 0 < a) (hab : a ≤ b)
+    (hMA : ModerateArc 0 κ (Function.update ℓ k b)) :
+    ModerateArc 0 κ (Function.update ℓ k a) := by
+  rw [moderateArc_zero_iff] at hMA ⊢
+  intro i
+  obtain ⟨hpos, hw1, hw2⟩ := hMA i
+  refine ⟨?_, ?_, ?_⟩
+  · by_cases h : i = k
+    · subst h; rw [Function.update_self]; exact ha
+    · rw [Function.update_of_ne h]; rw [Function.update_of_ne h] at hpos; exact hpos
+  · have hb : |κ i| * (Function.update ℓ k a (i - 1) / 2)
+        ≤ |κ i| * (Function.update ℓ k b (i - 1) / 2) :=
+      mul_le_mul_of_nonneg_left
+        (by linarith [update_mono (ℓ := ℓ) (k := k) hab (i - 1)]) (abs_nonneg _)
+    linarith
+  · have hb : |κ i| * (Function.update ℓ k a i / 2)
+        ≤ |κ i| * (Function.update ℓ k b i / 2) :=
+      mul_le_mul_of_nonneg_left
+        (by linarith [update_mono (ℓ := ℓ) (k := k) hab i]) (abs_nonneg _)
+    linarith
+
+/-- Continuity of the single-edge value slot: `a ↦ Function.update ℓ k a m` is
+continuous (it is `id` when `m = k`, constant otherwise). -/
+private lemma continuous_update_apply {ℓ : ZMod n → ℝ} (k m : ZMod n) :
+    Continuous (fun a : ℝ => Function.update ℓ k a m) := by
+  by_cases h : m = k
+  · subst h; simp only [Function.update_self]; exact continuous_id
+  · simp only [Function.update_of_ne h]; exact continuous_const
+
+/-- The single-edge turning map `a ↦ turningSum κ (update ℓ k a)` is continuous:
+each summand is `arcsin` of an argument linear in the (continuous) updated edge
+value. -/
+private lemma continuous_turningSum_update [NeZero n] {κ ℓ : ZMod n → ℝ}
+    (k : ZMod n) :
+    Continuous (fun a : ℝ => turningSum κ (Function.update ℓ k a)) := by
+  have hEq : (fun a : ℝ => turningSum κ (Function.update ℓ k a))
+      = fun a : ℝ => ∑ i : ZMod n,
+        (Real.arcsin (κ i * (Function.update ℓ k a (i - 1) / 2))
+          + Real.arcsin (κ i * (Function.update ℓ k a i / 2))) := by
+    funext a
+    simp only [turningSum, turningAngle, tK_zero]
+  rw [hEq]
+  refine continuous_finsetSum _ (fun i _ => ?_)
+  refine (Real.continuous_arcsin.comp ?_).add (Real.continuous_arcsin.comp ?_)
+  · exact continuous_const.mul ((continuous_update_apply k (i - 1)).div_const 2)
+  · exact continuous_const.mul ((continuous_update_apply k i).div_const 2)
+
+/-- **`lem:exists_edge_turning_scale`.** Given `n ≥ 3` (`[NeZero n]`), a positive
+profile `κ`, a base `ℓ`, a tuned edge `k`, and `0 < lo < hi` with the larger
+value moderate-arc and `turningSum (update ℓ k lo) < 2π ≤ turningSum
+(update ℓ k hi)`, there is `a ∈ (lo, hi]` at which `update ℓ k a` is moderate-arc
+and turns by exactly `2π`. Monotone IVT: `g a = turningSum κ (update ℓ k a)` is
+continuous (`continuous_turningSum_update`) with `g lo < 2π ≤ g hi`, so
+`intermediate_value_Icc` hits `2π`; the hitting value exceeds `lo` (since
+`g lo < 2π`) and is `≤ hi`, hence moderate-arc by `moderateArc_update_le`. -/
+theorem exists_edge_turning_scale [NeZero n] {κ ℓ : ZMod n → ℝ}
+    (_hκ : ∀ i, 0 < κ i) (k : ZMod n) {lo hi : ℝ} (hlo : 0 < lo) (hlohi : lo < hi)
+    (hMA : ModerateArc 0 κ (Function.update ℓ k hi))
+    (hlt : turningSum κ (Function.update ℓ k lo) < 2 * Real.pi)
+    (hge : 2 * Real.pi ≤ turningSum κ (Function.update ℓ k hi)) :
+    ∃ a ∈ Set.Ioc lo hi, ModerateArc 0 κ (Function.update ℓ k a) ∧
+      turningSum κ (Function.update ℓ k a) = 2 * Real.pi := by
+  set g : ℝ → ℝ := fun a => turningSum κ (Function.update ℓ k a) with hg
+  have hcont : Continuous g := continuous_turningSum_update k
+  have hmem : 2 * Real.pi ∈ Set.Icc (g lo) (g hi) := ⟨hlt.le, hge⟩
+  obtain ⟨a, hamem, hga⟩ :=
+    intermediate_value_Icc hlohi.le hcont.continuousOn hmem
+  obtain ⟨hloa, hahi⟩ := hamem
+  have hloa' : lo < a := by
+    rcases hloa.lt_or_eq with h | h
+    · exact h
+    · exfalso
+      rw [← h] at hga
+      exact absurd hga (ne_of_lt hlt)
+  refine ⟨a, ⟨hloa', hahi⟩,
+    moderateArc_update_le (hlo.trans hloa') hahi hMA, hga⟩
+
+/-- Uniqueness of the single-edge turning tune (the `unique` clause of
+`lem:exists_edge_turning_scale`): two positive moderate-arc single-edge values of
+a base with equal total turning coincide. Immediate from the strict monotonicity
+of `turningSum_update_lt` via trichotomy. -/
+theorem edge_turning_scale_unique [NeZero n] {κ ℓ : ZMod n → ℝ}
+    (hκ : ∀ i, 0 < κ i) (k : ZMod n) {a b : ℝ} (ha : 0 < a) (hb : 0 < b)
+    (hMAa : ModerateArc 0 κ (Function.update ℓ k a))
+    (hMAb : ModerateArc 0 κ (Function.update ℓ k b))
+    (hAB : turningSum κ (Function.update ℓ k a)
+      = turningSum κ (Function.update ℓ k b)) : a = b := by
+  rcases lt_trichotomy a b with h | h | h
+  · exact absurd hAB (ne_of_lt (turningSum_update_lt hκ k ha h hMAb))
+  · exact h
+  · exact absurd hAB.symm (ne_of_lt (turningSum_update_lt hκ k hb h hMAa))
+
 end Gluck.Discrete
