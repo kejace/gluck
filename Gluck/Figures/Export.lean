@@ -13,6 +13,12 @@ private def texParameters : String :=
   "\\def\\GluckMixedSinThree{0.08}\n" ++
   "\\def\\GluckFourfoldCosTwo{0.45}\n" ++
   "\\def\\GluckFourfoldCosFour{-0.1}\n" ++
+  "\\def\\DahlbergOneCosTwo{1.35}\n" ++
+  "\\def\\DahlbergTwoCosTwo{1.15}\n" ++
+  "\\def\\DahlbergTwoCosSix{0.45}\n" ++
+  "\\def\\DahlbergThreeCosTwo{1.55}\n" ++
+  "\\def\\DahlbergThreeCosFour{0.25}\n" ++
+  "\\def\\DahlbergThreeCosEight{0.18}\n" ++
   "\\def\\SphereRadius{0.5}\n" ++
   "\\def\\SphereCurvature{0.75}\n" ++
   "\\def\\HyperbolicCOne{2}\n" ++
@@ -32,6 +38,13 @@ private def jsonManifest : String :=
   "      \"parameters\": {\n" ++
   "        \"ovalCos2\": 0.55, \"mixedCos2\": 0.38, \"mixedSin3\": 0.08,\n" ++
   "        \"fourfoldCos2\": 0.45, \"fourfoldCos4\": -0.1\n" ++
+  "      }\n" ++
+  "    },\n" ++
+  "    {\n" ++
+  "      \"id\": \"euclidean-dahlberg-reconstructions\",\n" ++
+  "      \"parameters\": {\n" ++
+  "        \"oneCos2\": 1.35, \"twoCos2\": 1.15, \"twoCos6\": 0.45,\n" ++
+  "        \"threeCos2\": 1.55, \"threeCos4\": 0.25, \"threeCos8\": 0.18\n" ++
   "      }\n" ++
   "    },\n" ++
   "    {\n" ++

@@ -13,6 +13,13 @@
       }
     },
     {
+      "id": "euclidean-dahlberg-reconstructions",
+      "parameters": {
+        "oneCos2": 1.35, "twoCos2": 1.15, "twoCos6": 0.45,
+        "threeCos2": 1.55, "threeCos4": 0.25, "threeCos8": 0.18
+      }
+    },
+    {
       "id": "sphere-stereographic",
       "parameters": { "radius": 0.5, "curvature": 0.75 }
     },

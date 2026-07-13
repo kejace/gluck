@@ -69,6 +69,58 @@ theorem gluckFourfoldWeight_pos (θ : ℝ) : 0 < gluckFourfoldWeight θ := by
   have h₄ := Real.cos_le_one (4 * θ)
   nlinarith
 
+/-- First mixed-sign curvature used in the Dahlberg reconstruction figure. -/
+noncomputable def dahlbergCurvatureOne (s : ℝ) : ℝ :=
+  1 + (27 / 20 : ℝ) * Real.cos (2 * s)
+
+/-- Second mixed-sign curvature, with extra local extrema. -/
+noncomputable def dahlbergCurvatureTwo (s : ℝ) : ℝ :=
+  1 + (23 / 20 : ℝ) * Real.cos (2 * s) + (9 / 20 : ℝ) * Real.cos (6 * s)
+
+/-- Third mixed-sign curvature, with a higher-frequency ripple. -/
+noncomputable def dahlbergCurvatureThree (s : ℝ) : ℝ :=
+  1 + (31 / 20 : ℝ) * Real.cos (2 * s) + (1 / 4 : ℝ) * Real.cos (4 * s) +
+    (9 / 50 : ℝ) * Real.cos (8 * s)
+
+/-- The first Dahlberg example has positive maxima and negative minima. -/
+theorem dahlbergCurvatureOne_values :
+    dahlbergCurvatureOne 0 = 47 / 20 ∧
+      dahlbergCurvatureOne (Real.pi / 2) = -7 / 20 := by
+  constructor <;> unfold dahlbergCurvatureOne
+  · norm_num
+  · rw [show 2 * (Real.pi / 2) = Real.pi by ring]
+    rw [Real.cos_pi]
+    norm_num
+
+/-- The second Dahlberg example has positive maxima and negative minima. -/
+theorem dahlbergCurvatureTwo_values :
+    dahlbergCurvatureTwo 0 = 13 / 5 ∧
+      dahlbergCurvatureTwo (Real.pi / 2) = -3 / 5 := by
+  constructor <;> unfold dahlbergCurvatureTwo
+  · norm_num
+  · rw [show 2 * (Real.pi / 2) = Real.pi by ring,
+        show 6 * (Real.pi / 2) = 3 * Real.pi by ring]
+    have hthree : Real.cos (3 * Real.pi) = -1 := by
+      rw [show 3 * Real.pi = Real.pi + 2 * Real.pi by ring,
+        Real.cos_add_two_pi, Real.cos_pi]
+    rw [Real.cos_pi, hthree]
+    norm_num
+
+/-- The third Dahlberg example has positive maxima and negative minima. -/
+theorem dahlbergCurvatureThree_values :
+    dahlbergCurvatureThree 0 = 149 / 50 ∧
+      dahlbergCurvatureThree (Real.pi / 2) = -3 / 25 := by
+  constructor <;> unfold dahlbergCurvatureThree
+  · norm_num
+  · rw [show 2 * (Real.pi / 2) = Real.pi by ring,
+        show 4 * (Real.pi / 2) = 2 * Real.pi by ring,
+        show 8 * (Real.pi / 2) = 2 * (2 * Real.pi) by ring]
+    have hfour : Real.cos (2 * (2 * Real.pi)) = 1 := by
+      rw [show 2 * (2 * Real.pi) = 2 * Real.pi + 2 * Real.pi by ring,
+        Real.cos_add_two_pi, Real.cos_two_pi]
+    rw [Real.cos_pi, Real.cos_two_pi, hfour]
+    norm_num
+
 /-- The stereographic radius used for the spherical sign-check figure. -/
 noncomputable def sphereRadius : ℝ := 1 / 2
 

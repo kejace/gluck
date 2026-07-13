@@ -1,0 +1,91 @@
+\begin{tikzpicture}[
+  >=Stealth,
+  curve/.style={line width=1.15pt},
+  vertex/.style={circle, minimum size=7pt, inner sep=.35pt, font=\tiny\bfseries,
+    text=white, draw=white, line width=.35pt},
+  tangent arrow/.style={postaction={decorate}, decoration={markings,
+    mark=at position .13 with {\arrow{Stealth}}}}
+]
+  \def\dahlbergaxes{%
+    \draw[black!25, ->] (0,-.45) -- (0,1.45) node[above=-1pt, text=black!55] {$\kappa$};
+    \draw[black!35, ->] (0,0) -- (3.15,0) node[right=-1pt, text=black!55] {$s$};
+    \node[font=\scriptsize, text=black!50, below] at (0,0) {$0$};
+    \node[font=\scriptsize, text=black!50, below] at (3.03,0) {$2\pi$};
+  }
+  \input{figures/dahlberg-curve-coordinates}
+
+  \begin{scope}
+    \node[font=\small\bfseries] at (1.55,5.55) {two-mode swing};
+    \node[font=\scriptsize, text=black!68, align=center] at (1.55,5.03)
+      {$\kappa_1(s)=1+1.35\cos2s$};
+    \begin{scope}[yshift=3.15cm]
+      \dahlbergaxes
+      \draw[curve, blue!75!black, variable=\t, domain=0:360, samples=241]
+        plot ({\t/120},{.45*(1+\DahlbergOneCosTwo*cos(2*\t))});
+      \foreach \t/\n in {0/1,90/2,180/3,270/4}
+        \node[vertex, fill=blue!75!black]
+          at ({\t/120},{.45*(1+\DahlbergOneCosTwo*cos(2*\t))}) {\n};
+    \end{scope}
+    \begin{scope}[shift={(1.55,.7)}, scale=.65]
+      \draw[curve, blue!75!black, tangent arrow]
+        plot coordinates {\DahlbergCurveOneCoordinates};
+      \foreach \p/\n in {\DahlbergOneVertexOne/1,\DahlbergOneVertexTwo/2,
+          \DahlbergOneVertexThree/3,\DahlbergOneVertexFour/4}
+        \node[vertex, fill=blue!75!black] at \p {\n};
+    \end{scope}
+    \node[font=\scriptsize, text=black!55] at (1.55,.3) {$\kappa_1<0$ on two arcs};
+  \end{scope}
+
+  \begin{scope}[xshift=5cm]
+    \node[font=\small\bfseries] at (1.55,5.55) {sixth-harmonic ripple};
+    \node[font=\scriptsize, text=black!68, align=center] at (1.55,4.98)
+      {$\kappa_2(s)=1+1.15\cos2s$\\$\mathrel{\phantom{\kappa_2(s)=}}+0.45\cos6s$};
+    \begin{scope}[yshift=3.15cm]
+      \dahlbergaxes
+      \draw[curve, teal!70!black, variable=\t, domain=0:360, samples=241]
+        plot ({\t/120},{.45*(1+\DahlbergTwoCosTwo*cos(2*\t)
+          +\DahlbergTwoCosSix*cos(6*\t))});
+      \foreach \t/\n in {0/1,90/2,180/3,270/4}
+        \node[vertex, fill=teal!70!black]
+          at ({\t/120},{.45*(1+\DahlbergTwoCosTwo*cos(2*\t)
+            +\DahlbergTwoCosSix*cos(6*\t))}) {\n};
+    \end{scope}
+    \begin{scope}[shift={(1.55,.7)}, scale=.65]
+      \draw[curve, teal!70!black, tangent arrow]
+        plot coordinates {\DahlbergCurveTwoCoordinates};
+      \foreach \p/\n in {\DahlbergTwoVertexOne/1,\DahlbergTwoVertexTwo/2,
+          \DahlbergTwoVertexThree/3,\DahlbergTwoVertexFour/4}
+        \node[vertex, fill=teal!70!black] at \p {\n};
+    \end{scope}
+    \node[font=\scriptsize, text=black!55] at (1.55,.3) {extra vertices unmarked};
+  \end{scope}
+
+  \begin{scope}[xshift=10cm]
+    \node[font=\small\bfseries] at (1.55,5.55) {eighth-harmonic ripple};
+    \node[font=\scriptsize, text=black!68, align=center] at (1.55,4.98)
+      {$\kappa_3(s)=1+1.55\cos2s$\\
+       $\mathrel{\phantom{\kappa_3(s)=}}+0.25\cos4s+0.18\cos8s$};
+    \begin{scope}[yshift=3.15cm]
+      \dahlbergaxes
+      \draw[curve, orange!85!black, variable=\t, domain=0:360, samples=241]
+        plot ({\t/120},{.45*(1+\DahlbergThreeCosTwo*cos(2*\t)
+          +\DahlbergThreeCosFour*cos(4*\t)+\DahlbergThreeCosEight*cos(8*\t))});
+      \foreach \t/\n in {0/1,72.1084/2,180/3,252.1084/4}
+        \node[vertex, fill=orange!85!black]
+          at ({\t/120},{.45*(1+\DahlbergThreeCosTwo*cos(2*\t)
+            +\DahlbergThreeCosFour*cos(4*\t)+\DahlbergThreeCosEight*cos(8*\t))}) {\n};
+    \end{scope}
+    \begin{scope}[shift={(1.55,.7)}, scale=.65]
+      \draw[curve, orange!85!black, tangent arrow]
+        plot coordinates {\DahlbergCurveThreeCoordinates};
+      \foreach \p/\n in {\DahlbergThreeVertexOne/1,\DahlbergThreeVertexTwo/2,
+          \DahlbergThreeVertexThree/3,\DahlbergThreeVertexFour/4}
+        \node[vertex, fill=orange!85!black] at \p {\n};
+    \end{scope}
+    \node[font=\scriptsize, text=black!55] at (1.55,.3) {extra vertices unmarked};
+  \end{scope}
+
+  \node[font=\small, text=black!68] at (6.55,-.35)
+    {$\phi_j(s)=\int_0^s\kappa_j(u)\,du,\qquad
+      \gamma_j'(s)=e^{i\phi_j(s)},\qquad \gamma_j(s+2\pi)=\gamma_j(s)$};
+\end{tikzpicture}

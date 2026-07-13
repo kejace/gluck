@@ -34,7 +34,8 @@ else
   (cd "$repo_root" && lake exe gluckFigures "$generated")
 fi
 
-for id in euclidean-closure euclidean-gluck-reconstructions sphere-stereographic hyperbolic-escape; do
+for id in euclidean-closure euclidean-gluck-reconstructions \
+    euclidean-dahlberg-reconstructions sphere-stereographic hyperbolic-escape; do
   (cd "$src" && xelatex -interaction=batchmode -halt-on-error -no-pdf \
     -output-directory="$tmp" "figures/standalone/$id.tex" >/dev/null)
   dvisvgm --no-fonts --exact --bbox=papersize \

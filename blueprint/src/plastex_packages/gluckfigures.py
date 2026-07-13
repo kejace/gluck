@@ -41,6 +41,7 @@ def ProcessOptions(options, document):
         for figure_id in (
             "euclidean-closure",
             "euclidean-gluck-reconstructions",
+            "euclidean-dahlberg-reconstructions",
             "sphere-stereographic",
             "hyperbolic-escape",
         )
