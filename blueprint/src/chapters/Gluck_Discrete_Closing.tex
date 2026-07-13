@@ -1,0 +1,219 @@
+\chapter{The closing engine (Euclidean, positive)}
+\label{chap:discrete_closing}
+
+% archon:covers Gluck/Discrete/Closing.lean
+
+% D1 closing engine of the discrete program: the substantial remaining piece of
+% the committed target D-R^2-pos. Given n >= 3, kappa_i > 0, and a discrete
+% four-vertex window DFV(kappa; c), produce moderate-arc edge lengths ell with
+% closureGap(kappa, ell) = 0 and turningSum(kappa, ell) = 2*pi (= lem:dfv_closes
+% of chap:discrete_converse). ROUTE (reframed @065 on the strategy-auditor +
+% mathlib-analogist consult, logs/iter-065): the strictly-positive case does NOT
+% need Dahlberg's four-bar linkage — that is a mixed-sign device, demoted to D2.
+% Gluck's smooth positive proof (deturck-gluck §III-IV) closes by a winding-number
+% argument in Diff(S^1) on the reconstruction map, and the project already owns
+% the discrete analogue: the in-tree Winding.lean degree engine
+% (exists_zero_of_boundary_winding). So the positive closing engine is two steps:
+%   (1) the Umlauf rescaling retraction kills the turning coordinate (monotone
+%       IVT) -- SECTION 1, rigorous and formalizable NOW;
+%   (2) closure = a zero of the R^2-valued closureGap on the Umlauf slice, via the
+%       winding degree engine -- SECTION 3, ARCHITECTURE level (the discrete
+%       boundary-winding certificate is not yet written).
+% HONEST STATUS: Section 1 (the retraction) is complete and ready to formalize,
+% with ONE corrected hypothesis (auditor @065 Finding 1): the naive claim that
+% t |-> turningSum(kappa, t*ell^0) has range (0, n*pi) is FALSE for a general base
+% ell^0 -- the sum saturates at the moderate-arc wall, possibly below 2*pi. The
+% retraction therefore reaches 2*pi only when the base is "balanced" so that the
+% turning capacity exceeds 2*pi before the wall; this range fact is carried as an
+% explicit hypothesis (a ceiling t_1 with turningSum >= 2*pi). Constructing such a
+% balanced base is SECTION 2 (open, architecture only). Sections 2-3 are NOT
+% prover targets; only Section 1 is.
+
+\section{Overview}
+
+Fix $n \ge 3$ and a positive profile $\kappa : \ZMod n \to \mathbb{R}$,
+$\kappa_i > 0$. Recall (\cref{chap:discrete_defs}) that for $K = 0$
+\[
+  \mathrm{turningAngle}\,\kappa\,\ell\,i
+    \;=\; \arcsin\!\Big(\tfrac{\kappa_i\,\ell_{i-1}}{2}\Big)
+        + \arcsin\!\Big(\tfrac{\kappa_i\,\ell_i}{2}\Big),
+  \qquad
+  \mathrm{turningSum}\,\kappa\,\ell \;=\; \sum_{i \in \ZMod n}
+    \mathrm{turningAngle}\,\kappa\,\ell\,i,
+\]
+and that $\mathrm{closureGap}\,\kappa\,\ell \in \mathbb{C}$ is the position
+residual of the development, so that $\mathrm{RealizesR2}\,\kappa$ asks for a
+moderate-arc $\ell$ with $\mathrm{closureGap} = 0$,
+$\mathrm{turningSum} = 2\pi$, and a simple development. In the positive case
+simplicity is free by L1 (\cref{thm:convex_simple}), so the task reduces to
+solving the two closing equations
+\[
+  \mathrm{turningSum}\,\kappa\,\ell = 2\pi
+  \qquad\text{and}\qquad
+  \mathrm{closureGap}\,\kappa\,\ell = 0 \in \mathbb{R}^2 .
+\]
+The engine solves the scalar turning equation first, by a monotone rescaling
+retraction (\cref{sec:umlauf}), and then the $2$-dimensional position equation
+on the resulting slice by a winding-degree argument (\cref{sec:closure}).
+
+\section{The Umlauf rescaling retraction}
+\label{sec:umlauf}
+
+For a fixed positive base $\ell^0 : \ZMod n \to \mathbb{R}$ ($\ell^0_i > 0$) and
+a scalar $t > 0$ write $t \cdot \ell^0$ for the pointwise scaling. Each turning
+angle
+\[
+  \mathrm{turningAngle}\,\kappa\,(t\cdot\ell^0)\,i
+    = \arcsin\!\Big(\tfrac{\kappa_i\,t\,\ell^0_{i-1}}{2}\Big)
+    + \arcsin\!\Big(\tfrac{\kappa_i\,t\,\ell^0_i}{2}\Big)
+\]
+has both arguments positive (as $\kappa_i, \ell^0_j, t > 0$) and strictly
+increasing in $t$; since $\arcsin$ is strictly increasing on $[-1,1]$
+(\texttt{strictMonoOn\_arcsin}), each turning angle — and hence the total — is
+strictly increasing in $t$ on the range of $t$ for which $t\cdot\ell^0$ stays in
+the moderate-arc domain.
+
+\begin{lemma}[turning sum is strictly increasing under scaling]
+  \label{lem:turning_scale_mono}
+  \lean{Gluck.Discrete.turningSum_smul_lt}
+  \leanok
+  \uses{def:discrete_development, def:moderate_arc}
+  Let $\kappa_i > 0$ and $\ell^0_i > 0$ for all $i$, and let $0 < s < t$ with
+  $\mathrm{ModerateArc}\,0\,\kappa\,(t\cdot\ell^0)$. Then
+  \[
+    \mathrm{turningSum}\,\kappa\,(s\cdot\ell^0)
+      \;<\; \mathrm{turningSum}\,\kappa\,(t\cdot\ell^0).
+  \]
+  (Moderate-arcness at the larger scale $t$ implies it at the smaller scale $s$,
+  since every $\arcsin$ argument shrinks.)
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  \uses{def:moderate_arc}
+  It suffices to compare termwise. For each $i$, both
+  $\kappa_i s \ell^0_{i-1}/2 < \kappa_i t \ell^0_{i-1}/2$ and
+  $\kappa_i s \ell^0_i/2 < \kappa_i t \ell^0_i/2$ hold ($\kappa_i,\ell^0_j>0$,
+  $s<t$), and each right-hand argument lies in $(-1,1)$ by
+  $\mathrm{ModerateArc}$ at scale $t$ (\texttt{wall\_left}/\texttt{wall\_right}),
+  so each left-hand argument lies in $[-1,1)$ too. As $\arcsin$ is strictly
+  increasing on $[-1,1]$, each summand strictly increases, and a finite sum of
+  termwise-strict increases is strictly larger (\texttt{Finset.sum\_lt\_sum} with
+  one strict term suffices; here every term is strict).
+\end{proof}
+
+\begin{lemma}[turning sum vanishes in the small-scale limit]
+  \label{lem:turning_scale_zero}
+  \lean{Gluck.Discrete.turningSum_smul_tendsto_zero}
+  \leanok
+  \uses{def:discrete_development}
+  For $\kappa$, $\ell^0$ as above the function
+  $t \mapsto \mathrm{turningSum}\,\kappa\,(t\cdot\ell^0)$ is continuous and tends
+  to $0$ as $t \to 0^+$ (indeed it equals $0$ at $t = 0$).
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  Each summand is a finite sum of $\arcsin$ of a continuous (linear in $t$)
+  argument; $\arcsin$ is continuous on $[-1,1]$ (\texttt{continuous\_arcsin}),
+  and at $t = 0$ every argument is $0$ with $\arcsin 0 = 0$
+  (\texttt{Real.arcsin\_zero}), so the total is $0$.
+\end{proof}
+
+\begin{lemma}[Umlauf slice exists for a balanced base]
+  \label{lem:exists_umlauf_scale}
+  \lean{Gluck.Discrete.exists_umlauf_scale}
+  \leanok
+  \uses{lem:turning_scale_mono, lem:turning_scale_zero, def:moderate_arc}
+  Let $n \ge 3$, $\kappa_i > 0$ and $\ell^0_i > 0$ for all $i$, and suppose there
+  is a \emph{ceiling} $t_1 > 0$ with
+  \[
+    \mathrm{ModerateArc}\,0\,\kappa\,(t_1\cdot\ell^0)
+    \qquad\text{and}\qquad
+    2\pi \;\le\; \mathrm{turningSum}\,\kappa\,(t_1\cdot\ell^0).
+  \]
+  Then there is a unique $t^\star \in (0, t_1]$ with
+  $\mathrm{ModerateArc}\,0\,\kappa\,(t^\star\cdot\ell^0)$ and
+  $\mathrm{turningSum}\,\kappa\,(t^\star\cdot\ell^0) = 2\pi$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  \uses{lem:turning_scale_mono, lem:turning_scale_zero}
+  On $(0, t_1]$ the map $g(t) = \mathrm{turningSum}\,\kappa\,(t\cdot\ell^0)$ is
+  continuous (\cref{lem:turning_scale_zero}) and, by
+  \cref{lem:turning_scale_mono}, strictly increasing, with
+  $g(t) \to 0 < 2\pi$ as $t \to 0^+$ and $g(t_1) \ge 2\pi$. The intermediate
+  value theorem on the interval — Mathlib
+  \texttt{intermediate\_value\_Ioc} / \texttt{intermediate\_value\_Icc} applied
+  to the continuous $g$, or \texttt{exists\_Ioo\_of\_tendsto} against the
+  $t\to0^+$ limit — yields $t^\star \in (0, t_1]$ with $g(t^\star) = 2\pi$;
+  uniqueness is immediate from strict monotonicity. Moderate-arcness at
+  $t^\star \le t_1$ follows from moderate-arcness at $t_1$ (arguments only
+  shrink), exactly as in \cref{lem:turning_scale_mono}.
+\end{proof}
+
+\begin{remark}[why the ceiling hypothesis is unavoidable]
+  Without a ceiling the retraction can \emph{fail}: for a base $\ell^0$ with one
+  edge much longer than the rest, the long edge's $\arcsin$ argument reaches the
+  moderate-arc wall while the others are still small, so
+  $\sup_t \mathrm{turningSum}\,\kappa\,(t\cdot\ell^0) < 2\pi$ and no admissible
+  $t$ gives turning $2\pi$. This corrects the naive ``range $= (0, n\pi)$'' claim
+  of discrete\_plan.md §5.1; see \cref{sec:balanced} for how a balanced base is
+  produced so the ceiling hypothesis is met.
+\end{remark}
+
+\section{The balanced base --- architecture (open)}
+\label{sec:balanced}
+
+To instantiate the ceiling hypothesis of \cref{lem:exists_umlauf_scale} we need a
+base $\ell^0$ whose turning capacity exceeds $2\pi$ before the moderate-arc wall.
+The natural choice makes all $\arcsin$ arguments approach the wall together: take
+$\ell^0_i \propto 1/\kappa_i$ (equalising $\kappa_i \ell^0_i$), so that as $t$
+grows every argument $\kappa_i t \ell^0_i / 2$ reaches $1$ simultaneously and the
+turning sum tends to $n \cdot \pi > 2\pi$ (using $n \ge 3$). A base built from the
+four window values of $\mathrm{DFV}(\kappa; c)$ likewise has enough capacity. This
+section is deliberately left at architecture level: the precise construction and
+the ceiling bound are the open piece feeding \cref{lem:dfv_closes}, and are
+\emph{not} a prover target until written to atomic detail.
+
+\section{Closure on the Umlauf slice via winding --- architecture}
+\label{sec:closure}
+
+After \cref{lem:exists_umlauf_scale} fixes the turning coordinate, the remaining
+equation is the $2$-dimensional position equation
+$\mathrm{closureGap}\,\kappa\,\ell = 0 \in \mathbb{R}^2$, solved on the Umlauf
+slice by a winding-degree argument — the discrete analogue of Gluck's smooth
+argument in $\mathrm{Diff}(S^1)$ (deturck-gluck §III--IV, Prop.~9.1: closure iff
+opposite arcs agree). This section records the intended architecture; it is
+\emph{not} a prover target.
+
+\begin{itemize}
+  \item \textbf{The closing family.} Parametrise a $2$-real-dimensional family of
+    length profiles through the balanced base, staying on the Umlauf slice
+    $\{\mathrm{turningSum} = 2\pi\}$ (e.g.\ redistribute length between two
+    off-window blocks; the retraction re-normalises turning after each move).
+    Composing with the retraction of \cref{lem:exists_umlauf_scale} gives a
+    continuous map $D \to \mathbb{R}^2$, $u \mapsto \mathrm{closureGap}$, on a
+    $2$-disk $D$.
+  \item \textbf{Boundary winding.} On $\partial D$ the position residual winds
+    once around the origin, certified by the arcsin-monotone dependence
+    $\partial\theta_i/\partial\ell > 0$ (the sign faces). This is the discrete
+    cousin of the smooth $E$-vector winding; the in-tree
+    \texttt{exists\_zero\_of\_boundary\_winding} (\cref{chap:winding}) then
+    produces an interior zero. (\texttt{poincareMiranda\_rect} is the box-shaped
+    fallback with identical sign inputs, matching the in-tree $H^2$ proofs.)
+  \item \textbf{Assembly.} The interior zero is a length profile $\ell$ with
+    $\mathrm{closureGap} = 0$ and $\mathrm{turningSum} = 2\pi$; L1
+    (\cref{thm:convex_simple}) makes it simple, giving
+    $\mathrm{RealizesR2}\,\kappa$ and hence \cref{lem:dfv_closes}.
+\end{itemize}
+
+\begin{remark}[what is safe now]
+  Only \cref{sec:umlauf} (\cref{lem:turning_scale_mono,lem:turning_scale_zero,%
+  lem:exists_umlauf_scale}) is complete and ready to formalize; it rests solely
+  on the definitional layer \cref{chap:discrete_defs} and standard Mathlib
+  $\arcsin$/IVT facts. \Cref{sec:balanced,sec:closure} are architecture only and
+  carry the remaining (currently conjectural) work of \cref{lem:dfv_closes};
+  they must be expanded to atomic detail before any prover is dispatched on them.
+\end{remark}
