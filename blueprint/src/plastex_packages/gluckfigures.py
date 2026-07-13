@@ -40,6 +40,7 @@ def ProcessOptions(options, document):
         FigureAsset(path=GENERATED_DIR / f"{figure_id}.svg")
         for figure_id in (
             "euclidean-closure",
+            "euclidean-gluck-reconstructions",
             "sphere-stereographic",
             "hyperbolic-escape",
         )

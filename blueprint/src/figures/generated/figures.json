@@ -6,6 +6,13 @@
       "parameters": { "openA": 0.25, "closedA": 0, "b": 0.1666666667 }
     },
     {
+      "id": "euclidean-gluck-reconstructions",
+      "parameters": {
+        "ovalCos2": 0.55, "mixedCos3": 0.38, "mixedSin2": 0.25,
+        "fourfoldCos2": 0.25, "fourfoldCos4": -0.45
+      }
+    },
+    {
       "id": "sphere-stereographic",
       "parameters": { "radius": 0.5, "curvature": 0.75 }
     },
