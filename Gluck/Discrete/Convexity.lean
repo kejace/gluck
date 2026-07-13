@@ -373,4 +373,27 @@ lemma polygonR2_consecutive_inter [NeZero n] {κ ℓ : ZMod n → ℝ}
     exact (mul_eq_zero.1 hz).resolve_right (ne_of_gt hLj2)
   rw [← hz2eq, hs'0, zero_smul, add_zero, show s = 1 from by linarith, one_smul]
 
+/-- **L1: positive turning ⇒ simple.** A closed positively-oriented moderate-arc
+development with total turning `2π` is a simple polygon. Project-local — the
+discrete analogue of smooth simplicity being free in the positive case. -/
+theorem isSimplePolygon_of_turningPositive [NeZero n] {κ ℓ : ZMod n → ℝ}
+    (hn : 3 ≤ n) (h : ModerateArc 0 κ ℓ) (hκ : ∀ i : ZMod n, 0 < κ i)
+    (hE : closureGap κ ℓ = 0) (hT : turningSum κ ℓ = 2 * Real.pi) :
+    IsSimplePolygon (polygonR2 κ ℓ) :=
+  ⟨fun i => polygonR2_edge_ne h hE hT i,
+   fun i => polygonR2_consecutive_inter h hκ hE hT hn i,
+   fun i j hij hij1 hji1 => polygonR2_nonadjacent_disjoint h hκ hE hT i j hij hij1 hji1⟩
+
+/-! ## The constant branch of D-R²-pos -/
+
+/-- **Constant positive profiles are realized.** For `n ≥ 3` and `c > 0` the
+constant curvature profile `κ ≡ c` is Euclidean-realizable, witnessed by the
+regular `n`-gon of edge length `(2/c) sin(π/n)`. The first genuine `RealizesR2`
+witness of the discrete program. -/
+theorem realizesR2_const [NeZero n] (hn : 3 ≤ n) {c : ℝ} (hc : 0 < c) :
+    RealizesR2 (fun _ : ZMod n => c) := by
+  obtain ⟨hMA, _, hsum, hclose⟩ := regularGon_closes hn hc
+  exact ⟨fun _ => 2 / c * Real.sin (Real.pi / n), hMA, hclose, hsum,
+    isSimplePolygon_of_turningPositive hn hMA (fun _ => hc) hclose hsum⟩
+
 end Gluck.Discrete
