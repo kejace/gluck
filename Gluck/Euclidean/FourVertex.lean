@@ -205,7 +205,7 @@ is only `C¹`, so the `signedCurvature` formula (and with it the `C²` predicate
 `signedCurvature γ = κ`.
 
 A second, independent-route proof of this exact statement —
-`Gluck.gluck_converse_spaceForm` (`Gluck/Euclidean/SpaceFormInstance.lean`) —
+`Gluck.gluck_converse_flow` (`Gluck/Euclidean/SpaceFormInstance.lean`) —
 runs the space-form flow engine at ambient curvature `K = 0` and removes the disk
 confinement by a dilation.
 

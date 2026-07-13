@@ -8,7 +8,7 @@ import Gluck.Hyperbolic.Family
 /-!
 # Exact-profile reparam removal (dropping the `H²` reparametrisation `Ψ`)
 
-The up-to-reparam capstone `hyperbolicMixedConverse` realizes `κ ∘ Ψ` with a
+The up-to-reparam capstone `dahlberg_converse_reparam` realizes `κ ∘ Ψ` with a
 `C¹`, orientation-preserving `Ψ`.  This file proves that when `Ψ` is additionally
 a **degree-one circle map** (`Ψ(t+2π) = Ψ(t) + 2π`), the reparam can be removed:
 `w = γ ∘ Ψ⁻¹` realizes `κ` *exactly* as a simple closed curve.
@@ -158,16 +158,16 @@ theorem realizes_of_reparam_degree_one {K : ℝ} {γ : ℝ → ℂ} {κ Ψ : ℝ
 /-- **The exact-profile hyperbolic mixed (Dahlberg) converse.**  A genuinely-negative
 `MixedSignHyperbolicFourVertex` profile is realized **exactly** — with *no*
 reparametrisation — as the hyperbolic geodesic curvature of a simple closed curve in
-the Poincaré disk.  Strengthening of the up-to-reparam `hyperbolicMixedConverse`:
+the Poincaré disk.  Strengthening of the up-to-reparam `dahlberg_converse_reparam`:
 the fork-A reparam `Ψ = h₁ ∘ nodeMap ∘ χ` is a degree-one circle map
-(`hyperbolicMixedConverse_reparam_deg1`), so `realizes_of_reparam_degree_one`
+(`dahlberg_converse_reparam_deg1`), so `realizes_of_reparam_degree_one`
 removes it.  This closes the AL-6 gap — the reparam was an artifact of the abstract
 converse, not a feature of the geometry. -/
-theorem hyperbolicMixedConverse_exact {κ : ℝ → ℝ}
+theorem dahlberg_converse {κ : ℝ → ℝ}
     (h : MixedSignHyperbolicFourVertex κ) :
     ∃ γ : ℝ → ℂ, IsSimpleClosed γ ∧ Realizes (-1) γ κ := by
   obtain ⟨γ, Ψ, hΨC1, hΨpos, hΨdeg, hsc, hreal⟩ :=
-    hyperbolicMixedConverse_reparam_deg1 h
+    dahlberg_converse_reparam_deg1 h
   exact realizes_of_reparam_degree_one hΨC1 hΨpos hΨdeg hsc hreal
 
 end Gluck.Hyperbolic

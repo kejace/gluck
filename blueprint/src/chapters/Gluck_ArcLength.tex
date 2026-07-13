@@ -296,7 +296,7 @@ Throughout, $K,\kappa : \mathbb{R}\to\mathbb{R}$ are continuous and $2\pi$-perio
 \leanok
 [Arc-length converse: (1.1)--(1.3) realize $K$ by a simple closed curve]
   \label{thm:arclength_converse}
-  \lean{Gluck.arcLengthConverse}
+  \lean{Gluck.arcLength_converse}
   \uses{def:arclength_curvature, lem:realizes_curvature_dahlberg, lem:issimpleclosed_dahlberg_curve}
   If $K$ is continuous, $2\pi$-periodic, and an arc-length curvature function
   (satisfies (1.1)--(1.3)), then
@@ -434,4 +434,4 @@ with $\kappa\circ\varphi$ non-normalised. \cref{chap:dahlberg_step1} (complete)
 constructs the preliminary diffeomorphism $\eta$ giving $\kappa\circ\eta=a(1-f)+bf
 +e$ with $\int_0^{2\pi}|e|<C\varepsilon$; \cref{chap:dahlberg_step2} (complete)
 finds the closing parameter via the in-tree winding/degree core and transports
-conditions (1.2)/(1.3), delivering the capstone \texttt{dahlbergConverse}.
+conditions (1.2)/(1.3), delivering the capstone \texttt{dahlberg\_converse}.

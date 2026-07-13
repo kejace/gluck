@@ -11,13 +11,13 @@ import Gluck.Euclidean.DahlbergStep2
 /-!
 # The space-form converse, mixed-sign stage (`K`-generic Dahlberg converse)
 
-The `K`-generic mixed-sign converse `spaceFormMixedConverse`: a curvature profile
+The `K`-generic mixed-sign converse `dahlberg_converse`: a curvature profile
 satisfying the mixed-sign four-vertex hypothesis `MixedSignSpaceFormFourVertex K`
 is realized exactly as the space-form geodesic curvature of a simple closed curve
 at ambient curvature `K ∈ {+1, −1}`, unifying the spherical and hyperbolic Dahlberg
 converses in one statement.  The flat member `K = 0` is stated separately
-(`spaceFormMixedConverse_flat`) in the dilation-free Euclidean predicate
-`RealizesCurvature` — see the docstring of `spaceFormMixedConverse` for why the
+(`dahlberg_converse_flat`) in the dilation-free Euclidean predicate
+`RealizesCurvature` — see the docstring of `dahlberg_converse` for why the
 confined conclusion is genuinely `{+1, −1}`-only.
 
 The hypothesis is uniform in `K` through the **confinement threshold**
@@ -29,18 +29,18 @@ disk.
 The proofs are by **reduction to the three completed per-geometry
 developments** — no flow transport of their own.  At `K = +1` the hypothesis is
 the spherical `Gluck.MixedSignSphereFourVertex` (near-identity reduction), so
-`Gluck.sphericalConverse` applies.  At `K = −1` it is the hyperbolic
+`Gluck.spherical_dahlberg_converse` applies.  At `K = −1` it is the hyperbolic
 `Hyperbolic.MixedSignHyperbolicFourVertex` (the guarded floor is vacuous), so
-the exact-profile capstone `Hyperbolic.hyperbolicMixedConverse_exact` applies.
+the exact-profile capstone `Hyperbolic.dahlberg_converse` applies.
 At `K = 0` the four-vertex branch strengthens the Euclidean
-`Gluck.MixedSignFourVertex`, so `Gluck.dahlbergConverse` applies (constant
+`Gluck.MixedSignFourVertex`, so `Gluck.dahlberg_converse` applies (constant
 profiles are round circles, `Gluck.gluck_converse`).  An earlier plan proved
 the mixed statement by a `K`-generic transport of the S² flow development
 (relaxed `L¹` reparam, invariant admissible domain, mixed endpoint winding);
 that route was superseded by the H² arc-length engine and the reductions below.
 
 The `K = −1` instance is the **hyperbolic (H²) Dahlberg converse**
-(`hyperbolicDahlbergConverse`), the geodesic-curvature converse of the four
+(`dahlberg_converse_hyperbolic`), the geodesic-curvature converse of the four
 vertex theorem in the hyperbolic plane (Dahlberg 2005, *Converse of the Four
 Vertex Theorem*, Proc. AMS 133, hyperbolic transport).
 
@@ -70,8 +70,8 @@ open scoped Real InnerProductSpace NNReal
   confinement floor `∀ θ, −(centeredRadius K c) < κ θ` is demanded **at
   positive ambient curvature only** (guard `0 < K`): the S² flow reduction is the
   floor's sole consumer — the H² arc-length capstone
-  `Hyperbolic.hyperbolicMixedConverse_exact` carries no floor, and the flat
-  instance reduces to the dilation-free Euclidean `Gluck.dahlbergConverse`,
+  `Hyperbolic.dahlberg_converse` carries no floor, and the flat
+  instance reduces to the dilation-free Euclidean `Gluck.dahlberg_converse`,
   which needs none either.
 
 No global positivity: `κ` may be `≤ 0` (`K = 1`), cross `0` (`K = 0`), resp.
@@ -134,7 +134,7 @@ theorem mixedSignHyperbolicFourVertex_of_spaceForm {κ : ℝ → ℝ}
       hsep, c, hcw₁, hcw₂, (le_max_left _ _).trans_lt hcw₁⟩
 
 /-- At `K = 0` the non-constant branch of the space-form mixed hypothesis
-strengthens the Euclidean mixed-sign hypothesis of `Gluck.dahlbergConverse`:
+strengthens the Euclidean mixed-sign hypothesis of `Gluck.dahlberg_converse`:
 the four-vertex package transfers verbatim, the separation
 `max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂)` weakens from the thresholded
 `max (1/2) … < min …`, and the maxima-positivity clause
@@ -142,7 +142,7 @@ the four-vertex package transfers verbatim, the separation
 guarded floor is vacuous at `K = 0`.  The constant branch is excluded by the
 non-constancy hypothesis (`Gluck.MixedSignFourVertex` is non-constant by its
 strict separation); constant profiles are round circles, handled by
-`Gluck.gluck_converse` inside `spaceFormMixedConverse_flat`. -/
+`Gluck.gluck_converse` inside `dahlberg_converse_flat`. -/
 theorem mixedSignFourVertex_of_spaceForm_flat {κ : ℝ → ℝ}
     (hκ : MixedSignSpaceFormFourVertex 0 κ) (hnc : ¬ ∃ c, ∀ θ, κ θ = c) :
     Gluck.MixedSignFourVertex κ := by
@@ -168,10 +168,10 @@ theorem realizes_one_iff_spherical {γ : ℝ → ℂ} {κ : ℝ → ℝ} :
 /-- **Space-form converse, mixed sign.** If `κ` satisfies the mixed-sign
 four-vertex hypothesis, there is a simple closed curve confined to the open disk
 realizing `κ` exactly as its space-form geodesic curvature at ambient curvature
-`K ∈ {+1, −1}`. Subsumes `spaceFormConverse_pos` at the curved signs. Proved by
+`K ∈ {+1, −1}`. Subsumes `gluck_converse` at the curved signs. Proved by
 reduction: the `K = +1` branch is the spherical Dahlberg converse
-`Gluck.sphericalConverse`, the `K = −1` branch the exact-profile hyperbolic
-capstone `Hyperbolic.hyperbolicMixedConverse_exact`.
+`Gluck.spherical_dahlberg_converse`, the `K = −1` branch the exact-profile hyperbolic
+capstone `Hyperbolic.dahlberg_converse`.
 
 **Why `hK` stays two-way** although `MixedSignSpaceFormFourVertex 0 κ` makes
 sense: the conclusion `Realizes K γ κ` is *confined* — it contains
@@ -183,30 +183,32 @@ inside the predicate), and with unrestricted minima a realizing curve can be
 forced arbitrarily large — so the confined flat statement is **false in
 general**.  The flat instance therefore concludes in the dilation-free
 Euclidean predicate `Gluck.RealizesCurvature`
-(`spaceFormMixedConverse_flat`, by reduction to `Gluck.dahlbergConverse`).  A
+(`dahlberg_converse_flat`, by reduction to `Gluck.dahlberg_converse`).  A
 confined flat version under the window floor `κ > −(centeredRadius 0 c)` would
 need the flat `L¹`-squeeze construction of the positive stage transported to
-mixed sign (the flat fork-A port) — future work. -/
-theorem spaceFormMixedConverse {K : ℝ} (hK : K = 1 ∨ K = -1) {κ : ℝ → ℝ}
+mixed sign (the flat fork-A port) — future work.
+
+(Formerly `spaceFormMixedConverse`.) -/
+theorem dahlberg_converse {K : ℝ} (hK : K = 1 ∨ K = -1) {κ : ℝ → ℝ}
     (hκ : MixedSignSpaceFormFourVertex K κ) :
     ∃ γ : ℝ → ℂ, IsSimpleClosed γ ∧ Realizes K γ κ := by
   rcases hK with rfl | rfl
   · obtain ⟨γ, hsc, hreal⟩ :=
-      Gluck.sphericalConverse (mixedSignSphereFourVertex_of_spaceForm hκ)
+      Gluck.spherical_dahlberg_converse (mixedSignSphereFourVertex_of_spaceForm hκ)
     exact ⟨γ, hsc, realizes_one_iff_spherical.mpr hreal⟩
-  · exact Hyperbolic.hyperbolicMixedConverse_exact (mixedSignHyperbolicFourVertex_of_spaceForm hκ)
+  · exact Hyperbolic.dahlberg_converse (mixedSignHyperbolicFourVertex_of_spaceForm hκ)
 
 /-! ## The hyperbolic (H²) Dahlberg instance -/
 
 /-- **The hyperbolic Dahlberg converse (H², `K = −1`).** The `K = −1` instance
-of `spaceFormMixedConverse`: a mixed-sign / sub-escape-velocity four-vertex
+of `dahlberg_converse`: a mixed-sign / sub-escape-velocity four-vertex
 curvature profile is realized as the geodesic curvature of a simple closed
 curve in the hyperbolic plane. This is the converse of the four vertex theorem
 in H² (Dahlberg 2005, hyperbolic transport). -/
-theorem hyperbolicDahlbergConverse {κ : ℝ → ℝ}
+theorem dahlberg_converse_hyperbolic {κ : ℝ → ℝ}
     (hκ : MixedSignSpaceFormFourVertex (-1) κ) :
     ∃ γ : ℝ → ℂ, IsSimpleClosed γ ∧ Realizes (-1) γ κ :=
-  spaceFormMixedConverse (Or.inr rfl) hκ
+  dahlberg_converse (Or.inr rfl) hκ
 
 /-! ## The flat (E²) instance -/
 
@@ -214,11 +216,11 @@ theorem hyperbolicDahlbergConverse {κ : ℝ → ℝ}
 satisfying the mixed-sign space-form hypothesis at `K = 0` (threshold `1/2`)
 is realized as the Euclidean curvature of a simple closed curve — in the
 **dilation-free** predicate `Gluck.RealizesCurvature`, not the confined
-`Realizes 0` (see `spaceFormMixedConverse` for the scale-rigidity
+`Realizes 0` (see `dahlberg_converse` for the scale-rigidity
 obstruction).  Constant profiles are round circles (the constant case of
 `Gluck.gluck_converse`); non-constant ones reduce to the Euclidean Dahlberg
-converse `Gluck.dahlbergConverse` via `mixedSignFourVertex_of_spaceForm_flat`. -/
-theorem spaceFormMixedConverse_flat {κ : ℝ → ℝ}
+converse `Gluck.dahlberg_converse` via `mixedSignFourVertex_of_spaceForm_flat`. -/
+theorem dahlberg_converse_flat {κ : ℝ → ℝ}
     (hκ : MixedSignSpaceFormFourVertex 0 κ) :
     ∃ γ : ℝ → ℂ, IsSimpleClosed γ ∧ RealizesCurvature γ κ := by
   obtain ⟨hκc, hκper, hdisj⟩ := hκ
@@ -231,7 +233,7 @@ theorem spaceFormMixedConverse_flat {κ : ℝ → ℝ}
   · -- Four-vertex branch: the strict separation forbids constancy, so the
     -- flat reduction feeds the Euclidean Dahlberg converse.
     obtain ⟨p₁, q₁, p₂, q₂, -, -, -, -, -, -, -, -, hsep, -⟩ := id h4v
-    exact Gluck.dahlbergConverse (mixedSignFourVertex_of_spaceForm_flat
+    exact Gluck.dahlberg_converse (mixedSignFourVertex_of_spaceForm_flat
       ⟨hκc, hκper, Or.inr h4v⟩
       (Gluck.not_constant_of_separation ((le_max_right _ _).trans_lt hsep)))
 

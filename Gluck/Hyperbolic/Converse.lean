@@ -51,8 +51,8 @@ theorem realizesHyperbolicCurvature_iff_realizes_neg_one (z : ℝ → ℂ) (κ :
     RealizesHyperbolicCurvature z κ ↔ SpaceForm.Realizes (-1) z κ := Iff.rfl
 
 /-- A hyperbolic four-vertex curvature function is realized by a simple closed curve. -/
-theorem hyperbolicConverse_pos {κ : ℝ → ℝ} (hκ : HyperbolicFourVertex κ) :
+theorem hyperbolic_gluck_converse {κ : ℝ → ℝ} (hκ : HyperbolicFourVertex κ) :
     ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ RealizesHyperbolicCurvature z κ :=
-  SpaceForm.spaceFormConverse_pos (Or.inr (Or.inl rfl)) hκ
+  SpaceForm.gluck_converse (Or.inr (Or.inl rfl)) hκ
 
 end Gluck

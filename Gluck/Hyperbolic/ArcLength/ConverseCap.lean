@@ -140,7 +140,7 @@ maps `[0, 2π]` onto the window `[0, L]`; by the no-rescaling transport
 `z ∘ ψ` realizes `κ ∘ ψ` (NOT `κ` — there is no scaling to normalise the argument,
 unlike the Euclidean `realizesCurvature_smul` in
 `Gluck.realizesCurvature_of_nonNormalised`, `ArcLength.lean:261`).  This is the
-honest H² analogue of `Gluck.arcLengthConverse` (`ArcLength.lean:212`) with the
+honest H² analogue of `Gluck.arcLength_converse` (`ArcLength.lean:212`) with the
 scaling step replaced by reparametrisation.
 
 The `Realizes (-1) (z ∘ ψ) (κ ∘ ψ)` half is **proven** (via `arcSolution_realizes`,
