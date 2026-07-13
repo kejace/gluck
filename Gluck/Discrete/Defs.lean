@@ -290,4 +290,97 @@ def RealizesR2 [NeZero n] (κ : ZMod n → ℝ) : Prop :=
   ∃ ℓ : ZMod n → ℝ, ModerateArc 0 κ ℓ ∧ closureGap κ ℓ = 0 ∧
     turningSum κ ℓ = 2 * Real.pi ∧ IsSimplePolygon (polygonR2 κ ℓ)
 
+/-! ## The constant profile closes -/
+
+/-- The regular `n`-gon closes the constant profile `κ ≡ c`: with all edge
+lengths `(2/c) sin (π/n)` the data is moderate-arc, every turning angle is
+`2π/n`, the total turning is `2π`, and the closure gap vanishes. End-to-end
+sanity check of the definitional layer. -/
+theorem regularGon_closes {n : ℕ} [NeZero n] (hn : 3 ≤ n) {c : ℝ} (hc : 0 < c) :
+    ModerateArc 0 (fun _ : ZMod n => c)
+        (fun _ => 2 / c * Real.sin (Real.pi / n)) ∧
+      (∀ i : ZMod n,
+        turningAngle 0 (fun _ => c) (fun _ => 2 / c * Real.sin (Real.pi / n)) i
+          = 2 * Real.pi / n) ∧
+      turningSum (fun _ : ZMod n => c)
+        (fun _ => 2 / c * Real.sin (Real.pi / n)) = 2 * Real.pi ∧
+      closureGap (fun _ : ZMod n => c)
+        (fun _ => 2 / c * Real.sin (Real.pi / n)) = 0 := by
+  have hn3 : (3 : ℝ) ≤ n := by exact_mod_cast hn
+  have hnpos : (0 : ℝ) < n := by linarith
+  have hπn_pos : 0 < Real.pi / n := div_pos Real.pi_pos hnpos
+  have hπn_le : Real.pi / n ≤ Real.pi / 3 := by gcongr
+  have hπn_lt_half : Real.pi / n < Real.pi / 2 := by linarith [Real.pi_pos]
+  have hsin_pos : 0 < Real.sin (Real.pi / n) :=
+    Real.sin_pos_of_pos_of_lt_pi hπn_pos (by linarith [Real.pi_pos])
+  have hsin_lt : Real.sin (Real.pi / n) < 1 := by
+    rw [← Real.sin_pi_div_two]
+    exact Real.sin_lt_sin_of_lt_of_le_pi_div_two (by linarith) le_rfl hπn_lt_half
+  have hl_pos : 0 < 2 / c * Real.sin (Real.pi / n) :=
+    mul_pos (div_pos two_pos hc) hsin_pos
+  have hkey : c * (2 / c * Real.sin (Real.pi / n) / 2) = Real.sin (Real.pi / n) := by
+    field_simp
+  have harc : Real.arcsin (Real.sin (Real.pi / n)) = Real.pi / n :=
+    Real.arcsin_sin (by linarith) (by linarith)
+  -- moderate arc
+  have hMA : ModerateArc 0 (fun _ : ZMod n => c)
+      (fun _ => 2 / c * Real.sin (Real.pi / n)) := by
+    rw [moderateArc_zero_iff]
+    intro i
+    refine ⟨hl_pos, ?_, ?_⟩ <;>
+      simpa [abs_of_pos hc, hkey] using hsin_lt
+  -- turning angles
+  have hturn : ∀ i : ZMod n,
+      turningAngle 0 (fun _ => c) (fun _ => 2 / c * Real.sin (Real.pi / n)) i
+        = 2 * Real.pi / n := by
+    intro i
+    simp only [turningAngle, tK_zero]
+    rw [hkey, harc]
+    ring
+  -- total turning
+  have hsum : turningSum (fun _ : ZMod n => c)
+      (fun _ => 2 / c * Real.sin (Real.pi / n)) = 2 * Real.pi := by
+    unfold turningSum
+    rw [Finset.sum_congr rfl fun i _ => hturn i, Finset.sum_const,
+      Finset.card_univ, ZMod.card, nsmul_eq_mul, mul_comm,
+      div_mul_cancel₀ _ (ne_of_gt hnpos)]
+  -- headings
+  have hhead : ∀ j : ℕ,
+      heading (fun _ : ZMod n => c) (fun _ => 2 / c * Real.sin (Real.pi / n)) j
+        = (j + 1) * (2 * Real.pi / n) := by
+    intro j
+    unfold heading
+    simp only [hturn]
+    rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+    push_cast
+    ring
+  refine ⟨hMA, hturn, hsum, ?_⟩
+  -- closure gap: finite geometric sum of the n-th roots of unity
+  have hζ : IsPrimitiveRoot (Complex.exp (2 * (Real.pi : ℂ) * Complex.I / n)) n :=
+    Complex.isPrimitiveRoot_exp n (NeZero.ne n)
+  have hterm : ∀ j : ℕ,
+      ((2 / c * Real.sin (Real.pi / n) : ℝ) : ℂ)
+          * Complex.exp
+            ((heading (fun _ : ZMod n => c)
+                (fun _ => 2 / c * Real.sin (Real.pi / n)) j : ℂ) * Complex.I)
+        = ((2 / c * Real.sin (Real.pi / n) : ℝ) : ℂ)
+            * Complex.exp (2 * (Real.pi : ℂ) * Complex.I / n) ^ (j + 1) := by
+    intro j
+    rw [hhead j]
+    congr 1
+    rw [← Complex.exp_nat_mul]
+    congr 1
+    push_cast
+    ring
+  simp only [closureGap, vertexR2]
+  rw [Finset.sum_congr rfl fun j _ => hterm j, ← Finset.mul_sum]
+  have hgeom : ∑ j ∈ Finset.range n,
+      Complex.exp (2 * (Real.pi : ℂ) * Complex.I / n) ^ (j + 1)
+        = Complex.exp (2 * (Real.pi : ℂ) * Complex.I / n)
+            * ∑ j ∈ Finset.range n,
+                Complex.exp (2 * (Real.pi : ℂ) * Complex.I / n) ^ j := by
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl fun j _ => pow_succ' _ _
+  rw [hgeom, hζ.geom_sum_eq_zero (by omega), mul_zero, mul_zero]
+
 end Gluck.Discrete
