@@ -161,6 +161,47 @@ theorem sum_sin_of_closure {l₀ l₁ l₂ ψ₀ ψ₁ ψ₂ : ℝ}
     add_zero, Complex.exp_ofReal_mul_I_im] at h2
   exact h2
 
+/-- Norm-squared core of the law of cosines: from a three-term closure, the
+middle length squared equals the law-of-cosines combination of the other
+two. Scalar core of the `n = 3` vertex-chord/opposite-edge identity. -/
+theorem sq_eq_of_closure {l₀ l₁ l₂ ψ₀ ψ₁ ψ₂ : ℝ}
+    (h : (l₀ : ℂ) * Complex.exp (ψ₀ * Complex.I) + l₁ * Complex.exp (ψ₁ * Complex.I) +
+      l₂ * Complex.exp (ψ₂ * Complex.I) = 0) :
+    l₁ ^ 2 = l₀ ^ 2 + l₂ ^ 2 + 2 * l₀ * l₂ * cos (ψ₀ - ψ₂) := by
+  have h1 : (l₁ : ℂ) * Complex.exp (ψ₁ * Complex.I) =
+      -((l₀ : ℂ) * Complex.exp (ψ₀ * Complex.I) + l₂ * Complex.exp (ψ₂ * Complex.I)) := by
+    linear_combination h
+  have h2 := congrArg Complex.normSq h1
+  rw [Complex.normSq_neg, Complex.normSq_add, Complex.normSq_mul, Complex.normSq_mul,
+    Complex.normSq_mul] at h2
+  simp only [Complex.normSq_ofReal] at h2
+  have habs : ∀ ψ : ℝ, Complex.normSq (Complex.exp (ψ * Complex.I)) = 1 := by
+    intro ψ
+    rw [Complex.normSq_apply, Complex.exp_ofReal_mul_I_re, Complex.exp_ofReal_mul_I_im]
+    linear_combination cos_sq_add_sin_sq ψ
+  rw [habs, habs, habs] at h2
+  have harg : ((ψ₀ : ℂ)) * Complex.I + ((-ψ₂ : ℝ) : ℂ) * Complex.I =
+      ((ψ₀ - ψ₂ : ℝ) : ℂ) * Complex.I := by
+    push_cast; ring
+  have hre : ((l₀ : ℂ) * Complex.exp (ψ₀ * Complex.I) *
+      (starRingEnd ℂ) ((l₂ : ℂ) * Complex.exp (ψ₂ * Complex.I))).re =
+      l₀ * l₂ * cos (ψ₀ - ψ₂) := by
+    rw [map_mul, ← Complex.exp_conj]
+    have hconj : (starRingEnd ℂ) ((ψ₂ : ℂ) * Complex.I) = ((-ψ₂ : ℝ) : ℂ) * Complex.I := by
+      simp [Complex.conj_ofReal]
+    rw [hconj, Complex.conj_ofReal]
+    have hprod : (l₀ : ℂ) * Complex.exp ((ψ₀ : ℂ) * Complex.I) *
+        ((l₂ : ℂ) * Complex.exp (((-ψ₂ : ℝ) : ℂ) * Complex.I)) =
+        ((l₀ * l₂ : ℝ) : ℂ) * Complex.exp (((ψ₀ - ψ₂ : ℝ) : ℂ) * Complex.I) := by
+      rw [← harg, Complex.exp_add]
+      push_cast
+      ring
+    rw [hprod, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im,
+      Complex.exp_ofReal_mul_I_re, Complex.exp_ofReal_mul_I_im]
+    ring
+  rw [hre] at h2
+  nlinarith [h2]
+
 /-! ## The killer profile -/
 
 /-- The alternating two-value profile on `ℤ/4`: value `M` at `i ∈ {0, 2}`
