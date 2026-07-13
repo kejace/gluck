@@ -213,4 +213,57 @@ lemma support_left_pos [NeZero n] {κ ℓ : ZMod n → ℝ} (h : ModerateArc 0 �
         (sin_neg_of_pi_lt hαgt (by linarith [hwin.2]))
     · exact ⟨j, Finset.mem_Ico.2 ⟨le_rfl, hjn⟩⟩
 
+/-! ## Simplicity from support -/
+
+/-- The cyclic vertex `P (a + t)` is the lifted development vertex `k + t`. -/
+private lemma polygonR2_add_nat [NeZero n] {κ ℓ : ZMod n → ℝ}
+    (hE : closureGap κ ℓ = 0) (hT : turningSum κ ℓ = 2 * Real.pi) (a : ZMod n) (t : ℕ) :
+    polygonR2 κ ℓ (a + (t : ZMod n)) = vertexR2 κ ℓ (a.val + t) := by
+  rw [vertexR2_eq_polygon hE hT]
+  congr 1
+  rw [Nat.cast_add, ZMod.natCast_rightInverse a]
+
+/-- Any cyclic vertex `P c` is a lifted development vertex `k + (c − a).val`, in
+the block `[k, k+n)` anchored at edge `a` (`k = a.val`). -/
+private lemma polygonR2_sub_val [NeZero n] {κ ℓ : ZMod n → ℝ}
+    (hE : closureGap κ ℓ = 0) (hT : turningSum κ ℓ = 2 * Real.pi) (a c : ZMod n) :
+    polygonR2 κ ℓ c = vertexR2 κ ℓ (a.val + (c - a).val) := by
+  rw [vertexR2_eq_polygon hE hT]
+  congr 1
+  rw [Nat.cast_add, ZMod.natCast_rightInverse a, ZMod.natCast_rightInverse (c - a)]
+  ring
+
+/-- The left-distance functional `z ↦ Im(u·(z − P))` is affine: it respects
+convex combinations. Project-local. -/
+private lemma im_rot_affine (u P x y : ℂ) {s t : ℝ} (hst : s + t = 1) :
+    (u * ((s • x + t • y) - P)).im
+      = s * (u * (x - P)).im + t * (u * (y - P)).im := by
+  have key : (s • x + t • y) - P = s • (x - P) + t • (y - P) := by
+    have hst' : (s : ℂ) + (t : ℂ) = 1 := by exact_mod_cast hst
+    simp only [Complex.real_smul]
+    linear_combination P * hst'
+  rw [key, mul_add, mul_smul_comm, mul_smul_comm, Complex.add_im, Complex.smul_im,
+    Complex.smul_im, smul_eq_mul, smul_eq_mul]
+
+/-- Nondegenerate edges: `P i ≠ P (i+1)` since the edge vector has modulus
+`ℓ i > 0`. Project-local. -/
+lemma polygonR2_edge_ne [NeZero n] {κ ℓ : ZMod n → ℝ} (h : ModerateArc 0 κ ℓ)
+    (hE : closureGap κ ℓ = 0) (hT : turningSum κ ℓ = 2 * Real.pi) (i : ZMod n) :
+    polygonR2 κ ℓ i ≠ polygonR2 κ ℓ (i + 1) := by
+  have e1 : polygonR2 κ ℓ (i + 1) = vertexR2 κ ℓ (i.val + 1) := by
+    have := polygonR2_add_nat hE hT i 1
+    simpa using this
+  have hd : vertexR2 κ ℓ (i.val + 1) - vertexR2 κ ℓ i.val
+      = (ℓ ((i.val : ℕ) : ZMod n) : ℂ)
+          * Complex.exp ((heading κ ℓ i.val : ℂ) * Complex.I) := by
+    rw [vertexR2_succ]; ring
+  have hne : (ℓ ((i.val : ℕ) : ZMod n) : ℂ)
+      * Complex.exp ((heading κ ℓ i.val : ℂ) * Complex.I) ≠ 0 := by
+    apply mul_ne_zero _ (Complex.exp_ne_zero _)
+    exact_mod_cast ne_of_gt (h.length_pos _)
+  rw [show polygonR2 κ ℓ i = vertexR2 κ ℓ i.val from rfl, e1]
+  intro heq
+  apply hne
+  rw [← hd, heq, sub_self]
+
 end Gluck.Discrete
