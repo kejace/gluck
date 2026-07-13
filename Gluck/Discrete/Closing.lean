@@ -138,4 +138,19 @@ theorem exists_umlauf_scale [NeZero n] {κ ℓ₀ : ZMod n → ℝ}
       linarith
   refine ⟨t, ⟨htpos, ht1⟩, moderateArc_scale_le hℓ htpos ht1 hMA₁, hgt⟩
 
+/-- Uniqueness of the Umlauf scale (the `unique` clause of
+`lem:exists_umlauf_scale`): two positive moderate-arc scales of a positive base
+with equal total turning coincide. Immediate from strict monotonicity
+(`turningSum_smul_lt`) via trichotomy. -/
+theorem umlauf_scale_unique [NeZero n] {κ ℓ₀ : ZMod n → ℝ}
+    (hκ : ∀ i, 0 < κ i) (hℓ : ∀ i, 0 < ℓ₀ i) {s t : ℝ} (hs : 0 < s) (ht : 0 < t)
+    (hMAs : ModerateArc 0 κ (fun i => s * ℓ₀ i))
+    (hMAt : ModerateArc 0 κ (fun i => t * ℓ₀ i))
+    (hST : turningSum κ (fun i => s * ℓ₀ i)
+      = turningSum κ (fun i => t * ℓ₀ i)) : s = t := by
+  rcases lt_trichotomy s t with h | h | h
+  · exact absurd hST (ne_of_lt (turningSum_smul_lt hκ hℓ hs h hMAt))
+  · exact h
+  · exact absurd hST.symm (ne_of_lt (turningSum_smul_lt hκ hℓ ht h hMAs))
+
 end Gluck.Discrete
