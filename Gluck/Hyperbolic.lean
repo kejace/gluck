@@ -17,10 +17,11 @@ Thin aggregator for the hyperbolic development (`Gluck/Hyperbolic/`), the
 Poincaré-disk (`ε = −1`) stage built on the arc-length reconstruction engine:
 
 * `ArcLength` (+ `ArcLength/`) — the H² arc-length reconstruction engine:
-  ODE layer, gate profile, closing, fork-A landing, and the arc-length converse
-  capstone `arcLengthH2Converse` / `realizesH2_of_reparam`.
-* `MixedSign` (+ `MixedSign/`) — the genuinely-negative (ALM) chain: hypothesis
-  `MixedSignHyperbolicFourVertex`, `L¹` confinement, degree closing, simplicity.
+  ODE layer, closing, and the arc-length converse capstone
+  `arcLengthH2Converse` / `realizesH2_of_reparam`.
+* `MixedSign` — the genuinely-negative hypothesis `MixedSignHyperbolicFourVertex`
+  (with positive-case subsumption) and the constant-branch witness
+  `hyperbolicCircle_realizes`.
 * `Family` (+ `Family/`) — the fork-A symbolic `(a, c)`-family bicircle layer,
   culminating in the up-to-reparam capstone `hyperbolicMixedConverse`.
 * `Exact` — the degree-one reparam removal and the exact-profile capstone

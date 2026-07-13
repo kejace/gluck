@@ -28,7 +28,7 @@ lemma truncatedSpeed_sub_le {κ κ' : ℝ → ℝ} {R δ : ℝ} (hR : 0 ≤ R) (
     |truncatedSpeed κ R δ θ z - truncatedSpeed κ' R δ θ z|
       ≤ (1 + R ^ 2) / (2 * δ ^ 2) * |κ θ - κ' θ| := by
   simpa only [truncatedSpeed, SpaceForm.truncatedSpeed, one_mul] using
-    SpaceForm.truncatedSpeed_sub_le (ε := 1) (by norm_num) hR hδ θ z
+    SpaceForm.truncatedSpeed_sub_le (K := 1) (by norm_num) hR hδ θ z
 
 /-- **Combined field sensitivity**: a mixed difference of truncated fields at
 two curvatures and two points is controlled by a Lipschitz term in the points
@@ -47,7 +47,7 @@ lemma truncatedField_sub_le {κ κ' : ℝ → ℝ} {R δ : ℝ} (hR : 0 ≤ R) (
       SpaceForm.truncatedSpeed, one_mul] using hL
   simpa only [truncatedField, SpaceForm.truncatedField, truncatedSpeed,
     SpaceForm.truncatedSpeed, one_mul] using
-      SpaceForm.truncatedField_sub_le (ε := 1) (by norm_num) hR hδ hL' θ z z'
+      SpaceForm.truncatedField_sub_le (K := 1) (by norm_num) hR hδ hL' θ z z'
 
 /-- **Two-solution uniqueness on a subinterval.** Two solutions of the
 truncated reconstruction ODE on `[0, T]` with the same initial value agree on
@@ -125,7 +125,7 @@ lemma invariant_admissible_domain {κ κ' : ℝ → ℝ} {κ₀ R δ μ : ℝ} {
   have hL' : ∀ θ, LipschitzWith L (fun w => SpaceForm.truncatedField 1 κ R δ θ w) := by
     simpa only [hfield] using hL
   simpa only [one_mul] using
-    (SpaceForm.invariant_admissible_domain (ε := 1) (z := z) (zs := zs) (by norm_num)
+    (SpaceForm.invariant_admissible_domain (K := 1) (γ := z) (γs := zs) (by norm_num)
       hκ hκ' hκ₀ hR hδ hL' (by simpa only [hfield] using hz)
       (by simpa only [hfield] using hzs) hzsR (by simpa only [one_mul] using hzsinner) hsmall)
 

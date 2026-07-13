@@ -9,8 +9,8 @@ import Mathlib.Util.CountHeartbeats
 /-!
 # Fork A · ALM-A11–A12: simplicity transport and the capstone
 
-Simplicity transport in the three regimes (ALM-A11), and the window-bridge exposure plus
-the capstone assembly `hyperbolicMixedConverse` and `layout_arcLengthH2Curvature`
+Simplicity transport in the three regimes (ALM-A11), and the window-bridge exposure
+`layout_windowSolution_exposed` plus the capstone assembly `hyperbolicMixedConverse`
 (ALM-A12).
 -/
 
@@ -1196,8 +1196,8 @@ theorem layout_chord_ne_zero {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
 /-! ## ALM-A12: window-bridge exposure + capstone assembly -/
 
 /-- **ALM-A12 (window-bridge application).**  The closed, confined, simple true
-layout flow of ALM-A10/A11 is fed through the (now public) arc-length window
-bridge `arcLengthH2Curvature_of_windowSolution` to certify that the reparametrised
+layout flow of ALM-A10/A11 is exposed as the window-solution package that the
+capstone feeds into `ArcLengthH2Curvature`, certifying that the reparametrised
 profile `κ_arc = κ ∘ h₁ ∘ g_{w,t}` is an H² arc-length curvature function.
 
 The layout flow is defined at horizon `2L` (`layoutFlow = arcFlow κ_arc R' (2L) M 9`),
@@ -1288,44 +1288,13 @@ theorem layout_windowSolution_exposed {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
     rw [hcongr]
     exact hchord p q hp hpq hqΛ
 
-/-- The layout window solution packages into `ArcLengthH2Curvature` at window
-`Λ = nodePeriod` (wrapper around `layout_windowSolution_exposed`). -/
-theorem layout_arcLengthH2Curvature {a c h L : ℝ} (ha : 1 < a) (hac : a < c)
-    (hwin : h ∈ bicircleWindow a) (hlow : 1 / (10 * c) ≤ h) (hL0 : 0 < L)
-    (hL : L ≤ bicircleBracket a h) (hL4 : L ≤ 4 * π)
-    (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
-    {κ h₁ : ℝ → ℝ} (hκc : Continuous κ) (hκper : Function.Periodic κ (2 * π))
-    (hh₁c : Continuous h₁) (hh₁per : ∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π)
-    {M : ℝ} (hM : ∀ θ, |κ θ| ≤ M) {w₁ w₂ t : ℝ}
-    (hw₁ : |w₁| ≤ L / 16) (hw₂ : |w₂| ≤ L / 16) (ht : |t| ≤ L / 16)
-    (hclose1 : (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)).1
-        = (layoutStart a c h L).1)
-    (hclose2 : (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)).2
-        = (layoutStart a c h L).2 + 2 * π)
-    (hconf : ∀ σ ∈ Set.Icc (0 : ℝ) (nodePeriod L w₁ w₂ t),
-        ‖(layoutFlow κ h₁ a c h L M w₁ w₂ t σ).1‖ ≤ layoutConfineRadius a c)
-    (hchord : ∀ p q : ℝ, 0 ≤ p → p < q → q < nodePeriod L w₁ w₂ t →
-        (∫ s in p..q, Complex.exp
-          (((layoutFlow κ h₁ a c h L M w₁ w₂ t s).2 : ℂ) * Complex.I)) ≠ 0) :
-    ArcLengthH2Curvature (kappaArc κ h₁ L w₁ w₂ t) := by
-  have hΛ0 : 0 < nodePeriod L w₁ w₂ t := by
-    rw [nodePeriod]
-    have hb1 := (abs_le.mp hw₁).1
-    have hb2 := (abs_le.mp hw₂).1
-    have hb3 := (abs_le.mp ht).1
-    linarith
-  exact ⟨nodePeriod L w₁ w₂ t, hΛ0,
-    layout_windowSolution_exposed ha hac hwin hlow hL0 hL hL4 hφe hκc hκper hh₁c
-      hh₁per hM hw₁ hw₂ ht hclose1 hclose2 hconf hchord⟩
-
 /-- **The hyperbolic mixed (Dahlberg) converse — genuinely-negative four-vertex.**
 A `MixedSignHyperbolicFourVertex` profile (continuous, `2π`-periodic, escape
 velocity at the maxima, **arbitrarily-negative minima — no lower bound**) is
 realized, up to an orientation-preserving `C¹` reparametrization `Ψ`, as the
 geodesic curvature of a *simple closed* curve in the hyperbolic plane at
 `ε = −1`.  The up-to-reparam form
-mirrors `realizesH2_of_reparam`/`exists_gateProfileSmooth_realization`
-(`ArcLengthH2.lean`): `H²` has no metric rescaling, so the period is co-constructed
+mirrors `realizesH2_of_reparam`: `H²` has no metric rescaling, so the period is co-constructed
 rather than normalized (the `AL-6` precedent).
 
 Fork-A assembly (honest Dahlberg §2–3 transcription onto the arc-length engine):
@@ -1337,8 +1306,8 @@ anchor `exists_bicircle_anchor` → the **reparam-uniform** closing constants
 `ε := min ε₀ (μ/C₁)` is chosen first, breaking the reparam/ε fixed point — then the
 `L¹`-plateau reparam `exists_bicircle_L1_reparam_pointwise` at tolerance `ε`,
 Poincaré–Miranda closing (`exists_layout_closing`), simplicity transport
-(`layout_chord_ne_zero`), the window bridge `layout_arcLengthH2Curvature`
-(`arcLengthH2Curvature_of_windowSolution`), `arcLengthH2Converse`, and the composite
+(`layout_chord_ne_zero`), the window bridge `layout_windowSolution_exposed`,
+`arcLengthH2Converse`, and the composite
 reparam `Ψ = h₁ ∘ g_{w*,t*} ∘ χ` (`nodeMap` `C¹`/positive-density, `χ` the linear
 window reparam of the converse).
 

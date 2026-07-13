@@ -1,0 +1,80 @@
+/-
+Copyright (c) 2026 kejace. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: kejace
+-/
+import Mathlib.Analysis.Normed.Field.Basic
+
+/-!
+# Perturbation bound for quotients
+
+The quotient-perturbation ("Lipschitz estimate for division") bound over a normed division
+ring: if `δ ≤ ‖d₁‖`, `δ ≤ ‖d₂‖` with `0 < δ`, and `‖n₁‖ ≤ B`, then
+
+  `‖n₁ / d₁ - n₂ / d₂‖ ≤ ‖n₁ - n₂‖ / δ + B * ‖d₁ - d₂‖ / δ ^ 2`.
+
+This is the workhorse behind "a bounded quotient with denominator bounded away from zero is
+Lipschitz". Mathlib has the inversion special case as the *equality* `dist_inv_inv₀`, but no
+packaged quotient-difference *bound*: both `uniformContinuousOn_inv₀` and
+`PeriodPair.weierstrassP_bound` rederive the estimate inline.
+
+The proof splits `n₁ / d₁ - n₂ / d₂ = (n₁ - n₂) * d₂⁻¹ + n₁ * (d₁⁻¹ - d₂⁻¹)` — a
+decomposition valid in noncommutative division rings — and bounds the inverse-difference term
+via `dist_inv_inv₀`.
+
+## Main results
+
+* `norm_div_sub_div_le`: the general bound over a `NormedDivisionRing`.
+* `abs_div_sub_div_le`: the `ℝ`-specialisation with one-sided denominator bounds `δ ≤ dᵢ` and
+  absolute values in place of norms.
+
+## Tags
+
+division, quotient, perturbation, Lipschitz, normed field
+-/
+
+-- TODO(PR): upstream to `Mathlib/Analysis/Normed/Field/Basic` next to `dist_inv_inv₀`, and
+-- refactor the two inline rederivations (`uniformContinuousOn_inv₀`,
+-- `PeriodPair.weierstrassP_bound`) to use it.
+
+variable {α : Type*} [NormedDivisionRing α]
+
+-- TODO(PR): a mathlib version would likely drop the abstract bounds `B`, `dn`, `dd` and state
+-- the RHS directly as `‖n₁ - n₂‖ / δ + ‖n₁‖ * ‖d₁ - d₂‖ / δ ^ 2` (callers recover the packaged
+-- form with `gcongr`); kept as-is here because downstream consumers use the packaged form.
+/-- **Perturbation bound for quotients.** If both denominators satisfy `δ ≤ ‖dᵢ‖` for some
+`δ > 0`, the first numerator is bounded by `B`, and the numerators (resp. denominators) differ
+by at most `dn` (resp. `dd`), then the quotients differ by at most `dn / δ + B * dd / δ ^ 2`. -/
+theorem norm_div_sub_div_le {n₁ n₂ d₁ d₂ : α} {δ B dn dd : ℝ} (hδ : 0 < δ)
+    (hd₁ : δ ≤ ‖d₁‖) (hd₂ : δ ≤ ‖d₂‖) (hn₁B : ‖n₁‖ ≤ B)
+    (hn : ‖n₁ - n₂‖ ≤ dn) (hd : ‖d₁ - d₂‖ ≤ dd) :
+    ‖n₁ / d₁ - n₂ / d₂‖ ≤ dn / δ + B * dd / δ ^ 2 := by
+  have h₁ : d₁ ≠ 0 := norm_pos_iff.mp (hδ.trans_le hd₁)
+  have h₂ : d₂ ≠ 0 := norm_pos_iff.mp (hδ.trans_le hd₂)
+  have hdn0 : 0 ≤ dn := (norm_nonneg _).trans hn
+  have hdd0 : 0 ≤ dd := (norm_nonneg _).trans hd
+  have hB0 : 0 ≤ B := (norm_nonneg _).trans hn₁B
+  have key : n₁ / d₁ - n₂ / d₂ = (n₁ - n₂) * d₂⁻¹ + n₁ * (d₁⁻¹ - d₂⁻¹) := by
+    rw [div_eq_mul_inv, div_eq_mul_inv, sub_mul, mul_sub]
+    abel
+  have hinv : ‖d₁⁻¹ - d₂⁻¹‖ ≤ dd / δ ^ 2 := by
+    rw [← dist_eq_norm] at hd ⊢
+    rw [dist_inv_inv₀ h₁ h₂, sq]
+    gcongr
+  calc ‖n₁ / d₁ - n₂ / d₂‖
+      ≤ ‖(n₁ - n₂) * d₂⁻¹‖ + ‖n₁ * (d₁⁻¹ - d₂⁻¹)‖ := key ▸ norm_add_le _ _
+    _ = ‖n₁ - n₂‖ / ‖d₂‖ + ‖n₁‖ * ‖d₁⁻¹ - d₂⁻¹‖ := by
+        rw [norm_mul, norm_mul, norm_inv, ← div_eq_mul_inv]
+    _ ≤ dn / δ + B * (dd / δ ^ 2) := by gcongr
+    _ = dn / δ + B * dd / δ ^ 2 := by rw [mul_div_assoc]
+
+-- Stated via `|·|` rather than `‖·‖`: mathlib convention for `ℝ`-specific lemmas is absolute
+-- values (cf. `abs_sub_abs_le_abs_sub`), and the `abs_` name prefix matches that choice.
+/-- `ℝ`-specialisation of `norm_div_sub_div_le` with one-sided denominator bounds `δ ≤ dᵢ`
+(which force the denominators positive) and absolute values in place of norms. -/
+theorem abs_div_sub_div_le {n₁ n₂ d₁ d₂ δ B dn dd : ℝ} (hδ : 0 < δ)
+    (hd₁ : δ ≤ d₁) (hd₂ : δ ≤ d₂) (hn₁B : |n₁| ≤ B)
+    (hn : |n₁ - n₂| ≤ dn) (hd : |d₁ - d₂| ≤ dd) :
+    |n₁ / d₁ - n₂ / d₂| ≤ dn / δ + B * dd / δ ^ 2 := by
+  rw [← Real.norm_eq_abs] at hn₁B hn hd ⊢
+  exact norm_div_sub_div_le hδ (hd₁.trans (le_abs_self d₁)) (hd₂.trans (le_abs_self d₂)) hn₁B hn hd

@@ -188,24 +188,16 @@ lemma arcModelConst_norm_le_margin {a c K m : ℝ} {z₀ : ℂ} {φ₀ : ℝ}
 
 The five-leg `arcModelConst` composition at levels `(c, a, c, a, c)` and lengths
 `(L/8, L/4 + w₁, L/4, L/4 + w₂, L/8 + t)` from the anchor's mid-`c` point
-`layoutStart = ρ(qArc2) = anchorCurve(3L/4)` — the closed-form comparison curve
+`layoutStart = ρ(qArc2)` (the anchor's mid-`c` point) — the closed-form comparison curve
 of the A6 five-leg Grönwall transport.  The terminal dof `t` enters only through
 the evaluation window `[0, Λ]` (the last leg is a `c`-arc of unbounded extent),
 so `layoutClean` itself is `t`-free — the A8 terminal-monotonicity works on the
 same curve. -/
 
 /-- **The layout start state**: the central reflection `ρ(z, φ) = (−z, φ + π)` of
-the quarter endpoint `qArc2`, i.e. the anchor curve's mid-`c` point
-`anchorCurve(3L/4)` (`layoutStart_eq_anchorCurve`). -/
+the quarter endpoint `qArc2`, i.e. the anchor's mid-`c` point. -/
 noncomputable def layoutStart (a c h L : ℝ) : ℂ × ℝ :=
   (-(qArc2 a c (h, L)).1, (qArc2 a c (h, L)).2 + π)
-
-private lemma layoutStart_eq_anchorCurve (a c h : ℝ) {L : ℝ} (hL : 0 < L) :
-    layoutStart a c h L = anchorCurve a c h L (3 * L / 4) := by
-  have h1 : anchorHalf a c h L (3 * L / 4 - L / 2) = qArc2 a c (h, L) := by
-    rw [show 3 * L / 4 - L / 2 = L / 4 by ring, anchorHalf_of_le a c h le_rfl,
-      anchorQuarter_quarter a c h hL]
-  rw [anchorCurve_of_ge a c h hL (by linarith), h1, layoutStart]
 
 /-- On the anchor locus (`G₂ = 0`) the layout start phase is `5π/2`. -/
 lemma layoutStart_snd {a c h L : ℝ} (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2) :
@@ -403,13 +395,8 @@ curvature bound `M`, start-ball radius `9` (the start `(z₀, 5π/2)` has norm
 leg, with the shift reparametrization and the uniform `exp(Lip·Lmax)` factor;
 `layout_leg_L1` restricts the total comp-`L¹` tolerance to one leg. -/
 
-/-- Shifting the profile through the field: `arcField (κ(b + ·)) R σ =
-arcField κ R (b + σ)` (the field reads the profile only at the current time). -/
-private lemma arcField_shift (κ : ℝ → ℝ) (R b σ : ℝ) :
-    arcField (fun s => κ (b + s)) R σ = arcField κ R (b + σ) := rfl
-
-/-- Reparametrisation of a trajectory by the shift `s ↦ b + s`, general-length
-form of the engine's `hasDerivWithinAt_shift`. -/
+/-- Reparametrisation of a trajectory by the shift `s ↦ b + s` (general-length
+window form). -/
 private lemma hasDerivWithinAt_shift_general {Φ : ℝ → ℂ × ℝ} {v : ℂ × ℝ}
     {b ℓ T σ : ℝ}
     (hmaps : Set.MapsTo (fun s => b + s) (Set.Icc 0 ℓ) (Set.Icc 0 T))
@@ -854,15 +841,6 @@ lemma mem_layoutBox {L : ℝ} {p : ℝ × ℝ × ℝ} :
     p ∈ layoutBox L ↔ |p.1| ≤ L / 16 ∧ |p.2.1| ≤ L / 16 ∧ |p.2.2| ≤ L / 16 :=
   Iff.rfl
 
-/-- The layout box is compact (A10 pre-payment: the Poincaré–Miranda domain). -/
-private lemma isCompact_layoutBox (L : ℝ) : IsCompact (layoutBox L) := by
-  have heq : layoutBox L = Set.Icc (-(L / 16)) (L / 16)
-      ×ˢ (Set.Icc (-(L / 16)) (L / 16) ×ˢ Set.Icc (-(L / 16)) (L / 16)) := by
-    ext p
-    simp only [layoutBox, Set.mem_setOf_eq, abs_le, Set.mem_prod, Set.mem_Icc]
-  rw [heq]
-  exact isCompact_Icc.prod (isCompact_Icc.prod isCompact_Icc)
-
 /-- Joint parameter continuity of the periodic pulse: with a continuous
 nonvanishing period and continuous support data, `periodTent` is continuous in
 the parameter (all denominators of the `clampTent` rescaling are nonzero). -/
@@ -1087,8 +1065,7 @@ private lemma kappaArc_L1_diff_tendsto {κ h₁ : ℝ → ℝ} (hκc : Continuou
 
 /-! ### ALM-A7: residual continuity in the layout dofs
 
-The parametric Grönwall squeeze (the `negSmoothResidual_continuousOn` pattern of
-`Gluck/Hyperbolic/MixedSign.lean`, with the profile-parameter `L¹`
+The parametric Grönwall squeeze (with the profile-parameter `L¹`
 bound replaced by the joint-`(w, t)` continuity ladder above): two true flows at
 nearby dofs share the start `layoutStart`, the horizon `2L`, the clamp radius
 and the start ball (the `(w, t)`-uniform `layoutFlow` design), so
@@ -1215,8 +1192,8 @@ layout flow at the period `Λ_{w,t}`, minus the closure target — the start poi
 with the phase advanced by one full turn `2π`.  Components: `.1` is the
 `z`-closure residual `z(Λ) − z(0)` (A10 consumes its `re`/`im` parts in the
 Poincaré–Miranda closing), `.2` is the turning residual `φ(Λ) − (φ(0) + 2π)`
-(A8's nested root variable; on the anchor locus the target is `9π/2`,
-`layoutResidual_snd_eq`). -/
+(A8's nested root variable; on the anchor locus the start phase is `5π/2`,
+`layoutStart_snd`, so the target is `9π/2`). -/
 noncomputable def layoutResidual (κ h₁ : ℝ → ℝ) (a c h L M w₁ w₂ t : ℝ) : ℂ × ℝ :=
   layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)
     - ((layoutStart a c h L).1, (layoutStart a c h L).2 + 2 * π)
@@ -1230,15 +1207,6 @@ lemma layoutResidual_snd (κ h₁ : ℝ → ℝ) (a c h L M w₁ w₂ t : ℝ) :
     (layoutResidual κ h₁ a c h L M w₁ w₂ t).2
       = (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)).2
         - ((layoutStart a c h L).2 + 2 * π) := rfl
-
-/-- On the anchor locus (`G₂ = 0`, start phase `5π/2`) the turning target is
-`9π/2`. -/
-private lemma layoutResidual_snd_eq {a c h L : ℝ} (hφe : (qArc2 a c (h, L)).2 = 3 * π / 2)
-    (κ h₁ : ℝ → ℝ) (M w₁ w₂ t : ℝ) :
-    (layoutResidual κ h₁ a c h L M w₁ w₂ t).2
-      = (layoutFlow κ h₁ a c h L M w₁ w₂ t (nodePeriod L w₁ w₂ t)).2 - 9 * π / 2 := by
-  rw [layoutResidual_snd, layoutStart_snd hφe]
-  ring
 
 /-- The residual vanishes iff the true flow closes with total turning `2π`. -/
 lemma layoutResidual_eq_zero_iff (κ h₁ : ℝ → ℝ) (a c h L M w₁ w₂ t : ℝ) :

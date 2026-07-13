@@ -1,7 +1,7 @@
 name = "gluck"
 version = "0.1.0"
 keywords = ["math"]
-defaultTargets = ["Gluck"]
+defaultTargets = ["Gluck", "ForMathlib"]
 
 [leanOptions]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`
@@ -29,3 +29,6 @@ rev = "v4.31.0"
 
 [[lean_lib]]
 name = "Gluck"
+
+[[lean_lib]]
+name = "ForMathlib"

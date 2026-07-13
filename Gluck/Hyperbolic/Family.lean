@@ -43,5 +43,5 @@ four-vertex gap above `max 1`, culminating in the capstone `hyperbolicMixedConve
 * `Gluck.SpaceForm.ArcLengthH2FamilyClosing` — **ALM-A9.3–A10**: the face-sign
   theorem and the Poincaré–Miranda closing `exists_layout_closing`.
 * `Gluck.SpaceForm.ArcLengthH2FamilySimplicity` — **ALM-A11–A12**: simplicity
-  transport and the capstone `hyperbolicMixedConverse` / `layout_arcLengthH2Curvature`.
+  transport and the capstone `hyperbolicMixedConverse`.
 -/

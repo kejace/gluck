@@ -38,8 +38,8 @@ mixed converse to the \emph{exact-profile} capstone
   $\kappa>1$ \emph{everywhere} is realized by a simple closed curve. The bound
   is the H\textsuperscript{2} threshold: circles have geodesic curvature $>1$,
   horocycles exactly $1$, and curves with $\kappa\le1$ can run off to infinity,
-  so $\kappa>1$ is the natural positivity hypothesis. This is the $\varepsilon=-1$
-  instance of the $\varepsilon$-generic space-form positive converse; nothing
+  so $\kappa>1$ is the natural positivity hypothesis. This is the $K=-1$
+  instance of the $K$-generic space-form positive converse; nothing
   hyperbolic-specific remains to prove.
 \item \emph{Mixed (Dahlberg) converse},
   \cref{thm:hyperbolic_mixed_converse}: $\kappa$ may dip genuinely negative —
@@ -51,8 +51,8 @@ mixed converse to the \emph{exact-profile} capstone
   \cref{thm:hyperbolic_mixed_converse_exact}: the same hypothesis realizes
   $\kappa$ \emph{exactly},
   \[
-    \exists\,z,\quad \texttt{IsSimpleClosed }z\ \wedge\
-    \texttt{Realizes }(-1)\ z\ \kappa,
+    \exists\,\gamma,\quad \texttt{IsSimpleClosed }\gamma\ \wedge\
+    \texttt{Realizes }(-1)\ \gamma\ \kappa,
   \]
   with \emph{no} reparametrization. The up-to-reparam form
   \cref{thm:hyperbolic_mixed_converse} is kept as a weakening corollary.
@@ -76,7 +76,7 @@ circle map}: $\Psi(t+2\pi)=\Psi(t)+2\pi$. This is recorded in
 with the degree-one clause attached), and
 \cref{thm:realizes_of_reparam_degree_one} shows that a degree-one,
 orientation-preserving $C^1$ reparametrization can always be removed: the
-global $C^1$ inverse $\Psi^{-1}$ exists, and $w=z\circ\Psi^{-1}$ is a simple
+global $C^1$ inverse $\Psi^{-1}$ exists, and $w=\gamma\circ\Psi^{-1}$ is a simple
 closed curve realizing $\kappa$ exactly.
 
 \paragraph{Historical honesty.}
@@ -92,7 +92,7 @@ structure of $\Psi$ was surfaced through
 be removed outright. This closed the AL-6 gap.
 
 \paragraph{Relation to the space-form wrappers.}
-The $\varepsilon$-generic packaging of these results lives in
+The $K$-generic packaging of these results lives in
 \cref{chap:spaceform_converse}: in particular the space-form-level hyperbolic
 Dahlberg converse \cref{thm:hyperbolic_dahlberg_converse} is derived
 \emph{from} the exact capstone \cref{thm:hyperbolic_mixed_converse_exact} of
@@ -126,18 +126,18 @@ without a positive-speed obstruction.
   \label{def:realizes_hyperbolic_curvature}
   \lean{Gluck.RealizesHyperbolicCurvature}
   \uses{def:spaceform_realizes}
-  A curve $z:\mathbb R\to\mathbb C$ \emph{realizes the hyperbolic curvature
-  function} $\kappa$ if $\texttt{SpaceForm.Realizes}\,(-1)\,z\,\kappa$: against
+  A curve $\gamma:\mathbb R\to\mathbb C$ \emph{realizes the hyperbolic curvature
+  function} $\kappa$ if $\texttt{SpaceForm.Realizes}\,(-1)\,\gamma\,\kappa$: against
   the tangent-angle gauge $\varphi$, the defining speed relation is
   \[
-    \frac{1-\lVert z\rVert^2}{2}\,\varphi'
-      \;=\;\bigl(\kappa+\langle z,\,ie^{i\varphi}\rangle_{\mathbb R}\bigr)
-      \,\lVert z'\rVert
+    \frac{1-\lVert \gamma\rVert^2}{2}\,\varphi'
+      \;=\;\bigl(\kappa+\langle \gamma,\,ie^{i\varphi}\rangle_{\mathbb R}\bigr)
+      \,\lVert \gamma'\rVert
   \]
   (note the $+$ inner-product term, versus the $-$ of the spherical
   \cref{def:realizes_spherical_curvature}, and the metric factor
-  $1-\lVert z\rVert^2$). Definitionally the $\varepsilon=-1$ instance of the
-  $\varepsilon$-generic predicate; the accompanying lemma
+  $1-\lVert z\rVert^2$). Definitionally the $K=-1$ instance of the
+  $K$-generic predicate; the accompanying lemma
   \texttt{realizesHyperbolicCurvature\_iff\_realizes\_neg\_one} records the
   (reflexive) unfolding.
 \end{definition}
@@ -147,11 +147,11 @@ without a positive-speed obstruction.
   \label{def:hyperbolic_four_vertex}
   \lean{Gluck.HyperbolicFourVertex}
   \uses{def:is_curvature_function, def:four_vertex_condition}
-  The $\varepsilon=-1$ instance of \texttt{SpaceForm.SpaceFormFourVertex}: a
+  The $K=-1$ instance of \texttt{SpaceForm.SpaceFormFourVertex}: a
   continuous, $2\pi$-periodic, strictly positive $\kappa$ with the
   value-separated four-vertex extrema (\cref{def:four_vertex_condition}) and
   the escape-velocity bound $\kappa>1$ everywhere. Since the ambient sign
-  $\varepsilon=-1$ is negative, the conditional escape guard of the generic
+  $K=-1$ is negative, the conditional escape guard of the generic
   predicate fires unconditionally, and the unfolding lemma
   \texttt{hyperbolicFourVertex\_iff} states the hypothesis as the plain
   conjunction: $\kappa$ is a curvature function, satisfies the four-vertex
@@ -169,8 +169,8 @@ without a positive-speed obstruction.
   the Poincar\'e disk:
   \[
     \texttt{HyperbolicFourVertex }\kappa\;\Longrightarrow\;
-    \exists\,z,\ \texttt{IsSimpleClosed }z\ \wedge\
-    \texttt{RealizesHyperbolicCurvature }z\,\kappa .
+    \exists\,\gamma,\ \texttt{IsSimpleClosed }\gamma\ \wedge\
+    \texttt{RealizesHyperbolicCurvature }\gamma\,\kappa .
   \]
   Genuinely new mathematics: there is no published Gluck--Dahlberg converse
   for prescribed cyclic geodesic curvature on H\textsuperscript{2}.
@@ -179,10 +179,10 @@ without a positive-speed obstruction.
 \begin{proof}
   \uses{thm:spaceform_converse_pos}
   \leanok
-  One line: the $\varepsilon=-1$ case of the space-form positive converse,
+  One line: the $K=-1$ case of the space-form positive converse,
   $\texttt{SpaceForm.spaceFormConverse\_pos}\ (\texttt{Or.inr rfl})$. All the
   work — flow, winding, reconstruction, simplicity — happens
-  $\varepsilon$-generically in \cref{chap:spaceform_converse}.
+  $K$-generically in \cref{chap:spaceform_converse}.
 \end{proof}
 
 \begin{definition}[Mixed-sign hyperbolic four-vertex hypothesis]
@@ -212,9 +212,9 @@ without a positive-speed obstruction.
   ($0<\Psi'$), as the hyperbolic geodesic curvature of a simple closed curve in
   the Poincar\'e disk:
   \[
-    \exists\,z\,\Psi,\quad C^1\,\Psi\ \wedge\ 0<\Psi'\ \wedge\
-    \texttt{IsSimpleClosed }z\ \wedge\
-    \texttt{RealizesHyperbolicCurvature }z\,(\kappa\circ\Psi).
+    \exists\,\gamma\,\Psi,\quad C^1\,\Psi\ \wedge\ 0<\Psi'\ \wedge\
+    \texttt{IsSimpleClosed }\gamma\ \wedge\
+    \texttt{RealizesHyperbolicCurvature }\gamma\,(\kappa\circ\Psi).
   \]
   As with the arc-length family results, the conclusion is stated up to
   reparametrization because H\textsuperscript{2} has no metric rescaling: the
@@ -269,16 +269,16 @@ without a positive-speed obstruction.
   \lean{Gluck.Hyperbolic.realizes_of_reparam_degree_one}
   \uses{def:spaceform_realizes, def:is_simple_closed,
         lem:injon_ico_shift_of_periodic}
-  Let $\varepsilon\in\mathbb R$ and suppose a simple closed curve $z$ realizes
-  $\kappa\circ\Psi$ at sign $\varepsilon$, where $\Psi$ is $C^1$,
+  Let $K\in\mathbb R$ and suppose a simple closed curve $\gamma$ realizes
+  $\kappa\circ\Psi$ at curvature $K$, where $\Psi$ is $C^1$,
   orientation-preserving ($0<\Psi'$ everywhere), and a \emph{degree-one circle
   map}: $\Psi(t+2\pi)=\Psi(t)+2\pi$. Then $\kappa$ is realized \emph{exactly}
-  by the simple closed curve $w=z\circ\Psi^{-1}$:
+  by the simple closed curve $w=\gamma\circ\Psi^{-1}$:
   \[
     \exists\,w,\quad \texttt{IsSimpleClosed }w\ \wedge\
-    \texttt{Realizes }\varepsilon\ w\ \kappa .
+    \texttt{Realizes }K\ w\ \kappa .
   \]
-  Stated $\varepsilon$-generically: nothing in the removal is hyperbolic.
+  Stated $K$-generically: nothing in the removal is hyperbolic.
 \end{theorem}
 
 \begin{proof}
@@ -300,18 +300,18 @@ without a positive-speed obstruction.
   $\Psi$ to both sides of the degree-one identity transfers it to $\Phi$:
   $\Phi(t+2\pi)=\Phi(t)+2\pi$.
 
-  \emph{$w=z\circ\Phi$ is simple closed.} Closedness: $w(t+2\pi)
-  =z(\Phi(t)+2\pi)=z(\Phi(t))=w(t)$ by the degree-one identity for $\Phi$ and
-  $2\pi$-periodicity of $z$. Injectivity on $[0,2\pi)$: $\Phi$ maps
+  \emph{$w=\gamma\circ\Phi$ is simple closed.} Closedness: $w(t+2\pi)
+  =\gamma(\Phi(t)+2\pi)=\gamma(\Phi(t))=w(t)$ by the degree-one identity for $\Phi$ and
+  $2\pi$-periodicity of $\gamma$. Injectivity on $[0,2\pi)$: $\Phi$ maps
   $[0,2\pi)$ strictly monotonically into the \emph{shifted} fundamental
-  interval $[\Phi(0),\Phi(0)+2\pi)$, on which $z$ is injective by
+  interval $[\Phi(0),\Phi(0)+2\pi)$, on which $\gamma$ is injective by
   \cref{lem:injon_ico_shift_of_periodic} — this injectivity transfer across a
   shifted period is exactly why the helper lemma exists.
 
   \emph{$w$ realizes $\kappa$.} The reparametrization-transport lemma
   \texttt{spaceFormRealizes\_comp} (\cref{chap:spaceform_converse}) applied to
   the realization of $\kappa\circ\Psi$ along the $C^1$, $\Phi'>0$ map $\Phi$
-  gives $\texttt{Realizes }\varepsilon\,(z\circ\Phi)\,((\kappa\circ\Psi)\circ\Phi)$,
+  gives $\texttt{Realizes }K\,(\gamma\circ\Phi)\,((\kappa\circ\Psi)\circ\Phi)$,
   and $(\kappa\circ\Psi)\circ\Phi=\kappa$ by the right-inverse identity
   $\Psi(\Phi t)=t$.
 \end{proof}
@@ -329,8 +329,8 @@ without a positive-speed obstruction.
   closed curve in the Poincar\'e disk:
   \[
     \texttt{MixedHyperbolicFourVertex }\kappa\;\Longrightarrow\;
-    \exists\,z,\ \texttt{IsSimpleClosed }z\ \wedge\
-    \texttt{Realizes }(-1)\ z\ \kappa .
+    \exists\,\gamma,\ \texttt{IsSimpleClosed }\gamma\ \wedge\
+    \texttt{Realizes }(-1)\ \gamma\ \kappa .
   \]
   The H\textsuperscript{2} capstone: it subsumes both
   \cref{thm:hyperbolic_converse_pos} (whose hypothesis implies the mixed one
@@ -347,14 +347,14 @@ without a positive-speed obstruction.
         thm:realizes_of_reparam_degree_one}
   \leanok
   Two steps. \cref{thm:hyperbolic_mixed_converse_reparam_deg1}
-  (\cref{chap:hyperbolic_family}) supplies a simple closed $z$ realizing
+  (\cref{chap:hyperbolic_family}) supplies a simple closed $\gamma$ realizing
   $\kappa\circ\Psi$ where the fork-A reparametrization
   $\Psi=(h_1\circ\mathrm{nodeMap})\circ\chi$ is $C^1$ with $0<\Psi'$ \emph{and}
   degree-one, $\Psi(t+2\pi)=\Psi(t)+2\pi$ — the degree-one clause is genuine
   because the node map conjugates the co-constructed period $\Lambda$ to
   $2\pi$ (\cref{lem:node_map_add_period}). Then
   \cref{thm:realizes_of_reparam_degree_one} removes $\Psi$ via
-  $w=z\circ\Psi^{-1}$. The user-facing \texttt{Gluck.hyperbolicMixedConverse\_exact}
+  $w=\gamma\circ\Psi^{-1}$. The user-facing \texttt{Gluck.hyperbolicMixedConverse\_exact}
   is the verbatim re-export of this composite through
   \cref{def:mixed_hyperbolic_four_vertex}.
 \end{proof}

@@ -15,7 +15,7 @@ This chapter corresponds primarily to \texttt{Gluck/Sphere/Reconstruction.lean} 
   \label{lem:spherical_circle_realizes}
   \lean{Gluck.sphericalCircle_realizes}
   \uses{def:realizes_spherical_curvature, lem:spherical_speed_circle}
-  For every constant $c>0$ the centered circle $z(\theta)=-r^\ast\,i\,e^{i\theta}$ with
+  For every constant $c>0$ the centered circle $\gamma(\theta)=-r^\ast\,i\,e^{i\theta}$ with
   $r^\ast=\sqrt{1+c^2}-c\in(0,1)$ is a simple closed curve realizing the constant
   curvature function $\kappa\equiv c$
   (\cref{def:realizes_spherical_curvature}). This discharges the constant disjunct of
@@ -27,11 +27,11 @@ This chapter corresponds primarily to \texttt{Gluck/Sphere/Reconstruction.lean} 
 \begin{proof}
   \uses{lem:spherical_speed_circle}
   \leanok
-  $z$ is $C^1$ (an explicit exponential), $2\pi$-periodic, and
-  $z'(\theta)=r^\ast e^{i\theta}\ne0$, so the tangent-angle witness is
-  $\varphi(\theta)=\theta$ with $\|z'\|=r^\ast$. Confinement: $\|z\|=r^\ast<1$ since
+  $\gamma$ is $C^1$ (an explicit exponential), $2\pi$-periodic, and
+  $\gamma'(\theta)=r^\ast e^{i\theta}\ne0$, so the tangent-angle witness is
+  $\varphi(\theta)=\theta$ with $\|\gamma'\|=r^\ast$. Confinement: $\|\gamma\|=r^\ast<1$ since
   $\sqrt{1+c^2}<1+c$. The speed relation is the geodesic-circle identity: with
-  $\langle z,ie^{i\theta}\rangle=-r^\ast$ the right-hand side is
+  $\langle \gamma,ie^{i\theta}\rangle=-r^\ast$ the right-hand side is
   $(c+r^\ast)r^\ast$ and the left-hand side $\tfrac{1+r^{\ast2}}{2}$; they agree by the
   circle identity $1+r^{\ast2}=2r^\ast(c+r^\ast)$ (defining property of
   $r^\ast=\sqrt{1+c^2}-c$; this is the content of \cref{lem:spherical_speed_circle} read
@@ -44,9 +44,9 @@ This chapter corresponds primarily to \texttt{Gluck/Sphere/Reconstruction.lean} 
   \label{lem:realizes_spherical_comp}
   \lean{Gluck.realizesSphericalCurvature_comp}
   \uses{def:realizes_spherical_curvature, lem:realizes_curvature_comp}
-  If $z$ realizes the spherical curvature $\mu$
+  If $\gamma$ realizes the spherical curvature $\mu$
   (\cref{def:realizes_spherical_curvature}) and $\psi:\mathbb R\to\mathbb R$ is $C^1$
-  with $\psi'>0$ everywhere, then $z\circ\psi$ realizes $\mu\circ\psi$.
+  with $\psi'>0$ everywhere, then $\gamma\circ\psi$ realizes $\mu\circ\psi$.
 \end{lemma}
 
 \begin{proof}
@@ -54,7 +54,7 @@ This chapter corresponds primarily to \texttt{Gluck/Sphere/Reconstruction.lean} 
 \leanok
   Mirror of the Euclidean \cref{lem:realizes_curvature_comp}
   (\texttt{Gluck.realizesCurvature\_comp}): the chain rule gives
-  $(z\circ\psi)'=\psi'\cdot(z'\circ\psi)$, so the speed scales by $\psi'>0$, the
+  $(\gamma\circ\psi)'=\psi'\cdot(\gamma'\circ\psi)$, so the speed scales by $\psi'>0$, the
   tangent-angle witness is $\varphi\circ\psi$, and the spherical speed relation of
   \cref{def:realizes_spherical_curvature} at $\psi(t)$ multiplies through by
   $\psi'(t)>0$ on both sides — the extra conformal factor $(1+\|z\|^2)/2$ and the
@@ -70,10 +70,10 @@ This chapter corresponds primarily to \texttt{Gluck/Sphere/Reconstruction.lean} 
 The simplicity of the closing trajectory reduces to the Euclidean chord-integral
 machinery of \cref{chap:simplicity} through one observation: in the gauge
 $\varphi(\theta)=\theta$ the disk representative is an ordinary plane curve with
-$\tilde z'=\rho(\theta)\,e^{i\theta}$, $\rho>0$, i.e.\ (up to the additive constant
-$\tilde z(0)$) exactly a Euclidean reconstruction curve
+$\tilde\gamma'=\rho(\theta)\,e^{i\theta}$, $\rho>0$, i.e.\ (up to the additive constant
+$\tilde\gamma(0)$) exactly a Euclidean reconstruction curve
 $\mathrm{reconstruct}\,\rho$ (\cref{def:reconstruct}) for the \emph{trajectory speed}
-$\rho(\theta)=q_\kappa(\theta,\tilde z(\theta))$. The disk metric plays no role in
+$\rho(\theta)=q_\kappa(\theta,\tilde\gamma(\theta))$. The disk metric plays no role in
 injectivity. The chain below works this out in three finite steps and one assembly.
 
 \begin{lemma}\leanok
@@ -85,10 +85,10 @@ injectivity. The chain below works this out in three finite steps and one assemb
   Let $\kappa$ be continuous and $2\pi$-periodic (no positivity — the whole
   chain is sign-agnostic and is consumed verbatim by the mixed-sign stage 2),
   $R<1$, $\delta>0$, and let
-  $z:[0,2\pi]\to\mathbb C$ be a trajectory of the $(\kappa,R,\delta)$-truncated flow
+  $\gamma:[0,2\pi]\to\mathbb C$ be a trajectory of the $(\kappa,R,\delta)$-truncated flow
   (in the hypothesis form of \cref{lem:reconstruction_ode}) that is admissible and
-  closed. Write $\tilde z$ for its periodic extension and set
-  $\rho(t)=q_\kappa\bigl(t,\tilde z(t)\bigr)$
+  closed. Write $\tilde\gamma$ for its periodic extension and set
+  $\rho(t)=q_\kappa\bigl(t,\tilde\gamma(t)\bigr)$
   (\cref{def:spherical_speed}). Then $\rho$ is continuous, $2\pi$-periodic, and
   $\rho(t)>0$ for all $t$.
 \end{lemma}
@@ -98,18 +98,18 @@ injectivity. The chain below works this out in three finite steps and one assemb
   \leanok
   \emph{Extended admissibility.} For any $t$ reduce $u=t-2\pi\lfloor t/(2\pi)\rfloor
   \in[0,2\pi)$; admissibility at $u$ plus $2\pi$-periodicity of $\kappa$ and of
-  $\theta\mapsto e^{i\theta}$ give $\|\tilde z(t)\|\le R$ and
-  $\kappa(t)-\langle\tilde z(t),ie^{it}\rangle\ge\delta$ (the same reduction as inside
+  $\theta\mapsto e^{i\theta}$ give $\|\tilde\gamma(t)\|\le R$ and
+  $\kappa(t)-\langle\tilde\gamma(t),ie^{it}\rangle\ge\delta$ (the same reduction as inside
   the proof of \cref{lem:reconstruction_ode}).
-  \emph{Continuity.} $\tilde z$ is differentiable (the exposed derivative conjunct of
+  \emph{Continuity.} $\tilde\gamma$ is differentiable (the exposed derivative conjunct of
   \cref{lem:reconstruction_ode}), hence continuous; $\rho$ is the quotient
-  $\rho=\tfrac{1+\|\tilde z\|^2}{2(\kappa-\langle\tilde z,ie^{it}\rangle)}$ whose
+  $\rho=\tfrac{1+\|\tilde\gamma\|^2}{2(\kappa-\langle\tilde\gamma,ie^{it}\rangle)}$ whose
   denominator is continuous and $\ge2\delta>0$ by extended admissibility, so $\rho$ is
   continuous.
-  \emph{Periodicity.} $\tilde z(t+2\pi)=\tilde z(t)$
+  \emph{Periodicity.} $\tilde\gamma(t+2\pi)=\tilde\gamma(t)$
   (\cref{lem:periodic_extension_periodic}), $\kappa(t+2\pi)=\kappa(t)$, and
   $e^{i(t+2\pi)}=e^{it}$; all three inputs of $\rho$ are $2\pi$-periodic.
-  \emph{Positivity.} Numerator $1+\|\tilde z\|^2\ge1>0$, denominator $\ge2\delta>0$.
+  \emph{Positivity.} Numerator $1+\|\tilde\gamma\|^2\ge1>0$, denominator $\ge2\delta>0$.
 \end{proof}
 
 \begin{lemma}\leanok
@@ -120,7 +120,7 @@ injectivity. The chain below works this out in three finite steps and one assemb
         lem:reconstruct_deriv}
   In the setting of \cref{lem:spherical_trajectory_speed},
   \[
-    \tilde z(t)\;=\;\tilde z(0)+\mathrm{reconstruct}\,\rho\,(t)
+    \tilde\gamma(t)\;=\;\tilde\gamma(0)+\mathrm{reconstruct}\,\rho\,(t)
     \qquad\text{for all } t\in\mathbb R .
   \]
 \end{lemma}
@@ -130,12 +130,12 @@ injectivity. The chain below works this out in three finite steps and one assemb
   \leanok
   Both sides are differentiable on all of $\mathbb R$ with the \emph{same} derivative
   $\rho(t)e^{it}$: the left side by the exposed derivative conjunct of
-  \cref{lem:reconstruction_ode} (which is $q_\kappa(t,\tilde z(t))e^{it}
+  \cref{lem:reconstruction_ode} (which is $q_\kappa(t,\tilde\gamma(t))e^{it}
   =\rho(t)e^{it}$ by definition of $\rho$), the right side by
   \cref{lem:reconstruct_deriv} ($\rho$ is continuous by
   \cref{lem:spherical_trajectory_speed}). Their difference has vanishing derivative on
   the connected set $\mathbb R$, hence is constant; at $t=0$ the difference is
-  $\tilde z(0)$ since $\mathrm{reconstruct}\,\rho\,(0)=\int_0^0=0$.
+  $\tilde\gamma(0)$ since $\mathrm{reconstruct}\,\rho\,(0)=\int_0^0=0$.
 \end{proof}
 
 \begin{lemma}\leanok
@@ -164,10 +164,10 @@ injectivity. The chain below works this out in three finite steps and one assemb
         def:error_vector, lem:reconstruction_ode}
   In the setting of \cref{lem:spherical_trajectory_speed} (continuous
   $2\pi$-periodic $\kappa$ — no positivity, $R<1$, $\delta>0$, an admissible
-  closed trajectory $z$ of the truncated flow on
-  $[0,2\pi]$), the periodic extension $\tilde z$ is a \emph{simple} closed curve:
+  closed trajectory $\gamma$ of the truncated flow on
+  $[0,2\pi]$), the periodic extension $\tilde\gamma$ is a \emph{simple} closed curve:
   distinct parameters in $[0,2\pi)$ give distinct disk points. (Confinement
-  $\|\tilde z\|\le R<1$ already places the curve in the open disk, so this is
+  $\|\tilde\gamma\|\le R<1$ already places the curve in the open disk, so this is
   simplicity on $S^2$ via the stereographic chart; no further transport is needed.)
 \end{lemma}
 
@@ -179,13 +179,13 @@ injectivity. The chain below works this out in three finite steps and one assemb
   continuous, $2\pi$-periodic, strictly positive. Its error vector
   (\cref{def:error_vector}) vanishes:
   $\mathrm{errorVector}\,\rho=\mathrm{reconstruct}\,\rho\,(2\pi)
-  =\tilde z(2\pi)-\tilde z(0)=0$ by \cref{lem:spherical_trajectory_eq_reconstruct} and
-  $2\pi$-periodicity of $\tilde z$. Hence
+  =\tilde\gamma(2\pi)-\tilde\gamma(0)=0$ by \cref{lem:spherical_trajectory_eq_reconstruct} and
+  $2\pi$-periodicity of $\tilde\gamma$. Hence
   \cref{cor:positive_curvature_implies_simple} (the public Euclidean
   \texttt{isSimpleClosed\_reconstruct}; the \texttt{private}
   \texttt{simplicity\_transport} of \texttt{DahlbergStep2} is not needed) makes
   $\mathrm{reconstruct}\,\rho$ a simple closed curve, and
   \cref{lem:spherical_trajectory_eq_reconstruct} +
-  \cref{lem:is_simple_closed_const_add} (translation by $\tilde z(0)$) transfer
-  simplicity to $\tilde z$.
+  \cref{lem:is_simple_closed_const_add} (translation by $\tilde\gamma(0)$) transfer
+  simplicity to $\tilde\gamma$.
 \end{proof}

@@ -159,7 +159,7 @@ private theorem windingNumberS_eq_div_of_lift (g : C(I, Circle)) (φ : C(I, ℝ)
 /-- The **conjugate once-around loop** `t ↦ w·conj(e^{2πit})` as a continuous
 `ℂ`-loop on `[0,1]`. For `w ≠ 0` it is nowhere zero with `ℂ`-winding number
 `−1` (`windingNumberC_conj_loop`): the loop the boundary loop of the step
-error map is compared against in `spherical_endpoint_winding`.
+error map is compared against in the K-generic `SpaceForm.spaceForm_endpoint_winding`.
 (Blueprint `lem:winding_conj_loop`.) -/
 noncomputable def conjLoop (w : ℂ) : C(I, ℂ) :=
   ⟨fun t => w * (starRingEnd ℂ) (Circle.exp (2 * π * (t : ℝ)) : ℂ),
