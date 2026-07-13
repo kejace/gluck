@@ -177,4 +177,117 @@ lemma abs_turningAngle_lt_pi {K : ℝ} {κ ℓ : ZMod n → ℝ} (h : ModerateAr
         |Real.arcsin (κ i * tK K (ℓ i / 2))| := abs_add_le _ _
     _ < Real.pi := by linarith
 
+/-! ## Euclidean development and closure -/
+
+/-- Heading of edge `j` in the Euclidean development: the cumulative turning
+`ψ j = ∑_{m ≤ j} θ m` over the ordered lift `m ↦ (m : ZMod n)`. Edge `j`
+leaves vertex `j` after the turn at vertex `j`. -/
+noncomputable def heading (κ ℓ : ZMod n → ℝ) (j : ℕ) : ℝ :=
+  ∑ m ∈ Finset.range (j + 1), turningAngle 0 κ ℓ (m : ZMod n)
+
+/-- Vertex `k` of the Euclidean development in `ℂ`:
+`v k = ∑_{j < k} ℓ j · e^{i ψ j}`. -/
+noncomputable def vertexR2 (κ ℓ : ZMod n → ℝ) (k : ℕ) : ℂ :=
+  ∑ j ∈ Finset.range k,
+    (ℓ (j : ZMod n) : ℂ) * Complex.exp ((heading κ ℓ j : ℂ) * Complex.I)
+
+/-- The closure gap `E(κ, ℓ) = v n`: the development closes up iff it
+vanishes. -/
+noncomputable def closureGap (κ ℓ : ZMod n → ℝ) : ℂ :=
+  vertexR2 κ ℓ n
+
+/-- The total turning `T(κ, ℓ) = ∑_{i ∈ ZMod n} θ i` of the Euclidean
+turning angles. -/
+noncomputable def turningSum [NeZero n] (κ ℓ : ZMod n → ℝ) : ℝ :=
+  ∑ i : ZMod n, turningAngle 0 κ ℓ i
+
+lemma vertexR2_succ (κ ℓ : ZMod n → ℝ) (k : ℕ) :
+    vertexR2 κ ℓ (k + 1) = vertexR2 κ ℓ k
+      + (ℓ (k : ZMod n) : ℂ) * Complex.exp ((heading κ ℓ k : ℂ) * Complex.I) :=
+  Finset.sum_range_succ _ _
+
+/-- Project-local Mathlib supplement: summing a cyclic function over any
+block of `n` consecutive lifted indices equals the sum over `ZMod n`
+(Mathlib has no `Finset.range`-to-`ZMod` reindexing lemma). -/
+lemma sum_range_natCast_add {M : Type*} [AddCommMonoid M] [NeZero n]
+    (f : ZMod n → M) (a : ℕ) :
+    ∑ m ∈ Finset.range n, f ((a + m : ℕ) : ZMod n) = ∑ i : ZMod n, f i := by
+  have base : ∀ g : ZMod n → M,
+      ∑ m ∈ Finset.range n, g (m : ZMod n) = ∑ i : ZMod n, g i := by
+    intro g
+    rw [← Fin.sum_univ_eq_sum_range (fun m => g (m : ZMod n)) n]
+    exact Fintype.sum_bijective (fun i : Fin n => ((i : ℕ) : ZMod n))
+      ⟨fun a b hab => Fin.ext (by
+          simpa [ZMod.val_cast_of_lt a.isLt, ZMod.val_cast_of_lt b.isLt] using
+            congrArg ZMod.val hab),
+        fun z => ⟨⟨z.val, z.val_lt⟩, ZMod.natCast_rightInverse z⟩⟩
+      _ _ (fun _ => rfl)
+  calc ∑ m ∈ Finset.range n, f ((a + m : ℕ) : ZMod n)
+      = ∑ m ∈ Finset.range n, (fun i => f ((a : ZMod n) + i)) (m : ZMod n) := by
+        refine Finset.sum_congr rfl fun m _ => ?_
+        push_cast
+        rfl
+    _ = ∑ i : ZMod n, (fun i => f ((a : ZMod n) + i)) i :=
+        base (fun i => f ((a : ZMod n) + i))
+    _ = ∑ i : ZMod n, f i :=
+        Fintype.sum_equiv (Equiv.addLeft ((a : ℕ) : ZMod n)) _ _ (fun _ => rfl)
+
+/-- Under total turning `2π`, headings advance by exactly `2π` per period. -/
+lemma heading_add_n [NeZero n] {κ ℓ : ZMod n → ℝ}
+    (hT : turningSum κ ℓ = 2 * Real.pi) (j : ℕ) :
+    heading κ ℓ (j + n) = heading κ ℓ j + 2 * Real.pi := by
+  unfold heading
+  rw [show j + n + 1 = (j + 1) + n from by ring,
+    Finset.sum_range_add (fun m => turningAngle 0 κ ℓ (m : ZMod n)) (j + 1) n,
+    sum_range_natCast_add (turningAngle 0 κ ℓ) (j + 1)]
+  rw [show (∑ i : ZMod n, turningAngle 0 κ ℓ i) = turningSum κ ℓ from rfl, hT]
+
+/-- Periodicity of the closed development: if the closure gap vanishes and the
+total turning is `2π`, the vertex map is `n`-periodic, so it descends to a
+well-defined polygon `ZMod n → ℂ`. -/
+lemma vertexR2_add_n [NeZero n] {κ ℓ : ZMod n → ℝ} (hE : closureGap κ ℓ = 0)
+    (hT : turningSum κ ℓ = 2 * Real.pi) (k : ℕ) :
+    vertexR2 κ ℓ (k + n) = vertexR2 κ ℓ k := by
+  induction k with
+  | zero => simpa [closureGap, vertexR2] using hE
+  | succ k ih =>
+    have hedge : (ℓ ((k + n : ℕ) : ZMod n) : ℂ)
+          * Complex.exp ((heading κ ℓ (k + n) : ℂ) * Complex.I)
+        = (ℓ (k : ZMod n) : ℂ) * Complex.exp ((heading κ ℓ k : ℂ) * Complex.I) := by
+      have h1 : ((k + n : ℕ) : ZMod n) = (k : ZMod n) := by
+        push_cast [ZMod.natCast_self]
+        ring
+      have h2 : ((heading κ ℓ k + 2 * Real.pi : ℝ) : ℂ) * Complex.I
+          = (heading κ ℓ k : ℂ) * Complex.I + 2 * (Real.pi : ℂ) * Complex.I := by
+        push_cast
+        ring
+      rw [h1, heading_add_n hT, h2, Complex.exp_add, Complex.exp_two_pi_mul_I, mul_one]
+    rw [show k + 1 + n = (k + n) + 1 from by ring, vertexR2_succ, vertexR2_succ, ih, hedge]
+
+/-- The polygon of a closed development: `i ↦ v (i.val)`. Well-defined as a
+cyclic object by `vertexR2_add_n`. -/
+noncomputable def polygonR2 (κ ℓ : ZMod n → ℝ) : ZMod n → ℂ :=
+  fun i => vertexR2 κ ℓ i.val
+
+/-! ## Simple polygons and realizability -/
+
+/-- A cyclic vertex tuple `v : ZMod n → ℂ` is a simple polygon when every
+closed edge segment `segment ℝ (v i) (v (i + 1))` is nondegenerate,
+consecutive edges meet exactly in their shared vertex, and non-adjacent
+edges are disjoint. -/
+def IsSimplePolygon (v : ZMod n → ℂ) : Prop :=
+  (∀ i : ZMod n, v i ≠ v (i + 1)) ∧
+    (∀ i : ZMod n,
+      segment ℝ (v i) (v (i + 1)) ∩ segment ℝ (v (i + 1)) (v (i + 1 + 1))
+        = {v (i + 1)}) ∧
+    (∀ i j : ZMod n, i ≠ j → i + 1 ≠ j → j + 1 ≠ i →
+      segment ℝ (v i) (v (i + 1)) ∩ segment ℝ (v j) (v (j + 1)) = ∅)
+
+/-- Euclidean discrete realizability of a cyclic curvature profile `κ`: some
+moderate-arc edge lengths close the development with total turning `2π`
+(positive-orientation gauge) and a simple polygon. -/
+def RealizesR2 [NeZero n] (κ : ZMod n → ℝ) : Prop :=
+  ∃ ℓ : ZMod n → ℝ, ModerateArc 0 κ ℓ ∧ closureGap κ ℓ = 0 ∧
+    turningSum κ ℓ = 2 * Real.pi ∧ IsSimplePolygon (polygonR2 κ ℓ)
+
 end Gluck.Discrete
