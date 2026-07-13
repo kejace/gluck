@@ -266,4 +266,72 @@ lemma polygonR2_edge_ne [NeZero n] {κ ℓ : ZMod n → ℝ} (h : ModerateArc 0 
   apply hne
   rw [← hd, heq, sub_self]
 
+/-- Cyclic support half-plane: a cyclic vertex `P c` distinct from both
+endpoints of edge `a` lies strictly left of edge line `a`. Project-local. -/
+private lemma support_pos_cyclic [NeZero n] {κ ℓ : ZMod n → ℝ}
+    (h : ModerateArc 0 κ ℓ) (hκ : ∀ i : ZMod n, 0 < κ i) (hE : closureGap κ ℓ = 0)
+    (hT : turningSum κ ℓ = 2 * Real.pi) (a c : ZMod n) (hca : c ≠ a)
+    (hca1 : c ≠ a + 1) :
+    0 < (Complex.exp (((-heading κ ℓ a.val : ℝ) : ℂ) * Complex.I)
+          * (polygonR2 κ ℓ c - polygonR2 κ ℓ a)).im := by
+  set t := (c - a).val with htdef
+  have hb : ((t : ℕ) : ZMod n) = c - a := ZMod.natCast_rightInverse (c - a)
+  have ht0 : t ≠ 0 := by
+    intro h0; rw [h0, Nat.cast_zero] at hb; exact hca (sub_eq_zero.1 hb.symm)
+  have ht1 : t ≠ 1 := by
+    intro h1; rw [h1, Nat.cast_one] at hb
+    exact hca1 (by linear_combination hb.symm)
+  have htn : t < n := ZMod.val_lt (c - a)
+  have hpc : polygonR2 κ ℓ c = vertexR2 κ ℓ (a.val + t) := polygonR2_sub_val hE hT a c
+  have hpa : polygonR2 κ ℓ a = vertexR2 κ ℓ a.val := rfl
+  rw [hpc, hpa]
+  exact support_left_pos h hκ hE hT a.val (by omega) (by omega)
+
+/-- The left-distance functional vanishes on the anchoring edge's far endpoint
+`P (i+1)` (it lies on edge line `i`). Project-local. -/
+private lemma im_rot_edge_end_zero [NeZero n] {κ ℓ : ZMod n → ℝ}
+    (hE : closureGap κ ℓ = 0) (hT : turningSum κ ℓ = 2 * Real.pi) (i : ZMod n) :
+    (Complex.exp (((-heading κ ℓ i.val : ℝ) : ℂ) * Complex.I)
+        * (polygonR2 κ ℓ (i + 1) - polygonR2 κ ℓ i)).im = 0 := by
+  have e1 : polygonR2 κ ℓ (i + 1) = vertexR2 κ ℓ (i.val + 1) := by
+    simpa using polygonR2_add_nat hE hT i 1
+  rw [e1, show polygonR2 κ ℓ i = vertexR2 κ ℓ i.val from rfl,
+    im_rot_vertex_sub κ ℓ (show i.val ≤ i.val + 1 by omega)]
+  rw [Finset.sum_Ico_succ_top (le_refl i.val)]
+  simp
+
+/-- Non-adjacent edges are disjoint: both endpoints of the far edge lie strictly
+left of the near edge line, so the whole far segment does. Project-local. -/
+lemma polygonR2_nonadjacent_disjoint [NeZero n] {κ ℓ : ZMod n → ℝ}
+    (h : ModerateArc 0 κ ℓ) (hκ : ∀ i : ZMod n, 0 < κ i) (hE : closureGap κ ℓ = 0)
+    (hT : turningSum κ ℓ = 2 * Real.pi) (i j : ZMod n) (hij : i ≠ j)
+    (hij1 : i + 1 ≠ j) (hji1 : j + 1 ≠ i) :
+    segment ℝ (polygonR2 κ ℓ i) (polygonR2 κ ℓ (i + 1))
+        ∩ segment ℝ (polygonR2 κ ℓ j) (polygonR2 κ ℓ (j + 1)) = ∅ := by
+  rw [Set.eq_empty_iff_forall_notMem]
+  rintro z ⟨hz1, hz2⟩
+  obtain ⟨r, r', hr, hr', hrr, hz1eq⟩ := hz1
+  obtain ⟨s, s', hs, hs', hss, hz2eq⟩ := hz2
+  -- L(z) computed from the near edge: on the edge line, hence 0
+  have hLnear : (Complex.exp (((-heading κ ℓ i.val : ℝ) : ℂ) * Complex.I)
+      * (z - polygonR2 κ ℓ i)).im = 0 := by
+    rw [← hz1eq, im_rot_affine _ _ _ _ hrr, sub_self, mul_zero, Complex.zero_im,
+      mul_zero, zero_add, im_rot_edge_end_zero hE hT i, mul_zero]
+  -- L(z) computed from the far edge: strictly positive
+  have hLj : 0 < (Complex.exp (((-heading κ ℓ i.val : ℝ) : ℂ) * Complex.I)
+      * (polygonR2 κ ℓ j - polygonR2 κ ℓ i)).im :=
+    support_pos_cyclic h hκ hE hT i j (Ne.symm hij) (Ne.symm hij1)
+  have hLj1 : 0 < (Complex.exp (((-heading κ ℓ i.val : ℝ) : ℂ) * Complex.I)
+      * (polygonR2 κ ℓ (j + 1) - polygonR2 κ ℓ i)).im :=
+    support_pos_cyclic h hκ hE hT i (j + 1) hji1
+      (by intro hcontra; exact hij (by linear_combination -hcontra))
+  have hLfar : 0 < (Complex.exp (((-heading κ ℓ i.val : ℝ) : ℂ) * Complex.I)
+      * (z - polygonR2 κ ℓ i)).im := by
+    rw [← hz2eq, im_rot_affine _ _ _ _ hss]
+    rcases eq_or_lt_of_le hs with hs0 | hspos
+    · have hs'1 : s' = 1 := by linarith
+      rw [← hs0, zero_mul, zero_add, hs'1, one_mul]; exact hLj1
+    · nlinarith [mul_pos hspos hLj, mul_nonneg hs' hLj1.le]
+  linarith
+
 end Gluck.Discrete
