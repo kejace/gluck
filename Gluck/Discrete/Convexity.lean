@@ -65,4 +65,32 @@ lemma heading_sub_lt_two_pi [NeZero n] {κ ℓ : ZMod n → ℝ} (h : ModerateAr
   have := heading_strictMono h hκ hkn
   rwa [heading_add_n hT] at this
 
+/-! ## The support half-plane -/
+
+/-- Left-distance telescoping: for `k ≤ j`, the signed distance of vertex `P j`
+to the left of edge line `k` telescopes into a sum of `ℓ_m sin(ψ_m − ψ_k)`.
+Project-local (bespoke development). -/
+lemma im_rot_vertex_sub (κ ℓ : ZMod n → ℝ) {k j : ℕ} (hkj : k ≤ j) :
+    (Complex.exp (((-heading κ ℓ k : ℝ) : ℂ) * Complex.I)
+        * (vertexR2 κ ℓ j - vertexR2 κ ℓ k)).im
+      = ∑ m ∈ Finset.Ico k j,
+          ℓ (m : ZMod n) * Real.sin (heading κ ℓ m - heading κ ℓ k) := by
+  have hdiff : vertexR2 κ ℓ j - vertexR2 κ ℓ k
+      = ∑ m ∈ Finset.Ico k j,
+          (ℓ (m : ZMod n) : ℂ) * Complex.exp ((heading κ ℓ m : ℂ) * Complex.I) := by
+    rw [vertexR2, vertexR2, ← Finset.sum_Ico_eq_sub _ hkj]
+  rw [hdiff, Finset.mul_sum, Complex.im_sum]
+  refine Finset.sum_congr rfl fun m _ => ?_
+  have hexp : Complex.exp (((-heading κ ℓ k : ℝ) : ℂ) * Complex.I)
+        * ((ℓ (m : ZMod n) : ℂ) * Complex.exp ((heading κ ℓ m : ℂ) * Complex.I))
+      = (ℓ (m : ZMod n) : ℂ)
+          * Complex.exp (((heading κ ℓ m - heading κ ℓ k : ℝ) : ℂ) * Complex.I) := by
+    rw [mul_left_comm, ← Complex.exp_add]
+    congr 1
+    push_cast
+    ring_nf
+  rw [hexp, Complex.mul_im, Complex.exp_ofReal_mul_I_re, Complex.exp_ofReal_mul_I_im,
+    Complex.ofReal_re, Complex.ofReal_im]
+  ring
+
 end Gluck.Discrete
