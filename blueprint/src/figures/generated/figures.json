@@ -8,8 +8,8 @@
     {
       "id": "euclidean-gluck-reconstructions",
       "parameters": {
-        "ovalCos2": 0.55, "mixedCos3": 0.38, "mixedSin2": 0.25,
-        "fourfoldCos2": 0.25, "fourfoldCos4": -0.45
+        "ovalCos2": 0.55, "mixedCos2": 0.38, "mixedSin3": 0.08,
+        "fourfoldCos2": 0.45, "fourfoldCos4": -0.1
       }
     },
     {

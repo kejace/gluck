@@ -9,10 +9,10 @@ private def texParameters : String :=
   "\\def\\EuclideanOpenA{0.25}\n" ++
   "\\def\\EuclideanB{0.1666666667}\n" ++
   "\\def\\GluckOvalCosTwo{0.55}\n" ++
-  "\\def\\GluckMixedCosThree{0.38}\n" ++
-  "\\def\\GluckMixedSinTwo{0.25}\n" ++
-  "\\def\\GluckFourfoldCosTwo{0.25}\n" ++
-  "\\def\\GluckFourfoldCosFour{-0.45}\n" ++
+  "\\def\\GluckMixedCosTwo{0.38}\n" ++
+  "\\def\\GluckMixedSinThree{0.08}\n" ++
+  "\\def\\GluckFourfoldCosTwo{0.45}\n" ++
+  "\\def\\GluckFourfoldCosFour{-0.1}\n" ++
   "\\def\\SphereRadius{0.5}\n" ++
   "\\def\\SphereCurvature{0.75}\n" ++
   "\\def\\HyperbolicCOne{2}\n" ++
@@ -30,8 +30,8 @@ private def jsonManifest : String :=
   "    {\n" ++
   "      \"id\": \"euclidean-gluck-reconstructions\",\n" ++
   "      \"parameters\": {\n" ++
-  "        \"ovalCos2\": 0.55, \"mixedCos3\": 0.38, \"mixedSin2\": 0.25,\n" ++
-  "        \"fourfoldCos2\": 0.25, \"fourfoldCos4\": -0.45\n" ++
+  "        \"ovalCos2\": 0.55, \"mixedCos2\": 0.38, \"mixedSin3\": 0.08,\n" ++
+  "        \"fourfoldCos2\": 0.45, \"fourfoldCos4\": -0.1\n" ++
   "      }\n" ++
   "    },\n" ++
   "    {\n" ++

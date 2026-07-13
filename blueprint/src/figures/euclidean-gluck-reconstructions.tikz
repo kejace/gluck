@@ -1,6 +1,8 @@
 \begin{tikzpicture}[
   >=Stealth,
   curve/.style={line width=1.15pt},
+  vertex/.style={circle, minimum size=7pt, inner sep=.35pt, font=\tiny\bfseries,
+    text=white, draw=white, line width=.35pt},
   tangent arrow/.style={
     postaction={decorate},
     decoration={markings,mark=at position .13 with {\arrow{Stealth}}}}
@@ -23,34 +25,49 @@
       \graphaxes
       \draw[curve, blue!75!black, variable=\t, domain=0:360, samples=181]
         plot ({\t/120},{0.4/(1+\a*cos(2*\t))});
+      \foreach \t/\n in {0/1,90/2,180/3,270/4}
+        \node[vertex, fill=blue!75!black] at ({\t/120},{0.4/(1+\a*cos(2*\t))}) {\n};
     \end{scope}
     \begin{scope}[shift={(1.55,1.25)}, scale=.82]
       \draw[curve, blue!75!black, tangent arrow, variable=\t, domain=0:360, samples=241]
         plot ({sin(\t)+\a/2*(sin(\t)+sin(3*\t)/3)},
               {-cos(\t)+\a/2*(cos(\t)-cos(3*\t)/3)});
+      \foreach \t/\n in {0/1,90/2,180/3,270/4}
+        \node[vertex, fill=blue!75!black]
+          at ({sin(\t)+\a/2*(sin(\t)+sin(3*\t)/3)},
+              {-cos(\t)+\a/2*(cos(\t)-cos(3*\t)/3)}) {\n};
       \fill[blue!75!black] ({\a/2*(1+1/3)}, {-1+\a/2*(1-1/3)}) circle (1.3pt);
     \end{scope}
   \end{scope}
 
   % Asymmetric example: rho = 1 + a cos(3 theta) + b sin(2 theta).
   \begin{scope}[xshift=5.0cm]
-    \pgfmathsetmacro{\a}{\GluckMixedCosThree}
-    \pgfmathsetmacro{\b}{\GluckMixedSinTwo}
+    \pgfmathsetmacro{\a}{\GluckMixedCosTwo}
+    \pgfmathsetmacro{\b}{\GluckMixedSinThree}
     \node[font=\small\bfseries] at (1.55,5.55) {mixed modes};
     \node[font=\scriptsize, text=black!68, align=center] at (1.55,5.03)
-      {$\rho_2(\theta)=1+0.38\cos3\theta+0.25\sin2\theta$\\$\kappa_2=1/\rho_2$};
+      {$\rho_2(\theta)=1+0.38\cos2\theta+0.08\sin3\theta$\\$\kappa_2=1/\rho_2$};
     \begin{scope}[yshift=3.15cm]
       \graphaxes
       \draw[curve, teal!70!black, variable=\t, domain=0:360, samples=181]
-        plot ({\t/120},{0.4/(1+\a*cos(3*\t)+\b*sin(2*\t))});
+        plot ({\t/120},{0.4/(1+\a*cos(2*\t)+\b*sin(3*\t))});
+      \foreach \t/\n in {8.3185/1,90/2,171.6815/3,270/4}
+        \node[vertex, fill=teal!70!black]
+          at ({\t/120},{0.4/(1+\a*cos(2*\t)+\b*sin(3*\t))}) {\n};
     \end{scope}
     \begin{scope}[shift={(1.55,1.25)}, scale=.82]
       \draw[curve, teal!70!black, tangent arrow, variable=\t, domain=0:360, samples=241]
-        plot ({sin(\t)+\a/2*(sin(2*\t)/2+sin(4*\t)/4)
-                    -\b/2*(cos(3*\t)/3+cos(\t))},
-              {-cos(\t)+\a/2*(cos(2*\t)/2-cos(4*\t)/4)
-                    +\b/2*(sin(\t)-sin(3*\t)/3)});
-      \fill[teal!70!black] ({-2*\b/3}, {-1+\a/8}) circle (1.3pt);
+        plot ({sin(\t)+\a/2*(sin(\t)+sin(3*\t)/3)
+                    -\b/2*(cos(4*\t)/4+cos(2*\t)/2)},
+              {-cos(\t)+\a/2*(cos(\t)-cos(3*\t)/3)
+                    +\b/2*(sin(2*\t)/2-sin(4*\t)/4)});
+      \foreach \t/\n in {8.3185/1,90/2,171.6815/3,270/4}
+        \node[vertex, fill=teal!70!black]
+          at ({sin(\t)+\a/2*(sin(\t)+sin(3*\t)/3)
+                    -\b/2*(cos(4*\t)/4+cos(2*\t)/2)},
+              {-cos(\t)+\a/2*(cos(\t)-cos(3*\t)/3)
+                    +\b/2*(sin(2*\t)/2-sin(4*\t)/4)}) {\n};
+      \fill[teal!70!black] ({-3*\b/8}, {-1+\a/3}) circle (1.3pt);
     \end{scope}
   \end{scope}
 
@@ -58,13 +75,16 @@
   \begin{scope}[xshift=10.0cm]
     \pgfmathsetmacro{\a}{\GluckFourfoldCosTwo}
     \pgfmathsetmacro{\b}{\GluckFourfoldCosFour}
-    \node[font=\small\bfseries] at (1.55,5.55) {rounded four-fold};
+    \node[font=\small\bfseries] at (1.55,5.55) {harmonic blend};
     \node[font=\scriptsize, text=black!68, align=center] at (1.55,5.03)
-      {$\rho_3(\theta)=1+0.25\cos2\theta-0.45\cos4\theta$\\$\kappa_3=1/\rho_3$};
+      {$\rho_3(\theta)=1+0.45\cos2\theta-0.10\cos4\theta$\\$\kappa_3=1/\rho_3$};
     \begin{scope}[yshift=3.15cm]
       \graphaxes
       \draw[curve, orange!85!black, variable=\t, domain=0:360, samples=181]
         plot ({\t/120},{0.4/(1+\a*cos(2*\t)+\b*cos(4*\t))});
+      \foreach \t/\n in {0/1,90/2,180/3,270/4}
+        \node[vertex, fill=orange!85!black]
+          at ({\t/120},{0.4/(1+\a*cos(2*\t)+\b*cos(4*\t))}) {\n};
     \end{scope}
     \begin{scope}[shift={(1.55,1.25)}, scale=.82]
       \draw[curve, orange!85!black, tangent arrow, variable=\t, domain=0:360, samples=241]
@@ -72,6 +92,12 @@
                     +\b/2*(sin(3*\t)/3+sin(5*\t)/5)},
               {-cos(\t)+\a/2*(cos(\t)-cos(3*\t)/3)
                     +\b/2*(cos(3*\t)/3-cos(5*\t)/5)});
+      \foreach \t/\n in {0/1,90/2,180/3,270/4}
+        \node[vertex, fill=orange!85!black]
+          at ({sin(\t)+\a/2*(sin(\t)+sin(3*\t)/3)
+                    +\b/2*(sin(3*\t)/3+sin(5*\t)/5)},
+              {-cos(\t)+\a/2*(cos(\t)-cos(3*\t)/3)
+                    +\b/2*(cos(3*\t)/3-cos(5*\t)/5)}) {\n};
       \fill[orange!85!black] (0,{-1+\a/3+\b/15}) circle (1.3pt);
     \end{scope}
   \end{scope}

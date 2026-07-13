@@ -43,11 +43,11 @@ noncomputable def gluckOvalWeight (θ : ℝ) : ℝ :=
 
 /-- Radius-of-curvature weight for the asymmetric mixed-mode reconstruction. -/
 noncomputable def gluckMixedWeight (θ : ℝ) : ℝ :=
-  1 + (19 / 50 : ℝ) * Real.cos (3 * θ) + (1 / 4 : ℝ) * Real.sin (2 * θ)
+  1 + (19 / 50 : ℝ) * Real.cos (2 * θ) + (2 / 25 : ℝ) * Real.sin (3 * θ)
 
 /-- Radius-of-curvature weight for the rounded four-fold reconstruction. -/
 noncomputable def gluckFourfoldWeight (θ : ℝ) : ℝ :=
-  1 + (1 / 4 : ℝ) * Real.cos (2 * θ) - (9 / 20 : ℝ) * Real.cos (4 * θ)
+  1 + (9 / 20 : ℝ) * Real.cos (2 * θ) - (1 / 10 : ℝ) * Real.cos (4 * θ)
 
 /-- The oval example has positive radius of curvature. -/
 theorem gluckOvalWeight_pos (θ : ℝ) : 0 < gluckOvalWeight θ := by
@@ -58,8 +58,8 @@ theorem gluckOvalWeight_pos (θ : ℝ) : 0 < gluckOvalWeight θ := by
 /-- The asymmetric example has positive radius of curvature. -/
 theorem gluckMixedWeight_pos (θ : ℝ) : 0 < gluckMixedWeight θ := by
   unfold gluckMixedWeight
-  have hc := Real.neg_one_le_cos (3 * θ)
-  have hs := neg_le_of_abs_le (Real.abs_sin_le_one (2 * θ))
+  have hc := Real.neg_one_le_cos (2 * θ)
+  have hs := neg_le_of_abs_le (Real.abs_sin_le_one (3 * θ))
   nlinarith
 
 /-- The four-fold example has positive radius of curvature. -/
