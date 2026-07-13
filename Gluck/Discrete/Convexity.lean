@@ -93,4 +93,124 @@ lemma im_rot_vertex_sub (κ ℓ : ZMod n → ℝ) {k j : ℕ} (hkj : k ≤ j) :
     Complex.ofReal_re, Complex.ofReal_im]
   ring
 
+/-- `sin` is strictly negative on the open second half of the circle. -/
+private lemma sin_neg_of_pi_lt {x : ℝ} (h1 : Real.pi < x) (h2 : x < 2 * Real.pi) :
+    Real.sin x < 0 := by
+  have hsub : Real.sin (2 * Real.pi - x) = -Real.sin x := Real.sin_two_pi_sub x
+  have hpos : 0 < Real.sin (2 * Real.pi - x) :=
+    Real.sin_pos_of_pos_of_lt_pi (by linarith) (by linarith)
+  rw [hsub] at hpos
+  linarith
+
+/-- Support half-plane (weak form): every developed vertex `P j` on one lifted
+period lies weakly to the left of edge line `k`. THE crux of L1. Project-local. -/
+lemma support_left_nonneg [NeZero n] {κ ℓ : ZMod n → ℝ} (h : ModerateArc 0 κ ℓ)
+    (hκ : ∀ i : ZMod n, 0 < κ i) (hE : closureGap κ ℓ = 0)
+    (hT : turningSum κ ℓ = 2 * Real.pi) (k : ℕ) {j : ℕ}
+    (hkj : k ≤ j) (hjn : j ≤ k + n) :
+    0 ≤ (Complex.exp (((-heading κ ℓ k : ℝ) : ℂ) * Complex.I)
+          * (vertexR2 κ ℓ j - vertexR2 κ ℓ k)).im := by
+  rw [im_rot_vertex_sub κ ℓ hkj]
+  have hmono := heading_strictMono h hκ
+  -- backward representation via closure: ∑_{[k,j)} = −∑_{[j,k+n)}
+  have hzero : ∑ m ∈ Finset.Ico k (k + n),
+      ℓ (m : ZMod n) * Real.sin (heading κ ℓ m - heading κ ℓ k) = 0 := by
+    have H := im_rot_vertex_sub κ ℓ (Nat.le_add_right k n)
+    rw [vertexR2_add_n hE hT k, sub_self, mul_zero, Complex.zero_im] at H
+    exact H.symm
+  have hsplit : ∑ m ∈ Finset.Ico k j,
+        ℓ (m : ZMod n) * Real.sin (heading κ ℓ m - heading κ ℓ k)
+      = -∑ m ∈ Finset.Ico j (k + n),
+          ℓ (m : ZMod n) * Real.sin (heading κ ℓ m - heading κ ℓ k) := by
+    have hc := Finset.sum_Ico_consecutive
+      (fun m => ℓ (m : ZMod n) * Real.sin (heading κ ℓ m - heading κ ℓ k)) hkj hjn
+    rw [hzero] at hc
+    linarith
+  by_cases hcross : ∀ m ∈ Finset.Ico k j, heading κ ℓ m - heading κ ℓ k ≤ Real.pi
+  · -- forward: every increment is nonnegative
+    apply Finset.sum_nonneg
+    intro m hm
+    rw [Finset.mem_Ico] at hm
+    have hαnn : 0 ≤ heading κ ℓ m - heading κ ℓ k :=
+      sub_nonneg.2 (hmono.monotone hm.1)
+    exact mul_nonneg (h.length_pos _).le
+      (Real.sin_nonneg_of_nonneg_of_le_pi hαnn (hcross m (Finset.mem_Ico.2 hm)))
+  · -- backward: past the π-crossing every increment is nonpositive
+    push Not at hcross
+    obtain ⟨m₀, hm₀mem, hm₀⟩ := hcross
+    rw [Finset.mem_Ico] at hm₀mem
+    rw [hsplit, neg_nonneg]
+    apply Finset.sum_nonpos
+    intro m hm
+    rw [Finset.mem_Ico] at hm
+    have hm₀m : m₀ < m := lt_of_lt_of_le hm₀mem.2 hm.1
+    have hαgt : Real.pi < heading κ ℓ m - heading κ ℓ k := by
+      have := hmono hm₀m; linarith
+    have hkm : k < m := lt_of_le_of_lt hm₀mem.1 hm₀m
+    have hwin := heading_sub_lt_two_pi h hκ hT hkm hm.2
+    have : Real.sin (heading κ ℓ m - heading κ ℓ k) < 0 :=
+      sin_neg_of_pi_lt hαgt (by linarith [hwin.2])
+    exact mul_nonpos_of_nonneg_of_nonpos (h.length_pos _).le this.le
+
+/-- Support half-plane (strict form): every developed vertex `P j` strictly
+interior to one lifted period lies strictly left of edge line `k`. Project-local. -/
+lemma support_left_pos [NeZero n] {κ ℓ : ZMod n → ℝ} (h : ModerateArc 0 κ ℓ)
+    (hκ : ∀ i : ZMod n, 0 < κ i) (hE : closureGap κ ℓ = 0)
+    (hT : turningSum κ ℓ = 2 * Real.pi) (k : ℕ) {j : ℕ}
+    (hkj : k + 1 < j) (hjn : j < k + n) :
+    0 < (Complex.exp (((-heading κ ℓ k : ℝ) : ℂ) * Complex.I)
+          * (vertexR2 κ ℓ j - vertexR2 κ ℓ k)).im := by
+  rw [im_rot_vertex_sub κ ℓ (by omega : k ≤ j)]
+  have hmono := heading_strictMono h hκ
+  have hzero : ∑ m ∈ Finset.Ico k (k + n),
+      ℓ (m : ZMod n) * Real.sin (heading κ ℓ m - heading κ ℓ k) = 0 := by
+    have H := im_rot_vertex_sub κ ℓ (Nat.le_add_right k n)
+    rw [vertexR2_add_n hE hT k, sub_self, mul_zero, Complex.zero_im] at H
+    exact H.symm
+  have hsplit : ∑ m ∈ Finset.Ico k j,
+        ℓ (m : ZMod n) * Real.sin (heading κ ℓ m - heading κ ℓ k)
+      = -∑ m ∈ Finset.Ico j (k + n),
+          ℓ (m : ZMod n) * Real.sin (heading κ ℓ m - heading κ ℓ k) := by
+    have hc := Finset.sum_Ico_consecutive
+      (fun m => ℓ (m : ZMod n) * Real.sin (heading κ ℓ m - heading κ ℓ k))
+      (by omega : k ≤ j) (by omega : j ≤ k + n)
+    rw [hzero] at hc
+    linarith
+  by_cases hcross : ∀ m ∈ Finset.Ico k j, heading κ ℓ m - heading κ ℓ k ≤ Real.pi
+  · -- forward: the (k+1) increment is strictly positive, the rest nonnegative
+    apply Finset.sum_pos'
+    · intro m hm
+      rw [Finset.mem_Ico] at hm
+      have hαnn : 0 ≤ heading κ ℓ m - heading κ ℓ k :=
+        sub_nonneg.2 (hmono.monotone hm.1)
+      exact mul_nonneg (h.length_pos _).le
+        (Real.sin_nonneg_of_nonneg_of_le_pi hαnn (hcross m (Finset.mem_Ico.2 hm)))
+    · refine ⟨k + 1, Finset.mem_Ico.2 ⟨Nat.le_add_right k 1, hkj⟩, ?_⟩
+      have hstep : heading κ ℓ (k + 1) - heading κ ℓ k
+          = turningAngle 0 κ ℓ ((k + 1 : ℕ) : ZMod n) := by
+        rw [heading_succ']; ring
+      have hpos : 0 < turningAngle 0 κ ℓ ((k + 1 : ℕ) : ZMod n) :=
+        turningAngle_pos h (hκ _)
+      have hlt : turningAngle 0 κ ℓ ((k + 1 : ℕ) : ZMod n) < Real.pi :=
+        lt_of_abs_lt (abs_turningAngle_lt_pi h _)
+      rw [hstep]
+      exact mul_pos (h.length_pos _)
+        (Real.sin_pos_of_pos_of_lt_pi hpos hlt)
+  · -- backward: past the π-crossing every increment is strictly negative
+    push Not at hcross
+    obtain ⟨m₀, hm₀mem, hm₀⟩ := hcross
+    rw [Finset.mem_Ico] at hm₀mem
+    rw [hsplit, neg_pos]
+    apply Finset.sum_neg
+    · intro m hm
+      rw [Finset.mem_Ico] at hm
+      have hm₀m : m₀ < m := lt_of_lt_of_le hm₀mem.2 hm.1
+      have hαgt : Real.pi < heading κ ℓ m - heading κ ℓ k := by
+        have := hmono hm₀m; linarith
+      have hkm : k < m := lt_of_le_of_lt hm₀mem.1 hm₀m
+      have hwin := heading_sub_lt_two_pi h hκ hT hkm hm.2
+      exact mul_neg_of_pos_of_neg (h.length_pos _)
+        (sin_neg_of_pi_lt hαgt (by linarith [hwin.2]))
+    · exact ⟨j, Finset.mem_Ico.2 ⟨le_rfl, hjn⟩⟩
+
 end Gluck.Discrete
