@@ -18,7 +18,7 @@ combine into the capstone.
 
 ## Main results
 
-* `sphericalConverse_pos`: if `κ` satisfies the positive-stage spherical
+* `spherical_gluck_converse`: if `κ` satisfies the positive-stage spherical
   four-vertex condition, there is a simple closed curve confined to the open disk
   realizing `κ` as its spherical geodesic curvature.
 -/
@@ -186,11 +186,11 @@ spherical four-vertex condition, then there is a simple closed curve `z` confine
 to the open disk that realizes `κ` as its spherical geodesic curvature. This is
 the same conclusion shape as the Euclidean `gluck_converse`, with
 `RealizesCurvature` replaced by its spherical analogue. Now derived from the
-`K`-generic `SpaceForm.spaceFormConverse_pos` at `K = +1`.
+`K`-generic `SpaceForm.gluck_converse` at `K = +1`.
 (Blueprint `thm:spherical_converse_pos`.) -/
-theorem sphericalConverse_pos {κ : ℝ → ℝ} (hκ : SphereFourVertex κ) :
+theorem spherical_gluck_converse {κ : ℝ → ℝ} (hκ : SphereFourVertex κ) :
     ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ RealizesSphericalCurvature z κ := by
-  obtain ⟨z, hsimple, hreal⟩ := SpaceForm.spaceFormConverse_pos (Or.inl rfl)
+  obtain ⟨z, hsimple, hreal⟩ := SpaceForm.gluck_converse (Or.inl rfl)
     ((sphereFourVertex_iff_spaceFormFourVertex_one κ).mp hκ)
   exact ⟨z, hsimple, (realizesSphericalCurvature_iff_realizes_one z κ).mpr hreal⟩
 

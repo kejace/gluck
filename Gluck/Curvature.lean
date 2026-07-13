@@ -64,7 +64,7 @@ def FourVertexCondition (κ : ℝ → ℝ) : Prop :=
 /-- A curvature function whose extrema satisfy the strict value-separation
 `max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂)` cannot be constant: a constant `κ`
 would force `c < c`. Shared by the positive (`gluck_converse`) and mixed-sign
-(`dahlbergConverse`) converses. -/
+(`dahlberg_converse`) converses. -/
 lemma not_constant_of_separation {κ : ℝ → ℝ} {p₁ q₁ p₂ q₂ : ℝ}
     (hsep : max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂)) :
     ¬ ∃ c, ∀ θ, κ θ = c := by

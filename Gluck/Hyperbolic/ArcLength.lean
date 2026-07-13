@@ -49,7 +49,7 @@ reuses the Euclidean-in-disk chord machinery of `Gluck/Euclidean/Simplicity.lean
   `ArcLengthH2Curvature` / `arcLengthH2Converse` / `realizesH2_of_reparam`.
 
 The general-profile consumers (bicircle family, transport, turning, closing,
-simplicity, and the capstone `hyperbolicMixedConverse`) live in
+simplicity, and the capstone `dahlberg_converse_reparam`) live in
 `Gluck/Hyperbolic/Family/`.
 
 Blueprint: `blueprint/src/chapters/Gluck_HyperbolicArcLength.tex`.

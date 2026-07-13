@@ -24,20 +24,20 @@ in which the minima are unconstrained:
 \begin{tabular}{lll}
  & positive curvature & mixed-sign curvature \\
 \hline
-$\mathbb{E}^2$ & \texttt{Gluck.gluck\_converse} & \texttt{Gluck.dahlbergConverse} \\
-$\mathbb{S}^2$ & \texttt{Gluck.sphericalConverse\_pos} & \texttt{Gluck.sphericalConverse} \\
-$\mathbb{H}^2$ & \texttt{Gluck.hyperbolicConverse\_pos} & \texttt{Gluck.hyperbolicMixedConverse\_exact} \\
+$\mathbb{E}^2$ & \texttt{Gluck.gluck\_converse} & \texttt{Gluck.dahlberg\_converse} \\
+$\mathbb{S}^2$ & \texttt{Gluck.spherical\_gluck\_converse} & \texttt{Gluck.spherical\_dahlberg\_converse} \\
+$\mathbb{H}^2$ & \texttt{Gluck.hyperbolic\_gluck\_converse} & \texttt{Gluck.hyperbolic\_dahlberg\_converse} \\
 \end{tabular}
 \end{center}
 
 All six conclusions are \emph{exact}: the witness curve realizes $\kappa$ on
 the nose, with no reparametrization. In addition the $K$-generic
 space-form layer states the unified capstones
-\texttt{Gluck.SpaceForm.spaceFormConverse\_pos} and
-\texttt{Gluck.SpaceForm.spaceFormMixedConverse} (with the $\mathbb{H}^2$
-instance \texttt{Gluck.SpaceForm.hyperbolicDahlbergConverse}), and the
+\texttt{Gluck.SpaceForm.gluck\_converse} and
+\texttt{Gluck.SpaceForm.dahlberg\_converse} (with the $\mathbb{H}^2$
+instance \texttt{Gluck.SpaceForm.dahlberg\_converse\_hyperbolic}), and the
 Euclidean development also proves the arc-length converse
-\texttt{Gluck.arcLengthConverse}.
+\texttt{Gluck.arcLength\_converse}.
 
 The geometry enters through the escape threshold: in $\mathbb{E}^2$ positivity
 suffices; in $\mathbb{H}^2$ closed curves require geodesic curvature above the
@@ -81,7 +81,7 @@ blueprint states it as the implementation has it:
   has no metric rescaling, so the period of the reconstruction is
   co-constructed and the engine works in Euclidean arc length;
 \item the mixed space-form capstone
-  \texttt{Gluck.SpaceForm.spaceFormMixedConverse} \emph{assembles} the
+  \texttt{Gluck.SpaceForm.dahlberg\_converse} \emph{assembles} the
   spherical and hyperbolic mixed capstones by reduction, rather than proving a
   third independent construction.
 \end{itemize}

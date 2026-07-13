@@ -23,14 +23,14 @@ on the nose, with no reparametrization.
 
 | | positive curvature | mixed-sign curvature |
 |---|---|---|
-| **E²** | `Gluck.gluck_converse` | `Gluck.dahlbergConverse` |
-| **S²** | `Gluck.sphericalConverse_pos` | `Gluck.sphericalConverse` |
-| **H²** | `Gluck.hyperbolicConverse_pos` | `Gluck.hyperbolicMixedConverse_exact` |
+| **E²** | `Gluck.gluck_converse` | `Gluck.dahlberg_converse` |
+| **S²** | `Gluck.spherical_gluck_converse` | `Gluck.spherical_dahlberg_converse` |
+| **H²** | `Gluck.hyperbolic_gluck_converse` | `Gluck.hyperbolic_dahlberg_converse` |
 
 An `ε`-generic space-form layer additionally states the unified capstones
-`Gluck.SpaceForm.spaceFormConverse_pos` and
-`Gluck.SpaceForm.spaceFormMixedConverse`, plus the Euclidean arc-length
-converse `Gluck.arcLengthConverse`.
+`Gluck.SpaceForm.gluck_converse` and
+`Gluck.SpaceForm.dahlberg_converse`, plus the Euclidean arc-length
+converse `Gluck.arcLength_converse`.
 
 The geometry enters through the escape threshold: in the plane positivity
 suffices, while closed curves in H² require geodesic curvature above the

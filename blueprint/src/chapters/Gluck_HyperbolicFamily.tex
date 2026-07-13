@@ -6,7 +6,7 @@
 % TurningB, TurningC, FaceA, FaceB, Closing, Simplicity}.lean — the
 % ALM-A1 … ALM-A12 chain.  Fork A realizes a general mixed-sign H² curvature
 % profile through a convex clean bicircle with symbolic levels 1 < a < c
-% chosen per κ, culminating in hyperbolicMixedConverse_reparam_deg1:
+% chosen per κ, culminating in dahlberg_converse_reparam_deg1:
 % realization up to an orientation-preserving C¹ DEGREE-ONE circle
 % reparametrization; the degree-one datum is consumed by
 % chap:hyperbolic_converse to remove the reparametrization.
@@ -532,7 +532,7 @@ the $L^1$ conclusion.
 \begin{theorem}\leanok
 [capstone: hyperbolic mixed converse, up to a degree-one reparametrization]
   \label{thm:hyperbolic_mixed_converse_reparam_deg1}
-  \lean{Gluck.Hyperbolic.hyperbolicMixedConverse_reparam_deg1}
+  \lean{Gluck.Hyperbolic.dahlberg_converse_reparam_deg1}
   \uses{def:mixed_sign_hyperbolic_four_vertex, def:spaceform_realizes,
         def:is_simple_closed, lem:exists_abab_levels,
         thm:exists_bicircle_anchor, lem:bicircle_L1_reparam_pointwise,
@@ -601,7 +601,7 @@ the $L^1$ conclusion.
 \begin{corollary}\leanok
 [up-to-reparam form, degree-one datum forgotten]
   \label{cor:hyperbolic_mixed_converse_family}
-  \lean{Gluck.Hyperbolic.hyperbolicMixedConverse}
+  \lean{Gluck.Hyperbolic.dahlberg_converse_reparam}
   \uses{thm:hyperbolic_mixed_converse_reparam_deg1}
   A $\texttt{MixedSignHyperbolicFourVertex}$ profile is realized, up to an
   orientation-preserving $C^1$ reparametrization, as the geodesic curvature

@@ -10,7 +10,7 @@ import Mathlib.Util.CountHeartbeats
 # Fork A · ALM-A11–A12: simplicity transport and the capstone
 
 Simplicity transport in the three regimes (ALM-A11), and the window-bridge exposure
-`layout_windowSolution_exposed` plus the capstone assembly `hyperbolicMixedConverse`
+`layout_windowSolution_exposed` plus the capstone assembly `dahlberg_converse_reparam`
 (ALM-A12).
 -/
 
@@ -1317,7 +1317,7 @@ was vestigial for this route (bound but unused — the `L¹` squeeze absorbs dip
 any depth) and has been removed from the hypothesis.  Relocated here from
 `ArcLengthH2Mixed.lean` because the closing/simplicity ingredients live in this
 file, which imports that one. -/
-theorem hyperbolicMixedConverse_reparam_deg1 {κ : ℝ → ℝ}
+theorem dahlberg_converse_reparam_deg1 {κ : ℝ → ℝ}
     (h : MixedSignHyperbolicFourVertex κ) :
     ∃ (z : ℝ → ℂ) (Ψ : ℝ → ℝ), ContDiff ℝ 1 Ψ ∧ (∀ t, 0 < deriv Ψ t) ∧
       (∀ t, Ψ (t + 2 * π) = Ψ t + 2 * π) ∧
@@ -1428,14 +1428,14 @@ theorem hyperbolicMixedConverse_reparam_deg1 {κ : ℝ → ℝ}
 A `MixedSignHyperbolicFourVertex` profile is realized, up to an orientation-
 preserving `C¹` reparametrization `Ψ`, as the geodesic curvature of a simple
 closed curve in the hyperbolic plane (`ε = −1`).  Weakening of
-`hyperbolicMixedConverse_reparam_deg1` that forgets the degree-one datum
+`dahlberg_converse_reparam_deg1` that forgets the degree-one datum
 `Ψ(t+2π) = Ψ(t)+2π`; the latter is what upgrades this to the exact-profile
-`hyperbolicMixedConverse_exact` (`Hyperbolic/Exact.lean`). -/
-theorem hyperbolicMixedConverse {κ : ℝ → ℝ} (h : MixedSignHyperbolicFourVertex κ) :
+`dahlberg_converse` (`Hyperbolic/Exact.lean`). -/
+theorem dahlberg_converse_reparam {κ : ℝ → ℝ} (h : MixedSignHyperbolicFourVertex κ) :
     ∃ (z : ℝ → ℂ) (Ψ : ℝ → ℝ), ContDiff ℝ 1 Ψ ∧ (∀ t, 0 < deriv Ψ t) ∧
       IsSimpleClosed z ∧ Realizes (-1) z (κ ∘ Ψ) := by
   obtain ⟨z, Ψ, hΨC1, hΨpos, _hΨdeg, hsc, hreal⟩ :=
-    hyperbolicMixedConverse_reparam_deg1 h
+    dahlberg_converse_reparam_deg1 h
   exact ⟨z, Ψ, hΨC1, hΨpos, hsc, hreal⟩
 
 end Gluck.Hyperbolic

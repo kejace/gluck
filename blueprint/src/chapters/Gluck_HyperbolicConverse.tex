@@ -3,14 +3,14 @@
 
 % Chapter for the three top-level H² wrapper files:
 %   Gluck/Hyperbolic/Converse.lean — positive (escape-velocity) wrappers:
-%     RealizesHyperbolicCurvature, HyperbolicFourVertex, hyperbolicConverse_pos
-%     (the ε = −1 instance of SpaceForm.spaceFormConverse_pos);
+%     RealizesHyperbolicCurvature, HyperbolicFourVertex, hyperbolic_gluck_converse
+%     (the ε = −1 instance of SpaceForm.gluck_converse);
 %   Gluck/Hyperbolic/Mixed.lean — mixed-sign wrappers:
-%     MixedHyperbolicFourVertex, hyperbolicMixedConverse (up to reparam),
-%     hyperbolicMixedConverse_exact (re-exports of the Hyperbolic.* results);
+%     MixedHyperbolicFourVertex, hyperbolic_dahlberg_converse_reparam (up to reparam),
+%     hyperbolic_dahlberg_converse (re-exports of the Hyperbolic.* results);
 %   Gluck/Hyperbolic/Exact.lean — degree-one reparam removal:
 %     injOn_Ico_shift_of_periodic, realizes_of_reparam_degree_one,
-%     Hyperbolic.hyperbolicMixedConverse_exact (closes the AL-6 gap).
+%     Hyperbolic.dahlberg_converse (closes the AL-6 gap).
 % Absorbs the prose of the retired chapter Gluck_HyperbolicMixed.tex; its two
 % content labels def:mixed_hyperbolic_four_vertex and
 % thm:hyperbolic_mixed_converse move here verbatim (label + pin preserved).
@@ -161,7 +161,7 @@ without a positive-speed obstruction.
 \begin{theorem}\leanok
 [positive hyperbolic converse]
   \label{thm:hyperbolic_converse_pos}
-  \lean{Gluck.hyperbolicConverse_pos}
+  \lean{Gluck.hyperbolic_gluck_converse}
   \uses{def:hyperbolic_four_vertex, def:realizes_hyperbolic_curvature,
         def:is_simple_closed, thm:spaceform_converse_pos}
   A hyperbolic four-vertex curvature function
@@ -180,7 +180,7 @@ without a positive-speed obstruction.
   \uses{thm:spaceform_converse_pos}
   \leanok
   One line: the $K=-1$ case of the space-form positive converse,
-  $\texttt{SpaceForm.spaceFormConverse\_pos}\ (\texttt{Or.inr rfl})$. All the
+  $\texttt{SpaceForm.gluck\_converse}\ (\texttt{Or.inr rfl})$. All the
   work — flow, winding, reconstruction, simplicity — happens
   $K$-generically in \cref{chap:spaceform_converse}.
 \end{proof}
@@ -203,7 +203,7 @@ without a positive-speed obstruction.
 
 \begin{theorem}[Hyperbolic mixed converse, up to reparametrization]
   \label{thm:hyperbolic_mixed_converse}
-  \lean{Gluck.hyperbolicMixedConverse}
+  \lean{Gluck.hyperbolic_dahlberg_converse_reparam}
   \leanok
   \uses{def:mixed_hyperbolic_four_vertex, def:realizes_hyperbolic_curvature,
         def:is_simple_closed}
@@ -228,7 +228,7 @@ without a positive-speed obstruction.
   \uses{thm:hyperbolic_mixed_converse_reparam_deg1}
   \leanok
   Re-export of the family-chain assembly
-  (\texttt{Hyperbolic.hyperbolicMixedConverse},
+  (\texttt{Hyperbolic.dahlberg\_converse\_reparam},
   \cref{chap:hyperbolic_family}): symbolic $(a,b)$-family anchor, five-leg
   Gr\"onwall transport, the asymmetric $3$-degree-of-freedom
   Poincar\'e--Miranda closing, the radial-monotonicity simplicity transport,
@@ -319,7 +319,7 @@ without a positive-speed obstruction.
 \begin{theorem}\leanok
 [exact-profile hyperbolic mixed converse]
   \label{thm:hyperbolic_mixed_converse_exact}
-  \lean{Gluck.hyperbolicMixedConverse_exact}
+  \lean{Gluck.hyperbolic_dahlberg_converse}
   \uses{def:mixed_hyperbolic_four_vertex, def:realizes_hyperbolic_curvature,
         def:is_simple_closed, thm:hyperbolic_mixed_converse_reparam_deg1,
         thm:realizes_of_reparam_degree_one}
@@ -354,7 +354,7 @@ without a positive-speed obstruction.
   because the node map conjugates the co-constructed period $\Lambda$ to
   $2\pi$ (\cref{lem:node_map_add_period}). Then
   \cref{thm:realizes_of_reparam_degree_one} removes $\Psi$ via
-  $w=\gamma\circ\Psi^{-1}$. The user-facing \texttt{Gluck.hyperbolicMixedConverse\_exact}
+  $w=\gamma\circ\Psi^{-1}$. The user-facing \texttt{Gluck.hyperbolic\_dahlberg\_converse}
   is the verbatim re-export of this composite through
   \cref{def:mixed_hyperbolic_four_vertex}.
 \end{proof}

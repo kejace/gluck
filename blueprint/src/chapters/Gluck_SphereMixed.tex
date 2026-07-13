@@ -327,7 +327,7 @@ and the capstone \cref{thm:spherical_converse}.
 \begin{theorem}\leanok
 [spherical converse, mixed sign]
   \label{thm:spherical_converse}
-  \lean{Gluck.sphericalConverse}
+  \lean{Gluck.spherical_dahlberg_converse}
   \uses{def:mixed_sign_sphere_four_vertex, def:realizes_spherical_curvature,
         lem:mixed_spherical_endpoint_winding, lem:reconstruction_ode,
         lem:spherical_simplicity, lem:realizes_spherical_comp,
@@ -343,7 +343,7 @@ and the capstone \cref{thm:spherical_converse}.
   \]
   This subsumes \cref{thm:spherical_converse_pos} (positive $\kappa$
   satisfies the mixed hypothesis trivially) and is the S² analogue of the
-  Euclidean \texttt{dahlbergConverse}.
+  Euclidean \texttt{dahlberg\_converse}.
 \end{theorem}
 
 \begin{proof}
@@ -352,7 +352,7 @@ and the capstone \cref{thm:spherical_converse}.
         lem:realizes_spherical_comp, lem:exists_c1_circle_inverse,
         lem:is_simple_closed_comp, lem:spherical_flow_spec}
         \leanok
-  The landed positive capstone proof (\texttt{sphericalConverse\_pos}, end of
+  The landed positive capstone proof (\texttt{spherical\_gluck\_converse}, end of
   Sphere.lean) with the mixed winding lemma substituted; every downstream
   ingredient landed sign-agnostic. Split the mixed-sign disjunction. The
   \emph{constant} branch is constant \emph{positive} by hypothesis:

@@ -21,8 +21,8 @@ the project (`Gluck/Euclidean/`):
 ## Main results
 
 * `Gluck.gluck_converse` — the positive-curvature converse (Gluck 1971).
-* `Gluck.arcLengthConverse` — the arc-length reconstruction converse.
-* `Gluck.dahlbergConverse` — the full mixed-sign converse (Dahlberg 2005).
+* `Gluck.arcLength_converse` — the arc-length reconstruction converse.
+* `Gluck.dahlberg_converse` — the full mixed-sign converse (Dahlberg 2005).
 
 The chord/step/winding machinery in this directory is the shared plane-curve
 substrate: `Gluck/Sphere/` and `Gluck/Hyperbolic/` model their geometries in the

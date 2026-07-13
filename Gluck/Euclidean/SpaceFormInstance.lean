@@ -13,9 +13,9 @@ The flat member `K = 0` of the space-form family *is* the Euclidean plane, in
 the conformal gauge `λ = 2` on the open unit disk: `Realizes 0 z κ` unfolds to
 the ordinary Euclidean realization law `φ' = (2κ)·‖z'‖` plus confinement
 `‖z‖ < 1` (`realizesCurvature_of_realizes_zero`). Composing the flat instance
-of the space-form converse `Gluck.SpaceForm.spaceFormConverse_pos` with a
+of the space-form converse `Gluck.SpaceForm.gluck_converse` with a
 dilation — the symmetry of `E²` that `S²` and `H²` lack — removes both the
-factor `2` and the confinement, yielding `gluck_converse_spaceForm`: a **second
+factor `2` and the confinement, yielding `gluck_converse_flow`: a **second
 proof** of Gluck's converse to the four-vertex theorem, with statement
 *identical* to the 1971-route capstone `Gluck.gluck_converse`
 (`Gluck/Euclidean/FourVertex.lean`).
@@ -71,13 +71,13 @@ The dilation argument (where the Euclidean plane's scaling symmetry — absent i
 `S²` and `H²` — re-enters): let `m > 0` be a positive lower bound for `κ`
 (`exists_curvature_lower_bound`), and set `μ := κ/m`. Then `μ > 1 > 1/2`
 pointwise, so `μ` satisfies the flat four-vertex hypothesis
-`SpaceFormFourVertex 0 μ`, and `spaceFormConverse_pos` at `K = 0` produces a
+`SpaceFormFourVertex 0 μ`, and `gluck_converse` at `K = 0` produces a
 simple closed curve `z` in the open unit disk with `SpaceForm.Realizes 0 z μ`.
 By the bridge `realizesCurvature_of_realizes_zero`, `z` realizes the Euclidean
 curvature `2μ = (2/m)·κ`; the dilation `γ := (2/m)·z` rescales curvature by
 `m/2` (`realizesCurvature_smul`) and preserves simplicity
 (`isSimpleClosed_smul`), so `γ` is a simple closed curve realizing `κ`. -/
-theorem gluck_converse_spaceForm {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
+theorem gluck_converse_flow {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ)
     (h4 : FourVertexCondition κ) :
     ∃ γ : ℝ → ℂ, IsSimpleClosed γ ∧ RealizesCurvature γ κ := by
   obtain ⟨hκc, hκper, hκpos⟩ := hκ
@@ -93,7 +93,7 @@ theorem gluck_converse_spaceForm {κ : ℝ → ℝ} (hκ : IsCurvatureFunction �
     have := hμfloor θ
     linarith
   obtain ⟨z, hsimple, hreal⟩ :=
-    SpaceForm.spaceFormConverse_pos (Or.inr (Or.inr rfl)) hsf
+    SpaceForm.gluck_converse (Or.inr (Or.inr rfl)) hsf
   have hrc : RealizesCurvature z (fun t => 2 * μ t) :=
     realizesCurvature_of_realizes_zero hreal
   have h2m : (0 : ℝ) < 2 / m := by positivity

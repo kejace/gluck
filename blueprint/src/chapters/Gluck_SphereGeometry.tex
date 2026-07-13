@@ -16,8 +16,8 @@ function on the round sphere $S^2$, with the four-vertex property and a uniform 
 bound forcing confinement to an open hemisphere, is the geodesic curvature of a simple
 closed curve contained in that hemisphere. The Euclidean development
 (\cref{chap:reduction} and its dependencies, culminating in \texttt{gluck\_converse} and
-\texttt{dahlbergConverse}) is complete and is reused, not disturbed. The positive-stage
-capstone is named \texttt{sphericalConverse\_pos}; the name \texttt{sphericalConverse} is
+\texttt{dahlberg\_converse}) is complete and is reused, not disturbed. The positive-stage
+capstone is named \texttt{spherical\_gluck\_converse}; the name \texttt{spherical\_dahlberg\_converse} is
 reserved for the mandatory mixed-sign stage 2.
 
 All spherical geometry is transported to the \emph{stereographic disk model}: the open
@@ -173,7 +173,7 @@ $\langle z, i\,e^{i\varphi}\rangle_{\mathbb R}=-(\operatorname{Re}z)\sin\varphi
 \begin{theorem}\leanok
 [spherical converse, positive stage]
   \label{thm:spherical_converse_pos}
-  \lean{Gluck.sphericalConverse_pos}
+  \lean{Gluck.spherical_gluck_converse}
   \uses{def:realizes_spherical_curvature, def:sphere_four_vertex,
         lem:spherical_speed_solve, lem:reconstruction_ode,
         thm:spaceform_endpoint_winding, lem:realizes_spherical_comp,
@@ -208,7 +208,7 @@ $\langle z, i\,e^{i\varphi}\rangle_{\mathbb R}=-(\operatorname{Re}z)\sin\varphi
   realizing $\kappa$ (closedness and injectivity-on-a-period transfer along the
   circle-equivariant $h_1^{-1}$, as in the Euclidean
   \texttt{isSimpleClosed\_comp}). \cref{lem:spherical_simplicity} gives simplicity in
-  the disk, hence on $S^2$. This mirrors how \texttt{dahlbergConverse} assembles its
+  the disk, hence on $S^2$. This mirrors how \texttt{dahlberg\_converse} assembles its
   closing parameter, simplicity transport, and reconstruction. \emph{(Assembled formally
   in S2-E once the S2-D layer exists in Lean.)}
 \end{proof}

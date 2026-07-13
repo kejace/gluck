@@ -208,7 +208,7 @@ theorem isSimpleClosed_dahlbergCurve {K : ℝ → ℝ} (hK : Continuous K)
 arc-length curvature function, then `K` is realized by a simple closed curve
 (witness `γ_K`). Same conclusion predicate as `gluck_converse`.
 (Blueprint `thm:arclength_converse`.) -/
-theorem arcLengthConverse {K : ℝ → ℝ} (hK : Continuous K)
+theorem arcLength_converse {K : ℝ → ℝ} (hK : Continuous K)
     (hper : Function.Periodic K (2 * π)) (hALC : ArcLengthCurvature K) :
     ∃ γ : ℝ → ℂ, IsSimpleClosed γ ∧ RealizesCurvature γ K :=
   ⟨dahlbergCurve K, isSimpleClosed_dahlbergCurve hK hper hALC,

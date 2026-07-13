@@ -16,7 +16,7 @@ witness `hyperbolicCircle_realizes` (the explicit hyperbolic circle realizing a
 constant escape profile `κ ≡ c`, `c > 1`).
 
 The hypothesis is consumed by the fork-A symbolic `(a, c)`-family bicircle layer
-(`Gluck/Hyperbolic/Family/`), which proves the capstone `hyperbolicMixedConverse`;
+(`Gluck/Hyperbolic/Family/`), which proves the capstone `dahlberg_converse_reparam`;
 the constant branch of that capstone is closed by `hyperbolicCircle_realizes`.
 
 Blueprint: `blueprint/src/chapters/Gluck_HyperbolicMixedSign.tex`.
@@ -89,7 +89,7 @@ theorem MixedSignHyperbolicFourVertex.of_escape_positive {κ : ℝ → ℝ}
 is a simple closed curve realizing the constant profile at `K = −1`.  (Arc-length
 analogue of `sphericalCircle_realizes`, `SphereMixed`; the H² model circle of
 `Gluck.SpaceForm.spaceFormSpeed_circle`, `Defs.lean:169`.)  Consumed by the
-constant branch of the capstone `hyperbolicMixedConverse`
+constant branch of the capstone `dahlberg_converse_reparam`
 (`Gluck/Hyperbolic/Family/Simplicity.lean`). -/
 theorem hyperbolicCircle_realizes {c : ℝ} (hc : 1 < c) :
     ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes (-1) z (fun _ => c) :=

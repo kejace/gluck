@@ -12,8 +12,8 @@ Assembly of the constant branch (the model geodesic circle) and the
 non-constant branch (endpoint-winding → reconstruction → simplicity, pulled
 back along the reparametrization inverse). `K`-generic transport of
 `Gluck/Sphere/Converse.lean`; instantiating `K = +1` recovers
-`Gluck.sphericalConverse_pos`, and `K = −1` gives the hyperbolic converse
-(`Gluck.hyperbolicConverse_pos`, in `Gluck/Hyperbolic.lean`).
+`Gluck.spherical_gluck_converse`, and `K = −1` gives the hyperbolic converse
+(`Gluck.hyperbolic_gluck_converse`, in `Gluck/Hyperbolic.lean`).
 -/
 
 namespace Gluck.SpaceForm
@@ -984,12 +984,12 @@ private theorem spaceFormConverse_pos_nonconst {K : ℝ} (hK : K = 1 ∨ K = -1 
 /-- **Space-form converse, positive stage.** If `κ` satisfies the `K`-generic
 four-vertex admissibility hypothesis (`K ∈ {+1, −1, 0}`), there is a simple
 closed curve confined to the open disk realizing `κ` as its space-form geodesic
-curvature. `K = +1` is `Gluck.sphericalConverse_pos`; `K = −1` is the
+curvature. `K = +1` is `Gluck.spherical_gluck_converse`; `K = −1` is the
 hyperbolic converse; `K = 0` is the flat member, which — dilated out of the
-disk gauge by `Gluck.gluck_converse_spaceForm` — gives a second proof of
+disk gauge by `Gluck.gluck_converse_flow` — gives a second proof of
 Gluck's Euclidean converse `Gluck.gluck_converse`.
-(Transport of `sphericalConverse_pos`.) -/
-theorem spaceFormConverse_pos {K : ℝ} (hK : K = 1 ∨ K = -1 ∨ K = 0) {κ : ℝ → ℝ}
+(Transport of `spherical_gluck_converse`. Formerly `spaceFormConverse_pos`.) -/
+theorem gluck_converse {K : ℝ} (hK : K = 1 ∨ K = -1 ∨ K = 0) {κ : ℝ → ℝ}
     (hκ : SpaceFormFourVertex K κ) :
     ∃ γ : ℝ → ℂ, IsSimpleClosed γ ∧ Realizes K γ κ := by
   obtain ⟨hκcf, hfv, hfloor⟩ := hκ

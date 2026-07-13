@@ -1537,7 +1537,7 @@ within any prescribed `L¹` tolerance `τ` of a **two-valued step weight**
 alignment map of the winding zero `z₀`).
 
 This is the closing input of the *flat* (`ε = 0`) branch of the space-form
-converse (`Gluck.SpaceForm.spaceFormConverse_pos`): at `ε = 0` the disk-model
+converse (`Gluck.SpaceForm.gluck_converse`): at `ε = 0` the disk-model
 gauge field is independent of the position, so the endpoint map of the flow is
 constant in the start point and the first-variation endpoint winding of the
 curved members degenerates (`stepError_expansion` has conjugation coefficient
