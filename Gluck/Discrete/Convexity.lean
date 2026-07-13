@@ -334,4 +334,43 @@ lemma polygonR2_nonadjacent_disjoint [NeZero n] {κ ℓ : ZMod n → ℝ}
     · nlinarith [mul_pos hspos hLj, mul_nonneg hs' hLj1.le]
   linarith
 
+/-- Consecutive edges meet only at their shared vertex. The far endpoint of the
+second edge lies strictly left of the first edge line, pinning the intersection
+to `P (i+1)`. Project-local. -/
+lemma polygonR2_consecutive_inter [NeZero n] {κ ℓ : ZMod n → ℝ}
+    (h : ModerateArc 0 κ ℓ) (hκ : ∀ i : ZMod n, 0 < κ i) (hE : closureGap κ ℓ = 0)
+    (hT : turningSum κ ℓ = 2 * Real.pi) (hn : 3 ≤ n) (i : ZMod n) :
+    segment ℝ (polygonR2 κ ℓ i) (polygonR2 κ ℓ (i + 1))
+        ∩ segment ℝ (polygonR2 κ ℓ (i + 1)) (polygonR2 κ ℓ (i + 1 + 1))
+      = {polygonR2 κ ℓ (i + 1)} := by
+  have hLj2 : 0 < (Complex.exp (((-heading κ ℓ i.val : ℝ) : ℂ) * Complex.I)
+      * (polygonR2 κ ℓ (i + 1 + 1) - polygonR2 κ ℓ i)).im := by
+    have e2 : polygonR2 κ ℓ (i + 1 + 1) = vertexR2 κ ℓ (i.val + 2) := by
+      have h2 := polygonR2_add_nat hE hT i 2
+      rw [show i + ((2 : ℕ) : ZMod n) = i + 1 + 1 from by push_cast; ring] at h2
+      exact h2
+    rw [e2, show polygonR2 κ ℓ i = vertexR2 κ ℓ i.val from rfl]
+    exact support_left_pos h hκ hE hT i.val (by omega) (by omega)
+  rw [Set.eq_singleton_iff_unique_mem]
+  refine ⟨⟨right_mem_segment ℝ _ _, left_mem_segment ℝ _ _⟩, ?_⟩
+  rintro z ⟨hz1, hz2⟩
+  obtain ⟨r, r', hr, hr', hrr, hz1eq⟩ := hz1
+  obtain ⟨s, s', hs, hs', hss, hz2eq⟩ := hz2
+  have hLnear : (Complex.exp (((-heading κ ℓ i.val : ℝ) : ℂ) * Complex.I)
+      * (z - polygonR2 κ ℓ i)).im = 0 := by
+    rw [← hz1eq, im_rot_affine _ _ _ _ hrr, sub_self, mul_zero, Complex.zero_im,
+      mul_zero, zero_add, im_rot_edge_end_zero hE hT i, mul_zero]
+  have hLfar : (Complex.exp (((-heading κ ℓ i.val : ℝ) : ℂ) * Complex.I)
+      * (z - polygonR2 κ ℓ i)).im
+      = s' * (Complex.exp (((-heading κ ℓ i.val : ℝ) : ℂ) * Complex.I)
+          * (polygonR2 κ ℓ (i + 1 + 1) - polygonR2 κ ℓ i)).im := by
+    rw [← hz2eq, im_rot_affine _ _ _ _ hss, im_rot_edge_end_zero hE hT i, mul_zero,
+      zero_add]
+  have hs'0 : s' = 0 := by
+    have hz : s' * (Complex.exp (((-heading κ ℓ i.val : ℝ) : ℂ) * Complex.I)
+        * (polygonR2 κ ℓ (i + 1 + 1) - polygonR2 κ ℓ i)).im = 0 := by
+      rw [← hLfar, hLnear]
+    exact (mul_eq_zero.1 hz).resolve_right (ne_of_gt hLj2)
+  rw [← hz2eq, hs'0, zero_smul, add_zero, show s = 1 from by linarith, one_smul]
+
 end Gluck.Discrete
