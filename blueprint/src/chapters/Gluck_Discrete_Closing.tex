@@ -658,6 +658,57 @@ deterministic sync cannot parse multi-name \texttt{\textbackslash lean} lists):
   Affine functions of $t$ are continuous.
 \end{proof}
 
+\subsubsection*{The generalized symmetric anchor (@080)}
+
+The @079 refutation (\cref{lem:closing_gap_zero_iff_fails_of_const} below) shows
+the hardwired anchor $\kappa^0 = \mathrm{centralSym}\,m\,\kappa$ degenerates on
+the class $\{\kappa : \kappa^0 \text{ constant}\}$ --- which contains genuine
+$\mathrm{DFV}$ profiles ($\kappa = c + $ odd half-period harmonics). The fix
+(numeric probes \texttt{references/verify\_anchor\_nondeg.py},
+\texttt{references/verify\_jacobian\_formula.py} + escalated ChatGPT gpt-5.5
+consult, 2026-07-14, converged; crux note \S9) is to \emph{generalize the
+homotopy to an arbitrary positive half-period-symmetric anchor}: positivity
+along the path is free by convexity, and the symmetry is used only at $t = 0$
+(through \cref{lem:central_symmetry_closes}). The anchor is then \emph{chosen
+per target profile} by a two-case selector ($\kappa^s = \kappa^0$ when
+non-constant; $\kappa^s = c + \delta w$ with $w$ a fixed symmetric non-constant
+bump for the constant class --- probe-verified: anchor winding $-1$, boundary
+margin $\ge 8\cdot10^{-3}$ along the whole modified path, $\delta \in
+[0.05, 0.4]$, $n \in \{8,12,16\}$). \emph{Dead end recorded (do not retry):
+anchoring at $t = \varepsilon$ on the original $\mathrm{centralSym}$ path ---
+$F(\varepsilon,\cdot)$ is boundary zero-free but its winding is $0$, for all
+tested $\varepsilon \in [0.05, 0.3]$.}
+
+\begin{definition}
+[the generalized anchor path $\kappa^s \leadsto \kappa$]
+  \label{def:curv_path}
+  \lean{Gluck.Discrete.curvPath}
+  \uses{def:central_symmetrization}
+  For positive profiles $\kappa^s$ (the \emph{anchor}) and $\kappa$ (the
+  target), $\mathrm{curvPath}\,\kappa^s\,\kappa\,t := \kappa^s + t(\kappa -
+  \kappa^s)$, $t \in [0,1]$; affine (hence continuous) in $t$, positive for all
+  $t$ (convex combination of positives), with endpoints
+  $\mathrm{curvPath}\,\kappa^s\,\kappa\,0 = \kappa^s$ and
+  $\mathrm{curvPath}\,\kappa^s\,\kappa\,1 = \kappa$. The central-symmetrization
+  homotopy of \cref{def:curv_homotopy} is the instance $\kappa^s =
+  \mathrm{centralSym}\,m\,\kappa$; the half-period symmetry
+  $\kappa^s_{i+m} = \kappa^s_i$ is carried as a hypothesis exactly where it is
+  used (the $t=0$ anchor lemmas), not baked into the path.
+\end{definition}
+
+\emph{Reading convention for the $2$-cell blocks below (@080).} The chart,
+perturbation, $2$-cell, window and continuity layer (from
+\cref{def:chart_perturb} through \cref{thm:closing_cell_package}) was landed
+@076--@078 for the instance $\kappa_t = \mathrm{curvHomotopy}\,m\,\kappa\,t$
+and is being generalized \emph{in place} to $\kappa_t =
+\mathrm{curvPath}\,\kappa^s\,\kappa\,t$ (same declaration names; the only
+hypothesis changes are ``$\kappa$ positive'' $\to$ ``$\kappa^s, \kappa$
+positive'' and, on the $t=0$ anchor lemmas
+\cref{lem:closing_cell_zero_symm,lem:closing_gap_center_eq_zero,thm:closing_cell_package},
+the explicit half-period symmetry of $\kappa^s$). Every statement and proof
+below is verbatim-correct under this substitution; none uses any property of
+$\mathrm{centralSym}$ beyond positivity and (at $t=0$ only) symmetry.
+
 \subsubsection*{Turning-angle coordinates and the antisymmetric $2$-cell}
 
 The naive parametrization by edge lengths is the wrong chart: the constraint
@@ -1357,134 +1408,432 @@ $\Phi$ and $F$; the compactness paragraph is the window package
   \cref{lem:closing_gap_center_eq_zero}.
 \end{proof}
 
-\subsubsection*{The crux, decomposed into one provable and one open leaf}
+\subsubsection*{Exact half-period heading ingredients (@079, survive any reshaping)}
+
+\begin{lemma}\leanok
+[window monotonicity in $\rho$]
+  \label{lem:closing_cell_window_mono}
+  \lean{Gluck.Discrete.closingCell_window_mono}
+  \uses{lem:exists_closing_cell_window}
+  If the window membership of \cref{lem:exists_closing_cell_window} holds at
+  radius $\rho$ then it holds at every radius $\rho' \le \rho$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  $|u|+|v| \le \rho' \le \rho$; restriction of the quantifier.
+\end{proof}
+
+\begin{lemma}\leanok
+[exact block heading advance in chart form]
+  \label{lem:heading_add_eq_chart_block}
+  \lean{Gluck.Discrete.heading_add_eq_chartBlock}
+  \uses{def:turning_chart, def:discrete_development}
+  For any $\kappa, \ell$ and $j, k \in \mathbb{N}$:
+  $\psi_{j+k} = \psi_j + \sum_{r=j+1}^{j+k} \bigl(\alpha_r + \beta_{r-1}\bigr)$,
+  i.e.\ the heading advance over a block of $k$ vertices is the sum of the
+  chart values $\tau_r(\ell_r)$ over the block, up to the boundary split
+  $\theta_r = \beta_{r-1} + \alpha_r$ (telescoping; hypothesis-free).
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Induction on the block length; each step is the definition of
+  $\theta$ and of the chart $\tau$.
+\end{proof}
+
+\begin{lemma}\leanok
+[a half-block hits an antipodal pair exactly once]
+  \label{lem:sum_ite_pair_half}
+  \lean{Gluck.Discrete.sum_ite_pair_half}
+  \uses{lem:development_recurrences}
+  For $n = 2m$, $q \in \ZMod n$ and any $j$: the half-open block
+  $\{j+1, \dots, j+m\}$ (indices cast to $\ZMod n$) contains exactly one of
+  $\{q, q+m\}$; consequently
+  $\sum_{r=j+1}^{j+m} \bigl([r = q] - [r = q+m]\bigr) w = \pm w$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Full-period count is $1$ for each singleton; shifting a half-block by $m$
+  swaps the antipodal pair ($m + m = 0$), and the two counts sum to $1$.
+\end{proof}
+
+\begin{lemma}\leanok
+[chart-perturbation block sum]
+  \label{lem:sum_chart_perturb_block}
+  \lean{Gluck.Discrete.sum_chartPerturb_block}
+  \uses{def:chart_perturb, lem:sum_ite_pair_half}
+  For $n = 2m$ and any $j$: $\sum_{r=j+1}^{j+m}
+  \mathrm{chartPerturb}\,m\,a\,b\,z\,r = \pi + \varepsilon_a u +
+  \varepsilon_b v$ with $\varepsilon_a, \varepsilon_b \in \{\pm1\}$ (signs
+  determined by which representative of each pair the block contains).
+\end{lemma}
+\begin{proof}
+
+\leanok
+  The constant part sums to $m \cdot 2\pi/n = \pi$; each antisymmetric pair
+  contributes $\pm$ its weight once by \cref{lem:sum_ite_pair_half}.
+\end{proof}
+
+\begin{lemma}\leanok
+[opposite-heading defect of the $2$-cell, all $t$]
+  \label{lem:heading_closing_cell_add_half}
+  \lean{Gluck.Discrete.heading_closingCell_add_half}
+  \uses{lem:heading_add_eq_chart_block, lem:sum_chart_perturb_block,
+        lem:chart_map_chart_inv, def:closing_2cell}
+  On the $2$-cell (window membership assumed), for ALL $t \in [0,1]$ and all
+  $j$: there are $\varepsilon_a, \varepsilon_b \in \{\pm1\}$ with
+  \[
+    \psi_{j+m} = \psi_j + \pi + \varepsilon_a u + \varepsilon_b v
+      + \arcsin\bigl(\kappa_{t,j+m}\,\ell_{j+m}/2\bigr)
+      - \arcsin\bigl(\kappa_{t,j}\,\ell_j/2\bigr),
+  \]
+  the exact defect $\gamma_j$ of the paired-edge splitting
+  $F = \sum_{j<m} e^{\mathrm{i}\psi_j}\bigl(\ell_j - \ell_{j+m}
+  e^{\mathrm{i}\gamma_j}\bigr)$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Assemble \cref{lem:heading_add_eq_chart_block} with the round-trip
+  \cref{lem:chart_map_chart_inv} and \cref{lem:sum_chart_perturb_block}; the
+  boundary half-turn split contributes the two $\arcsin$ terms.
+\end{proof}
+
+\subsubsection*{The constant-curvature degeneracy (@079 refutation, proved in Lean)}
+
+\begin{lemma}\leanok
+[constant discrete curvature closes every $2\pi$-turning development]
+  \label{lem:closure_gap_eq_zero_of_const}
+  \lean{Gluck.Discrete.closureGap_eq_zero_of_const}
+  \uses{def:discrete_development, lem:turning_sum_edge_chart,
+        lem:development_recurrences}
+  If $\kappa \equiv c \ne 0$ and $\ell$ satisfies the weak wall
+  $|c\,\ell_i/2| \le 1$ with $\mathrm{turningSum} = 2\pi$, then
+  $\mathrm{closureGap}(\kappa, \ell) = 0$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  With $A_i = \arcsin(c\,\ell_i/2)$ the heading satisfies $\psi_j = A_{-1} +
+  2\sum_{i<j} A_i + A_j$ (induction), so each edge vector telescopes through
+  the half-angle identity $e^{2x\mathrm{i}} - 1 = 2\mathrm{i}\sin(x)e^{x\mathrm{i}}$:
+  $\ell_j e^{\mathrm{i}\psi_j} = e^{\mathrm{i}A_{-1}}/(\mathrm{i}c)\,
+  (e^{\mathrm{i}\Sigma_{j+1}} - e^{\mathrm{i}\Sigma_j})$, and $\Sigma_n =
+  \mathrm{turningSum} = 2\pi$ kills the telescoped sum. Geometrically: constant
+  discrete curvature = inscribed in a circle of radius $1/c$; total central
+  angle $2\pi$ = closed.
+\end{proof}
+
+\begin{lemma}\leanok
+[the $t=0$ gap map vanishes identically when $\kappa^0$ is constant]
+  \label{lem:closing_gap_eq_zero_of_central_sym_const}
+  \lean{Gluck.Discrete.closingGap_eq_zero_of_centralSym_const}
+  \uses{lem:closure_gap_eq_zero_of_const, lem:moderate_arc_closing_cell,
+        lem:turning_sum_closing_cell, lem:curv_homotopy_zero, def:closing_gap}
+  If $\mathrm{centralSym}\,m\,\kappa \equiv c$ then $F(0, z) = 0$ for every
+  $z$ in the window (no $n = 2m$ needed).
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Rewrite $\kappa_0 \equiv c$, extract the wall from
+  \cref{lem:moderate_arc_closing_cell}, and apply
+  \cref{lem:closure_gap_eq_zero_of_const} with
+  \cref{lem:turning_sum_closing_cell}.
+\end{proof}
+
+\begin{lemma}\leanok
+[constant-profile instance]
+  \label{lem:closing_gap_const_profile_eq_zero}
+  \lean{Gluck.Discrete.closingGap_const_profile_eq_zero}
+  \uses{lem:closing_gap_eq_zero_of_central_sym_const,
+        lem:exists_closing_cell_window, lem:chart_map_image_window_subset}
+  For the constant profile $\kappa \equiv c > 0$: on the window of
+  \cref{lem:exists_closing_cell_window}, $F(0, z) = 0$ for all $z$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  $\mathrm{centralSym}$ of a constant is that constant; apply
+  \cref{lem:closing_gap_eq_zero_of_central_sym_const}.
+\end{proof}
+
+\begin{lemma}\leanok
+[formal refutation of the @079 rigidity statement]
+  \label{lem:closing_gap_zero_iff_fails_of_const}
+  \lean{Gluck.Discrete.closingGap_zero_iff_fails_of_const}
+  \uses{lem:closing_gap_const_profile_eq_zero}
+  For constant profiles, EVERY radius $\rho' > 0$ contains $z \ne 0$ with
+  $F(0, z) = 0$: the local iff ``$F(0,z) = 0 \iff z = 0$'' fails under the
+  @079 hypotheses (positivity + pair-distinctness alone).
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Witness $z = (\min(\rho, \rho')/2,\, 0)$ and
+  \cref{lem:closing_gap_const_profile_eq_zero}. Consequence: any true rigidity
+  statement must carry a nondegeneracy hypothesis on the anchor; and since
+  $\mathrm{DFV}$ profiles with constant $\kappa^0$ exist ($c$ + odd
+  half-period harmonics), the anchor must be \emph{generalized}
+  (\cref{def:curv_path}), not merely hypothesized away.
+\end{proof}
+
+\subsubsection*{The crux, decomposed: explicit Jacobian, rigidity, one open leaf}
 
 The winding-continuation argument needs exactly three facts about $F$:
 (i) continuity, (ii) $F(0,\cdot)$ winds $\pm1$ on $\partial D_\rho$, (iii) $F \ne 0$
-on $[0,1]\times\partial D_\rho$. The ChatGPT consult (2026-07-14) reduced (ii) to a
-\emph{rigidity} lemma (below, \textbf{provable} --- the discrete Prop~9.1 ``only
-if'' direction) and isolated (iii) as the single genuinely open analytic leaf.
+on $[0,1]\times\partial D_\rho$. After the @079 refutation, (ii) is re-based on an
+\emph{explicit closure Jacobian} at a generalized symmetric anchor
+(\cref{def:curv_path}); (iii) remains the single genuinely open analytic leaf.
 
-\begin{lemma}[$t=0$ closing rigidity on the $2$-cell --- discrete Prop~9.1 ``only if'']
+\begin{definition}
+[the closure Jacobian columns $C_q$ at a symmetric anchor]
+  \label{def:closing_jacobian_col}
+  \lean{Gluck.Discrete.closingJacobianCol}
+  \uses{def:curv_path, def:closing_2cell, def:chart_inv}
+  Let $\kappa^s$ be positive and half-period symmetric, $s^0 = 2\pi/n$, and at
+  the $2$-cell base point put $\ell_j = \lambda_j(s^0)$ (chart inverse for the
+  pair $(\kappa^s_j, \kappa^s_{j+1})$), $\psi_j$ the headings, $E_j = \ell_j
+  e^{\mathrm{i}\psi_j}$ the edge vectors, and
+  \[
+    A_j = \frac{\kappa^s_j}{2\sqrt{1 - (\kappa^s_j \ell_j/2)^2}}, \quad
+    B_j = \frac{\kappa^s_{j+1}}{2\sqrt{1 - (\kappa^s_{j+1} \ell_j/2)^2}}, \quad
+    \lambda'_j = \frac{1}{A_j + B_j}, \quad p_j = \frac{A_j}{A_j + B_j}.
+  \]
+  The \emph{Jacobian column} of the antisymmetric pair $q$ is
+  \[
+    C_q \;=\; 2\lambda'_q\, e^{\mathrm{i}\psi_q}
+      \;+\; \mathrm{i}\Bigl((2p_q - 1)\,E_q + \sum_{r=q+1}^{q+m-1} E_r\Bigr)
+      \;\in\; \mathbb{C},
+  \]
+  and the linear part of $F(0,\cdot)$ at $z = 0$ is $L(u,v) = u\,C_a + v\,C_b$,
+  nonsingular as a real $2\times2$ matrix iff
+  $\mathrm{Im}\bigl(\overline{C_a}\,C_b\bigr) \ne 0$.
+  \emph{Derivation:} the pair perturbation moves $\mathrm{d}\psi_j = p_q$ at
+  $j = q$, $1$ on the interior of the block $(q, q+m)$, $1 - p_q$ at $j = q+m$,
+  $0$ outside; $\mathrm{d}\ell_q = \lambda'_q$, $\mathrm{d}\ell_{q+m} =
+  -\lambda'_q$; at the symmetric base $e^{\mathrm{i}\psi_{q+m}} =
+  -e^{\mathrm{i}\psi_q}$ and $E_{q+m} = -E_q$, and the terms assemble to $C_q$.
+  \emph{Validation: the closed form matches finite differences of $F$ to
+  relative error $4\cdot10^{-9}$ across $n \in \{4,\dots,12\}$, $10$ random
+  symmetric anchors each (\texttt{references/verify\_jacobian\_formula.py}).
+  In the constant case $C_q = 0$ for every $q$ (regular polygon), matching the
+  degeneracy \cref{lem:closing_gap_eq_zero_of_central_sym_const}.}
+\end{definition}
+
+\begin{lemma}[$t=0$ closing rigidity at a nondegenerate symmetric anchor
+  (corrected @080)]
   \label{lem:closure_boundary_rigidity}
-  % NOTE (review @079): REFUTED AS STATED — proved in Lean
-  % (`Gluck.Discrete.closingGap_zero_iff_fails_of_const`, ClosingCell.lean): when
-  % centralSym m κ is CONSTANT the development inscribes in a circle and
-  % F(0,·) ≡ 0 on the whole window, so the iff fails for every ρ' > 0. The
-  % pinned decl closingGap_zero_iff was deliberately NOT added. The @079 "GO"
-  % certification below was a sampling artifact (log-normal κ never hits
-  % κ⁰ ≈ const). Constant-κ⁰ DFV profiles EXIST (c + odd half-period harmonics),
-  % so this block needs re-authoring with a nondegeneracy hypothesis on κ⁰
-  % (necessary: non-constancy; provable-by-linearization: closure Jacobian L
-  % nonsingular) — see task_results/Gluck_Discrete_ClosingCell.md (iter-079).
   \lean{Gluck.Discrete.closingGap_zero_iff}
-  \uses{def:closing_2cell, def:closing_gap, lem:central_symmetry_closes,
-        lem:closing_gap_center_eq_zero, lem:exists_closing_cell_window}
-  With $\kappa_0 = \kappa^0$ centrally symmetric, $\Phi$ as in
-  \cref{def:closing_2cell}, and the two perturbed half-pairs \emph{distinct}
-  ($a \ne b$ and $a \ne b + m$, so $\{a, a{+}m\} \cap \{b, b{+}m\} =
-  \emptyset$): $F(0,z) = 0 \iff z = 0$. In particular $F(0,\cdot)$ has $z=0$
-  as its \emph{unique} zero on $\overline{D}_\rho$. (Lean realization: the
-  ball is the $\ell^1$ diamond $|u|+|v| \le \rho'$; proving it for a possibly
-  smaller radius $\rho' \le \rho$ is faithful --- the radius is existential
-  throughout \cref{def:closing_2cell} and the window package is monotone in
-  $\rho$.)
+  \uses{def:curv_path, def:closing_2cell, def:closing_gap,
+        def:closing_jacobian_col, lem:central_symmetry_closes,
+        lem:closing_gap_center_eq_zero, lem:exists_closing_cell_window,
+        lem:closing_cell_window_mono}
+  Let $n = 2m \ge 4$, $\kappa^s$ positive half-period symmetric, the two
+  perturbed half-pairs distinct ($a \ne b$, $a \ne b + m$), and assume the
+  nondegeneracy $\mathrm{Im}\bigl(\overline{C_a}\,C_b\bigr) \ne 0$
+  (\cref{def:closing_jacobian_col}). Then there is $\rho' > 0$ (with
+  $\rho' \le \rho$ of the window package, sanctioned by
+  \cref{lem:closing_cell_window_mono}) such that for all $z$ with
+  $|u| + |v| \le \rho'$: $F(0, z) = 0 \iff z = 0$.
 \end{lemma}
 \begin{proof}
-  ($\Leftarrow$) is \cref{lem:central_symmetry_closes}. For ($\Rightarrow$):
-  under $\kappa_0 = \kappa^0$ half-period-symmetric, $\lambda_{0,j} =
-  \lambda_{0,j+m}$, so $\Phi(0,z)_{j+m} = \lambda_{0,j}(s(z)_{j+m})$. Splitting
-  $\mathrm{closureGap} = \sum_{j\in\mathrm{range}\,m}
-  \bigl(\ell_j e^{\mathrm{i}\psi_j} + \ell_{j+m} e^{\mathrm{i}\psi_{j+m}}\bigr)$ as
-  in \cref{lem:central_symmetry_closes}: the heading still advances by $\pi$ over
-  each half-period \emph{only when} the two half-periods carry equal turning
-  blocks, which here holds for the base but is perturbed by $(u,v)$. Writing
-  $\psi_{j+m} - \psi_j = \pi + \delta_j(z)$ with $\delta_j$ the accumulated chart
-  asymmetry (a linear functional of $(u,v)$ supported on the pairs $a,b$), one gets
-  $F(0,z) = \sum_{j} \ell_j\bigl(1 - e^{\mathrm{i}\delta_j}\bigr) e^{\mathrm{i}\psi_j}$
-  up to the symmetric cancellation; this is the discrete form of the DeTurck--Gluck
-  ``two vectors add to zero iff opposite arcs are equal'' picture (Prop~9.1, whose
-  error vector $E = (1/\mathrm{i}a - 1/\mathrm{i}b)(1 - q_2 + q_3 - q_4)$ vanishes
-  iff the alternating arc-length combination vanishes). For the two-parameter
-  antisymmetric family this alternating combination is a nondegenerate linear form
-  in $(u,v)$, so it vanishes iff $u = v = 0$. \emph{(Atomic Lean decomposition and
-  the exact nondegeneracy computation are the content of the prover node; the
-  $2\times2$ leading form is the closure Jacobian, numerically nonsingular ---
-  \texttt{verify\_noescape\_bound.py}, smallest singular value $\ge 0.025$.)}
-
-  \emph{Disprove-before-spend certification (@079,
-  \texttt{references/verify\_rigidity\_t0.py}): the GLOBAL statement holds
-  numerically on the full window diamond --- across $n \in \{4,\dots,12\}$,
-  $60$ profiles (half DFV, half generic positive), no interior zero other than
-  $z = 0$, worst linear lower-bound ratio $|F(0,z)|/(|u|+|v|) = 0.061$, worst
-  Jacobian singular value $0.083$. GO.} A Lean-friendly route that avoids
-  computing $DF$ exactly: prove the paired-edge expansion above, isolate the
-  \emph{linear} part $L(z)$ (explicit in the four perturbed chart slots),
-  show $L$ nonsingular from the pair-distinctness, and dominate the remainder
-  on a small ball; the local statement with $\rho' \le \rho$ suffices for the
-  downstream winding step.
+  \uses{lem:closing_gap_zero_iff_fails_of_const}
+  ($\Leftarrow$) is \cref{lem:closing_gap_center_eq_zero} (the anchor is
+  symmetric, so the base closes by \cref{lem:central_symmetry_closes}).
+  ($\Rightarrow$): $F(0, \cdot)$ is \emph{strictly differentiable} at $z = 0$
+  with derivative $L(u,v) = u C_a + v C_b$: each edge length
+  $\Phi(0,z)_j = \lambda_j(\mathrm{chartPerturb}\,z\,j)$ is a composition of
+  the affine perturbation with the chart inverse, which is strictly
+  differentiable because the chart $\tau_j$ has strictly positive derivative
+  $A_j + B_j$ on the moderate window (inverse-function rule for a strictly
+  monotone map with nonvanishing derivative; in Lean:
+  \texttt{HasStrictDerivAt.of\_local\_left\_inverse} on
+  \texttt{chartInv}, with \texttt{Real.hasStrictDerivAt\_arcsin} for the two
+  $\arcsin$ slots --- the moderate-arc bounds keep the arguments away from
+  $\pm1$); headings and edge vectors are finite sums/products of strictly
+  differentiable maps, and the derivative assembles to the columns of
+  \cref{def:closing_jacobian_col}. Strict differentiability gives: for
+  $\varepsilon := \sigma_{\min}(L)/2 > 0$ (positive by the nondegeneracy)
+  there is $\rho' > 0$ with
+  $\|F(0,z) - L z\| \le \varepsilon \|z\|$ for $|z|_1 \le \rho'$, whence
+  $\|F(0,z)\| \ge \sigma_{\min}(L)\|z\| - \varepsilon\|z\| =
+  \tfrac12\sigma_{\min}(L)\|z\| > 0$ for $z \ne 0$. (No inverse function
+  theorem needed --- the direct lower bound suffices; the $\ell^1$ diamond vs
+  Euclidean ball costs only a $\sqrt2$ constant.) The refuted @079 version
+  (no nondegeneracy hypothesis) is impossible by
+  \cref{lem:closing_gap_zero_iff_fails_of_const}.
 \end{proof}
+
+\begin{lemma}[the two-level witness anchor --- explicit nondegenerate pair]
+  \label{lem:anchor_witness_two_level}
+  \lean{Gluck.Discrete.anchorWitness_two_level}
+  \uses{def:closing_jacobian_col, lem:closing_gap_eq_zero_of_central_sym_const}
+  Let $n = 2m \ge 4$ and $K > 0$. The \emph{two-level profile}
+  $\kappa^{(\varepsilon)}_j := K + \varepsilon\,[j \in \{0, m\}]$ is positive
+  (for $|\varepsilon| < K$), half-period symmetric, and non-constant for
+  $\varepsilon \ne 0$; and for all sufficiently small $\varepsilon \ne 0$ its
+  columns satisfy
+  $\mathrm{Im}\bigl(\overline{C_0}\,C_1\bigr) \ne 0$. Explicitly, with
+  $\rho = \pi/n$:
+  \[
+    \mathrm{Im}\bigl(\overline{C_0(\varepsilon)}\,C_1(\varepsilon)\bigr)
+    = c_n\,\varepsilon^2 + O(\varepsilon^3), \qquad
+    c_n = \begin{cases}
+      -2\tan\rho\sec^2\rho\,/K^4 & m \ge 3\\[2pt]
+      -8/K^4 & m = 2,
+    \end{cases}
+  \]
+  both leading coefficients nonzero. \emph{(Numerically confirmed @080: the
+  ratio to the predicted leading term converges to $1$ as $\varepsilon \to 0$
+  for $n \in \{6,8,12\}$ and to the $-8/K^4$ coefficient for $n=4$.)}
+\end{lemma}
+\begin{proof}
+  Parametrize by the slot angles $a_j = \arcsin(\kappa_j\ell_j/2)$,
+  $b_j = \arcsin(\kappa_{j+1}\ell_j/2)$, so $a_j + b_j = \alpha := 2\pi/n$,
+  $\ell_j = 2\sin a_j/\kappa_j = 2\sin b_j/\kappa_{j+1}$, hence
+  $\kappa_{j+1}/\kappa_j = \sin(\alpha - a_j)/\sin a_j$ (so $\kappa$ constant
+  $\iff a_j \equiv \rho$), $\theta_j = \alpha + a_j - a_{j-1}$ and, up to one
+  global phase, $\psi_j = (j+1)\alpha + a_j$. In these coordinates
+  $A_j = \tan a_j/\ell_j$, $B_j = \tan b_j/\ell_j$,
+  $\lambda'_j = \ell_j/(\tan a_j + \tan b_j)$,
+  $p_j = \tan a_j/(\tan a_j + \tan b_j)$.
+
+  \emph{Base point ($\varepsilon = 0$, constant $K$): all $C_q = 0$ exactly.}
+  Then $a_j = b_j = \rho$, $\ell = 2\sin\rho/K$, $p = 1/2$ (killing the
+  $(2p-1)E_q$ term), $\lambda' = \cos\rho/K$, and up to global phase
+  $E_r = \ell e^{\mathrm{i}(r+1)\alpha}$. The half-block geometric sum is
+  $\sum_{t=1}^{m-1} e^{\mathrm{i}t\alpha} = \mathrm{i}\cot(\alpha/2) =
+  \mathrm{i}\cot\rho$ (since $\alpha = \pi/m$), so
+  $S_q = \ell\,\mathrm{i}\cot\rho\, e^{\mathrm{i}(q+1)\alpha} =
+  2\mathrm{i}\lambda' e^{\mathrm{i}\psi_q}$ and
+  $C_q = 2\lambda' e^{\mathrm{i}\psi_q} + \mathrm{i}S_q = 0$. (This grounds the
+  perturbation: $C_q(0) = 0$, so the first derivative $V_q$ below is
+  gauge-independent.)
+
+  \emph{First order in $\varepsilon$ (write $t = \tan\rho$, dot $=
+  d/d\varepsilon$ at $0$, $\chi_j = [j \in \{0,m\}]$).} Differentiating
+  $\tau_j(\ell_j) = \alpha$ gives
+  $\dot a_j = (t/2K)(\chi_j - \chi_{j+1})$ --- so $\dot a_0 = \dot a_m =
+  t/2K$, $\dot a_{m-1} = \dot a_{n-1} = -t/2K$, else $0$ --- and
+  $\dot\ell_j/\ell = \cot\rho\,\dot a_j - \chi_j/K$, so exactly the four edges
+  $j \in \{0, m{-}1, m, n{-}1\}$ move, each with $\dot\ell_j = -\ell/2K$.
+  Substituting into the column formula (with the gauge
+  $E_j = \ell e^{\mathrm{i}(j+1)\alpha}$) yields
+  $C_q(\varepsilon) = \varepsilon V_q + O(\varepsilon^2)$ with, for $m \ge 3$:
+  $V_0 = K^{-2}e^{\mathrm{i}\rho}(-\sec^2\rho + 2\mathrm{i}\tan\rho)$ and
+  $V_q = 2\mathrm{i}K^{-2}\tan\rho\, e^{\mathrm{i}\rho}$ for
+  $1 \le q \le m-2$; hence $\mathrm{Im}(\overline{V_0}V_1) =
+  -2\tan\rho\sec^2\rho/K^4 \ne 0$. For $m = 2$ ($\rho = \pi/4$) directly
+  $V_0 = -2\sqrt2/K^2$, $V_1 = 2\sqrt2\,\mathrm{i}/K^2$, so
+  $\mathrm{Im}(\overline{V_0}V_1) = -8/K^4 \ne 0$. In both cases
+  $\mathrm{Im}(\overline{C_0}C_1)(\varepsilon) = \varepsilon^2\,
+  \mathrm{Im}(\overline{V_0}V_1) + O(\varepsilon^3)$, nonzero for all small
+  $\varepsilon \ne 0$. (Lean shape: $\varepsilon \mapsto C_q(\varepsilon)$ is
+  differentiable at $0$ with $C_q(0) = 0$ --- same strict-differentiability
+  toolkit as \cref{lem:closure_boundary_rigidity}, now in the $\kappa$ slot ---
+  and the target is the existential ``$\exists \varepsilon \ne 0$ with
+  $\mathrm{Im}(\overline{C_0}C_1) \ne 0$'', so a first-order expansion with a
+  qualitative $o(\varepsilon)$ remainder on the product suffices; no
+  second-derivative bookkeeping is needed.
+  \emph{(ChatGPT gpt-5.5 consult 2026-07-14; leading coefficients verified
+  numerically @080.)})
+\end{proof}
+
+\emph{The anchor selector (@080) --- how \cref{lem:anchor_witness_two_level}
+feeds \cref{lem:closure_persists}.} For a target $\kappa$, the anchor datum is
+chosen by a (classically decidable) finite case split: if some distinct pair
+$(a,b)$ has $\mathrm{Im}(\overline{C_a(\kappa^0)}\,C_b(\kappa^0)) \ne 0$, take
+$\kappa^s = \kappa^0$ (shortest path; numerically this happens for every
+non-constant $\kappa^0$); otherwise take the two-level witness
+$\kappa^s = \kappa^{(\varepsilon)}$ of \cref{lem:anchor_witness_two_level}.
+\textbf{No general non-constancy lemma is needed on the critical path.} The
+general statement \emph{``$\kappa^s$ symmetric non-constant $\Rightarrow$ some
+pair has $\mathrm{Im}(\overline{C_a}C_b) \ne 0$''} is DEMOTED to a conjecture
+(consult @080: it reduces to a genuinely nonlinear rigidity system --- in slot
+coordinates, $D_j \pm \mathrm{i}E_j$ factor as
+$(2\ell_j\cos b_j/\sin\alpha)e^{\mathrm{i}(\psi_j + a_j)}$ resp.\
+$(2\ell_j\cos a_j/\sin\alpha)e^{\mathrm{i}(\psi_j - b_j)}$, and collinearity of
+all $C_{q+1} - C_q$ becomes a coupled phase/ratio system with no known
+argument; numerically no counterexample, probe Part~1). Do NOT blueprint it as
+a theorem; it is not \texttt{\textbackslash uses}-load-bearing anywhere.
 
 \begin{lemma}[winding $\pm1$ at $t=0$]
   \label{lem:closure_winding_t0}
-  \uses{lem:closure_boundary_rigidity, def:closing_2cell}
-  $F(0,\cdot)|_{\partial D_\rho}$ has winding number $\pm1$ about $0$.
+  \uses{lem:closure_boundary_rigidity, def:closing_jacobian_col,
+        def:closing_2cell}
+  Under the hypotheses of \cref{lem:closure_boundary_rigidity},
+  $F(0,\cdot)|_{\partial D_{\rho'}}$ has winding number $\pm1$ about $0$
+  (equal to $\mathrm{sgn}\,\mathrm{Im}\bigl(\overline{C_a}\,C_b\bigr)$).
 \end{lemma}
 \begin{proof}
   \uses{lem:closure_boundary_rigidity}
-  By \cref{lem:closure_boundary_rigidity} the only zero of the continuous map
-  $F(0,\cdot)$ on $\overline{D}_\rho$ is the interior point $z=0$, and its closure
-  Jacobian $DF(0,\cdot)|_{z=0}$ is nonsingular. Hence $z=0$ is an isolated
-  nondegenerate zero with local degree $\mathrm{sgn}\det DF = \pm1$, and (no other
-  zero in $\overline{D}_\rho$) excision identifies this with the winding number of
-  the outer boundary loop $F(0,\cdot)|_{\partial D_\rho}$, which is therefore
-  $\pm1$. \emph{(In Lean this is the outer-boundary specialization of the in-tree
-  \texttt{exists\_zero\_of\_boundary\_winding} degree engine,
-  \cref{chap:winding}.)}
+  On $|z|_1 = \rho'$ (the radius of \cref{lem:closure_boundary_rigidity}) run
+  the \emph{linear boundary homotopy} $H_s(z) = L z + s\bigl(F(0,z) - L z\bigr)$,
+  $s \in [0,1]$: by the strict-differentiability estimate
+  $\|F(0,z) - Lz\| \le \tfrac12\sigma_{\min}(L)\|z\| < \|Lz\|$, every $H_s$ is
+  zero-free on the boundary, so the winding of $F(0,\cdot)$ equals the winding
+  of the nonsingular real-linear loop $z \mapsto Lz$, which is
+  $\mathrm{sgn}\det L = \mathrm{sgn}\,\mathrm{Im}(\overline{C_a} C_b) = \pm1$.
+  \emph{(Lean ingredients: the public homotopy-invariance wrapper (P1, frozen
+  \texttt{Gluck/Winding.lean}, additive only) and a small ``winding of a
+  nonsingular linear loop'' lemma; both consumed by the same iter that
+  unblocks \cref{lem:closure_persists}.)}
 \end{proof}
 
-\begin{lemma}[boundary exclusion along the homotopy --- OPEN analytic leaf]
-  % NOTE (review @079): the constant-κ⁰ degeneracy refuting
-  % lem:closure_boundary_rigidity ALSO affects this leaf: when centralSym m κ
-  % is constant, F(0,·) ≡ 0 on ∂D_ρ, so boundary exclusion FAILS at t = 0 for
-  % that class and the t=0 anchor of the continuation degenerates. Any
-  % re-authoring must either exclude the constant-κ⁰ class here too or cover
-  % it by a separate argument (prover options (a)–(d),
-  % task_results/Gluck_Discrete_ClosingCell.md iter-079).
+\begin{lemma}[boundary exclusion along the anchor path --- OPEN analytic leaf]
   \label{lem:closure_boundary_exclusion}
-  \uses{def:closing_2cell}
-  For $\rho$ as in \cref{def:closing_2cell} and every $t \in [0,1]$,
-  $z \in \partial D_\rho$: $F(t,z) \ne 0$.
+  \uses{def:closing_2cell, def:curv_path}
+  For an anchor $\kappa^s$ and radius $\rho'$ satisfying
+  \cref{lem:closure_boundary_rigidity}, and the path $\kappa_t =
+  \mathrm{curvPath}\,\kappa^s\,\kappa\,t$: for every $t \in [0,1]$ and
+  $z \in \partial D_{\rho'}$, $F(t,z) \ne 0$.
 \end{lemma}
 
 \emph{Status of \cref{lem:closure_boundary_exclusion} --- the one genuinely open
-leaf (updated @075).} At $t=0$ this is \cref{lem:closure_boundary_rigidity}
-($z \ne 0 \Rightarrow F(0,z) \ne 0$); by compactness $\min_{z\in\partial D_\rho}
-|F(0,z)| =: \delta_\rho > 0$. For small $t$ it follows by uniform continuity
-($|F(t,z) - F(0,z)| < \delta_\rho$). \textbf{The open content is boundary
-exclusion for the full $t \in [0,1]$}, where the margin $\delta_\rho$ need not
-beat the total variation of $F$ in $t$. Numerically this holds: the
-boundary-exclusion probe (\texttt{references/verify\_boundary\_exclusion.py}, @072)
-found, across $n \in \{4,6,8,10,12\}$, $10$ DFV profiles each and a $6$-point
-$t$-grid, worst-case $\min|F|$ on $\partial\Omega\cap\{\mathrm{turningSum}=2\pi\}$
-equal to $0.0090$ ($\sim6$ orders above numerical zero). \textbf{Dead end recorded
-(do not retry):} the support-function / ``all headings in an arc of length
-$<2\pi$'' argument \emph{cannot} prove this --- positivity
-$\mathrm{Re}(e^{-\mathrm{i}\alpha}F) = \sum_j \ell_j\cos(\psi_j-\alpha) > 0$ needs
-all edge directions in an arc of length $<\pi$, but the shortest arc containing all
-$n$ directions has length $2\pi - \max_i\theta_i > \pi$ (the cyclic gaps are the
-$\theta_i \in (0,\pi)$ and $\sum\theta_i = 2\pi$), which is incompatible with any
-$2\pi$-turning closed development (ChatGPT gpt-5.5, 2026-07-14). A rigorous proof
-must instead be a boundary-tolerant degree/interval-certification argument;
-\textbf{no prover is dispatched on \cref{lem:closure_boundary_exclusion} until such
-an argument is authored to atomic detail and a HARD GATE clears it}.
+leaf (updated @080).} At $t=0$ this is \cref{lem:closure_boundary_rigidity}
+($z \ne 0 \Rightarrow F(0,z) \ne 0$); by compactness $\min_{z\in\partial D_{\rho'}}
+|F(0,z)| =: \delta > 0$, and for small $t$ it follows by uniform continuity.
+\textbf{The open content is boundary exclusion for the full $t \in [0,1]$}, where
+the margin need not beat the total variation of $F$ in $t$. The @080 anchor
+generalization does \emph{not} change the leaf's nature (consult @080) --- it only
+changes the path; keeping $\kappa^s = \kappa^0$ whenever $\kappa^0$ is
+non-constant keeps the path shortest, and the constant class adds one controlled
+extra segment. Numerics: the @072 probe
+(\texttt{references/verify\_boundary\_exclusion.py}) found worst-case
+$\min|F| = 0.0090$ on the original paths ($n \in \{4,\dots,12\}$, $10$ DFV
+profiles, $6$-point $t$-grid), and the @080 probe
+(\texttt{references/verify\_anchor\_nondeg.py} Part~2) worst-case
+$\ge 8\cdot10^{-3}$ on the perturbed-anchor paths for the constant-$\kappa^0$
+class. Consult ranking of proof strategies: (1) a global geometric argument from
+$\mathrm{DFV}$ (the only route likely to give the uniform theorem), (2) per-$n$
+interval-arithmetic certification (realistic but finite/boxed), (3) a
+quantitative anchor-margin vs.\ path-length estimate (insufficient alone, since
+$\sigma_{\min} \sim \delta$ while the target perturbation can be large).
+\textbf{Dead ends recorded (do not retry):} (i) the support-function / ``all
+headings in an arc'' argument --- positivity
+$\mathrm{Re}(e^{-\mathrm{i}\alpha}F) > 0$ needs all edge directions in an arc of
+length $<\pi$, impossible under $\sum\theta_i = 2\pi$, $\theta_i \in (0,\pi)$
+(@075); (ii) anchoring at $t = \varepsilon$ on the original path for the
+constant-$\kappa^0$ class --- boundary winding $0$ (@080).
+\textbf{No prover is dispatched on \cref{lem:closure_boundary_exclusion} until a
+boundary-tolerant argument is authored to atomic detail and a HARD GATE clears
+it}.
 
-\begin{lemma}[closure persists along the homotopy --- CRUX, modulo the open leaf]
+\begin{lemma}[closure persists along the anchor path --- CRUX, modulo the open leaf]
   \label{lem:closure_persists}
-  \uses{lem:closure_winding_t0, lem:closure_boundary_exclusion}
-  For $n \ge 4$ even and $\kappa$ with $\mathrm{DiscreteFourVertexPos}$, the
-  closing solution at $t = 0$ (\cref{lem:central_symmetry_closes}) continues to a
-  closing solution at $t = 1$: for every $t \in [0,1]$ there is $z_t \in D_\rho$
+  \uses{lem:closure_winding_t0, lem:closure_boundary_exclusion,
+        lem:anchor_witness_two_level}
+  For $n \ge 4$ even and $\kappa$ with $\mathrm{DiscreteFourVertexPos}$, choose
+  an admissible anchor datum (a positive half-period-symmetric $\kappa^s$ with
+  a nondegenerate pair, by the anchor selector: $\kappa^0$ when some pair is
+  nondegenerate, else the two-level witness
+  \cref{lem:anchor_witness_two_level}). The closing solution at $t = 0$
+  (\cref{lem:central_symmetry_closes}) continues along
+  $\mathrm{curvPath}\,\kappa^s\,\kappa$ to a closing solution at $t = 1$: for
+  every $t \in [0,1]$ there is $z_t \in D_{\rho'}$
   with $F(t,z_t) = 0$, so $\ell_t := \Phi(t,z_t)$ is moderate-arc with
   $\mathrm{turningSum}\,\kappa_t\,\ell_t = 2\pi$ and
   $\mathrm{closureGap}\,\kappa_t\,\ell_t = 0$; at $t=1$, $\ell_1$ realizes $\kappa$.
@@ -1504,20 +1853,25 @@ an argument is authored to atomic detail and a HARD GATE clears it}.
   = F(t,z_t) = 0$; at $t=1$, $\kappa_1 = \kappa$, so $\ell_1$ realizes $\kappa$.
 \end{proof}
 
-\emph{Formalization prerequisites and sequencing (updated @075).} The crux is now
-decomposed: \cref{lem:closure_boundary_rigidity} (and hence
-\cref{lem:closure_winding_t0}) is \textbf{provable} --- it is the discrete
-Prop~9.1 ``only if'' (Prop~9.1 is an \emph{iff} in the source,
-\texttt{deturck-gluck-fourvertex.txt} l.279); \cref{lem:closure_boundary_exclusion}
-is the \textbf{single open leaf}. Before a prover is dispatched on the persistence
-chain, two in-tree prerequisites are needed: (P1) a \emph{public} wrapper for
-\texttt{windingNumber\_eq\_of\_homotopy} (currently \texttt{private} in the frozen
-\texttt{Gluck/Winding.lean}; add a NEW public theorem, preserve all signatures,
-axiom-clean); (P2) the Lean definition of $\Phi$/$F$ (\cref{def:closing_2cell}). No
-prover is dispatched on \cref{lem:closure_persists} or
-\cref{lem:closure_boundary_exclusion} until the open leaf is authored to atomic
-detail and a fresh HARD GATE clears it. \Cref{lem:closure_boundary_rigidity} is the
-next committed prover target of this route.
+\emph{Formalization prerequisites and sequencing (updated @080).} The crux is
+decomposed and, after the @079 refutation, re-based on the generalized anchor:
+the persistence chain runs from any \emph{admissible anchor datum} --- a
+positive half-period-symmetric $\kappa^s$, a distinct pair $(a,b)$ with
+$\mathrm{Im}(\overline{C_a} C_b) \ne 0$, and boundary exclusion along
+$\mathrm{curvPath}\,\kappa^s\,\kappa$ --- and the datum is \emph{instantiated}
+per target $\kappa$ by the decidable anchor selector ($\kappa^s = \kappa^0$
+when some pair is nondegenerate; else the two-level witness
+\cref{lem:anchor_witness_two_level}). Committed prover sequence: (P2$'$) generalize
+the $2$-cell layer to \cref{def:curv_path} in place, define
+\cref{def:closing_jacobian_col}, and prove the corrected
+\cref{lem:closure_boundary_rigidity}; THEN \cref{lem:closure_winding_t0}
+(needs (P1), the \emph{public} wrapper for
+\texttt{windingNumber\_eq\_of\_homotopy} in the frozen
+\texttt{Gluck/Winding.lean} --- a NEW public theorem, preserve all signatures,
+axiom-clean --- plus a winding-of-a-nonsingular-linear-loop lemma). NEXT after rigidity: \cref{lem:anchor_witness_two_level} (authored to atomic
+detail @080, gated with the winding step). HELD (no prover until authored to
+atomic detail + fresh HARD GATE): \cref{lem:closure_boundary_exclusion},
+\cref{lem:closure_persists}.
 
 % NOTE (2026-07-14 archon-discuss + ChatGPT gpt-5.5 consult @075): standing crux
 % note at repo-root discrete_closing_crux_note.md. Coordinate corrected to the
