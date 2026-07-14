@@ -2791,4 +2791,242 @@ theorem closingJacobianCol_const_eq_zero [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
   rw [anchorGapDeriv_eq hn4 hn hq hq hκs hsym] at hD0
   simpa using ContinuousLinearMap.ext_iff.mp hD0 (1, 0)
 
+/-! ### The curvature-slot derivative of the edge-length recovery
+
+The two-level witness moves ONE curvature value; the induced motion of the
+special-edge base lengths is the scalar function `p ↦ λ_{p,q}(s)` of the first
+adjacent curvature. We totalize it (`chartInvCurv`), prove an eventual
+membership/round-trip package by squeezing through the strict monotonicity of
+the chart in the length slot and continuity in the curvature slot, and get the
+strict derivative from the EXPLICIT local left inverse
+`Θ(x) = (2/x)·sin(s − arcsin(q·x/2))` — implicit differentiation with no
+inverse function theorem, exactly as in the length slot. -/
+
+/-- The edge-length recovery as a (totalized) function of the FIRST adjacent
+curvature: `chartInvCurv hq s p = λ_{p,q}(s)` for `p > 0` (junk `0`
+otherwise). At the two-level profile the four special edges carry
+`chartInvCurv hK (2π/n) (K + ε)` (up to `chartInv_comm`). -/
+noncomputable def chartInvCurv {q : ℝ} (hq : 0 < q) (s : ℝ) (p : ℝ) : ℝ :=
+  if h : 0 < p then chartInv h hq s else 0
+
+/-- On positive curvature the totalization is the chart inverse. -/
+theorem chartInvCurv_of_pos {p q : ℝ} (hp : 0 < p) (hq : 0 < q) (s : ℝ) :
+    chartInvCurv hq s p = chartInv hp hq s := dif_pos hp
+
+/-- **The eventual membership/round-trip package in the curvature slot**: if
+`s` is achieved at the pair `(p₀, q)` then, for every sandwich
+`x₁ < λ_{p₀,q}(s) < x₂` inside the moderate window, all curvatures `p` near
+`p₀` are positive, achieve `s`, recover it (round trip), stay moderate, and
+keep the recovered length inside `(x₁, x₂)`. This single filter statement
+drives both the continuity and the differentiability of `chartInvCurv`. -/
+theorem eventually_chartInvCurv_mem {p₀ q : ℝ} (hp₀ : 0 < p₀) (hq : 0 < q)
+    {s x₁ x₂ : ℝ} (hs : s ∈ chartMap p₀ q '' Set.Ioo (0 : ℝ) (2 / max p₀ q))
+    (h₁ : 0 < x₁) (h₁lt : x₁ < chartInv hp₀ hq s)
+    (h₂gt : chartInv hp₀ hq s < x₂) (h₂ : x₂ < 2 / max p₀ q) :
+    ∀ᶠ p in nhds p₀, 0 < p ∧
+      s ∈ chartMap p q '' Set.Ioo (0 : ℝ) (2 / max p q) ∧
+      chartMap p q (chartInvCurv hq s p) = s ∧
+      chartInvCurv hq s p ∈ Set.Ioo (0 : ℝ) (2 / max p q) ∧
+      chartInvCurv hq s p ∈ Set.Ioo x₁ x₂ := by
+  have hx₀ := chartInv_mem hp₀ hq hs
+  have hround₀ : chartMap p₀ q (chartInv hp₀ hq s) = s := chartMap_chartInv hp₀ hq hs
+  -- the chart at a FIXED length is continuous in the curvature slot
+  have hc : ∀ x : ℝ, ContinuousAt (fun p : ℝ => chartMap p q x) p₀ := by
+    intro x
+    unfold chartMap
+    exact ((Real.continuous_arcsin.comp
+      ((continuous_id.mul continuous_const).div_const 2)).add
+      continuous_const).continuousAt
+  have hE1 : ∀ᶠ p : ℝ in nhds p₀, 0 < p := eventually_gt_nhds hp₀
+  have hwallcont : ContinuousAt (fun p : ℝ => 2 / max p q) p₀ :=
+    ContinuousAt.div continuousAt_const (continuousAt_id.max continuousAt_const)
+      (lt_of_lt_of_le hq (le_max_right p₀ q)).ne'
+  have hE2 : ∀ᶠ p in nhds p₀, x₂ < 2 / max p q :=
+    hwallcont.tendsto.eventually_const_lt h₂
+  have hE3 : ∀ᶠ p in nhds p₀, chartMap p q x₁ < s := by
+    have hlt : chartMap p₀ q x₁ < s := by
+      rw [← hround₀]
+      exact chartMap_strictMonoOn hp₀ hq ⟨h₁, lt_trans h₁lt hx₀.2⟩ hx₀ h₁lt
+    exact (hc x₁).tendsto.eventually_lt_const hlt
+  have hE4 : ∀ᶠ p in nhds p₀, s < chartMap p q x₂ := by
+    have hlt : s < chartMap p₀ q x₂ := by
+      rw [← hround₀]
+      exact chartMap_strictMonoOn hp₀ hq hx₀ ⟨lt_trans hx₀.1 h₂gt, h₂⟩ h₂gt
+    exact (hc x₂).tendsto.eventually_const_lt hlt
+  filter_upwards [hE1, hE2, hE3, hE4] with p hp1 hp2 hp3 hp4
+  have hIcc : s ∈ chartMap p q '' Set.Icc x₁ x₂ :=
+    chartMap_mem_image_Icc (by linarith [lt_trans h₁lt h₂gt]) ⟨hp3.le, hp4.le⟩
+  have hx₁mem : x₁ ∈ Set.Ioo (0 : ℝ) (2 / max p q) :=
+    ⟨h₁, by linarith [lt_trans h₁lt h₂gt]⟩
+  have hx₂mem : x₂ ∈ Set.Ioo (0 : ℝ) (2 / max p q) :=
+    ⟨lt_trans h₁ (lt_trans h₁lt h₂gt), hp2⟩
+  have hsub : Set.Icc x₁ x₂ ⊆ Set.Ioo (0 : ℝ) (2 / max p q) := fun w hw =>
+    ⟨lt_of_lt_of_le h₁ hw.1, lt_of_le_of_lt hw.2 hp2⟩
+  have hmem : s ∈ chartMap p q '' Set.Ioo (0 : ℝ) (2 / max p q) :=
+    Set.image_mono hsub hIcc
+  have hval : chartInvCurv hq s p = chartInv hp1 hq s := dif_pos hp1
+  have hmem' := chartInv_mem hp1 hq hmem
+  have hround : chartMap p q (chartInv hp1 hq s) = s :=
+    chartMap_chartInv hp1 hq hmem
+  refine ⟨hp1, hmem, by rw [hval]; exact hround, by rw [hval]; exact hmem', ?_⟩
+  rw [hval]
+  constructor
+  · exact ((chartMap_strictMonoOn hp1 hq).lt_iff_lt hx₁mem hmem').mp
+      (by rw [hround]; exact hp3)
+  · exact ((chartMap_strictMonoOn hp1 hq).lt_iff_lt hmem' hx₂mem).mp
+      (by rw [hround]; exact hp4)
+
+/-- Continuity of the edge-length recovery in the curvature slot at any
+achieved turning value: the ε-window `(λ(s) − δ, λ(s) + δ)` is captured by
+the eventual sandwich of `eventually_chartInvCurv_mem`. -/
+theorem continuousAt_chartInvCurv {p₀ q : ℝ} (hp₀ : 0 < p₀) (hq : 0 < q)
+    {s : ℝ} (hs : s ∈ chartMap p₀ q '' Set.Ioo (0 : ℝ) (2 / max p₀ q)) :
+    ContinuousAt (chartInvCurv hq s) p₀ := by
+  have hx₀ := chartInv_mem hp₀ hq hs
+  have hval₀ : chartInvCurv hq s p₀ = chartInv hp₀ hq s := dif_pos hp₀
+  rw [ContinuousAt, hval₀, Metric.tendsto_nhds]
+  intro ε hε
+  set δ : ℝ := min (ε / 2)
+    (min (chartInv hp₀ hq s / 2) ((2 / max p₀ q - chartInv hp₀ hq s) / 2))
+    with hδdef
+  have hδ1 : δ ≤ ε / 2 := min_le_left _ _
+  have hδ2 : δ ≤ chartInv hp₀ hq s / 2 := (min_le_right _ _).trans (min_le_left _ _)
+  have hδ3 : δ ≤ (2 / max p₀ q - chartInv hp₀ hq s) / 2 :=
+    (min_le_right _ _).trans (min_le_right _ _)
+  have hδ0 : 0 < δ := lt_min (by linarith)
+    (lt_min (by linarith [hx₀.1]) (by linarith [hx₀.2]))
+  filter_upwards [eventually_chartInvCurv_mem hp₀ hq hs
+    (x₁ := chartInv hp₀ hq s - δ) (x₂ := chartInv hp₀ hq s + δ)
+    (by linarith [hx₀.1]) (by linarith) (by linarith) (by linarith [hx₀.2])]
+    with p hp
+  obtain ⟨-, -, -, -, hIoo⟩ := hp
+  rw [Real.dist_eq, abs_lt]
+  exact ⟨by linarith [hIoo.1], by linarith [hIoo.2]⟩
+
+/-- **Strict differentiability of the edge-length recovery in the curvature
+slot** at any achieved turning value, with the implicit-function value
+`∂λ/∂p = −(λ/p)·A/(A + B)` (at the symmetric point `p = q = K`,
+`s = 2π/n` this is the `ℓ̇ = −ℓ/2K` of `lem:anchor_witness_two_level`).
+Route: `Θ(x) = (2/x)·sin(s − arcsin(q·x/2))` is an explicit local left
+inverse of `p ↦ λ_{p,q}(s)` — solving the chart equation for the FIRST
+curvature — so `HasStrictDerivAt.of_local_left_inverse` applies with the
+continuity supplied by `continuousAt_chartInvCurv`. -/
+theorem hasStrictDerivAt_chartInvCurv {p₀ q : ℝ} (hp₀ : 0 < p₀) (hq : 0 < q)
+    {s : ℝ} (hs : s ∈ chartMap p₀ q '' Set.Ioo (0 : ℝ) (2 / max p₀ q)) :
+    HasStrictDerivAt (chartInvCurv hq s)
+      (-(chartInv hp₀ hq s
+          * (chartSlotDeriv p₀ (chartInv hp₀ hq s)
+            / (chartSlotDeriv p₀ (chartInv hp₀ hq s)
+              + chartSlotDeriv q (chartInv hp₀ hq s)))
+          / p₀)) p₀ := by
+  have hmem := chartInv_mem hp₀ hq hs
+  set x₀ : ℝ := chartInv hp₀ hq s with hx₀def
+  have hx₀pos : 0 < x₀ := hmem.1
+  have hwallp : |p₀ * x₀ / 2| < 1 := by
+    have h := chartArg_mem hp₀ hq hmem hp₀ (le_max_left p₀ q)
+    exact abs_lt.mpr ⟨h.1, h.2⟩
+  have hwallq : |q * x₀ / 2| < 1 := by
+    have h := chartArg_mem hp₀ hq hmem hq (le_max_right p₀ q)
+    exact abs_lt.mpr ⟨h.1, h.2⟩
+  have hround : chartMap p₀ q x₀ = s := chartMap_chartInv hp₀ hq hs
+  set θ : ℝ → ℝ := fun x => s - Real.arcsin (q * x / 2) with hθdef
+  have hθx₀ : θ x₀ = Real.arcsin (p₀ * x₀ / 2) := by
+    have h := hround
+    unfold chartMap at h
+    rw [hθdef]
+    dsimp only
+    linarith
+  have hsin_val : Real.sin (θ x₀) = p₀ * x₀ / 2 := by
+    have hlt := abs_lt.mp hwallp
+    rw [hθx₀, Real.sin_arcsin (by linarith) (by linarith)]
+  have hcos_eq : Real.cos (θ x₀) = Real.sqrt (1 - (p₀ * x₀ / 2) ^ 2) := by
+    rw [hθx₀, Real.cos_arcsin]
+  have hsq_pos : 0 < 1 - (p₀ * x₀ / 2) ^ 2 := by
+    have hlt := abs_lt.mp hwallp
+    nlinarith
+  have hcos_pos : 0 < Real.cos (θ x₀) := by
+    rw [hcos_eq]
+    exact Real.sqrt_pos.mpr hsq_pos
+  -- the explicit left inverse and its strict derivative at the base length
+  have hx₀ne : x₀ ≠ 0 := hx₀pos.ne'
+  have hdiv : HasStrictDerivAt (fun x : ℝ => 2 / x) (-(2 / x₀ ^ 2)) x₀ := by
+    have h := (hasStrictDerivAt_inv hx₀ne).const_mul (2 : ℝ)
+    simpa [div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using h
+  have hinner : HasStrictDerivAt θ (-(chartSlotDeriv q x₀)) x₀ := by
+    rw [hθdef]
+    exact (hasStrictDerivAt_arcsinSlot hwallq).const_sub s
+  have hsin : HasStrictDerivAt (fun x => Real.sin (θ x))
+      (Real.cos (θ x₀) * -(chartSlotDeriv q x₀)) x₀ :=
+    (Real.hasStrictDerivAt_sin _).comp x₀ hinner
+  have hΘ : HasStrictDerivAt (fun x : ℝ => 2 / x * Real.sin (θ x))
+      (-(2 / x₀ ^ 2) * Real.sin (θ x₀)
+        + 2 / x₀ * (Real.cos (θ x₀) * -(chartSlotDeriv q x₀))) x₀ :=
+    hdiv.mul hsin
+  have hA := chartSlotDeriv_pos hp₀ hwallp
+  have hB := chartSlotDeriv_pos hq hwallq
+  -- the derivative of the left inverse is negative, in particular nonzero
+  have hΘ'neg : -(2 / x₀ ^ 2) * Real.sin (θ x₀)
+      + 2 / x₀ * (Real.cos (θ x₀) * -(chartSlotDeriv q x₀)) < 0 := by
+    have h1 : 0 < Real.sin (θ x₀) := by rw [hsin_val]; positivity
+    have h2 : 0 < 2 / x₀ ^ 2 := by positivity
+    have h3 : 0 < 2 / x₀ := by positivity
+    nlinarith [mul_pos h2 h1, mul_pos h3 (mul_pos hcos_pos hB)]
+  -- the eventual round trip `Θ (λ_{p,q}(s)) = p`
+  have hev : ∀ᶠ p in nhds p₀,
+      (fun x : ℝ => 2 / x * Real.sin (θ x)) (chartInvCurv hq s p) = p := by
+    filter_upwards [eventually_chartInvCurv_mem hp₀ hq hs
+      (x₁ := x₀ / 2) (x₂ := (x₀ + 2 / max p₀ q) / 2)
+      (by positivity) (by linarith) (by linarith [hmem.2]) (by linarith [hmem.2])]
+      with p hp
+    obtain ⟨hppos, -, hroundp, hIoo, -⟩ := hp
+    set x' : ℝ := chartInvCurv hq s p with hx'def
+    have hx'pos : 0 < x' := hIoo.1
+    have hwall' : p * x' / 2 < 1 := by
+      have hmaxp : p ≤ max p q := le_max_left p q
+      have h2 : x' < 2 / max p q := hIoo.2
+      have hmax0 : 0 < max p q := lt_of_lt_of_le hppos hmaxp
+      have : x' * max p q < 2 := (lt_div_iff₀ hmax0).mp h2
+      nlinarith
+    have hθx' : θ x' = Real.arcsin (p * x' / 2) := by
+      have h := hroundp
+      unfold chartMap at h
+      rw [hθdef]
+      dsimp only
+      linarith
+    have hlow : (-1 : ℝ) ≤ p * x' / 2 := by
+      have h0 : (0 : ℝ) ≤ p * x' / 2 := by positivity
+      linarith
+    have hsin' : Real.sin (θ x') = p * x' / 2 := by
+      rw [hθx', Real.sin_arcsin hlow hwall'.le]
+    change 2 / x' * Real.sin (θ x') = p
+    rw [hsin']
+    field_simp
+  -- assemble via the local-left-inverse rule and simplify the value
+  have hval₀ : chartInvCurv hq s p₀ = x₀ := dif_pos hp₀
+  have hcont := continuousAt_chartInvCurv hp₀ hq hs
+  rw [← hval₀] at hΘ
+  have hmain := HasStrictDerivAt.of_local_left_inverse hcont hΘ
+    (by rw [hval₀]; exact hΘ'neg.ne) hev
+  have hS₂pos : 0 < Real.sqrt (1 - (q * x₀ / 2) ^ 2) := by
+    have hlt := abs_lt.mp hwallq
+    apply Real.sqrt_pos.mpr
+    nlinarith
+  have hcos_A : Real.cos (θ x₀) = p₀ / (2 * chartSlotDeriv p₀ x₀) := by
+    have hs₁ : (0 : ℝ) < Real.sqrt (1 - (p₀ * x₀ / 2) ^ 2) :=
+      Real.sqrt_pos.mpr hsq_pos
+    rw [hcos_eq]
+    unfold chartSlotDeriv
+    field_simp
+  have hderiv_eq : (-(2 / x₀ ^ 2) * Real.sin (θ x₀)
+      + 2 / x₀ * (Real.cos (θ x₀) * -(chartSlotDeriv q x₀)))⁻¹
+      = -(x₀ * (chartSlotDeriv p₀ x₀
+          / (chartSlotDeriv p₀ x₀ + chartSlotDeriv q x₀)) / p₀) := by
+    rw [hsin_val, hcos_A]
+    have hAB : 0 < chartSlotDeriv p₀ x₀ + chartSlotDeriv q x₀ := add_pos hA hB
+    refine inv_eq_of_mul_eq_one_right ?_
+    field_simp
+    ring
+  rw [hval₀, hderiv_eq] at hmain
+  exact hmain
+
 end Gluck.Discrete
