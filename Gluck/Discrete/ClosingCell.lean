@@ -779,4 +779,141 @@ private lemma chartMap_norm_ge {p q : ℝ} (hp : 0 < p) (hq : 0 < q) {e r : ℝ}
       Real.monotone_arcsin (mul_le_mul_of_nonneg_left hr he)
     linarith
 
+/-- **Uniform lower bound on the adjacent curvature ratios along the
+homotopy**: by compactness of `[0,1]` (and finiteness of the edge set) there is
+`r > 0` with `r ≤ min(κ_t j, κ_t (j+1)) / max(κ_t j, κ_t (j+1))` for every
+`t ∈ [0,1]` and every edge `j`. -/
+theorem exists_ratio_bound [NeZero n] (m : ℕ) {κ : ZMod n → ℝ}
+    (hκ : ∀ i, 0 < κ i) :
+    ∃ r : ℝ, 0 < r ∧ ∀ t : ℝ, 0 ≤ t → t ≤ 1 → ∀ j : ZMod n,
+      r ≤ min (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) /
+          max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) := by
+  have hA : ∀ j : ZMod n, ∃ rj : ℝ, 0 < rj ∧ ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      rj ≤ min (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) /
+           max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) := by
+    intro j
+    have hfc : ContinuousOn (fun t : ℝ =>
+        min (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) /
+          max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)))
+        (Set.Icc (0 : ℝ) 1) := by
+      apply ContinuousOn.div
+      · exact ((continuous_curvHomotopy m κ j).min
+          (continuous_curvHomotopy m κ (j + 1))).continuousOn
+      · exact ((continuous_curvHomotopy m κ j).max
+          (continuous_curvHomotopy m κ (j + 1))).continuousOn
+      · intro t ht
+        exact (lt_of_lt_of_le (curvHomotopy_pos hκ ht.1 ht.2 j)
+          (le_max_left _ _)).ne'
+    obtain ⟨t₀, ht₀, hmin⟩ := isCompact_Icc.exists_isMinOn
+      (Set.nonempty_Icc.mpr zero_le_one) hfc
+    refine ⟨_, ?_, fun t ht => isMinOn_iff.mp hmin t ht⟩
+    exact div_pos
+      (lt_min (curvHomotopy_pos hκ ht₀.1 ht₀.2 j)
+        (curvHomotopy_pos hκ ht₀.1 ht₀.2 (j + 1)))
+      (lt_of_lt_of_le (curvHomotopy_pos hκ ht₀.1 ht₀.2 j) (le_max_left _ _))
+  choose r hr0 hrle using hA
+  have : Nonempty (ZMod n) := ⟨0⟩
+  refine ⟨Finset.univ.inf' Finset.univ_nonempty r, ?_, fun t ht0 ht1 j => ?_⟩
+  · exact (Finset.lt_inf'_iff _).mpr fun j _ => hr0 j
+  · exact le_trans (Finset.inf'_le r (Finset.mem_univ j)) (hrle j t ⟨ht0, ht1⟩)
+
+/-- **Existence of the uniform window and radius — the ρ-package of
+`def:closing_2cell`.** For `n ≥ 4` and a positive profile `κ` there are a
+radius `ρ > 0` (with `ρ < 2π/n`) and a normalized window `0 < c ≤ d < 1` such
+that every perturbed chart value `chartPerturb m a b z j` with
+`|z.1| + |z.2| ≤ ρ` is achieved inside the window
+`[c·(2/max), d·(2/max)]` on every edge, at every homotopy time. This
+discharges, in one stroke, the window hypotheses of `turningSum_closingCell`
+and `moderateArc_closingCell` (via `Icc ⊆ Ioo`) and of
+`continuousOn_closingCell_apply` / `continuousOn_closingGap`. The proof
+combines the uniform ratio bound (`exists_ratio_bound`), the normalized chart
+bounds (`chartMap_norm_le` / `chartMap_norm_ge`), and continuity of
+`arcsin` at `1` to place `d` below `1` while clearing `π/2 + ρ` at the wall. -/
+theorem exists_closingCell_window [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
+    {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i) :
+    ∃ ρ c d : ℝ, 0 < ρ ∧ ρ < 2 * Real.pi / n ∧ 0 < c ∧ c ≤ d ∧ d < 1 ∧
+      ∀ t : ℝ, 0 ≤ t → t ≤ 1 → ∀ z : ℝ × ℝ, |z.1| + |z.2| ≤ ρ →
+        ∀ a b j : ZMod n, chartPerturb m a b z j ∈
+          chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) ''
+            Set.Icc
+              (c * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))
+              (d * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)))) := by
+  obtain ⟨r, hr0, hrle⟩ := exists_ratio_bound m hκ
+  have hπ := Real.pi_pos
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hn0 : (0 : ℝ) < n := by linarith
+  have hX : 0 < Real.pi / n := div_pos hπ hn0
+  have hπn4 : Real.pi / n ≤ Real.pi / 4 :=
+    div_le_div_of_nonneg_left hπ.le four_pos hn4'
+  have hasr : 0 < Real.arcsin r := Real.arcsin_pos.2 hr0
+  have h2X : 2 * Real.pi / n = 2 * (Real.pi / n) := mul_div_assoc 2 Real.pi n
+  -- the radius
+  set ρ : ℝ := min (Real.pi / n) (Real.arcsin r) / 2 with hρdef
+  have hmin1 : min (Real.pi / n) (Real.arcsin r) ≤ Real.pi / n := min_le_left _ _
+  have hmin2 : min (Real.pi / n) (Real.arcsin r) ≤ Real.arcsin r := min_le_right _ _
+  have hρ0 : 0 < ρ := div_pos (lt_min hX hasr) two_pos
+  have hρ2πn : ρ < 2 * Real.pi / n := by rw [h2X, hρdef]; linarith
+  have hρar : ρ < Real.arcsin r := by rw [hρdef]; linarith
+  -- the lower window endpoint c = sin θ, θ = π/n − ρ/2
+  set θ : ℝ := Real.pi / n - ρ / 2 with hθdef
+  have hθ0 : 0 < θ := by rw [hθdef, hρdef]; linarith
+  have hθhalf : θ < Real.pi / 2 := by rw [hθdef]; linarith
+  set c : ℝ := Real.sin θ with hcdef
+  have hc0 : 0 < c := Real.sin_pos_of_pos_of_lt_pi hθ0 (by linarith)
+  have hc1 : c < 1 := by
+    have := Real.strictMonoOn_sin
+      (a := θ) (b := Real.pi / 2)
+      ⟨by linarith, hθhalf.le⟩ ⟨by linarith, le_refl _⟩ hθhalf
+    simpa [Real.sin_pi_div_two] using this
+  have harcc : Real.arcsin c = θ :=
+    Real.arcsin_sin (by linarith) hθhalf.le
+  -- the upper window endpoint d, via continuity of arcsin at 1
+  have hh1 : Real.pi / 2 + ρ <
+      Real.arcsin (1 : ℝ) + Real.arcsin ((1 : ℝ) * r) := by
+    rw [Real.arcsin_one, one_mul]; linarith
+  have hhc : Continuous fun x : ℝ => Real.arcsin x + Real.arcsin (x * r) :=
+    Real.continuous_arcsin.add
+      (Real.continuous_arcsin.comp (continuous_id.mul continuous_const))
+  have hev : ∀ᶠ x in nhdsWithin 1 (Set.Iio (1 : ℝ)),
+      Real.pi / 2 + ρ < Real.arcsin x + Real.arcsin (x * r) :=
+    (hhc.continuousAt.tendsto.mono_left nhdsWithin_le_nhds).eventually_const_lt hh1
+  obtain ⟨d₀, hd₀1, hd₀⟩ := (eventually_mem_nhdsWithin.and hev).exists
+  set d : ℝ := max d₀ c with hddef
+  have hcd : c ≤ d := le_max_right _ _
+  have hd1 : d < 1 := max_lt (Set.mem_Iio.mp hd₀1) hc1
+  have hd0 : 0 ≤ d := le_trans hc0.le hcd
+  have hhd : Real.pi / 2 + ρ < Real.arcsin d + Real.arcsin (d * r) := by
+    have h1 : d₀ ≤ d := le_max_left _ _
+    have h2 : Real.arcsin d₀ ≤ Real.arcsin d := Real.monotone_arcsin h1
+    have h3 : Real.arcsin (d₀ * r) ≤ Real.arcsin (d * r) :=
+      Real.monotone_arcsin (mul_le_mul_of_nonneg_right h1 hr0.le)
+    linarith [hd₀]
+  refine ⟨ρ, c, d, hρ0, hρ2πn, hc0, hcd, hd1, ?_⟩
+  intro t ht0 ht1 z hz a b j
+  have hp := curvHomotopy_pos (m := m) hκ ht0 ht1 j
+  have hq := curvHomotopy_pos (m := m) hκ ht0 ht1 (j + 1)
+  have hmax : 0 < max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) :=
+    lt_of_lt_of_le hp (le_max_left _ _)
+  have hA : (0 : ℝ) < 2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) :=
+    div_pos two_pos hmax
+  -- the perturbed value lies in [2π/n − ρ, 2π/n + ρ]
+  have habs := abs_le.mp (abs_chartPerturb_sub_le m a b z j)
+  -- lower endpoint clears the value from below
+  have hlow : chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))
+      (c * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))
+      ≤ chartPerturb m a b z j := by
+    have h1 := chartMap_norm_le hp hq hc0.le
+    rw [harcc] at h1
+    have h2θ : 2 * θ = 2 * Real.pi / n - ρ := by rw [hθdef, h2X]; ring
+    linarith [habs.1]
+  -- upper endpoint clears the value from above
+  have hup : chartPerturb m a b z j ≤
+      chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))
+        (d * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)))) := by
+    have h1 := chartMap_norm_ge hp hq hd0 (hrle t ht0 ht1 j)
+    have h2πn2 : 2 * Real.pi / n ≤ Real.pi / 2 := by rw [h2X]; linarith
+    linarith [habs.2]
+  exact chartMap_mem_image_Icc
+    (mul_le_mul_of_nonneg_right hcd hA.le) ⟨hlow, hup⟩
+
 end Gluck.Discrete
