@@ -1275,4 +1275,50 @@ theorem closingCell_window_mono (m : ℕ) {κ : ZMod n → ℝ}
             (d * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)))) :=
   fun t ht0 ht1 z hz => hwin t ht0 ht1 z (hz.trans hρ')
 
+/-- **The heading advance over an index block, in chart form** — exact and
+hypothesis-free: `ψ_{j+k} − ψ_j` equals the sum of the per-edge chart values
+over the block's `k` edges plus the boundary half-turn correction
+`P_{j+k} − P_j`, where `P_e = arcsin(κ_e·(ℓ_e/2))` is the tail half-turn of
+edge `e`. (Telescoping of `θ_i = Q_{i-1} + P_i` against
+`s_e = P_e + Q_e = chartMap`.) With `k = m` on the closing 2-cell this
+expresses the opposite-heading defect `ψ_{j+m} − ψ_j − π` through the
+antisymmetric chart perturbation and the two boundary half-turns alone — the
+exact paired-edge splitting that any corrected `t = 0` rigidity analysis
+(nondegenerate `κ⁰`) starts from. -/
+theorem heading_add_eq_chartBlock (κ ℓ : ZMod n → ℝ) (j k : ℕ) :
+    heading κ ℓ (j + k) = heading κ ℓ j
+      + ∑ e ∈ Finset.range k, chartMap (κ ((j + e : ℕ) : ZMod n))
+          (κ (((j + e : ℕ) : ZMod n) + 1)) (ℓ ((j + e : ℕ) : ZMod n))
+      + Real.arcsin (κ ((j + k : ℕ) : ZMod n) * (ℓ ((j + k : ℕ) : ZMod n) / 2))
+      - Real.arcsin (κ ((j : ℕ) : ZMod n) * (ℓ ((j : ℕ) : ZMod n) / 2)) := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [show j + (k + 1) = j + k + 1 from by ring]
+    have hstep : heading κ ℓ (j + k + 1)
+        = heading κ ℓ (j + k)
+          + turningAngle 0 κ ℓ ((j + k + 1 : ℕ) : ZMod n) := by
+      unfold heading
+      exact Finset.sum_range_succ _ (j + k + 1)
+    have hθ : turningAngle 0 κ ℓ ((j + k + 1 : ℕ) : ZMod n)
+        = Real.arcsin (κ ((j + k + 1 : ℕ) : ZMod n)
+            * (ℓ ((j + k : ℕ) : ZMod n) / 2))
+          + Real.arcsin (κ ((j + k + 1 : ℕ) : ZMod n)
+            * (ℓ ((j + k + 1 : ℕ) : ZMod n) / 2)) := by
+      have hcast : ((j + k + 1 : ℕ) : ZMod n) - 1 = ((j + k : ℕ) : ZMod n) := by
+        push_cast; ring
+      simp only [turningAngle, tK_zero, hcast]
+    have hchart : chartMap (κ ((j + k : ℕ) : ZMod n))
+        (κ (((j + k : ℕ) : ZMod n) + 1)) (ℓ ((j + k : ℕ) : ZMod n))
+        = Real.arcsin (κ ((j + k : ℕ) : ZMod n)
+            * (ℓ ((j + k : ℕ) : ZMod n) / 2))
+          + Real.arcsin (κ ((j + k + 1 : ℕ) : ZMod n)
+            * (ℓ ((j + k : ℕ) : ZMod n) / 2)) := by
+      have hcast : ((j + k : ℕ) : ZMod n) + 1 = ((j + k + 1 : ℕ) : ZMod n) := by
+        push_cast; ring
+      rw [chartMap, hcast]
+      simp only [mul_div_assoc]
+    rw [hstep, ih, Finset.sum_range_succ, hθ, hchart]
+    ring
+
 end Gluck.Discrete
