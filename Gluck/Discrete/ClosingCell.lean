@@ -3153,4 +3153,143 @@ theorem jacobianBaseLen_twoLevel [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
       rw [h2, if_neg (by omega), add_zero]
     exact hcongr _ _ hK hK _ hv1 hv2
 
+/-! ### Constant-pair evaluations and the two-level length derivative
+
+The explicit base-point data of `lem:anchor_witness_two_level` at `ε = 0`:
+the constant-pair base length `ℓ = 2·sin(π/n)/K`, the slot derivative
+`A = K/(2·cos(π/n))`, hence `λ' = cos(π/n)/K` and `p = 1/2`; and the strict
+derivative `ℓ̇* = −sin(π/n)/K²` of the special-edge length in `ε`. -/
+
+/-- The constant-pair base length is explicit: `λ_{K,K}(2π/n) = 2·sin(π/n)/K`
+(the inscribed chord of the circle of radius `1/K` under central angle
+`2π/n`). -/
+theorem chartInv_const [NeZero n] (hn4 : 4 ≤ n) {K : ℝ} (hK : 0 < K) :
+    chartInv hK hK (2 * Real.pi / n) = 2 * Real.sin (Real.pi / n) / K := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρpos : 0 < Real.pi / n := by positivity
+  have hρle : Real.pi / n ≤ Real.pi / 4 :=
+    div_le_div_of_nonneg_left hπ.le four_pos hn4'
+  have hρhalf : Real.pi / n < Real.pi / 2 := lt_of_le_of_lt hρle (by linarith)
+  have hsin0 : 0 < Real.sin (Real.pi / n) :=
+    Real.sin_pos_of_pos_of_lt_pi hρpos (by linarith)
+  have hsin1 : Real.sin (Real.pi / n) < 1 := by
+    have h := Real.strictMonoOn_sin (a := Real.pi / n) (b := Real.pi / 2)
+      ⟨by linarith, hρhalf.le⟩ ⟨by linarith, le_refl _⟩ hρhalf
+    simpa [Real.sin_pi_div_two] using h
+  have hx0 : 0 < 2 * Real.sin (Real.pi / n) / K := by positivity
+  have hxlt : 2 * Real.sin (Real.pi / n) / K < 2 / K := by
+    have h2 : 2 * Real.sin (Real.pi / n) * K⁻¹ < 2 * K⁻¹ :=
+      mul_lt_mul_of_pos_right (by linarith) (inv_pos.mpr hK)
+    simpa [div_eq_mul_inv] using h2
+  have hx : 2 * Real.sin (Real.pi / n) / K ∈
+      Set.Ioo (0 : ℝ) (2 / max K K) := by
+    rw [max_self]
+    exact ⟨hx0, hxlt⟩
+  have hmap : chartMap K K (2 * Real.sin (Real.pi / n) / K)
+      = 2 * Real.pi / n := by
+    unfold chartMap
+    have harg : K * (2 * Real.sin (Real.pi / n) / K) / 2
+        = Real.sin (Real.pi / n) := by
+      field_simp
+    rw [harg, Real.arcsin_sin (by linarith) hρhalf.le]
+    ring
+  rw [← hmap, chartInv_chartMap hK hK hx]
+
+/-- The slot derivative at the constant-pair base length:
+`A = K/(2·cos(π/n))`. -/
+theorem chartSlotDeriv_const [NeZero n] (hn4 : 4 ≤ n) {K : ℝ} (hK : 0 < K) :
+    chartSlotDeriv K (2 * Real.sin (Real.pi / n) / K)
+      = K / (2 * Real.cos (Real.pi / n)) := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρhalf : Real.pi / n < Real.pi / 2 :=
+    lt_of_le_of_lt (div_le_div_of_nonneg_left hπ.le four_pos hn4') (by linarith)
+  have hρ0 : (0 : ℝ) ≤ Real.pi / n := by positivity
+  unfold chartSlotDeriv
+  have harg : K * (2 * Real.sin (Real.pi / n) / K) / 2
+      = Real.sin (Real.pi / n) := by
+    field_simp
+  rw [harg, ← Real.cos_eq_sqrt_one_sub_sin_sq (by linarith) hρhalf.le]
+
+/-- `λ'` at a constant anchor: `cos(π/n)/K`, every edge. -/
+theorem jacobianLambda'_const [NeZero n] (hn4 : 4 ≤ n) {K : ℝ} (hK : 0 < K)
+    (j : ZMod n) :
+    jacobianLambda' (fun _ : ZMod n => hK) j = Real.cos (Real.pi / n) / K := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρhalf : Real.pi / n < Real.pi / 2 :=
+    lt_of_le_of_lt (div_le_div_of_nonneg_left hπ.le four_pos hn4') (by linarith)
+  have hρ0 : (0 : ℝ) ≤ Real.pi / n := by positivity
+  have hcos : 0 < Real.cos (Real.pi / n) :=
+    Real.cos_pos_of_mem_Ioo ⟨by linarith, hρhalf⟩
+  unfold jacobianLambda'
+  rw [show jacobianBaseLen (fun _ : ZMod n => hK) j
+      = chartInv hK hK (2 * Real.pi / n) from rfl,
+    chartInv_const hn4 hK, chartSlotDeriv_const hn4 hK]
+  field_simp
+  ring
+
+/-- The tail-slot share at a constant anchor is `1/2` — killing the
+`(2p−1)·E_q` boundary term of the columns at the base point. -/
+theorem jacobianShare_const [NeZero n] (hn4 : 4 ≤ n) {K : ℝ} (hK : 0 < K)
+    (j : ZMod n) :
+    jacobianShare (fun _ : ZMod n => hK) j = 1 / 2 := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρhalf : Real.pi / n < Real.pi / 2 :=
+    lt_of_le_of_lt (div_le_div_of_nonneg_left hπ.le four_pos hn4') (by linarith)
+  have hρ0 : (0 : ℝ) ≤ Real.pi / n := by positivity
+  have hcos : 0 < Real.cos (Real.pi / n) :=
+    Real.cos_pos_of_mem_Ioo ⟨by linarith, hρhalf⟩
+  unfold jacobianShare
+  rw [show jacobianBaseLen (fun _ : ZMod n => hK) j
+      = chartInv hK hK (2 * Real.pi / n) from rfl,
+    chartInv_const hn4 hK, chartSlotDeriv_const hn4 hK]
+  field_simp
+  ring
+
+/-- **The two-level length derivative** (`lem:anchor_witness_two_level`,
+first-order table): the special-edge base length moves with strict
+`ε`-derivative `ℓ̇* = −sin(π/n)/K²` (i.e. `−ℓ/(2K)`) at `ε = 0`. -/
+theorem hasStrictDerivAt_twoLevelLen [NeZero n] (hn4 : 4 ≤ n) {K : ℝ}
+    (hK : 0 < K) :
+    HasStrictDerivAt
+      (fun ε : ℝ => chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+      (-(Real.sin (Real.pi / n) / K ^ 2)) 0 := by
+  have hmem : 2 * Real.pi / (n : ℝ) ∈ chartMap K K ''
+      Set.Ioo (0 : ℝ) (2 / max K K) :=
+    base_chart_mem_image hn4 (fun _ : ZMod n => hK) 0
+  have hd := hasStrictDerivAt_chartInvCurv (p₀ := K) hK hK hmem
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρhalf : Real.pi / n < Real.pi / 2 :=
+    lt_of_le_of_lt (div_le_div_of_nonneg_left hπ.le four_pos hn4') (by linarith)
+  have hρ0 : (0 : ℝ) ≤ Real.pi / n := by positivity
+  have hcos : 0 < Real.cos (Real.pi / n) :=
+    Real.cos_pos_of_mem_Ioo ⟨by linarith, hρhalf⟩
+  -- simplify the derivative value first, then shift the base point
+  rw [chartInv_const hn4 hK, chartSlotDeriv_const hn4 hK] at hd
+  have hval : -(2 * Real.sin (Real.pi / n) / K
+        * (K / (2 * Real.cos (Real.pi / n))
+          / (K / (2 * Real.cos (Real.pi / n))
+            + K / (2 * Real.cos (Real.pi / n))))
+        / K)
+      = -(Real.sin (Real.pi / n) / K ^ 2) := by
+    field_simp
+    ring
+  rw [hval] at hd
+  have hd' : HasStrictDerivAt (chartInvCurv hK (2 * Real.pi / (n : ℝ)))
+      (-(Real.sin (Real.pi / n) / K ^ 2)) (K + 0) := by
+    rw [add_zero]
+    exact hd
+  have hshift : HasStrictDerivAt (fun ε : ℝ => K + ε) 1 0 := by
+    simpa using (hasStrictDerivAt_id (0 : ℝ)).const_add K
+  simpa [Function.comp_def] using hd'.comp 0 hshift
+
 end Gluck.Discrete
