@@ -1222,6 +1222,29 @@ theorem closureGap_eq_zero_of_const [NeZero n] {c : ℝ} (hc : c ≠ 0)
     simp [hg]
   rw [hgn, hg0, sub_self, mul_zero]
 
+/- USER (2026-07-14): the "handle the constant-κ⁰ class by a direct base-case,
+   closure is free" route is NOT the free win it looks like — read before
+   attempting it.
+   • The class here is `centralSym m κ ≡ c`, i.e. `κ_{i+m} = 2c − κ_i`: the
+     TARGET κ is half-period-ODD about c. The free-closure lemma
+     `central_symmetry_closes` (Closing.lean) requires half-period-EVEN
+     curvature `κ(i+m) = κ(i)`. It applies to the ANCHOR κ⁰ (a circle), NOT to
+     the target κ. So "trivially closes to a circle" is about the t=0 anchor
+     only; it does NOT hand you a `RealizesR2 κ` witness for the non-constant
+     target.
+   • Here `F(0,·) ≡ 0` on the whole window (this lemma), so the z-Jacobian
+     columns `C_a = C_b = 0` and `Im(conj C_a · C_b) ≠ 0` fails by
+     construction — neither the winding argument nor a plain IFT-in-z continues
+     the branch. A direct base-case must instead go through the HOMOTOPY
+     direction: `F(t,z) = t·G(z) + O(t²)` with `G := ∂_t F(0,·)` (a NEW object,
+     not the landed z-derivative `anchorGapDeriv`), solve `G(z*) = 0` in the
+     2-DOF fiber, check `∂_z G(z*)` nonsingular, IFT on `F(t,z)/t`, then redo
+     ModerateArc + IsSimplePolygon along the branch. Real second-order work; it
+     reuses NONE of the landed C_a/C_b machinery.
+   • The @080 bump-anchor selector (κˢ = c + δw non-constant) is the cheaper
+     finish: it restores C_a,C_b ≠ 0 and reuses all landed z-Jacobian lemmas,
+     paying only the two-level-witness combinatorics. Prefer it unless the
+     explicit goal is to eliminate that combinatorics. -/
 /-- At `t = 0` with CONSTANT central symmetrization the gap map vanishes at
 EVERY point of the 2-cell, not only at the center: the inscribed-polygon
 degeneracy transported to the closing 2-cell. (Compare

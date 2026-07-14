@@ -1623,6 +1623,600 @@ on $[0,1]\times\partial D_\rho$. After the @079 refutation, (ii) is re-based on 
   degeneracy \cref{lem:closing_gap_eq_zero_of_central_sym_const}.}
 \end{definition}
 
+% ------------------------------------------------------------------
+% Satellites of the @080 generalized-anchor Jacobian layer (Lean helpers,
+% one block per public declaration; landed iter-080, ClosingCell.lean).
+% ------------------------------------------------------------------
+
+\begin{lemma}[path endpoint $t=0$]
+  \label{lem:curv_path_zero}
+  \lean{Gluck.Discrete.curvPath_zero}
+  \uses{def:curv_path}
+  $\kappa_0 = \kappa^s$: the anchor path starts at the anchor profile.
+\end{lemma}
+\begin{proof}
+  Evaluation of the affine formula at $t = 0$.
+\end{proof}
+
+\begin{lemma}[path endpoint $t=1$]
+  \label{lem:curv_path_one}
+  \lean{Gluck.Discrete.curvPath_one}
+  \uses{def:curv_path}
+  $\kappa_1 = \kappa$: the anchor path ends at the target profile.
+\end{lemma}
+\begin{proof}
+  Evaluation of the affine formula at $t = 1$.
+\end{proof}
+
+\begin{lemma}[positivity along the path]
+  \label{lem:curv_path_pos}
+  \lean{Gluck.Discrete.curvPath_pos}
+  \uses{def:curv_path}
+  If $\kappa^s, \kappa > 0$ pointwise and $t \in [0,1]$, then
+  $\kappa_t = (1-t)\kappa^s + t\kappa > 0$ pointwise.
+\end{lemma}
+\begin{proof}
+  Convex combination of positives.
+\end{proof}
+
+\begin{lemma}[continuity in $t$]
+  \label{lem:continuous_curv_path}
+  \lean{Gluck.Discrete.continuous_curvPath}
+  \uses{def:curv_path}
+  For each vertex $i$, $t \mapsto \kappa_t(i)$ is continuous (affine).
+\end{lemma}
+\begin{proof}
+  Affine in $t$.
+\end{proof}
+
+\begin{lemma}[the old homotopy is the centralSym instance]
+  \label{lem:curv_homotopy_eq_curv_path}
+  \lean{Gluck.Discrete.curvHomotopy_eq_curvPath}
+  \uses{def:curv_path, def:curv_homotopy}
+  $\mathrm{curvHomotopy}\,m\,\kappa = \mathrm{curvPath}\,(\kappa^0)\,\kappa$
+  with $\kappa^0 = \mathrm{centralSym}\,m\,\kappa$ — definitional.
+\end{lemma}
+\begin{proof}
+  Both sides are the same affine formula ($\mathrm{rfl}$).
+\end{proof}
+
+\begin{definition}[chart slot derivative]
+  \label{def:chart_slot_deriv}
+  \lean{Gluck.Discrete.chartSlotDeriv}
+  \uses{def:turning_chart}
+  $\mathrm{chartSlotDeriv}\,p\,x = p / (2\sqrt{1 - (px/2)^2})$: the derivative
+  of one $\arcsin$ slot of the chart; $A_j = \mathrm{chartSlotDeriv}\,
+  \kappa^s_j\,\ell_j$ and $B_j = \mathrm{chartSlotDeriv}\,\kappa^s_{j+1}\,
+  \ell_j$ in \cref{def:closing_jacobian_col}.
+\end{definition}
+
+\begin{lemma}[strict derivative of one slot]
+  \label{lem:has_strict_deriv_at_arcsin_slot}
+  \lean{Gluck.Discrete.hasStrictDerivAt_arcsinSlot}
+  \uses{def:chart_slot_deriv}
+  For $|px/2| < 1$, $y \mapsto \arcsin(py/2)$ has strict derivative
+  $\mathrm{chartSlotDeriv}\,p\,x$ at $x$.
+\end{lemma}
+\begin{proof}
+  Chain rule with $\arcsin$ (strictly differentiable away from $\pm1$).
+\end{proof}
+
+\begin{lemma}[slot derivative positive]
+  \label{lem:chart_slot_deriv_pos}
+  \lean{Gluck.Discrete.chartSlotDeriv_pos}
+  \uses{def:chart_slot_deriv}
+  For $p > 0$ and $|px/2| < 1$, $\mathrm{chartSlotDeriv}\,p\,x > 0$.
+\end{lemma}
+\begin{proof}
+  Positive over positive square root.
+\end{proof}
+
+\begin{lemma}[strict derivative of the chart]
+  \label{lem:has_strict_deriv_at_chart_map}
+  \lean{Gluck.Discrete.hasStrictDerivAt_chartMap}
+  \uses{def:turning_chart, def:chart_slot_deriv,
+        lem:has_strict_deriv_at_arcsin_slot}
+  Strictly inside both walls, $\tau = \mathrm{chartMap}\,p\,q$ has strict
+  derivative $A + B = \mathrm{chartSlotDeriv}\,p\,x +
+  \mathrm{chartSlotDeriv}\,q\,x$ at $x$.
+\end{lemma}
+\begin{proof}
+  Sum of the two slot derivatives.
+\end{proof}
+
+\begin{lemma}[the chart image is open around achieved values]
+  \label{lem:chart_map_image_mem_nhds}
+  \lean{Gluck.Discrete.chartMap_image_mem_nhds}
+  \uses{lem:chart_map_mem_image_icc, lem:chart_map_strict_mono}
+  If $s = \tau(x)$ for some $x$ in the open moderate domain, then the image
+  $\tau(\mathrm{Ioo}(0, 2/\max(p,q)))$ is a neighbourhood of $s$.
+\end{lemma}
+\begin{proof}
+  Squeeze $x$ into a compact subinterval, apply the IVT on it, and use strict
+  monotonicity at the endpoints to capture an open interval around $s$.
+\end{proof}
+
+\begin{lemma}[strict derivative of the chart inverse]
+  \label{lem:has_strict_deriv_at_chart_inv}
+  \lean{Gluck.Discrete.hasStrictDerivAt_chartInv}
+  \uses{def:chart_inv, lem:chart_inv_chart_map, lem:chart_map_image_mem_nhds,
+        lem:has_strict_deriv_at_chart_map, lem:chart_slot_deriv_pos,
+        lem:chart_inv_mem}
+  At any achieved turning value $s$, the chart inverse $\lambda$ has strict
+  derivative $\lambda' = 1/(A + B)$ evaluated at the recovered length
+  $\lambda(s)$.
+\end{lemma}
+\begin{proof}
+  Local left inverse of a strictly differentiable map with nonvanishing
+  derivative (\texttt{HasStrictDerivAt.of\_local\_left\_inverse}); no inverse
+  function theorem.
+\end{proof}
+
+\begin{lemma}[the base chart value is achieved]
+  \label{lem:base_chart_mem_image}
+  \lean{Gluck.Discrete.base_chart_mem_image}
+  \uses{lem:chart_mem_image, lem:chart_wall}
+  For $n \ge 4$ and positive $\kappa^s$, the constant value $2\pi/n$ lies in
+  every edge's chart image ($0 < 2\pi/n \le \pi/2 <$ wall).
+\end{lemma}
+\begin{proof}
+  $2\pi/n \le \pi/2$ for $n \ge 4$; apply the surjectivity below the wall.
+\end{proof}
+
+\begin{definition}[Jacobian base length]
+  \label{def:jacobian_base_len}
+  \lean{Gluck.Discrete.jacobianBaseLen}
+  \uses{def:chart_inv, lem:base_chart_mem_image}
+  $\ell_j = \lambda_j(2\pi/n)$: the edge lengths of the $2$-cell base point
+  $\Phi(0,0)$ at the anchor, recovered from the constant chart value.
+\end{definition}
+
+\begin{lemma}[base length is moderate]
+  \label{lem:jacobian_base_len_mem}
+  \lean{Gluck.Discrete.jacobianBaseLen_mem}
+  \uses{def:jacobian_base_len, lem:chart_inv_mem}
+  $\ell_j \in (0, 2/\max(\kappa^s_j, \kappa^s_{j+1}))$ for every edge $j$.
+\end{lemma}
+\begin{proof}
+  The chart inverse lands in the open moderate domain.
+\end{proof}
+
+\begin{definition}[$\lambda'$ at the base point]
+  \label{def:jacobian_lambda}
+  \lean{Gluck.Discrete.jacobianLambda'}
+  \uses{def:chart_slot_deriv, def:jacobian_base_len}
+  $\lambda'_j = 1/(A_j + B_j)$ with the slot derivatives evaluated at the
+  Jacobian base length (\cref{def:closing_jacobian_col}).
+\end{definition}
+
+\begin{definition}[share $p$ at the base point]
+  \label{def:jacobian_share}
+  \lean{Gluck.Discrete.jacobianShare}
+  \uses{def:chart_slot_deriv, def:jacobian_base_len}
+  $p_j = A_j/(A_j + B_j)$: the tail slot's share of the chart derivative
+  (\cref{def:closing_jacobian_col}).
+\end{definition}
+
+\begin{definition}[base edge vectors]
+  \label{def:jacobian_edge}
+  \lean{Gluck.Discrete.jacobianEdge}
+  \uses{def:jacobian_base_len, def:discrete_development}
+  $E_r = \ell_r e^{\mathrm{i}\psi_r}$, the development edge vectors at the
+  Jacobian base point, indexed by the lifted index $r \in \mathbb{N}$.
+\end{definition}
+
+\begin{definition}[the linear part as a plain function]
+  \label{def:closing_jacobian_l}
+  \lean{Gluck.Discrete.closingJacobianL}
+  \uses{def:closing_jacobian_col}
+  $L(u,v) = u\,C_a + v\,C_b$ as a plain map $\mathbb{R}^2 \to \mathbb{C}$.
+\end{definition}
+
+\begin{lemma}[evaluation of $L$]
+  \label{lem:closing_jacobian_l_apply}
+  \lean{Gluck.Discrete.closingJacobianL_apply}
+  \uses{def:closing_jacobian_l}
+  $L(u,v) = u\,C_a + v\,C_b$, unfolded for \texttt{simp}.
+\end{lemma}
+\begin{proof}
+  Definition.
+\end{proof}
+
+\begin{lemma}[$\sigma_{\min}$ lower bound for a nondegenerate column pair]
+  \label{lem:norm_smul_add_smul_ge}
+  \lean{Gluck.Discrete.norm_smul_add_smul_ge}
+  \uses{def:closing_jacobian_col}
+  If $D = \mathrm{Im}(\overline{C_a}C_b) \ne 0$ then with
+  $\sigma = |D|/(\|C_a\| + \|C_b\|) > 0$:
+  $\|u C_a + v C_b\| \ge \sigma(|u| + |v|)$ for all $u, v \in \mathbb{R}$.
+\end{lemma}
+\begin{proof}
+  Pair $w = uC_a + vC_b$ against $\overline{C_a}$ to isolate $vD$, against
+  $\overline{C_b}$ to isolate $-uD$; $|\mathrm{Im}| \le \|\cdot\|$ finishes.
+\end{proof}
+
+\begin{lemma}[kernel triviality]
+  \label{lem:smul_add_smul_eq_zero_iff}
+  \lean{Gluck.Discrete.smul_add_smul_eq_zero_iff}
+  \uses{lem:norm_smul_add_smul_ge}
+  Under the same nondegeneracy, $uC_a + vC_b = 0 \iff u = v = 0$.
+\end{lemma}
+\begin{proof}
+  Immediate from the $\sigma_{\min}$ bound.
+\end{proof}
+
+\begin{definition}[clean $t=0$ anchor cell]
+  \label{def:anchor_cell}
+  \lean{Gluck.Discrete.anchorCell}
+  \uses{def:closing_2cell, def:chart_perturb, def:chart_inv}
+  $\mathrm{anchorCell}\,z\,j = \lambda_j(\mathrm{chartPerturb}\,z\,j)$: the
+  $t = 0$ slice of the closing $2$-cell, with the homotopy stripped.
+\end{definition}
+
+\begin{definition}[clean $t=0$ anchor gap]
+  \label{def:anchor_gap}
+  \lean{Gluck.Discrete.anchorGap}
+  \uses{def:anchor_cell, def:closing_gap}
+  $G(z) = \mathrm{closureGap}\,\kappa^s\,(\mathrm{anchorCell}\,z)$: the gap
+  map of the clean anchor cell.
+\end{definition}
+
+\begin{lemma}[$t=0$ slice of the cell]
+  \label{lem:closing_cell_zero_eq_anchor_cell}
+  \lean{Gluck.Discrete.closingCell_zero_eq_anchorCell}
+  \uses{def:anchor_cell, def:closing_2cell, lem:curv_path_zero}
+  $\Phi(0, z) = \mathrm{anchorCell}\,z$ (the homotopy at $t=0$ is the anchor).
+\end{lemma}
+\begin{proof}
+  $\kappa_0 = \kappa^s$ and the definitions agree.
+\end{proof}
+
+\begin{lemma}[$t=0$ slice of the gap]
+  \label{lem:closing_gap_zero_eq_anchor_gap}
+  \lean{Gluck.Discrete.closingGap_zero_eq_anchorGap}
+  \uses{def:anchor_gap, def:closing_gap, lem:closing_cell_zero_eq_anchor_cell}
+  $F(0, z) = G(z)$ for all $z$ in the window.
+\end{lemma}
+\begin{proof}
+  Apply the cell identity under the gap.
+\end{proof}
+
+\begin{lemma}[center of the anchor cell]
+  \label{lem:anchor_cell_zero}
+  \lean{Gluck.Discrete.anchorCell_zero}
+  \uses{def:anchor_cell, def:jacobian_base_len, lem:chart_perturb_zero}
+  $\mathrm{anchorCell}\,0 = \ell$, the Jacobian base point.
+\end{lemma}
+\begin{proof}
+  The unperturbed chart value is $2\pi/n$ at every edge.
+\end{proof}
+
+\begin{definition}[pair sign]
+  \label{def:pair_sign}
+  \lean{Gluck.Discrete.pairSign}
+  \uses{def:chart_perturb}
+  $\varepsilon_q(j) = +1$ at $j = q$, $-1$ at $j = q + m$, $0$ otherwise (and
+  $0$ if the pair collapses): the antisymmetric direction of pair $q$.
+\end{definition}
+
+\begin{definition}[pair direction as a linear map]
+  \label{def:pair_clm}
+  \lean{Gluck.Discrete.pairCLM}
+  \uses{def:pair_sign}
+  $(u,v) \mapsto \varepsilon_a(j)\,u + \varepsilon_b(j)\,v$, bundled as a
+  continuous linear map $\mathbb{R}^2 \to \mathbb{R}$.
+\end{definition}
+
+\begin{definition}[derivative of one anchor edge length]
+  \label{def:anchor_cell_deriv}
+  \lean{Gluck.Discrete.anchorCellDeriv}
+  \uses{def:pair_clm, def:jacobian_lambda}
+  $\mathrm{d}\ell_j = \lambda'_j \cdot (\varepsilon_a(j)\,\mathrm{d}u +
+  \varepsilon_b(j)\,\mathrm{d}v)$.
+\end{definition}
+
+\begin{lemma}[the perturbed chart base is affine]
+  \label{lem:chart_perturb_eq_affine}
+  \lean{Gluck.Discrete.chartPerturb_eq_affine}
+  \uses{def:chart_perturb, def:pair_sign}
+  $\mathrm{chartPerturb}\,z\,j = 2\pi/n + \varepsilon_a(j)\,u +
+  \varepsilon_b(j)\,v$.
+\end{lemma}
+\begin{proof}
+  Case split on the four indicator cases.
+\end{proof}
+
+\begin{lemma}[pair sign at lifted indices]
+  \label{lem:pair_sign_nat_cast}
+  \lean{Gluck.Discrete.pairSign_natCast}
+  \uses{def:pair_sign}
+  For $q < m$, $j < n$: $\varepsilon_q(j) = [j = q] - [j = q + m]$ over the
+  lifted indices (no wrap-around coincidences).
+\end{lemma}
+\begin{proof}
+  $\mathbb{Z}/n$ casts of distinct residues below $n$ are distinct.
+\end{proof}
+
+\begin{lemma}[pair sign at the boundary slot $-1$]
+  \label{lem:pair_sign_neg_one}
+  \lean{Gluck.Discrete.pairSign_neg_one}
+  \uses{def:pair_sign}
+  $\varepsilon_q(-1) = -[q + 1 = m]$: the index $-1 = n - 1$ meets the pair
+  only as $q + m$ with $q = m - 1$.
+\end{lemma}
+\begin{proof}
+  $n - 1 = q + m \iff q = m - 1$ under $q < m$.
+\end{proof}
+
+\begin{lemma}[strict derivative of the perturbed chart base]
+  \label{lem:has_strict_fderiv_at_chart_perturb}
+  \lean{Gluck.Discrete.hasStrictFDerivAt_chartPerturb}
+  \uses{lem:chart_perturb_eq_affine, def:pair_clm}
+  $z \mapsto \mathrm{chartPerturb}\,z\,j$ has strict derivative
+  $\mathrm{pairCLM}\,j$ at every $z_0$ (it is affine).
+\end{lemma}
+\begin{proof}
+  Affine maps are strictly differentiable with constant derivative.
+\end{proof}
+
+\begin{lemma}[strict derivative of each anchor edge length]
+  \label{lem:has_strict_fderiv_at_anchor_cell}
+  \lean{Gluck.Discrete.hasStrictFDerivAt_anchorCell}
+  \uses{def:anchor_cell, def:anchor_cell_deriv,
+        lem:has_strict_deriv_at_chart_inv,
+        lem:has_strict_fderiv_at_chart_perturb, lem:base_chart_mem_image}
+  $z \mapsto \mathrm{anchorCell}\,z\,j$ has strict derivative
+  $\mathrm{anchorCellDeriv}\,j$ at $z = 0$.
+\end{lemma}
+\begin{proof}
+  Chain rule: chart inverse after the affine perturbation, at the achieved
+  base value $2\pi/n$.
+\end{proof}
+
+\begin{lemma}[perturbed values stay in the chart images]
+  \label{lem:eventually_chart_perturb_mem}
+  \lean{Gluck.Discrete.eventually_chartPerturb_mem}
+  \uses{lem:chart_map_image_mem_nhds, lem:base_chart_mem_image,
+        lem:chart_perturb_eq_affine}
+  For $z$ near $0$, every $\mathrm{chartPerturb}\,z\,j$ lies in edge $j$'s
+  chart image.
+\end{lemma}
+\begin{proof}
+  Finitely many edges; each image is a neighbourhood of $2\pi/n$ and the
+  perturbation is continuous.
+\end{proof}
+
+\begin{lemma}[chart form of the heading near the center]
+  \label{lem:heading_anchor_cell_eventually_eq}
+  \lean{Gluck.Discrete.heading_anchorCell_eventuallyEq}
+  \uses{def:anchor_cell, lem:eventually_chart_perturb_mem,
+        lem:heading_add_eq_chart_block, lem:chart_map_chart_inv}
+  Near $z = 0$: $\psi_k(z) = \arcsin(\kappa^s_0 \ell_{-1}(z)/2) +
+  \sum_{e<k} \mathrm{chartPerturb}\,z\,e + \arcsin(\kappa^s_k \ell_k(z)/2)$
+  (the interior chart values round-trip through $\lambda_j \circ \tau_j$).
+\end{lemma}
+\begin{proof}
+  Split each turning angle at the vertex, telescope the block, and cancel
+  $\tau_j(\lambda_j(s)) = s$ on the interior slots.
+\end{proof}
+
+\begin{definition}[heading derivative at the center]
+  \label{def:anchor_heading_deriv}
+  \lean{Gluck.Discrete.anchorHeadingDeriv}
+  \uses{def:anchor_cell_deriv, def:chart_slot_deriv, def:pair_clm}
+  $\mathrm{d}\psi_k$ = two boundary $\arcsin$-slot terms (edges $-1$ and $k$)
+  plus the affine chart-sum part $\sum_{e<k} \mathrm{pairCLM}\,e$.
+\end{definition}
+
+\begin{lemma}[strict derivative of a boundary slot]
+  \label{lem:has_strict_fderiv_at_anchor_slot}
+  \lean{Gluck.Discrete.hasStrictFDerivAt_anchorSlot}
+  \uses{lem:has_strict_fderiv_at_anchor_cell,
+        lem:has_strict_deriv_at_arcsin_slot, lem:jacobian_base_len_mem}
+  For $i$ an endpoint vertex of edge $j$,
+  $z \mapsto \arcsin(\kappa^s_i\,\mathrm{anchorCell}\,z\,j/2)$ has strict
+  derivative $A\text{-slot} \cdot \mathrm{anchorCellDeriv}\,j$ at $0$.
+\end{lemma}
+\begin{proof}
+  Chain rule through the edge-length derivative; moderate-arc bounds keep the
+  argument off $\pm1$.
+\end{proof}
+
+\begin{lemma}[strict derivative of the heading]
+  \label{lem:has_strict_fderiv_at_anchor_heading}
+  \lean{Gluck.Discrete.hasStrictFDerivAt_anchorHeading}
+  \uses{lem:heading_anchor_cell_eventually_eq,
+        lem:has_strict_fderiv_at_anchor_slot,
+        lem:has_strict_fderiv_at_chart_perturb, def:anchor_heading_deriv}
+  $z \mapsto \psi_k(z)$ has strict derivative
+  $\mathrm{anchorHeadingDeriv}\,k$ at $z = 0$.
+\end{lemma}
+\begin{proof}
+  Differentiate the chart form termwise (eventual equality preserves strict
+  derivatives).
+\end{proof}
+
+\begin{definition}[derivative of the anchor gap]
+  \label{def:anchor_gap_deriv}
+  \lean{Gluck.Discrete.anchorGapDeriv}
+  \uses{def:anchor_cell_deriv, def:anchor_heading_deriv, def:jacobian_edge}
+  $\mathrm{d}F = \sum_j (e^{\mathrm{i}\psi_j}\,\mathrm{d}\ell_j + E_j\,
+  \mathrm{i}\,\mathrm{d}\psi_j)$, all data at the Jacobian base point,
+  bundled as a continuous linear map $\mathbb{R}^2 \to \mathbb{C}$.
+\end{definition}
+
+\begin{lemma}[strict derivative of the anchor gap]
+  \label{lem:has_strict_fderiv_at_anchor_gap}
+  \lean{Gluck.Discrete.hasStrictFDerivAt_anchorGap}
+  \uses{def:anchor_gap, def:anchor_gap_deriv,
+        lem:has_strict_fderiv_at_anchor_cell,
+        lem:has_strict_fderiv_at_anchor_heading, lem:anchor_cell_zero}
+  $G = F(0,\cdot)$ has strict derivative $\mathrm{anchorGapDeriv}$ at
+  $z = 0$.
+\end{lemma}
+\begin{proof}
+  Product/chain rule over the finite sum $\sum_j \ell_j(z)
+  e^{\mathrm{i}\psi_j(z)}$.
+\end{proof}
+
+\begin{lemma}[base length is half-period symmetric]
+  \label{lem:jacobian_base_len_symm}
+  \lean{Gluck.Discrete.jacobianBaseLen_symm}
+  \uses{def:jacobian_base_len}
+  At a symmetric anchor, $\ell_{i+m} = \ell_i$ (the curvature pairs coincide
+  on opposite edges).
+\end{lemma}
+\begin{proof}
+  The chart data of edges $i$ and $i+m$ agree.
+\end{proof}
+
+\begin{lemma}[total turning at the base point]
+  \label{lem:turning_sum_jacobian_base_len}
+  \lean{Gluck.Discrete.turningSum_jacobianBaseLen}
+  \uses{def:jacobian_base_len, lem:turning_sum_edge_chart,
+        lem:chart_map_chart_inv}
+  $\mathrm{turningSum}\,\kappa^s\,\ell = 2\pi$: each edge chart value is
+  $2\pi/n$.
+\end{lemma}
+\begin{proof}
+  $n$ summands, each $2\pi/n$ after the chart round-trip.
+\end{proof}
+
+\begin{lemma}[headings advance by $\pi$ over a half-period]
+  \label{lem:heading_jacobian_base_len_add_half}
+  \lean{Gluck.Discrete.heading_jacobianBaseLen_add_half}
+  \uses{lem:jacobian_base_len_symm, lem:heading_add_half}
+  $\psi_{j+m} = \psi_j + \pi$ at the symmetric base point.
+\end{lemma}
+\begin{proof}
+  Instance of the half-period heading advance at symmetric data.
+\end{proof}
+
+\begin{lemma}[edge vectors flip over a half-period]
+  \label{lem:jacobian_edge_add_half}
+  \lean{Gluck.Discrete.jacobianEdge_add_half}
+  \uses{def:jacobian_edge, lem:heading_jacobian_base_len_add_half,
+        lem:jacobian_base_len_symm}
+  $E_{j+m} = -E_j$ at the symmetric base point.
+\end{lemma}
+\begin{proof}
+  Equal lengths, headings differing by $\pi$.
+\end{proof}
+
+\begin{lemma}[base edge vectors sum to zero]
+  \label{lem:sum_jacobian_edge_eq_zero}
+  \lean{Gluck.Discrete.sum_jacobianEdge_eq_zero}
+  \uses{lem:jacobian_edge_add_half}
+  $\sum_{j<n} E_j = 0$: the base development closes
+  (\cref{lem:central_symmetry_closes} at the anchor).
+\end{lemma}
+\begin{proof}
+  Pair each $j < m$ with $j + m$; the pairs cancel.
+\end{proof}
+
+\begin{lemma}[slot derivatives positive at the base]
+  \label{lem:jacobian_slot_pos}
+  \lean{Gluck.Discrete.jacobianSlot_pos}
+  \uses{lem:chart_slot_deriv_pos, lem:jacobian_base_len_mem}
+  $A_j, B_j > 0$ at the Jacobian base point.
+\end{lemma}
+\begin{proof}
+  Positivity of the slot derivative inside the wall.
+\end{proof}
+
+\begin{lemma}[share relation $A\lambda' = p$]
+  \label{lem:tail_slot_mul_lambda}
+  \lean{Gluck.Discrete.tailSlot_mul_lambda'}
+  \uses{def:jacobian_lambda, def:jacobian_share}
+  $A_j \lambda'_j = p_j$.
+\end{lemma}
+\begin{proof}
+  Definitions: $A/(A+B) = p$.
+\end{proof}
+
+\begin{lemma}[share relation $B\lambda' = 1 - p$]
+  \label{lem:head_slot_mul_lambda}
+  \lean{Gluck.Discrete.headSlot_mul_lambda'}
+  \uses{def:jacobian_lambda, def:jacobian_share, lem:jacobian_slot_pos}
+  $B_j \lambda'_j = 1 - p_j$.
+\end{lemma}
+\begin{proof}
+  $B/(A+B) = 1 - A/(A+B)$; the denominators are positive.
+\end{proof}
+
+\begin{lemma}[$\lambda'$ is half-period symmetric]
+  \label{lem:jacobian_lambda_add_half}
+  \lean{Gluck.Discrete.jacobianLambda'_add_half}
+  \uses{def:jacobian_lambda, lem:jacobian_base_len_symm}
+  $\lambda'_{i+m} = \lambda'_i$ at a symmetric anchor.
+\end{lemma}
+\begin{proof}
+  All ingredients are half-period symmetric.
+\end{proof}
+
+\begin{lemma}[$p$ is half-period symmetric]
+  \label{lem:jacobian_share_add_half}
+  \lean{Gluck.Discrete.jacobianShare_add_half}
+  \uses{def:jacobian_share, lem:jacobian_base_len_symm}
+  $p_{i+m} = p_i$ at a symmetric anchor.
+\end{lemma}
+\begin{proof}
+  All ingredients are half-period symmetric.
+\end{proof}
+
+\begin{lemma}[pair-signed sum over a full period]
+  \label{lem:sum_mul_pair_sign}
+  \lean{Gluck.Discrete.sum_mul_pairSign}
+  \uses{def:pair_sign, lem:pair_sign_nat_cast}
+  $\sum_{j<n} f(j)\,\varepsilon_q(j) = f(q) - f(q+m)$ for any
+  $f : \mathbb{N} \to \mathbb{C}$ and $q < m$.
+\end{lemma}
+\begin{proof}
+  Only the two pair members contribute.
+\end{proof}
+
+\begin{lemma}[running count of the pair sign]
+  \label{lem:sum_pair_sign_range}
+  \lean{Gluck.Discrete.sum_pairSign_range}
+  \uses{def:pair_sign, lem:pair_sign_nat_cast}
+  $\sum_{e<j} \varepsilon_q(e) = [q < j] - [q + m < j]$ for $j \le n$:
+  the indicator of the open block $(q, q+m]$.
+\end{lemma}
+\begin{proof}
+  Count the two hits below the cutoff.
+\end{proof}
+
+\begin{lemma}[column evaluation --- the sum-form derivative is $C_q$]
+  \label{lem:sum_col_eval}
+  \lean{Gluck.Discrete.sum_col_eval}
+  \uses{def:closing_jacobian_col, lem:sum_mul_pair_sign,
+        lem:sum_pair_sign_range, lem:jacobian_edge_add_half,
+        lem:sum_jacobian_edge_eq_zero, lem:tail_slot_mul_lambda,
+        lem:head_slot_mul_lambda, lem:jacobian_share_add_half,
+        lem:pair_sign_neg_one, lem:heading_anchor_cell_eventually_eq}
+  At a symmetric anchor, the sum-form derivative of the gap in one pair
+  direction $q < m$ equals the closed-form column $C_q$.
+\end{lemma}
+\begin{proof}
+  The $\mathrm{d}\ell$ part extracts $2\lambda'_q e^{\mathrm{i}\psi_q}$
+  (pair extraction + half-period symmetry); the constant heading gauge
+  multiplies $\sum E = 0$; the running count contributes
+  $\sum_{(q,q+m)} E_r$; the boundary slots contribute $(2p_q-1)E_q$
+  after the share relations; assembling gives $C_q$.
+\end{proof}
+
+\begin{lemma}[the anchor gap derivative is the Jacobian]
+  \label{lem:anchor_gap_deriv_eq}
+  \lean{Gluck.Discrete.anchorGapDeriv_eq}
+  \uses{def:anchor_gap_deriv, def:closing_jacobian_col, lem:sum_col_eval}
+  At a symmetric anchor with $a, b < m$:
+  $\mathrm{anchorGapDeriv}(u,v) = u\,C_a + v\,C_b$.
+\end{lemma}
+\begin{proof}
+  Evaluate the sum form against each basis direction and apply
+  \cref{lem:sum_col_eval}.
+\end{proof}
+
 \begin{lemma}[$t=0$ closing rigidity at a nondegenerate symmetric anchor
   (corrected @080)]
   \label{lem:closure_boundary_rigidity}
@@ -1640,7 +2234,10 @@ on $[0,1]\times\partial D_\rho$. After the @079 refutation, (ii) is re-based on 
   $|u| + |v| \le \rho'$: $F(0, z) = 0 \iff z = 0$.
 \end{lemma}
 \begin{proof}
-  \uses{lem:closing_gap_zero_iff_fails_of_const}
+  \uses{lem:closing_gap_zero_iff_fails_of_const,
+        lem:closing_gap_zero_eq_anchor_gap, lem:has_strict_fderiv_at_anchor_gap,
+        lem:anchor_gap_deriv_eq, lem:norm_smul_add_smul_ge,
+        lem:anchor_cell_zero}
   ($\Leftarrow$) is \cref{lem:closing_gap_center_eq_zero} (the anchor is
   symmetric, so the base closes by \cref{lem:central_symmetry_closes}).
   ($\Rightarrow$): $F(0, \cdot)$ is \emph{strictly differentiable} at $z = 0$
