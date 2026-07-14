@@ -5222,4 +5222,72 @@ theorem hasStrictDerivAt_twoLevelCol₁' [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
         + 16 * ((Real.sqrt 2 : ℝ) : ℂ) ^ 2 * Complex.I) * Complex.I_mul_I
       + (16 * Complex.I) * hs2
 
+/-! ### R4 — slope-limit packaging of the two-level pairing
+(`lem:anchor_witness_two_level`) -/
+
+/-- Slope form of a strict `ℂ`-valued derivative at `0` with base value `0`:
+the normalized column `C(ε)/ε` tends to `C'(0)` along the punctured
+neighborhood — the R4 bridge of `lem:anchor_witness_two_level`. -/
+private lemma tendsto_div_ofReal_of_hasStrictDerivAt {f : ℝ → ℂ} {v : ℂ}
+    (hf : HasStrictDerivAt f v 0) (hf0 : f 0 = 0) :
+    Filter.Tendsto (fun ε : ℝ => f ε / (ε : ℂ))
+      (nhdsWithin (0 : ℝ) {(0 : ℝ)}ᶜ) (nhds v) := by
+  have h := hasDerivAt_iff_tendsto_slope.mp hf.hasDerivAt
+  have hs : slope f 0 = fun ε : ℝ => f ε / (ε : ℂ) := by
+    funext ε
+    rw [slope_def_module, hf0, sub_zero, sub_zero, Complex.real_smul,
+      Complex.ofReal_inv]
+    ring
+  rwa [hs] at h
+
+/-- **R4 — the normalized two-level pairing has a limit**: if the two columns
+have strict derivatives `V₀, V₁` at `0`, then
+`Im(conj C₀(ε) · C₁(ε))/ε² → Im(conj V₀ · V₁)` along `𝓝[≠] 0`
+(`lem:anchor_witness_two_level`, slope-limit step). -/
+theorem tendsto_twoLevelPairing [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    (hn : n = 2 * m) {K : ℝ} (hK : 0 < K) {V₀ V₁ : ℂ}
+    (h₀ : HasStrictDerivAt (twoLevelCol (n := n) m hK 0) V₀ 0)
+    (h₁ : HasStrictDerivAt (twoLevelCol (n := n) m hK 1) V₁ 0) :
+    Filter.Tendsto
+      (fun ε : ℝ => ((starRingEnd ℂ) (twoLevelCol (n := n) m hK 0 ε)
+          * twoLevelCol (n := n) m hK 1 ε).im / ε ^ 2)
+      (nhdsWithin (0 : ℝ) {(0 : ℝ)}ᶜ)
+      (nhds (((starRingEnd ℂ) V₀ * V₁).im)) := by
+  have hm2 : 2 ≤ m := by omega
+  have ht0 := tendsto_div_ofReal_of_hasStrictDerivAt h₀
+    (twoLevelCol_zero hn4 hn hK (by omega))
+  have ht1 := tendsto_div_ofReal_of_hasStrictDerivAt h₁
+    (twoLevelCol_zero hn4 hn hK (by omega))
+  have hmul : Filter.Tendsto
+      (fun ε : ℝ => (starRingEnd ℂ) (twoLevelCol (n := n) m hK 0 ε / (ε : ℂ))
+        * (twoLevelCol (n := n) m hK 1 ε / (ε : ℂ)))
+      (nhdsWithin (0 : ℝ) {(0 : ℝ)}ᶜ)
+      (nhds ((starRingEnd ℂ) V₀ * V₁)) := ht0.star.mul ht1
+  have him := (Complex.continuous_im.tendsto _).comp hmul
+  refine him.congr' ?_
+  filter_upwards [self_mem_nhdsWithin] with ε hε
+  have hε0 : ε ≠ 0 := hε
+  have hprod : (starRingEnd ℂ) (twoLevelCol (n := n) m hK 0 ε / (ε : ℂ))
+      * (twoLevelCol (n := n) m hK 1 ε / (ε : ℂ))
+      = ((starRingEnd ℂ) (twoLevelCol (n := n) m hK 0 ε)
+          * twoLevelCol (n := n) m hK 1 ε) / ((ε ^ 2 : ℝ) : ℂ) := by
+    rw [map_div₀, Complex.conj_ofReal, div_mul_div_comm, Complex.ofReal_pow]
+    ring
+  simp only [Function.comp_apply, hprod, Complex.div_ofReal_im]
+
+/-- **R4 — eventual nonvanishing of the two-level pairing**: if
+`Im(conj V₀ · V₁) ≠ 0`, then `Im(conj C₀(ε) · C₁(ε)) ≠ 0` for all
+sufficiently small `ε ≠ 0` (`lem:anchor_witness_two_level`, conclusion). -/
+theorem eventually_twoLevelPairing_ne [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    (hn : n = 2 * m) {K : ℝ} (hK : 0 < K) {V₀ V₁ : ℂ}
+    (h₀ : HasStrictDerivAt (twoLevelCol (n := n) m hK 0) V₀ 0)
+    (h₁ : HasStrictDerivAt (twoLevelCol (n := n) m hK 1) V₁ 0)
+    (hV : ((starRingEnd ℂ) V₀ * V₁).im ≠ 0) :
+    ∀ᶠ ε : ℝ in nhdsWithin (0 : ℝ) {(0 : ℝ)}ᶜ,
+      ((starRingEnd ℂ) (twoLevelCol (n := n) m hK 0 ε)
+        * twoLevelCol (n := n) m hK 1 ε).im ≠ 0 := by
+  have h := (tendsto_twoLevelPairing hn4 hn hK h₀ h₁).eventually_ne hV
+  filter_upwards [h] with ε hne hzero
+  exact hne (by rw [hzero, zero_div])
+
 end Gluck.Discrete
