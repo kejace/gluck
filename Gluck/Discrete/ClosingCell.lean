@@ -1913,4 +1913,134 @@ theorem hasStrictFDerivAt_anchorCell [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
     exact hasStrictDerivAt_chartInv (hκs j) (hκs (j + 1)) hbase
   exact hinv'.comp_hasStrictFDerivAt 0 (hasStrictFDerivAt_chartPerturb m a b j 0)
 
+/-! ### Strict differentiability of the anchor headings
+
+Near the center the heading of the anchor cell takes the *chart form*:
+one boundary half-turn slot at edge `−1`, the affine chart sum (whose values
+are the perturbed chart base, by the round trip), and one boundary half-turn
+slot at edge `k`. This makes the heading derivative two arcsin slots plus an
+explicitly affine part. -/
+
+/-- Near the center every perturbed chart value is an achieved turning value
+on its edge (continuity of the perturbation + openness of each edge's
+turning-value image around the base value `2π/n`). -/
+theorem eventually_chartPerturb_mem [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
+    (a b : ZMod n) {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) :
+    ∀ᶠ z : ℝ × ℝ in nhds 0, ∀ j : ZMod n, chartPerturb m a b z j ∈
+      chartMap (κs j) (κs (j + 1)) ''
+        Set.Ioo (0 : ℝ) (2 / max (κs j) (κs (j + 1))) := by
+  rw [Filter.eventually_all]
+  intro j
+  have hcont : ContinuousAt (fun z : ℝ × ℝ => chartPerturb m a b z j) 0 :=
+    (continuous_chartPerturb m a b j).continuousAt
+  have hmem : chartMap (κs j) (κs (j + 1)) ''
+      Set.Ioo (0 : ℝ) (2 / max (κs j) (κs (j + 1))) ∈
+      nhds (chartPerturb m a b (0 : ℝ × ℝ) j) := by
+    rw [show chartPerturb m a b (0 : ℝ × ℝ) j = 2 * Real.pi / n from
+      chartPerturb_zero m a b j]
+    exact chartMap_image_mem_nhds (hκs j) (hκs (j + 1))
+      (base_chart_mem_image hn4 hκs j)
+  exact hcont.eventually_mem hmem
+
+/-- **The chart form of the anchor-cell heading**, eventually near the center:
+`ψ_k(z) = arcsin(κˢ_0·(ℓ_{−1}(z)/2)) + ∑_{e<k} s(z)_e
++ arcsin(κˢ_k·(ℓ_k(z)/2))`. -/
+theorem heading_anchorCell_eventuallyEq [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
+    (a b : ZMod n) {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) (k : ℕ) :
+    (fun z : ℝ × ℝ => heading κs (anchorCell m a b hκs z) k)
+      =ᶠ[nhds 0] fun z : ℝ × ℝ =>
+        Real.arcsin (κs 0 * (anchorCell m a b hκs z (-1) / 2))
+          + ∑ e ∈ Finset.range k, chartPerturb m a b z ((e : ℕ) : ZMod n)
+          + Real.arcsin (κs (k : ZMod n)
+              * (anchorCell m a b hκs z ((k : ℕ) : ZMod n) / 2)) := by
+  filter_upwards [eventually_chartPerturb_mem hn4 m a b hκs] with z hz
+  have hround : ∀ i : ZMod n,
+      chartMap (κs i) (κs (i + 1)) (anchorCell m a b hκs z i)
+        = chartPerturb m a b z i := by
+    intro i
+    simp only [anchorCell]
+    exact chartMap_chartInv _ _ (hz i)
+  have hblock := heading_add_eq_chartBlock κs (anchorCell m a b hκs z) 0 k
+  simp only [Nat.zero_add, Nat.cast_zero] at hblock
+  have hhead0 : heading κs (anchorCell m a b hκs z) 0
+      = Real.arcsin (κs 0 * (anchorCell m a b hκs z (-1) / 2))
+        + Real.arcsin (κs 0 * (anchorCell m a b hκs z 0 / 2)) := by
+    simp only [heading, zero_add, Finset.sum_range_one, Nat.cast_zero,
+      turningAngle, tK_zero, zero_sub]
+  rw [hblock, hhead0, Finset.sum_congr rfl
+    (fun e _ => hround ((e : ℕ) : ZMod n))]
+  ring
+
+/-- **The heading derivative of the anchor cell at the center**: the two
+boundary arcsin slots (edges `−1` and `k`) plus the affine chart-sum part. -/
+noncomputable def anchorHeadingDeriv (m : ℕ) (a b : ZMod n) {κs : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (k : ℕ) : ℝ × ℝ →L[ℝ] ℝ :=
+  chartSlotDeriv (κs 0) (jacobianBaseLen hκs (-1))
+      • anchorCellDeriv m a b hκs (-1)
+    + ∑ e ∈ Finset.range k, pairCLM m a b ((e : ℕ) : ZMod n)
+    + chartSlotDeriv (κs (k : ZMod n)) (jacobianBaseLen hκs ((k : ℕ) : ZMod n))
+      • anchorCellDeriv m a b hκs ((k : ℕ) : ZMod n)
+
+/-- Strict differentiability of one heading slot `z ↦ arcsin(κˢ_i·(ℓ_j(z)/2))`
+of the anchor cell at the center, for `i` an endpoint vertex of edge `j`. -/
+theorem hasStrictFDerivAt_anchorSlot [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
+    (a b : ZMod n) {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) {i j : ZMod n}
+    (hij : i = j ∨ i = j + 1) :
+    HasStrictFDerivAt
+      (fun z : ℝ × ℝ => Real.arcsin (κs i * (anchorCell m a b hκs z j / 2)))
+      (chartSlotDeriv (κs i) (jacobianBaseLen hκs j)
+        • anchorCellDeriv m a b hκs j) 0 := by
+  have hmem := jacobianBaseLen_mem hn4 hκs j
+  have hle : κs i ≤ max (κs j) (κs (j + 1)) := by
+    rcases hij with rfl | rfl
+    · exact le_max_left _ _
+    · exact le_max_right _ _
+  have hwall : |κs i * jacobianBaseLen hκs j / 2| < 1 := by
+    have := chartArg_mem (hκs j) (hκs (j + 1)) hmem (hκs i) hle
+    exact abs_lt.mpr ⟨this.1, this.2⟩
+  have h0 : anchorCell m a b hκs (0 : ℝ × ℝ) j = jacobianBaseLen hκs j :=
+    congrFun (anchorCell_zero m a b hκs) j
+  have hslot' : HasStrictDerivAt (fun y : ℝ => Real.arcsin (κs i * y / 2))
+      (chartSlotDeriv (κs i) (jacobianBaseLen hκs j))
+      (anchorCell m a b hκs (0 : ℝ × ℝ) j) := by
+    rw [h0]
+    exact hasStrictDerivAt_arcsinSlot hwall
+  have hcomp := hslot'.comp_hasStrictFDerivAt 0
+    (hasStrictFDerivAt_anchorCell hn4 m a b hκs j)
+  have hfun : ((fun y : ℝ => Real.arcsin (κs i * y / 2))
+        ∘ fun z : ℝ × ℝ => anchorCell m a b hκs z j)
+      = fun z : ℝ × ℝ => Real.arcsin (κs i * (anchorCell m a b hκs z j / 2)) := by
+    funext z
+    simp [Function.comp, mul_div_assoc]
+  rw [hfun] at hcomp
+  exact hcomp
+
+/-- **Strict differentiability of the anchor-cell headings at the center**
+(`lem:closure_boundary_rigidity`, second layer): `ψ_k` has strict derivative
+`anchorHeadingDeriv k` at `z = 0`. -/
+theorem hasStrictFDerivAt_anchorHeading [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
+    (a b : ZMod n) {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) (k : ℕ) :
+    HasStrictFDerivAt (fun z : ℝ × ℝ => heading κs (anchorCell m a b hκs z) k)
+      (anchorHeadingDeriv m a b hκs k) 0 := by
+  have h1 := hasStrictFDerivAt_anchorSlot hn4 m a b hκs
+    (i := 0) (j := (-1 : ZMod n)) (Or.inr (by ring))
+  have h2 : HasStrictFDerivAt
+      (fun z : ℝ × ℝ => ∑ e ∈ Finset.range k,
+        chartPerturb m a b z ((e : ℕ) : ZMod n))
+      (∑ e ∈ Finset.range k, pairCLM m a b ((e : ℕ) : ZMod n)) 0 := by
+    have hfun : (∑ e ∈ Finset.range k,
+          fun z : ℝ × ℝ => chartPerturb m a b z ((e : ℕ) : ZMod n))
+        = fun z : ℝ × ℝ => ∑ e ∈ Finset.range k,
+            chartPerturb m a b z ((e : ℕ) : ZMod n) := by
+      funext z
+      simp
+    rw [← hfun]
+    exact HasStrictFDerivAt.sum
+      (fun e _ => hasStrictFDerivAt_chartPerturb m a b _ 0)
+  have h3 := hasStrictFDerivAt_anchorSlot hn4 m a b hκs
+    (i := ((k : ℕ) : ZMod n)) (j := ((k : ℕ) : ZMod n)) (Or.inl rfl)
+  have hG := (h1.add h2).add h3
+  exact hG.congr_of_eventuallyEq
+    (heading_anchorCell_eventuallyEq hn4 m a b hκs k).symm
+
 end Gluck.Discrete
