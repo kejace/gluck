@@ -1028,4 +1028,141 @@ theorem closingCell_package [NeZero n] (hn4 : 4 ≤ n) {m : ℕ} (hn : n = 2 * m
     exact closingGap_center_eq_zero hn a b hκ ht0 ht1
       (hmem 0 ht0 ht1 (0, 0) (by simp [hρ0.le]))
 
+/-! ### Constant curvature closes identically — the `t = 0` degeneracy of the
+dispatched rigidity target
+
+**Counterexample structure for `lem:closure_boundary_rigidity` as dispatched
+@079.** For a CONSTANT positive profile `κ ≡ c` the development inscribes in a
+circle of radius `1/c`: edge `j` is a chord subtending the central angle
+`φ_j = 2·arcsin(c·ℓ_j/2)`, and the heading of edge `j` is — up to the constant
+`arcsin(c·ℓ_{-1}/2)` — the accumulated central angle plus half the current one.
+The edge vector therefore telescopes,
+`ℓ_j·e^{iψ_j} = e^{iA₋₁}/(ic)·(e^{iΣ_{j+1}} − e^{iΣ_j})`, and whenever the
+turning sum — which equals the total central angle — is `2π`, the development
+closes REGARDLESS of the individual edge lengths
+(`closureGap_eq_zero_of_const`). Consequently the gap map of the closing 2-cell
+vanishes identically in `z` whenever the central symmetrization `κ⁰` is
+constant (`closingGap_eq_zero_of_centralSym_const`), so the `t = 0` rigidity
+statement `F(0,z) = 0 ↔ z = 0` is FALSE without a nondegeneracy hypothesis on
+`κ⁰ = centralSym m κ` (`closingGap_zero_iff_fails_of_const`). This degeneracy
+is not vacuous downstream: profiles `κ_i = c + (odd half-period harmonics)`
+have `centralSym m κ ≡ c` and can satisfy the DFV pattern. -/
+
+/-- The half-angle telescoping identity `e^{2xi} − 1 = 2i·(sin x)·e^{xi}` in
+`ℂ` for a real angle `x`, in the exact `Complex.exp ((· : ℝ) * I)` packaging of
+the development's edge vectors. -/
+private lemma exp_ofReal_two_mul_I_sub_one (x : ℝ) :
+    Complex.exp (((2 * x : ℝ) : ℂ) * Complex.I) - 1
+      = 2 * Complex.I * (Real.sin x : ℂ) * Complex.exp ((x : ℝ) * Complex.I) := by
+  have hpyth : (Real.sin x : ℂ) ^ 2 + (Real.cos x : ℂ) ^ 2 = 1 := by
+    exact_mod_cast congrArg (fun r : ℝ => (r : ℂ)) (Real.sin_sq_add_cos_sq x)
+  have h2 : ((2 * x : ℝ) : ℂ) * Complex.I
+      = (x : ℝ) * Complex.I + (x : ℝ) * Complex.I := by push_cast; ring
+  rw [h2, Complex.exp_add, Complex.exp_mul_I, ← Complex.ofReal_cos,
+    ← Complex.ofReal_sin]
+  linear_combination hpyth - (Real.sin x : ℂ) ^ 2 * Complex.I_sq
+
+/-- **Constant curvature closes identically** (the inscribed-polygon
+telescope): for a constant profile `κ ≡ c ≠ 0`, any edge-length vector inside
+the arcsin wall (`|c·(ℓ_i/2)| ≤ 1`) whose turning sum is `2π` develops to a
+CLOSED polygon. This is the discrete "circles close for free" degeneracy: at
+constant curvature the closure gap imposes no constraint beyond the turning
+constraint, which the antisymmetric 2-cell keeps identically — so `t = 0`
+rigidity FAILS whenever `centralSym m κ` is constant. -/
+theorem closureGap_eq_zero_of_const [NeZero n] {c : ℝ} (hc : c ≠ 0)
+    {ℓ : ZMod n → ℝ} (hwall : ∀ i : ZMod n, |c * (ℓ i / 2)| ≤ 1)
+    (hT : turningSum (fun _ => c) ℓ = 2 * Real.pi) :
+    closureGap (fun _ => c) ℓ = 0 := by
+  classical
+  set A : ZMod n → ℝ := fun i => Real.arcsin (c * (ℓ i / 2)) with hA
+  have hθ : ∀ i : ZMod n, turningAngle 0 (fun _ => c) ℓ i = A (i - 1) + A i := by
+    intro i
+    simp only [turningAngle, tK_zero, hA]
+  have hstep : ∀ j : ℕ, heading (fun _ => c) ℓ (j + 1)
+      = heading (fun _ => c) ℓ j
+        + turningAngle 0 (fun _ => c) ℓ ((j + 1 : ℕ) : ZMod n) := by
+    intro j
+    unfold heading
+    exact Finset.sum_range_succ _ (j + 1)
+  -- the heading partial-sum formula `ψ_j = A₋₁ + 2·Σ_{i<j} A_i + A_j`
+  have hhead : ∀ j : ℕ, heading (fun _ => c) ℓ j
+      = A (-1) + 2 * ∑ i ∈ Finset.range j, A ((i : ℕ) : ZMod n)
+        + A ((j : ℕ) : ZMod n) := by
+    intro j
+    induction j with
+    | zero =>
+      unfold heading
+      simp [hθ, zero_sub]
+    | succ j ih =>
+      rw [hstep j, ih, hθ]
+      have hcast : ((j + 1 : ℕ) : ZMod n) - 1 = ((j : ℕ) : ZMod n) := by
+        push_cast; ring
+      rw [hcast, Finset.sum_range_succ]
+      ring
+  -- per-edge telescoping against the central-angle partial sums
+  set g : ℕ → ℂ := fun j =>
+    Complex.exp (((2 * ∑ i ∈ Finset.range j, A ((i : ℕ) : ZMod n) : ℝ) : ℂ)
+      * Complex.I) with hg
+  set C : ℂ := Complex.exp ((A (-1) : ℂ) * Complex.I) / ((c : ℂ) * Complex.I)
+    with hC
+  have hc' : (c : ℂ) ≠ 0 := by exact_mod_cast hc
+  have hcI : (c : ℂ) * Complex.I ≠ 0 := mul_ne_zero hc' Complex.I_ne_zero
+  have hterm : ∀ j : ℕ, (ℓ ((j : ℕ) : ZMod n) : ℂ)
+      * Complex.exp ((heading (fun _ => c) ℓ j : ℂ) * Complex.I)
+      = C * (g (j + 1) - g j) := by
+    intro j
+    have hsin : Real.sin (A ((j : ℕ) : ZMod n))
+        = c * (ℓ ((j : ℕ) : ZMod n) / 2) := by
+      have h := abs_le.mp (hwall ((j : ℕ) : ZMod n))
+      rw [hA]
+      exact Real.sin_arcsin h.1 h.2
+    have hgdiff : g (j + 1) - g j
+        = Complex.exp (((2 * ∑ i ∈ Finset.range j, A ((i : ℕ) : ZMod n) : ℝ) : ℂ)
+            * Complex.I)
+          * (Complex.exp (((2 * A ((j : ℕ) : ZMod n) : ℝ) : ℂ) * Complex.I) - 1) := by
+      simp only [hg, Finset.sum_range_succ]
+      rw [show (2 * (∑ i ∈ Finset.range j, A ((i : ℕ) : ZMod n)
+            + A ((j : ℕ) : ZMod n)) : ℝ)
+          = 2 * ∑ i ∈ Finset.range j, A ((i : ℕ) : ZMod n)
+            + 2 * A ((j : ℕ) : ZMod n) from by ring]
+      push_cast
+      rw [add_mul, Complex.exp_add]
+      ring
+    rw [hgdiff, exp_ofReal_two_mul_I_sub_one, hsin, hhead j]
+    have hexp : ((A (-1) + 2 * ∑ i ∈ Finset.range j, A ((i : ℕ) : ZMod n)
+          + A ((j : ℕ) : ZMod n) : ℝ) : ℂ) * Complex.I
+        = (A (-1) : ℂ) * Complex.I
+          + ((2 * ∑ i ∈ Finset.range j, A ((i : ℕ) : ZMod n) : ℝ) : ℂ) * Complex.I
+          + (A ((j : ℕ) : ZMod n) : ℂ) * Complex.I := by
+      push_cast; ring
+    rw [hexp, Complex.exp_add, Complex.exp_add, hC]
+    push_cast
+    field_simp
+  -- the total central angle is the turning sum
+  have hSigma : (2 * ∑ i ∈ Finset.range n, A ((i : ℕ) : ZMod n) : ℝ)
+      = 2 * Real.pi := by
+    have h1 := turningSum_eq_sum_edgeChart (n := n) (fun _ => c) ℓ
+    rw [hT] at h1
+    have h2 : ∀ j : ZMod n, chartMap c c (ℓ j) = 2 * A j := by
+      intro j
+      simp only [chartMap, hA, mul_div_assoc]
+      ring
+    rw [Finset.sum_congr (rfl : (Finset.univ : Finset (ZMod n)) = Finset.univ)
+      fun j _ => h2 j, ← Finset.mul_sum] at h1
+    have h3 := sum_range_natCast_add A 0
+    simp only [zero_add] at h3
+    rw [h3]
+    linarith
+  -- assemble and telescope
+  unfold closureGap vertexR2
+  rw [Finset.sum_congr (rfl : Finset.range n = Finset.range n)
+    fun j _ => hterm j, ← Finset.mul_sum, Finset.sum_range_sub g n]
+  have hgn : g n = 1 := by
+    simp only [hg, hSigma]
+    push_cast
+    exact Complex.exp_two_pi_mul_I
+  have hg0 : g 0 = 1 := by
+    simp [hg]
+  rw [hgn, hg0, sub_self, mul_zero]
+
 end Gluck.Discrete
