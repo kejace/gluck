@@ -3029,4 +3029,128 @@ theorem hasStrictDerivAt_chartInvCurv {p₀ q : ℝ} (hp₀ : 0 < p₀) (hq : 0 
   rw [hval₀, hderiv_eq] at hmain
   exact hmain
 
+/-! ### The two-level chart data: piecewise base lengths
+
+At the two-level profile only the four edges `{0, m−1, m, n−1}` touch a bump
+vertex; they all recover the SAME length `chartInvCurv hK (2π/n) (K+ε)` (the
+two second-slot cases via `chartInv_comm`), while every other edge carries the
+`ε`-independent constant-pair length. This is the piecewise identification
+that reduces the `ε`-differentiation of ALL Jacobian data to the single
+scalar `hasStrictDerivAt_chartInvCurv`. -/
+
+/-- The two-level profile at a lifted index `j < n`: the bump hits exactly
+`j ∈ {0, m}` (as naturals). -/
+theorem twoLevelProfile_natCast [NeZero n] {m : ℕ} (hn : n = 2 * m)
+    (K ε : ℝ) {j : ℕ} (hj : j < n) :
+    twoLevelProfile (n := n) m K ε ((j : ℕ) : ZMod n)
+      = K + (if j = 0 ∨ j = m then ε else 0) := by
+  have hm : m < n := by omega
+  unfold twoLevelProfile
+  congr 1
+  by_cases h0 : j = 0 ∨ j = m
+  · rw [if_pos h0]
+    rcases h0 with rfl | rfl
+    · rw [if_pos (Or.inl (by norm_cast))]
+    · rw [if_pos (Or.inr rfl)]
+  · rw [if_neg ?_, if_neg h0]
+    rintro (hc | hc)
+    · exact h0 (Or.inl (natCast_zmod_inj hj (by omega)
+        (by simpa using hc)))
+    · exact h0 (Or.inr (natCast_zmod_inj hj hm hc))
+
+/-- The two-level profile at the SUCCESSOR of a lifted index `j < n`: the
+head vertex of edge `j` is a bump vertex exactly for `j ∈ {m−1, n−1}`. -/
+theorem twoLevelProfile_natCast_succ [NeZero n] {m : ℕ} (hn : n = 2 * m)
+    (K ε : ℝ) {j : ℕ} (hj : j < n) :
+    twoLevelProfile (n := n) m K ε (((j : ℕ) : ZMod n) + 1)
+      = K + (if j = m - 1 ∨ j = n - 1 then ε else 0) := by
+  have hm1 : 1 ≤ m := by omega
+  have hcast : ((j : ℕ) : ZMod n) + 1 = (((j + 1 : ℕ)) : ZMod n) := by push_cast; ring
+  rw [hcast]
+  by_cases hlast : j + 1 = n
+  · have hj' : j = n - 1 := by omega
+    rw [hlast, ZMod.natCast_self]
+    have h0 : (0 : ZMod n) = ((0 : ℕ) : ZMod n) := by norm_cast
+    rw [h0, twoLevelProfile_natCast hn K ε (by omega : 0 < n)]
+    rw [if_pos (Or.inl rfl), if_pos (Or.inr hj')]
+  · have hj1 : j + 1 < n := by omega
+    rw [twoLevelProfile_natCast hn K ε hj1]
+    congr 1
+    by_cases hcond : j = m - 1 ∨ j = n - 1
+    · rcases hcond with rfl | rfl
+      · rw [if_pos (Or.inr (by omega)), if_pos (Or.inl rfl)]
+      · omega
+    · rw [if_neg (by omega), if_neg hcond]
+
+/-- **Piecewise base lengths at the two-level profile**: the four special
+edges `{0, m−1, m, n−1}` recover `chartInvCurv hK (2π/n) (K+ε)`, every other
+edge recovers the constant-pair length — the `ε`-dependence of the whole base
+polygon lives in ONE scalar. -/
+theorem jacobianBaseLen_twoLevel [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    (hn : n = 2 * m) {K ε : ℝ} (hK : 0 < K) (hε : |ε| < K)
+    {j : ℕ} (hj : j < n) :
+    jacobianBaseLen (fun i => twoLevelProfile_pos (n := n) (m := m) hK hε i)
+        ((j : ℕ) : ZMod n)
+      = if j = 0 ∨ j = m - 1 ∨ j = m ∨ j = n - 1
+        then chartInvCurv hK (2 * Real.pi / n) (K + ε)
+        else chartInv hK hK (2 * Real.pi / n) := by
+  have hm2 : 2 ≤ m := by omega
+  have hKε : 0 < K + ε := by have := abs_lt.mp hε; linarith
+  have hcongr : ∀ {p p' q q' : ℝ} (hp : 0 < p) (hq : 0 < q) (hp' : 0 < p')
+      (hq' : 0 < q') (s : ℝ), p = p' → q = q' →
+      chartInv hp hq s = chartInv hp' hq' s := by
+    intro p p' q q' hp hq hp' hq' s hpe hqe
+    subst hpe; subst hqe; rfl
+  have h1 := twoLevelProfile_natCast (n := n) hn K ε hj
+  have h2 := twoLevelProfile_natCast_succ (n := n) hn K ε hj
+  -- membership of the base value at this edge, for transport through comm
+  have hmem := base_chart_mem_image hn4
+    (fun i => twoLevelProfile_pos (n := n) (m := m) hK hε i) ((j : ℕ) : ZMod n)
+  unfold jacobianBaseLen
+  by_cases hsp : j = 0 ∨ j = m - 1 ∨ j = m ∨ j = n - 1
+  · rw [if_pos hsp]
+    obtain h | h | h | h := hsp
+    · -- edge 0: pair (K + ε, K), bump in the tail slot
+      have hv1 : twoLevelProfile (n := n) m K ε ((j : ℕ) : ZMod n) = K + ε := by
+        rw [h1, if_pos (Or.inl h)]
+      have hv2 : twoLevelProfile (n := n) m K ε (((j : ℕ) : ZMod n) + 1) = K := by
+        rw [h2, if_neg (by omega), add_zero]
+      rw [chartInvCurv_of_pos hKε hK]
+      exact hcongr _ _ hKε hK _ hv1 hv2
+    · -- edge m − 1: pair (K, K + ε), bump in the head slot
+      have hv1 : twoLevelProfile (n := n) m K ε ((j : ℕ) : ZMod n) = K := by
+        rw [h1, if_neg (by omega), add_zero]
+      have hv2 : twoLevelProfile (n := n) m K ε (((j : ℕ) : ZMod n) + 1)
+          = K + ε := by
+        rw [h2, if_pos (Or.inl h)]
+      rw [hv1, hv2] at hmem
+      rw [chartInvCurv_of_pos hKε hK,
+        ← chartInv_comm hK hKε hmem]
+      exact hcongr _ _ hK hKε _ hv1 hv2
+    · -- edge m: pair (K + ε, K), bump in the tail slot
+      have hv1 : twoLevelProfile (n := n) m K ε ((j : ℕ) : ZMod n) = K + ε := by
+        rw [h1, if_pos (Or.inr h)]
+      have hv2 : twoLevelProfile (n := n) m K ε (((j : ℕ) : ZMod n) + 1) = K := by
+        rw [h2, if_neg (by omega), add_zero]
+      rw [chartInvCurv_of_pos hKε hK]
+      exact hcongr _ _ hKε hK _ hv1 hv2
+    · -- edge n − 1: pair (K, K + ε), bump in the head slot
+      have hv1 : twoLevelProfile (n := n) m K ε ((j : ℕ) : ZMod n) = K := by
+        rw [h1, if_neg (by omega), add_zero]
+      have hv2 : twoLevelProfile (n := n) m K ε (((j : ℕ) : ZMod n) + 1)
+          = K + ε := by
+        rw [h2, if_pos (Or.inr h)]
+      rw [hv1, hv2] at hmem
+      rw [chartInvCurv_of_pos hKε hK,
+        ← chartInv_comm hK hKε hmem]
+      exact hcongr _ _ hK hKε _ hv1 hv2
+  · rw [if_neg hsp]
+    simp only [not_or] at hsp
+    obtain ⟨hs0, hsm1, hsm, hsn1⟩ := hsp
+    have hv1 : twoLevelProfile (n := n) m K ε ((j : ℕ) : ZMod n) = K := by
+      rw [h1, if_neg (by omega), add_zero]
+    have hv2 : twoLevelProfile (n := n) m K ε (((j : ℕ) : ZMod n) + 1) = K := by
+      rw [h2, if_neg (by omega), add_zero]
+    exact hcongr _ _ hK hK _ hv1 hv2
+
 end Gluck.Discrete
