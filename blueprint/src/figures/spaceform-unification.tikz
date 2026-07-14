@@ -1,58 +1,90 @@
-\begin{tikzpicture}[>=Stealth,font=\small]
-  \path[use as bounding box](-.5,-2.3)rectangle(15.3,4.7);
-  \node[font=\bfseries]at(7.4,4.45)
-    {one intrinsic curvature function, three metric-dependent realizations};
+\begin{tikzpicture}[>=Stealth,font=\small,
+  curve/.style={line width=1.15pt},
+  vertex/.style={circle,minimum size=7pt,inner sep=.35pt,font=\tiny\bfseries,
+    text=white,draw=white,line width=.35pt}]
+  \input{figures/spaceform-reconstruction-data}
+  \path[use as bounding box](-.5,-.8)rectangle(15.3,5.8);
+  \newcommand{\axes}[1]{
+    \draw[black!28,->](0,-.5)--(0,1.4)node[above]{$#1$};
+    \draw[black!28,->](0,0)--(3.15,0)node[right]{$t$};
+    \node[below,font=\scriptsize,text=black!55]at(0,0){$0$};
+    \node[below,font=\scriptsize,text=black!55]at(3,0){$2\pi$};}
+  \node[font=\bfseries]at(7.4,5.55)
+    {analogous nonconstant reconstructions in the three space forms};
 
-  % The common periodic curvature profile.
-  \draw[black!30,->](4.7,3.35)--(10.1,3.35)node[right]{$s$};
-  \draw[black!30,->](4.7,3.1)--(4.7,4.15)node[above]{$\kappa_K$};
-  \draw[blue!75!black,line width=1.15pt](4.7,3.88)--(9.9,3.88);
-  \node[left,font=\scriptsize]at(4.7,3.88){$2$};
-  \node[below,font=\scriptsize]at(4.7,3.35){$0$};
-  \node[below,font=\scriptsize]at(9.9,3.35){$L_K$};
-  \draw[<->,black!35](4.7,3.02)--(9.9,3.02)
-    node[midway,below,font=\scriptsize]{$\kappa_K(s)\equiv2$, endpoints identified};
+  % Spherical example.
+  \begin{scope}
+    \node[font=\bfseries]at(1.55,5.05){$S^2$};
+    \node[font=\scriptsize,text=black!62]at(1.55,4.7)
+      {$0.51\le\kappa_S(t)\le1.16$};
+    \begin{scope}[yshift=3cm]
+      \axes{\kappa_S}
+      \draw[curve,blue!75!black]plot coordinates{\SphereGraphA};
+      \foreach\p/\n in{\SphereGraphAMarkerA/1,\SphereGraphAMarkerB/2,
+        \SphereGraphAMarkerC/3,\SphereGraphAMarkerD/4}
+        \node[vertex,fill=blue!75!black]at\p{\n};
+    \end{scope}
+    \begin{scope}[shift={(1.55,.72)},scale=.78]
+      \shade[ball color=blue!7](0,0)circle(1);
+      \draw[black!35](0,0)circle(1);
+      \draw[black!15](-1,0)arc[start angle=180,end angle=360,x radius=1,y radius=.24];
+      \draw[black!15,dashed](1,0)arc[start angle=0,end angle=180,x radius=1,y radius=.24];
+      \draw[curve,blue!75!black]plot coordinates{\SphereGlobeA};
+      \foreach\p/\n in{\SphereGlobeAMarkerA/1,\SphereGlobeAMarkerB/2,
+        \SphereGlobeAMarkerC/3,\SphereGlobeAMarkerD/4}
+        \node[vertex,fill=blue!75!black]at\p{\n};
+    \end{scope}
+  \end{scope}
 
-  % Spherical circle: intrinsic radius rho_S = arccot 2.
-  \node[font=\bfseries]at(2,2.45){$K=1$: $S^2$};
-  \shade[ball color=blue!7](2,.9)circle(1.18);
-  \draw[black!38](2,.9)circle(1.18);
-  \draw[black!15](.82,.9)arc[start angle=180,end angle=360,x radius=1.18,y radius=.28];
-  \draw[black!15,dashed](3.18,.9)arc[start angle=0,end angle=180,x radius=1.18,y radius=.28];
-  \draw[teal!75!black,line width=1.3pt,->](2,1.82)ellipse[x radius=.53,y radius=.16];
-  \foreach \a/\n in {0/1,90/2,180/3,270/4}
-    \node[circle,fill=teal!75!black,text=white,inner sep=1.1pt,font=\tiny]
-      at({2+.53*cos(\a)},{1.82+.16*sin(\a)}){\n};
-  \node[font=\scriptsize,align=center]at(2,-.62)
-    {$\rho_S=\operatorname{arccot}2$\\stereographic radius $\tan(\rho_S/2)\approx0.236$};
+  % Euclidean example, reconstructed exactly from rho = 1 + .55 cos 2 theta.
+  \begin{scope}[xshift=5cm]
+    \pgfmathsetmacro{\a}{\GluckOvalCosTwo}
+    \node[font=\bfseries]at(1.55,5.05){$\mathbb E^2$};
+    \node[font=\scriptsize,text=black!62]at(1.55,4.7)
+      {$\kappa_E(\theta)=1/(1+0.55\cos2\theta)$};
+    \begin{scope}[yshift=3cm]
+      \axes{\kappa_E}
+      \draw[curve,teal!70!black,variable=\t,domain=0:360,samples=181]
+        plot({\t/120},{.4/(1+\a*cos(2*\t))});
+      \foreach\t/\n in{0/1,90/2,180/3,270/4}
+        \node[vertex,fill=teal!70!black]
+          at({\t/120},{.4/(1+\a*cos(2*\t))}){\n};
+    \end{scope}
+    \begin{scope}[shift={(1.55,.72)},scale=.62]
+      \draw[curve,teal!70!black,variable=\t,domain=0:360,samples=241]
+        plot({sin(\t)+\a/2*(sin(\t)+sin(3*\t)/3)},
+             {-cos(\t)+\a/2*(cos(\t)-cos(3*\t)/3)});
+      \foreach\t/\n in{0/1,90/2,180/3,270/4}
+        \node[vertex,fill=teal!70!black]
+          at({sin(\t)+\a/2*(sin(\t)+sin(3*\t)/3)},
+             {-cos(\t)+\a/2*(cos(\t)-cos(3*\t)/3)}){\n};
+    \end{scope}
+  \end{scope}
 
-  % Euclidean circle: radius 1 / kappa.
-  \node[font=\bfseries]at(7.4,2.45){$K=0$: $\mathbb E^2$};
-  \draw[black!25,->](6.05,.9)--(8.75,.9);
-  \draw[black!25,->](7.4,-.45)--(7.4,2.25);
-  \draw[teal!75!black,line width=1.3pt,->](7.4,.9)circle(.72);
-  \foreach \a/\n in {0/1,90/2,180/3,270/4}
-    \node[circle,fill=teal!75!black,text=white,inner sep=1.1pt,font=\tiny]
-      at({7.4+.72*cos(\a)},{.9+.72*sin(\a)}){\n};
-  \node[font=\scriptsize,align=center]at(7.4,-.62)
-    {$\rho_E=r_E=1/2$\\Euclidean radius $1/\kappa_E$};
+  % Hyperbolic example.
+  \begin{scope}[xshift=10cm]
+    \node[font=\bfseries]at(1.55,5.05){$H^2$};
+    \node[font=\scriptsize,text=black!62]at(1.55,4.7)
+      {$1.46\le\kappa_H(t)\le1.72$};
+    \begin{scope}[yshift=3cm]
+      \axes{\kappa_H}
+      \draw[curve,orange!85!black]plot coordinates{\HyperbolicGraphA};
+      \foreach\p/\n in{\HyperbolicGraphAMarkerA/1,\HyperbolicGraphAMarkerB/2,
+        \HyperbolicGraphAMarkerC/3,\HyperbolicGraphAMarkerD/4}
+        \node[vertex,fill=orange!85!black]at\p{\n};
+    \end{scope}
+    \begin{scope}[shift={(1.55,.72)},scale=.78]
+      \fill[blue!3](0,0)circle(1);
+      \draw[black!40,dashed](0,0)circle(1);
+      \draw[black!12](-1,0)--(1,0)(0,-1)--(0,1);
+      \draw[curve,orange!85!black]plot coordinates{\HyperbolicCurveA};
+      \foreach\p/\n in{\HyperbolicCurveAMarkerA/1,\HyperbolicCurveAMarkerB/2,
+        \HyperbolicCurveAMarkerC/3,\HyperbolicCurveAMarkerD/4}
+        \node[vertex,fill=orange!85!black]at\p{\n};
+    \end{scope}
+  \end{scope}
 
-  % Hyperbolic circle: intrinsic radius arccoth 2 and smaller disk radius.
-  \node[font=\bfseries]at(12.8,2.45){$K=-1$: $H^2$};
-  \fill[blue!3](12.8,.9)circle(1.18);
-  \draw[black!42,dashed](12.8,.9)circle(1.18);
-  \draw[black!12](11.62,.9)--(13.98,.9) (12.8,-.28)--(12.8,2.08);
-  \draw[teal!75!black,line width=1.3pt,->](12.8,.9)circle(.38);
-  \foreach \a/\n in {0/1,90/2,180/3,270/4}
-    \node[circle,fill=teal!75!black,text=white,inner sep=1.1pt,font=\tiny]
-      at({12.8+.38*cos(\a)},{.9+.38*sin(\a)}){\n};
-  \node[font=\scriptsize,align=center]at(12.8,-.62)
-    {$\rho_H=\operatorname{arccoth}2$\\Poincaré radius $\tanh(\rho_H/2)=2-\sqrt3\approx0.268$};
-
-  \node[font=\scriptsize,align=center,text=black!65]at(7.4,-1.35)
-    {Markers $1$--$4$ are equal quarter-period samples, not curvature extrema.};
-  \node[font=\scriptsize]at(7.4,-1.85)
-    {$\kappa_S=\cot\rho_S=2,\qquad
-      \kappa_E=1/\rho_E=2,\qquad
-      \kappa_H=\coth\rho_H=2$};
+  \node[font=\scriptsize,align=center,text=black!62]at(7.4,-.5)
+    {Each column is internally matched and periodic. The profiles are not asserted
+     to be identical across metrics.};
 \end{tikzpicture}
