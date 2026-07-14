@@ -1,0 +1,24 @@
+\begin{tikzpicture}[>=Stealth,font=\small]
+  \node[font=\bfseries]at(7.4,4.35){one profile across the three constant-curvature geometries};
+  \draw[black!25,->](4.7,3.15)--(10.1,3.15)node[right]{$t$};
+  \draw[blue!75!black,line width=1pt]plot[smooth]coordinates{(4.8,3.55)(5.5,4)(6.2,3.35)(7,4.05)(7.8,3.4)(8.7,3.9)(9.8,3.55)};
+  \foreach \x/\n in {5.5/1,7/2,7.8/3,8.7/4}\node[circle,fill=blue!75!black,text=white,inner sep=1pt,font=\tiny]at(\x,{ifthenelse(\n==1,4,ifthenelse(\n==2,4.05,ifthenelse(\n==3,3.4,3.9)))}){\n};
+  \foreach \x/\K/\name in {2/1/$S^2$,7.4/0/$\mathbb E^2$,12.8/-1/$H^2$}{
+    \node[font=\bfseries]at(\x,2.85){$K=\K$: \name};
+    \fill[blue!3](\x,1.35)circle(1.15); \draw[black!35,dashed](\x,1.35)circle(1.15);
+    \draw[teal!75!black,line width=1.15pt,->]plot[smooth cycle]coordinates
+      {({\x+1},1.4)({\x+.4},2.15)({\x-.65},2)({\x-1},1.1)({\x-.25},.5)({\x+.75},.7)({\x+1},1.4)};
+    \foreach \a/\n in {20/1,105/2,200/3,290/4}\node[circle,fill=teal!75!black,text=white,inner sep=1pt,font=\tiny]at({\x+.9*cos(\a)},{1.35+.75*sin(\a)}){\n};}
+  \shade[ball color=blue!7,opacity=.72](2,1.35)circle(1.15);
+  \draw[black!18](.85,1.35)arc[start angle=180,end angle=360,x radius=1.15,y radius=.28];
+  \draw[black!18,dashed](3.15,1.35)arc[start angle=0,end angle=180,x radius=1.15,y radius=.28];
+  \draw[teal!75!black,line width=1.15pt,->]plot[smooth cycle]coordinates
+    {(3,1.4)(2.4,2.1)(1.35,2)(1,1.1)(1.75,.55)(2.75,.7)(3,1.4)};
+  \foreach \a/\n in {20/1,105/2,200/3,290/4}\node[circle,fill=teal!75!black,text=white,inner sep=1pt,font=\tiny]at({2+.9*cos(\a)},{1.35+.75*sin(\a)}){\n};
+  \node[font=\scriptsize,align=center]at(2,-.35){inverse stereographic lift\\normal correction $-\langle z,n\rangle$};
+  \node[font=\scriptsize,align=center]at(7.4,-.35){flat limit\\$\kappa_E$};
+  \node[font=\scriptsize,align=center]at(12.8,-.35){Poincaré disk\\normal correction $+\langle z,n\rangle$};
+  \draw[<->,orange!80!black,line width=1pt](3.35,-.95)--(11.45,-.95)
+    node[midway,below]{$K$ varies continuously through $0$};
+  \node[font=\scriptsize]at(7.4,-1.75){$\displaystyle \kappa_K=\frac{1+K|z|^2}{2}\kappa_E-K\langle z,n\rangle$};
+\end{tikzpicture}

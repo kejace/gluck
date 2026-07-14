@@ -1,0 +1,25 @@
+\begin{tikzpicture}[>=Stealth,font=\small]
+  \node[font=\bfseries]at(2.2,3.65){invariant admissible region};
+  \fill[blue!4](2.2,1.8)circle(1.45); \draw[black!45](2.2,1.8)circle(1.45);
+  \draw[dashed,orange!70!black](2.2,1.8)circle(1.12);
+  \foreach \a in {0,45,...,315}\draw[->,black!35]
+    ({2.2+1.35*cos(\a)},{1.8+1.35*sin(\a)})--({2.2+1.05*cos(\a)},{1.8+1.05*sin(\a)});
+  \draw[blue!75!black,line width=1.15pt,->]plot[smooth]coordinates
+    {(.95,1.6)(1.35,2.45)(2.2,2.65)(3.05,2.15)(3.15,1.25)(2.35,.85)(1.55,1.05)};
+  \node[font=\scriptsize]at(2.2,-.15){boundary field points inward};
+  \begin{scope}[xshift=5.1cm]
+    \node[font=\bfseries]at(2.2,3.65){$L^1$ perturbation stability};
+    \draw[black!25,->](0,.25)--(4.4,.25); \draw[black!25,->](0,.25)--(0,2.9);
+    \draw[blue!65,fill=blue!10]plot coordinates{(0,.25)(.5,.25)(.5,2.2)(1.7,2.2)(1.7,.75)(3,.75)(3,2.2)(4.2,2.2)(4.2,.25)}--cycle;
+    \draw[orange!80!black,line width=1pt]plot[smooth]coordinates{(0,.3)(.45,.4)(.6,1.8)(1.6,2.05)(1.85,.95)(2.9,.85)(3.15,1.9)(4.2,2.1)};
+    \node[font=\scriptsize]at(2.2,-.15){shaded area controls trajectory distance};
+  \end{scope}
+  \begin{scope}[xshift=10.2cm]
+    \node[font=\bfseries]at(2.2,3.65){deep but narrow negative spike};
+    \draw[black!25,->](0,1.5)--(4.4,1.5); \draw[black!25,->](0,.25)--(0,2.9);
+    \draw[orange!85!black,line width=1.15pt]plot[smooth]coordinates
+      {(0,2.3)(1.5,2.3)(1.9,2.15)(2.05,.35)(2.2,2.15)(2.6,2.3)(4.2,2.3)};
+    \fill[orange!15](1.88,1.5)--(2.05,.35)--(2.22,1.5)--cycle;
+    \node[font=\scriptsize,align=center]at(2.2,-.15){large negative minimum, small integral effect;\\the trajectory can remain confined};
+  \end{scope}
+\end{tikzpicture}

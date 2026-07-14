@@ -1,0 +1,19 @@
+\begin{tikzpicture}[>=Stealth,font=\small]
+  \node[font=\bfseries]at(3.2,3.55){nonvanishing proper sub-arc chord};
+  \fill[blue!3](3.2,1.7)circle(1.5); \draw[dashed,black!40](3.2,1.7)circle(1.5);
+  \draw[blue!75!black,line width=1.25pt,->]plot[smooth cycle]coordinates
+    {(4.35,1.5)(3.8,2.75)(2.35,2.65)(1.9,1.45)(2.65,.55)(3.9,.7)(4.35,1.5)};
+  \fill[orange!85!black](2.25,1.15)circle(2.5pt)node[below left]{$\gamma(p)$};
+  \fill[orange!85!black](3.85,2.65)circle(2.5pt)node[above right]{$\gamma(q)$};
+  \draw[->,orange!85!black,line width=1pt](2.25,1.15)--(3.85,2.65)node[midway,below right]{$\int_p^q e^{i\varphi(s)}ds\ne0$};
+  \draw[->](5.25,1.7)--(6.5,1.7)node[midway,above]{excludes};
+  \begin{scope}[xshift=7cm]
+    \node[font=\bfseries]at(3.2,3.55){self-intersection};
+    \fill[red!2](3.2,1.7)circle(1.5); \draw[dashed,black!40](3.2,1.7)circle(1.5);
+    \draw[red!70!black,line width=1.2pt]plot[smooth]coordinates
+      {(1.85,1.1)(2.6,2.8)(4.5,1.1)(2.1,1.9)(4.3,2.5)(1.85,1.1)};
+    \fill[black](3.15,1.85)circle(2.5pt)node[below]{$\gamma(p)=\gamma(q)$};
+    \draw[red!75!black,line width=1pt](2.75,1.45)--(3.55,2.25)(2.75,2.25)--(3.55,1.45);
+    \node[font=\scriptsize,align=center]at(3.2,-.15){a zero chord would identify two parameter times;\\the transported margin rules this out};
+  \end{scope}
+\end{tikzpicture}

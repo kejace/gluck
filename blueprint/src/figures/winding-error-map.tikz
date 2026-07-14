@@ -1,0 +1,27 @@
+\begin{tikzpicture}[>=Stealth,font=\small]
+  \node[font=\bfseries]at(1.8,3.2){configuration disk};
+  \fill[blue!3](1.8,1.4)circle(1.3); \draw[black!45](1.8,1.4)circle(1.3);
+  \foreach \a/\c in {25/blue,120/teal,210/orange,305/purple}
+    \fill[\c!75!black]({1.8+1.3*cos(\a)},{1.4+1.3*sin(\a)})circle(2.5pt);
+  \fill[red!75!black](2.05,1.15)circle(2.5pt)node[below right]{$z_*$};
+  \node[font=\scriptsize,align=center]at(1.8,-.35){choose breakpoints / reparametrization};
+  \draw[->,line width=.8pt](3.35,1.4)--(4.55,1.4)node[midway,above]{$E$};
+  \begin{scope}[xshift=5cm]
+    \node[font=\bfseries]at(1.8,3.2){endpoint-error plane};
+    \draw[->,black!35](0,1.4)--(3.6,1.4); \draw[->,black!35](1.8,0)--(1.8,2.8);
+    \draw[line width=1.25pt,teal!75!black,->] plot[smooth cycle] coordinates
+      {(3.05,1.5)(2.6,2.4)(1.5,2.55)(.55,1.8)(.7,.7)(1.65,.25)(2.8,.55)(3.05,1.5)};
+    \fill[red!75!black](1.8,1.4)circle(3pt)node[below right]{$E(z_*)=0$};
+    \node[font=\scriptsize,align=center]at(1.8,-.35){$E(\partial D)$ winds once around $0$};
+  \end{scope}
+  \draw[->,line width=.8pt](9.05,1.4)--(10.25,1.4)node[midway,above]{forces};
+  \begin{scope}[xshift=10.65cm]
+    \node[font=\bfseries]at(1.7,3.2){sample reconstructions};
+    \foreach \y/\dx/\col in {2.35/.5/blue,1.45/.22/teal,.55/0/orange}{
+      \draw[black!25,dashed](.1,\y)--(3.25,\y);
+      \draw[\col!75!black,line width=1pt] plot[smooth] coordinates
+        {(.2,\y)(.75,{\y+.35})(1.5,{\y-.25})(2.35,{\y+.28})(3,\y)};
+      \draw[->,red!65](3,\y)--({3+\dx},\y);}
+    \node[font=\scriptsize]at(1.7,-.35){one parameter gives zero closure defect};
+  \end{scope}
+\end{tikzpicture}

@@ -36,7 +36,10 @@ fi
 
 for id in euclidean-closure euclidean-gluck-reconstructions \
     euclidean-dahlberg-reconstructions sphere-stereographic sphere-reconstructions \
-    hyperbolic-escape hyperbolic-reconstructions; do
+    hyperbolic-escape hyperbolic-reconstructions winding-angle-lift \
+    winding-error-map degree-one-reparametrization hyperbolic-geometry-atlas \
+    hyperbolic-flow-stability hyperbolic-closing-engine hyperbolic-simplicity \
+    spaceform-unification; do
   (cd "$src" && xelatex -interaction=batchmode -halt-on-error -no-pdf \
     -output-directory="$tmp" "figures/standalone/$id.tex" >/dev/null)
   dvisvgm --no-fonts --exact --bbox=papersize \

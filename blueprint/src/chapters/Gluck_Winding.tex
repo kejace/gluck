@@ -24,6 +24,13 @@ infrastructure): this is the strategic replacement for the source's
 
 \section{Topological winding-number primitives}
 
+\gluckfigure{winding-angle-lift}
+  {A loop in $\mathbb C^\times$, its normalized circle loop, and a real angle
+   lift. The lift gains $4\pi$, so the displayed loop has winding number two.}
+  {Three panels show a complex loop around the origin, its normalization on
+   the unit circle, and an angle graph rising from zero to four pi.}
+  {fig:winding_angle_lift}
+
 Mathlib has no topological winding number of a continuous loop $S^1 \to
 \mathbb{C}\setminus\{0\}$. We build one project-side from the exponential covering
 $\mathrm{Circle.exp} : \mathbb{R} \to S^1$ (Mathlib's
@@ -535,6 +542,13 @@ blueprint.
   boundary loop $F|_{\partial\mathbb{D}}$ having winding number $\ne 0$ about the
   origin. Then $F$ has a zero in the interior of $\mathbb{D}$.
 \end{theorem}
+\gluckfigure{winding-error-map}
+  {The configuration-to-error map. Its boundary loop winds around the origin,
+   forcing an interior parameter with zero endpoint error and hence a closed
+   reconstruction.}
+  {A parameter disk maps to an error plane whose boundary image encircles the
+   origin; sample endpoint defects shrink to zero at an interior parameter.}
+  {fig:winding_error_map}
 \begin{proof}
   \uses{lem:error_map_winds_boundary}
   \leanok

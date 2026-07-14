@@ -46,6 +46,14 @@ def ProcessOptions(options, document):
             "sphere-reconstructions",
             "hyperbolic-escape",
             "hyperbolic-reconstructions",
+            "winding-angle-lift",
+            "winding-error-map",
+            "degree-one-reparametrization",
+            "hyperbolic-geometry-atlas",
+            "hyperbolic-flow-stability",
+            "hyperbolic-closing-engine",
+            "hyperbolic-simplicity",
+            "spaceform-unification",
         )
     )
     document.addPackageResource(resources)
