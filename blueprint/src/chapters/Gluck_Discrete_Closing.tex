@@ -1,33 +1,75 @@
 \chapter{The closing engine (Euclidean, positive)}
 \label{chap:discrete_closing}
 
-% archon:covers Gluck/Discrete/Closing.lean
+% archon:covers Gluck/Discrete/Closing.lean Gluck/Discrete/ClosingCell.lean
 
 % D1 closing engine of the discrete program: the substantial remaining piece of
-% the committed target D-R^2-pos. Given n >= 3, kappa_i > 0, and a discrete
+% the committed target D-R^2-pos. Given n >= 4, kappa_i > 0, and a discrete
 % four-vertex window DFV(kappa; c), produce moderate-arc edge lengths ell with
 % closureGap(kappa, ell) = 0 and turningSum(kappa, ell) = 2*pi (= lem:dfv_closes
-% of chap:discrete_converse). ROUTE (reframed @065 on the strategy-auditor +
-% mathlib-analogist consult, logs/iter-065): the strictly-positive case does NOT
-% need Dahlberg's four-bar linkage — that is a mixed-sign device, demoted to D2.
-% Gluck's smooth positive proof (deturck-gluck §III-IV) closes by a winding-number
-% argument in Diff(S^1) on the reconstruction map, and the project already owns
-% the discrete analogue: the in-tree Winding.lean degree engine
-% (exists_zero_of_boundary_winding). So the positive closing engine is two steps:
-%   (1) the Umlauf rescaling retraction kills the turning coordinate (monotone
-%       IVT) -- SECTION 1, rigorous and formalizable NOW;
-%   (2) closure = a zero of the R^2-valued closureGap on the Umlauf slice, via the
-%       winding degree engine -- SECTION 3, ARCHITECTURE level (the discrete
-%       boundary-winding certificate is not yet written).
-% HONEST STATUS: Section 1 (the retraction) is complete and ready to formalize,
-% with ONE corrected hypothesis (auditor @065 Finding 1): the naive claim that
-% t |-> turningSum(kappa, t*ell^0) has range (0, n*pi) is FALSE for a general base
-% ell^0 -- the sum saturates at the moderate-arc wall, possibly below 2*pi. The
-% retraction therefore reaches 2*pi only when the base is "balanced" so that the
-% turning capacity exceeds 2*pi before the wall; this range fact is carried as an
-% explicit hypothesis (a ceiling t_1 with turningSum >= 2*pi). Constructing such a
-% balanced base is SECTION 2 (open, architecture only). Sections 2-3 are NOT
-% prover targets; only Section 1 is.
+% of chap:discrete_converse).
+%
+% ROUTE (CORRECTED @066 on a decisive numeric probe + strategy-auditor consult,
+% logs/iter-066; SUPERSEDES the iter-065 "retract-then-wind" reframe):
+% Gluck's smooth positive proof (deturck-gluck §III-IV, lines 149-179)
+% parametrizes the reconstruction by the ANGLE OF INCLINATION theta itself
+% (alpha(theta)=int_0^theta (cos,sin) dtheta/kappa, theta in [0,2*pi]), so total
+% turning = 2*pi is BUILT INTO the parametrization; the ONLY equation solved is
+% the R^2 closure E = alpha(2*pi)-alpha(0) = 0. Gluck NEVER solves a separate
+% scalar "total turning = 2*pi" equation. The iter-065 discrete route inverted
+% this: it tried to solve turningSum = 2*pi FIRST, via a monotone edge-length ray
+% retraction t |-> turningSum(kappa, t*ell^0), then position on the resulting
+% slice. That step is now KNOWN BROKEN: the probe references/verify_umlauf_capacity.py
+% shows NO ray reaches 2*pi for a general positive profile -- even the numerically
+% OPTIMIZED best ray fails (worst capacity 3.2-5.0 < 2*pi=6.28 across n; DFV
+% profiles included), because for non-constant kappa the 2n arcsin arguments hit
+% the moderate wall at different t (making all coincide forces kappa constant).
+% So the balanced-base ray of the old SECTION 2 is NOT constructible; that
+% architecture is retired.
+%
+% ARCHITECTURE (RE-ARCHITECTED @069 on a numeric de-risk suite + strategy-auditor
+% + strategy-critic + progress-critic CHURNING; logs/iter-069; SUPERSEDES the
+% iter-068 "wind closureGap over a generic 2-D outer region partial R" framing):
+% the position closure E = closureGap = 0 is a WINDING/DEGREE statement. The
+% iter-068 phrasing -- take a generic 2-edge slice (rest pinned at a base), tune
+% turning via one edge, and wind closureGap over the inner-feasible region
+% partial R -- is NOT a valid +/-1 certificate: references/verify_2d_dR_winding.py
+% shows the degree of that closure map over a generic slice is 0 in the MAJORITY
+% of random-kappa cases (a generic slice is not the winding-+/-1 loop). Per
+% deturck-gluck §III-IV the winding-+/-1 loop is the BICIRCLE CONFIGURATION loop
+% (Prop 15.1: explicit E = (1/ib - 1/ia)(1 - q2 + q3 - q4); Prop 15.2
+% transversality; Prop 9.1: closes iff opposite arcs equal), reduced from a
+% general profile -- NOT a generic slice. Two candidate engines carry this:
+%   (A) CONTINUATION / central-symmetry homotopy (PRIMARY, best de-risked):
+%       kappa0 := central-symmetrization (kappa_i + kappa_{i+n/2})/2 CLOSES
+%       trivially (edge_{i+n/2} = -edge_i => sum = 0, verify_symmetric_bicircle.py);
+%       homotope kappa_t = kappa0 + t(kappa - kappa0) and continue the closing ell.
+%       verify_symmetric_continuation.py: 17-20/20 DFV profiles persist to t=1 and
+%       stay SIMPLE across n in {4,6,8,10,12}. Crux = a persistence/no-escape bound.
+%   (B) BICIRCLE config-loop (source-faithful alternative, mirrors the smooth
+%       in-tree Bicircle.lean/Winding.lean engine): discrete bicircle core +
+%       explicit error formula + Prop-15.1 winding + a general->bicircle transfer
+%       (the transfer is NOVEL, not in Gluck -- strategy-auditor).
+% Both share ONE genuine open step (persistence / no-escape of the solution off
+% the moderate wall along the deformation); the 3-D `poincareMiranda_cube` stays a
+% distant fallback (still needs unproven position-face signs).
+%
+% HONEST STATUS: SECTION 1 (Umlauf retraction) FORMALIZED, axiom-clean, OFF the
+% critical path (conditional infra). SECTION 2 RETIRED (numerically falsified).
+% SECTION 4 (sec:edge_tune) DONE @068 (turningSum_update_lt + exists_edge_turning_scale
+% + edge_turning_scale_unique) -- the route-shared single-edge turning tune, axiom
+% -clean. SECTION 3 (sec:closure): lem:central_symmetry_closes (the crux-INDEPENDENT
+% discrete Prop 9.1 anchor: half-period-symmetric kappa,ell + turningSum=2pi =>
+% closureGap=0) is authored to ATOMIC detail @070 and is the committed prover
+% target this iter. The CRUX lem:closure_persists (Route A) / general->bicircle
+% transfer (Route B) is NOT a prover target: the iter-070 no-escape probe
+% (verify_noescape_bound2.py) shows the interior moderate-arc slack collapses
+% toward the wall for a nontrivial fraction of DFV profiles, so an unconditional
+% a-priori wall bound is FALSE as stated -- the degree argument must tolerate the
+% boundary being approached. Per the iter-069 progress-critic CHURNING corrective
+% + this disprove-before-spend outcome, NO prover on closure_persists /
+% central_symmetrization until the boundary-tolerant degree argument is worked out
+% to atomic detail + a HARD GATE clears it.
 
 \section{Overview}
 
@@ -52,12 +94,51 @@ solving the two closing equations
   \qquad\text{and}\qquad
   \mathrm{closureGap}\,\kappa\,\ell = 0 \in \mathbb{R}^2 .
 \]
-The engine solves the scalar turning equation first, by a monotone rescaling
-retraction (\cref{sec:umlauf}), and then the $2$-dimensional position equation
-on the resulting slice by a winding-degree argument (\cref{sec:closure}).
+These are three scalar equations in the $n$ edge lengths ($n \ge 4$, so the
+solution set is generically $(n-3)$-dimensional and nonempty; $n = 3$ is triangle
+rigidity, \cref{chap:discrete_budget} N0). Mirroring Gluck's smooth positive
+proof (deturck-gluck §III--IV), the position closure $\mathrm{closureGap} = 0$ is
+a \emph{winding / degree} statement, not a coordinate-wise sign condition. The
+engine (\cref{sec:closure}) fixes the turning via the single-edge tune
+(\cref{sec:edge_tune}) and produces a zero of $\mathrm{closureGap}$ on the turning
+manifold by a degree argument \textbf{anchored at the centrally-symmetric case},
+which closes for free. A generic $2$-edge slice does \emph{not} carry the winding
+certificate (\cref{rem:generic_slice_fails}); the certificate lives on a
+symmetry-anchored deformation (\cref{sec:closure}).
+
+\begin{remark}[why not solve turning first]
+  \label{rem:no_ray_retraction}
+  An earlier route (iter-065) tried to solve $\mathrm{turningSum} = 2\pi$
+  \emph{first}, by a monotone rescaling retraction along a ray $t \cdot \ell^0$
+  of edge lengths (\cref{sec:umlauf}), and then position on the resulting
+  $2$-dimensional slice. This is \emph{not} viable: a numeric probe
+  (\texttt{references/verify\_umlauf\_capacity.py}) shows that for a non-constant
+  positive $\kappa$ \emph{no} ray reaches $\mathrm{turningSum} = 2\pi$ before the
+  moderate-arc wall --- even the numerically optimized best base $\ell^0$ falls
+  short (worst capacity $3.2$--$5.0 < 2\pi$ across $n$; $\mathrm{DFV}$ profiles
+  included). Algebraically, making all $2n$ arcsin arguments
+  $\kappa_i\,t\,\ell^0_{i-1}/2,\ \kappa_i\,t\,\ell^0_i/2$ reach the wall at a
+  common $t$ forces $\kappa_i\ell^0_{i-1} = \kappa_i\ell^0_i$ for all $i$, i.e.\
+  $\ell^0$ constant \emph{and} $\kappa$ constant; otherwise the ray saturates at
+  the first wall with $\sup_t \mathrm{turningSum}(\kappa, t\cdot\ell^0) < 2\pi$.
+  The retraction of \cref{sec:umlauf} is therefore off the critical path (its
+  ceiling hypothesis is not generally satisfiable); it survives only as
+  conditional infrastructure. The joint $\mathbb{R}^3$ solve avoids the ray
+  entirely, and the probe confirms the full moderate domain contains
+  $\mathrm{turningSum} \ge 2\pi$ robustly for $n \ge 4$.
+\end{remark}
 
 \section{The Umlauf rescaling retraction}
 \label{sec:umlauf}
+
+\emph{Status (corrected @066).} The three lemmas of this section are FORMALIZED
+and axiom-clean, but they are now \textbf{off the critical path} for the closing
+engine: they establish existence and uniqueness of a scale $t^\star$ solving
+$\mathrm{turningSum}(\kappa, t^\star\cdot\ell^0) = 2\pi$ \emph{under a ceiling
+hypothesis} that (\cref{rem:no_ray_retraction}) cannot be met by a ray for a
+general positive $\kappa$. They are retained as conditional infrastructure
+(useful on the restricted class where a balanced ray exists); the engine of
+\cref{sec:closure} does not depend on them.
 
 For a fixed positive base $\ell^0 : \ZMod n \to \mathbb{R}$ ($\ell^0_i > 0$) and
 a scalar $t > 0$ write $t \cdot \ell^0$ for the pointwise scaling. Each turning
@@ -132,9 +213,10 @@ the moderate-arc domain.
     \qquad\text{and}\qquad
     2\pi \;\le\; \mathrm{turningSum}\,\kappa\,(t_1\cdot\ell^0).
   \]
-  Then there is a unique $t^\star \in (0, t_1]$ with
+  Then there is $t^\star \in (0, t_1]$ with
   $\mathrm{ModerateArc}\,0\,\kappa\,(t^\star\cdot\ell^0)$ and
-  $\mathrm{turningSum}\,\kappa\,(t^\star\cdot\ell^0) = 2\pi$.
+  $\mathrm{turningSum}\,\kappa\,(t^\star\cdot\ell^0) = 2\pi$
+  (uniqueness: \cref{lem:umlauf_scale_unique}).
 \end{lemma}
 
 \begin{proof}
@@ -153,67 +235,1344 @@ the moderate-arc domain.
   shrink), exactly as in \cref{lem:turning_scale_mono}.
 \end{proof}
 
-\begin{remark}[why the ceiling hypothesis is unavoidable]
+\begin{remark}[why the ceiling hypothesis is unavoidable — and generally unmet]
   Without a ceiling the retraction can \emph{fail}: for a base $\ell^0$ with one
   edge much longer than the rest, the long edge's $\arcsin$ argument reaches the
   moderate-arc wall while the others are still small, so
   $\sup_t \mathrm{turningSum}\,\kappa\,(t\cdot\ell^0) < 2\pi$ and no admissible
   $t$ gives turning $2\pi$. This corrects the naive ``range $= (0, n\pi)$'' claim
-  of discrete\_plan.md §5.1; see \cref{sec:balanced} for how a balanced base is
-  produced so the ceiling hypothesis is met.
+  of discrete\_plan.md §5.1. \textbf{Moreover (numeric probe @066,
+  \cref{rem:no_ray_retraction}), the ceiling cannot be met by ANY ray for a
+  general positive $\kappa$}: the balanced base is not constructible, so the
+  retraction is off the critical path and the engine proceeds by the
+  symmetry-anchored degree argument of \cref{sec:closure}.
 \end{remark}
 
-\section{The balanced base --- architecture (open)}
+\begin{lemma}[uniqueness of the Umlauf scale]
+  \label{lem:umlauf_scale_unique}
+  \lean{Gluck.Discrete.umlauf_scale_unique}
+  \leanok
+  \uses{lem:turning_scale_mono}
+  With $\kappa$, $\ell^0$ as in \cref{lem:exists_umlauf_scale}, at most one
+  $t \in (0, t_1]$ with $\mathrm{ModerateArc}\,0\,\kappa\,(t\cdot\ell^0)$ has
+  $\mathrm{turningSum}\,\kappa\,(t\cdot\ell^0) = 2\pi$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  \uses{lem:turning_scale_mono}
+  If two distinct scales $s < t$ both solved the equation, strict monotonicity
+  (\cref{lem:turning_scale_mono}) would force
+  $\mathrm{turningSum}(\kappa,s\cdot\ell^0) < \mathrm{turningSum}(\kappa,t\cdot\ell^0)$,
+  contradicting both equal to $2\pi$; \texttt{lt\_trichotomy}.
+\end{proof}
+
+\section{The balanced base --- RETIRED (numerically falsified)}
 \label{sec:balanced}
 
-To instantiate the ceiling hypothesis of \cref{lem:exists_umlauf_scale} we need a
-base $\ell^0$ whose turning capacity exceeds $2\pi$ before the moderate-arc wall.
-The natural choice makes all $\arcsin$ arguments approach the wall together: take
-$\ell^0_i \propto 1/\kappa_i$ (equalising $\kappa_i \ell^0_i$), so that as $t$
-grows every argument $\kappa_i t \ell^0_i / 2$ reaches $1$ simultaneously and the
-turning sum tends to $n \cdot \pi > 2\pi$ (using $n \ge 3$). A base built from the
-four window values of $\mathrm{DFV}(\kappa; c)$ likewise has enough capacity. This
-section is deliberately left at architecture level: the precise construction and
-the ceiling bound are the open piece feeding \cref{lem:dfv_closes}, and are
-\emph{not} a prover target until written to atomic detail.
+\emph{This section is retired.} The iter-065 architecture asked for a base
+$\ell^0$ (a ray in edge-length space) whose turning capacity exceeds $2\pi$
+before the moderate-arc wall, so as to instantiate the ceiling hypothesis of
+\cref{lem:exists_umlauf_scale}. The proposed construction ($\ell^0_i \propto
+1/\kappa_i$, ``all $\arcsin$ arguments reach $1$ simultaneously'') is
+\textbf{false}: with $\ell^0_i = 1/\kappa_i$ the right argument at vertex $i$ is
+$\kappa_i t \ell^0_i/2 = t/2$, but the left argument is $\kappa_i t \ell^0_{i-1}/2
+= (t/2)(\kappa_i/\kappa_{i-1})$, so the two hit the wall at different $t$ unless
+$\kappa$ is constant. The numeric probe
+(\texttt{references/verify\_umlauf\_capacity.py}) confirms no ray works even after
+optimizing $\ell^0$ (\cref{rem:no_ray_retraction}). There is no balanced base to
+construct; the turning coordinate is handled inside the joint solve of
+\cref{sec:closure} instead. Retained only as a record of the dead end.
 
-\section{Closure on the Umlauf slice via winding --- architecture}
+\section{Single-edge turning tune (route-shared inner solve)}
+\label{sec:edge_tune}
+
+Unlike the \emph{ray} retraction of \cref{sec:umlauf} (which scales \emph{all}
+edges together and is obstructed, \cref{rem:no_ray_retraction}), the turning sum
+is monotone in \emph{one} edge with the others held fixed, and this single-edge
+dependence is not obstructed: it is the discrete
+$\partial\theta/\partial\ell_k > 0$ fact. It is needed by \emph{both} candidate
+closing engines (\cref{sec:closure}): the turning face of the joint
+$\mathbb{R}^3$ Poincar\'e--Miranda box, and the inner tune of the $2$-D fallback.
+We record it here to atomic, formalizable detail.
+
+The edge value $\ell_k$ enters $\mathrm{turningAngle}\,0\,\kappa\,\ell\,i$ at
+exactly two vertices: at $i = k$ through the right summand
+$\arcsin(\kappa_k\,\ell_k/2)$, and at $i = k+1$ through the left summand
+$\arcsin(\kappa_{k+1}\,\ell_k/2)$ (recall $\mathrm{turningAngle}$ at vertex $i$
+uses the edges $\ell_{i-1}$ and $\ell_i$). For $n \ge 3$ the two vertices $k$ and
+$k+1$ are distinct, and every other vertex's turning angle is independent of
+$\ell_k$. Write $\mathrm{update}\,\ell\,k\,a$ for the base $\ell$ with its
+$k$-th edge reset to $a$ (Mathlib \texttt{Function.update}).
+
+\begin{lemma}\leanok
+[turning sum strictly increases in a single edge]
+  \label{lem:turningSum_edge_mono}
+  \lean{Gluck.Discrete.turningSum_update_lt}
+  \uses{def:discrete_development, def:moderate_arc}
+  Let $n \ge 3$, $[\mathrm{NeZero}\,n]$, $\kappa_i > 0$ for all $i$, let
+  $\ell : \ZMod n \to \mathbb{R}$ be a base, fix $k \in \ZMod n$, and let
+  $0 < a < b$ with $\mathrm{ModerateArc}\,0\,\kappa\,(\mathrm{update}\,\ell\,k\,b)$.
+  Then
+  \[
+    \mathrm{turningSum}\,\kappa\,(\mathrm{update}\,\ell\,k\,a)
+      \;<\; \mathrm{turningSum}\,\kappa\,(\mathrm{update}\,\ell\,k\,b).
+  \]
+\end{lemma}
+
+\begin{proof}
+  \uses{def:moderate_arc}
+  \leanok
+  Compare the two turning sums termwise over $\ZMod n$. For a vertex $i \notin
+  \{k,\,k+1\}$ both summands of $\mathrm{turningAngle}\,0\,\kappa\,\cdot\,i$ use
+  edges other than $\ell_k$, so the term is unchanged by the update
+  ($\mathrm{Function.update}$ leaves those coordinates fixed). At $i = k$ only the
+  right summand $\arcsin(\kappa_k\,(\cdot)_k/2)$ changes, and at $i = k+1$ only the
+  left summand $\arcsin(\kappa_{k+1}\,(\cdot)_k/2)$ changes; $k \ne k+1$ since
+  $n \ge 3$. In each changed summand the argument scales with the edge value:
+  $\kappa_k\,a/2 < \kappa_k\,b/2$ and $\kappa_{k+1}\,a/2 < \kappa_{k+1}\,b/2$
+  (both $\kappa > 0$, $a < b$). The larger argument lies in $(-1,1)$ by the wall
+  at $b$ (\texttt{wall\_right} at vertex $k$, \texttt{wall\_left} at vertex
+  $k+1$), so the smaller lies in $[-1,1)$ too, and $\arcsin$ is strictly
+  increasing on $[-1,1]$ (\texttt{strictMonoOn\_arcsin}); each changed summand
+  strictly increases. Hence, termwise, every vertex's turning angle is $\le$ the
+  updated one and strictly $<$ at $i = k$. \texttt{Finset.sum\_lt\_sum} (over
+  $\mathrm{Finset.univ}$, with the $\le$ everywhere and the one strict term at
+  $k$) gives the strict inequality of the sums.
+\end{proof}
+
+\begin{lemma}\leanok
+[single-edge turning tune]
+  \label{lem:exists_edge_turning_scale}
+  \lean{Gluck.Discrete.exists_edge_turning_scale}
+  \uses{lem:turningSum_edge_mono, def:moderate_arc}
+  Let $n \ge 3$, $[\mathrm{NeZero}\,n]$, $\kappa_i > 0$ for all $i$, let $\ell$ be
+  a base, fix $k \in \ZMod n$, and let $0 < \mathrm{lo} < \mathrm{hi}$ with
+  \[
+    \mathrm{ModerateArc}\,0\,\kappa\,(\mathrm{update}\,\ell\,k\,\mathrm{hi}),
+    \quad
+    \mathrm{turningSum}\,\kappa\,(\mathrm{update}\,\ell\,k\,\mathrm{lo}) < 2\pi
+    \le \mathrm{turningSum}\,\kappa\,(\mathrm{update}\,\ell\,k\,\mathrm{hi}).
+  \]
+  Then there is $a \in (\mathrm{lo}, \mathrm{hi}]$ with
+  $\mathrm{ModerateArc}\,0\,\kappa\,(\mathrm{update}\,\ell\,k\,a)$ and
+  $\mathrm{turningSum}\,\kappa\,(\mathrm{update}\,\ell\,k\,a) = 2\pi$; it is
+  unique in $(\mathrm{lo},\mathrm{hi}]$.
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:turningSum_edge_mono}
+  \leanok
+  Let $g(a) = \mathrm{turningSum}\,\kappa\,(\mathrm{update}\,\ell\,k\,a)$. Only the
+  two summands at vertices $k$, $k+1$ depend on $a$, each an $\arcsin$ of a
+  function linear in $a$; $\arcsin$ is continuous on $[-1,1]$
+  (\texttt{continuous\_arcsin}), and on $[\mathrm{lo},\mathrm{hi}]$ every argument
+  stays in $[-1,1)$ by the wall at $\mathrm{hi}$, so $g$ is continuous on
+  $[\mathrm{lo},\mathrm{hi}]$. Since $g(\mathrm{lo}) < 2\pi \le g(\mathrm{hi})$,
+  the intermediate value theorem (\texttt{intermediate\_value\_Icc}) yields
+  $a \in [\mathrm{lo},\mathrm{hi}]$ with $g(a) = 2\pi$; as $g(\mathrm{lo}) < 2\pi$
+  we have $a > \mathrm{lo}$. Moderate-arcness at $a \le \mathrm{hi}$ follows from
+  moderate-arcness at $\mathrm{hi}$ (the $\arcsin$ arguments at $k$, $k+1$ only
+  shrink, and the other vertices are untouched). Uniqueness is immediate from the
+  strict monotonicity of \cref{lem:turningSum_edge_mono}.
+\end{proof}
+
+\begin{lemma}\leanok
+[uniqueness of the single-edge turning scale]
+  \label{lem:edge_turning_scale_unique}
+  \lean{Gluck.Discrete.edge_turning_scale_unique}
+  \uses{lem:turningSum_edge_mono}
+  Let $n \ge 3$, $[\mathrm{NeZero}\,n]$, $\kappa_i > 0$, fix $k \in \ZMod n$ and a
+  base $\ell$. If $a_1, a_2 > 0$ both satisfy
+  $\mathrm{ModerateArc}\,0\,\kappa\,(\mathrm{update}\,\ell\,k\,a_j)$ and
+  $\mathrm{turningSum}\,\kappa\,(\mathrm{update}\,\ell\,k\,a_j) = 2\pi$, then
+  $a_1 = a_2$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:turningSum_edge_mono}
+  \leanok
+  If $a_1 \ne a_2$, say $a_1 < a_2$, then $\mathrm{turningSum}$ at the smaller is
+  strictly less than at the larger by \cref{lem:turningSum_edge_mono}, so the two
+  turning sums cannot both equal $2\pi$; the trichotomy on $a_1, a_2$ gives
+  $a_1 = a_2$.
+\end{proof}
+
+\section{Closure via a symmetry-anchored degree argument --- architecture}
 \label{sec:closure}
 
-After \cref{lem:exists_umlauf_scale} fixes the turning coordinate, the remaining
-equation is the $2$-dimensional position equation
-$\mathrm{closureGap}\,\kappa\,\ell = 0 \in \mathbb{R}^2$, solved on the Umlauf
-slice by a winding-degree argument — the discrete analogue of Gluck's smooth
-argument in $\mathrm{Diff}(S^1)$ (deturck-gluck §III--IV, Prop.~9.1: closure iff
-opposite arcs agree). This section records the intended architecture; it is
-\emph{not} a prover target.
+% SOURCE: [DeTurck-Gluck-Pomerleano-Vick], Prop 9.1 (p.14), Prop 15.1/15.2 (p.20),
+% (read from references/deturck-gluck-fourvertex.txt lines 279-298, 444-502)
+% SOURCE QUOTE: "PROPOSITION 9.1. A plane curve, built with four arcs cut in
+% alternation from two different size circles, and assembled so that the tangent
+% line turns continuously through an angle of 2\pi , will close up if and only if
+% opposite arcs are equal in length."
+% SOURCE QUOTE: "PROPOSITION 15.1. The image of the loop \lambda under the error
+% map E has winding number \pm 1 about the origin in R2 ."
+% SOURCE QUOTE: "E(P) = (1 / i b(P) - 1 / i a(P)) (1 - q2 + q3 - q4)."
+
+\emph{Architecture only --- not a prover target. Per the iter-069 progress-critic
+CHURNING corrective, the crux persistence lemma below is not yet analytically
+de-risked; no prover is dispatched on this section until it is expanded to atomic
+detail and a HARD GATE clears it.}
+
+\subsection*{Why a generic slice fails}
+
+\begin{remark}[a generic $2$-edge slice carries no winding]
+  \label{rem:generic_slice_fails}
+  The turning tune (\cref{sec:edge_tune}) fixes one edge $\ell_k$ so that
+  $\mathrm{turningSum} = 2\pi$, leaving the closure map
+  $G(\ell_p,\ell_q) = \mathrm{closureGap}\,\kappa\,\ell$ on a $2$-parameter slice
+  (the other $n-3$ edges pinned at a base). The iter-068 idea was to wind $G$
+  along the boundary of the inner-feasible region. This is \emph{not} a valid
+  certificate: the degree probe \texttt{references/verify\_2d\_dR\_winding.py}
+  computes the degree of $G$ over the actual inner-feasible region (via a
+  $2\times 2$-cell winding sum, so interior edges telescope to the $\partial R$
+  integral) and finds it is $0$ in the \emph{majority} of random positive
+  profiles, $\pm 1$ only in a minority. A generic slice is not the winding-$\pm 1$
+  loop: most positive profiles are not even realizable
+  (\cref{rem:dfv_not_necessary} --- $\mathrm{DFV}$ is sufficient but not
+  necessary, yet ``most'' random profiles fail it), and even for a realizable
+  $\kappa$ a random slice may miss the $(n-3)$-dimensional solution set. Following
+  deturck-gluck §III--IV, the winding-$\pm 1$ loop is instead the \emph{bicircle
+  configuration} loop (Prop~15.1--15.2), anchored at the symmetric ``core''
+  (Prop~9.1: closure iff opposite arcs equal).
+\end{remark}
+
+\subsection*{Route A (primary): central-symmetry continuation}
+
+The best-de-risked engine anchors the degree argument at the centrally-symmetric
+case, which closes for free.
+
+This is the discrete analogue of the DeTurck--Gluck ``opposite arcs equal
+$\Rightarrow$ closes'' criterion (Prop~9.1), and it is \emph{route-independent}:
+it is the $t=0$ anchor of Route~A and the symmetric ``core'' of Route~B. It is
+crux-free and provable now; it is the committed prover target of this section.
+We phrase central symmetry as \emph{half-period} $m = n/2$: $n = 2m$ and both
+$\kappa$ and $\ell$ satisfy $x_{i+m} = x_i$ (indices in $\ZMod n$, so $m$ is the
+class $(m : \ZMod n)$).
+
+\begin{lemma}\leanok
+[central symmetry closes]
+  \label{lem:central_symmetry_closes}
+  \lean{Gluck.Discrete.central_symmetry_closes}
+  \uses{def:discrete_development}
+  Let $n = 2m$ with $m \ge 1$, and let $\kappa, \ell : \ZMod n \to \mathbb{R}$
+  satisfy the half-period symmetry $\kappa_{i+m} = \kappa_i$ and
+  $\ell_{i+m} = \ell_i$ for all $i \in \ZMod n$, together with
+  $\mathrm{turningSum}\,\kappa\,\ell = 2\pi$. Then
+  $\mathrm{closureGap}\,\kappa\,\ell = 0$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:turningangle_period, lem:half_block_sum, lem:heading_add_half}
+  \leanok
+  Recall $\mathrm{closureGap}\,\kappa\,\ell = \mathrm{vertexR2}\,\kappa\,\ell\,n
+    = \sum_{j \in \mathrm{range}\,n} \ell_j\,e^{\,\mathrm{i}\,\psi_j}$ with
+  $\psi_j = \mathrm{heading}\,\kappa\,\ell\,j$ (\cref{def:discrete_development}).
+  Split $\mathrm{range}\,(2m) = \mathrm{range}\,m \sqcup \{m,\dots,2m-1\}$ by
+  \texttt{Finset.sum\_range\_add}:
+  \[
+    \mathrm{closureGap}
+      = \sum_{j \in \mathrm{range}\,m} \ell_j\,e^{\,\mathrm{i}\,\psi_j}
+      + \sum_{j \in \mathrm{range}\,m} \ell_{j+m}\,e^{\,\mathrm{i}\,\psi_{j+m}} .
+  \]
+  For each $j$: the edge length is unchanged,
+  $\ell_{(j+m : \mathbb{N})} = \ell_{(j : \mathbb{N})}$ by the half-period
+  symmetry of $\ell$ (cast $(j+m : \mathbb{N}) = (j : \ZMod n) + (m : \ZMod n)$
+  and apply $\ell_{i+m} = \ell_i$); and the heading advances by exactly $\pi$,
+  \[
+    \psi_{j+m} = \mathrm{heading}\,\kappa\,\ell\,(j+m)
+      = \mathrm{heading}\,\kappa\,\ell\,j + \pi = \psi_j + \pi
+  \]
+  (\cref{lem:heading_add_half}). Hence
+  $e^{\,\mathrm{i}\,\psi_{j+m}} = e^{\,\mathrm{i}\psi_j}\,e^{\,\mathrm{i}\pi}
+    = -\,e^{\,\mathrm{i}\psi_j}$ (\texttt{Complex.exp\_pi\_mul\_I}), so the
+  $(j+m)$-th edge vector is the negative of the $j$-th and the two sums cancel
+  term by term, giving $\mathrm{closureGap} = 0$. (Verified numerically to
+  $|\mathrm{gap}| \sim 10^{-16}$ by
+  \texttt{references/verify\_symmetric\_bicircle.py}.)
+\end{proof}
+
+The proof rests on three atomic facts. Write $\theta_i = \mathrm{turningAngle}\,
+0\,\kappa\,\ell\,i$.
+
+\begin{lemma}\leanok
+[turning angle is half-periodic]
+  \label{lem:turningangle_period}
+  \lean{Gluck.Discrete.turningAngle_add_half}
+  \uses{def:discrete_development}
+  Under the half-period symmetry $\kappa_{i+m} = \kappa_i$, $\ell_{i+m} = \ell_i$
+  (all $i \in \ZMod n$, $n = 2m$), for every $i \in \ZMod n$,
+  $\theta_{i+m} = \theta_i$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  $\theta_i = \arcsin(\kappa_i\,\ell_{i-1}/2) + \arcsin(\kappa_i\,\ell_i/2)$
+  (\cref{def:discrete_development}, $K=0$, $t_0(x)=x$). Substituting $i+m$ and
+  using $\kappa_{i+m} = \kappa_i$, $\ell_{i+m} = \ell_i$, and
+  $\ell_{(i+m)-1} = \ell_{(i-1)+m} = \ell_{i-1}$ gives $\theta_{i+m} = \theta_i$.
+\end{proof}
+
+\begin{lemma}\leanok
+[a half-period block of turning angles sums to $\pi$]
+  \label{lem:half_block_sum}
+  \lean{Gluck.Discrete.turningAngle_block_sum_half}
+  \uses{lem:turningangle_period}
+  Under the same hypotheses and $\mathrm{turningSum}\,\kappa\,\ell = 2\pi$, for
+  every $a \in \mathbb{N}$,
+  $\sum_{i \in \mathrm{range}\,m} \theta_{(a+i : \ZMod n)} = \pi$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Let $B(a) = \sum_{i \in \mathrm{range}\,m}\theta_{(a+i:\ZMod n)}$. By
+  \cref{lem:turningangle_period}, $\theta$ is invariant under the index shift by
+  $m$, so $B(a+m) = B(a)$; hence the two consecutive $m$-blocks starting at $a$
+  are equal. Their concatenation is a block of $n = 2m$ consecutive indices,
+  whose sum equals $\sum_{i \in \ZMod n}\theta_i = \mathrm{turningSum} = 2\pi$
+  by \texttt{sum\_range\_natCast\_add} (\cref{def:discrete_development}). Thus
+  $2\,B(a) = 2\pi$, i.e.\ $B(a) = \pi$.
+\end{proof}
+
+\begin{lemma}\leanok
+[heading advances by $\pi$ over a half-period]
+  \label{lem:heading_add_half}
+  \lean{Gluck.Discrete.heading_add_half}
+  \uses{lem:half_block_sum}
+  Under the same hypotheses, for every $j \in \mathbb{N}$,
+  $\mathrm{heading}\,\kappa\,\ell\,(j+m) = \mathrm{heading}\,\kappa\,\ell\,j + \pi$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  $\mathrm{heading}\,\kappa\,\ell\,(j+m) = \sum_{i \in \mathrm{range}\,(j+m+1)}
+    \theta_{(i:\ZMod n)}$. Rewrite $j+m+1 = (j+1)+m$ and split off the last $m$
+  terms (\texttt{Finset.sum\_range\_add}):
+  $\mathrm{heading}\,\kappa\,\ell\,(j+m) = \mathrm{heading}\,\kappa\,\ell\,j
+    + \sum_{i \in \mathrm{range}\,m}\theta_{((j+1)+i : \ZMod n)}$. The trailing
+  block is $\pi$ by \cref{lem:half_block_sum} with $a = j+1$.
+\end{proof}
+
+\begin{definition}\leanok
+[central-symmetrization and its homotopy]
+  \label{def:central_symmetrization}
+  \lean{Gluck.Discrete.centralSym}
+  For a positive profile $\kappa$ ($n = 2m$) put
+  $\kappa^0_i := \tfrac12(\kappa_i + \kappa_{i+m})$ (centrally symmetric,
+  positive) and $\kappa_t := \kappa^0 + t(\kappa - \kappa^0)$, $t \in [0,1]$, so
+  $\kappa_0 = \kappa^0$ and $\kappa_1 = \kappa$. All $\kappa_t$ are positive.
+\end{definition}
+
+The Lean decomposition of \cref{def:central_symmetrization} (landed @076 in
+\texttt{ClosingCell.lean}; project-bespoke, one declaration per block --- the
+deterministic sync cannot parse multi-name \texttt{\textbackslash lean} lists):
+
+\begin{definition}\leanok
+[the curvature homotopy $\kappa_t$]
+  \label{def:curv_homotopy}
+  \lean{Gluck.Discrete.curvHomotopy}
+  \uses{def:central_symmetrization}
+  $\mathrm{curvHomotopy}\,m\,\kappa\,t := \kappa^0 + t(\kappa - \kappa^0)$ with
+  $\kappa^0 = \mathrm{centralSym}\,m\,\kappa$; affine (hence continuous) in $t$.
+\end{definition}
+
+\begin{lemma}\leanok
+[homotopy endpoint $t=0$]
+  \label{lem:curv_homotopy_zero}
+  \lean{Gluck.Discrete.curvHomotopy_zero}
+  \uses{def:curv_homotopy}
+  $\kappa_0 = \kappa^0$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Substitute $t = 0$; the linear term vanishes.
+\end{proof}
+
+\begin{lemma}\leanok
+[homotopy endpoint $t=1$]
+  \label{lem:curv_homotopy_one}
+  \lean{Gluck.Discrete.curvHomotopy_one}
+  \uses{def:curv_homotopy}
+  $\kappa_1 = \kappa$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Substitute $t = 1$; the symmetrization cancels.
+\end{proof}
+
+\begin{lemma}\leanok
+[half-period symmetry of the symmetrization]
+  \label{lem:central_sym_symm}
+  \lean{Gluck.Discrete.centralSym_symm}
+  \uses{def:central_symmetrization}
+  If $n = 2m$ then $\kappa^0_{i+m} = \kappa^0_i$ for all $i \in \ZMod n$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Since $2m \equiv 0$ in $\ZMod n$, a double shift by $m$ is the identity, so
+  the two summands of $\kappa^0_{i+m}$ are those of $\kappa^0_i$ swapped.
+\end{proof}
+
+\begin{lemma}\leanok
+[positivity of the symmetrization]
+  \label{lem:central_sym_pos}
+  \lean{Gluck.Discrete.centralSym_pos}
+  \uses{def:central_symmetrization}
+  If $\kappa_i > 0$ for all $i$ then $\kappa^0_i > 0$ for all $i$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  An average of two positive reals is positive.
+\end{proof}
+
+\begin{lemma}\leanok
+[positivity along the homotopy]
+  \label{lem:curv_homotopy_pos}
+  \lean{Gluck.Discrete.curvHomotopy_pos}
+  \uses{def:curv_homotopy, lem:central_sym_pos}
+  If $\kappa_i > 0$ for all $i$ and $t \in [0,1]$, then $\kappa_{t,i} > 0$ for
+  all $i$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  $\kappa_t = (1-t)\kappa^0 + t\kappa$ is a convex combination of the positive
+  profiles $\kappa^0$ (\cref{lem:central_sym_pos}) and $\kappa$.
+\end{proof}
+
+\begin{lemma}\leanok
+[continuity of the homotopy in $t$]
+  \label{lem:continuous_curv_homotopy}
+  \lean{Gluck.Discrete.continuous_curvHomotopy}
+  \uses{def:curv_homotopy}
+  For each fixed vertex $i$, the map $t \mapsto \kappa_{t,i}$ is continuous
+  (indeed affine).
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Affine functions of $t$ are continuous.
+\end{proof}
+
+\subsubsection*{Turning-angle coordinates and the antisymmetric $2$-cell}
+
+The naive parametrization by edge lengths is the wrong chart: the constraint
+$\mathrm{turningSum} = 2\pi$ is then a curved wall and the $t=0$ anchor is not a
+disk center in the obvious way (iter-070 CAUTION --- the moderate slack collapses
+toward the wall, so an edge-length margin is \textbf{false as stated}). The fix
+(ChatGPT gpt-5.5 consult, 2026-07-14) is to change coordinates to the per-edge
+turning contribution, which makes $\mathrm{turningSum} = 2\pi$ \emph{linear} and
+gives an honest, $t$-independent $2$-disk.
+
+\begin{definition}\leanok
+[turning-angle chart]
+  \label{def:turning_chart}
+  \lean{Gluck.Discrete.chartMap}
+  Fix $t \in [0,1]$. For each edge $j \in \ZMod n$ set
+  \[
+    \tau_{t,j}(x) := \arcsin(\kappa_{t,j}\,x/2) + \arcsin(\kappa_{t,j+1}\,x/2),
+    \qquad x \in \bigl(0,\ 2/\max(\kappa_{t,j},\kappa_{t,j+1})\bigr),
+  \]
+  so that $\mathrm{turningSum}\,\kappa_t\,\ell = \sum_j \tau_{t,j}(\ell_j)$ (each
+  $\tau_{t,j}$ is the two-arcsin contribution of edge $j$ to the two turning
+  angles at its endpoints). $\tau_{t,j}$ is a strictly increasing continuous
+  bijection onto $(0,\beta_{t,j})$ with
+  $\beta_{t,j} = \tfrac\pi2 + \arcsin\!\bigl(\min(\kappa_{t,j},\kappa_{t,j+1})/
+  \max(\kappa_{t,j},\kappa_{t,j+1})\bigr) > \tfrac\pi2$; write $\lambda_{t,j} :=
+  \tau_{t,j}^{-1}$ for its (continuous, strictly increasing) inverse. In the chart
+  variables $s_j := \tau_{t,j}(\ell_j)$ the turning constraint is exactly the
+  \emph{affine} condition $\sum_j s_j = 2\pi$, and $\ell_j = \lambda_{t,j}(s_j)$
+  recovers the edge lengths inside the moderate domain $\Omega(\kappa_t)$.
+\end{definition}
+
+\emph{Lean encoding hint (mathlib-analogist @075, verdict PROCEED).} Package each
+$\tau_{t,j}$ as a \texttt{Homeomorph} between the two open intervals via
+\texttt{StrictMonoOn.orderIso} (with \texttt{StrictMonoOn.image\_Ioo\_eq} for the
+range computation) then \texttt{OrderIso.toHomeomorph} (subtypes of $\mathbb{R}$
+carry the order topology); $\lambda_{t,j} := (\cdot).\mathtt{invFun}$ is then
+continuous strictly increasing with the round-trip identities for free. Keep
+$\lambda$ \emph{explicit} --- it makes downstream continuity of $F$ a plain
+composition. \textbf{Joint continuity} of $(t,z)\mapsto\Phi(t,z)$ is the one
+nontrivial obligation: Mathlib has no one-shot ``inverse of a continuous
+parametrized family is jointly continuous'' lemma. Since $\kappa_t = \kappa^0 +
+t(\kappa-\kappa^0)$ is \emph{affine} (hence $C^1$) in $t$, the inverse-function
+theorem route (\texttt{IsLocalHomeomorph.toHomeomorphOfBijective} on
+$(t,x)\mapsto(t,\tau_t(x))$, Jacobian lower-triangular with positive diagonal
+$\partial_x\tau_t>0$) gives joint continuity; alternatively a short bespoke
+$\varepsilon$--$\delta$ lemma suffices. This is a dedicated \texttt{mathlib-build}
+step preceding \cref{def:closing_2cell}.
+
+The Lean decomposition of \cref{def:turning_chart} (landed @076 in
+\texttt{ClosingCell.lean}; project-bespoke, one declaration per block). The
+single-edge chart in the two adjacent curvatures $p, q > 0$ is
+$\tau_{p,q}(x) := \arcsin(px/2) + \arcsin(qx/2)$
+(\lean{Gluck.Discrete.chartMap} above), on the moderate length interval
+$\bigl(0,\, 2/\max(p,q)\bigr)$:
+
+\begin{lemma}\leanok
+[chart vanishes at zero length]
+  \label{lem:chart_map_zero}
+  \lean{Gluck.Discrete.chartMap_zero}
+  \uses{def:turning_chart}
+  $\tau_{p,q}(0) = 0$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  $\arcsin 0 = 0$.
+\end{proof}
+
+\begin{lemma}\leanok
+[turning sum is the sum of edge charts]
+  \label{lem:turning_sum_edge_chart}
+  \lean{Gluck.Discrete.turningSum_eq_sum_edgeChart}
+  \uses{def:turning_chart, def:discrete_development}
+  $\mathrm{turningSum}\,\kappa\,\ell = \sum_{j} \tau_{\kappa_j,\kappa_{j+1}}(\ell_j)$:
+  edge $j$ contributes one $\arcsin$ to each of its two endpoint turning angles.
+  This is the linearization that makes the turning constraint affine in the
+  chart variables.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Expand each turning angle
+  $\theta_i = \arcsin(\kappa_i \ell_{i-1}/2) + \arcsin(\kappa_i \ell_i/2)$,
+  split the sum, and reindex the $\ell_{i-1}$ half by $i = j+1$ (the shift is a
+  bijection of $\ZMod n$).
+\end{proof}
+
+\begin{lemma}\leanok
+[strict monotonicity of the single-edge chart]
+  \label{lem:chart_map_strict_mono}
+  \lean{Gluck.Discrete.chartMap_strictMonoOn}
+  \uses{def:turning_chart}
+  For $p, q > 0$, $\tau_{p,q}$ is strictly increasing on
+  $\bigl(0, 2/\max(p,q)\bigr)$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  On that interval each argument $rx/2$ ($r \in \{p,q\}$) stays in $(-1,1)$,
+  where $\arcsin$ is strictly increasing; a sum of two strictly increasing
+  functions is strictly increasing.
+\end{proof}
+
+\begin{lemma}\leanok
+[continuity of the single-edge chart]
+  \label{lem:chart_map_continuous}
+  \lean{Gluck.Discrete.chartMap_continuous}
+  \uses{def:turning_chart}
+  $\tau_{p,q}$ is continuous on all of $\mathbb{R}$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  $\arcsin$ is globally continuous and the arguments are affine in $x$.
+\end{proof}
+
+\begin{definition}\leanok
+[the chart as a homeomorphism]
+  \label{def:chart_homeomorph}
+  \lean{Gluck.Discrete.chartHomeomorph}
+  \uses{lem:chart_map_strict_mono, lem:chart_map_continuous}
+  For $p, q > 0$, the chart packaged as a homeomorphism from
+  $\bigl(0, 2/\max(p,q)\bigr)$ onto its image
+  $\tau_{p,q}\bigl(\,(0, 2/\max(p,q))\,\bigr)$ (an interval of turning values),
+  via \texttt{StrictMonoOn.orderIso} then \texttt{OrderIso.toHomeomorph}. The
+  image carries the order topology because it is a preconnected subset of
+  $\mathbb{R}$, hence order-connected --- no computation of the endpoint
+  $\beta$ is needed.
+\end{definition}
+
+\begin{definition}\leanok
+[edge-length recovery $\lambda$]
+  \label{def:chart_inv}
+  \lean{Gluck.Discrete.chartInv}
+  \uses{def:chart_homeomorph}
+  The inverse $\lambda_{p,q}$ of the chart: on the turning-value image it is
+  the (continuous, strictly increasing) inverse of
+  \cref{def:chart_homeomorph}; off the image it is $0$ (junk value).
+\end{definition}
+
+\begin{lemma}\leanok
+[recovered length is moderate]
+  \label{lem:chart_inv_mem}
+  \lean{Gluck.Discrete.chartInv_mem}
+  \uses{def:chart_inv}
+  For $s$ in the turning-value image, $\lambda_{p,q}(s) \in
+  \bigl(0, 2/\max(p,q)\bigr)$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  The inverse homeomorphism lands in the source interval by construction.
+\end{proof}
+
+\begin{lemma}\leanok
+[round-trip identity $\tau \circ \lambda = \mathrm{id}$]
+  \label{lem:chart_map_chart_inv}
+  \lean{Gluck.Discrete.chartMap_chartInv}
+  \uses{def:chart_inv}
+  For $s$ in the turning-value image, $\tau_{p,q}(\lambda_{p,q}(s)) = s$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  \texttt{apply\_symm\_apply} of the homeomorphism, read through the subtype
+  coercion (the forward coercion of \texttt{StrictMonoOn.orderIso} is
+  definitional).
+\end{proof}
+
+\begin{lemma}\leanok
+[continuity of the recovery $\lambda$]
+  \label{lem:continuous_chart_inv}
+  \lean{Gluck.Discrete.continuousOn_chartInv}
+  \uses{def:chart_inv, def:chart_homeomorph}
+  $\lambda_{p,q}$ is continuous on the turning-value image.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  On the image, $\lambda_{p,q}$ restricts to the subtype coercion of the
+  continuous inverse homeomorphism.
+\end{proof}
+
+\begin{lemma}\leanok
+[joint continuity of the inverse of a continuous monotone family]
+  \label{lem:continuous_inv_family}
+  \lean{Gluck.Discrete.continuousOn_inv_family}
+  \uses{def:turning_chart}
+  Let $T$ be a compact Hausdorff space and $g : T \to (\mathbb{R} \to
+  \mathbb{R})$ jointly continuous, with each $g_t$ injective on a common compact
+  interval $[a,b]$. Then any inverse family $\mathrm{inv}$ (a right inverse of
+  $g_t$ on $g_t([a,b])$, valued in $[a,b]$) is \emph{jointly} continuous in
+  $(t,s)$ on $\{(t,s) : s \in g_t([a,b])\}$. This is the one nontrivial
+  analytic obligation of the chart (the ``Lean encoding hint'' above); it is
+  the IFT-free route, applied downstream with $g_t = \tau_{\kappa_{t,j},
+  \kappa_{t,j+1}}$ and $T = [0,1]$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  $F(t,x) := (t, g_t(x))$ is a continuous injection from the compact space
+  $T \times [a,b]$ to the Hausdorff space $T \times \mathbb{R}$, hence a
+  homeomorphism onto its range; that range is exactly
+  $\{(t,s) : s \in g_t([a,b])\}$. The second coordinate of $F^{-1}$ agrees with
+  $\mathrm{inv}$ there (by injectivity of $g_t$ and the right-inverse
+  identity), so $\mathrm{inv}$ is continuous on the range.
+\end{proof}
+
+\begin{lemma}\leanok
+[wall value of the chart exceeds $\pi/2$]
+  \label{lem:chart_wall}
+  \lean{Gluck.Discrete.pi_div_two_lt_chartMap_wall}
+  \uses{def:turning_chart}
+  For $p, q > 0$,
+  $\tau_{p,q}\bigl(2/\max(p,q)\bigr) = \tfrac\pi2 +
+  \arcsin\bigl(\min(p,q)/\max(p,q)\bigr) > \tfrac\pi2$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  At the wall length $2/\max(p,q)$ one $\arcsin$ argument is $1$ (contributing
+  $\pi/2$) and the other is $\min/\max \in (0,1]$, contributing a strictly
+  positive $\arcsin$.
+\end{proof}
+
+\begin{lemma}\leanok
+[surjectivity of the single-edge chart below the wall]
+  \label{lem:chart_mem_image}
+  \lean{Gluck.Discrete.chartMap_mem_image}
+  \uses{lem:chart_map_continuous, lem:chart_wall}
+  Every turning value $s$ with $0 < s < \tau_{p,q}(2/\max(p,q))$ lies in the
+  image $\tau_{p,q}\bigl((0, 2/\max(p,q))\bigr)$; this is the membership
+  criterion that makes $\lambda$ a genuine inverse at $s$
+  (\cref{lem:chart_map_chart_inv}).
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Intermediate value theorem on $[0, 2/\max(p,q)]$ from
+  $\tau_{p,q}(0) = 0$ (\cref{lem:chart_map_zero}); the open form
+  (\texttt{intermediate\_value\_Ioo}) lands directly in the image of the open
+  interval.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[left round-trip identity $\lambda \circ \tau = \mathrm{id}$]
+  \label{lem:chart_inv_chart_map}
+  \lean{Gluck.Discrete.chartInv_chartMap}
+  \uses{def:chart_inv, lem:chart_map_strict_mono, lem:chart_map_chart_inv}
+  For $x \in \bigl(0, 2/\max(p,q)\bigr)$,
+  $\lambda_{p,q}(\tau_{p,q}(x)) = x$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  $\tau_{p,q}(x)$ lies in the turning-value image with witness $x$, so
+  $\lambda$ returns \emph{some} preimage in the moderate interval
+  (\cref{lem:chart_inv_mem}, \cref{lem:chart_map_chart_inv}); strict
+  monotonicity of $\tau$ (\cref{lem:chart_map_strict_mono}) makes preimages
+  unique, so it returns $x$.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[$\mathrm{Icc}$-refined achievability of turning values]
+  \label{lem:chart_map_mem_image_icc}
+  \lean{Gluck.Discrete.chartMap_mem_image_Icc}
+  \uses{lem:chart_map_continuous}
+  For $x_1 \le x_2$, every $s \in [\tau_{p,q}(x_1), \tau_{p,q}(x_2)]$ lies in
+  $\tau_{p,q}\bigl([x_1, x_2]\bigr)$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Intermediate value theorem on the compact interval
+  (\texttt{intermediate\_value\_Icc}) with the continuity of
+  \cref{lem:chart_map_continuous}.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[the compact window sits inside the open moderate image]
+  \label{lem:chart_map_image_window_subset}
+  \lean{Gluck.Discrete.chartMap_image_window_subset}
+  \uses{def:turning_chart}
+  For $0 < c$ and $d < 1$,
+  $\tau_{p,q}\bigl([c \cdot 2/\max(p,q),\, d \cdot 2/\max(p,q)]\bigr) \subseteq
+  \tau_{p,q}\bigl((0, 2/\max(p,q))\bigr)$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Monotonicity of the image under
+  $[c\cdot 2/\max,\, d\cdot 2/\max] \subset (0, 2/\max)$, which holds because
+  $c \cdot 2/\max > 0$ and $d \cdot 2/\max < 2/\max$. This converts window
+  membership (\cref{lem:exists_closing_cell_window}) into the open
+  $\mathrm{Ioo}$-membership hypotheses of the $2$-cell lemmas.
+\end{proof}
+
+\begin{definition}\leanok
+[antisymmetric chart base $s(z)$]
+  \label{def:chart_perturb}
+  \lean{Gluck.Discrete.chartPerturb}
+  \uses{def:turning_chart}
+  The chart base of the closing $2$-cell: $s(z)_j := 2\pi/n$ for all $j$,
+  perturbed by $+u$ at $j=a$, $-u$ at $j=a+m$, $+v$ at $j=b$, $-v$ at $j=b+m$,
+  where $z = (u,v)$. (The concrete instance of the base in
+  \cref{def:closing_2cell} with $s^0_j = 2\pi/n$.)
+\end{definition}
+
+\begin{lemma}\leanok
+[the antisymmetric base keeps the turning sum]
+  \label{lem:sum_chart_perturb}
+  \lean{Gluck.Discrete.sum_chartPerturb}
+  \uses{def:chart_perturb}
+  $\sum_j s(z)_j = 2\pi$ \emph{identically} in $z$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  The constant part sums to $n \cdot (2\pi/n) = 2\pi$; each antisymmetric pair
+  $\pm u$, $\pm v$ cancels. (No distinctness of $a, a+m, b, b+m$ is needed for
+  the sum --- each indicator is summed separately.)
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[the perturbed base stays within $|z|_1$ of $2\pi/n$]
+  \label{lem:abs_chart_perturb_sub_le}
+  \lean{Gluck.Discrete.abs_chartPerturb_sub_le}
+  \uses{def:chart_perturb}
+  $\bigl|s(z)_j - 2\pi/n\bigr| \le |u| + |v|$ for every $j$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Each of the two indicator pairs contributes at most $|u|$ (resp.\ $|v|$) in
+  absolute value --- again without any distinctness of $a, a+m, b, b+m$ ---
+  and the triangle inequality adds them.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[achievability of the perturbed base]
+  \label{lem:chart_perturb_mem_image}
+  \lean{Gluck.Discrete.chartPerturb_mem_image}
+  \uses{lem:abs_chart_perturb_sub_le, lem:chart_mem_image}
+  If $|u| + |v| < 2\pi/n$ and $2\pi/n + (|u|+|v|)$ is below the wall value
+  $\tau_{\kappa'_j, \kappa'_{j+1}}(2/\max)$, then $s(z)_j$ lies in the open
+  moderate image of edge $j$ for the positive profile $\kappa'$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  By \cref{lem:abs_chart_perturb_sub_le}, $s(z)_j \in
+  \bigl(2\pi/n - (|u|+|v|),\, 2\pi/n + (|u|+|v|)\bigr)$, which the two
+  hypotheses place strictly between $0$ and the wall value; conclude by
+  \cref{lem:chart_mem_image}.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[continuity of the perturbed base in $z$]
+  \label{lem:continuous_chart_perturb}
+  \lean{Gluck.Discrete.continuous_chartPerturb}
+  \uses{def:chart_perturb}
+  For each fixed edge $j$, $z \mapsto s(z)_j$ is continuous (indeed affine).
+\end{lemma}
+\begin{proof}
+
+\leanok
+  A constant plus at most four indicator-gated coordinate projections; each
+  branch of the (parameter-independent) case split is affine in $z$.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[center value of the base]
+  \label{lem:chart_perturb_zero}
+  \lean{Gluck.Discrete.chartPerturb_zero}
+  \uses{def:chart_perturb}
+  $s(0)_j = 2\pi/n$ for every $j$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  All four perturbation terms vanish at $z = 0$.
+\end{proof}
+
+\begin{definition}\leanok
+[antisymmetric closing $2$-cell]
+  \label{def:closing_2cell}
+  \lean{Gluck.Discrete.closingCell}
+  \uses{def:turning_chart, def:central_symmetrization, def:chart_inv,
+        lem:chart_map_chart_inv, lem:chart_inv_mem, lem:chart_mem_image,
+        lem:chart_wall, lem:continuous_inv_family, lem:curv_homotopy_pos,
+        lem:continuous_curv_homotopy, def:chart_perturb, lem:sum_chart_perturb,
+        lem:turning_sum_edge_chart}
+  By compactness of $[0,1]$, $\underline\beta_j := \min_{t\in[0,1]}\beta_{t,j} >
+  \tfrac\pi2$. Fix a half-period-symmetric chart base $s^0$ with $s^0_{j+m} =
+  s^0_j$, $0 < s^0_j < \underline\beta_j$ and $\sum_j s^0_j = 2\pi$ (possible since
+  each $\underline\beta_j > \tfrac\pi2$; e.g.\ $s^0_j = 2\pi/n$ when all
+  $\underline\beta_j > 2\pi/n$). Choose two half-pair indices $a,b \in
+  \{0,\dots,m-1\}$ and a radius
+  $\rho < \min_{k\in\{a,a+m,b,b+m\}}\{s^0_k,\ \underline\beta_k - s^0_k\}$. For
+  $z = (u,v) \in \overline{D}_\rho \subset \mathbb{R}^2$ define the chart point
+  \[
+    s(z)_a = s^0_a + u,\quad s(z)_{a+m} = s^0_a - u,\quad
+    s(z)_b = s^0_b + v,\quad s(z)_{b+m} = s^0_b - v,
+  \]
+  all other $s(z)_j = s^0_j$. Then $\sum_j s(z)_j = 2\pi$ \emph{identically} in
+  $z$, every $s(z)_k \in (0,\underline\beta_k)$, and
+  \[
+    \Phi(t,z)_j := \lambda_{t,j}\bigl(s(z)_j\bigr)
+  \]
+  is a continuous map $[0,1]\times\overline{D}_\rho \to \Omega(\kappa_t)$ with
+  $\mathrm{turningSum}\,\kappa_t\,\Phi(t,z) = 2\pi$ throughout. The center
+  $\Phi(t,0)$ has chart coordinates $s^0$ (half-period symmetric), so at $t=0$,
+  $\Phi(0,0)$ is a \emph{half-period-symmetric} edge-length vector (because
+  $\lambda_{0,j} = \lambda_{0,j+m}$ under $\kappa_0 = \kappa^0$ symmetric), hence
+  closes by \cref{lem:central_symmetry_closes}. Set
+  $F(t,z) := \mathrm{closureGap}\,\kappa_t\,\Phi(t,z) \in \mathbb{C}$.
+\end{definition}
+
+\begin{remark}[why edge-length coordinates and the single-edge tune are retired here]
+  \label{rem:chart_supersedes_edge_tune}
+  The chart of \cref{def:turning_chart} supersedes the raw edge-length packaging:
+  the affine constraint $\sum_j s_j = 2\pi$ makes the dependent-coordinate solve
+  (the \cref{sec:edge_tune} single-edge tune \cref{lem:exists_edge_turning_scale})
+  unnecessary for the closing family --- the antisymmetric variation keeps
+  $\sum s_j = 2\pi$ for free. \Cref{sec:edge_tune} remains a correct, axiom-clean
+  monotone-tune API but is off this critical path.
+\end{remark}
+
+\subsubsection*{The assembled $2$-cell: turning constraint, moderation,
+continuity, window, anchor}
+
+The textual claims of \cref{def:closing_2cell} are each a theorem about
+$\Phi$ and $F$; the compactness paragraph is the window package
+\cref{lem:exists_closing_cell_window}, and the whole contract is bundled in
+\cref{thm:closing_cell_package}.
+
+\begin{lemma}
+
+\leanok
+[the $2$-cell keeps the turning constraint]
+  \label{lem:turning_sum_closing_cell}
+  \lean{Gluck.Discrete.turningSum_closingCell}
+  \uses{def:closing_2cell, lem:turning_sum_edge_chart, lem:chart_map_chart_inv,
+        lem:sum_chart_perturb}
+  If every $s(z)_j$ lies in the open moderate image of edge $j$ for
+  $\kappa_t$, then $\mathrm{turningSum}\,\kappa_t\,\Phi(t,z) = 2\pi$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  $\mathrm{turningSum} = \sum_j \tau_{t,j}(\Phi(t,z)_j)$
+  (\cref{lem:turning_sum_edge_chart}); each summand is
+  $\tau_{t,j}(\lambda_{t,j}(s(z)_j)) = s(z)_j$
+  (\cref{lem:chart_map_chart_inv} under the membership hypothesis), and
+  $\sum_j s(z)_j = 2\pi$ identically (\cref{lem:sum_chart_perturb}).
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[the $2$-cell is moderate]
+  \label{lem:moderate_arc_closing_cell}
+  \lean{Gluck.Discrete.moderateArc_closingCell}
+  \uses{def:closing_2cell, lem:chart_inv_mem, lem:curv_homotopy_pos}
+  Under the same membership hypothesis,
+  $\Phi(t,z) \in \mathrm{ModerateArc}\,0\,\kappa_t$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Each recovered length lies in $\bigl(0, 2/\max(\kappa_{t,j},
+  \kappa_{t,j+1})\bigr)$ (\cref{lem:chart_inv_mem}); for each vertex $i$ and
+  adjacent edge of length $x < 2/\max$ with $\kappa_{t,i} \le \max$ of the
+  adjacent pair, $\kappa_{t,i}\, (x/2) < 1$, the strict wall.
+\end{proof}
+
+\begin{definition}
+
+\leanok
+[the gap map $F$ of the $2$-cell]
+  \label{def:closing_gap}
+  \lean{Gluck.Discrete.closingGap}
+  \uses{def:closing_2cell, def:discrete_development}
+  $F(t,z) := \mathrm{closureGap}\,\kappa_t\,\Phi(t,z) \in \mathbb{C}$ (the
+  Lean-level packaging of the gap map named in \cref{def:closing_2cell}).
+\end{definition}
+
+\begin{lemma}
+
+\leanok
+[joint continuity of the closure gap]
+  \label{lem:continuous_closure_gap}
+  \lean{Gluck.Discrete.continuous_closureGap}
+  \uses{def:discrete_development}
+  $(\kappa, \ell) \mapsto \mathrm{closureGap}\,\kappa\,\ell$ is (jointly)
+  continuous.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  A finite sum of products of continuous functions of finitely many
+  coordinates ($\arcsin$, $\exp$, projections).
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[joint continuity of the recovery over the compact curvature family]
+  \label{lem:continuous_chart_inv_family}
+  \lean{Gluck.Discrete.continuousOn_chartInv_family}
+  \uses{lem:continuous_inv_family, def:chart_inv, lem:chart_map_continuous}
+  Let $T$ be compact Hausdorff and $p, q : T \to (0,\infty)$ continuous. For
+  $0 < c \le d < 1$, the map $(\tau_0, s) \mapsto
+  \lambda_{p(\tau_0),q(\tau_0)}(s)$ is jointly continuous on
+  $\{(\tau_0,s) : s \in \tau_{p,q}([c \cdot 2/\max,\, d \cdot 2/\max])\}$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  A single \emph{unnormalized} common length interval across the family is
+  impossible when curvature ratios vary (the needed length
+  $\sim (2/\kappa)\sin(\pi/n)$ collides with the wall $2/\kappa'$ of a
+  stiffer pair) --- do not retry that route. Instead apply
+  \cref{lem:continuous_inv_family} to the \emph{max-normalized} family
+  $g_{\tau_0}(y) := \tau_{p,q}\bigl(y \cdot 2/\max(p,q)\bigr)$, whose common
+  compact domain $[c,d] \subset (0,1)$ is parameter-independent; recover the
+  original scale as the normalized inverse times the continuous factor
+  $2/\max(p,q)$.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[per-edge joint continuity of $\Phi$]
+  \label{lem:continuous_closing_cell_apply}
+  \lean{Gluck.Discrete.continuousOn_closingCell_apply}
+  \uses{lem:continuous_chart_inv_family, def:closing_2cell,
+        lem:continuous_curv_homotopy, lem:continuous_chart_perturb}
+  If on a set $Z$ of perturbations every $s(z)_j$ stays in the compact window
+  image of edge $j$ for all $t \in [0,1]$, then $(t,z) \mapsto \Phi(t,z)_j$ is
+  continuous on $[0,1] \times Z$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  Compose \cref{lem:continuous_chart_inv_family} (with $T = [0,1]$,
+  $p = \kappa_{t,j}$, $q = \kappa_{t,j+1}$, continuous by
+  \cref{lem:continuous_curv_homotopy}) with the continuous
+  $(t,z) \mapsto (t, s(z)_j)$ (\cref{lem:continuous_chart_perturb}); the
+  window hypothesis keeps the pair in the continuity domain.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[joint continuity of $F$]
+  \label{lem:continuous_closing_gap}
+  \lean{Gluck.Discrete.continuousOn_closingGap}
+  \uses{def:closing_gap, lem:continuous_closing_cell_apply,
+        lem:continuous_closure_gap}
+  Under the same window hypothesis, $(t,z) \mapsto F(t,z)$ is continuous on
+  $[0,1] \times Z$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  $F = \mathrm{closureGap} \circ (\kappa_\bullet, \Phi)$: the curvature slot
+  is continuous, each of the finitely many length slots is
+  \cref{lem:continuous_closing_cell_apply}, and the outer map is
+  \cref{lem:continuous_closure_gap}.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[uniform curvature-ratio bound along the homotopy]
+  \label{lem:exists_ratio_bound}
+  \lean{Gluck.Discrete.exists_ratio_bound}
+  \uses{lem:curv_homotopy_pos, lem:continuous_curv_homotopy}
+  There is $r > 0$ with $r \le \min(\kappa_{t,j}, \kappa_{t,j+1}) /
+  \max(\kappa_{t,j}, \kappa_{t,j+1})$ for all $t \in [0,1]$ and all edges $j$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  For each of the finitely many edges the ratio is a continuous, strictly
+  positive function of $t$ on the compact $[0,1]$, hence has a positive
+  minimum; take the least over edges.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[the window package: radius and compact window]
+  \label{lem:exists_closing_cell_window}
+  \lean{Gluck.Discrete.exists_closingCell_window}
+  \uses{lem:exists_ratio_bound, lem:abs_chart_perturb_sub_le,
+        lem:chart_map_mem_image_icc, lem:chart_wall}
+  For $n \ge 4$ and a positive profile $\kappa$ there are $\rho, c, d$ with
+  $0 < \rho < 2\pi/n$ and $0 < c \le d < 1$ such that for every $t \in [0,1]$,
+  every $z$ with $|u| + |v| \le \rho$, and every edge $j$, the perturbed base
+  $s(z)_j$ is achieved by a length in the compact window
+  $[c \cdot 2/\max,\, d \cdot 2/\max]$ of edge $j$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  With $r$ from \cref{lem:exists_ratio_bound} set
+  $\rho = \min(\pi/n, \arcsin r)/2$ and $c = \sin(\pi/n - \rho/2)$; the lower
+  chart bound $\arcsin e + \arcsin(e \cdot \min/\max) \ge 2\arcsin(c)
+  \cdot(\text{normalized})$ places the window's left chart value below
+  $2\pi/n - \rho$, while continuity of $x \mapsto \arcsin x + \arcsin(xr)$ at
+  $x = 1$ (value $\pi/2 + \arcsin r > 2\pi/n + \rho$; here $n \ge 4$ enters as
+  $2\pi/n \le \pi/2$) yields $d < 1$ whose right chart value exceeds
+  $2\pi/n + \rho$. Conclude per edge by
+  \cref{lem:abs_chart_perturb_sub_le} + \cref{lem:chart_map_mem_image_icc}.
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[the center column at $t = 0$ is half-period symmetric]
+  \label{lem:closing_cell_zero_symm}
+  \lean{Gluck.Discrete.closingCell_zero_symm}
+  \uses{def:closing_2cell, lem:central_sym_symm, lem:curv_homotopy_zero,
+        lem:chart_perturb_zero}
+  For $n = 2m$: $\Phi(0,0)_{i+m} = \Phi(0,0)_i$ for every $i$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  At $t = 0$ the curvature pairs of edges $i$ and $i+m$ coincide
+  (\cref{lem:curv_homotopy_zero}, \cref{lem:central_sym_symm}), and both edges
+  recover their length from the same constant chart value $2\pi/n$
+  (\cref{lem:chart_perturb_zero}).
+\end{proof}
+
+\begin{lemma}
+
+\leanok
+[the closing anchor $F(0,0) = 0$]
+  \label{lem:closing_gap_center_eq_zero}
+  \lean{Gluck.Discrete.closingGap_center_eq_zero}
+  \uses{lem:closing_cell_zero_symm, lem:central_symmetry_closes,
+        lem:turning_sum_closing_cell, def:closing_gap}
+  For $n = 2m$ (and the membership hypothesis at $t=0$): $F(0,0) = 0$.
+\end{lemma}
+\begin{proof}
+
+\leanok
+  $\kappa_0$ and $\Phi(0,0)$ are both half-period symmetric
+  (\cref{lem:closing_cell_zero_symm}) with
+  $\mathrm{turningSum} = 2\pi$ (\cref{lem:turning_sum_closing_cell});
+  \cref{lem:central_symmetry_closes} closes it. This is the ($\Leftarrow$)
+  direction of \cref{lem:closure_boundary_rigidity} and the base point of the
+  degree argument.
+\end{proof}
+
+\begin{theorem}
+
+\leanok
+[the assembled closing $2$-cell package]
+  \label{thm:closing_cell_package}
+  \lean{Gluck.Discrete.closingCell_package}
+  \uses{lem:exists_closing_cell_window, lem:chart_map_image_window_subset,
+        lem:turning_sum_closing_cell, lem:moderate_arc_closing_cell,
+        lem:continuous_closing_gap, lem:closing_gap_center_eq_zero}
+  For $n = 2m \ge 4$ and a positive profile $\kappa$ there is $\rho > 0$ such
+  that on $[0,1] \times \{|u|+|v| \le \rho\}$: (i)
+  $\mathrm{turningSum}\,\kappa_t\,\Phi(t,z) = 2\pi$; (ii) $\Phi(t,z)$ is
+  moderate for $\kappa_t$; (iii) $F$ is continuous; (iv) $F(0,0) = 0$. (The
+  complete contract of \cref{def:closing_2cell}; the Lean realization uses the
+  $\ell^1$ ball $|u|+|v| \le \rho$ for $\overline{D}_\rho$, equivalent to the
+  Euclidean disk up to a $\sqrt2$ rescaling of $\rho$, and the window package
+  is monotone in $\rho$ --- shrinking $\rho$ preserves all four clauses.)
+\end{theorem}
+\begin{proof}
+
+\leanok
+  Take $\rho, c, d$ from \cref{lem:exists_closing_cell_window}; window
+  membership feeds (i)/(ii) through
+  \cref{lem:chart_map_image_window_subset} and (iii) directly; (iv) is
+  \cref{lem:closing_gap_center_eq_zero}.
+\end{proof}
+
+\subsubsection*{The crux, decomposed into one provable and one open leaf}
+
+The winding-continuation argument needs exactly three facts about $F$:
+(i) continuity, (ii) $F(0,\cdot)$ winds $\pm1$ on $\partial D_\rho$, (iii) $F \ne 0$
+on $[0,1]\times\partial D_\rho$. The ChatGPT consult (2026-07-14) reduced (ii) to a
+\emph{rigidity} lemma (below, \textbf{provable} --- the discrete Prop~9.1 ``only
+if'' direction) and isolated (iii) as the single genuinely open analytic leaf.
+
+\begin{lemma}[$t=0$ closing rigidity on the $2$-cell --- discrete Prop~9.1 ``only if'']
+  \label{lem:closure_boundary_rigidity}
+  % NOTE (review @079): REFUTED AS STATED — proved in Lean
+  % (`Gluck.Discrete.closingGap_zero_iff_fails_of_const`, ClosingCell.lean): when
+  % centralSym m κ is CONSTANT the development inscribes in a circle and
+  % F(0,·) ≡ 0 on the whole window, so the iff fails for every ρ' > 0. The
+  % pinned decl closingGap_zero_iff was deliberately NOT added. The @079 "GO"
+  % certification below was a sampling artifact (log-normal κ never hits
+  % κ⁰ ≈ const). Constant-κ⁰ DFV profiles EXIST (c + odd half-period harmonics),
+  % so this block needs re-authoring with a nondegeneracy hypothesis on κ⁰
+  % (necessary: non-constancy; provable-by-linearization: closure Jacobian L
+  % nonsingular) — see task_results/Gluck_Discrete_ClosingCell.md (iter-079).
+  \lean{Gluck.Discrete.closingGap_zero_iff}
+  \uses{def:closing_2cell, def:closing_gap, lem:central_symmetry_closes,
+        lem:closing_gap_center_eq_zero, lem:exists_closing_cell_window}
+  With $\kappa_0 = \kappa^0$ centrally symmetric, $\Phi$ as in
+  \cref{def:closing_2cell}, and the two perturbed half-pairs \emph{distinct}
+  ($a \ne b$ and $a \ne b + m$, so $\{a, a{+}m\} \cap \{b, b{+}m\} =
+  \emptyset$): $F(0,z) = 0 \iff z = 0$. In particular $F(0,\cdot)$ has $z=0$
+  as its \emph{unique} zero on $\overline{D}_\rho$. (Lean realization: the
+  ball is the $\ell^1$ diamond $|u|+|v| \le \rho'$; proving it for a possibly
+  smaller radius $\rho' \le \rho$ is faithful --- the radius is existential
+  throughout \cref{def:closing_2cell} and the window package is monotone in
+  $\rho$.)
+\end{lemma}
+\begin{proof}
+  ($\Leftarrow$) is \cref{lem:central_symmetry_closes}. For ($\Rightarrow$):
+  under $\kappa_0 = \kappa^0$ half-period-symmetric, $\lambda_{0,j} =
+  \lambda_{0,j+m}$, so $\Phi(0,z)_{j+m} = \lambda_{0,j}(s(z)_{j+m})$. Splitting
+  $\mathrm{closureGap} = \sum_{j\in\mathrm{range}\,m}
+  \bigl(\ell_j e^{\mathrm{i}\psi_j} + \ell_{j+m} e^{\mathrm{i}\psi_{j+m}}\bigr)$ as
+  in \cref{lem:central_symmetry_closes}: the heading still advances by $\pi$ over
+  each half-period \emph{only when} the two half-periods carry equal turning
+  blocks, which here holds for the base but is perturbed by $(u,v)$. Writing
+  $\psi_{j+m} - \psi_j = \pi + \delta_j(z)$ with $\delta_j$ the accumulated chart
+  asymmetry (a linear functional of $(u,v)$ supported on the pairs $a,b$), one gets
+  $F(0,z) = \sum_{j} \ell_j\bigl(1 - e^{\mathrm{i}\delta_j}\bigr) e^{\mathrm{i}\psi_j}$
+  up to the symmetric cancellation; this is the discrete form of the DeTurck--Gluck
+  ``two vectors add to zero iff opposite arcs are equal'' picture (Prop~9.1, whose
+  error vector $E = (1/\mathrm{i}a - 1/\mathrm{i}b)(1 - q_2 + q_3 - q_4)$ vanishes
+  iff the alternating arc-length combination vanishes). For the two-parameter
+  antisymmetric family this alternating combination is a nondegenerate linear form
+  in $(u,v)$, so it vanishes iff $u = v = 0$. \emph{(Atomic Lean decomposition and
+  the exact nondegeneracy computation are the content of the prover node; the
+  $2\times2$ leading form is the closure Jacobian, numerically nonsingular ---
+  \texttt{verify\_noescape\_bound.py}, smallest singular value $\ge 0.025$.)}
+
+  \emph{Disprove-before-spend certification (@079,
+  \texttt{references/verify\_rigidity\_t0.py}): the GLOBAL statement holds
+  numerically on the full window diamond --- across $n \in \{4,\dots,12\}$,
+  $60$ profiles (half DFV, half generic positive), no interior zero other than
+  $z = 0$, worst linear lower-bound ratio $|F(0,z)|/(|u|+|v|) = 0.061$, worst
+  Jacobian singular value $0.083$. GO.} A Lean-friendly route that avoids
+  computing $DF$ exactly: prove the paired-edge expansion above, isolate the
+  \emph{linear} part $L(z)$ (explicit in the four perturbed chart slots),
+  show $L$ nonsingular from the pair-distinctness, and dominate the remainder
+  on a small ball; the local statement with $\rho' \le \rho$ suffices for the
+  downstream winding step.
+\end{proof}
+
+\begin{lemma}[winding $\pm1$ at $t=0$]
+  \label{lem:closure_winding_t0}
+  \uses{lem:closure_boundary_rigidity, def:closing_2cell}
+  $F(0,\cdot)|_{\partial D_\rho}$ has winding number $\pm1$ about $0$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:closure_boundary_rigidity}
+  By \cref{lem:closure_boundary_rigidity} the only zero of the continuous map
+  $F(0,\cdot)$ on $\overline{D}_\rho$ is the interior point $z=0$, and its closure
+  Jacobian $DF(0,\cdot)|_{z=0}$ is nonsingular. Hence $z=0$ is an isolated
+  nondegenerate zero with local degree $\mathrm{sgn}\det DF = \pm1$, and (no other
+  zero in $\overline{D}_\rho$) excision identifies this with the winding number of
+  the outer boundary loop $F(0,\cdot)|_{\partial D_\rho}$, which is therefore
+  $\pm1$. \emph{(In Lean this is the outer-boundary specialization of the in-tree
+  \texttt{exists\_zero\_of\_boundary\_winding} degree engine,
+  \cref{chap:winding}.)}
+\end{proof}
+
+\begin{lemma}[boundary exclusion along the homotopy --- OPEN analytic leaf]
+  % NOTE (review @079): the constant-κ⁰ degeneracy refuting
+  % lem:closure_boundary_rigidity ALSO affects this leaf: when centralSym m κ
+  % is constant, F(0,·) ≡ 0 on ∂D_ρ, so boundary exclusion FAILS at t = 0 for
+  % that class and the t=0 anchor of the continuation degenerates. Any
+  % re-authoring must either exclude the constant-κ⁰ class here too or cover
+  % it by a separate argument (prover options (a)–(d),
+  % task_results/Gluck_Discrete_ClosingCell.md iter-079).
+  \label{lem:closure_boundary_exclusion}
+  \uses{def:closing_2cell}
+  For $\rho$ as in \cref{def:closing_2cell} and every $t \in [0,1]$,
+  $z \in \partial D_\rho$: $F(t,z) \ne 0$.
+\end{lemma}
+
+\emph{Status of \cref{lem:closure_boundary_exclusion} --- the one genuinely open
+leaf (updated @075).} At $t=0$ this is \cref{lem:closure_boundary_rigidity}
+($z \ne 0 \Rightarrow F(0,z) \ne 0$); by compactness $\min_{z\in\partial D_\rho}
+|F(0,z)| =: \delta_\rho > 0$. For small $t$ it follows by uniform continuity
+($|F(t,z) - F(0,z)| < \delta_\rho$). \textbf{The open content is boundary
+exclusion for the full $t \in [0,1]$}, where the margin $\delta_\rho$ need not
+beat the total variation of $F$ in $t$. Numerically this holds: the
+boundary-exclusion probe (\texttt{references/verify\_boundary\_exclusion.py}, @072)
+found, across $n \in \{4,6,8,10,12\}$, $10$ DFV profiles each and a $6$-point
+$t$-grid, worst-case $\min|F|$ on $\partial\Omega\cap\{\mathrm{turningSum}=2\pi\}$
+equal to $0.0090$ ($\sim6$ orders above numerical zero). \textbf{Dead end recorded
+(do not retry):} the support-function / ``all headings in an arc of length
+$<2\pi$'' argument \emph{cannot} prove this --- positivity
+$\mathrm{Re}(e^{-\mathrm{i}\alpha}F) = \sum_j \ell_j\cos(\psi_j-\alpha) > 0$ needs
+all edge directions in an arc of length $<\pi$, but the shortest arc containing all
+$n$ directions has length $2\pi - \max_i\theta_i > \pi$ (the cyclic gaps are the
+$\theta_i \in (0,\pi)$ and $\sum\theta_i = 2\pi$), which is incompatible with any
+$2\pi$-turning closed development (ChatGPT gpt-5.5, 2026-07-14). A rigorous proof
+must instead be a boundary-tolerant degree/interval-certification argument;
+\textbf{no prover is dispatched on \cref{lem:closure_boundary_exclusion} until such
+an argument is authored to atomic detail and a HARD GATE clears it}.
+
+\begin{lemma}[closure persists along the homotopy --- CRUX, modulo the open leaf]
+  \label{lem:closure_persists}
+  \uses{lem:closure_winding_t0, lem:closure_boundary_exclusion}
+  For $n \ge 4$ even and $\kappa$ with $\mathrm{DiscreteFourVertexPos}$, the
+  closing solution at $t = 0$ (\cref{lem:central_symmetry_closes}) continues to a
+  closing solution at $t = 1$: for every $t \in [0,1]$ there is $z_t \in D_\rho$
+  with $F(t,z_t) = 0$, so $\ell_t := \Phi(t,z_t)$ is moderate-arc with
+  $\mathrm{turningSum}\,\kappa_t\,\ell_t = 2\pi$ and
+  $\mathrm{closureGap}\,\kappa_t\,\ell_t = 0$; at $t=1$, $\ell_1$ realizes $\kappa$.
+\end{lemma}
+\begin{proof}
+  $F$ is continuous on $[0,1]\times\overline{D}_\rho$ (\cref{def:closing_2cell}).
+  By \cref{lem:closure_boundary_exclusion}, $F(t,\cdot)$ is zero-free on
+  $\partial D_\rho$ for all $t$, so $t \mapsto F(t,\cdot)|_{\partial D_\rho}$ is a
+  homotopy of zero-avoiding loops; by homotopy-invariance of the winding number
+  (in-tree \texttt{windingNumber\_eq\_of\_homotopy}, needs a public wrapper) the
+  boundary winding is constant in $t$, hence equals its $t=0$ value $\pm1$
+  (\cref{lem:closure_winding_t0}) for every $t$. By the in-tree engine
+  \texttt{exists\_zero\_of\_boundary\_winding} (\cref{chap:winding}: nonzero
+  boundary winding $\Rightarrow$ interior zero) each $F(t,\cdot)$ has a zero
+  $z_t \in D_\rho$. Then $\ell_t = \Phi(t,z_t)$ is moderate with
+  $\mathrm{turningSum} = 2\pi$ (\cref{def:closing_2cell}) and $\mathrm{closureGap}
+  = F(t,z_t) = 0$; at $t=1$, $\kappa_1 = \kappa$, so $\ell_1$ realizes $\kappa$.
+\end{proof}
+
+\emph{Formalization prerequisites and sequencing (updated @075).} The crux is now
+decomposed: \cref{lem:closure_boundary_rigidity} (and hence
+\cref{lem:closure_winding_t0}) is \textbf{provable} --- it is the discrete
+Prop~9.1 ``only if'' (Prop~9.1 is an \emph{iff} in the source,
+\texttt{deturck-gluck-fourvertex.txt} l.279); \cref{lem:closure_boundary_exclusion}
+is the \textbf{single open leaf}. Before a prover is dispatched on the persistence
+chain, two in-tree prerequisites are needed: (P1) a \emph{public} wrapper for
+\texttt{windingNumber\_eq\_of\_homotopy} (currently \texttt{private} in the frozen
+\texttt{Gluck/Winding.lean}; add a NEW public theorem, preserve all signatures,
+axiom-clean); (P2) the Lean definition of $\Phi$/$F$ (\cref{def:closing_2cell}). No
+prover is dispatched on \cref{lem:closure_persists} or
+\cref{lem:closure_boundary_exclusion} until the open leaf is authored to atomic
+detail and a fresh HARD GATE clears it. \Cref{lem:closure_boundary_rigidity} is the
+next committed prover target of this route.
+
+% NOTE (2026-07-14 archon-discuss + ChatGPT gpt-5.5 consult @075): standing crux
+% note at repo-root discrete_closing_crux_note.md. Coordinate corrected to the
+% turning-angle chart (def:turning_chart) -- makes turningSum=2pi AFFINE, so the
+% antisymmetric 2-cell (def:closing_2cell) needs no dependent-coordinate tune. The
+% support-function boundary-exclusion route is REFUTED (needs arc <pi, impossible
+% under 2pi turning) -- do NOT retry it. Interior-zero uniqueness at t=0 comes from
+% the rigidity lemma (Prop 9.1 only-if), NOT from central_symmetry_closes (one-way).
+
+\subsection*{Route B (alternative): bicircle configuration winding}
+
+Source-faithful to Gluck: reduce a general $\mathrm{DFV}$ profile to a discrete
+\emph{bicircle} (four arcs / two curvature levels $a > c > b$ at the window level
+$c$), for which the error vector has an explicit closed form and the
+configuration loop winds $\pm 1$.
 
 \begin{itemize}
-  \item \textbf{The closing family.} Parametrise a $2$-real-dimensional family of
-    length profiles through the balanced base, staying on the Umlauf slice
-    $\{\mathrm{turningSum} = 2\pi\}$ (e.g.\ redistribute length between two
-    off-window blocks; the retraction re-normalises turning after each move).
-    Composing with the retraction of \cref{lem:exists_umlauf_scale} gives a
-    continuous map $D \to \mathbb{R}^2$, $u \mapsto \mathrm{closureGap}$, on a
-    $2$-disk $D$.
-  \item \textbf{Boundary winding.} On $\partial D$ the position residual winds
-    once around the origin, certified by the arcsin-monotone dependence
-    $\partial\theta_i/\partial\ell > 0$ (the sign faces). This is the discrete
-    cousin of the smooth $E$-vector winding; the in-tree
-    \texttt{exists\_zero\_of\_boundary\_winding} (\cref{chap:winding}) then
-    produces an interior zero. (\texttt{poincareMiranda\_rect} is the box-shaped
-    fallback with identical sign inputs, matching the in-tree $H^2$ proofs.)
-  \item \textbf{Assembly.} The interior zero is a length profile $\ell$ with
-    $\mathrm{closureGap} = 0$ and $\mathrm{turningSum} = 2\pi$; L1
-    (\cref{thm:convex_simple}) makes it simple, giving
-    $\mathrm{RealizesR2}\,\kappa$ and hence \cref{lem:dfv_closes}.
+  \item \textbf{Bicircle core + explicit error.} Build the discrete $4$-arc
+    bicircle and its error vector; the smooth model gives
+    $E = (1/ib - 1/ia)(1 - q_2 + q_3 - q_4)$ (deturck-gluck Prop~15.2), vanishing
+    exactly on the symmetric ``core'' $q_1 - q_2 + q_3 - q_4 = 0$ (Prop~9.1).
+    This mirrors the in-tree smooth \texttt{Bicircle.lean} / \texttt{Winding.lean}
+    engine (\cref{chap:winding}: \texttt{errorMap\_winding\_eq\_one},
+    \texttt{exists\_zero\_of\_boundary\_winding}).
+  \item \textbf{Transversality $\Rightarrow$ winding $\pm 1$.} The differential of
+    the error map is nonsingular on the core (Prop~15.2), forcing winding $\pm 1$
+    of the configuration loop (Prop~15.1). This step is a direct discrete analogue
+    and appears tractable (strategy-auditor).
+  \item \textbf{General $\to$ bicircle transfer (NOVEL).} Deform a general
+    $\mathrm{DFV}$ profile to the $4$-arc bicircle model (e.g.\ merging
+    adjacent same-sign turning). This step is \emph{not} in Gluck (no direct
+    analogue of his C$^0$-density / Prop~17.1 evaluation map, since the discrete
+    $\kappa$ is an exact target, not an approximand) --- it is the open research
+    step, the same difficulty as \cref{lem:closure_persists}.
 \end{itemize}
 
+\subsection*{Assembly and gating}
+
+A closing $\ell$ from either route is moderate-arc with
+$\mathrm{closureGap} = 0$ and $\mathrm{turningSum} = 2\pi$; L1
+(\cref{thm:convex_simple}) makes its development simple, giving
+$\mathrm{RealizesR2}\,\kappa$ and hence \cref{lem:dfv_closes}. The $3$-D
+\texttt{poincareMiranda\_cube} solve stays a distant fallback (it still needs the
+unproven position-face signs Gluck never establishes).
+
 \begin{remark}[what is safe now]
-  Only \cref{sec:umlauf} (\cref{lem:turning_scale_mono,lem:turning_scale_zero,%
-  lem:exists_umlauf_scale}) is complete and ready to formalize; it rests solely
-  on the definitional layer \cref{chap:discrete_defs} and standard Mathlib
-  $\arcsin$/IVT facts. \Cref{sec:balanced,sec:closure} are architecture only and
-  carry the remaining (currently conjectural) work of \cref{lem:dfv_closes};
-  they must be expanded to atomic detail before any prover is dispatched on them.
+  \Cref{sec:umlauf} (\cref{lem:turning_scale_mono,lem:turning_scale_zero,%
+  lem:exists_umlauf_scale,lem:umlauf_scale_unique}) is complete and axiom-clean
+  but \textbf{off the critical path} (\cref{rem:no_ray_retraction}).
+  \Cref{sec:balanced} is retired. \Cref{sec:edge_tune} (the single-edge turning
+  tune, \cref{lem:turningSum_edge_mono,lem:exists_edge_turning_scale,%
+  lem:edge_turning_scale_unique}) is DONE and axiom-clean. \Cref{sec:closure} is
+  live architecture: \cref{lem:central_symmetry_closes} is a short provable
+  building block, but the crux \cref{lem:closure_persists} (Route~A) / the
+  general$\to$bicircle transfer (Route~B) is an open research step. Per the
+  iter-069 progress-critic CHURNING corrective, no prover is dispatched here until
+  that crux is worked out to atomic detail and a HARD GATE clears it.
 \end{remark}

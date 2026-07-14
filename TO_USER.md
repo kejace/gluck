@@ -8,10 +8,5 @@
   hits `κ⁰≈const`); DFV profiles with `κ⁰ ≡ const` EXIST (`c + odd harmonics`), so Route A's t=0
   anchor degenerates on that class — rigidity needs a nondegeneracy hypothesis and the escalated
   consult should decide how those profiles are covered. Open leaf still held.
-- **`sync_leanok` comma-list bug — worked around at authoring level @078:** the two churning
-  multi-name `\lean{a, b}` Convexity blocks are now split one-name-per-block (satellites
-  `lem:heading_strict_mono_global`, `lem:support_halfplane_strict`), so the every-iter manual
-  override should stop. A sync-side parser fix is still worthwhile: ~28 other multi-name blocks
-  exist project-wide (stable, but invisible to the sync and to leandag matching).
 - **Housekeeping (non-blocking):** still no `LICENSE` file though `Gluck/Basic.lean` cites
   Apache 2.0 — add before publishing.
