@@ -2541,4 +2541,109 @@ theorem anchorGapDeriv_eq [NeZero n] (hn4 : 4 ≤ n) {m : ℕ} (hn : n = 2 * m)
   simp only [jacobianEdge]
   ring
 
+/-! ### The `t = 0` closing rigidity at a nondegenerate symmetric anchor
+(`lem:closure_boundary_rigidity`, L3g)
+
+The final assembly: strict differentiability of the anchor gap
+(`hasStrictFDerivAt_anchorGap`) with the closed-form derivative
+(`anchorGapDeriv_eq`), the `σ_min` lower bound (`norm_smul_add_smul_ge`), and
+the vanishing at the center give the direct estimate
+`‖F(0,z)‖ ≥ (σ/2)·‖z‖` on a small `ℓ¹`-window — no inverse function
+theorem. -/
+
+/-- The clean anchor gap vanishes at the center: the Jacobian base point is
+half-period symmetric and keeps the turning constraint, so it closes by
+`central_symmetry_closes`. This is the (⇐) direction of
+`lem:closure_boundary_rigidity` in clean anchor form. -/
+theorem anchorGap_center_eq_zero [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    (hn : n = 2 * m) (a b : ZMod n) {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (hsym : ∀ i : ZMod n, κs (i + (m : ZMod n)) = κs i) :
+    anchorGap m a b hκs 0 = 0 := by
+  simp only [anchorGap, anchorCell_zero]
+  exact central_symmetry_closes hn hsym (jacobianBaseLen_symm hκs hsym)
+    (turningSum_jacobianBaseLen hn4 hκs)
+
+/-- **`t = 0` rigidity in clean anchor form** (`lem:closure_boundary_rigidity`,
+anchor half): at a half-period-symmetric anchor whose Jacobian columns
+`C_a, C_b` are nondegenerate (`Im(conj C_a · C_b) ≠ 0` — which already forces
+the perturbed half-pairs to be distinct), the anchor gap vanishes on a small
+`ℓ¹`-window only at the center. Direct estimate: strict differentiability
+supplies `‖F(0,z) − Lz‖ ≤ (σ/2)‖z‖` near `0`, the `σ_min` bound supplies
+`‖Lz‖ ≥ σ(|u|+|v|) ≥ σ‖z‖`, so `‖F(0,z)‖ ≥ (σ/2)‖z‖ > 0` off the center. -/
+theorem anchorGap_zero_iff [NeZero n] (hn4 : 4 ≤ n) {m : ℕ} (hn : n = 2 * m)
+    {a b : ℕ} (ha : a < m) (hb : b < m) {κs : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i)
+    (hsym : ∀ i : ZMod n, κs (i + (m : ZMod n)) = κs i)
+    (hL : ((starRingEnd ℂ) (closingJacobianCol m hκs a)
+        * closingJacobianCol m hκs b).im ≠ 0) :
+    ∃ ρ' : ℝ, 0 < ρ' ∧ ∀ z : ℝ × ℝ, |z.1| + |z.2| ≤ ρ' →
+      (anchorGap m ((a : ℕ) : ZMod n) ((b : ℕ) : ZMod n) hκs z = 0 ↔
+        z = 0) := by
+  obtain ⟨σ, hσ, hbound⟩ := norm_smul_add_smul_ge hL
+  have hd := hasStrictFDerivAt_anchorGap hn4 m ((a : ℕ) : ZMod n)
+    ((b : ℕ) : ZMod n) hκs
+  rw [anchorGapDeriv_eq hn4 hn ha hb hκs hsym] at hd
+  set L : ℝ × ℝ →L[ℝ] ℂ :=
+    (ContinuousLinearMap.fst ℝ ℝ ℝ).smulRight (closingJacobianCol m hκs a)
+      + (ContinuousLinearMap.snd ℝ ℝ ℝ).smulRight (closingJacobianCol m hκs b)
+    with hLdef
+  have h0 : anchorGap m ((a : ℕ) : ZMod n) ((b : ℕ) : ZMod n) hκs 0 = 0 :=
+    anchorGap_center_eq_zero hn4 hn _ _ hκs hsym
+  -- the little-o window of the strict derivative at the center
+  have hlo := hasFDerivAt_iff_isLittleO_nhds_zero.mp hd.hasFDerivAt
+  have hev : ∀ᶠ z : ℝ × ℝ in nhds 0,
+      ‖anchorGap m ((a : ℕ) : ZMod n) ((b : ℕ) : ZMod n) hκs z - L z‖
+        ≤ σ / 2 * ‖z‖ := by
+    have hhalf : (0 : ℝ) < σ / 2 := by positivity
+    filter_upwards [Asymptotics.isLittleO_iff.mp hlo hhalf] with z hz
+    simpa [h0] using hz
+  rw [Metric.eventually_nhds_iff] at hev
+  obtain ⟨δ, hδ0, hδ⟩ := hev
+  refine ⟨δ / 2, by positivity, fun z hz => ?_⟩
+  have hz1 : ‖z‖ ≤ |z.1| + |z.2| := by
+    rw [Prod.norm_def, Real.norm_eq_abs, Real.norm_eq_abs]
+    exact max_le (le_add_of_nonneg_right (abs_nonneg _))
+      (le_add_of_nonneg_left (abs_nonneg _))
+  constructor
+  · intro hFz
+    by_contra hzne
+    have hsmall := hδ (show dist z 0 < δ by
+      rw [dist_zero_right]; linarith [hz1.trans hz])
+    rw [hFz, zero_sub, norm_neg] at hsmall
+    have hLz : L z = z.1 • closingJacobianCol m hκs a
+        + z.2 • closingJacobianCol m hκs b := by
+      simp [hLdef]
+    have hlow : σ * (|z.1| + |z.2|) ≤ ‖L z‖ := by
+      rw [hLz]; exact hbound z.1 z.2
+    have hzpos : 0 < ‖z‖ := norm_pos_iff.mpr hzne
+    have hz1pos : 0 < |z.1| + |z.2| := lt_of_lt_of_le hzpos hz1
+    have hup : ‖L z‖ ≤ σ / 2 * (|z.1| + |z.2|) :=
+      hsmall.trans (mul_le_mul_of_nonneg_left hz1 (by positivity))
+    nlinarith
+  · rintro rfl
+    exact h0
+
+/-- **`t = 0` closing rigidity at a nondegenerate symmetric anchor**
+(`lem:closure_boundary_rigidity`, corrected @080): let `n = 2m ≥ 4`, `κˢ` a
+positive half-period-symmetric anchor with nondegenerate Jacobian columns
+`Im(conj C_a · C_b) ≠ 0` (which already forces the perturbed half-pairs to be
+distinct). Then for every radius `ρ > 0` — in particular the window radius of
+`exists_closingCell_window`, shrinkable per `closingCell_window_mono` — there
+is `0 < ρ' ≤ ρ` such that on the `ℓ¹`-ball of radius `ρ'` the `t = 0` gap map
+of the closing 2-cell vanishes only at the center: `F(0,z) = 0 ↔ z = 0`. -/
+theorem closingGap_zero_iff [NeZero n] (hn4 : 4 ≤ n) {m : ℕ} (hn : n = 2 * m)
+    {a b : ℕ} (ha : a < m) (hb : b < m) {κs κ : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i)
+    (hsym : ∀ i : ZMod n, κs (i + (m : ZMod n)) = κs i)
+    (hL : ((starRingEnd ℂ) (closingJacobianCol m hκs a)
+        * closingJacobianCol m hκs b).im ≠ 0)
+    {ρ : ℝ} (hρ : 0 < ρ) (ht0 : (0 : ℝ) ≤ 0) (ht1 : (0 : ℝ) ≤ 1) :
+    ∃ ρ' : ℝ, 0 < ρ' ∧ ρ' ≤ ρ ∧ ∀ z : ℝ × ℝ, |z.1| + |z.2| ≤ ρ' →
+      (closingGap m ((a : ℕ) : ZMod n) ((b : ℕ) : ZMod n) hκs hκ ht0 ht1 z = 0
+        ↔ z = 0) := by
+  obtain ⟨ρ'', hρ''0, hiff⟩ := anchorGap_zero_iff hn4 hn ha hb hκs hsym hL
+  refine ⟨min ρ'' ρ, lt_min hρ''0 hρ, min_le_right _ _, fun z hz => ?_⟩
+  rw [closingGap_zero_eq_anchorGap]
+  exact hiff z (hz.trans (min_le_left _ _))
+
 end Gluck.Discrete
