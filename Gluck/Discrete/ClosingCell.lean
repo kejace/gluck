@@ -1846,9 +1846,11 @@ theorem closingGap_zero_eq_anchorGap (m : ℕ) (a b : ZMod n)
 /-- The center of the clean anchor cell is the Jacobian base point. -/
 theorem anchorCell_zero (m : ℕ) (a b : ZMod n) {κs : ZMod n → ℝ}
     (hκs : ∀ i, 0 < κs i) :
-    anchorCell m a b hκs (0, 0) = jacobianBaseLen hκs := by
+    anchorCell m a b hκs (0 : ℝ × ℝ) = jacobianBaseLen hκs := by
   funext j
-  simp only [anchorCell, jacobianBaseLen, chartPerturb_zero]
+  have h0 : chartPerturb m a b (0 : ℝ × ℝ) j = 2 * Real.pi / n :=
+    chartPerturb_zero m a b j
+  simp only [anchorCell, jacobianBaseLen, h0]
 
 /-- The pair-direction coefficient of edge `j` for the antisymmetric pair at
 `q`: `+1` at `j = q`, `−1` at `j = q + m`, `0` elsewhere (and `0` when the
@@ -2042,5 +2044,94 @@ theorem hasStrictFDerivAt_anchorHeading [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
   have hG := (h1.add h2).add h3
   exact hG.congr_of_eventuallyEq
     (heading_anchorCell_eventuallyEq hn4 m a b hκs k).symm
+
+/-! ### Strict differentiability of the anchor gap map -/
+
+/-- The sum-form derivative of the anchor gap at the center:
+`dF = Σ_j (e^{iψ_j}·dℓ_j + ℓ_j·e^{iψ_j}·i·dψ_j)`, all data at the Jacobian
+base point. -/
+noncomputable def anchorGapDeriv (m : ℕ) (a b : ZMod n) {κs : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) : ℝ × ℝ →L[ℝ] ℂ :=
+  ∑ j ∈ Finset.range n,
+    (Complex.exp ((heading κs (jacobianBaseLen hκs) j : ℂ) * Complex.I) •
+        Complex.ofRealCLM.comp (anchorCellDeriv m a b hκs ((j : ℕ) : ZMod n))
+      + ((jacobianBaseLen hκs ((j : ℕ) : ZMod n) : ℂ)
+          * Complex.exp ((heading κs (jacobianBaseLen hκs) j : ℂ) * Complex.I)
+          * Complex.I) •
+        Complex.ofRealCLM.comp (anchorHeadingDeriv m a b hκs j))
+
+/-- **Strict differentiability of the anchor gap map at the center**
+(`lem:closure_boundary_rigidity`, third layer): `F(0,·)` has strict derivative
+`anchorGapDeriv` at `z = 0` — the product/chain rule assembly of the edge and
+heading derivatives through `exp(i·ψ)`. -/
+theorem hasStrictFDerivAt_anchorGap [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
+    (a b : ZMod n) {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) :
+    HasStrictFDerivAt (anchorGap m a b hκs) (anchorGapDeriv m a b hκs) 0 := by
+  have hcell0 : anchorCell m a b hκs (0 : ℝ × ℝ) = jacobianBaseLen hκs :=
+    anchorCell_zero m a b hκs
+  have hterm : ∀ j ∈ Finset.range n, HasStrictFDerivAt
+      (fun z : ℝ × ℝ => (anchorCell m a b hκs z ((j : ℕ) : ZMod n) : ℂ)
+        * Complex.exp
+            ((heading κs (anchorCell m a b hκs z) j : ℂ) * Complex.I))
+      (Complex.exp ((heading κs (jacobianBaseLen hκs) j : ℂ) * Complex.I) •
+          Complex.ofRealCLM.comp (anchorCellDeriv m a b hκs ((j : ℕ) : ZMod n))
+        + ((jacobianBaseLen hκs ((j : ℕ) : ZMod n) : ℂ)
+            * Complex.exp ((heading κs (jacobianBaseLen hκs) j : ℂ)
+              * Complex.I)
+            * Complex.I) •
+          Complex.ofRealCLM.comp (anchorHeadingDeriv m a b hκs j)) 0 := by
+    intro j _
+    have hc : HasStrictFDerivAt
+        (fun z : ℝ × ℝ => (anchorCell m a b hκs z ((j : ℕ) : ZMod n) : ℂ))
+        (Complex.ofRealCLM.comp
+          (anchorCellDeriv m a b hκs ((j : ℕ) : ZMod n))) 0 :=
+      Complex.ofRealCLM.hasStrictFDerivAt.comp 0
+        (hasStrictFDerivAt_anchorCell hn4 m a b hκs _)
+    have hψc : HasStrictFDerivAt
+        (fun z : ℝ × ℝ => ((heading κs (anchorCell m a b hκs z) j : ℝ) : ℂ))
+        (Complex.ofRealCLM.comp (anchorHeadingDeriv m a b hκs j)) 0 :=
+      Complex.ofRealCLM.hasStrictFDerivAt.comp 0
+        (hasStrictFDerivAt_anchorHeading hn4 m a b hκs j)
+    have hinner := hψc.mul_const Complex.I
+    have hexp : HasStrictDerivAt Complex.exp
+        (Complex.exp
+          ((heading κs (anchorCell m a b hκs (0 : ℝ × ℝ)) j : ℂ) * Complex.I))
+        ((heading κs (anchorCell m a b hκs (0 : ℝ × ℝ)) j : ℂ) * Complex.I) :=
+      Complex.hasStrictDerivAt_exp _
+    have hd := hexp.comp_hasStrictFDerivAt 0 hinner
+    have hmul := hc.mul hd
+    simp only [Function.comp_apply] at hmul
+    rw [hcell0] at hmul
+    have hDeq : Complex.exp
+          ((heading κs (jacobianBaseLen hκs) j : ℂ) * Complex.I) •
+            Complex.ofRealCLM.comp
+              (anchorCellDeriv m a b hκs ((j : ℕ) : ZMod n))
+          + ((jacobianBaseLen hκs ((j : ℕ) : ZMod n) : ℂ)
+              * Complex.exp ((heading κs (jacobianBaseLen hκs) j : ℂ)
+                * Complex.I)
+              * Complex.I) •
+            Complex.ofRealCLM.comp (anchorHeadingDeriv m a b hκs j)
+        = (jacobianBaseLen hκs ((j : ℕ) : ZMod n) : ℂ) •
+            (Complex.exp
+              ((heading κs (jacobianBaseLen hκs) j : ℂ) * Complex.I) •
+              Complex.I •
+                Complex.ofRealCLM.comp (anchorHeadingDeriv m a b hκs j))
+          + Complex.exp
+              ((heading κs (jacobianBaseLen hκs) j : ℂ) * Complex.I) •
+            Complex.ofRealCLM.comp
+              (anchorCellDeriv m a b hκs ((j : ℕ) : ZMod n)) := by
+      rw [smul_smul, smul_smul, add_comm, mul_assoc]
+    rw [hDeq]
+    exact hmul
+  have hsum := HasStrictFDerivAt.sum (x := (0 : ℝ × ℝ)) hterm
+  have hfun : (∑ j ∈ Finset.range n,
+        fun z : ℝ × ℝ => (anchorCell m a b hκs z ((j : ℕ) : ZMod n) : ℂ)
+          * Complex.exp
+              ((heading κs (anchorCell m a b hκs z) j : ℂ) * Complex.I))
+      = anchorGap m a b hκs := by
+    funext z
+    simp [anchorGap, closureGap, vertexR2]
+  rw [hfun] at hsum
+  exact hsum
 
 end Gluck.Discrete
