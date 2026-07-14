@@ -310,4 +310,103 @@ theorem edge_turning_scale_unique [NeZero n] {κ ℓ : ZMod n → ℝ}
   · exact h
   · exact absurd hAB.symm (ne_of_lt (turningSum_update_lt hκ k hb h hMAa))
 
+/-! ## Section 3 — the central-symmetry closing anchor (`sec:closure`)
+
+The crux-independent `t = 0` anchor of the central-symmetry continuation (discrete
+DeTurck–Gluck Prop 9.1): a centrally symmetric moderate-arc profile with total
+turning `2π` closes. We phrase central symmetry as **half-period** `m = n/2`:
+`n = 2m` and both `κ` and `ℓ` satisfy `x_{i+m} = x_i` (indices in `ZMod n`, so
+`m` is the class `(m : ZMod n)`). The chain is: the turning angle is
+half-periodic (`turningAngle_add_half`); hence a half-period block of turning
+angles sums to `π` (`turningAngle_block_sum_half`); hence the heading advances by
+exactly `π` over a half-period (`heading_add_half`); hence each opposite edge is
+the negation of its mate and the development closes (`central_symmetry_closes`).
+
+Blueprint: `blueprint/src/chapters/Gluck_Discrete_Closing.tex`, `sec:closure`. -/
+
+/-- **`lem:turningangle_period`.** Under the half-period symmetry
+`κ_{i+m} = κ_i`, `ℓ_{i+m} = ℓ_i` (all `i : ZMod n`, `n = 2m`, `m` the class
+`(m : ZMod n)`), the Euclidean turning angle is invariant under the index shift
+by `m`: `turningAngle 0 κ ℓ (i + m) = turningAngle 0 κ ℓ i`. Direct from the
+turning-angle law (`K = 0`, `tK 0 = id`): both `κ` and `ℓ` are half-periodic,
+and `(i + m) - 1 = (i - 1) + m` so the left edge length is unchanged too. -/
+theorem turningAngle_add_half {m : ℕ} {κ ℓ : ZMod n → ℝ}
+    (hκ : ∀ i : ZMod n, κ (i + (m : ZMod n)) = κ i)
+    (hℓ : ∀ i : ZMod n, ℓ (i + (m : ZMod n)) = ℓ i) (i : ZMod n) :
+    turningAngle 0 κ ℓ (i + (m : ZMod n)) = turningAngle 0 κ ℓ i := by
+  simp only [turningAngle, tK_zero]
+  rw [hκ i, hℓ i,
+    show (i + (m : ZMod n)) - 1 = (i - 1) + (m : ZMod n) from by ring, hℓ (i - 1)]
+
+/-- **`lem:half_block_sum`.** Under the half-period symmetry and
+`turningSum κ ℓ = 2π` (`n = 2m`), every half-period block of turning angles sums
+to `π`: for all `a : ℕ`,
+`∑_{i ∈ range m} turningAngle 0 κ ℓ ((a+i : ℕ) : ZMod n) = π`.
+Two consecutive `m`-blocks starting at `a` are equal by `turningAngle_add_half`,
+and their concatenation is a full period summing to `turningSum = 2π`
+(`sum_range_natCast_add`); hence each block is `π`. -/
+theorem turningAngle_block_sum_half [NeZero n] {m : ℕ} (hn : n = 2 * m)
+    {κ ℓ : ZMod n → ℝ}
+    (hκ : ∀ i : ZMod n, κ (i + (m : ZMod n)) = κ i)
+    (hℓ : ∀ i : ZMod n, ℓ (i + (m : ZMod n)) = ℓ i)
+    (hT : turningSum κ ℓ = 2 * Real.pi) (a : ℕ) :
+    ∑ i ∈ Finset.range m, turningAngle 0 κ ℓ ((a + i : ℕ) : ZMod n) = Real.pi := by
+  have hnn : Finset.range n = Finset.range (m + m) := by rw [hn, two_mul]
+  have hfull : ∑ k ∈ Finset.range n, turningAngle 0 κ ℓ ((a + k : ℕ) : ZMod n)
+      = 2 * Real.pi := by
+    rw [sum_range_natCast_add (turningAngle 0 κ ℓ) a]; exact hT
+  rw [hnn, Finset.sum_range_add] at hfull
+  have hsecond : ∑ k ∈ Finset.range m,
+        turningAngle 0 κ ℓ ((a + (m + k) : ℕ) : ZMod n)
+      = ∑ k ∈ Finset.range m, turningAngle 0 κ ℓ ((a + k : ℕ) : ZMod n) := by
+    refine Finset.sum_congr rfl fun k _ => ?_
+    have hcast : ((a + (m + k) : ℕ) : ZMod n)
+        = ((a + k : ℕ) : ZMod n) + (m : ZMod n) := by push_cast; ring
+    rw [hcast, turningAngle_add_half hκ hℓ]
+  rw [hsecond] at hfull
+  linarith
+
+/-- **`lem:heading_add_half`.** Under the half-period symmetry and
+`turningSum κ ℓ = 2π` (`n = 2m`), the heading advances by exactly `π` over a
+half-period: for all `j : ℕ`, `heading κ ℓ (j + m) = heading κ ℓ j + π`.
+Split `range (j + m + 1) = range ((j+1) + m)` (`Finset.sum_range_add`); the
+trailing `m`-block is `π` by `turningAngle_block_sum_half` at `a = j + 1`. -/
+theorem heading_add_half [NeZero n] {m : ℕ} (hn : n = 2 * m) {κ ℓ : ZMod n → ℝ}
+    (hκ : ∀ i : ZMod n, κ (i + (m : ZMod n)) = κ i)
+    (hℓ : ∀ i : ZMod n, ℓ (i + (m : ZMod n)) = ℓ i)
+    (hT : turningSum κ ℓ = 2 * Real.pi) (j : ℕ) :
+    heading κ ℓ (j + m) = heading κ ℓ j + Real.pi := by
+  unfold heading
+  rw [show j + m + 1 = (j + 1) + m from by ring,
+    Finset.sum_range_add (fun i => turningAngle 0 κ ℓ (i : ZMod n)) (j + 1) m]
+  congr 1
+  exact turningAngle_block_sum_half hn hκ hℓ hT (j + 1)
+
+/-- **`lem:central_symmetry_closes`.** The crux-independent central-symmetry
+closing anchor (discrete DeTurck–Gluck Prop 9.1): a centrally symmetric
+(half-period `n = 2m`, `κ_{i+m} = κ_i`, `ℓ_{i+m} = ℓ_i`) profile with total
+turning `2π` closes, `closureGap κ ℓ = 0`. Split `range n = range (m+m)`; over
+each half-period the edge length is unchanged and the heading advances by `π`
+(`heading_add_half`), so `e^{i ψ_{j+m}} = -e^{i ψ_j}` (`Complex.exp_pi_mul_I`)
+and the opposite edge vectors cancel term by term. -/
+theorem central_symmetry_closes [NeZero n] {m : ℕ} (hn : n = 2 * m)
+    {κ ℓ : ZMod n → ℝ}
+    (hκ : ∀ i : ZMod n, κ (i + (m : ZMod n)) = κ i)
+    (hℓ : ∀ i : ZMod n, ℓ (i + (m : ZMod n)) = ℓ i)
+    (hT : turningSum κ ℓ = 2 * Real.pi) :
+    closureGap κ ℓ = 0 := by
+  have hnn : Finset.range n = Finset.range (m + m) := by rw [hn, two_mul]
+  simp only [closureGap, vertexR2]
+  rw [hnn, Finset.sum_range_add, ← Finset.sum_add_distrib]
+  apply Finset.sum_eq_zero
+  intro j _
+  have hℓeq : ((m + j : ℕ) : ZMod n) = ((j : ℕ) : ZMod n) + (m : ZMod n) := by
+    push_cast; ring
+  have hheq : heading κ ℓ (m + j) = heading κ ℓ j + Real.pi := by
+    rw [Nat.add_comm m j]; exact heading_add_half hn hκ hℓ hT j
+  rw [hℓeq, hℓ, hheq]
+  push_cast
+  rw [add_mul, Complex.exp_add, Complex.exp_pi_mul_I]
+  ring
+
 end Gluck.Discrete
