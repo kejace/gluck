@@ -3621,4 +3621,111 @@ theorem hasStrictDerivAt_twoLevelTheta [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
           (Real.arcsin (K * (chartInv hK hK (2 * Real.pi / n) / 2))
             + Real.arcsin (K * (chartInv hK hK (2 * Real.pi / n) / 2)))
 
+/-! ### The ε-total two-level headings and their derivative table -/
+
+/-- The heading `ε`-derivative table of `lem:anchor_witness_two_level`
+(valid for `j ≤ m`): `ψ̇_j = tan(π/n)/K` at `j ∈ {0, m}`, `0` at
+`j = m − 1`, and `tan(π/n)/(2K)` in between. -/
+noncomputable def twoLevelHeadDot (m : ℕ) (K : ℝ) (j : ℕ) : ℝ :=
+  if j = 0 ∨ j = m then Real.tan (Real.pi / n) / K
+  else if j = m - 1 then 0
+  else Real.tan (Real.pi / n) / (2 * K)
+
+/-- On the window `|ε| < K` the heading of the two-level profile at its
+Jacobian base lengths is the sum of the total turning angles. -/
+theorem heading_twoLevel [NeZero n] (hn4 : 4 ≤ n) {m : ℕ} (hn : n = 2 * m)
+    {K ε : ℝ} (hK : 0 < K) (hε : |ε| < K) {j : ℕ} (hj : j < n) :
+    heading (twoLevelProfile (n := n) m K ε)
+        (jacobianBaseLen (fun i => twoLevelProfile_pos (n := n) (m := m) hK hε i)) j
+      = ∑ i ∈ Finset.range (j + 1), twoLevelTheta (n := n) m hK ε i := by
+  unfold heading
+  exact Finset.sum_congr rfl fun i hi => turningAngle_twoLevel hn4 hn hK hε
+    (lt_of_le_of_lt (Finset.mem_range_succ_iff.mp hi) hj)
+
+/-- At `ε = 0` the total heading is the constant development `(j+1)·(2π/n)`. -/
+theorem sum_twoLevelTheta_zero [NeZero n] (hn4 : 4 ≤ n) {m : ℕ} {K : ℝ}
+    (hK : 0 < K) (j : ℕ) :
+    ∑ i ∈ Finset.range (j + 1), twoLevelTheta (n := n) m hK 0 i
+      = ((j : ℝ) + 1) * (2 * Real.pi / n) := by
+  rw [Finset.sum_congr rfl fun i _ => twoLevelTheta_zero hn4 hK i,
+    Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+  push_cast
+  ring
+
+/-- **The strict `ε`-derivative of the total heading** at `ε = 0` for
+`j ≤ m`: termwise differentiation of the slot table, evaluated to the
+closed-form `twoLevelHeadDot`. -/
+theorem hasStrictDerivAt_twoLevelHead [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    (hn : n = 2 * m) {K : ℝ} (hK : 0 < K) {j : ℕ} (hj : j ≤ m) :
+    HasStrictDerivAt
+      (fun ε : ℝ => ∑ i ∈ Finset.range (j + 1), twoLevelTheta (n := n) m hK ε i)
+      (twoLevelHeadDot (n := n) m K j) 0 := by
+  have hm2 : 2 ≤ m := by omega
+  have hsum : HasStrictDerivAt
+      (fun ε : ℝ => ∑ i ∈ Finset.range (j + 1), twoLevelTheta (n := n) m hK ε i)
+      (∑ i ∈ Finset.range (j + 1),
+        ((if i = 0 ∨ i = m then Real.tan (Real.pi / n) / (2 * K)
+          else if i = 1 then -(Real.tan (Real.pi / n) / (2 * K)) else 0)
+         + (if i = 0 ∨ i = m then Real.tan (Real.pi / n) / (2 * K)
+            else if i = m - 1 then -(Real.tan (Real.pi / n) / (2 * K)) else 0)))
+      0 := by
+    have h := HasStrictDerivAt.sum fun i hi =>
+      hasStrictDerivAt_twoLevelTheta hn4 hn hK
+        (le_trans (Finset.mem_range_succ_iff.mp hi) hj)
+    have hfun : (∑ i ∈ Finset.range (j + 1),
+          fun ε : ℝ => twoLevelTheta (n := n) m hK ε i)
+        = fun ε : ℝ => ∑ i ∈ Finset.range (j + 1),
+            twoLevelTheta (n := n) m hK ε i := by
+      funext ε
+      simp
+    rwa [hfun] at h
+  have hval : (∑ i ∈ Finset.range (j + 1),
+      ((if i = 0 ∨ i = m then Real.tan (Real.pi / n) / (2 * K)
+        else if i = 1 then -(Real.tan (Real.pi / n) / (2 * K)) else 0)
+       + (if i = 0 ∨ i = m then Real.tan (Real.pi / n) / (2 * K)
+          else if i = m - 1 then -(Real.tan (Real.pi / n) / (2 * K)) else 0)))
+      = twoLevelHeadDot (n := n) m K j := by
+    have hdecomp : ∀ i : ℕ,
+        ((if i = 0 ∨ i = m then Real.tan (Real.pi / n) / (2 * K)
+          else if i = 1 then -(Real.tan (Real.pi / n) / (2 * K)) else 0)
+         + (if i = 0 ∨ i = m then Real.tan (Real.pi / n) / (2 * K)
+            else if i = m - 1 then -(Real.tan (Real.pi / n) / (2 * K)) else 0))
+        = ((if i = 0 then Real.tan (Real.pi / n) / (2 * K) else 0)
+            + (if i = m then Real.tan (Real.pi / n) / (2 * K) else 0)
+            + (if i = 1 then -(Real.tan (Real.pi / n) / (2 * K)) else 0))
+          + ((if i = 0 then Real.tan (Real.pi / n) / (2 * K) else 0)
+            + (if i = m then Real.tan (Real.pi / n) / (2 * K) else 0)
+            + (if i = m - 1 then -(Real.tan (Real.pi / n) / (2 * K)) else 0)) := by
+      intro i
+      split_ifs <;> first | ring1 | (exfalso; omega)
+    rw [Finset.sum_congr rfl fun i _ => hdecomp i]
+    simp only [Finset.sum_add_distrib, Finset.sum_ite_eq', Finset.mem_range]
+    unfold twoLevelHeadDot
+    have hK' : K ≠ 0 := hK.ne'
+    have h0j : (0 : ℕ) < j + 1 := by omega
+    by_cases hj0 : j = 0
+    · rw [if_pos h0j, if_neg (by omega : ¬ m < j + 1),
+        if_neg (by omega : ¬ 1 < j + 1), if_neg (by omega : ¬ m - 1 < j + 1),
+        if_pos (Or.inl hj0)]
+      field_simp
+      ring
+    · by_cases hjm : j = m
+      · rw [if_pos h0j, if_pos (by omega : m < j + 1),
+          if_pos (by omega : 1 < j + 1), if_pos (by omega : m - 1 < j + 1),
+          if_pos (Or.inr hjm)]
+        field_simp
+        ring
+      · by_cases hjm1 : j = m - 1
+        · rw [if_pos h0j, if_neg (by omega : ¬ m < j + 1),
+            if_pos (by omega : 1 < j + 1), if_pos (by omega : m - 1 < j + 1),
+            if_neg (by omega : ¬(j = 0 ∨ j = m)), if_pos hjm1]
+          ring
+        · rw [if_pos h0j, if_neg (by omega : ¬ m < j + 1),
+            if_pos (by omega : 1 < j + 1), if_neg (by omega : ¬ m - 1 < j + 1),
+            if_neg (by omega : ¬(j = 0 ∨ j = m)), if_neg hjm1]
+          field_simp
+          ring
+  rw [← hval]
+  exact hsum
+
 end Gluck.Discrete
