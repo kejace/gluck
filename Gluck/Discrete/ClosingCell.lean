@@ -1165,4 +1165,114 @@ theorem closureGap_eq_zero_of_const [NeZero n] {c : ℝ} (hc : c ≠ 0)
     simp [hg]
   rw [hgn, hg0, sub_self, mul_zero]
 
+/-- At `t = 0` with CONSTANT central symmetrization the gap map vanishes at
+EVERY point of the 2-cell, not only at the center: the inscribed-polygon
+degeneracy transported to the closing 2-cell. (Compare
+`closingGap_center_eq_zero`, which needs no constancy but only covers
+`z = 0`.) No `n = 2m` hypothesis is needed — constancy alone degenerates the
+gap. -/
+theorem closingGap_eq_zero_of_centralSym_const [NeZero n] (m : ℕ)
+    (a b : ZMod n) {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i) {c : ℝ}
+    (hconst : ∀ i, centralSym m κ i = c)
+    (ht0 : (0 : ℝ) ≤ 0) (ht1 : (0 : ℝ) ≤ 1) {z : ℝ × ℝ}
+    (hmem : ∀ j : ZMod n, chartPerturb m a b z j ∈
+      chartMap (curvHomotopy m κ 0 j) (curvHomotopy m κ 0 (j + 1)) ''
+        Set.Ioo (0 : ℝ)
+          (2 / max (curvHomotopy m κ 0 j) (curvHomotopy m κ 0 (j + 1)))) :
+    closingGap m a b hκ ht0 ht1 z = 0 := by
+  have hc0 : 0 < c := by
+    have := centralSym_pos (m := m) hκ 0
+    rwa [hconst 0] at this
+  have hfun : curvHomotopy m κ 0 = fun _ => c := by
+    funext i
+    rw [curvHomotopy_zero]
+    exact hconst i
+  have hMA := moderateArc_closingCell m a b hκ ht0 ht1 hmem
+  have hT := turningSum_closingCell m a b hκ ht0 ht1 hmem
+  rw [hfun] at hMA hT
+  have hwall : ∀ i : ZMod n,
+      |c * (closingCell m a b hκ ht0 ht1 z i / 2)| ≤ 1 := by
+    intro i
+    have h1 := (hMA i).2.2.2.2
+    simp only [tK_zero] at h1
+    have hpos : 0 < closingCell m a b hκ ht0 ht1 z i := (hMA i).1
+    rw [abs_mul, abs_of_pos (by linarith :
+      (0 : ℝ) < closingCell m a b hκ ht0 ht1 z i / 2)]
+    exact le_of_lt h1
+  unfold closingGap
+  rw [hfun]
+  exact closureGap_eq_zero_of_const hc0.ne' hwall hT
+
+/-- **The `t = 0` rigidity target is degenerate for constant profiles**: for
+`κ ≡ c > 0` (whose central symmetrization is again `≡ c`) there is a positive
+radius on which the gap map `F(0,·)` of the closing 2-cell vanishes
+IDENTICALLY in `z`. -/
+theorem closingGap_const_profile_eq_zero [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
+    (a b : ZMod n) {c : ℝ} (hc : 0 < c)
+    (ht0 : (0 : ℝ) ≤ 0) (ht1 : (0 : ℝ) ≤ 1) :
+    ∃ ρ : ℝ, 0 < ρ ∧ ∀ z : ℝ × ℝ, |z.1| + |z.2| ≤ ρ →
+      closingGap (κ := fun _ => c) m a b (fun _ => hc) ht0 ht1 z = 0 := by
+  obtain ⟨ρ, c₁, d₁, hρ0, _hρπ, hc₁, hcd₁, hd₁, hwin⟩ :=
+    exists_closingCell_window hn4 m (κ := fun _ => c) (fun _ => hc)
+  refine ⟨ρ, hρ0, fun z hz => ?_⟩
+  have hconst : ∀ i : ZMod n, centralSym m (fun _ => c) i = c := by
+    intro i
+    simp [centralSym]
+  refine closingGap_eq_zero_of_centralSym_const m a b _ hconst ht0 ht1 ?_
+  intro j
+  exact chartMap_image_window_subset (curvHomotopy_pos (fun _ => hc) ht0 ht1 j)
+    hc₁ hd₁ (hwin 0 ht0 ht1 z hz a b j)
+
+/-- **Refutation of the dispatched `t = 0` rigidity iff** (`closingGap_zero_iff`
+as specified @079, `lem:closure_boundary_rigidity`): for a constant positive
+profile — with the perturbed half-pairs `a, b` arbitrary, in particular as
+distinct as desired — EVERY radius contains a NONZERO `z` with `F(0,z) = 0`.
+Positivity and pair-distinctness therefore do not suffice; a correct rigidity
+statement must carry a nondegeneracy hypothesis on `κ⁰ = centralSym m κ`
+(non-constancy at the very least). -/
+theorem closingGap_zero_iff_fails_of_const [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
+    (a b : ZMod n) {c : ℝ} (hc : 0 < c)
+    (ht0 : (0 : ℝ) ≤ 0) (ht1 : (0 : ℝ) ≤ 1) :
+    ∀ ρ' : ℝ, 0 < ρ' → ∃ z : ℝ × ℝ, z ≠ 0 ∧ |z.1| + |z.2| ≤ ρ' ∧
+      closingGap (κ := fun _ => c) m a b (fun _ => hc) ht0 ht1 z = 0 := by
+  obtain ⟨ρ, hρ0, hall⟩ := closingGap_const_profile_eq_zero hn4 m a b hc ht0 ht1
+  intro ρ' hρ'
+  have hmin : 0 < min ρ ρ' := lt_min hρ0 hρ'
+  have habs : |min ρ ρ' / 2| + |(0 : ℝ)| = min ρ ρ' / 2 := by
+    rw [abs_zero, add_zero, abs_of_pos (by linarith : (0 : ℝ) < min ρ ρ' / 2)]
+  refine ⟨(min ρ ρ' / 2, 0), ?_, ?_, hall _ ?_⟩
+  · intro hEq
+    have h1 : min ρ ρ' / 2 = 0 := by
+      simpa using congrArg Prod.fst hEq
+    linarith
+  · change |min ρ ρ' / 2| + |(0 : ℝ)| ≤ ρ'
+    rw [habs]
+    have := min_le_right ρ ρ'
+    linarith
+  · change |min ρ ρ' / 2| + |(0 : ℝ)| ≤ ρ
+    rw [habs]
+    have := min_le_left ρ ρ'
+    linarith
+
+/-- Monotonicity of the uniform window in the radius: the window package of
+`exists_closingCell_window` restricts to any smaller radius `ρ' ≤ ρ` — the
+sanctioned shrinking of `ρ` in `def:closing_2cell`
+(`lem:closure_boundary_rigidity` licenses proving rigidity on a possibly
+smaller ball). -/
+theorem closingCell_window_mono (m : ℕ) {κ : ZMod n → ℝ}
+    {c d ρ ρ' : ℝ} (hρ' : ρ' ≤ ρ)
+    (hwin : ∀ t : ℝ, 0 ≤ t → t ≤ 1 → ∀ z : ℝ × ℝ, |z.1| + |z.2| ≤ ρ →
+      ∀ a b j : ZMod n, chartPerturb m a b z j ∈
+        chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) ''
+          Set.Icc
+            (c * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))
+            (d * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))) :
+    ∀ t : ℝ, 0 ≤ t → t ≤ 1 → ∀ z : ℝ × ℝ, |z.1| + |z.2| ≤ ρ' →
+      ∀ a b j : ZMod n, chartPerturb m a b z j ∈
+        chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) ''
+          Set.Icc
+            (c * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))
+            (d * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)))) :=
+  fun t ht0 ht1 z hz => hwin t ht0 ht1 z (hz.trans hρ')
+
 end Gluck.Discrete
