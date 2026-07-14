@@ -2134,4 +2134,200 @@ theorem hasStrictFDerivAt_anchorGap [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
   rw [hfun] at hsum
   exact hsum
 
+/-! ### The symmetric base point: cast, counting, and symmetry identities
+
+The ingredients for identifying `anchorGapDeriv` with the closed-form columns
+`closingJacobianCol` at a half-period-symmetric anchor. -/
+
+private lemma natCast_zmod_inj [NeZero n] {i j : ℕ} (hi : i < n) (hj : j < n)
+    (h : (i : ZMod n) = (j : ZMod n)) : i = j := by
+  have := congrArg ZMod.val h
+  rwa [ZMod.val_natCast_of_lt hi, ZMod.val_natCast_of_lt hj] at this
+
+private lemma neg_one_zmod_eq [NeZero n] :
+    (-1 : ZMod n) = ((n - 1 : ℕ) : ZMod n) := by
+  have h1 : 1 ≤ n := NeZero.one_le
+  rw [Nat.cast_sub h1, ZMod.natCast_self, Nat.cast_one, zero_sub]
+
+/-- Evaluation of the pair sign at lifted indices below `n`. -/
+theorem pairSign_natCast [NeZero n] {m : ℕ} (hn : n = 2 * m) {q j : ℕ}
+    (hq : q < m) (hj : j < n) :
+    pairSign m ((q : ℕ) : ZMod n) ((j : ℕ) : ZMod n)
+      = (if j = q then (1 : ℝ) else 0) - (if j = q + m then 1 else 0) := by
+  have hqn : q < n := by omega
+  have hqmn : q + m < n := by omega
+  rw [pairSign]
+  congr 1
+  · refine if_congr ⟨fun h => natCast_zmod_inj hj hqn h, fun h => by rw [h]⟩
+      rfl rfl
+  · refine if_congr ⟨fun h => ?_, fun h => by rw [h]; push_cast; ring⟩ rfl rfl
+    refine natCast_zmod_inj hj hqmn ?_
+    rw [h]
+    push_cast
+    ring
+
+/-- The pair sign at the wrap-around edge `−1`: it fires (negatively) exactly
+for the boundary pair `q = m − 1`. -/
+theorem pairSign_neg_one [NeZero n] {m : ℕ} (hn : n = 2 * m) (hn4 : 4 ≤ n)
+    {q : ℕ} (hq : q < m) :
+    pairSign m ((q : ℕ) : ZMod n) (-1)
+      = -(if q + 1 = m then (1 : ℝ) else 0) := by
+  have hn1 : n - 1 < n := by omega
+  rw [neg_one_zmod_eq, pairSign_natCast hn hq hn1]
+  have h1 : ¬(n - 1 = q) := by omega
+  rw [if_neg h1]
+  have h2 : (n - 1 = q + m) ↔ (q + 1 = m) := by omega
+  rw [if_congr h2 rfl rfl, zero_sub]
+
+/-- The Jacobian base point is half-period symmetric (the anchor's curvature
+pairs coincide on opposite edges). -/
+theorem jacobianBaseLen_symm {m : ℕ} {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (hsym : ∀ i : ZMod n, κs (i + (m : ZMod n)) = κs i) (i : ZMod n) :
+    jacobianBaseLen hκs (i + (m : ZMod n)) = jacobianBaseLen hκs i := by
+  have hcongr : ∀ {p p' q q' : ℝ} (hp : 0 < p) (hq : 0 < q) (hp' : 0 < p')
+      (hq' : 0 < q') (s : ℝ), p = p' → q = q' →
+      chartInv hp hq s = chartInv hp' hq' s := by
+    intro p p' q q' hp hq hp' hq' s hpe hqe
+    subst hpe; subst hqe; rfl
+  simp only [jacobianBaseLen]
+  exact hcongr _ _ _ _ _ (hsym i)
+    (by rw [show i + (m : ZMod n) + 1 = (i + 1) + (m : ZMod n) by ring]
+        exact hsym (i + 1))
+
+/-- The Jacobian base point satisfies the turning constraint: every edge chart
+value is `2π/n`, so the total turning is `2π`. -/
+theorem turningSum_jacobianBaseLen [NeZero n] (hn4 : 4 ≤ n)
+    {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) :
+    turningSum κs (jacobianBaseLen hκs) = 2 * Real.pi := by
+  rw [turningSum_eq_sum_edgeChart]
+  have hval : ∀ j : ZMod n,
+      chartMap (κs j) (κs (j + 1)) (jacobianBaseLen hκs j) = 2 * Real.pi / n := by
+    intro j
+    simp only [jacobianBaseLen]
+    exact chartMap_chartInv _ _ (base_chart_mem_image hn4 hκs j)
+  rw [Finset.sum_congr rfl fun j _ => hval j, Finset.sum_const,
+    Finset.card_univ, ZMod.card, nsmul_eq_mul]
+  have hn0 : (n : ℝ) ≠ 0 := by
+    have := NeZero.pos n
+    positivity
+  field_simp
+
+/-- Headings of the Jacobian base point advance by `π` over a half-period. -/
+theorem heading_jacobianBaseLen_add_half [NeZero n] {m : ℕ} (hn : n = 2 * m)
+    (hn4 : 4 ≤ n) {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (hsym : ∀ i : ZMod n, κs (i + (m : ZMod n)) = κs i) (j : ℕ) :
+    heading κs (jacobianBaseLen hκs) (j + m)
+      = heading κs (jacobianBaseLen hκs) j + Real.pi :=
+  heading_add_half hn hsym (jacobianBaseLen_symm hκs hsym)
+    (turningSum_jacobianBaseLen hn4 hκs) j
+
+/-- The base edge vectors flip sign over a half-period: `E_{j+m} = −E_j`. -/
+theorem jacobianEdge_add_half [NeZero n] {m : ℕ} (hn : n = 2 * m)
+    (hn4 : 4 ≤ n) {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (hsym : ∀ i : ZMod n, κs (i + (m : ZMod n)) = κs i) (j : ℕ) :
+    jacobianEdge hκs (j + m) = -jacobianEdge hκs j := by
+  have hcast : ((j + m : ℕ) : ZMod n) = ((j : ℕ) : ZMod n) + (m : ZMod n) := by
+    push_cast; ring
+  rw [jacobianEdge, jacobianEdge, hcast, jacobianBaseLen_symm hκs hsym,
+    heading_jacobianBaseLen_add_half hn hn4 hκs hsym]
+  push_cast
+  rw [add_mul, Complex.exp_add, Complex.exp_pi_mul_I]
+  ring
+
+/-- The base edge vectors sum to zero: the symmetric base point closes
+(`central_symmetry_closes` at the anchor). -/
+theorem sum_jacobianEdge_eq_zero [NeZero n] {m : ℕ} (hn : n = 2 * m)
+    (hn4 : 4 ≤ n) {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (hsym : ∀ i : ZMod n, κs (i + (m : ZMod n)) = κs i) :
+    ∑ j ∈ Finset.range n, jacobianEdge hκs j = 0 := by
+  have hclose := central_symmetry_closes hn hsym
+    (jacobianBaseLen_symm hκs hsym) (turningSum_jacobianBaseLen hn4 hκs)
+  simpa [closureGap, vertexR2, jacobianEdge] using hclose
+
+/-- The slot derivatives at the Jacobian base point are positive. -/
+theorem jacobianSlot_pos [NeZero n] (hn4 : 4 ≤ n) {κs : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) {i j : ZMod n} (hij : i = j ∨ i = j + 1) :
+    0 < chartSlotDeriv (κs i) (jacobianBaseLen hκs j) := by
+  have hmem := jacobianBaseLen_mem hn4 hκs j
+  have hle : κs i ≤ max (κs j) (κs (j + 1)) := by
+    rcases hij with rfl | rfl
+    · exact le_max_left _ _
+    · exact le_max_right _ _
+  have hwall : |κs i * jacobianBaseLen hκs j / 2| < 1 := by
+    have := chartArg_mem (hκs j) (hκs (j + 1)) hmem (hκs i) hle
+    exact abs_lt.mpr ⟨this.1, this.2⟩
+  exact chartSlotDeriv_pos (hκs i) hwall
+
+/-- The tail slot times `λ'` is the share `p_j`. -/
+theorem tailSlot_mul_lambda' {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (j : ZMod n) :
+    chartSlotDeriv (κs j) (jacobianBaseLen hκs j) * jacobianLambda' hκs j
+      = jacobianShare hκs j := by
+  rw [jacobianLambda', jacobianShare, mul_one_div]
+
+/-- The head slot times `λ'` is `1 − p_j` (the chart derivative splits as
+`A + B = 1/λ'`). -/
+theorem headSlot_mul_lambda' [NeZero n] (hn4 : 4 ≤ n) {κs : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (j : ZMod n) :
+    chartSlotDeriv (κs (j + 1)) (jacobianBaseLen hκs j) * jacobianLambda' hκs j
+      = 1 - jacobianShare hκs j := by
+  have hA := jacobianSlot_pos hn4 hκs (i := j) (j := j) (Or.inl rfl)
+  have hB := jacobianSlot_pos hn4 hκs (i := j + 1) (j := j) (Or.inr rfl)
+  rw [jacobianLambda', jacobianShare]
+  field_simp
+  ring
+
+/-- `λ'` is half-period symmetric at a symmetric anchor. -/
+theorem jacobianLambda'_add_half {m : ℕ} {κs : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i)
+    (hsym : ∀ i : ZMod n, κs (i + (m : ZMod n)) = κs i) (i : ZMod n) :
+    jacobianLambda' hκs (i + (m : ZMod n)) = jacobianLambda' hκs i := by
+  rw [jacobianLambda', jacobianLambda', jacobianBaseLen_symm hκs hsym, hsym,
+    show i + (m : ZMod n) + 1 = (i + 1) + (m : ZMod n) by ring, hsym]
+
+/-- The share `p` is half-period symmetric at a symmetric anchor. -/
+theorem jacobianShare_add_half {m : ℕ} {κs : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i)
+    (hsym : ∀ i : ZMod n, κs (i + (m : ZMod n)) = κs i) (i : ZMod n) :
+    jacobianShare hκs (i + (m : ZMod n)) = jacobianShare hκs i := by
+  rw [jacobianShare, jacobianShare, jacobianBaseLen_symm hκs hsym, hsym,
+    show i + (m : ZMod n) + 1 = (i + 1) + (m : ZMod n) by ring, hsym]
+
+/-- Extraction of a pair-signed sum over a full period: only the two members
+of the antipodal pair survive. -/
+theorem sum_mul_pairSign [NeZero n] {m : ℕ} (hn : n = 2 * m)
+    (f : ℕ → ℂ) {q : ℕ} (hq : q < m) :
+    ∑ j ∈ Finset.range n,
+        f j * ((pairSign m ((q : ℕ) : ZMod n) ((j : ℕ) : ZMod n) : ℝ) : ℂ)
+      = f q - f (q + m) := by
+  have hqn : q < n := by omega
+  have hqmn : q + m < n := by omega
+  have hsummand : ∀ j ∈ Finset.range n,
+      f j * ((pairSign m ((q : ℕ) : ZMod n) ((j : ℕ) : ZMod n) : ℝ) : ℂ)
+        = (if j = q then f j else 0) - (if j = q + m then f j else 0) := by
+    intro j hj
+    rw [pairSign_natCast hn hq (Finset.mem_range.mp hj)]
+    push_cast
+    split_ifs <;> simp
+  rw [Finset.sum_congr rfl hsummand, Finset.sum_sub_distrib,
+    Finset.sum_ite_eq' (Finset.range n) q f,
+    Finset.sum_ite_eq' (Finset.range n) (q + m) f,
+    if_pos (Finset.mem_range.mpr hqn), if_pos (Finset.mem_range.mpr hqmn)]
+
+/-- The running pair-sign count: over the first `j` edges the antisymmetric
+pair contributes `[q < j] − [q + m < j]`. -/
+theorem sum_pairSign_range [NeZero n] {m : ℕ} (hn : n = 2 * m) {q j : ℕ}
+    (hq : q < m) (hj : j ≤ n) :
+    ∑ e ∈ Finset.range j, pairSign m ((q : ℕ) : ZMod n) ((e : ℕ) : ZMod n)
+      = (if q < j then (1 : ℝ) else 0) - (if q + m < j then 1 else 0) := by
+  have hsummand : ∀ e ∈ Finset.range j,
+      pairSign m ((q : ℕ) : ZMod n) ((e : ℕ) : ZMod n)
+        = (if e = q then (1 : ℝ) else 0) - (if e = q + m then 1 else 0) :=
+    fun e he =>
+      pairSign_natCast hn hq (lt_of_lt_of_le (Finset.mem_range.mp he) hj)
+  rw [Finset.sum_congr rfl hsummand, Finset.sum_sub_distrib,
+    Finset.sum_ite_eq' (Finset.range j) q (fun _ => (1 : ℝ)),
+    Finset.sum_ite_eq' (Finset.range j) (q + m) (fun _ => (1 : ℝ))]
+  simp only [Finset.mem_range]
+
 end Gluck.Discrete
