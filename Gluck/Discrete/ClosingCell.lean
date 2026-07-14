@@ -3728,4 +3728,84 @@ theorem hasStrictDerivAt_twoLevelHead [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
   rw [← hval]
   exact hsum
 
+/-! ### The free half-block phase sum
+
+`closingJacobianCol_const_eq_zero` at `K = 1` *is* the geometric-sum
+evaluation `∑_{r=q+1}^{q+m−1} e^{i(r+1)α} = i·cot(π/n)·e^{i(q+1)α}` — no
+`geom_sum` lemma is needed (blueprint R3 note). -/
+
+/-- Real→complex coercion preserves strict differentiability (project-local:
+Mathlib has only the non-strict `HasDerivAt.ofReal_comp`). -/
+private lemma hasStrictDerivAt_ofReal_comp {f : ℝ → ℝ} {f' x : ℝ}
+    (hf : HasStrictDerivAt f f' x) :
+    HasStrictDerivAt (fun y => (f y : ℂ)) (f' : ℂ) x := by
+  have h := Complex.ofRealCLM.hasStrictFDerivAt.comp_hasStrictDerivAt x hf
+  simp only [Function.comp_def, Complex.ofRealCLM_apply] at h
+  exact h
+
+/-- **The half-block phase sum at the constant anchor**
+(`lem:anchor_witness_two_level`, base-point gauge): for `q < m`,
+`∑_{r∈Ico(q+1,q+m)} e^{i(r+1)·2π/n} = i·cot(π/n)·e^{i(q+1)·2π/n}` — extracted
+from the exact vanishing of the constant-anchor Jacobian column. -/
+theorem sum_exp_Ico_eq [NeZero n] (hn4 : 4 ≤ n) {m : ℕ} (hn : n = 2 * m)
+    {q : ℕ} (hq : q < m) :
+    ∑ r ∈ Finset.Ico (q + 1) (q + m),
+        Complex.exp (((((r : ℝ) + 1) * (2 * Real.pi / n) : ℝ) : ℂ) * Complex.I)
+      = Complex.I
+          * ((Real.cos (Real.pi / n) / Real.sin (Real.pi / n) : ℝ) : ℂ)
+          * Complex.exp (((((q : ℝ) + 1) * (2 * Real.pi / n) : ℝ) : ℂ)
+              * Complex.I) := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρpos : 0 < Real.pi / n := by positivity
+  have hρhalf : Real.pi / n < Real.pi / 2 :=
+    lt_of_le_of_lt (div_le_div_of_nonneg_left hπ.le four_pos hn4') (by linarith)
+  have hsin0 : 0 < Real.sin (Real.pi / n) :=
+    Real.sin_pos_of_pos_of_lt_pi hρpos (by linarith)
+  have hcos0 : 0 < Real.cos (Real.pi / n) :=
+    Real.cos_pos_of_mem_Ioo ⟨by linarith, hρhalf⟩
+  have h0 := closingJacobianCol_const_eq_zero (K := 1) hn4 hn one_pos hq
+  unfold closingJacobianCol at h0
+  have hfun : jacobianBaseLen (fun _ : ZMod n => one_pos)
+      = fun _ : ZMod n => 2 * Real.sin (Real.pi / n) / 1 :=
+    funext fun j => chartInv_const hn4 one_pos
+  rw [Finset.sum_congr rfl fun r _ => jacobianEdge_const hn4 one_pos r,
+    jacobianLambda'_const hn4 one_pos, jacobianShare_const hn4 one_pos,
+    hfun, heading_const hn4 one_pos q] at h0
+  set e : ℂ := Complex.exp (((((q : ℝ) + 1) * (2 * Real.pi / n) : ℝ) : ℂ)
+    * Complex.I) with he
+  set S2 : ℂ := ∑ r ∈ Finset.Ico (q + 1) (q + m),
+    Complex.exp (((((r : ℝ) + 1) * (2 * Real.pi / n) : ℝ) : ℂ) * Complex.I)
+    with hS2
+  have hsum : (∑ r ∈ Finset.Ico (q + 1) (q + m),
+      ((2 * Real.sin (Real.pi / n) / 1 : ℝ) : ℂ)
+        * Complex.exp (((((r : ℝ) + 1) * (2 * Real.pi / n) : ℝ) : ℂ)
+            * Complex.I))
+      = ((2 * Real.sin (Real.pi / n) / 1 : ℝ) : ℂ) * S2 := by
+    rw [hS2, Finset.mul_sum]
+  rw [hsum] at h0
+  have hkey : Complex.I * ((2 * Real.sin (Real.pi / n) / 1 : ℝ) : ℂ) * S2
+      = -(((2 * (Real.cos (Real.pi / n) / 1) : ℝ) : ℂ) * e) := by
+    have h20 : ((2 * (1 / 2 : ℝ) - 1 : ℝ) : ℂ) = 0 := by norm_num
+    rw [h20, zero_mul, zero_add] at h0
+    linear_combination h0
+  have h2s : (0 : ℝ) < 2 * Real.sin (Real.pi / n) / 1 := by positivity
+  have hne : Complex.I * ((2 * Real.sin (Real.pi / n) / 1 : ℝ) : ℂ) ≠ 0 :=
+    mul_ne_zero Complex.I_ne_zero (Complex.ofReal_ne_zero.mpr h2s.ne')
+  apply mul_left_cancel₀ hne
+  rw [hkey]
+  have hI : Complex.I * Complex.I = -1 := Complex.I_mul_I
+  have hsC : (Real.sin (Real.pi / n) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr hsin0.ne'
+  have hd : (Real.sin (Real.pi / n) : ℂ)
+      * ((Real.cos (Real.pi / n) : ℂ) / (Real.sin (Real.pi / n) : ℂ))
+      = (Real.cos (Real.pi / n) : ℂ) := by
+    field_simp
+  simp only [Complex.ofReal_mul, Complex.ofReal_div, Complex.ofReal_ofNat,
+    Complex.ofReal_one, div_one]
+  linear_combination (-2 * (Real.sin (Real.pi / n) : ℂ)
+      * ((Real.cos (Real.pi / n) : ℂ) / (Real.sin (Real.pi / n) : ℂ)) * e) * hI
+    + (2 * e) * hd
+
 end Gluck.Discrete
