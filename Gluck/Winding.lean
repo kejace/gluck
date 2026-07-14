@@ -1120,4 +1120,41 @@ theorem windingNumberC_linearLoop (a b : ℂ) (hab : ‖a‖ ≠ ‖b‖) :
       (expLoop_loop a) (linearLoop_loop a b) hpert
     rw [← h, windingNumberC_expLoop a ha]
 
+/-- **Public free-homotopy invariance of the `ℂ`-winding number** (blueprint
+`thm:winding_number_c_homotopy`), the public wrapper for the private
+`windingNumber_eq_of_homotopy`.  If `H : [0,1]² → ℂ` is a continuous
+*nowhere-zero* homotopy through loops (`H (s,0) = H (s,1)` for every `s`) from
+the nowhere-zero loop `γ₀` (at `s = 0`) to the nowhere-zero loop `γ₁`
+(at `s = 1`), then `γ₀` and `γ₁` have the same winding number about the origin.
+Normalise `H` pointwise onto `S¹` by radial projection and apply the circle
+version, exactly as in the proof of `windingNumberC_eq_of_perturb` with a
+general `H` in place of the straight line. -/
+theorem windingNumberC_eq_of_homotopy (γ₀ γ₁ : C(I, ℂ))
+    (hγ₀ : ∀ t, γ₀ t ≠ 0) (hγ₁ : ∀ t, γ₁ t ≠ 0)
+    (H : C(I × I, ℂ)) (hH : ∀ st, H st ≠ 0)
+    (h0 : ∀ t, H (0, t) = γ₀ t) (h1 : ∀ t, H (1, t) = γ₁ t)
+    (hloop : ∀ s, H (s, 0) = H (s, 1)) :
+    windingNumberC γ₀ hγ₀ = windingNumberC γ₁ hγ₁ := by
+  set Hn : C(I × I, Circle) :=
+    ⟨fun st => circleProj (H st) (hH st), by
+      apply Continuous.subtype_mk
+      exact H.continuous.div
+        (Complex.continuous_ofReal.comp (continuous_norm.comp H.continuous))
+        (fun st => Complex.ofReal_ne_zero.2 (norm_ne_zero_iff.2 (hH st)))⟩ with hHndef
+  have h0' : ∀ t : I, Hn (0, t) = normLoop γ₀ hγ₀ t := by
+    intro t
+    change circleProj (H (0, t)) (hH (0, t)) = circleProj (γ₀ t) (hγ₀ t)
+    exact circleProj_congr _ _ (h0 t)
+  have h1' : ∀ t : I, Hn (1, t) = normLoop γ₁ hγ₁ t := by
+    intro t
+    change circleProj (H (1, t)) (hH (1, t)) = circleProj (γ₁ t) (hγ₁ t)
+    exact circleProj_congr _ _ (h1 t)
+  have hloop' : ∀ s : I, Hn (s, 0) = Hn (s, 1) := by
+    intro s
+    change circleProj (H (s, 0)) (hH (s, 0)) = circleProj (H (s, 1)) (hH (s, 1))
+    exact circleProj_congr _ _ (hloop s)
+  have hinv := windingNumber_eq_of_homotopy Hn h0' h1' hloop'
+  rw [windingNumberC, windingNumberC]
+  exact hinv
+
 end Gluck
