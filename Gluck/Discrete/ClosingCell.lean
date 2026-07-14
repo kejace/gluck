@@ -5290,4 +5290,147 @@ theorem eventually_twoLevelPairing_ne [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
   filter_upwards [h] with ε hne hzero
   exact hne (by rw [hzero, zero_div])
 
+/-! ### The pairing values `Im(conj V₀ · V₁)` -/
+
+/-- **The interior pairing value** (`lem:anchor_witness_two_level`,
+`m ≥ 3` row): `Im(conj V₀ · V₁) = −2·tanρ·sec²ρ/K⁴ = −2·sinρ/(cos³ρ·K⁴)`,
+nonzero. -/
+theorem im_conj_twoLevelV₀_mul_twoLevelV₁ [NeZero n] (hn4 : 4 ≤ n) {K : ℝ}
+    (hK : 0 < K) :
+    ((starRingEnd ℂ) (twoLevelV₀ (n := n) K) * twoLevelV₁ (n := n) K).im
+      = -(2 * Real.sin (Real.pi / n)
+          / (Real.cos (Real.pi / n) ^ 3 * K ^ 4)) := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρpos : 0 < Real.pi / n := by positivity
+  have hρhalf : Real.pi / n < Real.pi / 2 :=
+    lt_of_le_of_lt (div_le_div_of_nonneg_left hπ.le four_pos hn4') (by linarith)
+  have hcos : 0 < Real.cos (Real.pi / n) :=
+    Real.cos_pos_of_mem_Ioo ⟨by linarith, hρhalf⟩
+  have hc0 : Real.cos (Real.pi / n) ≠ 0 := hcos.ne'
+  have hK0 : K ≠ 0 := hK.ne'
+  have he : Complex.exp (((2 * Real.pi / (n : ℝ) : ℝ) : ℂ) * Complex.I)
+      = ((Real.cos (Real.pi / n) ^ 2 - Real.sin (Real.pi / n) ^ 2 : ℝ) : ℂ)
+        + ((2 * Real.sin (Real.pi / n) * Real.cos (Real.pi / n) : ℝ) : ℂ)
+          * Complex.I := by
+    rw [Complex.exp_mul_I, ← Complex.ofReal_cos, ← Complex.ofReal_sin]
+    rw [show 2 * Real.pi / (n : ℝ) = 2 * (Real.pi / n) by ring,
+      Real.cos_two_mul', Real.sin_two_mul]
+  unfold twoLevelV₀ twoLevelV₁
+  rw [he, map_div₀, Complex.conj_ofReal, div_mul_div_comm,
+    ← Complex.ofReal_mul, Complex.div_ofReal_im]
+  simp only [map_add, map_mul, Complex.conj_ofReal, Complex.conj_I]
+  simp only [Complex.add_im, Complex.add_re, Complex.mul_im, Complex.mul_re,
+    Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im,
+    Complex.neg_re, Complex.neg_im, mul_zero, mul_one,
+    add_zero, zero_add, sub_zero, neg_zero, neg_neg, mul_neg,
+    neg_mul]
+  have hs1 : Real.sin (Real.pi / n) ^ 2 + Real.cos (Real.pi / n) ^ 2 = 1 :=
+    Real.sin_sq_add_cos_sq _
+  field_simp
+  linear_combination (Real.sin (Real.pi / n)
+      * (-(1 + Real.cos (Real.pi / n) ^ 2) * Real.sin (Real.pi / n) ^ 4
+        - (2 + 3 * Real.cos (Real.pi / n) ^ 2
+            + 2 * Real.cos (Real.pi / n) ^ 4) * Real.sin (Real.pi / n) ^ 2
+        - (2 + 2 * Real.cos (Real.pi / n) ^ 2
+            + 2 * Real.cos (Real.pi / n) ^ 4
+            + Real.cos (Real.pi / n) ^ 6))) * hs1
+
+/-- **`V₀` at `n = 4`** (`lem:anchor_witness_two_level`, `m = 2` row):
+`V₀ = −2√2/K²` — the boundary evaluation of the uniform `twoLevelV₀`. -/
+theorem twoLevelV₀_of_four [NeZero n] (hn4' : n = 4) {K : ℝ} (hK : 0 < K) :
+    twoLevelV₀ (n := n) K = ((-(2 * Real.sqrt 2) / K ^ 2 : ℝ) : ℂ) := by
+  have hnR : ((n : ℕ) : ℝ) = 4 := by
+    rw [hn4']
+    norm_num
+  have hρ4 : Real.pi / (n : ℝ) = Real.pi / 4 := by rw [hnR]
+  have hα2 : 2 * Real.pi / (n : ℝ) = Real.pi / 2 := by
+    rw [hnR]
+    ring
+  have hexpI : Complex.exp (((2 * Real.pi / (n : ℝ) : ℝ) : ℂ) * Complex.I)
+      = Complex.I := by
+    rw [hα2, Complex.ofReal_div, Complex.ofReal_ofNat,
+      Complex.exp_pi_div_two_mul_I]
+  unfold twoLevelV₀
+  rw [hexpI, hρ4, Real.sin_pi_div_four, Real.cos_pi_div_four]
+  have hs2 : ((Real.sqrt 2 : ℝ) : ℂ) * ((Real.sqrt 2 : ℝ) : ℂ) = 2 := by
+    rw [← Complex.ofReal_mul, Real.mul_self_sqrt two_pos.le]
+    norm_num
+  have hs2pos : (0 : ℝ) < Real.sqrt 2 := Real.sqrt_pos.mpr two_pos
+  have hsC : ((Real.sqrt 2 : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr hs2pos.ne'
+  have hKC : ((K : ℝ) : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hK.ne'
+  simp only [Complex.ofReal_mul, Complex.ofReal_div, Complex.ofReal_add,
+    Complex.ofReal_neg,
+    Complex.ofReal_ofNat, Complex.ofReal_pow]
+  field_simp
+  linear_combination (4 + ((Real.sqrt 2 : ℝ) : ℂ) ^ 2) * Complex.I_mul_I
+    + 2 * hs2
+
+/-- **The boundary pairing value** (`lem:anchor_witness_two_level`, `m = 2`
+row): `Im(conj V₀ · V₁) = −8/K⁴`, nonzero. -/
+theorem im_conj_twoLevelV₀_mul_twoLevelV₁' [NeZero n] (hn4' : n = 4) {K : ℝ}
+    (hK : 0 < K) :
+    ((starRingEnd ℂ) (twoLevelV₀ (n := n) K) * twoLevelV₁' K).im
+      = -(8 / K ^ 4) := by
+  rw [twoLevelV₀_of_four hn4' hK]
+  unfold twoLevelV₁'
+  rw [Complex.conj_ofReal]
+  simp only [Complex.mul_im, Complex.mul_re, Complex.I_re, Complex.I_im,
+    Complex.ofReal_re, Complex.ofReal_im, mul_zero, mul_one,
+    add_zero, sub_zero]
+  have hs2 : Real.sqrt 2 * Real.sqrt 2 = 2 := Real.mul_self_sqrt two_pos.le
+  have hK0 : K ≠ 0 := hK.ne'
+  field_simp
+  linear_combination (-4) * hs2
+
+/-! ### The two-level witness anchor (`lem:anchor_witness_two_level`) -/
+
+/-- **The two-level witness anchor — explicit nondegenerate pair**
+(`lem:anchor_witness_two_level`): for `n = 2m ≥ 4` and `K > 0` the two-level
+profile `κ^(ε)` is positive on the window `|ε| < K`, half-period symmetric,
+non-constant for `ε ≠ 0`, and its closing pair satisfies
+`Im(conj C₀(ε) · C₁(ε)) ≠ 0` for all sufficiently small `ε ≠ 0`. -/
+theorem anchorWitness_two_level [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    (hn : n = 2 * m) {K : ℝ} (hK : 0 < K) :
+    (∀ ε : ℝ, |ε| < K → ∀ j, 0 < twoLevelProfile (n := n) m K ε j)
+    ∧ (∀ (ε : ℝ) (i : ZMod n), twoLevelProfile (n := n) m K ε (i + (m : ZMod n))
+        = twoLevelProfile (n := n) m K ε i)
+    ∧ (∀ ε : ℝ, ε ≠ 0 → twoLevelProfile (n := n) m K ε 1
+        ≠ twoLevelProfile (n := n) m K ε 0)
+    ∧ ∀ᶠ ε : ℝ in nhdsWithin (0 : ℝ) {(0 : ℝ)}ᶜ,
+        ((starRingEnd ℂ) (twoLevelCol (n := n) m hK 0 ε)
+          * twoLevelCol (n := n) m hK 1 ε).im ≠ 0 := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρpos : 0 < Real.pi / n := by positivity
+  have hρhalf : Real.pi / n < Real.pi / 2 :=
+    lt_of_le_of_lt (div_le_div_of_nonneg_left hπ.le four_pos hn4') (by linarith)
+  have hcos : 0 < Real.cos (Real.pi / n) :=
+    Real.cos_pos_of_mem_Ioo ⟨by linarith, hρhalf⟩
+  have hsin0 : 0 < Real.sin (Real.pi / n) :=
+    Real.sin_pos_of_pos_of_lt_pi hρpos (by linarith)
+  refine ⟨fun ε hε j => twoLevelProfile_pos hK hε j,
+    fun ε i => twoLevelProfile_symm hn K ε i,
+    fun ε hε => twoLevelProfile_ne_of_ne hn4 hn hε, ?_⟩
+  by_cases hm2 : m = 2
+  · refine eventually_twoLevelPairing_ne hn4 hn hK
+      (hasStrictDerivAt_twoLevelCol₀ hn4 hn hK)
+      (hasStrictDerivAt_twoLevelCol₁' hn4 hn hm2 hK) ?_
+    rw [im_conj_twoLevelV₀_mul_twoLevelV₁' (by omega) hK]
+    have hpos : (0 : ℝ) < 8 / K ^ 4 := by positivity
+    exact neg_ne_zero.mpr hpos.ne'
+  · have hm3 : 3 ≤ m := by omega
+    refine eventually_twoLevelPairing_ne hn4 hn hK
+      (hasStrictDerivAt_twoLevelCol₀ hn4 hn hK)
+      (hasStrictDerivAt_twoLevelCol₁ hn4 hn hm3 hK) ?_
+    rw [im_conj_twoLevelV₀_mul_twoLevelV₁ hn4 hK]
+    have hpos : (0 : ℝ) < 2 * Real.sin (Real.pi / n)
+        / (Real.cos (Real.pi / n) ^ 3 * K ^ 4) :=
+      div_pos (mul_pos two_pos hsin0)
+        (mul_pos (pow_pos hcos 3) (pow_pos hK 4))
+    exact neg_ne_zero.mpr hpos.ne'
+
 end Gluck.Discrete
