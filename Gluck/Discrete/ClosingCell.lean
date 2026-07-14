@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
 import Gluck.Discrete.Closing
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.InverseDeriv
 import Mathlib.Topology.Order.MonotoneContinuity
 import Mathlib.Order.Hom.Set
 
@@ -1511,5 +1512,231 @@ theorem heading_closingCell_add_half [NeZero n] {m : ℕ} (hn : n = 2 * m)
     (rfl : Finset.range m = Finset.range m)
     (fun e _ => hround ((j + e : ℕ) : ZMod n)), hsum]
   ring
+
+/-! ## The closure Jacobian at a symmetric anchor (`def:closing_jacobian_col`, @080)
+
+The corrected `t = 0` rigidity (`lem:closure_boundary_rigidity`) is anchored at
+an explicit *closure Jacobian*: at a positive half-period-symmetric anchor `κˢ`
+with constant chart base `2π/n`, the linear part of `F(0,·)` at `z = 0` is
+`L(u,v) = u·C_a + v·C_b` with columns `C_q` in closed form (validated against
+finite differences of `F` to relative error `4·10⁻⁹`,
+`references/verify_jacobian_formula.py`). The nondegeneracy criterion is
+`Im(conj C_a · C_b) ≠ 0`, and it yields an explicit `σ_min`-style lower bound
+`‖u·C_a + v·C_b‖ ≥ σ·(|u| + |v|)` (`norm_smul_add_smul_ge`) — the direct
+estimate that replaces the inverse function theorem in the rigidity proof. -/
+
+/-- The derivative of the arcsin slot `x ↦ arcsin (p·x/2)` of the single-edge
+chart: `p / (2·√(1 − (p·x/2)²))` — the `A_j`/`B_j` ingredients of
+`def:closing_jacobian_col` (`A_j = chartSlotDeriv κˢ_j ℓ_j`,
+`B_j = chartSlotDeriv κˢ_{j+1} ℓ_j`). -/
+noncomputable def chartSlotDeriv (p x : ℝ) : ℝ :=
+  p / (2 * Real.sqrt (1 - (p * x / 2) ^ 2))
+
+/-- The arcsin slot of the chart has strict derivative `chartSlotDeriv p x`
+at any point strictly inside the wall `|p·x/2| < 1`. -/
+theorem hasStrictDerivAt_arcsinSlot {p x : ℝ} (h : |p * x / 2| < 1) :
+    HasStrictDerivAt (fun y : ℝ => Real.arcsin (p * y / 2))
+      (chartSlotDeriv p x) x := by
+  have hlt := abs_lt.mp h
+  have harc := Real.hasStrictDerivAt_arcsin
+    (ne_of_gt hlt.1) (ne_of_lt hlt.2)
+  have hlin : HasStrictDerivAt (fun y : ℝ => p * y / 2) (p / 2) x := by
+    simpa using ((hasStrictDerivAt_id x).const_mul p).div_const 2
+  have hcomp := harc.comp x hlin
+  have hEq : 1 / Real.sqrt (1 - (p * x / 2) ^ 2) * (p / 2)
+      = chartSlotDeriv p x := by
+    rw [chartSlotDeriv]; ring
+  rw [hEq] at hcomp
+  exact hcomp
+
+/-- The slot derivative is positive strictly inside the wall (for `p > 0`). -/
+theorem chartSlotDeriv_pos {p x : ℝ} (hp : 0 < p) (h : |p * x / 2| < 1) :
+    0 < chartSlotDeriv p x := by
+  have h1 : (p * x / 2) ^ 2 < 1 := by
+    have := abs_lt.mp h
+    nlinarith [abs_nonneg (p * x / 2)]
+  exact div_pos hp (by positivity)
+
+/-- The single-edge chart has strict derivative `A + B` — the sum of its two
+slot derivatives — at any point strictly inside both walls. This is the
+`τ'_j = A_j + B_j > 0` input of the chart-inverse differentiation
+(`lem:closure_boundary_rigidity`). -/
+theorem hasStrictDerivAt_chartMap {p q x : ℝ} (hp : |p * x / 2| < 1)
+    (hq : |q * x / 2| < 1) :
+    HasStrictDerivAt (chartMap p q)
+      (chartSlotDeriv p x + chartSlotDeriv q x) x :=
+  (hasStrictDerivAt_arcsinSlot hp).add (hasStrictDerivAt_arcsinSlot hq)
+
+/-- The constant chart value `2π/n` is an achievable turning value on every
+edge of a positive profile when `n ≥ 4`: it is positive and clears the wall
+value through `2π/n ≤ π/2 < wall`. -/
+theorem base_chart_mem_image [NeZero n] (hn4 : 4 ≤ n) {κs : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (j : ZMod n) :
+    2 * Real.pi / n ∈ chartMap (κs j) (κs (j + 1)) ''
+      Set.Ioo (0 : ℝ) (2 / max (κs j) (κs (j + 1))) := by
+  have hn0 : (0 : ℝ) < n := by
+    have := NeZero.pos n
+    exact_mod_cast this
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  refine chartMap_mem_image (hκs j) (hκs (j + 1)) (by positivity) ?_
+  have h1 : 2 * Real.pi / n ≤ Real.pi / 2 := by
+    rw [div_le_div_iff₀ hn0 two_pos]
+    nlinarith
+  exact lt_of_le_of_lt h1 (pi_div_two_lt_chartMap_wall (hκs j) (hκs (j + 1)))
+
+/-- **The Jacobian base point** (`def:closing_jacobian_col`): edge `j` recovers
+its base length from the constant chart value `2π/n` via the chart inverse of
+its curvature pair `(κˢ_j, κˢ_{j+1})`. This is the center column `Φ(0,0)` of
+the closing 2-cell at the anchor. -/
+noncomputable def jacobianBaseLen {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) :
+    ZMod n → ℝ :=
+  fun j => chartInv (hκs j) (hκs (j + 1)) (2 * Real.pi / n)
+
+/-- The Jacobian base length is a moderate length of its edge pair. -/
+theorem jacobianBaseLen_mem [NeZero n] (hn4 : 4 ≤ n) {κs : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (j : ZMod n) :
+    jacobianBaseLen hκs j ∈
+      Set.Ioo (0 : ℝ) (2 / max (κs j) (κs (j + 1))) :=
+  chartInv_mem _ _ (base_chart_mem_image hn4 hκs j)
+
+/-- `λ'_j = 1/(A_j + B_j)` — the derivative of the edge-length recovery at the
+Jacobian base point (`def:closing_jacobian_col`). -/
+noncomputable def jacobianLambda' {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (j : ZMod n) : ℝ :=
+  1 / (chartSlotDeriv (κs j) (jacobianBaseLen hκs j)
+    + chartSlotDeriv (κs (j + 1)) (jacobianBaseLen hκs j))
+
+/-- `p_j = A_j/(A_j + B_j)` — the tail-slot share of the chart derivative at
+the Jacobian base point (`def:closing_jacobian_col`). -/
+noncomputable def jacobianShare {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (j : ZMod n) : ℝ :=
+  chartSlotDeriv (κs j) (jacobianBaseLen hκs j)
+    / (chartSlotDeriv (κs j) (jacobianBaseLen hκs j)
+      + chartSlotDeriv (κs (j + 1)) (jacobianBaseLen hκs j))
+
+/-- `E_r = ℓ_r·e^{iψ_r}` — the edge vectors of the base development at the
+anchor (`def:closing_jacobian_col`), indexed by the lifted index `r : ℕ`. -/
+noncomputable def jacobianEdge {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (r : ℕ) : ℂ :=
+  (jacobianBaseLen hκs (r : ZMod n) : ℂ)
+    * Complex.exp ((heading κs (jacobianBaseLen hκs) r : ℂ) * Complex.I)
+
+/-- **The closure-Jacobian column `C_q`** (`def:closing_jacobian_col`): the
+derivative of `F(0,·)` at `z = 0` in the antisymmetric-pair direction `q`,
+
+  `C_q = 2λ'_q·e^{iψ_q} + i·((2p_q − 1)·E_q + ∑_{r=q+1}^{q+m−1} E_r)`.
+
+Validated against finite differences of `F` to relative error `4·10⁻⁹`
+(`references/verify_jacobian_formula.py`); vanishes identically in the
+constant-anchor case, matching the @079 degeneracy. -/
+noncomputable def closingJacobianCol (m : ℕ) {κs : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (q : ℕ) : ℂ :=
+  (2 * jacobianLambda' hκs (q : ZMod n) : ℝ)
+      * Complex.exp ((heading κs (jacobianBaseLen hκs) q : ℂ) * Complex.I)
+    + Complex.I * (((2 * jacobianShare hκs (q : ZMod n) - 1 : ℝ))
+        * jacobianEdge hκs q
+      + ∑ r ∈ Finset.Ico (q + 1) (q + m), jacobianEdge hκs r)
+
+/-- **The linear part `L` of `F(0,·)` at `z = 0`**: `L z = z.1·C_a + z.2·C_b`
+(`def:closing_jacobian_col`). -/
+noncomputable def closingJacobianL (m : ℕ) {κs : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (a b : ℕ) (z : ℝ × ℝ) : ℂ :=
+  z.1 • closingJacobianCol m hκs a + z.2 • closingJacobianCol m hκs b
+
+/-- `simp`-friendly form of the linear part: real scalars become complex
+multiplications. -/
+@[simp] lemma closingJacobianL_apply (m : ℕ) {κs : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (a b : ℕ) (z : ℝ × ℝ) :
+    closingJacobianL m hκs a b z
+      = (z.1 : ℂ) * closingJacobianCol m hκs a
+        + (z.2 : ℂ) * closingJacobianCol m hκs b := by
+  simp [closingJacobianL, Complex.real_smul]
+
+/-! ### The determinant criterion: an explicit `σ_min` lower bound
+
+Project-local Mathlib supplement. A real `2×2` system presented by two complex
+columns `C_a, C_b` is nonsingular iff `Im(conj C_a · C_b) ≠ 0`, and in that
+case `‖u·C_a + v·C_b‖` is bounded below by an explicit positive multiple of
+`|u| + |v|` — the elementary substitute for `σ_min` that drives the direct
+rigidity estimate of `lem:closure_boundary_rigidity` (no inverse function
+theorem). -/
+
+/-- The `ℓ¹`-`σ_min` lower bound: if `D = Im(conj C_a · C_b) ≠ 0` then
+`‖u·C_a + v·C_b‖ ≥ σ·(|u| + |v|)` with `σ = |D|/(‖C_a‖ + ‖C_b‖) > 0`.
+(Pairing `w = u·C_a + v·C_b` against `conj C_a` isolates `v·D`; against
+`conj C_b` isolates `−u·D`; `|Im| ≤ ‖·‖` finishes.) -/
+theorem norm_smul_add_smul_ge {Ca Cb : ℂ}
+    (hD : ((starRingEnd ℂ) Ca * Cb).im ≠ 0) :
+    ∃ σ : ℝ, 0 < σ ∧ ∀ u v : ℝ,
+      σ * (|u| + |v|) ≤ ‖u • Ca + v • Cb‖ := by
+  set D : ℝ := ((starRingEnd ℂ) Ca * Cb).im with hDdef
+  have hCa : Ca ≠ 0 := by
+    rintro rfl
+    simp [hDdef] at hD
+  have hCb : Cb ≠ 0 := by
+    rintro rfl
+    simp [hDdef] at hD
+  have hnCa : 0 < ‖Ca‖ := norm_pos_iff.mpr hCa
+  have hnCb : 0 < ‖Cb‖ := norm_pos_iff.mpr hCb
+  have hsum : 0 < ‖Ca‖ + ‖Cb‖ := by linarith
+  refine ⟨|D| / (‖Ca‖ + ‖Cb‖), div_pos (abs_pos.mpr hD) hsum, fun u v => ?_⟩
+  set w : ℂ := u • Ca + v • Cb with hw
+  -- pairing against `conj Ca` isolates `v·D`
+  have hpair1 : ((starRingEnd ℂ) Ca * w).im = v * D := by
+    have hself : ((starRingEnd ℂ) Ca * Ca).im = 0 := by
+      rw [← Complex.normSq_eq_conj_mul_self, Complex.ofReal_im]
+    rw [hw, mul_add, Complex.add_im]
+    rw [mul_comm ((starRingEnd ℂ) Ca) (u • Ca), smul_mul_assoc,
+      mul_comm Ca ((starRingEnd ℂ) Ca), Complex.smul_im, hself,
+      mul_comm ((starRingEnd ℂ) Ca) (v • Cb), smul_mul_assoc,
+      mul_comm Cb ((starRingEnd ℂ) Ca), Complex.smul_im]
+    ring
+  -- pairing against `conj Cb` isolates `−u·D`
+  have hpair2 : ((starRingEnd ℂ) Cb * w).im = -(u * D) := by
+    have hswap : ((starRingEnd ℂ) Cb * Ca).im = -D := by
+      have : (starRingEnd ℂ) Cb * Ca
+          = (starRingEnd ℂ) ((starRingEnd ℂ) Ca * Cb) := by
+        rw [map_mul, Complex.conj_conj, mul_comm]
+      rw [this, Complex.conj_im]
+    have hself : ((starRingEnd ℂ) Cb * Cb).im = 0 := by
+      rw [← Complex.normSq_eq_conj_mul_self, Complex.ofReal_im]
+    rw [hw, mul_add, Complex.add_im]
+    rw [mul_comm ((starRingEnd ℂ) Cb) (u • Ca), smul_mul_assoc,
+      mul_comm Ca ((starRingEnd ℂ) Cb), Complex.smul_im, hswap,
+      mul_comm ((starRingEnd ℂ) Cb) (v • Cb), smul_mul_assoc,
+      mul_comm Cb ((starRingEnd ℂ) Cb), Complex.smul_im, hself]
+    ring
+  have hbound1 : |v| * |D| ≤ ‖Ca‖ * ‖w‖ := by
+    calc |v| * |D| = |((starRingEnd ℂ) Ca * w).im| := by
+          rw [hpair1, abs_mul]
+      _ ≤ ‖(starRingEnd ℂ) Ca * w‖ := Complex.abs_im_le_norm _
+      _ = ‖Ca‖ * ‖w‖ := by rw [norm_mul, Complex.norm_conj]
+  have hbound2 : |u| * |D| ≤ ‖Cb‖ * ‖w‖ := by
+    calc |u| * |D| = |((starRingEnd ℂ) Cb * w).im| := by
+          rw [hpair2, abs_neg, abs_mul]
+      _ ≤ ‖(starRingEnd ℂ) Cb * w‖ := Complex.abs_im_le_norm _
+      _ = ‖Cb‖ * ‖w‖ := by rw [norm_mul, Complex.norm_conj]
+  rw [div_mul_eq_mul_div, div_le_iff₀ hsum]
+  have hwn : 0 ≤ ‖w‖ := norm_nonneg w
+  nlinarith [abs_nonneg u, abs_nonneg v, abs_nonneg D]
+
+/-- Nondegeneracy of the columns makes the linear part injective: the packaged
+kernel-triviality form of the determinant criterion. -/
+theorem smul_add_smul_eq_zero_iff {Ca Cb : ℂ}
+    (hD : ((starRingEnd ℂ) Ca * Cb).im ≠ 0) (u v : ℝ) :
+    u • Ca + v • Cb = 0 ↔ u = 0 ∧ v = 0 := by
+  constructor
+  · intro h0
+    obtain ⟨σ, hσ, hbound⟩ := norm_smul_add_smul_ge hD
+    have := hbound u v
+    rw [h0, norm_zero] at this
+    have habs : |u| + |v| ≤ 0 :=
+      le_of_mul_le_mul_left (by linarith : σ * (|u| + |v|) ≤ σ * 0) hσ
+    constructor
+    · exact abs_eq_zero.mp (le_antisymm (by linarith [abs_nonneg v]) (abs_nonneg u))
+    · exact abs_eq_zero.mp (le_antisymm (by linarith [abs_nonneg u]) (abs_nonneg v))
+  · rintro ⟨rfl, rfl⟩
+    simp
 
 end Gluck.Discrete
