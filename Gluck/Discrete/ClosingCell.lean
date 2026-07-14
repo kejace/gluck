@@ -2646,4 +2646,149 @@ theorem closingGap_zero_iff [NeZero n] (hn4 : 4 ≤ n) {m : ℕ} (hn : n = 2 * m
   rw [closingGap_zero_eq_anchorGap]
   exact hiff z (hz.trans (min_le_left _ _))
 
+/-! ### The two-level witness profile (`lem:anchor_witness_two_level`, @080)
+
+For the constant-κ⁰ class the anchor selector needs an explicit non-constant
+positive half-period-symmetric anchor with nondegenerate Jacobian columns
+(`Im(conj C_0 · C_1) ≠ 0`). The witness is the *two-level profile*
+`κ^(ε) = K + ε·1_{{0,m}}`. This section lands the compositional layer: the
+profile and its structural properties, the `(p,q)`-symmetry of the chart
+(only three distinct edge charts occur at the two-level profile), and the
+exact vanishing of ALL Jacobian columns at the constant base point `ε = 0` —
+the ground of the perturbative expansion. -/
+
+/-- The two-level witness profile `κ^(ε)_j = K + ε·[j ∈ {0, m}]`
+(`lem:anchor_witness_two_level`). -/
+noncomputable def twoLevelProfile (m : ℕ) (K ε : ℝ) : ZMod n → ℝ :=
+  fun j => K + (if j = 0 ∨ j = (m : ZMod n) then ε else 0)
+
+/-- The two-level profile at `ε = 0` is the constant profile `K`. -/
+theorem twoLevelProfile_zero (m : ℕ) (K : ℝ) :
+    twoLevelProfile (n := n) m K 0 = fun _ => K := by
+  funext j
+  unfold twoLevelProfile
+  split_ifs <;> ring
+
+/-- Positivity of the two-level profile for `|ε| < K`. -/
+theorem twoLevelProfile_pos {m : ℕ} {K ε : ℝ} (hK : 0 < K) (hε : |ε| < K)
+    (j : ZMod n) : 0 < twoLevelProfile m K ε j := by
+  have h := abs_lt.mp hε
+  unfold twoLevelProfile
+  split_ifs <;> linarith [h.1]
+
+/-- Half-period symmetry of the two-level profile: the bump set `{0, m}` is
+invariant under the half-period shift (`m + m = 0` in `ZMod (2m)`). -/
+theorem twoLevelProfile_symm [NeZero n] {m : ℕ} (hn : n = 2 * m) (K ε : ℝ)
+    (i : ZMod n) :
+    twoLevelProfile m K ε (i + (m : ZMod n)) = twoLevelProfile m K ε i := by
+  have h2m : (m : ZMod n) + (m : ZMod n) = 0 := by
+    have h : ((2 * m : ℕ) : ZMod n) = 0 := by
+      rw [← hn]; exact ZMod.natCast_self n
+    push_cast at h
+    linear_combination h
+  have hcond : (i + (m : ZMod n) = 0 ∨ i + (m : ZMod n) = (m : ZMod n))
+      ↔ (i = 0 ∨ i = (m : ZMod n)) := by
+    constructor
+    · rintro (h | h)
+      · right
+        have h' := congrArg (· + (m : ZMod n)) h
+        simpa [add_assoc, h2m] using h'
+      · left
+        have h' := congrArg (· - (m : ZMod n)) h
+        simpa using h'
+    · rintro (h | h)
+      · right; rw [h, zero_add]
+      · left; rw [h, h2m]
+  unfold twoLevelProfile
+  simp only [hcond]
+
+/-- Non-constancy of the two-level profile for `ε ≠ 0`: the bump index `0`
+carries `K + ε`, its neighbor `1 ∉ {0, m}` carries `K`. -/
+theorem twoLevelProfile_ne_of_ne [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    (hn : n = 2 * m) {K ε : ℝ} (hε : ε ≠ 0) :
+    twoLevelProfile (n := n) m K ε 1 ≠ twoLevelProfile (n := n) m K ε 0 := by
+  have hm2 : 2 ≤ m := by omega
+  have h10 : (1 : ZMod n) ≠ 0 := by
+    intro h
+    have h' : ((1 : ℕ) : ZMod n) = ((0 : ℕ) : ZMod n) := by simpa using h
+    have := natCast_zmod_inj (by omega) (by omega) h'
+    omega
+  have h1m : (1 : ZMod n) ≠ (m : ZMod n) := by
+    intro h
+    have h' : ((1 : ℕ) : ZMod n) = ((m : ℕ) : ZMod n) := by simpa using h
+    have := natCast_zmod_inj (by omega) (by omega) h'
+    omega
+  unfold twoLevelProfile
+  rw [if_pos (Or.inl rfl), if_neg (by tauto)]
+  simpa using hε
+
+/-- The turning chart is symmetric in the two adjacent curvatures. -/
+theorem chartMap_comm (p q x : ℝ) : chartMap p q x = chartMap q p x := by
+  unfold chartMap
+  ring
+
+/-- The edge-length recovery is symmetric in the two adjacent curvatures: at
+the two-level profile the four special edges `{n−1, 0, m−1, m}` therefore all
+recover the SAME length from the constant chart value. -/
+theorem chartInv_comm {p q : ℝ} (hp : 0 < p) (hq : 0 < q) {s : ℝ}
+    (hs : s ∈ chartMap p q '' Set.Ioo (0 : ℝ) (2 / max p q)) :
+    chartInv hp hq s = chartInv hq hp s := by
+  have hmapeq : chartMap q p = chartMap p q := funext fun x => chartMap_comm q p x
+  have hs' : s ∈ chartMap q p '' Set.Ioo (0 : ℝ) (2 / max q p) := by
+    rw [hmapeq, max_comm q p]; exact hs
+  have h1 := chartInv_mem hp hq hs
+  have h2 := chartInv_mem hq hp hs'
+  rw [max_comm q p] at h2
+  refine (chartMap_strictMonoOn hp hq).injOn h1 h2 ?_
+  rw [chartMap_chartInv hp hq hs, chartMap_comm p q, chartMap_chartInv hq hp hs']
+
+/-- **All Jacobian columns vanish at a constant anchor** — the exact
+base-point identity grounding the two-level perturbation
+(`lem:anchor_witness_two_level`): at `κˢ ≡ K` the anchor gap vanishes
+identically near the center (the inscribed-polygon degeneracy
+`closureGap_eq_zero_of_const`), so its strict derivative — which
+`anchorGapDeriv_eq` evaluates to the columns — is the zero map. -/
+theorem closingJacobianCol_const_eq_zero [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    (hn : n = 2 * m) {K : ℝ} (hK : 0 < K) {q : ℕ} (hq : q < m) :
+    closingJacobianCol m (fun _ : ZMod n => hK) q = 0 := by
+  have hκs : ∀ i : ZMod n, 0 < (fun _ : ZMod n => K) i := fun _ => hK
+  have hsym : ∀ i : ZMod n,
+      (fun _ : ZMod n => K) (i + (m : ZMod n)) = (fun _ : ZMod n => K) i :=
+    fun _ => rfl
+  -- the anchor gap vanishes identically near the center
+  have hev : (fun _ : ℝ × ℝ => (0 : ℂ)) =ᶠ[nhds 0]
+      anchorGap m ((q : ℕ) : ZMod n) ((q : ℕ) : ZMod n) hκs := by
+    filter_upwards [eventually_chartPerturb_mem hn4 m ((q : ℕ) : ZMod n)
+      ((q : ℕ) : ZMod n) hκs] with z hz
+    have hwall : ∀ i : ZMod n,
+        |K * (anchorCell m ((q : ℕ) : ZMod n) ((q : ℕ) : ZMod n) hκs z i / 2)|
+          ≤ 1 := by
+      intro i
+      have hmem : anchorCell m ((q : ℕ) : ZMod n) ((q : ℕ) : ZMod n) hκs z i
+          ∈ Set.Ioo (0 : ℝ) (2 / K) := by
+        simpa [anchorCell, max_self] using chartInv_mem (hκs i) (hκs (i + 1)) (hz i)
+      have hKx : anchorCell m ((q : ℕ) : ZMod n) ((q : ℕ) : ZMod n) hκs z i * K
+          < 2 := (lt_div_iff₀ hK).mp hmem.2
+      rw [abs_of_nonneg (mul_nonneg hK.le
+        (div_nonneg hmem.1.le (by norm_num : (0 : ℝ) ≤ 2)))]
+      linarith
+    have hT : turningSum (fun _ : ZMod n => K)
+        (anchorCell m ((q : ℕ) : ZMod n) ((q : ℕ) : ZMod n) hκs z)
+          = 2 * Real.pi := by
+      rw [turningSum_eq_sum_edgeChart,
+        ← sum_chartPerturb (n := n) m ((q : ℕ) : ZMod n) ((q : ℕ) : ZMod n) z]
+      exact Finset.sum_congr rfl fun j _ => chartMap_chartInv _ _ (hz j)
+    exact (closureGap_eq_zero_of_const hK.ne' hwall hT).symm
+  -- hence the strict derivative of the anchor gap at the center is zero
+  have hd := hasStrictFDerivAt_anchorGap hn4 m ((q : ℕ) : ZMod n)
+    ((q : ℕ) : ZMod n) hκs
+  have hzero : HasStrictFDerivAt
+      (anchorGap m ((q : ℕ) : ZMod n) ((q : ℕ) : ZMod n) hκs)
+      (0 : ℝ × ℝ →L[ℝ] ℂ) 0 :=
+    (hasStrictFDerivAt_const (0 : ℂ) (0 : ℝ × ℝ)).congr_of_eventuallyEq hev
+  have hD0 : anchorGapDeriv m ((q : ℕ) : ZMod n) ((q : ℕ) : ZMod n) hκs = 0 :=
+    hd.hasFDerivAt.unique hzero.hasFDerivAt
+  rw [anchorGapDeriv_eq hn4 hn hq hq hκs hsym] at hD0
+  simpa using ContinuousLinearMap.ext_iff.mp hD0 (1, 0)
+
 end Gluck.Discrete
