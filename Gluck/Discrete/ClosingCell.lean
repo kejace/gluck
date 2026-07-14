@@ -646,4 +646,78 @@ theorem continuousOn_chartInv_family {T : Type*} [TopologicalSpace T]
   rw [hsets]
   exact hfinal
 
+/-- **Joint continuity of the closing 2-cell, edge by edge.** On any
+perturbation set `Z` whose chart values are achieved inside the common
+normalized length window `[c·(2/max), d·(2/max)]` uniformly along the homotopy
+(hypothesis `hwin` — the ρ-package of `def:closing_2cell`), the map
+`(t, z) ↦ Φ(t,z)_j` is continuous on `[0,1] × Z`. -/
+theorem continuousOn_closingCell_apply (m : ℕ) (a b : ZMod n)
+    {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i) {c d : ℝ} (hc : 0 < c) (hcd : c ≤ d)
+    (hd : d < 1) {Z : Set (ℝ × ℝ)} (j : ZMod n)
+    (hwin : ∀ t : ℝ, 0 ≤ t → t ≤ 1 → ∀ z ∈ Z, chartPerturb m a b z j ∈
+      chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) ''
+        Set.Icc
+          (c * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))
+          (d * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))) :
+    ContinuousOn
+      (fun x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) =>
+        closingCell m a b hκ x.1.2.1 x.1.2.2 x.2 j)
+      {x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) | x.2 ∈ Z} := by
+  have hfam := continuousOn_chartInv_family
+    (p := fun τ : ↥(Set.Icc (0 : ℝ) 1) => curvHomotopy m κ (↑τ) j)
+    (q := fun τ : ↥(Set.Icc (0 : ℝ) 1) => curvHomotopy m κ (↑τ) (j + 1))
+    (fun τ => curvHomotopy_pos hκ τ.2.1 τ.2.2 j)
+    (fun τ => curvHomotopy_pos hκ τ.2.1 τ.2.2 (j + 1))
+    ((continuous_curvHomotopy m κ j).comp continuous_subtype_val)
+    ((continuous_curvHomotopy m κ (j + 1)).comp continuous_subtype_val)
+    hc hcd hd
+  have hcomp : Continuous fun x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) =>
+      ((x.1, chartPerturb m a b x.2 j) : ↥(Set.Icc (0 : ℝ) 1) × ℝ) :=
+    continuous_fst.prodMk ((continuous_chartPerturb m a b j).comp continuous_snd)
+  have hmaps : Set.MapsTo
+      (fun x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) =>
+        ((x.1, chartPerturb m a b x.2 j) : ↥(Set.Icc (0 : ℝ) 1) × ℝ))
+      {x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) | x.2 ∈ Z}
+      {x : ↥(Set.Icc (0 : ℝ) 1) × ℝ | x.2 ∈
+        chartMap (curvHomotopy m κ (↑x.1) j) (curvHomotopy m κ (↑x.1) (j + 1)) ''
+          Set.Icc
+            (c * (2 / max (curvHomotopy m κ (↑x.1) j)
+              (curvHomotopy m κ (↑x.1) (j + 1))))
+            (d * (2 / max (curvHomotopy m κ (↑x.1) j)
+              (curvHomotopy m κ (↑x.1) (j + 1))))} :=
+    fun x hx => hwin (↑x.1) x.1.2.1 x.1.2.2 x.2 hx
+  exact (hfam.comp hcomp.continuousOn hmaps).congr fun x _ => rfl
+
+/-- **Joint continuity of the gap map `F` of the closing 2-cell**
+(`def:closing_2cell`): under the same uniform window hypothesis (now for every
+edge), `(t, z) ↦ F(t,z)` is continuous on `[0,1] × Z`. Composition of
+`continuous_closureGap` with the per-edge continuity of `Φ` and the continuity
+of the homotopy `κ_t`. -/
+theorem continuousOn_closingGap (m : ℕ) (a b : ZMod n)
+    {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i) {c d : ℝ} (hc : 0 < c) (hcd : c ≤ d)
+    (hd : d < 1) {Z : Set (ℝ × ℝ)}
+    (hwin : ∀ t : ℝ, 0 ≤ t → t ≤ 1 → ∀ z ∈ Z, ∀ j : ZMod n,
+      chartPerturb m a b z j ∈
+        chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) ''
+          Set.Icc
+            (c * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))
+            (d * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))) :
+    ContinuousOn
+      (fun x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) =>
+        closingGap m a b hκ x.1.2.1 x.1.2.2 x.2)
+      {x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) | x.2 ∈ Z} := by
+  have hpair : ContinuousOn
+      (fun x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) =>
+        ((curvHomotopy m κ (↑x.1), closingCell m a b hκ x.1.2.1 x.1.2.2 x.2) :
+          (ZMod n → ℝ) × (ZMod n → ℝ)))
+      {x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) | x.2 ∈ Z} := by
+    refine ContinuousOn.prodMk ?_ ?_
+    · refine Continuous.continuousOn (continuous_pi fun i => ?_)
+      exact (continuous_curvHomotopy m κ i).comp
+        (continuous_subtype_val.comp continuous_fst)
+    · refine continuousOn_pi.mpr fun j => ?_
+      exact continuousOn_closingCell_apply m a b hκ hc hcd hd j
+        fun t ht0 ht1 z hz => hwin t ht0 ht1 z hz j
+  exact (continuous_closureGap.comp_continuousOn hpair).congr fun x _ => rfl
+
 end Gluck.Discrete
