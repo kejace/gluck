@@ -243,4 +243,74 @@ theorem continuousOn_inv_family {T : Type*} [TopologicalSpace T] [CompactSpace T
   rw [hkey]
   exact continuous_subtype_val.comp (continuous_snd.comp hsymm)
 
+/-! ### The central-symmetrization homotopy (`def:central_symmetrization`)
+
+The degree argument of `sec:closure` is anchored at the centrally-symmetric case,
+which closes for free (`central_symmetry_closes`). Here we build the homotopy from
+the central symmetrization `κ⁰_i = (κ_i + κ_{i+m})/2` (centrally symmetric,
+positive) to `κ` itself, `κ_t = κ⁰ + t·(κ - κ⁰)`, `t ∈ [0,1]`. -/
+
+/-- The central symmetrization `κ⁰_i = (κ_i + κ_{i+m})/2` of a profile `κ`
+(half-period `m`, so `n = 2m`). It is half-period symmetric (`centralSym_symm`)
+and positive when `κ` is. -/
+noncomputable def centralSym (m : ℕ) (κ : ZMod n → ℝ) : ZMod n → ℝ :=
+  fun i => (κ i + κ (i + (m : ZMod n))) / 2
+
+/-- The central-symmetrization homotopy `κ_t = κ⁰ + t·(κ - κ⁰)` from the central
+symmetrization `κ⁰ = centralSym m κ` (`t = 0`) to `κ` itself (`t = 1`). Affine —
+hence continuous — in `t`, which drives the joint-continuity route
+(`continuousOn_inv_family`). -/
+noncomputable def curvHomotopy (m : ℕ) (κ : ZMod n → ℝ) (t : ℝ) : ZMod n → ℝ :=
+  fun i => centralSym m κ i + t * (κ i - centralSym m κ i)
+
+@[simp] lemma curvHomotopy_zero (m : ℕ) (κ : ZMod n → ℝ) :
+    curvHomotopy m κ 0 = centralSym m κ := by
+  funext i; simp [curvHomotopy]
+
+@[simp] lemma curvHomotopy_one (m : ℕ) (κ : ZMod n → ℝ) :
+    curvHomotopy m κ 1 = κ := by
+  funext i; simp [curvHomotopy]
+
+/-- The central symmetrization is half-period symmetric: `κ⁰_{i+m} = κ⁰_i`
+(uses `n = 2m`, so a double shift by `m` is the identity in `ZMod n`). -/
+theorem centralSym_symm [NeZero n] {m : ℕ} (hn : n = 2 * m) (κ : ZMod n → ℝ)
+    (i : ZMod n) : centralSym m κ (i + (m : ZMod n)) = centralSym m κ i := by
+  have hdouble : (i + (m : ZMod n)) + (m : ZMod n) = i := by
+    have : ((2 * m : ℕ) : ZMod n) = 0 := by rw [← hn]; exact ZMod.natCast_self n
+    have h2 : (m : ZMod n) + (m : ZMod n) = 0 := by
+      have := this; push_cast at this; linear_combination this
+    rw [add_assoc, h2, add_zero]
+  rw [centralSym, centralSym, hdouble, add_comm (κ (i + (m : ZMod n)))]
+
+/-- The central symmetrization of a positive profile is positive. -/
+theorem centralSym_pos {m : ℕ} {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i) (i : ZMod n) :
+    0 < centralSym m κ i := by
+  rw [centralSym]; exact div_pos (add_pos (hκ i) (hκ _)) two_pos
+
+/-- Along the homotopy every curvature stays positive for `t ∈ [0,1]`
+(`κ_t = (1-t)·κ⁰ + t·κ`, a convex combination of positives). -/
+theorem curvHomotopy_pos {m : ℕ} {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i)
+    {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (i : ZMod n) :
+    0 < curvHomotopy m κ t i := by
+  have hc : 0 < centralSym m κ i := centralSym_pos hκ i
+  have hconv : curvHomotopy m κ t i = (1 - t) * centralSym m κ i + t * κ i := by
+    rw [curvHomotopy]; ring
+  rw [hconv]
+  have h1 : 0 ≤ (1 - t) * centralSym m κ i := by
+    apply mul_nonneg (by linarith) hc.le
+  have h2 : 0 < t * κ i ∨ 0 < (1 - t) * centralSym m κ i := by
+    rcases eq_or_lt_of_le ht0 with h | h
+    · right; rw [← h]; simp only [sub_zero, one_mul]; exact hc
+    · left; exact mul_pos h (hκ i)
+  rcases h2 with h | h
+  · linarith
+  · have : 0 ≤ t * κ i := mul_nonneg ht0 (hκ i).le
+    linarith
+
+/-- The homotopy is jointly continuous in `(t, i)`, in particular continuous in
+`t` for each fixed vertex (affine in `t`). -/
+theorem continuous_curvHomotopy (m : ℕ) (κ : ZMod n → ℝ) (i : ZMod n) :
+    Continuous (fun t : ℝ => curvHomotopy m κ t i) := by
+  unfold curvHomotopy; fun_prop
+
 end Gluck.Discrete
