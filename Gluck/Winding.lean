@@ -1040,4 +1040,84 @@ theorem windingNumberC_expLoopRev (c : ℂ) (hc : c ≠ 0) :
     = c * ((negStandardLoop t : Circle) : ℂ)
   congr 1
 
+/-- The **nonsingular real-linear loop** `t ↦ a·e^{2π i t} + b·e^{−2π i t}`
+(blueprint `lem:winding_number_c_linear_loop`): the boundary loop of the
+real-linear map `z ↦ a z + b z̄` on the unit circle.  Project-local: Mathlib has
+no topological winding number, so its model loops live here. -/
+noncomputable def linearLoop (a b : ℂ) : C(I, ℂ) :=
+  ⟨fun t => expLoop a t + expLoopRev b t,
+    ((expLoop a).continuous.add (expLoopRev b).continuous)⟩
+
+/-- `linearLoop a b` evaluates to `a·e^{2π i t} + b·e^{−2π i t}`. -/
+theorem linearLoop_apply (a b : ℂ) (t : I) :
+    linearLoop a b t
+      = a * Complex.exp (((2 * π * (t : ℝ) : ℝ) : ℂ) * Complex.I)
+        + b * Complex.exp (((-(2 * π * (t : ℝ)) : ℝ) : ℂ) * Complex.I) := rfl
+
+/-- For `‖a‖ ≠ ‖b‖` the real-linear loop is nowhere zero (a zero would force
+`‖a‖ = ‖b‖` since both exponential factors are unimodular). -/
+theorem linearLoop_ne_zero (a b : ℂ) (hab : ‖a‖ ≠ ‖b‖) (t : I) : linearLoop a b t ≠ 0 := by
+  intro h
+  apply hab
+  have h' : expLoop a t + expLoopRev b t = 0 := h
+  have hx : expLoop a t = -(expLoopRev b t) := by linear_combination h'
+  have hn := congrArg norm hx
+  rwa [norm_neg, expLoop_norm, expLoopRev_norm] at hn
+
+/-- `linearLoop a b` starts at `a + b`. -/
+theorem linearLoop_zero (a b : ℂ) : linearLoop a b 0 = a + b := by
+  change expLoop a 0 + expLoopRev b 0 = a + b
+  rw [expLoop_zero, expLoopRev_zero]
+
+/-- `linearLoop a b` ends at `a + b`. -/
+theorem linearLoop_one (a b : ℂ) : linearLoop a b 1 = a + b := by
+  change expLoop a 1 + expLoopRev b 1 = a + b
+  rw [expLoop_one, expLoopRev_one]
+
+/-- `linearLoop a b` is a loop: `linearLoop a b 0 = linearLoop a b 1`. -/
+theorem linearLoop_loop (a b : ℂ) : linearLoop a b 0 = linearLoop a b 1 := by
+  rw [linearLoop_zero, linearLoop_one]
+
+/-- **Winding of the nonsingular real-linear loop** (blueprint
+`lem:winding_number_c_linear_loop`): for `‖a‖ ≠ ‖b‖` the loop
+`t ↦ a·e^{2π i t} + b·e^{−2π i t}` has winding number `1` when the forward term
+dominates (`‖b‖ < ‖a‖`) and `−1` when the reverse term dominates
+(`‖a‖ < ‖b‖`).  Rouché-style: the subordinate term is a pointwise perturbation
+of the dominant exponential loop of strictly smaller norm, so
+`windingNumberC_eq_of_perturb` reduces to `windingNumberC_expLoop` /
+`windingNumberC_expLoopRev`.  (`‖a‖² − ‖b‖²` is the determinant of
+`z ↦ a z + b z̄`.) -/
+theorem windingNumberC_linearLoop (a b : ℂ) (hab : ‖a‖ ≠ ‖b‖) :
+    windingNumberC (linearLoop a b) (linearLoop_ne_zero a b hab)
+      = if ‖b‖ < ‖a‖ then 1 else -1 := by
+  rcases lt_or_gt_of_ne hab with hlt | hgt
+  · -- `‖a‖ < ‖b‖`: the reverse term dominates, winding `−1`
+    rw [if_neg (asymm hlt)]
+    have hb : b ≠ 0 := norm_pos_iff.1 (lt_of_le_of_lt (norm_nonneg a) hlt)
+    have hpert : ∀ t : I, ‖linearLoop a b t - expLoopRev b t‖ < ‖expLoopRev b t‖ := by
+      intro t
+      have he : linearLoop a b t - expLoopRev b t = expLoop a t := by
+        change expLoop a t + expLoopRev b t - expLoopRev b t = expLoop a t
+        ring
+      rw [he, expLoop_norm, expLoopRev_norm]
+      exact hlt
+    have h := windingNumberC_eq_of_perturb (expLoopRev b) (linearLoop a b)
+      (expLoopRev_ne_zero b hb) (linearLoop_ne_zero a b hab)
+      (expLoopRev_loop b) (linearLoop_loop a b) hpert
+    rw [← h, windingNumberC_expLoopRev b hb]
+  · -- `‖b‖ < ‖a‖`: the forward term dominates, winding `1`
+    rw [if_pos hgt]
+    have ha : a ≠ 0 := norm_pos_iff.1 (lt_of_le_of_lt (norm_nonneg b) hgt)
+    have hpert : ∀ t : I, ‖linearLoop a b t - expLoop a t‖ < ‖expLoop a t‖ := by
+      intro t
+      have he : linearLoop a b t - expLoop a t = expLoopRev b t := by
+        change expLoop a t + expLoopRev b t - expLoop a t = expLoopRev b t
+        ring
+      rw [he, expLoopRev_norm, expLoop_norm]
+      exact hgt
+    have h := windingNumberC_eq_of_perturb (expLoop a) (linearLoop a b)
+      (expLoop_ne_zero a ha) (linearLoop_ne_zero a b hab)
+      (expLoop_loop a) (linearLoop_loop a b) hpert
+    rw [← h, windingNumberC_expLoop a ha]
+
 end Gluck
