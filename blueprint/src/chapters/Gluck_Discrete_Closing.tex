@@ -2360,7 +2360,8 @@ on $[0,1]\times\partial D_\rho$. After the @079 refutation, (ii) is re-based on 
   \cref{lem:sum_col_eval}.
 \end{proof}
 
-\begin{lemma}[the symmetric anchor gap vanishes at the center]
+\begin{lemma}\leanok
+[the symmetric anchor gap vanishes at the center]
   \label{lem:anchor_gap_center_eq_zero}
   \lean{Gluck.Discrete.anchorGap_center_eq_zero}
   \uses{def:anchor_gap, lem:central_symmetry_closes,
@@ -2369,13 +2370,16 @@ on $[0,1]\times\partial D_\rho$. After the @079 refutation, (ii) is re-based on 
   $\mathrm{anchorGap}\,m\,a\,b\,\kappa^s\,0 = 0$, for any pair $(a,b)$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   At $z = 0$ the anchor cell is the symmetric base polygon
   (\cref{lem:jacobian_base_len_symm}) with turning sum $2\pi$
   (\cref{lem:turning_sum_jacobian_base_len}), so
   \cref{lem:central_symmetry_closes} closes it.
 \end{proof}
 
-\begin{lemma}[anchor-form rigidity]
+\begin{lemma}\leanok
+[anchor-form rigidity]
   \label{lem:anchor_gap_zero_iff}
   \lean{Gluck.Discrete.anchorGap_zero_iff}
   \uses{def:anchor_gap, def:closing_jacobian_col,
@@ -2388,6 +2392,7 @@ on $[0,1]\times\partial D_\rho$. After the @079 refutation, (ii) is re-based on 
 \begin{proof}
   \uses{lem:has_strict_fderiv_at_anchor_gap, lem:anchor_gap_deriv_eq,
         lem:norm_smul_add_smul_ge, lem:anchor_gap_center_eq_zero}
+        \leanok
   ($\Leftarrow$) is \cref{lem:anchor_gap_center_eq_zero}. ($\Rightarrow$) The
   strict derivative at $0$ is $L(u,v) = u C_a + v C_b$
   (\cref{lem:has_strict_fderiv_at_anchor_gap} + \cref{lem:anchor_gap_deriv_eq});
@@ -2454,7 +2459,8 @@ following landed layers: the profile and its structure, the curvature-slot
 calculus of the chart inverse, the piecewise two-level base lengths, the
 explicit constant-anchor data, and the first-order slot table.
 
-\begin{definition}[the two-level profile]
+\begin{definition}\leanok
+[the two-level profile]
   \label{def:two_level_profile}
   \lean{Gluck.Discrete.twoLevelProfile}
   For $m \in \mathbb{N}$, $K, \varepsilon \in \mathbb{R}$:
@@ -2462,17 +2468,21 @@ explicit constant-anchor data, and the first-order slot table.
   $j \mapsto K + \varepsilon\,[j \in \{0, m\}]$.
 \end{definition}
 
-\begin{lemma}[two-level profile at $\varepsilon = 0$]
+\begin{lemma}\leanok
+[two-level profile at $\varepsilon = 0$]
   \label{lem:two_level_profile_zero}
   \lean{Gluck.Discrete.twoLevelProfile_zero}
   \uses{def:two_level_profile}
   $\kappa^{(0)} = \mathrm{const}\,K$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   The indicator term vanishes.
 \end{proof}
 
-\begin{lemma}[two-level positivity]
+\begin{lemma}\leanok
+[two-level positivity]
   \label{lem:two_level_profile_pos}
   \lean{Gluck.Discrete.twoLevelProfile_pos}
   \uses{def:two_level_profile}
@@ -2480,10 +2490,13 @@ explicit constant-anchor data, and the first-order slot table.
   every $j$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Each value is $K$ or $K + \varepsilon > 0$ by $|\varepsilon| < K$.
 \end{proof}
 
-\begin{lemma}[two-level half-period symmetry]
+\begin{lemma}\leanok
+[two-level half-period symmetry]
   \label{lem:two_level_profile_symm}
   \lean{Gluck.Discrete.twoLevelProfile_symm}
   \uses{def:two_level_profile}
@@ -2491,10 +2504,13 @@ explicit constant-anchor data, and the first-order slot table.
   every $i \in \mathbb{Z}/n$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   $m + m = 0$ in $\mathbb{Z}/n$, so $i + m \in \{0,m\} \iff i \in \{0,m\}$.
 \end{proof}
 
-\begin{lemma}[two-level non-constancy]
+\begin{lemma}\leanok
+[two-level non-constancy]
   \label{lem:two_level_profile_ne_of_ne}
   \lean{Gluck.Discrete.twoLevelProfile_ne_of_ne}
   \uses{def:two_level_profile}
@@ -2502,11 +2518,14 @@ explicit constant-anchor data, and the first-order slot table.
   $\kappa^{(\varepsilon)}_1 \ne \kappa^{(\varepsilon)}_0$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   $1 \notin \{0, m\}$ (as $m \ge 2$, by cast injectivity below $n$), so the
   values are $K$ and $K + \varepsilon$.
 \end{proof}
 
-\begin{lemma}[chart symmetry in the pair]
+\begin{lemma}\leanok
+[chart symmetry in the pair]
   \label{lem:chart_map_comm}
   \lean{Gluck.Discrete.chartMap_comm}
   \uses{def:turning_chart}
@@ -2514,10 +2533,13 @@ explicit constant-anchor data, and the first-order slot table.
   curvature slots.
 \end{lemma}
 \begin{proof}
+
+\leanok
   The two $\arcsin$ summands swap.
 \end{proof}
 
-\begin{lemma}[chart-inverse symmetry in the pair]
+\begin{lemma}\leanok
+[chart-inverse symmetry in the pair]
   \label{lem:chart_inv_comm}
   \lean{Gluck.Discrete.chartInv_comm}
   \uses{def:chart_inv, lem:chart_map_comm, lem:chart_map_strict_mono,
@@ -2526,12 +2548,15 @@ explicit constant-anchor data, and the first-order slot table.
   $\lambda_{p,q}(s) = \lambda_{q,p}(s)$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Both are moderate preimages of $s$ under the same strictly monotone map
   (\cref{lem:chart_map_comm}); uniqueness by injectivity
   (\cref{lem:chart_map_strict_mono}).
 \end{proof}
 
-\begin{lemma}[all columns vanish at a constant anchor]
+\begin{lemma}\leanok
+[all columns vanish at a constant anchor]
   \label{lem:closing_jacobian_col_const_eq_zero}
   \lean{Gluck.Discrete.closingJacobianCol_const_eq_zero}
   \uses{def:closing_jacobian_col, lem:closure_gap_eq_zero_of_const,
@@ -2541,6 +2566,8 @@ explicit constant-anchor data, and the first-order slot table.
   $C_q(\mathrm{const}\,K) = 0$ exactly.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Not by the geometric-sum computation: the anchor gap of a constant profile
   vanishes identically near $0$ (\cref{lem:closure_gap_eq_zero_of_const} +
   \cref{lem:eventually_chart_perturb_mem}), so its strict derivative is $0$
@@ -2550,7 +2577,8 @@ explicit constant-anchor data, and the first-order slot table.
   bookkeeping.
 \end{proof}
 
-\begin{definition}[the chart inverse in the curvature slot, totalized]
+\begin{definition}\leanok
+[the chart inverse in the curvature slot, totalized]
   \label{def:chart_inv_curv}
   \lean{Gluck.Discrete.chartInvCurv}
   \uses{def:chart_inv}
@@ -2560,17 +2588,21 @@ explicit constant-anchor data, and the first-order slot table.
   the recovered edge length as a function of ONE curvature.
 \end{definition}
 
-\begin{lemma}[curvature-slot inverse agrees with the chart inverse]
+\begin{lemma}\leanok
+[curvature-slot inverse agrees with the chart inverse]
   \label{lem:chart_inv_curv_of_pos}
   \lean{Gluck.Discrete.chartInvCurv_of_pos}
   \uses{def:chart_inv_curv}
   For $p > 0$: $\mathrm{chartInvCurv}\,q\,s\,p = \lambda_{p,q}(s)$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Definitional (positive branch).
 \end{proof}
 
-\begin{lemma}[eventual membership/round-trip package in the curvature slot]
+\begin{lemma}\leanok
+[eventual membership/round-trip package in the curvature slot]
   \label{lem:eventually_chart_inv_curv_mem}
   \lean{Gluck.Discrete.eventually_chartInvCurv_mem}
   \uses{def:chart_inv_curv, lem:chart_map_strict_mono, lem:chart_inv_mem,
@@ -2581,12 +2613,15 @@ explicit constant-anchor data, and the first-order slot table.
   recovered length is moderate, and it lies in $(x_1, x_2)$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Monotone squeeze: $\tau_{p,q}(x_1) < s < \tau_{p,q}(x_2)$ holds at
   $p_0$ strictly and is open in $p$ (continuity of the chart in the
   curvature slot); strict monotonicity in $x$ then localizes the preimage.
 \end{proof}
 
-\begin{lemma}[continuity in the curvature slot]
+\begin{lemma}\leanok
+[continuity in the curvature slot]
   \label{lem:continuous_at_chart_inv_curv}
   \lean{Gluck.Discrete.continuousAt_chartInvCurv}
   \uses{lem:eventually_chart_inv_curv_mem}
@@ -2594,13 +2629,16 @@ explicit constant-anchor data, and the first-order slot table.
   continuous at $p_0$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   $\varepsilon$-$\delta$ squeeze through
   \cref{lem:eventually_chart_inv_curv_mem} with the sandwich
   $(x_1, x_2) = (\lambda - \varepsilon, \lambda + \varepsilon)$ --- no family
   machinery.
 \end{proof}
 
-\begin{lemma}[strict derivative in the curvature slot]
+\begin{lemma}\leanok
+[strict derivative in the curvature slot]
   \label{lem:has_strict_deriv_at_chart_inv_curv}
   \lean{Gluck.Discrete.hasStrictDerivAt_chartInvCurv}
   \uses{def:chart_inv_curv, def:chart_slot_deriv,
@@ -2612,6 +2650,8 @@ explicit constant-anchor data, and the first-order slot table.
   $-(\lambda/p_0)\cdot A/(A+B)$ at $p_0$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Via the EXPLICIT local left inverse
   $\Theta(x) = (2/x)\sin\bigl(s - \arcsin(qx/2)\bigr)$ (solve the chart
   equation for the curvature given the length) and
@@ -2619,7 +2659,8 @@ explicit constant-anchor data, and the first-order slot table.
   landed $s$-slot proof \cref{lem:has_strict_deriv_at_chart_inv}.
 \end{proof}
 
-\begin{lemma}[two-level values at lifted indices]
+\begin{lemma}\leanok
+[two-level values at lifted indices]
   \label{lem:two_level_profile_nat_cast}
   \lean{Gluck.Discrete.twoLevelProfile_natCast}
   \uses{def:two_level_profile}
@@ -2628,10 +2669,13 @@ explicit constant-anchor data, and the first-order slot table.
   [j = 0 \lor j = m]$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Cast injectivity below $n$.
 \end{proof}
 
-\begin{lemma}[two-level values at successor indices]
+\begin{lemma}\leanok
+[two-level values at successor indices]
   \label{lem:two_level_profile_nat_cast_succ}
   \lean{Gluck.Discrete.twoLevelProfile_natCast_succ}
   \uses{def:two_level_profile, lem:two_level_profile_nat_cast}
@@ -2640,11 +2684,14 @@ explicit constant-anchor data, and the first-order slot table.
   [j = m - 1 \lor j = n - 1]$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   The successor of a lifted index is lifted (mod $n$); apply
   \cref{lem:two_level_profile_nat_cast}.
 \end{proof}
 
-\begin{lemma}[two-level base lengths --- piecewise, one moving scalar]
+\begin{lemma}\leanok
+[two-level base lengths --- piecewise, one moving scalar]
   \label{lem:jacobian_base_len_two_level}
   \lean{Gluck.Discrete.jacobianBaseLen_twoLevel}
   \uses{def:jacobian_base_len, def:chart_inv_curv,
@@ -2659,6 +2706,8 @@ explicit constant-anchor data, and the first-order slot table.
   scalar.}
 \end{lemma}
 \begin{proof}
+
+\leanok
   By \cref{lem:two_level_profile_nat_cast} + \cref{lem:two_level_profile_nat_cast_succ}
   the pair $(\kappa_j, \kappa_{j+1})$ is $(K{+}\varepsilon, K)$,
   $(K, K{+}\varepsilon)$ or $(K, K)$ according to the four special edges;
@@ -2666,39 +2715,49 @@ explicit constant-anchor data, and the first-order slot table.
   curvature-slot scalar.
 \end{proof}
 
-\begin{lemma}[constant base length]
+\begin{lemma}\leanok
+[constant base length]
   \label{lem:chart_inv_const}
   \lean{Gluck.Discrete.chartInv_const}
   \uses{def:chart_inv, lem:chart_inv_chart_map, lem:base_chart_mem_image}
   $\lambda_{K,K}(2\pi/n) = 2\sin(\pi/n)/K$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   $\tau_{K,K}(2\sin(\pi/n)/K) = 2\arcsin(\sin(\pi/n)) = 2\pi/n$ and the
   chart inverse is the unique moderate preimage.
 \end{proof}
 
-\begin{lemma}[constant slot derivative]
+\begin{lemma}\leanok
+[constant slot derivative]
   \label{lem:chart_slot_deriv_const}
   \lean{Gluck.Discrete.chartSlotDeriv_const}
   \uses{def:chart_slot_deriv, lem:chart_inv_const}
   $A\bigl(K,\, 2\sin(\pi/n)/K\bigr) = K/(2\cos(\pi/n))$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   $\arcsin$-derivative at $\sin(\pi/n)$:
   $\sqrt{1 - \sin^2} = \cos$ on $[0, \pi/2)$.
 \end{proof}
 
-\begin{lemma}[constant $\lambda'$]
+\begin{lemma}\leanok
+[constant $\lambda'$]
   \label{lem:jacobian_lambda_const}
   \lean{Gluck.Discrete.jacobianLambda'_const}
   \uses{def:jacobian_lambda, lem:chart_inv_const, lem:chart_slot_deriv_const}
   At the constant anchor $K$: $\lambda'_j = \cos(\pi/n)/K$ for every $j$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   $\lambda' = 1/(A+B)$ with $A = B = K/(2\cos(\pi/n))$.
 \end{proof}
 
-\begin{lemma}[constant share]
+\begin{lemma}\leanok
+[constant share]
   \label{lem:jacobian_share_const}
   \lean{Gluck.Discrete.jacobianShare_const}
   \uses{def:jacobian_share, lem:chart_inv_const, lem:chart_slot_deriv_const}
@@ -2706,10 +2765,13 @@ explicit constant-anchor data, and the first-order slot table.
   $(2p-1)E_q$ boundary term of the columns.
 \end{lemma}
 \begin{proof}
+
+\leanok
   $p = A/(A+B)$ with $A = B$.
 \end{proof}
 
-\begin{lemma}[derivative of the two-level base length]
+\begin{lemma}\leanok
+[derivative of the two-level base length]
   \label{lem:has_strict_deriv_at_two_level_len}
   \lean{Gluck.Discrete.hasStrictDerivAt_twoLevelLen}
   \uses{def:chart_inv_curv, lem:has_strict_deriv_at_chart_inv_curv,
@@ -2719,12 +2781,15 @@ explicit constant-anchor data, and the first-order slot table.
   has strict derivative $\dot\ell^* = -\sin(\pi/n)/K^2$ at $\varepsilon = 0$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Chain rule through \cref{lem:has_strict_deriv_at_chart_inv_curv} at
   $p_0 = K$; evaluate with $\lambda = 2\sin(\pi/n)/K$, $A = B$:
   $-(\lambda/K)\cdot\tfrac12 = -\sin(\pi/n)/K^2$.
 \end{proof}
 
-\begin{lemma}[constant turning angle]
+\begin{lemma}\leanok
+[constant turning angle]
   \label{lem:turning_angle_const}
   \lean{Gluck.Discrete.turningAngle_const}
   \uses{def:turning_angle, lem:chart_inv_const}
@@ -2732,10 +2797,13 @@ explicit constant-anchor data, and the first-order slot table.
   $\theta_i = 2\pi/n$ for every $i$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Both $\arcsin$ slots equal $\pi/n$.
 \end{proof}
 
-\begin{lemma}[constant headings]
+\begin{lemma}\leanok
+[constant headings]
   \label{lem:heading_const}
   \lean{Gluck.Discrete.heading_const}
   \uses{def:discrete_development, lem:turning_angle_const}
@@ -2743,10 +2811,13 @@ explicit constant-anchor data, and the first-order slot table.
   \mathbb{N}$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Telescoping sum of $j+1$ constant turning angles.
 \end{proof}
 
-\begin{lemma}[constant Jacobian edges]
+\begin{lemma}\leanok
+[constant Jacobian edges]
   \label{lem:jacobian_edge_const}
   \lean{Gluck.Discrete.jacobianEdge_const}
   \uses{def:jacobian_edge, lem:chart_inv_const, lem:heading_const}
@@ -2756,10 +2827,13 @@ explicit constant-anchor data, and the first-order slot table.
   \cref{lem:anchor_witness_two_level}.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Assemble \cref{lem:chart_inv_const} and \cref{lem:heading_const}.
 \end{proof}
 
-\begin{lemma}[bump-slot derivative]
+\begin{lemma}\leanok
+[bump-slot derivative]
   \label{lem:has_strict_deriv_at_bump_slot}
   \lean{Gluck.Discrete.hasStrictDerivAt_bumpSlot}
   \uses{lem:has_strict_deriv_at_two_level_len, lem:chart_inv_const}
@@ -2768,13 +2842,16 @@ explicit constant-anchor data, and the first-order slot table.
   derivative $\dot a = \tan(\pi/n)/(2K)$ at $\varepsilon = 0$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Product + chain rule through \cref{lem:has_strict_deriv_at_two_level_len};
   at $\varepsilon = 0$ the argument is $\sin(\pi/n)$, the $\arcsin$ factor
   contributes $1/\cos(\pi/n)$, and
   $\tfrac12(\ell^* + K\dot\ell^*) = \sin(\pi/n)/(2K)$.
 \end{proof}
 
-\begin{lemma}[mixed-slot derivative]
+\begin{lemma}\leanok
+[mixed-slot derivative]
   \label{lem:has_strict_deriv_at_mixed_slot}
   \lean{Gluck.Discrete.hasStrictDerivAt_mixedSlot}
   \uses{lem:has_strict_deriv_at_two_level_len, lem:chart_inv_const}
@@ -2783,6 +2860,8 @@ explicit constant-anchor data, and the first-order slot table.
   derivative $-\tan(\pi/n)/(2K)$ at $\varepsilon = 0$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Same chain rule with the constant factor $K$:
   $\tfrac{K}{2}\dot\ell^*\cdot\tfrac1{\cos(\pi/n)} = -\tan(\pi/n)/(2K)$.
 \end{proof}
@@ -2796,7 +2875,8 @@ one on the window $|\varepsilon| < K$ --- the dif-totalization idiom of
 \cref{lem:closing_jacobian_col_const_eq_zero}. Throughout $\rho = \pi/n$,
 $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
 
-\begin{definition}[$\varepsilon$-total two-level base length]
+\begin{definition}\leanok
+[$\varepsilon$-total two-level base length]
   \label{def:two_level_base_len}
   \lean{Gluck.Discrete.twoLevelBaseLen}
   \uses{def:chart_inv_curv, lem:chart_inv_const}
@@ -2806,7 +2886,8 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   constant-pair length $2\sin\rho/K$.
 \end{definition}
 
-\begin{lemma}[window bridge for the base length]
+\begin{lemma}\leanok
+[window bridge for the base length]
   \label{lem:two_level_base_len_eq}
   \lean{Gluck.Discrete.twoLevelBaseLen_eq}
   \uses{def:two_level_base_len, lem:jacobian_base_len_two_level,
@@ -2815,20 +2896,26 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   length of the two-level profile at every lifted edge.
 \end{lemma}
 \begin{proof}
+
+\leanok
   \cref{lem:jacobian_base_len_two_level} + \cref{lem:chart_inv_curv_of_pos}.
 \end{proof}
 
-\begin{lemma}[base length at $\varepsilon = 0$]
+\begin{lemma}\leanok
+[base length at $\varepsilon = 0$]
   \label{lem:two_level_base_len_zero}
   \lean{Gluck.Discrete.twoLevelBaseLen_zero}
   \uses{def:two_level_base_len, lem:chart_inv_const}
   At $\varepsilon = 0$ every total base length is $2\sin\rho/K$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   The special edges reduce to \cref{lem:chart_inv_const} at curvature $K$.
 \end{proof}
 
-\begin{lemma}[base-length $\varepsilon$-derivative]
+\begin{lemma}\leanok
+[base-length $\varepsilon$-derivative]
   \label{lem:has_strict_deriv_at_two_level_base_len}
   \lean{Gluck.Discrete.hasStrictDerivAt_twoLevelBaseLen}
   \uses{def:two_level_base_len, lem:has_strict_deriv_at_two_level_len}
@@ -2836,11 +2923,14 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   $0$: $-\sin\rho/K^2$ on the four special edges, $0$ elsewhere.
 \end{lemma}
 \begin{proof}
+
+\leanok
   \cref{lem:has_strict_deriv_at_two_level_len} on the special edges; the rest
   are constant.
 \end{proof}
 
-\begin{definition}[$\varepsilon$-total two-level turning angle]
+\begin{definition}\leanok
+[$\varepsilon$-total two-level turning angle]
   \label{def:two_level_theta}
   \lean{Gluck.Discrete.twoLevelTheta}
   \uses{def:two_level_base_len}
@@ -2849,7 +2939,8 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
    \arcsin(\kappa^{(\varepsilon)}_i\,\ell_i/2)$ with the total base lengths.
 \end{definition}
 
-\begin{lemma}[window bridge for the turning angle]
+\begin{lemma}\leanok
+[window bridge for the turning angle]
   \label{lem:turning_angle_two_level}
   \lean{Gluck.Discrete.turningAngle_twoLevel}
   \uses{def:two_level_theta, lem:two_level_base_len_eq,
@@ -2858,21 +2949,27 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   two-level profile at its Jacobian base point.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Per-vertex from \cref{lem:two_level_base_len_eq} and the bump
   identifications.
 \end{proof}
 
-\begin{lemma}[turning angle at $\varepsilon = 0$]
+\begin{lemma}\leanok
+[turning angle at $\varepsilon = 0$]
   \label{lem:two_level_theta_zero}
   \lean{Gluck.Discrete.twoLevelTheta_zero}
   \uses{def:two_level_theta, lem:two_level_base_len_zero}
   At $\varepsilon = 0$ every total turning angle is $\alpha = 2\pi/n$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Both slots evaluate at $\sin\rho$.
 \end{proof}
 
-\begin{lemma}[turning-angle $\varepsilon$-derivative table]
+\begin{lemma}\leanok
+[turning-angle $\varepsilon$-derivative table]
   \label{lem:has_strict_deriv_at_two_level_theta}
   \lean{Gluck.Discrete.hasStrictDerivAt_twoLevelTheta}
   \uses{def:two_level_theta, lem:has_strict_deriv_at_bump_slot,
@@ -2886,19 +2983,23 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   $\chi = [\,\cdot \in \{0,m\}\,]$, packaged for $i \le m$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Sum of the bump/mixed slot derivatives
   (\cref{lem:has_strict_deriv_at_bump_slot,lem:has_strict_deriv_at_mixed_slot})
   selected by the indicator decomposition.
 \end{proof}
 
-\begin{definition}[heading derivative table]
+\begin{definition}\leanok
+[heading derivative table]
   \label{def:two_level_head_dot}
   \lean{Gluck.Discrete.twoLevelHeadDot}
   The closed-form value of $\dot\psi_j = \sum_{i \le j}\dot\theta_i$: a
   $\pm\tan\rho/(2K)$-valued step function of $j$.
 \end{definition}
 
-\begin{lemma}[window bridge for the heading]
+\begin{lemma}\leanok
+[window bridge for the heading]
   \label{lem:heading_two_level}
   \lean{Gluck.Discrete.heading_twoLevel}
   \uses{lem:turning_angle_two_level}
@@ -2906,10 +3007,13 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   point is $\sum_{i \le j} \mathrm{twoLevelTheta}\,i$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Sum the per-vertex bridge \cref{lem:turning_angle_two_level}.
 \end{proof}
 
-\begin{lemma}[heading at $\varepsilon = 0$]
+\begin{lemma}\leanok
+[heading at $\varepsilon = 0$]
   \label{lem:sum_two_level_theta_zero}
   \lean{Gluck.Discrete.sum_twoLevelTheta_zero}
   \uses{lem:two_level_theta_zero}
@@ -2917,10 +3021,13 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   $\psi_j = (j+1)\alpha$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Sum \cref{lem:two_level_theta_zero}.
 \end{proof}
 
-\begin{lemma}[heading $\varepsilon$-derivative]
+\begin{lemma}\leanok
+[heading $\varepsilon$-derivative]
   \label{lem:has_strict_deriv_at_two_level_head}
   \lean{Gluck.Discrete.hasStrictDerivAt_twoLevelHead}
   \uses{def:two_level_head_dot, lem:has_strict_deriv_at_two_level_theta}
@@ -2928,11 +3035,14 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   has strict derivative $\mathrm{twoLevelHeadDot}\,j$ at $0$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Finite sum of \cref{lem:has_strict_deriv_at_two_level_theta}; the telescoping
   indicator sum gives the step table.
 \end{proof}
 
-\begin{lemma}[half-block phase sum at the constant anchor]
+\begin{lemma}\leanok
+[half-block phase sum at the constant anchor]
   \label{lem:sum_exp_ico_eq}
   \lean{Gluck.Discrete.sum_exp_Ico_eq}
   For $q < m$:
@@ -2940,12 +3050,15 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
    = \mathrm{i}\cot\rho\; e^{\mathrm{i}(q+1)\alpha}$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Telescope against $(1 - e^{\mathrm{i}\alpha})$ and use
   $e^{\mathrm{i}m\alpha} = -1$ (no geometric-series library lemma needed);
   extracted from the proof of \cref{lem:closing_jacobian_col_const_eq_zero}.
 \end{proof}
 
-\begin{lemma}[slot derivative at $\varepsilon = 0$]
+\begin{lemma}\leanok
+[slot derivative at $\varepsilon = 0$]
   \label{lem:two_level_slot_zero}
   \lean{Gluck.Discrete.twoLevelSlot_zero}
   \uses{lem:chart_inv_curv_of_pos, lem:chart_inv_const,
@@ -2954,11 +3067,14 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   constant-pair value $K/(2\cos\rho)$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Round-trip \cref{lem:chart_inv_curv_of_pos} then
   \cref{lem:chart_inv_const,lem:chart_slot_deriv_const}.
 \end{proof}
 
-\begin{lemma}[bump-slot-derivative motion]
+\begin{lemma}\leanok
+[bump-slot-derivative motion]
   \label{lem:has_strict_deriv_at_bump_slot_deriv}
   \lean{Gluck.Discrete.hasStrictDerivAt_bumpSlotDeriv}
   \uses{lem:has_strict_deriv_at_chart_inv_curv, lem:chart_inv_const}
@@ -2967,12 +3083,15 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   $\dot A = (1 + \cos^2\rho)/(4\cos^3\rho)$ at $0$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Chain rule through the inner wall argument $(K+\varepsilon)\ell^*(\varepsilon)/2$
   (derivative $\sin\rho/(2K)$, value $\sin\rho$) and the square-root
   denominator.
 \end{proof}
 
-\begin{lemma}[mixed-slot-derivative motion]
+\begin{lemma}\leanok
+[mixed-slot-derivative motion]
   \label{lem:has_strict_deriv_at_mixed_slot_deriv}
   \lean{Gluck.Discrete.hasStrictDerivAt_mixedSlotDeriv}
   \uses{lem:has_strict_deriv_at_chart_inv_curv, lem:chart_inv_const}
@@ -2981,11 +3100,14 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   $\dot B = -\sin^2\rho/(4\cos^3\rho)$ at $0$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Same chain rule with constant outer factor $K$ (inner derivative
   $-\sin\rho/(2K)$).
 \end{proof}
 
-\begin{lemma}[$\lambda'(\varepsilon)$ of the special edge]
+\begin{lemma}\leanok
+[$\lambda'(\varepsilon)$ of the special edge]
   \label{lem:has_strict_deriv_at_two_level_lambda}
   \lean{Gluck.Discrete.hasStrictDerivAt_twoLevelLambda'}
   \uses{lem:has_strict_deriv_at_bump_slot_deriv,
@@ -2994,11 +3116,14 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   derivative $\dot\lambda' = -\cos\rho/(2K^2)$ at $0$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Quotient rule: $\dot A + \dot B = 1/(4\cos\rho)$, base value
   $A + B = K/\cos\rho$.
 \end{proof}
 
-\begin{lemma}[share $p(\varepsilon)$ of the special edge]
+\begin{lemma}\leanok
+[share $p(\varepsilon)$ of the special edge]
   \label{lem:has_strict_deriv_at_two_level_share}
   \lean{Gluck.Discrete.hasStrictDerivAt_twoLevelShare}
   \uses{lem:has_strict_deriv_at_bump_slot_deriv,
@@ -3007,10 +3132,13 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   $\dot p = 1/(4K\cos^2\rho)$ at $0$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Quotient rule with $\dot A - \dot B = \sec\rho/2$ at the base $p = 1/2$.
 \end{proof}
 
-\begin{definition}[$\varepsilon$-total two-level Jacobian column]
+\begin{definition}\leanok
+[$\varepsilon$-total two-level Jacobian column]
   \label{def:two_level_col}
   \lean{Gluck.Discrete.twoLevelCol}
   \uses{def:closing_jacobian_col, def:two_level_base_len, def:two_level_theta}
@@ -3019,7 +3147,8 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   \sum_{q < r < q+m} E_r)$ assembled from the $\varepsilon$-total data.
 \end{definition}
 
-\begin{lemma}[window bridge for the column]
+\begin{lemma}\leanok
+[window bridge for the column]
   \label{lem:two_level_col_eq}
   \lean{Gluck.Discrete.twoLevelCol_eq}
   \uses{def:two_level_col, def:closing_jacobian_col,
@@ -3028,10 +3157,13 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   \mathrm{closingJacobianCol}$ of the two-level profile at column $q$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Substitute the bridges into each ingredient.
 \end{proof}
 
-\begin{lemma}[exact vanishing at $\varepsilon = 0$]
+\begin{lemma}\leanok
+[exact vanishing at $\varepsilon = 0$]
   \label{lem:two_level_col_zero}
   \lean{Gluck.Discrete.twoLevelCol_zero}
   \uses{lem:two_level_col_eq, lem:closing_jacobian_col_const_eq_zero,
@@ -3039,12 +3171,15 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   $\mathrm{twoLevelCol}\,q\,(0) = 0$ for every $q$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   At $\varepsilon = 0$ the profile is constant
   (\cref{lem:two_level_profile_zero}) and all constant-anchor columns vanish
   (\cref{lem:closing_jacobian_col_const_eq_zero}).
 \end{proof}
 
-\begin{lemma}[window bridge for the edge vectors]
+\begin{lemma}\leanok
+[window bridge for the edge vectors]
   \label{lem:jacobian_edge_two_level}
   \lean{Gluck.Discrete.jacobianEdge_twoLevel}
   \uses{def:jacobian_edge, lem:two_level_base_len_eq,
@@ -3054,10 +3189,13 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   $E_r(\varepsilon) = \ell_r(\varepsilon)\,e^{\mathrm{i}\psi_r(\varepsilon)}$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   \cref{lem:two_level_base_len_eq} + summed \cref{lem:turning_angle_two_level}.
 \end{proof}
 
-\begin{lemma}[edge-vector $\varepsilon$-derivative]
+\begin{lemma}\leanok
+[edge-vector $\varepsilon$-derivative]
   \label{lem:has_strict_deriv_at_two_level_edge}
   \lean{Gluck.Discrete.hasStrictDerivAt_twoLevelEdge}
   \uses{lem:has_strict_deriv_at_two_level_base_len,
@@ -3068,11 +3206,14 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   e^{\mathrm{i}(r+1)\alpha}$ at $0$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Product + $\exp$ chain rule on the strict derivatives of
   $\ell_r$ and $\psi_r$, evaluated with the base values.
 \end{proof}
 
-\begin{lemma}[total formula of column 0]
+\begin{lemma}\leanok
+[total formula of column 0]
   \label{lem:two_level_col_formula_zero}
   \lean{Gluck.Discrete.twoLevelCol_formula₀}
   \uses{lem:two_level_col_eq, def:chart_inv_curv, def:two_level_base_len,
@@ -3082,11 +3223,14 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   headings, and the total edge vectors over $\mathrm{Ico}(1, m{+}1)$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Unfold \cref{lem:two_level_col_eq}; edge $0$ is special, the middle edges
   are identified pointwise.
 \end{proof}
 
-\begin{definition}[first-order value $V_0$]
+\begin{definition}\leanok
+[first-order value $V_0$]
   \label{def:two_level_v_zero}
   \lean{Gluck.Discrete.twoLevelV₀}
   $V_0 = \bigl(e^{\mathrm{i}\alpha}(-\cos\rho + (\sin\rho +
@@ -3096,7 +3240,8 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   half-angle identity.
 \end{definition}
 
-\begin{lemma}[column-0 derivative $C_0'(0) = V_0$]
+\begin{lemma}\leanok
+[column-0 derivative $C_0'(0) = V_0$]
   \label{lem:has_strict_deriv_at_two_level_col_zero}
   \lean{Gluck.Discrete.hasStrictDerivAt_twoLevelCol₀}
   \uses{lem:two_level_col_formula_zero, def:two_level_v_zero,
@@ -3109,11 +3254,14 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   at $0$, uniformly in $m \ge 2$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   Differentiate the total formula termwise; the half-block edge-dot sum
   collapses by \cref{lem:sum_exp_ico_eq} and $e^{\mathrm{i}m\alpha} = -1$.
 \end{proof}
 
-\begin{lemma}[total formula of column 1, interior case]
+\begin{lemma}\leanok
+[total formula of column 1, interior case]
   \label{lem:two_level_col_formula_one}
   \lean{Gluck.Discrete.twoLevelCol_formula₁}
   \uses{lem:two_level_col_eq, lem:chart_inv_const,
@@ -3124,11 +3272,14 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   $\cos\rho/K$ and $1/2$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   As \cref{lem:two_level_col_formula_zero} with the constant special-edge
   data.
 \end{proof}
 
-\begin{definition}[first-order value $V_1$]
+\begin{definition}\leanok
+[first-order value $V_1$]
   \label{def:two_level_v_one}
   \lean{Gluck.Discrete.twoLevelV₁}
   $V_1 = \bigl((-\sin^2\rho/\cos\rho + \sin\rho\,\mathrm{i}) +
@@ -3137,7 +3288,8 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   by the half-angle identity.
 \end{definition}
 
-\begin{lemma}[column-1 derivative $C_1'(0) = V_1$, interior case]
+\begin{lemma}\leanok
+[column-1 derivative $C_1'(0) = V_1$, interior case]
   \label{lem:has_strict_deriv_at_two_level_col_one}
   \lean{Gluck.Discrete.hasStrictDerivAt_twoLevelCol₁}
   \uses{lem:two_level_col_formula_one, def:two_level_v_one,
@@ -3147,11 +3299,140 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   derivative $V_1$ at $0$.
 \end{lemma}
 \begin{proof}
+
+\leanok
   As \cref{lem:has_strict_deriv_at_two_level_col_zero}; now edges $1$ and $m$
   are the moving ones inside the half-block.
 \end{proof}
 
-\begin{lemma}[the two-level witness anchor --- explicit nondegenerate pair]
+% --- @084 satellites: m = 2 boundary case of column 1, R4 slope-limit
+% packaging, and the explicit pairing values (public decls landed @083). ---
+
+\begin{lemma}[column-1 total formula, boundary case $m = 2$]
+  \label{lem:two_level_col_formula_one_prime}
+  \lean{Gluck.Discrete.twoLevelCol_formula₁'}
+  \uses{lem:two_level_col_eq, def:chart_inv_curv, def:chart_slot_deriv,
+        lem:two_level_profile_nat_cast_succ, lem:two_level_col_formula_one}
+  For $m = 2$ ($n = 4$) all four edges are special and edge $1 = m - 1$
+  carries the MOVING slot data (pair $(K, K+\varepsilon)$, mixed-first order):
+  the total formula for $\mathrm{twoLevelCol}\,1$ holds on the window, the
+  $m = 2$ analogue of \cref{lem:two_level_col_formula_one} with
+  $\lambda'_1, p_1$ the moving mixed-first slot expressions.
+\end{lemma}
+\begin{proof}
+  \uses{lem:two_level_col_eq, lem:two_level_profile_nat_cast_succ}
+  Mirror of \cref{lem:two_level_col_formula_zero}: unfold
+  $\mathrm{jacobianLambda}'/\mathrm{jacobianShare}$ at $j = 1$; the curvature
+  pair at edge $1$ is $(\kappa_1, \kappa_2) = (K, K + \varepsilon)$ by
+  \cref{lem:two_level_profile_nat_cast_succ}, so both the length slot and the
+  share slot move with $\varepsilon$.
+\end{proof}
+
+\begin{definition}[$V_1$ at the boundary case $m = 2$]
+  \label{def:two_level_v_one_prime}
+  \lean{Gluck.Discrete.twoLevelV₁'}
+  \uses{def:two_level_v_one}
+  $V_1' = 2\sqrt2\,\mathrm{i}/K^2$ --- the $m = 2$ row of the target-value
+  table (at $\rho = \pi/4$: $\tan\rho = 1$, and the boundary case collects the
+  extra moving-share contribution).
+\end{definition}
+
+\begin{lemma}[column-1 derivative $C_1'(0) = V_1'$, boundary case $m = 2$]
+  \label{lem:has_strict_deriv_at_two_level_col_one_prime}
+  \lean{Gluck.Discrete.hasStrictDerivAt_twoLevelCol₁'}
+  \uses{lem:two_level_col_formula_one_prime, def:two_level_v_one_prime,
+        lem:has_strict_deriv_at_two_level_edge,
+        lem:has_strict_deriv_at_two_level_head,
+        lem:has_strict_deriv_at_two_level_share}
+  For $m = 2$: $\varepsilon \mapsto \mathrm{twoLevelCol}\,1$ has strict
+  derivative $V_1' = 2\sqrt2\,\mathrm{i}/K^2$ at $0$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:two_level_col_formula_one_prime,
+        lem:has_strict_deriv_at_two_level_edge}
+  Assembly mirrors the column-0 case (both $\lambda'$ and the share move,
+  unlike $m \ge 3$). Key $m = 2$ evaluations: $\mathrm{twoLevelHeadDot}\,1 = 0$
+  (edge $1 = m-1$), $\mathrm{twoLevelHeadDot}\,2 = \tan\rho/K$, and the
+  heading exponentials at $n = 4$: $e^{2\alpha\mathrm{i}} = -1$,
+  $e^{3\alpha\mathrm{i}} = -\mathrm{i}$. FD-confirmed
+  (\texttt{references/verify\_two\_level\_Vq.py}, $m = 2$ row).
+\end{proof}
+
+\begin{lemma}[R4 slope limit of the pairing]
+  \label{lem:tendsto_two_level_pairing}
+  \lean{Gluck.Discrete.tendsto_twoLevelPairing}
+  \uses{lem:two_level_col_zero, def:two_level_col}
+  Parametric in $(V_0, V_1)$: if $C_0, C_1$ have strict derivatives
+  $V_0, V_1$ at $0$ and $C_q(0) = 0$ (\cref{lem:two_level_col_zero}), then
+  $\mathrm{Im}(\overline{C_0}C_1)/\varepsilon^2 \to
+  \mathrm{Im}(\overline{V_0}V_1)$ on $\mathcal N[\ne]\,0$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:two_level_col_zero}
+  \texttt{hasDerivAt\_iff\_tendsto\_slope} gives
+  $C_q(\varepsilon)/\varepsilon \to V_q$; continuity of
+  $\overline{(\cdot)}\cdot(\cdot)$ and $\mathrm{Im}$, plus the pointwise
+  identity $\mathrm{Im}(\overline{C_0}C_1)/\varepsilon^2 =
+  \mathrm{Im}\bigl(\overline{C_0/\varepsilon}\cdot C_1/\varepsilon\bigr)$
+  (real $\varepsilon$), transports the limit.
+\end{proof}
+
+\begin{lemma}[R4 conclusion: eventual nonvanishing of the pairing]
+  \label{lem:eventually_two_level_pairing_ne}
+  \lean{Gluck.Discrete.eventually_twoLevelPairing_ne}
+  \uses{lem:tendsto_two_level_pairing}
+  Under the hypotheses of \cref{lem:tendsto_two_level_pairing}, if
+  $\mathrm{Im}(\overline{V_0}V_1) \ne 0$ then
+  $\forall^f \varepsilon \in \mathcal N[\ne]\,0$,
+  $\mathrm{Im}(\overline{C_0}C_1)(\varepsilon) \ne 0$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:tendsto_two_level_pairing}
+  \texttt{Tendsto.eventually\_ne} against the nonzero limit; if the pairing
+  vanished, so would its $\varepsilon^{-2}$ rescaling.
+\end{proof}
+
+\begin{lemma}[interior pairing value]
+  \label{lem:im_conj_two_level_v}
+  \lean{Gluck.Discrete.im_conj_twoLevelV₀_mul_twoLevelV₁}
+  \uses{def:two_level_v_zero, def:two_level_v_one}
+  $\mathrm{Im}(\overline{V_0}V_1) = -2\sin\rho/(\cos^3\rho\,K^4)
+  = -2\tan\rho\sec^2\rho/K^4 \ne 0$ (interior rows, $m \ge 3$).
+\end{lemma}
+\begin{proof}
+  \uses{def:two_level_v_zero, def:two_level_v_one}
+  Expand $e^{\mathrm{i}\alpha}$ by double-angle identities
+  ($\alpha = 2\rho$), compute the imaginary part, and reduce with
+  $\sin^2\rho + \cos^2\rho = 1$.
+\end{proof}
+
+\begin{lemma}[boundary evaluation of $V_0$ at $n = 4$]
+  \label{lem:two_level_v_zero_of_four}
+  \lean{Gluck.Discrete.twoLevelV₀_of_four}
+  \uses{def:two_level_v_zero}
+  For $n = 4$: $V_0 = -2\sqrt2/K^2$ (the uniform column-0 value evaluated at
+  $\rho = \pi/4$).
+\end{lemma}
+\begin{proof}
+  \uses{def:two_level_v_zero}
+  Substitute $\rho = \pi/4$ ($\sin\rho = \cos\rho = \sqrt2/2$) in
+  \cref{def:two_level_v_zero}.
+\end{proof}
+
+\begin{lemma}[boundary pairing value]
+  \label{lem:im_conj_two_level_v_prime}
+  \lean{Gluck.Discrete.im_conj_twoLevelV₀_mul_twoLevelV₁'}
+  \uses{lem:two_level_v_zero_of_four, def:two_level_v_one_prime}
+  $\mathrm{Im}(\overline{V_0}V_1') = -8/K^4 \ne 0$ (boundary case $m = 2$).
+\end{lemma}
+\begin{proof}
+  \uses{lem:two_level_v_zero_of_four, def:two_level_v_one_prime}
+  Direct: $\overline{(-2\sqrt2/K^2)}\cdot(2\sqrt2\,\mathrm{i}/K^2)
+  = -8\,\mathrm{i}/K^4$.
+\end{proof}
+
+\begin{lemma}\leanok
+[the two-level witness anchor --- explicit nondegenerate pair]
   \label{lem:anchor_witness_two_level}
   \lean{Gluck.Discrete.anchorWitness_two_level}
   \uses{def:closing_jacobian_col, lem:closing_gap_eq_zero_of_central_sym_const,
@@ -3187,7 +3468,11 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
         def:two_level_col, lem:two_level_col_zero,
         lem:has_strict_deriv_at_two_level_col_zero,
         lem:has_strict_deriv_at_two_level_col_one,
+        lem:has_strict_deriv_at_two_level_col_one_prime,
+        lem:tendsto_two_level_pairing, lem:eventually_two_level_pairing_ne,
+        lem:im_conj_two_level_v, lem:im_conj_two_level_v_prime,
         def:two_level_v_zero, def:two_level_v_one}
+        \leanok
   Parametrize by the slot angles $a_j = \arcsin(\kappa_j\ell_j/2)$,
   $b_j = \arcsin(\kappa_{j+1}\ell_j/2)$, so $a_j + b_j = \alpha := 2\pi/n$,
   $\ell_j = 2\sin a_j/\kappa_j = 2\sin b_j/\kappa_{j+1}$, hence
@@ -3239,22 +3524,13 @@ $\alpha = 2\pi/n$, $n = 2m \ge 4$, $K > 0$.
   numerically @080.)})
 \end{proof}
 
-\emph{Assembly state (@083).} R1 (heading tables), R2 (slot calculus, edge
-derivatives), and R3 for both columns in the interior case are LANDED
-(satellites above); $C_0'(0) = V_0$ holds uniformly in $m \ge 2$, $C_1'(0) =
-V_1$ for $m \ge 3$. Remaining: (i) the $m = 2$ case of column $1$ --- for
-$n = 4$ ALL four edges are special, so edge $1$ carries the moving slot data
-exactly as edge $0$ did in \cref{lem:two_level_col_formula_zero}; the target
-values are $V_0 = -2\sqrt2/K^2$, $V_1 = 2\sqrt2\,\mathrm{i}/K^2$ (blueprint
-$m=2$ row, FD-confirmed); (ii) R4, the slope-limit packaging: from $C_q(0) =
-0$ (\cref{lem:two_level_col_zero}) and $C_q'(0) = V_q$, via
-$\mathrm{hasDerivAt\_iff\_tendsto\_slope}$, $C_q(\varepsilon)/\varepsilon \to
-V_q$ on $\mathcal N[\ne]0$; continuity of $\overline{(\cdot)}\cdot(\cdot)$ and
-$\mathrm{Im}$ gives $\mathrm{Im}(\overline{C_0}C_1)/\varepsilon^2 \to
-\mathrm{Im}(\overline{V_0}V_1) = -2\tan\rho\sec^2\rho/K^4 \ne 0$ ($-8/K^4$ for
-$m=2$), hence $\forall^f \varepsilon \in \mathcal N[\ne]0$,
-$\mathrm{Im}(\overline{C_0}C_1)(\varepsilon) \ne 0$; package with the W-layer-1
-openers as \cref{lem:anchor_witness_two_level}.
+\emph{Assembly state (@084): COMPLETE.} The full witness chain R1--R4 is
+LANDED axiom-clean (commits \texttt{ae84815}--\texttt{5c188ec}): both columns
+in both cases ($C_0'(0) = V_0$ uniformly in $m \ge 2$; $C_1'(0) = V_1$ for
+$m \ge 3$ and $= V_1' = 2\sqrt2\,\mathrm{i}/K^2$ for $m = 2$), the R4
+slope-limit packaging, the two pairing values, and the capstone
+\cref{lem:anchor_witness_two_level}. The anchor selector of
+\cref{lem:closure_persists} is now fully backed on the witness side.
 
 \emph{The anchor selector (@080) --- how \cref{lem:anchor_witness_two_level}
 feeds \cref{lem:closure_persists}.} For a target $\kappa$, the anchor datum is
@@ -3283,23 +3559,41 @@ a theorem; it is not \texttt{\textbackslash uses}-load-bearing anywhere.
   (equal to $\mathrm{sgn}\,\mathrm{Im}\bigl(\overline{C_a}\,C_b\bigr)$).
 \end{lemma}
 \begin{proof}
-  \uses{lem:closure_boundary_rigidity}
-  On $|z|_1 = \rho'$ (the radius of \cref{lem:closure_boundary_rigidity}) run
-  the \emph{linear boundary homotopy} $H_s(z) = L z + s\bigl(F(0,z) - L z\bigr)$,
-  $s \in [0,1]$: by the strict-differentiability estimate
-  $\|F(0,z) - Lz\| \le \tfrac12\sigma_{\min}(L)\|z\| < \|Lz\|$, every $H_s$ is
-  zero-free on the boundary, so the winding of $F(0,\cdot)$ equals the winding
-  of the nonsingular real-linear loop $z \mapsto Lz$, which is
-  $\mathrm{sgn}\det L = \mathrm{sgn}\,\mathrm{Im}(\overline{C_a} C_b) = \pm1$.
-  \emph{(Lean ingredients: the public homotopy-invariance wrapper (P1, frozen
-  \texttt{Gluck/Winding.lean}, additive only) and a small ``winding of a
-  nonsingular linear loop'' lemma; both consumed by the same iter that
-  unblocks \cref{lem:closure_persists}.)}
+  \uses{lem:closure_boundary_rigidity, lem:winding_number_c_perturb,
+        lem:winding_number_c_linear_loop}
+  Work on the Euclidean circle $z(t) = \rho'(\cos 2\pi t, \sin 2\pi t)$ inside
+  the rigidity radius of \cref{lem:closure_boundary_rigidity} (the strict-%
+  differentiability estimate $\|F(0,z) - Lz\| \le \tfrac12\sigma_{\min}(L)
+  \|z\|$ is pointwise, so it holds on Euclidean circles; shrink $\rho'$ by the
+  $\ell^1\!/\ell^2$ norm-equivalence constant if the landed estimate is stated
+  on the $\ell^1$ ball). Two steps:
+  \textbf{(a) The linear loop.} With $L z = z_1 C_a + z_2 C_b$, on the circle
+  \[
+    L(z(t)) = \rho'\bigl(a\,e^{2\pi i t} + b\,e^{-2\pi i t}\bigr), \qquad
+    a = \tfrac12(C_a - \mathrm{i}C_b),\quad b = \tfrac12(C_a + \mathrm{i}C_b),
+  \]
+  and $\|a\|^2 - \|b\|^2 = \mathrm{Im}(\overline{C_a}C_b) \ne 0$ (polarization:
+  $|x-y|^2 - |x+y|^2 = -4\,\mathrm{Re}(\bar x y)$ with $x = C_a$,
+  $y = \mathrm{i}C_b$). By \cref{lem:winding_number_c_linear_loop} (the
+  positive scalar $\rho'$ is absorbed by
+  \cref{lem:winding_number_c_const_mul}) the linear boundary loop has winding
+  $\mathrm{sgn}(\|a\| - \|b\|) = \mathrm{sgn}\,\mathrm{Im}(\overline{C_a}C_b)
+  = \pm1$.
+  \textbf{(b) Rou\-ch\'e transfer.} The loop $t \mapsto F(0, z(t))$ is a
+  pointwise perturbation of the linear loop with
+  $\|F(0,z(t)) - L z(t)\| \le \tfrac12\sigma_{\min}(L)\|z(t)\| <
+  \sigma_{\min}(L)\|z(t)\| \le \|L z(t)\|$, so
+  \cref{lem:winding_number_c_perturb} gives equality of windings; in
+  particular the winding of $F(0,\cdot)$ on the circle is $\pm1 \ne 0$.
+  \emph{(No general homotopy wrapper is needed for THIS step ---
+  \cref{lem:winding_number_c_perturb} is the exact Rou\-ch\'e tool; the public
+  wrapper \cref{thm:winding_number_c_homotopy} is consumed later by the
+  $t$-continuation in \cref{lem:closure_persists}.)}
 \end{proof}
 
 \begin{definition}[the moving pair rectangle and its normalization]
   \label{def:closing_rect}
-  \uses{def:closing_2cell, def:curv_path, def:turning_chart}
+  \uses{def:closing_2cell, def:curv_path, def:turning_chart, lem:chart_wall}
   For the pair $(a,b)$ and the path $\kappa_t$, the \emph{natural rectangle}
   is the closed product of chart intervals
   \[
@@ -3309,13 +3603,29 @@ a theorem; it is not \texttt{\textbackslash uses}-load-bearing anywhere.
   \]
   where $w_j(t) = \pi/2 + \arcsin\bigl(\min/\max \text{ of }
   (\kappa_t)_j, (\kappa_t)_{j+1}\bigr)$ is the exact chart wall of edge $j$
-  (attained at the arcsin saturation $\ell_j = 2/\max$) and the $s = 0$ faces
-  are the zero-length collapse. Both interval factors have positive length
-  ($\alpha = 2\pi/n \le \pi/2 < w_j$), and $F(t,\cdot)$ extends continuously
-  to the closed rectangle. The per-coordinate affine rescaling
-  $\Xi_t : [-1,1]^2 \to R_t$ is a homeomorphism, continuous in $t$, and
+  (\cref{lem:chart_wall}, attained at the arcsin saturation $\ell_j = 2/\max$)
+  and the $s = 0$ faces are the zero-length collapse. Both interval factors
+  have positive length and contain $0$ in their interior
+  ($\alpha = 2\pi/n \le \pi/2 < w_j$, so the $u$-interval is
+  $[\max(-\alpha,\, \alpha - w_{a+m}(t)),\ \min(w_a(t) - \alpha,\, \alpha)]$
+  with negative left and positive right endpoint, and likewise for $v$). The
+  per-coordinate affine rescaling $\Xi_t : [-1,1]^2 \to R_t$ (mapping
+  $[-1,0]$ resp.\ $[0,1]$ affinely onto the negative resp.\ positive part, so
+  $\Xi_t(0) = 0$) is a homeomorphism, jointly continuous in $(t,q)$ (the four
+  endpoint functions are continuous in $t$: $\kappa_t$ is affine in $t$ and
+  $\min/\max/\arcsin$ are continuous), and
   $H(t,q) := F(t, \Xi_t(q))$ puts the whole continuation on the FIXED square
   --- the in-tree fixed-domain winding engine applies to $H$.
+  \emph{Lean shape (@084): build on the landed chart layer ---
+  \texttt{chartMap}/\texttt{chartInv} and the wall value
+  \texttt{pi\_div\_two\_lt\_chartMap\_wall}. Suggested decls: the four wall
+  widths $w$ as functions of $t$; the endpoint functions and their
+  positivity/negativity; $\Xi$ with $\Xi_t(0) = 0$ and joint continuity; the
+  extension claim for $F(t,\cdot)$ to the CLOSED rectangle can be scoped to
+  whatever sub-rectangle the landed continuity of $\Phi$ supports --- if the
+  closed-wall extension genuinely needs new chart-continuity work at the
+  saturation faces, stop cleanly at a precise decomposition instead of
+  weakening statements.}
 \end{definition}
 
 \begin{lemma}[global $t = 0$ window rigidity --- companion, OPEN]
@@ -3380,13 +3690,19 @@ so per-$n$ boxes cannot cover ALL DFV profiles). \textbf{No prover is
 dispatched on \cref{lem:closure_boundary_exclusion} or
 \cref{lem:closure_window_rigidity} until the adversarial verdict is recorded,
 the surviving statement is authored to atomic detail, and a HARD GATE clears
-it.}
+it.} \emph{Probe state @084 plan: still RUNNING (relaunched @083; Parts 1--2
+PASS; Part 3 adversarial descent has completed $n = 6$ with min wall margin
+$2.79\times10^{-3}$ --- no wall zero found so far; $n = 8$ in progress). The
+verdict is recorded here when the run completes; the verdict-independent
+layers (\cref{def:closing_rect} fixed-square infrastructure, the additive
+winding toolbox of \cref{chap:winding}, and \cref{lem:closure_winding_t0})
+proceed meanwhile.}
 
 \begin{lemma}[closure persists along the anchor path --- CRUX, modulo the open leaf]
   \label{lem:closure_persists}
   \uses{lem:closure_winding_t0, lem:closure_boundary_exclusion,
         lem:closure_window_rigidity, def:closing_rect,
-        lem:anchor_witness_two_level}
+        lem:anchor_witness_two_level, thm:winding_number_c_homotopy}
   For $n \ge 4$ even and $\kappa$ with $\mathrm{DiscreteFourVertexPos}$, choose
   an admissible anchor datum (a positive half-period-symmetric $\kappa^s$ with
   a nondegenerate pair, by the anchor selector: $\kappa^0$ when some pair is
@@ -3404,8 +3720,8 @@ it.}
   (\cref{def:closing_rect}). By \cref{lem:closure_boundary_exclusion},
   $H(t,\cdot)$ is zero-free on $\partial[-1,1]^2$ for all $t$, so
   $t \mapsto H(t,\cdot)|_{\partial[-1,1]^2}$ is a homotopy of zero-avoiding
-  loops; by homotopy-invariance of the winding number (in-tree
-  \texttt{windingNumber\_eq\_of\_homotopy}, needs a public wrapper) the
+  loops; by homotopy-invariance of the winding number (the public wrapper
+  \cref{thm:winding_number_c_homotopy}) the
   boundary winding is constant in $t$, hence equals its $t=0$ value $\pm1$
   (\cref{lem:closure_winding_t0} on the small circle, transferred to the
   square boundary by \cref{lem:closure_window_rigidity}) for every $t$. By the
@@ -3429,13 +3745,19 @@ when some pair is nondegenerate; else the two-level witness
 \cref{lem:anchor_witness_two_level}). Committed prover sequence: (P2$'$) generalize
 the $2$-cell layer to \cref{def:curv_path} in place, define
 \cref{def:closing_jacobian_col}, and prove the corrected
-\cref{lem:closure_boundary_rigidity}; THEN \cref{lem:closure_winding_t0}
-(needs (P1), the \emph{public} wrapper for
-\texttt{windingNumber\_eq\_of\_homotopy} in the frozen
-\texttt{Gluck/Winding.lean} --- a NEW public theorem, preserve all signatures,
-axiom-clean --- plus a winding-of-a-nonsingular-linear-loop lemma). NEXT after rigidity: \cref{lem:anchor_witness_two_level} (authored to atomic
-detail @080, gated with the winding step). HELD (no prover until authored to
-atomic detail + fresh HARD GATE): \cref{lem:closure_boundary_exclusion},
+\cref{lem:closure_boundary_rigidity} --- DONE @081;
+\cref{lem:anchor_witness_two_level} --- DONE @083. Current wave (@084): the
+ADDITIVE winding toolbox in the frozen \texttt{Gluck/Winding.lean}
+(\cref{lem:winding_number_c_exp_loop},
+\cref{lem:winding_number_c_exp_loop_rev},
+\cref{lem:winding_number_c_linear_loop}, and the public wrapper
+\cref{thm:winding_number_c_homotopy} --- NEW public theorems only, preserve
+all existing signatures, axiom-clean) in parallel with the
+\cref{def:closing_rect} fixed-square layer. NEXT: the
+\cref{lem:closure_winding_t0} assembly (consumes both waves). HELD (no prover
+until the adversarial verdict is recorded, the surviving statement is authored
+to atomic detail, and a fresh HARD GATE clears it):
+\cref{lem:closure_boundary_exclusion}, \cref{lem:closure_window_rigidity},
 \cref{lem:closure_persists}.
 
 % NOTE (2026-07-14 archon-discuss + ChatGPT gpt-5.5 consult @075): standing crux
