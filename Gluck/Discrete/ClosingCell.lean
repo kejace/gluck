@@ -172,4 +172,75 @@ theorem continuousOn_chartInv {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
   rw [hrestrict]
   exact continuous_subtype_val.comp (chartHomeomorph hp hq).symm.continuous
 
+/-! ### Joint continuity of the inverse of a continuous monotone family
+
+The one nontrivial analytic obligation of `def:turning_chart`: the recovered
+edge length depends continuously on *both* the homotopy parameter `t` and the
+chart value `s`. We prove it abstractly for any jointly-continuous family
+`g : T → ℝ → ℝ` (`T` compact Hausdorff) that is injective on a common compact
+length interval `Icc a b`, with a chosen inverse `inv`. The proof is the
+compact-to-Hausdorff argument: `F (t, x) = (t, g t x)` is a continuous injection
+from the compact `T × Icc a b`, hence a homeomorphism onto its range, so its
+inverse — which recovers `inv` in the second coordinate — is continuous. -/
+
+/-- **Joint continuity of the inverse of a continuous strictly-monotone family.**
+For a jointly continuous `g : T → ℝ → ℝ` (`T` compact Hausdorff) that is
+injective on `Icc a b` for each parameter, any inverse `inv` (a right inverse of
+`g t` on the value set `g t '' Icc a b`, landing in `Icc a b`) is jointly
+continuous in `(t, s)` on `{(t, s) : s ∈ g t '' Icc a b}`. This is the IFT-free
+route to joint continuity of the edge-length recovery `λ` of `def:turning_chart`
+(with `g t = chartMap (κ_t j) (κ_t (j+1))`, `κ_t` affine in `t`). -/
+theorem continuousOn_inv_family {T : Type*} [TopologicalSpace T] [CompactSpace T]
+    [T2Space T] {g : T → ℝ → ℝ} {a b : ℝ}
+    (hg : Continuous fun p : T × ℝ => g p.1 p.2)
+    (hinj : ∀ t, Set.InjOn (g t) (Set.Icc a b))
+    {inv : T → ℝ → ℝ}
+    (hinv1 : ∀ t s, s ∈ g t '' Set.Icc a b → g t (inv t s) = s)
+    (hinv2 : ∀ t s, s ∈ g t '' Set.Icc a b → inv t s ∈ Set.Icc a b) :
+    ContinuousOn (fun p : T × ℝ => inv p.1 p.2)
+      {p : T × ℝ | p.2 ∈ g p.1 '' Set.Icc a b} := by
+  haveI : CompactSpace ↥(Set.Icc a b) := isCompact_iff_compactSpace.mp isCompact_Icc
+  set F : T × ↥(Set.Icc a b) → T × ℝ := fun x => (x.1, g x.1 (x.2 : ℝ)) with hF
+  have hFcont : Continuous F :=
+    continuous_fst.prodMk
+      (hg.comp (continuous_fst.prodMk (continuous_subtype_val.comp continuous_snd)))
+  have hFinj : Function.Injective F := by
+    rintro ⟨t, x⟩ ⟨t', x'⟩ hEq
+    simp only [hF, Prod.mk.injEq] at hEq
+    obtain ⟨rfl, h2⟩ := hEq
+    exact Prod.ext rfl (Subtype.ext (hinj t x.2 x'.2 h2))
+  have hrange : Set.range F = {p : T × ℝ | p.2 ∈ g p.1 '' Set.Icc a b} := by
+    ext ⟨t, s⟩
+    simp only [Set.mem_range, Set.mem_setOf_eq, hF, Prod.mk.injEq, Set.mem_image]
+    constructor
+    · rintro ⟨⟨t', x⟩, ⟨rfl, rfl⟩⟩
+      exact ⟨(x : ℝ), x.2, rfl⟩
+    · rintro ⟨x, hx, rfl⟩
+      exact ⟨(t, ⟨x, hx⟩), rfl, rfl⟩
+  set e : (T × ↥(Set.Icc a b)) ≃ ↥(Set.range F) := Equiv.ofInjective F hFinj with he
+  have hecont : Continuous e := by
+    rw [he]
+    exact hFcont.subtype_mk _
+  have hsymm : Continuous e.symm := hecont.continuous_symm_of_equiv_compact_to_t2
+  rw [← hrange, continuousOn_iff_continuous_restrict]
+  have hkey : (Set.range F).restrict (fun p => inv p.1 p.2)
+      = fun y => ((e.symm y).2 : ℝ) := by
+    funext y
+    have hFy : F (e.symm y) = (y : T × ℝ) := by
+      rw [he]; exact Equiv.apply_ofInjective_symm hFinj y
+    have h1 : (e.symm y).1 = (y : T × ℝ).1 := by rw [← hFy]
+    have h2 : g (e.symm y).1 ((e.symm y).2 : ℝ) = (y : T × ℝ).2 := by
+      rw [← hFy]
+    set x : ℝ := ((e.symm y).2 : ℝ) with hx
+    have hxmem : x ∈ Set.Icc a b := (e.symm y).2.2
+    have hgx : g (y : T × ℝ).1 x = (y : T × ℝ).2 := by rw [← h1]; exact h2
+    have hmemimg : (y : T × ℝ).2 ∈ g (y : T × ℝ).1 '' Set.Icc a b :=
+      ⟨x, hxmem, hgx⟩
+    have hinveq : inv (y : T × ℝ).1 (y : T × ℝ).2 = x := by
+      apply hinj (y : T × ℝ).1 (hinv2 _ _ hmemimg) hxmem
+      rw [hinv1 _ _ hmemimg, hgx]
+    simpa [Set.restrict_apply] using hinveq
+  rw [hkey]
+  exact continuous_subtype_val.comp (continuous_snd.comp hsymm)
+
 end Gluck.Discrete
