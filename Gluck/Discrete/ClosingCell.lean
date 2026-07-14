@@ -3444,4 +3444,181 @@ theorem hasStrictDerivAt_mixedSlot [NeZero n] (hn4 : 4 ≤ n) {K : ℝ}
   rw [hderiv] at hcomp
   exact hcomp
 
+/-! ### The ε-total two-level Jacobian data (`lem:anchor_witness_two_level`, R1)
+
+`ε ↦ jacobianBaseLen (twoLevelProfile_pos hK hε)` is not globally well-formed —
+the positivity proof needs `|ε| < K` — so the `ε`-differentiation happens on
+the TOTAL piecewise functions below, which agree with the Jacobian data on the
+window `|ε| < K` (via `jacobianBaseLen_twoLevel`) and are honest functions of
+`ε`. The bridge back is `HasStrictDerivAt.congr_of_eventuallyEq` on `|ε| < K`. -/
+
+/-- The ε-total two-level base length of edge `j` (lifted index): the four
+special edges carry the moving scalar `chartInvCurv hK (2π/n) (K+ε)`, the rest
+the constant-pair length. Agrees with `jacobianBaseLen` of the two-level
+profile on the window `|ε| < K` (`twoLevelBaseLen_eq`). -/
+noncomputable def twoLevelBaseLen (m : ℕ) {K : ℝ} (hK : 0 < K) (ε : ℝ)
+    (j : ℕ) : ℝ :=
+  if j = 0 ∨ j = m - 1 ∨ j = m ∨ j = n - 1
+  then chartInvCurv hK (2 * Real.pi / n) (K + ε)
+  else chartInv hK hK (2 * Real.pi / n)
+
+/-- On the window `|ε| < K` the total base length IS the Jacobian base length
+of the two-level profile (restatement of `jacobianBaseLen_twoLevel`). -/
+theorem twoLevelBaseLen_eq [NeZero n] (hn4 : 4 ≤ n) {m : ℕ} (hn : n = 2 * m)
+    {K ε : ℝ} (hK : 0 < K) (hε : |ε| < K) {j : ℕ} (hj : j < n) :
+    jacobianBaseLen (fun i => twoLevelProfile_pos (n := n) (m := m) hK hε i)
+        ((j : ℕ) : ZMod n)
+      = twoLevelBaseLen (n := n) m hK ε j := by
+  unfold twoLevelBaseLen
+  exact jacobianBaseLen_twoLevel hn4 hn hK hε hj
+
+/-- At `ε = 0` every total base length is the constant-pair length. -/
+theorem twoLevelBaseLen_zero {m : ℕ} {K : ℝ} (hK : 0 < K) (j : ℕ) :
+    twoLevelBaseLen (n := n) m hK 0 j = chartInv hK hK (2 * Real.pi / n) := by
+  unfold twoLevelBaseLen
+  split_ifs with h
+  · rw [add_zero, chartInvCurv_of_pos hK hK]
+  · rfl
+
+/-- The strict `ε`-derivative of the total base length at `ε = 0`: the four
+special edges move at `ℓ̇* = −sin(π/n)/K²`, every other edge is frozen. -/
+theorem hasStrictDerivAt_twoLevelBaseLen [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    {K : ℝ} (hK : 0 < K) (j : ℕ) :
+    HasStrictDerivAt (fun ε : ℝ => twoLevelBaseLen (n := n) m hK ε j)
+      (if j = 0 ∨ j = m - 1 ∨ j = m ∨ j = n - 1
+       then -(Real.sin (Real.pi / n) / K ^ 2) else 0) 0 := by
+  unfold twoLevelBaseLen
+  split_ifs with h
+  · exact hasStrictDerivAt_twoLevelLen hn4 hK
+  · exact hasStrictDerivAt_const 0 _
+
+/-- `hasStrictDerivAt_bumpSlot`, re-associated to the `κ · (ℓ/2)` shape of
+`turningAngle`. -/
+private lemma hasStrictDerivAt_bumpSlot' [NeZero n] (hn4 : 4 ≤ n) {K : ℝ}
+    (hK : 0 < K) :
+    HasStrictDerivAt (fun ε : ℝ => Real.arcsin
+        ((K + ε) * (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε) / 2)))
+      (Real.tan (Real.pi / n) / (2 * K)) 0 := by
+  simpa only [mul_div_assoc] using hasStrictDerivAt_bumpSlot (n := n) hn4 hK
+
+/-- `hasStrictDerivAt_mixedSlot`, re-associated to the `κ · (ℓ/2)` shape of
+`turningAngle`. -/
+private lemma hasStrictDerivAt_mixedSlot' [NeZero n] (hn4 : 4 ≤ n) {K : ℝ}
+    (hK : 0 < K) :
+    HasStrictDerivAt (fun ε : ℝ => Real.arcsin
+        (K * (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε) / 2)))
+      (-(Real.tan (Real.pi / n) / (2 * K))) 0 := by
+  simpa only [mul_div_assoc] using hasStrictDerivAt_mixedSlot (n := n) hn4 hK
+
+/-- The ε-total two-level turning angle at lifted vertex `i < n`: two arcsin
+slots whose curvature factor carries the bump indicator and whose length
+factors are the total base lengths of the two adjacent edges (wrap-around
+`n − 1` at `i = 0`). -/
+noncomputable def twoLevelTheta (m : ℕ) {K : ℝ} (hK : 0 < K) (ε : ℝ)
+    (i : ℕ) : ℝ :=
+  Real.arcsin ((K + if i = 0 ∨ i = m then ε else 0)
+      * (twoLevelBaseLen (n := n) m hK ε (if i = 0 then n - 1 else i - 1) / 2))
+    + Real.arcsin ((K + if i = 0 ∨ i = m then ε else 0)
+      * (twoLevelBaseLen (n := n) m hK ε i / 2))
+
+/-- On the window `|ε| < K` the total turning angle IS the turning angle of
+the two-level profile at its Jacobian base lengths. -/
+theorem turningAngle_twoLevel [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    (hn : n = 2 * m) {K ε : ℝ} (hK : 0 < K) (hε : |ε| < K) {i : ℕ}
+    (hi : i < n) :
+    turningAngle 0 (twoLevelProfile (n := n) m K ε)
+        (jacobianBaseLen (fun i => twoLevelProfile_pos (n := n) (m := m) hK hε i))
+        ((i : ℕ) : ZMod n)
+      = twoLevelTheta (n := n) m hK ε i := by
+  unfold turningAngle twoLevelTheta
+  simp only [tK_zero]
+  rw [twoLevelProfile_natCast hn K ε hi,
+    twoLevelBaseLen_eq hn4 hn hK hε hi]
+  rcases Nat.eq_zero_or_pos i with rfl | hipos
+  · have hcast : ((0 : ℕ) : ZMod n) - 1 = ((n - 1 : ℕ) : ZMod n) := by
+      rw [Nat.cast_zero, zero_sub, neg_one_zmod_eq]
+    have hj' : n - 1 < n := by omega
+    rw [hcast, twoLevelBaseLen_eq hn4 hn hK hε hj', if_pos rfl]
+  · have hcast : ((i : ℕ) : ZMod n) - 1 = ((i - 1 : ℕ) : ZMod n) := by
+      rw [Nat.cast_sub hipos, Nat.cast_one]
+    have hj' : i - 1 < n := by omega
+    have hne : ¬ i = 0 := by omega
+    rw [hcast, twoLevelBaseLen_eq hn4 hn hK hε hj', if_neg hne]
+
+/-- At `ε = 0` every total turning angle is `2π/n`. -/
+theorem twoLevelTheta_zero [NeZero n] (hn4 : 4 ≤ n) {m : ℕ} {K : ℝ}
+    (hK : 0 < K) (i : ℕ) :
+    twoLevelTheta (n := n) m hK 0 i = 2 * Real.pi / n := by
+  have h := turningAngle_const (n := n) hn4 hK 0
+  unfold turningAngle at h
+  simp only [tK_zero] at h
+  rw [← chartInv_const hn4 hK] at h
+  unfold twoLevelTheta
+  simp only [ite_self, add_zero, twoLevelBaseLen_zero hK]
+  exact h
+
+/-- **The strict `ε`-derivative of the total turning angle** at `ε = 0`, for
+vertices `i ≤ m`: the two-slot table `ȧ = ±tan(π/n)/(2K)` of
+`lem:anchor_witness_two_level` — bump vertices `{0, m}` carry two bump slots,
+vertices `1` and `m − 1` carry one (or, at `m = 2`, two) mixed slots, interior
+vertices are frozen. -/
+theorem hasStrictDerivAt_twoLevelTheta [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    (hn : n = 2 * m) {K : ℝ} (hK : 0 < K) {i : ℕ} (hi : i ≤ m) :
+    HasStrictDerivAt (fun ε : ℝ => twoLevelTheta (n := n) m hK ε i)
+      ((if i = 0 ∨ i = m then Real.tan (Real.pi / n) / (2 * K)
+        else if i = 1 then -(Real.tan (Real.pi / n) / (2 * K)) else 0)
+       + (if i = 0 ∨ i = m then Real.tan (Real.pi / n) / (2 * K)
+          else if i = m - 1 then -(Real.tan (Real.pi / n) / (2 * K)) else 0))
+      0 := by
+  have hm2 : 2 ≤ m := by omega
+  unfold twoLevelTheta twoLevelBaseLen
+  by_cases hbump : i = 0 ∨ i = m
+  · have hcondh : i = 0 ∨ i = m - 1 ∨ i = m ∨ i = n - 1 := by
+      rcases hbump with h | h <;> omega
+    by_cases hi0 : i = 0
+    · have hcondt : n - 1 = 0 ∨ n - 1 = m - 1 ∨ n - 1 = m ∨ n - 1 = n - 1 :=
+        Or.inr (Or.inr (Or.inr rfl))
+      simp only [if_pos hbump, if_pos hi0, if_pos hcondt, if_pos hcondh,
+        or_true, ite_true]
+      exact (hasStrictDerivAt_bumpSlot' hn4 hK).add
+        (hasStrictDerivAt_bumpSlot' hn4 hK)
+    · have him : i = m := hbump.resolve_left hi0
+      have hcondt : i - 1 = 0 ∨ i - 1 = m - 1 ∨ i - 1 = m ∨ i - 1 = n - 1 := by
+        omega
+      simp only [if_pos hbump, if_neg hi0, if_pos hcondt, if_pos hcondh]
+      exact (hasStrictDerivAt_bumpSlot' hn4 hK).add
+        (hasStrictDerivAt_bumpSlot' hn4 hK)
+  · have hi0 : ¬ i = 0 := fun h => hbump (Or.inl h)
+    have him : ¬ i = m := fun h => hbump (Or.inr h)
+    simp only [if_neg hbump, if_neg hi0, add_zero]
+    by_cases hi1 : i = 1
+    · have hcondt : i - 1 = 0 ∨ i - 1 = m - 1 ∨ i - 1 = m ∨ i - 1 = n - 1 := by
+        omega
+      simp only [if_pos hcondt, if_pos hi1]
+      by_cases hm : m = 2
+      · have hcondh : i = 0 ∨ i = m - 1 ∨ i = m ∨ i = n - 1 := by omega
+        have h1m : i = m - 1 := by omega
+        simp only [if_pos hcondh, if_pos h1m]
+        exact (hasStrictDerivAt_mixedSlot' hn4 hK).add
+          (hasStrictDerivAt_mixedSlot' hn4 hK)
+      · have hcondh : ¬(i = 0 ∨ i = m - 1 ∨ i = m ∨ i = n - 1) := by omega
+        have h1m : ¬ i = m - 1 := by omega
+        simp only [if_neg hcondh, if_neg h1m]
+        rw [add_zero]
+        exact (hasStrictDerivAt_mixedSlot' hn4 hK).add_const _
+    · simp only [if_neg hi1]
+      have hcondt : ¬(i - 1 = 0 ∨ i - 1 = m - 1 ∨ i - 1 = m ∨ i - 1 = n - 1) := by
+        omega
+      by_cases hlast : i = m - 1
+      · have hcondh : i = 0 ∨ i = m - 1 ∨ i = m ∨ i = n - 1 := Or.inr (Or.inl hlast)
+        simp only [if_pos hlast, if_neg hcondt, if_pos hcondh]
+        rw [zero_add]
+        exact HasStrictDerivAt.const_add _ (hasStrictDerivAt_mixedSlot' hn4 hK)
+      · have hcondh : ¬(i = 0 ∨ i = m - 1 ∨ i = m ∨ i = n - 1) := by omega
+        simp only [if_neg hlast, if_neg hcondt, if_neg hcondh]
+        rw [add_zero]
+        exact hasStrictDerivAt_const (0 : ℝ)
+          (Real.arcsin (K * (chartInv hK hK (2 * Real.pi / n) / 2))
+            + Real.arcsin (K * (chartInv hK hK (2 * Real.pi / n) / 2)))
+
 end Gluck.Discrete
