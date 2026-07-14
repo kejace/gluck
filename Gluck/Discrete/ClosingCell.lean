@@ -985,4 +985,47 @@ theorem closingGap_center_eq_zero [NeZero n] {m : ℕ} (hn : n = 2 * m)
     (closingCell_zero_symm hn a b hκ ht0 ht1)
     (turningSum_closingCell m a b hκ ht0 ht1 hmem)
 
+/-- **The assembled closing 2-cell** (`def:closing_2cell`, complete package):
+for `n = 2m ≥ 4` and a positive profile `κ` there is a radius `ρ > 0` such
+that on `[0,1] × {|z.1| + |z.2| ≤ ρ}` the 2-cell `Φ = closingCell` (i) keeps
+the turning constraint `turningSum = 2π` identically, (ii) stays in the
+moderate-arc domain of `κ_t`, and (iii) has a continuous gap map `F`; moreover
+(iv) the center closes at `t = 0`: `F(0,0) = 0`. This is the full analytic
+input of the degree argument of `sec:closure` except the two winding leaves
+(`lem:closure_boundary_rigidity`, `lem:closure_boundary_exclusion`). -/
+theorem closingCell_package [NeZero n] (hn4 : 4 ≤ n) {m : ℕ} (hn : n = 2 * m)
+    (a b : ZMod n) {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i) :
+    ∃ ρ : ℝ, 0 < ρ ∧
+      (∀ t : ℝ, ∀ (ht0 : 0 ≤ t) (ht1 : t ≤ 1), ∀ z : ℝ × ℝ,
+        |z.1| + |z.2| ≤ ρ →
+        turningSum (curvHomotopy m κ t) (closingCell m a b hκ ht0 ht1 z)
+            = 2 * Real.pi ∧
+        ModerateArc 0 (curvHomotopy m κ t) (closingCell m a b hκ ht0 ht1 z)) ∧
+      ContinuousOn
+        (fun x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) =>
+          closingGap m a b hκ x.1.2.1 x.1.2.2 x.2)
+        {x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) | |x.2.1| + |x.2.2| ≤ ρ} ∧
+      ∀ (ht0 : (0 : ℝ) ≤ 0) (ht1 : (0 : ℝ) ≤ 1),
+        closingGap m a b hκ ht0 ht1 (0, 0) = 0 := by
+  obtain ⟨ρ, c, d, hρ0, _hρ2πn, hc0, hcd, hd1, hwin⟩ :=
+    exists_closingCell_window hn4 m hκ
+  have hmem : ∀ t : ℝ, ∀ (ht0 : 0 ≤ t) (ht1 : t ≤ 1), ∀ z : ℝ × ℝ,
+      |z.1| + |z.2| ≤ ρ → ∀ j : ZMod n, chartPerturb m a b z j ∈
+        chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) ''
+          Set.Ioo (0 : ℝ)
+            (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))) :=
+    fun t ht0 ht1 z hz j =>
+      chartMap_image_window_subset (curvHomotopy_pos hκ ht0 ht1 j) hc0 hd1
+        (hwin t ht0 ht1 z hz a b j)
+  refine ⟨ρ, hρ0, ?_, ?_, ?_⟩
+  · intro t ht0 ht1 z hz
+    exact ⟨turningSum_closingCell m a b hκ ht0 ht1 (hmem t ht0 ht1 z hz),
+      moderateArc_closingCell m a b hκ ht0 ht1 (hmem t ht0 ht1 z hz)⟩
+  · exact continuousOn_closingGap m a b hκ hc0 hcd hd1
+      (Z := {z : ℝ × ℝ | |z.1| + |z.2| ≤ ρ})
+      fun t ht0 ht1 z hz j => hwin t ht0 ht1 z hz a b j
+  · intro ht0 ht1
+    exact closingGap_center_eq_zero hn a b hκ ht0 ht1
+      (hmem 0 ht0 ht1 (0, 0) (by simp [hρ0.le]))
+
 end Gluck.Discrete
