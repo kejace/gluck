@@ -900,4 +900,93 @@ theorem errorMap_winding_eq_one (a b δ : ℝ) (_ha : 0 < a) (_hb : 0 < b) (hab 
         (windingNumberC_const_mul _ hcc negCircleExpLoop negCircleExpLoop_ne).trans
           windingNumberC_negCircleExp
 
+/-! ## Additive winding toolbox: explicit winding values and public homotopy invariance
+
+The additive layer for the discrete closing argument (blueprint
+`lem:winding_number_c_exp_loop`, `lem:winding_number_c_exp_loop_rev`,
+`lem:winding_number_c_linear_loop`, `thm:winding_number_c_homotopy`): the
+forward/reverse scaled exponential loops and the nonsingular real-linear loop
+`t ↦ a·e^{2πit} + b·e^{-2πit}` with their explicitly computed winding numbers,
+plus the public wrapper for free-homotopy invariance of `windingNumberC`.
+Everything above this section is frozen; this section only appends. -/
+
+/-- The **forward once-around circle loop** `t ↦ Circle.exp (2π t)`, the
+orientation-reversed twin of `negStandardLoop`. -/
+private noncomputable def posStandardLoop : C(I, Circle) :=
+  ⟨fun t => Circle.exp (2 * π * (t : ℝ)),
+    Circle.exp.continuous.comp (continuous_const.mul continuous_subtype_val)⟩
+
+/-- The forward once-around loop has winding number `1` (computed directly from
+the lift `φ t = 2π t`). -/
+private theorem windingNumber_posStandard : windingNumber posStandardLoop = 1 := by
+  have hlift : ∀ t : I, Circle.exp ((fun t : I => 2 * π * (t : ℝ)) t) = posStandardLoop t :=
+    fun _ => rfl
+  rw [windingNumber_eq_div_of_lift posStandardLoop
+    ⟨fun t : I => 2 * π * (t : ℝ), continuous_const.mul continuous_subtype_val⟩ hlift]
+  have h2pi : (2 * π : ℝ) ≠ 0 := by positivity
+  simp only [ContinuousMap.coe_mk, Set.Icc.coe_one, Set.Icc.coe_zero, mul_one, mul_zero,
+    sub_zero]
+  field_simp
+
+/-- The **scaled forward exponential loop** `t ↦ c·e^{2π i t}` on `[0,1]`
+(blueprint `lem:winding_number_c_exp_loop`).  Project-local: Mathlib has no
+topological winding number, so its model loops live here. -/
+noncomputable def expLoop (c : ℂ) : C(I, ℂ) :=
+  ⟨fun t => c * Complex.exp (((2 * π * (t : ℝ) : ℝ) : ℂ) * Complex.I), by fun_prop⟩
+
+/-- `expLoop c` evaluates to `c·e^{2π i t}`. -/
+theorem expLoop_apply (c : ℂ) (t : I) :
+    expLoop c t = c * Complex.exp (((2 * π * (t : ℝ) : ℝ) : ℂ) * Complex.I) := rfl
+
+/-- `expLoop c` has constant norm `‖c‖`. -/
+theorem expLoop_norm (c : ℂ) (t : I) : ‖expLoop c t‖ = ‖c‖ := by
+  rw [expLoop_apply, norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one]
+
+/-- For `c ≠ 0` the scaled forward exponential loop is nowhere zero. -/
+theorem expLoop_ne_zero (c : ℂ) (hc : c ≠ 0) (t : I) : expLoop c t ≠ 0 := by
+  rw [expLoop_apply]
+  exact mul_ne_zero hc (Complex.exp_ne_zero _)
+
+/-- `expLoop c` starts at `c`. -/
+theorem expLoop_zero (c : ℂ) : expLoop c 0 = c := by
+  rw [expLoop_apply]
+  norm_num
+
+/-- `expLoop c` ends at `c`. -/
+theorem expLoop_one (c : ℂ) : expLoop c 1 = c := by
+  have h : (((2 * π * ((1 : I) : ℝ) : ℝ)) : ℂ) * Complex.I = 2 * (π : ℂ) * Complex.I := by
+    rw [Set.Icc.coe_one]; push_cast; ring
+  rw [expLoop_apply, h, Complex.exp_two_pi_mul_I, mul_one]
+
+/-- `expLoop c` is a loop: `expLoop c 0 = expLoop c 1`. -/
+theorem expLoop_loop (c : ℂ) : expLoop c 0 = expLoop c 1 := by
+  rw [expLoop_zero, expLoop_one]
+
+/-- **Winding of the scaled forward exponential loop** (blueprint
+`lem:winding_number_c_exp_loop`): for `c ≠ 0` the loop `t ↦ c·e^{2π i t}` has
+winding number `1` about the origin.  Reduce to `c = 1` by scaling invariance;
+the unit loop normalises to `posStandardLoop`, whose winding is computed from
+the explicit lift `φ t = 2π t`. -/
+theorem windingNumberC_expLoop (c : ℂ) (hc : c ≠ 0) :
+    windingNumberC (expLoop c) (expLoop_ne_zero c hc) = 1 := by
+  have hne : ∀ t : I, ((posStandardLoop t : Circle) : ℂ) ≠ 0 := fun t =>
+    norm_pos_iff.1 (by rw [Circle.norm_coe]; norm_num)
+  set γ₁ : C(I, ℂ) := ⟨fun t => ((posStandardLoop t : Circle) : ℂ),
+    continuous_subtype_val.comp posStandardLoop.continuous⟩ with hγ₁def
+  have hγ₁ne : ∀ t, γ₁ t ≠ 0 := hne
+  have hunit : windingNumberC γ₁ hγ₁ne = 1 := by
+    have hnl : normLoop γ₁ hγ₁ne = posStandardLoop := by
+      apply ContinuousMap.ext
+      intro t
+      exact circleProj_coe (posStandardLoop t) (hγ₁ne t)
+    rw [windingNumberC, hnl, windingNumber_posStandard]
+  have hmul := windingNumberC_const_mul c hc γ₁ hγ₁ne
+  rw [hunit] at hmul
+  refine Eq.trans ?_ hmul
+  apply windingNumberC_congr
+  intro t
+  change c * Complex.exp (((2 * π * (t : ℝ) : ℝ) : ℂ) * Complex.I)
+    = c * ((posStandardLoop t : Circle) : ℂ)
+  congr 1
+
 end Gluck
