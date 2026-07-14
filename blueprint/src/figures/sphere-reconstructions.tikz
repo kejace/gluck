@@ -4,6 +4,13 @@
   tangent arrow/.style={postaction={decorate},decoration={markings,
     mark=at position .13 with {\arrow{Stealth}}}}]
   \input{figures/spaceform-reconstruction-data}
+  \newcommand{\globe}{
+    \shade[ball color=blue!7] (0,0) circle (1);
+    \draw[black!38,line width=.45pt] (0,0) circle (1);
+    \draw[black!16] (-1,0) arc[start angle=180,end angle=360,x radius=1,y radius=.24];
+    \draw[black!16,dashed] (1,0) arc[start angle=0,end angle=180,x radius=1,y radius=.24];
+    \draw[black!14] (0,-1) arc[start angle=-90,end angle=90,x radius=.31,y radius=1];
+    \draw[black!14,dashed] (0,1) arc[start angle=90,end angle=270,x radius=.31,y radius=1];}
   \newcommand{\saxes}{\draw[black!25,->](0,-.5)--(0,1.35)node[above]{$\kappa_S$};
     \draw[black!30,->](0,0)--(3.15,0)node[right]{$t$};
     \node[font=\scriptsize,text=black!50,below]at(0,0){$0$};
@@ -18,10 +25,11 @@
         \node[vertex,fill=blue!75!black]at\p{\n};
       \node[font=\tiny,text=black!55]at(2.55,1.12){$\SphereMinA\le\kappa_S\le\SphereMaxA$};
     \end{scope}
-    \begin{scope}[shift={(1.55,1.15)},scale=2.25]
-      \draw[curve,blue!75!black,tangent arrow]plot coordinates{\SphereCurveA};
-      \foreach\p/\n in{\SphereCurveAMarkerA/1,\SphereCurveAMarkerB/2,
-        \SphereCurveAMarkerC/3,\SphereCurveAMarkerD/4}
+    \begin{scope}[shift={(1.55,1.15)},scale=.88]
+      \globe
+      \draw[curve,blue!75!black,tangent arrow]plot coordinates{\SphereGlobeA};
+      \foreach\p/\n in{\SphereGlobeAMarkerA/1,\SphereGlobeAMarkerB/2,
+        \SphereGlobeAMarkerC/3,\SphereGlobeAMarkerD/4}
         \node[vertex,fill=blue!75!black]at\p{\n};
     \end{scope}
   \end{scope}
@@ -35,10 +43,11 @@
         \node[vertex,fill=teal!70!black]at\p{\n};
       \node[font=\tiny,text=black!55]at(2.55,1.12){$\SphereMinB\le\kappa_S\le\SphereMaxB$};
     \end{scope}
-    \begin{scope}[shift={(1.55,1.15)},scale=2.25]
-      \draw[curve,teal!70!black,tangent arrow]plot coordinates{\SphereCurveB};
-      \foreach\p/\n in{\SphereCurveBMarkerA/1,\SphereCurveBMarkerB/2,
-        \SphereCurveBMarkerC/3,\SphereCurveBMarkerD/4}
+    \begin{scope}[shift={(1.55,1.15)},scale=.88]
+      \globe
+      \draw[curve,teal!70!black,tangent arrow]plot coordinates{\SphereGlobeB};
+      \foreach\p/\n in{\SphereGlobeBMarkerA/1,\SphereGlobeBMarkerB/2,
+        \SphereGlobeBMarkerC/3,\SphereGlobeBMarkerD/4}
         \node[vertex,fill=teal!70!black]at\p{\n};
     \end{scope}
   \end{scope}
@@ -54,10 +63,11 @@
         \node[vertex,fill=orange!85!black]at\p{\n};
       \node[font=\tiny,text=black!55]at(2.55,1.12){$\SphereMinC\le\kappa_S\le\SphereMaxC$};
     \end{scope}
-    \begin{scope}[shift={(1.55,1.15)},scale=2.25]
-      \draw[curve,orange!85!black,tangent arrow]plot coordinates{\SphereCurveC};
-      \foreach\p/\n in{\SphereCurveCMarkerA/1,\SphereCurveCMarkerB/2,
-        \SphereCurveCMarkerC/3,\SphereCurveCMarkerD/4}
+    \begin{scope}[shift={(1.55,1.15)},scale=.88]
+      \globe
+      \draw[curve,orange!85!black,tangent arrow]plot coordinates{\SphereGlobeC};
+      \foreach\p/\n in{\SphereGlobeCMarkerA/1,\SphereGlobeCMarkerB/2,
+        \SphereGlobeCMarkerC/3,\SphereGlobeCMarkerD/4}
         \node[vertex,fill=orange!85!black]at\p{\n};
     \end{scope}
   \end{scope}

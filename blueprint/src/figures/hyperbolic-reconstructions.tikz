@@ -4,6 +4,12 @@
   tangent arrow/.style={postaction={decorate},decoration={markings,
     mark=at position .13 with {\arrow{Stealth}}}}]
   \input{figures/spaceform-reconstruction-data}
+  \newcommand{\poincaredisk}{
+    \fill[blue!3] (0,0) circle (1);
+    \draw[black!38,dashed,line width=.55pt] (0,0) circle (1);
+    \draw[black!12] (-1,0)--(1,0) (0,-1)--(0,1);
+    \draw[black!10] (-.8,-.6) arc[start angle=216.87,end angle=323.13,radius=1.25];
+    \node[font=\tiny,text=black!48] at (0,-1.13) {ideal boundary};}
   \newcommand{\haxes}{\draw[black!25,->](0,-.5)--(0,1.35)node[above]{$\kappa_H$};
     \draw[black!30,->](0,0)--(3.15,0)node[right]{$t$};
     \node[font=\scriptsize,text=black!50,below]at(0,0){$0$};
@@ -18,7 +24,8 @@
         \node[vertex,fill=blue!75!black]at\p{\n};
       \node[font=\tiny,text=black!55]at(2.55,1.12){$\HyperbolicMinA\le\kappa_H\le\HyperbolicMaxA$};
     \end{scope}
-    \begin{scope}[shift={(1.55,1.15)},scale=2.7]
+    \begin{scope}[shift={(1.55,1.25)},scale=.92]
+      \poincaredisk
       \draw[curve,blue!75!black,tangent arrow]plot coordinates{\HyperbolicCurveA};
       \foreach\p/\n in{\HyperbolicCurveAMarkerA/1,\HyperbolicCurveAMarkerB/2,
         \HyperbolicCurveAMarkerC/3,\HyperbolicCurveAMarkerD/4}
@@ -36,7 +43,8 @@
         \node[vertex,fill=teal!70!black]at\p{\n};
       \node[font=\tiny,text=black!55]at(2.55,1.12){$\HyperbolicMinB\le\kappa_H\le\HyperbolicMaxB$};
     \end{scope}
-    \begin{scope}[shift={(1.55,1.15)},scale=2.7]
+    \begin{scope}[shift={(1.55,1.25)},scale=.92]
+      \poincaredisk
       \draw[curve,teal!70!black,tangent arrow]plot coordinates{\HyperbolicCurveB};
       \foreach\p/\n in{\HyperbolicCurveBMarkerA/1,\HyperbolicCurveBMarkerB/2,
         \HyperbolicCurveBMarkerC/3,\HyperbolicCurveBMarkerD/4}
@@ -55,7 +63,8 @@
         \node[vertex,fill=orange!85!black]at\p{\n};
       \node[font=\tiny,text=black!55]at(2.55,1.12){$\HyperbolicMinC\le\kappa_H\le\HyperbolicMaxC$};
     \end{scope}
-    \begin{scope}[shift={(1.55,1.15)},scale=2.7]
+    \begin{scope}[shift={(1.55,1.25)},scale=.92]
+      \poincaredisk
       \draw[curve,orange!85!black,tangent arrow]plot coordinates{\HyperbolicCurveC};
       \foreach\p/\n in{\HyperbolicCurveCMarkerA/1,\HyperbolicCurveCMarkerB/2,
         \HyperbolicCurveCMarkerC/3,\HyperbolicCurveCMarkerD/4}
