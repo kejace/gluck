@@ -20,6 +20,14 @@
       }
     },
     {
+      "id": "sphere-reconstructions",
+      "parameters": { "model": "stereographic", "examples": 3 }
+    },
+    {
+      "id": "hyperbolic-reconstructions",
+      "parameters": { "model": "poincare-disk", "examples": 3 }
+    },
+    {
       "id": "sphere-stereographic",
       "parameters": { "radius": 0.5, "curvature": 0.75 }
     },

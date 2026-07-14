@@ -43,7 +43,9 @@ def ProcessOptions(options, document):
             "euclidean-gluck-reconstructions",
             "euclidean-dahlberg-reconstructions",
             "sphere-stereographic",
+            "sphere-reconstructions",
             "hyperbolic-escape",
+            "hyperbolic-reconstructions",
         )
     )
     document.addPackageResource(resources)

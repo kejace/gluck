@@ -1,0 +1,67 @@
+\begin{tikzpicture}[>=Stealth,curve/.style={line width=1.15pt},
+  vertex/.style={circle,minimum size=7pt,inner sep=.35pt,font=\tiny\bfseries,
+    text=white,draw=white,line width=.35pt},
+  tangent arrow/.style={postaction={decorate},decoration={markings,
+    mark=at position .13 with {\arrow{Stealth}}}}]
+  \input{figures/spaceform-reconstruction-data}
+  \newcommand{\haxes}{\draw[black!25,->](0,-.5)--(0,1.35)node[above]{$\kappa_H$};
+    \draw[black!30,->](0,0)--(3.15,0)node[right]{$t$};
+    \node[font=\scriptsize,text=black!50,below]at(0,0){$0$};
+    \node[font=\scriptsize,text=black!50,below]at(3,0){$2\pi$};}
+  \begin{scope}
+    \node[font=\small\bfseries]at(1.55,5.45){positive, above escape};
+    \node[font=\scriptsize,text=black!65]at(1.55,5.05){$r(t)=0.35(1+0.035\cos2t)$};
+    \begin{scope}[yshift=3.3cm]\haxes
+      \draw[curve,blue!75!black]plot coordinates{\HyperbolicGraphA};
+      \foreach\p/\n in{\HyperbolicGraphAMarkerA/1,\HyperbolicGraphAMarkerB/2,
+        \HyperbolicGraphAMarkerC/3,\HyperbolicGraphAMarkerD/4}
+        \node[vertex,fill=blue!75!black]at\p{\n};
+      \node[font=\tiny,text=black!55]at(2.55,1.12){$\HyperbolicMinA\le\kappa_H\le\HyperbolicMaxA$};
+    \end{scope}
+    \begin{scope}[shift={(1.55,1.15)},scale=2.7]
+      \draw[curve,blue!75!black,tangent arrow]plot coordinates{\HyperbolicCurveA};
+      \foreach\p/\n in{\HyperbolicCurveAMarkerA/1,\HyperbolicCurveAMarkerB/2,
+        \HyperbolicCurveAMarkerC/3,\HyperbolicCurveAMarkerD/4}
+        \node[vertex,fill=blue!75!black]at\p{\n};
+    \end{scope}
+  \end{scope}
+  \begin{scope}[xshift=5cm]
+    \node[font=\small\bfseries]at(1.55,5.45){positive, extra vertices};
+    \node[font=\scriptsize,text=black!65,align=center]at(1.55,5.02)
+      {$r(t)=0.30(1+0.018\cos(2t+0.2)$\\$\phantom{r(t)=0.30(}+0.008\cos5t)$};
+    \begin{scope}[yshift=3.3cm]\haxes
+      \draw[curve,teal!70!black]plot coordinates{\HyperbolicGraphB};
+      \foreach\p/\n in{\HyperbolicGraphBMarkerA/1,\HyperbolicGraphBMarkerB/2,
+        \HyperbolicGraphBMarkerC/3,\HyperbolicGraphBMarkerD/4}
+        \node[vertex,fill=teal!70!black]at\p{\n};
+      \node[font=\tiny,text=black!55]at(2.55,1.12){$\HyperbolicMinB\le\kappa_H\le\HyperbolicMaxB$};
+    \end{scope}
+    \begin{scope}[shift={(1.55,1.15)},scale=2.7]
+      \draw[curve,teal!70!black,tangent arrow]plot coordinates{\HyperbolicCurveB};
+      \foreach\p/\n in{\HyperbolicCurveBMarkerA/1,\HyperbolicCurveBMarkerB/2,
+        \HyperbolicCurveBMarkerC/3,\HyperbolicCurveBMarkerD/4}
+        \node[vertex,fill=teal!70!black]at\p{\n};
+    \end{scope}
+  \end{scope}
+  \begin{scope}[xshift=10cm]
+    \node[font=\small\bfseries]at(1.55,5.45){mixed sign};
+    \node[font=\scriptsize,text=black!65,align=center]at(1.55,5.02)
+      {$r(t)=0.32(1+0.18\cos(2t+0.2)$\\$\phantom{r(t)=0.32(}+0.11\cos5t)$};
+    \begin{scope}[yshift=3.3cm]\haxes
+      \draw[red!55,dashed](0,\HyperbolicZeroC)--(3,\HyperbolicZeroC)node[right,font=\tiny]{$0$};
+      \draw[curve,orange!85!black]plot coordinates{\HyperbolicGraphC};
+      \foreach\p/\n in{\HyperbolicGraphCMarkerA/1,\HyperbolicGraphCMarkerB/2,
+        \HyperbolicGraphCMarkerC/3,\HyperbolicGraphCMarkerD/4}
+        \node[vertex,fill=orange!85!black]at\p{\n};
+      \node[font=\tiny,text=black!55]at(2.55,1.12){$\HyperbolicMinC\le\kappa_H\le\HyperbolicMaxC$};
+    \end{scope}
+    \begin{scope}[shift={(1.55,1.15)},scale=2.7]
+      \draw[curve,orange!85!black,tangent arrow]plot coordinates{\HyperbolicCurveC};
+      \foreach\p/\n in{\HyperbolicCurveCMarkerA/1,\HyperbolicCurveCMarkerB/2,
+        \HyperbolicCurveCMarkerC/3,\HyperbolicCurveCMarkerD/4}
+        \node[vertex,fill=orange!85!black]at\p{\n};
+    \end{scope}
+  \end{scope}
+  \node[font=\small,text=black!65]at(6.55,-.25)
+    {$\kappa_H=\frac{1-|z|^2}{2}\kappa_E+\langle z,n\rangle,\qquad |z|<1$};
+\end{tikzpicture}

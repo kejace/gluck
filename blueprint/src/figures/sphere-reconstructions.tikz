@@ -1,0 +1,66 @@
+\begin{tikzpicture}[>=Stealth,curve/.style={line width=1.15pt},
+  vertex/.style={circle,minimum size=7pt,inner sep=.35pt,font=\tiny\bfseries,
+    text=white,draw=white,line width=.35pt},
+  tangent arrow/.style={postaction={decorate},decoration={markings,
+    mark=at position .13 with {\arrow{Stealth}}}}]
+  \input{figures/spaceform-reconstruction-data}
+  \newcommand{\saxes}{\draw[black!25,->](0,-.5)--(0,1.35)node[above]{$\kappa_S$};
+    \draw[black!30,->](0,0)--(3.15,0)node[right]{$t$};
+    \node[font=\scriptsize,text=black!50,below]at(0,0){$0$};
+    \node[font=\scriptsize,text=black!50,below]at(3,0){$2\pi$};}
+  \begin{scope}
+    \node[font=\small\bfseries]at(1.55,5.45){positive, two-fold};
+    \node[font=\scriptsize,text=black!65]at(1.55,5.05){$r(t)=0.45(1+0.08\cos2t)$};
+    \begin{scope}[yshift=3.3cm]\saxes
+      \draw[curve,blue!75!black]plot coordinates{\SphereGraphA};
+      \foreach\p/\n in{\SphereGraphAMarkerA/1,\SphereGraphAMarkerB/2,
+        \SphereGraphAMarkerC/3,\SphereGraphAMarkerD/4}
+        \node[vertex,fill=blue!75!black]at\p{\n};
+      \node[font=\tiny,text=black!55]at(2.55,1.12){$\SphereMinA\le\kappa_S\le\SphereMaxA$};
+    \end{scope}
+    \begin{scope}[shift={(1.55,1.15)},scale=2.25]
+      \draw[curve,blue!75!black,tangent arrow]plot coordinates{\SphereCurveA};
+      \foreach\p/\n in{\SphereCurveAMarkerA/1,\SphereCurveAMarkerB/2,
+        \SphereCurveAMarkerC/3,\SphereCurveAMarkerD/4}
+        \node[vertex,fill=blue!75!black]at\p{\n};
+    \end{scope}
+  \end{scope}
+  \begin{scope}[xshift=5cm]
+    \node[font=\small\bfseries]at(1.55,5.45){positive, extra vertices};
+    \node[font=\scriptsize,text=black!65]at(1.55,5.05){$r(t)=0.42(1+0.055\cos(3t+0.3))$};
+    \begin{scope}[yshift=3.3cm]\saxes
+      \draw[curve,teal!70!black]plot coordinates{\SphereGraphB};
+      \foreach\p/\n in{\SphereGraphBMarkerA/1,\SphereGraphBMarkerB/2,
+        \SphereGraphBMarkerC/3,\SphereGraphBMarkerD/4}
+        \node[vertex,fill=teal!70!black]at\p{\n};
+      \node[font=\tiny,text=black!55]at(2.55,1.12){$\SphereMinB\le\kappa_S\le\SphereMaxB$};
+    \end{scope}
+    \begin{scope}[shift={(1.55,1.15)},scale=2.25]
+      \draw[curve,teal!70!black,tangent arrow]plot coordinates{\SphereCurveB};
+      \foreach\p/\n in{\SphereCurveBMarkerA/1,\SphereCurveBMarkerB/2,
+        \SphereCurveBMarkerC/3,\SphereCurveBMarkerD/4}
+        \node[vertex,fill=teal!70!black]at\p{\n};
+    \end{scope}
+  \end{scope}
+  \begin{scope}[xshift=10cm]
+    \node[font=\small\bfseries]at(1.55,5.45){mixed sign};
+    \node[font=\scriptsize,text=black!65,align=center]at(1.55,5.02)
+      {$r(t)=0.42(1+0.20\cos(2t+0.2)$\\$\phantom{r(t)=0.42(}+0.13\cos5t)$};
+    \begin{scope}[yshift=3.3cm]\saxes
+      \draw[red!55,dashed](0,\SphereZeroC)--(3,\SphereZeroC)node[right,font=\tiny]{$0$};
+      \draw[curve,orange!85!black]plot coordinates{\SphereGraphC};
+      \foreach\p/\n in{\SphereGraphCMarkerA/1,\SphereGraphCMarkerB/2,
+        \SphereGraphCMarkerC/3,\SphereGraphCMarkerD/4}
+        \node[vertex,fill=orange!85!black]at\p{\n};
+      \node[font=\tiny,text=black!55]at(2.55,1.12){$\SphereMinC\le\kappa_S\le\SphereMaxC$};
+    \end{scope}
+    \begin{scope}[shift={(1.55,1.15)},scale=2.25]
+      \draw[curve,orange!85!black,tangent arrow]plot coordinates{\SphereCurveC};
+      \foreach\p/\n in{\SphereCurveCMarkerA/1,\SphereCurveCMarkerB/2,
+        \SphereCurveCMarkerC/3,\SphereCurveCMarkerD/4}
+        \node[vertex,fill=orange!85!black]at\p{\n};
+    \end{scope}
+  \end{scope}
+  \node[font=\small,text=black!65]at(6.55,-.25)
+    {$\kappa_S=\frac{1+|z|^2}{2}\kappa_E-\langle z,n\rangle$};
+\end{tikzpicture}

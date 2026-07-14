@@ -81,6 +81,17 @@ convention}; any Lean formalization must reproduce $q(\text{circle }r)=r$.
    and the evaluated curvature three quarters.}
   {fig:spherical_stereographic_sign_check}
 
+\gluckfigure{sphere-reconstructions}
+  {Three stereographic representatives on $S^2$: two have strictly positive
+   spherical geodesic curvature, while the third is in the mixed-sign regime.
+   Numbered markers match four selected curvature extrema to the corresponding
+   curve points; higher-frequency profiles may have additional vertices.}
+  {Three columns pair spherical geodesic-curvature graphs with their smooth
+   closed stereographic plane representatives. Two graphs remain positive and
+   one crosses zero. Four numbered extrema correspond to identically numbered
+   points on each curve.}
+  {fig:spherical_reconstructions}
+
 \paragraph{Lean encoding of the normal term.}
 In Lean the left normal $iT$ is the natural object: $\langle z,iT\rangle=\langle z,
 i\,e^{i\varphi}\rangle=-x\sin\varphi+y\cos\varphi=-\langle z,n\rangle$. Hence the speed

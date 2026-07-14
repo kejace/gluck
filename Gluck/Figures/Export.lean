@@ -48,6 +48,14 @@ private def jsonManifest : String :=
   "      }\n" ++
   "    },\n" ++
   "    {\n" ++
+  "      \"id\": \"sphere-reconstructions\",\n" ++
+  "      \"parameters\": { \"model\": \"stereographic\", \"examples\": 3 }\n" ++
+  "    },\n" ++
+  "    {\n" ++
+  "      \"id\": \"hyperbolic-reconstructions\",\n" ++
+  "      \"parameters\": { \"model\": \"poincare-disk\", \"examples\": 3 }\n" ++
+  "    },\n" ++
+  "    {\n" ++
   "      \"id\": \"sphere-stereographic\",\n" ++
   "      \"parameters\": { \"radius\": 0.5, \"curvature\": 0.75 }\n" ++
   "    },\n" ++

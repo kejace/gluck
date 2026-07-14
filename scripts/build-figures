@@ -35,7 +35,8 @@ else
 fi
 
 for id in euclidean-closure euclidean-gluck-reconstructions \
-    euclidean-dahlberg-reconstructions sphere-stereographic hyperbolic-escape; do
+    euclidean-dahlberg-reconstructions sphere-stereographic sphere-reconstructions \
+    hyperbolic-escape hyperbolic-reconstructions; do
   (cd "$src" && xelatex -interaction=batchmode -halt-on-error -no-pdf \
     -output-directory="$tmp" "figures/standalone/$id.tex" >/dev/null)
   dvisvgm --no-fonts --exact --bbox=papersize \
