@@ -523,4 +523,24 @@ noncomputable def closingGap (m : ℕ) (a b : ZMod n) {κ : ZMod n → ℝ}
     (hκ : ∀ i, 0 < κ i) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (z : ℝ × ℝ) : ℂ :=
   closureGap (curvHomotopy m κ t) (closingCell m a b hκ ht0 ht1 z)
 
+/-! ### Joint continuity of the gap map `F` -/
+
+/-- Project-local supplement: the closure gap is jointly continuous in the
+curvature profile and the edge lengths — a finite composition of `arcsin`,
+`Complex.exp`, sums, and products. This is the outer layer of the continuity
+of `F` on `[0,1] × \overline{D}_ρ` (`def:closing_2cell`). -/
+theorem continuous_closureGap :
+    Continuous fun x : (ZMod n → ℝ) × (ZMod n → ℝ) => closureGap x.1 x.2 := by
+  unfold closureGap vertexR2
+  refine continuous_finsetSum _ fun j _ => Continuous.mul ?_ ?_
+  · exact Complex.continuous_ofReal.comp ((continuous_apply _).comp continuous_snd)
+  · refine Complex.continuous_exp.comp (Continuous.mul ?_ continuous_const)
+    refine Complex.continuous_ofReal.comp ?_
+    unfold heading
+    refine continuous_finsetSum _ fun k _ => ?_
+    unfold turningAngle
+    simp only [tK_zero]
+    exact (Real.continuous_arcsin.comp (by fun_prop)).add
+      (Real.continuous_arcsin.comp (by fun_prop))
+
 end Gluck.Discrete
