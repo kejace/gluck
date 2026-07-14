@@ -4158,4 +4158,111 @@ theorem hasStrictDerivAt_twoLevelShare [NeZero n] (hn4 : 4 ≤ n) {K : ℝ}
     ring
   rwa [hveq] at hdiv
 
+/-! ### The ε-total two-level Jacobian column and its edge vectors -/
+
+/-- Columns only depend on the curvature profile, not on the positivity
+proof. -/
+private lemma closingJacobianCol_congr {κs κs' : ZMod n → ℝ} (h : κs = κs')
+    (hκs : ∀ i, 0 < κs i) (hκs' : ∀ i, 0 < κs' i) (m q : ℕ) :
+    closingJacobianCol m hκs q = closingJacobianCol m hκs' q := by
+  subst h
+  rfl
+
+/-- **The ε-total two-level Jacobian column**: `closingJacobianCol` of the
+two-level profile on the window `|ε| < K`, junk `0` outside — the honest
+function of `ε` that `lem:anchor_witness_two_level` differentiates. -/
+noncomputable def twoLevelCol (m : ℕ) {K : ℝ} (hK : 0 < K) (q : ℕ)
+    (ε : ℝ) : ℂ :=
+  if h : |ε| < K
+  then closingJacobianCol m
+    (fun i => twoLevelProfile_pos (n := n) (m := m) hK h i) q
+  else 0
+
+/-- On the window the total column IS the two-level Jacobian column. -/
+theorem twoLevelCol_eq [NeZero n] {m : ℕ} {K ε : ℝ} (hK : 0 < K)
+    (hε : |ε| < K) (q : ℕ) :
+    twoLevelCol (n := n) m hK q ε
+      = closingJacobianCol m
+          (fun i => twoLevelProfile_pos (n := n) (m := m) hK hε i) q :=
+  dif_pos hε
+
+/-- At `ε = 0` the total column vanishes exactly (the constant-anchor
+degeneracy — the ground of the perturbation). -/
+theorem twoLevelCol_zero [NeZero n] (hn4 : 4 ≤ n) {m : ℕ} (hn : n = 2 * m)
+    {K : ℝ} (hK : 0 < K) {q : ℕ} (hq : q < m) :
+    twoLevelCol (n := n) m hK q 0 = 0 := by
+  have h0 : |(0 : ℝ)| < K := by simpa using hK
+  rw [twoLevelCol_eq hK h0 q,
+    closingJacobianCol_congr (twoLevelProfile_zero (n := n) m K)
+      (fun i => twoLevelProfile_pos hK h0 i) (fun _ => hK) m q,
+    closingJacobianCol_const_eq_zero hn4 hn hK hq]
+
+/-- On the window the two-level Jacobian edge vector is the total edge vector
+(total base length times the exponential of the total heading). -/
+theorem jacobianEdge_twoLevel [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    (hn : n = 2 * m) {K ε : ℝ} (hK : 0 < K) (hε : |ε| < K) {r : ℕ}
+    (hr : r < n) :
+    jacobianEdge (fun i => twoLevelProfile_pos (n := n) (m := m) hK hε i) r
+      = ((twoLevelBaseLen (n := n) m hK ε r : ℝ) : ℂ)
+        * Complex.exp (((∑ i ∈ Finset.range (r + 1),
+            twoLevelTheta (n := n) m hK ε i : ℝ) : ℂ) * Complex.I) := by
+  unfold jacobianEdge
+  rw [twoLevelBaseLen_eq hn4 hn hK hε hr, heading_twoLevel hn4 hn hK hε hr]
+
+/-- **The strict `ε`-derivative of the total edge vector** at `ε = 0` for
+`r ≤ m`: `Ė_r = (ℓ̇_r + i·ℓ·ψ̇_r)·e^{i(r+1)·2π/n}` with the length and heading
+rows of the first-order table (`lem:anchor_witness_two_level`). -/
+theorem hasStrictDerivAt_twoLevelEdge [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    (hn : n = 2 * m) {K : ℝ} (hK : 0 < K) {r : ℕ} (hr : r ≤ m) :
+    HasStrictDerivAt
+      (fun ε : ℝ => ((twoLevelBaseLen (n := n) m hK ε r : ℝ) : ℂ)
+        * Complex.exp (((∑ i ∈ Finset.range (r + 1),
+            twoLevelTheta (n := n) m hK ε i : ℝ) : ℂ) * Complex.I))
+      ((((if r = 0 ∨ r = m - 1 ∨ r = m ∨ r = n - 1
+            then -(Real.sin (Real.pi / n) / K ^ 2) else 0 : ℝ)) : ℂ)
+          * Complex.exp (((((r : ℝ) + 1) * (2 * Real.pi / n) : ℝ) : ℂ)
+              * Complex.I)
+        + ((2 * Real.sin (Real.pi / n) / K : ℝ) : ℂ)
+          * (Complex.exp (((((r : ℝ) + 1) * (2 * Real.pi / n) : ℝ) : ℂ)
+              * Complex.I)
+            * (((twoLevelHeadDot (n := n) m K r : ℝ) : ℂ) * Complex.I))) 0 := by
+  have hlen : HasStrictDerivAt
+      (fun ε : ℝ => ((twoLevelBaseLen (n := n) m hK ε r : ℝ) : ℂ))
+      (((if r = 0 ∨ r = m - 1 ∨ r = m ∨ r = n - 1
+          then -(Real.sin (Real.pi / n) / K ^ 2) else 0 : ℝ) : ℂ)) 0 :=
+    hasStrictDerivAt_ofReal_comp (hasStrictDerivAt_twoLevelBaseLen hn4 hK r)
+  have hψ : HasStrictDerivAt
+      (fun ε : ℝ => ((∑ i ∈ Finset.range (r + 1),
+          twoLevelTheta (n := n) m hK ε i : ℝ) : ℂ))
+      ((twoLevelHeadDot (n := n) m K r : ℝ) : ℂ) 0 :=
+    hasStrictDerivAt_ofReal_comp (hasStrictDerivAt_twoLevelHead hn4 hn hK hr)
+  have hinner := hψ.mul_const Complex.I
+  have hexp : HasStrictDerivAt
+      (fun ε : ℝ => Complex.exp (((∑ i ∈ Finset.range (r + 1),
+          twoLevelTheta (n := n) m hK ε i : ℝ) : ℂ) * Complex.I))
+      (Complex.exp (((∑ i ∈ Finset.range (r + 1),
+          twoLevelTheta (n := n) m hK 0 i : ℝ) : ℂ) * Complex.I)
+        * (((twoLevelHeadDot (n := n) m K r : ℝ) : ℂ) * Complex.I)) 0 :=
+    (Complex.hasStrictDerivAt_exp _).comp 0 hinner
+  have hmul : HasStrictDerivAt
+      (fun ε : ℝ => ((twoLevelBaseLen (n := n) m hK ε r : ℝ) : ℂ)
+        * Complex.exp (((∑ i ∈ Finset.range (r + 1),
+            twoLevelTheta (n := n) m hK ε i : ℝ) : ℂ) * Complex.I))
+      ((((if r = 0 ∨ r = m - 1 ∨ r = m ∨ r = n - 1
+            then -(Real.sin (Real.pi / n) / K ^ 2) else 0 : ℝ)) : ℂ)
+          * Complex.exp (((∑ i ∈ Finset.range (r + 1),
+              twoLevelTheta (n := n) m hK 0 i : ℝ) : ℂ) * Complex.I)
+        + ((twoLevelBaseLen (n := n) m hK 0 r : ℝ) : ℂ)
+          * (Complex.exp (((∑ i ∈ Finset.range (r + 1),
+              twoLevelTheta (n := n) m hK 0 i : ℝ) : ℂ) * Complex.I)
+            * (((twoLevelHeadDot (n := n) m K r : ℝ) : ℂ) * Complex.I))) 0 :=
+    hlen.mul hexp
+  have hS0 : (∑ i ∈ Finset.range (r + 1), twoLevelTheta (n := n) m hK 0 i)
+      = ((r : ℝ) + 1) * (2 * Real.pi / n) := sum_twoLevelTheta_zero hn4 hK r
+  have hbl0 : twoLevelBaseLen (n := n) m hK 0 r
+      = 2 * Real.sin (Real.pi / n) / K := by
+    rw [twoLevelBaseLen_zero hK r, chartInv_const hn4 hK]
+  rw [hS0, hbl0] at hmul
+  exact hmul
+
 end Gluck.Discrete
