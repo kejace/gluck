@@ -172,6 +172,26 @@ theorem continuousOn_chartInv {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
   rw [hrestrict]
   exact continuous_subtype_val.comp (chartHomeomorph hp hq).symm.continuous
 
+/-- Left inverse: recovering the length of a charted moderate length returns
+the length (`λ ∘ τ = id` on the moderate domain). Together with
+`chartMap_chartInv` this makes `chartInv` a two-sided inverse. -/
+theorem chartInv_chartMap {p q : ℝ} (hp : 0 < p) (hq : 0 < q) {x : ℝ}
+    (hx : x ∈ Set.Ioo (0 : ℝ) (2 / max p q)) :
+    chartInv hp hq (chartMap p q x) = x := by
+  have hmem : chartMap p q x ∈ chartMap p q '' Set.Ioo (0 : ℝ) (2 / max p q) :=
+    ⟨x, hx, rfl⟩
+  exact (chartMap_strictMonoOn hp hq).injOn (chartInv_mem hp hq hmem) hx
+    (chartMap_chartInv hp hq hmem)
+
+/-- Achieving a turning value inside a compact length subinterval: any `s`
+between the chart values at the endpoints is achieved by a length in the
+subinterval (intermediate value theorem). This is the `Icc`-refined membership
+used by the joint-continuity route. -/
+theorem chartMap_mem_image_Icc {p q x₁ x₂ s : ℝ} (hx : x₁ ≤ x₂)
+    (h : s ∈ Set.Icc (chartMap p q x₁) (chartMap p q x₂)) :
+    s ∈ chartMap p q '' Set.Icc x₁ x₂ :=
+  intermediate_value_Icc hx (chartMap_continuous p q).continuousOn h
+
 /-! ### Joint continuity of the inverse of a continuous monotone family
 
 The one nontrivial analytic obligation of `def:turning_chart`: the recovered
@@ -384,5 +404,45 @@ theorem sum_chartPerturb [NeZero n] (m : ℕ) (a b : ZMod n) (z : ℝ × ℝ) :
   have hn : (n : ℝ) ≠ 0 := by exact_mod_cast NeZero.ne n
   field_simp
   ring
+
+/-- The antisymmetric perturbation moves each chart coordinate by at most
+`|z.1| + |z.2|` away from the base value `2π/n` (each `±z.i` pair contributes
+at most `|z.i|`, regardless of coincidences among the four indices). -/
+theorem abs_chartPerturb_sub_le (m : ℕ) (a b : ZMod n) (z : ℝ × ℝ) (j : ZMod n) :
+    |chartPerturb m a b z j - 2 * Real.pi / n| ≤ |z.1| + |z.2| := by
+  have key : ∀ (c : ZMod n) (u : ℝ),
+      |(if j = c then u else 0) + (if j = c + (m : ZMod n) then -u else 0)| ≤ |u| := by
+    intro c u
+    split_ifs <;> simp
+  have hEq : chartPerturb m a b z j - 2 * Real.pi / n
+      = ((if j = a then z.1 else 0) + (if j = a + (m : ZMod n) then -z.1 else 0))
+        + ((if j = b then z.2 else 0) + (if j = b + (m : ZMod n) then -z.2 else 0)) := by
+    rw [chartPerturb]; ring
+  rw [hEq]
+  exact (abs_add_le _ _).trans (add_le_add (key a z.1) (key b z.2))
+
+/-- **Membership of the perturbed chart base among achievable turning values.**
+For a positive profile `κ'` and edge `j`, if the perturbation size keeps the
+chart value strictly positive (`hlow`) and strictly below the wall of edge `j`
+(`hup`), then the value is achieved by a moderate edge length, so `chartInv` is
+a genuine inverse there. -/
+theorem chartPerturb_mem_image {κ' : ZMod n → ℝ} (hκ' : ∀ i, 0 < κ' i)
+    (m : ℕ) (a b : ZMod n) {z : ℝ × ℝ} (j : ZMod n)
+    (hlow : |z.1| + |z.2| < 2 * Real.pi / n)
+    (hup : 2 * Real.pi / n + (|z.1| + |z.2|)
+      < chartMap (κ' j) (κ' (j + 1)) (2 / max (κ' j) (κ' (j + 1)))) :
+    chartPerturb m a b z j ∈
+      chartMap (κ' j) (κ' (j + 1)) ''
+        Set.Ioo (0 : ℝ) (2 / max (κ' j) (κ' (j + 1)))  := by
+  have hd := abs_le.mp (abs_chartPerturb_sub_le m a b z j)
+  exact chartMap_mem_image (hκ' j) (hκ' (j + 1))
+    (by linarith [hd.1]) (by linarith [hd.2])
+
+/-- For a fixed edge `j` the perturbed chart base is a continuous (indeed
+affine) function of the perturbation parameter `z`. -/
+theorem continuous_chartPerturb (m : ℕ) (a b : ZMod n) (j : ZMod n) :
+    Continuous fun z : ℝ × ℝ => chartPerturb m a b z j := by
+  unfold chartPerturb
+  split_ifs <;> fun_prop
 
 end Gluck.Discrete
