@@ -1,0 +1,96 @@
+\begin{tikzpicture}[
+  >=Stealth,
+  polygon/.style={line width=1.15pt, line join=round},
+  sample/.style={circle, fill=white, inner sep=0pt, minimum size=3.2pt, line width=.45pt},
+  marked/.style={circle, minimum size=8pt, inner sep=.4pt, font=\tiny\bfseries,
+    text=white, draw=white, line width=.35pt},
+  stem/.style={line width=.65pt},
+]
+  \newcommand{\profileaxes}[1]{%
+    \draw[black!25,->] (0,0) -- (4.25,0) node[right=-1pt,text=black!55] {$i$};
+    \draw[black!25,->] (0,0) -- (0,1.72) node[above=-1pt,text=black!55] {$\kappa_i$};
+    \draw[black!15,dashed] (0,1.02) -- (4.08,1.02) node[right,font=\tiny,text=black!50] {$c$};
+    \node[font=\scriptsize,text=black!50,below] at (0,0) {$0$};
+    \node[font=\scriptsize,text=black!50,below] at (4.02,0) {$n-1$};
+    \node[font=\small\bfseries] at (2.05,2.08) {#1};
+  }
+
+  % Every plotted kappa value below is the signed Menger curvature computed
+  % from the corresponding triple of the displayed polygon.
+  \begin{scope}
+    \profileaxes{two-fold oval ($n=12$)}
+    \def\Kvals{{1.708,1.198,.683,.546,.683,1.198,1.708,1.198,.683,.546,.683,1.198}}
+    \foreach \i in {0,...,11}{
+      \pgfmathsetmacro{\x}{.36*\i+0.04}
+      \pgfmathparse{\Kvals[\i]}\let\k\pgfmathresult
+      \draw[stem,blue!70!black] (\x,0)--(\x,{.82*\k});
+      \node[sample,draw=blue!70!black] at (\x,{.82*\k}) {};
+    }
+    \foreach \i/\k/\m in {0/1.708/1,3/.546/2,6/1.708/3,9/.546/4}
+      \node[marked,fill=blue!75!black] at ({.36*\i+.04},{.82*\k}) {\m};
+    \begin{scope}[shift={(2.02,-2.05)},scale=1.15]
+      \coordinate (p0) at (1.250,0); \coordinate (p1) at (1.083,.410);
+      \coordinate (p2) at (.625,.710); \coordinate (p3) at (0,.820);
+      \coordinate (p4) at (-.625,.710); \coordinate (p5) at (-1.083,.410);
+      \coordinate (p6) at (-1.250,0); \coordinate (p7) at (-1.083,-.410);
+      \coordinate (p8) at (-.625,-.710); \coordinate (p9) at (0,-.820);
+      \coordinate (p10) at (.625,-.710); \coordinate (p11) at (1.083,-.410);
+      \draw[polygon,blue!75!black] (p0)--(p1)--(p2)--(p3)--(p4)--(p5)--(p6)--(p7)--(p8)--(p9)--(p10)--(p11)--cycle;
+      \foreach \i in {0,...,11} \node[sample,draw=blue!75!black] at (p\i) {};
+      \foreach \i/\m in {0/1,3/2,6/3,9/4} \node[marked,fill=blue!75!black] at (p\i) {\m};
+    \end{scope}
+  \end{scope}
+
+  \begin{scope}[xshift=5.25cm]
+    \profileaxes{asymmetric oval ($n=12$)}
+    \def\Kvals{{1.188,1.092,.952,.927,1.015,1.132,1.181,1.132,1.015,.927,.952,1.092}}
+    \foreach \i in {0,...,11}{
+      \pgfmathsetmacro{\x}{.36*\i+0.04}
+      \pgfmathparse{\Kvals[\i]}\let\k\pgfmathresult
+      \draw[stem,teal!70!black] (\x,0)--(\x,{.82*\k});
+      \node[sample,draw=teal!70!black] at (\x,{.82*\k}) {};
+    }
+    \foreach \i/\k/\m in {0/1.188/1,3/.927/2,6/1.181/3,9/.927/4}
+      \node[marked,fill=teal!70!black] at ({.36*\i+.04},{.82*\k}) {\m};
+    \begin{scope}[shift={(2.02,-2.05)},scale=1.18]
+      \coordinate (q0) at (1.160,0); \coordinate (q1) at (.986,.512);
+      \coordinate (q2) at (.540,.842); \coordinate (q3) at (0,.900);
+      \coordinate (q4) at (-.460,.717); \coordinate (q5) at (-.746,.388);
+      \coordinate (q6) at (-.840,0); \coordinate (q7) at (-.746,-.388);
+      \coordinate (q8) at (-.460,-.717); \coordinate (q9) at (0,-.900);
+      \coordinate (q10) at (.540,-.842); \coordinate (q11) at (.986,-.512);
+      \draw[polygon,teal!70!black] (q0)--(q1)--(q2)--(q3)--(q4)--(q5)--(q6)--(q7)--(q8)--(q9)--(q10)--(q11)--cycle;
+      \foreach \i in {0,...,11} \node[sample,draw=teal!70!black] at (q\i) {};
+      \foreach \i/\m in {0/1,3/2,6/3,9/4} \node[marked,fill=teal!70!black] at (q\i) {\m};
+    \end{scope}
+  \end{scope}
+
+  \begin{scope}[xshift=10.5cm]
+    \profileaxes{multi-lobed oval ($n=14$)}
+    \def\Kvals{{1.831,1.193,.282,.483,1.139,1.477,1.027,.258,1.027,1.477,1.139,.483,.282,1.193}}
+    \foreach \i in {0,...,13}{
+      \pgfmathsetmacro{\x}{.31*\i+0.04}
+      \pgfmathparse{\Kvals[\i]}\let\k\pgfmathresult
+      \draw[stem,orange!85!black] (\x,0)--(\x,{.82*\k});
+      \node[sample,draw=orange!85!black] at (\x,{.82*\k}) {};
+    }
+    \foreach \i/\k/\m in {0/1.831/1,2/.282/2,5/1.477/3,7/.258/4}
+      \node[marked,fill=orange!85!black] at ({.31*\i+.04},{.82*\k}) {\m};
+    \begin{scope}[shift={(2.02,-2.05)},scale=1.12]
+      \coordinate (r0) at (1.188,0); \coordinate (r1) at (.995,.417);
+      \coordinate (r2) at (.613,.669); \coordinate (r3) at (.225,.859);
+      \coordinate (r4) at (-.255,.974); \coordinate (r5) at (-.734,.801);
+      \coordinate (r6) at (-.951,.399); \coordinate (r7) at (-.972,0);
+      \coordinate (r8) at (-.951,-.399); \coordinate (r9) at (-.734,-.801);
+      \coordinate (r10) at (-.255,-.974); \coordinate (r11) at (.225,-.859);
+      \coordinate (r12) at (.613,-.669); \coordinate (r13) at (.995,-.417);
+      \draw[polygon,orange!85!black] (r0)--(r1)--(r2)--(r3)--(r4)--(r5)--(r6)--(r7)--(r8)--(r9)--(r10)--(r11)--(r12)--(r13)--cycle;
+      \foreach \i in {0,...,13} \node[sample,draw=orange!85!black] at (r\i) {};
+      \foreach \i/\m in {0/1,2/2,5/3,7/4} \node[marked,fill=orange!85!black] at (r\i) {\m};
+    \end{scope}
+  \end{scope}
+
+  \node[font=\small,text=black!67,align=center] at (7.25,-3.55)
+    {stems are the signed Menger curvatures of the displayed polygon triples\\
+     numbered samples alternate high--low--high--low across the window level $c$};
+\end{tikzpicture}

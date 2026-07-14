@@ -35,6 +35,7 @@ else
 fi
 
 for id in euclidean-closure euclidean-gluck-reconstructions \
+    discrete-gluck-menger-reconstructions discrete-menger-bridge \
     euclidean-dahlberg-reconstructions sphere-stereographic sphere-reconstructions \
     hyperbolic-escape hyperbolic-reconstructions winding-angle-lift \
     winding-error-map degree-one-reparametrization hyperbolic-geometry-atlas \

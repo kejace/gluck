@@ -6,7 +6,7 @@
 \usepackage{amssymb, amsmath}
 \usepackage{graphicx}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,decorations.markings}
+\usetikzlibrary{arrows.meta,calc,decorations.markings}
 
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
@@ -42,6 +42,22 @@
    from their reciprocal radius-of-curvature weights. With no first Fourier
    harmonic, each displayed reconstruction closes. Matching numbered markers
    identify four selected curvature extrema and their corresponding curve vertices.}
+
+\newpage
+\illustrationpage{discrete-gluck-menger-reconstructions}
+  {Three discrete Euclidean Gluck reconstructions}
+  {Each stem is the signed Menger curvature computed from three consecutive
+   vertices of the polygon directly below it. The four numbered samples
+   alternate high--low--high--low across a common window level; all samples are
+   positive, and additional unmarked extrema are allowed.}
+
+\newpage
+\illustrationpage{discrete-menger-bridge}
+  {The Euclidean tangent--chord/Menger bridge}
+  {At vertex $i$, the signed Menger curvature is the reciprocal circumradius.
+   The two adjacent edge lengths determine the turning angle through the
+   tangent--chord law. Globally, the flexible lengths must also close the
+   position gap and produce total turning $2\pi$.}
 
 \newpage
 \illustrationpage{euclidean-dahlberg-reconstructions}
