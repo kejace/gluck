@@ -1739,4 +1739,68 @@ theorem smul_add_smul_eq_zero_iff {Ca Cb : ℂ}
   · rintro ⟨rfl, rfl⟩
     simp
 
+/-! ### Strict differentiability of the edge-length recovery
+
+The analytic backbone of `lem:closure_boundary_rigidity`: the chart inverse is
+strictly differentiable at every achieved turning value, with derivative
+`λ' = 1/(A + B)` — the inverse-function *rule* for a strictly monotone map
+with nonvanishing derivative (`HasStrictDerivAt.of_local_left_inverse`), no
+inverse function *theorem*. -/
+
+/-- The moderate turning-value image is a neighborhood of each of its points:
+around an achieved value `chartMap p q x`, squeeze `x` into a compact
+subinterval of the moderate domain and apply the IVT
+(`chartMap_mem_image_Icc`) plus strict monotonicity at its endpoints. -/
+theorem chartMap_image_mem_nhds {p q : ℝ} (hp : 0 < p) (hq : 0 < q) {s : ℝ}
+    (hs : s ∈ chartMap p q '' Set.Ioo (0 : ℝ) (2 / max p q)) :
+    chartMap p q '' Set.Ioo (0 : ℝ) (2 / max p q) ∈ nhds s := by
+  obtain ⟨x, hx, rfl⟩ := hs
+  obtain ⟨hx0, hxD⟩ := hx
+  have hmax : 0 < max p q := lt_of_lt_of_le hp (le_max_left p q)
+  have hD : 0 < 2 / max p q := div_pos two_pos hmax
+  set x₁ : ℝ := x / 2 with hx₁def
+  set x₂ : ℝ := (x + 2 / max p q) / 2 with hx₂def
+  have hx₁mem : x₁ ∈ Set.Ioo (0 : ℝ) (2 / max p q) :=
+    ⟨by positivity, by rw [hx₁def]; linarith⟩
+  have hx₂mem : x₂ ∈ Set.Ioo (0 : ℝ) (2 / max p q) :=
+    ⟨by positivity, by rw [hx₂def]; linarith⟩
+  have h₁ : chartMap p q x₁ < chartMap p q x :=
+    chartMap_strictMonoOn hp hq hx₁mem ⟨hx0, hxD⟩ (by rw [hx₁def]; linarith)
+  have h₂ : chartMap p q x < chartMap p q x₂ :=
+    chartMap_strictMonoOn hp hq ⟨hx0, hxD⟩ hx₂mem (by rw [hx₂def]; linarith)
+  refine Filter.mem_of_superset (Ioo_mem_nhds h₁ h₂) fun y hy => ?_
+  have hyIcc : y ∈ chartMap p q '' Set.Icc x₁ x₂ :=
+    chartMap_mem_image_Icc (by rw [hx₁def, hx₂def]; linarith)
+      ⟨hy.1.le, hy.2.le⟩
+  have hsub : Set.Icc x₁ x₂ ⊆ Set.Ioo (0 : ℝ) (2 / max p q) := fun w hw =>
+    ⟨lt_of_lt_of_le hx₁mem.1 hw.1, lt_of_le_of_lt hw.2 hx₂mem.2⟩
+  exact Set.image_mono hsub hyIcc
+
+/-- **Strict differentiability of the edge-length recovery** at any achieved
+turning value, with the explicit derivative `λ' = 1/(A + B)` in the slot
+derivatives at the recovered length. -/
+theorem hasStrictDerivAt_chartInv {p q : ℝ} (hp : 0 < p) (hq : 0 < q) {s : ℝ}
+    (hs : s ∈ chartMap p q '' Set.Ioo (0 : ℝ) (2 / max p q)) :
+    HasStrictDerivAt (chartInv hp hq)
+      (1 / (chartSlotDeriv p (chartInv hp hq s)
+        + chartSlotDeriv q (chartInv hp hq s))) s := by
+  have hmem := chartInv_mem hp hq hs
+  have hwallp : |p * chartInv hp hq s / 2| < 1 := by
+    have := chartArg_mem hp hq hmem hp (le_max_left p q)
+    exact abs_lt.mpr ⟨this.1, this.2⟩
+  have hwallq : |q * chartInv hp hq s / 2| < 1 := by
+    have := chartArg_mem hp hq hmem hq (le_max_right p q)
+    exact abs_lt.mpr ⟨this.1, this.2⟩
+  have hf := hasStrictDerivAt_chartMap hwallp hwallq
+  have hcont : ContinuousAt (chartInv hp hq) s :=
+    (continuousOn_chartInv hp hq).continuousAt (chartMap_image_mem_nhds hp hq hs)
+  have hne : chartSlotDeriv p (chartInv hp hq s)
+      + chartSlotDeriv q (chartInv hp hq s) ≠ 0 :=
+    (add_pos (chartSlotDeriv_pos hp hwallp) (chartSlotDeriv_pos hq hwallq)).ne'
+  have hev : ∀ᶠ y in nhds s, chartMap p q (chartInv hp hq y) = y := by
+    filter_upwards [chartMap_image_mem_nhds hp hq hs] with y hy
+    exact chartMap_chartInv hp hq hy
+  have hmain := HasStrictDerivAt.of_local_left_inverse hcont hf hne hev
+  simpa [one_div] using hmain
+
 end Gluck.Discrete
