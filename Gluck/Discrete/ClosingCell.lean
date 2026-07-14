@@ -5522,4 +5522,166 @@ theorem continuous_wallWidth {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
     ((continuous_curvPath κs κ j).comp continuous_subtype_val)
     ((continuous_curvPath κs κ (j + 1)).comp continuous_subtype_val)
 
+/-! ### The rectangle interval endpoints (`def:closing_rect`, R-b)
+
+A perturbation coordinate `u` enters two opposite edges: with sign `+` at the
+edge `e₊` (chart value `α + u`, `α = 2π/n`) and with sign `−` at the edge
+`e₋ = e₊ + m` (chart value `α − u`). Keeping both chart values in their walls
+`[0, w(t)]` confines `u` to
+`[max (−α) (α − w_{e₋}(t)), min (w_{e₊}(t) − α) α]`, an interval with
+strictly negative left and strictly positive right endpoint. -/
+
+/-- The left endpoint of a rectangle factor: the constraint of the `−`-signed
+edge `e`, `rectLo = max (−α) (α − w_e(t))` with `α = 2π/n`. -/
+noncomputable def rectLo (κs κ : ZMod n → ℝ) (e : ZMod n) (t : ℝ) : ℝ :=
+  max (-(2 * Real.pi / n)) (2 * Real.pi / n - wallWidth κs κ e t)
+
+/-- The right endpoint of a rectangle factor: the constraint of the
+`+`-signed edge `e`, `rectHi = min (w_e(t) − α) α`. -/
+noncomputable def rectHi (κs κ : ZMod n → ℝ) (e : ZMod n) (t : ℝ) : ℝ :=
+  min (wallWidth κs κ e t - 2 * Real.pi / n) (2 * Real.pi / n)
+
+/-- `α = 2π/n ≤ π/2` for `n ≥ 4` — the base chart value clears every wall
+(`w > π/2`). Stated once; feeds all sign lemmas of the rectangle. -/
+theorem two_pi_div_le_pi_div_two [NeZero n] (hn4 : 4 ≤ n) :
+    2 * Real.pi / n ≤ Real.pi / 2 := by
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπn4 : Real.pi / n ≤ Real.pi / 4 :=
+    div_le_div_of_nonneg_left Real.pi_pos.le four_pos hn4'
+  rw [mul_div_assoc]
+  linarith
+
+/-- The left endpoint is strictly negative (`−α < 0` and `α − w < 0` since
+`α ≤ π/2 < w`): the rectangle factor contains `0` in its interior from the
+left. -/
+theorem rectLo_neg [NeZero n] (hn4 : 4 ≤ n) {κs κ : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i) {t : ℝ} (ht0 : 0 ≤ t)
+    (ht1 : t ≤ 1) (e : ZMod n) : rectLo κs κ e t < 0 := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hα : 0 < 2 * Real.pi / n := by positivity
+  have hα2 := two_pi_div_le_pi_div_two (n := n) hn4
+  have hw := pi_div_two_lt_wallWidth hκs hκ ht0 ht1 e
+  exact max_lt (by linarith) (by linarith)
+
+/-- The right endpoint is strictly positive (`w − α > 0` since `w > π/2 ≥ α`,
+and `α > 0`): the rectangle factor contains `0` in its interior from the
+right. -/
+theorem rectHi_pos [NeZero n] (hn4 : 4 ≤ n) {κs κ : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i) {t : ℝ} (ht0 : 0 ≤ t)
+    (ht1 : t ≤ 1) (e : ZMod n) : 0 < rectHi κs κ e t := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hα : 0 < 2 * Real.pi / n := by positivity
+  have hα2 := two_pi_div_le_pi_div_two (n := n) hn4
+  have hw := pi_div_two_lt_wallWidth hκs hκ ht0 ht1 e
+  exact lt_min (by linarith) hα
+
+/-- The left endpoint never drops below `−α` (needed for the uniform bound
+`|Ξ_t(q)| ≤ α·|q|` of the rescale). -/
+theorem neg_le_rectLo (κs κ : ZMod n → ℝ) (e : ZMod n) (t : ℝ) :
+    -(2 * Real.pi / n) ≤ rectLo κs κ e t := le_max_left _ _
+
+/-- The right endpoint never exceeds `α`. -/
+theorem rectHi_le (κs κ : ZMod n → ℝ) (e : ZMod n) (t : ℝ) :
+    rectHi κs κ e t ≤ 2 * Real.pi / n := min_le_right _ _
+
+/-- The left endpoint is continuous in the homotopy time. -/
+theorem continuous_rectLo {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (hκ : ∀ i, 0 < κ i) (e : ZMod n) :
+    Continuous fun τ : ↥(Set.Icc (0 : ℝ) 1) => rectLo κs κ e ↑τ :=
+  continuous_const.max
+    (continuous_const.sub (continuous_wallWidth hκs hκ e))
+
+/-- The right endpoint is continuous in the homotopy time. -/
+theorem continuous_rectHi {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (hκ : ∀ i, 0 < κ i) (e : ZMod n) :
+    Continuous fun τ : ↥(Set.Icc (0 : ℝ) 1) => rectHi κs κ e ↑τ :=
+  ((continuous_wallWidth hκs hκ e).sub continuous_const).min continuous_const
+
+/-! ### The piecewise-affine rescale of a single factor (`def:closing_rect`, R-c)
+
+`rescale L R` maps `[-1, 0]` affinely onto `[L, 0]` and `[0, 1]` affinely
+onto `[0, R]`, fixing `0` — the one-coordinate building block of the
+fixed-square normalization `Ξ_t : [-1,1]² → R_t`. -/
+
+/-- The piecewise-affine rescale: `rescale L R x = (−L)·min x 0 + R·max x 0`
+(so `x ≤ 0 ↦ (−L)·x` and `x ≥ 0 ↦ R·x`). -/
+noncomputable def rescale (L R x : ℝ) : ℝ := -L * min x 0 + R * max x 0
+
+@[simp] lemma rescale_zero (L R : ℝ) : rescale L R 0 = 0 := by
+  simp [rescale]
+
+@[simp] lemma rescale_one (L R : ℝ) : rescale L R 1 = R := by
+  norm_num [rescale]
+
+@[simp] lemma rescale_neg_one (L R : ℝ) : rescale L R (-1) = L := by
+  norm_num [rescale]
+
+/-- The rescale is jointly continuous in the endpoints and the coordinate. -/
+theorem continuous_rescale :
+    Continuous fun p : (ℝ × ℝ) × ℝ => rescale p.1.1 p.1.2 p.2 := by
+  unfold rescale; fun_prop
+
+/-- The rescale of a fixed factor is continuous in the coordinate. -/
+theorem continuous_rescale_coord (L R : ℝ) : Continuous (rescale L R) := by
+  unfold rescale; fun_prop
+
+/-- The rescale is monotone for `L ≤ 0 ≤ R`. -/
+theorem monotone_rescale {L R : ℝ} (hL : L ≤ 0) (hR : 0 ≤ R) :
+    Monotone (rescale L R) := by
+  intro x y hxy
+  unfold rescale
+  have h1 : min x 0 ≤ min y 0 := min_le_min hxy le_rfl
+  have h2 : max x 0 ≤ max y 0 := max_le_max hxy le_rfl
+  have h3 := mul_le_mul_of_nonneg_left h1 (neg_nonneg.mpr hL)
+  have h4 := mul_le_mul_of_nonneg_left h2 hR
+  linarith
+
+/-- The rescale is strictly monotone for `L < 0 < R` — with continuity and
+the endpoint values this makes `Ξ_t` a homeomorphism `[-1,1]² ≃ R_t`. -/
+theorem strictMono_rescale {L R : ℝ} (hL : L < 0) (hR : 0 < R) :
+    StrictMono (rescale L R) := by
+  intro x y hxy
+  unfold rescale
+  rcases le_or_gt y 0 with hy | hy
+  · have hx : x < 0 := lt_of_lt_of_le hxy hy
+    rw [min_eq_left hx.le, min_eq_left hy, max_eq_right hx.le, max_eq_right hy]
+    nlinarith
+  · rcases le_or_gt x 0 with hx | hx
+    · rw [min_eq_left hx, min_eq_right hy.le, max_eq_right hx, max_eq_left hy.le]
+      nlinarith
+    · rw [min_eq_right hx.le, min_eq_right hy.le, max_eq_left hx.le,
+        max_eq_left hy.le]
+      nlinarith
+
+/-- The rescale maps `[-1, 1]` into `[L, R]`. -/
+theorem rescale_mem_Icc {L R : ℝ} (hL : L ≤ 0) (hR : 0 ≤ R) {x : ℝ}
+    (hx : x ∈ Set.Icc (-1 : ℝ) 1) : rescale L R x ∈ Set.Icc L R :=
+  ⟨by simpa using monotone_rescale hL hR hx.1,
+   by simpa using monotone_rescale hL hR hx.2⟩
+
+/-- The rescale maps `[-1, 1]` *onto* `[L, R]` (surjectivity of the
+fixed-square normalization onto the moving rectangle). -/
+theorem rescale_image_Icc {L R : ℝ} (hL : L ≤ 0) (hR : 0 ≤ R) :
+    rescale L R '' Set.Icc (-1 : ℝ) 1 = Set.Icc L R := by
+  refine Set.Subset.antisymm ?_ ?_
+  · rintro _ ⟨x, hx, rfl⟩
+    exact rescale_mem_Icc hL hR hx
+  · have h := intermediate_value_Icc (by norm_num : (-1 : ℝ) ≤ 1)
+      (continuous_rescale_coord L R).continuousOn
+    rwa [rescale_neg_one, rescale_one] at h
+
+/-- Uniform bound of the rescale: if both endpoints are within `C` of `0`
+then `|rescale L R x| ≤ C·|x|` — with `C = α` this puts the normalized cell
+inside the `ℓ¹`-ball of radius `α·(|q.1| + |q.2|)`. -/
+theorem abs_rescale_le {L R C x : ℝ} (hCL : -C ≤ L) (hL : L ≤ 0)
+    (hR : 0 ≤ R) (hRC : R ≤ C) : |rescale L R x| ≤ C * |x| := by
+  unfold rescale
+  rcases le_or_gt x 0 with hx | hx
+  · rw [min_eq_left hx, max_eq_right hx, mul_zero, add_zero, abs_mul,
+      abs_of_nonneg (neg_nonneg.mpr hL)]
+    exact mul_le_mul_of_nonneg_right (by linarith) (abs_nonneg x)
+  · rw [min_eq_right hx.le, max_eq_left hx.le, mul_zero, zero_add, abs_mul,
+      abs_of_nonneg hR]
+    exact mul_le_mul_of_nonneg_right hRC (abs_nonneg x)
+
 end Gluck.Discrete
