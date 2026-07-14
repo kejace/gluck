@@ -3292,4 +3292,51 @@ theorem hasStrictDerivAt_twoLevelLen [NeZero n] (hn4 : 4 ≤ n) {K : ℝ}
     simpa using (hasStrictDerivAt_id (0 : ℝ)).const_add K
   simpa [Function.comp_def] using hd'.comp 0 hshift
 
+/-- Every turning angle of the constant base polygon is `2π/n`. -/
+theorem turningAngle_const [NeZero n] (hn4 : 4 ≤ n) {K : ℝ} (hK : 0 < K)
+    (i : ZMod n) :
+    turningAngle 0 (fun _ : ZMod n => K)
+        (fun _ : ZMod n => 2 * Real.sin (Real.pi / n) / K) i
+      = 2 * Real.pi / n := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρhalf : Real.pi / n < Real.pi / 2 :=
+    lt_of_le_of_lt (div_le_div_of_nonneg_left hπ.le four_pos hn4') (by linarith)
+  have hρ0 : (0 : ℝ) ≤ Real.pi / n := by positivity
+  have harg : K * (2 * Real.sin (Real.pi / n) / K / 2)
+      = Real.sin (Real.pi / n) := by
+    field_simp
+  unfold turningAngle
+  dsimp only
+  rw [tK_zero, harg, Real.arcsin_sin (by linarith) hρhalf.le]
+  ring
+
+/-- Heading of the constant base polygon: `ψ_j = (j+1)·(2π/n)` — the
+blueprint gauge of `lem:anchor_witness_two_level` (base point
+`E_r = ℓ·e^{i(r+1)α}`, `α = 2π/n`). -/
+theorem heading_const [NeZero n] (hn4 : 4 ≤ n) {K : ℝ} (hK : 0 < K) (j : ℕ) :
+    heading (fun _ : ZMod n => K)
+        (fun _ : ZMod n => 2 * Real.sin (Real.pi / n) / K) j
+      = ((j : ℝ) + 1) * (2 * Real.pi / n) := by
+  unfold heading
+  rw [Finset.sum_congr rfl fun i _ => turningAngle_const hn4 hK _,
+    Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+  push_cast
+  ring
+
+/-- The edge vectors of the constant base polygon:
+`E_r = ℓ·e^{i(r+1)α}` with `ℓ = 2·sin(π/n)/K` and `α = 2π/n`. -/
+theorem jacobianEdge_const [NeZero n] (hn4 : 4 ≤ n) {K : ℝ} (hK : 0 < K)
+    (r : ℕ) :
+    jacobianEdge (fun _ : ZMod n => hK) r
+      = ((2 * Real.sin (Real.pi / n) / K : ℝ) : ℂ)
+        * Complex.exp (((((r : ℝ) + 1) * (2 * Real.pi / n) : ℝ) : ℂ)
+            * Complex.I) := by
+  have hfun : jacobianBaseLen (fun _ : ZMod n => hK)
+      = fun _ : ZMod n => 2 * Real.sin (Real.pi / n) / K :=
+    funext fun j => chartInv_const hn4 hK
+  unfold jacobianEdge
+  rw [hfun, heading_const hn4 hK r]
+
 end Gluck.Discrete
