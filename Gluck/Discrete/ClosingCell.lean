@@ -1803,4 +1803,114 @@ theorem hasStrictDerivAt_chartInv {p q : ℝ} (hp : 0 < p) (hq : 0 < q) {s : ℝ
   have hmain := HasStrictDerivAt.of_local_left_inverse hcont hf hne hev
   simpa [one_div] using hmain
 
+/-! ### The clean `t = 0` cell at the anchor and its edge-length derivatives
+
+`closingGap` at `t = 0` involves the curvatures `curvPath κs κ 0 j`, which are
+propositionally (not definitionally) equal to `κs j`. For the rigidity
+analysis we work with the *clean* anchor cell (curvatures `κs` directly) and
+bridge back at the end. -/
+
+/-- The `t = 0` closing 2-cell at the anchor, in clean form. -/
+noncomputable def anchorCell (m : ℕ) (a b : ZMod n) {κs : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (z : ℝ × ℝ) : ZMod n → ℝ :=
+  fun j => chartInv (hκs j) (hκs (j + 1)) (chartPerturb m a b z j)
+
+/-- The `t = 0` gap map at the anchor, in clean form. -/
+noncomputable def anchorGap (m : ℕ) (a b : ZMod n) {κs : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (z : ℝ × ℝ) : ℂ :=
+  closureGap κs (anchorCell m a b hκs z)
+
+/-- The `t = 0` slice of the closing 2-cell is the clean anchor cell. -/
+theorem closingCell_zero_eq_anchorCell (m : ℕ) (a b : ZMod n)
+    {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i)
+    (ht0 : (0 : ℝ) ≤ 0) (ht1 : (0 : ℝ) ≤ 1) (z : ℝ × ℝ) :
+    closingCell m a b hκs hκ ht0 ht1 z = anchorCell m a b hκs z := by
+  funext j
+  have hcongr : ∀ {p p' q q' : ℝ} (hp : 0 < p) (hq : 0 < q) (hp' : 0 < p')
+      (hq' : 0 < q') (s : ℝ), p = p' → q = q' →
+      chartInv hp hq s = chartInv hp' hq' s := by
+    intro p p' q q' hp hq hp' hq' s hpe hqe
+    subst hpe; subst hqe; rfl
+  simp only [closingCell, anchorCell]
+  exact hcongr _ _ _ _ _ (congrFun (curvPath_zero κs κ) j)
+    (congrFun (curvPath_zero κs κ) (j + 1))
+
+/-- The `t = 0` slice of the gap map is the clean anchor gap. -/
+theorem closingGap_zero_eq_anchorGap (m : ℕ) (a b : ZMod n)
+    {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i)
+    (ht0 : (0 : ℝ) ≤ 0) (ht1 : (0 : ℝ) ≤ 1) (z : ℝ × ℝ) :
+    closingGap m a b hκs hκ ht0 ht1 z = anchorGap m a b hκs z := by
+  simp only [closingGap, anchorGap, curvPath_zero,
+    closingCell_zero_eq_anchorCell m a b hκs hκ ht0 ht1 z]
+
+/-- The center of the clean anchor cell is the Jacobian base point. -/
+theorem anchorCell_zero (m : ℕ) (a b : ZMod n) {κs : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) :
+    anchorCell m a b hκs (0, 0) = jacobianBaseLen hκs := by
+  funext j
+  simp only [anchorCell, jacobianBaseLen, chartPerturb_zero]
+
+/-- The pair-direction coefficient of edge `j` for the antisymmetric pair at
+`q`: `+1` at `j = q`, `−1` at `j = q + m`, `0` elsewhere (and `0` when the
+pair collapses onto one index). -/
+def pairSign (m : ℕ) (q j : ZMod n) : ℝ :=
+  (if j = q then 1 else 0) - (if j = q + (m : ZMod n) then 1 else 0)
+
+/-- The linear part of the antisymmetric perturbation at edge `j` as a
+continuous linear map: `(u, v) ↦ pairSign a j · u + pairSign b j · v`. -/
+noncomputable def pairCLM (m : ℕ) (a b j : ZMod n) : ℝ × ℝ →L[ℝ] ℝ :=
+  pairSign m a j • ContinuousLinearMap.fst ℝ ℝ ℝ
+    + pairSign m b j • ContinuousLinearMap.snd ℝ ℝ ℝ
+
+/-- The derivative of a single edge length of the anchor cell at `z = 0`:
+`λ'_j` times the pair direction of edge `j`. -/
+noncomputable def anchorCellDeriv (m : ℕ) (a b : ZMod n) {κs : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (j : ZMod n) : ℝ × ℝ →L[ℝ] ℝ :=
+  jacobianLambda' hκs j • pairCLM m a b j
+
+/-- The perturbed chart base is affine in `z` with the pair-sign coefficients. -/
+theorem chartPerturb_eq_affine (m : ℕ) (a b : ZMod n) (z : ℝ × ℝ) (j : ZMod n) :
+    chartPerturb m a b z j
+      = 2 * Real.pi / n
+        + (pairSign m a j * z.1 + pairSign m b j * z.2) := by
+  simp only [chartPerturb, pairSign]
+  split_ifs <;> ring
+
+/-- The perturbed chart base of edge `j` has (everywhere) the constant strict
+derivative `pairSign m a j · du + pairSign m b j · dv`. -/
+theorem hasStrictFDerivAt_chartPerturb (m : ℕ) (a b j : ZMod n) (z₀ : ℝ × ℝ) :
+    HasStrictFDerivAt (fun z : ℝ × ℝ => chartPerturb m a b z j)
+      (pairCLM m a b j) z₀ := by
+  rw [pairCLM]
+  have hfun : (fun z : ℝ × ℝ => chartPerturb m a b z j)
+      = fun z : ℝ × ℝ => 2 * Real.pi / n
+        + (pairSign m a j * z.1 + pairSign m b j * z.2) := by
+    funext z
+    exact chartPerturb_eq_affine m a b z j
+  rw [hfun]
+  have h1 : HasStrictFDerivAt (fun z : ℝ × ℝ => pairSign m a j * z.1)
+      (pairSign m a j • ContinuousLinearMap.fst ℝ ℝ ℝ) z₀ :=
+    (ContinuousLinearMap.fst ℝ ℝ ℝ).hasStrictFDerivAt.const_mul (pairSign m a j)
+  have h2 : HasStrictFDerivAt (fun z : ℝ × ℝ => pairSign m b j * z.2)
+      (pairSign m b j • ContinuousLinearMap.snd ℝ ℝ ℝ) z₀ :=
+    (ContinuousLinearMap.snd ℝ ℝ ℝ).hasStrictFDerivAt.const_mul (pairSign m b j)
+  exact (h1.add h2).const_add (2 * Real.pi / n)
+
+/-- **Strict differentiability of a single edge length of the anchor cell** at
+the center `z = 0` (`lem:closure_boundary_rigidity`, first layer): the
+derivative is `λ'_j` times the pair-sign direction of edge `j`. -/
+theorem hasStrictFDerivAt_anchorCell [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
+    (a b : ZMod n) {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) (j : ZMod n) :
+    HasStrictFDerivAt (fun z : ℝ × ℝ => anchorCell m a b hκs z j)
+      (anchorCellDeriv m a b hκs j) 0 := by
+  rw [anchorCellDeriv]
+  have hbase := base_chart_mem_image hn4 hκs j
+  have h0 : chartPerturb m a b (0 : ℝ × ℝ) j = 2 * Real.pi / n :=
+    chartPerturb_zero m a b j
+  have hinv' : HasStrictDerivAt (chartInv (hκs j) (hκs (j + 1)))
+      (jacobianLambda' hκs j) (chartPerturb m a b (0 : ℝ × ℝ) j) := by
+    rw [h0]
+    exact hasStrictDerivAt_chartInv (hκs j) (hκs (j + 1)) hbase
+  exact hinv'.comp_hasStrictFDerivAt 0 (hasStrictFDerivAt_chartPerturb m a b j 0)
+
 end Gluck.Discrete
