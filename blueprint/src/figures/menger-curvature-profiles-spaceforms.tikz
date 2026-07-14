@@ -1,0 +1,52 @@
+\begin{tikzpicture}[>=Stealth,font=\small]
+  \tikzset{stem/.style={line width=.65pt}, sample/.style={circle,fill=white,inner sep=0pt,minimum size=3pt,line width=.45pt},
+    marked/.style={circle,fill=orange!85!black,text=white,font=\tiny\bfseries,inner sep=1.2pt}}
+  \newcommand{\axes}[2]{
+    \node[font=\bfseries] at (2.15,4.8) {#1};
+    \draw[black!25,->] (0,2.2)--(4.3,2.2) node[right] {$i$};
+    \draw[black!25,->] (0,1.35)--(0,4.25) node[above] {$\kappa_i$};
+    \draw[black!15,dashed] (0,#2)--(4.12,#2);
+  }
+  \newcommand{\stems}[2]{
+    \def\Vals{#1}
+    \foreach \i in {0,...,11}{
+      \pgfmathparse{\Vals[\i]}\let\k\pgfmathresult
+      \pgfmathsetmacro{\x}{.35*\i+.08}
+      \draw[stem,#2] (\x,2.2)--(\x,{2.2+.82*\k});
+      \node[sample,draw=#2] at (\x,{2.2+.82*\k}) {};
+    }
+  }
+
+  \begin{scope}
+    \axes{$E^2$: Euclidean circumcircle}{2.2}
+    \stems{{1.931,1.291,.693,.543,.693,1.291,1.931,1.291,.693,.543,.693,1.291}}{blue!75!black}
+    \node[marked] at ({.35*3+.08},{2.2+.82*.543}) {$i$};
+    \draw[blue!75!black,line width=1pt] (.65,.42)--(1.05,.78)--(1.65,.98)--(2.3,1.02)--(2.9,.98)--(3.5,.78)--(3.9,.42)--(3.5,.06)--(2.9,-.14)--(2.3,-.18)--(1.65,-.14)--(1.05,.06)--cycle;
+    \node[marked] at (2.3,1.02) {$i$};
+    \node[font=\scriptsize,align=center] at (2.15,-.72) {$\kappa_i=1/R_i$};
+  \end{scope}
+
+  \begin{scope}[xshift=5.25cm]
+    \axes{$S^2$: stereographic model}{2.2}
+    \stems{{1.585,.750,.094,-.043,.094,.750,1.585,.750,.094,-.043,.094,.750}}{teal!70!black}
+    \node[marked] at ({.35*3+.08},{2.2-.82*.043}) {$i$};
+    \fill[blue!3] (2.2,.42) circle (1.18); \draw[black!35] (2.2,.42) circle (1.18);
+    \draw[teal!70!black,line width=1pt] (3.05,.42)--(2.94,.68)--(2.63,.87)--(2.2,.94)--(1.78,.87)--(1.46,.68)--(1.35,.42)--(1.46,.16)--(1.78,-.03)--(2.2,-.10)--(2.63,-.03)--(2.94,.16)--cycle;
+    \node[marked] at (2.2,.94) {$i$};
+    \node[font=\scriptsize,align=center] at (2.15,-.72) {$\displaystyle\kappa_i=\frac{1+|c_i|^2-r_i^2}{2r_i}$};
+  \end{scope}
+
+  \begin{scope}[xshift=10.5cm]
+    \axes{$H^2$: Poincar\'e disk}{3.02}
+    \stems{{1.694,1.307,.895,.780,.895,1.307,1.694,1.307,.895,.780,.895,1.307}}{orange!85!black}
+    \node[marked] at ({.35*3+.08},{2.2+.82*.780}) {$i$};
+    \fill[blue!3] (2.2,.42) circle (1.18); \draw[black!45,dashed] (2.2,.42) circle (1.18);
+    \draw[orange!85!black,line width=1pt] (2.88,.42)--(2.79,.62)--(2.54,.77)--(2.2,.82)--(1.86,.77)--(1.61,.62)--(1.52,.42)--(1.61,.22)--(1.86,.07)--(2.2,.02)--(2.54,.07)--(2.79,.22)--cycle;
+    \node[marked] at (2.2,.82) {$i$};
+    \node[font=\scriptsize,align=center] at (2.15,-.72) {$\displaystyle\kappa_i=\frac{1-|c_i|^2+r_i^2}{2r_i}$};
+  \end{scope}
+
+  \node[font=\small,text=black!65,align=center] at (7.35,-1.48)
+    {At each index $i$, fit the ambient cycle through $(v_{i-1},v_i,v_{i+1})$ and plot its signed geodesic curvature.\\
+     The dashed $H^2$ line is the horocycle threshold $\kappa=1$; the spherical example crosses $\kappa=0$.};
+\end{tikzpicture}

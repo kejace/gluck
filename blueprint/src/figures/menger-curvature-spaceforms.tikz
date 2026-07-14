@@ -1,0 +1,66 @@
+\begin{tikzpicture}[>=Stealth,font=\small,line cap=round,line join=round]
+  \tikzset{triple/.style={line width=1.25pt,blue!75!black},
+    point/.style={circle,fill=blue!75!black,inner sep=1.7pt}}
+
+  % Euclidean plane.
+  \begin{scope}
+    \node[font=\bfseries] at (2.1,4.65) {Euclidean plane $E^2$};
+    \fill[blue!3] (-.15,.15) rectangle (4.35,4.15);
+    \coordinate (O) at (2.05,2.12);
+    \draw[orange!80!black,line width=1pt] (O) circle (1.42);
+    \coordinate (em) at ($(O)+(205:1.42)$); \coordinate (ez) at ($(O)+(285:1.42)$);
+    \coordinate (ep) at ($(O)+(25:1.42)$);
+    \node[point,label={[font=\scriptsize]below:$v_{i-1}$}] at (em) {};
+    \node[point,label={[font=\scriptsize]below:$v_i$}] at (ez) {};
+    \node[point,label={[font=\scriptsize]below:$v_{i+1}$}] at (ep) {};
+    \draw[triple] (em)--(ez)--(ep);
+    \draw[black!35,dashed] (O)--(ez) node[midway,right,font=\scriptsize] {$R$};
+    \node[align=center] at (2.1,-.45)
+      {$\displaystyle \kappa_i=\operatorname{sgn}(v_{i-1},v_i,v_{i+1})\frac1R$\\
+       geodesic $\Longleftrightarrow\kappa_i=0$};
+  \end{scope}
+
+  % Unit sphere, genuine latitude cycle.
+  \begin{scope}[xshift=5.25cm]
+    \node[font=\bfseries] at (2.1,4.65) {unit sphere $S^2$};
+    \shade[ball color=blue!9,opacity=.72] (2.1,2.2) circle (1.78);
+    \draw[black!45] (2.1,2.2) circle (1.78);
+    \draw[black!22,dashed] (.32,2.2) arc[start angle=180,end angle=360,x radius=1.78,y radius=.48];
+    \draw[black!32] (.32,2.2) arc[start angle=180,end angle=0,x radius=1.78,y radius=.48];
+    \draw[orange!80!black,dashed] (.76,2.75) arc[start angle=180,end angle=360,x radius=1.34,y radius=.37];
+    \draw[orange!80!black,line width=1pt] (.76,2.75) arc[start angle=180,end angle=0,x radius=1.34,y radius=.37];
+    \coordinate (s0) at (1.00,2.55); \coordinate (s1) at (2.08,2.38); \coordinate (s2) at (3.22,2.57);
+    \draw[triple] (s0)--(s1)--(s2);
+    \node[point,label={[font=\scriptsize]below left:$v_{i-1}$}] at (s0) {};
+    \node[point,label={[font=\scriptsize]below:$v_i$}] at (s1) {};
+    \node[point,label={[font=\scriptsize]below right:$v_{i+1}$}] at (s2) {};
+    \draw[<->,black!40] (2.1,3.98) arc[start angle=90,end angle=48,radius=1.78];
+    \node[font=\scriptsize] at (2.75,3.72) {$\rho$};
+    \node[align=center] at (2.1,-.45)
+      {$\displaystyle \kappa_i=\pm\cot\rho$\\
+       great circle $\Longleftrightarrow\kappa_i=0$};
+  \end{scope}
+
+  % Hyperbolic plane in the Poincare disk.
+  \begin{scope}[xshift=10.5cm]
+    \node[font=\bfseries] at (2.1,4.65) {hyperbolic plane $H^2$};
+    \fill[blue!3] (2.1,2.2) circle (1.78);
+    \draw[black!50,dashed] (2.1,2.2) circle (1.78) node[above right] {$\partial H^2$};
+    \coordinate (hO) at (2.1,2.2);
+    \draw[orange!80!black,line width=1pt] (hO) circle (1.02);
+    \coordinate (hm) at ($(hO)+(205:1.02)$); \coordinate (hz) at ($(hO)+(285:1.02)$);
+    \coordinate (hp) at ($(hO)+(25:1.02)$);
+    \node[point,label={[font=\scriptsize]below:$v_{i-1}$}] at (hm) {};
+    \node[point,label={[font=\scriptsize]below:$v_i$}] at (hz) {};
+    \node[point,label={[font=\scriptsize]below:$v_{i+1}$}] at (hp) {};
+    \draw[triple] (hm)--(hz)--(hp);
+    \node[font=\scriptsize,orange!85!black] at (2.1,3.43) {circumcycle};
+    \node[align=center] at (2.1,-.45)
+      {$\displaystyle \kappa_i=\pm\coth\rho\quad(|\kappa_i|>1)$\\
+       $|\kappa|=1$: horocycle; $0<|\kappa|<1$: hypercycle};
+  \end{scope}
+
+  \node[font=\small,text=black!65,align=center] at (7.35,-1.42)
+    {Menger curvature is intrinsic: it is the signed geodesic curvature of the unique ambient cycle\\
+     through three consecutive polygon vertices---not the curvature of the drawn chord segments.};
+\end{tikzpicture}

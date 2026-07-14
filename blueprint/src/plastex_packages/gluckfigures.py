@@ -43,6 +43,8 @@ def ProcessOptions(options, document):
             "euclidean-gluck-reconstructions",
             "discrete-gluck-menger-reconstructions",
             "discrete-menger-bridge",
+            "menger-curvature-spaceforms",
+            "menger-curvature-profiles-spaceforms",
             "euclidean-dahlberg-reconstructions",
             "sphere-stereographic",
             "sphere-reconstructions",
