@@ -989,4 +989,55 @@ theorem windingNumberC_expLoop (c : ℂ) (hc : c ≠ 0) :
     = c * ((posStandardLoop t : Circle) : ℂ)
   congr 1
 
+/-- The **scaled reverse exponential loop** `t ↦ c·e^{−2π i t}` on `[0,1]`
+(blueprint `lem:winding_number_c_exp_loop_rev`).  Project-local: Mathlib has no
+topological winding number, so its model loops live here. -/
+noncomputable def expLoopRev (c : ℂ) : C(I, ℂ) :=
+  ⟨fun t => c * Complex.exp (((-(2 * π * (t : ℝ)) : ℝ) : ℂ) * Complex.I), by fun_prop⟩
+
+/-- `expLoopRev c` evaluates to `c·e^{−2π i t}`. -/
+theorem expLoopRev_apply (c : ℂ) (t : I) :
+    expLoopRev c t = c * Complex.exp (((-(2 * π * (t : ℝ)) : ℝ) : ℂ) * Complex.I) := rfl
+
+/-- `expLoopRev c` has constant norm `‖c‖`. -/
+theorem expLoopRev_norm (c : ℂ) (t : I) : ‖expLoopRev c t‖ = ‖c‖ := by
+  rw [expLoopRev_apply, norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one]
+
+/-- For `c ≠ 0` the scaled reverse exponential loop is nowhere zero. -/
+theorem expLoopRev_ne_zero (c : ℂ) (hc : c ≠ 0) (t : I) : expLoopRev c t ≠ 0 := by
+  rw [expLoopRev_apply]
+  exact mul_ne_zero hc (Complex.exp_ne_zero _)
+
+/-- `expLoopRev c` starts at `c`. -/
+theorem expLoopRev_zero (c : ℂ) : expLoopRev c 0 = c := by
+  rw [expLoopRev_apply]
+  norm_num
+
+/-- `expLoopRev c` ends at `c`. -/
+theorem expLoopRev_one (c : ℂ) : expLoopRev c 1 = c := by
+  have h : (((-(2 * π * ((1 : I) : ℝ)) : ℝ)) : ℂ) * Complex.I
+      = -(2 * (π : ℂ) * Complex.I) := by
+    rw [Set.Icc.coe_one]; push_cast; ring
+  rw [expLoopRev_apply, h, Complex.exp_neg, Complex.exp_two_pi_mul_I, inv_one, mul_one]
+
+/-- `expLoopRev c` is a loop: `expLoopRev c 0 = expLoopRev c 1`. -/
+theorem expLoopRev_loop (c : ℂ) : expLoopRev c 0 = expLoopRev c 1 := by
+  rw [expLoopRev_zero, expLoopRev_one]
+
+/-- **Winding of the scaled reverse exponential loop** (blueprint
+`lem:winding_number_c_exp_loop_rev`): for `c ≠ 0` the loop `t ↦ c·e^{−2π i t}`
+has winding number `−1` about the origin.  Reduce to `c = 1` by scaling
+invariance; the unit reverse loop is the in-file `negCircleExpLoop` with
+winding `−1` from the explicit lift `φ t = −2π t`. -/
+theorem windingNumberC_expLoopRev (c : ℂ) (hc : c ≠ 0) :
+    windingNumberC (expLoopRev c) (expLoopRev_ne_zero c hc) = -1 := by
+  have hmul := windingNumberC_const_mul c hc negCircleExpLoop negCircleExpLoop_ne
+  rw [windingNumberC_negCircleExp] at hmul
+  refine Eq.trans ?_ hmul
+  apply windingNumberC_congr
+  intro t
+  change c * Complex.exp (((-(2 * π * (t : ℝ)) : ℝ) : ℂ) * Complex.I)
+    = c * ((negStandardLoop t : Circle) : ℂ)
+  congr 1
+
 end Gluck
