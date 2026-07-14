@@ -1411,4 +1411,42 @@ theorem sum_chartPerturb_block [NeZero n] {m : ℕ} (hn : n = 2 * m)
     hfac (-z.2) (b + (m : ZMod n))]
   linear_combination z.1 * hSa + z.2 * hSb
 
+/-- **The exact opposite-heading defect of the closing 2-cell** (all homotopy
+times `t`, all `z` in the window): the heading advance over a half-period is
+`π + ε_a·u + ε_b·v` (signs `±1` from `sum_chartPerturb_block`) plus the two
+boundary half-turn corrections. At `z = 0` and `t = 0` the correction terms
+cancel by half-period symmetry and this recovers `heading_add_half`; in
+general it is the exact (non-linearized) formula for the defect `γ_j` in the
+paired-edge splitting
+`F = ∑_{j<m} e^{iψ_j}(ℓ_j − ℓ_{j+m}·e^{iγ_j})` of the corrected `t = 0`
+rigidity analysis and of any boundary-exclusion estimate. -/
+theorem heading_closingCell_add_half [NeZero n] {m : ℕ} (hn : n = 2 * m)
+    (a b : ZMod n) {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i) {t : ℝ}
+    (ht0 : 0 ≤ t) (ht1 : t ≤ 1) {z : ℝ × ℝ}
+    (hmem : ∀ i : ZMod n, chartPerturb m a b z i ∈
+      chartMap (curvHomotopy m κ t i) (curvHomotopy m κ t (i + 1)) ''
+        Set.Ioo (0 : ℝ)
+          (2 / max (curvHomotopy m κ t i) (curvHomotopy m κ t (i + 1))))
+    (j : ℕ) :
+    ∃ εa εb : ℝ, (εa = 1 ∨ εa = -1) ∧ (εb = 1 ∨ εb = -1) ∧
+      heading (curvHomotopy m κ t) (closingCell m a b hκ ht0 ht1 z) (j + m)
+        = heading (curvHomotopy m κ t) (closingCell m a b hκ ht0 ht1 z) j
+          + Real.pi + εa * z.1 + εb * z.2
+          + Real.arcsin (curvHomotopy m κ t ((j + m : ℕ) : ZMod n)
+              * (closingCell m a b hκ ht0 ht1 z ((j + m : ℕ) : ZMod n) / 2))
+          - Real.arcsin (curvHomotopy m κ t ((j : ℕ) : ZMod n)
+              * (closingCell m a b hκ ht0 ht1 z ((j : ℕ) : ZMod n) / 2)) := by
+  obtain ⟨εa, εb, hεa, hεb, hsum⟩ := sum_chartPerturb_block hn a b z j
+  refine ⟨εa, εb, hεa, hεb, ?_⟩
+  have hround : ∀ i : ZMod n,
+      chartMap (curvHomotopy m κ t i) (curvHomotopy m κ t (i + 1))
+        (closingCell m a b hκ ht0 ht1 z i) = chartPerturb m a b z i := by
+    intro i
+    simp only [closingCell]
+    exact chartMap_chartInv _ _ (hmem i)
+  rw [heading_add_eq_chartBlock, Finset.sum_congr
+    (rfl : Finset.range m = Finset.range m)
+    (fun e _ => hround ((j + e : ℕ) : ZMod n)), hsum]
+  ring
+
 end Gluck.Discrete
