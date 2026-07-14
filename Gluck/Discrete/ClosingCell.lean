@@ -4936,4 +4936,290 @@ theorem hasStrictDerivAt_twoLevelCol₁ [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
       * (Complex.exp (Complex.I * 2 * (Real.pi : ℂ) / ((n : ℝ) : ℂ)) - 1))
       * Complex.I_mul_I
 
+/-! ### The column-1 derivative of the two-level witness, boundary case
+`m = 2` (`n = 4`): all four edges are special (`V₁` row, `m = 2`) -/
+
+/-- **The total formula of column 1 on the window, `m = 2`**: edge 1 is the
+special edge `m − 1`, so it carries the moving pair `(K, K + ε)` — `λ'₁` and
+`p₁` are the moving slot expressions with the mixed slot in head position. -/
+theorem twoLevelCol_formula₁' [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    (hn : n = 2 * m) (hm2 : m = 2) {K ε : ℝ} (hK : 0 < K) (hε : |ε| < K) :
+    twoLevelCol (n := n) m hK 1 ε
+      = ((2 * (1 / (chartSlotDeriv K
+              (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+            + chartSlotDeriv (K + ε)
+              (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε)))) : ℝ) : ℂ)
+          * Complex.exp (((∑ i ∈ Finset.range (1 + 1),
+              twoLevelTheta (n := n) m hK ε i : ℝ) : ℂ) * Complex.I)
+        + Complex.I * (((2 * (chartSlotDeriv K
+                (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+              / (chartSlotDeriv K
+                  (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+                + chartSlotDeriv (K + ε)
+                  (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε)))) - 1 : ℝ) : ℂ)
+            * (((twoLevelBaseLen (n := n) m hK ε 1 : ℝ) : ℂ)
+              * Complex.exp (((∑ i ∈ Finset.range (1 + 1),
+                  twoLevelTheta (n := n) m hK ε i : ℝ) : ℂ) * Complex.I))
+          + ∑ r ∈ Finset.Ico (1 + 1) (1 + m),
+              ((twoLevelBaseLen (n := n) m hK ε r : ℝ) : ℂ)
+                * Complex.exp (((∑ i ∈ Finset.range (r + 1),
+                    twoLevelTheta (n := n) m hK ε i : ℝ) : ℂ) * Complex.I)) := by
+  rw [twoLevelCol_eq hK hε 1]
+  unfold closingJacobianCol
+  have hedge : ∀ r ∈ Finset.Ico (1 + 1) (1 + m),
+      jacobianEdge (fun i => twoLevelProfile_pos (n := n) (m := m) hK hε i) r
+        = ((twoLevelBaseLen (n := n) m hK ε r : ℝ) : ℂ)
+          * Complex.exp (((∑ i ∈ Finset.range (r + 1),
+              twoLevelTheta (n := n) m hK ε i : ℝ) : ℂ) * Complex.I) := by
+    intro r hr
+    have hrn : r < n := by
+      have := Finset.mem_Ico.mp hr
+      omega
+    exact jacobianEdge_twoLevel hn4 hn hK hε hrn
+  rw [Finset.sum_congr rfl hedge,
+    jacobianEdge_twoLevel hn4 hn hK hε (r := 1) (by omega),
+    heading_twoLevel hn4 hn hK hε (j := 1) (by omega)]
+  have hbl : jacobianBaseLen
+      (fun i => twoLevelProfile_pos (n := n) (m := m) hK hε i) ((1 : ℕ) : ZMod n)
+      = chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε) := by
+    rw [twoLevelBaseLen_eq hn4 hn hK hε (j := 1) (by omega)]
+    unfold twoLevelBaseLen
+    rw [if_pos (Or.inr (Or.inl (by omega)))]
+  have hκ1 : twoLevelProfile (n := n) m K ε ((1 : ℕ) : ZMod n) = K := by
+    rw [twoLevelProfile_natCast hn K ε (by omega), if_neg (by omega), add_zero]
+  have hκ2 : twoLevelProfile (n := n) m K ε (((1 : ℕ) : ZMod n) + 1)
+      = K + ε := by
+    rw [twoLevelProfile_natCast_succ hn K ε (by omega),
+      if_pos (Or.inl (by omega))]
+  unfold jacobianLambda' jacobianShare
+  rw [hbl, hκ1, hκ2]
+
+/-- The mixed-first tail share `B/(B + A)` of the special edge `m − 1` moves
+at `−ṗ = −1/(4K·cos²ρ)` — the column-1 share row for `m = 2`, where edge 1
+carries the moving pair in head position. -/
+private lemma hasStrictDerivAt_twoLevelShareMixed [NeZero n] (hn4 : 4 ≤ n)
+    {K : ℝ} (hK : 0 < K) :
+    HasStrictDerivAt
+      (fun ε : ℝ => chartSlotDeriv K
+          (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+        / (chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+          + chartSlotDeriv (K + ε)
+            (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))))
+      (-(1 / (4 * K * Real.cos (Real.pi / n) ^ 2))) 0 := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρpos : 0 < Real.pi / n := by positivity
+  have hρhalf : Real.pi / n < Real.pi / 2 :=
+    lt_of_le_of_lt (div_le_div_of_nonneg_left hπ.le four_pos hn4') (by linarith)
+  have hcos : 0 < Real.cos (Real.pi / n) :=
+    Real.cos_pos_of_mem_Ioo ⟨by linarith, hρhalf⟩
+  have hB := hasStrictDerivAt_mixedSlotDeriv hn4 hK
+  have hBA : HasStrictDerivAt
+      (fun ε : ℝ => chartSlotDeriv K
+          (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+        + chartSlotDeriv (K + ε)
+            (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε)))
+      (-(Real.sin (Real.pi / n) ^ 2) / (4 * Real.cos (Real.pi / n) ^ 3)
+        + (1 + Real.cos (Real.pi / n) ^ 2)
+          / (4 * Real.cos (Real.pi / n) ^ 3)) 0 :=
+    hB.add (hasStrictDerivAt_bumpSlotDeriv hn4 hK)
+  have hBA0 : chartSlotDeriv K
+        (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+      + chartSlotDeriv (K + 0)
+          (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0)) ≠ 0 := by
+    rw [add_zero, twoLevelSlot_zero hn4 hK]
+    positivity
+  have hdiv : HasStrictDerivAt
+      (fun ε : ℝ => chartSlotDeriv K
+          (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+        / (chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+          + chartSlotDeriv (K + ε)
+            (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))))
+      ((-(Real.sin (Real.pi / n) ^ 2) / (4 * Real.cos (Real.pi / n) ^ 3)
+          * (chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+            + chartSlotDeriv (K + 0)
+                (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0)))
+        - chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+          * (-(Real.sin (Real.pi / n) ^ 2) / (4 * Real.cos (Real.pi / n) ^ 3)
+            + (1 + Real.cos (Real.pi / n) ^ 2)
+              / (4 * Real.cos (Real.pi / n) ^ 3)))
+       / (chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+          + chartSlotDeriv (K + 0)
+              (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))) ^ 2) 0 :=
+    hB.div hBA hBA0
+  have hveq : (-(Real.sin (Real.pi / n) ^ 2) / (4 * Real.cos (Real.pi / n) ^ 3)
+          * (chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+            + chartSlotDeriv (K + 0)
+                (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0)))
+        - chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+          * (-(Real.sin (Real.pi / n) ^ 2) / (4 * Real.cos (Real.pi / n) ^ 3)
+            + (1 + Real.cos (Real.pi / n) ^ 2)
+              / (4 * Real.cos (Real.pi / n) ^ 3)))
+       / (chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+          + chartSlotDeriv (K + 0)
+              (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))) ^ 2
+      = -(1 / (4 * K * Real.cos (Real.pi / n) ^ 2)) := by
+    rw [add_zero, twoLevelSlot_zero hn4 hK, Real.sin_sq]
+    field_simp
+    ring
+  rwa [hveq] at hdiv
+
+/-- **`V₁` for `m = 2`** (`lem:anchor_witness_two_level`, boundary case
+`n = 4`): `V₁ = 2√2·i/K²` — the first-order value of column 1 when all four
+edges are special. -/
+noncomputable def twoLevelV₁' (K : ℝ) : ℂ :=
+  ((2 * Real.sqrt 2 / K ^ 2 : ℝ) : ℂ) * Complex.I
+
+/-- **The strict `ε`-derivative of column 1 of the two-level witness, `m = 2`**
+(`lem:anchor_witness_two_level`, boundary case `n = 4`):
+`C₁'(0) = V₁ = 2√2·i/K²`. -/
+theorem hasStrictDerivAt_twoLevelCol₁' [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    (hn : n = 2 * m) (hm2 : m = 2) {K : ℝ} (hK : 0 < K) :
+    HasStrictDerivAt (twoLevelCol (n := n) m hK 1) (twoLevelV₁' K) 0 := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρpos : 0 < Real.pi / n := by positivity
+  have hρhalf : Real.pi / n < Real.pi / 2 :=
+    lt_of_le_of_lt (div_le_div_of_nonneg_left hπ.le four_pos hn4') (by linarith)
+  have hcos : 0 < Real.cos (Real.pi / n) :=
+    Real.cos_pos_of_mem_Ioo ⟨by linarith, hρhalf⟩
+  have hsin0 : 0 < Real.sin (Real.pi / n) :=
+    Real.sin_pos_of_pos_of_lt_pi hρpos (by linarith)
+  have hψ1ℂ : HasStrictDerivAt
+      (fun ε : ℝ => ((∑ i ∈ Finset.range (1 + 1),
+          twoLevelTheta (n := n) m hK ε i : ℝ) : ℂ))
+      ((twoLevelHeadDot (n := n) m K 1 : ℝ) : ℂ) 0 :=
+    hasStrictDerivAt_ofReal_comp
+      (hasStrictDerivAt_twoLevelHead hn4 hn hK (by omega))
+  have hexp1 : HasStrictDerivAt
+      (fun ε : ℝ => Complex.exp (((∑ i ∈ Finset.range (1 + 1),
+          twoLevelTheta (n := n) m hK ε i : ℝ) : ℂ) * Complex.I))
+      (Complex.exp (((∑ i ∈ Finset.range (1 + 1),
+          twoLevelTheta (n := n) m hK 0 i : ℝ) : ℂ) * Complex.I)
+        * (((twoLevelHeadDot (n := n) m K 1 : ℝ) : ℂ) * Complex.I)) 0 :=
+    (Complex.hasStrictDerivAt_exp _).comp 0 (hψ1ℂ.mul_const Complex.I)
+  have hΛ : HasStrictDerivAt
+      (fun ε : ℝ => 1 / (chartSlotDeriv K
+          (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+        + chartSlotDeriv (K + ε)
+          (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))))
+      (-(Real.cos (Real.pi / n)) / (2 * K ^ 2)) 0 := by
+    have h := hasStrictDerivAt_twoLevelLambda' hn4 hK
+    have hfun : (fun ε : ℝ => 1 / (chartSlotDeriv (K + ε)
+          (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+        + chartSlotDeriv K
+          (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))))
+        = (fun ε : ℝ => 1 / (chartSlotDeriv K
+            (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+          + chartSlotDeriv (K + ε)
+            (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε)))) := by
+      funext ε
+      rw [add_comm]
+    rwa [hfun] at h
+  have h2Λ := hasStrictDerivAt_ofReal_comp (hΛ.const_mul 2)
+  have hfirst := h2Λ.mul hexp1
+  have hsh := hasStrictDerivAt_ofReal_comp
+    (((hasStrictDerivAt_twoLevelShareMixed hn4 hK).const_mul 2).sub_const 1)
+  have hE1 := hasStrictDerivAt_twoLevelEdge hn4 hn hK (r := 1) (by omega)
+  have hsecond := hsh.mul hE1
+  have hsum : HasStrictDerivAt
+      (fun ε : ℝ => ∑ r ∈ Finset.Ico (1 + 1) (1 + m),
+        ((twoLevelBaseLen (n := n) m hK ε r : ℝ) : ℂ)
+          * Complex.exp (((∑ i ∈ Finset.range (r + 1),
+              twoLevelTheta (n := n) m hK ε i : ℝ) : ℂ) * Complex.I))
+      (∑ r ∈ Finset.Ico (1 + 1) (1 + m),
+        ((((if r = 0 ∨ r = m - 1 ∨ r = m ∨ r = n - 1
+              then -(Real.sin (Real.pi / n) / K ^ 2) else 0 : ℝ)) : ℂ)
+            * Complex.exp (((((r : ℝ) + 1) * (2 * Real.pi / n) : ℝ) : ℂ)
+                * Complex.I)
+          + ((2 * Real.sin (Real.pi / n) / K : ℝ) : ℂ)
+            * (Complex.exp (((((r : ℝ) + 1) * (2 * Real.pi / n) : ℝ) : ℂ)
+                * Complex.I)
+              * (((twoLevelHeadDot (n := n) m K r : ℝ) : ℂ) * Complex.I))))
+      0 := by
+    have h := HasStrictDerivAt.sum (u := Finset.Ico (1 + 1) (1 + m))
+      (x := (0 : ℝ))
+      (fun r hr => hasStrictDerivAt_twoLevelEdge hn4 hn hK (r := r)
+        (by have := Finset.mem_Ico.mp hr; omega))
+    have hfun : (∑ r ∈ Finset.Ico (1 + 1) (1 + m),
+          fun ε : ℝ => ((twoLevelBaseLen (n := n) m hK ε r : ℝ) : ℂ)
+            * Complex.exp (((∑ i ∈ Finset.range (r + 1),
+                twoLevelTheta (n := n) m hK ε i : ℝ) : ℂ) * Complex.I))
+        = fun ε : ℝ => ∑ r ∈ Finset.Ico (1 + 1) (1 + m),
+            ((twoLevelBaseLen (n := n) m hK ε r : ℝ) : ℂ)
+              * Complex.exp (((∑ i ∈ Finset.range (r + 1),
+                  twoLevelTheta (n := n) m hK ε i : ℝ) : ℂ) * Complex.I) := by
+      funext ε
+      simp
+    rwa [hfun] at h
+  have hev : ∀ᶠ ε : ℝ in nhds 0, |ε| < K :=
+    (continuous_abs.tendsto' 0 0 abs_zero).eventually_lt_const hK
+  have htot := hfirst.add ((hsecond.add hsum).const_mul Complex.I)
+  have hd := HasStrictDerivAt.congr_of_eventuallyEq htot
+    (by filter_upwards [hev] with ε hε
+        exact (twoLevelCol_formula₁' hn4 hn hm2 hK hε).symm)
+  convert hd using 2
+  · exact rfl
+  · unfold twoLevelV₁'
+    have hIco2 : Finset.Ico (1 + 1) (1 + m) = ({2} : Finset ℕ) := by
+      rw [hm2]
+      decide
+    rw [hIco2, Finset.sum_singleton]
+    have hhd1 : twoLevelHeadDot (n := n) m K 1 = 0 := by
+      unfold twoLevelHeadDot
+      rw [if_neg (by omega), if_pos (by omega)]
+    have hhd2 : twoLevelHeadDot (n := n) m K 2
+        = Real.tan (Real.pi / n) / K := by
+      unfold twoLevelHeadDot
+      rw [if_pos (Or.inr (by omega))]
+    have hif1 : ((if (1 : ℕ) = 0 ∨ 1 = m - 1 ∨ 1 = m ∨ 1 = n - 1
+        then -(Real.sin (Real.pi / n) / K ^ 2) else 0 : ℝ))
+        = -(Real.sin (Real.pi / n) / K ^ 2) := if_pos (by omega)
+    have hif2 : ((if (2 : ℕ) = 0 ∨ 2 = m - 1 ∨ 2 = m ∨ 2 = n - 1
+        then -(Real.sin (Real.pi / n) / K ^ 2) else 0 : ℝ))
+        = -(Real.sin (Real.pi / n) / K ^ 2) := if_pos (by omega)
+    have hbl01 : twoLevelBaseLen (n := n) m hK 0 1
+        = 2 * Real.sin (Real.pi / n) / K := by
+      rw [twoLevelBaseLen_zero hK 1, chartInv_const hn4 hK]
+    rw [hhd1, hhd2, hif1, hif2, hbl01, sum_twoLevelTheta_zero hn4 hK 1,
+      add_zero, twoLevelSlot_zero hn4 hK]
+    have hn4eq : n = 4 := by omega
+    have hnR : ((n : ℕ) : ℝ) = 4 := by
+      rw [hn4eq]
+      norm_num
+    have hρ4 : Real.pi / (n : ℝ) = Real.pi / 4 := by rw [hnR]
+    have harg1 : (((1 : ℕ) : ℝ) + 1) * (2 * Real.pi / (n : ℝ)) = Real.pi := by
+      rw [hnR]
+      push_cast
+      ring
+    have harg2 : (((2 : ℕ) : ℝ) + 1) * (2 * Real.pi / (n : ℝ))
+        = Real.pi / 2 + Real.pi := by
+      rw [hnR]
+      push_cast
+      ring
+    have hexp32 : Complex.exp (((Real.pi / 2 + Real.pi : ℝ) : ℂ) * Complex.I)
+        = -Complex.I := by
+      rw [Complex.ofReal_add, add_mul, Complex.exp_add, Complex.exp_pi_mul_I,
+        Complex.ofReal_div, Complex.ofReal_ofNat,
+        Complex.exp_pi_div_two_mul_I]
+      ring
+    rw [harg1, harg2, hρ4, Complex.exp_pi_mul_I, hexp32,
+      Real.tan_pi_div_four, Real.sin_pi_div_four, Real.cos_pi_div_four]
+    have hs2 : ((Real.sqrt 2 : ℝ) : ℂ) * ((Real.sqrt 2 : ℝ) : ℂ) = 2 := by
+      rw [← Complex.ofReal_mul, Real.mul_self_sqrt two_pos.le]
+      norm_num
+    have hs2pos : (0 : ℝ) < Real.sqrt 2 := Real.sqrt_pos.mpr two_pos
+    have hsC : ((Real.sqrt 2 : ℝ) : ℂ) ≠ 0 :=
+      Complex.ofReal_ne_zero.mpr hs2pos.ne'
+    have hKC : ((K : ℝ) : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hK.ne'
+    simp only [Complex.ofReal_mul, Complex.ofReal_div, Complex.ofReal_add,
+      Complex.ofReal_sub, Complex.ofReal_neg, Complex.ofReal_one,
+      Complex.ofReal_ofNat, Complex.ofReal_pow, Complex.ofReal_zero]
+    field_simp
+    linear_combination ((-8) * ((Real.sqrt 2 : ℝ) : ℂ) ^ 2
+        + 16 * ((Real.sqrt 2 : ℝ) : ℂ) ^ 2 * Complex.I) * Complex.I_mul_I
+      + (16 * Complex.I) * hs2
+
 end Gluck.Discrete
