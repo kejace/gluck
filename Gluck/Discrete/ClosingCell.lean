@@ -2330,4 +2330,192 @@ theorem sum_pairSign_range [NeZero n] {m : ℕ} (hn : n = 2 * m) {q j : ℕ}
     Finset.sum_ite_eq' (Finset.range j) (q + m) (fun _ => (1 : ℝ))]
   simp only [Finset.mem_range]
 
+/-- **The master column identification**: the sum-form derivative of the
+anchor gap, evaluated in the direction of the antisymmetric pair `q`, equals
+the closed-form Jacobian column `C_q` of `def:closing_jacobian_col`. The
+computation: the `dℓ` part extracts `2λ'_q e^{iψ_q}` (pair extraction +
+half-period symmetry); the constant heading gauge multiplies `ΣE = 0`; the
+running count contributes `∑_{Ioc q (q+m)} E`; the boundary slots contribute
+`2p_q E_q`; assembling gives `C_q`. -/
+theorem sum_col_eval [NeZero n] (hn4 : 4 ≤ n) {m : ℕ} (hn : n = 2 * m)
+    {κs : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (hsym : ∀ i : ZMod n, κs (i + (m : ZMod n)) = κs i)
+    {q : ℕ} (hq : q < m) :
+    ∑ j ∈ Finset.range n,
+      (Complex.exp ((heading κs (jacobianBaseLen hκs) j : ℂ) * Complex.I)
+          * ((jacobianLambda' hκs ((j : ℕ) : ZMod n)
+              * pairSign m ((q : ℕ) : ZMod n) ((j : ℕ) : ZMod n) : ℝ) : ℂ)
+        + jacobianEdge hκs j * Complex.I
+          * ((chartSlotDeriv (κs 0) (jacobianBaseLen hκs (-1))
+                * (jacobianLambda' hκs (-1)
+                  * pairSign m ((q : ℕ) : ZMod n) (-1))
+              + (∑ e ∈ Finset.range j,
+                  pairSign m ((q : ℕ) : ZMod n) ((e : ℕ) : ZMod n))
+              + chartSlotDeriv (κs ((j : ℕ) : ZMod n))
+                  (jacobianBaseLen hκs ((j : ℕ) : ZMod n))
+                * (jacobianLambda' hκs ((j : ℕ) : ZMod n)
+                  * pairSign m ((q : ℕ) : ZMod n) ((j : ℕ) : ZMod n)) : ℝ) : ℂ))
+      = closingJacobianCol m hκs q := by
+  have hcastqm : ((q + m : ℕ) : ZMod n)
+      = ((q : ℕ) : ZMod n) + (m : ZMod n) := by
+    push_cast; ring
+  have hexpqm : Complex.exp
+        ((heading κs (jacobianBaseLen hκs) (q + m) : ℂ) * Complex.I)
+      = -Complex.exp
+          ((heading κs (jacobianBaseLen hκs) q : ℂ) * Complex.I) := by
+    rw [heading_jacobianBaseLen_add_half hn hn4 hκs hsym]
+    push_cast
+    rw [add_mul, Complex.exp_add, Complex.exp_pi_mul_I]
+    ring
+  -- split every summand into the four pieces
+  have hsplit : ∀ j ∈ Finset.range n,
+      (Complex.exp ((heading κs (jacobianBaseLen hκs) j : ℂ) * Complex.I)
+          * ((jacobianLambda' hκs ((j : ℕ) : ZMod n)
+              * pairSign m ((q : ℕ) : ZMod n) ((j : ℕ) : ZMod n) : ℝ) : ℂ)
+        + jacobianEdge hκs j * Complex.I
+          * ((chartSlotDeriv (κs 0) (jacobianBaseLen hκs (-1))
+                * (jacobianLambda' hκs (-1)
+                  * pairSign m ((q : ℕ) : ZMod n) (-1))
+              + (∑ e ∈ Finset.range j,
+                  pairSign m ((q : ℕ) : ZMod n) ((e : ℕ) : ZMod n))
+              + chartSlotDeriv (κs ((j : ℕ) : ZMod n))
+                  (jacobianBaseLen hκs ((j : ℕ) : ZMod n))
+                * (jacobianLambda' hκs ((j : ℕ) : ZMod n)
+                  * pairSign m ((q : ℕ) : ZMod n) ((j : ℕ) : ZMod n)) : ℝ) : ℂ))
+      = (Complex.exp ((heading κs (jacobianBaseLen hκs) j : ℂ) * Complex.I)
+            * ((jacobianLambda' hκs ((j : ℕ) : ZMod n) : ℝ) : ℂ))
+          * ((pairSign m ((q : ℕ) : ZMod n) ((j : ℕ) : ZMod n) : ℝ) : ℂ)
+        + ((jacobianEdge hκs j * Complex.I)
+            * ((chartSlotDeriv (κs 0) (jacobianBaseLen hκs (-1))
+                * (jacobianLambda' hκs (-1)
+                  * pairSign m ((q : ℕ) : ZMod n) (-1)) : ℝ) : ℂ)
+          + (jacobianEdge hκs j * Complex.I
+              * ((∑ e ∈ Finset.range j,
+                  pairSign m ((q : ℕ) : ZMod n) ((e : ℕ) : ZMod n) : ℝ) : ℂ)
+            + (jacobianEdge hκs j * Complex.I
+                * ((chartSlotDeriv (κs ((j : ℕ) : ZMod n))
+                      (jacobianBaseLen hκs ((j : ℕ) : ZMod n))
+                    * jacobianLambda' hκs ((j : ℕ) : ZMod n) : ℝ) : ℂ))
+              * ((pairSign m ((q : ℕ) : ZMod n) ((j : ℕ) : ZMod n) : ℝ) : ℂ))) := by
+    intro j _
+    push_cast
+    ring
+  rw [Finset.sum_congr rfl hsplit, Finset.sum_add_distrib,
+    Finset.sum_add_distrib, Finset.sum_add_distrib]
+  -- Part 1: the `dℓ` sum extracts `2λ'_q·e^{iψ_q}`
+  have hP : ∑ j ∈ Finset.range n,
+      (Complex.exp ((heading κs (jacobianBaseLen hκs) j : ℂ) * Complex.I)
+          * ((jacobianLambda' hκs ((j : ℕ) : ZMod n) : ℝ) : ℂ))
+        * ((pairSign m ((q : ℕ) : ZMod n) ((j : ℕ) : ZMod n) : ℝ) : ℂ)
+      = ((2 * jacobianLambda' hκs ((q : ℕ) : ZMod n) : ℝ) : ℂ)
+        * Complex.exp
+            ((heading κs (jacobianBaseLen hκs) q : ℂ) * Complex.I) := by
+    rw [sum_mul_pairSign hn _ hq]
+    rw [hexpqm, hcastqm, jacobianLambda'_add_half hκs hsym]
+    push_cast
+    ring
+  -- Part 2a: the constant heading gauge multiplies `ΣE = 0`
+  have hQ1 : ∑ j ∈ Finset.range n,
+      (jacobianEdge hκs j * Complex.I)
+        * ((chartSlotDeriv (κs 0) (jacobianBaseLen hκs (-1))
+            * (jacobianLambda' hκs (-1)
+              * pairSign m ((q : ℕ) : ZMod n) (-1)) : ℝ) : ℂ)
+      = 0 := by
+    have : ∀ j ∈ Finset.range n,
+        (jacobianEdge hκs j * Complex.I)
+          * ((chartSlotDeriv (κs 0) (jacobianBaseLen hκs (-1))
+              * (jacobianLambda' hκs (-1)
+                * pairSign m ((q : ℕ) : ZMod n) (-1)) : ℝ) : ℂ)
+        = jacobianEdge hκs j
+          * (Complex.I * ((chartSlotDeriv (κs 0) (jacobianBaseLen hκs (-1))
+              * (jacobianLambda' hκs (-1)
+                * pairSign m ((q : ℕ) : ZMod n) (-1)) : ℝ) : ℂ)) :=
+      fun j _ => by ring
+    rw [Finset.sum_congr rfl this, ← Finset.sum_mul,
+      sum_jacobianEdge_eq_zero hn hn4 hκs hsym, zero_mul]
+  -- Part 2b: the running count contributes the half-block of edges
+  have hQ2 : ∑ j ∈ Finset.range n,
+      jacobianEdge hκs j * Complex.I
+        * ((∑ e ∈ Finset.range j,
+            pairSign m ((q : ℕ) : ZMod n) ((e : ℕ) : ZMod n) : ℝ) : ℂ)
+      = (∑ r ∈ Finset.Ico (q + 1) (q + m), jacobianEdge hκs r) * Complex.I
+        - jacobianEdge hκs q * Complex.I := by
+    have hqmn : q + m < n := by omega
+    have hstep : ∀ j ∈ Finset.range n,
+        jacobianEdge hκs j * Complex.I
+          * ((∑ e ∈ Finset.range j,
+              pairSign m ((q : ℕ) : ZMod n) ((e : ℕ) : ZMod n) : ℝ) : ℂ)
+        = if j ∈ Finset.Ico (q + 1) (q + m + 1)
+            then jacobianEdge hκs j * Complex.I else 0 := by
+      intro j hj
+      rw [sum_pairSign_range hn hq (le_of_lt (Finset.mem_range.mp hj))]
+      rcases lt_or_ge q j with h1 | h1
+      · rcases lt_or_ge (q + m) j with h2 | h2
+        · rw [if_pos h1, if_pos h2,
+            if_neg (fun hmem => by
+              have := Finset.mem_Ico.mp hmem; omega)]
+          push_cast
+          ring
+        · rw [if_pos h1, if_neg (show ¬(q + m < j) by omega),
+            if_pos (Finset.mem_Ico.mpr (by omega))]
+          push_cast
+          ring
+      · rw [if_neg (show ¬(q < j) by omega),
+          if_neg (show ¬(q + m < j) by omega),
+          if_neg (fun hmem => by
+            have := Finset.mem_Ico.mp hmem; omega)]
+        push_cast
+        ring
+    have hsub : Finset.Ico (q + 1) (q + m + 1) ⊆ Finset.range n := fun x hx =>
+      Finset.mem_range.mpr (by have := Finset.mem_Ico.mp hx; omega)
+    rw [Finset.sum_congr rfl hstep, Finset.sum_ite_mem,
+      Finset.inter_eq_right.mpr hsub,
+      Finset.sum_Ico_succ_top (by omega : q + 1 ≤ q + m),
+      jacobianEdge_add_half hn hn4 hκs hsym, Finset.sum_mul]
+    ring
+  -- Part 2c: the boundary slots contribute `2p_q·E_q·i`
+  have hQ3 : ∑ j ∈ Finset.range n,
+      (jacobianEdge hκs j * Complex.I
+          * ((chartSlotDeriv (κs ((j : ℕ) : ZMod n))
+                (jacobianBaseLen hκs ((j : ℕ) : ZMod n))
+              * jacobianLambda' hκs ((j : ℕ) : ZMod n) : ℝ) : ℂ))
+        * ((pairSign m ((q : ℕ) : ZMod n) ((j : ℕ) : ZMod n) : ℝ) : ℂ)
+      = 2 * ((jacobianShare hκs ((q : ℕ) : ZMod n) : ℝ) : ℂ)
+        * jacobianEdge hκs q * Complex.I := by
+    rw [sum_mul_pairSign hn _ hq]
+    rw [jacobianEdge_add_half hn hn4 hκs hsym, hcastqm]
+    simp only [tailSlot_mul_lambda' hκs]
+    rw [jacobianShare_add_half hκs hsym]
+    ring
+  rw [hP, hQ1, hQ2, hQ3, closingJacobianCol]
+  push_cast
+  ring
+
+/-- **The derivative of the anchor gap is the closed-form Jacobian**: at a
+half-period-symmetric anchor, `anchorGapDeriv` is exactly the linear map
+`(u, v) ↦ u·C_a + v·C_b` with the columns of `def:closing_jacobian_col`. -/
+theorem anchorGapDeriv_eq [NeZero n] (hn4 : 4 ≤ n) {m : ℕ} (hn : n = 2 * m)
+    {a b : ℕ} (ha : a < m) (hb : b < m) {κs : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i)
+    (hsym : ∀ i : ZMod n, κs (i + (m : ZMod n)) = κs i) :
+    anchorGapDeriv m ((a : ℕ) : ZMod n) ((b : ℕ) : ZMod n) hκs
+      = (ContinuousLinearMap.fst ℝ ℝ ℝ).smulRight (closingJacobianCol m hκs a)
+        + (ContinuousLinearMap.snd ℝ ℝ ℝ).smulRight
+            (closingJacobianCol m hκs b) := by
+  refine ContinuousLinearMap.ext fun w => ?_
+  have hEvalA := sum_col_eval hn4 hn hκs hsym ha
+  have hEvalB := sum_col_eval hn4 hn hκs hsym hb
+  simp only [anchorGapDeriv, sum_apply, add_apply, FunLike.coe_smul,
+    Pi.smul_apply, ContinuousLinearMap.coe_comp, Function.comp_apply,
+    Complex.ofRealCLM_apply, anchorCellDeriv, anchorHeadingDeriv, pairCLM,
+    ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.coe_fst',
+    ContinuousLinearMap.coe_snd', smul_eq_mul, Complex.real_smul]
+  rw [← hEvalA, ← hEvalB, Finset.mul_sum, Finset.mul_sum,
+    ← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl fun j hj => ?_
+  push_cast
+  rw [Finset.sum_add_distrib, ← Finset.sum_mul, ← Finset.sum_mul]
+  simp only [jacobianEdge]
+  ring
+
 end Gluck.Discrete
