@@ -128,4 +128,48 @@ noncomputable def chartHomeomorph {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
     orderTopology_of_ordConnected
   (StrictMonoOn.orderIso (chartMap p q) _ (chartMap_strictMonoOn hp hq)).toHomeomorph
 
+/-- The edge-length recovery map `λ` of `def:turning_chart`: the inverse of the
+single-edge turning chart. On the turning-value interval
+`chartMap p q '' Ioo 0 (2 / max p q)` it is the continuous, strictly increasing
+inverse `(chartHomeomorph hp hq).symm`; off that interval it is `0` (junk). -/
+noncomputable def chartInv {p q : ℝ} (hp : 0 < p) (hq : 0 < q) (s : ℝ) : ℝ := by
+  classical
+  exact if h : s ∈ chartMap p q '' Set.Ioo (0 : ℝ) (2 / max p q) then
+    ((chartHomeomorph hp hq).symm ⟨s, h⟩ : ℝ) else 0
+
+/-- On the turning-value interval the recovered edge length lies in the moderate
+length interval `Ioo 0 (2 / max p q)`. -/
+theorem chartInv_mem {p q : ℝ} (hp : 0 < p) (hq : 0 < q) {s : ℝ}
+    (hs : s ∈ chartMap p q '' Set.Ioo (0 : ℝ) (2 / max p q)) :
+    chartInv hp hq s ∈ Set.Ioo (0 : ℝ) (2 / max p q) := by
+  classical
+  rw [chartInv, dif_pos hs]
+  exact ((chartHomeomorph hp hq).symm ⟨s, hs⟩).2
+
+/-- Round-trip: recovering the edge length and re-applying the chart returns the
+turning value. This is the inverse identity `τ ∘ λ = id` of `def:turning_chart`. -/
+theorem chartMap_chartInv {p q : ℝ} (hp : 0 < p) (hq : 0 < q) {s : ℝ}
+    (hs : s ∈ chartMap p q '' Set.Ioo (0 : ℝ) (2 / max p q)) :
+    chartMap p q (chartInv hp hq s) = s := by
+  classical
+  rw [chartInv, dif_pos hs]
+  have h := (chartHomeomorph hp hq).apply_symm_apply ⟨s, hs⟩
+  have hcoe : ((chartHomeomorph hp hq) ((chartHomeomorph hp hq).symm ⟨s, hs⟩) : ℝ)
+      = chartMap p q ((chartHomeomorph hp hq).symm ⟨s, hs⟩ : ℝ) := rfl
+  rw [← hcoe, h]
+
+/-- The recovery map `λ` is continuous on the turning-value interval (as the
+subtype coercion of the continuous inverse homeomorphism). -/
+theorem continuousOn_chartInv {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
+    ContinuousOn (chartInv hp hq) (chartMap p q '' Set.Ioo (0 : ℝ) (2 / max p q)) := by
+  classical
+  rw [continuousOn_iff_continuous_restrict]
+  have hrestrict : (chartMap p q '' Set.Ioo (0 : ℝ) (2 / max p q)).restrict
+        (chartInv hp hq)
+      = fun x => ((chartHomeomorph hp hq).symm x : ℝ) := by
+    funext x
+    simp only [Set.restrict_apply, chartInv, dif_pos x.2, Subtype.coe_eta]
+  rw [hrestrict]
+  exact continuous_subtype_val.comp (chartHomeomorph hp hq).symm.continuous
+
 end Gluck.Discrete
