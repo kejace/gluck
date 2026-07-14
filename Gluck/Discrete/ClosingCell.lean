@@ -4328,7 +4328,7 @@ theorem twoLevelCol_formula₀ [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
 the uniform `iℓ·ψ̇`-rotation, edge `m−1` carries the frozen-heading length
 motion; the boundary term collapses through `e^{imα} = −1`. -/
 private lemma sum_twoLevelEdgeDot₀ [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
-    (hn : n = 2 * m) {K : ℝ} (hK : 0 < K) :
+    (hn : n = 2 * m) {K : ℝ} (_hK : 0 < K) :
     (∑ r ∈ Finset.Ico (0 + 1) (0 + m),
       ((((if r = 0 ∨ r = m - 1 ∨ r = m ∨ r = n - 1
             then -(Real.sin (Real.pi / n) / K ^ 2) else 0 : ℝ)) : ℂ)
