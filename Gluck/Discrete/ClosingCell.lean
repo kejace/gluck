@@ -445,4 +445,82 @@ theorem continuous_chartPerturb (m : ℕ) (a b : ZMod n) (j : ZMod n) :
   unfold chartPerturb
   split_ifs <;> fun_prop
 
+/-! ### The closing 2-cell `Φ` and its gap map `F` (`def:closing_2cell`)
+
+`Φ t z` recovers, edge by edge, the lengths whose per-edge turning
+contributions are the antisymmetrically perturbed chart base `chartPerturb`:
+`Φ t z j = λ_{t,j}(s(z)_j)`. The turning constraint `turningSum = 2π` then
+holds identically on the cell (`turningSum_closingCell`), and the gap map is
+`F t z = closureGap κ_t (Φ t z)`. -/
+
+/-- **The closing 2-cell `Φ`** (`def:closing_2cell`): at homotopy time
+`t ∈ [0,1]` and perturbation `z`, edge `j` carries the length recovered by the
+edge-length recovery map `chartInv` of the pair `(κ_t j, κ_t (j+1))` from the
+perturbed chart value `chartPerturb m a b z j`. -/
+noncomputable def closingCell (m : ℕ) (a b : ZMod n) {κ : ZMod n → ℝ}
+    (hκ : ∀ i, 0 < κ i) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (z : ℝ × ℝ) :
+    ZMod n → ℝ := fun j =>
+  chartInv (curvHomotopy_pos (m := m) hκ ht0 ht1 j)
+    (curvHomotopy_pos (m := m) hκ ht0 ht1 (j + 1)) (chartPerturb m a b z j)
+
+/-- **The 2-cell keeps the turning constraint identically in `(t, z)`**: as long
+as every perturbed chart value is achievable on its edge (`hmem`), the total
+turning of `Φ t z` is exactly `2π`. Chain: the affine linearization
+`turningSum_eq_sum_edgeChart`, the round-trip `chartMap_chartInv`, and the
+antisymmetric cancellation `sum_chartPerturb`. -/
+theorem turningSum_closingCell [NeZero n] (m : ℕ) (a b : ZMod n)
+    {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
+    {z : ℝ × ℝ}
+    (hmem : ∀ j : ZMod n, chartPerturb m a b z j ∈
+      chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) ''
+        Set.Ioo (0 : ℝ)
+          (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)))) :
+    turningSum (curvHomotopy m κ t) (closingCell m a b hκ ht0 ht1 z)
+      = 2 * Real.pi := by
+  rw [turningSum_eq_sum_edgeChart, ← sum_chartPerturb (n := n) m a b z]
+  refine Finset.sum_congr rfl fun j _ => ?_
+  simp only [closingCell]
+  exact chartMap_chartInv _ _ (hmem j)
+
+/-- **The 2-cell lies in the moderate-arc domain of `κ_t`**: every recovered
+length is positive and stays below the joint wall `2 / max` of its edge pair
+(`chartInv_mem`), which yields both strict vertex walls of `ModerateArc`. -/
+theorem moderateArc_closingCell (m : ℕ) (a b : ZMod n) {κ : ZMod n → ℝ}
+    (hκ : ∀ i, 0 < κ i) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) {z : ℝ × ℝ}
+    (hmem : ∀ j : ZMod n, chartPerturb m a b z j ∈
+      chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) ''
+        Set.Ioo (0 : ℝ)
+          (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)))) :
+    ModerateArc 0 (curvHomotopy m κ t) (closingCell m a b hκ ht0 ht1 z) := by
+  have hκ' : ∀ i, 0 < curvHomotopy m κ t i := curvHomotopy_pos hκ ht0 ht1
+  have hL : ∀ j : ZMod n, closingCell m a b hκ ht0 ht1 z j ∈
+      Set.Ioo (0 : ℝ)
+        (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))) := by
+    intro j
+    simp only [closingCell]
+    exact chartInv_mem _ _ (hmem j)
+  have key : ∀ r M x : ℝ, 0 < r → r ≤ M → 0 < x → x < 2 / M → r * (x / 2) < 1 := by
+    intro r M x hr hrM hx hxM
+    have hM : 0 < M := lt_of_lt_of_le hr hrM
+    have h1 : r * x ≤ M * x := mul_le_mul_of_nonneg_right hrM hx.le
+    have h2 : M * x < M * (2 / M) := mul_lt_mul_of_pos_left hxM hM
+    have h3 : M * (2 / M) = 2 := by field_simp
+    linarith
+  intro i
+  refine ⟨(hL i).1, by simpa using half_pos (hL i).1, by simp, ?_, ?_⟩
+  · rw [tK_zero, abs_of_pos (hκ' i)]
+    have hprev := hL (i - 1)
+    rw [show i - 1 + 1 = i by ring] at hprev
+    exact key _ _ _ (hκ' i) (le_max_right _ _) hprev.1 hprev.2
+  · rw [tK_zero, abs_of_pos (hκ' i)]
+    exact key _ _ _ (hκ' i) (le_max_left _ _) (hL i).1 (hL i).2
+
+/-- **The gap map `F`** of the closing 2-cell (`def:closing_2cell`):
+`F t z = closureGap κ_t (Φ t z)`. Zeros of `F` are closed developments; the
+degree argument of `sec:closure` tracks its boundary winding along the
+homotopy. -/
+noncomputable def closingGap (m : ℕ) (a b : ZMod n) {κ : ZMod n → ℝ}
+    (hκ : ∀ i, 0 < κ i) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (z : ℝ × ℝ) : ℂ :=
+  closureGap (curvHomotopy m κ t) (closingCell m a b hκ ht0 ht1 z)
+
 end Gluck.Discrete
