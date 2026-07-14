@@ -3339,4 +3339,109 @@ theorem jacobianEdge_const [NeZero n] (hn4 : 4 ≤ n) {K : ℝ} (hK : 0 < K)
   unfold jacobianEdge
   rw [hfun, heading_const hn4 hK r]
 
+/-! ### The moving arcsin slots of the two-level turning angles
+
+Every `ε`-dependent arcsin slot of the two-level turning angles has one of
+two shapes: the *bump slot* `arcsin((K+ε)·ℓ*(ε)/2)` (bump curvature times
+special length) and the *mixed slot* `arcsin(K·ℓ*(ε)/2)` (constant curvature
+times special length). Their derivatives `±tan(π/n)/(2K)` are the `ȧ`-table
+of `lem:anchor_witness_two_level`; all other slots are constant in `ε`. -/
+
+/-- The bump arcsin slot moves with strict derivative `tan(π/n)/(2K)` at
+`ε = 0` (`ȧ₀ = t/2K` in the blueprint's first-order table). -/
+theorem hasStrictDerivAt_bumpSlot [NeZero n] (hn4 : 4 ≤ n) {K : ℝ}
+    (hK : 0 < K) :
+    HasStrictDerivAt (fun ε : ℝ => Real.arcsin
+        ((K + ε) * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε) / 2))
+      (Real.tan (Real.pi / n) / (2 * K)) 0 := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρpos : 0 < Real.pi / n := by positivity
+  have hρhalf : Real.pi / n < Real.pi / 2 :=
+    lt_of_le_of_lt (div_le_div_of_nonneg_left hπ.le four_pos hn4') (by linarith)
+  have hsin0 : 0 < Real.sin (Real.pi / n) :=
+    Real.sin_pos_of_pos_of_lt_pi hρpos (by linarith)
+  have hsin1 : Real.sin (Real.pi / n) < 1 := by
+    have h := Real.strictMonoOn_sin (a := Real.pi / n) (b := Real.pi / 2)
+      ⟨by linarith, hρhalf.le⟩ ⟨by linarith, le_refl _⟩ hρhalf
+    simpa [Real.sin_pi_div_two] using h
+  have hcos : 0 < Real.cos (Real.pi / n) :=
+    Real.cos_pos_of_mem_Ioo ⟨by linarith, hρhalf⟩
+  have hval0 : chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0)
+      = 2 * Real.sin (Real.pi / n) / K := by
+    rw [add_zero, chartInvCurv_of_pos hK hK, chartInv_const hn4 hK]
+  have hshift : HasStrictDerivAt (fun ε : ℝ => K + ε) 1 0 := by
+    simpa using (hasStrictDerivAt_id (0 : ℝ)).const_add K
+  have hlen := hasStrictDerivAt_twoLevelLen (n := n) hn4 hK
+  have hprod := (hshift.mul hlen).div_const 2
+  have hg0 : (K + (0 : ℝ))
+        * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0) / 2
+      = Real.sin (Real.pi / n) := by
+    rw [hval0, add_zero]
+    field_simp
+  have harc : HasStrictDerivAt Real.arcsin
+      (1 / Real.sqrt (1 - Real.sin (Real.pi / n) ^ 2))
+      ((K + (0 : ℝ)) * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0) / 2) := by
+    rw [hg0]
+    exact Real.hasStrictDerivAt_arcsin (by linarith) hsin1.ne
+  have hcomp := harc.comp 0 hprod
+  simp only [Function.comp_def] at hcomp
+  have hderiv : 1 / Real.sqrt (1 - Real.sin (Real.pi / n) ^ 2)
+      * ((1 * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0)
+          + (K + 0) * -(Real.sin (Real.pi / n) / K ^ 2)) / 2)
+      = Real.tan (Real.pi / n) / (2 * K) := by
+    rw [hval0, add_zero, ← Real.cos_eq_sqrt_one_sub_sin_sq (by linarith)
+      hρhalf.le, Real.tan_eq_sin_div_cos]
+    field_simp
+    ring
+  rw [hderiv] at hcomp
+  simpa [Pi.mul_apply] using hcomp
+
+/-- The mixed arcsin slot moves with strict derivative `−tan(π/n)/(2K)` at
+`ε = 0` (the `−t/2K` entries of the blueprint's first-order table). -/
+theorem hasStrictDerivAt_mixedSlot [NeZero n] (hn4 : 4 ≤ n) {K : ℝ}
+    (hK : 0 < K) :
+    HasStrictDerivAt (fun ε : ℝ => Real.arcsin
+        (K * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε) / 2))
+      (-(Real.tan (Real.pi / n) / (2 * K))) 0 := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρpos : 0 < Real.pi / n := by positivity
+  have hρhalf : Real.pi / n < Real.pi / 2 :=
+    lt_of_le_of_lt (div_le_div_of_nonneg_left hπ.le four_pos hn4') (by linarith)
+  have hsin0 : 0 < Real.sin (Real.pi / n) :=
+    Real.sin_pos_of_pos_of_lt_pi hρpos (by linarith)
+  have hsin1 : Real.sin (Real.pi / n) < 1 := by
+    have h := Real.strictMonoOn_sin (a := Real.pi / n) (b := Real.pi / 2)
+      ⟨by linarith, hρhalf.le⟩ ⟨by linarith, le_refl _⟩ hρhalf
+    simpa [Real.sin_pi_div_two] using h
+  have hcos : 0 < Real.cos (Real.pi / n) :=
+    Real.cos_pos_of_mem_Ioo ⟨by linarith, hρhalf⟩
+  have hval0 : chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0)
+      = 2 * Real.sin (Real.pi / n) / K := by
+    rw [add_zero, chartInvCurv_of_pos hK hK, chartInv_const hn4 hK]
+  have hlen := hasStrictDerivAt_twoLevelLen (n := n) hn4 hK
+  have hprod := (hlen.const_mul K).div_const 2
+  have hg0 : K * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0) / 2
+      = Real.sin (Real.pi / n) := by
+    rw [hval0]
+    field_simp
+  have harc : HasStrictDerivAt Real.arcsin
+      (1 / Real.sqrt (1 - Real.sin (Real.pi / n) ^ 2))
+      (K * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0) / 2) := by
+    rw [hg0]
+    exact Real.hasStrictDerivAt_arcsin (by linarith) hsin1.ne
+  have hcomp := harc.comp 0 hprod
+  simp only [Function.comp_def] at hcomp
+  have hderiv : 1 / Real.sqrt (1 - Real.sin (Real.pi / n) ^ 2)
+      * (K * -(Real.sin (Real.pi / n) / K ^ 2) / 2)
+      = -(Real.tan (Real.pi / n) / (2 * K)) := by
+    rw [← Real.cos_eq_sqrt_one_sub_sin_sq (by linarith) hρhalf.le,
+      Real.tan_eq_sin_div_cos]
+    field_simp
+  rw [hderiv] at hcomp
+  exact hcomp
+
 end Gluck.Discrete
