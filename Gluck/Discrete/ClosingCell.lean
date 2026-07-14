@@ -333,6 +333,56 @@ theorem continuous_curvHomotopy (m : ℕ) (κ : ZMod n → ℝ) (i : ZMod n) :
     Continuous (fun t : ℝ => curvHomotopy m κ t i) := by
   unfold curvHomotopy; fun_prop
 
+/-! ### The generalized anchor path `curvPath` (`def:curv_path`, @080)
+
+The @079 refutation (`closingGap_zero_iff_fails_of_const` below) shows the
+hardwired anchor `κ⁰ = centralSym m κ` degenerates on the class
+`{κ : κ⁰ constant}` — which contains genuine DFV profiles (constants plus odd
+half-period harmonics). The fix is to generalize the homotopy to an *arbitrary*
+positive anchor `κˢ`: positivity along the path is free by convexity, and the
+half-period symmetry of the anchor is carried as an explicit hypothesis exactly
+where it is used (the `t = 0` anchor lemmas), not baked into the path. The
+central-symmetrization homotopy is the instance `κˢ = centralSym m κ`
+(`curvHomotopy_eq_curvPath`). -/
+
+/-- The generalized anchor path `κ_t = κˢ + t·(κ − κˢ)` from an arbitrary
+anchor profile `κˢ` (`t = 0`) to the target `κ` (`t = 1`) (`def:curv_path`).
+Affine — hence continuous — in `t` (`continuous_curvPath`); positive for
+`t ∈ [0,1]` when both endpoints are (`curvPath_pos`). -/
+noncomputable def curvPath (κs κ : ZMod n → ℝ) (t : ℝ) : ZMod n → ℝ :=
+  fun i => κs i + t * (κ i - κs i)
+
+@[simp] lemma curvPath_zero (κs κ : ZMod n → ℝ) : curvPath κs κ 0 = κs := by
+  funext i; simp [curvPath]
+
+@[simp] lemma curvPath_one (κs κ : ZMod n → ℝ) : curvPath κs κ 1 = κ := by
+  funext i; simp [curvPath]
+
+/-- The central-symmetrization homotopy of `def:curv_homotopy` is the
+`κˢ = centralSym m κ` instance of the generalized anchor path. -/
+theorem curvHomotopy_eq_curvPath (m : ℕ) (κ : ZMod n → ℝ) :
+    curvHomotopy m κ = curvPath (centralSym m κ) κ := rfl
+
+/-- Along the generalized anchor path every curvature stays positive for
+`t ∈ [0,1]` (`κ_t = (1−t)·κˢ + t·κ`, a convex combination of positives). -/
+theorem curvPath_pos {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (hκ : ∀ i, 0 < κ i) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (i : ZMod n) :
+    0 < curvPath κs κ t i := by
+  have hconv : curvPath κs κ t i = (1 - t) * κs i + t * κ i := by
+    rw [curvPath]; ring
+  rcases eq_or_lt_of_le ht1 with h | h
+  · rw [hconv, h]; simpa using hκ i
+  · rw [hconv]
+    have h1 : 0 < (1 - t) * κs i := mul_pos (by linarith) (hκs i)
+    have h2 : 0 ≤ t * κ i := mul_nonneg ht0 (hκ i).le
+    linarith
+
+/-- For each fixed vertex the generalized anchor path is continuous (indeed
+affine) in `t`. -/
+theorem continuous_curvPath (κs κ : ZMod n → ℝ) (i : ZMod n) :
+    Continuous (fun t : ℝ => curvPath κs κ t i) := by
+  unfold curvPath; fun_prop
+
 /-! ### Reaching the turning value: the chart's wall value and surjectivity
 
 For `def:closing_2cell` the chart base `s⁰_j` (and its antisymmetric
@@ -457,11 +507,11 @@ holds identically on the cell (`turningSum_closingCell`), and the gap map is
 `t ∈ [0,1]` and perturbation `z`, edge `j` carries the length recovered by the
 edge-length recovery map `chartInv` of the pair `(κ_t j, κ_t (j+1))` from the
 perturbed chart value `chartPerturb m a b z j`. -/
-noncomputable def closingCell (m : ℕ) (a b : ZMod n) {κ : ZMod n → ℝ}
-    (hκ : ∀ i, 0 < κ i) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (z : ℝ × ℝ) :
+noncomputable def closingCell (m : ℕ) (a b : ZMod n) {κs κ : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (z : ℝ × ℝ) :
     ZMod n → ℝ := fun j =>
-  chartInv (curvHomotopy_pos (m := m) hκ ht0 ht1 j)
-    (curvHomotopy_pos (m := m) hκ ht0 ht1 (j + 1)) (chartPerturb m a b z j)
+  chartInv (curvPath_pos hκs hκ ht0 ht1 j)
+    (curvPath_pos hκs hκ ht0 ht1 (j + 1)) (chartPerturb m a b z j)
 
 /-- **The 2-cell keeps the turning constraint identically in `(t, z)`**: as long
 as every perturbed chart value is achievable on its edge (`hmem`), the total
@@ -469,13 +519,14 @@ turning of `Φ t z` is exactly `2π`. Chain: the affine linearization
 `turningSum_eq_sum_edgeChart`, the round-trip `chartMap_chartInv`, and the
 antisymmetric cancellation `sum_chartPerturb`. -/
 theorem turningSum_closingCell [NeZero n] (m : ℕ) (a b : ZMod n)
-    {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
+    {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i)
+    {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
     {z : ℝ × ℝ}
     (hmem : ∀ j : ZMod n, chartPerturb m a b z j ∈
-      chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) ''
+      chartMap (curvPath κs κ t j) (curvPath κs κ t (j + 1)) ''
         Set.Ioo (0 : ℝ)
-          (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)))) :
-    turningSum (curvHomotopy m κ t) (closingCell m a b hκ ht0 ht1 z)
+          (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1)))) :
+    turningSum (curvPath κs κ t) (closingCell m a b hκs hκ ht0 ht1 z)
       = 2 * Real.pi := by
   rw [turningSum_eq_sum_edgeChart, ← sum_chartPerturb (n := n) m a b z]
   refine Finset.sum_congr rfl fun j _ => ?_
@@ -485,17 +536,17 @@ theorem turningSum_closingCell [NeZero n] (m : ℕ) (a b : ZMod n)
 /-- **The 2-cell lies in the moderate-arc domain of `κ_t`**: every recovered
 length is positive and stays below the joint wall `2 / max` of its edge pair
 (`chartInv_mem`), which yields both strict vertex walls of `ModerateArc`. -/
-theorem moderateArc_closingCell (m : ℕ) (a b : ZMod n) {κ : ZMod n → ℝ}
-    (hκ : ∀ i, 0 < κ i) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) {z : ℝ × ℝ}
+theorem moderateArc_closingCell (m : ℕ) (a b : ZMod n) {κs κ : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) {z : ℝ × ℝ}
     (hmem : ∀ j : ZMod n, chartPerturb m a b z j ∈
-      chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) ''
+      chartMap (curvPath κs κ t j) (curvPath κs κ t (j + 1)) ''
         Set.Ioo (0 : ℝ)
-          (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)))) :
-    ModerateArc 0 (curvHomotopy m κ t) (closingCell m a b hκ ht0 ht1 z) := by
-  have hκ' : ∀ i, 0 < curvHomotopy m κ t i := curvHomotopy_pos hκ ht0 ht1
-  have hL : ∀ j : ZMod n, closingCell m a b hκ ht0 ht1 z j ∈
+          (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1)))) :
+    ModerateArc 0 (curvPath κs κ t) (closingCell m a b hκs hκ ht0 ht1 z) := by
+  have hκ' : ∀ i, 0 < curvPath κs κ t i := curvPath_pos hκs hκ ht0 ht1
+  have hL : ∀ j : ZMod n, closingCell m a b hκs hκ ht0 ht1 z j ∈
       Set.Ioo (0 : ℝ)
-        (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))) := by
+        (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1))) := by
     intro j
     simp only [closingCell]
     exact chartInv_mem _ _ (hmem j)
@@ -519,9 +570,9 @@ theorem moderateArc_closingCell (m : ℕ) (a b : ZMod n) {κ : ZMod n → ℝ}
 `F t z = closureGap κ_t (Φ t z)`. Zeros of `F` are closed developments; the
 degree argument of `sec:closure` tracks its boundary winding along the
 homotopy. -/
-noncomputable def closingGap (m : ℕ) (a b : ZMod n) {κ : ZMod n → ℝ}
-    (hκ : ∀ i, 0 < κ i) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (z : ℝ × ℝ) : ℂ :=
-  closureGap (curvHomotopy m κ t) (closingCell m a b hκ ht0 ht1 z)
+noncomputable def closingGap (m : ℕ) (a b : ZMod n) {κs κ : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (z : ℝ × ℝ) : ℂ :=
+  closureGap (curvPath κs κ t) (closingCell m a b hκs hκ ht0 ht1 z)
 
 /-! ### Joint continuity of the gap map `F` -/
 
@@ -652,24 +703,25 @@ normalized length window `[c·(2/max), d·(2/max)]` uniformly along the homotopy
 (hypothesis `hwin` — the ρ-package of `def:closing_2cell`), the map
 `(t, z) ↦ Φ(t,z)_j` is continuous on `[0,1] × Z`. -/
 theorem continuousOn_closingCell_apply (m : ℕ) (a b : ZMod n)
-    {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i) {c d : ℝ} (hc : 0 < c) (hcd : c ≤ d)
+    {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i)
+    {c d : ℝ} (hc : 0 < c) (hcd : c ≤ d)
     (hd : d < 1) {Z : Set (ℝ × ℝ)} (j : ZMod n)
     (hwin : ∀ t : ℝ, 0 ≤ t → t ≤ 1 → ∀ z ∈ Z, chartPerturb m a b z j ∈
-      chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) ''
+      chartMap (curvPath κs κ t j) (curvPath κs κ t (j + 1)) ''
         Set.Icc
-          (c * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))
-          (d * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))) :
+          (c * (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1))))
+          (d * (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1))))) :
     ContinuousOn
       (fun x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) =>
-        closingCell m a b hκ x.1.2.1 x.1.2.2 x.2 j)
+        closingCell m a b hκs hκ x.1.2.1 x.1.2.2 x.2 j)
       {x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) | x.2 ∈ Z} := by
   have hfam := continuousOn_chartInv_family
-    (p := fun τ : ↥(Set.Icc (0 : ℝ) 1) => curvHomotopy m κ (↑τ) j)
-    (q := fun τ : ↥(Set.Icc (0 : ℝ) 1) => curvHomotopy m κ (↑τ) (j + 1))
-    (fun τ => curvHomotopy_pos hκ τ.2.1 τ.2.2 j)
-    (fun τ => curvHomotopy_pos hκ τ.2.1 τ.2.2 (j + 1))
-    ((continuous_curvHomotopy m κ j).comp continuous_subtype_val)
-    ((continuous_curvHomotopy m κ (j + 1)).comp continuous_subtype_val)
+    (p := fun τ : ↥(Set.Icc (0 : ℝ) 1) => curvPath κs κ (↑τ) j)
+    (q := fun τ : ↥(Set.Icc (0 : ℝ) 1) => curvPath κs κ (↑τ) (j + 1))
+    (fun τ => curvPath_pos hκs hκ τ.2.1 τ.2.2 j)
+    (fun τ => curvPath_pos hκs hκ τ.2.1 τ.2.2 (j + 1))
+    ((continuous_curvPath κs κ j).comp continuous_subtype_val)
+    ((continuous_curvPath κs κ (j + 1)).comp continuous_subtype_val)
     hc hcd hd
   have hcomp : Continuous fun x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) =>
       ((x.1, chartPerturb m a b x.2 j) : ↥(Set.Icc (0 : ℝ) 1) × ℝ) :=
@@ -679,12 +731,12 @@ theorem continuousOn_closingCell_apply (m : ℕ) (a b : ZMod n)
         ((x.1, chartPerturb m a b x.2 j) : ↥(Set.Icc (0 : ℝ) 1) × ℝ))
       {x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) | x.2 ∈ Z}
       {x : ↥(Set.Icc (0 : ℝ) 1) × ℝ | x.2 ∈
-        chartMap (curvHomotopy m κ (↑x.1) j) (curvHomotopy m κ (↑x.1) (j + 1)) ''
+        chartMap (curvPath κs κ (↑x.1) j) (curvPath κs κ (↑x.1) (j + 1)) ''
           Set.Icc
-            (c * (2 / max (curvHomotopy m κ (↑x.1) j)
-              (curvHomotopy m κ (↑x.1) (j + 1))))
-            (d * (2 / max (curvHomotopy m κ (↑x.1) j)
-              (curvHomotopy m κ (↑x.1) (j + 1))))} :=
+            (c * (2 / max (curvPath κs κ (↑x.1) j)
+              (curvPath κs κ (↑x.1) (j + 1))))
+            (d * (2 / max (curvPath κs κ (↑x.1) j)
+              (curvPath κs κ (↑x.1) (j + 1))))} :=
     fun x hx => hwin (↑x.1) x.1.2.1 x.1.2.2 x.2 hx
   exact (hfam.comp hcomp.continuousOn hmaps).congr fun x _ => rfl
 
@@ -694,29 +746,30 @@ edge), `(t, z) ↦ F(t,z)` is continuous on `[0,1] × Z`. Composition of
 `continuous_closureGap` with the per-edge continuity of `Φ` and the continuity
 of the homotopy `κ_t`. -/
 theorem continuousOn_closingGap (m : ℕ) (a b : ZMod n)
-    {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i) {c d : ℝ} (hc : 0 < c) (hcd : c ≤ d)
+    {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i)
+    {c d : ℝ} (hc : 0 < c) (hcd : c ≤ d)
     (hd : d < 1) {Z : Set (ℝ × ℝ)}
     (hwin : ∀ t : ℝ, 0 ≤ t → t ≤ 1 → ∀ z ∈ Z, ∀ j : ZMod n,
       chartPerturb m a b z j ∈
-        chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) ''
+        chartMap (curvPath κs κ t j) (curvPath κs κ t (j + 1)) ''
           Set.Icc
-            (c * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))
-            (d * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))) :
+            (c * (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1))))
+            (d * (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1))))) :
     ContinuousOn
       (fun x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) =>
-        closingGap m a b hκ x.1.2.1 x.1.2.2 x.2)
+        closingGap m a b hκs hκ x.1.2.1 x.1.2.2 x.2)
       {x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) | x.2 ∈ Z} := by
   have hpair : ContinuousOn
       (fun x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) =>
-        ((curvHomotopy m κ (↑x.1), closingCell m a b hκ x.1.2.1 x.1.2.2 x.2) :
+        ((curvPath κs κ (↑x.1), closingCell m a b hκs hκ x.1.2.1 x.1.2.2 x.2) :
           (ZMod n → ℝ) × (ZMod n → ℝ)))
       {x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) | x.2 ∈ Z} := by
     refine ContinuousOn.prodMk ?_ ?_
     · refine Continuous.continuousOn (continuous_pi fun i => ?_)
-      exact (continuous_curvHomotopy m κ i).comp
+      exact (continuous_curvPath κs κ i).comp
         (continuous_subtype_val.comp continuous_fst)
     · refine continuousOn_pi.mpr fun j => ?_
-      exact continuousOn_closingCell_apply m a b hκ hc hcd hd j
+      exact continuousOn_closingCell_apply m a b hκs hκ hc hcd hd j
         fun t ht0 ht1 z hz => hwin t ht0 ht1 z hz j
   exact (continuous_closureGap.comp_continuousOn hpair).congr fun x _ => rfl
 
@@ -783,34 +836,34 @@ private lemma chartMap_norm_ge {p q : ℝ} (hp : 0 < p) (hq : 0 < q) {e r : ℝ}
 homotopy**: by compactness of `[0,1]` (and finiteness of the edge set) there is
 `r > 0` with `r ≤ min(κ_t j, κ_t (j+1)) / max(κ_t j, κ_t (j+1))` for every
 `t ∈ [0,1]` and every edge `j`. -/
-theorem exists_ratio_bound [NeZero n] (m : ℕ) {κ : ZMod n → ℝ}
-    (hκ : ∀ i, 0 < κ i) :
+theorem exists_ratio_bound [NeZero n] {κs κ : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i) :
     ∃ r : ℝ, 0 < r ∧ ∀ t : ℝ, 0 ≤ t → t ≤ 1 → ∀ j : ZMod n,
-      r ≤ min (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) /
-          max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) := by
+      r ≤ min (curvPath κs κ t j) (curvPath κs κ t (j + 1)) /
+          max (curvPath κs κ t j) (curvPath κs κ t (j + 1)) := by
   have hA : ∀ j : ZMod n, ∃ rj : ℝ, 0 < rj ∧ ∀ t ∈ Set.Icc (0 : ℝ) 1,
-      rj ≤ min (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) /
-           max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) := by
+      rj ≤ min (curvPath κs κ t j) (curvPath κs κ t (j + 1)) /
+           max (curvPath κs κ t j) (curvPath κs κ t (j + 1)) := by
     intro j
     have hfc : ContinuousOn (fun t : ℝ =>
-        min (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) /
-          max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)))
+        min (curvPath κs κ t j) (curvPath κs κ t (j + 1)) /
+          max (curvPath κs κ t j) (curvPath κs κ t (j + 1)))
         (Set.Icc (0 : ℝ) 1) := by
       apply ContinuousOn.div
-      · exact ((continuous_curvHomotopy m κ j).min
-          (continuous_curvHomotopy m κ (j + 1))).continuousOn
-      · exact ((continuous_curvHomotopy m κ j).max
-          (continuous_curvHomotopy m κ (j + 1))).continuousOn
+      · exact ((continuous_curvPath κs κ j).min
+          (continuous_curvPath κs κ (j + 1))).continuousOn
+      · exact ((continuous_curvPath κs κ j).max
+          (continuous_curvPath κs κ (j + 1))).continuousOn
       · intro t ht
-        exact (lt_of_lt_of_le (curvHomotopy_pos hκ ht.1 ht.2 j)
+        exact (lt_of_lt_of_le (curvPath_pos hκs hκ ht.1 ht.2 j)
           (le_max_left _ _)).ne'
     obtain ⟨t₀, ht₀, hmin⟩ := isCompact_Icc.exists_isMinOn
       (Set.nonempty_Icc.mpr zero_le_one) hfc
     refine ⟨_, ?_, fun t ht => isMinOn_iff.mp hmin t ht⟩
     exact div_pos
-      (lt_min (curvHomotopy_pos hκ ht₀.1 ht₀.2 j)
-        (curvHomotopy_pos hκ ht₀.1 ht₀.2 (j + 1)))
-      (lt_of_lt_of_le (curvHomotopy_pos hκ ht₀.1 ht₀.2 j) (le_max_left _ _))
+      (lt_min (curvPath_pos hκs hκ ht₀.1 ht₀.2 j)
+        (curvPath_pos hκs hκ ht₀.1 ht₀.2 (j + 1)))
+      (lt_of_lt_of_le (curvPath_pos hκs hκ ht₀.1 ht₀.2 j) (le_max_left _ _))
   choose r hr0 hrle using hA
   have : Nonempty (ZMod n) := ⟨0⟩
   refine ⟨Finset.univ.inf' Finset.univ_nonempty r, ?_, fun t ht0 ht1 j => ?_⟩
@@ -830,15 +883,15 @@ combines the uniform ratio bound (`exists_ratio_bound`), the normalized chart
 bounds (`chartMap_norm_le` / `chartMap_norm_ge`), and continuity of
 `arcsin` at `1` to place `d` below `1` while clearing `π/2 + ρ` at the wall. -/
 theorem exists_closingCell_window [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
-    {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i) :
+    {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i) :
     ∃ ρ c d : ℝ, 0 < ρ ∧ ρ < 2 * Real.pi / n ∧ 0 < c ∧ c ≤ d ∧ d < 1 ∧
       ∀ t : ℝ, 0 ≤ t → t ≤ 1 → ∀ z : ℝ × ℝ, |z.1| + |z.2| ≤ ρ →
         ∀ a b j : ZMod n, chartPerturb m a b z j ∈
-          chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) ''
+          chartMap (curvPath κs κ t j) (curvPath κs κ t (j + 1)) ''
             Set.Icc
-              (c * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))
-              (d * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)))) := by
-  obtain ⟨r, hr0, hrle⟩ := exists_ratio_bound m hκ
+              (c * (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1))))
+              (d * (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1)))) := by
+  obtain ⟨r, hr0, hrle⟩ := exists_ratio_bound hκs hκ
   have hπ := Real.pi_pos
   have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
   have hn0 : (0 : ℝ) < n := by linarith
@@ -890,17 +943,17 @@ theorem exists_closingCell_window [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
     linarith [hd₀]
   refine ⟨ρ, c, d, hρ0, hρ2πn, hc0, hcd, hd1, ?_⟩
   intro t ht0 ht1 z hz a b j
-  have hp := curvHomotopy_pos (m := m) hκ ht0 ht1 j
-  have hq := curvHomotopy_pos (m := m) hκ ht0 ht1 (j + 1)
-  have hmax : 0 < max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) :=
+  have hp := curvPath_pos hκs hκ ht0 ht1 j
+  have hq := curvPath_pos hκs hκ ht0 ht1 (j + 1)
+  have hmax : 0 < max (curvPath κs κ t j) (curvPath κs κ t (j + 1)) :=
     lt_of_lt_of_le hp (le_max_left _ _)
-  have hA : (0 : ℝ) < 2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) :=
+  have hA : (0 : ℝ) < 2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1)) :=
     div_pos two_pos hmax
   -- the perturbed value lies in [2π/n − ρ, 2π/n + ρ]
   have habs := abs_le.mp (abs_chartPerturb_sub_le m a b z j)
   -- lower endpoint clears the value from below
-  have hlow : chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))
-      (c * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))
+  have hlow : chartMap (curvPath κs κ t j) (curvPath κs κ t (j + 1))
+      (c * (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1))))
       ≤ chartPerturb m a b z j := by
     have h1 := chartMap_norm_le hp hq hc0.le
     rw [harcc] at h1
@@ -908,8 +961,8 @@ theorem exists_closingCell_window [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
     linarith [habs.1]
   -- upper endpoint clears the value from above
   have hup : chartPerturb m a b z j ≤
-      chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))
-        (d * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)))) := by
+      chartMap (curvPath κs κ t j) (curvPath κs κ t (j + 1))
+        (d * (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1)))) := by
     have h1 := chartMap_norm_ge hp hq hd0 (hrle t ht0 ht1 j)
     have h2πn2 : 2 * Real.pi / n ≤ Real.pi / 2 := by rw [h2X]; linarith
     linarith [habs.2]
@@ -940,20 +993,21 @@ theorem chartMap_image_window_subset {p q : ℝ} (hp : 0 < p) {c d : ℝ}
     chartPerturb m a b (0, 0) j = 2 * Real.pi / n := by
   simp [chartPerturb]
 
-/-- At `t = 0` (where `κ_0 = centralSym m κ` is half-period symmetric) the
-center column `Φ(0, 0)` of the closing 2-cell is a half-period-symmetric
-edge-length vector: opposite edges recover equal lengths from the constant
-chart value `2π/n` because their curvature pairs coincide. -/
-theorem closingCell_zero_symm [NeZero n] {m : ℕ} (hn : n = 2 * m)
-    (a b : ZMod n) {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i)
+/-- At `t = 0` (where `κ_0 = κˢ` is half-period symmetric by the anchor
+hypothesis `hsym`) the center column `Φ(0, 0)` of the closing 2-cell is a
+half-period-symmetric edge-length vector: opposite edges recover equal lengths
+from the constant chart value `2π/n` because their curvature pairs coincide. -/
+theorem closingCell_zero_symm (m : ℕ)
+    (a b : ZMod n) {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i)
+    (hsym : ∀ i : ZMod n, κs (i + (m : ZMod n)) = κs i)
     (ht0 : (0 : ℝ) ≤ 0) (ht1 : (0 : ℝ) ≤ 1) (i : ZMod n) :
-    closingCell m a b hκ ht0 ht1 (0, 0) (i + (m : ZMod n))
-      = closingCell m a b hκ ht0 ht1 (0, 0) i := by
+    closingCell m a b hκs hκ ht0 ht1 (0, 0) (i + (m : ZMod n))
+      = closingCell m a b hκs hκ ht0 ht1 (0, 0) i := by
   have hκsym : ∀ i' : ZMod n,
-      curvHomotopy m κ 0 (i' + (m : ZMod n)) = curvHomotopy m κ 0 i' := by
+      curvPath κs κ 0 (i' + (m : ZMod n)) = curvPath κs κ 0 i' := by
     intro i'
-    simp only [curvHomotopy_zero]
-    exact centralSym_symm hn κ i'
+    simp only [curvPath_zero]
+    exact hsym i'
   have hcongr : ∀ {p p' q q' : ℝ} (hp : 0 < p) (hq : 0 < q) (hp' : 0 < p')
       (hq' : 0 < q') (s : ℝ), p = p' → q = q' →
       chartInv hp hq s = chartInv hp' hq' s := by
@@ -969,21 +1023,22 @@ theorem closingCell_zero_symm [NeZero n] {m : ℕ} (hn : n = 2 * m)
 center column). This is the base point of the degree argument of
 `sec:closure` and the (⇐) direction of `lem:closure_boundary_rigidity`. -/
 theorem closingGap_center_eq_zero [NeZero n] {m : ℕ} (hn : n = 2 * m)
-    (a b : ZMod n) {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i)
+    (a b : ZMod n) {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i)
+    (hsym : ∀ i : ZMod n, κs (i + (m : ZMod n)) = κs i)
     (ht0 : (0 : ℝ) ≤ 0) (ht1 : (0 : ℝ) ≤ 1)
     (hmem : ∀ j : ZMod n, chartPerturb m a b ((0 : ℝ), (0 : ℝ)) j ∈
-      chartMap (curvHomotopy m κ 0 j) (curvHomotopy m κ 0 (j + 1)) ''
+      chartMap (curvPath κs κ 0 j) (curvPath κs κ 0 (j + 1)) ''
         Set.Ioo (0 : ℝ)
-          (2 / max (curvHomotopy m κ 0 j) (curvHomotopy m κ 0 (j + 1)))) :
-    closingGap m a b hκ ht0 ht1 (0, 0) = 0 := by
+          (2 / max (curvPath κs κ 0 j) (curvPath κs κ 0 (j + 1)))) :
+    closingGap m a b hκs hκ ht0 ht1 (0, 0) = 0 := by
   have hκsym : ∀ i : ZMod n,
-      curvHomotopy m κ 0 (i + (m : ZMod n)) = curvHomotopy m κ 0 i := by
+      curvPath κs κ 0 (i + (m : ZMod n)) = curvPath κs κ 0 i := by
     intro i
-    simp only [curvHomotopy_zero]
-    exact centralSym_symm hn κ i
+    simp only [curvPath_zero]
+    exact hsym i
   exact central_symmetry_closes hn hκsym
-    (closingCell_zero_symm hn a b hκ ht0 ht1)
-    (turningSum_closingCell m a b hκ ht0 ht1 hmem)
+    (closingCell_zero_symm m a b hκs hκ hsym ht0 ht1)
+    (turningSum_closingCell m a b hκs hκ ht0 ht1 hmem)
 
 /-- **The assembled closing 2-cell** (`def:closing_2cell`, complete package):
 for `n = 2m ≥ 4` and a positive profile `κ` there is a radius `ρ > 0` such
@@ -994,38 +1049,39 @@ moderate-arc domain of `κ_t`, and (iii) has a continuous gap map `F`; moreover
 input of the degree argument of `sec:closure` except the two winding leaves
 (`lem:closure_boundary_rigidity`, `lem:closure_boundary_exclusion`). -/
 theorem closingCell_package [NeZero n] (hn4 : 4 ≤ n) {m : ℕ} (hn : n = 2 * m)
-    (a b : ZMod n) {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i) :
+    (a b : ZMod n) {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i)
+    (hsym : ∀ i : ZMod n, κs (i + (m : ZMod n)) = κs i) :
     ∃ ρ : ℝ, 0 < ρ ∧
       (∀ t : ℝ, ∀ (ht0 : 0 ≤ t) (ht1 : t ≤ 1), ∀ z : ℝ × ℝ,
         |z.1| + |z.2| ≤ ρ →
-        turningSum (curvHomotopy m κ t) (closingCell m a b hκ ht0 ht1 z)
+        turningSum (curvPath κs κ t) (closingCell m a b hκs hκ ht0 ht1 z)
             = 2 * Real.pi ∧
-        ModerateArc 0 (curvHomotopy m κ t) (closingCell m a b hκ ht0 ht1 z)) ∧
+        ModerateArc 0 (curvPath κs κ t) (closingCell m a b hκs hκ ht0 ht1 z)) ∧
       ContinuousOn
         (fun x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) =>
-          closingGap m a b hκ x.1.2.1 x.1.2.2 x.2)
+          closingGap m a b hκs hκ x.1.2.1 x.1.2.2 x.2)
         {x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) | |x.2.1| + |x.2.2| ≤ ρ} ∧
       ∀ (ht0 : (0 : ℝ) ≤ 0) (ht1 : (0 : ℝ) ≤ 1),
-        closingGap m a b hκ ht0 ht1 (0, 0) = 0 := by
+        closingGap m a b hκs hκ ht0 ht1 (0, 0) = 0 := by
   obtain ⟨ρ, c, d, hρ0, _hρ2πn, hc0, hcd, hd1, hwin⟩ :=
-    exists_closingCell_window hn4 m hκ
+    exists_closingCell_window hn4 m hκs hκ
   have hmem : ∀ t : ℝ, ∀ (ht0 : 0 ≤ t) (ht1 : t ≤ 1), ∀ z : ℝ × ℝ,
       |z.1| + |z.2| ≤ ρ → ∀ j : ZMod n, chartPerturb m a b z j ∈
-        chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) ''
+        chartMap (curvPath κs κ t j) (curvPath κs κ t (j + 1)) ''
           Set.Ioo (0 : ℝ)
-            (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))) :=
+            (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1))) :=
     fun t ht0 ht1 z hz j =>
-      chartMap_image_window_subset (curvHomotopy_pos hκ ht0 ht1 j) hc0 hd1
+      chartMap_image_window_subset (curvPath_pos hκs hκ ht0 ht1 j) hc0 hd1
         (hwin t ht0 ht1 z hz a b j)
   refine ⟨ρ, hρ0, ?_, ?_, ?_⟩
   · intro t ht0 ht1 z hz
-    exact ⟨turningSum_closingCell m a b hκ ht0 ht1 (hmem t ht0 ht1 z hz),
-      moderateArc_closingCell m a b hκ ht0 ht1 (hmem t ht0 ht1 z hz)⟩
-  · exact continuousOn_closingGap m a b hκ hc0 hcd hd1
+    exact ⟨turningSum_closingCell m a b hκs hκ ht0 ht1 (hmem t ht0 ht1 z hz),
+      moderateArc_closingCell m a b hκs hκ ht0 ht1 (hmem t ht0 ht1 z hz)⟩
+  · exact continuousOn_closingGap m a b hκs hκ hc0 hcd hd1
       (Z := {z : ℝ × ℝ | |z.1| + |z.2| ≤ ρ})
       fun t ht0 ht1 z hz j => hwin t ht0 ht1 z hz a b j
   · intro ht0 ht1
-    exact closingGap_center_eq_zero hn a b hκ ht0 ht1
+    exact closingGap_center_eq_zero hn a b hκs hκ hsym ht0 ht1
       (hmem 0 ht0 ht1 (0, 0) (by simp [hρ0.le]))
 
 /-! ### Constant curvature closes identically — the `t = 0` degeneracy of the
@@ -1179,25 +1235,29 @@ theorem closingGap_eq_zero_of_centralSym_const [NeZero n] (m : ℕ)
       chartMap (curvHomotopy m κ 0 j) (curvHomotopy m κ 0 (j + 1)) ''
         Set.Ioo (0 : ℝ)
           (2 / max (curvHomotopy m κ 0 j) (curvHomotopy m κ 0 (j + 1)))) :
-    closingGap m a b hκ ht0 ht1 z = 0 := by
+    closingGap m a b (centralSym_pos (m := m) hκ) hκ ht0 ht1 z = 0 := by
   have hc0 : 0 < c := by
     have := centralSym_pos (m := m) hκ 0
     rwa [hconst 0] at this
-  have hfun : curvHomotopy m κ 0 = fun _ => c := by
+  have hfun : curvPath (centralSym m κ) κ 0 = fun _ => c := by
     funext i
-    rw [curvHomotopy_zero]
+    rw [curvPath_zero]
     exact hconst i
-  have hMA := moderateArc_closingCell m a b hκ ht0 ht1 hmem
-  have hT := turningSum_closingCell m a b hκ ht0 ht1 hmem
+  have hMA := moderateArc_closingCell m a b (centralSym_pos (m := m) hκ) hκ
+    ht0 ht1 hmem
+  have hT := turningSum_closingCell m a b (centralSym_pos (m := m) hκ) hκ
+    ht0 ht1 hmem
   rw [hfun] at hMA hT
   have hwall : ∀ i : ZMod n,
-      |c * (closingCell m a b hκ ht0 ht1 z i / 2)| ≤ 1 := by
+      |c * (closingCell m a b (centralSym_pos (m := m) hκ) hκ ht0 ht1 z i / 2)|
+        ≤ 1 := by
     intro i
     have h1 := (hMA i).2.2.2.2
     simp only [tK_zero] at h1
-    have hpos : 0 < closingCell m a b hκ ht0 ht1 z i := (hMA i).1
-    rw [abs_mul, abs_of_pos (by linarith :
-      (0 : ℝ) < closingCell m a b hκ ht0 ht1 z i / 2)]
+    have hpos : 0 < closingCell m a b (centralSym_pos (m := m) hκ) hκ
+        ht0 ht1 z i := (hMA i).1
+    rw [abs_mul, abs_of_pos (by linarith : (0 : ℝ)
+      < closingCell m a b (centralSym_pos (m := m) hκ) hκ ht0 ht1 z i / 2)]
     exact le_of_lt h1
   unfold closingGap
   rw [hfun]
@@ -1211,9 +1271,11 @@ theorem closingGap_const_profile_eq_zero [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
     (a b : ZMod n) {c : ℝ} (hc : 0 < c)
     (ht0 : (0 : ℝ) ≤ 0) (ht1 : (0 : ℝ) ≤ 1) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ z : ℝ × ℝ, |z.1| + |z.2| ≤ ρ →
-      closingGap (κ := fun _ => c) m a b (fun _ => hc) ht0 ht1 z = 0 := by
+      closingGap (κ := fun _ => c) m a b
+        (centralSym_pos (m := m) fun _ => hc) (fun _ => hc) ht0 ht1 z = 0 := by
   obtain ⟨ρ, c₁, d₁, hρ0, _hρπ, hc₁, hcd₁, hd₁, hwin⟩ :=
-    exists_closingCell_window hn4 m (κ := fun _ => c) (fun _ => hc)
+    exists_closingCell_window hn4 m (κ := fun _ => c)
+      (centralSym_pos (m := m) fun _ => hc) (fun _ => hc)
   refine ⟨ρ, hρ0, fun z hz => ?_⟩
   have hconst : ∀ i : ZMod n, centralSym m (fun _ => c) i = c := by
     intro i
@@ -1234,7 +1296,8 @@ theorem closingGap_zero_iff_fails_of_const [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
     (a b : ZMod n) {c : ℝ} (hc : 0 < c)
     (ht0 : (0 : ℝ) ≤ 0) (ht1 : (0 : ℝ) ≤ 1) :
     ∀ ρ' : ℝ, 0 < ρ' → ∃ z : ℝ × ℝ, z ≠ 0 ∧ |z.1| + |z.2| ≤ ρ' ∧
-      closingGap (κ := fun _ => c) m a b (fun _ => hc) ht0 ht1 z = 0 := by
+      closingGap (κ := fun _ => c) m a b
+        (centralSym_pos (m := m) fun _ => hc) (fun _ => hc) ht0 ht1 z = 0 := by
   obtain ⟨ρ, hρ0, hall⟩ := closingGap_const_profile_eq_zero hn4 m a b hc ht0 ht1
   intro ρ' hρ'
   have hmin : 0 < min ρ ρ' := lt_min hρ0 hρ'
@@ -1259,20 +1322,20 @@ theorem closingGap_zero_iff_fails_of_const [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
 sanctioned shrinking of `ρ` in `def:closing_2cell`
 (`lem:closure_boundary_rigidity` licenses proving rigidity on a possibly
 smaller ball). -/
-theorem closingCell_window_mono (m : ℕ) {κ : ZMod n → ℝ}
+theorem closingCell_window_mono (m : ℕ) {κs κ : ZMod n → ℝ}
     {c d ρ ρ' : ℝ} (hρ' : ρ' ≤ ρ)
     (hwin : ∀ t : ℝ, 0 ≤ t → t ≤ 1 → ∀ z : ℝ × ℝ, |z.1| + |z.2| ≤ ρ →
       ∀ a b j : ZMod n, chartPerturb m a b z j ∈
-        chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) ''
+        chartMap (curvPath κs κ t j) (curvPath κs κ t (j + 1)) ''
           Set.Icc
-            (c * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))
-            (d * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))) :
+            (c * (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1))))
+            (d * (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1))))) :
     ∀ t : ℝ, 0 ≤ t → t ≤ 1 → ∀ z : ℝ × ℝ, |z.1| + |z.2| ≤ ρ' →
       ∀ a b j : ZMod n, chartPerturb m a b z j ∈
-        chartMap (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)) ''
+        chartMap (curvPath κs κ t j) (curvPath κs κ t (j + 1)) ''
           Set.Icc
-            (c * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1))))
-            (d * (2 / max (curvHomotopy m κ t j) (curvHomotopy m κ t (j + 1)))) :=
+            (c * (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1))))
+            (d * (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1)))) :=
   fun t ht0 ht1 z hz => hwin t ht0 ht1 z (hz.trans hρ')
 
 /-- **The heading advance over an index block, in chart form** — exact and
@@ -1421,26 +1484,26 @@ paired-edge splitting
 `F = ∑_{j<m} e^{iψ_j}(ℓ_j − ℓ_{j+m}·e^{iγ_j})` of the corrected `t = 0`
 rigidity analysis and of any boundary-exclusion estimate. -/
 theorem heading_closingCell_add_half [NeZero n] {m : ℕ} (hn : n = 2 * m)
-    (a b : ZMod n) {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i) {t : ℝ}
+    (a b : ZMod n) {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i) {t : ℝ}
     (ht0 : 0 ≤ t) (ht1 : t ≤ 1) {z : ℝ × ℝ}
     (hmem : ∀ i : ZMod n, chartPerturb m a b z i ∈
-      chartMap (curvHomotopy m κ t i) (curvHomotopy m κ t (i + 1)) ''
+      chartMap (curvPath κs κ t i) (curvPath κs κ t (i + 1)) ''
         Set.Ioo (0 : ℝ)
-          (2 / max (curvHomotopy m κ t i) (curvHomotopy m κ t (i + 1))))
+          (2 / max (curvPath κs κ t i) (curvPath κs κ t (i + 1))))
     (j : ℕ) :
     ∃ εa εb : ℝ, (εa = 1 ∨ εa = -1) ∧ (εb = 1 ∨ εb = -1) ∧
-      heading (curvHomotopy m κ t) (closingCell m a b hκ ht0 ht1 z) (j + m)
-        = heading (curvHomotopy m κ t) (closingCell m a b hκ ht0 ht1 z) j
+      heading (curvPath κs κ t) (closingCell m a b hκs hκ ht0 ht1 z) (j + m)
+        = heading (curvPath κs κ t) (closingCell m a b hκs hκ ht0 ht1 z) j
           + Real.pi + εa * z.1 + εb * z.2
-          + Real.arcsin (curvHomotopy m κ t ((j + m : ℕ) : ZMod n)
-              * (closingCell m a b hκ ht0 ht1 z ((j + m : ℕ) : ZMod n) / 2))
-          - Real.arcsin (curvHomotopy m κ t ((j : ℕ) : ZMod n)
-              * (closingCell m a b hκ ht0 ht1 z ((j : ℕ) : ZMod n) / 2)) := by
+          + Real.arcsin (curvPath κs κ t ((j + m : ℕ) : ZMod n)
+              * (closingCell m a b hκs hκ ht0 ht1 z ((j + m : ℕ) : ZMod n) / 2))
+          - Real.arcsin (curvPath κs κ t ((j : ℕ) : ZMod n)
+              * (closingCell m a b hκs hκ ht0 ht1 z ((j : ℕ) : ZMod n) / 2)) := by
   obtain ⟨εa, εb, hεa, hεb, hsum⟩ := sum_chartPerturb_block hn a b z j
   refine ⟨εa, εb, hεa, hεb, ?_⟩
   have hround : ∀ i : ZMod n,
-      chartMap (curvHomotopy m κ t i) (curvHomotopy m κ t (i + 1))
-        (closingCell m a b hκ ht0 ht1 z i) = chartPerturb m a b z i := by
+      chartMap (curvPath κs κ t i) (curvPath κs κ t (i + 1))
+        (closingCell m a b hκs hκ ht0 ht1 z i) = chartPerturb m a b z i := by
     intro i
     simp only [closingCell]
     exact chartMap_chartInv _ _ (hmem i)
