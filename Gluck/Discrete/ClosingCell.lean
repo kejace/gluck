@@ -5,6 +5,7 @@ Authors: kejace
 -/
 import Gluck.Discrete.Closing
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.InverseDeriv
+import Mathlib.Analysis.SpecialFunctions.Sqrt
 import Mathlib.Topology.Order.MonotoneContinuity
 import Mathlib.Order.Hom.Set
 
@@ -3578,8 +3579,7 @@ theorem hasStrictDerivAt_twoLevelTheta [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
     by_cases hi0 : i = 0
     · have hcondt : n - 1 = 0 ∨ n - 1 = m - 1 ∨ n - 1 = m ∨ n - 1 = n - 1 :=
         Or.inr (Or.inr (Or.inr rfl))
-      simp only [if_pos hbump, if_pos hi0, if_pos hcondt, if_pos hcondh,
-        or_true, ite_true]
+      simp only [if_pos hbump, if_pos hi0, if_pos hcondh, or_true, ite_true]
       exact (hasStrictDerivAt_bumpSlot' hn4 hK).add
         (hasStrictDerivAt_bumpSlot' hn4 hK)
     · have him : i = m := hbump.resolve_left hi0
@@ -3803,9 +3803,359 @@ theorem sum_exp_Ico_eq [NeZero n] (hn4 : 4 ≤ n) {m : ℕ} (hn : n = 2 * m)
       = (Real.cos (Real.pi / n) : ℂ) := by
     field_simp
   simp only [Complex.ofReal_mul, Complex.ofReal_div, Complex.ofReal_ofNat,
-    Complex.ofReal_one, div_one]
+    div_one]
   linear_combination (-2 * (Real.sin (Real.pi / n) : ℂ)
       * ((Real.cos (Real.pi / n) : ℂ) / (Real.sin (Real.pi / n) : ℂ)) * e) * hI
     + (2 * e) * hd
+
+/-! ### The moving slot-derivative data `A(ε), B(ε), λ'(ε), p(ε)` of edge 0
+
+The `ε`-calculus of the chart slot derivatives along the two-level special
+edge: `A(ε) = chartSlotDeriv (K+ε) (ℓ*(ε))` and `B(ε) = chartSlotDeriv K
+(ℓ*(ε))` with values `Ȧ = (1+cos²ρ)/(4cos³ρ)`, `Ḃ = −sin²ρ/(4cos³ρ)`, hence
+`λ̇' = −cosρ/(2K²)` and `ṗ = 1/(4K·cos²ρ)` — the `λ'`, `p` rows of the
+first-order table of `lem:anchor_witness_two_level`. -/
+
+/-- Both slot derivatives of the special edge at `ε = 0` equal the
+constant-pair value `K/(2cos(π/n))`. -/
+theorem twoLevelSlot_zero [NeZero n] (hn4 : 4 ≤ n) {K : ℝ} (hK : 0 < K) :
+    chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) K)
+      = K / (2 * Real.cos (Real.pi / n)) := by
+  rw [chartInvCurv_of_pos hK hK, chartInv_const hn4 hK,
+    chartSlotDeriv_const hn4 hK]
+
+/-- The inner wall argument `(K+ε)·ℓ*(ε)/2` of the bump slot moves with strict
+derivative `sin(π/n)/(2K)` at `ε = 0` (value `sin(π/n)`). -/
+private lemma hasStrictDerivAt_bumpArg [NeZero n] (hn4 : 4 ≤ n) {K : ℝ}
+    (hK : 0 < K) :
+    HasStrictDerivAt
+      (fun ε : ℝ => (K + ε) * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε) / 2)
+      (Real.sin (Real.pi / n) / (2 * K)) 0 := by
+  have hval0 : chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0)
+      = 2 * Real.sin (Real.pi / n) / K := by
+    rw [add_zero, chartInvCurv_of_pos hK hK, chartInv_const hn4 hK]
+  have hshift : HasStrictDerivAt (fun ε : ℝ => K + ε) 1 0 := by
+    simpa using (hasStrictDerivAt_id (0 : ℝ)).const_add K
+  have hprod := (hshift.mul (hasStrictDerivAt_twoLevelLen hn4 hK)).div_const 2
+  have hval : (1 * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0)
+      + (K + 0) * -(Real.sin (Real.pi / n) / K ^ 2)) / 2
+      = Real.sin (Real.pi / n) / (2 * K) := by
+    rw [hval0]
+    field_simp
+    ring
+  rwa [hval] at hprod
+
+/-- The inner wall argument `K·ℓ*(ε)/2` of the mixed slot moves with strict
+derivative `−sin(π/n)/(2K)` at `ε = 0` (value `sin(π/n)`). -/
+private lemma hasStrictDerivAt_mixedArg [NeZero n] (hn4 : 4 ≤ n) {K : ℝ}
+    (hK : 0 < K) :
+    HasStrictDerivAt
+      (fun ε : ℝ => K * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε) / 2)
+      (-(Real.sin (Real.pi / n) / (2 * K))) 0 := by
+  have hprod := ((hasStrictDerivAt_twoLevelLen hn4 hK).const_mul K).div_const 2
+  have hval : K * -(Real.sin (Real.pi / n) / K ^ 2) / 2
+      = -(Real.sin (Real.pi / n) / (2 * K)) := by
+    field_simp
+  rwa [hval] at hprod
+
+/-- The wall square-root denominator `2√(1 − arg²)` of a slot derivative,
+differentiated along a moving wall argument with value `sin(π/n)` and strict
+derivative `d`: derivative `2·(−2·sin(π/n)·d)/(2cos(π/n))`, value `2cos(π/n)`. -/
+private lemma hasStrictDerivAt_slotDen [NeZero n] (hn4 : 4 ≤ n)
+    {g : ℝ → ℝ} {d : ℝ} (hg : HasStrictDerivAt g d 0)
+    (hg0 : g 0 = Real.sin (Real.pi / n)) :
+    HasStrictDerivAt (fun ε : ℝ => 2 * Real.sqrt (1 - g ε ^ 2))
+      (2 * (-(2 * Real.sin (Real.pi / n) * d) / (2 * Real.cos (Real.pi / n))))
+      0 := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρpos : 0 < Real.pi / n := by positivity
+  have hρhalf : Real.pi / n < Real.pi / 2 :=
+    lt_of_le_of_lt (div_le_div_of_nonneg_left hπ.le four_pos hn4') (by linarith)
+  have hsin0 : 0 < Real.sin (Real.pi / n) :=
+    Real.sin_pos_of_pos_of_lt_pi hρpos (by linarith)
+  have hsin1 : Real.sin (Real.pi / n) < 1 := by
+    have h := Real.strictMonoOn_sin (a := Real.pi / n) (b := Real.pi / 2)
+      ⟨by linarith, hρhalf.le⟩ ⟨by linarith, le_refl _⟩ hρhalf
+    simpa [Real.sin_pi_div_two] using h
+  have hsq : HasStrictDerivAt (fun ε : ℝ => 1 - g ε ^ 2) (-(2 * g 0 * d)) 0 := by
+    have h := (hg.pow 2).const_sub 1
+    have hfun : (fun x : ℝ => 1 - (g ^ 2) x) = fun ε : ℝ => 1 - g ε ^ 2 := by
+      funext ε
+      simp
+    have hval : -(((2 : ℕ) : ℝ) * g 0 ^ (2 - 1) * d) = -(2 * g 0 * d) := by
+      norm_num
+    rw [hfun, hval] at h
+    exact h
+  have harg0 : (0 : ℝ) < 1 - g 0 ^ 2 := by
+    rw [hg0]
+    nlinarith
+  have hcomp : HasStrictDerivAt (fun ε : ℝ => 2 * Real.sqrt (1 - g ε ^ 2))
+      (2 * (-(2 * g 0 * d) / (2 * Real.sqrt (1 - g 0 ^ 2)))) 0 :=
+    (hsq.sqrt harg0.ne').const_mul 2
+  have hveq : 2 * (-(2 * g 0 * d) / (2 * Real.sqrt (1 - g 0 ^ 2)))
+      = 2 * (-(2 * Real.sin (Real.pi / n) * d) / (2 * Real.cos (Real.pi / n))) := by
+    rw [hg0, ← Real.cos_eq_sqrt_one_sub_sin_sq (by linarith) hρhalf.le]
+  rwa [hveq] at hcomp
+
+/-- **The bump slot derivative moves at `Ȧ = (1+cos²ρ)/(4cos³ρ)`**
+(`lem:anchor_witness_two_level`, first-order table, `ρ = π/n`). -/
+theorem hasStrictDerivAt_bumpSlotDeriv [NeZero n] (hn4 : 4 ≤ n) {K : ℝ}
+    (hK : 0 < K) :
+    HasStrictDerivAt
+      (fun ε : ℝ => chartSlotDeriv (K + ε)
+        (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε)))
+      ((1 + Real.cos (Real.pi / n) ^ 2) / (4 * Real.cos (Real.pi / n) ^ 3))
+      0 := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρpos : 0 < Real.pi / n := by positivity
+  have hρhalf : Real.pi / n < Real.pi / 2 :=
+    lt_of_le_of_lt (div_le_div_of_nonneg_left hπ.le four_pos hn4') (by linarith)
+  have hcos : 0 < Real.cos (Real.pi / n) :=
+    Real.cos_pos_of_mem_Ioo ⟨by linarith, hρhalf⟩
+  have hsin0 : 0 < Real.sin (Real.pi / n) :=
+    Real.sin_pos_of_pos_of_lt_pi hρpos (by linarith)
+  have hbarg := hasStrictDerivAt_bumpArg hn4 hK
+  have hbarg0 : (K + 0) * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0) / 2
+      = Real.sin (Real.pi / n) := by
+    rw [add_zero, chartInvCurv_of_pos hK hK, chartInv_const hn4 hK]
+    field_simp
+  have hden := hasStrictDerivAt_slotDen hn4 hbarg hbarg0
+  have hshift : HasStrictDerivAt (fun ε : ℝ => K + ε) 1 0 := by
+    simpa using (hasStrictDerivAt_id (0 : ℝ)).const_add K
+  have hden0 : 2 * Real.sqrt (1 - ((K + 0)
+      * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0) / 2) ^ 2) ≠ 0 := by
+    rw [hbarg0, ← Real.cos_eq_sqrt_one_sub_sin_sq (by linarith) hρhalf.le]
+    positivity
+  have hdiv : HasStrictDerivAt
+      (fun ε : ℝ => (K + ε) / (2 * Real.sqrt (1 - ((K + ε)
+        * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε) / 2) ^ 2)))
+      ((1 * (2 * Real.sqrt (1 - ((K + 0)
+          * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0) / 2) ^ 2))
+        - (K + 0) * (2 * (-(2 * Real.sin (Real.pi / n)
+            * (Real.sin (Real.pi / n) / (2 * K)))
+          / (2 * Real.cos (Real.pi / n)))))
+       / (2 * Real.sqrt (1 - ((K + 0)
+          * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0) / 2) ^ 2)) ^ 2) 0 :=
+    hshift.div hden hden0
+  have hveq : (1 * (2 * Real.sqrt (1 - ((K + 0)
+          * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0) / 2) ^ 2))
+        - (K + 0) * (2 * (-(2 * Real.sin (Real.pi / n)
+            * (Real.sin (Real.pi / n) / (2 * K)))
+          / (2 * Real.cos (Real.pi / n)))))
+       / (2 * Real.sqrt (1 - ((K + 0)
+          * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0) / 2) ^ 2)) ^ 2
+      = (1 + Real.cos (Real.pi / n) ^ 2) / (4 * Real.cos (Real.pi / n) ^ 3) := by
+    rw [hbarg0, ← Real.cos_eq_sqrt_one_sub_sin_sq (by linarith) hρhalf.le,
+      add_zero]
+    have hss : 2 * Real.sin (Real.pi / n) * (Real.sin (Real.pi / n) / (2 * K))
+        = (1 - Real.cos (Real.pi / n) ^ 2) / K := by
+      rw [mul_div_assoc', mul_assoc, ← sq, Real.sin_sq,
+        mul_div_mul_left _ _ (two_ne_zero)]
+    rw [hss]
+    field_simp
+    ring
+  rw [hveq] at hdiv
+  unfold chartSlotDeriv
+  exact hdiv
+
+/-- **The mixed slot derivative moves at `Ḃ = −sin²ρ/(4cos³ρ)`**
+(`lem:anchor_witness_two_level`, first-order table, `ρ = π/n`). -/
+theorem hasStrictDerivAt_mixedSlotDeriv [NeZero n] (hn4 : 4 ≤ n) {K : ℝ}
+    (hK : 0 < K) :
+    HasStrictDerivAt
+      (fun ε : ℝ => chartSlotDeriv K
+        (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε)))
+      (-(Real.sin (Real.pi / n) ^ 2) / (4 * Real.cos (Real.pi / n) ^ 3))
+      0 := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρpos : 0 < Real.pi / n := by positivity
+  have hρhalf : Real.pi / n < Real.pi / 2 :=
+    lt_of_le_of_lt (div_le_div_of_nonneg_left hπ.le four_pos hn4') (by linarith)
+  have hcos : 0 < Real.cos (Real.pi / n) :=
+    Real.cos_pos_of_mem_Ioo ⟨by linarith, hρhalf⟩
+  have hsin0 : 0 < Real.sin (Real.pi / n) :=
+    Real.sin_pos_of_pos_of_lt_pi hρpos (by linarith)
+  have hmarg := hasStrictDerivAt_mixedArg hn4 hK
+  have hmarg0 : K * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0) / 2
+      = Real.sin (Real.pi / n) := by
+    rw [add_zero, chartInvCurv_of_pos hK hK, chartInv_const hn4 hK]
+    field_simp
+  have hden := hasStrictDerivAt_slotDen hn4 hmarg hmarg0
+  have hden0 : 2 * Real.sqrt (1 - (K
+      * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0) / 2) ^ 2) ≠ 0 := by
+    rw [hmarg0, ← Real.cos_eq_sqrt_one_sub_sin_sq (by linarith) hρhalf.le]
+    positivity
+  have hdiv : HasStrictDerivAt
+      (fun ε : ℝ => K / (2 * Real.sqrt (1 - (K
+        * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε) / 2) ^ 2)))
+      ((0 * (2 * Real.sqrt (1 - (K
+          * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0) / 2) ^ 2))
+        - K * (2 * (-(2 * Real.sin (Real.pi / n)
+            * -(Real.sin (Real.pi / n) / (2 * K)))
+          / (2 * Real.cos (Real.pi / n)))))
+       / (2 * Real.sqrt (1 - (K
+          * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0) / 2) ^ 2)) ^ 2) 0 :=
+    (hasStrictDerivAt_const (0 : ℝ) K).div hden hden0
+  have hveq : (0 * (2 * Real.sqrt (1 - (K
+          * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0) / 2) ^ 2))
+        - K * (2 * (-(2 * Real.sin (Real.pi / n)
+            * -(Real.sin (Real.pi / n) / (2 * K)))
+          / (2 * Real.cos (Real.pi / n)))))
+       / (2 * Real.sqrt (1 - (K
+          * chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0) / 2) ^ 2)) ^ 2
+      = -(Real.sin (Real.pi / n) ^ 2) / (4 * Real.cos (Real.pi / n) ^ 3) := by
+    rw [hmarg0, ← Real.cos_eq_sqrt_one_sub_sin_sq (by linarith) hρhalf.le]
+    have hss : 2 * Real.sin (Real.pi / n) * -(Real.sin (Real.pi / n) / (2 * K))
+        = -((1 - Real.cos (Real.pi / n) ^ 2) / K) := by
+      rw [mul_neg, mul_div_assoc', mul_assoc, ← sq, Real.sin_sq,
+        mul_div_mul_left _ _ (two_ne_zero)]
+    rw [hss, Real.sin_sq]
+    field_simp
+    ring
+  rw [hveq] at hdiv
+  unfold chartSlotDeriv
+  exact hdiv
+
+/-- **`λ'(ε)` of the special edge moves at `λ̇' = −cosρ/(2K²)`**
+(`lem:anchor_witness_two_level`, first-order table). -/
+theorem hasStrictDerivAt_twoLevelLambda' [NeZero n] (hn4 : 4 ≤ n) {K : ℝ}
+    (hK : 0 < K) :
+    HasStrictDerivAt
+      (fun ε : ℝ => 1 / (chartSlotDeriv (K + ε)
+          (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+        + chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))))
+      (-(Real.cos (Real.pi / n)) / (2 * K ^ 2)) 0 := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρpos : 0 < Real.pi / n := by positivity
+  have hρhalf : Real.pi / n < Real.pi / 2 :=
+    lt_of_le_of_lt (div_le_div_of_nonneg_left hπ.le four_pos hn4') (by linarith)
+  have hcos : 0 < Real.cos (Real.pi / n) :=
+    Real.cos_pos_of_mem_Ioo ⟨by linarith, hρhalf⟩
+  have hAB : HasStrictDerivAt
+      (fun ε : ℝ => chartSlotDeriv (K + ε)
+          (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+        + chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε)))
+      ((1 + Real.cos (Real.pi / n) ^ 2) / (4 * Real.cos (Real.pi / n) ^ 3)
+        + -(Real.sin (Real.pi / n) ^ 2) / (4 * Real.cos (Real.pi / n) ^ 3)) 0 :=
+    (hasStrictDerivAt_bumpSlotDeriv hn4 hK).add
+      (hasStrictDerivAt_mixedSlotDeriv hn4 hK)
+  have hAB0 : chartSlotDeriv (K + 0)
+        (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+      + chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+      ≠ 0 := by
+    rw [add_zero, twoLevelSlot_zero hn4 hK]
+    positivity
+  have hdiv : HasStrictDerivAt
+      (fun ε : ℝ => 1 / (chartSlotDeriv (K + ε)
+          (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+        + chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))))
+      ((0 * (chartSlotDeriv (K + 0)
+            (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+          + chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0)))
+        - 1 * ((1 + Real.cos (Real.pi / n) ^ 2)
+              / (4 * Real.cos (Real.pi / n) ^ 3)
+            + -(Real.sin (Real.pi / n) ^ 2)
+              / (4 * Real.cos (Real.pi / n) ^ 3)))
+       / (chartSlotDeriv (K + 0)
+            (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+          + chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))) ^ 2)
+      0 :=
+    (hasStrictDerivAt_const (0 : ℝ) (1 : ℝ)).div hAB hAB0
+  have hveq : (0 * (chartSlotDeriv (K + 0)
+            (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+          + chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0)))
+        - 1 * ((1 + Real.cos (Real.pi / n) ^ 2)
+              / (4 * Real.cos (Real.pi / n) ^ 3)
+            + -(Real.sin (Real.pi / n) ^ 2)
+              / (4 * Real.cos (Real.pi / n) ^ 3)))
+       / (chartSlotDeriv (K + 0)
+            (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+          + chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))) ^ 2
+      = -(Real.cos (Real.pi / n)) / (2 * K ^ 2) := by
+    rw [add_zero, twoLevelSlot_zero hn4 hK, Real.sin_sq]
+    field_simp
+    ring
+  rwa [hveq] at hdiv
+
+/-- **The tail share `p(ε)` of the special edge moves at `ṗ = 1/(4K·cos²ρ)`**
+(`lem:anchor_witness_two_level`, first-order table). -/
+theorem hasStrictDerivAt_twoLevelShare [NeZero n] (hn4 : 4 ≤ n) {K : ℝ}
+    (hK : 0 < K) :
+    HasStrictDerivAt
+      (fun ε : ℝ => chartSlotDeriv (K + ε)
+          (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+        / (chartSlotDeriv (K + ε)
+            (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+          + chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))))
+      (1 / (4 * K * Real.cos (Real.pi / n) ^ 2)) 0 := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hn4' : (4 : ℝ) ≤ n := by exact_mod_cast hn4
+  have hπ := Real.pi_pos
+  have hρpos : 0 < Real.pi / n := by positivity
+  have hρhalf : Real.pi / n < Real.pi / 2 :=
+    lt_of_le_of_lt (div_le_div_of_nonneg_left hπ.le four_pos hn4') (by linarith)
+  have hcos : 0 < Real.cos (Real.pi / n) :=
+    Real.cos_pos_of_mem_Ioo ⟨by linarith, hρhalf⟩
+  have hA := hasStrictDerivAt_bumpSlotDeriv hn4 hK
+  have hAB : HasStrictDerivAt
+      (fun ε : ℝ => chartSlotDeriv (K + ε)
+          (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+        + chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε)))
+      ((1 + Real.cos (Real.pi / n) ^ 2) / (4 * Real.cos (Real.pi / n) ^ 3)
+        + -(Real.sin (Real.pi / n) ^ 2) / (4 * Real.cos (Real.pi / n) ^ 3)) 0 :=
+    hA.add (hasStrictDerivAt_mixedSlotDeriv hn4 hK)
+  have hAB0 : chartSlotDeriv (K + 0)
+        (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+      + chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+      ≠ 0 := by
+    rw [add_zero, twoLevelSlot_zero hn4 hK]
+    positivity
+  have hdiv : HasStrictDerivAt
+      (fun ε : ℝ => chartSlotDeriv (K + ε)
+          (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+        / (chartSlotDeriv (K + ε)
+            (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))
+          + chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + ε))))
+      (((1 + Real.cos (Real.pi / n) ^ 2) / (4 * Real.cos (Real.pi / n) ^ 3)
+          * (chartSlotDeriv (K + 0)
+              (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+            + chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0)))
+        - chartSlotDeriv (K + 0)
+            (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+          * ((1 + Real.cos (Real.pi / n) ^ 2)
+              / (4 * Real.cos (Real.pi / n) ^ 3)
+            + -(Real.sin (Real.pi / n) ^ 2)
+              / (4 * Real.cos (Real.pi / n) ^ 3)))
+       / (chartSlotDeriv (K + 0)
+            (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+          + chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))) ^ 2)
+      0 :=
+    hA.div hAB hAB0
+  have hveq : ((1 + Real.cos (Real.pi / n) ^ 2) / (4 * Real.cos (Real.pi / n) ^ 3)
+          * (chartSlotDeriv (K + 0)
+              (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+            + chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0)))
+        - chartSlotDeriv (K + 0)
+            (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+          * ((1 + Real.cos (Real.pi / n) ^ 2)
+              / (4 * Real.cos (Real.pi / n) ^ 3)
+            + -(Real.sin (Real.pi / n) ^ 2)
+              / (4 * Real.cos (Real.pi / n) ^ 3)))
+       / (chartSlotDeriv (K + 0)
+            (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))
+          + chartSlotDeriv K (chartInvCurv hK (2 * Real.pi / (n : ℝ)) (K + 0))) ^ 2
+      = 1 / (4 * K * Real.cos (Real.pi / n) ^ 2) := by
+    rw [add_zero, twoLevelSlot_zero hn4 hK, Real.sin_sq]
+    field_simp
+    ring
+  rwa [hveq] at hdiv
 
 end Gluck.Discrete
