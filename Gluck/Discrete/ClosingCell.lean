@@ -313,4 +313,47 @@ theorem continuous_curvHomotopy (m : ℕ) (κ : ZMod n → ℝ) (i : ZMod n) :
     Continuous (fun t : ℝ => curvHomotopy m κ t i) := by
   unfold curvHomotopy; fun_prop
 
+/-! ### Reaching the turning value: the chart's wall value and surjectivity
+
+For `def:closing_2cell` the chart base `s⁰_j` (and its antisymmetric
+perturbation) must be an achievable turning value, i.e.\ lie in the image
+`chartMap p q '' Ioo 0 (2 / max p q)`. The supremum of that image is the *wall
+value* `β = chartMap p q (2 / max p q) = π/2 + arcsin(min/max) > π/2`, so any
+`s ∈ (0, β)` — in particular any `s ∈ (0, π/2]` — is achieved. -/
+
+/-- The turning contribution at the moderate-arc wall exceeds `π/2`: one of the
+two `arcsin` arguments is `1` (contributing `arcsin 1 = π/2`) and the other is
+`min/max > 0` (contributing a strictly positive `arcsin`). This is the strict
+lower bound on the chart's supremum `β`. -/
+theorem pi_div_two_lt_chartMap_wall {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
+    Real.pi / 2 < chartMap p q (2 / max p q) := by
+  rw [chartMap]
+  rcases le_total q p with h | h
+  · rw [max_eq_left h]
+    have e1 : p * (2 / p) / 2 = 1 := by field_simp
+    have e3 : 0 < Real.arcsin (q * (2 / p) / 2) := Real.arcsin_pos.2 (by positivity)
+    rw [e1, Real.arcsin_one]; linarith
+  · rw [max_eq_right h]
+    have e1 : q * (2 / q) / 2 = 1 := by field_simp
+    have e3 : 0 < Real.arcsin (p * (2 / q) / 2) := Real.arcsin_pos.2 (by positivity)
+    rw [e1, Real.arcsin_one]; linarith
+
+/-- **Surjectivity of the single-edge chart.** Every turning value `s` strictly
+between `0` and the wall value `chartMap p q (2 / max p q)` is achieved by some
+moderate edge length: `s ∈ chartMap p q '' Ioo 0 (2 / max p q)`. By the
+intermediate value theorem (`chartMap` is continuous with value `0` at `0`), an
+interior length maps to `s`; it is interior since `s ≠ 0` and `s ≠ wall`. This is
+the membership criterion that makes `chartInv` a genuine inverse at `s`. -/
+theorem chartMap_mem_image {p q : ℝ} (hp : 0 < p) (_hq : 0 < q) {s : ℝ}
+    (hs0 : 0 < s) (hs : s < chartMap p q (2 / max p q)) :
+    s ∈ chartMap p q '' Set.Ioo (0 : ℝ) (2 / max p q) := by
+  have hmax : 0 < max p q := lt_of_lt_of_le hp (le_max_left p q)
+  have hdle : (0 : ℝ) ≤ 2 / max p q := by positivity
+  have hcont : ContinuousOn (chartMap p q) (Set.Icc 0 (2 / max p q)) :=
+    (chartMap_continuous p q).continuousOn
+  have hsub := intermediate_value_Ioo hdle hcont
+  have hmem : s ∈ Set.Ioo (chartMap p q 0) (chartMap p q (2 / max p q)) := by
+    rw [chartMap_zero]; exact ⟨hs0, hs⟩
+  exact hsub hmem
+
 end Gluck.Discrete
