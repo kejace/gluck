@@ -720,4 +720,63 @@ theorem continuousOn_closingGap (m : ℕ) (a b : ZMod n)
         fun t ht0 ht1 z hz => hwin t ht0 ht1 z hz j
   exact (continuous_closureGap.comp_continuousOn hpair).congr fun x _ => rfl
 
+/-! ### Existence of the uniform window (the ρ-package of `def:closing_2cell`)
+
+By compactness of `[0,1]` the curvature ratios `min/max` of adjacent pairs are
+uniformly bounded below along the homotopy, which produces a single normalized
+window `[c, d] ⊂ (0,1)` and a radius `ρ > 0` such that every perturbed chart
+value `chartPerturb z j` (`|z.1| + |z.2| ≤ ρ`) is achieved inside the window on
+every edge, at every time. In normalized coordinates the wall obstruction
+disappears: `chartMap p q (e·2/max) ∈ [arcsin e + arcsin(e·min/max), 2·arcsin e]`
+uniformly in the pair. -/
+
+/-- Upper bound for the chart at a normalized length: both `arcsin` arguments
+are at most `e`, so `chartMap p q (e·(2/max)) ≤ 2·arcsin e`. -/
+private lemma chartMap_norm_le {p q : ℝ} (hp : 0 < p) (hq : 0 < q) {e : ℝ}
+    (he : 0 ≤ e) : chartMap p q (e * (2 / max p q)) ≤ 2 * Real.arcsin e := by
+  have hmax : 0 < max p q := lt_of_lt_of_le hp (le_max_left _ _)
+  have harg : ∀ r : ℝ, 0 < r → r ≤ max p q → r * (e * (2 / max p q)) / 2 ≤ e := by
+    intro r hr hrle
+    have hEq : r * (e * (2 / max p q)) / 2 = e * (r / max p q) := by
+      field_simp
+    rw [hEq]
+    calc e * (r / max p q) ≤ e * 1 :=
+          mul_le_mul_of_nonneg_left ((div_le_one hmax).mpr hrle) he
+      _ = e := mul_one e
+  rw [chartMap, two_mul]
+  exact add_le_add
+    (Real.monotone_arcsin (harg p hp (le_max_left _ _)))
+    (Real.monotone_arcsin (harg q hq (le_max_right _ _)))
+
+/-- Lower bound for the chart at a normalized length: one `arcsin` argument is
+exactly `e` and the other is `e·(min/max) ≥ e·r`, so
+`arcsin e + arcsin (e·r) ≤ chartMap p q (e·(2/max))` for any lower ratio bound
+`r ≤ min p q / max p q`. -/
+private lemma chartMap_norm_ge {p q : ℝ} (hp : 0 < p) (hq : 0 < q) {e r : ℝ}
+    (he : 0 ≤ e) (hr : r ≤ min p q / max p q) :
+    Real.arcsin e + Real.arcsin (e * r) ≤ chartMap p q (e * (2 / max p q)) := by
+  rcases le_total p q with h | h
+  · have hmax : max p q = q := max_eq_right h
+    have hmin : min p q = p := min_eq_left h
+    rw [chartMap, hmax]
+    have hq' : q ≠ 0 := hq.ne'
+    have hEq : q * (e * (2 / q)) / 2 = e := by field_simp
+    have hEp : p * (e * (2 / q)) / 2 = e * (p / q) := by field_simp
+    rw [hEq, hEp]
+    rw [hmax, hmin] at hr
+    have h1 : Real.arcsin (e * r) ≤ Real.arcsin (e * (p / q)) :=
+      Real.monotone_arcsin (mul_le_mul_of_nonneg_left hr he)
+    linarith
+  · have hmax : max p q = p := max_eq_left h
+    have hmin : min p q = q := min_eq_right h
+    rw [chartMap, hmax]
+    have hp' : p ≠ 0 := hp.ne'
+    have hEp : p * (e * (2 / p)) / 2 = e := by field_simp
+    have hEq : q * (e * (2 / p)) / 2 = e * (q / p) := by field_simp
+    rw [hEp, hEq]
+    rw [hmax, hmin] at hr
+    have h1 : Real.arcsin (e * r) ≤ Real.arcsin (e * (q / p)) :=
+      Real.monotone_arcsin (mul_le_mul_of_nonneg_left hr he)
+    linarith
+
 end Gluck.Discrete
