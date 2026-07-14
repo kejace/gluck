@@ -1,11 +1,13 @@
 \begin{tikzpicture}[>=Stealth,line cap=round,line join=round]
-  \coordinate (A) at (0,0);
-  \coordinate (B) at (2.35,.35);
-  \coordinate (C) at (4.05,2.05);
   \coordinate (O) at (1.58,1.78);
+  \coordinate (A) at ($(O)+(205:1.94)$);
+  \coordinate (B) at ($(O)+(280:1.94)$);
+  \coordinate (C) at ($(O)+(20:1.94)$);
 
   \draw[black!18,fill=blue!4] (O) circle (1.94);
-  \draw[line width=1.25pt,blue!75!black] (A)--(B)--(C);
+  \draw[line width=1.25pt,blue!75!black]
+    (A)--node[below,font=\scriptsize] {$\ell_{i-1}$}(B)
+       --node[right,font=\scriptsize] {$\ell_i$}(C);
   \draw[black!35,dashed] (O)--(A) node[midway,above left,font=\scriptsize] {$R_i$};
   \draw[black!35,dashed] (O)--(B) (O)--(C);
   \fill[blue!75!black] (A) circle (2pt) (B) circle (2pt) (C) circle (2pt);
@@ -13,13 +15,12 @@
   \node[below] at (B) {$v_i$};
   \node[above right] at (C) {$v_{i+1}$};
   \node[above] at (O) {$O_i$};
-  \node[font=\scriptsize,below] at (1.18,.17) {$\ell_{i-1}$};
-  \node[font=\scriptsize,right] at (3.18,1.03) {$\ell_i$};
-  \draw[->,orange!85!black,line width=.9pt] ($(B)+(-.62,-.09)$) arc[start angle=188,end angle=225,radius=.62];
-  \node[orange!85!black,font=\scriptsize] at (1.72,.76) {$\theta_i$};
+  \draw[->,orange!85!black,line width=.9pt]
+    ($(B)+(-27:.55)$) arc[start angle=-27,end angle=60,radius=.55];
+  \node[orange!85!black,font=\scriptsize] at ($(B)+(.72,.45)$) {$\theta_i$};
 
-  \draw[->,black!35] (4.75,1.05)--(5.55,1.05);
-  \node[font=\scriptsize,text=black!55,align=center] at (5.15,1.48)
+  \draw[->,black!35] (4.2,1.05)--(5.25,1.05);
+  \node[font=\scriptsize,text=black!55,align=center] at (4.72,1.48)
     {local\\bridge};
 
   \begin{scope}[xshift=6.05cm]
