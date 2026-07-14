@@ -356,4 +356,33 @@ theorem chartMap_mem_image {p q : ℝ} (hp : 0 < p) (_hq : 0 < q) {s : ℝ}
     rw [chartMap_zero]; exact ⟨hs0, hs⟩
   exact hsub hmem
 
+/-! ### The antisymmetric chart base (`def:closing_2cell`)
+
+The chart base `s(z)` of the closing 2-cell: the constant turning value `2π/n`
+perturbed antisymmetrically on two half-period pairs `{a, a+m}` and `{b, b+m}` by
+`z = (u, v)`. The antisymmetry (`+u` at `a`, `−u` at `a+m`; likewise `b`) is
+exactly what keeps `∑_j s(z)_j = 2π` **identically in `z`** (`sum_chartPerturb`),
+so the turning constraint holds for free on the whole 2-cell — the affine
+constraint of `def:turning_chart`. -/
+
+/-- The half-period-antisymmetric chart base of `def:closing_2cell`: constant
+`2π/n` with `±z.1` on the pair `{a, a+m}` and `±z.2` on the pair `{b, b+m}`. -/
+noncomputable def chartPerturb (m : ℕ) (a b : ZMod n) (z : ℝ × ℝ) : ZMod n → ℝ :=
+  fun j => 2 * Real.pi / n
+    + ((if j = a then z.1 else 0) + (if j = a + (m : ZMod n) then -z.1 else 0))
+    + ((if j = b then z.2 else 0) + (if j = b + (m : ZMod n) then -z.2 else 0))
+
+/-- The antisymmetric chart base sums to `2π` identically in `z`: the constant
+part gives `n · (2π/n) = 2π` and each antisymmetric pair `±z.i` cancels to `0`
+(`Finset.sum_ite_eq'`). This is the "turning is kept for free" property of the
+2-cell. -/
+theorem sum_chartPerturb [NeZero n] (m : ℕ) (a b : ZMod n) (z : ℝ × ℝ) :
+    ∑ j : ZMod n, chartPerturb m a b z j = 2 * Real.pi := by
+  unfold chartPerturb
+  simp only [Finset.sum_add_distrib, Finset.sum_ite_eq', Finset.mem_univ, if_true]
+  rw [Finset.sum_const, Finset.card_univ, ZMod.card, nsmul_eq_mul]
+  have hn : (n : ℝ) ≠ 0 := by exact_mod_cast NeZero.ne n
+  field_simp
+  ring
+
 end Gluck.Discrete
