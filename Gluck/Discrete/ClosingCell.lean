@@ -916,4 +916,73 @@ theorem exists_closingCell_window [NeZero n] (hn4 : 4 ≤ n) (m : ℕ)
   exact chartMap_mem_image_Icc
     (mul_le_mul_of_nonneg_right hcd hA.le) ⟨hlow, hup⟩
 
+/-- The compact window sits inside the open moderate length interval: window
+membership (as produced by `exists_closingCell_window`) feeds the
+`Ioo`-membership hypotheses of `turningSum_closingCell` and
+`moderateArc_closingCell`. -/
+theorem chartMap_image_window_subset {p q : ℝ} (hp : 0 < p) {c d : ℝ}
+    (hc : 0 < c) (hd : d < 1) :
+    chartMap p q '' Set.Icc (c * (2 / max p q)) (d * (2 / max p q)) ⊆
+      chartMap p q '' Set.Ioo (0 : ℝ) (2 / max p q) := by
+  apply Set.image_mono
+  intro x hx
+  have hA : (0 : ℝ) < 2 / max p q :=
+    div_pos two_pos (lt_of_lt_of_le hp (le_max_left _ _))
+  refine ⟨lt_of_lt_of_le (mul_pos hc hA) hx.1, ?_⟩
+  calc x ≤ d * (2 / max p q) := hx.2
+    _ < 1 * (2 / max p q) := mul_lt_mul_of_pos_right hd hA
+    _ = 2 / max p q := one_mul _
+
+/-! ### The center of the 2-cell at `t = 0`: the closing anchor -/
+
+/-- At the center `z = 0` the perturbed chart base is the constant `2π/n`. -/
+@[simp] lemma chartPerturb_zero (m : ℕ) (a b : ZMod n) (j : ZMod n) :
+    chartPerturb m a b (0, 0) j = 2 * Real.pi / n := by
+  simp [chartPerturb]
+
+/-- At `t = 0` (where `κ_0 = centralSym m κ` is half-period symmetric) the
+center column `Φ(0, 0)` of the closing 2-cell is a half-period-symmetric
+edge-length vector: opposite edges recover equal lengths from the constant
+chart value `2π/n` because their curvature pairs coincide. -/
+theorem closingCell_zero_symm [NeZero n] {m : ℕ} (hn : n = 2 * m)
+    (a b : ZMod n) {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i)
+    (ht0 : (0 : ℝ) ≤ 0) (ht1 : (0 : ℝ) ≤ 1) (i : ZMod n) :
+    closingCell m a b hκ ht0 ht1 (0, 0) (i + (m : ZMod n))
+      = closingCell m a b hκ ht0 ht1 (0, 0) i := by
+  have hκsym : ∀ i' : ZMod n,
+      curvHomotopy m κ 0 (i' + (m : ZMod n)) = curvHomotopy m κ 0 i' := by
+    intro i'
+    simp only [curvHomotopy_zero]
+    exact centralSym_symm hn κ i'
+  have hcongr : ∀ {p p' q q' : ℝ} (hp : 0 < p) (hq : 0 < q) (hp' : 0 < p')
+      (hq' : 0 < q') (s : ℝ), p = p' → q = q' →
+      chartInv hp hq s = chartInv hp' hq' s := by
+    intro p p' q q' hp hq hp' hq' s hpe hqe
+    subst hpe; subst hqe; rfl
+  simp only [closingCell, chartPerturb_zero]
+  exact hcongr _ _ _ _ _ (hκsym i)
+    (by rw [show i + (m : ZMod n) + 1 = (i + 1) + (m : ZMod n) by ring]
+        exact hκsym (i + 1))
+
+/-- **The closing anchor `F(0, 0) = 0`** — the center of the 2-cell closes at
+`t = 0` (`lem:central_symmetry_closes` applied to the half-period-symmetric
+center column). This is the base point of the degree argument of
+`sec:closure` and the (⇐) direction of `lem:closure_boundary_rigidity`. -/
+theorem closingGap_center_eq_zero [NeZero n] {m : ℕ} (hn : n = 2 * m)
+    (a b : ZMod n) {κ : ZMod n → ℝ} (hκ : ∀ i, 0 < κ i)
+    (ht0 : (0 : ℝ) ≤ 0) (ht1 : (0 : ℝ) ≤ 1)
+    (hmem : ∀ j : ZMod n, chartPerturb m a b ((0 : ℝ), (0 : ℝ)) j ∈
+      chartMap (curvHomotopy m κ 0 j) (curvHomotopy m κ 0 (j + 1)) ''
+        Set.Ioo (0 : ℝ)
+          (2 / max (curvHomotopy m κ 0 j) (curvHomotopy m κ 0 (j + 1)))) :
+    closingGap m a b hκ ht0 ht1 (0, 0) = 0 := by
+  have hκsym : ∀ i : ZMod n,
+      curvHomotopy m κ 0 (i + (m : ZMod n)) = curvHomotopy m κ 0 i := by
+    intro i
+    simp only [curvHomotopy_zero]
+    exact centralSym_symm hn κ i
+  exact central_symmetry_closes hn hκsym
+    (closingCell_zero_symm hn a b hκ ht0 ht1)
+    (turningSum_closingCell m a b hκ ht0 ht1 hmem)
+
 end Gluck.Discrete
