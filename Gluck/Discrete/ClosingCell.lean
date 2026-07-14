@@ -1321,4 +1321,94 @@ theorem heading_add_eq_chartBlock (κ ℓ : ZMod n → ℝ) (j k : ℕ) :
     rw [hstep, ih, Finset.sum_range_succ, hθ, hchart]
     ring
 
+/-- Any block of `m` consecutive lifted indices (`n = 2m`) hits the antipodal
+pair `{x, x + m}` exactly once, counting both members: the two half-blocks of a
+full period partition it, and shifting a block by `m` swaps the two members of
+the pair. -/
+lemma sum_ite_pair_half [NeZero n] {m : ℕ} (hn : n = 2 * m) (x : ZMod n)
+    (j : ℕ) :
+    ((∑ e ∈ Finset.range m, if ((j + e : ℕ) : ZMod n) = x then (1 : ℕ) else 0)
+      + ∑ e ∈ Finset.range m,
+          if ((j + e : ℕ) : ZMod n) = x + (m : ZMod n) then (1 : ℕ) else 0)
+      = 1 := by
+  classical
+  have hmm : (m : ZMod n) + (m : ZMod n) = 0 := by
+    have h : ((2 * m : ℕ) : ZMod n) = 0 := by rw [← hn]; exact ZMod.natCast_self n
+    push_cast at h
+    linear_combination h
+  have hfull : (∑ e ∈ Finset.range (m + m),
+      if ((j + e : ℕ) : ZMod n) = x then (1 : ℕ) else 0) = 1 := by
+    rw [show m + m = n from by rw [hn]; ring,
+      sum_range_natCast_add (fun i => if i = x then (1 : ℕ) else 0) j]
+    simp
+  rw [Finset.sum_range_add] at hfull
+  have hsecond : ∀ e : ℕ,
+      (if ((j + (m + e) : ℕ) : ZMod n) = x then (1 : ℕ) else 0)
+      = if ((j + e : ℕ) : ZMod n) = x + (m : ZMod n) then (1 : ℕ) else 0 := by
+    intro e
+    have hcast : ((j + (m + e) : ℕ) : ZMod n)
+        = ((j + e : ℕ) : ZMod n) + (m : ZMod n) := by
+      push_cast; ring
+    rw [hcast]
+    refine if_congr ⟨fun h => ?_, fun h => ?_⟩ rfl rfl
+    · rw [← h, add_assoc, hmm, add_zero]
+    · rw [h, add_assoc, hmm, add_zero]
+  rw [Finset.sum_congr (rfl : Finset.range m = Finset.range m)
+    fun e _ => hsecond e] at hfull
+  exact hfull
+
+/-- **The chart-perturbation sum over a half-period block is explicitly
+affine**: on the closing 2-cell the perturbed chart values of any `m`
+consecutive edges (`n = 2m`) sum to `π + ε_a·u + ε_b·v` with signs
+`ε_a, ε_b ∈ {±1}` recording which member of each antipodal pair the block
+contains. Combined with `heading_add_eq_chartBlock` at `k = m` and the chart
+round-trip `chartMap_chartInv`, this makes the opposite-heading defect
+`ψ_{j+m} − ψ_j − π` of the 2-cell an explicit affine function of `z` plus two
+boundary half-turn corrections — the exact splitting behind any corrected
+(nondegenerate-`κ⁰`) `t = 0` rigidity analysis. -/
+theorem sum_chartPerturb_block [NeZero n] {m : ℕ} (hn : n = 2 * m)
+    (a b : ZMod n) (z : ℝ × ℝ) (j : ℕ) :
+    ∃ εa εb : ℝ, (εa = 1 ∨ εa = -1) ∧ (εb = 1 ∨ εb = -1) ∧
+      ∑ e ∈ Finset.range m, chartPerturb m a b z ((j + e : ℕ) : ZMod n)
+        = Real.pi + εa * z.1 + εb * z.2 := by
+  classical
+  have hm : m ≠ 0 := fun h => NeZero.ne n (by rw [hn, h, mul_zero])
+  have hcastS : ∀ y : ZMod n,
+      (∑ e ∈ Finset.range m, if ((j + e : ℕ) : ZMod n) = y then (1 : ℝ) else 0)
+      = ((∑ e ∈ Finset.range m,
+          if ((j + e : ℕ) : ZMod n) = y then (1 : ℕ) else 0 : ℕ) : ℝ) := by
+    intro y
+    push_cast
+    rfl
+  have hsign : ∀ x : ZMod n, ∃ ε : ℝ, (ε = 1 ∨ ε = -1) ∧
+      ((∑ e ∈ Finset.range m, if ((j + e : ℕ) : ZMod n) = x then (1 : ℝ) else 0)
+        - ∑ e ∈ Finset.range m,
+            if ((j + e : ℕ) : ZMod n) = x + (m : ZMod n) then (1 : ℝ) else 0)
+        = ε := by
+    intro x
+    have hp := sum_ite_pair_half hn x j
+    rcases Nat.add_eq_one_iff.mp hp with ⟨h1, h2⟩ | ⟨h1, h2⟩
+    · exact ⟨-1, Or.inr rfl, by rw [hcastS, hcastS, h1, h2]; norm_num⟩
+    · exact ⟨1, Or.inl rfl, by rw [hcastS, hcastS, h1, h2]; norm_num⟩
+  obtain ⟨εa, hεa, hSa⟩ := hsign a
+  obtain ⟨εb, hεb, hSb⟩ := hsign b
+  refine ⟨εa, εb, hεa, hεb, ?_⟩
+  have hfac : ∀ (w : ℝ) (y : ZMod n),
+      (∑ e ∈ Finset.range m, if ((j + e : ℕ) : ZMod n) = y then w else 0)
+      = w * ∑ e ∈ Finset.range m,
+          if ((j + e : ℕ) : ZMod n) = y then (1 : ℝ) else 0 := by
+    intro w y
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun e _ => ?_
+    split_ifs <;> simp
+  have hconst : ∑ _e ∈ Finset.range m, (2 * Real.pi / n : ℝ) = Real.pi := by
+    rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul, hn]
+    have hm' : (m : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hm
+    push_cast
+    field_simp
+  simp only [chartPerturb, Finset.sum_add_distrib]
+  rw [hconst, hfac z.1 a, hfac (-z.1) (a + (m : ZMod n)), hfac z.2 b,
+    hfac (-z.2) (b + (m : ZMod n))]
+  linear_combination z.1 * hSa + z.2 * hSb
+
 end Gluck.Discrete
