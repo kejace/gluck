@@ -5433,4 +5433,93 @@ theorem anchorWitness_two_level [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
         (mul_pos (pow_pos hcos 3) (pow_pos hK 4))
     exact neg_ne_zero.mpr hpos.ne'
 
+/-! ## The moving pair rectangle and its fixed-square normalization
+(`def:closing_rect`)
+
+The natural domain of the closing 2-cell in the chart coordinates is the
+*moving rectangle* `R_t`: at each of the four perturbed edges the chart value
+must stay in the closed interval `[0, w_j(t)]`, where
+`w_j(t) = chartMap (κ_t j) (κ_t (j+1)) (2 / max ...)` is the *exact wall* of
+edge `j` (`lem:chart_wall`). This section builds, per `def:closing_rect`:
+the wall widths (`wallWidth`) and their continuity in `t`; the rectangle
+endpoint functions (`rectLo`/`rectHi`) with their sign and continuity lemmas;
+the per-coordinate piecewise-affine rescale (`rescale`/`rectRescale`,
+`Ξ_t : [-1,1]² → R_t`, `Ξ_t 0 = 0`) with joint continuity; and the
+fixed-square gap map `H(t,q) = F(t, Ξ_t q)` (`closingRectGap`) with its
+continuity on the sub-square supported by the landed window continuity of
+`Φ` (`continuousOn_closingGap`). -/
+
+/-- The exact chart wall of a single edge with curvature pair `(p, q)`: the
+supremum `chartMap p q (2 / max p q)` of the achievable turning values
+(`lem:chart_wall`). For positive `p, q` it equals
+`π/2 + arcsin (min p q / max p q)` (`chartWall_eq_pi_div_two_add`), in
+particular it exceeds `π/2` (`pi_div_two_lt_chartWall`). -/
+noncomputable def chartWall (p q : ℝ) : ℝ := chartMap p q (2 / max p q)
+
+/-- The chart wall in normalized-argument form: at the wall length both
+`arcsin` arguments are the curvature ratios `p / max`, `q / max`. -/
+theorem chartWall_eq (p q : ℝ) (h : max p q ≠ 0) :
+    chartWall p q = Real.arcsin (p / max p q) + Real.arcsin (q / max p q) := by
+  unfold chartWall chartMap
+  congr 2 <;> field_simp
+
+/-- The exact wall value of `lem:chart_wall`:
+`chartWall p q = π/2 + arcsin (min p q / max p q)` for positive curvatures
+(the larger ratio saturates at `arcsin 1 = π/2`). -/
+theorem chartWall_eq_pi_div_two_add {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
+    chartWall p q = Real.pi / 2 + Real.arcsin (min p q / max p q) := by
+  have hmax : (0 : ℝ) < max p q := lt_of_lt_of_le hp (le_max_left p q)
+  rw [chartWall_eq p q hmax.ne']
+  rcases le_total p q with h | h
+  · rw [max_eq_right h, min_eq_left h, div_self (hp.trans_le h).ne',
+      Real.arcsin_one, add_comm]
+  · rw [max_eq_left h, min_eq_right h, div_self (hq.trans_le h).ne',
+      Real.arcsin_one]
+
+/-- The chart wall exceeds `π/2` (restatement of
+`pi_div_two_lt_chartMap_wall` in terms of `chartWall`). -/
+theorem pi_div_two_lt_chartWall {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
+    Real.pi / 2 < chartWall p q :=
+  pi_div_two_lt_chartMap_wall hp hq
+
+/-- The chart wall of a continuous positive curvature family is continuous
+(via the normalized form `arcsin (p/max) + arcsin (q/max)`; `max` stays
+positive). -/
+theorem continuous_chartWall_comp {T : Type*} [TopologicalSpace T]
+    {p q : T → ℝ} (hp : ∀ τ, 0 < p τ) (_hq : ∀ τ, 0 < q τ)
+    (hpc : Continuous p) (hqc : Continuous q) :
+    Continuous fun τ => chartWall (p τ) (q τ) := by
+  have hmax : ∀ τ, max (p τ) (q τ) ≠ 0 := fun τ =>
+    (lt_of_lt_of_le (hp τ) (le_max_left _ _)).ne'
+  have hEq : (fun τ => chartWall (p τ) (q τ))
+      = fun τ => Real.arcsin (p τ / max (p τ) (q τ))
+        + Real.arcsin (q τ / max (p τ) (q τ)) := by
+    funext τ; exact chartWall_eq _ _ (hmax τ)
+  rw [hEq]
+  exact (Real.continuous_arcsin.comp (hpc.div (hpc.max hqc) hmax)).add
+    (Real.continuous_arcsin.comp (hqc.div (hpc.max hqc) hmax))
+
+/-- **The moving wall width of edge `j`** along the anchor path
+(`def:closing_rect`): the exact chart wall of the pair
+`(κ_t j, κ_t (j+1))`, `κ_t = curvPath κs κ t`. -/
+noncomputable def wallWidth (κs κ : ZMod n → ℝ) (j : ZMod n) (t : ℝ) : ℝ :=
+  chartWall (curvPath κs κ t j) (curvPath κs κ t (j + 1))
+
+/-- The moving wall width exceeds `π/2` along the whole homotopy. -/
+theorem pi_div_two_lt_wallWidth {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (hκ : ∀ i, 0 < κ i) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (j : ZMod n) :
+    Real.pi / 2 < wallWidth κs κ j t :=
+  pi_div_two_lt_chartWall (curvPath_pos hκs hκ ht0 ht1 j)
+    (curvPath_pos hκs hκ ht0 ht1 (j + 1))
+
+/-- The moving wall width is continuous in the homotopy time (on the compact
+time interval, where positivity holds). -/
+theorem continuous_wallWidth {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (hκ : ∀ i, 0 < κ i) (j : ZMod n) :
+    Continuous fun τ : ↥(Set.Icc (0 : ℝ) 1) => wallWidth κs κ j ↑τ :=
+  continuous_chartWall_comp (fun τ => curvPath_pos hκs hκ τ.2.1 τ.2.2 j)
+    (fun τ => curvPath_pos hκs hκ τ.2.1 τ.2.2 (j + 1))
+    ((continuous_curvPath κs κ j).comp continuous_subtype_val)
+    ((continuous_curvPath κs κ (j + 1)).comp continuous_subtype_val)
+
 end Gluck.Discrete
