@@ -2286,6 +2286,19 @@ theorem not_constant_signedMengerProfile_zero_of_isSimplePolygon {n : ℕ} [NeZe
     eq_of_crossR2_eq_zero_of_lineCoordR2_eq hbase hC hD hcoord
   exact hsimple.1 i hvi
 
+/-- A simple Dahlberg-regular polygon has some nonzero signed-Menger value.
+Otherwise the zero-profile subdivision branch contradicts simplicity. -/
+theorem exists_signedMengerProfile_ne_zero_of_isSimplePolygon {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) :
+    ∃ i : ZMod n, SignedMengerProfile v i ≠ 0 := by
+  by_contra hnone
+  have hκzero : ∀ i : ZMod n, SignedMengerProfile v i = 0 := by
+    intro i
+    by_contra hi
+    exact hnone ⟨i, hi⟩
+  exact not_constant_signedMengerProfile_zero_of_isSimplePolygon hsimple hregular hκzero
+
 /-- Polygon-indexed own-region membership over the outgoing edge from nonzero
 signed Menger curvature at the left endpoint. -/
 theorem polygonEdgePrev_mem_own_dahlbergRegion_of_vertex_menger_ne_zero {n : ℕ}

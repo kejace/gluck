@@ -170,6 +170,23 @@ theorem signedMengerProfile_globalMinMax_strict_E2_of_not_concyclic
   exact signedMengerProfile_exists_globalMinMax_strict_of_not_concyclic
     hsimple hregular hnoncircle
 
+/-- E² zero-profile obstruction: a constant-zero signed-Menger profile is
+impossible on a simple Dahlberg-regular polygon. -/
+theorem not_constant_signedMengerProfile_zero_E2_of_isSimplePolygon {n : ℕ} [NeZero n]
+    (v : ZMod n → ℂ) (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hκ : ∀ i : ZMod n, SignedMengerProfile v i = 0) :
+    False := by
+  exact not_constant_signedMengerProfile_zero_of_isSimplePolygon hsimple hregular hκ
+
+/-- E² zero-profile obstruction: every simple Dahlberg-regular polygon has at
+least one nonzero signed-Menger value. -/
+theorem exists_signedMengerProfile_ne_zero_E2_of_isSimplePolygon {n : ℕ} [NeZero n]
+    (v : ZMod n → ℂ) (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) :
+    ∃ i : ZMod n, SignedMengerProfile v i ≠ 0 := by
+  exact exists_signedMengerProfile_ne_zero_of_isSimplePolygon hsimple hregular
+
 /-- E² reduction: for a nonconcyclic locally regular simple polygon, one
 nonzero signed-Menger value forces the signed-Menger profile to be
 nonconstant. -/
