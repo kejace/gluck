@@ -607,6 +607,24 @@ theorem normalizedCenter_nonpos_of_inVertexCone {a y : ℝ} {z : ℂ}
   simp [normalizedCircleCenter] at him
   nlinarith [mul_nonpos_of_nonneg_of_nonpos hα hz.le]
 
+/-- The right-endpoint version of the normalized vertex-cone sign statement. -/
+theorem normalizedCenter_nonneg_of_inVertexCone_right {a y : ℝ} {z : ℂ}
+    (hcone : InVertexCone (-a : ℂ) (a : ℂ) z (normalizedCircleCenter y))
+    (hz : 0 < z.im) : 0 ≤ y := by
+  obtain ⟨α, β, hα, hβ, hcenter⟩ := hcone
+  have him := congrArg Complex.im hcenter
+  simp [normalizedCircleCenter] at him
+  nlinarith [mul_nonneg hβ hz.le]
+
+/-- The right-endpoint version below the oriented edge. -/
+theorem normalizedCenter_nonpos_of_inVertexCone_right {a y : ℝ} {z : ℂ}
+    (hcone : InVertexCone (-a : ℂ) (a : ℂ) z (normalizedCircleCenter y))
+    (hz : z.im < 0) : y ≤ 0 := by
+  obtain ⟨α, β, hα, hβ, hcenter⟩ := hcone
+  have him := congrArg Complex.im hcenter
+  simp [normalizedCircleCenter] at him
+  nlinarith [mul_nonpos_of_nonneg_of_nonpos hβ hz.le]
+
 /-- Dahlberg regularity at the left endpoint of a normalized edge places its
 circumcentre parameter on the interior side when the preceding vertex is
 above the edge. -/
@@ -632,6 +650,31 @@ theorem normalizedCircumcenterParameter_nonpos_of_regular {a : ℝ} (ha : a ≠ 
     (hcircle.2.1.trans hcircle.2.2.2.symm)
   rw [hO] at hcone
   exact normalizedCenter_nonpos_of_inVertexCone hcone hz
+
+/-- Dahlberg regularity at the right endpoint of a normalized edge gives the
+same centre-side condition. -/
+theorem normalizedCircumcenterParameter_nonneg_of_regular_right {a : ℝ} (ha : a ≠ 0)
+    {z O : ℂ} {R : ℝ} (hz : 0 < z.im)
+    (hcircle : CircumcircleR2 (-a : ℂ) (a : ℂ) z O R)
+    (hcone : InVertexCone (-a : ℂ) (a : ℂ) z O) :
+    0 ≤ normalizedCircumcenterParameter a z := by
+  have hO := eq_normalizedCircleCenter_of_equidistant ha hz.ne'
+    (hcircle.2.1.trans hcircle.2.2.1.symm)
+    (hcircle.2.2.2.trans hcircle.2.2.1.symm)
+  rw [hO] at hcone
+  exact normalizedCenter_nonneg_of_inVertexCone_right hcone hz
+
+/-- The right-endpoint regularity statement below the oriented edge. -/
+theorem normalizedCircumcenterParameter_nonpos_of_regular_right {a : ℝ} (ha : a ≠ 0)
+    {z O : ℂ} {R : ℝ} (hz : z.im < 0)
+    (hcircle : CircumcircleR2 (-a : ℂ) (a : ℂ) z O R)
+    (hcone : InVertexCone (-a : ℂ) (a : ℂ) z O) :
+    normalizedCircumcenterParameter a z ≤ 0 := by
+  have hO := eq_normalizedCircleCenter_of_equidistant ha hz.ne
+    (hcircle.2.1.trans hcircle.2.2.1.symm)
+    (hcircle.2.2.2.trans hcircle.2.2.1.symm)
+  rw [hO] at hcone
+  exact normalizedCenter_nonpos_of_inVertexCone_right hcone hz
 
 /-- Dahlberg regularity at the left endpoint of an arbitrary oriented edge
 places the canonical circumcentre parameter on the interior side. -/
@@ -661,6 +704,35 @@ theorem edgeCircumcenterParameter_nonpos_of_regular {A B C O : ℂ} {R : ℝ}
   have hcone' := inVertexCone_edgeCoordinates A B C A B O hcone
   rw [(edgeCoordinates_endpoints hAB).1, (edgeCoordinates_endpoints hAB).2] at hcone'
   have hy := normalizedCircumcenterParameter_nonpos_of_regular
+    (chordHalfLength_pos hAB).ne' hz hcircle' hcone'
+  simpa [edgeCircumcenterParameter] using hy
+
+/-- Right-endpoint regularity for an arbitrary oriented edge also places the
+canonical circumcentre parameter on the interior side. -/
+theorem edgeCircumcenterParameter_nonneg_of_regular_right {A B C O : ℂ} {R : ℝ}
+    (hAB : A ≠ B) (hcross : 0 < Gluck.Discrete.crossR2 A B C)
+    (hcircle : CircumcircleR2 A B C O R) (hcone : InVertexCone A B C O) :
+    0 ≤ edgeCircumcenterParameter A B C := by
+  have hz := (crossR2_pos_iff_edgeCoordinates_im_pos hAB C).mp hcross
+  have hcircle' := circumcircleR2_edgeCoordinates (E₁ := A) (E₂ := B) hAB hcircle
+  rw [(edgeCoordinates_endpoints hAB).1, (edgeCoordinates_endpoints hAB).2] at hcircle'
+  have hcone' := inVertexCone_edgeCoordinates A B A B C O hcone
+  rw [(edgeCoordinates_endpoints hAB).1, (edgeCoordinates_endpoints hAB).2] at hcone'
+  have hy := normalizedCircumcenterParameter_nonneg_of_regular_right
+    (chordHalfLength_pos hAB).ne' hz hcircle' hcone'
+  simpa [edgeCircumcenterParameter] using hy
+
+/-- Right-endpoint regularity below the oriented edge. -/
+theorem edgeCircumcenterParameter_nonpos_of_regular_right {A B C O : ℂ} {R : ℝ}
+    (hAB : A ≠ B) (hcross : Gluck.Discrete.crossR2 A B C < 0)
+    (hcircle : CircumcircleR2 A B C O R) (hcone : InVertexCone A B C O) :
+    edgeCircumcenterParameter A B C ≤ 0 := by
+  have hz := (crossR2_neg_iff_edgeCoordinates_im_neg hAB C).mp hcross
+  have hcircle' := circumcircleR2_edgeCoordinates (E₁ := A) (E₂ := B) hAB hcircle
+  rw [(edgeCoordinates_endpoints hAB).1, (edgeCoordinates_endpoints hAB).2] at hcircle'
+  have hcone' := inVertexCone_edgeCoordinates A B A B C O hcone
+  rw [(edgeCoordinates_endpoints hAB).1, (edgeCoordinates_endpoints hAB).2] at hcone'
+  have hy := normalizedCircumcenterParameter_nonpos_of_regular_right
     (chordHalfLength_pos hAB).ne' hz hcircle' hcone'
   simpa [edgeCircumcenterParameter] using hy
 
@@ -1249,6 +1321,23 @@ theorem edgePointDahlbergRegion_anti_of_positive {A B P Q O : ℂ} {R : ℝ}
     edgePointDahlbergRegion_eq_of_pos hAB hPcross]
   apply edgeDahlbergRegion_anti_of_positive hAB
   · exact edgeCircumcenterParameter_nonneg_of_regular hAB hPcross hcircleP hconeP
+  · simpa [signedMengerR2_edge_parameter_of_pos hAB hPcross,
+      signedMengerR2_edge_parameter_of_pos hAB hQcross] using hκ
+
+/-- Positive same-sign nesting using right-endpoint Dahlberg regularity for the
+lower-curvature point. -/
+theorem edgePointDahlbergRegion_anti_of_positive_right {A B P Q O : ℂ} {R : ℝ}
+    (hAB : A ≠ B)
+    (hPcross : 0 < Gluck.Discrete.crossR2 A B P)
+    (hQcross : 0 < Gluck.Discrete.crossR2 A B Q)
+    (hcircleP : CircumcircleR2 A B P O R) (hconeP : InVertexCone A B P O)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P ≤
+      Gluck.Discrete.signedMengerR2 A B Q) :
+    edgePointDahlbergRegion A B Q ⊆ edgePointDahlbergRegion A B P := by
+  rw [edgePointDahlbergRegion_eq_of_pos hAB hQcross,
+    edgePointDahlbergRegion_eq_of_pos hAB hPcross]
+  apply edgeDahlbergRegion_anti_of_positive hAB
+  · exact edgeCircumcenterParameter_nonneg_of_regular_right hAB hPcross hcircleP hconeP
   · simpa [signedMengerR2_edge_parameter_of_pos hAB hPcross,
       signedMengerR2_edge_parameter_of_pos hAB hQcross] using hκ
 
