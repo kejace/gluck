@@ -36,6 +36,11 @@ statement.
 
 ## Deferred targets
 
+See `MixedSpaceFormTransport.md` for the dedicated research pass on extending
+Dahlberg's mixed, nonconvex theorem to `S²` and `H²`, including candidate
+statements, the coaxial-pencil nesting calculation, and the remaining proof
+gates.
+
 The smooth and discrete forward statements for `S²` and `H²` are declared in
 `Sphere.lean` and `Hyperbolic.lean`.  They intentionally remain `sorry` until
 the Euclidean proof and the correct intrinsic space-form regularity API are
