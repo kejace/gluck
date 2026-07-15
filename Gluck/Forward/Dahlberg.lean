@@ -2276,6 +2276,24 @@ theorem negativeOrientation_of_signedMengerProfile_neg {n : ℕ}
     simpa using hsimple.1 (i - 1)
   exact crossR2_neg_of_signedMengerR2_neg hAB (hκ i)
 
+/-! ## Signed-Menger profiles and discrete realizability -/
+
+/-- A simple polygon realizes its own signed-Menger profile. -/
+theorem realizesMenger_signedMengerProfile {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v) :
+    Gluck.Discrete.RealizesMenger (SignedMengerProfile v) := by
+  exact ⟨v, hsimple, fun i => rfl⟩
+
+/-- If a simple polygon has signed-Menger profile `κ`, then it realizes `κ` in
+the project-local Menger sense. -/
+theorem realizesMenger_of_signedMengerProfile_eq {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ} {κ : ZMod n → ℝ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hκ : SignedMengerProfile v = κ) :
+    Gluck.Discrete.RealizesMenger κ := by
+  subst hκ
+  exact realizesMenger_signedMengerProfile hsimple
+
 /-! ## Finite cyclic signed-Menger profile API -/
 
 /-- A nonconstant polygon signed-Menger profile has both a strict adjacent
