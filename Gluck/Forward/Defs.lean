@@ -975,6 +975,29 @@ theorem dahlbergFourVertex_of_orderedAdjacentTurns_four_le {n : ℕ}
     DahlbergFourVertex κ := by
   exact dahlbergFourVertex_of_orderedAdjacentTurns (two_le_of_four_le hn) hturns
 
+/-- An ordered-adjacent-turn witness contains, in particular, an adjacent
+strict increase and an adjacent strict decrease. -/
+theorem exists_adjacent_increase_and_decrease_of_orderedAdjacentTurns {n : ℕ}
+    {κ : ZMod n → ℝ} (hturns : OrderedAdjacentTurns κ) :
+    (∃ i : ZMod n, κ i < κ (i + 1)) ∧
+      ∃ i : ZMod n, κ (i + 1) < κ i := by
+  rcases hturns with
+    ⟨i₁, _i₂, _i₃, _i₄, _hi₁₂, _hi₂₃, _hi₃₄, _hi₄₁,
+      hinc₁, hdec₁, _hdec₂, _hinc₂, _hinc₃, _hdec₃, _hdec₄, _hinc₄⟩
+  refine ⟨⟨i₁, hinc₁⟩, ⟨(i₁ : ZMod n) + 1, ?_⟩⟩
+  simpa [add_assoc] using hdec₁
+
+/-- An ordered-adjacent-turn witness forces the cyclic profile to be
+nonconstant. -/
+theorem not_constant_of_orderedAdjacentTurns {n : ℕ} {κ : ZMod n → ℝ}
+    (hturns : OrderedAdjacentTurns κ) :
+    ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
+  rintro ⟨c, hconst⟩
+  rcases exists_adjacent_increase_and_decrease_of_orderedAdjacentTurns hturns with
+    ⟨⟨i, hinc⟩, _⟩
+  rw [hconst i, hconst (i + 1)] at hinc
+  exact (lt_irrefl c) hinc
+
 /-- Positive affine changes preserve ordered adjacent turns. -/
 theorem orderedAdjacentTurns_posAffine {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
     (ha : 0 < a) (hturns : OrderedAdjacentTurns κ) :
@@ -1010,6 +1033,69 @@ theorem orderedAdjacentTurns_congr {n : ℕ} {κ μ : ZMod n → ℝ}
     OrderedAdjacentTurns μ := by
   exact orderedAdjacentTurns_of_eq_posAffine (a := 1) (b := 0) (by norm_num)
     (by intro i; simp [hμ i]) hturns
+
+/-- Translating cyclic indices preserves ordered adjacent turns. -/
+theorem orderedAdjacentTurns_translateIndex {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} (a : ZMod n) (hturns : OrderedAdjacentTurns κ) :
+    OrderedAdjacentTurns (fun j => κ (j + a)) := by
+  rcases hturns with
+    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
+      hinc₁, hdec₁, hdec₂, hinc₂, hinc₃, hdec₃, hdec₄, hinc₄⟩
+  let A := a.val
+  let j₁ := i₁ + n - A
+  let j₂ := i₂ + n - A
+  let j₃ := i₃ + n - A
+  let j₄ := i₄ + n - A
+  have hAcast : (A : ZMod n) = a := ZMod.natCast_zmod_val a
+  have hAlt : A < n := ZMod.val_lt a
+  have hA₁ : A ≤ i₁ + n := by omega
+  have hA₂ : A ≤ i₂ + n := by omega
+  have hA₃ : A ≤ i₃ + n := by omega
+  have hA₄ : A ≤ i₄ + n := by omega
+  have hj₁ : ((j₁ : ℕ) : ZMod n) = (i₁ : ZMod n) - a := by
+    dsimp [j₁, A]
+    rw [Nat.cast_sub hA₁, Nat.cast_add, ZMod.natCast_self, add_zero, hAcast]
+  have hj₂ : ((j₂ : ℕ) : ZMod n) = (i₂ : ZMod n) - a := by
+    dsimp [j₂, A]
+    rw [Nat.cast_sub hA₂, Nat.cast_add, ZMod.natCast_self, add_zero, hAcast]
+  have hj₃ : ((j₃ : ℕ) : ZMod n) = (i₃ : ZMod n) - a := by
+    dsimp [j₃, A]
+    rw [Nat.cast_sub hA₃, Nat.cast_add, ZMod.natCast_self, add_zero, hAcast]
+  have hj₄ : ((j₄ : ℕ) : ZMod n) = (i₄ : ZMod n) - a := by
+    dsimp [j₄, A]
+    rw [Nat.cast_sub hA₄, Nat.cast_add, ZMod.natCast_self, add_zero, hAcast]
+  refine ⟨j₁, j₂, j₃, j₄, by omega, by omega, by omega, by omega,
+    ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · convert hinc₁ using 1
+    all_goals (simp [hj₁]; try abel)
+  · convert hdec₁ using 1
+    all_goals (simp [hj₁]; try abel)
+  · convert hdec₂ using 1
+    all_goals (simp [hj₂]; try abel)
+  · convert hinc₂ using 1
+    all_goals (simp [hj₂]; try abel)
+  · convert hinc₃ using 1
+    all_goals (simp [hj₃]; try abel)
+  · convert hdec₃ using 1
+    all_goals (simp [hj₃]; try abel)
+  · convert hdec₄ using 1
+    all_goals (simp [hj₄]; try abel)
+  · convert hinc₄ using 1
+    all_goals (simp [hj₄]; try abel)
+
+/-- Translating cyclic indices preserves ordered adjacent turns exactly. -/
+theorem orderedAdjacentTurns_translateIndex_iff {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} {a : ZMod n} :
+    OrderedAdjacentTurns (fun j => κ (j + a)) ↔ OrderedAdjacentTurns κ := by
+  constructor
+  · intro hturns
+    have hback :=
+      orderedAdjacentTurns_translateIndex (κ := fun j : ZMod n => κ (j + a)) (-a) hturns
+    convert hback using 1
+    ext j
+    congr 1
+    abel
+  · exact orderedAdjacentTurns_translateIndex a
 
 /-- A cyclic real profile has a global maximum. -/
 theorem exists_globalMax_zmod {n : ℕ} [NeZero n] (κ : ZMod n → ℝ) :
