@@ -2024,6 +2024,110 @@ theorem polygonEdgeCircleRadius_antitone_of_endpoint_order_pos_of_vertex_menger_
   exact polygonEdgeCircleRadius_antitone_of_endpoint_order_pos hsimple hregular i
     hPcross hQcross hκ
 
+/-! ## Profile-facing endpoint order wrappers -/
+
+/-- Positive signed-Menger profile at a polygon vertex gives positive
+orientation over the outgoing edge with the previous vertex as third point. -/
+theorem polygonEdgePrev_cross_pos_of_signedMengerProfile_pos {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v) {i : ZMod n}
+    (hκ : 0 < SignedMengerProfile v i) :
+    0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) := by
+  exact polygonEdgePrev_cross_pos_of_vertex_signedMenger_pos hsimple
+    (by simpa [SignedMengerProfile] using hκ)
+
+/-- Negative signed-Menger profile at a polygon vertex gives negative
+orientation over the outgoing edge with the previous vertex as third point. -/
+theorem polygonEdgePrev_cross_neg_of_signedMengerProfile_neg {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v) {i : ZMod n}
+    (hκ : SignedMengerProfile v i < 0) :
+    Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) < 0 := by
+  exact polygonEdgePrev_cross_neg_of_vertex_signedMenger_neg hsimple
+    (by simpa [SignedMengerProfile] using hκ)
+
+/-- Profile-facing own-region membership over the outgoing edge from nonzero
+signed Menger curvature at the left endpoint. -/
+theorem signedMengerProfile_edgePrev_mem_own_dahlbergRegion_of_ne_zero {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v) {i : ZMod n}
+    (hκ : SignedMengerProfile v i ≠ 0) :
+    v (i - 1) ∈ edgePointDahlbergRegion (v i) (v (i + 1)) (v (i - 1)) := by
+  exact polygonEdgePrev_mem_own_dahlbergRegion_of_vertex_menger_ne_zero hsimple
+    (by simpa [SignedMengerProfile] using hκ)
+
+/-- Profile-facing form of Dahlberg Lemma 8(1) for the left endpoint of the
+edge `i → i+1`. -/
+theorem signedMengerProfile_edgePrev_region_subset_halfPlane_of_nonneg {n : ℕ}
+    {v : ZMod n → ℂ} {i : ZMod n}
+    (hk : 0 ≤ SignedMengerProfile v i) :
+    edgePointDahlbergRegion (v i) (v (i + 1)) (v (i - 1)) ⊆
+      edgeHalfPlane (v i) (v (i + 1)) := by
+  exact polygonEdgePrev_region_subset_halfPlane_of_nonneg
+    (by simpa [SignedMengerProfile] using hk)
+
+/-- Profile-facing form of Dahlberg Lemma 8(2) for the left endpoint of the
+edge `i → i+1`. -/
+theorem signedMengerProfile_edgePrev_halfPlane_subset_region_of_nonpos {n : ℕ}
+    {v : ZMod n → ℂ} {i : ZMod n}
+    (hk : SignedMengerProfile v i ≤ 0) :
+    edgeHalfPlane (v i) (v (i + 1)) ⊆
+      edgePointDahlbergRegion (v i) (v (i + 1)) (v (i - 1)) := by
+  exact polygonEdgePrev_halfPlane_subset_region_of_nonpos
+    (by simpa [SignedMengerProfile] using hk)
+
+/-- Profile-facing endpoint form of Dahlberg Lemma 8 for the oriented edge
+from `v i` to `v (i+1)`. -/
+theorem signedMengerProfile_edgeDahlbergRegion_anti_of_endpoint_order
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (i : ZMod n)
+    (hκ : SignedMengerProfile v i ≤ SignedMengerProfile v (i + 1)) :
+    edgePointDahlbergRegion (v i) (v (i + 1)) (v (i + 1 + 1)) ⊆
+      edgePointDahlbergRegion (v i) (v (i + 1)) (v (i - 1)) := by
+  exact polygonEdgeDahlbergRegion_anti_of_endpoint_order hsimple hregular i
+    (by simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hκ)
+
+/-- Profile-facing incidence corollary of endpoint nesting. -/
+theorem signedMengerProfile_edgePoint_mem_region_of_endpoint_order
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (i : ZMod n)
+    (hκ : SignedMengerProfile v i ≤ SignedMengerProfile v (i + 1))
+    (hQcross : Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) ≠ 0) :
+    v (i + 1 + 1) ∈
+      edgePointDahlbergRegion (v i) (v (i + 1)) (v (i - 1)) := by
+  exact polygonEdgePoint_mem_region_of_endpoint_order hsimple hregular i
+    (by simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hκ) hQcross
+
+/-- Positive profile-facing incidence into the ordinary curvature disk. -/
+theorem signedMengerProfile_edgePoint_mem_edgeClosedDisk_of_endpoint_order_pos
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (i : ZMod n)
+    (hPκpos : 0 < SignedMengerProfile v i)
+    (hκ : SignedMengerProfile v i ≤ SignedMengerProfile v (i + 1)) :
+    v (i + 1 + 1) ∈
+      edgeClosedDisk (v i) (v (i + 1))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1))) := by
+  exact polygonEdgePoint_mem_edgeClosedDisk_of_endpoint_order_pos_of_vertex_menger_pos
+    hsimple hregular i
+    (by simpa [SignedMengerProfile] using hPκpos)
+    (by simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hκ)
+
+/-- Positive profile-facing radius comparison along one oriented edge. -/
+theorem signedMengerProfile_edgeCircleRadius_antitone_of_endpoint_order_pos
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (i : ZMod n)
+    (hPκpos : 0 < SignedMengerProfile v i)
+    (hκ : SignedMengerProfile v i ≤ SignedMengerProfile v (i + 1)) :
+    normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1))) ≤
+      normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1))) := by
+  exact polygonEdgeCircleRadius_antitone_of_endpoint_order_pos_of_vertex_menger_pos
+    hsimple hregular i
+    (by simpa [SignedMengerProfile] using hPκpos)
+    (by simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hκ)
+
 /-! ## Concyclic polygons and signed Menger curvature -/
 
 /-- A concyclic polygon gives a circumcircle for every oriented vertex triple. -/
