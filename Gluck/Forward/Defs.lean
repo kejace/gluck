@@ -92,6 +92,26 @@ theorem discreteLocalMin_of_neighbors {n : ℕ} (hn : 2 ≤ n) {κ : ZMod n → 
   · simpa using hleft
   · simpa using hright
 
+/-- An adjacent increase followed by an adjacent decrease gives a strict
+one-step cyclic local maximum at the middle vertex. -/
+theorem discreteLocalMax_of_succ_turn {n : ℕ} (hn : 2 ≤ n) {κ : ZMod n → ℝ}
+    {i : ZMod n} (hinc : κ i < κ (i + 1))
+    (hdec : κ (i + 1 + 1) < κ (i + 1)) :
+    DiscreteLocalMax κ (i + 1) := by
+  apply discreteLocalMax_of_neighbors hn
+  · simpa [sub_eq_add_neg, add_assoc] using hinc
+  · simpa [add_assoc] using hdec
+
+/-- An adjacent decrease followed by an adjacent increase gives a strict
+one-step cyclic local minimum at the middle vertex. -/
+theorem discreteLocalMin_of_succ_turn {n : ℕ} (hn : 2 ≤ n) {κ : ZMod n → ℝ}
+    {i : ZMod n} (hdec : κ (i + 1) < κ i)
+    (hinc : κ (i + 1) < κ (i + 1 + 1)) :
+    DiscreteLocalMin κ (i + 1) := by
+  apply discreteLocalMin_of_neighbors hn
+  · simpa [sub_eq_add_neg, add_assoc] using hdec
+  · simpa [add_assoc] using hinc
+
 /-- Dahlberg's source-form conclusion: two distinct local maxima and two
 distinct local minima, alternating around the cyclic vertex set. -/
 def DahlbergFourVertex {n : ℕ} (κ : ZMod n → ℝ) : Prop :=
@@ -311,6 +331,15 @@ theorem exists_adjacent_succ_lt_of_not_constant {n : ℕ} [NeZero n]
   apply exists_constant_of_forall_le_succ
   intro i
   exact le_of_not_gt (fun hlt => hnone ⟨i, hlt⟩)
+
+/-- A nonconstant cyclic profile has both a strict adjacent increase and a
+strict adjacent decrease. -/
+theorem exists_adjacent_increase_and_decrease_of_not_constant {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    (∃ i : ZMod n, κ i < κ (i + 1)) ∧
+      ∃ i : ZMod n, κ (i + 1) < κ i := by
+  exact ⟨exists_adjacent_lt_succ_of_not_constant hnc,
+    exists_adjacent_succ_lt_of_not_constant hnc⟩
 
 /-- A nonconstant cyclic profile has an adjacent strict increase or strict
 decrease. -/

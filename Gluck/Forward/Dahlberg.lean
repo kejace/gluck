@@ -2091,6 +2091,24 @@ theorem exists_constant_signedMenger_of_concyclic_neg {n : ℕ}
   refine ⟨-(1 / R), fun i => ?_⟩
   exact polygonSignedMenger_eq_neg_inv_radius_of_concyclic_neg hsimple hR hdist i (hcross i)
 
+/-! ## Finite cyclic signed-Menger profile API -/
+
+/-- A nonconstant polygon signed-Menger profile has both a strict adjacent
+increase and a strict adjacent decrease. -/
+theorem polygonSignedMenger_exists_adjacent_increase_and_decrease_of_not_constant
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hnc : ¬ ∃ c, ∀ i : ZMod n,
+      Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) = c) :
+    (∃ i : ZMod n,
+      Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) <
+        Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1))) ∧
+      ∃ i : ZMod n,
+        Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) <
+          Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) := by
+  simpa [sub_eq_add_neg, add_assoc] using
+    (exists_adjacent_increase_and_decrease_of_not_constant
+      (κ := fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) hnc)
+
 /-! ## Dahlberg's Euclidean discrete four-vertex kernel -/
 
 /-- Dahlberg's Euclidean discrete four-vertex kernel.
