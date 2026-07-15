@@ -144,6 +144,17 @@ theorem not_constant_of_dahlbergFourVertex {n : ℕ} {κ : ZMod n → ℝ}
   rw [hconst ((i₁ : ZMod n) - (l : ZMod n)), hconst (i₁ : ZMod n)] at hdrop
   exact (lt_irrefl c) hdrop
 
+/-- A constant-or-Dahlberg conclusion upgrades to Dahlberg's conclusion as
+soon as the profile is known to be nonconstant. -/
+theorem dahlbergFourVertex_of_constant_or_of_not_constant {n : ℕ}
+    {κ : ZMod n → ℝ}
+    (h : (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  rcases h with hconst | hfv
+  · exact False.elim (hnc hconst)
+  · exact hfv
+
 /-- Four ordered plateau-aware extrema in `min-max-min-max` order give
 Dahlberg's source-form conclusion after rotating the cyclic order to start at
 the first maximum. -/
