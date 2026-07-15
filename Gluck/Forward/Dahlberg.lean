@@ -1516,6 +1516,36 @@ theorem edgePointDahlbergRegion_anti_of_endpoint_regular {A B P Q : ℂ}
         dahlbergRegularAt_circle_of_cross_ne_zero hPreg hPpos.ne'
       exact edgePointDahlbergRegion_anti_of_positive hAB hPpos hQpos hcircleP hconeP hκ
 
+/-- The actual signed-Menger curvature at vertex `i` is the same cyclic
+orientation as the endpoint-edge curvature over edge `i → i+1` with the
+previous vertex as third point. -/
+theorem polygonSignedMenger_eq_edgePrev {n : ℕ} {v : ZMod n → ℂ} (i : ZMod n) :
+    Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) =
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) := by
+  exact (signedMengerR2_cycle (v (i - 1)) (v i) (v (i + 1))).symm
+
+/-- The corresponding cyclic rewrite for oriented twice-area. -/
+theorem polygonCross_eq_edgePrev {n : ℕ} {v : ZMod n → ℂ} (i : ZMod n) :
+    Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) =
+      Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) := by
+  exact (crossR2_cycle (v (i - 1)) (v i) (v (i + 1))).symm
+
+/-- Positive oriented area at the actual vertex is positive over the outgoing
+edge with the previous vertex as third point. -/
+theorem polygonEdgePrev_cross_pos_of_vertex_cross_pos {n : ℕ} {v : ZMod n → ℂ}
+    {i : ZMod n}
+    (hcross : 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) :
+    0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) := by
+  rwa [← polygonCross_eq_edgePrev i]
+
+/-- Negative oriented area at the actual vertex is negative over the outgoing
+edge with the previous vertex as third point. -/
+theorem polygonEdgePrev_cross_neg_of_vertex_cross_neg {n : ℕ} {v : ZMod n → ℂ}
+    {i : ZMod n}
+    (hcross : Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) < 0) :
+    Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) < 0 := by
+  rwa [← polygonCross_eq_edgePrev i]
+
 /-- Polygon-indexed endpoint form of Dahlberg Lemma 8 for the oriented edge
 from `v i` to `v (i+1)`. The curvature at the left endpoint is cyclically
 rewritten to use the same oriented edge. -/
