@@ -398,6 +398,26 @@ def normalizedClosedDisk (a y : ℝ) : Set ℂ :=
 def normalizedClosedExterior (a y : ℝ) : Set ℂ :=
   {z | a ^ 2 ≤ z.re ^ 2 + z.im ^ 2 - 2 * y * z.im}
 
+/-- Both normalized chord endpoints lie in every coaxial closed disk. -/
+theorem normalizedClosedDisk_endpoints (a y : ℝ) :
+    (a : ℂ) ∈ normalizedClosedDisk a y ∧
+      (-a : ℂ) ∈ normalizedClosedDisk a y := by
+  constructor
+  · change (a : ℂ).re ^ 2 + (a : ℂ).im ^ 2 - 2 * y * (a : ℂ).im ≤ a ^ 2
+    simp
+  · change (-a : ℂ).re ^ 2 + (-a : ℂ).im ^ 2 - 2 * y * (-a : ℂ).im ≤ a ^ 2
+    simp
+
+/-- The noncollinear third point lies in the closed disk bounded by its
+normalized circumcircle. -/
+theorem normalizedCircumcenter_mem_closedDisk {a : ℝ} {z : ℂ} (hz : z.im ≠ 0) :
+    z ∈ normalizedClosedDisk a (normalizedCircumcenterParameter a z) := by
+  have hzero := circlePowerR2_normalized_parameter (a := a) (z := z) hz
+  rw [circlePowerR2_normalized] at hzero
+  change z.re ^ 2 + z.im ^ 2 -
+      2 * normalizedCircumcenterParameter a z * z.im ≤ a ^ 2
+  linarith
+
 /-- Dahlberg's exact oriented region `δ(P,e)` in normalized coordinates. -/
 def normalizedDahlbergRegion (a y k : ℝ) : Set ℂ :=
   if 0 < k then normalizedClosedDisk a y ∩ normalizedEdgeHalfPlane
@@ -509,6 +529,31 @@ the point's signed Menger curvature with that edge. -/
 noncomputable def edgePointDahlbergRegion (A B C : ℂ) : Set ℂ :=
   edgeDahlbergRegion A B (edgeCircumcenterParameter A B C)
     (Gluck.Discrete.signedMengerR2 A B C)
+
+/-- Every canonical edge disk contains both endpoints of the edge. -/
+theorem edgeClosedDisk_endpoints {A B : ℂ} (hAB : A ≠ B) (y : ℝ) :
+    A ∈ edgeClosedDisk A B y ∧ B ∈ edgeClosedDisk A B y := by
+  have he := canonicalChord_endpoints hAB
+  have hnorm := normalizedClosedDisk_endpoints (chordHalfLength A B) y
+  constructor
+  · unfold edgeClosedDisk transportedClosedDisk directIsometryImage
+    exact ⟨(-chordHalfLength A B : ℂ), hnorm.2, by
+      simpa [transportedChordLeft] using he.1⟩
+  · unfold edgeClosedDisk transportedClosedDisk directIsometryImage
+    exact ⟨(chordHalfLength A B : ℂ), hnorm.1, by
+      simpa [transportedChordRight] using he.2⟩
+
+/-- A noncollinear point lies in the canonical edge disk determined by its
+circumcircle through the oriented edge. -/
+theorem edgePoint_mem_own_edgeClosedDisk {A B C : ℂ}
+    (hAB : A ≠ B) (hcross : Gluck.Discrete.crossR2 A B C ≠ 0) :
+    C ∈ edgeClosedDisk A B (edgeCircumcenterParameter A B C) := by
+  have hz := edgeCoordinates_im_ne_zero hAB hcross
+  have hmem := normalizedCircumcenter_mem_closedDisk
+    (a := chordHalfLength A B) (z := edgeCoordinates A B C) hz
+  unfold edgeClosedDisk transportedClosedDisk directIsometryImage
+  exact ⟨edgeCoordinates A B C, by simpa [edgeCircumcenterParameter] using hmem,
+    directIsometryR2_edgeCoordinates hAB C⟩
 
 /-- The normalized upper cap is the upper-half-plane part of the corresponding
 closed Euclidean disk. -/
@@ -757,6 +802,27 @@ theorem edgePointDahlbergRegion_eq_of_pos {A B C : ℂ} (hAB : A ≠ B)
   unfold edgePointDahlbergRegion
   rw [signedMengerR2_edge_parameter_of_pos hAB hcross]
 
+/-- On the positive branch, the third point belongs to its own Dahlberg
+edge-region. -/
+theorem edgePoint_mem_own_dahlbergRegion_of_pos {A B C : ℂ}
+    (hAB : A ≠ B) (hcross : 0 < Gluck.Discrete.crossR2 A B C) :
+    C ∈ edgePointDahlbergRegion A B C := by
+  rw [edgePointDahlbergRegion_eq_of_pos hAB hcross]
+  have hz := (crossR2_pos_iff_edgeCoordinates_im_pos hAB C).mp hcross
+  have hdisk := normalizedCircumcenter_mem_closedDisk
+    (a := chordHalfLength A B) (z := edgeCoordinates A B C) hz.ne'
+  unfold edgeDahlbergRegion transportedDahlbergRegion directIsometryImage
+  refine ⟨edgeCoordinates A B C, ?_, directIsometryR2_edgeCoordinates hAB C⟩
+  rw [normalizedDahlbergRegion_eq_upperCap_of_pos
+    (normalizedCircleCurvature_pos (chordHalfLength_pos hAB).ne' _)]
+  change 0 ≤ (edgeCoordinates A B C).im ∧
+    (edgeCoordinates A B C).re ^ 2 + (edgeCoordinates A B C).im ^ 2 -
+        2 * edgeCircumcenterParameter A B C * (edgeCoordinates A B C).im ≤
+      chordHalfLength A B ^ 2
+  constructor
+  · exact hz.le
+  · simpa [normalizedClosedDisk, edgeCircumcenterParameter] using hdisk
+
 /-- Negative orientation rewrites the point-edge Dahlberg region using the
 negative normalized curvature of its canonical circle. -/
 theorem edgePointDahlbergRegion_eq_of_neg {A B C : ℂ} (hAB : A ≠ B)
@@ -767,6 +833,39 @@ theorem edgePointDahlbergRegion_eq_of_neg {A B C : ℂ} (hAB : A ≠ B)
           (edgeCircumcenterParameter A B C)) := by
   unfold edgePointDahlbergRegion
   rw [signedMengerR2_edge_parameter_of_neg hAB hcross]
+
+/-- On the negative branch, the third point belongs to its own Dahlberg
+edge-region via the exterior side of the oriented disk. -/
+theorem edgePoint_mem_own_dahlbergRegion_of_neg {A B C : ℂ}
+    (hAB : A ≠ B) (hcross : Gluck.Discrete.crossR2 A B C < 0) :
+    C ∈ edgePointDahlbergRegion A B C := by
+  rw [edgePointDahlbergRegion_eq_of_neg hAB hcross]
+  have hz := (crossR2_neg_iff_edgeCoordinates_im_neg hAB C).mp hcross
+  have hzero := circlePowerR2_normalized_parameter
+    (a := chordHalfLength A B) (z := edgeCoordinates A B C) hz.ne
+  change circlePowerR2 (normalizedCircleCenter (edgeCircumcenterParameter A B C))
+    (edgeCoordinates A B C)
+    (normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B C)) = 0 at hzero
+  unfold edgeDahlbergRegion transportedDahlbergRegion directIsometryImage
+  refine ⟨edgeCoordinates A B C, ?_, directIsometryR2_edgeCoordinates hAB C⟩
+  have hneg : -normalizedCircleCurvature (chordHalfLength A B)
+      (edgeCircumcenterParameter A B C) < 0 :=
+    neg_lt_zero.mpr (normalizedCircleCurvature_pos (chordHalfLength_pos hAB).ne' _)
+  rw [normalizedDahlbergRegion, if_neg (not_lt_of_ge hneg.le), if_pos hneg]
+  apply Or.inl
+  rw [circlePowerR2_normalized] at hzero
+  change chordHalfLength A B ^ 2 ≤
+    (edgeCoordinates A B C).re ^ 2 + (edgeCoordinates A B C).im ^ 2 -
+      2 * edgeCircumcenterParameter A B C * (edgeCoordinates A B C).im
+  linarith
+
+/-- Every noncollinear point belongs to its own Dahlberg edge-region. -/
+theorem edgePoint_mem_own_dahlbergRegion {A B C : ℂ}
+    (hAB : A ≠ B) (hcross : Gluck.Discrete.crossR2 A B C ≠ 0) :
+    C ∈ edgePointDahlbergRegion A B C := by
+  rcases lt_or_gt_of_ne hcross with hneg | hpos
+  · exact edgePoint_mem_own_dahlbergRegion_of_neg hAB hneg
+  · exact edgePoint_mem_own_dahlbergRegion_of_pos hAB hpos
 
 /-- Collinear triples have zero signed Menger curvature. -/
 theorem signedMengerR2_eq_zero_of_cross_eq_zero {A B C : ℂ}
