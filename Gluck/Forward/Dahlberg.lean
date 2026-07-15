@@ -442,6 +442,13 @@ theorem normalizedDahlbergRegion_subset_halfPlane {a y k : ℝ} (hk : 0 ≤ k) :
     intro z hz
     exact hz.1
 
+/-- On the positive branch, Dahlberg's exact region lies in the closed disk. -/
+theorem normalizedDahlbergRegion_subset_closedDisk_of_pos {a y k : ℝ} (hk : 0 < k) :
+    normalizedDahlbergRegion a y k ⊆ normalizedClosedDisk a y := by
+  rw [normalizedDahlbergRegion_eq_upperCap_of_pos hk]
+  intro z hz
+  exact hz.2
+
 /-- Dahlberg Lemma 8(2): the interior half-plane lies in every
 nonpositive-curvature region. -/
 theorem normalizedHalfPlane_subset_dahlbergRegion {a y k : ℝ} (hk : k ≤ 0) :
@@ -1071,6 +1078,30 @@ theorem transportedDahlbergRegion_mono (u w : ℂ) {a yP yQ kP kQ : ℝ}
   unfold transportedDahlbergRegion directIsometryImage
   exact Set.image_mono h
 
+/-- Positive transported Dahlberg regions lie in their transported closed disk. -/
+theorem transportedDahlbergRegion_subset_closedDisk_of_pos (u w : ℂ) {a y k : ℝ}
+    (hk : 0 < k) :
+    transportedDahlbergRegion u w a y k ⊆ transportedClosedDisk u w a y := by
+  unfold transportedDahlbergRegion transportedClosedDisk directIsometryImage
+  exact Set.image_mono (normalizedDahlbergRegion_subset_closedDisk_of_pos hk)
+
+/-- Positive edge Dahlberg regions lie in the corresponding edge disk. -/
+theorem edgeDahlbergRegion_subset_closedDisk_of_pos (A B : ℂ) {y k : ℝ}
+    (hk : 0 < k) :
+    edgeDahlbergRegion A B y k ⊆ edgeClosedDisk A B y := by
+  unfold edgeDahlbergRegion edgeClosedDisk
+  exact transportedDahlbergRegion_subset_closedDisk_of_pos _ _ hk
+
+/-- On the positive branch, a point-edge Dahlberg region is contained in the
+ordinary curvature disk for that point and edge. -/
+theorem edgePointDahlbergRegion_subset_edgeClosedDisk_of_pos {A B C : ℂ}
+    (hAB : A ≠ B) (hcross : 0 < Gluck.Discrete.crossR2 A B C) :
+    edgePointDahlbergRegion A B C ⊆
+      edgeClosedDisk A B (edgeCircumcenterParameter A B C) := by
+  rw [edgePointDahlbergRegion_eq_of_pos hAB hcross]
+  exact edgeDahlbergRegion_subset_closedDisk_of_pos A B
+    (normalizedCircleCurvature_pos (chordHalfLength_pos hAB).ne' _)
+
 /-- Membership in an arbitrary edge disk is membership in the normalized disk
 after passing to canonical edge coordinates. -/
 theorem edgeCoordinates_mem_normalizedClosedDisk_of_mem_edgeClosedDisk {A B C : ℂ}
@@ -1235,5 +1266,18 @@ theorem edgePointDahlbergRegion_anti_of_regular {A B P Q : ℂ}
     · obtain ⟨O, R, hcircleP, hconeP⟩ :=
         dahlbergRegularAt_circle_of_cross_ne_zero hPreg hPpos.ne'
       exact edgePointDahlbergRegion_anti_of_positive hAB hPpos hQpos hcircleP hconeP hκ
+
+/-- If two locally regular points over an oriented edge are ordered by signed
+Menger curvature, then the higher-curvature point lies in the lower-curvature
+point's Dahlberg edge-region. -/
+theorem edgePoint_mem_region_of_regular_order {A B P Q : ℂ}
+    (hAB : A ≠ B)
+    (hPreg : DahlbergRegularAt P A B) (hQreg : DahlbergRegularAt Q A B)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P ≤
+      Gluck.Discrete.signedMengerR2 A B Q)
+    (hQcross : Gluck.Discrete.crossR2 A B Q ≠ 0) :
+    Q ∈ edgePointDahlbergRegion A B P := by
+  have hQmem := edgePoint_mem_own_dahlbergRegion hAB hQcross
+  exact edgePointDahlbergRegion_anti_of_regular hAB hPreg hQreg hκ hQmem
 
 end Gluck.Forward
