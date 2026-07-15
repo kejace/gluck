@@ -356,6 +356,80 @@ theorem dahlberg_discrete_four_vertex_E2_of_strict_orientation
   exact signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_strict_orientation
     hn v hsimple hregular horient
 
+/-! ## E² conformal-Menger normalization -/
+
+/-- At `ε = 0`, the conformal-Menger model curvature of a positively oriented
+triple is half the signed Euclidean Menger curvature. -/
+theorem conformalMenger_zero_eq_half_signedMengerR2_of_pos {A B C : ℂ} {κ : ℝ}
+    (hAB : A ≠ B) (hcross : 0 < Gluck.Discrete.crossR2 A B C)
+    (hκ : ConformalMenger 0 A B C κ) :
+    κ = (1 / 2) * Gluck.Discrete.signedMengerR2 A B C := by
+  rcases hκ with ⟨O, R, hR, hA, hB, hC, hκ⟩
+  have hcircle : CircumcircleR2 C A B O R := ⟨hR, hC, hA, hB⟩
+  have hsigned :=
+    signedMengerR2_eq_inv_circumradius_of_pos hAB hcross hcircle
+  rw [hκ, hsigned]
+  rw [if_pos hcross]
+  field_simp [hR.ne']
+  ring
+
+/-- At `ε = 0`, the conformal-Menger model curvature of a negatively oriented
+triple is half the signed Euclidean Menger curvature. -/
+theorem conformalMenger_zero_eq_half_signedMengerR2_of_neg {A B C : ℂ} {κ : ℝ}
+    (hAB : A ≠ B) (hcross : Gluck.Discrete.crossR2 A B C < 0)
+    (hκ : ConformalMenger 0 A B C κ) :
+    κ = (1 / 2) * Gluck.Discrete.signedMengerR2 A B C := by
+  rcases hκ with ⟨O, R, hR, hA, hB, hC, hκ⟩
+  have hcircle : CircumcircleR2 C A B O R := ⟨hR, hC, hA, hB⟩
+  have hsigned :=
+    signedMengerR2_eq_neg_inv_circumradius_of_neg hAB hcross hcircle
+  rw [hκ, hsigned]
+  rw [if_neg (not_lt_of_gt hcross)]
+  field_simp [hR.ne']
+  ring
+
+/-- A positively oriented `ε = 0` conformal-Menger realization is pointwise
+`1/2` times the E² signed-Menger profile. -/
+theorem realizesConformalMenger_zero_eq_half_signedMengerProfile_of_positiveOrientation
+    {n : ℕ} {v : ZMod n → ℂ} {κ : ZMod n → ℝ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ) :
+    ∀ i : ZMod n, κ i = (1 / 2) * SignedMengerProfile v i := by
+  intro i
+  have hAB : v (i - 1) ≠ v i := by
+    simpa using hsimple.1 (i - 1)
+  exact conformalMenger_zero_eq_half_signedMengerR2_of_pos
+    hAB (horient i) (hκ i)
+
+/-- A negatively oriented `ε = 0` conformal-Menger realization is pointwise
+`1/2` times the E² signed-Menger profile. -/
+theorem realizesConformalMenger_zero_eq_half_signedMengerProfile_of_negativeOrientation
+    {n : ℕ} {v : ZMod n → ℂ} {κ : ZMod n → ℝ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ) :
+    ∀ i : ZMod n, κ i = (1 / 2) * SignedMengerProfile v i := by
+  intro i
+  have hAB : v (i - 1) ≠ v i := by
+    simpa using hsimple.1 (i - 1)
+  exact conformalMenger_zero_eq_half_signedMengerR2_of_neg
+    hAB (horient i) (hκ i)
+
+/-- A strictly oriented `ε = 0` conformal-Menger realization is pointwise
+`1/2` times the E² signed-Menger profile. -/
+theorem realizesConformalMenger_zero_eq_half_signedMengerProfile_of_strict_orientation
+    {n : ℕ} {v : ZMod n → ℂ} {κ : ZMod n → ℝ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ) :
+    ∀ i : ZMod n, κ i = (1 / 2) * SignedMengerProfile v i := by
+  rcases horient with hpos | hneg
+  · exact realizesConformalMenger_zero_eq_half_signedMengerProfile_of_positiveOrientation
+      hsimple hpos hκ
+  · exact realizesConformalMenger_zero_eq_half_signedMengerProfile_of_negativeOrientation
+      hsimple hneg hκ
+
 /-- Positive affine changes of the E² signed-Menger profile preserve the
 nonconcyclic Dahlberg four-vertex conclusion.  This is the algebraic transport
 interface used by space-form reductions after their curvature is identified
@@ -421,6 +495,41 @@ theorem constant_or_dahlbergFourVertex_E2_of_posAffine_signedMengerProfile_stric
       convert hfv using 1
       ext i
       exact hκ i)
+
+/-- Nonconcyclic `ε = 0` conformal-Menger realizations inherit Dahlberg's E²
+four-vertex conclusion under strict orientation. -/
+theorem dahlbergFourVertex_E2_of_realizesConformalMenger_zero_not_concyclic
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v)
+    (hκ : RealizesConformalMenger 0 v κ) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_E2_of_posAffine_signedMengerProfile_not_concyclic
+    hn v κ hsimple hregular hnoncircle (a := 1 / 2) (b := 0) (by norm_num)
+    (by
+      intro i
+      simpa [add_zero] using
+        realizesConformalMenger_zero_eq_half_signedMengerProfile_of_strict_orientation
+          hsimple horient hκ i)
+
+/-- Strictly oriented `ε = 0` conformal-Menger realizations satisfy the E²
+constant-or-Dahlberg four-vertex package. -/
+theorem constant_or_dahlbergFourVertex_E2_of_realizesConformalMenger_zero_strict_orientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_E2_of_posAffine_signedMengerProfile_strict_orientation
+    hn v κ hsimple hregular horient (a := 1 / 2) (b := 0) (by norm_num)
+    (by
+      intro i
+      simpa [add_zero] using
+        realizesConformalMenger_zero_eq_half_signedMengerProfile_of_strict_orientation
+          hsimple horient hκ i)
 
 /-- Dahlberg's Euclidean discrete four-vertex theorem: the signed Menger
 curvature of a locally regular simple closed polygon is constant or has an
