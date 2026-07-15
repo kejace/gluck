@@ -64,7 +64,8 @@ gates `constant_or_dahlbergFourVertex_S2_source` and
 wrappers add an explicit nonconstancy hypothesis to rule out the
 constant-curvature case.  `ConformalMenger.lean` adds the proved
 `ε ∈ {0,1,-1}` dispatch layer over the E²/S²/H² conformal-Menger wrappers,
-using a common positive-orientation interface.  Their status is not uniform:
+using common positive-orientation and strict-orientation interfaces.  Their
+status is not uniform:
 
 - the smooth theorem is one unconditional space-form theorem, transported by
   the Möbius-invariant osculating-cycle contact condition;
