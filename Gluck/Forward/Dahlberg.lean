@@ -1745,6 +1745,19 @@ theorem polygonEdgePoint_mem_region_of_endpoint_order {n : ℕ} [NeZero n]
   have hQmem := edgePoint_mem_own_dahlbergRegion hAB hQcross
   exact polygonEdgeDahlbergRegion_anti_of_endpoint_order hsimple hregular i hκ hQmem
 
+/-- Polygon-indexed endpoint incidence using nonzero signed Menger curvature
+at the next vertex. -/
+theorem polygonEdgePoint_mem_region_of_endpoint_order_menger_ne_zero {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (i : ZMod n)
+    (hκ : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) ≤
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)))
+    (hQκ : Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) ≠ 0) :
+    v (i + 1 + 1) ∈
+      edgePointDahlbergRegion (v i) (v (i + 1)) (v (i - 1)) := by
+  exact polygonEdgePoint_mem_region_of_endpoint_order hsimple hregular i hκ
+    (crossR2_ne_zero_of_signedMengerR2_ne_zero hQκ)
+
 /-- Positive polygon-indexed incidence into the ordinary curvature disk. -/
 theorem polygonEdgePoint_mem_edgeClosedDisk_of_endpoint_order_pos {n : ℕ} [NeZero n]
     {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
@@ -1834,6 +1847,18 @@ theorem edgePoint_mem_region_of_endpoint_regular_order {A B P Q : ℂ}
     Q ∈ edgePointDahlbergRegion A B P := by
   have hQmem := edgePoint_mem_own_dahlbergRegion hAB hQcross
   exact edgePointDahlbergRegion_anti_of_endpoint_regular hAB hPreg hQreg hκ hQmem
+
+/-- Endpoint ordered regular incidence using nonzero signed Menger curvature
+for the higher-curvature endpoint. -/
+theorem edgePoint_mem_region_of_endpoint_regular_order_menger_ne_zero {A B P Q : ℂ}
+    (hAB : A ≠ B)
+    (hPreg : DahlbergRegularAt P A B) (hQreg : DahlbergRegularAt A B Q)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P ≤
+      Gluck.Discrete.signedMengerR2 A B Q)
+    (hQκ : Gluck.Discrete.signedMengerR2 A B Q ≠ 0) :
+    Q ∈ edgePointDahlbergRegion A B P := by
+  exact edgePoint_mem_region_of_endpoint_regular_order hAB hPreg hQreg hκ
+    (crossR2_ne_zero_of_signedMengerR2_ne_zero hQκ)
 
 /-- Positive ordered regular incidence into the ordinary curvature disk. -/
 theorem edgePoint_mem_edgeClosedDisk_of_regular_order_pos {A B P Q : ℂ}
