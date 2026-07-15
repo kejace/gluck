@@ -739,6 +739,23 @@ theorem not_constant_posAffine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
     field_simp [ha.ne'] at hi ⊢
     linarith
 
+/-- Nonzero affine changes preserve nonconstancy of cyclic profiles. -/
+theorem not_constant_affine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
+    (ha : a ≠ 0) :
+    (¬ ∃ c, ∀ i : ZMod n, a * κ i + b = c) ↔
+      ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
+  constructor
+  · intro hscaled hconst
+    rcases hconst with ⟨c, hc⟩
+    exact hscaled ⟨a * c + b, fun i => by simp [hc i]⟩
+  · intro h hscaledconst
+    rcases hscaledconst with ⟨c, hc⟩
+    apply h
+    refine ⟨(c - b) / a, fun i => ?_⟩
+    have hi := hc i
+    field_simp [ha] at hi ⊢
+    linarith
+
 /-- Translating cyclic indices preserves nonconstancy. -/
 theorem not_constant_translateIndex_iff {n : ℕ} {κ : ZMod n → ℝ} {a : ZMod n} :
     (¬ ∃ c, ∀ i : ZMod n, κ (i + a) = c) ↔
