@@ -205,6 +205,22 @@ theorem five_consecutive_cross_eq_zero_E2_of_constant_signedMengerProfile_zero {
   exact five_consecutive_cross_eq_zero_of_constant_signedMengerProfile_zero
     hsimple hκ
 
+/-- E² zero-profile propagation along every natural forward offset from a
+fixed base edge. -/
+theorem forward_chain_cross_eq_zero_E2_of_constant_signedMengerProfile_zero {n : ℕ}
+    (v : ZMod n → ℂ) (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hκ : ∀ i : ZMod n, SignedMengerProfile v i = 0) (i : ZMod n) :
+    ∀ k : ℕ, Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + (k : ZMod n))) = 0 := by
+  exact forward_chain_cross_eq_zero_of_constant_signedMengerProfile_zero hsimple hκ i
+
+/-- E² zero-profile propagation: every vertex lies on every chosen base-edge
+line. -/
+theorem all_vertices_cross_eq_zero_E2_of_constant_signedMengerProfile_zero {n : ℕ}
+    [NeZero n] (v : ZMod n → ℂ) (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hκ : ∀ i : ZMod n, SignedMengerProfile v i = 0) :
+    ∀ i j : ZMod n, Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v j) = 0 := by
+  exact all_vertices_cross_eq_zero_of_constant_signedMengerProfile_zero hsimple hκ
+
 /-- E² zero-profile regularity reduction: a constant-zero signed-Menger
 profile on a simple locally regular polygon makes every vertex a segment
 subdivision point between its two neighbors. -/

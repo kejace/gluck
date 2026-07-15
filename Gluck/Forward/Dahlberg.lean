@@ -89,6 +89,20 @@ theorem crossR2_cycle_two (A B C : ℂ) :
     Gluck.Discrete.crossR2 C A B = Gluck.Discrete.crossR2 A B C := by
   exact (crossR2_cycle C A B).symm
 
+/-- The oriented twice-area vanishes when the third point is the left endpoint. -/
+theorem crossR2_left_endpoint (A B : ℂ) :
+    Gluck.Discrete.crossR2 A B A = 0 := by
+  unfold Gluck.Discrete.crossR2
+  simp only [Complex.sub_re, Complex.sub_im]
+  ring_nf
+
+/-- The oriented twice-area vanishes when the third point is the right endpoint. -/
+theorem crossR2_right_endpoint (A B : ℂ) :
+    Gluck.Discrete.crossR2 A B B = 0 := by
+  unfold Gluck.Discrete.crossR2
+  simp only [Complex.sub_re, Complex.sub_im]
+  ring_nf
+
 /-- Consecutive collinear triples propagate collinearity across the shared
 nondegenerate edge. -/
 theorem crossR2_eq_zero_of_consecutive {A B C D : ℂ} (hBC : B ≠ C)
@@ -173,6 +187,49 @@ theorem crossR2_eq_zero_of_same_line_step {A B C D E : ℂ}
   have hBCE : Gluck.Discrete.crossR2 B C E = 0 :=
     crossR2_eq_zero_of_consecutive hCD hBCD hCDE
   exact crossR2_eq_zero_of_consecutive hBC hABC hBCE
+
+/-- One-step line propagation without any nonincidence condition between the
+fixed base edge and the moving edge.  If `C` and `D` are on the nondegenerate
+line `A B`, the moving edge `C D` is nondegenerate, and `E` is collinear with
+`C,D`, then `E` is on the base line `A B`. -/
+theorem crossR2_eq_zero_of_same_line_step_of_moving_edge {A B C D E : ℂ}
+    (hCD : C ≠ D)
+    (hABC : Gluck.Discrete.crossR2 A B C = 0)
+    (hABD : Gluck.Discrete.crossR2 A B D = 0)
+    (hCDE : Gluck.Discrete.crossR2 C D E = 0) :
+    Gluck.Discrete.crossR2 A B E = 0 := by
+  have hCDsq_pos : 0 < (D.re - C.re) ^ 2 + (D.im - C.im) ^ 2 := by
+    have hCDsq_ne : (D.re - C.re) ^ 2 + (D.im - C.im) ^ 2 ≠ 0 := by
+      intro hsq
+      apply hCD
+      apply Complex.ext
+      · nlinarith [sq_nonneg (D.re - C.re), sq_nonneg (D.im - C.im)]
+      · nlinarith [sq_nonneg (D.re - C.re), sq_nonneg (D.im - C.im)]
+    exact lt_of_le_of_ne' (add_nonneg (sq_nonneg _) (sq_nonneg _)) hCDsq_ne
+  unfold Gluck.Discrete.crossR2 at hABC hABD hCDE ⊢
+  simp only [Complex.sub_re, Complex.sub_im] at hABC hABD hCDE ⊢
+  ring_nf at hABC hABD hCDE ⊢
+  have hdet :
+      (-(B.re * A.im) + B.re * E.im + A.re * B.im - A.re * E.im +
+            A.im * E.re - B.im * E.re) *
+          ((D.re - C.re) ^ 2 + (D.im - C.im) ^ 2) =
+        (B.re * C.im - B.re * A.im - A.re * C.im + A.re * B.im +
+              A.im * C.re - B.im * C.re) *
+            ((D.re - C.re) ^ 2 + (D.im - C.im) ^ 2) +
+          (-(C.im * D.re) + C.im * E.re + C.re * D.im - C.re * E.im -
+                D.im * E.re + D.re * E.im) *
+            ((B.re - A.re) * (D.re - C.re) +
+              (B.im - A.im) * (D.im - C.im)) +
+          ((-(B.re * A.im) + B.re * D.im + A.re * B.im - A.re * D.im +
+                  A.im * D.re - B.im * D.re) -
+                (B.re * C.im - B.re * A.im - A.re * C.im + A.re * B.im +
+                  A.im * C.re - B.im * C.re)) *
+            ((D.re - C.re) * (E.re - C.re) +
+              (D.im - C.im) * (E.im - C.im)) := by
+    ring_nf
+  rw [hABC, hABD, hCDE, zero_mul, zero_mul, sub_self, zero_mul, zero_add,
+    zero_add] at hdet
+  exact (mul_eq_zero.mp hdet).resolve_right (ne_of_gt hCDsq_pos)
 
 /-- Cyclic permutations preserve signed Menger curvature. -/
 theorem signedMengerR2_cycle (A B C : ℂ) :
@@ -2044,6 +2101,55 @@ theorem five_consecutive_cross_eq_zero_of_constant_signedMengerProfile_zero {n :
       (vertex_cross_eq_zero_of_constant_signedMengerProfile_zero hsimple hκ
         (i + 1 + 1 + 1))
   exact crossR2_eq_zero_of_same_line_step hAB hBC hCD hABC hABD hCDE
+
+/-- A constant-zero signed-Menger profile propagates along every natural
+forward offset from any fixed base edge. -/
+theorem forward_chain_cross_eq_zero_of_constant_signedMengerProfile_zero {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hκ : ∀ i : ZMod n, SignedMengerProfile v i = 0) (i : ZMod n) :
+    ∀ k : ℕ, Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + (k : ZMod n))) = 0 := by
+  have hpair :
+      ∀ k : ℕ,
+        Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + (k : ZMod n))) = 0 ∧
+          Gluck.Discrete.crossR2 (v i) (v (i + 1))
+            (v (i + ((k + 1 : ℕ) : ZMod n))) = 0 := by
+    intro k
+    induction k with
+    | zero =>
+        constructor
+        · simpa using crossR2_left_endpoint (v i) (v (i + 1))
+        · simpa using crossR2_right_endpoint (v i) (v (i + 1))
+    | succ k ih =>
+        constructor
+        · exact ih.2
+        · have hCD : v (i + (k : ZMod n)) ≠ v (i + ((k + 1 : ℕ) : ZMod n)) := by
+            simpa [Nat.cast_add, add_assoc] using hsimple.1 (i + (k : ZMod n))
+          have hCDE :
+              Gluck.Discrete.crossR2 (v (i + (k : ZMod n)))
+                (v (i + ((k + 1 : ℕ) : ZMod n)))
+                (v (i + ((k : ZMod n) + (1 + 1)))) = 0 := by
+            simpa [Nat.cast_add, sub_eq_add_neg, add_assoc] using
+              (vertex_cross_eq_zero_of_constant_signedMengerProfile_zero hsimple hκ
+                (i + ((k + 1 : ℕ) : ZMod n)))
+          have htwo : ((1 : ZMod n) + 1) = 2 := by norm_num
+          simpa [Nat.cast_add, add_assoc, htwo] using
+            crossR2_eq_zero_of_same_line_step_of_moving_edge hCD ih.1 ih.2 hCDE
+  intro k
+  exact (hpair k).1
+
+/-- A constant-zero signed-Menger profile puts every vertex on the line through
+any chosen oriented edge. -/
+theorem all_vertices_cross_eq_zero_of_constant_signedMengerProfile_zero {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hκ : ∀ i : ZMod n, SignedMengerProfile v i = 0) :
+    ∀ i j : ZMod n, Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v j) = 0 := by
+  intro i j
+  have hchain :=
+    forward_chain_cross_eq_zero_of_constant_signedMengerProfile_zero hsimple hκ i
+      (j - i).val
+  have hcast : (((j + -i).val : ℕ) : ZMod n) = j + -i :=
+    ZMod.natCast_rightInverse (j + -i)
+  simpa [hcast, sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hchain
 
 /-- A constant-zero signed-Menger profile on a simple locally regular polygon
 makes every vertex a segment subdivision point between its two neighbors. -/
