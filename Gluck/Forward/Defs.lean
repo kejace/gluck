@@ -123,6 +123,37 @@ theorem dahlbergFourVertex_of_strict_neighbors {n : ℕ} (hn : 2 ≤ n)
   · exact discreteLocalMax_of_neighbors hn hmax₃_left hmax₃_right
   · exact discreteLocalMin_of_neighbors hn hmin₄_left hmin₄_right
 
+/-- A cyclic real profile has a global maximum. -/
+theorem exists_globalMax_zmod {n : ℕ} [NeZero n] (κ : ZMod n → ℝ) :
+    ∃ i : ZMod n, ∀ j : ZMod n, κ j ≤ κ i := by
+  obtain ⟨i, _hi_mem, hi⟩ :=
+    Finset.exists_max_image (Finset.univ : Finset (ZMod n)) κ Finset.univ_nonempty
+  exact ⟨i, fun j => hi j (Finset.mem_univ j)⟩
+
+/-- A cyclic real profile has a global minimum. -/
+theorem exists_globalMin_zmod {n : ℕ} [NeZero n] (κ : ZMod n → ℝ) :
+    ∃ i : ZMod n, ∀ j : ZMod n, κ i ≤ κ j := by
+  obtain ⟨i, _hi_mem, hi⟩ :=
+    Finset.exists_min_image (Finset.univ : Finset (ZMod n)) κ Finset.univ_nonempty
+  exact ⟨i, fun j => hi j (Finset.mem_univ j)⟩
+
+/-- A nonconstant cyclic real profile has a global minimum and maximum with
+strictly separated values. -/
+theorem exists_globalMinMax_strict_of_not_constant {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    ∃ i₀ i₁ : ZMod n,
+      (∀ j : ZMod n, κ i₀ ≤ κ j) ∧
+      (∀ j : ZMod n, κ j ≤ κ i₁) ∧
+      κ i₀ < κ i₁ := by
+  obtain ⟨i₀, hmin⟩ := exists_globalMin_zmod κ
+  obtain ⟨i₁, hmax⟩ := exists_globalMax_zmod κ
+  refine ⟨i₀, i₁, hmin, hmax, ?_⟩
+  by_contra hnot
+  have hle : κ i₁ ≤ κ i₀ := le_of_not_gt hnot
+  apply hnc
+  refine ⟨κ i₀, fun j => ?_⟩
+  exact le_antisymm ((hmax j).trans hle) (hmin j)
+
 /-- A Euclidean circle with centre `O` and positive radius `R` through a triple. -/
 def CircumcircleR2 (A B C O : ℂ) (R : ℝ) : Prop :=
   0 < R ∧ dist O A = R ∧ dist O B = R ∧ dist O C = R
