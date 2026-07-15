@@ -82,8 +82,15 @@ from the model-specific ordered-turn extraction gates
 general cyclic constructor `dahlbergFourVertex_of_orderedAdjacentTurns_four_le`.
 The uniform ordered-turn dispatch is `orderedAdjacentTurns_spaceForm_source`,
 and the uniform nonconstant theorem `dahlbergFourVertex_spaceForm_source` is
-derived from it by the same cyclic constructor.  The `discrete_four_vertex_*`
-wrappers expose this with the usual model-specific hypotheses.
+derived from it by the same cyclic constructor.  The public S²/H² wrapper files
+also expose positive-orientation ordered-turn endpoints
+`orderedAdjacentTurns_S2_of_positiveOrientation` and
+`orderedAdjacentTurns_H2_of_positiveOrientation`, together with reflected
+negative-orientation endpoints
+`orderedAdjacentTurns_S2_of_negativeOrientation_reflected` and
+`orderedAdjacentTurns_H2_of_negativeOrientation_reflected`.  The
+`discrete_four_vertex_*` wrappers expose the D4VT conclusions with the usual
+model-specific hypotheses.
 `ConformalMenger.lean` adds the proved
 `ε ∈ {0,1,-1}` dispatch layer over the E²/S²/H² conformal-Menger wrappers,
 using common positive-orientation, negative-orientation, and

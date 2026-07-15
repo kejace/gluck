@@ -107,6 +107,20 @@ theorem constant_or_dahlbergFourVertex_H2_of_positiveOrientation
   exact constant_or_dahlbergFourVertex_H2
     hn v κ hdisk hsimple horient hregular hκ hcircle
 
+/-- Hyperbolic ordered-turn theorem using the shared positive orientation
+interface for convex/coherent cyclic polygons. -/
+theorem orderedAdjacentTurns_H2_of_positiveOrientation {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    OrderedAdjacentTurns κ := by
+  exact orderedAdjacentTurns_H2_source
+    hn v κ hdisk hsimple horient hregular hκ hcircle hnc
+
 /-- Hyperbolic discrete four-vertex theorem using the shared positive
 orientation interface for convex/coherent cyclic polygons. -/
 theorem discrete_four_vertex_H2_of_positiveOrientation {n : ℕ} [NeZero n]
@@ -118,7 +132,9 @@ theorem discrete_four_vertex_H2_of_positiveOrientation {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact discrete_four_vertex_H2 hn v κ hdisk hsimple horient hregular hκ hcircle hnc
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (orderedAdjacentTurns_H2_of_positiveOrientation
+      hn v κ hdisk hsimple horient hregular hκ hcircle hnc)
 
 /-- Hyperbolic constant-or-Dahlberg theorem for negatively oriented
 convex/coherent cyclic polygons, stated for the naturally reversed
@@ -182,6 +198,37 @@ theorem discrete_four_vertex_H2_of_negativeOrientation_reflected
     hn (ReverseCyclicPolygon v) (fun i => -κ (-i))
       hdisk' hsimple' horient' hregular' hκ' hcircle' hnc_reflected
 
+/-- Hyperbolic ordered-turn theorem for negatively oriented convex/coherent
+cyclic polygons, stated for the naturally reversed proper-circle curvature
+profile. -/
+theorem orderedAdjacentTurns_H2_of_negativeOrientation_reflected
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i)
+    (hnc_reflected : ¬ ∃ c, ∀ i : ZMod n, -κ (-i) = c) :
+    OrderedAdjacentTurns (fun i => -κ (-i)) := by
+  have hdisk' : ∀ i, ‖ReverseCyclicPolygon v i‖ < 1 := by
+    intro i
+    simpa [ReverseCyclicPolygon] using hdisk (-i)
+  have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
+    isSimplePolygon_reverseCyclicPolygon hsimple
+  have horient' : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
+    positiveOrientation_reverseCyclicPolygon_of_negativeOrientation horient
+  have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
+    dahlbergRegular_reverseCyclicPolygon hregular
+  have hκ' :
+      RealizesConformalMenger (-1) (ReverseCyclicPolygon v) (fun i => -κ (-i)) :=
+    realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation horient hκ
+  have hcircle' : ∀ i, 1 < (fun i => -κ (-i)) i := by
+    intro i
+    exact hcircle (-i)
+  exact orderedAdjacentTurns_H2_of_positiveOrientation
+    hn (ReverseCyclicPolygon v) (fun i => -κ (-i))
+      hdisk' hsimple' horient' hregular' hκ' hcircle' hnc_reflected
+
 /-- Hyperbolic constant-or-Dahlberg theorem for negatively oriented
 convex/coherent cyclic polygons whose reversed curvature profile lies on
 proper hyperbolic circles (`-κᵢ > 1`). -/
@@ -213,8 +260,9 @@ theorem discrete_four_vertex_H2_of_negativeOrientation {n : ℕ} [NeZero n]
     (not_constant_neg_reflectIndex_iff (κ := κ)).mpr hnc
   have hfv_reflected :
       DahlbergFourVertex (fun i => -κ (-i)) :=
-    discrete_four_vertex_H2_of_negativeOrientation_reflected
-      hn v κ hdisk hsimple horient hregular hκ hcircle hnc_reflected
+    dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+      (orderedAdjacentTurns_H2_of_negativeOrientation_reflected
+        hn v κ hdisk hsimple horient hregular hκ hcircle hnc_reflected)
   exact dahlbergFourVertex_of_neg_reflectIndex hfv_reflected
 
 /-- Hyperbolic constant-or-Dahlberg theorem for strictly oriented
