@@ -581,6 +581,40 @@ theorem dahlbergFourVertex_E2_of_affine_signedMengerProfile_not_constant
       ((not_constant_affine_iff
         (κ := SignedMengerProfile v) (a := a) (b := b) ha).mp hnc_affine)
 
+/-- Nonzero affine changes of the E² signed-Menger profile preserve the
+strict-orientation constant-or-four-vertex package. -/
+theorem affine_signedMengerProfile_constant_or_dahlbergFourVertex_E2
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    {a b : ℝ} (ha : a ≠ 0) :
+    (∃ c, ∀ i : ZMod n, a * SignedMengerProfile v i + b = c) ∨
+      DahlbergFourVertex (fun i => a * SignedMengerProfile v i + b) := by
+  exact constant_or_dahlbergFourVertex_affine ha
+    (signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_strict_orientation
+      hn v hsimple hregular horient)
+
+/-- Any curvature profile pointwise equal to a nonzero affine change of the
+E² signed-Menger profile inherits the strict-orientation constant-or-four
+vertex package. -/
+theorem constant_or_dahlbergFourVertex_E2_of_affine_signedMengerProfile
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    {a b : ℝ} (ha : a ≠ 0)
+    (hκ : ∀ i : ZMod n, κ i = a * SignedMengerProfile v i + b) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  rcases affine_signedMengerProfile_constant_or_dahlbergFourVertex_E2
+    hn v hsimple hregular horient ha with hconst | hfv
+  · rcases hconst with ⟨c, hc⟩
+    exact Or.inl ⟨c, fun i => by rw [hκ i, hc i]⟩
+  · exact Or.inr (by
+      convert hfv using 1
+      ext i
+      exact hκ i)
+
 /-- Positive affine changes of the E² signed-Menger profile preserve the
 strict-orientation constant-or-four-vertex package. -/
 theorem posAffine_signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_strict_orientation

@@ -315,6 +315,17 @@ theorem dahlbergFourVertex_affine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ
     ring
   · exact dahlbergFourVertex_affine ha
 
+/-- Nonzero affine changes preserve a constant-or-Dahlberg conclusion. -/
+theorem constant_or_dahlbergFourVertex_affine {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
+    (ha : a ≠ 0)
+    (h : (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ) :
+    (∃ c, ∀ i : ZMod n, a * κ i + b = c) ∨
+      DahlbergFourVertex (fun i => a * κ i + b) := by
+  rcases h with hconst | hfv
+  · rcases hconst with ⟨c, hc⟩
+    exact Or.inl ⟨a * c + b, fun i => by simp [hc i]⟩
+  · exact Or.inr (dahlbergFourVertex_affine ha hfv)
+
 /-- Translating cyclic indices preserves plateau-aware local maxima. -/
 theorem discreteLocalMax_translateIndex {n : ℕ} {κ : ZMod n → ℝ} {a i : ZMod n}
     (hmax : DiscreteLocalMax κ i) :
