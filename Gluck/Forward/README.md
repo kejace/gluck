@@ -90,10 +90,11 @@ using common positive-orientation, negative-orientation, and
 strict-orientation interfaces, plus a bundled orientation/properness interface
 matching the H² public API shape.  Its positive-orientation nonconstant kernel
 now first dispatches to the ordered-turn endpoint
-`orderedAdjacentTurns_conformalMenger_spaceForm_kernel`, then derives D4VT by
-`dahlbergFourVertex_of_orderedAdjacentTurns_four_le`; the other nonconstant
-endpoints reuse the positive/strict-orientation D4VT wrappers.  Their status is
-not uniform:
+`orderedAdjacentTurns_conformalMenger_spaceForm_kernel`; the public spelling is
+`orderedAdjacentTurns_conformalMenger_spaceForm_of_positiveOrientation`, and
+D4VT is derived by `dahlbergFourVertex_of_orderedAdjacentTurns_four_le`.  The
+other nonconstant endpoints reuse the positive/strict-orientation D4VT
+wrappers.  Their status is not uniform:
 
 - the smooth theorem is one unconditional space-form theorem, transported by
   the Möbius-invariant osculating-cycle contact condition;

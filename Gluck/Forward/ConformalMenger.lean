@@ -106,6 +106,22 @@ theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_positiveOrie
   exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel
     hε hn v κ hdisk hsimple horient hregular hκ hproper
 
+/-- Positive-orientation nonconstant all-space-form conformal-Menger
+ordered-turn theorem. -/
+theorem orderedAdjacentTurns_conformalMenger_spaceForm_of_positiveOrientation
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    OrderedAdjacentTurns κ := by
+  exact orderedAdjacentTurns_conformalMenger_spaceForm_kernel
+    hε hn v κ hdisk hsimple horient hregular hκ hproper hnc
+
 /-- Positive-orientation nonconstant all-space-form conformal-Menger theorem. -/
 theorem dahlbergFourVertex_conformalMenger_spaceForm_of_positiveOrientation
     {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
@@ -118,8 +134,9 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_of_positiveOrientation
     (hproper : ε < 0 → ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_spaceForm_kernel
-    hε hn v κ hdisk hsimple horient hregular hκ hproper hnc
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (orderedAdjacentTurns_conformalMenger_spaceForm_of_positiveOrientation
+      hε hn v κ hdisk hsimple horient hregular hκ hproper hnc)
 
 /-- Constant-or-Dahlberg conformal-Menger theorem for strictly oriented
 convex/coherent polygons in the three project space forms.
