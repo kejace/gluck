@@ -313,31 +313,6 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_of_oriented_proper
       dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn hturns_reflected
     exact dahlbergFourVertex_of_neg_reflectIndex hfv_reflected
 
-/-- Negative-orientation spelling of the all-space-form conformal-Menger
-constant-or-Dahlberg theorem.
-
-For `ε = -1`, the proper-circle hypothesis is `1 < -κᵢ`, matching reversal of
-the oriented conformal-Menger curvature. -/
-theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_negativeOrientation
-    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
-    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
-    (hdisk : ∀ i, ‖v i‖ < 1)
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (horient : NegativePolygonOrientation v)
-    (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger ε v κ)
-    (hproper : ε < 0 → ∀ i, 1 < -κ i) :
-    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_strict_orientation
-    hε hn v κ hdisk hsimple (Or.inr horient) hregular hκ
-    (by
-      intro _ hpos
-      exfalso
-      have hp := hpos (0 : ZMod n)
-      have hn := horient (0 : ZMod n)
-      linarith)
-    (by intro hlt _; exact hproper hlt)
-
 /-- Negative-orientation nonconstant all-space-form conformal-Menger
 ordered-turn theorem after reversing the cyclic order and changing sign.
 
@@ -390,13 +365,35 @@ theorem constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOr
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger ε v κ)
     (hproper : ε < 0 → ∀ i, 1 < -κ i) :
-    (∃ c, ∀ i : ZMod n, κ i = c) ∨
+    (∃ c, ∀ i : ZMod n, -κ (-i) = c) ∨
       OrderedAdjacentTurns (fun i => -κ (-i)) := by
-  by_cases hconst : ∃ c, ∀ i : ZMod n, κ i = c
+  by_cases hconst : ∃ c, ∀ i : ZMod n, -κ (-i) = c
   · exact Or.inl hconst
   · exact Or.inr
       (orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected
-        hε hn v κ hdisk hsimple horient hregular hκ hproper hconst)
+        hε hn v κ hdisk hsimple horient hregular hκ hproper
+        ((not_constant_neg_reflectIndex_iff (κ := κ)).mp hconst))
+
+/-- Negative-orientation spelling of the all-space-form conformal-Menger
+constant-or-Dahlberg theorem.
+
+For `ε = -1`, the proper-circle hypothesis is `1 < -κᵢ`, matching reversal of
+the oriented conformal-Menger curvature. -/
+theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_negativeOrientation
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < -κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact
+    constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns_neg_reflectIndex
+      hn
+      (constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected
+        hε hn v κ hdisk hsimple horient hregular hκ hproper)
 
 /-- Bundled strict-orientation nonconstant all-space-form conformal-Menger
 ordered-turn theorem.
@@ -440,12 +437,18 @@ theorem constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_of_oriented_p
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger ε v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨
-      OrderedAdjacentTurns κ ∨ OrderedAdjacentTurns (fun i => -κ (-i)) := by
+      OrderedAdjacentTurns κ ∨
+        ((∃ c, ∀ i : ZMod n, -κ (-i) = c) ∨
+          OrderedAdjacentTurns (fun i => -κ (-i))) := by
   by_cases hconst : ∃ c, ∀ i : ZMod n, κ i = c
   · exact Or.inl hconst
-  · exact Or.inr
-      (orderedAdjacentTurns_conformalMenger_spaceForm_of_oriented_proper
-        hε hn v κ hdisk hsimple horient hregular hκ hconst)
+  · rcases horient with hpos | hneg
+    · exact Or.inr (Or.inl
+        (orderedAdjacentTurns_conformalMenger_spaceForm_of_positiveOrientation
+          hε hn v κ hdisk hsimple hpos.1 hregular hκ hpos.2 hconst))
+    · exact Or.inr (Or.inr
+        (constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected
+          hε hn v κ hdisk hsimple hneg.1 hregular hκ hneg.2))
 
 /-- Negative-orientation nonconstant all-space-form conformal-Menger theorem. -/
 theorem dahlbergFourVertex_conformalMenger_spaceForm_of_negativeOrientation

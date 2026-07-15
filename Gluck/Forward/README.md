@@ -127,7 +127,9 @@ endpoint is exposed in reflected-sign form as
 `orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected`,
 which is then converted to the public negative D4VT theorem by
 `dahlbergFourVertex_of_neg_reflectIndex`; its constant-or analogue is
-`constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected`.
+`constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected`,
+with the constant branch stated for the same reflected-sign profile
+`i ↦ -κ(-i)`.
 The bundled turn-level endpoint is
 `orderedAdjacentTurns_conformalMenger_spaceForm_of_oriented_proper`, returning
 either turns for `κ` or turns for the reflected-sign profile according to the
