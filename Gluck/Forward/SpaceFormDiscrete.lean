@@ -13,13 +13,26 @@ namespace Gluck.Forward
 
 open scoped Real
 
-/-- Spherical source theorem for the convex/coherent discrete four-vertex
-package in an open hemisphere.
+/-- Spherical nonconstant source theorem for the convex/coherent discrete
+four-vertex package in an open hemisphere.
 
 This is the project-derived `sin R` analogue of the convex coherent
 circumradius theorem.  It is kept separate from the hyperbolic source because
 the spherical branch has no proper-circle hypothesis and is not a formal
 specialization of Grant--Mogilski. -/
+theorem dahlbergFourVertex_S2_source {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  sorry
+
+/-- Spherical constant-or theorem obtained from the nonconstant source by
+splitting off the constant profile case. -/
 theorem constant_or_dahlbergFourVertex_S2_source {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
     (hdisk : ∀ i, ‖v i‖ < 1)
@@ -28,10 +41,26 @@ theorem constant_or_dahlbergFourVertex_S2_source {n : ℕ} [NeZero n]
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger 1 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  by_cases hconst : ∃ c, ∀ i : ZMod n, κ i = c
+  · exact Or.inl hconst
+  · exact Or.inr (dahlbergFourVertex_S2_source
+      hn v κ hdisk hsimple hconvex hregular hκ hconst)
+
+/-- Hyperbolic nonconstant source theorem for Grant--Mogilski's convex
+coherent discrete four-vertex theorem in the proper-circle regime `κᵢ > 1`. -/
+theorem dahlbergFourVertex_H2_source {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
   sorry
 
-/-- Hyperbolic source theorem for Grant--Mogilski's convex coherent discrete
-four-vertex theorem in the proper-circle regime `κᵢ > 1`. -/
+/-- Hyperbolic constant-or theorem obtained from the nonconstant source by
+splitting off the constant profile case. -/
 theorem constant_or_dahlbergFourVertex_H2_source {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
     (hdisk : ∀ i, ‖v i‖ < 1)
@@ -40,7 +69,10 @@ theorem constant_or_dahlbergFourVertex_H2_source {n : ℕ} [NeZero n]
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  sorry
+  by_cases hconst : ∃ c, ∀ i : ZMod n, κ i = c
+  · exact Or.inl hconst
+  · exact Or.inr (dahlbergFourVertex_H2_source
+      hn v κ hdisk hsimple hconvex hregular hκ hcircle hconst)
 
 /-- Uniform source theorem for the convex/coherent discrete four-vertex package
 in `S²` (`ε = 1`) and `H²` (`ε = -1`), dispatching to the corresponding

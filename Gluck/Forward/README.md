@@ -62,11 +62,13 @@ cases from the model-specific source gates
 discrete forward statements for `S²` and `H²` are also exposed through
 model-specific wrappers in `Sphere.lean` and `Hyperbolic.lean`.  The shared
 dispatch theorem `constant_or_dahlbergFourVertex_spaceForm_kernel` in
-`SpaceFormDiscrete.lean` is proved by cases from the model-specific source
-gates `constant_or_dahlbergFourVertex_S2_source` and
-`constant_or_dahlbergFourVertex_H2_source`; the `discrete_four_vertex_*`
-wrappers add an explicit nonconstancy hypothesis to rule out the
-constant-curvature case.  `ConformalMenger.lean` adds the proved
+`SpaceFormDiscrete.lean` is proved by cases from the model-specific
+constant-or wrappers `constant_or_dahlbergFourVertex_S2_source` and
+`constant_or_dahlbergFourVertex_H2_source`, which themselves split off the
+constant case from the nonconstant source gates `dahlbergFourVertex_S2_source`
+and `dahlbergFourVertex_H2_source`; the `discrete_four_vertex_*` wrappers add
+an explicit nonconstancy hypothesis to rule out the constant-curvature case.
+`ConformalMenger.lean` adds the proved
 `ε ∈ {0,1,-1}` dispatch layer over the E²/S²/H² conformal-Menger wrappers,
 using common positive-orientation, negative-orientation, and
 strict-orientation interfaces, plus a bundled orientation/properness interface
