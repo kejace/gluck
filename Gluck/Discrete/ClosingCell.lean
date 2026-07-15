@@ -5856,4 +5856,102 @@ theorem chartPerturb_rectRescale_mem_wall [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
     have hw := pi_div_two_lt_wallWidth hκs hκ ht0 ht1 j
     exact ⟨hα0.le, by linarith⟩
 
+/-! ### The closed-wall edge-length recovery (`def:closing_rect`, R-d)
+
+Extending `F(t, ·)` to the CLOSED rectangle needs the edge-length recovery on
+the closed chart interval `[0, w]` — including the collapse value `s = 0`
+(length `0`) and the saturation value `s = w` (length `2/max`), which the
+open-interval `chartInv` treats as junk. The chart is strictly monotone on
+the *closed* moderate interval (`arcsin` is strictly monotone on the closed
+`[-1, 1]`), so a choice-based closed recovery is a genuine two-sided inverse,
+and the landed compact-to-Hausdorff engine `continuousOn_inv_family` yields
+its joint continuity — no new analytic input is needed. -/
+
+/-- The single-edge chart is strictly increasing on the CLOSED moderate
+interval `[0, 2/max]` (for positive `p, q`): the `arcsin` arguments stay in
+the closed `[-1, 1]`, where `arcsin` is still strictly monotone. -/
+theorem chartMap_strictMonoOn_Icc {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
+    StrictMonoOn (chartMap p q) (Set.Icc (0 : ℝ) (2 / max p q)) := by
+  have hmax : (0 : ℝ) < max p q := lt_of_lt_of_le hp (le_max_left p q)
+  have key : ∀ r : ℝ, 0 < r → r ≤ max p q → ∀ w ∈ Set.Icc (0 : ℝ) (2 / max p q),
+      r * w / 2 ∈ Set.Icc (-1 : ℝ) 1 := by
+    intro r hr hrle w hw
+    have h1 : r * w ≤ max p q * w := mul_le_mul_of_nonneg_right hrle hw.1
+    have h2 : max p q * w ≤ max p q * (2 / max p q) :=
+      mul_le_mul_of_nonneg_left hw.2 hmax.le
+    have h3 : max p q * (2 / max p q) = 2 := by field_simp
+    constructor
+    · nlinarith [hw.1]
+    · linarith
+  intro x hx y hy hxy
+  unfold chartMap
+  have h1 : Real.arcsin (p * x / 2) < Real.arcsin (p * y / 2) :=
+    Real.strictMonoOn_arcsin (key p hp (le_max_left _ _) x hx)
+      (key p hp (le_max_left _ _) y hy)
+      (by have := mul_lt_mul_of_pos_left hxy hp; linarith)
+  have h2 : Real.arcsin (q * x / 2) < Real.arcsin (q * y / 2) :=
+    Real.strictMonoOn_arcsin (key q hq (le_max_right _ _) x hx)
+      (key q hq (le_max_right _ _) y hy)
+      (by have := mul_lt_mul_of_pos_left hxy hq; linarith)
+  exact add_lt_add h1 h2
+
+/-- The achievable closed chart values are exactly `[0, chartWall p q]`
+(monotone continuous image of the closed moderate interval; the endpoints
+are the collapse value `0` and the saturation value `chartWall`). This is
+the bridge from the wall membership `[0, w_j(t)]` of
+`chartPerturb_rectRescale_mem_wall` to the domain of the closed recovery. -/
+theorem chartMap_image_Icc_eq {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
+    chartMap p q '' Set.Icc (0 : ℝ) (2 / max p q)
+      = Set.Icc (0 : ℝ) (chartWall p q) := by
+  have hmax : (0 : ℝ) < max p q := lt_of_lt_of_le hp (le_max_left p q)
+  have hD : (0 : ℝ) ≤ 2 / max p q := by positivity
+  refine Set.Subset.antisymm ?_ ?_
+  · rintro _ ⟨x, hx, rfl⟩
+    have hmono := (chartMap_strictMonoOn_Icc hp hq).monotoneOn
+    constructor
+    · have := hmono (Set.left_mem_Icc.mpr hD) hx hx.1
+      rwa [chartMap_zero] at this
+    · exact hmono hx (Set.right_mem_Icc.mpr hD) hx.2
+  · have h := intermediate_value_Icc hD (chartMap_continuous p q).continuousOn
+    rwa [chartMap_zero] at h
+
+/-- The closed-wall edge-length recovery `λ̄` of `def:closing_rect`: a choice
+of preimage of the chart value in the CLOSED moderate interval `[0, 2/max]`;
+total (junk `0` off the achievable interval), no positivity proof arguments.
+Strict monotonicity of the closed chart makes it the unique — hence genuine
+two-sided — inverse there, agreeing with the open recovery `chartInv` on the
+open window (`chartInvIcc_eq_chartInv`). -/
+noncomputable def chartInvIcc (p q s : ℝ) : ℝ := by
+  classical
+  exact if h : s ∈ chartMap p q '' Set.Icc (0 : ℝ) (2 / max p q) then
+    h.choose else 0
+
+/-- The closed recovery lands in the closed moderate interval. -/
+theorem chartInvIcc_mem {p q s : ℝ}
+    (h : s ∈ chartMap p q '' Set.Icc (0 : ℝ) (2 / max p q)) :
+    chartInvIcc p q s ∈ Set.Icc (0 : ℝ) (2 / max p q) := by
+  classical
+  rw [chartInvIcc, dif_pos h]
+  exact h.choose_spec.1
+
+/-- Round-trip: the closed recovery is a right inverse of the chart on the
+achievable closed interval. -/
+theorem chartMap_chartInvIcc {p q s : ℝ}
+    (h : s ∈ chartMap p q '' Set.Icc (0 : ℝ) (2 / max p q)) :
+    chartMap p q (chartInvIcc p q s) = s := by
+  classical
+  rw [chartInvIcc, dif_pos h]
+  exact h.choose_spec.2
+
+/-- On the OPEN achievable window the closed recovery agrees with the landed
+open recovery `chartInv` (both are preimages; the closed chart is injective). -/
+theorem chartInvIcc_eq_chartInv {p q : ℝ} (hp : 0 < p) (hq : 0 < q) {s : ℝ}
+    (hs : s ∈ chartMap p q '' Set.Ioo (0 : ℝ) (2 / max p q)) :
+    chartInvIcc p q s = chartInv hp hq s := by
+  have hsIcc : s ∈ chartMap p q '' Set.Icc (0 : ℝ) (2 / max p q) :=
+    Set.image_mono Set.Ioo_subset_Icc_self hs
+  refine (chartMap_strictMonoOn_Icc hp hq).injOn (chartInvIcc_mem hsIcc)
+    (Set.Ioo_subset_Icc_self (chartInv_mem hp hq hs)) ?_
+  rw [chartMap_chartInvIcc hsIcc, chartMap_chartInv hp hq hs]
+
 end Gluck.Discrete
