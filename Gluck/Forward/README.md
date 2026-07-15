@@ -80,10 +80,10 @@ and `dahlbergFourVertex_H2_source`.  Those nonconstant gates are now proved
 from the model-specific ordered-turn extraction gates
 `orderedAdjacentTurns_S2_source` and `orderedAdjacentTurns_H2_source` via the
 general cyclic constructor `dahlbergFourVertex_of_orderedAdjacentTurns_four_le`.
-The uniform nonconstant theorem `dahlbergFourVertex_spaceForm_source`
-dispatches directly to the proved nonconstant wrappers, and the
-`discrete_four_vertex_*` wrappers expose it with the usual model-specific
-hypotheses.
+The uniform ordered-turn dispatch is `orderedAdjacentTurns_spaceForm_source`,
+and the uniform nonconstant theorem `dahlbergFourVertex_spaceForm_source` is
+derived from it by the same cyclic constructor.  The `discrete_four_vertex_*`
+wrappers expose this with the usual model-specific hypotheses.
 `ConformalMenger.lean` adds the proved
 `ε ∈ {0,1,-1}` dispatch layer over the E²/S²/H² conformal-Menger wrappers,
 using common positive-orientation, negative-orientation, and
