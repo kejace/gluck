@@ -1014,6 +1014,24 @@ theorem constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns {n : 
   · exact Or.inl hconst
   · exact Or.inr (dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn hturns)
 
+/-- A constant-or-reflected ordered-turn conclusion transports to a
+constant-or-Dahlberg conclusion for the original profile.  This is the
+turn-level analogue of `constant_or_dahlbergFourVertex_of_neg_reflectIndex`
+for negative-orientation discrete wrappers. -/
+theorem constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns_neg_reflectIndex
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {κ : ZMod n → ℝ}
+    (h : (∃ c, ∀ i : ZMod n, -κ (-i) = c) ∨
+      OrderedAdjacentTurns (fun i => -κ (-i))) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  rcases h with hconst | hturns
+  · rcases hconst with ⟨c, hc⟩
+    exact Or.inl ⟨-c, fun i => by
+      have hi := congrArg Neg.neg (hc (-i))
+      simpa using hi⟩
+  · have hfv_reflected : DahlbergFourVertex (fun i => -κ (-i)) :=
+      dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn hturns
+    exact Or.inr (dahlbergFourVertex_of_neg_reflectIndex hfv_reflected)
+
 /-- An ordered-adjacent-turn witness contains, in particular, an adjacent
 strict increase and an adjacent strict decrease. -/
 theorem exists_adjacent_increase_and_decrease_of_orderedAdjacentTurns {n : ℕ}

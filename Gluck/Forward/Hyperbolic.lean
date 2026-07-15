@@ -258,9 +258,11 @@ theorem constant_or_dahlbergFourVertex_H2_of_negativeOrientation
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_of_neg_reflectIndex
-    (constant_or_dahlbergFourVertex_H2_of_negativeOrientation_reflected
-      hn v κ hdisk hsimple horient hregular hκ hcircle)
+  exact
+    constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns_neg_reflectIndex
+      hn
+      (constant_or_orderedAdjacentTurns_H2_of_negativeOrientation_reflected
+        hn v κ hdisk hsimple horient hregular hκ hcircle)
 
 /-- Hyperbolic discrete four-vertex theorem for negatively oriented convex
 coherent cyclic polygons whose reversed curvature profile lies on proper
