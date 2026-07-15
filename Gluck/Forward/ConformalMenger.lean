@@ -161,73 +161,6 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_of_positiveOrientation
     (orderedAdjacentTurns_conformalMenger_spaceForm_of_positiveOrientation
       hε hn v κ hdisk hsimple horient hregular hκ hproper hnc)
 
-/-- Constant-or-Dahlberg conformal-Menger theorem for strictly oriented
-convex/coherent polygons in the three project space forms.
-
-For `ε = -1`, the proper-circle hypothesis is orientation-sensitive: positive
-orientation requires `1 < κᵢ`, while negative orientation requires
-`1 < -κᵢ`, matching the public H² wrappers. -/
-theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_strict_orientation
-    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
-    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
-    (hdisk : ∀ i, ‖v i‖ < 1)
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
-    (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger ε v κ)
-    (hproper_pos : ε < 0 → PositivePolygonOrientation v → ∀ i, 1 < κ i)
-    (hproper_neg : ε < 0 → NegativePolygonOrientation v → ∀ i, 1 < -κ i) :
-    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  rcases hε with hE | hrest
-  · subst ε
-    exact constant_or_dahlbergFourVertex_E2_of_realizesConformalMenger_zero_strict_orientation
-      hn v κ hsimple hregular horient hκ
-  · rcases hrest with hS | hH
-    · subst ε
-      exact constant_or_dahlbergFourVertex_S2_of_strict_orientation
-        hn v κ hdisk hsimple horient hregular hκ
-    · subst ε
-      have hHorient :
-          (PositivePolygonOrientation v ∧ ∀ i, 1 < κ i) ∨
-            (NegativePolygonOrientation v ∧ ∀ i, 1 < -κ i) := by
-        rcases horient with hpos | hneg
-        · exact Or.inl ⟨hpos, hproper_pos (by norm_num) hpos⟩
-        · exact Or.inr ⟨hneg, hproper_neg (by norm_num) hneg⟩
-      exact constant_or_dahlbergFourVertex_H2_of_strict_orientation
-        hn v κ hdisk hsimple hHorient hregular hκ
-
-/-- Nonconstant conformal-Menger theorem for strictly oriented convex/coherent
-polygons in the three project space forms. -/
-theorem dahlbergFourVertex_conformalMenger_spaceForm_of_strict_orientation
-    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
-    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
-    (hdisk : ∀ i, ‖v i‖ < 1)
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
-    (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger ε v κ)
-    (hproper_pos : ε < 0 → PositivePolygonOrientation v → ∀ i, 1 < κ i)
-    (hproper_neg : ε < 0 → NegativePolygonOrientation v → ∀ i, 1 < -κ i)
-    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
-    DahlbergFourVertex κ := by
-  rcases hε with hE | hrest
-  · subst ε
-    exact dahlbergFourVertex_E2_of_realizesConformalMenger_zero_not_constant_strict_orientation
-      hn v κ hsimple hregular horient hκ hnc
-  · rcases hrest with hS | hH
-    · subst ε
-      exact discrete_four_vertex_S2_of_strict_orientation
-        hn v κ hdisk hsimple horient hregular hκ hnc
-    · subst ε
-      have hHorient :
-          (PositivePolygonOrientation v ∧ ∀ i, 1 < κ i) ∨
-            (NegativePolygonOrientation v ∧ ∀ i, 1 < -κ i) := by
-        rcases horient with hpos | hneg
-        · exact Or.inl ⟨hpos, hproper_pos (by norm_num) hpos⟩
-        · exact Or.inr ⟨hneg, hproper_neg (by norm_num) hneg⟩
-      exact discrete_four_vertex_H2_of_strict_orientation
-        hn v κ hdisk hsimple hHorient hregular hκ hnc
-
 /-- Negative-orientation nonconstant all-space-form conformal-Menger
 ordered-turn theorem after reversing the cyclic order and changing sign.
 
@@ -407,6 +340,51 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_of_oriented_proper
   exact dahlbergFourVertex_of_constant_or_of_not_constant
     (constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_oriented_proper
       hε hn v κ hdisk hsimple horient hregular hκ)
+    hnc
+
+/-- Constant-or-Dahlberg conformal-Menger theorem for strictly oriented
+convex/coherent polygons in the three project space forms.
+
+For `ε = -1`, the proper-circle hypothesis is orientation-sensitive: positive
+orientation requires `1 < κᵢ`, while negative orientation requires
+`1 < -κᵢ`, matching the public H² wrappers. -/
+theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_strict_orientation
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper_pos : ε < 0 → PositivePolygonOrientation v → ∀ i, 1 < κ i)
+    (hproper_neg : ε < 0 → NegativePolygonOrientation v → ∀ i, 1 < -κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  have horient_proper :
+      (PositivePolygonOrientation v ∧ (ε < 0 → ∀ i, 1 < κ i)) ∨
+        (NegativePolygonOrientation v ∧ (ε < 0 → ∀ i, 1 < -κ i)) := by
+    rcases horient with hpos | hneg
+    · exact Or.inl ⟨hpos, fun hlt => hproper_pos hlt hpos⟩
+    · exact Or.inr ⟨hneg, fun hlt => hproper_neg hlt hneg⟩
+  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_oriented_proper
+    hε hn v κ hdisk hsimple horient_proper hregular hκ
+
+/-- Nonconstant conformal-Menger theorem for strictly oriented convex/coherent
+polygons in the three project space forms. -/
+theorem dahlbergFourVertex_conformalMenger_spaceForm_of_strict_orientation
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper_pos : ε < 0 → PositivePolygonOrientation v → ∀ i, 1 < κ i)
+    (hproper_neg : ε < 0 → NegativePolygonOrientation v → ∀ i, 1 < -κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_strict_orientation
+      hε hn v κ hdisk hsimple horient hregular hκ hproper_pos hproper_neg)
     hnc
 
 /-- Negative-orientation nonconstant all-space-form conformal-Menger theorem. -/
