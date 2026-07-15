@@ -123,6 +123,57 @@ theorem crossR2_eq_zero_of_consecutive {A B C D : ℂ} (hBC : B ≠ C)
   rw [hABC, hBCD, zero_mul, zero_mul, zero_add] at hdet
   exact (mul_eq_zero.mp hdet).resolve_right (ne_of_gt hBCsq_pos)
 
+/-- If two points lie on the same nondegenerate line through `A` and `B`, then
+the triangle obtained by replacing `A` with one of those points is also
+collinear. -/
+theorem crossR2_eq_zero_of_same_line_right {A B C D : ℂ} (hAB : A ≠ B)
+    (hABC : Gluck.Discrete.crossR2 A B C = 0)
+    (hABD : Gluck.Discrete.crossR2 A B D = 0) :
+    Gluck.Discrete.crossR2 B C D = 0 := by
+  have hABsq_pos : 0 < (B.re - A.re) ^ 2 + (B.im - A.im) ^ 2 := by
+    have hABsq_ne : (B.re - A.re) ^ 2 + (B.im - A.im) ^ 2 ≠ 0 := by
+      intro hsq
+      apply hAB
+      apply Complex.ext
+      · nlinarith [sq_nonneg (B.re - A.re), sq_nonneg (B.im - A.im)]
+      · nlinarith [sq_nonneg (B.re - A.re), sq_nonneg (B.im - A.im)]
+    exact lt_of_le_of_ne' (add_nonneg (sq_nonneg _) (sq_nonneg _)) hABsq_ne
+  unfold Gluck.Discrete.crossR2 at hABC hABD ⊢
+  simp only [Complex.sub_re, Complex.sub_im] at hABC hABD ⊢
+  ring_nf at hABC hABD ⊢
+  have hdet :
+      (B.re * C.im - B.re * D.im - C.im * D.re - B.im * C.re +
+            B.im * D.re + C.re * D.im) *
+          ((B.re - A.re) ^ 2 + (B.im - A.im) ^ 2) =
+        (B.re * C.im - B.re * A.im - A.re * C.im + A.re * B.im +
+              A.im * C.re - B.im * C.re) *
+            (((B.re - A.re) ^ 2 + (B.im - A.im) ^ 2) -
+              ((D.re - A.re) * (B.re - A.re) +
+                (D.im - A.im) * (B.im - A.im))) +
+          (-(B.re * A.im) + B.re * D.im + A.re * B.im - A.re * D.im +
+                A.im * D.re - B.im * D.re) *
+            (((C.re - A.re) * (B.re - A.re) +
+                (C.im - A.im) * (B.im - A.im)) -
+              ((B.re - A.re) ^ 2 + (B.im - A.im) ^ 2)) := by
+    ring_nf
+  rw [hABC, hABD, zero_mul, zero_mul, zero_add] at hdet
+  exact (mul_eq_zero.mp hdet).resolve_right (ne_of_gt hABsq_pos)
+
+/-- One-step propagation along a chain of collinear consecutive triples.  If
+`C` and `D` are already on the nondegenerate base line `A B`, and `C,D,E` are
+collinear, then `E` is on the same base line. -/
+theorem crossR2_eq_zero_of_same_line_step {A B C D E : ℂ}
+    (hAB : A ≠ B) (hBC : B ≠ C) (hCD : C ≠ D)
+    (hABC : Gluck.Discrete.crossR2 A B C = 0)
+    (hABD : Gluck.Discrete.crossR2 A B D = 0)
+    (hCDE : Gluck.Discrete.crossR2 C D E = 0) :
+    Gluck.Discrete.crossR2 A B E = 0 := by
+  have hBCD : Gluck.Discrete.crossR2 B C D = 0 :=
+    crossR2_eq_zero_of_same_line_right hAB hABC hABD
+  have hBCE : Gluck.Discrete.crossR2 B C E = 0 :=
+    crossR2_eq_zero_of_consecutive hCD hBCD hCDE
+  exact crossR2_eq_zero_of_consecutive hBC hABC hBCE
+
 /-- Cyclic permutations preserve signed Menger curvature. -/
 theorem signedMengerR2_cycle (A B C : ℂ) :
     Gluck.Discrete.signedMengerR2 B C A =
@@ -1965,6 +2016,34 @@ theorem four_consecutive_cross_eq_zero_of_constant_signedMengerProfile_zero {n :
   intro i
   exact four_consecutive_cross_eq_zero_of_signedMengerProfile_eq_zero
     hsimple (hκ i) (hκ (i + 1))
+
+/-- A constant-zero signed-Menger profile propagates one step further: five
+consecutive vertices are collinear with the first edge. -/
+theorem five_consecutive_cross_eq_zero_of_constant_signedMengerProfile_zero {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hκ : ∀ i : ZMod n, SignedMengerProfile v i = 0) :
+    ∀ i : ZMod n,
+      Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1 + 1 + 1)) = 0 := by
+  intro i
+  have hAB : v i ≠ v (i + 1) := hsimple.1 i
+  have hBC : v (i + 1) ≠ v (i + 1 + 1) := by
+    simpa [add_assoc] using hsimple.1 (i + 1)
+  have hCD : v (i + 1 + 1) ≠ v (i + 1 + 1 + 1) := by
+    simpa [add_assoc] using hsimple.1 (i + 1 + 1)
+  have hABC : Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) = 0 := by
+    simpa [sub_eq_add_neg, add_assoc] using
+      (vertex_cross_eq_zero_of_constant_signedMengerProfile_zero hsimple hκ (i + 1))
+  have hABD : Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1 + 1)) = 0 := by
+    simpa [sub_eq_add_neg, add_assoc] using
+      (four_consecutive_cross_eq_zero_of_constant_signedMengerProfile_zero
+        hsimple hκ (i + 1))
+  have hCDE :
+      Gluck.Discrete.crossR2 (v (i + 1 + 1)) (v (i + 1 + 1 + 1))
+        (v (i + 1 + 1 + 1 + 1)) = 0 := by
+    simpa [sub_eq_add_neg, add_assoc] using
+      (vertex_cross_eq_zero_of_constant_signedMengerProfile_zero hsimple hκ
+        (i + 1 + 1 + 1))
+  exact crossR2_eq_zero_of_same_line_step hAB hBC hCD hABC hABD hCDE
 
 /-- A constant-zero signed-Menger profile on a simple locally regular polygon
 makes every vertex a segment subdivision point between its two neighbors. -/
