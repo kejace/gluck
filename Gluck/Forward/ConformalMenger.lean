@@ -228,91 +228,6 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_of_strict_orientation
       exact discrete_four_vertex_H2_of_strict_orientation
         hn v κ hdisk hsimple hHorient hregular hκ hnc
 
-/-- Bundled strict-orientation form of the all-space-form conformal-Menger
-constant-or-Dahlberg theorem.
-
-The orientation package carries exactly the H² proper-circle condition needed
-for that orientation; for `ε = 0` and `ε = 1`, the properness implication is
-vacuous. -/
-theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_oriented_proper
-    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
-    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
-    (hdisk : ∀ i, ‖v i‖ < 1)
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (horient :
-      (PositivePolygonOrientation v ∧ (ε < 0 → ∀ i, 1 < κ i)) ∨
-        (NegativePolygonOrientation v ∧ (ε < 0 → ∀ i, 1 < -κ i)))
-    (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger ε v κ) :
-    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  have hstrict : PositivePolygonOrientation v ∨ NegativePolygonOrientation v := by
-    rcases horient with hpos | hneg
-    · exact Or.inl hpos.1
-    · exact Or.inr hneg.1
-  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_strict_orientation
-    hε hn v κ hdisk hsimple hstrict hregular hκ
-    (by
-      intro hlt hpos
-      rcases horient with hpack | hpack
-      · exact hpack.2 hlt
-      · exfalso
-        have hp := hpos (0 : ZMod n)
-        have hn := hpack.1 (0 : ZMod n)
-        linarith)
-    (by
-      intro hlt hneg
-      rcases horient with hpack | hpack
-      · exfalso
-        have hp := hpack.1 (0 : ZMod n)
-        have hn := hneg (0 : ZMod n)
-        linarith
-      · exact hpack.2 hlt)
-
-/-- Bundled strict-orientation nonconstant all-space-form conformal-Menger
-theorem. -/
-theorem dahlbergFourVertex_conformalMenger_spaceForm_of_oriented_proper
-    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
-    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
-    (hdisk : ∀ i, ‖v i‖ < 1)
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (horient :
-      (PositivePolygonOrientation v ∧ (ε < 0 → ∀ i, 1 < κ i)) ∨
-        (NegativePolygonOrientation v ∧ (ε < 0 → ∀ i, 1 < -κ i)))
-    (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger ε v κ)
-    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
-    DahlbergFourVertex κ := by
-  rcases horient with hpos | hneg
-  · have hturns : OrderedAdjacentTurns κ :=
-      orderedAdjacentTurns_conformalMenger_spaceForm_of_positiveOrientation
-        hε hn v κ hdisk hsimple hpos.1 hregular hκ hpos.2 hnc
-    exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn hturns
-  · have hdisk' : ∀ i, ‖ReverseCyclicPolygon v i‖ < 1 := by
-      intro i
-      exact hdisk (-i)
-    have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
-      isSimplePolygon_reverseCyclicPolygon hsimple
-    have horient' : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
-      positiveOrientation_reverseCyclicPolygon_of_negativeOrientation hneg.1
-    have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
-      dahlbergRegular_reverseCyclicPolygon hregular
-    have hκ' :
-        RealizesConformalMenger ε (ReverseCyclicPolygon v) (fun i => -κ (-i)) :=
-      realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation hneg.1 hκ
-    have hproper' : ε < 0 → ∀ i, 1 < -κ (-i) := by
-      intro hlt i
-      exact hneg.2 hlt (-i)
-    have hnc' : ¬ ∃ c, ∀ i : ZMod n, -κ (-i) = c :=
-      (not_constant_neg_reflectIndex_iff (κ := κ)).mpr hnc
-    have hturns_reflected :
-        OrderedAdjacentTurns (fun i => -κ (-i)) :=
-      orderedAdjacentTurns_conformalMenger_spaceForm_of_positiveOrientation
-        hε hn (ReverseCyclicPolygon v) (fun i => -κ (-i))
-        hdisk' hsimple' horient' hregular' hκ' hproper' hnc'
-    have hfv_reflected : DahlbergFourVertex (fun i => -κ (-i)) :=
-      dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn hturns_reflected
-    exact dahlbergFourVertex_of_neg_reflectIndex hfv_reflected
-
 /-- Negative-orientation nonconstant all-space-form conformal-Menger
 ordered-turn theorem after reversing the cyclic order and changing sign.
 
@@ -449,6 +364,50 @@ theorem constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_of_oriented_p
     · exact Or.inr (Or.inr
         (constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected
           hε hn v κ hdisk hsimple hneg.1 hregular hκ hneg.2))
+
+/-- Bundled strict-orientation form of the all-space-form conformal-Menger
+constant-or-Dahlberg theorem.
+
+The orientation package carries exactly the H² proper-circle condition needed
+for that orientation; for `ε = 0` and `ε = 1`, the properness implication is
+vacuous. -/
+theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_oriented_proper
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient :
+      (PositivePolygonOrientation v ∧ (ε < 0 → ∀ i, 1 < κ i)) ∨
+        (NegativePolygonOrientation v ∧ (ε < 0 → ∀ i, 1 < -κ i)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  rcases constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_of_oriented_proper
+      hε hn v κ hdisk hsimple horient hregular hκ with hconst | hturns
+  · exact Or.inl hconst
+  · rcases hturns with hturns_pos | hturns_neg
+    · exact Or.inr (dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn hturns_pos)
+    · exact constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns_neg_reflectIndex
+        hn hturns_neg
+
+/-- Bundled strict-orientation nonconstant all-space-form conformal-Menger
+theorem. -/
+theorem dahlbergFourVertex_conformalMenger_spaceForm_of_oriented_proper
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient :
+      (PositivePolygonOrientation v ∧ (ε < 0 → ∀ i, 1 < κ i)) ∨
+        (NegativePolygonOrientation v ∧ (ε < 0 → ∀ i, 1 < -κ i)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_oriented_proper
+      hε hn v κ hdisk hsimple horient hregular hκ)
+    hnc
 
 /-- Negative-orientation nonconstant all-space-form conformal-Menger theorem. -/
 theorem dahlbergFourVertex_conformalMenger_spaceForm_of_negativeOrientation
