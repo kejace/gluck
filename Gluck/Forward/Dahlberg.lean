@@ -2850,6 +2850,50 @@ theorem edgeCircleRadius_antitone_of_endpoint_regular_order_pos {A B P Q : ℂ}
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk_right
     hAB hQcross hcircleQ hconeQ hmem
 
+/-- Strict endpoint version of the positive ordered regular radius comparison. -/
+theorem edgeCircleRadius_strictAnti_of_endpoint_regular_order_pos {A B P Q : ℂ}
+    (hAB : A ≠ B)
+    (hPcross : 0 < Gluck.Discrete.crossR2 A B P)
+    (hQcross : 0 < Gluck.Discrete.crossR2 A B Q)
+    (hPreg : DahlbergRegularAt P A B) (hQreg : DahlbergRegularAt A B Q)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P <
+      Gluck.Discrete.signedMengerR2 A B Q) :
+    normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B Q) <
+      normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B P) := by
+  obtain ⟨OP, RP, hcircleP, hconeP⟩ :=
+    dahlbergRegularAt_circle_of_cross_ne_zero hPreg hPcross.ne'
+  obtain ⟨OQ, RQ, hcircleQ, hconeQ⟩ :=
+    dahlbergRegularAt_circle_of_cross_ne_zero_right hQreg hQcross.ne'
+  have hyP : 0 ≤ edgeCircumcenterParameter A B P :=
+    edgeCircumcenterParameter_nonneg_of_regular hAB hPcross hcircleP hconeP
+  have hyQ : 0 ≤ edgeCircumcenterParameter A B Q :=
+    edgeCircumcenterParameter_nonneg_of_regular_right hAB hQcross hcircleQ hconeQ
+  have hcurv :
+      normalizedCircleCurvature (chordHalfLength A B) (edgeCircumcenterParameter A B P) <
+        normalizedCircleCurvature (chordHalfLength A B)
+          (edgeCircumcenterParameter A B Q) := by
+    calc
+      normalizedCircleCurvature (chordHalfLength A B) (edgeCircumcenterParameter A B P)
+          = Gluck.Discrete.signedMengerR2 A B P :=
+            (signedMengerR2_edge_parameter_of_pos hAB hPcross).symm
+      _ < Gluck.Discrete.signedMengerR2 A B Q := hκ
+      _ = normalizedCircleCurvature (chordHalfLength A B)
+          (edgeCircumcenterParameter A B Q) :=
+            signedMengerR2_edge_parameter_of_pos hAB hQcross
+  have hyQPle : edgeCircumcenterParameter A B Q ≤ edgeCircumcenterParameter A B P :=
+    parameter_le_of_curvature_le_nonneg
+      (a := chordHalfLength A B)
+      (yP := edgeCircumcenterParameter A B P)
+      (yQ := edgeCircumcenterParameter A B Q)
+      (chordHalfLength_pos hAB).ne' hyP hcurv.le
+  have hyne : edgeCircumcenterParameter A B Q ≠ edgeCircumcenterParameter A B P := by
+    intro hy
+    rw [hy] at hcurv
+    exact (lt_irrefl _) hcurv
+  have hyQP : edgeCircumcenterParameter A B Q < edgeCircumcenterParameter A B P :=
+    lt_of_le_of_ne hyQPle hyne
+  exact normalizedCircleRadius_strictMono_of_nonneg hyQ hyQP
+
 /-- Endpoint version of the negative ordered regular radius comparison.  On
 the negative branch `κ = -1 / R`, so the signed-curvature order makes the
 canonical radius monotone rather than antitone. -/
@@ -2891,6 +2935,52 @@ theorem edgeCircleRadius_mono_of_endpoint_regular_order_neg {A B P Q : ℂ}
       (yQ := edgeCircumcenterParameter A B Q)
       (chordHalfLength_pos hAB).ne' hyQ hcurv
   exact normalizedCircleRadius_antitone_of_nonpos hyQP hyP
+
+/-- Strict endpoint version of the negative ordered regular radius comparison. -/
+theorem edgeCircleRadius_strictMono_of_endpoint_regular_order_neg {A B P Q : ℂ}
+    (hAB : A ≠ B)
+    (hPcross : Gluck.Discrete.crossR2 A B P < 0)
+    (hQcross : Gluck.Discrete.crossR2 A B Q < 0)
+    (hPreg : DahlbergRegularAt P A B) (hQreg : DahlbergRegularAt A B Q)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P <
+      Gluck.Discrete.signedMengerR2 A B Q) :
+    normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B P) <
+      normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B Q) := by
+  obtain ⟨OP, RP, hcircleP, hconeP⟩ :=
+    dahlbergRegularAt_circle_of_cross_ne_zero hPreg hPcross.ne
+  obtain ⟨OQ, RQ, hcircleQ, hconeQ⟩ :=
+    dahlbergRegularAt_circle_of_cross_ne_zero_right hQreg hQcross.ne
+  have hyP : edgeCircumcenterParameter A B P ≤ 0 :=
+    edgeCircumcenterParameter_nonpos_of_regular hAB hPcross hcircleP hconeP
+  have hyQ : edgeCircumcenterParameter A B Q ≤ 0 :=
+    edgeCircumcenterParameter_nonpos_of_regular_right hAB hQcross hcircleQ hconeQ
+  have hcurv :
+      normalizedCircleCurvature (chordHalfLength A B) (edgeCircumcenterParameter A B Q) <
+        normalizedCircleCurvature (chordHalfLength A B)
+          (edgeCircumcenterParameter A B P) := by
+    calc
+      normalizedCircleCurvature (chordHalfLength A B) (edgeCircumcenterParameter A B Q)
+          = -Gluck.Discrete.signedMengerR2 A B Q := by
+            have hQeq := signedMengerR2_edge_parameter_of_neg hAB hQcross
+            linarith
+      _ < -Gluck.Discrete.signedMengerR2 A B P := by linarith
+      _ = normalizedCircleCurvature (chordHalfLength A B)
+          (edgeCircumcenterParameter A B P) := by
+            have hPeq := signedMengerR2_edge_parameter_of_neg hAB hPcross
+            linarith
+  have hyQPle : edgeCircumcenterParameter A B Q ≤ edgeCircumcenterParameter A B P :=
+    parameter_le_of_curvature_ge_nonpos
+      (a := chordHalfLength A B)
+      (yP := edgeCircumcenterParameter A B P)
+      (yQ := edgeCircumcenterParameter A B Q)
+      (chordHalfLength_pos hAB).ne' hyQ hcurv.le
+  have hyne : edgeCircumcenterParameter A B Q ≠ edgeCircumcenterParameter A B P := by
+    intro hy
+    rw [hy] at hcurv
+    exact (lt_irrefl _) hcurv
+  have hyQP : edgeCircumcenterParameter A B Q < edgeCircumcenterParameter A B P :=
+    lt_of_le_of_ne hyQPle hyne
+  exact normalizedCircleRadius_strictAnti_of_nonpos hyQP hyP
 
 /-- Polygon-indexed positive endpoint radius comparison along one oriented
 edge. -/
