@@ -502,6 +502,11 @@ def transportedUpperCap (u w : ℂ) (a y : ℝ) : Set ℂ :=
 def transportedClosedDisk (u w : ℂ) (a y : ℝ) : Set ℂ :=
   directIsometryImage u w (normalizedClosedDisk a y)
 
+/-- The normalized interior-side half-plane transported to arbitrary Euclidean
+coordinates. -/
+def transportedEdgeHalfPlane (u w : ℂ) : Set ℂ :=
+  directIsometryImage u w normalizedEdgeHalfPlane
+
 /-- Dahlberg's exact oriented region transported to arbitrary Euclidean
 coordinates. -/
 def transportedDahlbergRegion (u w : ℂ) (a y k : ℝ) : Set ℂ :=
@@ -526,6 +531,9 @@ noncomputable def edgeUpperCap (A B : ℂ) (y : ℝ) : Set ℂ :=
 
 noncomputable def edgeClosedDisk (A B : ℂ) (y : ℝ) : Set ℂ :=
   transportedClosedDisk (chordUnit A B) (chordMidpoint A B) (chordHalfLength A B) y
+
+noncomputable def edgeHalfPlane (A B : ℂ) : Set ℂ :=
+  transportedEdgeHalfPlane (chordUnit A B) (chordMidpoint A B)
 
 noncomputable def edgeDahlbergRegion (A B : ℂ) (y k : ℝ) : Set ℂ :=
   transportedDahlbergRegion (chordUnit A B) (chordMidpoint A B)
@@ -1205,6 +1213,20 @@ theorem transportedDahlbergRegion_mono (u w : ℂ) {a yP yQ kP kQ : ℝ}
   unfold transportedDahlbergRegion directIsometryImage
   exact Set.image_mono h
 
+/-- Transported form of Dahlberg Lemma 8(1). -/
+theorem transportedDahlbergRegion_subset_halfPlane (u w : ℂ) {a y k : ℝ}
+    (hk : 0 ≤ k) :
+    transportedDahlbergRegion u w a y k ⊆ transportedEdgeHalfPlane u w := by
+  unfold transportedDahlbergRegion transportedEdgeHalfPlane directIsometryImage
+  exact Set.image_mono (normalizedDahlbergRegion_subset_halfPlane hk)
+
+/-- Transported form of Dahlberg Lemma 8(2). -/
+theorem transportedHalfPlane_subset_dahlbergRegion (u w : ℂ) {a y k : ℝ}
+    (hk : k ≤ 0) :
+    transportedEdgeHalfPlane u w ⊆ transportedDahlbergRegion u w a y k := by
+  unfold transportedDahlbergRegion transportedEdgeHalfPlane directIsometryImage
+  exact Set.image_mono (normalizedHalfPlane_subset_dahlbergRegion hk)
+
 /-- Positive transported Dahlberg regions lie in their transported closed disk. -/
 theorem transportedDahlbergRegion_subset_closedDisk_of_pos (u w : ℂ) {a y k : ℝ}
     (hk : 0 < k) :
@@ -1212,12 +1234,38 @@ theorem transportedDahlbergRegion_subset_closedDisk_of_pos (u w : ℂ) {a y k : 
   unfold transportedDahlbergRegion transportedClosedDisk directIsometryImage
   exact Set.image_mono (normalizedDahlbergRegion_subset_closedDisk_of_pos hk)
 
+/-- Nonnegative edge Dahlberg regions lie in the corresponding edge half-plane. -/
+theorem edgeDahlbergRegion_subset_halfPlane (A B : ℂ) {y k : ℝ} (hk : 0 ≤ k) :
+    edgeDahlbergRegion A B y k ⊆ edgeHalfPlane A B := by
+  unfold edgeDahlbergRegion edgeHalfPlane
+  exact transportedDahlbergRegion_subset_halfPlane _ _ hk
+
+/-- The edge half-plane lies in every nonpositive edge Dahlberg region. -/
+theorem edgeHalfPlane_subset_dahlbergRegion (A B : ℂ) {y k : ℝ} (hk : k ≤ 0) :
+    edgeHalfPlane A B ⊆ edgeDahlbergRegion A B y k := by
+  unfold edgeDahlbergRegion edgeHalfPlane
+  exact transportedHalfPlane_subset_dahlbergRegion _ _ hk
+
 /-- Positive edge Dahlberg regions lie in the corresponding edge disk. -/
 theorem edgeDahlbergRegion_subset_closedDisk_of_pos (A B : ℂ) {y k : ℝ}
     (hk : 0 < k) :
     edgeDahlbergRegion A B y k ⊆ edgeClosedDisk A B y := by
   unfold edgeDahlbergRegion edgeClosedDisk
   exact transportedDahlbergRegion_subset_closedDisk_of_pos _ _ hk
+
+/-- Point-edge form of Dahlberg Lemma 8(1). -/
+theorem edgePointDahlbergRegion_subset_edgeHalfPlane_of_nonneg {A B C : ℂ}
+    (hk : 0 ≤ Gluck.Discrete.signedMengerR2 A B C) :
+    edgePointDahlbergRegion A B C ⊆ edgeHalfPlane A B := by
+  unfold edgePointDahlbergRegion
+  exact edgeDahlbergRegion_subset_halfPlane A B hk
+
+/-- Point-edge form of Dahlberg Lemma 8(2). -/
+theorem edgeHalfPlane_subset_edgePointDahlbergRegion_of_nonpos {A B C : ℂ}
+    (hk : Gluck.Discrete.signedMengerR2 A B C ≤ 0) :
+    edgeHalfPlane A B ⊆ edgePointDahlbergRegion A B C := by
+  unfold edgePointDahlbergRegion
+  exact edgeHalfPlane_subset_dahlbergRegion A B hk
 
 /-- On the positive branch, a point-edge Dahlberg region is contained in the
 ordinary curvature disk for that point and edge. -/
