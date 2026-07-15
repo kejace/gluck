@@ -4588,6 +4588,40 @@ theorem signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concycl
   · exact signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_concyclic
       hn hsimple hregular hneg hnoncircle
 
+/-- Dahlberg's final disk-reduction source extraction: for a general simple
+locally regular nonconcyclic polygon, the smallest-enclosing-disk argument
+produces four ordered adjacent signed-Menger turns on the original cyclic
+profile.
+
+This is the formal target corresponding to the last part of §4 of
+`references/23.pdf`: the boundary contact set of the minimal disk, Lemma 10's
+triangle-sector radius comparison, and the convex approximation together
+produce the ordered turn witness below.  The remaining conversion from this
+witness to `DahlbergFourVertex` is purely cyclic and already proved. -/
+theorem exists_ordered_signedMenger_turns_of_dahlberg_disk_reduction
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    ∃ i₁ i₂ i₃ i₄ : ℕ,
+      i₁ < i₂ ∧ i₂ < i₃ ∧ i₃ < i₄ ∧ i₄ < i₁ + n ∧
+        SignedMengerProfile v (i₁ : ZMod n) <
+          SignedMengerProfile v ((i₁ : ZMod n) + 1) ∧
+        SignedMengerProfile v (((i₁ : ZMod n) + 1) + 1) <
+          SignedMengerProfile v ((i₁ : ZMod n) + 1) ∧
+        SignedMengerProfile v ((i₂ : ZMod n) + 1) <
+          SignedMengerProfile v (i₂ : ZMod n) ∧
+        SignedMengerProfile v ((i₂ : ZMod n) + 1) <
+          SignedMengerProfile v (((i₂ : ZMod n) + 1) + 1) ∧
+        SignedMengerProfile v (i₃ : ZMod n) <
+          SignedMengerProfile v ((i₃ : ZMod n) + 1) ∧
+        SignedMengerProfile v (((i₃ : ZMod n) + 1) + 1) <
+          SignedMengerProfile v ((i₃ : ZMod n) + 1) ∧
+        SignedMengerProfile v ((i₄ : ZMod n) + 1) <
+          SignedMengerProfile v (i₄ : ZMod n) ∧
+        SignedMengerProfile v ((i₄ : ZMod n) + 1) <
+          SignedMengerProfile v (((i₄ : ZMod n) + 1) + 1) := by
+  sorry
+
 /-- Dahlberg's reduction from the general simple locally regular polygon to the
 strictly-convex auxiliary polygon used in the last part of §4 of
 `references/23.pdf`.
@@ -4602,7 +4636,12 @@ theorem signedMengerProfile_dahlbergFourVertex_of_dahlberg_disk_reduction
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  sorry
+  obtain ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
+    hinc₁, hdec₁, hdec₂, hinc₂, hinc₃, hdec₃, hdec₄, hinc₄⟩ :=
+    exists_ordered_signedMenger_turns_of_dahlberg_disk_reduction
+      hn hsimple hregular hnoncircle
+  exact signedMengerProfile_dahlbergFourVertex_of_ordered_turns_four_le hn
+    hi₁₂ hi₂₃ hi₃₄ hi₄₁ hinc₁ hdec₁ hdec₂ hinc₂ hinc₃ hdec₃ hdec₄ hinc₄
 
 /-- Dahlberg's geometric extraction step: Lemma 8, Lemma 9, and Lemma 10
 produce two local maxima and two local minima of signed Menger curvature for a
