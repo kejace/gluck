@@ -214,6 +214,63 @@ theorem dahlbergFourVertex_neg_iff {n : ℕ} {κ : ZMod n → ℝ} :
       simpa using hfv
     exact dahlbergFourVertex_of_neg (κ := fun i => -κ i) hfv'
 
+/-- Positive affine changes of a cyclic profile preserve plateau-aware local
+maxima. -/
+theorem discreteLocalMax_posAffine {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
+    (ha : 0 < a) {i : ZMod n} (hmax : DiscreteLocalMax κ i) :
+    DiscreteLocalMax (fun j => a * κ j + b) i := by
+  rcases hmax with ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq, hleft, hright⟩
+  refine ⟨l, r, hlpos, hrpos, hlr, ?_, ?_, ?_, ?_⟩
+  · intro m hm
+    simp [hleft_eq m hm]
+  · intro m hm
+    simp [hright_eq m hm]
+  · nlinarith [mul_lt_mul_of_pos_left hleft ha]
+  · nlinarith [mul_lt_mul_of_pos_left hright ha]
+
+/-- Positive affine changes of a cyclic profile preserve plateau-aware local
+minima. -/
+theorem discreteLocalMin_posAffine {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
+    (ha : 0 < a) {i : ZMod n} (hmin : DiscreteLocalMin κ i) :
+    DiscreteLocalMin (fun j => a * κ j + b) i := by
+  rcases hmin with ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq, hleft, hright⟩
+  refine ⟨l, r, hlpos, hrpos, hlr, ?_, ?_, ?_, ?_⟩
+  · intro m hm
+    simp [hleft_eq m hm]
+  · intro m hm
+    simp [hright_eq m hm]
+  · nlinarith [mul_lt_mul_of_pos_left hleft ha]
+  · nlinarith [mul_lt_mul_of_pos_left hright ha]
+
+/-- The plateau-aware Dahlberg conclusion is invariant under positive affine
+changes of the cyclic curvature profile. -/
+theorem dahlbergFourVertex_posAffine {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
+    (ha : 0 < a) (hfv : DahlbergFourVertex κ) :
+    DahlbergFourVertex (fun i => a * κ i + b) := by
+  rcases hfv with
+    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁, hmax₁, hmin₂, hmax₃, hmin₄⟩
+  exact ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
+    discreteLocalMax_posAffine ha hmax₁,
+    discreteLocalMin_posAffine ha hmin₂,
+    discreteLocalMax_posAffine ha hmax₃,
+    discreteLocalMin_posAffine ha hmin₄⟩
+
+/-- Positive affine changes of a cyclic curvature profile preserve the
+plateau-aware Dahlberg conclusion exactly. -/
+theorem dahlbergFourVertex_posAffine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
+    (ha : 0 < a) :
+    DahlbergFourVertex (fun i => a * κ i + b) ↔ DahlbergFourVertex κ := by
+  constructor
+  · intro hfv
+    have hscaled :=
+      dahlbergFourVertex_posAffine (κ := fun i => a * κ i + b)
+        (a := a⁻¹) (b := -b / a) (inv_pos.mpr ha) hfv
+    convert hscaled using 1
+    ext i
+    field_simp [ha.ne']
+    ring
+  · exact dahlbergFourVertex_posAffine ha
+
 /-- Four ordered strict one-step extrema give Dahlberg's plateau-aware
 four-vertex conclusion. -/
 theorem dahlbergFourVertex_of_strict_neighbors {n : ℕ} (hn : 2 ≤ n)
