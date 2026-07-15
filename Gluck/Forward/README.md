@@ -99,7 +99,11 @@ now first dispatches to the ordered-turn endpoint
 `orderedAdjacentTurns_conformalMenger_spaceForm_kernel`; the public spelling is
 `orderedAdjacentTurns_conformalMenger_spaceForm_of_positiveOrientation`, and
 D4VT is derived by `dahlbergFourVertex_of_orderedAdjacentTurns_four_le`.  The
-negative-orientation turn-level endpoint is exposed in reflected-sign form as
+constant-or positive-orientation spelling also has a turn-level endpoint,
+`constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_kernel`, and the
+public constant-or D4VT wrapper routes through that endpoint before applying
+the same cyclic constructor.  The negative-orientation turn-level endpoint is
+exposed in reflected-sign form as
 `orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected`,
 which is then converted to the public negative D4VT theorem by
 `dahlbergFourVertex_of_neg_reflectIndex`.  The bundled turn-level endpoint is
