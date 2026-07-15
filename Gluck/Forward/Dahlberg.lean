@@ -1280,4 +1280,34 @@ theorem edgePoint_mem_region_of_regular_order {A B P Q : ℂ}
   have hQmem := edgePoint_mem_own_dahlbergRegion hAB hQcross
   exact edgePointDahlbergRegion_anti_of_regular hAB hPreg hQreg hκ hQmem
 
+/-- Positive ordered regular incidence into the ordinary curvature disk. -/
+theorem edgePoint_mem_edgeClosedDisk_of_regular_order_pos {A B P Q : ℂ}
+    (hAB : A ≠ B)
+    (hPcross : 0 < Gluck.Discrete.crossR2 A B P)
+    (hPreg : DahlbergRegularAt P A B) (hQreg : DahlbergRegularAt Q A B)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P ≤
+      Gluck.Discrete.signedMengerR2 A B Q)
+    (hQcross : Gluck.Discrete.crossR2 A B Q ≠ 0) :
+    Q ∈ edgeClosedDisk A B (edgeCircumcenterParameter A B P) := by
+  have hregion := edgePoint_mem_region_of_regular_order hAB hPreg hQreg hκ hQcross
+  exact edgePointDahlbergRegion_subset_edgeClosedDisk_of_pos hAB hPcross hregion
+
+/-- Positive ordered regular vertices compare their canonical circle radii:
+higher signed Menger curvature gives no larger positive-branch radius. -/
+theorem edgeCircleRadius_antitone_of_regular_order_pos {A B P Q : ℂ}
+    (hAB : A ≠ B)
+    (hPcross : 0 < Gluck.Discrete.crossR2 A B P)
+    (hQcross : 0 < Gluck.Discrete.crossR2 A B Q)
+    (hPreg : DahlbergRegularAt P A B) (hQreg : DahlbergRegularAt Q A B)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P ≤
+      Gluck.Discrete.signedMengerR2 A B Q) :
+    normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B Q) ≤
+      normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B P) := by
+  have hmem := edgePoint_mem_edgeClosedDisk_of_regular_order_pos
+    hAB hPcross hPreg hQreg hκ hQcross.ne'
+  obtain ⟨OQ, RQ, hcircleQ, hconeQ⟩ :=
+    dahlbergRegularAt_circle_of_cross_ne_zero hQreg hQcross.ne'
+  exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
+    hAB hQcross hcircleQ hconeQ hmem
+
 end Gluck.Forward
