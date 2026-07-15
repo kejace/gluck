@@ -2459,6 +2459,128 @@ theorem signedMengerProfile_edgeCommonCircumcircle_of_constant_neg
   · exact hκneg i
   · rw [hc i, hc (i + 1)]
 
+/-- A globally constant positive signed-Menger profile on a locally regular
+simple polygon forces all vertices onto one Euclidean circle. -/
+theorem concyclic_of_constant_signedMengerProfile_pos
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hκpos : ∀ i : ZMod n, 0 < SignedMengerProfile v i)
+    (hconst : ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    Concyclic v := by
+  classical
+  have hlocal :=
+    signedMengerProfile_edgeCommonCircumcircle_of_constant_pos hsimple hregular hκpos hconst
+  choose O R hOR using hlocal
+  have hsucc : ∀ i : ZMod n, O i = O (i + 1) ∧ R i = R (i + 1) := by
+    intro i
+    have hcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+      have hAB : v i ≠ v (i + 1) := hsimple.1 i
+      have hκ : 0 <
+          Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+        simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hκpos (i + 1)
+      exact crossR2_pos_of_signedMengerR2_pos hAB hκ
+    have hleft :
+        CircumcircleR2 (v i) (v (i + 1)) (v (i + 1 + 1)) (O i) (R i) :=
+      (hOR i).2
+    have hright :
+        CircumcircleR2 (v (i + 1)) (v (i + 1 + 1)) (v i) (O (i + 1)) (R (i + 1)) := by
+      simpa [sub_eq_add_neg, add_assoc] using (hOR (i + 1)).1
+    exact circumcircleR2_unique_of_cyclic_reorder (hsimple.1 i) hcross.ne' hleft hright
+  have hnat : ∀ k : ℕ, O 0 = O (k : ZMod n) ∧ R 0 = R (k : ZMod n) := by
+    intro k
+    induction k with
+    | zero => simp
+    | succ k ih =>
+        have hs := hsucc (k : ZMod n)
+        have hOstep : O (k : ZMod n) = O ((k + 1 : ℕ) : ZMod n) := by
+          simpa [Nat.cast_add] using hs.1
+        have hRstep : R (k : ZMod n) = R ((k + 1 : ℕ) : ZMod n) := by
+          simpa [Nat.cast_add] using hs.2
+        constructor
+        · exact ih.1.trans hOstep
+        · exact ih.2.trans hRstep
+  refine ⟨O 0, R 0, (hOR 0).1.1, fun i => ?_⟩
+  have hi := hnat i.val
+  have hO : O 0 = O i := by
+    simpa [ZMod.natCast_rightInverse i] using hi.1
+  have hR : R 0 = R i := by
+    simpa [ZMod.natCast_rightInverse i] using hi.2
+  rw [hO, hR]
+  exact (hOR i).1.2.1
+
+/-- A globally constant negative signed-Menger profile on a locally regular
+simple polygon forces all vertices onto one Euclidean circle. -/
+theorem concyclic_of_constant_signedMengerProfile_neg
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hκneg : ∀ i : ZMod n, SignedMengerProfile v i < 0)
+    (hconst : ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    Concyclic v := by
+  classical
+  have hlocal :=
+    signedMengerProfile_edgeCommonCircumcircle_of_constant_neg hsimple hregular hκneg hconst
+  choose O R hOR using hlocal
+  have hsucc : ∀ i : ZMod n, O i = O (i + 1) ∧ R i = R (i + 1) := by
+    intro i
+    have hcross : Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) < 0 := by
+      have hAB : v i ≠ v (i + 1) := hsimple.1 i
+      have hκ :
+          Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) < 0 := by
+        simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hκneg (i + 1)
+      exact crossR2_neg_of_signedMengerR2_neg hAB hκ
+    have hleft :
+        CircumcircleR2 (v i) (v (i + 1)) (v (i + 1 + 1)) (O i) (R i) :=
+      (hOR i).2
+    have hright :
+        CircumcircleR2 (v (i + 1)) (v (i + 1 + 1)) (v i) (O (i + 1)) (R (i + 1)) := by
+      simpa [sub_eq_add_neg, add_assoc] using (hOR (i + 1)).1
+    exact circumcircleR2_unique_of_cyclic_reorder (hsimple.1 i) hcross.ne hleft hright
+  have hnat : ∀ k : ℕ, O 0 = O (k : ZMod n) ∧ R 0 = R (k : ZMod n) := by
+    intro k
+    induction k with
+    | zero => simp
+    | succ k ih =>
+        have hs := hsucc (k : ZMod n)
+        have hOstep : O (k : ZMod n) = O ((k + 1 : ℕ) : ZMod n) := by
+          simpa [Nat.cast_add] using hs.1
+        have hRstep : R (k : ZMod n) = R ((k + 1 : ℕ) : ZMod n) := by
+          simpa [Nat.cast_add] using hs.2
+        constructor
+        · exact ih.1.trans hOstep
+        · exact ih.2.trans hRstep
+  refine ⟨O 0, R 0, (hOR 0).1.1, fun i => ?_⟩
+  have hi := hnat i.val
+  have hO : O 0 = O i := by
+    simpa [ZMod.natCast_rightInverse i] using hi.1
+  have hR : R 0 = R i := by
+    simpa [ZMod.natCast_rightInverse i] using hi.2
+  rw [hO, hR]
+  exact (hOR i).1.2.1
+
+/-- Positive same-sign contrapositive: a nonconcyclic locally regular simple
+polygon has nonconstant signed-Menger profile. -/
+theorem not_constant_signedMengerProfile_of_not_concyclic_pos
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hκpos : ∀ i : ZMod n, 0 < SignedMengerProfile v i)
+    (hnoncircle : ¬ Concyclic v) :
+    ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  intro hconst
+  exact hnoncircle (concyclic_of_constant_signedMengerProfile_pos
+    hsimple hregular hκpos hconst)
+
+/-- Negative same-sign contrapositive: a nonconcyclic locally regular simple
+polygon has nonconstant signed-Menger profile. -/
+theorem not_constant_signedMengerProfile_of_not_concyclic_neg
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hκneg : ∀ i : ZMod n, SignedMengerProfile v i < 0)
+    (hnoncircle : ¬ Concyclic v) :
+    ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  intro hconst
+  exact hnoncircle (concyclic_of_constant_signedMengerProfile_neg
+    hsimple hregular hκneg hconst)
+
 /-! ## Profile-facing endpoint order wrappers -/
 
 /-- Positive signed-Menger profile at a polygon vertex gives positive
