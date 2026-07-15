@@ -94,19 +94,6 @@ theorem discrete_four_vertex_H2 {n : ℕ} [NeZero n]
     DahlbergFourVertex κ := by
   exact discrete_four_vertex_H2_kernel hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
 
-/-- Hyperbolic constant-or-Dahlberg theorem using the shared positive
-orientation interface for convex/coherent cyclic polygons. -/
-theorem constant_or_dahlbergFourVertex_H2_of_positiveOrientation
-    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
-    (hdisk : ∀ i, ‖v i‖ < 1)
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (horient : PositivePolygonOrientation v)
-    (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
-    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_H2
-    hn v κ hdisk hsimple horient hregular hκ hcircle
-
 /-- Hyperbolic ordered-turn theorem using the shared positive orientation
 interface for convex/coherent cyclic polygons. -/
 theorem orderedAdjacentTurns_H2_of_positiveOrientation {n : ℕ} [NeZero n]
@@ -120,6 +107,36 @@ theorem orderedAdjacentTurns_H2_of_positiveOrientation {n : ℕ} [NeZero n]
     OrderedAdjacentTurns κ := by
   exact orderedAdjacentTurns_H2_source
     hn v κ hdisk hsimple horient hregular hκ hcircle hnc
+
+/-- Hyperbolic constant-or ordered-turn theorem using the shared positive
+orientation interface for convex/coherent cyclic polygons. -/
+theorem constant_or_orderedAdjacentTurns_H2_of_positiveOrientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ OrderedAdjacentTurns κ := by
+  by_cases hconst : ∃ c, ∀ i : ZMod n, κ i = c
+  · exact Or.inl hconst
+  · exact Or.inr
+      (orderedAdjacentTurns_H2_of_positiveOrientation
+        hn v κ hdisk hsimple horient hregular hκ hcircle hconst)
+
+/-- Hyperbolic constant-or-Dahlberg theorem using the shared positive
+orientation interface for convex/coherent cyclic polygons. -/
+theorem constant_or_dahlbergFourVertex_H2_of_positiveOrientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns hn
+    (constant_or_orderedAdjacentTurns_H2_of_positiveOrientation
+      hn v κ hdisk hsimple horient hregular hκ hcircle)
 
 /-- Hyperbolic discrete four-vertex theorem using the shared positive
 orientation interface for convex/coherent cyclic polygons. -/

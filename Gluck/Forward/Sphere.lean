@@ -92,19 +92,6 @@ theorem discrete_four_vertex_S2 {n : ℕ} [NeZero n]
     DahlbergFourVertex κ := by
   exact discrete_four_vertex_S2_kernel hn v κ hdisk hsimple hconvex hregular hκ hnc
 
-/-- Spherical constant-or-Dahlberg theorem using the shared positive
-orientation interface for convex/coherent cyclic polygons. -/
-theorem constant_or_dahlbergFourVertex_S2_of_positiveOrientation
-    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
-    (hdisk : ∀ i, ‖v i‖ < 1)
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (horient : PositivePolygonOrientation v)
-    (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger 1 v κ) :
-    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_S2
-    hn v κ hdisk hsimple horient hregular hκ
-
 /-- Spherical ordered-turn theorem using the shared positive orientation
 interface for convex/coherent cyclic polygons. -/
 theorem orderedAdjacentTurns_S2_of_positiveOrientation {n : ℕ} [NeZero n]
@@ -118,6 +105,36 @@ theorem orderedAdjacentTurns_S2_of_positiveOrientation {n : ℕ} [NeZero n]
     OrderedAdjacentTurns κ := by
   exact orderedAdjacentTurns_S2_source
     hn v κ hdisk hsimple horient hregular hκ hnc
+
+/-- Spherical constant-or ordered-turn theorem using the shared positive
+orientation interface for convex/coherent cyclic polygons. -/
+theorem constant_or_orderedAdjacentTurns_S2_of_positiveOrientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ OrderedAdjacentTurns κ := by
+  by_cases hconst : ∃ c, ∀ i : ZMod n, κ i = c
+  · exact Or.inl hconst
+  · exact Or.inr
+      (orderedAdjacentTurns_S2_of_positiveOrientation
+        hn v κ hdisk hsimple horient hregular hκ hconst)
+
+/-- Spherical constant-or-Dahlberg theorem using the shared positive
+orientation interface for convex/coherent cyclic polygons. -/
+theorem constant_or_dahlbergFourVertex_S2_of_positiveOrientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns hn
+    (constant_or_orderedAdjacentTurns_S2_of_positiveOrientation
+      hn v κ hdisk hsimple horient hregular hκ)
 
 /-- Spherical discrete four-vertex theorem using the shared positive
 orientation interface for convex/coherent cyclic polygons. -/
