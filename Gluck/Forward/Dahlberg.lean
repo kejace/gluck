@@ -2024,6 +2024,73 @@ theorem polygonEdgeCircleRadius_antitone_of_endpoint_order_pos_of_vertex_menger_
   exact polygonEdgeCircleRadius_antitone_of_endpoint_order_pos hsimple hregular i
     hPcross hQcross hκ
 
+/-! ## Concyclic polygons and signed Menger curvature -/
+
+/-- A concyclic polygon gives a circumcircle for every oriented vertex triple. -/
+theorem circumcircleR2_of_concyclic_triple {n : ℕ} {v : ZMod n → ℂ}
+    (hcyc : Concyclic v) (i : ZMod n) :
+    ∃ O R, CircumcircleR2 (v (i - 1)) (v i) (v (i + 1)) O R := by
+  rcases hcyc with ⟨O, R, hR, hdist⟩
+  exact ⟨O, R, hR, hdist (i - 1), hdist i, hdist (i + 1)⟩
+
+/-- A concyclic polygon gives a circumcircle for the cyclically reordered
+vertex triple used by the edge-radius API. -/
+theorem circumcircleR2_of_concyclic_edgePrev {n : ℕ} {v : ZMod n → ℂ}
+    (hcyc : Concyclic v) (i : ZMod n) :
+    ∃ O R, CircumcircleR2 (v (i + 1)) (v (i - 1)) (v i) O R := by
+  rcases hcyc with ⟨O, R, hR, hdist⟩
+  exact ⟨O, R, hR, hdist (i + 1), hdist (i - 1), hdist i⟩
+
+/-- On a concyclic polygon, a positively oriented noncollinear vertex has
+signed Menger curvature equal to the reciprocal of the common radius. -/
+theorem polygonSignedMenger_eq_inv_radius_of_concyclic_pos {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    {O : ℂ} {R : ℝ} (hR : 0 < R) (hdist : ∀ i, dist O (v i) = R)
+    (i : ZMod n)
+    (hcross : 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) :
+    Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) = 1 / R := by
+  have hAB : v (i - 1) ≠ v i := by
+    simpa using hsimple.1 (i - 1)
+  exact signedMengerR2_eq_inv_circumradius_of_pos hAB hcross
+    ⟨hR, hdist (i + 1), hdist (i - 1), hdist i⟩
+
+/-- On a concyclic polygon, a negatively oriented noncollinear vertex has
+signed Menger curvature equal to minus the reciprocal of the common radius. -/
+theorem polygonSignedMenger_eq_neg_inv_radius_of_concyclic_neg {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    {O : ℂ} {R : ℝ} (hR : 0 < R) (hdist : ∀ i, dist O (v i) = R)
+    (i : ZMod n)
+    (hcross : Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) < 0) :
+    Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) = -(1 / R) := by
+  have hAB : v (i - 1) ≠ v i := by
+    simpa using hsimple.1 (i - 1)
+  exact signedMengerR2_eq_neg_inv_circumradius_of_neg hAB hcross
+    ⟨hR, hdist (i + 1), hdist (i - 1), hdist i⟩
+
+/-- A consistently positively oriented concyclic simple polygon has constant
+signed Menger curvature. -/
+theorem exists_constant_signedMenger_of_concyclic_pos {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hcyc : Concyclic v)
+    (hcross : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) :
+    ∃ c, ∀ i : ZMod n,
+      Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) = c := by
+  rcases hcyc with ⟨O, R, hR, hdist⟩
+  refine ⟨1 / R, fun i => ?_⟩
+  exact polygonSignedMenger_eq_inv_radius_of_concyclic_pos hsimple hR hdist i (hcross i)
+
+/-- A consistently negatively oriented concyclic simple polygon has constant
+signed Menger curvature. -/
+theorem exists_constant_signedMenger_of_concyclic_neg {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hcyc : Concyclic v)
+    (hcross : ∀ i, Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) < 0) :
+    ∃ c, ∀ i : ZMod n,
+      Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) = c := by
+  rcases hcyc with ⟨O, R, hR, hdist⟩
+  refine ⟨-(1 / R), fun i => ?_⟩
+  exact polygonSignedMenger_eq_neg_inv_radius_of_concyclic_neg hsimple hR hdist i (hcross i)
+
 /-! ## Dahlberg's Euclidean discrete four-vertex kernel -/
 
 /-- Dahlberg's Euclidean discrete four-vertex kernel.
