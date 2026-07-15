@@ -744,6 +744,44 @@ theorem constant_or_orderedAdjacentTurns_E2_of_realizesConformalMenger_zero_posi
     (constant_or_orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_source
       hn hsimple hregular horient)
 
+/-- Negative-orientation nonconstant `ε = 0` conformal-Menger realizations
+inherit the reflected ordered-turn witness from the positive E² source after
+reversing cyclic order. -/
+theorem orderedAdjacentTurns_E2_of_negativeOrientation_reflected
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (horient : NegativePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, -κ (-i) = c) :
+    OrderedAdjacentTurns (fun i => -κ (-i)) := by
+  have horient' : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
+    positiveOrientation_reverseCyclicPolygon_of_negativeOrientation horient
+  have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
+    isSimplePolygon_reverseCyclicPolygon hsimple
+  have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
+    dahlbergRegular_reverseCyclicPolygon hregular
+  have hκ' :
+      RealizesConformalMenger 0 (ReverseCyclicPolygon v) (fun i => -κ (-i)) :=
+    realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation horient hκ
+  exact orderedAdjacentTurns_E2_of_realizesConformalMenger_zero_positiveOrientation_not_constant
+    hn (ReverseCyclicPolygon v) (fun i => -κ (-i))
+    hsimple' hregular' horient' hκ' hnc
+
+/-- Negative-orientation `ε = 0` conformal-Menger endpoint in reflected
+constant-or ordered-turn form. -/
+theorem constant_or_orderedAdjacentTurns_E2_of_negativeOrientation_reflected
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (horient : NegativePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ) :
+    (∃ c, ∀ i : ZMod n, -κ (-i) = c) ∨
+      OrderedAdjacentTurns (fun i => -κ (-i)) := by
+  by_cases hconst : ∃ c, ∀ i : ZMod n, -κ (-i) = c
+  · exact Or.inl hconst
+  · exact Or.inr
+      (orderedAdjacentTurns_E2_of_negativeOrientation_reflected
+        hn v κ hsimple hregular horient hκ hconst)
+
 /-- Nonconcyclic `ε = 0` conformal-Menger realizations inherit Dahlberg's E²
 four-vertex conclusion under strict orientation. -/
 theorem dahlbergFourVertex_E2_of_realizesConformalMenger_zero_not_concyclic
@@ -872,8 +910,11 @@ theorem constant_or_dahlbergFourVertex_E2_of_realizesConformalMenger_zero_negati
     (hregular : DahlbergRegular v) (horient : NegativePolygonOrientation v)
     (hκ : RealizesConformalMenger 0 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_E2_of_realizesConformalMenger_zero_strict_orientation
-    hn v κ hsimple hregular (Or.inr horient) hκ
+  exact
+    constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns_neg_reflectIndex
+      hn
+      (constant_or_orderedAdjacentTurns_E2_of_negativeOrientation_reflected
+        hn v κ hsimple hregular horient hκ)
 
 /-- Public `ε = 0` conformal-Menger discrete four-vertex theorem in the same
 constant-or-four-vertex shape as the strict E² signed-Menger endpoint. -/
