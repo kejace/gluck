@@ -97,4 +97,32 @@ theorem four_vertex_condition_smooth_spaceForm_kernel {ε : ℝ}
   · exact four_vertex_condition_smooth_spaceForm_nonconstant_source
       hε hclosed hreal hκ hper hconst
 
+/-- Uniform ordinary smooth forward four-vertex theorem for the project space
+forms `E²`, `S²`, and `H²`.
+
+This is the ordinary local-extrema conclusion obtained from the stronger
+value-separated kernel `four_vertex_condition_smooth_spaceForm_kernel`. -/
+theorem smoothFourVertex_spaceForm_kernel {ε : ℝ}
+    (hε : ε = 0 ∨ ε = 1 ∨ ε = -1) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : SmoothForwardRealizes ε γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_of_fourVertexCondition
+    (four_vertex_condition_smooth_spaceForm_kernel hε hclosed hreal hκ hper)
+
+/-- Nonconstant ordinary smooth forward four-vertex theorem for the project
+space forms `E²`, `S²`, and `H²`, dispatching directly to the nonconstant
+source gate. -/
+theorem smoothFourVertex_spaceForm_nonconstant {ε : ℝ}
+    (hε : ε = 0 ∨ ε = 1 ∨ ε = -1) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : SmoothForwardRealizes ε γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_of_fourVertexCondition
+    (four_vertex_condition_smooth_spaceForm_nonconstant_source
+      hε hclosed hreal hκ hper hnc)
+
 end Gluck.Forward

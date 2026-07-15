@@ -58,7 +58,11 @@ model-specific wrappers in `Euclidean.lean`, `Sphere.lean`, and
 cases from the model-specific source gates
 `four_vertex_condition_smooth_E2_nonconstant_source`,
 `four_vertex_condition_smooth_S2_nonconstant_source`, and
-`four_vertex_condition_smooth_H2_nonconstant_source`.  The
+`four_vertex_condition_smooth_H2_nonconstant_source`.  The ordinary
+local-extrema conclusion is exposed uniformly as
+`smoothFourVertex_spaceForm_kernel`, with the nonconstant branch available as
+`smoothFourVertex_spaceForm_nonconstant`; both are derived directly from the
+value-separated smooth source gates.  The
 discrete forward statements for `S²` and `H²` are also exposed through
 model-specific wrappers in `Sphere.lean` and `Hyperbolic.lean`.  The shared
 dispatch theorem `constant_or_dahlbergFourVertex_spaceForm_kernel` in
