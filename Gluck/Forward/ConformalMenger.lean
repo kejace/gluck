@@ -142,6 +142,21 @@ theorem orderedAdjacentTurns_conformalMenger_spaceForm_of_positiveOrientation
   exact orderedAdjacentTurns_conformalMenger_spaceForm_kernel
     hε hn v κ hdisk hsimple horient hregular hκ hproper hnc
 
+/-- Positive-orientation constant-or ordered-turn all-space-form
+conformal-Menger theorem. -/
+theorem constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_of_positiveOrientation
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ OrderedAdjacentTurns κ := by
+  exact constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_kernel
+    hε hn v κ hdisk hsimple horient hregular hκ hproper
+
 /-- Positive-orientation nonconstant all-space-form conformal-Menger theorem. -/
 theorem dahlbergFourVertex_conformalMenger_spaceForm_of_positiveOrientation
     {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
@@ -373,6 +388,28 @@ theorem orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_re
     hε hn (ReverseCyclicPolygon v) (fun i => -κ (-i))
     hdisk' hsimple' horient' hregular' hκ' hproper' hnc'
 
+/-- Negative-orientation constant-or ordered-turn all-space-form
+conformal-Menger theorem after reversing the cyclic order and changing sign.
+
+The nonconstant branch produces ordered turns for the reflected profile
+`i ↦ -κ(-i)`, matching the negative-orientation D4VT transport. -/
+theorem constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < -κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨
+      OrderedAdjacentTurns (fun i => -κ (-i)) := by
+  by_cases hconst : ∃ c, ∀ i : ZMod n, κ i = c
+  · exact Or.inl hconst
+  · exact Or.inr
+      (orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected
+        hε hn v κ hdisk hsimple horient hregular hκ hproper hconst)
+
 /-- Bundled strict-orientation nonconstant all-space-form conformal-Menger
 ordered-turn theorem.
 
@@ -398,6 +435,29 @@ theorem orderedAdjacentTurns_conformalMenger_spaceForm_of_oriented_proper
   · exact Or.inr
       (orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected
         hε hn v κ hdisk hsimple hneg.1 hregular hκ hneg.2 hnc)
+
+/-- Bundled strict-orientation constant-or ordered-turn all-space-form
+conformal-Menger theorem.
+
+The positive branch gives ordered turns for `κ`; the negative branch gives
+ordered turns for the reflected-sign profile `i ↦ -κ(-i)`. -/
+theorem constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_of_oriented_proper
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient :
+      (PositivePolygonOrientation v ∧ (ε < 0 → ∀ i, 1 < κ i)) ∨
+        (NegativePolygonOrientation v ∧ (ε < 0 → ∀ i, 1 < -κ i)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨
+      OrderedAdjacentTurns κ ∨ OrderedAdjacentTurns (fun i => -κ (-i)) := by
+  by_cases hconst : ∃ c, ∀ i : ZMod n, κ i = c
+  · exact Or.inl hconst
+  · exact Or.inr
+      (orderedAdjacentTurns_conformalMenger_spaceForm_of_oriented_proper
+        hε hn v κ hdisk hsimple horient hregular hκ hconst)
 
 /-- Negative-orientation nonconstant all-space-form conformal-Menger theorem. -/
 theorem dahlbergFourVertex_conformalMenger_spaceForm_of_negativeOrientation
