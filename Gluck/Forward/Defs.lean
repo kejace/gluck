@@ -381,6 +381,157 @@ theorem discreteLocalMin_negIndex {n : ℕ} {κ : ZMod n → ℝ} {i : ZMod n}
   · simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hright
   · simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hleft
 
+/-- Reflecting cyclic indices about an arbitrary origin preserves
+plateau-aware local maxima. -/
+theorem discreteLocalMax_reflectIndex {n : ℕ} {κ : ZMod n → ℝ} {a i : ZMod n}
+    (hmax : DiscreteLocalMax κ i) :
+    DiscreteLocalMax (fun j => κ (a - j)) (a - i) := by
+  have hneg := discreteLocalMax_negIndex (κ := κ) hmax
+  have htrans :=
+    discreteLocalMax_translateIndex (κ := fun j : ZMod n => κ (-j)) (a := -a) hneg
+  convert htrans using 1
+  · ext j
+    congr 1
+    abel
+  · abel
+
+/-- Reflecting cyclic indices about an arbitrary origin preserves
+plateau-aware local minima. -/
+theorem discreteLocalMin_reflectIndex {n : ℕ} {κ : ZMod n → ℝ} {a i : ZMod n}
+    (hmin : DiscreteLocalMin κ i) :
+    DiscreteLocalMin (fun j => κ (a - j)) (a - i) := by
+  have hneg := discreteLocalMin_negIndex (κ := κ) hmin
+  have htrans :=
+    discreteLocalMin_translateIndex (κ := fun j : ZMod n => κ (-j)) (a := -a) hneg
+  convert htrans using 1
+  · ext j
+    congr 1
+    abel
+  · abel
+
+/-- Translating cyclic indices preserves the plateau-aware Dahlberg
+four-vertex conclusion. -/
+theorem dahlbergFourVertex_translateIndex {n : ℕ} [NeZero n] {κ : ZMod n → ℝ}
+    (a : ZMod n) (hfv : DahlbergFourVertex κ) :
+    DahlbergFourVertex (fun j => κ (j + a)) := by
+  rcases hfv with
+    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁, hmax₁, hmin₂, hmax₃, hmin₄⟩
+  let A := a.val
+  let j₁ := i₁ + n - A
+  let j₂ := i₂ + n - A
+  let j₃ := i₃ + n - A
+  let j₄ := i₄ + n - A
+  have hAcast : (A : ZMod n) = a := by
+    exact ZMod.natCast_zmod_val a
+  have hAlt : A < n := ZMod.val_lt a
+  have hA₁ : A ≤ i₁ + n := by omega
+  have hA₂ : A ≤ i₂ + n := by omega
+  have hA₃ : A ≤ i₃ + n := by omega
+  have hA₄ : A ≤ i₄ + n := by omega
+  refine ⟨j₁, j₂, j₃, j₄, by omega, by omega, by omega, by omega, ?_, ?_, ?_, ?_⟩
+  · have hmax := discreteLocalMax_translateIndex (κ := κ) (a := a) hmax₁
+    have hj : ((j₁ : ℕ) : ZMod n) = (i₁ : ZMod n) - a := by
+      dsimp [j₁, A]
+      rw [Nat.cast_sub hA₁, Nat.cast_add, ZMod.natCast_self, add_zero, hAcast]
+    simpa [hj] using hmax
+  · have hmin := discreteLocalMin_translateIndex (κ := κ) (a := a) hmin₂
+    have hj : ((j₂ : ℕ) : ZMod n) = (i₂ : ZMod n) - a := by
+      dsimp [j₂, A]
+      rw [Nat.cast_sub hA₂, Nat.cast_add, ZMod.natCast_self, add_zero, hAcast]
+    simpa [hj] using hmin
+  · have hmax := discreteLocalMax_translateIndex (κ := κ) (a := a) hmax₃
+    have hj : ((j₃ : ℕ) : ZMod n) = (i₃ : ZMod n) - a := by
+      dsimp [j₃, A]
+      rw [Nat.cast_sub hA₃, Nat.cast_add, ZMod.natCast_self, add_zero, hAcast]
+    simpa [hj] using hmax
+  · have hmin := discreteLocalMin_translateIndex (κ := κ) (a := a) hmin₄
+    have hj : ((j₄ : ℕ) : ZMod n) = (i₄ : ZMod n) - a := by
+      dsimp [j₄, A]
+      rw [Nat.cast_sub hA₄, Nat.cast_add, ZMod.natCast_self, add_zero, hAcast]
+    simpa [hj] using hmin
+
+/-- Translating cyclic indices preserves the plateau-aware Dahlberg
+four-vertex conclusion exactly. -/
+theorem dahlbergFourVertex_translateIndex_iff {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} {a : ZMod n} :
+    DahlbergFourVertex (fun j => κ (j + a)) ↔ DahlbergFourVertex κ := by
+  constructor
+  · intro hfv
+    have hback :=
+      dahlbergFourVertex_translateIndex (κ := fun j : ZMod n => κ (j + a)) (-a) hfv
+    convert hback using 1
+    ext j
+    congr 1
+    abel
+  · exact dahlbergFourVertex_translateIndex a
+
+/-- Reflecting cyclic indices preserves the plateau-aware Dahlberg
+four-vertex conclusion. -/
+theorem dahlbergFourVertex_reflectIndex {n : ℕ} [NeZero n] {κ : ZMod n → ℝ}
+    (a : ZMod n) (hfv : DahlbergFourVertex κ) :
+    DahlbergFourVertex (fun j => κ (a - j)) := by
+  rcases hfv with
+    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁, hmax₁, hmin₂, hmax₃, hmin₄⟩
+  let j₁ := i₁ + n - i₄
+  let j₂ := i₁ + n - i₃
+  let j₃ := i₁ + n - i₂
+  let j₄ := i₁ + n - i₁
+  have hi₄le : i₄ ≤ i₁ + n := Nat.le_of_lt hi₄₁
+  have hi₃le : i₃ ≤ i₁ + n := by omega
+  have hi₂le : i₂ ≤ i₁ + n := by omega
+  have hi₁le : i₁ ≤ i₁ + n := by omega
+  have hbase : DahlbergFourVertex (fun j => κ ((i₁ : ZMod n) - j)) := by
+    apply dahlbergFourVertex_of_localExtrema_min_max
+      (i₁ := j₁) (i₂ := j₂) (i₃ := j₃) (i₄ := j₄)
+      (by omega) (by omega) (by omega) (by omega)
+    · have hmin := discreteLocalMin_reflectIndex
+        (κ := κ) (a := (i₁ : ZMod n)) hmin₄
+      have hj : ((j₁ : ℕ) : ZMod n) = (i₁ : ZMod n) - (i₄ : ZMod n) := by
+        dsimp [j₁]
+        rw [Nat.cast_sub hi₄le, Nat.cast_add, ZMod.natCast_self, add_zero]
+      simpa [hj] using hmin
+    · have hmax := discreteLocalMax_reflectIndex
+        (κ := κ) (a := (i₁ : ZMod n)) hmax₃
+      have hj : ((j₂ : ℕ) : ZMod n) = (i₁ : ZMod n) - (i₃ : ZMod n) := by
+        dsimp [j₂]
+        rw [Nat.cast_sub hi₃le, Nat.cast_add, ZMod.natCast_self, add_zero]
+      simpa [hj] using hmax
+    · have hmin := discreteLocalMin_reflectIndex
+        (κ := κ) (a := (i₁ : ZMod n)) hmin₂
+      have hj : ((j₃ : ℕ) : ZMod n) = (i₁ : ZMod n) - (i₂ : ZMod n) := by
+        dsimp [j₃]
+        rw [Nat.cast_sub hi₂le, Nat.cast_add, ZMod.natCast_self, add_zero]
+      simpa [hj] using hmin
+    · have hmax := discreteLocalMax_reflectIndex
+        (κ := κ) (a := (i₁ : ZMod n)) hmax₁
+      have hj : ((j₄ : ℕ) : ZMod n) = (i₁ : ZMod n) - (i₁ : ZMod n) := by
+        dsimp [j₄]
+        rw [Nat.cast_sub hi₁le, Nat.cast_add, ZMod.natCast_self, add_zero]
+      simpa [hj] using hmax
+  have hshift :=
+    dahlbergFourVertex_translateIndex
+      (κ := fun j : ZMod n => κ ((i₁ : ZMod n) - j))
+      ((i₁ : ZMod n) - a) hbase
+  convert hshift using 1
+  ext j
+  congr 1
+  abel
+
+/-- Reflecting cyclic indices preserves the plateau-aware Dahlberg
+four-vertex conclusion exactly. -/
+theorem dahlbergFourVertex_reflectIndex_iff {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} {a : ZMod n} :
+    DahlbergFourVertex (fun j => κ (a - j)) ↔ DahlbergFourVertex κ := by
+  constructor
+  · intro hfv
+    have hback :=
+      dahlbergFourVertex_reflectIndex (κ := fun j : ZMod n => κ (a - j)) a hfv
+    convert hback using 1
+    ext j
+    congr 1
+    abel
+  · exact dahlbergFourVertex_reflectIndex a
+
 /-- Four ordered strict one-step extrema give Dahlberg's plateau-aware
 four-vertex conclusion. -/
 theorem dahlbergFourVertex_of_strict_neighbors {n : ℕ} (hn : 2 ≤ n)
@@ -811,6 +962,10 @@ vertex triple. -/
 theorem SignedMengerProfile_apply {n : ℕ} (v : ZMod n → ℂ) (i : ZMod n) :
     SignedMengerProfile v i =
       Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) := rfl
+
+/-- Reverse the cyclic order of a polygonal vertex map. -/
+def ReverseCyclicPolygon {n : ℕ} (v : ZMod n → ℂ) : ZMod n → ℂ :=
+  fun i => v (-i)
 
 /-- Every consecutive vertex triple has positive orientation.  This is the
 local orientation/strict-convexity interface used by the Euclidean convex

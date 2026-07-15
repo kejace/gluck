@@ -2078,6 +2078,137 @@ theorem polygonSignedMenger_reverse_vertex {n : ℕ} {v : ZMod n → ℂ} (i : Z
       -SignedMengerProfile v i := by
   exact signedMengerR2_reverse (v (i - 1)) (v i) (v (i + 1))
 
+/-- The signed-Menger profile of the reversed cyclic polygon is the negated
+profile of the original polygon, reindexed by `i ↦ -i`. -/
+theorem SignedMengerProfile_reverseCyclicPolygon {n : ℕ} (v : ZMod n → ℂ)
+    (i : ZMod n) :
+    SignedMengerProfile (ReverseCyclicPolygon v) i =
+      -SignedMengerProfile v (-i) := by
+  change Gluck.Discrete.signedMengerR2
+      (v (-(i - 1))) (v (-i)) (v (-(i + 1))) =
+    -SignedMengerProfile v (-i)
+  convert polygonSignedMenger_reverse_vertex (v := v) (-i) using 1
+  abel_nf
+
+/-- Reversing the cyclic order turns negative orientation into positive
+orientation. -/
+theorem positiveOrientation_reverseCyclicPolygon_of_negativeOrientation {n : ℕ}
+    {v : ZMod n → ℂ} (horient : NegativePolygonOrientation v) :
+    PositivePolygonOrientation (ReverseCyclicPolygon v) := by
+  intro i
+  change 0 < Gluck.Discrete.crossR2 (v (-(i - 1))) (v (-i)) (v (-(i + 1)))
+  rw [show (-(i - 1) : ZMod n) = -i + 1 by abel,
+    show (-(i + 1) : ZMod n) = -i - 1 by abel,
+    polygonCross_reverse_vertex (v := v) (-i)]
+  exact neg_pos.mpr (horient (-i))
+
+/-- Reversing the endpoints of a circumcircle triple preserves the
+circumcircle. -/
+theorem CircumcircleR2_reverse {A B C O : ℂ} {R : ℝ}
+    (hcircle : CircumcircleR2 A B C O R) :
+    CircumcircleR2 C B A O R := by
+  rcases hcircle with ⟨hR, hA, hB, hC⟩
+  exact ⟨hR, hC, hB, hA⟩
+
+/-- Reversing the endpoints of a vertex cone preserves membership in the
+cone. -/
+theorem InVertexCone_reverse {A B C O : ℂ}
+    (hcone : InVertexCone A B C O) :
+    InVertexCone C B A O := by
+  rcases hcone with ⟨a, b, ha, hb, hO⟩
+  refine ⟨b, a, hb, ha, ?_⟩
+  simpa [add_comm] using hO
+
+/-- Dahlberg local regularity is invariant under reversing the two outer
+vertices of the local triple. -/
+theorem DahlbergRegularAt_reverse {A B C : ℂ}
+    (hreg : DahlbergRegularAt A B C) :
+    DahlbergRegularAt C B A := by
+  rcases hreg with hcol | hcircle
+  · left
+    refine ⟨?_, ?_⟩
+    · rw [crossR2_reverse, hcol.1, neg_zero]
+    · simpa [segment_symm ℝ A C] using hcol.2
+  · right
+    rcases hcircle with ⟨O, R, hcirc, hcone⟩
+    exact ⟨O, R, CircumcircleR2_reverse hcirc, InVertexCone_reverse hcone⟩
+
+/-- Reversing cyclic order preserves Dahlberg regularity. -/
+theorem dahlbergRegular_reverseCyclicPolygon {n : ℕ} {v : ZMod n → ℂ}
+    (hregular : DahlbergRegular v) :
+    DahlbergRegular (ReverseCyclicPolygon v) := by
+  intro i
+  change DahlbergRegularAt (v (-(i - 1))) (v (-i)) (v (-(i + 1)))
+  convert DahlbergRegularAt_reverse (hregular (-i)) using 1
+  · congr 1
+    abel
+  · congr 1
+    abel
+
+/-- Reversing cyclic order preserves concyclicity. -/
+theorem concyclic_reverseCyclicPolygon {n : ℕ} {v : ZMod n → ℂ}
+    (hcyc : Concyclic v) :
+    Concyclic (ReverseCyclicPolygon v) := by
+  rcases hcyc with ⟨O, R, hR, hdist⟩
+  exact ⟨O, R, hR, fun i => by simpa [ReverseCyclicPolygon] using hdist (-i)⟩
+
+/-- Reversing cyclic order preserves concyclicity exactly. -/
+theorem concyclic_reverseCyclicPolygon_iff {n : ℕ} {v : ZMod n → ℂ} :
+    Concyclic (ReverseCyclicPolygon v) ↔ Concyclic v := by
+  constructor
+  · intro hcyc
+    rcases hcyc with ⟨O, R, hR, hdist⟩
+    exact ⟨O, R, hR, fun i => by
+      simpa [ReverseCyclicPolygon] using hdist (-i)⟩
+  · exact concyclic_reverseCyclicPolygon
+
+/-- Reversing cyclic order preserves polygon simplicity. -/
+theorem isSimplePolygon_reverseCyclicPolygon {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) :
+    Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro i
+    change v (-i) ≠ v (-(i + 1))
+    intro h
+    have hedge := hsimple.1 (-(i + 1))
+    apply hedge
+    rw [show (-(i + 1) + 1 : ZMod n) = -i by abel]
+    exact h.symm
+  · intro i
+    change
+      segment ℝ (v (-i)) (v (-(i + 1))) ∩
+          segment ℝ (v (-(i + 1))) (v (-((i + 1) + 1))) =
+        {v (-(i + 1))}
+    rw [segment_symm ℝ (v (-i)) (v (-(i + 1))),
+      segment_symm ℝ (v (-(i + 1))) (v (-((i + 1) + 1))), Set.inter_comm]
+    convert hsimple.2.1 (-(i + 1 + 1)) using 1
+    · abel_nf
+    · abel_nf
+  · intro i j hij hij_next hji_next
+    change
+      segment ℝ (v (-i)) (v (-(i + 1))) ∩
+          segment ℝ (v (-j)) (v (-(j + 1))) =
+        ∅
+    have hIJ : -(i + 1) ≠ -(j + 1) := by
+      intro h
+      apply hij
+      have h' := congrArg Neg.neg h
+      simpa [sub_eq_add_neg, add_assoc] using congrArg (fun x : ZMod n => x - 1) h'
+    have hIJs : -(i + 1) + 1 ≠ -(j + 1) := by
+      intro h
+      apply hji_next
+      have h' := congrArg Neg.neg h
+      simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using h'.symm
+    have hJIs : -(j + 1) + 1 ≠ -(i + 1) := by
+      intro h
+      apply hij_next
+      have h' := congrArg Neg.neg h
+      simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using h'.symm
+    rw [segment_symm ℝ (v (-i)) (v (-(i + 1))),
+      segment_symm ℝ (v (-j)) (v (-(j + 1)))]
+    convert hsimple.2.2 (-(i + 1)) (-(j + 1)) hIJ hIJs hJIs using 1
+    abel_nf
+
 /-- Positive oriented area at the actual vertex is positive over the outgoing
 edge with the previous vertex as third point. -/
 theorem polygonEdgePrev_cross_pos_of_vertex_cross_pos {n : ℕ} {v : ZMod n → ℂ}
@@ -4202,7 +4333,30 @@ theorem neg_signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_co
     (horient : NegativePolygonOrientation v)
     (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (fun i => -SignedMengerProfile v i) := by
-  sorry
+  have hpos : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
+    positiveOrientation_reverseCyclicPolygon_of_negativeOrientation horient
+  have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
+    isSimplePolygon_reverseCyclicPolygon hsimple
+  have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
+    dahlbergRegular_reverseCyclicPolygon hregular
+  have hnoncircle' : ¬ Concyclic (ReverseCyclicPolygon v) := by
+    intro hcyc
+    exact hnoncircle (concyclic_reverseCyclicPolygon_iff.mp hcyc)
+  have hfv_rev :
+      DahlbergFourVertex (SignedMengerProfile (ReverseCyclicPolygon v)) :=
+    signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyclic
+      hn hsimple' hregular' hpos hnoncircle'
+  have hfv_reflected : DahlbergFourVertex
+      (fun i => -SignedMengerProfile v (-i)) := by
+    convert hfv_rev using 1
+    ext i
+    exact (SignedMengerProfile_reverseCyclicPolygon v i).symm
+  exact (dahlbergFourVertex_reflectIndex_iff
+    (κ := fun i : ZMod n => -SignedMengerProfile v i) (a := 0)).mp (by
+      convert hfv_reflected using 1
+      ext i
+      congr 1
+      abel_nf)
 
 /-- Dahlberg's negatively oriented strictly-convex case. -/
 theorem signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_concyclic
