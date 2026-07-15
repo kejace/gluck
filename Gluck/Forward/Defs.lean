@@ -102,6 +102,18 @@ def DahlbergFourVertex {n : ℕ} (κ : ZMod n → ℝ) : Prop :=
       DiscreteLocalMax κ (i₃ : ZMod n) ∧
       DiscreteLocalMin κ (i₄ : ZMod n)
 
+/-- Dahlberg's four-vertex conclusion forces the cyclic profile to be
+nonconstant. -/
+theorem not_constant_of_dahlbergFourVertex {n : ℕ} {κ : ZMod n → ℝ}
+    (hfv : DahlbergFourVertex κ) :
+    ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
+  rintro ⟨c, hconst⟩
+  rcases hfv with
+    ⟨i₁, _i₂, _i₃, _i₄, _hi₁₂, _hi₂₃, _hi₃₄, _hi₄₁, hmax₁, _hmin₂, _hmax₃, _hmin₄⟩
+  rcases hmax₁ with ⟨l, _r, _hlpos, _hrpos, _hlr, _hleft_eq, _hright_eq, hdrop, _⟩
+  rw [hconst ((i₁ : ZMod n) - (l : ZMod n)), hconst (i₁ : ZMod n)] at hdrop
+  exact (lt_irrefl c) hdrop
+
 /-- Four ordered plateau-aware extrema in `min-max-min-max` order give
 Dahlberg's source-form conclusion after rotating the cyclic order to start at
 the first maximum. -/
