@@ -72,13 +72,12 @@ value-separated smooth source gates.  The
 discrete forward statements for `S²` and `H²` are also exposed through
 model-specific wrappers in `Sphere.lean` and `Hyperbolic.lean`.  The shared
 dispatch theorem `constant_or_dahlbergFourVertex_spaceForm_kernel` in
-`SpaceFormDiscrete.lean` is proved by cases from the model-specific
-constant-or wrappers `constant_or_dahlbergFourVertex_S2_source` and
-`constant_or_dahlbergFourVertex_H2_source`, which themselves split off the
-constant case from the nonconstant source gates `dahlbergFourVertex_S2_source`
-and `dahlbergFourVertex_H2_source`.  Those nonconstant gates are now proved
-from the model-specific ordered-turn extraction gates
-`orderedAdjacentTurns_S2_source` and `orderedAdjacentTurns_H2_source` via the
+`SpaceFormDiscrete.lean` is proved from the uniform constant-or ordered-turn
+theorem `constant_or_orderedAdjacentTurns_spaceForm_kernel`, whose
+model-specific branches are `constant_or_orderedAdjacentTurns_S2_source` and
+`constant_or_orderedAdjacentTurns_H2_source`.  The nonconstant ordered-turn
+source gates are `orderedAdjacentTurns_S2_source` and
+`orderedAdjacentTurns_H2_source`; D4VT is derived from ordered turns by the
 general cyclic constructor `dahlbergFourVertex_of_orderedAdjacentTurns_four_le`.
 The uniform ordered-turn dispatch is `orderedAdjacentTurns_spaceForm_source`,
 and the uniform nonconstant theorem `dahlbergFourVertex_spaceForm_source` is
