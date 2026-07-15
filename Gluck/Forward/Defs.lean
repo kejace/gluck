@@ -225,6 +225,17 @@ theorem exists_ne_succ_of_not_constant {n : ℕ} [NeZero n] {κ : ZMod n → ℝ
   by_contra hne
   exact hnone ⟨i, hne⟩
 
+/-- A nonconstant cyclic profile has an adjacent strict increase or strict
+decrease. -/
+theorem exists_adjacent_lt_or_gt_of_not_constant {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    ∃ i : ZMod n, κ i < κ (i + 1) ∨ κ (i + 1) < κ i := by
+  obtain ⟨i, hi⟩ := exists_ne_succ_of_not_constant hnc
+  rcases lt_trichotomy (κ i) (κ (i + 1)) with hlt | heq | hgt
+  · exact ⟨i, Or.inl hlt⟩
+  · exact False.elim (hi heq)
+  · exact ⟨i, Or.inr hgt⟩
+
 /-- A Euclidean circle with centre `O` and positive radius `R` through a triple. -/
 def CircumcircleR2 (A B C O : ℂ) (R : ℝ) : Prop :=
   0 < R ∧ dist O A = R ∧ dist O B = R ∧ dist O C = R
