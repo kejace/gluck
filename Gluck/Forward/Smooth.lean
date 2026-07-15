@@ -21,19 +21,37 @@ space-form predicate. -/
 def SmoothForwardRealizes (ε : ℝ) (γ : ℝ → ℂ) (κ : ℝ → ℝ) : Prop :=
   if ε = 0 then Gluck.RealizesCurvature γ κ else Gluck.SpaceForm.Realizes ε γ κ
 
-/-- Uniform smooth forward four-vertex source theorem for the project space
+/-- Nonconstant smooth forward four-vertex source theorem for the project space
 forms `E²`, `S²`, and `H²`.
 
 This is the shared geometric kernel behind the model-specific wrappers in
 `Euclidean.lean`, `Sphere.lean`, and `Hyperbolic.lean`: a simple closed curve
-realizing a continuous `2π`-periodic curvature profile has the value-separated
-four-vertex condition. -/
+realizing a continuous nonconstant `2π`-periodic curvature profile has the
+value-separated four-vertex condition. -/
+theorem four_vertex_condition_smooth_spaceForm_nonconstant_source {ε : ℝ}
+    (hε : ε = 0 ∨ ε = 1 ∨ ε = -1) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : SmoothForwardRealizes ε γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    Gluck.FourVertexCondition κ := by
+  sorry
+
+/-- Uniform smooth forward four-vertex theorem for the project space forms
+`E²`, `S²`, and `H²`.
+
+The constant profile case is immediate from the definition of
+`FourVertexCondition`; the remaining geometric source theorem is isolated in
+`four_vertex_condition_smooth_spaceForm_nonconstant_source`. -/
 theorem four_vertex_condition_smooth_spaceForm_kernel {ε : ℝ}
     (hε : ε = 0 ∨ ε = 1 ∨ ε = -1) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
     (hclosed : Gluck.IsSimpleClosed γ)
     (hreal : SmoothForwardRealizes ε γ κ)
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
     Gluck.FourVertexCondition κ := by
-  sorry
+  by_cases hconst : ∃ c, ∀ t, κ t = c
+  · exact Or.inl hconst
+  · exact four_vertex_condition_smooth_spaceForm_nonconstant_source
+      hε hclosed hreal hκ hper hconst
 
 end Gluck.Forward
