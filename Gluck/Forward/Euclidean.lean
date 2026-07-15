@@ -514,6 +514,28 @@ theorem dahlbergFourVertex_E2_of_realizesConformalMenger_zero_not_concyclic
         realizesConformalMenger_zero_eq_half_signedMengerProfile_of_strict_orientation
           hsimple horient hκ i)
 
+/-- Positive-orientation nonconcyclic `ε = 0` conformal-Menger endpoint. -/
+theorem dahlbergFourVertex_E2_of_realizesConformalMenger_zero_positiveOrientation_not_concyclic
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (horient : PositivePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v)
+    (hκ : RealizesConformalMenger 0 v κ) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_E2_of_realizesConformalMenger_zero_not_concyclic
+    hn v κ hsimple hregular (Or.inl horient) hnoncircle hκ
+
+/-- Negative-orientation nonconcyclic `ε = 0` conformal-Menger endpoint. -/
+theorem dahlbergFourVertex_E2_of_realizesConformalMenger_zero_negativeOrientation_not_concyclic
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (horient : NegativePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v)
+    (hκ : RealizesConformalMenger 0 v κ) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_E2_of_realizesConformalMenger_zero_not_concyclic
+    hn v κ hsimple hregular (Or.inr horient) hnoncircle hκ
+
 /-- Strictly oriented `ε = 0` conformal-Menger realizations satisfy the E²
 constant-or-Dahlberg four-vertex package. -/
 theorem constant_or_dahlbergFourVertex_E2_of_realizesConformalMenger_zero_strict_orientation
@@ -530,6 +552,40 @@ theorem constant_or_dahlbergFourVertex_E2_of_realizesConformalMenger_zero_strict
       simpa [add_zero] using
         realizesConformalMenger_zero_eq_half_signedMengerProfile_of_strict_orientation
           hsimple horient hκ i)
+
+/-- Positive-orientation `ε = 0` conformal-Menger endpoint in
+constant-or-four-vertex form. -/
+theorem constant_or_dahlbergFourVertex_E2_of_realizesConformalMenger_zero_positiveOrientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (horient : PositivePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_E2_of_realizesConformalMenger_zero_strict_orientation
+    hn v κ hsimple hregular (Or.inl horient) hκ
+
+/-- Negative-orientation `ε = 0` conformal-Menger endpoint in
+constant-or-four-vertex form. -/
+theorem constant_or_dahlbergFourVertex_E2_of_realizesConformalMenger_zero_negativeOrientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (horient : NegativePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_E2_of_realizesConformalMenger_zero_strict_orientation
+    hn v κ hsimple hregular (Or.inr horient) hκ
+
+/-- Public `ε = 0` conformal-Menger discrete four-vertex theorem in the same
+constant-or-four-vertex shape as the strict E² signed-Menger endpoint. -/
+theorem dahlberg_discrete_four_vertex_E2_of_realizesConformalMenger_zero_strict_orientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_E2_of_realizesConformalMenger_zero_strict_orientation
+    hn v κ hsimple hregular horient hκ
 
 /-- Dahlberg's Euclidean discrete four-vertex theorem: the signed Menger
 curvature of a locally regular simple closed polygon is constant or has an
