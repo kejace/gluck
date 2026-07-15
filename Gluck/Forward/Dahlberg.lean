@@ -471,6 +471,10 @@ theorem normalizedDahlbergRegion_mono_of_negative {a y₁ y₂ k₁ k₂ : ℝ}
 def transportedUpperCap (u w : ℂ) (a y : ℝ) : Set ℂ :=
   directIsometryImage u w (normalizedUpperCap a y)
 
+/-- A normalized closed disk transported to arbitrary Euclidean coordinates. -/
+def transportedClosedDisk (u w : ℂ) (a y : ℝ) : Set ℂ :=
+  directIsometryImage u w (normalizedClosedDisk a y)
+
 /-- Dahlberg's exact oriented region transported to arbitrary Euclidean
 coordinates. -/
 def transportedDahlbergRegion (u w : ℂ) (a y k : ℝ) : Set ℂ :=
@@ -492,6 +496,9 @@ noncomputable def edgeCircumcenterParameter (A B C : ℂ) : ℝ :=
 
 noncomputable def edgeUpperCap (A B : ℂ) (y : ℝ) : Set ℂ :=
   transportedUpperCap (chordUnit A B) (chordMidpoint A B) (chordHalfLength A B) y
+
+noncomputable def edgeClosedDisk (A B : ℂ) (y : ℝ) : Set ℂ :=
+  transportedClosedDisk (chordUnit A B) (chordMidpoint A B) (chordHalfLength A B) y
 
 noncomputable def edgeDahlbergRegion (A B : ℂ) (y k : ℝ) : Set ℂ :=
   transportedDahlbergRegion (chordUnit A B) (chordMidpoint A B)
@@ -820,6 +827,22 @@ theorem normalizedCircleRadius_mono_of_nonneg {a y₁ y₂ : ℝ}
   apply Real.sqrt_le_sqrt
   nlinarith [mul_nonneg (sub_nonneg.mpr hy) (add_nonneg hy₁ (hy₁.trans hy))]
 
+/-- Normalized radius comparison behind Dahlberg Lemma 10.  If the circle
+through the shared chord and `z` has centre on the interior side, then any
+other coaxial circle whose closed disk contains `z` has at least as large a
+radius. -/
+theorem normalizedCircleRadius_le_of_mem_closedDisk {a yρ yΔ : ℝ} {z : ℂ}
+    (hyρ : 0 ≤ yρ) (hz : 0 < z.im)
+    (hρ : circlePowerR2 (normalizedCircleCenter yρ) z
+      (normalizedCircleRadius a yρ) = 0)
+    (hΔ : z ∈ normalizedClosedDisk a yΔ) :
+    normalizedCircleRadius a yρ ≤ normalizedCircleRadius a yΔ := by
+  rw [circlePowerR2_normalized] at hρ
+  change z.re ^ 2 + z.im ^ 2 - 2 * yΔ * z.im ≤ a ^ 2 at hΔ
+  have hy : yρ ≤ yΔ := by
+    nlinarith [hz]
+  exact normalizedCircleRadius_mono_of_nonneg hyρ hy
+
 /-- Strict radius monotonicity on the nonnegative-centre branch. -/
 theorem normalizedCircleRadius_strictMono_of_nonneg {a y₁ y₂ : ℝ}
     (hy₁ : 0 ≤ y₁) (hy : y₁ < y₂) :
@@ -948,6 +971,45 @@ theorem transportedDahlbergRegion_mono (u w : ℂ) {a yP yQ kP kQ : ℝ}
     transportedDahlbergRegion u w a yQ kQ ⊆ transportedDahlbergRegion u w a yP kP := by
   unfold transportedDahlbergRegion directIsometryImage
   exact Set.image_mono h
+
+/-- Membership in an arbitrary edge disk is membership in the normalized disk
+after passing to canonical edge coordinates. -/
+theorem edgeCoordinates_mem_normalizedClosedDisk_of_mem_edgeClosedDisk {A B C : ℂ}
+    {y : ℝ} (hAB : A ≠ B) (hmem : C ∈ edgeClosedDisk A B y) :
+    edgeCoordinates A B C ∈ normalizedClosedDisk (chordHalfLength A B) y := by
+  unfold edgeClosedDisk transportedClosedDisk directIsometryImage at hmem
+  rcases hmem with ⟨z, hz, hzC⟩
+  have hz_eq : z = edgeCoordinates A B C := by
+    apply directIsometryR2_injective (norm_chordUnit hAB) (chordMidpoint A B)
+    rw [hzC, directIsometryR2_edgeCoordinates hAB]
+  simpa [← hz_eq] using hz
+
+/-- Arbitrary-edge form of the normalized radius comparison behind Dahlberg
+Lemma 10. -/
+theorem edgeCircleRadius_le_of_mem_edgeClosedDisk {A B C : ℂ} {yΔ : ℝ}
+    (hAB : A ≠ B) (hcross : 0 < Gluck.Discrete.crossR2 A B C)
+    (hyρ : 0 ≤ edgeCircumcenterParameter A B C)
+    (hmem : C ∈ edgeClosedDisk A B yΔ) :
+    normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B C) ≤
+      normalizedCircleRadius (chordHalfLength A B) yΔ := by
+  have hz := (crossR2_pos_iff_edgeCoordinates_im_pos hAB C).mp hcross
+  have hρ := circlePowerR2_normalized_parameter
+    (a := chordHalfLength A B) (z := edgeCoordinates A B C) hz.ne'
+  change circlePowerR2 (normalizedCircleCenter (edgeCircumcenterParameter A B C))
+    (edgeCoordinates A B C)
+    (normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B C)) = 0 at hρ
+  have hmem' := edgeCoordinates_mem_normalizedClosedDisk_of_mem_edgeClosedDisk hAB hmem
+  exact normalizedCircleRadius_le_of_mem_closedDisk hyρ hz hρ hmem'
+
+/-- Regular point-edge form of the radius comparison behind Dahlberg Lemma 10. -/
+theorem edgeRegularCircleRadius_le_of_mem_edgeClosedDisk {A B C O : ℂ} {R yΔ : ℝ}
+    (hAB : A ≠ B) (hcross : 0 < Gluck.Discrete.crossR2 A B C)
+    (hcircle : CircumcircleR2 C A B O R) (hcone : InVertexCone C A B O)
+    (hmem : C ∈ edgeClosedDisk A B yΔ) :
+    normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B C) ≤
+      normalizedCircleRadius (chordHalfLength A B) yΔ := by
+  have hyρ := edgeCircumcenterParameter_nonneg_of_regular hAB hcross hcircle hcone
+  exact edgeCircleRadius_le_of_mem_edgeClosedDisk hAB hcross hyρ hmem
 
 /-- Arbitrary-edge form of the disk-side nesting statement in Dahlberg's
 Lemma 8. -/
