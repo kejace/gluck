@@ -387,6 +387,16 @@ def DahlbergRegular {n : ℕ} (v : ZMod n → ℂ) : Prop :=
 def Concyclic {n : ℕ} (v : ZMod n → ℂ) : Prop :=
   ∃ O R, 0 < R ∧ ∀ i, dist O (v i) = R
 
+/-- The signed-Menger curvature profile of a cyclic Euclidean polygon. -/
+noncomputable def SignedMengerProfile {n : ℕ} (v : ZMod n → ℂ) : ZMod n → ℝ :=
+  fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))
+
+/-- The signed-Menger profile unfolds to the signed curvature of the adjacent
+vertex triple. -/
+theorem SignedMengerProfile_apply {n : ℕ} (v : ZMod n → ℂ) (i : ZMod n) :
+    SignedMengerProfile v i =
+      Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) := rfl
+
 /-- In the stereographic/Poincaré models, a Euclidean circumcircle `(c,r)` has
 space-form geodesic curvature
 `(1 + ε (‖c‖²-r²))/(2r)`, with orientation supplied by the triple. -/

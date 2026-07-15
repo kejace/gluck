@@ -2095,6 +2095,16 @@ theorem exists_constant_signedMenger_of_concyclic_neg {n : ℕ}
 
 /-- A nonconstant polygon signed-Menger profile has both a strict adjacent
 increase and a strict adjacent decrease. -/
+theorem signedMengerProfile_exists_adjacent_increase_and_decrease_of_not_constant
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    (∃ i : ZMod n, SignedMengerProfile v i < SignedMengerProfile v (i + 1)) ∧
+      ∃ i : ZMod n, SignedMengerProfile v (i + 1) < SignedMengerProfile v i := by
+  exact exists_adjacent_increase_and_decrease_of_not_constant
+    (κ := SignedMengerProfile v) hnc
+
+/-- A nonconstant polygon signed-Menger profile has both a strict adjacent
+increase and a strict adjacent decrease. -/
 theorem polygonSignedMenger_exists_adjacent_increase_and_decrease_of_not_constant
     {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
     (hnc : ¬ ∃ c, ∀ i : ZMod n,
@@ -2108,6 +2118,60 @@ theorem polygonSignedMenger_exists_adjacent_increase_and_decrease_of_not_constan
   simpa [sub_eq_add_neg, add_assoc] using
     (exists_adjacent_increase_and_decrease_of_not_constant
       (κ := fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) hnc)
+
+/-- Profile-level constructor for Dahlberg's conclusion from four ordered
+strict one-step signed-Menger extrema. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_strict_neighbors {n : ℕ}
+    (hn : 2 ≤ n) {v : ZMod n → ℂ} {i₁ i₂ i₃ i₄ : ℕ}
+    (hi₁₂ : i₁ < i₂) (hi₂₃ : i₂ < i₃) (hi₃₄ : i₃ < i₄)
+    (hi₄₁ : i₄ < i₁ + n)
+    (hmax₁_left : SignedMengerProfile v ((i₁ : ZMod n) - 1) <
+      SignedMengerProfile v (i₁ : ZMod n))
+    (hmax₁_right : SignedMengerProfile v ((i₁ : ZMod n) + 1) <
+      SignedMengerProfile v (i₁ : ZMod n))
+    (hmin₂_left : SignedMengerProfile v (i₂ : ZMod n) <
+      SignedMengerProfile v ((i₂ : ZMod n) - 1))
+    (hmin₂_right : SignedMengerProfile v (i₂ : ZMod n) <
+      SignedMengerProfile v ((i₂ : ZMod n) + 1))
+    (hmax₃_left : SignedMengerProfile v ((i₃ : ZMod n) - 1) <
+      SignedMengerProfile v (i₃ : ZMod n))
+    (hmax₃_right : SignedMengerProfile v ((i₃ : ZMod n) + 1) <
+      SignedMengerProfile v (i₃ : ZMod n))
+    (hmin₄_left : SignedMengerProfile v (i₄ : ZMod n) <
+      SignedMengerProfile v ((i₄ : ZMod n) - 1))
+    (hmin₄_right : SignedMengerProfile v (i₄ : ZMod n) <
+      SignedMengerProfile v ((i₄ : ZMod n) + 1)) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact dahlbergFourVertex_of_strict_neighbors hn hi₁₂ hi₂₃ hi₃₄ hi₄₁
+    hmax₁_left hmax₁_right hmin₂_left hmin₂_right
+    hmax₃_left hmax₃_right hmin₄_left hmin₄_right
+
+/-- Profile-level constructor for Dahlberg's conclusion from four ordered
+strict one-step signed-Menger extrema in `min-max-min-max` order. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_strict_neighbors_min_max {n : ℕ}
+    (hn : 2 ≤ n) {v : ZMod n → ℂ} {i₁ i₂ i₃ i₄ : ℕ}
+    (hi₁₂ : i₁ < i₂) (hi₂₃ : i₂ < i₃) (hi₃₄ : i₃ < i₄)
+    (hi₄₁ : i₄ < i₁ + n)
+    (hmin₁_left : SignedMengerProfile v (i₁ : ZMod n) <
+      SignedMengerProfile v ((i₁ : ZMod n) - 1))
+    (hmin₁_right : SignedMengerProfile v (i₁ : ZMod n) <
+      SignedMengerProfile v ((i₁ : ZMod n) + 1))
+    (hmax₂_left : SignedMengerProfile v ((i₂ : ZMod n) - 1) <
+      SignedMengerProfile v (i₂ : ZMod n))
+    (hmax₂_right : SignedMengerProfile v ((i₂ : ZMod n) + 1) <
+      SignedMengerProfile v (i₂ : ZMod n))
+    (hmin₃_left : SignedMengerProfile v (i₃ : ZMod n) <
+      SignedMengerProfile v ((i₃ : ZMod n) - 1))
+    (hmin₃_right : SignedMengerProfile v (i₃ : ZMod n) <
+      SignedMengerProfile v ((i₃ : ZMod n) + 1))
+    (hmax₄_left : SignedMengerProfile v ((i₄ : ZMod n) - 1) <
+      SignedMengerProfile v (i₄ : ZMod n))
+    (hmax₄_right : SignedMengerProfile v ((i₄ : ZMod n) + 1) <
+      SignedMengerProfile v (i₄ : ZMod n)) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact dahlbergFourVertex_of_strict_neighbors_min_max hn hi₁₂ hi₂₃ hi₃₄ hi₄₁
+    hmin₁_left hmin₁_right hmax₂_left hmax₂_right
+    hmin₃_left hmin₃_right hmax₄_left hmax₄_right
 
 /-- Polygon-facing constructor for Dahlberg's conclusion from four ordered
 strict one-step signed-Menger extrema. -/
@@ -2225,8 +2289,7 @@ theorem dahlberg_discrete_four_vertex_E2_kernel {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) (v : ZMod n → ℂ)
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
-    DahlbergFourVertex
-      (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
+    DahlbergFourVertex (SignedMengerProfile v) := by
   sorry
 
 end Gluck.Forward
