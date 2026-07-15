@@ -35,6 +35,88 @@ theorem smoothFourVertex_of_fourVertexCondition {κ : ℝ → ℝ}
     exact Or.inr ⟨p₁, q₁, p₂, q₂, hpq, hqp, hpq', hcycle,
       hmax₁, hmin₁, hmax₂, hmin₂⟩
 
+/-- Positive affine changes preserve the value-separated four-vertex
+condition. -/
+theorem fourVertexCondition_posAffine {κ : ℝ → ℝ} {a b : ℝ} (ha : 0 < a)
+    (hfv : Gluck.FourVertexCondition κ) :
+    Gluck.FourVertexCondition (fun t => a * κ t + b) := by
+  have hmono : Monotone (fun x : ℝ => a * x + b) := by
+    intro x y hxy
+    nlinarith [mul_le_mul_of_nonneg_left hxy (le_of_lt ha)]
+  rcases hfv with hconst | hextrema
+  · rcases hconst with ⟨c, hc⟩
+    exact Or.inl ⟨a * c + b, fun t => by simp [hc t]⟩
+  · rcases hextrema with
+      ⟨p₁, q₁, p₂, q₂, hpq, hqp, hpq', hcycle, hmax₁, hmax₂, hmin₁, hmin₂, hsep⟩
+    have hq₁p₁ : κ q₁ < κ p₁ :=
+      lt_of_le_of_lt (le_max_left _ _) (lt_of_lt_of_le hsep (min_le_left _ _))
+    have hq₁p₂ : κ q₁ < κ p₂ :=
+      lt_of_le_of_lt (le_max_left _ _) (lt_of_lt_of_le hsep (min_le_right _ _))
+    have hq₂p₁ : κ q₂ < κ p₁ :=
+      lt_of_le_of_lt (le_max_right _ _) (lt_of_lt_of_le hsep (min_le_left _ _))
+    have hq₂p₂ : κ q₂ < κ p₂ :=
+      lt_of_le_of_lt (le_max_right _ _) (lt_of_lt_of_le hsep (min_le_right _ _))
+    refine Or.inr ⟨p₁, q₁, p₂, q₂, hpq, hqp, hpq', hcycle,
+      by simpa [Function.comp_def] using hmax₁.comp_mono hmono,
+      by simpa [Function.comp_def] using hmax₂.comp_mono hmono,
+      by simpa [Function.comp_def] using hmin₁.comp_mono hmono,
+      by simpa [Function.comp_def] using hmin₂.comp_mono hmono, ?_⟩
+    rw [max_lt_iff, lt_min_iff, lt_min_iff]
+    exact ⟨⟨by nlinarith [mul_lt_mul_of_pos_left hq₁p₁ ha],
+        by nlinarith [mul_lt_mul_of_pos_left hq₁p₂ ha]⟩,
+      ⟨by nlinarith [mul_lt_mul_of_pos_left hq₂p₁ ha],
+        by nlinarith [mul_lt_mul_of_pos_left hq₂p₂ ha]⟩⟩
+
+/-- Positive affine changes preserve the value-separated four-vertex
+condition exactly. -/
+theorem fourVertexCondition_posAffine_iff {κ : ℝ → ℝ} {a b : ℝ} (ha : 0 < a) :
+    Gluck.FourVertexCondition (fun t => a * κ t + b) ↔ Gluck.FourVertexCondition κ := by
+  constructor
+  · intro hfv
+    have hscaled :=
+      fourVertexCondition_posAffine (κ := fun t => a * κ t + b)
+        (a := a⁻¹) (b := -b / a) (inv_pos.mpr ha) hfv
+    convert hscaled using 1
+    ext t
+    field_simp [ha.ne']
+    ring
+  · exact fourVertexCondition_posAffine ha
+
+/-- A smooth profile pointwise equal to a positive affine change of a
+value-separated four-vertex profile inherits that condition. -/
+theorem fourVertexCondition_of_eq_posAffine {κ μ : ℝ → ℝ} {a b : ℝ} (ha : 0 < a)
+    (hμ : ∀ t, μ t = a * κ t + b) (hfv : Gluck.FourVertexCondition κ) :
+    Gluck.FourVertexCondition μ := by
+  have hscaled := fourVertexCondition_posAffine (κ := κ) (a := a) (b := b) ha hfv
+  convert hscaled using 1
+  ext t
+  exact hμ t
+
+/-- A smooth profile pointwise equal to a positive affine change has the same
+value-separated four-vertex condition. -/
+theorem fourVertexCondition_of_eq_posAffine_iff {κ μ : ℝ → ℝ} {a b : ℝ}
+    (ha : 0 < a) (hμ : ∀ t, μ t = a * κ t + b) :
+    Gluck.FourVertexCondition μ ↔ Gluck.FourVertexCondition κ := by
+  constructor
+  · intro hfv
+    have hκ :
+        ∀ t, κ t = a⁻¹ * μ t + (-b / a) := by
+      intro t
+      rw [hμ t]
+      field_simp [ha.ne']
+      ring
+    exact fourVertexCondition_of_eq_posAffine (κ := μ) (μ := κ)
+      (a := a⁻¹) (b := -b / a) (inv_pos.mpr ha) hκ hfv
+  · exact fourVertexCondition_of_eq_posAffine ha hμ
+
+/-- Pointwise equal smooth profiles have the same value-separated four-vertex
+condition. -/
+theorem fourVertexCondition_congr {κ μ : ℝ → ℝ} (hμ : ∀ t, μ t = κ t)
+    (hfv : Gluck.FourVertexCondition κ) :
+    Gluck.FourVertexCondition μ := by
+  exact fourVertexCondition_of_eq_posAffine (a := 1) (b := 0) (by norm_num)
+    (by intro t; simp [hμ t]) hfv
+
 /-- Positive affine changes preserve the smooth forward four-vertex
 conclusion. -/
 theorem smoothFourVertex_posAffine {κ : ℝ → ℝ} {a b : ℝ} (ha : 0 < a)
