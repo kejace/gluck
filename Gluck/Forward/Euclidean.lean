@@ -185,6 +185,16 @@ theorem vertex_cross_eq_zero_E2_of_constant_signedMengerProfile_zero {n : ℕ}
     ∀ i : ZMod n, Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) = 0 := by
   exact vertex_cross_eq_zero_of_constant_signedMengerProfile_zero hsimple hκ
 
+/-- E² zero-profile regularity reduction: a constant-zero signed-Menger
+profile on a simple locally regular polygon makes every vertex a segment
+subdivision point between its two neighbors. -/
+theorem vertex_mem_neighbor_segment_E2_of_constant_signedMengerProfile_zero {n : ℕ}
+    (v : ZMod n → ℂ) (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hκ : ∀ i : ZMod n, SignedMengerProfile v i = 0) :
+    ∀ i : ZMod n, v i ∈ segment ℝ (v (i - 1)) (v (i + 1)) := by
+  exact vertex_mem_neighbor_segment_of_constant_signedMengerProfile_zero
+    hsimple hregular hκ
+
 /-- Dahlberg's Euclidean discrete four-vertex theorem: the signed Menger
 curvature of a locally regular simple closed polygon is constant or has an
 alternating four-vertex level window. -/

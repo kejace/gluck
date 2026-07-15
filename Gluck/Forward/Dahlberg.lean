@@ -324,6 +324,34 @@ theorem eq_normalizedCircleCenter_of_equidistant {a : ℝ} (ha : a ≠ 0)
     nlinarith
   apply Complex.ext <;> simp [normalizedCircleCenter, hOre, hOim]
 
+/-- A circle through the normalized chord endpoints and a third point on the
+same line must have that third point equal to one of the endpoints. -/
+theorem normalized_collinear_circumcircle_third_eq_endpoint {a R : ℝ} (ha : a ≠ 0)
+    {z O : ℂ} (hz : z.im = 0)
+    (hcircle : CircumcircleR2 (-a : ℂ) (a : ℂ) z O R) :
+    z = (-a : ℂ) ∨ z = (a : ℂ) := by
+  have hendsSq := congrArg (fun x : ℝ => x ^ 2)
+    (hcircle.2.1.trans hcircle.2.2.1.symm)
+  simp only [dist_eq_norm] at hendsSq
+  rw [Complex.sq_norm, Complex.sq_norm] at hendsSq
+  simp only [sub_neg_eq_add, Complex.normSq_apply, Complex.add_re, Complex.ofReal_re,
+    Complex.add_im, Complex.ofReal_im, add_zero, Complex.sub_re, Complex.sub_im,
+    sub_zero, add_left_inj] at hendsSq
+  have hOre : O.re = 0 := by
+    have hprod : O.re * a = 0 := by nlinarith
+    exact (mul_eq_zero.mp hprod).resolve_right ha
+  have hthirdSq := congrArg (fun x : ℝ => x ^ 2)
+    (hcircle.2.2.2.trans hcircle.2.2.1.symm)
+  simp only [dist_eq_norm] at hthirdSq
+  rw [Complex.sq_norm, Complex.sq_norm] at hthirdSq
+  simp [Complex.normSq_apply, hOre, hz] at hthirdSq
+  have hzsq : z.re ^ 2 = a ^ 2 := by nlinarith
+  rcases sq_eq_sq_iff_eq_or_eq_neg.mp hzsq with hza | hza
+  · right
+    apply Complex.ext <;> simp [hza, hz]
+  · left
+    apply Complex.ext <;> simp [hza, hz]
+
 /-- Algebraic circumradius identity for a normalized triple. -/
 theorem normalized_circumradius_sq_identity {a : ℝ} {z : ℂ} (hz : z.im ≠ 0) :
     4 * z.im ^ 2 *
@@ -877,6 +905,36 @@ theorem circumcircleR2_edge_radius_eq {A B C O : ℂ} {R : ℝ}
   have hR := normalizedCircumcircle_radius_eq (chordHalfLength_pos hAB).ne' hz hcircle'
   simpa [edgeCircumcenterParameter] using hR
 
+/-- A Euclidean circle through a collinear triple over a nondegenerate edge
+forces the third point to be one of the edge endpoints. -/
+theorem collinear_circumcircle_third_eq_endpoint {A B C O : ℂ} {R : ℝ}
+    (hAB : A ≠ B) (hcross : Gluck.Discrete.crossR2 A B C = 0)
+    (hcircle : CircumcircleR2 A B C O R) :
+    C = A ∨ C = B := by
+  have hcircle' := circumcircleR2_edgeCoordinates (E₁ := A) (E₂ := B) hAB hcircle
+  rw [(edgeCoordinates_endpoints hAB).1, (edgeCoordinates_endpoints hAB).2] at hcircle'
+  have him : (edgeCoordinates A B C).im = 0 := by
+    have harea := crossR2_edgeCoordinates hAB C
+    have hzero : 2 * chordHalfLength A B * (edgeCoordinates A B C).im = 0 := by
+      simpa [crossR2_normalized, hcross] using harea
+    have hcoef : 2 * chordHalfLength A B ≠ 0 := by
+      nlinarith [chordHalfLength_pos hAB]
+    exact (mul_eq_zero.mp hzero).resolve_left hcoef
+  have hthird :=
+    normalized_collinear_circumcircle_third_eq_endpoint
+      (chordHalfLength_pos hAB).ne' him hcircle'
+  rcases hthird with hleft | hright
+  · left
+    have himage :=
+      congrArg (directIsometryR2 (chordUnit A B) (chordMidpoint A B)) hleft
+    rw [directIsometryR2_edgeCoordinates hAB C] at himage
+    exact himage.trans (canonicalChord_endpoints hAB).1
+  · right
+    have himage :=
+      congrArg (directIsometryR2 (chordUnit A B) (chordMidpoint A B)) hright
+    rw [directIsometryR2_edgeCoordinates hAB C] at himage
+    exact himage.trans (canonicalChord_endpoints hAB).2
+
 /-- Any Euclidean circumcircle through a noncollinear edge triple has the
 canonical edge centre. -/
 theorem circumcircleR2_edge_center_eq {A B C O : ℂ} {R : ℝ}
@@ -1164,6 +1222,23 @@ theorem edgePoint_mem_own_dahlbergRegion_of_signedMenger_ne_zero {A B C : ℂ}
   exact edgePoint_mem_own_dahlbergRegion hAB
     (crossR2_ne_zero_of_signedMengerR2_ne_zero hκ)
 
+/-- In a simple polygon, vertices two steps apart are distinct. -/
+theorem isSimplePolygon_two_step_ne {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (i : ZMod n) :
+    v i ≠ v (i + 1 + 1) := by
+  intro h
+  have hmem :
+      v i ∈ segment ℝ (v i) (v (i + 1)) ∩
+        segment ℝ (v (i + 1)) (v (i + 1 + 1)) := by
+    constructor
+    · exact left_mem_segment ℝ (v i) (v (i + 1))
+    · simpa [← h] using right_mem_segment ℝ (v (i + 1)) (v (i + 1 + 1))
+  have hsingleton : v i ∈ ({v (i + 1)} : Set ℂ) := by
+    simpa [hsimple.2.1 i] using hmem
+  have hvi : v i = v (i + 1) := by
+    simpa using hsingleton
+  exact hsimple.1 i hvi
+
 /-- A noncollinear Dahlberg-regular vertex is in the circle/cone branch. -/
 theorem dahlbergRegularAt_circle_of_cross_ne_zero {A B C : ℂ}
     (hreg : DahlbergRegularAt C A B)
@@ -1187,6 +1262,38 @@ theorem dahlbergRegularAt_circle_of_cross_ne_zero_right {A B C : ℂ}
   rcases hreg with hcol | hcircle
   · exact False.elim (hcross hcol.1)
   · exact hcircle
+
+/-- In the collinear case, Dahlberg regularity over a genuinely three-point
+triple is exactly the segment/subdivision branch. -/
+theorem dahlbergRegularAt_segment_of_cross_eq_zero {A B C : ℂ}
+    (hAB : A ≠ B) (hBC : B ≠ C) (hAC : A ≠ C)
+    (hreg : DahlbergRegularAt A B C)
+    (hcross : Gluck.Discrete.crossR2 A B C = 0) :
+    B ∈ segment ℝ A C := by
+  rcases hreg with hcol | hcircle
+  · exact hcol.2
+  · rcases hcircle with ⟨O, R, hcircle, _hcone⟩
+    rcases collinear_circumcircle_third_eq_endpoint hAB hcross hcircle with hCA | hCB
+    · exact False.elim (hAC hCA.symm)
+    · exact False.elim (hBC hCB.symm)
+
+/-- Polygon-indexed collinear regularity: if the signed-Menger profile
+vanishes at a vertex of a simple locally regular polygon, then that vertex
+lies on the segment joining its neighbors. -/
+theorem vertex_mem_neighbor_segment_of_signedMengerProfile_eq_zero {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) {i : ZMod n}
+    (hκ : SignedMengerProfile v i = 0) :
+    v i ∈ segment ℝ (v (i - 1)) (v (i + 1)) := by
+  have hAB : v (i - 1) ≠ v i := by
+    simpa using hsimple.1 (i - 1)
+  have hcross : Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) = 0 :=
+    crossR2_eq_zero_of_signedMengerR2_eq_zero hAB
+      (by simpa [SignedMengerProfile] using hκ)
+  have hBC : v i ≠ v (i + 1) := hsimple.1 i
+  have hAC : v (i - 1) ≠ v (i + 1) := by
+    simpa [sub_eq_add_neg, add_assoc] using isSimplePolygon_two_step_ne hsimple (i - 1)
+  exact dahlbergRegularAt_segment_of_cross_eq_zero hAB hBC hAC (hregular i) hcross
 
 /-- The disk-side cap in the lower half-plane. -/
 def normalizedLowerCap (a y : ℝ) : Set ℂ :=
@@ -1797,6 +1904,16 @@ theorem vertex_cross_eq_zero_of_constant_signedMengerProfile_zero {n : ℕ}
     ∀ i : ZMod n, Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) = 0 := by
   intro i
   exact (signedMengerProfile_eq_zero_iff_vertex_cross_eq_zero hsimple i).mp (hκ i)
+
+/-- A constant-zero signed-Menger profile on a simple locally regular polygon
+makes every vertex a segment subdivision point between its two neighbors. -/
+theorem vertex_mem_neighbor_segment_of_constant_signedMengerProfile_zero {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hκ : ∀ i : ZMod n, SignedMengerProfile v i = 0) :
+    ∀ i : ZMod n, v i ∈ segment ℝ (v (i - 1)) (v (i + 1)) := by
+  intro i
+  exact vertex_mem_neighbor_segment_of_signedMengerProfile_eq_zero hsimple hregular (hκ i)
 
 /-- Polygon-indexed own-region membership over the outgoing edge from nonzero
 signed Menger curvature at the left endpoint. -/
