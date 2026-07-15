@@ -322,6 +322,64 @@ theorem exists_constant_of_forall_succ_le {n : ℕ} [NeZero n] {κ : ZMod n → 
     abel
   simpa [hidx] using hk
 
+/-- A cyclic real profile where every value lies between its two neighbours
+must have at least one adjacent equality.  Equivalently, a closed cyclic
+sequence with no adjacent plateau cannot be locally between-neighbour
+monotone everywhere. -/
+theorem exists_eq_succ_of_forall_mem_uIcc_neighbors {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ}
+    (hbetween : ∀ i : ZMod n, κ i ∈ Set.uIcc (κ (i - 1)) (κ (i + 1))) :
+    ∃ i : ZMod n, κ i = κ (i + 1) := by
+  by_contra hnone
+  have hne : ∀ i : ZMod n, κ i ≠ κ (i + 1) := by
+    intro i hi
+    exact hnone ⟨i, hi⟩
+  rcases lt_or_gt_of_ne (hne 0) with hinc0 | hdec0
+  · have hinc_nat : ∀ k : ℕ, κ (k : ZMod n) < κ ((k : ZMod n) + 1) := by
+      intro k
+      induction k with
+      | zero =>
+          simpa using hinc0
+      | succ k ih =>
+          have hb := hbetween ((k : ZMod n) + 1)
+          rw [Set.mem_uIcc] at hb
+          rcases hb with h | h
+          · have hright :
+                κ ((k + 1 : ℕ) : ZMod n) ≤ κ (((k + 1 : ℕ) : ZMod n) + 1) := by
+              simpa [Nat.cast_add, add_assoc] using h.2
+            exact lt_of_le_of_ne hright (hne (((k + 1 : ℕ) : ZMod n)))
+          · have hleft : κ ((k : ZMod n) + 1) ≤ κ (k : ZMod n) := by
+              simpa [sub_eq_add_neg, add_assoc] using h.2
+            exact False.elim ((not_lt_of_ge hleft) ih)
+    have hle : ∀ i : ZMod n, κ i ≤ κ (i + 1) := by
+      intro i
+      have hi := hinc_nat i.val
+      simpa [ZMod.natCast_rightInverse i] using hi.le
+    rcases exists_constant_of_forall_le_succ hle with ⟨c, hc⟩
+    exact hne 0 (by rw [hc 0, hc (0 + 1)])
+  · have hdec_nat : ∀ k : ℕ, κ ((k : ZMod n) + 1) < κ (k : ZMod n) := by
+      intro k
+      induction k with
+      | zero =>
+          simpa using hdec0
+      | succ k ih =>
+          have hb := hbetween ((k : ZMod n) + 1)
+          rw [Set.mem_uIcc] at hb
+          rcases hb with h | h
+          · have hleft : κ (k : ZMod n) ≤ κ ((k : ZMod n) + 1) := by
+              simpa [sub_eq_add_neg, add_assoc] using h.1
+            exact False.elim ((not_lt_of_ge hleft) ih)
+          · have hright :
+                κ (((k + 1 : ℕ) : ZMod n) + 1) ≤ κ ((k + 1 : ℕ) : ZMod n) := by
+              simpa [Nat.cast_add, add_assoc] using h.1
+            exact lt_of_le_of_ne hright (hne (((k + 1 : ℕ) : ZMod n))).symm
+    have hle : ∀ i : ZMod n, κ (i + 1) ≤ κ i := by
+      intro i
+      have hi := hdec_nat i.val
+      simpa [ZMod.natCast_rightInverse i] using hi.le
+    rcases exists_constant_of_forall_succ_le hle with ⟨c, hc⟩
+    exact hne 0 (by rw [hc 0, hc (0 + 1)])
+
 /-- A nonconstant cyclic profile has at least one strict adjacent increase. -/
 theorem exists_adjacent_lt_succ_of_not_constant {n : ℕ} [NeZero n]
     {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :

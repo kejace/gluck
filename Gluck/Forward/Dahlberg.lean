@@ -103,6 +103,73 @@ theorem crossR2_right_endpoint (A B : ℂ) :
   simp only [Complex.sub_re, Complex.sub_im]
   ring_nf
 
+/-- Unnormalised scalar coordinate along the oriented base edge `A → B`. -/
+def lineCoordR2 (A B Z : ℂ) : ℝ :=
+  (Z.re - A.re) * (B.re - A.re) + (Z.im - A.im) * (B.im - A.im)
+
+/-- Projection to an arbitrary edge coordinate sends a complex segment into the
+unordered real interval joining the projected endpoint coordinates. -/
+theorem lineCoordR2_mem_uIcc_of_mem_segment {A B X Y Z : ℂ}
+    (hZ : Z ∈ segment ℝ X Y) :
+    lineCoordR2 A B Z ∈ Set.uIcc (lineCoordR2 A B X) (lineCoordR2 A B Y) := by
+  rw [segment_eq_image_lineMap] at hZ
+  rcases hZ with ⟨t, ht, rfl⟩
+  rw [← segment_eq_uIcc]
+  rw [segment_eq_image_lineMap]
+  refine ⟨t, ht, ?_⟩
+  unfold lineCoordR2
+  simp [AffineMap.lineMap_apply]
+  ring
+
+/-- On the line through a nondegenerate base edge, the edge coordinate is
+injective. -/
+theorem eq_of_crossR2_eq_zero_of_lineCoordR2_eq {A B C D : ℂ} (hAB : A ≠ B)
+    (hC : Gluck.Discrete.crossR2 A B C = 0)
+    (hD : Gluck.Discrete.crossR2 A B D = 0)
+    (hcoord : lineCoordR2 A B C = lineCoordR2 A B D) :
+    C = D := by
+  have hABsq_pos : 0 < (B.re - A.re) ^ 2 + (B.im - A.im) ^ 2 := by
+    have hABsq_ne : (B.re - A.re) ^ 2 + (B.im - A.im) ^ 2 ≠ 0 := by
+      intro hsq
+      apply hAB
+      apply Complex.ext
+      · nlinarith [sq_nonneg (B.re - A.re), sq_nonneg (B.im - A.im)]
+      · nlinarith [sq_nonneg (B.re - A.re), sq_nonneg (B.im - A.im)]
+    exact lt_of_le_of_ne' (add_nonneg (sq_nonneg _) (sq_nonneg _)) hABsq_ne
+  unfold lineCoordR2 at hcoord
+  unfold Gluck.Discrete.crossR2 at hC hD
+  simp only [Complex.sub_re, Complex.sub_im] at hcoord hC hD
+  ring_nf at hcoord hC hD
+  have hdot :
+      (C.re - D.re) * (B.re - A.re) + (C.im - D.im) * (B.im - A.im) = 0 := by
+    linarith
+  have hdet :
+      (B.re - A.re) * (C.im - D.im) - (B.im - A.im) * (C.re - D.re) = 0 := by
+    linarith
+  apply Complex.ext
+  · have hx :
+        (C.re - D.re) * ((B.re - A.re) ^ 2 + (B.im - A.im) ^ 2) =
+          (B.re - A.re) *
+              ((C.re - D.re) * (B.re - A.re) +
+                (C.im - D.im) * (B.im - A.im)) -
+            (B.im - A.im) *
+              ((B.re - A.re) * (C.im - D.im) -
+                (B.im - A.im) * (C.re - D.re)) := by
+      ring
+    rw [hdot, hdet, mul_zero, mul_zero, sub_zero] at hx
+    exact sub_eq_zero.mp ((mul_eq_zero.mp hx).resolve_right (ne_of_gt hABsq_pos))
+  · have hy :
+        (C.im - D.im) * ((B.re - A.re) ^ 2 + (B.im - A.im) ^ 2) =
+          (B.im - A.im) *
+              ((C.re - D.re) * (B.re - A.re) +
+                (C.im - D.im) * (B.im - A.im)) +
+            (B.re - A.re) *
+              ((B.re - A.re) * (C.im - D.im) -
+                (B.im - A.im) * (C.re - D.re)) := by
+      ring
+    rw [hdot, hdet, mul_zero, mul_zero, zero_add] at hy
+    exact sub_eq_zero.mp ((mul_eq_zero.mp hy).resolve_right (ne_of_gt hABsq_pos))
+
 /-- Consecutive collinear triples propagate collinearity across the shared
 nondegenerate edge. -/
 theorem crossR2_eq_zero_of_consecutive {A B C D : ℂ} (hBC : B ≠ C)
@@ -2151,6 +2218,17 @@ theorem all_vertices_cross_eq_zero_of_constant_signedMengerProfile_zero {n : ℕ
     ZMod.natCast_rightInverse (j + -i)
   simpa [hcast, sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hchain
 
+/-- Projection to real parts sends a complex segment into the unordered real
+interval joining the endpoint real parts. -/
+theorem re_mem_uIcc_of_mem_segment {A B C : ℂ} (hB : B ∈ segment ℝ A C) :
+    B.re ∈ Set.uIcc A.re C.re := by
+  rw [segment_eq_image_lineMap] at hB
+  rcases hB with ⟨t, ht, rfl⟩
+  rw [← segment_eq_uIcc]
+  rw [segment_eq_image_lineMap]
+  refine ⟨t, ht, ?_⟩
+  simp [AffineMap.lineMap_apply]
+
 /-- A constant-zero signed-Menger profile on a simple locally regular polygon
 makes every vertex a segment subdivision point between its two neighbors. -/
 theorem vertex_mem_neighbor_segment_of_constant_signedMengerProfile_zero {n : ℕ}
@@ -2160,6 +2238,53 @@ theorem vertex_mem_neighbor_segment_of_constant_signedMengerProfile_zero {n : �
     ∀ i : ZMod n, v i ∈ segment ℝ (v (i - 1)) (v (i + 1)) := by
   intro i
   exact vertex_mem_neighbor_segment_of_signedMengerProfile_eq_zero hsimple hregular (hκ i)
+
+/-- The zero-profile segment-subdivision condition descends to a real
+between-neighbours condition on real parts. -/
+theorem re_mem_uIcc_neighbors_of_constant_signedMengerProfile_zero {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hκ : ∀ i : ZMod n, SignedMengerProfile v i = 0) :
+    ∀ i : ZMod n, (v i).re ∈ Set.uIcc (v (i - 1)).re (v (i + 1)).re := by
+  intro i
+  exact re_mem_uIcc_of_mem_segment
+    (vertex_mem_neighbor_segment_of_constant_signedMengerProfile_zero hsimple hregular hκ i)
+
+/-- In edge coordinates, the zero-profile segment-subdivision condition has an
+adjacent plateau. -/
+theorem exists_adjacent_equal_lineCoordR2_of_constant_signedMengerProfile_zero
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hκ : ∀ i : ZMod n, SignedMengerProfile v i = 0) (base : ZMod n) :
+    ∃ i : ZMod n,
+      lineCoordR2 (v base) (v (base + 1)) (v i) =
+        lineCoordR2 (v base) (v (base + 1)) (v (i + 1)) := by
+  apply exists_eq_succ_of_forall_mem_uIcc_neighbors
+  intro i
+  exact lineCoordR2_mem_uIcc_of_mem_segment
+    (vertex_mem_neighbor_segment_of_constant_signedMengerProfile_zero hsimple hregular hκ i)
+
+/-- A constant-zero signed-Menger profile is impossible on a simple
+Dahlberg-regular polygon: the segment branch would make the polygon a
+one-dimensional cyclic chain with no possible adjacent strict movement. -/
+theorem not_constant_signedMengerProfile_zero_of_isSimplePolygon {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hκ : ∀ i : ZMod n, SignedMengerProfile v i = 0) :
+    False := by
+  obtain ⟨i, hcoord⟩ :=
+    exists_adjacent_equal_lineCoordR2_of_constant_signedMengerProfile_zero
+      hsimple hregular hκ (0 : ZMod n)
+  have hbase : v (0 : ZMod n) ≠ v ((0 : ZMod n) + 1) := hsimple.1 0
+  have hC :
+      Gluck.Discrete.crossR2 (v (0 : ZMod n)) (v ((0 : ZMod n) + 1)) (v i) = 0 :=
+    all_vertices_cross_eq_zero_of_constant_signedMengerProfile_zero hsimple hκ 0 i
+  have hD :
+      Gluck.Discrete.crossR2 (v (0 : ZMod n)) (v ((0 : ZMod n) + 1)) (v (i + 1)) = 0 :=
+    all_vertices_cross_eq_zero_of_constant_signedMengerProfile_zero hsimple hκ 0 (i + 1)
+  have hvi : v i = v (i + 1) :=
+    eq_of_crossR2_eq_zero_of_lineCoordR2_eq hbase hC hD hcoord
+  exact hsimple.1 i hvi
 
 /-- Polygon-indexed own-region membership over the outgoing edge from nonzero
 signed Menger curvature at the left endpoint. -/
@@ -3030,6 +3155,22 @@ theorem constant_signedMengerProfile_eq_zero_of_not_concyclic
   exact hnoncircle (concyclic_of_constant_signedMengerProfile_ne_zero
     hsimple hregular hc hc0)
 
+/-- A nonconcyclic locally regular simple polygon has nonconstant
+signed-Menger profile.  The zero constant is ruled out by the subdivision
+obstruction. -/
+theorem not_constant_signedMengerProfile_of_not_concyclic
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v) :
+    ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  rintro ⟨c, hc⟩
+  have hc0 : c = 0 :=
+    constant_signedMengerProfile_eq_zero_of_not_concyclic hsimple hregular hnoncircle hc
+  have hκzero : ∀ i : ZMod n, SignedMengerProfile v i = 0 := by
+    intro i
+    exact (hc i).trans hc0
+  exact not_constant_signedMengerProfile_zero_of_isSimplePolygon hsimple hregular hκzero
+
 /-- On a nonconcyclic locally regular simple polygon, one nonzero
 signed-Menger value already forces the profile to be nonconstant. -/
 theorem not_constant_signedMengerProfile_of_not_concyclic_of_exists_ne_zero
@@ -3526,6 +3667,30 @@ theorem signedMengerProfile_exists_globalMinMax_strict_of_not_constant
       (∀ j : ZMod n, SignedMengerProfile v j ≤ SignedMengerProfile v i₁) ∧
       SignedMengerProfile v i₀ < SignedMengerProfile v i₁ := by
   exact exists_globalMinMax_strict_of_not_constant (κ := SignedMengerProfile v) hnc
+
+/-- A nonconcyclic locally regular simple polygon has both an adjacent strict
+increase and an adjacent strict decrease. -/
+theorem signedMengerProfile_exists_adjacent_increase_and_decrease_of_not_concyclic
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v) :
+    (∃ i : ZMod n, SignedMengerProfile v i < SignedMengerProfile v (i + 1)) ∧
+      ∃ i : ZMod n, SignedMengerProfile v (i + 1) < SignedMengerProfile v i := by
+  exact signedMengerProfile_exists_adjacent_increase_and_decrease_of_not_constant
+    (not_constant_signedMengerProfile_of_not_concyclic hsimple hregular hnoncircle)
+
+/-- A nonconcyclic locally regular simple polygon has strictly separated
+global minimum and maximum signed-Menger values. -/
+theorem signedMengerProfile_exists_globalMinMax_strict_of_not_concyclic
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v) :
+    ∃ i₀ i₁ : ZMod n,
+      (∀ j : ZMod n, SignedMengerProfile v i₀ ≤ SignedMengerProfile v j) ∧
+      (∀ j : ZMod n, SignedMengerProfile v j ≤ SignedMengerProfile v i₁) ∧
+      SignedMengerProfile v i₀ < SignedMengerProfile v i₁ := by
+  exact signedMengerProfile_exists_globalMinMax_strict_of_not_constant
+    (not_constant_signedMengerProfile_of_not_concyclic hsimple hregular hnoncircle)
 
 /-- A nonconcyclic locally regular simple polygon with at least one nonzero
 signed-Menger value has both an adjacent strict increase and an adjacent

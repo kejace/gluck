@@ -138,6 +138,38 @@ theorem constant_signedMengerProfile_eq_zero_E2_of_not_concyclic {n : ℕ} [NeZe
     c = 0 := by
   exact constant_signedMengerProfile_eq_zero_of_not_concyclic hsimple hregular hnoncircle hc
 
+/-- E² reduction: a nonconcyclic locally regular simple polygon has
+nonconstant signed-Menger profile. -/
+theorem signedMengerProfile_not_constant_E2_of_not_concyclic {n : ℕ} [NeZero n]
+    (v : ZMod n → ℂ) (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  exact not_constant_signedMengerProfile_of_not_concyclic hsimple hregular hnoncircle
+
+/-- E² reduction: nonconcyclicity forces both an adjacent strict increase and
+an adjacent strict decrease of signed Menger curvature. -/
+theorem signedMengerProfile_adjacent_increase_and_decrease_E2_of_not_concyclic
+    {n : ℕ} [NeZero n] (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v) :
+    (∃ i : ZMod n, SignedMengerProfile v i < SignedMengerProfile v (i + 1)) ∧
+      ∃ i : ZMod n, SignedMengerProfile v (i + 1) < SignedMengerProfile v i := by
+  exact signedMengerProfile_exists_adjacent_increase_and_decrease_of_not_concyclic
+    hsimple hregular hnoncircle
+
+/-- E² reduction: nonconcyclicity gives strictly separated global minimum and
+maximum signed-Menger values. -/
+theorem signedMengerProfile_globalMinMax_strict_E2_of_not_concyclic
+    {n : ℕ} [NeZero n] (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v) :
+    ∃ i₀ i₁ : ZMod n,
+      (∀ j : ZMod n, SignedMengerProfile v i₀ ≤ SignedMengerProfile v j) ∧
+      (∀ j : ZMod n, SignedMengerProfile v j ≤ SignedMengerProfile v i₁) ∧
+      SignedMengerProfile v i₀ < SignedMengerProfile v i₁ := by
+  exact signedMengerProfile_exists_globalMinMax_strict_of_not_concyclic
+    hsimple hregular hnoncircle
+
 /-- E² reduction: for a nonconcyclic locally regular simple polygon, one
 nonzero signed-Menger value forces the signed-Menger profile to be
 nonconstant. -/
