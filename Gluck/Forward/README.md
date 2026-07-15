@@ -74,7 +74,8 @@ usual model-specific hypotheses.
 `ε ∈ {0,1,-1}` dispatch layer over the E²/S²/H² conformal-Menger wrappers,
 using common positive-orientation, negative-orientation, and
 strict-orientation interfaces, plus a bundled orientation/properness interface
-matching the H² public API shape.  Their status is not uniform:
+matching the H² public API shape; its nonconstant endpoints dispatch directly
+to the E²/S²/H² nonconstant wrappers.  Their status is not uniform:
 
 - the smooth theorem is one unconditional space-form theorem, transported by
   the Möbius-invariant osculating-cycle contact condition;

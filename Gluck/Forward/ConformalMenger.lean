@@ -59,10 +59,17 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_kernel
     (hproper : ε < 0 → ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_of_constant_or_of_not_constant
-    (constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel
-      hε hn v κ hdisk hsimple horient hregular hκ hproper)
-    hnc
+  rcases hε with hE | hrest
+  · subst ε
+    exact dahlbergFourVertex_E2_of_realizesConformalMenger_zero_positiveOrientation_not_constant
+      hn v κ hsimple hregular horient hκ hnc
+  · rcases hrest with hS | hH
+    · subst ε
+      exact discrete_four_vertex_S2_kernel
+        hn v κ hdisk hsimple horient hregular hκ hnc
+    · subst ε
+      exact discrete_four_vertex_H2_kernel
+        hn v κ hdisk hsimple horient hregular hκ (hproper (by norm_num)) hnc
 
 /-- Positive-orientation spelling of the all-space-form conformal-Menger
 constant-or-Dahlberg theorem. -/
@@ -91,10 +98,8 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_of_positiveOrientation
     (hproper : ε < 0 → ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_of_constant_or_of_not_constant
-    (constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_positiveOrientation
-      hε hn v κ hdisk hsimple horient hregular hκ hproper)
-    hnc
+  exact dahlbergFourVertex_conformalMenger_spaceForm_kernel
+    hε hn v κ hdisk hsimple horient hregular hκ hproper hnc
 
 /-- Constant-or-Dahlberg conformal-Menger theorem for strictly oriented
 convex/coherent polygons in the three project space forms.
@@ -145,10 +150,23 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_of_strict_orientation
     (hproper_neg : ε < 0 → NegativePolygonOrientation v → ∀ i, 1 < -κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_of_constant_or_of_not_constant
-    (constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_strict_orientation
-      hε hn v κ hdisk hsimple horient hregular hκ hproper_pos hproper_neg)
-    hnc
+  rcases hε with hE | hrest
+  · subst ε
+    exact dahlbergFourVertex_E2_of_realizesConformalMenger_zero_not_constant_strict_orientation
+      hn v κ hsimple hregular horient hκ hnc
+  · rcases hrest with hS | hH
+    · subst ε
+      exact discrete_four_vertex_S2_of_strict_orientation
+        hn v κ hdisk hsimple horient hregular hκ hnc
+    · subst ε
+      have hHorient :
+          (PositivePolygonOrientation v ∧ ∀ i, 1 < κ i) ∨
+            (NegativePolygonOrientation v ∧ ∀ i, 1 < -κ i) := by
+        rcases horient with hpos | hneg
+        · exact Or.inl ⟨hpos, hproper_pos (by norm_num) hpos⟩
+        · exact Or.inr ⟨hneg, hproper_neg (by norm_num) hneg⟩
+      exact discrete_four_vertex_H2_of_strict_orientation
+        hn v κ hdisk hsimple hHorient hregular hκ hnc
 
 /-- Bundled strict-orientation form of the all-space-form conformal-Menger
 constant-or-Dahlberg theorem.
@@ -204,9 +222,28 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_of_oriented_proper
     (hκ : RealizesConformalMenger ε v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_of_constant_or_of_not_constant
-    (constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_oriented_proper
-      hε hn v κ hdisk hsimple horient hregular hκ)
+  have hstrict : PositivePolygonOrientation v ∨ NegativePolygonOrientation v := by
+    rcases horient with hpos | hneg
+    · exact Or.inl hpos.1
+    · exact Or.inr hneg.1
+  exact dahlbergFourVertex_conformalMenger_spaceForm_of_strict_orientation
+    hε hn v κ hdisk hsimple hstrict hregular hκ
+    (by
+      intro hlt hpos
+      rcases horient with hpack | hpack
+      · exact hpack.2 hlt
+      · exfalso
+        have hp := hpos (0 : ZMod n)
+        have hn := hpack.1 (0 : ZMod n)
+        linarith)
+    (by
+      intro hlt hneg
+      rcases horient with hpack | hpack
+      · exfalso
+        have hp := hpack.1 (0 : ZMod n)
+        have hn := hneg (0 : ZMod n)
+        linarith
+      · exact hpack.2 hlt)
     hnc
 
 /-- Negative-orientation spelling of the all-space-form conformal-Menger
@@ -246,9 +283,15 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_of_negativeOrientation
     (hproper : ε < 0 → ∀ i, 1 < -κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_of_constant_or_of_not_constant
-    (constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_negativeOrientation
-      hε hn v κ hdisk hsimple horient hregular hκ hproper)
+  exact dahlbergFourVertex_conformalMenger_spaceForm_of_strict_orientation
+    hε hn v κ hdisk hsimple (Or.inr horient) hregular hκ
+    (by
+      intro _ hpos
+      exfalso
+      have hp := hpos (0 : ZMod n)
+      have hn := horient (0 : ZMod n)
+      linarith)
+    (by intro hlt _; exact hproper hlt)
     hnc
 
 end Gluck.Forward
