@@ -46,6 +46,14 @@ adjacent curvature turns from the nonconstant strictly convex profile, not the
 nonconcyclic-to-nonconstant reduction or the final conversion from turns to
 Dahlberg's plateau-aware conclusion.
 
+For `ε = 0` conformal-Menger realizations, the positive-orientation
+nonconstant endpoint is
+`orderedAdjacentTurns_E2_of_realizesConformalMenger_zero_positiveOrientation_not_constant`.
+The corresponding constant-or turn-level endpoint is
+`constant_or_orderedAdjacentTurns_E2_of_realizesConformalMenger_zero_positiveOrientation`;
+the positive constant-or D4VT wrapper routes through it and then applies
+`dahlbergFourVertex_of_orderedAdjacentTurns_four_le`.
+
 `AlternatesAcrossLevel` remains available as a later corollary of the exact
 plateau-aware conclusion; it is not used as a substitute for Dahlberg's source
 statement.
