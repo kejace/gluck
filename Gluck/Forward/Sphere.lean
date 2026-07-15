@@ -43,6 +43,19 @@ theorem exists_ordered_conformalMenger_turns_S2_kernel {n : ℕ} [NeZero n]
     OrderedAdjacentTurns κ := by
   sorry
 
+/-- Spherical ordered-turn extraction using the shared positive-orientation
+interface for convex/coherent cyclic polygons. -/
+theorem exists_ordered_conformalMenger_turns_S2_of_positiveOrientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    OrderedAdjacentTurns κ := by
+  exact exists_ordered_conformalMenger_turns_S2_kernel
+    hn v κ hdisk hsimple horient hregular hκ
+
 /-- Deferred spherical discrete four-vertex theorem for a convex coherent
 polygon in an open hemisphere.  This is the project-derived `sin R` analogue
 of the Musin / Grant--Mogilski circumradius theorem and appears to be new. -/

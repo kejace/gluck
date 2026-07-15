@@ -43,6 +43,19 @@ theorem exists_ordered_conformalMenger_turns_H2_kernel {n : ℕ} [NeZero n]
     OrderedAdjacentTurns κ := by
   sorry
 
+/-- Hyperbolic ordered-turn extraction using the shared positive-orientation
+interface for convex/coherent cyclic polygons in the proper-circle regime. -/
+theorem exists_ordered_conformalMenger_turns_H2_of_positiveOrientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
+    OrderedAdjacentTurns κ := by
+  exact exists_ordered_conformalMenger_turns_H2_kernel
+    hn v κ hdisk hsimple horient hregular hκ hcircle
+
 /-- Grant--Mogilski's hyperbolic discrete four-vertex theorem for a convex
 coherent polygon whose consecutive triples lie on proper hyperbolic circles
 (`κᵢ > 1`).  The proof is deferred while E² is developed. -/
