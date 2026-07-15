@@ -2294,6 +2294,22 @@ theorem realizesMenger_of_signedMengerProfile_eq {n : ℕ} [NeZero n]
   subst hκ
   exact realizesMenger_signedMengerProfile hsimple
 
+/-- Menger realizability is equivalently realization by the named
+signed-Menger profile of a simple polygon. -/
+theorem realizesMenger_iff_exists_signedMengerProfile_eq {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} :
+    Gluck.Discrete.RealizesMenger κ ↔
+      ∃ v : ZMod n → ℂ, Gluck.Discrete.IsSimplePolygon v ∧
+        SignedMengerProfile v = κ := by
+  constructor
+  · intro h
+    rcases h with ⟨v, hsimple, hκ⟩
+    refine ⟨v, hsimple, ?_⟩
+    funext i
+    exact hκ i
+  · rintro ⟨v, hsimple, hκ⟩
+    exact realizesMenger_of_signedMengerProfile_eq hsimple hκ
+
 /-! ## Finite cyclic signed-Menger profile API -/
 
 /-- A nonconstant polygon signed-Menger profile has both a strict adjacent
