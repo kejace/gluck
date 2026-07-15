@@ -52,12 +52,13 @@ model-specific wrappers in `Euclidean.lean`, `Sphere.lean`, and
 `Hyperbolic.lean`, but they now share one source gate:
 `four_vertex_condition_smooth_spaceForm_kernel` in `Smooth.lean`.  The
 discrete forward statements for `S²` and `H²` are also exposed through
-model-specific wrappers in `Sphere.lean` and `Hyperbolic.lean`, with their
-shared source gate isolated as
-`constant_or_dahlbergFourVertex_spaceForm_kernel` in
-`SpaceFormDiscrete.lean`; the `discrete_four_vertex_*` wrappers add an explicit
-nonconstancy hypothesis to rule out the constant-curvature case.  Their status
-is not uniform:
+model-specific wrappers in `Sphere.lean` and `Hyperbolic.lean`.  The shared
+dispatch theorem `constant_or_dahlbergFourVertex_spaceForm_kernel` in
+`SpaceFormDiscrete.lean` is proved by cases from the model-specific source
+gates `constant_or_dahlbergFourVertex_S2_source` and
+`constant_or_dahlbergFourVertex_H2_source`; the `discrete_four_vertex_*`
+wrappers add an explicit nonconstancy hypothesis to rule out the
+constant-curvature case.  Their status is not uniform:
 
 - the smooth theorem is one unconditional space-form theorem, transported by
   the Möbius-invariant osculating-cycle contact condition;
