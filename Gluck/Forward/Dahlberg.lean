@@ -4134,9 +4134,42 @@ theorem polygonDahlbergFourVertex_of_ordered_signedMenger_turns {n : ℕ}
 
 /-! ## Dahlberg's Euclidean discrete four-vertex kernel -/
 
-/-- Dahlberg's geometric extraction step: Lemma 8 and Lemma 10 produce four
-ordered adjacent turns of signed Menger curvature for a nonconcyclic locally
-regular simple polygon.
+/-- Dahlberg's strictly-convex case, corresponding to Lemma 9 in
+`references/23.pdf`.
+
+The hypotheses use the existing orientation interfaces as the Lean-side
+strict-convexity proxy: a simple locally regular polygon whose consecutive
+triples all turn with one sign.  Dahlberg proves this case by combining
+Lemma 8's monotonicity of the half-plane/disk regions `δ(P,e)` with the convex
+DFV theorem. -/
+theorem signedMengerProfile_orderedTurns_of_strict_orientation_not_concyclic
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) :
+    OrderedTurns (SignedMengerProfile v) := by
+  sorry
+
+/-- Dahlberg's reduction from the general simple locally regular polygon to the
+strictly-convex auxiliary polygon used in the last part of §4 of
+`references/23.pdf`.
+
+This is where the smallest enclosing disk `Δ`, its boundary set `E`, Lemma 10's
+triangle-sector radius comparison, and the polygonal approximation of the
+convex domain `U` enter.  Its output is still the ordered-turn form used by the
+Lean endpoint, so the remaining analytic geometry is isolated here rather than
+hidden inside the public theorem. -/
+theorem signedMengerProfile_orderedTurns_of_dahlberg_disk_reduction
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    OrderedTurns (SignedMengerProfile v) := by
+  sorry
+
+/-- Dahlberg's geometric extraction step: Lemma 8, Lemma 9, and Lemma 10
+produce four ordered adjacent turns of signed Menger curvature for a
+nonconcyclic locally regular simple polygon.
 
 All preceding lemmas reduce the Euclidean discrete four-vertex theorem to this
 ordered-turn statement: zero profiles are impossible, nonzero constant profiles
@@ -4146,7 +4179,8 @@ theorem signedMengerProfile_orderedTurns_of_not_concyclic {n : ℕ} [NeZero n]
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     OrderedTurns (SignedMengerProfile v) := by
-  sorry
+  exact signedMengerProfile_orderedTurns_of_dahlberg_disk_reduction
+    hn hsimple hregular hnoncircle
 
 /-- Dahlberg's Euclidean discrete four-vertex kernel.
 

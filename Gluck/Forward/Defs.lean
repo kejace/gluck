@@ -498,6 +498,55 @@ def DahlbergRegular {n : ℕ} (v : ZMod n → ℂ) : Prop :=
 def Concyclic {n : ℕ} (v : ZMod n → ℂ) : Prop :=
   ∃ O R, 0 < R ∧ ∀ i, dist O (v i) = R
 
+/-- A vertex lies in the closed Euclidean disk with centre `O` and radius `R`. -/
+def InClosedDiskR2 (O : ℂ) (R : ℝ) (P : ℂ) : Prop :=
+  dist O P ≤ R
+
+/-- A cyclic Euclidean polygon lies in a closed disk. -/
+def PolygonInClosedDiskR2 {n : ℕ} (v : ZMod n → ℂ) (O : ℂ) (R : ℝ) : Prop :=
+  ∀ i, InClosedDiskR2 O R (v i)
+
+/-- A closed disk of least radius enclosing all vertices of a cyclic Euclidean
+polygon.  This is the object denoted `Δ` in Dahlberg's proof of DFV. -/
+def MinimalEnclosingDiskR2 {n : ℕ} (v : ZMod n → ℂ) (O : ℂ) (R : ℝ) : Prop :=
+  0 ≤ R ∧ PolygonInClosedDiskR2 v O R ∧
+    ∀ O' R', 0 ≤ R' → PolygonInClosedDiskR2 v O' R' → R ≤ R'
+
+/-- The vertices lying on the boundary of a chosen enclosing disk.  Dahlberg
+calls this boundary set `E` in the final proof of DFV. -/
+def OnDiskBoundaryR2 {n : ℕ} (v : ZMod n → ℂ) (O : ℂ) (R : ℝ) (i : ZMod n) :
+    Prop :=
+  dist O (v i) = R
+
+/-- A minimal enclosing disk has nonnegative radius. -/
+theorem radius_nonneg_of_minimalEnclosingDiskR2 {n : ℕ} {v : ZMod n → ℂ}
+    {O : ℂ} {R : ℝ} (hΔ : MinimalEnclosingDiskR2 v O R) :
+    0 ≤ R := by
+  exact hΔ.1
+
+/-- A minimal enclosing disk contains every polygon vertex. -/
+theorem polygonInClosedDiskR2_of_minimalEnclosingDiskR2 {n : ℕ}
+    {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
+    (hΔ : MinimalEnclosingDiskR2 v O R) :
+    PolygonInClosedDiskR2 v O R := by
+  exact hΔ.2.1
+
+/-- The radius of a minimal enclosing disk is bounded above by the radius of
+any other enclosing disk. -/
+theorem minimalEnclosingDiskR2_le_of_polygonInClosedDiskR2 {n : ℕ}
+    {v : ZMod n → ℂ} {O O' : ℂ} {R R' : ℝ}
+    (hΔ : MinimalEnclosingDiskR2 v O R) (hR' : 0 ≤ R')
+    (hcontains : PolygonInClosedDiskR2 v O' R') :
+    R ≤ R' := by
+  exact hΔ.2.2 O' R' hR' hcontains
+
+/-- A boundary vertex of a disk is, in particular, contained in that disk. -/
+theorem inClosedDiskR2_of_onDiskBoundaryR2 {n : ℕ} {v : ZMod n → ℂ}
+    {O : ℂ} {R : ℝ} {i : ZMod n}
+    (hboundary : OnDiskBoundaryR2 v O R i) :
+    InClosedDiskR2 O R (v i) := by
+  exact le_of_eq hboundary
+
 /-- The signed-Menger curvature profile of a cyclic Euclidean polygon. -/
 noncomputable def SignedMengerProfile {n : ℕ} (v : ZMod n → ℂ) : ZMod n → ℝ :=
   fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))
