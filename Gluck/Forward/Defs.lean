@@ -97,6 +97,43 @@ theorem discreteFourVertex_affine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ
     ring
   · exact discreteFourVertex_affine ha
 
+/-- A profile pointwise equal to a nonzero affine change of a level-window
+profile inherits the same alternating level window. -/
+theorem alternatesAcrossLevel_of_eq_affine {n : ℕ} {κ μ : ZMod n → ℝ}
+    {a b c : ℝ} (ha : a ≠ 0) (hμ : ∀ i : ZMod n, μ i = a * κ i + b)
+    (halt : AlternatesAcrossLevel κ c) :
+    AlternatesAcrossLevel μ (a * c + b) := by
+  have hscaled := alternatesAcrossLevel_affine (κ := κ) (a := a) (b := b) ha halt
+  convert hscaled using 1
+  ext i
+  exact hμ i
+
+/-- Pointwise equal cyclic profiles have the same alternating level window. -/
+theorem alternatesAcrossLevel_congr {n : ℕ} {κ μ : ZMod n → ℝ} {c : ℝ}
+    (hμ : ∀ i : ZMod n, μ i = κ i) (halt : AlternatesAcrossLevel κ c) :
+    AlternatesAcrossLevel μ c := by
+  simpa using alternatesAcrossLevel_of_eq_affine (a := 1) (b := 0) (c := c)
+    (by norm_num) (by intro i; simp [hμ i]) halt
+
+/-- A profile pointwise equal to a nonzero affine change of a discrete
+level-window four-vertex profile inherits that conclusion. -/
+theorem discreteFourVertex_of_eq_affine {n : ℕ} {κ μ : ZMod n → ℝ} {a b : ℝ}
+    (ha : a ≠ 0) (hμ : ∀ i : ZMod n, μ i = a * κ i + b)
+    (hfv : DiscreteFourVertex κ) :
+    DiscreteFourVertex μ := by
+  have hscaled := discreteFourVertex_affine (κ := κ) (a := a) (b := b) ha hfv
+  convert hscaled using 1
+  ext i
+  exact hμ i
+
+/-- Pointwise equal cyclic profiles have the same discrete level-window
+four-vertex conclusion. -/
+theorem discreteFourVertex_congr {n : ℕ} {κ μ : ZMod n → ℝ}
+    (hμ : ∀ i : ZMod n, μ i = κ i) (hfv : DiscreteFourVertex κ) :
+    DiscreteFourVertex μ := by
+  exact discreteFourVertex_of_eq_affine (a := 1) (b := 0) (by norm_num)
+    (by intro i; simp [hμ i]) hfv
+
 /-- The Dahlberg polygon-size hypothesis implies the neighbour-extrema size
 hypothesis used by strict one-step constructors. -/
 theorem two_le_of_four_le {n : ℕ} (hn : 4 ≤ n) : 2 ≤ n := by
