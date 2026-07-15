@@ -237,6 +237,81 @@ theorem exists_ne_succ_of_not_constant {n : ℕ} [NeZero n] {κ : ZMod n → ℝ
   by_contra hne
   exact hnone ⟨i, hne⟩
 
+/-- If a cyclic real profile is weakly increasing at every adjacent step, then
+it is constant. -/
+theorem exists_constant_of_forall_le_succ {n : ℕ} [NeZero n] {κ : ZMod n → ℝ}
+    (hstep : ∀ i : ZMod n, κ i ≤ κ (i + 1)) :
+    ∃ c, ∀ i : ZMod n, κ i = c := by
+  obtain ⟨imax, hmax⟩ := exists_globalMax_zmod κ
+  refine ⟨κ imax, fun i => ?_⟩
+  have hnat : ∀ k : ℕ, κ (imax + (k : ZMod n)) = κ imax := by
+    intro k
+    induction k with
+    | zero => simp
+    | succ k ih =>
+        have hle_step : κ (imax + (k : ZMod n)) ≤ κ (imax + (k : ZMod n) + 1) :=
+          hstep (imax + (k : ZMod n))
+        have hle_max : κ (imax + ((k + 1 : ℕ) : ZMod n)) ≤ κ imax :=
+          hmax (imax + ((k + 1 : ℕ) : ZMod n))
+        apply le_antisymm hle_max
+        have hle_step' : κ imax ≤ κ (imax + (k : ZMod n) + 1) := by
+          simpa [ih] using hle_step
+        simpa [Nat.cast_add, add_assoc] using hle_step'
+  let k : ℕ := (i - imax).val
+  have hk := hnat k
+  have hidx : imax + (k : ZMod n) = i := by
+    dsimp [k]
+    rw [ZMod.natCast_rightInverse (i - imax)]
+    abel
+  simpa [hidx] using hk
+
+/-- If a cyclic real profile is weakly decreasing at every adjacent step, then
+it is constant. -/
+theorem exists_constant_of_forall_succ_le {n : ℕ} [NeZero n] {κ : ZMod n → ℝ}
+    (hstep : ∀ i : ZMod n, κ (i + 1) ≤ κ i) :
+    ∃ c, ∀ i : ZMod n, κ i = c := by
+  obtain ⟨imin, hmin⟩ := exists_globalMin_zmod κ
+  refine ⟨κ imin, fun i => ?_⟩
+  have hnat : ∀ k : ℕ, κ (imin + (k : ZMod n)) = κ imin := by
+    intro k
+    induction k with
+    | zero => simp
+    | succ k ih =>
+        have hle_step : κ (imin + (k : ZMod n) + 1) ≤ κ (imin + (k : ZMod n)) :=
+          hstep (imin + (k : ZMod n))
+        have hle_min : κ imin ≤ κ (imin + ((k + 1 : ℕ) : ZMod n)) :=
+          hmin (imin + ((k + 1 : ℕ) : ZMod n))
+        apply le_antisymm
+        · simpa [Nat.cast_add, add_assoc] using hle_step.trans (le_of_eq ih)
+        · exact hle_min
+  let k : ℕ := (i - imin).val
+  have hk := hnat k
+  have hidx : imin + (k : ZMod n) = i := by
+    dsimp [k]
+    rw [ZMod.natCast_rightInverse (i - imin)]
+    abel
+  simpa [hidx] using hk
+
+/-- A nonconstant cyclic profile has at least one strict adjacent increase. -/
+theorem exists_adjacent_lt_succ_of_not_constant {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    ∃ i : ZMod n, κ i < κ (i + 1) := by
+  by_contra hnone
+  apply hnc
+  apply exists_constant_of_forall_succ_le
+  intro i
+  exact le_of_not_gt (fun hlt => hnone ⟨i, hlt⟩)
+
+/-- A nonconstant cyclic profile has at least one strict adjacent decrease. -/
+theorem exists_adjacent_succ_lt_of_not_constant {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    ∃ i : ZMod n, κ (i + 1) < κ i := by
+  by_contra hnone
+  apply hnc
+  apply exists_constant_of_forall_le_succ
+  intro i
+  exact le_of_not_gt (fun hlt => hnone ⟨i, hlt⟩)
+
 /-- A nonconstant cyclic profile has an adjacent strict increase or strict
 decrease. -/
 theorem exists_adjacent_lt_or_gt_of_not_constant {n : ℕ} [NeZero n]
