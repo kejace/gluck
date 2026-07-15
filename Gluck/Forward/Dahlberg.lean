@@ -1027,6 +1027,16 @@ theorem dahlbergRegularAt_circle_of_cross_ne_zero {A B C : ℂ}
       _ = 0 := hcol.1
   · exact hcircle
 
+/-- A noncollinear right-endpoint Dahlberg-regular vertex is in the
+circle/cone branch. -/
+theorem dahlbergRegularAt_circle_of_cross_ne_zero_right {A B C : ℂ}
+    (hreg : DahlbergRegularAt A B C)
+    (hcross : Gluck.Discrete.crossR2 A B C ≠ 0) :
+    ∃ O R, CircumcircleR2 A B C O R ∧ InVertexCone A B C O := by
+  rcases hreg with hcol | hcircle
+  · exact False.elim (hcross hcol.1)
+  · exact hcircle
+
 /-- The disk-side cap in the lower half-plane. -/
 def normalizedLowerCap (a y : ℝ) : Set ℂ :=
   {z | z.im ≤ 0 ∧ z.re ^ 2 + z.im ^ 2 - 2 * y * z.im ≤ a ^ 2}
@@ -1358,6 +1368,23 @@ theorem edgePointDahlbergRegion_anti_of_negative {A B P Q O : ℂ} {R : ℝ}
   · simpa [signedMengerR2_edge_parameter_of_neg hAB hPcross,
       signedMengerR2_edge_parameter_of_neg hAB hQcross] using hκ
 
+/-- Negative same-sign nesting using right-endpoint Dahlberg regularity for the
+higher-curvature point. -/
+theorem edgePointDahlbergRegion_anti_of_negative_right {A B P Q O : ℂ} {R : ℝ}
+    (hAB : A ≠ B)
+    (hPcross : Gluck.Discrete.crossR2 A B P < 0)
+    (hQcross : Gluck.Discrete.crossR2 A B Q < 0)
+    (hcircleQ : CircumcircleR2 A B Q O R) (hconeQ : InVertexCone A B Q O)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P ≤
+      Gluck.Discrete.signedMengerR2 A B Q) :
+    edgePointDahlbergRegion A B Q ⊆ edgePointDahlbergRegion A B P := by
+  rw [edgePointDahlbergRegion_eq_of_neg hAB hQcross,
+    edgePointDahlbergRegion_eq_of_neg hAB hPcross]
+  apply edgeDahlbergRegion_anti_of_negative hAB
+  · exact edgeCircumcenterParameter_nonpos_of_regular_right hAB hQcross hcircleQ hconeQ
+  · simpa [signedMengerR2_edge_parameter_of_neg hAB hPcross,
+      signedMengerR2_edge_parameter_of_neg hAB hQcross] using hκ
+
 /-- Dahlberg Lemma 8 for two locally regular points over the same oriented
 edge, expressed with the actual signed Menger curvatures. -/
 theorem edgePointDahlbergRegion_anti_of_regular {A B P Q : ℂ}
@@ -1401,6 +1428,50 @@ theorem edgePointDahlbergRegion_anti_of_regular {A B P Q : ℂ}
         dahlbergRegularAt_circle_of_cross_ne_zero hPreg hPpos.ne'
       exact edgePointDahlbergRegion_anti_of_positive hAB hPpos hQpos hcircleP hconeP hκ
 
+/-- Dahlberg Lemma 8 with right-endpoint local regularity over the same
+oriented edge. This is the form supplied directly by polygon vertex regularity
+for triples `(A,B,C)`. -/
+theorem edgePointDahlbergRegion_anti_of_regular_right {A B P Q : ℂ}
+    (hAB : A ≠ B)
+    (hPreg : DahlbergRegularAt A B P) (hQreg : DahlbergRegularAt A B Q)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P ≤
+      Gluck.Discrete.signedMengerR2 A B Q) :
+    edgePointDahlbergRegion A B Q ⊆ edgePointDahlbergRegion A B P := by
+  rcases lt_trichotomy (Gluck.Discrete.crossR2 A B P) 0 with hPneg | hPzero | hPpos
+  · rcases lt_trichotomy (Gluck.Discrete.crossR2 A B Q) 0 with hQneg | hQzero | hQpos
+    · obtain ⟨O, R, hcircleQ, hconeQ⟩ :=
+        dahlbergRegularAt_circle_of_cross_ne_zero_right hQreg hQneg.ne
+      exact edgePointDahlbergRegion_anti_of_negative_right hAB hPneg hQneg hcircleQ hconeQ hκ
+    · apply edgePointDahlbergRegion_anti_of_nonpos_nonneg
+      · exact (signedMengerR2_neg_of_cross_neg hAB hPneg).le
+      · rw [signedMengerR2_eq_zero_of_cross_eq_zero hQzero]
+    · apply edgePointDahlbergRegion_anti_of_nonpos_nonneg
+      · exact (signedMengerR2_neg_of_cross_neg hAB hPneg).le
+      · exact (signedMengerR2_pos_of_cross_pos hAB hQpos).le
+  · rcases lt_trichotomy (Gluck.Discrete.crossR2 A B Q) 0 with hQneg | hQzero | hQpos
+    · exfalso
+      have hPκ := signedMengerR2_eq_zero_of_cross_eq_zero hPzero
+      have hQκ := signedMengerR2_neg_of_cross_neg hAB hQneg
+      nlinarith
+    · apply edgePointDahlbergRegion_anti_of_nonpos_nonneg
+      · rw [signedMengerR2_eq_zero_of_cross_eq_zero hPzero]
+      · rw [signedMengerR2_eq_zero_of_cross_eq_zero hQzero]
+    · apply edgePointDahlbergRegion_anti_of_nonpos_nonneg
+      · rw [signedMengerR2_eq_zero_of_cross_eq_zero hPzero]
+      · exact (signedMengerR2_pos_of_cross_pos hAB hQpos).le
+  · rcases lt_trichotomy (Gluck.Discrete.crossR2 A B Q) 0 with hQneg | hQzero | hQpos
+    · exfalso
+      have hPκ := signedMengerR2_pos_of_cross_pos hAB hPpos
+      have hQκ := signedMengerR2_neg_of_cross_neg hAB hQneg
+      nlinarith
+    · exfalso
+      have hPκ := signedMengerR2_pos_of_cross_pos hAB hPpos
+      have hQκ := signedMengerR2_eq_zero_of_cross_eq_zero hQzero
+      nlinarith
+    · obtain ⟨O, R, hcircleP, hconeP⟩ :=
+        dahlbergRegularAt_circle_of_cross_ne_zero_right hPreg hPpos.ne'
+      exact edgePointDahlbergRegion_anti_of_positive_right hAB hPpos hQpos hcircleP hconeP hκ
+
 /-- If two locally regular points over an oriented edge are ordered by signed
 Menger curvature, then the higher-curvature point lies in the lower-curvature
 point's Dahlberg edge-region. -/
@@ -1414,6 +1485,18 @@ theorem edgePoint_mem_region_of_regular_order {A B P Q : ℂ}
   have hQmem := edgePoint_mem_own_dahlbergRegion hAB hQcross
   exact edgePointDahlbergRegion_anti_of_regular hAB hPreg hQreg hκ hQmem
 
+/-- Right-endpoint version of ordered regular incidence into a Dahlberg
+edge-region. -/
+theorem edgePoint_mem_region_of_regular_order_right {A B P Q : ℂ}
+    (hAB : A ≠ B)
+    (hPreg : DahlbergRegularAt A B P) (hQreg : DahlbergRegularAt A B Q)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P ≤
+      Gluck.Discrete.signedMengerR2 A B Q)
+    (hQcross : Gluck.Discrete.crossR2 A B Q ≠ 0) :
+    Q ∈ edgePointDahlbergRegion A B P := by
+  have hQmem := edgePoint_mem_own_dahlbergRegion hAB hQcross
+  exact edgePointDahlbergRegion_anti_of_regular_right hAB hPreg hQreg hκ hQmem
+
 /-- Positive ordered regular incidence into the ordinary curvature disk. -/
 theorem edgePoint_mem_edgeClosedDisk_of_regular_order_pos {A B P Q : ℂ}
     (hAB : A ≠ B)
@@ -1425,6 +1508,30 @@ theorem edgePoint_mem_edgeClosedDisk_of_regular_order_pos {A B P Q : ℂ}
     Q ∈ edgeClosedDisk A B (edgeCircumcenterParameter A B P) := by
   have hregion := edgePoint_mem_region_of_regular_order hAB hPreg hQreg hκ hQcross
   exact edgePointDahlbergRegion_subset_edgeClosedDisk_of_pos hAB hPcross hregion
+
+/-- Right-endpoint positive ordered regular incidence into the ordinary
+curvature disk. -/
+theorem edgePoint_mem_edgeClosedDisk_of_regular_order_pos_right {A B P Q : ℂ}
+    (hAB : A ≠ B)
+    (hPcross : 0 < Gluck.Discrete.crossR2 A B P)
+    (hPreg : DahlbergRegularAt A B P) (hQreg : DahlbergRegularAt A B Q)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P ≤
+      Gluck.Discrete.signedMengerR2 A B Q)
+    (hQcross : Gluck.Discrete.crossR2 A B Q ≠ 0) :
+    Q ∈ edgeClosedDisk A B (edgeCircumcenterParameter A B P) := by
+  have hregion := edgePoint_mem_region_of_regular_order_right hAB hPreg hQreg hκ hQcross
+  exact edgePointDahlbergRegion_subset_edgeClosedDisk_of_pos hAB hPcross hregion
+
+/-- Right-endpoint regular point-edge form of the radius comparison behind
+Dahlberg Lemma 10. -/
+theorem edgeRegularCircleRadius_le_of_mem_edgeClosedDisk_right {A B C O : ℂ} {R yΔ : ℝ}
+    (hAB : A ≠ B) (hcross : 0 < Gluck.Discrete.crossR2 A B C)
+    (hcircle : CircumcircleR2 A B C O R) (hcone : InVertexCone A B C O)
+    (hmem : C ∈ edgeClosedDisk A B yΔ) :
+    normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B C) ≤
+      normalizedCircleRadius (chordHalfLength A B) yΔ := by
+  have hyρ := edgeCircumcenterParameter_nonneg_of_regular_right hAB hcross hcircle hcone
+  exact edgeCircleRadius_le_of_mem_edgeClosedDisk hAB hcross hyρ hmem
 
 /-- Positive ordered regular vertices compare their canonical circle radii:
 higher signed Menger curvature gives no larger positive-branch radius. -/
@@ -1442,6 +1549,23 @@ theorem edgeCircleRadius_antitone_of_regular_order_pos {A B P Q : ℂ}
   obtain ⟨OQ, RQ, hcircleQ, hconeQ⟩ :=
     dahlbergRegularAt_circle_of_cross_ne_zero hQreg hQcross.ne'
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
+    hAB hQcross hcircleQ hconeQ hmem
+
+/-- Right-endpoint version of the positive ordered regular radius comparison. -/
+theorem edgeCircleRadius_antitone_of_regular_order_pos_right {A B P Q : ℂ}
+    (hAB : A ≠ B)
+    (hPcross : 0 < Gluck.Discrete.crossR2 A B P)
+    (hQcross : 0 < Gluck.Discrete.crossR2 A B Q)
+    (hPreg : DahlbergRegularAt A B P) (hQreg : DahlbergRegularAt A B Q)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P ≤
+      Gluck.Discrete.signedMengerR2 A B Q) :
+    normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B Q) ≤
+      normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B P) := by
+  have hmem := edgePoint_mem_edgeClosedDisk_of_regular_order_pos_right
+    hAB hPcross hPreg hQreg hκ hQcross.ne'
+  obtain ⟨OQ, RQ, hcircleQ, hconeQ⟩ :=
+    dahlbergRegularAt_circle_of_cross_ne_zero_right hQreg hQcross.ne'
+  exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk_right
     hAB hQcross hcircleQ hconeQ hmem
 
 end Gluck.Forward
