@@ -13,6 +13,24 @@ namespace Gluck.Forward
 
 open scoped Real
 
+/-- Uniform nonconstant ordered-turn source theorem for the convex/coherent
+discrete four-vertex package in `S²` (`ε = 1`) and `H²` (`ε = -1`).
+
+This is the single remaining non-Euclidean discrete geometric source gate.  The
+model-specific S²/H² source declarations below are derived from it. -/
+theorem orderedAdjacentTurns_spaceForm_source {ε : ℝ}
+    (hε : ε = 1 ∨ ε = -1) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    OrderedAdjacentTurns κ := by
+  sorry
+
 /-- Spherical nonconstant source theorem for the convex/coherent discrete
 four-vertex package in an open hemisphere.
 
@@ -29,7 +47,9 @@ theorem orderedAdjacentTurns_S2_source {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger 1 v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     OrderedAdjacentTurns κ := by
-  sorry
+  exact orderedAdjacentTurns_spaceForm_source
+    (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro hlt; norm_num at hlt) hnc
 
 /-- Spherical nonconstant source theorem for the convex/coherent discrete
 four-vertex package in an open hemisphere, derived from the ordered-turn
@@ -88,7 +108,9 @@ theorem orderedAdjacentTurns_H2_source {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     OrderedAdjacentTurns κ := by
-  sorry
+  exact orderedAdjacentTurns_spaceForm_source
+    (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro _; exact hcircle) hnc
 
 /-- Hyperbolic nonconstant source theorem for Grant--Mogilski's convex
 coherent discrete four-vertex theorem in the proper-circle regime `κᵢ > 1`,
@@ -174,28 +196,6 @@ theorem constant_or_dahlbergFourVertex_spaceForm_kernel {ε : ℝ}
       hε hn v κ hdisk hsimple hconvex hregular hκ hproper with hconst | hturns
   · exact Or.inl hconst
   · exact Or.inr (dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn hturns)
-
-/-- Uniform nonconstant source theorem for the convex/coherent discrete
-four-vertex package in `S²` (`ε = 1`) and `H²` (`ε = -1`), dispatching directly
-to the corresponding ordered-turn model-specific source theorem. -/
-theorem orderedAdjacentTurns_spaceForm_source {ε : ℝ}
-    (hε : ε = 1 ∨ ε = -1) {n : ℕ} [NeZero n]
-    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
-    (hdisk : ∀ i, ‖v i‖ < 1)
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
-    (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger ε v κ)
-    (hproper : ε < 0 → ∀ i, 1 < κ i)
-    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
-    OrderedAdjacentTurns κ := by
-  rcases hε with hS | hH
-  · subst ε
-    exact orderedAdjacentTurns_S2_source
-      hn v κ hdisk hsimple hconvex hregular hκ hnc
-  · subst ε
-    exact orderedAdjacentTurns_H2_source
-      hn v κ hdisk hsimple hconvex hregular hκ (hproper (by norm_num)) hnc
 
 /-- Uniform nonconstant source theorem for the convex/coherent discrete
 four-vertex package in `S²` (`ε = 1`) and `H²` (`ε = -1`), obtained from the

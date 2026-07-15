@@ -68,12 +68,14 @@ gates.
 The smooth forward statements for `E²`, `S²`, and `H²` are exposed through
 model-specific wrappers in `Euclidean.lean`, `Sphere.lean`, and
 `Hyperbolic.lean`.  The shared dispatch theorem
-`four_vertex_condition_smooth_spaceForm_kernel` in `Smooth.lean` is proved by
-cases from the model-specific source gates
+`four_vertex_condition_smooth_spaceForm_kernel` in `Smooth.lean` is proved from
+the single uniform nonconstant source gate
+`four_vertex_condition_smooth_spaceForm_nonconstant_source`; the
+model-specific source names
 `four_vertex_condition_smooth_E2_nonconstant_source`,
 `four_vertex_condition_smooth_S2_nonconstant_source`, and
-`four_vertex_condition_smooth_H2_nonconstant_source`.  The ordinary
-local-extrema conclusion is exposed uniformly as
+`four_vertex_condition_smooth_H2_nonconstant_source` are wrappers around that
+uniform gate.  The ordinary local-extrema conclusion is exposed uniformly as
 `smoothFourVertex_spaceForm_kernel`, with the nonconstant branch available as
 `smoothFourVertex_spaceForm_nonconstant`; both are derived directly from the
 value-separated smooth source gates.  The
@@ -84,12 +86,13 @@ dispatch theorem `constant_or_dahlbergFourVertex_spaceForm_kernel` in
 theorem `constant_or_orderedAdjacentTurns_spaceForm_kernel`, whose
 model-specific branches are `constant_or_orderedAdjacentTurns_S2_source` and
 `constant_or_orderedAdjacentTurns_H2_source`.  The nonconstant ordered-turn
-source gates are `orderedAdjacentTurns_S2_source` and
-`orderedAdjacentTurns_H2_source`; D4VT is derived from ordered turns by the
-general cyclic constructor `dahlbergFourVertex_of_orderedAdjacentTurns_four_le`.
-The uniform ordered-turn dispatch is `orderedAdjacentTurns_spaceForm_source`,
-and the uniform nonconstant theorem `dahlbergFourVertex_spaceForm_source` is
-derived from it by the same cyclic constructor.  The public S²/H² wrapper files
+source gate is the uniform theorem `orderedAdjacentTurns_spaceForm_source`; the
+model-specific source names `orderedAdjacentTurns_S2_source` and
+`orderedAdjacentTurns_H2_source` are wrappers around it.  D4VT is derived from
+ordered turns by the general cyclic constructor
+`dahlbergFourVertex_of_orderedAdjacentTurns_four_le`, and the uniform
+nonconstant theorem `dahlbergFourVertex_spaceForm_source` is derived from the
+same ordered-turn source.  The public S²/H² wrapper files
 also expose positive-orientation ordered-turn endpoints
 `orderedAdjacentTurns_S2_of_positiveOrientation` and
 `orderedAdjacentTurns_H2_of_positiveOrientation`, together with reflected
