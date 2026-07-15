@@ -4479,6 +4479,17 @@ expected to produce four cyclically ordered adjacent signed-Menger turns.  The
 profile-level constructor
 `signedMengerProfile_dahlbergFourVertex_of_ordered_turns_four_le` then turns
 these inequalities into the plateau-aware Dahlberg four-vertex conclusion. -/
+theorem orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_not_constant_source
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    OrderedAdjacentTurns (SignedMengerProfile v) := by
+  sorry
+
+/-- Existential spelling of
+`orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_not_constant_source`. -/
 theorem exists_ordered_signedMenger_turns_of_positiveOrientation_not_constant_source
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
@@ -4503,11 +4514,26 @@ theorem exists_ordered_signedMenger_turns_of_positiveOrientation_not_constant_so
         SignedMengerProfile v (i₄ : ZMod n) ∧
       SignedMengerProfile v ((i₄ : ZMod n) + 1) <
         SignedMengerProfile v (((i₄ : ZMod n) + 1) + 1) := by
-  sorry
+  exact orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_not_constant_source
+    hn hsimple hregular horient hnc
 
 /-- Nonconcyclic form of the positive Lemma 9 ordered-turn extraction.  The
 only use of nonconcyclicity here is to obtain nonconstancy of the
 signed-Menger profile. -/
+theorem orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_lemma9_source
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) :
+    OrderedAdjacentTurns (SignedMengerProfile v) := by
+  exact orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_not_constant_source
+    hn hsimple hregular horient
+    (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
+      hsimple hregular horient hnoncircle)
+
+/-- Existential spelling of
+`orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_lemma9_source`. -/
 theorem exists_ordered_signedMenger_turns_of_positiveOrientation_lemma9_source
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
@@ -4532,10 +4558,8 @@ theorem exists_ordered_signedMenger_turns_of_positiveOrientation_lemma9_source
         SignedMengerProfile v (i₄ : ZMod n) ∧
       SignedMengerProfile v ((i₄ : ZMod n) + 1) <
         SignedMengerProfile v (((i₄ : ZMod n) + 1) + 1) := by
-  exact exists_ordered_signedMenger_turns_of_positiveOrientation_not_constant_source
-    hn hsimple hregular horient
-    (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
-      hsimple hregular horient hnoncircle)
+  exact orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_lemma9_source
+    hn hsimple hregular horient hnoncircle
 
 /-- Dahlberg's reduction from the general simple locally regular polygon to the
 strictly-convex auxiliary polygon used in the last part of §4 of
@@ -4581,13 +4605,9 @@ theorem signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_lemma9_sou
     (horient : PositivePolygonOrientation v)
     (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  rcases exists_ordered_signedMenger_turns_of_positiveOrientation_lemma9_source
-      hn hsimple hregular horient hnoncircle with
-    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
-      hinc₁, hdec₁, hdec₂, hinc₂, hinc₃, hdec₃, hdec₄, hinc₄⟩
-  exact signedMengerProfile_dahlbergFourVertex_of_ordered_turns_four_le
-    hn hi₁₂ hi₂₃ hi₃₄ hi₄₁
-    hinc₁ hdec₁ hdec₂ hinc₂ hinc₃ hdec₃ hdec₄ hinc₄
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_lemma9_source
+      hn hsimple hregular horient hnoncircle)
 
 /-- Dahlberg's positively oriented strictly-convex case, corresponding to
 Lemma 9 in `references/23.pdf`.
