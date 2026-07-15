@@ -4150,8 +4150,20 @@ theorem signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyc
     DahlbergFourVertex (SignedMengerProfile v) := by
   sorry
 
-/-- Dahlberg's negatively oriented strictly-convex case.  This is the same
-geometric argument as the positive case with the cyclic orientation reversed. -/
+/-- Dahlberg's negatively oriented strictly-convex case after sign
+normalization.  The profile `-SignedMengerProfile v` has positive values; the
+ordinary negative-orientation theorem below follows by the general fact that
+Dahlberg extrema are invariant under negating the cyclic profile. -/
+theorem neg_signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_concyclic
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : NegativePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (fun i => -SignedMengerProfile v i) := by
+  sorry
+
+/-- Dahlberg's negatively oriented strictly-convex case. -/
 theorem signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_concyclic
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
@@ -4159,7 +4171,9 @@ theorem signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_concyc
     (horient : NegativePolygonOrientation v)
     (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  sorry
+  exact dahlbergFourVertex_of_neg
+    (neg_signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_concyclic
+      hn hsimple hregular horient hnoncircle)
 
 /-- Dahlberg's strictly-convex case, packaged over either global orientation. -/
 theorem signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concyclic
