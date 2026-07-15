@@ -867,6 +867,35 @@ theorem dahlbergFourVertex_reflectIndex_iff {n : ℕ} [NeZero n]
     abel
   · exact dahlbergFourVertex_reflectIndex a
 
+/-- A Dahlberg four-vertex conclusion for the orientation-reversed negated
+profile transports back to the original profile. -/
+theorem dahlbergFourVertex_of_neg_reflectIndex {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ}
+    (hfv : DahlbergFourVertex (fun i => -κ (-i))) :
+    DahlbergFourVertex κ := by
+  have hfv_neg : DahlbergFourVertex (fun i => -κ i) := by
+    exact (dahlbergFourVertex_reflectIndex_iff
+      (κ := fun i : ZMod n => -κ i) (a := 0)).mp (by
+        convert hfv using 1
+        ext i
+        congr 1
+        abel_nf)
+  exact dahlbergFourVertex_of_neg hfv_neg
+
+/-- A constant-or-Dahlberg conclusion for the orientation-reversed negated
+profile transports back to the original profile. -/
+theorem constant_or_dahlbergFourVertex_of_neg_reflectIndex {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ}
+    (h : (∃ c, ∀ i : ZMod n, -κ (-i) = c) ∨
+      DahlbergFourVertex (fun i => -κ (-i))) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  rcases h with hconst | hfv
+  · rcases hconst with ⟨c, hc⟩
+    exact Or.inl ⟨-c, fun i => by
+      have hi := congrArg Neg.neg (hc (-i))
+      simpa using hi⟩
+  · exact Or.inr (dahlbergFourVertex_of_neg_reflectIndex hfv)
+
 /-- Four ordered strict one-step extrema give Dahlberg's plateau-aware
 four-vertex conclusion. -/
 theorem dahlbergFourVertex_of_strict_neighbors {n : ℕ} (hn : 2 ≤ n)
@@ -1333,6 +1362,20 @@ theorem not_constant_negIndex_iff {n : ℕ} {κ : ZMod n → ℝ} :
     refine ⟨c, fun i => ?_⟩
     have hi := hc (-i)
     simpa using hi
+
+/-- Negating and reversing cyclic indices preserves nonconstancy. -/
+theorem not_constant_neg_reflectIndex_iff {n : ℕ} {κ : ZMod n → ℝ} :
+    (¬ ∃ c, ∀ i : ZMod n, -κ (-i) = c) ↔
+      ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
+  constructor
+  · intro href hconst
+    rcases hconst with ⟨c, hc⟩
+    exact href ⟨-c, fun i => by simp [hc (-i)]⟩
+  · intro h hrefconst
+    rcases hrefconst with ⟨c, hc⟩
+    exact h ⟨-c, fun i => by
+      have hi := congrArg Neg.neg (hc (-i))
+      simpa using hi⟩
 
 /-- If a cyclic real profile is weakly increasing at every adjacent step, then
 it is constant. -/

@@ -192,20 +192,9 @@ theorem constant_or_dahlbergFourVertex_H2_of_negativeOrientation
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  rcases constant_or_dahlbergFourVertex_H2_of_negativeOrientation_reflected
-      hn v κ hdisk hsimple horient hregular hκ hcircle with hconst | hfv_reflected
-  · rcases hconst with ⟨c, hc⟩
-    exact Or.inl ⟨-c, fun i => by
-      have hi := congrArg Neg.neg (hc (-i))
-      simpa using hi⟩
-  · have hfv_neg : DahlbergFourVertex (fun i => -κ i) := by
-      exact (dahlbergFourVertex_reflectIndex_iff
-        (κ := fun i : ZMod n => -κ i) (a := 0)).mp (by
-          convert hfv_reflected using 1
-          ext i
-          congr 1
-          abel_nf)
-    exact Or.inr (dahlbergFourVertex_of_neg hfv_neg)
+  exact constant_or_dahlbergFourVertex_of_neg_reflectIndex
+    (constant_or_dahlbergFourVertex_H2_of_negativeOrientation_reflected
+      hn v κ hdisk hsimple horient hregular hκ hcircle)
 
 /-- Hyperbolic discrete four-vertex theorem for negatively oriented convex
 coherent cyclic polygons whose reversed curvature profile lies on proper
@@ -219,23 +208,13 @@ theorem discrete_four_vertex_H2_of_negativeOrientation {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  have hnc_reflected : ¬ ∃ c, ∀ i : ZMod n, -κ (-i) = c := by
-    rintro ⟨c, hc⟩
-    exact hnc ⟨-c, fun i => by
-      have hi := congrArg Neg.neg (hc (-i))
-      simpa using hi⟩
+  have hnc_reflected : ¬ ∃ c, ∀ i : ZMod n, -κ (-i) = c :=
+    (not_constant_neg_reflectIndex_iff (κ := κ)).mpr hnc
   have hfv_reflected :
       DahlbergFourVertex (fun i => -κ (-i)) :=
     discrete_four_vertex_H2_of_negativeOrientation_reflected
       hn v κ hdisk hsimple horient hregular hκ hcircle hnc_reflected
-  have hfv_neg : DahlbergFourVertex (fun i => -κ i) := by
-    exact (dahlbergFourVertex_reflectIndex_iff
-      (κ := fun i : ZMod n => -κ i) (a := 0)).mp (by
-        convert hfv_reflected using 1
-        ext i
-        congr 1
-        abel_nf)
-  exact dahlbergFourVertex_of_neg hfv_neg
+  exact dahlbergFourVertex_of_neg_reflectIndex hfv_reflected
 
 /-- Hyperbolic constant-or-Dahlberg theorem for strictly oriented
 convex/coherent cyclic polygons, packaged with the matching proper-circle
