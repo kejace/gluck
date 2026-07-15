@@ -49,6 +49,16 @@ alternating four-sample level window. -/
 def DiscreteFourVertex {n : ℕ} (κ : ZMod n → ℝ) : Prop :=
   (∃ c, ∀ i, κ i = c) ∨ ∃ c, AlternatesAcrossLevel κ c
 
+/-- The Dahlberg polygon-size hypothesis implies the neighbour-extrema size
+hypothesis used by strict one-step constructors. -/
+theorem two_le_of_four_le {n : ℕ} (hn : 4 ≤ n) : 2 ≤ n := by
+  omega
+
+/-- The Dahlberg polygon-size hypothesis also gives the nontriangle lower
+bound used in geometric reductions. -/
+theorem three_le_of_four_le {n : ℕ} (hn : 4 ≤ n) : 3 ≤ n := by
+  omega
+
 /-- A plateau-aware local maximum of a cyclic sequence.  Moving left and right
 from `i`, the value remains constant until it becomes strictly smaller. -/
 def DiscreteLocalMax {n : ℕ} (κ : ZMod n → ℝ) (i : ZMod n) : Prop :=

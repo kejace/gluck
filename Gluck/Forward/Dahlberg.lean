@@ -2161,6 +2161,58 @@ theorem polygonDahlbergFourVertex_of_strict_signedMenger_neighbors {n : ℕ}
     hmax₁_left hmax₁_right hmin₂_left hmin₂_right
     hmax₃_left hmax₃_right hmin₄_left hmin₄_right
 
+/-- Polygon-facing constructor for Dahlberg's conclusion from four ordered
+strict one-step signed-Menger extrema in `min-max-min-max` order. -/
+theorem polygonDahlbergFourVertex_of_strict_signedMenger_neighbors_min_max {n : ℕ}
+    (hn : 2 ≤ n) {v : ZMod n → ℂ} {i₁ i₂ i₃ i₄ : ℕ}
+    (hi₁₂ : i₁ < i₂) (hi₂₃ : i₂ < i₃) (hi₃₄ : i₃ < i₄)
+    (hi₄₁ : i₄ < i₁ + n)
+    (hmin₁_left :
+      Gluck.Discrete.signedMengerR2 (v ((i₁ : ZMod n) - 1)) (v (i₁ : ZMod n))
+          (v ((i₁ : ZMod n) + 1)) <
+        Gluck.Discrete.signedMengerR2 (v (((i₁ : ZMod n) - 1) - 1))
+          (v ((i₁ : ZMod n) - 1)) (v (((i₁ : ZMod n) - 1) + 1)))
+    (hmin₁_right :
+      Gluck.Discrete.signedMengerR2 (v ((i₁ : ZMod n) - 1)) (v (i₁ : ZMod n))
+          (v ((i₁ : ZMod n) + 1)) <
+        Gluck.Discrete.signedMengerR2 (v (((i₁ : ZMod n) + 1) - 1))
+          (v ((i₁ : ZMod n) + 1)) (v (((i₁ : ZMod n) + 1) + 1)))
+    (hmax₂_left :
+      Gluck.Discrete.signedMengerR2 (v (((i₂ : ZMod n) - 1) - 1))
+          (v ((i₂ : ZMod n) - 1)) (v (((i₂ : ZMod n) - 1) + 1)) <
+        Gluck.Discrete.signedMengerR2 (v ((i₂ : ZMod n) - 1)) (v (i₂ : ZMod n))
+          (v ((i₂ : ZMod n) + 1)))
+    (hmax₂_right :
+      Gluck.Discrete.signedMengerR2 (v (((i₂ : ZMod n) + 1) - 1))
+          (v ((i₂ : ZMod n) + 1)) (v (((i₂ : ZMod n) + 1) + 1)) <
+        Gluck.Discrete.signedMengerR2 (v ((i₂ : ZMod n) - 1)) (v (i₂ : ZMod n))
+          (v ((i₂ : ZMod n) + 1)))
+    (hmin₃_left :
+      Gluck.Discrete.signedMengerR2 (v ((i₃ : ZMod n) - 1)) (v (i₃ : ZMod n))
+          (v ((i₃ : ZMod n) + 1)) <
+        Gluck.Discrete.signedMengerR2 (v (((i₃ : ZMod n) - 1) - 1))
+          (v ((i₃ : ZMod n) - 1)) (v (((i₃ : ZMod n) - 1) + 1)))
+    (hmin₃_right :
+      Gluck.Discrete.signedMengerR2 (v ((i₃ : ZMod n) - 1)) (v (i₃ : ZMod n))
+          (v ((i₃ : ZMod n) + 1)) <
+        Gluck.Discrete.signedMengerR2 (v (((i₃ : ZMod n) + 1) - 1))
+          (v ((i₃ : ZMod n) + 1)) (v (((i₃ : ZMod n) + 1) + 1)))
+    (hmax₄_left :
+      Gluck.Discrete.signedMengerR2 (v (((i₄ : ZMod n) - 1) - 1))
+          (v ((i₄ : ZMod n) - 1)) (v (((i₄ : ZMod n) - 1) + 1)) <
+        Gluck.Discrete.signedMengerR2 (v ((i₄ : ZMod n) - 1)) (v (i₄ : ZMod n))
+          (v ((i₄ : ZMod n) + 1)))
+    (hmax₄_right :
+      Gluck.Discrete.signedMengerR2 (v (((i₄ : ZMod n) + 1) - 1))
+          (v ((i₄ : ZMod n) + 1)) (v (((i₄ : ZMod n) + 1) + 1)) <
+        Gluck.Discrete.signedMengerR2 (v ((i₄ : ZMod n) - 1)) (v (i₄ : ZMod n))
+          (v ((i₄ : ZMod n) + 1))) :
+    DahlbergFourVertex
+      (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
+  exact dahlbergFourVertex_of_strict_neighbors_min_max hn hi₁₂ hi₂₃ hi₃₄ hi₄₁
+    hmin₁_left hmin₁_right hmax₂_left hmax₂_right
+    hmin₃_left hmin₃_right hmax₄_left hmax₄_right
+
 /-! ## Dahlberg's Euclidean discrete four-vertex kernel -/
 
 /-- Dahlberg's Euclidean discrete four-vertex kernel.
