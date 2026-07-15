@@ -505,6 +505,28 @@ theorem orderedAdjacentTurns_signedMengerProfile_E2_of_not_concyclic
   exact exists_ordered_signedMenger_turns_of_dahlberg_disk_reduction
     hn hsimple hregular hnoncircle
 
+/-- Positive-orientation E² source extraction: Dahlberg's convex/coherent
+comparison produces four ordered adjacent signed-Menger turns. -/
+theorem orderedAdjacentTurns_signedMengerProfile_E2_of_positiveOrientation_not_concyclic
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) (hnoncircle : ¬ Concyclic v) :
+    OrderedAdjacentTurns (SignedMengerProfile v) := by
+  exact exists_ordered_signedMenger_turns_of_positiveOrientation_not_concyclic
+    hn hsimple hregular horient hnoncircle
+
+/-- Negative-orientation E² source extraction, stated for the naturally
+reversed signed-Menger profile. -/
+theorem orderedAdjacentTurns_signedMengerProfile_E2_of_negativeOrientation_reflected_not_concyclic
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : NegativePolygonOrientation v) (hnoncircle : ¬ Concyclic v) :
+    OrderedAdjacentTurns (fun i => -SignedMengerProfile v (-i)) := by
+  exact exists_ordered_signedMenger_turns_of_negativeOrientation_reflected_not_concyclic
+    hn hsimple hregular horient hnoncircle
+
 /-- Any curvature profile pointwise equal to a nonzero affine change of the
 E² signed-Menger profile inherits the ordered-turn witness. -/
 theorem orderedAdjacentTurns_E2_of_affine_signedMengerProfile_not_concyclic

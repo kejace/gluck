@@ -4488,6 +4488,34 @@ theorem exists_ordered_signedMenger_turns_of_positiveOrientation_not_concyclic
     OrderedAdjacentTurns (SignedMengerProfile v) := by
   sorry
 
+/-- Dahlberg's Lemma 9 source extraction for negatively oriented polygons,
+stated for the naturally reversed signed-Menger profile.  This is just the
+positive source extraction applied to `ReverseCyclicPolygon v`, plus the
+pointwise identity
+`SignedMengerProfile (ReverseCyclicPolygon v) i = -SignedMengerProfile v (-i)`. -/
+theorem exists_ordered_signedMenger_turns_of_negativeOrientation_reflected_not_concyclic
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : NegativePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) :
+    OrderedAdjacentTurns (fun i => -SignedMengerProfile v (-i)) := by
+  have hpos : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
+    positiveOrientation_reverseCyclicPolygon_of_negativeOrientation horient
+  have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
+    isSimplePolygon_reverseCyclicPolygon hsimple
+  have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
+    dahlbergRegular_reverseCyclicPolygon hregular
+  have hnoncircle' : ¬ Concyclic (ReverseCyclicPolygon v) := by
+    intro hcyc
+    exact hnoncircle (concyclic_reverseCyclicPolygon_iff.mp hcyc)
+  exact orderedAdjacentTurns_congr
+    (κ := SignedMengerProfile (ReverseCyclicPolygon v))
+    (μ := fun i => -SignedMengerProfile v (-i))
+    (fun i => (SignedMengerProfile_reverseCyclicPolygon v i).symm)
+    (exists_ordered_signedMenger_turns_of_positiveOrientation_not_concyclic
+      hn hsimple' hregular' hpos hnoncircle')
+
 /-- Dahlberg's positively oriented strictly-convex case, corresponding to
 Lemma 9 in `references/23.pdf`.
 
@@ -4517,24 +4545,11 @@ theorem neg_signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_co
     (horient : NegativePolygonOrientation v)
     (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (fun i => -SignedMengerProfile v i) := by
-  have hpos : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
-    positiveOrientation_reverseCyclicPolygon_of_negativeOrientation horient
-  have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
-    isSimplePolygon_reverseCyclicPolygon hsimple
-  have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
-    dahlbergRegular_reverseCyclicPolygon hregular
-  have hnoncircle' : ¬ Concyclic (ReverseCyclicPolygon v) := by
-    intro hcyc
-    exact hnoncircle (concyclic_reverseCyclicPolygon_iff.mp hcyc)
-  have hfv_rev :
-      DahlbergFourVertex (SignedMengerProfile (ReverseCyclicPolygon v)) :=
-    signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyclic
-      hn hsimple' hregular' hpos hnoncircle'
-  have hfv_reflected : DahlbergFourVertex
-      (fun i => -SignedMengerProfile v (-i)) := by
-    convert hfv_rev using 1
-    ext i
-    exact (SignedMengerProfile_reverseCyclicPolygon v i).symm
+  have hfv_reflected :
+      DahlbergFourVertex (fun i => -SignedMengerProfile v (-i)) := by
+    exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+      (exists_ordered_signedMenger_turns_of_negativeOrientation_reflected_not_concyclic
+        hn hsimple hregular horient hnoncircle)
   exact (dahlbergFourVertex_reflectIndex_iff
     (κ := fun i : ZMod n => -SignedMengerProfile v i) (a := 0)).mp (by
       convert hfv_reflected using 1
