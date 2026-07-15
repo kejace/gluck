@@ -2026,6 +2026,29 @@ theorem polygonEdgeCircleRadius_antitone_of_endpoint_order_pos_of_vertex_menger_
 
 /-! ## Equal-curvature rigidity over a shared positive edge -/
 
+/-- If two noncollinear triples over the same oriented edge have the same
+canonical edge parameter, then their canonical edge circles are the same
+circle. -/
+theorem edgeCommonCircumcircle_of_parameter_eq {A B P Q : ℂ}
+    (hAB : A ≠ B)
+    (hPcross : Gluck.Discrete.crossR2 A B P ≠ 0)
+    (hQcross : Gluck.Discrete.crossR2 A B Q ≠ 0)
+    (hy : edgeCircumcenterParameter A B P = edgeCircumcenterParameter A B Q) :
+    ∃ O R,
+      CircumcircleR2 A B P O R ∧ CircumcircleR2 A B Q O R := by
+  refine ⟨edgeCircleCenter A B (edgeCircumcenterParameter A B P),
+    normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B P),
+    circumcircleR2_edge_parameter hAB hPcross, ?_⟩
+  rw [hy]
+  exact circumcircleR2_edge_parameter hAB hQcross
+
+/-- A shared canonical edge circle packages the four incident vertices as
+concyclic metric data. -/
+theorem exists_common_circle_of_edgeCommonCircumcircle {A B P Q O : ℂ} {R : ℝ}
+    (hP : CircumcircleR2 A B P O R) (hQ : CircumcircleR2 A B Q O R) :
+    0 < R ∧ dist O P = R ∧ dist O A = R ∧ dist O B = R ∧ dist O Q = R := by
+  exact ⟨hP.1, hP.2.2.2, hP.2.1, hP.2.2.1, hQ.2.2.2⟩
+
 /-- Over a fixed oriented edge, two positive locally regular endpoint triples
 with the same signed Menger curvature have the same canonical circumcenter
 parameter. -/
@@ -2111,6 +2134,71 @@ theorem signedMengerProfile_edgeCircumcenterParameter_eq_of_endpoint_pos_eq
       simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hQκpos
     exact crossR2_pos_of_signedMengerR2_pos hAB hQκ'
   exact polygonEdgeCircumcenterParameter_eq_of_endpoint_pos_eq hsimple hregular i
+    hPcross hQcross
+    (by simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hκ)
+
+/-- Equal positive endpoint signed-Menger curvatures over a shared edge give a
+common Euclidean circle through the two edge endpoints and the two adjacent
+third vertices. -/
+theorem edgeCommonCircumcircle_of_endpoint_regular_pos_eq {A B P Q : ℂ}
+    (hAB : A ≠ B)
+    (hPcross : 0 < Gluck.Discrete.crossR2 A B P)
+    (hQcross : 0 < Gluck.Discrete.crossR2 A B Q)
+    (hPreg : DahlbergRegularAt P A B) (hQreg : DahlbergRegularAt A B Q)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P =
+      Gluck.Discrete.signedMengerR2 A B Q) :
+    ∃ O R,
+      CircumcircleR2 A B P O R ∧ CircumcircleR2 A B Q O R := by
+  exact edgeCommonCircumcircle_of_parameter_eq hAB hPcross.ne' hQcross.ne'
+    (edgeCircumcenterParameter_eq_of_endpoint_regular_pos_eq
+      hAB hPcross hQcross hPreg hQreg hκ)
+
+/-- Polygon-indexed positive common-circle consequence for equal adjacent
+signed-Menger curvatures. -/
+theorem polygonEdgeCommonCircumcircle_of_endpoint_pos_eq
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (i : ZMod n)
+    (hPcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)))
+    (hQcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)))
+    (hκ : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) =
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1))) :
+    ∃ O R,
+      CircumcircleR2 (v i) (v (i + 1)) (v (i - 1)) O R ∧
+        CircumcircleR2 (v i) (v (i + 1)) (v (i + 1 + 1)) O R := by
+  have hPreg : DahlbergRegularAt (v (i - 1)) (v i) (v (i + 1)) := hregular i
+  have hQreg : DahlbergRegularAt (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    simpa using hregular (i + 1)
+  have hκ' :
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) =
+        Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    rw [← polygonSignedMenger_eq_edgePrev i]
+    exact hκ
+  exact edgeCommonCircumcircle_of_endpoint_regular_pos_eq
+    (hsimple.1 i) hPcross hQcross hPreg hQreg hκ'
+
+/-- Profile-facing positive common-circle consequence for equal adjacent
+signed-Menger values. -/
+theorem signedMengerProfile_edgeCommonCircumcircle_of_endpoint_pos_eq
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (i : ZMod n)
+    (hPκpos : 0 < SignedMengerProfile v i)
+    (hκ : SignedMengerProfile v i = SignedMengerProfile v (i + 1)) :
+    ∃ O R,
+      CircumcircleR2 (v i) (v (i + 1)) (v (i - 1)) O R ∧
+        CircumcircleR2 (v i) (v (i + 1)) (v (i + 1 + 1)) O R := by
+  have hPcross := polygonEdgePrev_cross_pos_of_vertex_signedMenger_pos hsimple
+    (by simpa [SignedMengerProfile] using hPκpos)
+  have hQκpos : 0 < SignedMengerProfile v (i + 1) := by
+    rwa [← hκ]
+  have hQcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    have hAB : v i ≠ v (i + 1) := hsimple.1 i
+    have hQκ' : 0 <
+        Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+      simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hQκpos
+    exact crossR2_pos_of_signedMengerR2_pos hAB hQκ'
+  exact polygonEdgeCommonCircumcircle_of_endpoint_pos_eq hsimple hregular i
     hPcross hQcross
     (by simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hκ)
 
@@ -2208,6 +2296,104 @@ theorem signedMengerProfile_edgeCircumcenterParameter_eq_of_endpoint_neg_eq
   exact polygonEdgeCircumcenterParameter_eq_of_endpoint_neg_eq hsimple hregular i
     hPcross hQcross
     (by simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hκ)
+
+/-- Equal negative endpoint signed-Menger curvatures over a shared edge give a
+common Euclidean circle through the two edge endpoints and the two adjacent
+third vertices. -/
+theorem edgeCommonCircumcircle_of_endpoint_regular_neg_eq {A B P Q : ℂ}
+    (hAB : A ≠ B)
+    (hPcross : Gluck.Discrete.crossR2 A B P < 0)
+    (hQcross : Gluck.Discrete.crossR2 A B Q < 0)
+    (hPreg : DahlbergRegularAt P A B) (hQreg : DahlbergRegularAt A B Q)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P =
+      Gluck.Discrete.signedMengerR2 A B Q) :
+    ∃ O R,
+      CircumcircleR2 A B P O R ∧ CircumcircleR2 A B Q O R := by
+  exact edgeCommonCircumcircle_of_parameter_eq hAB hPcross.ne hQcross.ne
+    (edgeCircumcenterParameter_eq_of_endpoint_regular_neg_eq
+      hAB hPcross hQcross hPreg hQreg hκ)
+
+/-- Polygon-indexed negative common-circle consequence for equal adjacent
+signed-Menger curvatures. -/
+theorem polygonEdgeCommonCircumcircle_of_endpoint_neg_eq
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (i : ZMod n)
+    (hPcross : Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) < 0)
+    (hQcross : Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) < 0)
+    (hκ : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) =
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1))) :
+    ∃ O R,
+      CircumcircleR2 (v i) (v (i + 1)) (v (i - 1)) O R ∧
+        CircumcircleR2 (v i) (v (i + 1)) (v (i + 1 + 1)) O R := by
+  have hPreg : DahlbergRegularAt (v (i - 1)) (v i) (v (i + 1)) := hregular i
+  have hQreg : DahlbergRegularAt (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    simpa using hregular (i + 1)
+  have hκ' :
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) =
+        Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    rw [← polygonSignedMenger_eq_edgePrev i]
+    exact hκ
+  exact edgeCommonCircumcircle_of_endpoint_regular_neg_eq
+    (hsimple.1 i) hPcross hQcross hPreg hQreg hκ'
+
+/-- Profile-facing negative common-circle consequence for equal adjacent
+signed-Menger values. -/
+theorem signedMengerProfile_edgeCommonCircumcircle_of_endpoint_neg_eq
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (i : ZMod n)
+    (hPκneg : SignedMengerProfile v i < 0)
+    (hκ : SignedMengerProfile v i = SignedMengerProfile v (i + 1)) :
+    ∃ O R,
+      CircumcircleR2 (v i) (v (i + 1)) (v (i - 1)) O R ∧
+        CircumcircleR2 (v i) (v (i + 1)) (v (i + 1 + 1)) O R := by
+  have hPcross := polygonEdgePrev_cross_neg_of_vertex_signedMenger_neg hsimple
+    (by simpa [SignedMengerProfile] using hPκneg)
+  have hQκneg : SignedMengerProfile v (i + 1) < 0 := by
+    rwa [← hκ]
+  have hQcross :
+      Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) < 0 := by
+    have hAB : v i ≠ v (i + 1) := hsimple.1 i
+    have hQκ' :
+        Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) < 0 := by
+      simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hQκneg
+    exact crossR2_neg_of_signedMengerR2_neg hAB hQκ'
+  exact polygonEdgeCommonCircumcircle_of_endpoint_neg_eq hsimple hregular i
+    hPcross hQcross
+    (by simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hκ)
+
+/-- A globally constant positive signed-Menger profile gives a common circle
+on every adjacent four-point window. -/
+theorem signedMengerProfile_edgeCommonCircumcircle_of_constant_pos
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hκpos : ∀ i : ZMod n, 0 < SignedMengerProfile v i)
+    (hconst : ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c)
+    (i : ZMod n) :
+    ∃ O R,
+      CircumcircleR2 (v i) (v (i + 1)) (v (i - 1)) O R ∧
+        CircumcircleR2 (v i) (v (i + 1)) (v (i + 1 + 1)) O R := by
+  rcases hconst with ⟨c, hc⟩
+  apply signedMengerProfile_edgeCommonCircumcircle_of_endpoint_pos_eq hsimple hregular i
+  · exact hκpos i
+  · rw [hc i, hc (i + 1)]
+
+/-- A globally constant negative signed-Menger profile gives a common circle
+on every adjacent four-point window. -/
+theorem signedMengerProfile_edgeCommonCircumcircle_of_constant_neg
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hκneg : ∀ i : ZMod n, SignedMengerProfile v i < 0)
+    (hconst : ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c)
+    (i : ZMod n) :
+    ∃ O R,
+      CircumcircleR2 (v i) (v (i + 1)) (v (i - 1)) O R ∧
+        CircumcircleR2 (v i) (v (i + 1)) (v (i + 1 + 1)) O R := by
+  rcases hconst with ⟨c, hc⟩
+  apply signedMengerProfile_edgeCommonCircumcircle_of_endpoint_neg_eq hsimple hregular i
+  · exact hκneg i
+  · rw [hc i, hc (i + 1)]
 
 /-! ## Profile-facing endpoint order wrappers -/
 
