@@ -47,6 +47,78 @@ theorem convex_four_vertex_E2 {γ : ℝ → ℂ} {κ : ℝ → ℝ}
     SmoothFourVertex κ := by
   exact four_vertex_E2 hclosed hreal hκ hper
 
+/-! ## Same-sign Euclidean discrete reductions -/
+
+/-- Positive-orientation E² Dahlberg reduction: nonconcyclicity forces the
+signed-Menger profile to be nonconstant. -/
+theorem signedMengerProfile_not_constant_E2_of_positiveOrientation {n : ℕ} [NeZero n]
+    (v : ZMod n → ℂ) (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (horient : PositivePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) :
+    ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  exact not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
+    hsimple hregular horient hnoncircle
+
+/-- Negative-orientation E² Dahlberg reduction: nonconcyclicity forces the
+signed-Menger profile to be nonconstant. -/
+theorem signedMengerProfile_not_constant_E2_of_negativeOrientation {n : ℕ} [NeZero n]
+    (v : ZMod n → ℂ) (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (horient : NegativePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) :
+    ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  exact not_constant_signedMengerProfile_of_not_concyclic_negativeOrientation
+    hsimple hregular horient hnoncircle
+
+/-- Positive-orientation E² Dahlberg reduction: nonconcyclicity forces both an
+adjacent strict increase and an adjacent strict decrease of signed Menger
+curvature. -/
+theorem signedMengerProfile_adjacent_increase_and_decrease_E2_of_positiveOrientation
+    {n : ℕ} [NeZero n] (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) (hnoncircle : ¬ Concyclic v) :
+    (∃ i : ZMod n, SignedMengerProfile v i < SignedMengerProfile v (i + 1)) ∧
+      ∃ i : ZMod n, SignedMengerProfile v (i + 1) < SignedMengerProfile v i := by
+  exact signedMengerProfile_exists_adjacent_increase_and_decrease_of_not_concyclic_pos
+    hsimple hregular horient hnoncircle
+
+/-- Negative-orientation E² Dahlberg reduction: nonconcyclicity forces both an
+adjacent strict increase and an adjacent strict decrease of signed Menger
+curvature. -/
+theorem signedMengerProfile_adjacent_increase_and_decrease_E2_of_negativeOrientation
+    {n : ℕ} [NeZero n] (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (horient : NegativePolygonOrientation v) (hnoncircle : ¬ Concyclic v) :
+    (∃ i : ZMod n, SignedMengerProfile v i < SignedMengerProfile v (i + 1)) ∧
+      ∃ i : ZMod n, SignedMengerProfile v (i + 1) < SignedMengerProfile v i := by
+  exact signedMengerProfile_exists_adjacent_increase_and_decrease_of_not_concyclic_neg
+    hsimple hregular horient hnoncircle
+
+/-- Positive-orientation E² Dahlberg reduction: nonconcyclicity gives strictly
+separated global minimum and maximum signed-Menger values. -/
+theorem signedMengerProfile_globalMinMax_strict_E2_of_positiveOrientation
+    {n : ℕ} [NeZero n] (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) (hnoncircle : ¬ Concyclic v) :
+    ∃ i₀ i₁ : ZMod n,
+      (∀ j : ZMod n, SignedMengerProfile v i₀ ≤ SignedMengerProfile v j) ∧
+      (∀ j : ZMod n, SignedMengerProfile v j ≤ SignedMengerProfile v i₁) ∧
+      SignedMengerProfile v i₀ < SignedMengerProfile v i₁ := by
+  exact signedMengerProfile_exists_globalMinMax_strict_of_not_concyclic_pos
+    hsimple hregular horient hnoncircle
+
+/-- Negative-orientation E² Dahlberg reduction: nonconcyclicity gives strictly
+separated global minimum and maximum signed-Menger values. -/
+theorem signedMengerProfile_globalMinMax_strict_E2_of_negativeOrientation
+    {n : ℕ} [NeZero n] (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (horient : NegativePolygonOrientation v) (hnoncircle : ¬ Concyclic v) :
+    ∃ i₀ i₁ : ZMod n,
+      (∀ j : ZMod n, SignedMengerProfile v i₀ ≤ SignedMengerProfile v j) ∧
+      (∀ j : ZMod n, SignedMengerProfile v j ≤ SignedMengerProfile v i₁) ∧
+      SignedMengerProfile v i₀ < SignedMengerProfile v i₁ := by
+  exact signedMengerProfile_exists_globalMinMax_strict_of_not_concyclic_neg
+    hsimple hregular horient hnoncircle
+
 /-- Dahlberg's Euclidean discrete four-vertex theorem: the signed Menger
 curvature of a locally regular simple closed polygon is constant or has an
 alternating four-vertex level window. -/
