@@ -531,6 +531,35 @@ theorem dahlbergFourVertex_E2_of_realizesConformalMenger_zero_not_concyclic
         realizesConformalMenger_zero_eq_half_signedMengerProfile_of_strict_orientation
           hsimple horient hκ i)
 
+/-- Nonconstant `ε = 0` conformal-Menger realizations inherit Dahlberg's E²
+four-vertex conclusion under strict orientation. -/
+theorem dahlbergFourVertex_E2_of_realizesConformalMenger_zero_not_constant_strict_orientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  have hscale :
+      ∀ i : ZMod n, κ i = (1 / 2) * SignedMengerProfile v i :=
+    realizesConformalMenger_zero_eq_half_signedMengerProfile_of_strict_orientation
+      hsimple horient hκ
+  have hnc_signed : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+    intro hconst
+    rcases hconst with ⟨c, hc⟩
+    exact hnc ⟨(1 / 2) * c, fun i => by rw [hscale i, hc i]⟩
+  have hfv_signed :
+      DahlbergFourVertex (SignedMengerProfile v) :=
+    signedMengerProfile_dahlbergFourVertex_E2_of_not_constant_strict_orientation
+      hn v hsimple hregular horient hnc_signed
+  have hfv_scaled :
+      DahlbergFourVertex (fun i : ZMod n => (1 / 2) * SignedMengerProfile v i + 0) :=
+    dahlbergFourVertex_posAffine (by norm_num) hfv_signed
+  convert hfv_scaled using 1
+  ext i
+  simpa [add_zero] using hscale i
+
 /-- Positive-orientation nonconcyclic `ε = 0` conformal-Menger endpoint. -/
 theorem dahlbergFourVertex_E2_of_realizesConformalMenger_zero_positiveOrientation_not_concyclic
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
