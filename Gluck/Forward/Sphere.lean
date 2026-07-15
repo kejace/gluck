@@ -91,6 +91,19 @@ theorem discrete_four_vertex_S2 {n : ℕ} [NeZero n]
     DahlbergFourVertex κ := by
   exact discrete_four_vertex_S2_kernel hn v κ hdisk hsimple hconvex hregular hκ hnc
 
+/-- Spherical constant-or-Dahlberg theorem using the shared positive
+orientation interface for convex/coherent cyclic polygons. -/
+theorem constant_or_dahlbergFourVertex_S2_of_positiveOrientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_S2
+    hn v κ hdisk hsimple horient hregular hκ
+
 /-- Spherical discrete four-vertex theorem using the shared positive
 orientation interface for convex/coherent cyclic polygons. -/
 theorem discrete_four_vertex_S2_of_positiveOrientation {n : ℕ} [NeZero n]
@@ -103,6 +116,34 @@ theorem discrete_four_vertex_S2_of_positiveOrientation {n : ℕ} [NeZero n]
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
   exact discrete_four_vertex_S2 hn v κ hdisk hsimple horient hregular hκ hnc
+
+/-- Spherical constant-or-Dahlberg theorem for negatively oriented
+convex/coherent cyclic polygons, stated for the naturally reversed curvature
+profile. -/
+theorem constant_or_dahlbergFourVertex_S2_of_negativeOrientation_reflected
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, -κ (-i) = c) ∨
+      DahlbergFourVertex (fun i => -κ (-i)) := by
+  have hdisk' : ∀ i, ‖ReverseCyclicPolygon v i‖ < 1 := by
+    intro i
+    simpa [ReverseCyclicPolygon] using hdisk (-i)
+  have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
+    isSimplePolygon_reverseCyclicPolygon hsimple
+  have horient' : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
+    positiveOrientation_reverseCyclicPolygon_of_negativeOrientation horient
+  have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
+    dahlbergRegular_reverseCyclicPolygon hregular
+  have hκ' :
+      RealizesConformalMenger 1 (ReverseCyclicPolygon v) (fun i => -κ (-i)) :=
+    realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation horient hκ
+  exact constant_or_dahlbergFourVertex_S2_of_positiveOrientation
+    hn (ReverseCyclicPolygon v) (fun i => -κ (-i))
+      hdisk' hsimple' horient' hregular' hκ'
 
 /-- Spherical discrete four-vertex theorem for negatively oriented convex
 coherent cyclic polygons, stated for the naturally reversed curvature profile. -/
@@ -130,6 +171,31 @@ theorem discrete_four_vertex_S2_of_negativeOrientation_reflected
   exact discrete_four_vertex_S2_of_positiveOrientation
     hn (ReverseCyclicPolygon v) (fun i => -κ (-i))
       hdisk' hsimple' horient' hregular' hκ' hnc_reflected
+
+/-- Spherical constant-or-Dahlberg theorem for negatively oriented
+convex/coherent cyclic polygons. -/
+theorem constant_or_dahlbergFourVertex_S2_of_negativeOrientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  rcases constant_or_dahlbergFourVertex_S2_of_negativeOrientation_reflected
+      hn v κ hdisk hsimple horient hregular hκ with hconst | hfv_reflected
+  · rcases hconst with ⟨c, hc⟩
+    exact Or.inl ⟨-c, fun i => by
+      have hi := congrArg Neg.neg (hc (-i))
+      simpa using hi⟩
+  · have hfv_neg : DahlbergFourVertex (fun i => -κ i) := by
+      exact (dahlbergFourVertex_reflectIndex_iff
+        (κ := fun i : ZMod n => -κ i) (a := 0)).mp (by
+          convert hfv_reflected using 1
+          ext i
+          congr 1
+          abel_nf)
+    exact Or.inr (dahlbergFourVertex_of_neg hfv_neg)
 
 /-- Spherical discrete four-vertex theorem for negatively oriented convex
 coherent cyclic polygons, obtained from the positive kernel by reversing the
@@ -160,6 +226,22 @@ theorem discrete_four_vertex_S2_of_negativeOrientation {n : ℕ} [NeZero n]
         congr 1
         abel_nf)
   exact dahlbergFourVertex_of_neg hfv_neg
+
+/-- Spherical constant-or-Dahlberg theorem for strictly oriented
+convex/coherent cyclic polygons. -/
+theorem constant_or_dahlbergFourVertex_S2_of_strict_orientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  rcases horient with hpos | hneg
+  · exact constant_or_dahlbergFourVertex_S2_of_positiveOrientation
+      hn v κ hdisk hsimple hpos hregular hκ
+  · exact constant_or_dahlbergFourVertex_S2_of_negativeOrientation
+      hn v κ hdisk hsimple hneg hregular hκ
 
 /-- Spherical discrete four-vertex theorem for strictly oriented convex
 coherent cyclic polygons, packaged over the two possible orientations. -/
