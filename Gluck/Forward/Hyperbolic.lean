@@ -56,4 +56,16 @@ theorem discrete_four_vertex_H2 {n : ℕ} [NeZero n]
     DahlbergFourVertex κ := by
   exact discrete_four_vertex_H2_kernel hn v κ hdisk hsimple hconvex hregular hκ hcircle
 
+/-- Hyperbolic discrete four-vertex theorem using the shared positive
+orientation interface for convex/coherent cyclic polygons. -/
+theorem discrete_four_vertex_H2_of_positiveOrientation {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
+    DahlbergFourVertex κ := by
+  exact discrete_four_vertex_H2 hn v κ hdisk hsimple horient hregular hκ hcircle
+
 end Gluck.Forward
