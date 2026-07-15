@@ -3797,6 +3797,17 @@ theorem not_concyclic_of_dahlbergFourVertex_negativeOrientation {n : ℕ}
     ¬ Concyclic v := by
   exact not_concyclic_of_dahlbergFourVertex_neg hsimple hfv horient
 
+/-- Under either strict orientation, Dahlberg's four-vertex conclusion rules
+out concyclicity. -/
+theorem not_concyclic_of_dahlbergFourVertex_strict_orientation {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hfv : DahlbergFourVertex (SignedMengerProfile v))
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v) :
+    ¬ Concyclic v := by
+  rcases horient with hpos | hneg
+  · exact not_concyclic_of_dahlbergFourVertex_positiveOrientation hsimple hfv hpos
+  · exact not_concyclic_of_dahlbergFourVertex_negativeOrientation hsimple hfv hneg
+
 /-! ## Signed-Menger signs and polygon orientation -/
 
 /-- Positive polygon orientation gives pointwise positive signed-Menger

@@ -146,6 +146,16 @@ theorem signedMengerProfile_not_constant_E2_of_not_concyclic {n : ℕ} [NeZero n
     ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
   exact not_constant_signedMengerProfile_of_not_concyclic hsimple hregular hnoncircle
 
+/-- E² strict-orientation reduction: Dahlberg's signed-Menger four-vertex
+conclusion rules out concyclicity. -/
+theorem not_concyclic_E2_of_signedMengerProfile_dahlbergFourVertex_strict_orientation
+    {n : ℕ} (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hfv : DahlbergFourVertex (SignedMengerProfile v)) :
+    ¬ Concyclic v := by
+  exact not_concyclic_of_dahlbergFourVertex_strict_orientation hsimple hfv horient
+
 /-- E² reduction: nonconcyclicity forces both an adjacent strict increase and
 an adjacent strict decrease of signed Menger curvature. -/
 theorem signedMengerProfile_adjacent_increase_and_decrease_E2_of_not_concyclic
