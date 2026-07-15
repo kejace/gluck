@@ -4470,6 +4470,23 @@ theorem polygonDahlbergFourVertex_of_ordered_signedMenger_turns {n : ℕ}
 
 /-! ## Dahlberg's Euclidean discrete four-vertex kernel -/
 
+/-- Dahlberg's Euclidean ordered-turn source theorem: for a simple locally
+regular nonconcyclic polygon, the signed-Menger curvature profile has four
+ordered adjacent turns, alternating
+increase/decrease/decrease/increase around the cyclic vertex set.
+
+This is the single source gate for the Euclidean discrete theorem from
+`references/23.pdf`.  The named positive-orientation Lemma 9 wrapper and the
+final enclosing-disk reduction wrapper below are retained as documentation of
+Dahlberg's proof architecture, but both are specializations of this source
+statement at the API level. -/
+theorem exists_ordered_signedMenger_turns_E2_dahlberg_source
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    OrderedAdjacentTurns (SignedMengerProfile v) := by
+  sorry
+
 /-- Dahlberg's Lemma 9 source extraction in the positive strictly-convex case:
 from a simple locally regular positively oriented nonconcyclic polygon one
 obtains four ordered adjacent signed-Menger turns, alternating
@@ -4483,10 +4500,11 @@ theorem exists_ordered_signedMenger_turns_of_positiveOrientation_not_concyclic
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v)
-    (horient : PositivePolygonOrientation v)
+    (_horient : PositivePolygonOrientation v)
     (hnoncircle : ¬ Concyclic v) :
     OrderedAdjacentTurns (SignedMengerProfile v) := by
-  sorry
+  exact exists_ordered_signedMenger_turns_E2_dahlberg_source
+    hn hsimple hregular hnoncircle
 
 /-- Dahlberg's Lemma 9 source extraction for negatively oriented polygons,
 stated for the naturally reversed signed-Menger profile.  This is just the
@@ -4598,7 +4616,8 @@ theorem exists_ordered_signedMenger_turns_of_dahlberg_disk_reduction
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     OrderedAdjacentTurns (SignedMengerProfile v) := by
-  sorry
+  exact exists_ordered_signedMenger_turns_E2_dahlberg_source
+    hn hsimple hregular hnoncircle
 
 /-- Dahlberg's reduction from the general simple locally regular polygon to the
 strictly-convex auxiliary polygon used in the last part of §4 of

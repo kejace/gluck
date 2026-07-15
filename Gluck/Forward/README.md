@@ -30,6 +30,11 @@ the converse project's level-window condition:
 5. Reduce the general locally regular polygon to the convex theorem as in the
    proof of Theorem 1.
 
+The formal source gate for this chain is
+`exists_ordered_signedMenger_turns_E2_dahlberg_source`; the Lemma 9 and final
+disk-reduction wrappers specialize it so downstream code can keep the paper's
+proof architecture visible.
+
 `AlternatesAcrossLevel` remains available as a later corollary of the exact
 plateau-aware conclusion; it is not used as a substitute for Dahlberg's source
 statement.
