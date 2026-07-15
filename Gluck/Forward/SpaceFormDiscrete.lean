@@ -20,6 +20,20 @@ This is the project-derived `sin R` analogue of the convex coherent
 circumradius theorem.  It is kept separate from the hyperbolic source because
 the spherical branch has no proper-circle hypothesis and is not a formal
 specialization of Grant--Mogilski. -/
+theorem orderedAdjacentTurns_S2_source {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    OrderedAdjacentTurns κ := by
+  sorry
+
+/-- Spherical nonconstant source theorem for the convex/coherent discrete
+four-vertex package in an open hemisphere, derived from the ordered-turn
+source and the general cyclic conversion. -/
 theorem dahlbergFourVertex_S2_source {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
     (hdisk : ∀ i, ‖v i‖ < 1)
@@ -29,7 +43,9 @@ theorem dahlbergFourVertex_S2_source {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger 1 v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  sorry
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (orderedAdjacentTurns_S2_source
+      hn v κ hdisk hsimple hconvex hregular hκ hnc)
 
 /-- Spherical constant-or theorem obtained from the nonconstant source by
 splitting off the constant profile case. -/
@@ -46,8 +62,22 @@ theorem constant_or_dahlbergFourVertex_S2_source {n : ℕ} [NeZero n]
   · exact Or.inr (dahlbergFourVertex_S2_source
       hn v κ hdisk hsimple hconvex hregular hκ hconst)
 
-/-- Hyperbolic nonconstant source theorem for Grant--Mogilski's convex
+/-- Hyperbolic ordered-turn source theorem for Grant--Mogilski's convex
 coherent discrete four-vertex theorem in the proper-circle regime `κᵢ > 1`. -/
+theorem orderedAdjacentTurns_H2_source {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    OrderedAdjacentTurns κ := by
+  sorry
+
+/-- Hyperbolic nonconstant source theorem for Grant--Mogilski's convex
+coherent discrete four-vertex theorem in the proper-circle regime `κᵢ > 1`,
+derived from the ordered-turn source and the general cyclic conversion. -/
 theorem dahlbergFourVertex_H2_source {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
     (hdisk : ∀ i, ‖v i‖ < 1)
@@ -57,7 +87,9 @@ theorem dahlbergFourVertex_H2_source {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  sorry
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (orderedAdjacentTurns_H2_source
+      hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc)
 
 /-- Hyperbolic constant-or theorem obtained from the nonconstant source by
 splitting off the constant profile case. -/

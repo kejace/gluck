@@ -76,10 +76,14 @@ dispatch theorem `constant_or_dahlbergFourVertex_spaceForm_kernel` in
 constant-or wrappers `constant_or_dahlbergFourVertex_S2_source` and
 `constant_or_dahlbergFourVertex_H2_source`, which themselves split off the
 constant case from the nonconstant source gates `dahlbergFourVertex_S2_source`
-and `dahlbergFourVertex_H2_source`.  The uniform nonconstant theorem
-`dahlbergFourVertex_spaceForm_source` dispatches directly to those nonconstant
-source gates, and the `discrete_four_vertex_*` wrappers expose it with the
-usual model-specific hypotheses.
+and `dahlbergFourVertex_H2_source`.  Those nonconstant gates are now proved
+from the model-specific ordered-turn extraction gates
+`orderedAdjacentTurns_S2_source` and `orderedAdjacentTurns_H2_source` via the
+general cyclic constructor `dahlbergFourVertex_of_orderedAdjacentTurns_four_le`.
+The uniform nonconstant theorem `dahlbergFourVertex_spaceForm_source`
+dispatches directly to the proved nonconstant wrappers, and the
+`discrete_four_vertex_*` wrappers expose it with the usual model-specific
+hypotheses.
 `ConformalMenger.lean` adds the proved
 `ε ∈ {0,1,-1}` dispatch layer over the E²/S²/H² conformal-Menger wrappers,
 using common positive-orientation, negative-orientation, and
