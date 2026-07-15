@@ -690,6 +690,17 @@ theorem dist_normalizedCircleCenter_left (a y : ℝ) :
     dist (normalizedCircleCenter y) (-a : ℂ) = normalizedCircleRadius a y := by
   simpa [normalizedCircleRadius] using dist_normalizedCircleCenter_right (-a) y
 
+/-- Any normalized circumcircle through a noncollinear triple has the canonical
+coaxial radius. -/
+theorem normalizedCircumcircle_radius_eq {a R : ℝ} (ha : a ≠ 0) {z O : ℂ}
+    (hz : z.im ≠ 0)
+    (hcircle : CircumcircleR2 z (-a : ℂ) (a : ℂ) O R) :
+    R = normalizedCircleRadius a (normalizedCircumcenterParameter a z) := by
+  have hO := eq_normalizedCircleCenter_of_equidistant ha hz
+    (hcircle.2.2.1.trans hcircle.2.2.2.symm)
+    (hcircle.2.1.trans hcircle.2.2.2.symm)
+  rw [← hcircle.2.2.2, hO, dist_normalizedCircleCenter_right]
+
 /-- A nondegenerate normalized triple has the advertised circumcircle. -/
 theorem circumcircleR2_normalized_parameter {a : ℝ} (ha : a ≠ 0) {z : ℂ}
     (hz : z.im ≠ 0) :
@@ -755,6 +766,18 @@ theorem circumcircleR2_edge_parameter {A B C : ℂ} (hAB : A ≠ B)
   exact dist_eq_of_circlePowerR2_eq_zero (Real.sqrt_nonneg _)
     (circlePowerR2_edge_parameter hAB hcross)
 
+/-- Any Euclidean circumcircle through a noncollinear edge triple has the same
+radius as the canonical edge-parameter circle. -/
+theorem circumcircleR2_edge_radius_eq {A B C O : ℂ} {R : ℝ}
+    (hAB : A ≠ B) (hcross : Gluck.Discrete.crossR2 A B C ≠ 0)
+    (hcircle : CircumcircleR2 C A B O R) :
+    R = normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B C) := by
+  have hcircle' := circumcircleR2_edgeCoordinates (E₁ := A) (E₂ := B) hAB hcircle
+  rw [(edgeCoordinates_endpoints hAB).1, (edgeCoordinates_endpoints hAB).2] at hcircle'
+  have hz := edgeCoordinates_im_ne_zero hAB hcross
+  have hR := normalizedCircumcircle_radius_eq (chordHalfLength_pos hAB).ne' hz hcircle'
+  simpa [edgeCircumcenterParameter] using hR
+
 /-- Signed Menger curvature of an arbitrary noncollinear triple, expressed by
 its canonical edge-circle radius and orientation. -/
 theorem signedMengerR2_edge_parameter {A B C : ℂ} (hAB : A ≠ B)
@@ -797,6 +820,28 @@ theorem signedMengerR2_edge_parameter_of_neg {A B C : ℂ} (hAB : A ≠ B)
     field_simp [hz.ne]
   rw [h, hsign]
   ring
+
+/-- The positive signed Menger curvature of a noncollinear triple is the
+reciprocal of any Euclidean circumcircle radius for the same triple. -/
+theorem signedMengerR2_eq_inv_circumradius_of_pos {A B C O : ℂ} {R : ℝ}
+    (hAB : A ≠ B) (hcross : 0 < Gluck.Discrete.crossR2 A B C)
+    (hcircle : CircumcircleR2 C A B O R) :
+    Gluck.Discrete.signedMengerR2 A B C = 1 / R := by
+  rw [signedMengerR2_edge_parameter_of_pos hAB hcross]
+  have hR := circumcircleR2_edge_radius_eq hAB hcross.ne' hcircle
+  rw [hR]
+  rfl
+
+/-- The negative signed Menger curvature of a noncollinear triple is the
+negative reciprocal of any Euclidean circumcircle radius for the same triple. -/
+theorem signedMengerR2_eq_neg_inv_circumradius_of_neg {A B C O : ℂ} {R : ℝ}
+    (hAB : A ≠ B) (hcross : Gluck.Discrete.crossR2 A B C < 0)
+    (hcircle : CircumcircleR2 C A B O R) :
+    Gluck.Discrete.signedMengerR2 A B C = -(1 / R) := by
+  rw [signedMengerR2_edge_parameter_of_neg hAB hcross]
+  have hR := circumcircleR2_edge_radius_eq hAB hcross.ne hcircle
+  rw [hR]
+  rfl
 
 /-- Positive orientation rewrites the point-edge Dahlberg region using the
 positive normalized curvature of its canonical circle. -/
