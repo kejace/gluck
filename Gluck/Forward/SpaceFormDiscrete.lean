@@ -95,8 +95,30 @@ theorem constant_or_dahlbergFourVertex_spaceForm_kernel {ε : ℝ}
     exact constant_or_dahlbergFourVertex_H2_source
       hn v κ hdisk hsimple hconvex hregular hκ (hproper (by norm_num))
 
+/-- Uniform nonconstant source theorem for the convex/coherent discrete
+four-vertex package in `S²` (`ε = 1`) and `H²` (`ε = -1`), dispatching directly
+to the corresponding nonconstant model-specific source theorem. -/
+theorem dahlbergFourVertex_spaceForm_source {ε : ℝ}
+    (hε : ε = 1 ∨ ε = -1) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  rcases hε with hS | hH
+  · subst ε
+    exact dahlbergFourVertex_S2_source
+      hn v κ hdisk hsimple hconvex hregular hκ hnc
+  · subst ε
+    exact dahlbergFourVertex_H2_source
+      hn v κ hdisk hsimple hconvex hregular hκ (hproper (by norm_num)) hnc
+
 /-- Uniform nonconstant convex/coherent discrete four-vertex theorem in `S²`
-and `H²`, obtained from the constant-or-D4VT source package. -/
+and `H²`, obtained from the nonconstant source package. -/
 theorem discrete_four_vertex_spaceForm_kernel {ε : ℝ}
     (hε : ε = 1 ∨ ε = -1) {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
@@ -108,9 +130,7 @@ theorem discrete_four_vertex_spaceForm_kernel {ε : ℝ}
     (hproper : ε < 0 → ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_of_constant_or_of_not_constant
-    (constant_or_dahlbergFourVertex_spaceForm_kernel
-      hε hn v κ hdisk hsimple hconvex hregular hκ hproper)
-    hnc
+  exact dahlbergFourVertex_spaceForm_source
+    hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
 
 end Gluck.Forward
