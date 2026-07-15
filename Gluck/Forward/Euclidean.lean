@@ -526,6 +526,39 @@ theorem dahlbergFourVertex_E2_of_posAffine_signedMengerProfile_signed_not_consta
   ext i
   exact hκ i
 
+/-- A nonzero affine change of a nonconstant E² signed-Menger profile inherits
+the strict-orientation Dahlberg conclusion. -/
+theorem affine_signedMengerProfile_dahlbergFourVertex_E2_of_not_constant
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    {a b : ℝ} (ha : a ≠ 0)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    DahlbergFourVertex (fun i => a * SignedMengerProfile v i + b) := by
+  exact dahlbergFourVertex_affine ha
+    (signedMengerProfile_dahlbergFourVertex_E2_of_not_constant_strict_orientation
+      hn v hsimple hregular horient hnc)
+
+/-- Any curvature profile pointwise equal to a nonzero affine change of a
+nonconstant E² signed-Menger profile inherits the strict-orientation Dahlberg
+conclusion. -/
+theorem dahlbergFourVertex_E2_of_affine_signedMengerProfile_signed_not_constant
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    {a b : ℝ} (ha : a ≠ 0)
+    (hκ : ∀ i : ZMod n, κ i = a * SignedMengerProfile v i + b)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    DahlbergFourVertex κ := by
+  have hfv :=
+    affine_signedMengerProfile_dahlbergFourVertex_E2_of_not_constant
+      hn v hsimple hregular horient (a := a) (b := b) ha hnc
+  convert hfv using 1
+  ext i
+  exact hκ i
+
 /-- Positive affine changes of the E² signed-Menger profile preserve the
 strict-orientation constant-or-four-vertex package. -/
 theorem posAffine_signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_strict_orientation

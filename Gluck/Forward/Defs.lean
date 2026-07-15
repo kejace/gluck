@@ -282,6 +282,39 @@ theorem dahlbergFourVertex_posAffine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : 
     ring
   · exact dahlbergFourVertex_posAffine ha
 
+/-- Nonzero affine changes of a cyclic curvature profile preserve the
+plateau-aware Dahlberg conclusion.  Negative scale factors swap maxima and
+minima via profile negation. -/
+theorem dahlbergFourVertex_affine {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
+    (ha : a ≠ 0) (hfv : DahlbergFourVertex κ) :
+    DahlbergFourVertex (fun i => a * κ i + b) := by
+  rcases lt_or_gt_of_ne ha with hneg | hpos
+  · have hfv_neg : DahlbergFourVertex (fun i => -κ i) :=
+      dahlbergFourVertex_neg_iff.mpr hfv
+    have hscaled :=
+      dahlbergFourVertex_posAffine (κ := fun i => -κ i)
+        (a := -a) (b := b) (neg_pos.mpr hneg) hfv_neg
+    convert hscaled using 1
+    ext i
+    ring
+  · exact dahlbergFourVertex_posAffine hpos hfv
+
+/-- Nonzero affine changes of a cyclic curvature profile preserve the
+plateau-aware Dahlberg conclusion exactly. -/
+theorem dahlbergFourVertex_affine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
+    (ha : a ≠ 0) :
+    DahlbergFourVertex (fun i => a * κ i + b) ↔ DahlbergFourVertex κ := by
+  constructor
+  · intro hfv
+    have hscaled :=
+      dahlbergFourVertex_affine (κ := fun i => a * κ i + b)
+        (a := a⁻¹) (b := -b / a) (inv_ne_zero ha) hfv
+    convert hscaled using 1
+    ext i
+    field_simp [ha]
+    ring
+  · exact dahlbergFourVertex_affine ha
+
 /-- Translating cyclic indices preserves plateau-aware local maxima. -/
 theorem discreteLocalMax_translateIndex {n : ℕ} {κ : ZMod n → ℝ} {a i : ZMod n}
     (hmax : DiscreteLocalMax κ i) :
