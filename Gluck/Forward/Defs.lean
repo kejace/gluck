@@ -514,6 +514,67 @@ theorem exists_ne_succ_of_not_constant {n : ℕ} [NeZero n] {κ : ZMod n → ℝ
   by_contra hne
   exact hnone ⟨i, hne⟩
 
+/-- Negating a cyclic profile preserves nonconstancy. -/
+theorem not_constant_neg_iff {n : ℕ} {κ : ZMod n → ℝ} :
+    (¬ ∃ c, ∀ i : ZMod n, -κ i = c) ↔ ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
+  constructor
+  · intro hneg hconst
+    rcases hconst with ⟨c, hc⟩
+    exact hneg ⟨-c, fun i => by simp [hc i]⟩
+  · intro h hnegconst
+    rcases hnegconst with ⟨c, hc⟩
+    exact h ⟨-c, fun i => by
+      have hi := congrArg Neg.neg (hc i)
+      simpa using hi⟩
+
+/-- Positive affine changes preserve nonconstancy of cyclic profiles. -/
+theorem not_constant_posAffine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
+    (ha : 0 < a) :
+    (¬ ∃ c, ∀ i : ZMod n, a * κ i + b = c) ↔
+      ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
+  constructor
+  · intro hscaled hconst
+    rcases hconst with ⟨c, hc⟩
+    exact hscaled ⟨a * c + b, fun i => by simp [hc i]⟩
+  · intro h hscaledconst
+    rcases hscaledconst with ⟨c, hc⟩
+    apply h
+    refine ⟨(c - b) / a, fun i => ?_⟩
+    have hi := hc i
+    field_simp [ha.ne'] at hi ⊢
+    linarith
+
+/-- Translating cyclic indices preserves nonconstancy. -/
+theorem not_constant_translateIndex_iff {n : ℕ} {κ : ZMod n → ℝ} {a : ZMod n} :
+    (¬ ∃ c, ∀ i : ZMod n, κ (i + a) = c) ↔
+      ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
+  constructor
+  · intro htrans hconst
+    rcases hconst with ⟨c, hc⟩
+    exact htrans ⟨c, fun i => hc (i + a)⟩
+  · intro h htransconst
+    rcases htransconst with ⟨c, hc⟩
+    apply h
+    refine ⟨c, fun i => ?_⟩
+    have hi := hc (i - a)
+    convert hi using 1
+    abel_nf
+
+/-- Reversing cyclic indices preserves nonconstancy. -/
+theorem not_constant_negIndex_iff {n : ℕ} {κ : ZMod n → ℝ} :
+    (¬ ∃ c, ∀ i : ZMod n, κ (-i) = c) ↔
+      ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
+  constructor
+  · intro hrev hconst
+    rcases hconst with ⟨c, hc⟩
+    exact hrev ⟨c, fun i => hc (-i)⟩
+  · intro h hrevconst
+    rcases hrevconst with ⟨c, hc⟩
+    apply h
+    refine ⟨c, fun i => ?_⟩
+    have hi := hc (-i)
+    simpa using hi
+
 /-- If a cyclic real profile is weakly increasing at every adjacent step, then
 it is constant. -/
 theorem exists_constant_of_forall_le_succ {n : ℕ} [NeZero n] {κ : ZMod n → ℝ}
