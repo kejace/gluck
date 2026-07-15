@@ -4504,6 +4504,21 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_dahlberg_source
 /-- Dahlberg's positively oriented strictly-convex case, corresponding to
 Lemma 9 in `references/23.pdf`.
 
+This is a smaller source gate than the full §4 disk reduction: it covers the
+strictly convex same-orientation case using Lemma 8's nesting of the regions
+`δ(P,e)` and the convex discrete four-vertex theorem. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_lemma9_source
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  sorry
+
+/-- Dahlberg's positively oriented strictly-convex case, corresponding to
+Lemma 9 in `references/23.pdf`.
+
 The hypotheses use the existing orientation interfaces as the Lean-side
 strict-convexity proxy.  Dahlberg proves this case by combining Lemma 8's
 monotonicity of the half-plane/disk regions `δ(P,e)` with the convex DFV
@@ -4512,11 +4527,11 @@ theorem signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyc
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v)
-    (_horient : PositivePolygonOrientation v)
+    (horient : PositivePolygonOrientation v)
     (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_dahlberg_source
-    hn hsimple hregular hnoncircle
+  exact signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_lemma9_source
+    hn hsimple hregular horient hnoncircle
 
 /-- Dahlberg's negatively oriented strictly-convex case after sign
 normalization.  The profile `-SignedMengerProfile v` has positive values; the

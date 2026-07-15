@@ -34,7 +34,11 @@ The formal source gate for this chain is now
 `signedMengerProfile_dahlbergFourVertex_of_dahlberg_disk_reduction`; the public
 endpoint `signedMengerProfile_dahlbergFourVertex_E2_dahlberg_source` is proved
 from that named §4 disk-reduction gate so downstream code can keep the paper's
-proof architecture visible.
+proof architecture visible.  The same-orientation strictly convex branch is
+isolated separately as
+`signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_lemma9_source`,
+so the Lemma 9 API no longer depends on the full nonconvex enclosing-disk
+reduction.
 
 `AlternatesAcrossLevel` remains available as a later corollary of the exact
 plateau-aware conclusion; it is not used as a substitute for Dahlberg's source
