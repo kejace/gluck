@@ -2581,6 +2581,32 @@ theorem not_constant_signedMengerProfile_of_not_concyclic_neg
   exact hnoncircle (concyclic_of_constant_signedMengerProfile_neg
     hsimple hregular hκneg hconst)
 
+/-- A nonzero constant signed-Menger profile on a locally regular simple
+polygon forces all vertices onto one Euclidean circle. -/
+theorem concyclic_of_constant_signedMengerProfile_ne_zero
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    {c : ℝ} (hc : ∀ i : ZMod n, SignedMengerProfile v i = c) (hc0 : c ≠ 0) :
+    Concyclic v := by
+  rcases lt_trichotomy c 0 with hcneg | hczero | hcpos
+  · exact concyclic_of_constant_signedMengerProfile_neg hsimple hregular
+      (fun i => by simpa [hc i] using hcneg) ⟨c, hc⟩
+  · exact False.elim (hc0 hczero)
+  · exact concyclic_of_constant_signedMengerProfile_pos hsimple hregular
+      (fun i => by simpa [hc i] using hcpos) ⟨c, hc⟩
+
+/-- Contrapositive form: on a nonconcyclic locally regular simple polygon, a
+constant signed-Menger profile must be the zero profile. -/
+theorem constant_signedMengerProfile_eq_zero_of_not_concyclic
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v)
+    {c : ℝ} (hc : ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    c = 0 := by
+  by_contra hc0
+  exact hnoncircle (concyclic_of_constant_signedMengerProfile_ne_zero
+    hsimple hregular hc hc0)
+
 /-! ## Profile-facing endpoint order wrappers -/
 
 /-- Positive signed-Menger profile at a polygon vertex gives positive

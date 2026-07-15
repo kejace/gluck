@@ -119,6 +119,25 @@ theorem signedMengerProfile_globalMinMax_strict_E2_of_negativeOrientation
   exact signedMengerProfile_exists_globalMinMax_strict_of_not_concyclic_neg
     hsimple hregular horient hnoncircle
 
+/-- E² constant-profile reduction: if a locally regular simple polygon has
+nonzero constant signed-Menger profile, then it is concyclic. -/
+theorem concyclic_E2_of_constant_signedMengerProfile_ne_zero {n : ℕ} [NeZero n]
+    (v : ZMod n → ℂ) (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) {c : ℝ}
+    (hc : ∀ i : ZMod n, SignedMengerProfile v i = c) (hc0 : c ≠ 0) :
+    Concyclic v := by
+  exact concyclic_of_constant_signedMengerProfile_ne_zero hsimple hregular hc hc0
+
+/-- E² nonconcyclic constant-profile reduction: if a locally regular simple
+polygon is not concyclic and has constant signed-Menger profile, that constant
+is zero. -/
+theorem constant_signedMengerProfile_eq_zero_E2_of_not_concyclic {n : ℕ} [NeZero n]
+    (v : ZMod n → ℂ) (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) {c : ℝ}
+    (hc : ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    c = 0 := by
+  exact constant_signedMengerProfile_eq_zero_of_not_concyclic hsimple hregular hnoncircle hc
+
 /-- Dahlberg's Euclidean discrete four-vertex theorem: the signed Menger
 curvature of a locally regular simple closed polygon is constant or has an
 alternating four-vertex level window. -/
