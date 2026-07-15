@@ -2024,6 +2024,191 @@ theorem polygonEdgeCircleRadius_antitone_of_endpoint_order_pos_of_vertex_menger_
   exact polygonEdgeCircleRadius_antitone_of_endpoint_order_pos hsimple hregular i
     hPcross hQcross hκ
 
+/-! ## Equal-curvature rigidity over a shared positive edge -/
+
+/-- Over a fixed oriented edge, two positive locally regular endpoint triples
+with the same signed Menger curvature have the same canonical circumcenter
+parameter. -/
+theorem edgeCircumcenterParameter_eq_of_endpoint_regular_pos_eq {A B P Q : ℂ}
+    (hAB : A ≠ B)
+    (hPcross : 0 < Gluck.Discrete.crossR2 A B P)
+    (hQcross : 0 < Gluck.Discrete.crossR2 A B Q)
+    (hPreg : DahlbergRegularAt P A B) (hQreg : DahlbergRegularAt A B Q)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P =
+      Gluck.Discrete.signedMengerR2 A B Q) :
+    edgeCircumcenterParameter A B P = edgeCircumcenterParameter A B Q := by
+  obtain ⟨OP, RP, hcircleP, hconeP⟩ :=
+    dahlbergRegularAt_circle_of_cross_ne_zero hPreg hPcross.ne'
+  obtain ⟨OQ, RQ, hcircleQ, hconeQ⟩ :=
+    dahlbergRegularAt_circle_of_cross_ne_zero_right hQreg hQcross.ne'
+  have hyP : 0 ≤ edgeCircumcenterParameter A B P :=
+    edgeCircumcenterParameter_nonneg_of_regular hAB hPcross hcircleP hconeP
+  have hyQ : 0 ≤ edgeCircumcenterParameter A B Q :=
+    edgeCircumcenterParameter_nonneg_of_regular_right hAB hQcross hcircleQ hconeQ
+  have hcurv :
+      normalizedCircleCurvature (chordHalfLength A B) (edgeCircumcenterParameter A B P) =
+        normalizedCircleCurvature (chordHalfLength A B)
+          (edgeCircumcenterParameter A B Q) := by
+    calc
+      normalizedCircleCurvature (chordHalfLength A B) (edgeCircumcenterParameter A B P)
+          = Gluck.Discrete.signedMengerR2 A B P :=
+            (signedMengerR2_edge_parameter_of_pos hAB hPcross).symm
+      _ = Gluck.Discrete.signedMengerR2 A B Q := hκ
+      _ = normalizedCircleCurvature (chordHalfLength A B)
+          (edgeCircumcenterParameter A B Q) :=
+            signedMengerR2_edge_parameter_of_pos hAB hQcross
+  apply le_antisymm
+  · exact parameter_le_of_curvature_le_nonneg
+      (a := chordHalfLength A B) (yP := edgeCircumcenterParameter A B Q)
+      (yQ := edgeCircumcenterParameter A B P) (chordHalfLength_pos hAB).ne'
+      hyQ (le_of_eq hcurv.symm)
+  · exact parameter_le_of_curvature_le_nonneg
+      (a := chordHalfLength A B) (yP := edgeCircumcenterParameter A B P)
+      (yQ := edgeCircumcenterParameter A B Q) (chordHalfLength_pos hAB).ne'
+      hyP (le_of_eq hcurv)
+
+/-- Polygon-indexed equal-curvature rigidity over the shared edge
+`v i → v (i+1)` on the positive branch. -/
+theorem polygonEdgeCircumcenterParameter_eq_of_endpoint_pos_eq
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (i : ZMod n)
+    (hPcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)))
+    (hQcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)))
+    (hκ : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) =
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1))) :
+    edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1)) =
+      edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+  have hPreg : DahlbergRegularAt (v (i - 1)) (v i) (v (i + 1)) := hregular i
+  have hQreg : DahlbergRegularAt (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    simpa using hregular (i + 1)
+  have hκ' :
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) =
+        Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    rw [← polygonSignedMenger_eq_edgePrev i]
+    exact hκ
+  exact edgeCircumcenterParameter_eq_of_endpoint_regular_pos_eq
+    (hsimple.1 i) hPcross hQcross hPreg hQreg hκ'
+
+/-- Profile-facing equal-curvature rigidity over the shared edge
+`v i → v (i+1)` on the positive branch. -/
+theorem signedMengerProfile_edgeCircumcenterParameter_eq_of_endpoint_pos_eq
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (i : ZMod n)
+    (hPκpos : 0 < SignedMengerProfile v i)
+    (hκ : SignedMengerProfile v i = SignedMengerProfile v (i + 1)) :
+    edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1)) =
+      edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+  have hPcross := polygonEdgePrev_cross_pos_of_vertex_signedMenger_pos hsimple
+    (by simpa [SignedMengerProfile] using hPκpos)
+  have hQκpos : 0 < SignedMengerProfile v (i + 1) := by
+    rwa [← hκ]
+  have hQcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    have hAB : v i ≠ v (i + 1) := hsimple.1 i
+    have hQκ' : 0 <
+        Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+      simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hQκpos
+    exact crossR2_pos_of_signedMengerR2_pos hAB hQκ'
+  exact polygonEdgeCircumcenterParameter_eq_of_endpoint_pos_eq hsimple hregular i
+    hPcross hQcross
+    (by simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hκ)
+
+/-- Over a fixed oriented edge, two negative locally regular endpoint triples
+with the same signed Menger curvature have the same canonical circumcenter
+parameter. -/
+theorem edgeCircumcenterParameter_eq_of_endpoint_regular_neg_eq {A B P Q : ℂ}
+    (hAB : A ≠ B)
+    (hPcross : Gluck.Discrete.crossR2 A B P < 0)
+    (hQcross : Gluck.Discrete.crossR2 A B Q < 0)
+    (hPreg : DahlbergRegularAt P A B) (hQreg : DahlbergRegularAt A B Q)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P =
+      Gluck.Discrete.signedMengerR2 A B Q) :
+    edgeCircumcenterParameter A B P = edgeCircumcenterParameter A B Q := by
+  obtain ⟨OP, RP, hcircleP, hconeP⟩ :=
+    dahlbergRegularAt_circle_of_cross_ne_zero hPreg hPcross.ne
+  obtain ⟨OQ, RQ, hcircleQ, hconeQ⟩ :=
+    dahlbergRegularAt_circle_of_cross_ne_zero_right hQreg hQcross.ne
+  have hyP : edgeCircumcenterParameter A B P ≤ 0 :=
+    edgeCircumcenterParameter_nonpos_of_regular hAB hPcross hcircleP hconeP
+  have hyQ : edgeCircumcenterParameter A B Q ≤ 0 :=
+    edgeCircumcenterParameter_nonpos_of_regular_right hAB hQcross hcircleQ hconeQ
+  have hcurv :
+      normalizedCircleCurvature (chordHalfLength A B) (edgeCircumcenterParameter A B P) =
+        normalizedCircleCurvature (chordHalfLength A B)
+          (edgeCircumcenterParameter A B Q) := by
+    have hneg :
+        -normalizedCircleCurvature (chordHalfLength A B)
+            (edgeCircumcenterParameter A B P) =
+          -normalizedCircleCurvature (chordHalfLength A B)
+            (edgeCircumcenterParameter A B Q) := by
+      calc
+        -normalizedCircleCurvature (chordHalfLength A B) (edgeCircumcenterParameter A B P)
+            = Gluck.Discrete.signedMengerR2 A B P :=
+              (signedMengerR2_edge_parameter_of_neg hAB hPcross).symm
+        _ = Gluck.Discrete.signedMengerR2 A B Q := hκ
+        _ = -normalizedCircleCurvature (chordHalfLength A B)
+            (edgeCircumcenterParameter A B Q) :=
+              signedMengerR2_edge_parameter_of_neg hAB hQcross
+    linarith
+  apply le_antisymm
+  · exact parameter_le_of_curvature_ge_nonpos
+      (a := chordHalfLength A B) (yP := edgeCircumcenterParameter A B Q)
+      (yQ := edgeCircumcenterParameter A B P) (chordHalfLength_pos hAB).ne'
+      hyP (le_of_eq hcurv)
+  · exact parameter_le_of_curvature_ge_nonpos
+      (a := chordHalfLength A B) (yP := edgeCircumcenterParameter A B P)
+      (yQ := edgeCircumcenterParameter A B Q) (chordHalfLength_pos hAB).ne'
+      hyQ (le_of_eq hcurv.symm)
+
+/-- Polygon-indexed equal-curvature rigidity over the shared edge
+`v i → v (i+1)` on the negative branch. -/
+theorem polygonEdgeCircumcenterParameter_eq_of_endpoint_neg_eq
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (i : ZMod n)
+    (hPcross : Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) < 0)
+    (hQcross : Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) < 0)
+    (hκ : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) =
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1))) :
+    edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1)) =
+      edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+  have hPreg : DahlbergRegularAt (v (i - 1)) (v i) (v (i + 1)) := hregular i
+  have hQreg : DahlbergRegularAt (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    simpa using hregular (i + 1)
+  have hκ' :
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) =
+        Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    rw [← polygonSignedMenger_eq_edgePrev i]
+    exact hκ
+  exact edgeCircumcenterParameter_eq_of_endpoint_regular_neg_eq
+    (hsimple.1 i) hPcross hQcross hPreg hQreg hκ'
+
+/-- Profile-facing equal-curvature rigidity over the shared edge
+`v i → v (i+1)` on the negative branch. -/
+theorem signedMengerProfile_edgeCircumcenterParameter_eq_of_endpoint_neg_eq
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (i : ZMod n)
+    (hPκneg : SignedMengerProfile v i < 0)
+    (hκ : SignedMengerProfile v i = SignedMengerProfile v (i + 1)) :
+    edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1)) =
+      edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+  have hPcross := polygonEdgePrev_cross_neg_of_vertex_signedMenger_neg hsimple
+    (by simpa [SignedMengerProfile] using hPκneg)
+  have hQκneg : SignedMengerProfile v (i + 1) < 0 := by
+    rwa [← hκ]
+  have hQcross :
+      Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) < 0 := by
+    have hAB : v i ≠ v (i + 1) := hsimple.1 i
+    have hQκ' :
+        Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) < 0 := by
+      simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hQκneg
+    exact crossR2_neg_of_signedMengerR2_neg hAB hQκ'
+  exact polygonEdgeCircumcenterParameter_eq_of_endpoint_neg_eq hsimple hregular i
+    hPcross hQcross
+    (by simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hκ)
+
 /-! ## Profile-facing endpoint order wrappers -/
 
 /-- Positive signed-Menger profile at a polygon vertex gives positive
