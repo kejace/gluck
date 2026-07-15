@@ -54,6 +54,21 @@ theorem smoothFourVertex_posAffine {κ : ℝ → ℝ} {a b : ℝ} (ha : 0 < a)
       by simpa [Function.comp_def] using hmax₂.comp_mono hmono,
       by simpa [Function.comp_def] using hmin₂.comp_mono hmono⟩
 
+/-- Positive affine changes preserve the smooth forward four-vertex conclusion
+exactly. -/
+theorem smoothFourVertex_posAffine_iff {κ : ℝ → ℝ} {a b : ℝ} (ha : 0 < a) :
+    SmoothFourVertex (fun t => a * κ t + b) ↔ SmoothFourVertex κ := by
+  constructor
+  · intro hfv
+    have hscaled :=
+      smoothFourVertex_posAffine (κ := fun t => a * κ t + b)
+        (a := a⁻¹) (b := -b / a) (inv_pos.mpr ha) hfv
+    convert hscaled using 1
+    ext t
+    field_simp [ha.ne']
+    ring
+  · exact smoothFourVertex_posAffine ha
+
 /-- A smooth profile pointwise equal to a positive affine change of a
 four-vertex profile inherits the smooth forward conclusion. -/
 theorem smoothFourVertex_of_eq_posAffine {κ μ : ℝ → ℝ} {a b : ℝ} (ha : 0 < a)
@@ -63,6 +78,23 @@ theorem smoothFourVertex_of_eq_posAffine {κ μ : ℝ → ℝ} {a b : ℝ} (ha :
   convert hscaled using 1
   ext t
   exact hμ t
+
+/-- A smooth profile pointwise equal to a positive affine change has the same
+smooth forward four-vertex conclusion. -/
+theorem smoothFourVertex_of_eq_posAffine_iff {κ μ : ℝ → ℝ} {a b : ℝ}
+    (ha : 0 < a) (hμ : ∀ t, μ t = a * κ t + b) :
+    SmoothFourVertex μ ↔ SmoothFourVertex κ := by
+  constructor
+  · intro hfv
+    have hκ :
+        ∀ t, κ t = a⁻¹ * μ t + (-b / a) := by
+      intro t
+      rw [hμ t]
+      field_simp [ha.ne']
+      ring
+    exact smoothFourVertex_of_eq_posAffine (κ := μ) (μ := κ)
+      (a := a⁻¹) (b := -b / a) (inv_pos.mpr ha) hκ hfv
+  · exact smoothFourVertex_of_eq_posAffine ha hμ
 
 /-- Pointwise equal smooth profiles have the same smooth forward four-vertex
 conclusion. -/
