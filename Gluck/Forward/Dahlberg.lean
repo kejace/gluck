@@ -2102,6 +2102,77 @@ theorem positiveOrientation_reverseCyclicPolygon_of_negativeOrientation {n : ℕ
     polygonCross_reverse_vertex (v := v) (-i)]
   exact neg_pos.mpr (horient (-i))
 
+/-- Reversing the cyclic order turns positive orientation into negative
+orientation. -/
+theorem negativeOrientation_reverseCyclicPolygon_of_positiveOrientation {n : ℕ}
+    {v : ZMod n → ℂ} (horient : PositivePolygonOrientation v) :
+    NegativePolygonOrientation (ReverseCyclicPolygon v) := by
+  intro i
+  change Gluck.Discrete.crossR2 (v (-(i - 1))) (v (-i)) (v (-(i + 1))) < 0
+  rw [show (-(i - 1) : ZMod n) = -i + 1 by abel,
+    show (-(i + 1) : ZMod n) = -i - 1 by abel,
+    polygonCross_reverse_vertex (v := v) (-i)]
+  exact neg_neg_of_pos (horient (-i))
+
+/-- Reversing a strictly positively oriented conformal-Menger triple negates
+the realized curvature.  The noncollinearity hypothesis is essential because
+`ConformalMenger` chooses sign by `if 0 < cross then 1 else -1`. -/
+theorem conformalMenger_reverse_of_cross_pos {ε : ℝ} {A B C : ℂ} {κ : ℝ}
+    (hcross : 0 < Gluck.Discrete.crossR2 A B C)
+    (hκ : ConformalMenger ε A B C κ) :
+    ConformalMenger ε C B A (-κ) := by
+  rcases hκ with ⟨O, R, hR, hA, hB, hC, hκ⟩
+  refine ⟨O, R, hR, hC, hB, hA, ?_⟩
+  have hrev : ¬ 0 < Gluck.Discrete.crossR2 C B A := by
+    rw [crossR2_reverse]
+    exact not_lt_of_gt (neg_neg_of_pos hcross)
+  rw [hκ, if_pos hcross, if_neg hrev]
+  ring
+
+/-- Reversing a strictly negatively oriented conformal-Menger triple negates
+the realized curvature. -/
+theorem conformalMenger_reverse_of_cross_neg {ε : ℝ} {A B C : ℂ} {κ : ℝ}
+    (hcross : Gluck.Discrete.crossR2 A B C < 0)
+    (hκ : ConformalMenger ε A B C κ) :
+    ConformalMenger ε C B A (-κ) := by
+  rcases hκ with ⟨O, R, hR, hA, hB, hC, hκ⟩
+  refine ⟨O, R, hR, hC, hB, hA, ?_⟩
+  have hrev : 0 < Gluck.Discrete.crossR2 C B A := by
+    rw [crossR2_reverse]
+    exact neg_pos.mpr hcross
+  rw [hκ, if_neg (not_lt_of_gt hcross), if_pos hrev]
+  ring
+
+/-- Reversing a positively oriented cyclic polygon negates and reverses a
+space-form conformal-Menger realization. -/
+theorem realizesConformalMenger_reverseCyclicPolygon_of_positiveOrientation
+    {n : ℕ} {ε : ℝ} {v : ZMod n → ℂ} {κ : ZMod n → ℝ}
+    (horient : PositivePolygonOrientation v)
+    (hκ : RealizesConformalMenger ε v κ) :
+    RealizesConformalMenger ε (ReverseCyclicPolygon v) (fun i => -κ (-i)) := by
+  intro i
+  change ConformalMenger ε (v (-(i - 1))) (v (-i)) (v (-(i + 1))) (-κ (-i))
+  convert conformalMenger_reverse_of_cross_pos (horient (-i)) (hκ (-i)) using 1
+  · congr 1
+    abel
+  · congr 1
+    abel
+
+/-- Reversing a negatively oriented cyclic polygon negates and reverses a
+space-form conformal-Menger realization. -/
+theorem realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation
+    {n : ℕ} {ε : ℝ} {v : ZMod n → ℂ} {κ : ZMod n → ℝ}
+    (horient : NegativePolygonOrientation v)
+    (hκ : RealizesConformalMenger ε v κ) :
+    RealizesConformalMenger ε (ReverseCyclicPolygon v) (fun i => -κ (-i)) := by
+  intro i
+  change ConformalMenger ε (v (-(i - 1))) (v (-i)) (v (-(i + 1))) (-κ (-i))
+  convert conformalMenger_reverse_of_cross_neg (horient (-i)) (hκ (-i)) using 1
+  · congr 1
+    abel
+  · congr 1
+    abel
+
 /-- Reversing the endpoints of a circumcircle triple preserves the
 circumcircle. -/
 theorem CircumcircleR2_reverse {A B C O : ℂ} {R : ℝ}
