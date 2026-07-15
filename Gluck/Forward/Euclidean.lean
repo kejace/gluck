@@ -128,6 +128,17 @@ theorem concyclic_E2_of_constant_signedMengerProfile_ne_zero {n : ℕ} [NeZero n
     Concyclic v := by
   exact concyclic_of_constant_signedMengerProfile_ne_zero hsimple hregular hc hc0
 
+/-- E² strict-orientation constant-profile equivalence: for a simple locally
+regular strictly oriented polygon, concyclicity is exactly constancy of the
+signed-Menger profile. -/
+theorem concyclic_E2_iff_exists_constant_signedMengerProfile_strict_orientation
+    {n : ℕ} [NeZero n] (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v) :
+    Concyclic v ↔ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  exact concyclic_iff_exists_constant_signedMengerProfile_strict_orientation
+    hsimple hregular horient
+
 /-- E² nonconcyclic constant-profile reduction: if a locally regular simple
 polygon is not concyclic and has constant signed-Menger profile, that constant
 is zero. -/

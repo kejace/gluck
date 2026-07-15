@@ -3702,6 +3702,27 @@ theorem exists_constant_signedMengerProfile_of_concyclic_strict_orientation {n :
   · exact exists_constant_signedMengerProfile_of_concyclic_negativeOrientation
       hsimple hcyc hneg
 
+/-- For a simple locally regular strictly oriented polygon, concyclicity is
+equivalent to constancy of the signed-Menger profile. -/
+theorem concyclic_iff_exists_constant_signedMengerProfile_strict_orientation
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v) :
+    Concyclic v ↔ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  constructor
+  · intro hcyc
+    exact exists_constant_signedMengerProfile_of_concyclic_strict_orientation
+      hsimple hcyc horient
+  · rintro ⟨c, hc⟩
+    have hc0 : c ≠ 0 := by
+      intro hczero
+      have hzero : ∀ i : ZMod n, SignedMengerProfile v i = 0 := by
+        intro i
+        rw [hc i, hczero]
+      exact not_constant_signedMengerProfile_zero_of_isSimplePolygon
+        hsimple hregular hzero
+    exact concyclic_of_constant_signedMengerProfile_ne_zero hsimple hregular hc hc0
+
 /-- Under consistent positive orientation, a nonconstant signed-Menger profile
 rules out concyclicity. -/
 theorem not_concyclic_of_not_constant_signedMengerProfile_pos {n : ℕ}
