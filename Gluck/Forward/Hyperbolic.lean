@@ -33,7 +33,7 @@ theorem four_vertex_H2 {z : ℝ → ℂ} {κ : ℝ → ℝ}
 /-- Grant--Mogilski's hyperbolic discrete four-vertex theorem for a convex
 coherent polygon whose consecutive triples lie on proper hyperbolic circles
 (`κᵢ > 1`).  The proof is deferred while E² is developed. -/
-theorem discrete_four_vertex_H2 {n : ℕ} [NeZero n]
+theorem discrete_four_vertex_H2_kernel {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
     (hdisk : ∀ i, ‖v i‖ < 1)
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
@@ -42,5 +42,18 @@ theorem discrete_four_vertex_H2 {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
     DahlbergFourVertex κ := by
   sorry
+
+/-- Hyperbolic discrete four-vertex theorem for a convex coherent polygon
+whose consecutive triples lie on proper hyperbolic circles, exposed as a
+public wrapper around the Grant--Mogilski geometric kernel. -/
+theorem discrete_four_vertex_H2 {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
+    DahlbergFourVertex κ := by
+  exact discrete_four_vertex_H2_kernel hn v κ hdisk hsimple hconvex hregular hκ hcircle
 
 end Gluck.Forward

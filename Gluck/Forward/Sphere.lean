@@ -33,7 +33,7 @@ theorem four_vertex_S2 {z : ℝ → ℂ} {κ : ℝ → ℝ}
 /-- Deferred spherical discrete four-vertex theorem for a convex coherent
 polygon in an open hemisphere.  This is the project-derived `sin R` analogue
 of the Musin / Grant--Mogilski circumradius theorem and appears to be new. -/
-theorem discrete_four_vertex_S2 {n : ℕ} [NeZero n]
+theorem discrete_four_vertex_S2_kernel {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
     (hdisk : ∀ i, ‖v i‖ < 1)
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
@@ -42,5 +42,17 @@ theorem discrete_four_vertex_S2 {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger 1 v κ) :
     DahlbergFourVertex κ := by
   sorry
+
+/-- Spherical discrete four-vertex theorem for a convex coherent polygon in an
+open hemisphere, exposed as a public wrapper around the geometric kernel. -/
+theorem discrete_four_vertex_S2 {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    DahlbergFourVertex κ := by
+  exact discrete_four_vertex_S2_kernel hn v κ hdisk hsimple hconvex hregular hκ
 
 end Gluck.Forward
