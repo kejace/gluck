@@ -49,6 +49,54 @@ alternating four-sample level window. -/
 def DiscreteFourVertex {n : ℕ} (κ : ZMod n → ℝ) : Prop :=
   (∃ c, ∀ i, κ i = c) ∨ ∃ c, AlternatesAcrossLevel κ c
 
+/-- Nonzero affine changes preserve the alternating four-sample level window,
+with the cyclic order rotated when the scale is negative. -/
+theorem alternatesAcrossLevel_affine {n : ℕ} {κ : ZMod n → ℝ} {a b c : ℝ}
+    (ha : a ≠ 0) (halt : AlternatesAcrossLevel κ c) :
+    AlternatesAcrossLevel (fun i => a * κ i + b) (a * c + b) := by
+  rcases halt with
+    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁, hlow₂, hlow₄, hhigh₁, hhigh₃⟩
+  rcases lt_or_gt_of_ne ha with hneg | hpos
+  · have hwrap : ((i₁ + n : ℕ) : ZMod n) = (i₁ : ZMod n) := by
+      rw [Nat.cast_add, ZMod.natCast_self, add_zero]
+    refine ⟨i₂, i₃, i₄, i₁ + n, hi₂₃, hi₃₄, hi₄₁,
+      Nat.add_lt_add_right hi₁₂ n, ?_, ?_, ?_, ?_⟩
+    · nlinarith
+    · have hlow₁ : a * κ (i₁ : ZMod n) + b < a * c + b := by
+        nlinarith
+      simpa [hwrap] using hlow₁
+    · nlinarith
+    · nlinarith
+  · exact ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
+      by nlinarith, by nlinarith, by nlinarith, by nlinarith⟩
+
+/-- Nonzero affine changes preserve the discrete level-window four-vertex
+conclusion. -/
+theorem discreteFourVertex_affine {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
+    (ha : a ≠ 0) (hfv : DiscreteFourVertex κ) :
+    DiscreteFourVertex (fun i => a * κ i + b) := by
+  rcases hfv with hconst | halt
+  · rcases hconst with ⟨c, hc⟩
+    exact Or.inl ⟨a * c + b, fun i => by simp [hc i]⟩
+  · rcases halt with ⟨c, hc⟩
+    exact Or.inr ⟨a * c + b, alternatesAcrossLevel_affine ha hc⟩
+
+/-- Nonzero affine changes preserve the discrete level-window four-vertex
+conclusion exactly. -/
+theorem discreteFourVertex_affine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
+    (ha : a ≠ 0) :
+    DiscreteFourVertex (fun i => a * κ i + b) ↔ DiscreteFourVertex κ := by
+  constructor
+  · intro hfv
+    have hscaled :=
+      discreteFourVertex_affine (κ := fun i => a * κ i + b)
+        (a := a⁻¹) (b := -b / a) (inv_ne_zero ha) hfv
+    convert hscaled using 1
+    ext i
+    field_simp [ha]
+    ring
+  · exact discreteFourVertex_affine ha
+
 /-- The Dahlberg polygon-size hypothesis implies the neighbour-extrema size
 hypothesis used by strict one-step constructors. -/
 theorem two_le_of_four_le {n : ℕ} (hn : 4 ≤ n) : 2 ≤ n := by
