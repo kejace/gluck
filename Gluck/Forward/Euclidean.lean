@@ -138,6 +138,45 @@ theorem constant_signedMengerProfile_eq_zero_E2_of_not_concyclic {n : ℕ} [NeZe
     c = 0 := by
   exact constant_signedMengerProfile_eq_zero_of_not_concyclic hsimple hregular hnoncircle hc
 
+/-- E² reduction: for a nonconcyclic locally regular simple polygon, one
+nonzero signed-Menger value forces the signed-Menger profile to be
+nonconstant. -/
+theorem signedMengerProfile_not_constant_E2_of_exists_ne_zero {n : ℕ} [NeZero n]
+    (v : ZMod n → ℂ) (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v)
+    (hne : ∃ i : ZMod n, SignedMengerProfile v i ≠ 0) :
+    ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  exact not_constant_signedMengerProfile_of_not_concyclic_of_exists_ne_zero
+    hsimple hregular hnoncircle hne
+
+/-- E² reduction: for a nonconcyclic locally regular simple polygon, one
+nonzero signed-Menger value forces both an adjacent strict increase and an
+adjacent strict decrease. -/
+theorem signedMengerProfile_adjacent_increase_and_decrease_E2_of_exists_ne_zero
+    {n : ℕ} [NeZero n] (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v)
+    (hne : ∃ i : ZMod n, SignedMengerProfile v i ≠ 0) :
+    (∃ i : ZMod n, SignedMengerProfile v i < SignedMengerProfile v (i + 1)) ∧
+      ∃ i : ZMod n, SignedMengerProfile v (i + 1) < SignedMengerProfile v i := by
+  exact signedMengerProfile_exists_adjacent_increase_and_decrease_of_not_concyclic_of_exists_ne_zero
+    hsimple hregular hnoncircle hne
+
+/-- E² reduction: for a nonconcyclic locally regular simple polygon, one
+nonzero signed-Menger value gives strictly separated global minimum and maximum
+signed-Menger values. -/
+theorem signedMengerProfile_globalMinMax_strict_E2_of_exists_ne_zero
+    {n : ℕ} [NeZero n] (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v)
+    (hne : ∃ i : ZMod n, SignedMengerProfile v i ≠ 0) :
+    ∃ i₀ i₁ : ZMod n,
+      (∀ j : ZMod n, SignedMengerProfile v i₀ ≤ SignedMengerProfile v j) ∧
+      (∀ j : ZMod n, SignedMengerProfile v j ≤ SignedMengerProfile v i₁) ∧
+      SignedMengerProfile v i₀ < SignedMengerProfile v i₁ := by
+  exact signedMengerProfile_exists_globalMinMax_strict_of_not_concyclic_of_exists_ne_zero
+    hsimple hregular hnoncircle hne
+
 /-- E² zero-profile reduction: a constant-zero signed-Menger profile makes
 every consecutive triple collinear in oriented-area form. -/
 theorem vertex_cross_eq_zero_E2_of_constant_signedMengerProfile_zero {n : ℕ}
