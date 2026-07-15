@@ -1594,6 +1594,30 @@ theorem polygonEdgePrev_cross_neg_of_vertex_cross_neg {n : ℕ} {v : ZMod n → 
     Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) < 0 := by
   rwa [← polygonCross_eq_edgePrev i]
 
+/-- Polygon-indexed form of Dahlberg Lemma 8(1) for the left endpoint of the
+edge `i → i+1`. -/
+theorem polygonEdgePrev_region_subset_halfPlane_of_nonneg {n : ℕ} {v : ZMod n → ℂ}
+    {i : ZMod n}
+    (hk : 0 ≤ Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) :
+    edgePointDahlbergRegion (v i) (v (i + 1)) (v (i - 1)) ⊆
+      edgeHalfPlane (v i) (v (i + 1)) := by
+  have hk' :
+      0 ≤ Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) := by
+    rwa [← polygonSignedMenger_eq_edgePrev i]
+  exact edgePointDahlbergRegion_subset_edgeHalfPlane_of_nonneg hk'
+
+/-- Polygon-indexed form of Dahlberg Lemma 8(2) for the left endpoint of the
+edge `i → i+1`. -/
+theorem polygonEdgePrev_halfPlane_subset_region_of_nonpos {n : ℕ} {v : ZMod n → ℂ}
+    {i : ZMod n}
+    (hk : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) ≤ 0) :
+    edgeHalfPlane (v i) (v (i + 1)) ⊆
+      edgePointDahlbergRegion (v i) (v (i + 1)) (v (i - 1)) := by
+  have hk' :
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) ≤ 0 := by
+    rwa [← polygonSignedMenger_eq_edgePrev i]
+  exact edgeHalfPlane_subset_edgePointDahlbergRegion_of_nonpos hk'
+
 /-- Polygon-indexed endpoint form of Dahlberg Lemma 8 for the oriented edge
 from `v i` to `v (i+1)`. The curvature at the left endpoint is cyclically
 rewritten to use the same oriented edge. -/
