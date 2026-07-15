@@ -1,4 +1,4 @@
-import Gluck.Forward.Defs
+import Gluck.Forward.Dahlberg
 
 /-!
 # Forward four-vertex theorems in the Euclidean plane
@@ -48,6 +48,6 @@ theorem dahlberg_discrete_four_vertex_E2 {n : ℕ} [NeZero n]
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex
       (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
-  sorry
+  exact dahlberg_discrete_four_vertex_E2_kernel hn v hsimple hregular hnoncircle
 
 end Gluck.Forward

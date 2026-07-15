@@ -2024,4 +2024,20 @@ theorem polygonEdgeCircleRadius_antitone_of_endpoint_order_pos_of_vertex_menger_
   exact polygonEdgeCircleRadius_antitone_of_endpoint_order_pos hsimple hregular i
     hPcross hQcross hκ
 
+/-! ## Dahlberg's Euclidean discrete four-vertex kernel -/
+
+/-- Dahlberg's Euclidean discrete four-vertex kernel.
+
+This is the named endpoint of the Lemma 8/10 reduction: a locally regular simple
+polygon whose vertices are not all concyclic has two plateau-aware local maxima
+and two plateau-aware local minima of signed Menger curvature, alternating
+around the cyclic vertex set. -/
+theorem dahlberg_discrete_four_vertex_E2_kernel {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex
+      (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
+  sorry
+
 end Gluck.Forward
