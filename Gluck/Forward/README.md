@@ -49,8 +49,12 @@ gates.
 
 The smooth forward statements for `E²`, `S²`, and `H²` are exposed through
 model-specific wrappers in `Euclidean.lean`, `Sphere.lean`, and
-`Hyperbolic.lean`, but they now share one source gate:
-`four_vertex_condition_smooth_spaceForm_kernel` in `Smooth.lean`.  The
+`Hyperbolic.lean`.  The shared dispatch theorem
+`four_vertex_condition_smooth_spaceForm_kernel` in `Smooth.lean` is proved by
+cases from the model-specific source gates
+`four_vertex_condition_smooth_E2_nonconstant_source`,
+`four_vertex_condition_smooth_S2_nonconstant_source`, and
+`four_vertex_condition_smooth_H2_nonconstant_source`.  The
 discrete forward statements for `S²` and `H²` are also exposed through
 model-specific wrappers in `Sphere.lean` and `Hyperbolic.lean`.  The shared
 dispatch theorem `constant_or_dahlbergFourVertex_spaceForm_kernel` in
