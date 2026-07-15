@@ -2151,6 +2151,33 @@ theorem not_concyclic_of_not_constant_signedMengerProfile_neg {n : ℕ}
   intro hcyc
   exact hnc (exists_constant_signedMengerProfile_of_concyclic_neg hsimple hcyc hcross)
 
+/-- Dahlberg's four-vertex conclusion makes the signed-Menger profile
+nonconstant. -/
+theorem not_constant_signedMengerProfile_of_dahlbergFourVertex {n : ℕ}
+    {v : ZMod n → ℂ} (hfv : DahlbergFourVertex (SignedMengerProfile v)) :
+    ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  exact not_constant_of_dahlbergFourVertex hfv
+
+/-- Under consistent positive orientation, Dahlberg's four-vertex conclusion
+rules out concyclicity. -/
+theorem not_concyclic_of_dahlbergFourVertex_pos {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hfv : DahlbergFourVertex (SignedMengerProfile v))
+    (hcross : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) :
+    ¬ Concyclic v := by
+  exact not_concyclic_of_not_constant_signedMengerProfile_pos hsimple
+    (not_constant_signedMengerProfile_of_dahlbergFourVertex hfv) hcross
+
+/-- Under consistent negative orientation, Dahlberg's four-vertex conclusion
+rules out concyclicity. -/
+theorem not_concyclic_of_dahlbergFourVertex_neg {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hfv : DahlbergFourVertex (SignedMengerProfile v))
+    (hcross : ∀ i, Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) < 0) :
+    ¬ Concyclic v := by
+  exact not_concyclic_of_not_constant_signedMengerProfile_neg hsimple
+    (not_constant_signedMengerProfile_of_dahlbergFourVertex hfv) hcross
+
 /-! ## Finite cyclic signed-Menger profile API -/
 
 /-- A nonconstant polygon signed-Menger profile has both a strict adjacent
