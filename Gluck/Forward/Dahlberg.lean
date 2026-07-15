@@ -4210,6 +4210,37 @@ theorem signedMengerProfile_neg_of_negativeOrientation {n : ℕ}
     simpa using hsimple.1 (i - 1)
   exact signedMengerR2_neg_of_cross_neg hAB (horient i)
 
+/-- Positive-orientation strict adjacent-turn radius comparison along one
+oriented edge. -/
+theorem signedMengerProfile_edgeCircleRadius_strictAnti_of_positiveOrientation
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) (i : ZMod n)
+    (hκ : SignedMengerProfile v i < SignedMengerProfile v (i + 1)) :
+    normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1))) <
+      normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1))) := by
+  exact signedMengerProfile_edgeCircleRadius_strictAnti_of_endpoint_order_pos
+    hsimple hregular i
+    (signedMengerProfile_pos_of_positiveOrientation hsimple horient i)
+    hκ
+
+/-- Negative-orientation strict adjacent-turn radius comparison along one
+oriented edge. -/
+theorem signedMengerProfile_edgeCircleRadius_strictMono_of_negativeOrientation
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (horient : NegativePolygonOrientation v) (i : ZMod n)
+    (hκ : SignedMengerProfile v i < SignedMengerProfile v (i + 1)) :
+    normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1))) <
+      normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1))) := by
+  have hneg := signedMengerProfile_neg_of_negativeOrientation hsimple horient
+  exact signedMengerProfile_edgeCircleRadius_strictMono_of_endpoint_order_neg
+    hsimple hregular i (hneg i) (hneg (i + 1)) hκ
+
 /-- Pointwise positive signed-Menger profile forces positive polygon
 orientation. -/
 theorem positiveOrientation_of_signedMengerProfile_pos {n : ℕ}
