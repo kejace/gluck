@@ -5954,4 +5954,110 @@ theorem chartInvIcc_eq_chartInv {p q : ℝ} (hp : 0 < p) (hq : 0 < q) {s : ℝ}
     (Set.Ioo_subset_Icc_self (chartInv_mem hp hq hs)) ?_
   rw [chartMap_chartInvIcc hsIcc, chartMap_chartInv hp hq hs]
 
+/-- **Joint continuity of the closed-wall edge-length recovery over a compact
+curvature family** (`def:closing_rect`, R-d): for continuous positive
+curvature families `p q : T → ℝ` on a compact Hausdorff `T`, the closed
+recovery `(τ, s) ↦ chartInvIcc (p τ) (q τ) s` is jointly continuous on the
+pairs whose value is achieved in the CLOSED moderate interval — i.e. on the
+full closed chart intervals `[0, chartWall]`, saturation and collapse faces
+included. Same normalization + compact-to-Hausdorff route as the landed
+`continuousOn_chartInv_family`, with window `[c, d] = [0, 1]` (admissible
+because the closed chart is strictly monotone, `chartMap_strictMonoOn_Icc`). -/
+theorem continuousOn_chartInvIcc_family {T : Type*} [TopologicalSpace T]
+    [CompactSpace T] [T2Space T] {p q : T → ℝ} (hp : ∀ τ, 0 < p τ)
+    (hq : ∀ τ, 0 < q τ) (hpc : Continuous p) (hqc : Continuous q) :
+    ContinuousOn (fun x : T × ℝ => chartInvIcc (p x.1) (q x.1) x.2)
+      {x : T × ℝ | x.2 ∈ chartMap (p x.1) (q x.1) ''
+        Set.Icc (0 : ℝ) (2 / max (p x.1) (q x.1))} := by
+  have hmax : ∀ τ, 0 < max (p τ) (q τ) := fun τ =>
+    lt_of_lt_of_le (hp τ) (le_max_left _ _)
+  have hone : ∀ τ : T, 2 / max (p τ) (q τ) * (max (p τ) (q τ) / 2) = 1 := by
+    intro τ
+    rw [div_mul_div_comm, mul_comm (max (p τ) (q τ)) 2,
+      div_self (mul_ne_zero two_ne_zero (hmax τ).ne')]
+  have hone' : ∀ τ : T, max (p τ) (q τ) / 2 * (2 / max (p τ) (q τ)) = 1 := by
+    intro τ
+    rw [div_mul_div_comm, mul_comm 2 (max (p τ) (q τ)),
+      div_self (mul_ne_zero (hmax τ).ne' two_ne_zero)]
+  set g : T → ℝ → ℝ :=
+    fun τ y => chartMap (p τ) (q τ) (y * (2 / max (p τ) (q τ))) with hg
+  set inv : T → ℝ → ℝ :=
+    fun τ s => chartInvIcc (p τ) (q τ) s * (max (p τ) (q τ) / 2) with hinv
+  -- the normalized closed window maps into the closed moderate interval
+  have hscale : ∀ τ, ∀ y ∈ Set.Icc (0 : ℝ) 1,
+      y * (2 / max (p τ) (q τ)) ∈ Set.Icc (0 : ℝ) (2 / max (p τ) (q τ)) := by
+    intro τ y hy
+    have h2 : (0 : ℝ) < 2 / max (p τ) (q τ) := div_pos two_pos (hmax τ)
+    refine ⟨mul_nonneg hy.1 h2.le, ?_⟩
+    calc y * (2 / max (p τ) (q τ)) ≤ 1 * (2 / max (p τ) (q τ)) :=
+          mul_le_mul_of_nonneg_right hy.2 h2.le
+      _ = 2 / max (p τ) (q τ) := one_mul _
+  -- joint continuity of the normalized family
+  have hgc : Continuous fun x : T × ℝ => g x.1 x.2 := by
+    have hinner : Continuous fun x : T × ℝ => x.2 * (2 / max (p x.1) (q x.1)) :=
+      continuous_snd.mul (continuous_const.div
+        ((hpc.max hqc).comp continuous_fst) fun x => (hmax x.1).ne')
+    simp only [hg, chartMap]
+    exact (Real.continuous_arcsin.comp
+        (((hpc.comp continuous_fst).mul hinner).div_const 2)).add
+      (Real.continuous_arcsin.comp
+        (((hqc.comp continuous_fst).mul hinner).div_const 2))
+  -- injectivity on the normalized closed window
+  have hinj : ∀ τ, Set.InjOn (g τ) (Set.Icc (0 : ℝ) 1) := by
+    intro τ y₁ h₁ y₂ h₂ hEq
+    simp only [hg] at hEq
+    have := (chartMap_strictMonoOn_Icc (hp τ) (hq τ)).injOn
+      (hscale τ y₁ h₁) (hscale τ y₂ h₂) hEq
+    exact mul_right_cancel₀ (div_pos two_pos (hmax τ)).ne' this
+  -- the normalized value set is the closed achievable interval
+  have hset : ∀ τ : T, g τ '' Set.Icc (0 : ℝ) 1
+      = chartMap (p τ) (q τ) ''
+          Set.Icc (0 : ℝ) (2 / max (p τ) (q τ)) := by
+    intro τ
+    have himg : (fun y : ℝ => y * (2 / max (p τ) (q τ))) '' Set.Icc (0 : ℝ) 1
+        = Set.Icc (0 * (2 / max (p τ) (q τ))) (1 * (2 / max (p τ) (q τ))) :=
+      Set.image_mul_right_Icc zero_le_one (div_pos two_pos (hmax τ)).le
+    calc g τ '' Set.Icc (0 : ℝ) 1
+        = chartMap (p τ) (q τ) ''
+            ((fun y : ℝ => y * (2 / max (p τ) (q τ))) '' Set.Icc (0 : ℝ) 1) := by
+          rw [Set.image_image]
+      _ = _ := by rw [himg, zero_mul, one_mul]
+  -- the normalized closed recovery is a two-sided inverse on the value set
+  have hinv1 : ∀ τ s, s ∈ g τ '' Set.Icc (0 : ℝ) 1 → g τ (inv τ s) = s := by
+    intro τ s hs
+    rw [hset τ] at hs
+    simp only [hg, hinv]
+    rw [mul_assoc, hone' τ, mul_one]
+    exact chartMap_chartInvIcc hs
+  have hinv2 : ∀ τ s, s ∈ g τ '' Set.Icc (0 : ℝ) 1 →
+      inv τ s ∈ Set.Icc (0 : ℝ) 1 := by
+    intro τ s hs
+    rw [hset τ] at hs
+    obtain ⟨h1, h2⟩ := chartInvIcc_mem hs
+    simp only [hinv]
+    have hhalf : (0 : ℝ) < max (p τ) (q τ) / 2 := div_pos (hmax τ) two_pos
+    refine ⟨mul_nonneg h1 hhalf.le, ?_⟩
+    calc chartInvIcc (p τ) (q τ) s * (max (p τ) (q τ) / 2)
+        ≤ 2 / max (p τ) (q τ) * (max (p τ) (q τ) / 2) :=
+          mul_le_mul_of_nonneg_right h2 hhalf.le
+      _ = 1 := hone τ
+  have hmain := continuousOn_inv_family (g := g) (a := 0) (b := 1)
+    hgc hinj hinv1 hinv2
+  -- back to the original scale
+  have hfactor : Continuous fun x : T × ℝ => 2 / max (p x.1) (q x.1) :=
+    continuous_const.div ((hpc.max hqc).comp continuous_fst)
+      fun x => (hmax x.1).ne'
+  have hfinal : ContinuousOn (fun x : T × ℝ => chartInvIcc (p x.1) (q x.1) x.2)
+      {x : T × ℝ | x.2 ∈ g x.1 '' Set.Icc (0 : ℝ) 1} := by
+    refine (hmain.mul hfactor.continuousOn).congr fun x _ => ?_
+    simp only [hinv, Pi.mul_apply]
+    rw [mul_assoc, hone' x.1, mul_one]
+  have hsets : {x : T × ℝ | x.2 ∈ chartMap (p x.1) (q x.1) ''
+        Set.Icc (0 : ℝ) (2 / max (p x.1) (q x.1))}
+      = {x : T × ℝ | x.2 ∈ g x.1 '' Set.Icc (0 : ℝ) 1} := by
+    ext x
+    simp only [Set.mem_setOf_eq, hset x.1]
+  rw [hsets]
+  exact hfinal
+
 end Gluck.Discrete
