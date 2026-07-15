@@ -1067,21 +1067,21 @@ theorem orderedAdjacentTurns_translateIndex {n : ℕ} [NeZero n]
   refine ⟨j₁, j₂, j₃, j₄, by omega, by omega, by omega, by omega,
     ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · convert hinc₁ using 1
-    all_goals (simp [hj₁]; try abel)
+    all_goals (simp [hj₁]; try abel_nf)
   · convert hdec₁ using 1
-    all_goals (simp [hj₁]; try abel)
+    all_goals (simp [hj₁]; try abel_nf)
   · convert hdec₂ using 1
-    all_goals (simp [hj₂]; try abel)
+    all_goals (simp [hj₂]; try abel_nf)
   · convert hinc₂ using 1
-    all_goals (simp [hj₂]; try abel)
+    all_goals (simp [hj₂]; try abel_nf)
   · convert hinc₃ using 1
-    all_goals (simp [hj₃]; try abel)
+    all_goals (simp [hj₃]; try abel_nf)
   · convert hdec₃ using 1
-    all_goals (simp [hj₃]; try abel)
+    all_goals (simp [hj₃]; try abel_nf)
   · convert hdec₄ using 1
-    all_goals (simp [hj₄]; try abel)
+    all_goals (simp [hj₄]; try abel_nf)
   · convert hinc₄ using 1
-    all_goals (simp [hj₄]; try abel)
+    all_goals (simp [hj₄]; try abel_nf)
 
 /-- Translating cyclic indices preserves ordered adjacent turns exactly. -/
 theorem orderedAdjacentTurns_translateIndex_iff {n : ℕ} [NeZero n]

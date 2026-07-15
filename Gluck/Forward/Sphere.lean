@@ -30,6 +30,19 @@ theorem four_vertex_S2 {z : ℝ → ℂ} {κ : ℝ → ℝ}
   exact smoothFourVertex_of_fourVertexCondition
     (four_vertex_condition_S2_kernel hclosed hreal hκ hper)
 
+/-- Spherical convex/coherent source extraction: the `sin R` comparison
+argument for a polygon in an open hemisphere produces four ordered adjacent
+turns of the conformal Menger curvature profile. -/
+theorem exists_ordered_conformalMenger_turns_S2_kernel {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    OrderedAdjacentTurns κ := by
+  sorry
+
 /-- Deferred spherical discrete four-vertex theorem for a convex coherent
 polygon in an open hemisphere.  This is the project-derived `sin R` analogue
 of the Musin / Grant--Mogilski circumradius theorem and appears to be new. -/
@@ -41,7 +54,9 @@ theorem discrete_four_vertex_S2_kernel {n : ℕ} [NeZero n]
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger 1 v κ) :
     DahlbergFourVertex κ := by
-  sorry
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (exists_ordered_conformalMenger_turns_S2_kernel
+      hn v κ hdisk hsimple hconvex hregular hκ)
 
 /-- Spherical discrete four-vertex theorem for a convex coherent polygon in an
 open hemisphere, exposed as a public wrapper around the geometric kernel. -/

@@ -30,6 +30,19 @@ theorem four_vertex_H2 {z : ℝ → ℂ} {κ : ℝ → ℝ}
   exact smoothFourVertex_of_fourVertexCondition
     (four_vertex_condition_H2_kernel hclosed hreal hκ hper)
 
+/-- Hyperbolic convex/coherent source extraction: Grant--Mogilski's proper-circle
+comparison produces four ordered adjacent turns of the hyperbolic conformal
+Menger curvature profile. -/
+theorem exists_ordered_conformalMenger_turns_H2_kernel {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
+    OrderedAdjacentTurns κ := by
+  sorry
+
 /-- Grant--Mogilski's hyperbolic discrete four-vertex theorem for a convex
 coherent polygon whose consecutive triples lie on proper hyperbolic circles
 (`κᵢ > 1`).  The proof is deferred while E² is developed. -/
@@ -41,7 +54,9 @@ theorem discrete_four_vertex_H2_kernel {n : ℕ} [NeZero n]
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
     DahlbergFourVertex κ := by
-  sorry
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (exists_ordered_conformalMenger_turns_H2_kernel
+      hn v κ hdisk hsimple hconvex hregular hκ hcircle)
 
 /-- Hyperbolic discrete four-vertex theorem for a convex coherent polygon
 whose consecutive triples lie on proper hyperbolic circles, exposed as a
