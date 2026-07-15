@@ -35,6 +35,43 @@ theorem smoothFourVertex_of_fourVertexCondition {κ : ℝ → ℝ}
     exact Or.inr ⟨p₁, q₁, p₂, q₂, hpq, hqp, hpq', hcycle,
       hmax₁, hmin₁, hmax₂, hmin₂⟩
 
+/-- Positive affine changes preserve the smooth forward four-vertex
+conclusion. -/
+theorem smoothFourVertex_posAffine {κ : ℝ → ℝ} {a b : ℝ} (ha : 0 < a)
+    (hfv : SmoothFourVertex κ) :
+    SmoothFourVertex (fun t => a * κ t + b) := by
+  have hmono : Monotone (fun x : ℝ => a * x + b) := by
+    intro x y hxy
+    nlinarith [mul_le_mul_of_nonneg_left hxy (le_of_lt ha)]
+  rcases hfv with hconst | hextrema
+  · rcases hconst with ⟨c, hc⟩
+    exact Or.inl ⟨a * c + b, fun t => by simp [hc t]⟩
+  · rcases hextrema with
+      ⟨p₁, q₁, p₂, q₂, hpq, hqp, hpq', hcycle, hmax₁, hmin₁, hmax₂, hmin₂⟩
+    exact Or.inr ⟨p₁, q₁, p₂, q₂, hpq, hqp, hpq', hcycle,
+      by simpa [Function.comp_def] using hmax₁.comp_mono hmono,
+      by simpa [Function.comp_def] using hmin₁.comp_mono hmono,
+      by simpa [Function.comp_def] using hmax₂.comp_mono hmono,
+      by simpa [Function.comp_def] using hmin₂.comp_mono hmono⟩
+
+/-- A smooth profile pointwise equal to a positive affine change of a
+four-vertex profile inherits the smooth forward conclusion. -/
+theorem smoothFourVertex_of_eq_posAffine {κ μ : ℝ → ℝ} {a b : ℝ} (ha : 0 < a)
+    (hμ : ∀ t, μ t = a * κ t + b) (hfv : SmoothFourVertex κ) :
+    SmoothFourVertex μ := by
+  have hscaled := smoothFourVertex_posAffine (κ := κ) (a := a) (b := b) ha hfv
+  convert hscaled using 1
+  ext t
+  exact hμ t
+
+/-- Pointwise equal smooth profiles have the same smooth forward four-vertex
+conclusion. -/
+theorem smoothFourVertex_congr {κ μ : ℝ → ℝ} (hμ : ∀ t, μ t = κ t)
+    (hfv : SmoothFourVertex κ) :
+    SmoothFourVertex μ := by
+  exact smoothFourVertex_of_eq_posAffine (a := 1) (b := 0) (by norm_num)
+    (by intro t; simp [hμ t]) hfv
+
 /-- Four cyclic samples alternating strictly above and below a common level.
 For a finite nonconstant cyclic sequence this is the level-set form of having
 two distinct local maxima and two distinct local minima. -/
