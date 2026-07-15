@@ -1034,6 +1034,81 @@ theorem orderedAdjacentTurns_congr {n : ℕ} {κ μ : ZMod n → ℝ}
   exact orderedAdjacentTurns_of_eq_posAffine (a := 1) (b := 0) (by norm_num)
     (by intro i; simp [hμ i]) hturns
 
+/-- Negating a cyclic profile preserves ordered adjacent turns, after rotating
+the witness to start at the first original valley. -/
+theorem orderedAdjacentTurns_neg {n : ℕ} {κ : ZMod n → ℝ}
+    (hturns : OrderedAdjacentTurns κ) :
+    OrderedAdjacentTurns (fun i => -κ i) := by
+  rcases hturns with
+    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
+      hinc₁, hdec₁, hdec₂, hinc₂, hinc₃, hdec₃, hdec₄, hinc₄⟩
+  have hwrap : ((i₁ + n : ℕ) : ZMod n) = (i₁ : ZMod n) := by
+    rw [Nat.cast_add, ZMod.natCast_self, add_zero]
+  refine ⟨i₂, i₃, i₄, i₁ + n, hi₂₃, hi₃₄, hi₄₁,
+    Nat.add_lt_add_right hi₁₂ n, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · exact neg_lt_neg hdec₂
+  · exact neg_lt_neg hinc₂
+  · exact neg_lt_neg hinc₃
+  · exact neg_lt_neg hdec₃
+  · exact neg_lt_neg hdec₄
+  · exact neg_lt_neg hinc₄
+  · simpa [hwrap] using neg_lt_neg hinc₁
+  · simpa [hwrap] using neg_lt_neg hdec₁
+
+/-- Ordered adjacent turns are invariant under negating the cyclic profile. -/
+theorem orderedAdjacentTurns_neg_iff {n : ℕ} {κ : ZMod n → ℝ} :
+    OrderedAdjacentTurns (fun i => -κ i) ↔ OrderedAdjacentTurns κ := by
+  constructor
+  · intro hturns
+    have hback := orderedAdjacentTurns_neg (κ := fun i : ZMod n => -κ i) hturns
+    convert hback using 1
+    ext i
+    simp
+  · exact orderedAdjacentTurns_neg
+
+/-- Nonzero affine changes preserve ordered adjacent turns.  Negative scales
+are handled by negating the profile, which swaps maxima and minima and rotates
+the ordered witness. -/
+theorem orderedAdjacentTurns_affine {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
+    (ha : a ≠ 0) (hturns : OrderedAdjacentTurns κ) :
+    OrderedAdjacentTurns (fun i => a * κ i + b) := by
+  rcases lt_or_gt_of_ne ha with hneg | hpos
+  · have hturns_neg : OrderedAdjacentTurns (fun i => -κ i) :=
+      orderedAdjacentTurns_neg hturns
+    have hscaled :=
+      orderedAdjacentTurns_posAffine (κ := fun i : ZMod n => -κ i)
+        (a := -a) (b := b) (neg_pos.mpr hneg) hturns_neg
+    convert hscaled using 1
+    ext i
+    ring
+  · exact orderedAdjacentTurns_posAffine hpos hturns
+
+/-- Nonzero affine changes preserve ordered adjacent turns exactly. -/
+theorem orderedAdjacentTurns_affine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
+    (ha : a ≠ 0) :
+    OrderedAdjacentTurns (fun i => a * κ i + b) ↔ OrderedAdjacentTurns κ := by
+  constructor
+  · intro hturns
+    have hback :=
+      orderedAdjacentTurns_affine (κ := fun i => a * κ i + b)
+        (a := a⁻¹) (b := -b / a) (inv_ne_zero ha) hturns
+    convert hback using 1
+    ext i
+    field_simp [ha]
+    ring
+  · exact orderedAdjacentTurns_affine ha
+
+/-- A cyclic profile pointwise equal to a nonzero affine change of another
+profile inherits ordered adjacent turns. -/
+theorem orderedAdjacentTurns_of_eq_affine {n : ℕ} {κ μ : ZMod n → ℝ}
+    {a b : ℝ} (ha : a ≠ 0) (hμ : ∀ i : ZMod n, μ i = a * κ i + b)
+    (hturns : OrderedAdjacentTurns κ) :
+    OrderedAdjacentTurns μ := by
+  have hscaled := orderedAdjacentTurns_affine (κ := κ) (a := a) (b := b) ha hturns
+  convert hscaled using 1
+  ext i
+  exact hμ i
+
 /-- Translating cyclic indices preserves ordered adjacent turns. -/
 theorem orderedAdjacentTurns_translateIndex {n : ℕ} [NeZero n]
     {κ : ZMod n → ℝ} (a : ZMod n) (hturns : OrderedAdjacentTurns κ) :
