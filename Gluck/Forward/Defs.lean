@@ -941,6 +941,76 @@ theorem dahlbergFourVertex_of_ordered_turns {n : ℕ} (hn : 2 ≤ n)
   · simpa [Nat.cast_add, sub_eq_add_neg, add_assoc] using hdec₄
   · simpa [Nat.cast_add, add_assoc] using hinc₄
 
+/-- Four ordered adjacent turns of a cyclic profile, alternating
+increase/decrease/decrease/increase.  This is the source witness extracted by
+Dahlberg's geometric comparison arguments before the purely cyclic conversion
+to plateau-aware local extrema. -/
+def OrderedAdjacentTurns {n : ℕ} (κ : ZMod n → ℝ) : Prop :=
+  ∃ i₁ i₂ i₃ i₄ : ℕ,
+    i₁ < i₂ ∧ i₂ < i₃ ∧ i₃ < i₄ ∧ i₄ < i₁ + n ∧
+      κ (i₁ : ZMod n) < κ ((i₁ : ZMod n) + 1) ∧
+      κ (((i₁ : ZMod n) + 1) + 1) < κ ((i₁ : ZMod n) + 1) ∧
+      κ ((i₂ : ZMod n) + 1) < κ (i₂ : ZMod n) ∧
+      κ ((i₂ : ZMod n) + 1) < κ (((i₂ : ZMod n) + 1) + 1) ∧
+      κ (i₃ : ZMod n) < κ ((i₃ : ZMod n) + 1) ∧
+      κ (((i₃ : ZMod n) + 1) + 1) < κ ((i₃ : ZMod n) + 1) ∧
+      κ ((i₄ : ZMod n) + 1) < κ (i₄ : ZMod n) ∧
+      κ ((i₄ : ZMod n) + 1) < κ (((i₄ : ZMod n) + 1) + 1)
+
+/-- Four ordered adjacent turns imply Dahlberg's plateau-aware four-vertex
+conclusion. -/
+theorem dahlbergFourVertex_of_orderedAdjacentTurns {n : ℕ} (hn : 2 ≤ n)
+    {κ : ZMod n → ℝ} (hturns : OrderedAdjacentTurns κ) :
+    DahlbergFourVertex κ := by
+  rcases hturns with
+    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
+      hinc₁, hdec₁, hdec₂, hinc₂, hinc₃, hdec₃, hdec₄, hinc₄⟩
+  exact dahlbergFourVertex_of_ordered_turns hn hi₁₂ hi₂₃ hi₃₄ hi₄₁
+    hinc₁ hdec₁ hdec₂ hinc₂ hinc₃ hdec₃ hdec₄ hinc₄
+
+/-- Four ordered adjacent turns imply Dahlberg's conclusion under the standard
+`4 ≤ n` polygon-size hypothesis. -/
+theorem dahlbergFourVertex_of_orderedAdjacentTurns_four_le {n : ℕ}
+    (hn : 4 ≤ n) {κ : ZMod n → ℝ} (hturns : OrderedAdjacentTurns κ) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_of_orderedAdjacentTurns (two_le_of_four_le hn) hturns
+
+/-- Positive affine changes preserve ordered adjacent turns. -/
+theorem orderedAdjacentTurns_posAffine {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
+    (ha : 0 < a) (hturns : OrderedAdjacentTurns κ) :
+    OrderedAdjacentTurns (fun i => a * κ i + b) := by
+  rcases hturns with
+    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
+      hinc₁, hdec₁, hdec₂, hinc₂, hinc₃, hdec₃, hdec₄, hinc₄⟩
+  refine ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · nlinarith [mul_lt_mul_of_pos_left hinc₁ ha]
+  · nlinarith [mul_lt_mul_of_pos_left hdec₁ ha]
+  · nlinarith [mul_lt_mul_of_pos_left hdec₂ ha]
+  · nlinarith [mul_lt_mul_of_pos_left hinc₂ ha]
+  · nlinarith [mul_lt_mul_of_pos_left hinc₃ ha]
+  · nlinarith [mul_lt_mul_of_pos_left hdec₃ ha]
+  · nlinarith [mul_lt_mul_of_pos_left hdec₄ ha]
+  · nlinarith [mul_lt_mul_of_pos_left hinc₄ ha]
+
+/-- A cyclic profile pointwise equal to a positive affine change of another
+profile inherits ordered adjacent turns. -/
+theorem orderedAdjacentTurns_of_eq_posAffine {n : ℕ} {κ μ : ZMod n → ℝ}
+    {a b : ℝ} (ha : 0 < a) (hμ : ∀ i : ZMod n, μ i = a * κ i + b)
+    (hturns : OrderedAdjacentTurns κ) :
+    OrderedAdjacentTurns μ := by
+  have hscaled := orderedAdjacentTurns_posAffine (κ := κ) (a := a) (b := b) ha hturns
+  convert hscaled using 1
+  ext i
+  exact hμ i
+
+/-- Pointwise equal cyclic profiles have the same ordered-adjacent-turn
+witness. -/
+theorem orderedAdjacentTurns_congr {n : ℕ} {κ μ : ZMod n → ℝ}
+    (hμ : ∀ i : ZMod n, μ i = κ i) (hturns : OrderedAdjacentTurns κ) :
+    OrderedAdjacentTurns μ := by
+  exact orderedAdjacentTurns_of_eq_posAffine (a := 1) (b := 0) (by norm_num)
+    (by intro i; simp [hμ i]) hturns
+
 /-- A cyclic real profile has a global maximum. -/
 theorem exists_globalMax_zmod {n : ℕ} [NeZero n] (κ : ZMod n → ℝ) :
     ∃ i : ZMod n, ∀ j : ZMod n, κ j ≤ κ i := by
