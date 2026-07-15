@@ -6060,4 +6060,153 @@ theorem continuousOn_chartInvIcc_family {T : Type*} [TopologicalSpace T]
   rw [hsets]
   exact hfinal
 
+/-! ### The closed-rectangle 2-cell and the fixed-square gap map `H`
+(`def:closing_rect`) -/
+
+/-- **The closed-rectangle 2-cell `Φ̄`** (`def:closing_rect`): the closing
+2-cell extended to the CLOSED walls via the closed-wall recovery
+`chartInvIcc`; total in all arguments (no positivity/time proofs needed).
+Agrees with the landed `closingCell` wherever the chart values are achieved
+in the open moderate window (`closingCellIcc_eq_closingCell`). -/
+noncomputable def closingCellIcc (m : ℕ) (a b : ZMod n) (κs κ : ZMod n → ℝ)
+    (t : ℝ) (z : ℝ × ℝ) : ZMod n → ℝ := fun j =>
+  chartInvIcc (curvPath κs κ t j) (curvPath κs κ t (j + 1))
+    (chartPerturb m a b z j)
+
+/-- On the open achievable window the closed-rectangle 2-cell agrees with the
+landed open 2-cell `Φ` — zeros of the fixed-square gap map in the open cell
+are zeros of the landed gap map `F`. -/
+theorem closingCellIcc_eq_closingCell (m : ℕ) (a b : ZMod n)
+    {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i)
+    {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) {z : ℝ × ℝ}
+    (hmem : ∀ j : ZMod n, chartPerturb m a b z j ∈
+      chartMap (curvPath κs κ t j) (curvPath κs κ t (j + 1)) ''
+        Set.Ioo (0 : ℝ)
+          (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1)))) :
+    closingCellIcc m a b κs κ t z = closingCell m a b hκs hκ ht0 ht1 z := by
+  funext j
+  exact chartInvIcc_eq_chartInv (curvPath_pos hκs hκ ht0 ht1 j)
+    (curvPath_pos hκs hκ ht0 ht1 (j + 1)) (hmem j)
+
+/-- **The fixed-square gap map `H`** (`def:closing_rect`):
+`H(t, q) = F̄(t, Ξ_t(q))` — the closure gap of the closed-rectangle 2-cell at
+the normalized point. Total; continuous on `[0,1] × [-1,1]²`
+(`continuousOn_closingRectGap`); agrees with the landed open gap map `F`
+wherever the chart values stay in the open window
+(`closingRectGap_eq_closingGap`) — in particular at the center
+(`closingRectGap_center`). The in-tree fixed-domain winding engine applies
+to `H` on the fixed square. -/
+noncomputable def closingRectGap (m : ℕ) (a b : ZMod n) (κs κ : ZMod n → ℝ)
+    (t : ℝ) (q : ℝ × ℝ) : ℂ :=
+  closureGap (curvPath κs κ t)
+    (closingCellIcc m a b κs κ t (rectRescale κs κ m a b t q))
+
+/-- Where the chart values of the normalized point stay in the open window,
+the fixed-square gap map is the landed gap map `F` at `Ξ_t(q)`. -/
+theorem closingRectGap_eq_closingGap (m : ℕ) (a b : ZMod n)
+    {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i)
+    {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) {q : ℝ × ℝ}
+    (hmem : ∀ j : ZMod n,
+      chartPerturb m a b (rectRescale κs κ m a b t q) j ∈
+        chartMap (curvPath κs κ t j) (curvPath κs κ t (j + 1)) ''
+          Set.Ioo (0 : ℝ)
+            (2 / max (curvPath κs κ t j) (curvPath κs κ t (j + 1)))) :
+    closingRectGap m a b κs κ t q
+      = closingGap m a b hκs hκ ht0 ht1 (rectRescale κs κ m a b t q) := by
+  unfold closingRectGap closingGap
+  rw [closingCellIcc_eq_closingCell m a b hκs hκ ht0 ht1 hmem]
+
+/-- At the center of the fixed square the fixed-square gap map is the landed
+gap map at the center of the 2-cell: `H(t, 0) = F(t, 0)` — the anchor values
+(`closingGap_center_eq_zero`, `anchorGap_center_eq_zero`) transfer to `H`. -/
+theorem closingRectGap_center [NeZero n] (hn4 : 4 ≤ n) (m : ℕ) (a b : ZMod n)
+    {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i)
+    {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) :
+    closingRectGap m a b κs κ t (0, 0)
+      = closingGap m a b hκs hκ ht0 ht1 (0, 0) := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hα0 : 0 < 2 * Real.pi / n := by positivity
+  have hα2 := two_pi_div_le_pi_div_two (n := n) hn4
+  unfold closingRectGap closingGap
+  rw [rectRescale_zero,
+    closingCellIcc_eq_closingCell m a b hκs hκ ht0 ht1 fun j => ?_]
+  rw [chartPerturb_zero]
+  refine chartMap_mem_image (curvPath_pos hκs hκ ht0 ht1 j)
+    (curvPath_pos hκs hκ ht0 ht1 (j + 1)) hα0 ?_
+  have hw := pi_div_two_lt_chartMap_wall (curvPath_pos hκs hκ ht0 ht1 j)
+    (curvPath_pos hκs hκ ht0 ht1 (j + 1))
+  linarith
+
+/-- Joint continuity of the closed-rectangle 2-cell at the normalized point,
+edge by edge, on the FULL fixed square: the chart value of `Ξ_t(q)` stays in
+the closed achievable interval (`chartPerturb_rectRescale_mem_wall` +
+`chartMap_image_Icc_eq`), where the closed recovery family is continuous. -/
+theorem continuousOn_closingRectCell_apply [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    {a b : ZMod n} (hm0 : (m : ZMod n) ≠ 0) (hab : a ≠ b) (habm : a ≠ b + m)
+    (hbam : b ≠ a + m) {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (hκ : ∀ i, 0 < κ i) (j : ZMod n) :
+    ContinuousOn (fun x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) =>
+        closingCellIcc m a b κs κ ↑x.1 (rectRescale κs κ m a b ↑x.1 x.2) j)
+      {x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) |
+        x.2.1 ∈ Set.Icc (-1 : ℝ) 1 ∧ x.2.2 ∈ Set.Icc (-1 : ℝ) 1} := by
+  have hfam := continuousOn_chartInvIcc_family
+    (p := fun τ : ↥(Set.Icc (0 : ℝ) 1) => curvPath κs κ (↑τ) j)
+    (q := fun τ : ↥(Set.Icc (0 : ℝ) 1) => curvPath κs κ (↑τ) (j + 1))
+    (fun τ => curvPath_pos hκs hκ τ.2.1 τ.2.2 j)
+    (fun τ => curvPath_pos hκs hκ τ.2.1 τ.2.2 (j + 1))
+    ((continuous_curvPath κs κ j).comp continuous_subtype_val)
+    ((continuous_curvPath κs κ (j + 1)).comp continuous_subtype_val)
+  have hcomp : Continuous fun x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) =>
+      ((x.1, chartPerturb m a b (rectRescale κs κ m a b ↑x.1 x.2) j)
+        : ↥(Set.Icc (0 : ℝ) 1) × ℝ) :=
+    continuous_fst.prodMk ((continuous_chartPerturb m a b j).comp
+      (continuous_rectRescale hκs hκ m a b))
+  have hmaps : Set.MapsTo
+      (fun x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) =>
+        ((x.1, chartPerturb m a b (rectRescale κs κ m a b ↑x.1 x.2) j)
+          : ↥(Set.Icc (0 : ℝ) 1) × ℝ))
+      {x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) |
+        x.2.1 ∈ Set.Icc (-1 : ℝ) 1 ∧ x.2.2 ∈ Set.Icc (-1 : ℝ) 1}
+      {x : ↥(Set.Icc (0 : ℝ) 1) × ℝ | x.2 ∈
+        chartMap (curvPath κs κ (↑x.1) j) (curvPath κs κ (↑x.1) (j + 1)) ''
+          Set.Icc (0 : ℝ)
+            (2 / max (curvPath κs κ (↑x.1) j)
+              (curvPath κs κ (↑x.1) (j + 1)))} := by
+    rintro x ⟨hx1, hx2⟩
+    have hwall := chartPerturb_rectRescale_mem_wall hn4 hm0 hab habm hbam
+      hκs hκ x.1.2.1 x.1.2.2 hx1 hx2 j
+    rw [Set.mem_setOf_eq, chartMap_image_Icc_eq
+      (curvPath_pos hκs hκ x.1.2.1 x.1.2.2 j)
+      (curvPath_pos hκs hκ x.1.2.1 x.1.2.2 (j + 1))]
+    exact hwall
+  exact (hfam.comp hcomp.continuousOn hmaps).congr fun x _ => rfl
+
+/-- **Continuity of the fixed-square gap map on the whole fixed square**
+(`def:closing_rect`): for a nondegenerate pair configuration,
+`(t, q) ↦ H(t, q)` is continuous on `[0,1] × [-1,1]²` — walls included. The
+fixed-domain winding engine (`windingNumberC` on `∂[-1,1]²` parametrized
+loops) applies to `H` with no moving-domain bookkeeping. -/
+theorem continuousOn_closingRectGap [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    {a b : ZMod n} (hm0 : (m : ZMod n) ≠ 0) (hab : a ≠ b) (habm : a ≠ b + m)
+    (hbam : b ≠ a + m) {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (hκ : ∀ i, 0 < κ i) :
+    ContinuousOn (fun x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) =>
+        closingRectGap m a b κs κ ↑x.1 x.2)
+      {x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) |
+        x.2.1 ∈ Set.Icc (-1 : ℝ) 1 ∧ x.2.2 ∈ Set.Icc (-1 : ℝ) 1} := by
+  have hpair : ContinuousOn
+      (fun x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) =>
+        ((curvPath κs κ (↑x.1),
+          closingCellIcc m a b κs κ (↑x.1) (rectRescale κs κ m a b (↑x.1) x.2)) :
+          (ZMod n → ℝ) × (ZMod n → ℝ)))
+      {x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) |
+        x.2.1 ∈ Set.Icc (-1 : ℝ) 1 ∧ x.2.2 ∈ Set.Icc (-1 : ℝ) 1} := by
+    refine ContinuousOn.prodMk ?_ ?_
+    · refine Continuous.continuousOn (continuous_pi fun i => ?_)
+      exact (continuous_curvPath κs κ i).comp
+        (continuous_subtype_val.comp continuous_fst)
+    · exact continuousOn_pi.mpr fun j =>
+        continuousOn_closingRectCell_apply hn4 hm0 hab habm hbam hκs hκ j
+  exact (continuous_closureGap.comp_continuousOn hpair).congr fun x _ => rfl
+
 end Gluck.Discrete
