@@ -877,6 +877,70 @@ theorem circumcircleR2_edge_radius_eq {A B C O : ℂ} {R : ℝ}
   have hR := normalizedCircumcircle_radius_eq (chordHalfLength_pos hAB).ne' hz hcircle'
   simpa [edgeCircumcenterParameter] using hR
 
+/-- Any Euclidean circumcircle through a noncollinear edge triple has the
+canonical edge centre. -/
+theorem circumcircleR2_edge_center_eq {A B C O : ℂ} {R : ℝ}
+    (hAB : A ≠ B) (hcross : Gluck.Discrete.crossR2 A B C ≠ 0)
+    (hcircle : CircumcircleR2 A B C O R) :
+    O = edgeCircleCenter A B (edgeCircumcenterParameter A B C) := by
+  have hcircle' := circumcircleR2_edgeCoordinates (E₁ := A) (E₂ := B) hAB hcircle
+  rw [(edgeCoordinates_endpoints hAB).1, (edgeCoordinates_endpoints hAB).2] at hcircle'
+  have hz := edgeCoordinates_im_ne_zero hAB hcross
+  have hO := eq_normalizedCircleCenter_of_equidistant (chordHalfLength_pos hAB).ne' hz
+    (hcircle'.2.1.trans hcircle'.2.2.1.symm)
+    (hcircle'.2.2.2.trans hcircle'.2.2.1.symm)
+  have hOimage :=
+    congrArg (directIsometryR2 (chordUnit A B) (chordMidpoint A B)) hO
+  rw [directIsometryR2_edgeCoordinates hAB O] at hOimage
+  simpa [edgeCircleCenter, transportedCircleCenter, edgeCircumcenterParameter] using hOimage
+
+/-- Right-endpoint order version of the canonical edge-radius uniqueness
+statement. -/
+theorem circumcircleR2_edge_radius_eq_right {A B C O : ℂ} {R : ℝ}
+    (hAB : A ≠ B) (hcross : Gluck.Discrete.crossR2 A B C ≠ 0)
+    (hcircle : CircumcircleR2 A B C O R) :
+    R = normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B C) := by
+  exact circumcircleR2_edge_radius_eq hAB hcross
+    ⟨hcircle.1, hcircle.2.2.2, hcircle.2.1, hcircle.2.2.1⟩
+
+/-- A noncollinear triple has the canonical edge centre and radius. -/
+theorem circumcircleR2_edge_center_radius_eq {A B C O : ℂ} {R : ℝ}
+    (hAB : A ≠ B) (hcross : Gluck.Discrete.crossR2 A B C ≠ 0)
+    (hcircle : CircumcircleR2 A B C O R) :
+    O = edgeCircleCenter A B (edgeCircumcenterParameter A B C) ∧
+      R = normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B C) := by
+  exact ⟨circumcircleR2_edge_center_eq hAB hcross hcircle,
+    circumcircleR2_edge_radius_eq_right hAB hcross hcircle⟩
+
+/-- Two Euclidean circumcircles through the same noncollinear triple have the
+same centre and radius. -/
+theorem circumcircleR2_unique_of_noncollinear {A B C O₁ O₂ : ℂ} {R₁ R₂ : ℝ}
+    (hAB : A ≠ B) (hcross : Gluck.Discrete.crossR2 A B C ≠ 0)
+    (h₁ : CircumcircleR2 A B C O₁ R₁) (h₂ : CircumcircleR2 A B C O₂ R₂) :
+    O₁ = O₂ ∧ R₁ = R₂ := by
+  have hcanon₁ := circumcircleR2_edge_center_radius_eq hAB hcross h₁
+  have hcanon₂ := circumcircleR2_edge_center_radius_eq hAB hcross h₂
+  exact ⟨hcanon₁.1.trans hcanon₂.1.symm, hcanon₁.2.trans hcanon₂.2.symm⟩
+
+/-- Circumcircle uniqueness is insensitive to cyclic reordering of the same
+noncollinear triple. -/
+theorem circumcircleR2_unique_of_cyclic_reorder {A B C O₁ O₂ : ℂ} {R₁ R₂ : ℝ}
+    (hAB : A ≠ B) (hcross : Gluck.Discrete.crossR2 A B C ≠ 0)
+    (h₁ : CircumcircleR2 A B C O₁ R₁) (h₂ : CircumcircleR2 B C A O₂ R₂) :
+    O₁ = O₂ ∧ R₁ = R₂ := by
+  have h₂' : CircumcircleR2 A B C O₂ R₂ :=
+    ⟨h₂.1, h₂.2.2.2, h₂.2.1, h₂.2.2.1⟩
+  exact circumcircleR2_unique_of_noncollinear hAB hcross h₁ h₂'
+
+/-- Propagation primitive: two adjacent four-point windows whose common
+circles overlap in a noncollinear triple determine the same circle. -/
+theorem edgeCommonCircumcircle_overlap_unique {A B C P Q O₁ O₂ : ℂ} {R₁ R₂ : ℝ}
+    (hAB : A ≠ B) (hcross : Gluck.Discrete.crossR2 A B C ≠ 0)
+    (hleft : CircumcircleR2 A B P O₁ R₁ ∧ CircumcircleR2 A B C O₁ R₁)
+    (hright : CircumcircleR2 B C A O₂ R₂ ∧ CircumcircleR2 B C Q O₂ R₂) :
+    O₁ = O₂ ∧ R₁ = R₂ := by
+  exact circumcircleR2_unique_of_cyclic_reorder hAB hcross hleft.2 hright.1
+
 /-- Signed Menger curvature of an arbitrary noncollinear triple, expressed by
 its canonical edge-circle radius and orientation. -/
 theorem signedMengerR2_edge_parameter {A B C : ℂ} (hAB : A ≠ B)
