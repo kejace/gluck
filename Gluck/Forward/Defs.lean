@@ -102,6 +102,23 @@ def DahlbergFourVertex {n : ℕ} (κ : ZMod n → ℝ) : Prop :=
       DiscreteLocalMax κ (i₃ : ZMod n) ∧
       DiscreteLocalMin κ (i₄ : ZMod n)
 
+/-- Four ordered plateau-aware extrema in `min-max-min-max` order give
+Dahlberg's source-form conclusion after rotating the cyclic order to start at
+the first maximum. -/
+theorem dahlbergFourVertex_of_localExtrema_min_max {n : ℕ} {κ : ZMod n → ℝ}
+    {i₁ i₂ i₃ i₄ : ℕ}
+    (hi₁₂ : i₁ < i₂) (hi₂₃ : i₂ < i₃) (hi₃₄ : i₃ < i₄)
+    (hi₄₁ : i₄ < i₁ + n)
+    (hmin₁ : DiscreteLocalMin κ (i₁ : ZMod n))
+    (hmax₂ : DiscreteLocalMax κ (i₂ : ZMod n))
+    (hmin₃ : DiscreteLocalMin κ (i₃ : ZMod n))
+    (hmax₄ : DiscreteLocalMax κ (i₄ : ZMod n)) :
+    DahlbergFourVertex κ := by
+  have hwrap : ((i₁ + n : ℕ) : ZMod n) = (i₁ : ZMod n) := by
+    rw [Nat.cast_add, ZMod.natCast_self, add_zero]
+  exact ⟨i₂, i₃, i₄, i₁ + n, hi₂₃, hi₃₄, hi₄₁,
+    Nat.add_lt_add_right hi₁₂ n, hmax₂, hmin₃, hmax₄, by simpa [hwrap] using hmin₁⟩
+
 /-- Four ordered strict one-step extrema give Dahlberg's plateau-aware
 four-vertex conclusion. -/
 theorem dahlbergFourVertex_of_strict_neighbors {n : ℕ} (hn : 2 ≤ n)
