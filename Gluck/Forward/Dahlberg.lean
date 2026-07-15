@@ -398,6 +398,12 @@ def normalizedClosedDisk (a y : ℝ) : Set ℂ :=
 def normalizedClosedExterior (a y : ℝ) : Set ℂ :=
   {z | a ^ 2 ≤ z.re ^ 2 + z.im ^ 2 - 2 * y * z.im}
 
+/-- Both normalized chord endpoints lie on the boundary of the normalized
+interior-side half-plane. -/
+theorem normalizedEdgeHalfPlane_endpoints (a : ℝ) :
+    (a : ℂ) ∈ normalizedEdgeHalfPlane ∧ (-a : ℂ) ∈ normalizedEdgeHalfPlane := by
+  constructor <;> simp [normalizedEdgeHalfPlane]
+
 /-- Both normalized chord endpoints lie in every coaxial closed disk. -/
 theorem normalizedClosedDisk_endpoints (a y : ℝ) :
     (a : ℂ) ∈ normalizedClosedDisk a y ∧
@@ -555,6 +561,19 @@ theorem edgeClosedDisk_endpoints {A B : ℂ} (hAB : A ≠ B) (y : ℝ) :
     exact ⟨(-chordHalfLength A B : ℂ), hnorm.2, by
       simpa [transportedChordLeft] using he.1⟩
   · unfold edgeClosedDisk transportedClosedDisk directIsometryImage
+    exact ⟨(chordHalfLength A B : ℂ), hnorm.1, by
+      simpa [transportedChordRight] using he.2⟩
+
+/-- Every canonical edge half-plane contains both endpoints of the edge. -/
+theorem edgeHalfPlane_endpoints {A B : ℂ} (hAB : A ≠ B) :
+    A ∈ edgeHalfPlane A B ∧ B ∈ edgeHalfPlane A B := by
+  have he := canonicalChord_endpoints hAB
+  have hnorm := normalizedEdgeHalfPlane_endpoints (chordHalfLength A B)
+  constructor
+  · unfold edgeHalfPlane transportedEdgeHalfPlane directIsometryImage
+    exact ⟨(-chordHalfLength A B : ℂ), hnorm.2, by
+      simpa [transportedChordLeft] using he.1⟩
+  · unfold edgeHalfPlane transportedEdgeHalfPlane directIsometryImage
     exact ⟨(chordHalfLength A B : ℂ), hnorm.1, by
       simpa [transportedChordRight] using he.2⟩
 
