@@ -337,6 +337,14 @@ theorem dahlbergFourVertex_of_eq_affine {n : ℕ} {κ μ : ZMod n → ℝ} {a b 
   ext i
   exact hμ i
 
+/-- Pointwise equal cyclic profiles have the same plateau-aware Dahlberg
+conclusion. -/
+theorem dahlbergFourVertex_congr {n : ℕ} {κ μ : ZMod n → ℝ}
+    (hμ : ∀ i : ZMod n, μ i = κ i) (hfv : DahlbergFourVertex κ) :
+    DahlbergFourVertex μ := by
+  exact dahlbergFourVertex_of_eq_affine (a := 1) (b := 0) (by norm_num)
+    (by intro i; simp [hμ i]) hfv
+
 /-- A profile pointwise equal to a nonzero affine change of a
 constant-or-Dahlberg profile inherits the constant-or-Dahlberg conclusion. -/
 theorem constant_or_dahlbergFourVertex_of_eq_affine {n : ℕ}
@@ -352,6 +360,15 @@ theorem constant_or_dahlbergFourVertex_of_eq_affine {n : ℕ}
       convert hfv using 1
       ext i
       exact hμ i)
+
+/-- Pointwise equal cyclic profiles have the same constant-or-Dahlberg
+conclusion. -/
+theorem constant_or_dahlbergFourVertex_congr {n : ℕ} {κ μ : ZMod n → ℝ}
+    (hμ : ∀ i : ZMod n, μ i = κ i)
+    (h : (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ) :
+    (∃ c, ∀ i : ZMod n, μ i = c) ∨ DahlbergFourVertex μ := by
+  exact constant_or_dahlbergFourVertex_of_eq_affine (a := 1) (b := 0) (by norm_num)
+    (by intro i; simp [hμ i]) h
 
 /-- Translating cyclic indices preserves plateau-aware local maxima. -/
 theorem discreteLocalMax_translateIndex {n : ℕ} {κ : ZMod n → ℝ} {a i : ZMod n}
@@ -810,6 +827,14 @@ theorem not_constant_of_eq_affine_iff {n : ℕ} {κ μ : ZMod n → ℝ} {a b : 
       ⟨c, fun i => by rw [← hμ i, hc i]⟩
     exact ((not_constant_affine_iff (κ := κ) (a := a) (b := b) ha).mpr
       hκnc) hscaled_const
+
+/-- Pointwise equal cyclic profiles have the same nonconstancy condition. -/
+theorem not_constant_congr_iff {n : ℕ} {κ μ : ZMod n → ℝ}
+    (hμ : ∀ i : ZMod n, μ i = κ i) :
+    (¬ ∃ c, ∀ i : ZMod n, μ i = c) ↔
+      ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
+  exact not_constant_of_eq_affine_iff (a := 1) (b := 0) (by norm_num)
+    (by intro i; simp [hμ i])
 
 /-- Translating cyclic indices preserves nonconstancy. -/
 theorem not_constant_translateIndex_iff {n : ℕ} {κ : ZMod n → ℝ} {a : ZMod n} :
