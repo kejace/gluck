@@ -89,6 +89,18 @@ theorem crossR2_cycle_two (A B C : ℂ) :
     Gluck.Discrete.crossR2 C A B = Gluck.Discrete.crossR2 A B C := by
   exact (crossR2_cycle C A B).symm
 
+/-- Swapping the last two vertices reverses the oriented twice-area. -/
+theorem crossR2_swap (A B C : ℂ) :
+    Gluck.Discrete.crossR2 A C B = -Gluck.Discrete.crossR2 A B C := by
+  unfold Gluck.Discrete.crossR2
+  simp only [Complex.sub_re, Complex.sub_im]
+  ring_nf
+
+/-- Reversing a triple reverses the oriented twice-area. -/
+theorem crossR2_reverse (A B C : ℂ) :
+    Gluck.Discrete.crossR2 C B A = -Gluck.Discrete.crossR2 A B C := by
+  rw [← crossR2_cycle_two C B A, crossR2_swap]
+
 /-- The oriented twice-area vanishes when the third point is the left endpoint. -/
 theorem crossR2_left_endpoint (A B : ℂ) :
     Gluck.Discrete.crossR2 A B A = 0 := by
@@ -311,6 +323,21 @@ theorem signedMengerR2_cycle_two (A B C : ℂ) :
     Gluck.Discrete.signedMengerR2 C A B =
       Gluck.Discrete.signedMengerR2 A B C := by
   exact (signedMengerR2_cycle C A B).symm
+
+/-- Swapping the last two vertices reverses signed Menger curvature. -/
+theorem signedMengerR2_swap (A B C : ℂ) :
+    Gluck.Discrete.signedMengerR2 A C B =
+      -Gluck.Discrete.signedMengerR2 A B C := by
+  unfold Gluck.Discrete.signedMengerR2
+  rw [crossR2_swap]
+  rw [dist_comm A C, dist_comm C B, dist_comm B A]
+  ring
+
+/-- Reversing a triple reverses signed Menger curvature. -/
+theorem signedMengerR2_reverse (A B C : ℂ) :
+    Gluck.Discrete.signedMengerR2 C B A =
+      -Gluck.Discrete.signedMengerR2 A B C := by
+  rw [← signedMengerR2_cycle_two C B A, signedMengerR2_swap]
 
 /-- Signed twice-area of a normalized triple. -/
 theorem crossR2_normalized (a : ℝ) (z : ℂ) :
@@ -2036,6 +2063,20 @@ theorem polygonCross_eq_edgePrev {n : ℕ} {v : ZMod n → ℂ} (i : ZMod n) :
     Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) =
       Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) := by
   exact (crossR2_cycle (v (i - 1)) (v i) (v (i + 1))).symm
+
+/-- Reversing the consecutive triple at a polygon vertex negates its oriented
+twice-area. -/
+theorem polygonCross_reverse_vertex {n : ℕ} {v : ZMod n → ℂ} (i : ZMod n) :
+    Gluck.Discrete.crossR2 (v (i + 1)) (v i) (v (i - 1)) =
+      -Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) := by
+  exact crossR2_reverse (v (i - 1)) (v i) (v (i + 1))
+
+/-- Reversing the consecutive triple at a polygon vertex negates its
+signed-Menger curvature. -/
+theorem polygonSignedMenger_reverse_vertex {n : ℕ} {v : ZMod n → ℂ} (i : ZMod n) :
+    Gluck.Discrete.signedMengerR2 (v (i + 1)) (v i) (v (i - 1)) =
+      -SignedMengerProfile v i := by
+  exact signedMengerR2_reverse (v (i - 1)) (v i) (v (i + 1))
 
 /-- Positive oriented area at the actual vertex is positive over the outgoing
 edge with the previous vertex as third point. -/
