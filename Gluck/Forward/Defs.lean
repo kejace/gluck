@@ -123,6 +123,32 @@ theorem dahlbergFourVertex_of_strict_neighbors {n : ℕ} (hn : 2 ≤ n)
   · exact discreteLocalMax_of_neighbors hn hmax₃_left hmax₃_right
   · exact discreteLocalMin_of_neighbors hn hmin₄_left hmin₄_right
 
+/-- Four ordered strict one-step extrema in `min-max-min-max` order also give
+Dahlberg's plateau-aware four-vertex conclusion, by rotating the cyclic order
+to start at the first maximum. -/
+theorem dahlbergFourVertex_of_strict_neighbors_min_max {n : ℕ} (hn : 2 ≤ n)
+    {κ : ZMod n → ℝ} {i₁ i₂ i₃ i₄ : ℕ}
+    (hi₁₂ : i₁ < i₂) (hi₂₃ : i₂ < i₃) (hi₃₄ : i₃ < i₄)
+    (hi₄₁ : i₄ < i₁ + n)
+    (hmin₁_left : κ (i₁ : ZMod n) < κ ((i₁ : ZMod n) - 1))
+    (hmin₁_right : κ (i₁ : ZMod n) < κ ((i₁ : ZMod n) + 1))
+    (hmax₂_left : κ ((i₂ : ZMod n) - 1) < κ (i₂ : ZMod n))
+    (hmax₂_right : κ ((i₂ : ZMod n) + 1) < κ (i₂ : ZMod n))
+    (hmin₃_left : κ (i₃ : ZMod n) < κ ((i₃ : ZMod n) - 1))
+    (hmin₃_right : κ (i₃ : ZMod n) < κ ((i₃ : ZMod n) + 1))
+    (hmax₄_left : κ ((i₄ : ZMod n) - 1) < κ (i₄ : ZMod n))
+    (hmax₄_right : κ ((i₄ : ZMod n) + 1) < κ (i₄ : ZMod n)) :
+    DahlbergFourVertex κ := by
+  have hwrap : ((i₁ + n : ℕ) : ZMod n) = (i₁ : ZMod n) := by
+    rw [Nat.cast_add, ZMod.natCast_self, add_zero]
+  exact dahlbergFourVertex_of_strict_neighbors hn
+    hi₂₃ hi₃₄ hi₄₁ (Nat.add_lt_add_right hi₁₂ n)
+    hmax₂_left hmax₂_right
+    hmin₃_left hmin₃_right
+    hmax₄_left hmax₄_right
+    (by simpa [hwrap] using hmin₁_left)
+    (by simpa [hwrap] using hmin₁_right)
+
 /-- A cyclic real profile has a global maximum. -/
 theorem exists_globalMax_zmod {n : ℕ} [NeZero n] (κ : ZMod n → ℝ) :
     ∃ i : ZMod n, ∀ j : ZMod n, κ j ≤ κ i := by
