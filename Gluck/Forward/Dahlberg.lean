@@ -2276,6 +2276,52 @@ theorem negativeOrientation_of_signedMengerProfile_neg {n : ℕ}
     simpa using hsimple.1 (i - 1)
   exact crossR2_neg_of_signedMengerR2_neg hAB (hκ i)
 
+/-! ## Oriented regular vertices are genuine circle vertices -/
+
+/-- Positive orientation forces each Dahlberg-regular vertex into the genuine
+circle/cone branch. -/
+theorem dahlbergRegular_circle_of_positiveOrientation {n : ℕ}
+    {v : ZMod n → ℂ} (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) (i : ZMod n) :
+    ∃ O R,
+      CircumcircleR2 (v (i - 1)) (v i) (v (i + 1)) O R ∧
+        InVertexCone (v (i - 1)) (v i) (v (i + 1)) O := by
+  exact dahlbergRegularAt_circle_of_cross_ne_zero_right (hregular i) (horient i).ne'
+
+/-- Negative orientation also forces each Dahlberg-regular vertex into the
+genuine circle/cone branch. -/
+theorem dahlbergRegular_circle_of_negativeOrientation {n : ℕ}
+    {v : ZMod n → ℂ} (hregular : DahlbergRegular v)
+    (horient : NegativePolygonOrientation v) (i : ZMod n) :
+    ∃ O R,
+      CircumcircleR2 (v (i - 1)) (v i) (v (i + 1)) O R ∧
+        InVertexCone (v (i - 1)) (v i) (v (i + 1)) O := by
+  exact dahlbergRegularAt_circle_of_cross_ne_zero_right (hregular i) (horient i).ne
+
+/-- Pointwise positive signed-Menger profile turns Dahlberg regularity into
+genuine circle/cone data at every vertex. -/
+theorem dahlbergRegular_circle_of_signedMengerProfile_pos {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hκ : ∀ i : ZMod n, 0 < SignedMengerProfile v i) (i : ZMod n) :
+    ∃ O R,
+      CircumcircleR2 (v (i - 1)) (v i) (v (i + 1)) O R ∧
+        InVertexCone (v (i - 1)) (v i) (v (i + 1)) O := by
+  exact dahlbergRegular_circle_of_positiveOrientation hregular
+    (positiveOrientation_of_signedMengerProfile_pos hsimple hκ) i
+
+/-- Pointwise negative signed-Menger profile turns Dahlberg regularity into
+genuine circle/cone data at every vertex. -/
+theorem dahlbergRegular_circle_of_signedMengerProfile_neg {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hκ : ∀ i : ZMod n, SignedMengerProfile v i < 0) (i : ZMod n) :
+    ∃ O R,
+      CircumcircleR2 (v (i - 1)) (v i) (v (i + 1)) O R ∧
+        InVertexCone (v (i - 1)) (v i) (v (i + 1)) O := by
+  exact dahlbergRegular_circle_of_negativeOrientation hregular
+    (negativeOrientation_of_signedMengerProfile_neg hsimple hκ) i
+
 /-! ## Signed-Menger profiles and discrete realizability -/
 
 /-- A simple polygon realizes its own signed-Menger profile. -/
