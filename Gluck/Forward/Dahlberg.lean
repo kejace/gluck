@@ -4470,21 +4470,36 @@ theorem polygonDahlbergFourVertex_of_ordered_signedMenger_turns {n : ℕ}
 
 /-! ## Dahlberg's Euclidean discrete four-vertex kernel -/
 
-/-- Dahlberg's Euclidean source theorem: for a simple locally regular
-nonconcyclic polygon, the signed-Menger curvature profile has at least two
-plateau-aware local maxima and at least two plateau-aware local minima.
+/-- Dahlberg's reduction from the general simple locally regular polygon to the
+strictly-convex auxiliary polygon used in the last part of §4 of
+`references/23.pdf`.
 
-This is the single source gate for the Euclidean discrete theorem from
-`references/23.pdf`, matching Theorem 1 and Lemma 9's conclusion.  The named
-positive-orientation and final enclosing-disk wrappers below are retained as
-documentation of Dahlberg's proof architecture, but both are specializations of
-this source statement at the API level. -/
-theorem signedMengerProfile_dahlbergFourVertex_E2_dahlberg_source
+This is where the smallest enclosing disk `Δ`, its boundary set `E`, Lemma 10's
+triangle-sector radius comparison, and the polygonal approximation of the
+convex domain `U` enter.  Its output is the actual plateau-aware Dahlberg
+conclusion, so the remaining analytic geometry is isolated here rather than
+hidden inside the public theorem. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_dahlberg_disk_reduction
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
   sorry
+
+/-- Dahlberg's Euclidean source theorem: for a simple locally regular
+nonconcyclic polygon, the signed-Menger curvature profile has at least two
+plateau-aware local maxima and at least two plateau-aware local minima.
+
+The public source theorem is now proved from the §4 disk-reduction gate above;
+that gate is the remaining unformalized paper-local geometry for
+`references/23.pdf`. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_dahlberg_source
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact signedMengerProfile_dahlbergFourVertex_of_dahlberg_disk_reduction
+    hn hsimple hregular hnoncircle
 
 /-- Dahlberg's positively oriented strictly-convex case, corresponding to
 Lemma 9 in `references/23.pdf`.
@@ -4564,23 +4579,6 @@ theorem signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concycl
       hn hsimple hregular hpos hnoncircle
   · exact signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_concyclic
       hn hsimple hregular hneg hnoncircle
-
-/-- Dahlberg's reduction from the general simple locally regular polygon to the
-strictly-convex auxiliary polygon used in the last part of §4 of
-`references/23.pdf`.
-
-This is where the smallest enclosing disk `Δ`, its boundary set `E`, Lemma 10's
-triangle-sector radius comparison, and the polygonal approximation of the
-convex domain `U` enter.  Its output is the actual plateau-aware Dahlberg
-conclusion, so the remaining analytic geometry is isolated here rather than
-hidden inside the public theorem. -/
-theorem signedMengerProfile_dahlbergFourVertex_of_dahlberg_disk_reduction
-    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
-    DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_dahlberg_source
-    hn hsimple hregular hnoncircle
 
 /-- Dahlberg's geometric extraction step: Lemma 8, Lemma 9, and Lemma 10
 produce two local maxima and two local minima of signed Menger curvature for a
