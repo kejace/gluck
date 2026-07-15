@@ -2131,6 +2131,22 @@ theorem exists_constant_signedMengerProfile_of_concyclic_neg {n : ℕ}
     ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
   exact exists_constant_signedMenger_of_concyclic_neg hsimple hcyc hcross
 
+/-- A positively oriented concyclic simple polygon has constant signed-Menger
+profile. -/
+theorem exists_constant_signedMengerProfile_of_concyclic_positiveOrientation {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hcyc : Concyclic v) (horient : PositivePolygonOrientation v) :
+    ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  exact exists_constant_signedMengerProfile_of_concyclic_pos hsimple hcyc horient
+
+/-- A negatively oriented concyclic simple polygon has constant signed-Menger
+profile. -/
+theorem exists_constant_signedMengerProfile_of_concyclic_negativeOrientation {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hcyc : Concyclic v) (horient : NegativePolygonOrientation v) :
+    ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  exact exists_constant_signedMengerProfile_of_concyclic_neg hsimple hcyc horient
+
 /-- Under consistent positive orientation, a nonconstant signed-Menger profile
 rules out concyclicity. -/
 theorem not_concyclic_of_not_constant_signedMengerProfile_pos {n : ℕ}
@@ -2150,6 +2166,24 @@ theorem not_concyclic_of_not_constant_signedMengerProfile_neg {n : ℕ}
     ¬ Concyclic v := by
   intro hcyc
   exact hnc (exists_constant_signedMengerProfile_of_concyclic_neg hsimple hcyc hcross)
+
+/-- Under positive orientation, a nonconstant signed-Menger profile rules out
+concyclicity. -/
+theorem not_concyclic_of_not_constant_signedMengerProfile_positiveOrientation {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c)
+    (horient : PositivePolygonOrientation v) :
+    ¬ Concyclic v := by
+  exact not_concyclic_of_not_constant_signedMengerProfile_pos hsimple hnc horient
+
+/-- Under negative orientation, a nonconstant signed-Menger profile rules out
+concyclicity. -/
+theorem not_concyclic_of_not_constant_signedMengerProfile_negativeOrientation {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c)
+    (horient : NegativePolygonOrientation v) :
+    ¬ Concyclic v := by
+  exact not_concyclic_of_not_constant_signedMengerProfile_neg hsimple hnc horient
 
 /-- Dahlberg's four-vertex conclusion makes the signed-Menger profile
 nonconstant. -/
@@ -2177,6 +2211,70 @@ theorem not_concyclic_of_dahlbergFourVertex_neg {n : ℕ}
     ¬ Concyclic v := by
   exact not_concyclic_of_not_constant_signedMengerProfile_neg hsimple
     (not_constant_signedMengerProfile_of_dahlbergFourVertex hfv) hcross
+
+/-- Under positive orientation, Dahlberg's four-vertex conclusion rules out
+concyclicity. -/
+theorem not_concyclic_of_dahlbergFourVertex_positiveOrientation {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hfv : DahlbergFourVertex (SignedMengerProfile v))
+    (horient : PositivePolygonOrientation v) :
+    ¬ Concyclic v := by
+  exact not_concyclic_of_dahlbergFourVertex_pos hsimple hfv horient
+
+/-- Under negative orientation, Dahlberg's four-vertex conclusion rules out
+concyclicity. -/
+theorem not_concyclic_of_dahlbergFourVertex_negativeOrientation {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hfv : DahlbergFourVertex (SignedMengerProfile v))
+    (horient : NegativePolygonOrientation v) :
+    ¬ Concyclic v := by
+  exact not_concyclic_of_dahlbergFourVertex_neg hsimple hfv horient
+
+/-! ## Signed-Menger signs and polygon orientation -/
+
+/-- Positive polygon orientation gives pointwise positive signed-Menger
+profile. -/
+theorem signedMengerProfile_pos_of_positiveOrientation {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v) :
+    ∀ i : ZMod n, 0 < SignedMengerProfile v i := by
+  intro i
+  have hAB : v (i - 1) ≠ v i := by
+    simpa using hsimple.1 (i - 1)
+  exact signedMengerR2_pos_of_cross_pos hAB (horient i)
+
+/-- Negative polygon orientation gives pointwise negative signed-Menger
+profile. -/
+theorem signedMengerProfile_neg_of_negativeOrientation {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v) :
+    ∀ i : ZMod n, SignedMengerProfile v i < 0 := by
+  intro i
+  have hAB : v (i - 1) ≠ v i := by
+    simpa using hsimple.1 (i - 1)
+  exact signedMengerR2_neg_of_cross_neg hAB (horient i)
+
+/-- Pointwise positive signed-Menger profile forces positive polygon
+orientation. -/
+theorem positiveOrientation_of_signedMengerProfile_pos {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hκ : ∀ i : ZMod n, 0 < SignedMengerProfile v i) :
+    PositivePolygonOrientation v := by
+  intro i
+  have hAB : v (i - 1) ≠ v i := by
+    simpa using hsimple.1 (i - 1)
+  exact crossR2_pos_of_signedMengerR2_pos hAB (hκ i)
+
+/-- Pointwise negative signed-Menger profile forces negative polygon
+orientation. -/
+theorem negativeOrientation_of_signedMengerProfile_neg {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hκ : ∀ i : ZMod n, SignedMengerProfile v i < 0) :
+    NegativePolygonOrientation v := by
+  intro i
+  have hAB : v (i - 1) ≠ v i := by
+    simpa using hsimple.1 (i - 1)
+  exact crossR2_neg_of_signedMengerR2_neg hAB (hκ i)
 
 /-! ## Finite cyclic signed-Menger profile API -/
 

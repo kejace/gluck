@@ -397,6 +397,16 @@ theorem SignedMengerProfile_apply {n : ℕ} (v : ZMod n → ℂ) (i : ZMod n) :
     SignedMengerProfile v i =
       Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) := rfl
 
+/-- Every consecutive vertex triple has positive orientation.  This is the
+local orientation/strict-convexity interface used by the Euclidean convex
+discrete four-vertex reduction. -/
+def PositivePolygonOrientation {n : ℕ} (v : ZMod n → ℂ) : Prop :=
+  ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))
+
+/-- Every consecutive vertex triple has negative orientation. -/
+def NegativePolygonOrientation {n : ℕ} (v : ZMod n → ℂ) : Prop :=
+  ∀ i, Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) < 0
+
 /-- In the stereographic/Poincaré models, a Euclidean circumcircle `(c,r)` has
 space-form geodesic curvature
 `(1 + ε (‖c‖²-r²))/(2r)`, with orientation supplied by the triple. -/
