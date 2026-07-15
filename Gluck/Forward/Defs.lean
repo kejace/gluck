@@ -64,6 +64,34 @@ def DiscreteLocalMin {n : ℕ} (κ : ZMod n → ℝ) (i : ZMod n) : Prop :=
     (∀ m < r, κ (i + (m : ZMod n)) = κ i) ∧
     κ i < κ (i - (l : ZMod n)) ∧ κ i < κ (i + (r : ZMod n))
 
+/-- A strict one-step cyclic peak is a plateau-aware discrete local maximum. -/
+theorem discreteLocalMax_of_neighbors {n : ℕ} (hn : 2 ≤ n) {κ : ZMod n → ℝ}
+    {i : ZMod n} (hleft : κ (i - 1) < κ i) (hright : κ (i + 1) < κ i) :
+    DiscreteLocalMax κ i := by
+  refine ⟨1, 1, by norm_num, by norm_num, hn, ?_, ?_, ?_, ?_⟩
+  · intro m hm
+    have hm0 : m = 0 := by omega
+    simp [hm0]
+  · intro m hm
+    have hm0 : m = 0 := by omega
+    simp [hm0]
+  · simpa using hleft
+  · simpa using hright
+
+/-- A strict one-step cyclic valley is a plateau-aware discrete local minimum. -/
+theorem discreteLocalMin_of_neighbors {n : ℕ} (hn : 2 ≤ n) {κ : ZMod n → ℝ}
+    {i : ZMod n} (hleft : κ i < κ (i - 1)) (hright : κ i < κ (i + 1)) :
+    DiscreteLocalMin κ i := by
+  refine ⟨1, 1, by norm_num, by norm_num, hn, ?_, ?_, ?_, ?_⟩
+  · intro m hm
+    have hm0 : m = 0 := by omega
+    simp [hm0]
+  · intro m hm
+    have hm0 : m = 0 := by omega
+    simp [hm0]
+  · simpa using hleft
+  · simpa using hright
+
 /-- Dahlberg's source-form conclusion: two distinct local maxima and two
 distinct local minima, alternating around the cyclic vertex set. -/
 def DahlbergFourVertex {n : ℕ} (κ : ZMod n → ℝ) : Prop :=
