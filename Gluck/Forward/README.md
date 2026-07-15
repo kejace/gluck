@@ -103,8 +103,11 @@ D4VT is derived by `dahlbergFourVertex_of_orderedAdjacentTurns_four_le`.  The
 negative-orientation turn-level endpoint is exposed in reflected-sign form as
 `orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected`,
 which is then converted to the public negative D4VT theorem by
-`dahlbergFourVertex_of_neg_reflectIndex`; the remaining nonconstant endpoints
-reuse the strict-orientation D4VT wrappers.  Their status is not uniform:
+`dahlbergFourVertex_of_neg_reflectIndex`.  The bundled turn-level endpoint is
+`orderedAdjacentTurns_conformalMenger_spaceForm_of_oriented_proper`, returning
+either turns for `κ` or turns for the reflected-sign profile according to the
+orientation branch; the bundled D4VT theorem routes through the same turn-level
+construction.  Their status is not uniform:
 
 - the smooth theorem is one unconditional space-form theorem, transported by
   the Möbius-invariant osculating-cycle contact condition;
