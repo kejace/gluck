@@ -229,6 +229,24 @@ theorem orderedAdjacentTurns_H2_of_negativeOrientation_reflected
     hn (ReverseCyclicPolygon v) (fun i => -κ (-i))
       hdisk' hsimple' horient' hregular' hκ' hcircle' hnc_reflected
 
+/-- Hyperbolic constant-or ordered-turn theorem for negatively oriented
+convex/coherent cyclic polygons, stated for the naturally reversed
+proper-circle curvature profile. -/
+theorem constant_or_orderedAdjacentTurns_H2_of_negativeOrientation_reflected
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i) :
+    (∃ c, ∀ i : ZMod n, -κ (-i) = c) ∨
+      OrderedAdjacentTurns (fun i => -κ (-i)) := by
+  by_cases hconst : ∃ c, ∀ i : ZMod n, -κ (-i) = c
+  · exact Or.inl hconst
+  · exact Or.inr
+      (orderedAdjacentTurns_H2_of_negativeOrientation_reflected
+        hn v κ hdisk hsimple horient hregular hκ hcircle hconst)
+
 /-- Hyperbolic constant-or-Dahlberg theorem for negatively oriented
 convex/coherent cyclic polygons whose reversed curvature profile lies on
 proper hyperbolic circles (`-κᵢ > 1`). -/

@@ -97,7 +97,10 @@ negative-orientation endpoints
 `orderedAdjacentTurns_S2_of_negativeOrientation_reflected` and
 `orderedAdjacentTurns_H2_of_negativeOrientation_reflected`.  The
 `discrete_four_vertex_*` wrappers expose the D4VT conclusions with the usual
-model-specific hypotheses.
+model-specific hypotheses.  The model-specific negative-orientation reflected
+turn endpoints also have constant-or forms:
+`constant_or_orderedAdjacentTurns_S2_of_negativeOrientation_reflected` and
+`constant_or_orderedAdjacentTurns_H2_of_negativeOrientation_reflected`.
 `ConformalMenger.lean` adds the proved
 `ε ∈ {0,1,-1}` dispatch layer over the E²/S²/H² conformal-Menger wrappers,
 using common positive-orientation, negative-orientation, and

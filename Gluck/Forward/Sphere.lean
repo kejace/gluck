@@ -216,6 +216,24 @@ theorem orderedAdjacentTurns_S2_of_negativeOrientation_reflected
     hn (ReverseCyclicPolygon v) (fun i => -κ (-i))
       hdisk' hsimple' horient' hregular' hκ' hnc_reflected
 
+/-- Spherical constant-or ordered-turn theorem for negatively oriented
+convex/coherent cyclic polygons, stated for the naturally reversed curvature
+profile. -/
+theorem constant_or_orderedAdjacentTurns_S2_of_negativeOrientation_reflected
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, -κ (-i) = c) ∨
+      OrderedAdjacentTurns (fun i => -κ (-i)) := by
+  by_cases hconst : ∃ c, ∀ i : ZMod n, -κ (-i) = c
+  · exact Or.inl hconst
+  · exact Or.inr
+      (orderedAdjacentTurns_S2_of_negativeOrientation_reflected
+        hn v κ hdisk hsimple horient hregular hκ hconst)
+
 /-- Spherical constant-or-Dahlberg theorem for negatively oriented
 convex/coherent cyclic polygons. -/
 theorem constant_or_dahlbergFourVertex_S2_of_negativeOrientation
