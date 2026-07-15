@@ -2143,6 +2143,16 @@ theorem conformalMenger_reverse_of_cross_neg {ε : ℝ} {A B C : ℂ} {κ : ℝ}
   rw [hκ, if_neg (not_lt_of_gt hcross), if_pos hrev]
   ring
 
+/-- Reversing a noncollinear conformal-Menger triple negates the realized
+curvature. -/
+theorem conformalMenger_reverse_of_cross_ne_zero {ε : ℝ} {A B C : ℂ} {κ : ℝ}
+    (hcross : Gluck.Discrete.crossR2 A B C ≠ 0)
+    (hκ : ConformalMenger ε A B C κ) :
+    ConformalMenger ε C B A (-κ) := by
+  rcases lt_or_gt_of_ne hcross with hneg | hpos
+  · exact conformalMenger_reverse_of_cross_neg hneg hκ
+  · exact conformalMenger_reverse_of_cross_pos hpos hκ
+
 /-- Reversing a positively oriented cyclic polygon negates and reverses a
 space-form conformal-Menger realization. -/
 theorem realizesConformalMenger_reverseCyclicPolygon_of_positiveOrientation
@@ -2172,6 +2182,17 @@ theorem realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation
     abel
   · congr 1
     abel
+
+/-- Reversing a strictly oriented cyclic polygon negates and reverses a
+space-form conformal-Menger realization. -/
+theorem realizesConformalMenger_reverseCyclicPolygon_of_strict_orientation
+    {n : ℕ} {ε : ℝ} {v : ZMod n → ℂ} {κ : ZMod n → ℝ}
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hκ : RealizesConformalMenger ε v κ) :
+    RealizesConformalMenger ε (ReverseCyclicPolygon v) (fun i => -κ (-i)) := by
+  rcases horient with hpos | hneg
+  · exact realizesConformalMenger_reverseCyclicPolygon_of_positiveOrientation hpos hκ
+  · exact realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation hneg hκ
 
 /-- Reversing the endpoints of a circumcircle triple preserves the
 circumcircle. -/
@@ -3668,6 +3689,19 @@ theorem exists_constant_signedMengerProfile_of_concyclic_negativeOrientation {n 
     ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
   exact exists_constant_signedMengerProfile_of_concyclic_neg hsimple hcyc horient
 
+/-- A strictly oriented concyclic simple polygon has constant signed-Menger
+profile. -/
+theorem exists_constant_signedMengerProfile_of_concyclic_strict_orientation {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hcyc : Concyclic v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v) :
+    ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  rcases horient with hpos | hneg
+  · exact exists_constant_signedMengerProfile_of_concyclic_positiveOrientation
+      hsimple hcyc hpos
+  · exact exists_constant_signedMengerProfile_of_concyclic_negativeOrientation
+      hsimple hcyc hneg
+
 /-- Under consistent positive orientation, a nonconstant signed-Menger profile
 rules out concyclicity. -/
 theorem not_concyclic_of_not_constant_signedMengerProfile_pos {n : ℕ}
@@ -3705,6 +3739,18 @@ theorem not_concyclic_of_not_constant_signedMengerProfile_negativeOrientation {n
     (horient : NegativePolygonOrientation v) :
     ¬ Concyclic v := by
   exact not_concyclic_of_not_constant_signedMengerProfile_neg hsimple hnc horient
+
+/-- Under either strict orientation, a nonconstant signed-Menger profile rules
+out concyclicity. -/
+theorem not_concyclic_of_not_constant_signedMengerProfile_strict_orientation {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v) :
+    ¬ Concyclic v := by
+  intro hcyc
+  exact hnc
+    (exists_constant_signedMengerProfile_of_concyclic_strict_orientation
+      hsimple hcyc horient)
 
 /-- Dahlberg's four-vertex conclusion makes the signed-Menger profile
 nonconstant. -/

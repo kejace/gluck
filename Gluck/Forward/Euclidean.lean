@@ -333,11 +333,13 @@ theorem signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_strict_orientat
     (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v) :
     (∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) ∨
       DahlbergFourVertex (SignedMengerProfile v) := by
-  rcases horient with hpos | hneg
-  · exact signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_positiveOrientation
-      hn v hsimple hregular hpos
-  · exact signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_negativeOrientation
-      hn v hsimple hregular hneg
+  by_cases hcyc : Concyclic v
+  · exact Or.inl
+      (exists_constant_signedMengerProfile_of_concyclic_strict_orientation
+        hsimple hcyc horient)
+  · exact Or.inr
+      (signedMengerProfile_dahlbergFourVertex_E2_of_not_concyclic
+        hn v hsimple hregular hcyc)
 
 /-- Dahlberg's Euclidean discrete four-vertex theorem in strict-orientation
 form, stated directly for the signed Menger curvature of consecutive triples. -/
