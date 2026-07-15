@@ -271,6 +271,116 @@ theorem dahlbergFourVertex_posAffine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : 
     ring
   · exact dahlbergFourVertex_posAffine ha
 
+/-- Translating cyclic indices preserves plateau-aware local maxima. -/
+theorem discreteLocalMax_translateIndex {n : ℕ} {κ : ZMod n → ℝ} {a i : ZMod n}
+    (hmax : DiscreteLocalMax κ i) :
+    DiscreteLocalMax (fun j => κ (j + a)) (i - a) := by
+  rcases hmax with ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq, hleft, hright⟩
+  refine ⟨l, r, hlpos, hrpos, hlr, ?_, ?_, ?_, ?_⟩
+  · intro m hm
+    calc
+      κ (((i - a) - (m : ZMod n)) + a) = κ (i - (m : ZMod n)) := by
+        congr 1
+        abel
+      _ = κ i := hleft_eq m hm
+      _ = κ ((i - a) + a) := by
+        congr 1
+        abel
+  · intro m hm
+    calc
+      κ (((i - a) + (m : ZMod n)) + a) = κ (i + (m : ZMod n)) := by
+        congr 1
+        abel
+      _ = κ i := hright_eq m hm
+      _ = κ ((i - a) + a) := by
+        congr 1
+        abel
+  · calc
+      κ (((i - a) - (l : ZMod n)) + a) = κ (i - (l : ZMod n)) := by
+        congr 1
+        abel
+      _ < κ i := hleft
+      _ = κ ((i - a) + a) := by
+        congr 1
+        abel
+  · calc
+      κ (((i - a) + (r : ZMod n)) + a) = κ (i + (r : ZMod n)) := by
+        congr 1
+        abel
+      _ < κ i := hright
+      _ = κ ((i - a) + a) := by
+        congr 1
+        abel
+
+/-- Translating cyclic indices preserves plateau-aware local minima. -/
+theorem discreteLocalMin_translateIndex {n : ℕ} {κ : ZMod n → ℝ} {a i : ZMod n}
+    (hmin : DiscreteLocalMin κ i) :
+    DiscreteLocalMin (fun j => κ (j + a)) (i - a) := by
+  rcases hmin with ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq, hleft, hright⟩
+  refine ⟨l, r, hlpos, hrpos, hlr, ?_, ?_, ?_, ?_⟩
+  · intro m hm
+    calc
+      κ (((i - a) - (m : ZMod n)) + a) = κ (i - (m : ZMod n)) := by
+        congr 1
+        abel
+      _ = κ i := hleft_eq m hm
+      _ = κ ((i - a) + a) := by
+        congr 1
+        abel
+  · intro m hm
+    calc
+      κ (((i - a) + (m : ZMod n)) + a) = κ (i + (m : ZMod n)) := by
+        congr 1
+        abel
+      _ = κ i := hright_eq m hm
+      _ = κ ((i - a) + a) := by
+        congr 1
+        abel
+  · calc
+      κ ((i - a) + a) = κ i := by
+        congr 1
+        abel
+      _ < κ (i - (l : ZMod n)) := hleft
+      _ = κ (((i - a) - (l : ZMod n)) + a) := by
+        congr 1
+        abel
+  · calc
+      κ ((i - a) + a) = κ i := by
+        congr 1
+        abel
+      _ < κ (i + (r : ZMod n)) := hright
+      _ = κ (((i - a) + (r : ZMod n)) + a) := by
+        congr 1
+        abel
+
+/-- Reversing cyclic indices preserves plateau-aware local maxima, with the
+left and right plateau lengths exchanged. -/
+theorem discreteLocalMax_negIndex {n : ℕ} {κ : ZMod n → ℝ} {i : ZMod n}
+    (hmax : DiscreteLocalMax κ i) :
+    DiscreteLocalMax (fun j => κ (-j)) (-i) := by
+  rcases hmax with ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq, hleft, hright⟩
+  refine ⟨r, l, hrpos, hlpos, by simpa [add_comm] using hlr, ?_, ?_, ?_, ?_⟩
+  · intro m hm
+    simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hright_eq m hm
+  · intro m hm
+    simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hleft_eq m hm
+  · simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hright
+  · simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hleft
+
+/-- Reversing cyclic indices preserves plateau-aware local minima, with the
+left and right plateau lengths exchanged. -/
+theorem discreteLocalMin_negIndex {n : ℕ} {κ : ZMod n → ℝ} {i : ZMod n}
+    (hmin : DiscreteLocalMin κ i) :
+    DiscreteLocalMin (fun j => κ (-j)) (-i) := by
+  rcases hmin with ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq, hleft, hright⟩
+  refine ⟨r, l, hrpos, hlpos, by simpa [add_comm] using hlr, ?_, ?_, ?_, ?_⟩
+  · intro m hm
+    simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hright_eq m hm
+  · intro m hm
+    simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hleft_eq m hm
+  · simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hright
+  · simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hleft
+
 /-- Four ordered strict one-step extrema give Dahlberg's plateau-aware
 four-vertex conclusion. -/
 theorem dahlbergFourVertex_of_strict_neighbors {n : ℕ} (hn : 2 ≤ n)
