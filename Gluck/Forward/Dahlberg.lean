@@ -1040,6 +1040,30 @@ theorem signedMengerR2_neg_of_cross_neg {A B C : ℂ} (hAB : A ≠ B)
   rw [signedMengerR2_edge_parameter_of_neg hAB hcross]
   exact neg_neg_of_pos (normalizedCircleCurvature_pos (chordHalfLength_pos hAB).ne' _)
 
+/-- Positive signed Menger curvature forces positive orientation over a
+nondegenerate oriented edge. -/
+theorem crossR2_pos_of_signedMengerR2_pos {A B C : ℂ} (hAB : A ≠ B)
+    (hκ : 0 < Gluck.Discrete.signedMengerR2 A B C) :
+    0 < Gluck.Discrete.crossR2 A B C := by
+  rcases lt_trichotomy (Gluck.Discrete.crossR2 A B C) 0 with hneg | hzero | hpos
+  · have hκneg := signedMengerR2_neg_of_cross_neg hAB hneg
+    nlinarith
+  · have hκzero := signedMengerR2_eq_zero_of_cross_eq_zero hzero
+    nlinarith
+  · exact hpos
+
+/-- Negative signed Menger curvature forces negative orientation over a
+nondegenerate oriented edge. -/
+theorem crossR2_neg_of_signedMengerR2_neg {A B C : ℂ} (hAB : A ≠ B)
+    (hκ : Gluck.Discrete.signedMengerR2 A B C < 0) :
+    Gluck.Discrete.crossR2 A B C < 0 := by
+  rcases lt_trichotomy (Gluck.Discrete.crossR2 A B C) 0 with hneg | hzero | hpos
+  · exact hneg
+  · have hκzero := signedMengerR2_eq_zero_of_cross_eq_zero hzero
+    nlinarith
+  · have hκpos := signedMengerR2_pos_of_cross_pos hAB hpos
+    nlinarith
+
 /-- A noncollinear Dahlberg-regular vertex is in the circle/cone branch. -/
 theorem dahlbergRegularAt_circle_of_cross_ne_zero {A B C : ℂ}
     (hreg : DahlbergRegularAt C A B)
@@ -1612,6 +1636,28 @@ theorem polygonEdgePrev_cross_neg_of_vertex_cross_neg {n : ℕ} {v : ZMod n → 
     (hcross : Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) < 0) :
     Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) < 0 := by
   rwa [← polygonCross_eq_edgePrev i]
+
+/-- Positive signed Menger curvature at a polygon vertex gives positive
+orientation over the outgoing edge with the previous vertex as third point. -/
+theorem polygonEdgePrev_cross_pos_of_vertex_signedMenger_pos {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v) {i : ZMod n}
+    (hκ : 0 < Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) :
+    0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) := by
+  have hκ' :
+      0 < Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) := by
+    rwa [← polygonSignedMenger_eq_edgePrev i]
+  exact crossR2_pos_of_signedMengerR2_pos (hsimple.1 i) hκ'
+
+/-- Negative signed Menger curvature at a polygon vertex gives negative
+orientation over the outgoing edge with the previous vertex as third point. -/
+theorem polygonEdgePrev_cross_neg_of_vertex_signedMenger_neg {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v) {i : ZMod n}
+    (hκ : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) < 0) :
+    Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) < 0 := by
+  have hκ' :
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) < 0 := by
+    rwa [← polygonSignedMenger_eq_edgePrev i]
+  exact crossR2_neg_of_signedMengerR2_neg (hsimple.1 i) hκ'
 
 /-- Polygon-indexed form of Dahlberg Lemma 8(1) for the left endpoint of the
 edge `i → i+1`. -/
