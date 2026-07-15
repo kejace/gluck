@@ -89,6 +89,40 @@ theorem crossR2_cycle_two (A B C : ℂ) :
     Gluck.Discrete.crossR2 C A B = Gluck.Discrete.crossR2 A B C := by
   exact (crossR2_cycle C A B).symm
 
+/-- Consecutive collinear triples propagate collinearity across the shared
+nondegenerate edge. -/
+theorem crossR2_eq_zero_of_consecutive {A B C D : ℂ} (hBC : B ≠ C)
+    (hABC : Gluck.Discrete.crossR2 A B C = 0)
+    (hBCD : Gluck.Discrete.crossR2 B C D = 0) :
+    Gluck.Discrete.crossR2 A B D = 0 := by
+  have hBCsq_pos : 0 < (B.re - C.re) ^ 2 + (B.im - C.im) ^ 2 := by
+    have hBCsq_ne : (B.re - C.re) ^ 2 + (B.im - C.im) ^ 2 ≠ 0 := by
+      intro hsq
+      apply hBC
+      apply Complex.ext
+      · nlinarith [sq_nonneg (B.re - C.re), sq_nonneg (B.im - C.im)]
+      · nlinarith [sq_nonneg (B.re - C.re), sq_nonneg (B.im - C.im)]
+    exact lt_of_le_of_ne' (add_nonneg (sq_nonneg _) (sq_nonneg _)) hBCsq_ne
+  unfold Gluck.Discrete.crossR2 at hABC hBCD ⊢
+  simp only [Complex.sub_re, Complex.sub_im] at hABC hBCD ⊢
+  ring_nf at hABC hBCD ⊢
+  have hdet :
+      (-(B.re * A.im) + B.re * D.im + A.re * B.im - A.re * D.im +
+            A.im * D.re - B.im * D.re) *
+          ((B.re - C.re) ^ 2 + (B.im - C.im) ^ 2) =
+        (B.re * C.im - B.re * A.im - A.re * C.im + A.re * B.im +
+              A.im * C.re - B.im * C.re) *
+            (((B.re - C.re) ^ 2 + (B.im - C.im) ^ 2) +
+              ((D.re - C.re) * (C.re - B.re) +
+                (D.im - C.im) * (C.im - B.im))) +
+          (B.re * C.im - B.re * D.im - C.im * D.re - B.im * C.re +
+                B.im * D.re + C.re * D.im) *
+            ((B.re - A.re) * (C.re - B.re) +
+              (B.im - A.im) * (C.im - B.im)) := by
+    ring_nf
+  rw [hABC, hBCD, zero_mul, zero_mul, zero_add] at hdet
+  exact (mul_eq_zero.mp hdet).resolve_right (ne_of_gt hBCsq_pos)
+
 /-- Cyclic permutations preserve signed Menger curvature. -/
 theorem signedMengerR2_cycle (A B C : ℂ) :
     Gluck.Discrete.signedMengerR2 B C A =
@@ -1904,6 +1938,33 @@ theorem vertex_cross_eq_zero_of_constant_signedMengerProfile_zero {n : ℕ}
     ∀ i : ZMod n, Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) = 0 := by
   intro i
   exact (signedMengerProfile_eq_zero_iff_vertex_cross_eq_zero hsimple i).mp (hκ i)
+
+/-- Zero signed-Menger profile at two adjacent vertices propagates collinearity
+across the four consecutive vertices. -/
+theorem four_consecutive_cross_eq_zero_of_signedMengerProfile_eq_zero {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v) {i : ZMod n}
+    (hκi : SignedMengerProfile v i = 0)
+    (hκs : SignedMengerProfile v (i + 1) = 0) :
+    Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1 + 1)) = 0 := by
+  have hleft :
+      Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) = 0 :=
+    (signedMengerProfile_eq_zero_iff_vertex_cross_eq_zero hsimple i).mp hκi
+  have hright :
+      Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) = 0 := by
+    simpa [sub_eq_add_neg, add_assoc] using
+      (signedMengerProfile_eq_zero_iff_vertex_cross_eq_zero hsimple (i + 1)).mp hκs
+  exact crossR2_eq_zero_of_consecutive (hsimple.1 i) hleft hright
+
+/-- A constant-zero signed-Menger profile propagates collinearity across every
+four consecutive vertices. -/
+theorem four_consecutive_cross_eq_zero_of_constant_signedMengerProfile_zero {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hκ : ∀ i : ZMod n, SignedMengerProfile v i = 0) :
+    ∀ i : ZMod n,
+      Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1 + 1)) = 0 := by
+  intro i
+  exact four_consecutive_cross_eq_zero_of_signedMengerProfile_eq_zero
+    hsimple (hκ i) (hκ (i + 1))
 
 /-- A constant-zero signed-Menger profile on a simple locally regular polygon
 makes every vertex a segment subdivision point between its two neighbors. -/

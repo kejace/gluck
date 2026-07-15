@@ -185,6 +185,16 @@ theorem vertex_cross_eq_zero_E2_of_constant_signedMengerProfile_zero {n : ℕ}
     ∀ i : ZMod n, Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) = 0 := by
   exact vertex_cross_eq_zero_of_constant_signedMengerProfile_zero hsimple hκ
 
+/-- E² zero-profile propagation: a constant-zero signed-Menger profile makes
+every four consecutive vertices collinear across the first edge. -/
+theorem four_consecutive_cross_eq_zero_E2_of_constant_signedMengerProfile_zero {n : ℕ}
+    (v : ZMod n → ℂ) (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hκ : ∀ i : ZMod n, SignedMengerProfile v i = 0) :
+    ∀ i : ZMod n,
+      Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1 + 1)) = 0 := by
+  exact four_consecutive_cross_eq_zero_of_constant_signedMengerProfile_zero
+    hsimple hκ
+
 /-- E² zero-profile regularity reduction: a constant-zero signed-Menger
 profile on a simple locally regular polygon makes every vertex a segment
 subdivision point between its two neighbors. -/
