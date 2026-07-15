@@ -93,8 +93,11 @@ now first dispatches to the ordered-turn endpoint
 `orderedAdjacentTurns_conformalMenger_spaceForm_kernel`; the public spelling is
 `orderedAdjacentTurns_conformalMenger_spaceForm_of_positiveOrientation`, and
 D4VT is derived by `dahlbergFourVertex_of_orderedAdjacentTurns_four_le`.  The
-other nonconstant endpoints reuse the positive/strict-orientation D4VT
-wrappers.  Their status is not uniform:
+negative-orientation turn-level endpoint is exposed in reflected-sign form as
+`orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected`,
+which is then converted to the public negative D4VT theorem by
+`dahlbergFourVertex_of_neg_reflectIndex`; the remaining nonconstant endpoints
+reuse the strict-orientation D4VT wrappers.  Their status is not uniform:
 
 - the smooth theorem is one unconditional space-form theorem, transported by
   the Möbius-invariant osculating-cycle contact condition;

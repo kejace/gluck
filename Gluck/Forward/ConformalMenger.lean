@@ -308,6 +308,44 @@ theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_negativeOrie
       linarith)
     (by intro hlt _; exact hproper hlt)
 
+/-- Negative-orientation nonconstant all-space-form conformal-Menger
+ordered-turn theorem after reversing the cyclic order and changing sign.
+
+This is the turn-level endpoint actually used by the negative-orientation D4VT
+proof: the reflected profile `i ↦ -κ(-i)` has the positive-orientation
+ordered-turn witness. -/
+theorem orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < -κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    OrderedAdjacentTurns (fun i => -κ (-i)) := by
+  have hdisk' : ∀ i, ‖ReverseCyclicPolygon v i‖ < 1 := by
+    intro i
+    exact hdisk (-i)
+  have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
+    isSimplePolygon_reverseCyclicPolygon hsimple
+  have horient' : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
+    positiveOrientation_reverseCyclicPolygon_of_negativeOrientation horient
+  have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
+    dahlbergRegular_reverseCyclicPolygon hregular
+  have hκ' :
+      RealizesConformalMenger ε (ReverseCyclicPolygon v) (fun i => -κ (-i)) :=
+    realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation horient hκ
+  have hproper' : ε < 0 → ∀ i, 1 < -κ (-i) := by
+    intro hlt i
+    exact hproper hlt (-i)
+  have hnc' : ¬ ∃ c, ∀ i : ZMod n, -κ (-i) = c :=
+    (not_constant_neg_reflectIndex_iff (κ := κ)).mpr hnc
+  exact orderedAdjacentTurns_conformalMenger_spaceForm_of_positiveOrientation
+    hε hn (ReverseCyclicPolygon v) (fun i => -κ (-i))
+    hdisk' hsimple' horient' hregular' hκ' hproper' hnc'
+
 /-- Negative-orientation nonconstant all-space-form conformal-Menger theorem. -/
 theorem dahlbergFourVertex_conformalMenger_spaceForm_of_negativeOrientation
     {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
@@ -320,15 +358,12 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_of_negativeOrientation
     (hproper : ε < 0 → ∀ i, 1 < -κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_spaceForm_of_strict_orientation
-    hε hn v κ hdisk hsimple (Or.inr horient) hregular hκ
-    (by
-      intro _ hpos
-      exfalso
-      have hp := hpos (0 : ZMod n)
-      have hn := horient (0 : ZMod n)
-      linarith)
-    (by intro hlt _; exact hproper hlt)
-    hnc
+  have hturns_reflected :
+      OrderedAdjacentTurns (fun i => -κ (-i)) :=
+    orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected
+      hε hn v κ hdisk hsimple horient hregular hκ hproper hnc
+  have hfv_reflected : DahlbergFourVertex (fun i => -κ (-i)) :=
+    dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn hturns_reflected
+  exact dahlbergFourVertex_of_neg_reflectIndex hfv_reflected
 
 end Gluck.Forward
