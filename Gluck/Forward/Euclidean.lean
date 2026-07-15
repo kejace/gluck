@@ -12,13 +12,21 @@ namespace Gluck.Forward
 
 open scoped Real
 
-/-- Geometric kernel of the standard Euclidean four-vertex theorem, stated in
-the value-separated form shared with the converse development. -/
-theorem four_vertex_condition_E2 {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+/-- Geometric kernel of the standard Euclidean smooth four-vertex theorem,
+stated in the value-separated form shared with the converse development. -/
+theorem four_vertex_condition_E2_kernel {γ : ℝ → ℂ} {κ : ℝ → ℝ}
     (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
     Gluck.FourVertexCondition κ := by
   sorry
+
+/-- The standard Euclidean smooth four-vertex theorem, stated in the
+value-separated form used by the converse development. -/
+theorem four_vertex_condition_E2 {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    Gluck.FourVertexCondition κ := by
+  exact four_vertex_condition_E2_kernel hclosed hreal hκ hper
 
 /-- The standard Euclidean four-vertex theorem for a regular simple closed
 curve, without a convexity assumption. -/
