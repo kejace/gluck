@@ -373,6 +373,22 @@ theorem dahlberg_discrete_four_vertex_E2_of_strict_orientation
   exact signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_strict_orientation
     hn v hsimple hregular horient
 
+/-- Dahlberg's Euclidean discrete four-vertex theorem in strict-orientation
+form when the raw signed-Menger profile is known to be nonconstant. -/
+theorem dahlberg_discrete_four_vertex_E2_of_strict_orientation_not_constant
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n,
+      Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) = c) :
+    DahlbergFourVertex
+      (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
+  change DahlbergFourVertex (SignedMengerProfile v)
+  change ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c at hnc
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_not_constant_strict_orientation
+    hn v hsimple hregular horient hnc
+
 /-! ## E² conformal-Menger normalization -/
 
 /-- At `ε = 0`, the conformal-Menger model curvature of a positively oriented
@@ -512,6 +528,23 @@ theorem constant_or_dahlbergFourVertex_E2_of_posAffine_signedMengerProfile_stric
       convert hfv using 1
       ext i
       exact hκ i)
+
+/-- Any nonconstant curvature profile pointwise equal to a positive affine
+change of the E² signed-Menger profile inherits the strict-orientation
+Dahlberg conclusion. -/
+theorem dahlbergFourVertex_E2_of_posAffine_signedMengerProfile_not_constant_strict_orientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    {a b : ℝ} (ha : 0 < a)
+    (hκ : ∀ i : ZMod n, κ i = a * SignedMengerProfile v i + b)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_E2_of_posAffine_signedMengerProfile_strict_orientation
+      hn v κ hsimple hregular horient ha hκ)
+    hnc
 
 /-- Nonconcyclic `ε = 0` conformal-Menger realizations inherit Dahlberg's E²
 four-vertex conclusion under strict orientation. -/
