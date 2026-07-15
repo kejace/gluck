@@ -37,8 +37,13 @@ from that named §4 disk-reduction gate so downstream code can keep the paper's
 proof architecture visible.  The same-orientation strictly convex branch is
 isolated separately as
 `signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_lemma9_source`,
-so the Lemma 9 API no longer depends on the full nonconvex enclosing-disk
-reduction.
+which is now proved from the narrower ordered-turn extraction gate
+`exists_ordered_signedMenger_turns_of_positiveOrientation_lemma9_source`
+and the existing profile-level constructor
+`signedMengerProfile_dahlbergFourVertex_of_ordered_turns_four_le`.  Thus the
+remaining Lemma 9 gap is exactly the geometric extraction of four ordered
+adjacent curvature turns, not the final conversion from turns to Dahlberg's
+plateau-aware conclusion.
 
 `AlternatesAcrossLevel` remains available as a later corollary of the exact
 plateau-aware conclusion; it is not used as a substitute for Dahlberg's source

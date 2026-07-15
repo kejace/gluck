@@ -4470,6 +4470,41 @@ theorem polygonDahlbergFourVertex_of_ordered_signedMenger_turns {n : ℕ}
 
 /-! ## Dahlberg's Euclidean discrete four-vertex kernel -/
 
+/-- The remaining ordered-turn extraction in Dahlberg's positively oriented
+strictly-convex case, corresponding to the geometric content of Lemma 9 in
+`references/23.pdf`.
+
+Dahlberg's Lemma 8 nesting and the convex discrete four-vertex theorem are
+expected to produce four cyclically ordered adjacent signed-Menger turns.  The
+profile-level constructor
+`signedMengerProfile_dahlbergFourVertex_of_ordered_turns_four_le` then turns
+these inequalities into the plateau-aware Dahlberg four-vertex conclusion. -/
+theorem exists_ordered_signedMenger_turns_of_positiveOrientation_lemma9_source
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) :
+    ∃ i₁ i₂ i₃ i₄ : ℕ,
+      i₁ < i₂ ∧ i₂ < i₃ ∧ i₃ < i₄ ∧ i₄ < i₁ + n ∧
+      SignedMengerProfile v (i₁ : ZMod n) <
+        SignedMengerProfile v ((i₁ : ZMod n) + 1) ∧
+      SignedMengerProfile v (((i₁ : ZMod n) + 1) + 1) <
+        SignedMengerProfile v ((i₁ : ZMod n) + 1) ∧
+      SignedMengerProfile v ((i₂ : ZMod n) + 1) <
+        SignedMengerProfile v (i₂ : ZMod n) ∧
+      SignedMengerProfile v ((i₂ : ZMod n) + 1) <
+        SignedMengerProfile v (((i₂ : ZMod n) + 1) + 1) ∧
+      SignedMengerProfile v (i₃ : ZMod n) <
+        SignedMengerProfile v ((i₃ : ZMod n) + 1) ∧
+      SignedMengerProfile v (((i₃ : ZMod n) + 1) + 1) <
+        SignedMengerProfile v ((i₃ : ZMod n) + 1) ∧
+      SignedMengerProfile v ((i₄ : ZMod n) + 1) <
+        SignedMengerProfile v (i₄ : ZMod n) ∧
+      SignedMengerProfile v ((i₄ : ZMod n) + 1) <
+        SignedMengerProfile v (((i₄ : ZMod n) + 1) + 1) := by
+  sorry
+
 /-- Dahlberg's reduction from the general simple locally regular polygon to the
 strictly-convex auxiliary polygon used in the last part of §4 of
 `references/23.pdf`.
@@ -4514,7 +4549,13 @@ theorem signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_lemma9_sou
     (horient : PositivePolygonOrientation v)
     (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  sorry
+  rcases exists_ordered_signedMenger_turns_of_positiveOrientation_lemma9_source
+      hn hsimple hregular horient hnoncircle with
+    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
+      hinc₁, hdec₁, hdec₂, hinc₂, hinc₃, hdec₃, hdec₄, hinc₄⟩
+  exact signedMengerProfile_dahlbergFourVertex_of_ordered_turns_four_le
+    hn hi₁₂ hi₂₃ hi₃₄ hi₄₁
+    hinc₁ hdec₁ hdec₂ hinc₂ hinc₃ hdec₃ hdec₄ hinc₄
 
 /-- Dahlberg's positively oriented strictly-convex case, corresponding to
 Lemma 9 in `references/23.pdf`.
