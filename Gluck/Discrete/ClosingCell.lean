@@ -6209,4 +6209,128 @@ theorem continuousOn_closingRectGap [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
         continuousOn_closingRectCell_apply hn4 hm0 hab habm hbam hκs hκ j
   exact (continuous_closureGap.comp_continuousOn hpair).congr fun x _ => rfl
 
+/-! ### The geometry of the closed faces (`def:closing_rect`)
+
+The closed recovery at the collapse value `s = 0` is the zero length and at
+the saturation value `s = chartWall` is the diameter length `2/max`; on the
+boundary of the fixed square each face either saturates its `+`-edge or
+collapses its `−`-edge (the exact-wall `∂R_t` of
+`lem:closure_boundary_exclusion`). -/
+
+/-- The closed recovery of the collapse value is the zero length. -/
+theorem chartInvIcc_zero {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
+    chartInvIcc p q 0 = 0 := by
+  have hD : (0 : ℝ) ≤ 2 / max p q := by
+    have := lt_of_lt_of_le hp (le_max_left p q); positivity
+  have h0 : (0 : ℝ) ∈ chartMap p q '' Set.Icc (0 : ℝ) (2 / max p q) :=
+    ⟨0, Set.left_mem_Icc.mpr hD, chartMap_zero p q⟩
+  refine (chartMap_strictMonoOn_Icc hp hq).injOn (chartInvIcc_mem h0)
+    (Set.left_mem_Icc.mpr hD) ?_
+  rw [chartMap_chartInvIcc h0, chartMap_zero]
+
+/-- The closed recovery of the saturation value is the diameter length
+`2/max` (the arcsin-saturated edge of `lem:chart_wall`). -/
+theorem chartInvIcc_wall {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
+    chartInvIcc p q (chartWall p q) = 2 / max p q := by
+  have hD : (0 : ℝ) ≤ 2 / max p q := by
+    have := lt_of_lt_of_le hp (le_max_left p q); positivity
+  have hw : chartWall p q ∈ chartMap p q '' Set.Icc (0 : ℝ) (2 / max p q) :=
+    ⟨2 / max p q, Set.right_mem_Icc.mpr hD, rfl⟩
+  refine (chartMap_strictMonoOn_Icc hp hq).injOn (chartInvIcc_mem hw)
+    (Set.right_mem_Icc.mpr hD) ?_
+  rw [chartMap_chartInvIcc hw]
+  rfl
+
+/-- Boundary-face dichotomy, right `u`-face (`q.1 = 1`): the normalized point
+saturates edge `a` (`s = w_a(t)`) or collapses edge `a + m` (`s = 0`). -/
+theorem chartPerturb_rectRescale_face_fst_hi [NeZero n] {m : ℕ}
+    {a b : ZMod n} (hm0 : (m : ZMod n) ≠ 0) (hab : a ≠ b) (habm : a ≠ b + m)
+    (hbam : b ≠ a + m) (κs κ : ZMod n → ℝ) (t : ℝ) {q : ℝ × ℝ}
+    (hq : q.1 = 1) :
+    chartPerturb m a b (rectRescale κs κ m a b t q) a = wallWidth κs κ a t
+      ∨ chartPerturb m a b (rectRescale κs κ m a b t q) (a + m) = 0 := by
+  have haam : a ≠ a + m := fun h => hm0 (left_eq_add.mp h)
+  have hambm : a + (m : ZMod n) ≠ b + m := fun h => hab (add_right_cancel h)
+  have hu : (rectRescale κs κ m a b t q).1 = rectHi κs κ a t := by
+    simp [rectRescale, hq]
+  rcases le_total (wallWidth κs κ a t - 2 * Real.pi / n) (2 * Real.pi / n)
+    with h | h
+  · left
+    rw [chartPerturb_apply_fst m _ haam hab habm, hu, rectHi, min_eq_left h]
+    ring
+  · right
+    rw [chartPerturb_apply_fst' m _ haam.symm hbam.symm hambm, hu, rectHi,
+      min_eq_right h]
+    ring
+
+/-- Boundary-face dichotomy, left `u`-face (`q.1 = -1`): the normalized point
+collapses edge `a` (`s = 0`) or saturates edge `a + m` (`s = w_{a+m}(t)`). -/
+theorem chartPerturb_rectRescale_face_fst_lo [NeZero n] {m : ℕ}
+    {a b : ZMod n} (hm0 : (m : ZMod n) ≠ 0) (hab : a ≠ b) (habm : a ≠ b + m)
+    (hbam : b ≠ a + m) (κs κ : ZMod n → ℝ) (t : ℝ) {q : ℝ × ℝ}
+    (hq : q.1 = -1) :
+    chartPerturb m a b (rectRescale κs κ m a b t q) a = 0
+      ∨ chartPerturb m a b (rectRescale κs κ m a b t q) (a + m)
+        = wallWidth κs κ (a + m) t := by
+  have haam : a ≠ a + m := fun h => hm0 (left_eq_add.mp h)
+  have hambm : a + (m : ZMod n) ≠ b + m := fun h => hab (add_right_cancel h)
+  have hu : (rectRescale κs κ m a b t q).1 = rectLo κs κ (a + m) t := by
+    simp [rectRescale, hq]
+  rcases le_total (2 * Real.pi / n - wallWidth κs κ (a + m) t)
+    (-(2 * Real.pi / n)) with h | h
+  · left
+    rw [chartPerturb_apply_fst m _ haam hab habm, hu, rectLo, max_eq_left h]
+    ring
+  · right
+    rw [chartPerturb_apply_fst' m _ haam.symm hbam.symm hambm, hu, rectLo,
+      max_eq_right h]
+    ring
+
+/-- Boundary-face dichotomy, right `v`-face (`q.2 = 1`): the normalized point
+saturates edge `b` (`s = w_b(t)`) or collapses edge `b + m` (`s = 0`). -/
+theorem chartPerturb_rectRescale_face_snd_hi [NeZero n] {m : ℕ}
+    {a b : ZMod n} (hm0 : (m : ZMod n) ≠ 0) (hab : a ≠ b) (habm : a ≠ b + m)
+    (hbam : b ≠ a + m) (κs κ : ZMod n → ℝ) (t : ℝ) {q : ℝ × ℝ}
+    (hq : q.2 = 1) :
+    chartPerturb m a b (rectRescale κs κ m a b t q) b = wallWidth κs κ b t
+      ∨ chartPerturb m a b (rectRescale κs κ m a b t q) (b + m) = 0 := by
+  have hbbm : b ≠ b + m := fun h => hm0 (left_eq_add.mp h)
+  have hambm : a + (m : ZMod n) ≠ b + m := fun h => hab (add_right_cancel h)
+  have hv : (rectRescale κs κ m a b t q).2 = rectHi κs κ b t := by
+    simp [rectRescale, hq]
+  rcases le_total (wallWidth κs κ b t - 2 * Real.pi / n) (2 * Real.pi / n)
+    with h | h
+  · left
+    rw [chartPerturb_apply_snd m _ hab.symm hbam hbbm, hv, rectHi,
+      min_eq_left h]
+    ring
+  · right
+    rw [chartPerturb_apply_snd' m _ habm.symm hambm.symm hbbm.symm, hv,
+      rectHi, min_eq_right h]
+    ring
+
+/-- Boundary-face dichotomy, left `v`-face (`q.2 = -1`): the normalized point
+collapses edge `b` (`s = 0`) or saturates edge `b + m` (`s = w_{b+m}(t)`). -/
+theorem chartPerturb_rectRescale_face_snd_lo [NeZero n] {m : ℕ}
+    {a b : ZMod n} (hm0 : (m : ZMod n) ≠ 0) (hab : a ≠ b) (habm : a ≠ b + m)
+    (hbam : b ≠ a + m) (κs κ : ZMod n → ℝ) (t : ℝ) {q : ℝ × ℝ}
+    (hq : q.2 = -1) :
+    chartPerturb m a b (rectRescale κs κ m a b t q) b = 0
+      ∨ chartPerturb m a b (rectRescale κs κ m a b t q) (b + m)
+        = wallWidth κs κ (b + m) t := by
+  have hbbm : b ≠ b + m := fun h => hm0 (left_eq_add.mp h)
+  have hambm : a + (m : ZMod n) ≠ b + m := fun h => hab (add_right_cancel h)
+  have hv : (rectRescale κs κ m a b t q).2 = rectLo κs κ (b + m) t := by
+    simp [rectRescale, hq]
+  rcases le_total (2 * Real.pi / n - wallWidth κs κ (b + m) t)
+    (-(2 * Real.pi / n)) with h | h
+  · left
+    rw [chartPerturb_apply_snd m _ hab.symm hbam hbbm, hv, rectLo,
+      max_eq_left h]
+    ring
+  · right
+    rw [chartPerturb_apply_snd' m _ habm.symm hambm.symm hbbm.symm, hv,
+      rectLo, max_eq_right h]
+    ring
+
 end Gluck.Discrete
