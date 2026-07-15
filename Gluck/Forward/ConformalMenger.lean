@@ -77,10 +77,9 @@ theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel
     (hκ : RealizesConformalMenger ε v κ)
     (hproper : ε < 0 → ∀ i, 1 < κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  rcases constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_kernel
-      hε hn v κ hdisk hsimple horient hregular hκ hproper with hconst | hturns
-  · exact Or.inl hconst
-  · exact Or.inr (dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn hturns)
+  exact constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns hn
+    (constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_kernel
+      hε hn v κ hdisk hsimple horient hregular hκ hproper)
 
 /-- Nonconstant conformal-Menger theorem for convex/coherent polygons in the
 three project space forms, derived from the ordered-turn kernel. -/
@@ -111,10 +110,9 @@ theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_positiveOrie
     (hκ : RealizesConformalMenger ε v κ)
     (hproper : ε < 0 → ∀ i, 1 < κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  rcases constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_kernel
-      hε hn v κ hdisk hsimple horient hregular hκ hproper with hconst | hturns
-  · exact Or.inl hconst
-  · exact Or.inr (dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn hturns)
+  exact constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns hn
+    (constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_kernel
+      hε hn v κ hdisk hsimple horient hregular hκ hproper)
 
 /-- Positive-orientation nonconstant all-space-form conformal-Menger
 ordered-turn theorem. -/

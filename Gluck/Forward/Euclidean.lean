@@ -860,10 +860,9 @@ theorem constant_or_dahlbergFourVertex_E2_of_realizesConformalMenger_zero_positi
     (hregular : DahlbergRegular v) (horient : PositivePolygonOrientation v)
     (hκ : RealizesConformalMenger 0 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  rcases constant_or_orderedAdjacentTurns_E2_of_realizesConformalMenger_zero_positiveOrientation
-      hn v κ hsimple hregular horient hκ with hconst | hturns
-  · exact Or.inl hconst
-  · exact Or.inr (dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn hturns)
+  exact constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns hn
+    (constant_or_orderedAdjacentTurns_E2_of_realizesConformalMenger_zero_positiveOrientation
+      hn v κ hsimple hregular horient hκ)
 
 /-- Negative-orientation `ε = 0` conformal-Menger endpoint in
 constant-or-four-vertex form. -/

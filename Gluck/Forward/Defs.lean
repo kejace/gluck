@@ -1004,6 +1004,16 @@ theorem dahlbergFourVertex_of_orderedAdjacentTurns_four_le {n : ℕ}
     DahlbergFourVertex κ := by
   exact dahlbergFourVertex_of_orderedAdjacentTurns (two_le_of_four_le hn) hturns
 
+/-- A constant-or ordered-adjacent-turn witness gives the corresponding
+constant-or Dahlberg conclusion. -/
+theorem constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns {n : ℕ}
+    (hn : 4 ≤ n) {κ : ZMod n → ℝ}
+    (h : (∃ c, ∀ i : ZMod n, κ i = c) ∨ OrderedAdjacentTurns κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  rcases h with hconst | hturns
+  · exact Or.inl hconst
+  · exact Or.inr (dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn hturns)
+
 /-- An ordered-adjacent-turn witness contains, in particular, an adjacent
 strict increase and an adjacent strict decrease. -/
 theorem exists_adjacent_increase_and_decrease_of_orderedAdjacentTurns {n : ℕ}
