@@ -326,6 +326,33 @@ theorem constant_or_dahlbergFourVertex_affine {n : ℕ} {κ : ZMod n → ℝ} {a
     exact Or.inl ⟨a * c + b, fun i => by simp [hc i]⟩
   · exact Or.inr (dahlbergFourVertex_affine ha hfv)
 
+/-- A profile pointwise equal to a nonzero affine change of a Dahlberg profile
+inherits the plateau-aware Dahlberg conclusion. -/
+theorem dahlbergFourVertex_of_eq_affine {n : ℕ} {κ μ : ZMod n → ℝ} {a b : ℝ}
+    (ha : a ≠ 0) (hμ : ∀ i : ZMod n, μ i = a * κ i + b)
+    (hfv : DahlbergFourVertex κ) :
+    DahlbergFourVertex μ := by
+  have hscaled := dahlbergFourVertex_affine (κ := κ) (a := a) (b := b) ha hfv
+  convert hscaled using 1
+  ext i
+  exact hμ i
+
+/-- A profile pointwise equal to a nonzero affine change of a
+constant-or-Dahlberg profile inherits the constant-or-Dahlberg conclusion. -/
+theorem constant_or_dahlbergFourVertex_of_eq_affine {n : ℕ}
+    {κ μ : ZMod n → ℝ} {a b : ℝ}
+    (ha : a ≠ 0) (hμ : ∀ i : ZMod n, μ i = a * κ i + b)
+    (h : (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ) :
+    (∃ c, ∀ i : ZMod n, μ i = c) ∨ DahlbergFourVertex μ := by
+  rcases constant_or_dahlbergFourVertex_affine (κ := κ) (a := a) (b := b) ha h with
+    hconst | hfv
+  · rcases hconst with ⟨c, hc⟩
+    exact Or.inl ⟨c, fun i => by rw [hμ i, hc i]⟩
+  · exact Or.inr (by
+      convert hfv using 1
+      ext i
+      exact hμ i)
+
 /-- Translating cyclic indices preserves plateau-aware local maxima. -/
 theorem discreteLocalMax_translateIndex {n : ℕ} {κ : ZMod n → ℝ} {a i : ZMod n}
     (hmax : DiscreteLocalMax κ i) :
@@ -766,6 +793,23 @@ theorem not_constant_affine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
     have hi := hc i
     field_simp [ha] at hi ⊢
     linarith
+
+/-- Pointwise equality to a nonzero affine change preserves nonconstancy. -/
+theorem not_constant_of_eq_affine_iff {n : ℕ} {κ μ : ZMod n → ℝ} {a b : ℝ}
+    (ha : a ≠ 0) (hμ : ∀ i : ZMod n, μ i = a * κ i + b) :
+    (¬ ∃ c, ∀ i : ZMod n, μ i = c) ↔
+      ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
+  constructor
+  · intro hμnc hconst
+    rcases hconst with ⟨c, hc⟩
+    exact hμnc ⟨a * c + b, fun i => by rw [hμ i, hc i]⟩
+  · intro hκnc hμconst
+    rcases hμconst with ⟨c, hc⟩
+    have hscaled_const :
+        ∃ c, ∀ i : ZMod n, a * κ i + b = c :=
+      ⟨c, fun i => by rw [← hμ i, hc i]⟩
+    exact ((not_constant_affine_iff (κ := κ) (a := a) (b := b) ha).mpr
+      hκnc) hscaled_const
 
 /-- Translating cyclic indices preserves nonconstancy. -/
 theorem not_constant_translateIndex_iff {n : ℕ} {κ : ZMod n → ℝ} {a : ZMod n} :
