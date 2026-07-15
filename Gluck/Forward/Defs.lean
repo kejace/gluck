@@ -1,4 +1,5 @@
 import Gluck.Curve
+import Gluck.Curvature
 import Gluck.Discrete.TangentChord
 import Gluck.SpaceForm.Defs
 
@@ -22,6 +23,17 @@ def SmoothFourVertex (κ : ℝ → ℝ) : Prop :=
     ∃ p₁ q₁ p₂ q₂,
       p₁ < q₁ ∧ q₁ < p₂ ∧ p₂ < q₂ ∧ q₂ < p₁ + 2 * Real.pi ∧
       IsLocalMax κ p₁ ∧ IsLocalMin κ q₁ ∧ IsLocalMax κ p₂ ∧ IsLocalMin κ q₂
+
+/-- The value-separated four-vertex condition used by the converse development
+implies the ordinary forward four-vertex conclusion. -/
+theorem smoothFourVertex_of_fourVertexCondition {κ : ℝ → ℝ}
+    (hκ : Gluck.FourVertexCondition κ) : SmoothFourVertex κ := by
+  rcases hκ with hconst | hextrema
+  · exact Or.inl hconst
+  · rcases hextrema with
+      ⟨p₁, q₁, p₂, q₂, hpq, hqp, hpq', hcycle, hmax₁, hmax₂, hmin₁, hmin₂, _⟩
+    exact Or.inr ⟨p₁, q₁, p₂, q₂, hpq, hqp, hpq', hcycle,
+      hmax₁, hmin₁, hmax₂, hmin₂⟩
 
 /-- Four cyclic samples alternating strictly above and below a common level.
 For a finite nonconstant cyclic sequence this is the level-set form of having

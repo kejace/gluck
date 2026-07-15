@@ -12,13 +12,22 @@ namespace Gluck.Forward
 
 open scoped Real
 
+/-- Geometric kernel of the standard Euclidean four-vertex theorem, stated in
+the value-separated form shared with the converse development. -/
+theorem four_vertex_condition_E2 {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    Gluck.FourVertexCondition κ := by
+  sorry
+
 /-- The standard Euclidean four-vertex theorem for a regular simple closed
 curve, without a convexity assumption. -/
 theorem four_vertex_E2 {γ : ℝ → ℂ} {κ : ℝ → ℝ}
     (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
     SmoothFourVertex κ := by
-  sorry
+  exact smoothFourVertex_of_fourVertexCondition
+    (four_vertex_condition_E2 hclosed hreal hκ hper)
 
 /-- The convex Euclidean four-vertex theorem.  At the API level this is an
 immediate specialization of the standard theorem; the source-level convex
