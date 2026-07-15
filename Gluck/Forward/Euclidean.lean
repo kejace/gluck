@@ -291,6 +291,21 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_of_not_concyclic {n : ℕ} [Ne
   exact signedMengerProfile_dahlbergFourVertex_of_not_concyclic
     hn hsimple hregular hnoncircle
 
+/-- E² strict-orientation Dahlberg reduction from the curvature-side
+nonconstancy condition.  The nonconstant signed-Menger profile rules out
+concyclicity, and Dahlberg's nonconcyclic theorem supplies the four vertices. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_of_not_constant_strict_orientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_not_concyclic
+    hn v hsimple hregular
+      (not_concyclic_of_not_constant_signedMengerProfile_strict_orientation
+        hsimple hnc horient)
+
 /-- Strictly positive-orientation E² Dahlberg theorem in constant-or-four
 vertex form.  The concyclic case gives a constant signed-Menger profile; the
 nonconcyclic case gives Dahlberg's plateau-aware four-vertex conclusion. -/
