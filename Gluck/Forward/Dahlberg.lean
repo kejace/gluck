@@ -1135,6 +1135,27 @@ theorem crossR2_ne_zero_of_signedMengerR2_ne_zero {A B C : ℂ}
   intro hcross
   exact hκ (signedMengerR2_eq_zero_of_cross_eq_zero hcross)
 
+/-- Zero signed Menger curvature forces zero oriented area over a
+nondegenerate edge. -/
+theorem crossR2_eq_zero_of_signedMengerR2_eq_zero {A B C : ℂ} (hAB : A ≠ B)
+    (hκ : Gluck.Discrete.signedMengerR2 A B C = 0) :
+    Gluck.Discrete.crossR2 A B C = 0 := by
+  rcases lt_trichotomy (Gluck.Discrete.crossR2 A B C) 0 with hneg | hzero | hpos
+  · have hκneg := signedMengerR2_neg_of_cross_neg hAB hneg
+    nlinarith
+  · exact hzero
+  · have hκpos := signedMengerR2_pos_of_cross_pos hAB hpos
+    nlinarith
+
+/-- For a nondegenerate edge, zero signed Menger curvature is equivalent to
+zero oriented area. -/
+theorem signedMengerR2_eq_zero_iff_crossR2_eq_zero {A B C : ℂ} (hAB : A ≠ B) :
+    Gluck.Discrete.signedMengerR2 A B C = 0 ↔
+      Gluck.Discrete.crossR2 A B C = 0 := by
+  constructor
+  · exact crossR2_eq_zero_of_signedMengerR2_eq_zero hAB
+  · exact signedMengerR2_eq_zero_of_cross_eq_zero
+
 /-- A point with nonzero signed Menger curvature belongs to its own Dahlberg
 edge-region. -/
 theorem edgePoint_mem_own_dahlbergRegion_of_signedMenger_ne_zero {A B C : ℂ}
@@ -1737,6 +1758,45 @@ theorem polygonEdgePrev_cross_neg_of_vertex_signedMenger_neg {n : ℕ}
       Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) < 0 := by
     rwa [← polygonSignedMenger_eq_edgePrev i]
   exact crossR2_neg_of_signedMengerR2_neg (hsimple.1 i) hκ'
+
+/-- Zero signed Menger curvature at a polygon vertex gives zero oriented area
+over the outgoing edge with the previous vertex as third point. -/
+theorem polygonEdgePrev_cross_eq_zero_of_vertex_signedMenger_eq_zero {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v) {i : ZMod n}
+    (hκ : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) = 0) :
+    Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) = 0 := by
+  have hκ' :
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) = 0 := by
+    rwa [← polygonSignedMenger_eq_edgePrev i]
+  exact crossR2_eq_zero_of_signedMengerR2_eq_zero (hsimple.1 i) hκ'
+
+/-- Zero signed-Menger profile at a polygon vertex gives zero oriented area
+over the outgoing edge with the previous vertex as third point. -/
+theorem polygonEdgePrev_cross_eq_zero_of_signedMengerProfile_eq_zero {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v) {i : ZMod n}
+    (hκ : SignedMengerProfile v i = 0) :
+    Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) = 0 := by
+  exact polygonEdgePrev_cross_eq_zero_of_vertex_signedMenger_eq_zero hsimple
+    (by simpa [SignedMengerProfile] using hκ)
+
+/-- Zero signed-Menger profile at a polygon vertex is equivalent to zero
+oriented area at that vertex. -/
+theorem signedMengerProfile_eq_zero_iff_vertex_cross_eq_zero {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v) (i : ZMod n) :
+    SignedMengerProfile v i = 0 ↔
+      Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) = 0 := by
+  have hAB : v (i - 1) ≠ v i := by
+    simpa using hsimple.1 (i - 1)
+  exact signedMengerR2_eq_zero_iff_crossR2_eq_zero hAB
+
+/-- A constant-zero signed-Menger profile makes every consecutive triple
+collinear in oriented-area form. -/
+theorem vertex_cross_eq_zero_of_constant_signedMengerProfile_zero {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hκ : ∀ i : ZMod n, SignedMengerProfile v i = 0) :
+    ∀ i : ZMod n, Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) = 0 := by
+  intro i
+  exact (signedMengerProfile_eq_zero_iff_vertex_cross_eq_zero hsimple i).mp (hκ i)
 
 /-- Polygon-indexed own-region membership over the outgoing edge from nonzero
 signed Menger curvature at the left endpoint. -/

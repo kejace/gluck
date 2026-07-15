@@ -138,6 +138,14 @@ theorem constant_signedMengerProfile_eq_zero_E2_of_not_concyclic {n : ℕ} [NeZe
     c = 0 := by
   exact constant_signedMengerProfile_eq_zero_of_not_concyclic hsimple hregular hnoncircle hc
 
+/-- E² zero-profile reduction: a constant-zero signed-Menger profile makes
+every consecutive triple collinear in oriented-area form. -/
+theorem vertex_cross_eq_zero_E2_of_constant_signedMengerProfile_zero {n : ℕ}
+    (v : ZMod n → ℂ) (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hκ : ∀ i : ZMod n, SignedMengerProfile v i = 0) :
+    ∀ i : ZMod n, Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) = 0 := by
+  exact vertex_cross_eq_zero_of_constant_signedMengerProfile_zero hsimple hκ
+
 /-- Dahlberg's Euclidean discrete four-vertex theorem: the signed Menger
 curvature of a locally regular simple closed polygon is constant or has an
 alternating four-vertex level window. -/
