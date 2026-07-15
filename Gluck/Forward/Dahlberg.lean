@@ -1516,6 +1516,58 @@ theorem edgePointDahlbergRegion_anti_of_endpoint_regular {A B P Q : ℂ}
         dahlbergRegularAt_circle_of_cross_ne_zero hPreg hPpos.ne'
       exact edgePointDahlbergRegion_anti_of_positive hAB hPpos hQpos hcircleP hconeP hκ
 
+/-- Polygon-indexed endpoint form of Dahlberg Lemma 8 for the oriented edge
+from `v i` to `v (i+1)`. The curvature at the left endpoint is cyclically
+rewritten to use the same oriented edge. -/
+theorem polygonEdgeDahlbergRegion_anti_of_endpoint_order {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (i : ZMod n)
+    (hκ : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) ≤
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1))) :
+    edgePointDahlbergRegion (v i) (v (i + 1)) (v (i + 1 + 1)) ⊆
+      edgePointDahlbergRegion (v i) (v (i + 1)) (v (i - 1)) := by
+  have hAB : v i ≠ v (i + 1) := hsimple.1 i
+  have hPreg : DahlbergRegularAt (v (i - 1)) (v i) (v (i + 1)) := hregular i
+  have hQreg : DahlbergRegularAt (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    simpa using hregular (i + 1)
+  have hκ' :
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) ≤
+        Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    rw [signedMengerR2_cycle (v (i - 1)) (v i) (v (i + 1))]
+    exact hκ
+  exact edgePointDahlbergRegion_anti_of_endpoint_regular hAB hPreg hQreg hκ'
+
+/-- Polygon-indexed incidence corollary of endpoint nesting: under the adjacent
+curvature order, the next vertex lies in the Dahlberg region attached to the
+previous vertex over the same edge. -/
+theorem polygonEdgePoint_mem_region_of_endpoint_order {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (i : ZMod n)
+    (hκ : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) ≤
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)))
+    (hQcross : Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) ≠ 0) :
+    v (i + 1 + 1) ∈
+      edgePointDahlbergRegion (v i) (v (i + 1)) (v (i - 1)) := by
+  have hAB : v i ≠ v (i + 1) := hsimple.1 i
+  have hQmem := edgePoint_mem_own_dahlbergRegion hAB hQcross
+  exact polygonEdgeDahlbergRegion_anti_of_endpoint_order hsimple hregular i hκ hQmem
+
+/-- Positive polygon-indexed incidence into the ordinary curvature disk. -/
+theorem polygonEdgePoint_mem_edgeClosedDisk_of_endpoint_order_pos {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (i : ZMod n)
+    (hPcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)))
+    (hκ : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) ≤
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)))
+    (hQcross : Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) ≠ 0) :
+    v (i + 1 + 1) ∈
+      edgeClosedDisk (v i) (v (i + 1))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1))) := by
+  have hregion :=
+    polygonEdgePoint_mem_region_of_endpoint_order hsimple hregular i hκ hQcross
+  exact edgePointDahlbergRegion_subset_edgeClosedDisk_of_pos
+    (hsimple.1 i) hPcross hregion
+
 /-- If two locally regular points over an oriented edge are ordered by signed
 Menger curvature, then the higher-curvature point lies in the lower-curvature
 point's Dahlberg edge-region. -/
@@ -1652,5 +1704,29 @@ theorem edgeCircleRadius_antitone_of_endpoint_regular_order_pos {A B P Q : ℂ}
     dahlbergRegularAt_circle_of_cross_ne_zero_right hQreg hQcross.ne'
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk_right
     hAB hQcross hcircleQ hconeQ hmem
+
+/-- Polygon-indexed positive endpoint radius comparison along one oriented
+edge. -/
+theorem polygonEdgeCircleRadius_antitone_of_endpoint_order_pos {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (i : ZMod n)
+    (hPcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)))
+    (hQcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)))
+    (hκ : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) ≤
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1))) :
+    normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1))) ≤
+      normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1))) := by
+  have hPreg : DahlbergRegularAt (v (i - 1)) (v i) (v (i + 1)) := hregular i
+  have hQreg : DahlbergRegularAt (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    simpa using hregular (i + 1)
+  have hκ' :
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) ≤
+        Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    rw [signedMengerR2_cycle (v (i - 1)) (v i) (v (i + 1))]
+    exact hκ
+  exact edgeCircleRadius_antitone_of_endpoint_regular_order_pos
+    (hsimple.1 i) hPcross hQcross hPreg hQreg hκ'
 
 end Gluck.Forward
