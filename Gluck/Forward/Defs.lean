@@ -161,6 +161,59 @@ theorem dahlbergFourVertex_of_localExtrema_min_max {n : ℕ} {κ : ZMod n → �
   exact ⟨i₂, i₃, i₄, i₁ + n, hi₂₃, hi₃₄, hi₄₁,
     Nat.add_lt_add_right hi₁₂ n, hmax₂, hmin₃, hmax₄, by simpa [hwrap] using hmin₁⟩
 
+/-- Negating a cyclic profile turns a plateau-aware local maximum into a
+plateau-aware local minimum. -/
+theorem discreteLocalMin_of_neg_localMax {n : ℕ} {κ : ZMod n → ℝ} {i : ZMod n}
+    (hmax : DiscreteLocalMax (fun j => -κ j) i) :
+    DiscreteLocalMin κ i := by
+  rcases hmax with ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq, hleft, hright⟩
+  refine ⟨l, r, hlpos, hrpos, hlr, ?_, ?_, ?_, ?_⟩
+  · intro m hm
+    exact neg_inj.mp (hleft_eq m hm)
+  · intro m hm
+    exact neg_inj.mp (hright_eq m hm)
+  · exact neg_lt_neg_iff.mp hleft
+  · exact neg_lt_neg_iff.mp hright
+
+/-- Negating a cyclic profile turns a plateau-aware local minimum into a
+plateau-aware local maximum. -/
+theorem discreteLocalMax_of_neg_localMin {n : ℕ} {κ : ZMod n → ℝ} {i : ZMod n}
+    (hmin : DiscreteLocalMin (fun j => -κ j) i) :
+    DiscreteLocalMax κ i := by
+  rcases hmin with ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq, hleft, hright⟩
+  refine ⟨l, r, hlpos, hrpos, hlr, ?_, ?_, ?_, ?_⟩
+  · intro m hm
+    exact neg_inj.mp (hleft_eq m hm)
+  · intro m hm
+    exact neg_inj.mp (hright_eq m hm)
+  · exact neg_lt_neg_iff.mp hleft
+  · exact neg_lt_neg_iff.mp hright
+
+/-- The plateau-aware Dahlberg four-vertex conclusion is invariant under
+negating the cyclic profile.  Maxima and minima swap, so the cyclic order is
+rotated from `min-max-min-max` back to `max-min-max-min`. -/
+theorem dahlbergFourVertex_of_neg {n : ℕ} {κ : ZMod n → ℝ}
+    (hfv : DahlbergFourVertex (fun i => -κ i)) :
+    DahlbergFourVertex κ := by
+  rcases hfv with
+    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁, hmax₁, hmin₂, hmax₃, hmin₄⟩
+  exact dahlbergFourVertex_of_localExtrema_min_max hi₁₂ hi₂₃ hi₃₄ hi₄₁
+    (discreteLocalMin_of_neg_localMax hmax₁)
+    (discreteLocalMax_of_neg_localMin hmin₂)
+    (discreteLocalMin_of_neg_localMax hmax₃)
+    (discreteLocalMax_of_neg_localMin hmin₄)
+
+/-- The plateau-aware Dahlberg four-vertex conclusion is equivalent for a
+profile and its negative. -/
+theorem dahlbergFourVertex_neg_iff {n : ℕ} {κ : ZMod n → ℝ} :
+    DahlbergFourVertex (fun i => -κ i) ↔ DahlbergFourVertex κ := by
+  constructor
+  · exact dahlbergFourVertex_of_neg
+  · intro hfv
+    have hfv' : DahlbergFourVertex (fun i => -(-κ i)) := by
+      simpa using hfv
+    exact dahlbergFourVertex_of_neg (κ := fun i => -κ i) hfv'
+
 /-- Four ordered strict one-step extrema give Dahlberg's plateau-aware
 four-vertex conclusion. -/
 theorem dahlbergFourVertex_of_strict_neighbors {n : ℕ} (hn : 2 ≤ n)
