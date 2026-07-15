@@ -4141,38 +4141,38 @@ The hypotheses use the existing orientation interfaces as the Lean-side
 strict-convexity proxy.  Dahlberg proves this case by combining Lemma 8's
 monotonicity of the half-plane/disk regions `δ(P,e)` with the convex DFV
 theorem. -/
-theorem signedMengerProfile_orderedTurns_of_positiveOrientation_not_concyclic
+theorem signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyclic
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v)
     (horient : PositivePolygonOrientation v)
     (hnoncircle : ¬ Concyclic v) :
-    OrderedTurns (SignedMengerProfile v) := by
+    DahlbergFourVertex (SignedMengerProfile v) := by
   sorry
 
 /-- Dahlberg's negatively oriented strictly-convex case.  This is the same
 geometric argument as the positive case with the cyclic orientation reversed. -/
-theorem signedMengerProfile_orderedTurns_of_negativeOrientation_not_concyclic
+theorem signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_concyclic
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v)
     (horient : NegativePolygonOrientation v)
     (hnoncircle : ¬ Concyclic v) :
-    OrderedTurns (SignedMengerProfile v) := by
+    DahlbergFourVertex (SignedMengerProfile v) := by
   sorry
 
 /-- Dahlberg's strictly-convex case, packaged over either global orientation. -/
-theorem signedMengerProfile_orderedTurns_of_strict_orientation_not_concyclic
+theorem signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concyclic
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v)
     (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
     (hnoncircle : ¬ Concyclic v) :
-    OrderedTurns (SignedMengerProfile v) := by
+    DahlbergFourVertex (SignedMengerProfile v) := by
   rcases horient with hpos | hneg
-  · exact signedMengerProfile_orderedTurns_of_positiveOrientation_not_concyclic
+  · exact signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyclic
       hn hsimple hregular hpos hnoncircle
-  · exact signedMengerProfile_orderedTurns_of_negativeOrientation_not_concyclic
+  · exact signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_concyclic
       hn hsimple hregular hneg hnoncircle
 
 /-- Dahlberg's reduction from the general simple locally regular polygon to the
@@ -4181,29 +4181,29 @@ strictly-convex auxiliary polygon used in the last part of §4 of
 
 This is where the smallest enclosing disk `Δ`, its boundary set `E`, Lemma 10's
 triangle-sector radius comparison, and the polygonal approximation of the
-convex domain `U` enter.  Its output is still the ordered-turn form used by the
-Lean endpoint, so the remaining analytic geometry is isolated here rather than
+convex domain `U` enter.  Its output is the actual plateau-aware Dahlberg
+conclusion, so the remaining analytic geometry is isolated here rather than
 hidden inside the public theorem. -/
-theorem signedMengerProfile_orderedTurns_of_dahlberg_disk_reduction
+theorem signedMengerProfile_dahlbergFourVertex_of_dahlberg_disk_reduction
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
-    OrderedTurns (SignedMengerProfile v) := by
+    DahlbergFourVertex (SignedMengerProfile v) := by
   sorry
 
 /-- Dahlberg's geometric extraction step: Lemma 8, Lemma 9, and Lemma 10
-produce four ordered adjacent turns of signed Menger curvature for a
+produce two local maxima and two local minima of signed Menger curvature for a
 nonconcyclic locally regular simple polygon.
 
 All preceding lemmas reduce the Euclidean discrete four-vertex theorem to this
-ordered-turn statement: zero profiles are impossible, nonzero constant profiles
-are concyclic, and ordered turns mechanically package as plateau-aware extrema. -/
-theorem signedMengerProfile_orderedTurns_of_not_concyclic {n : ℕ} [NeZero n]
+Dahlberg statement: zero profiles are impossible and nonzero constant profiles
+are concyclic, while Dahlberg's comparison lemmas rule out too few extrema. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_not_concyclic {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
-    OrderedTurns (SignedMengerProfile v) := by
-  exact signedMengerProfile_orderedTurns_of_dahlberg_disk_reduction
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact signedMengerProfile_dahlbergFourVertex_of_dahlberg_disk_reduction
     hn hsimple hregular hnoncircle
 
 /-- Dahlberg's Euclidean discrete four-vertex kernel.
@@ -4217,7 +4217,7 @@ theorem dahlberg_discrete_four_vertex_E2_kernel {n : ℕ} [NeZero n]
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact dahlbergFourVertex_of_orderedTurns (two_le_of_four_le hn)
-    (signedMengerProfile_orderedTurns_of_not_concyclic hn hsimple hregular hnoncircle)
+  exact signedMengerProfile_dahlbergFourVertex_of_not_concyclic
+    hn hsimple hregular hnoncircle
 
 end Gluck.Forward

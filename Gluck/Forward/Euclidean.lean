@@ -281,14 +281,14 @@ theorem vertex_mem_neighbor_segment_E2_of_constant_signedMengerProfile_zero {n :
     hsimple hregular hκ
 
 /-- E² source-form Dahlberg reduction: a nonconcyclic locally regular simple
-polygon has four ordered alternating adjacent turns of signed Menger
-curvature. -/
-theorem signedMengerProfile_orderedTurns_E2_of_not_concyclic {n : ℕ} [NeZero n]
+polygon has two local maxima and two local minima of signed Menger curvature,
+alternating in Dahlberg's plateau-aware sense. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_of_not_concyclic {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) (v : ZMod n → ℂ)
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
-    OrderedTurns (SignedMengerProfile v) := by
-  exact signedMengerProfile_orderedTurns_of_not_concyclic
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact signedMengerProfile_dahlbergFourVertex_of_not_concyclic
     hn hsimple hregular hnoncircle
 
 /-- Dahlberg's Euclidean discrete four-vertex theorem: the signed Menger
@@ -301,6 +301,7 @@ theorem dahlberg_discrete_four_vertex_E2 {n : ℕ} [NeZero n]
     DahlbergFourVertex
       (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
   change DahlbergFourVertex (SignedMengerProfile v)
-  exact dahlberg_discrete_four_vertex_E2_kernel hn v hsimple hregular hnoncircle
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_not_concyclic
+    hn v hsimple hregular hnoncircle
 
 end Gluck.Forward
