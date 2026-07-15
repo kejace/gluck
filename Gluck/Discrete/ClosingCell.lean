@@ -5684,4 +5684,81 @@ theorem abs_rescale_le {L R C x : ℝ} (hCL : -C ≤ L) (hL : L ≤ 0)
       abs_of_nonneg hR]
     exact mul_le_mul_of_nonneg_right hRC (abs_nonneg x)
 
+/-! ### The fixed-square normalization `Ξ_t : [-1,1]² → R_t`
+(`def:closing_rect`, R-c) -/
+
+/-- **The fixed-square normalization `Ξ`** (`def:closing_rect`): the
+per-coordinate piecewise-affine rescale onto the moving rectangle — the
+`u`-factor is `[rectLo (a+m), rectHi a]` (edge `a` carries `+u`, edge `a+m`
+carries `−u`), the `v`-factor is `[rectLo (b+m), rectHi b]`. -/
+noncomputable def rectRescale (κs κ : ZMod n → ℝ) (m : ℕ) (a b : ZMod n)
+    (t : ℝ) (q : ℝ × ℝ) : ℝ × ℝ :=
+  (rescale (rectLo κs κ (a + m) t) (rectHi κs κ a t) q.1,
+   rescale (rectLo κs κ (b + m) t) (rectHi κs κ b t) q.2)
+
+/-- The normalization fixes the center: `Ξ_t 0 = 0` for every `t`. -/
+@[simp] lemma rectRescale_zero (κs κ : ZMod n → ℝ) (m : ℕ) (a b : ZMod n)
+    (t : ℝ) : rectRescale κs κ m a b t (0, 0) = (0, 0) := by
+  simp [rectRescale]
+
+/-- Continuity of a single rescaled factor in `(t, coordinate)` — the
+building block of `continuous_rectRescale`. -/
+theorem continuous_rescale_factor {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (hκ : ∀ i, 0 < κ i) (e₀ e₁ : ZMod n) :
+    Continuous fun x : ↥(Set.Icc (0 : ℝ) 1) × ℝ =>
+      rescale (rectLo κs κ e₀ ↑x.1) (rectHi κs κ e₁ ↑x.1) x.2 :=
+  continuous_rescale.comp
+    ((((continuous_rectLo hκs hκ e₀).comp continuous_fst).prodMk
+      ((continuous_rectHi hκs hκ e₁).comp continuous_fst)).prodMk
+      continuous_snd)
+
+/-- The normalization is jointly continuous in the homotopy time and the
+square coordinate. -/
+theorem continuous_rectRescale {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (hκ : ∀ i, 0 < κ i) (m : ℕ) (a b : ZMod n) :
+    Continuous fun x : ↥(Set.Icc (0 : ℝ) 1) × (ℝ × ℝ) =>
+      rectRescale κs κ m a b ↑x.1 x.2 := by
+  unfold rectRescale
+  refine Continuous.prodMk ?_ ?_ <;>
+  · exact continuous_rescale.comp (Continuous.prodMk
+      (Continuous.prodMk
+        (by exact (continuous_rectLo hκs hκ _).comp continuous_fst)
+        (by exact (continuous_rectHi hκs hκ _).comp continuous_fst))
+      (by fun_prop))
+
+/-- The normalization maps the fixed square into the moving rectangle,
+coordinate by coordinate. -/
+theorem rectRescale_mem [NeZero n] (hn4 : 4 ≤ n) {κs κ : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i) (m : ℕ) (a b : ZMod n)
+    {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) {q : ℝ × ℝ}
+    (hq1 : q.1 ∈ Set.Icc (-1 : ℝ) 1) (hq2 : q.2 ∈ Set.Icc (-1 : ℝ) 1) :
+    (rectRescale κs κ m a b t q).1 ∈
+        Set.Icc (rectLo κs κ (a + m) t) (rectHi κs κ a t)
+      ∧ (rectRescale κs κ m a b t q).2 ∈
+        Set.Icc (rectLo κs κ (b + m) t) (rectHi κs κ b t) :=
+  ⟨rescale_mem_Icc (rectLo_neg hn4 hκs hκ ht0 ht1 (a + m)).le
+    (rectHi_pos hn4 hκs hκ ht0 ht1 a).le hq1,
+   rescale_mem_Icc (rectLo_neg hn4 hκs hκ ht0 ht1 (b + m)).le
+    (rectHi_pos hn4 hκs hκ ht0 ht1 b).le hq2⟩
+
+/-- The `ℓ¹` bound of the normalization: `‖Ξ_t(q)‖₁ ≤ α·‖q‖₁` with
+`α = 2π/n` — the sub-square `‖q‖₁ ≤ ρ·n/(2π)` of the fixed square lands
+inside the `ℓ¹`-ball of any radius `ρ`, connecting the rectangle layer to the
+landed window continuity of `Φ`. -/
+theorem abs_rectRescale_le [NeZero n] (hn4 : 4 ≤ n) {κs κ : ZMod n → ℝ}
+    (hκs : ∀ i, 0 < κs i) (hκ : ∀ i, 0 < κ i) (m : ℕ) (a b : ZMod n)
+    {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (q : ℝ × ℝ) :
+    |(rectRescale κs κ m a b t q).1| + |(rectRescale κs κ m a b t q).2|
+      ≤ 2 * Real.pi / n * (|q.1| + |q.2|) := by
+  have h1 : |(rectRescale κs κ m a b t q).1| ≤ 2 * Real.pi / n * |q.1| :=
+    abs_rescale_le (neg_le_rectLo κs κ (a + m) t)
+      (rectLo_neg hn4 hκs hκ ht0 ht1 (a + m)).le
+      (rectHi_pos hn4 hκs hκ ht0 ht1 a).le (rectHi_le κs κ a t)
+  have h2 : |(rectRescale κs κ m a b t q).2| ≤ 2 * Real.pi / n * |q.2| :=
+    abs_rescale_le (neg_le_rectLo κs κ (b + m) t)
+      (rectLo_neg hn4 hκs hκ ht0 ht1 (b + m)).le
+      (rectHi_pos hn4 hκs hκ ht0 ht1 b).le (rectHi_le κs κ b t)
+  have := mul_add (2 * Real.pi / n) |q.1| |q.2|
+  linarith
+
 end Gluck.Discrete
