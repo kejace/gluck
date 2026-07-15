@@ -208,6 +208,33 @@ theorem dahlbergFourVertex_of_strict_neighbors_min_max {n : ℕ} (hn : 2 ≤ n)
     (by simpa [hwrap] using hmin₁_left)
     (by simpa [hwrap] using hmin₁_right)
 
+/-- Four ordered adjacent turn points, alternating peak/valley/peak/valley,
+give Dahlberg's plateau-aware four-vertex conclusion. -/
+theorem dahlbergFourVertex_of_ordered_turns {n : ℕ} (hn : 2 ≤ n)
+    {κ : ZMod n → ℝ} {i₁ i₂ i₃ i₄ : ℕ}
+    (hi₁₂ : i₁ < i₂) (hi₂₃ : i₂ < i₃) (hi₃₄ : i₃ < i₄)
+    (hi₄₁ : i₄ < i₁ + n)
+    (hinc₁ : κ (i₁ : ZMod n) < κ ((i₁ : ZMod n) + 1))
+    (hdec₁ : κ (((i₁ : ZMod n) + 1) + 1) < κ ((i₁ : ZMod n) + 1))
+    (hdec₂ : κ ((i₂ : ZMod n) + 1) < κ (i₂ : ZMod n))
+    (hinc₂ : κ ((i₂ : ZMod n) + 1) < κ (((i₂ : ZMod n) + 1) + 1))
+    (hinc₃ : κ (i₃ : ZMod n) < κ ((i₃ : ZMod n) + 1))
+    (hdec₃ : κ (((i₃ : ZMod n) + 1) + 1) < κ ((i₃ : ZMod n) + 1))
+    (hdec₄ : κ ((i₄ : ZMod n) + 1) < κ (i₄ : ZMod n))
+    (hinc₄ : κ ((i₄ : ZMod n) + 1) < κ (((i₄ : ZMod n) + 1) + 1)) :
+    DahlbergFourVertex κ := by
+  apply dahlbergFourVertex_of_strict_neighbors hn
+    (Nat.succ_lt_succ hi₁₂) (Nat.succ_lt_succ hi₂₃) (Nat.succ_lt_succ hi₃₄)
+    (by omega)
+  · simpa [Nat.cast_add, sub_eq_add_neg, add_assoc] using hinc₁
+  · simpa [Nat.cast_add, add_assoc] using hdec₁
+  · simpa [Nat.cast_add, sub_eq_add_neg, add_assoc] using hdec₂
+  · simpa [Nat.cast_add, add_assoc] using hinc₂
+  · simpa [Nat.cast_add, sub_eq_add_neg, add_assoc] using hinc₃
+  · simpa [Nat.cast_add, add_assoc] using hdec₃
+  · simpa [Nat.cast_add, sub_eq_add_neg, add_assoc] using hdec₄
+  · simpa [Nat.cast_add, add_assoc] using hinc₄
+
 /-- A cyclic real profile has a global maximum. -/
 theorem exists_globalMax_zmod {n : ℕ} [NeZero n] (κ : ZMod n → ℝ) :
     ∃ i : ZMod n, ∀ j : ZMod n, κ j ≤ κ i := by

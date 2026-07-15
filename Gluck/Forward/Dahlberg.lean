@@ -3915,6 +3915,59 @@ theorem signedMengerProfile_dahlbergFourVertex_of_strict_neighbors_min_max_four_
     hmin₁_left hmin₁_right hmax₂_left hmax₂_right
     hmin₃_left hmin₃_right hmax₄_left hmax₄_right
 
+/-- Profile-level constructor from four ordered adjacent signed-Menger turns,
+alternating peak/valley/peak/valley. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_ordered_turns {n : ℕ}
+    (hn : 2 ≤ n) {v : ZMod n → ℂ} {i₁ i₂ i₃ i₄ : ℕ}
+    (hi₁₂ : i₁ < i₂) (hi₂₃ : i₂ < i₃) (hi₃₄ : i₃ < i₄)
+    (hi₄₁ : i₄ < i₁ + n)
+    (hinc₁ : SignedMengerProfile v (i₁ : ZMod n) <
+      SignedMengerProfile v ((i₁ : ZMod n) + 1))
+    (hdec₁ : SignedMengerProfile v (((i₁ : ZMod n) + 1) + 1) <
+      SignedMengerProfile v ((i₁ : ZMod n) + 1))
+    (hdec₂ : SignedMengerProfile v ((i₂ : ZMod n) + 1) <
+      SignedMengerProfile v (i₂ : ZMod n))
+    (hinc₂ : SignedMengerProfile v ((i₂ : ZMod n) + 1) <
+      SignedMengerProfile v (((i₂ : ZMod n) + 1) + 1))
+    (hinc₃ : SignedMengerProfile v (i₃ : ZMod n) <
+      SignedMengerProfile v ((i₃ : ZMod n) + 1))
+    (hdec₃ : SignedMengerProfile v (((i₃ : ZMod n) + 1) + 1) <
+      SignedMengerProfile v ((i₃ : ZMod n) + 1))
+    (hdec₄ : SignedMengerProfile v ((i₄ : ZMod n) + 1) <
+      SignedMengerProfile v (i₄ : ZMod n))
+    (hinc₄ : SignedMengerProfile v ((i₄ : ZMod n) + 1) <
+      SignedMengerProfile v (((i₄ : ZMod n) + 1) + 1)) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact dahlbergFourVertex_of_ordered_turns hn hi₁₂ hi₂₃ hi₃₄ hi₄₁
+    hinc₁ hdec₁ hdec₂ hinc₂ hinc₃ hdec₃ hdec₄ hinc₄
+
+/-- Profile-level adjacent-turn constructor using Dahlberg's polygon-size
+hypothesis directly. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_ordered_turns_four_le {n : ℕ}
+    (hn : 4 ≤ n) {v : ZMod n → ℂ} {i₁ i₂ i₃ i₄ : ℕ}
+    (hi₁₂ : i₁ < i₂) (hi₂₃ : i₂ < i₃) (hi₃₄ : i₃ < i₄)
+    (hi₄₁ : i₄ < i₁ + n)
+    (hinc₁ : SignedMengerProfile v (i₁ : ZMod n) <
+      SignedMengerProfile v ((i₁ : ZMod n) + 1))
+    (hdec₁ : SignedMengerProfile v (((i₁ : ZMod n) + 1) + 1) <
+      SignedMengerProfile v ((i₁ : ZMod n) + 1))
+    (hdec₂ : SignedMengerProfile v ((i₂ : ZMod n) + 1) <
+      SignedMengerProfile v (i₂ : ZMod n))
+    (hinc₂ : SignedMengerProfile v ((i₂ : ZMod n) + 1) <
+      SignedMengerProfile v (((i₂ : ZMod n) + 1) + 1))
+    (hinc₃ : SignedMengerProfile v (i₃ : ZMod n) <
+      SignedMengerProfile v ((i₃ : ZMod n) + 1))
+    (hdec₃ : SignedMengerProfile v (((i₃ : ZMod n) + 1) + 1) <
+      SignedMengerProfile v ((i₃ : ZMod n) + 1))
+    (hdec₄ : SignedMengerProfile v ((i₄ : ZMod n) + 1) <
+      SignedMengerProfile v (i₄ : ZMod n))
+    (hinc₄ : SignedMengerProfile v ((i₄ : ZMod n) + 1) <
+      SignedMengerProfile v (((i₄ : ZMod n) + 1) + 1)) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact signedMengerProfile_dahlbergFourVertex_of_ordered_turns
+    (two_le_of_four_le hn) hi₁₂ hi₂₃ hi₃₄ hi₄₁
+    hinc₁ hdec₁ hdec₂ hinc₂ hinc₃ hdec₃ hdec₄ hinc₄
+
 /-- Polygon-facing constructor for Dahlberg's conclusion from four ordered
 strict one-step signed-Menger extrema. -/
 theorem polygonDahlbergFourVertex_of_strict_signedMenger_neighbors {n : ℕ}
@@ -4018,6 +4071,66 @@ theorem polygonDahlbergFourVertex_of_strict_signedMenger_neighbors_min_max {n : 
   exact dahlbergFourVertex_of_strict_neighbors_min_max hn hi₁₂ hi₂₃ hi₃₄ hi₄₁
     hmin₁_left hmin₁_right hmax₂_left hmax₂_right
     hmin₃_left hmin₃_right hmax₄_left hmax₄_right
+
+/-- Polygon-facing constructor from four ordered adjacent signed-Menger turns,
+alternating peak/valley/peak/valley. -/
+theorem polygonDahlbergFourVertex_of_ordered_signedMenger_turns {n : ℕ}
+    (hn : 2 ≤ n) {v : ZMod n → ℂ} {i₁ i₂ i₃ i₄ : ℕ}
+    (hi₁₂ : i₁ < i₂) (hi₂₃ : i₂ < i₃) (hi₃₄ : i₃ < i₄)
+    (hi₄₁ : i₄ < i₁ + n)
+    (hinc₁ :
+      Gluck.Discrete.signedMengerR2 (v ((i₁ : ZMod n) - 1)) (v (i₁ : ZMod n))
+          (v ((i₁ : ZMod n) + 1)) <
+        Gluck.Discrete.signedMengerR2 (v (((i₁ : ZMod n) + 1) - 1))
+          (v ((i₁ : ZMod n) + 1)) (v (((i₁ : ZMod n) + 1) + 1)))
+    (hdec₁ :
+      Gluck.Discrete.signedMengerR2 (v ((((i₁ : ZMod n) + 1) + 1) - 1))
+          (v (((i₁ : ZMod n) + 1) + 1)) (v ((((i₁ : ZMod n) + 1) + 1) + 1)) <
+        Gluck.Discrete.signedMengerR2 (v (((i₁ : ZMod n) + 1) - 1))
+          (v ((i₁ : ZMod n) + 1)) (v (((i₁ : ZMod n) + 1) + 1)))
+    (hdec₂ :
+      Gluck.Discrete.signedMengerR2 (v (((i₂ : ZMod n) + 1) - 1))
+          (v ((i₂ : ZMod n) + 1)) (v (((i₂ : ZMod n) + 1) + 1)) <
+        Gluck.Discrete.signedMengerR2 (v ((i₂ : ZMod n) - 1)) (v (i₂ : ZMod n))
+          (v ((i₂ : ZMod n) + 1)))
+    (hinc₂ :
+      Gluck.Discrete.signedMengerR2 (v (((i₂ : ZMod n) + 1) - 1))
+          (v ((i₂ : ZMod n) + 1)) (v (((i₂ : ZMod n) + 1) + 1)) <
+        Gluck.Discrete.signedMengerR2 (v ((((i₂ : ZMod n) + 1) + 1) - 1))
+          (v (((i₂ : ZMod n) + 1) + 1)) (v ((((i₂ : ZMod n) + 1) + 1) + 1)))
+    (hinc₃ :
+      Gluck.Discrete.signedMengerR2 (v ((i₃ : ZMod n) - 1)) (v (i₃ : ZMod n))
+          (v ((i₃ : ZMod n) + 1)) <
+        Gluck.Discrete.signedMengerR2 (v (((i₃ : ZMod n) + 1) - 1))
+          (v ((i₃ : ZMod n) + 1)) (v (((i₃ : ZMod n) + 1) + 1)))
+    (hdec₃ :
+      Gluck.Discrete.signedMengerR2 (v ((((i₃ : ZMod n) + 1) + 1) - 1))
+          (v (((i₃ : ZMod n) + 1) + 1)) (v ((((i₃ : ZMod n) + 1) + 1) + 1)) <
+        Gluck.Discrete.signedMengerR2 (v (((i₃ : ZMod n) + 1) - 1))
+          (v ((i₃ : ZMod n) + 1)) (v (((i₃ : ZMod n) + 1) + 1)))
+    (hdec₄ :
+      Gluck.Discrete.signedMengerR2 (v (((i₄ : ZMod n) + 1) - 1))
+          (v ((i₄ : ZMod n) + 1)) (v (((i₄ : ZMod n) + 1) + 1)) <
+        Gluck.Discrete.signedMengerR2 (v ((i₄ : ZMod n) - 1)) (v (i₄ : ZMod n))
+          (v ((i₄ : ZMod n) + 1)))
+    (hinc₄ :
+      Gluck.Discrete.signedMengerR2 (v (((i₄ : ZMod n) + 1) - 1))
+          (v ((i₄ : ZMod n) + 1)) (v (((i₄ : ZMod n) + 1) + 1)) <
+        Gluck.Discrete.signedMengerR2 (v ((((i₄ : ZMod n) + 1) + 1) - 1))
+          (v (((i₄ : ZMod n) + 1) + 1)) (v ((((i₄ : ZMod n) + 1) + 1) + 1))) :
+    DahlbergFourVertex
+      (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
+  change DahlbergFourVertex (SignedMengerProfile v)
+  exact signedMengerProfile_dahlbergFourVertex_of_ordered_turns hn
+    hi₁₂ hi₂₃ hi₃₄ hi₄₁
+    (by simpa [SignedMengerProfile] using hinc₁)
+    (by simpa [SignedMengerProfile] using hdec₁)
+    (by simpa [SignedMengerProfile] using hdec₂)
+    (by simpa [SignedMengerProfile] using hinc₂)
+    (by simpa [SignedMengerProfile] using hinc₃)
+    (by simpa [SignedMengerProfile] using hdec₃)
+    (by simpa [SignedMengerProfile] using hdec₄)
+    (by simpa [SignedMengerProfile] using hinc₄)
 
 /-! ## Dahlberg's Euclidean discrete four-vertex kernel -/
 
