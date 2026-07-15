@@ -120,8 +120,9 @@ constant-or positive-orientation spelling also has a turn-level endpoint,
 `constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_kernel`, with public
 spelling
 `constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_of_positiveOrientation`;
-the public constant-or D4VT wrapper routes through that endpoint before
-applying the same cyclic constructor.  The negative-orientation turn-level
+the positive-orientation constant-or D4VT kernel and public wrapper route
+through that endpoint before applying the same cyclic constructor.  The
+negative-orientation turn-level
 endpoint is exposed in reflected-sign form as
 `orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected`,
 which is then converted to the public negative D4VT theorem by

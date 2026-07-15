@@ -18,34 +18,6 @@ namespace Gluck.Forward
 
 open scoped Real
 
-/-- Constant-or-Dahlberg conformal-Menger theorem for convex/coherent polygons
-in the three project space forms.
-
-The hypotheses are intentionally the common positive-orientation interface.
-The disk hypothesis is only used by the non-Euclidean branches, while the
-proper-circle hypothesis is only used by the hyperbolic branch. -/
-theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel
-    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
-    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
-    (hdisk : ∀ i, ‖v i‖ < 1)
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (horient : PositivePolygonOrientation v)
-    (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger ε v κ)
-    (hproper : ε < 0 → ∀ i, 1 < κ i) :
-    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  rcases hε with hE | hrest
-  · subst ε
-    exact constant_or_dahlbergFourVertex_E2_of_realizesConformalMenger_zero_positiveOrientation
-      hn v κ hsimple hregular horient hκ
-  · rcases hrest with hS | hH
-    · subst ε
-      exact constant_or_dahlbergFourVertex_S2_kernel
-        hn v κ hdisk hsimple horient hregular hκ
-    · subst ε
-      exact constant_or_dahlbergFourVertex_H2_kernel
-        hn v κ hdisk hsimple horient hregular hκ (hproper (by norm_num))
-
 /-- Nonconstant conformal-Menger ordered-turn theorem for positive-orientation
 convex/coherent polygons in the three project space forms. -/
 theorem orderedAdjacentTurns_conformalMenger_spaceForm_kernel
@@ -91,6 +63,24 @@ theorem constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_kernel
   · exact Or.inr
       (orderedAdjacentTurns_conformalMenger_spaceForm_kernel
         hε hn v κ hdisk hsimple horient hregular hκ hproper hconst)
+
+/-- Constant-or-Dahlberg conformal-Menger theorem for convex/coherent polygons
+in the three project space forms, derived from the constant-or ordered-turn
+kernel. -/
+theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  rcases constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_kernel
+      hε hn v κ hdisk hsimple horient hregular hκ hproper with hconst | hturns
+  · exact Or.inl hconst
+  · exact Or.inr (dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn hturns)
 
 /-- Nonconstant conformal-Menger theorem for convex/coherent polygons in the
 three project space forms, derived from the ordered-turn kernel. -/
