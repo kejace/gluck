@@ -11,13 +11,24 @@ namespace Gluck.Forward
 
 open scoped Real
 
+/-- Geometric kernel of the hyperbolic smooth four-vertex theorem in the
+Poincaré disk, stated in the value-separated form shared with the E² forward
+development. -/
+theorem four_vertex_condition_H2_kernel {z : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed z)
+    (hreal : Gluck.SpaceForm.Realizes (-1) z κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    Gluck.FourVertexCondition κ := by
+  sorry
+
 /-- Hyperbolic smooth four-vertex theorem in the Poincaré disk. -/
 theorem four_vertex_H2 {z : ℝ → ℂ} {κ : ℝ → ℝ}
     (hclosed : Gluck.IsSimpleClosed z)
     (hreal : Gluck.SpaceForm.Realizes (-1) z κ)
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
     SmoothFourVertex κ := by
-  sorry
+  exact smoothFourVertex_of_fourVertexCondition
+    (four_vertex_condition_H2_kernel hclosed hreal hκ hper)
 
 /-- Grant--Mogilski's hyperbolic discrete four-vertex theorem for a convex
 coherent polygon whose consecutive triples lie on proper hyperbolic circles

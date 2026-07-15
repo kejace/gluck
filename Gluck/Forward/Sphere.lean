@@ -11,13 +11,24 @@ namespace Gluck.Forward
 
 open scoped Real
 
+/-- Geometric kernel of the spherical smooth four-vertex theorem in
+stereographic coordinates, stated in the value-separated form shared with the
+E² forward development. -/
+theorem four_vertex_condition_S2_kernel {z : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed z)
+    (hreal : Gluck.SpaceForm.Realizes 1 z κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    Gluck.FourVertexCondition κ := by
+  sorry
+
 /-- Spherical smooth four-vertex theorem in stereographic coordinates. -/
 theorem four_vertex_S2 {z : ℝ → ℂ} {κ : ℝ → ℝ}
     (hclosed : Gluck.IsSimpleClosed z)
     (hreal : Gluck.SpaceForm.Realizes 1 z κ)
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
     SmoothFourVertex κ := by
-  sorry
+  exact smoothFourVertex_of_fourVertexCondition
+    (four_vertex_condition_S2_kernel hclosed hreal hκ hper)
 
 /-- Deferred spherical discrete four-vertex theorem for a convex coherent
 polygon in an open hemisphere.  This is the project-derived `sin R` analogue
