@@ -3045,6 +3045,53 @@ theorem polygonEdgeCircleRadius_antitone_of_endpoint_order_pos_of_vertex_menger_
   exact polygonEdgeCircleRadius_antitone_of_endpoint_order_pos hsimple hregular i
     hPcross hQcross hκ
 
+/-- Polygon-indexed strict positive endpoint radius comparison along one
+oriented edge. -/
+theorem polygonEdgeCircleRadius_strictAnti_of_endpoint_order_pos {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (i : ZMod n)
+    (hPcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)))
+    (hQcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)))
+    (hκ : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) <
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1))) :
+    normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1))) <
+      normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1))) := by
+  have hPreg : DahlbergRegularAt (v (i - 1)) (v i) (v (i + 1)) := hregular i
+  have hQreg : DahlbergRegularAt (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    simpa using hregular (i + 1)
+  have hκ' :
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) <
+        Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    rw [signedMengerR2_cycle (v (i - 1)) (v i) (v (i + 1))]
+    exact hκ
+  exact edgeCircleRadius_strictAnti_of_endpoint_regular_order_pos
+    (hsimple.1 i) hPcross hQcross hPreg hQreg hκ'
+
+/-- Polygon-indexed strict positive endpoint radius comparison, using only
+signed-Menger positivity at the left endpoint and the adjacent strict curvature
+order. -/
+theorem polygonEdgeCircleRadius_strictAnti_of_endpoint_order_pos_of_vertex_menger_pos
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (i : ZMod n)
+    (hPκpos : 0 < Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hκ : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) <
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1))) :
+    normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1))) <
+      normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1))) := by
+  have hPcross := polygonEdgePrev_cross_pos_of_vertex_signedMenger_pos hsimple hPκpos
+  have hQκpos : 0 <
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) :=
+    lt_trans hPκpos hκ
+  have hQcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) :=
+    crossR2_pos_of_signedMengerR2_pos (hsimple.1 i) hQκpos
+  exact polygonEdgeCircleRadius_strictAnti_of_endpoint_order_pos hsimple hregular i
+    hPcross hQcross hκ
+
 /-- Polygon-indexed negative endpoint radius comparison along one oriented
 edge.  For negative signed Menger curvature, the adjacent curvature order
 gives the corresponding monotone radius order. -/
@@ -3105,6 +3152,51 @@ theorem polygonEdgeCircleRadius_mono_of_endpoint_order_neg_of_vertex_menger_neg
   have hQcross : Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) < 0 :=
     crossR2_neg_of_signedMengerR2_neg (hsimple.1 i) hQκneg
   exact polygonEdgeCircleRadius_mono_of_endpoint_order_neg hsimple hregular i
+    hPcross hQcross hκ
+
+/-- Polygon-indexed strict negative endpoint radius comparison along one
+oriented edge. -/
+theorem polygonEdgeCircleRadius_strictMono_of_endpoint_order_neg {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (i : ZMod n)
+    (hPcross : Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) < 0)
+    (hQcross : Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) < 0)
+    (hκ : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) <
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1))) :
+    normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1))) <
+      normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1))) := by
+  have hPreg : DahlbergRegularAt (v (i - 1)) (v i) (v (i + 1)) := hregular i
+  have hQreg : DahlbergRegularAt (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    simpa using hregular (i + 1)
+  have hκ' :
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) <
+        Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    rw [signedMengerR2_cycle (v (i - 1)) (v i) (v (i + 1))]
+    exact hκ
+  exact edgeCircleRadius_strictMono_of_endpoint_regular_order_neg
+    (hsimple.1 i) hPcross hQcross hPreg hQreg hκ'
+
+/-- Polygon-indexed strict negative endpoint radius comparison, using
+signed-Menger negativity at both adjacent endpoint vertices and the adjacent
+strict curvature order. -/
+theorem polygonEdgeCircleRadius_strictMono_of_endpoint_order_neg_of_vertex_menger_neg
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (i : ZMod n)
+    (hPκneg : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) < 0)
+    (hQκneg : Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1)) < 0)
+    (hκ : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) <
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i + 1 + 1))) :
+    normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1))) <
+      normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1))) := by
+  have hPcross := polygonEdgePrev_cross_neg_of_vertex_signedMenger_neg hsimple hPκneg
+  have hQcross : Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) < 0 :=
+    crossR2_neg_of_signedMengerR2_neg (hsimple.1 i) hQκneg
+  exact polygonEdgeCircleRadius_strictMono_of_endpoint_order_neg hsimple hregular i
     hPcross hQcross hκ
 
 /-! ## Equal-curvature rigidity over a shared positive edge -/
@@ -3760,6 +3852,22 @@ theorem signedMengerProfile_edgeCircleRadius_antitone_of_endpoint_order_pos
     (by simpa [SignedMengerProfile] using hPκpos)
     (by simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hκ)
 
+/-- Positive profile-facing strict radius comparison along one oriented edge. -/
+theorem signedMengerProfile_edgeCircleRadius_strictAnti_of_endpoint_order_pos
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (i : ZMod n)
+    (hPκpos : 0 < SignedMengerProfile v i)
+    (hκ : SignedMengerProfile v i < SignedMengerProfile v (i + 1)) :
+    normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1))) <
+      normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1))) := by
+  exact polygonEdgeCircleRadius_strictAnti_of_endpoint_order_pos_of_vertex_menger_pos
+    hsimple hregular i
+    (by simpa [SignedMengerProfile] using hPκpos)
+    (by simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hκ)
+
 /-- Negative profile-facing radius comparison along one oriented edge.  In the
 negative branch, signed Menger curvature is `-1/R`, so adjacent signed-curvature
 order gives monotone radius order. -/
@@ -3775,6 +3883,26 @@ theorem signedMengerProfile_edgeCircleRadius_mono_of_endpoint_order_neg
       normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
         (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1))) := by
   exact polygonEdgeCircleRadius_mono_of_endpoint_order_neg_of_vertex_menger_neg
+    hsimple hregular i
+    (by simpa [SignedMengerProfile] using hPκneg)
+    (by simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hQκneg)
+    (by simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hκ)
+
+/-- Negative profile-facing strict radius comparison along one oriented edge.
+In the negative branch, signed Menger curvature is `-1/R`, so adjacent
+signed-curvature order gives monotone radius order. -/
+theorem signedMengerProfile_edgeCircleRadius_strictMono_of_endpoint_order_neg
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (i : ZMod n)
+    (hPκneg : SignedMengerProfile v i < 0)
+    (hQκneg : SignedMengerProfile v (i + 1) < 0)
+    (hκ : SignedMengerProfile v i < SignedMengerProfile v (i + 1)) :
+    normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1))) <
+      normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1))) := by
+  exact polygonEdgeCircleRadius_strictMono_of_endpoint_order_neg_of_vertex_menger_neg
     hsimple hregular i
     (by simpa [SignedMengerProfile] using hPκneg)
     (by simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hQκneg)
