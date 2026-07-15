@@ -197,6 +197,34 @@ theorem exists_globalMinMax_strict_of_not_constant {n : ℕ} [NeZero n]
   refine ⟨κ i₀, fun j => ?_⟩
   exact le_antisymm ((hmax j).trans hle) (hmin j)
 
+/-- If every adjacent cyclic value agrees, then the cyclic profile is
+constant. -/
+theorem exists_constant_of_forall_eq_succ {n : ℕ} [NeZero n] {κ : ZMod n → ℝ}
+    (hstep : ∀ i : ZMod n, κ i = κ (i + 1)) :
+    ∃ c, ∀ i : ZMod n, κ i = c := by
+  refine ⟨κ 0, fun i => ?_⟩
+  have hnat : ∀ k : ℕ, κ (k : ZMod n) = κ 0 := by
+    intro k
+    induction k with
+    | zero => simp
+    | succ k ih =>
+        have hs := hstep (k : ZMod n)
+        have hcast : ((k + 1 : ℕ) : ZMod n) = (k : ZMod n) + 1 := by norm_num
+        rw [hcast]
+        exact hs.symm.trans ih
+  simpa [ZMod.natCast_rightInverse i] using hnat i.val
+
+/-- A nonconstant cyclic profile has at least one adjacent change. -/
+theorem exists_ne_succ_of_not_constant {n : ℕ} [NeZero n] {κ : ZMod n → ℝ}
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    ∃ i : ZMod n, κ i ≠ κ (i + 1) := by
+  by_contra hnone
+  apply hnc
+  apply exists_constant_of_forall_eq_succ
+  intro i
+  by_contra hne
+  exact hnone ⟨i, hne⟩
+
 /-- A Euclidean circle with centre `O` and positive radius `R` through a triple. -/
 def CircumcircleR2 (A B C O : ℂ) (R : ℝ) : Prop :=
   0 < R ∧ dist O A = R ∧ dist O B = R ∧ dist O C = R
