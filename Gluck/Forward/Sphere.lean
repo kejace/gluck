@@ -31,8 +31,9 @@ theorem four_vertex_S2 {z : ℝ → ℂ} {κ : ℝ → ℝ}
     (hreal : Gluck.SpaceForm.Realizes 1 z κ)
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
     SmoothFourVertex κ := by
-  exact smoothFourVertex_of_fourVertexCondition
-    (four_vertex_condition_S2_kernel hclosed hreal hκ hper)
+  exact smoothFourVertex_spaceForm_kernel
+    (ε := 1) (Or.inr (Or.inl rfl)) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper
 
 /-- Deferred spherical constant-or-Dahlberg theorem for a convex coherent
 polygon in an open hemisphere.  This is the project-derived `sin R` analogue

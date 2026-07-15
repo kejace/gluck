@@ -31,8 +31,9 @@ theorem four_vertex_H2 {z : ℝ → ℂ} {κ : ℝ → ℝ}
     (hreal : Gluck.SpaceForm.Realizes (-1) z κ)
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
     SmoothFourVertex κ := by
-  exact smoothFourVertex_of_fourVertexCondition
-    (four_vertex_condition_H2_kernel hclosed hreal hκ hper)
+  exact smoothFourVertex_spaceForm_kernel
+    (ε := -1) (Or.inr (Or.inr rfl)) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper
 
 /-- Grant--Mogilski's hyperbolic constant-or-Dahlberg theorem for a convex
 coherent polygon whose consecutive triples lie on proper hyperbolic circles

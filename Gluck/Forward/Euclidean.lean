@@ -37,8 +37,9 @@ theorem four_vertex_E2 {γ : ℝ → ℂ} {κ : ℝ → ℝ}
     (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
     SmoothFourVertex κ := by
-  exact smoothFourVertex_of_fourVertexCondition
-    (four_vertex_condition_E2 hclosed hreal hκ hper)
+  exact smoothFourVertex_spaceForm_kernel
+    (ε := 0) (Or.inl rfl) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper
 
 /-- The convex Euclidean four-vertex theorem.  At the API level this is an
 immediate specialization of the standard theorem; the source-level convex
