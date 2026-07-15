@@ -45,8 +45,11 @@ The smooth forward statements for `E²`, `S²`, and `H²` are exposed through
 model-specific wrappers in `Euclidean.lean`, `Sphere.lean`, and
 `Hyperbolic.lean`, but they now share one source gate:
 `four_vertex_condition_smooth_spaceForm_kernel` in `Smooth.lean`.  The
-discrete forward statements for `S²` and `H²` are declared in `Sphere.lean`
-and `Hyperbolic.lean`.  Their status is not uniform:
+discrete forward statements for `S²` and `H²` are also exposed through
+model-specific wrappers in `Sphere.lean` and `Hyperbolic.lean`, with their
+shared source gate isolated as
+`exists_ordered_conformalMenger_turns_spaceForm_kernel` in
+`SpaceFormDiscrete.lean`.  Their status is not uniform:
 
 - the smooth theorem is one unconditional space-form theorem, transported by
   the Möbius-invariant osculating-cycle contact condition;

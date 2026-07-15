@@ -1,4 +1,5 @@
 import Gluck.Forward.Dahlberg
+import Gluck.Forward.SpaceFormDiscrete
 import Gluck.Forward.Smooth
 
 /-!
@@ -44,7 +45,9 @@ theorem exists_ordered_conformalMenger_turns_S2_kernel {n : ℕ} [NeZero n]
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger 1 v κ) :
     OrderedAdjacentTurns κ := by
-  sorry
+  exact exists_ordered_conformalMenger_turns_spaceForm_kernel
+    (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro hlt; norm_num at hlt)
 
 /-- Spherical ordered-turn extraction using the shared positive-orientation
 interface for convex/coherent cyclic polygons. -/
@@ -96,9 +99,9 @@ theorem discrete_four_vertex_S2_kernel {n : ℕ} [NeZero n]
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger 1 v κ) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
-    (exists_ordered_conformalMenger_turns_S2_kernel
-      hn v κ hdisk hsimple hconvex hregular hκ)
+  exact discrete_four_vertex_spaceForm_kernel
+    (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro hlt; norm_num at hlt)
 
 /-- Spherical discrete four-vertex theorem for a convex coherent polygon in an
 open hemisphere, exposed as a public wrapper around the geometric kernel. -/

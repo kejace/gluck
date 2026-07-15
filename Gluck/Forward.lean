@@ -1,5 +1,6 @@
 import Gluck.Forward.Dahlberg
 import Gluck.Forward.Smooth
+import Gluck.Forward.SpaceFormDiscrete
 import Gluck.Forward.Euclidean
 import Gluck.Forward.Sphere
 import Gluck.Forward.Hyperbolic

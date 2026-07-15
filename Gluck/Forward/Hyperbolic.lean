@@ -1,4 +1,5 @@
 import Gluck.Forward.Dahlberg
+import Gluck.Forward.SpaceFormDiscrete
 import Gluck.Forward.Smooth
 
 /-!
@@ -44,7 +45,9 @@ theorem exists_ordered_conformalMenger_turns_H2_kernel {n : ℕ} [NeZero n]
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
     OrderedAdjacentTurns κ := by
-  sorry
+  exact exists_ordered_conformalMenger_turns_spaceForm_kernel
+    (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro _; exact hcircle)
 
 /-- Hyperbolic ordered-turn extraction using the shared positive-orientation
 interface for convex/coherent cyclic polygons in the proper-circle regime. -/
@@ -100,9 +103,9 @@ theorem discrete_four_vertex_H2_kernel {n : ℕ} [NeZero n]
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
-    (exists_ordered_conformalMenger_turns_H2_kernel
-      hn v κ hdisk hsimple hconvex hregular hκ hcircle)
+  exact discrete_four_vertex_spaceForm_kernel
+    (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro _; exact hcircle)
 
 /-- Hyperbolic discrete four-vertex theorem for a convex coherent polygon
 whose consecutive triples lie on proper hyperbolic circles, exposed as a
