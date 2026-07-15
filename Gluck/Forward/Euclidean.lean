@@ -356,6 +356,72 @@ theorem dahlberg_discrete_four_vertex_E2_of_strict_orientation
   exact signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_strict_orientation
     hn v hsimple hregular horient
 
+/-- Positive affine changes of the E² signed-Menger profile preserve the
+nonconcyclic Dahlberg four-vertex conclusion.  This is the algebraic transport
+interface used by space-form reductions after their curvature is identified
+with `a • κ_E² + b`, `a > 0`. -/
+theorem posAffine_signedMengerProfile_dahlbergFourVertex_E2_of_not_concyclic
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v)
+    {a b : ℝ} (ha : 0 < a) :
+    DahlbergFourVertex (fun i => a * SignedMengerProfile v i + b) := by
+  exact dahlbergFourVertex_posAffine ha
+    (signedMengerProfile_dahlbergFourVertex_E2_of_not_concyclic
+      hn v hsimple hregular hnoncircle)
+
+/-- Any curvature profile pointwise equal to a positive affine change of the
+E² signed-Menger profile inherits the nonconcyclic Dahlberg conclusion. -/
+theorem dahlbergFourVertex_E2_of_posAffine_signedMengerProfile_not_concyclic
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v)
+    {a b : ℝ} (ha : 0 < a)
+    (hκ : ∀ i : ZMod n, κ i = a * SignedMengerProfile v i + b) :
+    DahlbergFourVertex κ := by
+  have hfv :=
+    posAffine_signedMengerProfile_dahlbergFourVertex_E2_of_not_concyclic
+      hn v hsimple hregular hnoncircle (a := a) (b := b) ha
+  convert hfv using 1
+  ext i
+  exact hκ i
+
+/-- Positive affine changes of the E² signed-Menger profile preserve the
+strict-orientation constant-or-four-vertex package. -/
+theorem posAffine_signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_strict_orientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    {a b : ℝ} (ha : 0 < a) :
+    (∃ c, ∀ i : ZMod n, a * SignedMengerProfile v i + b = c) ∨
+      DahlbergFourVertex (fun i => a * SignedMengerProfile v i + b) := by
+  rcases signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_strict_orientation
+    hn v hsimple hregular horient with hconst | hfv
+  · rcases hconst with ⟨c, hc⟩
+    exact Or.inl ⟨a * c + b, fun i => by simp [hc i]⟩
+  · exact Or.inr (dahlbergFourVertex_posAffine ha hfv)
+
+/-- Any curvature profile pointwise equal to a positive affine change of the
+E² signed-Menger profile inherits the strict-orientation constant-or-four
+vertex package. -/
+theorem constant_or_dahlbergFourVertex_E2_of_posAffine_signedMengerProfile_strict_orientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    {a b : ℝ} (ha : 0 < a)
+    (hκ : ∀ i : ZMod n, κ i = a * SignedMengerProfile v i + b) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  rcases posAffine_signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_strict_orientation
+    hn v hsimple hregular horient ha with hconst | hfv
+  · rcases hconst with ⟨c, hc⟩
+    exact Or.inl ⟨c, fun i => by rw [hκ i, hc i]⟩
+  · exact Or.inr (by
+      convert hfv using 1
+      ext i
+      exact hκ i)
+
 /-- Dahlberg's Euclidean discrete four-vertex theorem: the signed Menger
 curvature of a locally regular simple closed polygon is constant or has an
 alternating four-vertex level window. -/
