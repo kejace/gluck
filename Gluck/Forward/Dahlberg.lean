@@ -2091,6 +2091,66 @@ theorem exists_constant_signedMenger_of_concyclic_neg {n : ℕ}
   refine ⟨-(1 / R), fun i => ?_⟩
   exact polygonSignedMenger_eq_neg_inv_radius_of_concyclic_neg hsimple hR hdist i (hcross i)
 
+/-- Profile form: on a concyclic polygon, a positively oriented noncollinear
+vertex has signed Menger curvature equal to the reciprocal of the common
+radius. -/
+theorem signedMengerProfile_eq_inv_radius_of_concyclic_pos {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    {O : ℂ} {R : ℝ} (hR : 0 < R) (hdist : ∀ i, dist O (v i) = R)
+    (i : ZMod n)
+    (hcross : 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) :
+    SignedMengerProfile v i = 1 / R := by
+  exact polygonSignedMenger_eq_inv_radius_of_concyclic_pos hsimple hR hdist i hcross
+
+/-- Profile form: on a concyclic polygon, a negatively oriented noncollinear
+vertex has signed Menger curvature equal to minus the reciprocal of the common
+radius. -/
+theorem signedMengerProfile_eq_neg_inv_radius_of_concyclic_neg {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    {O : ℂ} {R : ℝ} (hR : 0 < R) (hdist : ∀ i, dist O (v i) = R)
+    (i : ZMod n)
+    (hcross : Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) < 0) :
+    SignedMengerProfile v i = -(1 / R) := by
+  exact polygonSignedMenger_eq_neg_inv_radius_of_concyclic_neg hsimple hR hdist i hcross
+
+/-- A consistently positively oriented concyclic simple polygon has constant
+signed-Menger profile. -/
+theorem exists_constant_signedMengerProfile_of_concyclic_pos {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hcyc : Concyclic v)
+    (hcross : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) :
+    ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  exact exists_constant_signedMenger_of_concyclic_pos hsimple hcyc hcross
+
+/-- A consistently negatively oriented concyclic simple polygon has constant
+signed-Menger profile. -/
+theorem exists_constant_signedMengerProfile_of_concyclic_neg {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hcyc : Concyclic v)
+    (hcross : ∀ i, Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) < 0) :
+    ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  exact exists_constant_signedMenger_of_concyclic_neg hsimple hcyc hcross
+
+/-- Under consistent positive orientation, a nonconstant signed-Menger profile
+rules out concyclicity. -/
+theorem not_concyclic_of_not_constant_signedMengerProfile_pos {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c)
+    (hcross : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) :
+    ¬ Concyclic v := by
+  intro hcyc
+  exact hnc (exists_constant_signedMengerProfile_of_concyclic_pos hsimple hcyc hcross)
+
+/-- Under consistent negative orientation, a nonconstant signed-Menger profile
+rules out concyclicity. -/
+theorem not_concyclic_of_not_constant_signedMengerProfile_neg {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c)
+    (hcross : ∀ i, Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)) < 0) :
+    ¬ Concyclic v := by
+  intro hcyc
+  exact hnc (exists_constant_signedMengerProfile_of_concyclic_neg hsimple hcyc hcross)
+
 /-! ## Finite cyclic signed-Menger profile API -/
 
 /-- A nonconstant polygon signed-Menger profile has both a strict adjacent
@@ -2102,6 +2162,17 @@ theorem signedMengerProfile_exists_adjacent_increase_and_decrease_of_not_constan
       ∃ i : ZMod n, SignedMengerProfile v (i + 1) < SignedMengerProfile v i := by
   exact exists_adjacent_increase_and_decrease_of_not_constant
     (κ := SignedMengerProfile v) hnc
+
+/-- A nonconstant signed-Menger profile has a global minimum and maximum with
+strictly separated values. -/
+theorem signedMengerProfile_exists_globalMinMax_strict_of_not_constant
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    ∃ i₀ i₁ : ZMod n,
+      (∀ j : ZMod n, SignedMengerProfile v i₀ ≤ SignedMengerProfile v j) ∧
+      (∀ j : ZMod n, SignedMengerProfile v j ≤ SignedMengerProfile v i₁) ∧
+      SignedMengerProfile v i₀ < SignedMengerProfile v i₁ := by
+  exact exists_globalMinMax_strict_of_not_constant (κ := SignedMengerProfile v) hnc
 
 /-- A nonconstant polygon signed-Menger profile has both a strict adjacent
 increase and a strict adjacent decrease. -/
