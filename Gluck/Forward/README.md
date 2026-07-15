@@ -38,12 +38,13 @@ proof architecture visible.  The same-orientation strictly convex branch is
 isolated separately as
 `signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_lemma9_source`,
 which is now proved from the narrower ordered-turn extraction gate
-`exists_ordered_signedMenger_turns_of_positiveOrientation_lemma9_source`
+`exists_ordered_signedMenger_turns_of_positiveOrientation_not_constant_source`
 and the existing profile-level constructor
 `signedMengerProfile_dahlbergFourVertex_of_ordered_turns_four_le`.  Thus the
 remaining Lemma 9 gap is exactly the geometric extraction of four ordered
-adjacent curvature turns, not the final conversion from turns to Dahlberg's
-plateau-aware conclusion.
+adjacent curvature turns from the nonconstant strictly convex profile, not the
+nonconcyclic-to-nonconstant reduction or the final conversion from turns to
+Dahlberg's plateau-aware conclusion.
 
 `AlternatesAcrossLevel` remains available as a later corollary of the exact
 plateau-aware conclusion; it is not used as a substitute for Dahlberg's source
