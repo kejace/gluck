@@ -56,6 +56,36 @@ theorem exists_ordered_conformalMenger_turns_H2_of_positiveOrientation
   exact exists_ordered_conformalMenger_turns_H2_kernel
     hn v κ hdisk hsimple horient hregular hκ hcircle
 
+/-- Hyperbolic ordered-turn extraction for negatively oriented convex/coherent
+cyclic polygons, stated for the naturally reversed proper-circle curvature
+profile. -/
+theorem exists_ordered_conformalMenger_turns_H2_of_negativeOrientation_reflected
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i) :
+    OrderedAdjacentTurns (fun i => -κ (-i)) := by
+  have hdisk' : ∀ i, ‖ReverseCyclicPolygon v i‖ < 1 := by
+    intro i
+    simpa [ReverseCyclicPolygon] using hdisk (-i)
+  have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
+    isSimplePolygon_reverseCyclicPolygon hsimple
+  have horient' : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
+    positiveOrientation_reverseCyclicPolygon_of_negativeOrientation horient
+  have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
+    dahlbergRegular_reverseCyclicPolygon hregular
+  have hκ' :
+      RealizesConformalMenger (-1) (ReverseCyclicPolygon v) (fun i => -κ (-i)) :=
+    realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation horient hκ
+  have hcircle' : ∀ i, 1 < (fun i => -κ (-i)) i := by
+    intro i
+    exact hcircle (-i)
+  exact exists_ordered_conformalMenger_turns_H2_of_positiveOrientation
+    hn (ReverseCyclicPolygon v) (fun i => -κ (-i))
+      hdisk' hsimple' horient' hregular' hκ' hcircle'
+
 /-- Grant--Mogilski's hyperbolic discrete four-vertex theorem for a convex
 coherent polygon whose consecutive triples lie on proper hyperbolic circles
 (`κᵢ > 1`).  The proof is deferred while E² is developed. -/
