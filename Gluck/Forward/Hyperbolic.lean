@@ -1,4 +1,5 @@
 import Gluck.Forward.Dahlberg
+import Gluck.Forward.Smooth
 
 /-!
 # Deferred forward four-vertex theorems on the hyperbolic plane
@@ -19,7 +20,9 @@ theorem four_vertex_condition_H2_kernel {z : ℝ → ℂ} {κ : ℝ → ℝ}
     (hreal : Gluck.SpaceForm.Realizes (-1) z κ)
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
     Gluck.FourVertexCondition κ := by
-  sorry
+  exact four_vertex_condition_smooth_spaceForm_kernel
+    (ε := -1) (Or.inr (Or.inr rfl)) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper
 
 /-- Hyperbolic smooth four-vertex theorem in the Poincaré disk. -/
 theorem four_vertex_H2 {z : ℝ → ℂ} {κ : ℝ → ℝ}

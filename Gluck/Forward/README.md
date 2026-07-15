@@ -41,22 +41,24 @@ Dahlberg's mixed, nonconvex theorem to `S²` and `H²`, including candidate
 statements, the coaxial-pencil nesting calculation, and the remaining proof
 gates.
 
-The smooth and discrete forward statements for `S²` and `H²` are declared in
-`Sphere.lean` and `Hyperbolic.lean`.  They intentionally remain `sorry` until
-the Euclidean proof and the correct intrinsic space-form regularity API are
-complete.  Their status is not uniform:
+The smooth forward statements for `E²`, `S²`, and `H²` are exposed through
+model-specific wrappers in `Euclidean.lean`, `Sphere.lean`, and
+`Hyperbolic.lean`, but they now share one source gate:
+`four_vertex_condition_smooth_spaceForm_kernel` in `Smooth.lean`.  The
+discrete forward statements for `S²` and `H²` are declared in `Sphere.lean`
+and `Hyperbolic.lean`.  Their status is not uniform:
 
 - the smooth theorem is one unconditional space-form theorem, transported by
   the Möbius-invariant osculating-cycle contact condition;
 - the H² discrete statement is the published convex coherent proper-circle
   theorem of Grant–Mogilski (`κᵢ > 1`);
 - the S² discrete statement is the project-derived, apparently new, open-
-  hemisphere `sin R` analogue described in `discrete_plan.md` §5.4;
+  hemisphere `sin R` analogue described in the project notes;
 - no full nonconvex Dahlberg transport to S²/H² is asserted here.
 
-The detailed internal source is `smooth_forward_plan.md`, especially §§0–6 and
-§9.  It records the common conformal proof route and keeps curvature extrema
-separate from the unrelated spherical inflection theorems.
+The detailed internal source is the common conformal proof route recorded in
+the project notes; the formalization keeps curvature extrema separate from the
+unrelated spherical inflection theorems.
 
 Primary online orientation references:
 

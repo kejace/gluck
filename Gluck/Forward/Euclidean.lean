@@ -1,4 +1,5 @@
 import Gluck.Forward.Dahlberg
+import Gluck.Forward.Smooth
 
 /-!
 # Forward four-vertex theorems in the Euclidean plane
@@ -18,7 +19,9 @@ theorem four_vertex_condition_E2_kernel {γ : ℝ → ℂ} {κ : ℝ → ℝ}
     (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
     Gluck.FourVertexCondition κ := by
-  sorry
+  exact four_vertex_condition_smooth_spaceForm_kernel
+    (ε := 0) (Or.inl rfl) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper
 
 /-- The standard Euclidean smooth four-vertex theorem, stated in the
 value-separated form used by the converse development. -/
