@@ -2937,6 +2937,30 @@ theorem negativeOrientation_of_signedMengerProfile_neg {n : ℕ}
     simpa using hsimple.1 (i - 1)
   exact crossR2_neg_of_signedMengerR2_neg hAB (hκ i)
 
+/-! ## Same-sign nonconcyclic profiles -/
+
+/-- Positive orientation version of the constant-profile contrapositive:
+a nonconcyclic locally regular simple polygon has nonconstant signed-Menger
+profile. -/
+theorem not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) (hnoncircle : ¬ Concyclic v) :
+    ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  exact not_constant_signedMengerProfile_of_not_concyclic_pos hsimple hregular
+    (signedMengerProfile_pos_of_positiveOrientation hsimple horient) hnoncircle
+
+/-- Negative orientation version of the constant-profile contrapositive:
+a nonconcyclic locally regular simple polygon has nonconstant signed-Menger
+profile. -/
+theorem not_constant_signedMengerProfile_of_not_concyclic_negativeOrientation
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (horient : NegativePolygonOrientation v) (hnoncircle : ¬ Concyclic v) :
+    ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  exact not_constant_signedMengerProfile_of_not_concyclic_neg hsimple hregular
+    (signedMengerProfile_neg_of_negativeOrientation hsimple horient) hnoncircle
+
 /-! ## Oriented regular vertices are genuine circle vertices -/
 
 /-- Positive orientation forces each Dahlberg-regular vertex into the genuine
@@ -3039,6 +3063,60 @@ theorem signedMengerProfile_exists_globalMinMax_strict_of_not_constant
       (∀ j : ZMod n, SignedMengerProfile v j ≤ SignedMengerProfile v i₁) ∧
       SignedMengerProfile v i₀ < SignedMengerProfile v i₁ := by
   exact exists_globalMinMax_strict_of_not_constant (κ := SignedMengerProfile v) hnc
+
+/-- A positive-orientation nonconcyclic locally regular simple polygon has
+both an adjacent strict increase and an adjacent strict decrease of signed
+Menger curvature. -/
+theorem signedMengerProfile_exists_adjacent_increase_and_decrease_of_not_concyclic_pos
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) (hnoncircle : ¬ Concyclic v) :
+    (∃ i : ZMod n, SignedMengerProfile v i < SignedMengerProfile v (i + 1)) ∧
+      ∃ i : ZMod n, SignedMengerProfile v (i + 1) < SignedMengerProfile v i := by
+  exact signedMengerProfile_exists_adjacent_increase_and_decrease_of_not_constant
+    (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
+      hsimple hregular horient hnoncircle)
+
+/-- A negative-orientation nonconcyclic locally regular simple polygon has
+both an adjacent strict increase and an adjacent strict decrease of signed
+Menger curvature. -/
+theorem signedMengerProfile_exists_adjacent_increase_and_decrease_of_not_concyclic_neg
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (horient : NegativePolygonOrientation v) (hnoncircle : ¬ Concyclic v) :
+    (∃ i : ZMod n, SignedMengerProfile v i < SignedMengerProfile v (i + 1)) ∧
+      ∃ i : ZMod n, SignedMengerProfile v (i + 1) < SignedMengerProfile v i := by
+  exact signedMengerProfile_exists_adjacent_increase_and_decrease_of_not_constant
+    (not_constant_signedMengerProfile_of_not_concyclic_negativeOrientation
+      hsimple hregular horient hnoncircle)
+
+/-- A positive-orientation nonconcyclic locally regular simple polygon has
+strictly separated global minimum and maximum signed-Menger values. -/
+theorem signedMengerProfile_exists_globalMinMax_strict_of_not_concyclic_pos
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) (hnoncircle : ¬ Concyclic v) :
+    ∃ i₀ i₁ : ZMod n,
+      (∀ j : ZMod n, SignedMengerProfile v i₀ ≤ SignedMengerProfile v j) ∧
+      (∀ j : ZMod n, SignedMengerProfile v j ≤ SignedMengerProfile v i₁) ∧
+      SignedMengerProfile v i₀ < SignedMengerProfile v i₁ := by
+  exact signedMengerProfile_exists_globalMinMax_strict_of_not_constant
+    (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
+      hsimple hregular horient hnoncircle)
+
+/-- A negative-orientation nonconcyclic locally regular simple polygon has
+strictly separated global minimum and maximum signed-Menger values. -/
+theorem signedMengerProfile_exists_globalMinMax_strict_of_not_concyclic_neg
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (horient : NegativePolygonOrientation v) (hnoncircle : ¬ Concyclic v) :
+    ∃ i₀ i₁ : ZMod n,
+      (∀ j : ZMod n, SignedMengerProfile v i₀ ≤ SignedMengerProfile v j) ∧
+      (∀ j : ZMod n, SignedMengerProfile v j ≤ SignedMengerProfile v i₁) ∧
+      SignedMengerProfile v i₀ < SignedMengerProfile v i₁ := by
+  exact signedMengerProfile_exists_globalMinMax_strict_of_not_constant
+    (not_constant_signedMengerProfile_of_not_concyclic_negativeOrientation
+      hsimple hregular horient hnoncircle)
 
 /-- A nonconstant polygon signed-Menger profile has both a strict adjacent
 increase and a strict adjacent decrease. -/
