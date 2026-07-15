@@ -53,15 +53,19 @@ model-specific wrappers in `Euclidean.lean`, `Sphere.lean`, and
 discrete forward statements for `S²` and `H²` are also exposed through
 model-specific wrappers in `Sphere.lean` and `Hyperbolic.lean`, with their
 shared source gate isolated as
-`discrete_four_vertex_spaceForm_kernel` in
-`SpaceFormDiscrete.lean`.  Their status is not uniform:
+`constant_or_dahlbergFourVertex_spaceForm_kernel` in
+`SpaceFormDiscrete.lean`; the `discrete_four_vertex_*` wrappers add an explicit
+nonconstancy hypothesis to rule out the constant-curvature case.  Their status
+is not uniform:
 
 - the smooth theorem is one unconditional space-form theorem, transported by
   the Möbius-invariant osculating-cycle contact condition;
 - the H² discrete statement is the published convex coherent proper-circle
-  theorem of Grant–Mogilski (`κᵢ > 1`);
+  theorem of Grant–Mogilski (`κᵢ > 1`), in constant-or-D4VT form unless
+  nonconstancy is supplied;
 - the S² discrete statement is the project-derived, apparently new, open-
-  hemisphere `sin R` analogue described in the project notes;
+  hemisphere `sin R` analogue described in the project notes, with the same
+  constant-or/nonconstant split;
 - no full nonconvex Dahlberg transport to S²/H² is asserted here.
 
 The detailed internal source is the common conformal proof route recorded in

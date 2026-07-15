@@ -34,32 +34,62 @@ theorem four_vertex_S2 {z : ℝ → ℂ} {κ : ℝ → ℝ}
   exact smoothFourVertex_of_fourVertexCondition
     (four_vertex_condition_S2_kernel hclosed hreal hκ hper)
 
-/-- Deferred spherical discrete four-vertex theorem for a convex coherent
+/-- Deferred spherical constant-or-Dahlberg theorem for a convex coherent
 polygon in an open hemisphere.  This is the project-derived `sin R` analogue
 of the Musin / Grant--Mogilski circumradius theorem and appears to be new. -/
+theorem constant_or_dahlbergFourVertex_S2_kernel {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_spaceForm_kernel
+    (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro hlt; norm_num at hlt)
+
+/-- Spherical discrete four-vertex theorem for a nonconstant convex coherent
+polygon in an open hemisphere. -/
 theorem discrete_four_vertex_S2_kernel {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
     (hdisk : ∀ i, ‖v i‖ < 1)
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
     (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger 1 v κ) :
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
   exact discrete_four_vertex_spaceForm_kernel
     (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
-    (by intro hlt; norm_num at hlt)
+    (by intro hlt; norm_num at hlt) hnc
 
-/-- Spherical discrete four-vertex theorem for a convex coherent polygon in an
+/-- Spherical constant-or-Dahlberg theorem for a convex coherent polygon in an
 open hemisphere, exposed as a public wrapper around the geometric kernel. -/
-theorem discrete_four_vertex_S2 {n : ℕ} [NeZero n]
+theorem constant_or_dahlbergFourVertex_S2 {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
     (hdisk : ∀ i, ‖v i‖ < 1)
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_S2_kernel
+    hn v κ hdisk hsimple hconvex hregular hκ
+
+/-- Spherical discrete four-vertex theorem for a nonconstant convex coherent
+polygon in an open hemisphere, exposed as a public wrapper around the
+geometric kernel. -/
+theorem discrete_four_vertex_S2 {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact discrete_four_vertex_S2_kernel hn v κ hdisk hsimple hconvex hregular hκ
+  exact discrete_four_vertex_S2_kernel hn v κ hdisk hsimple hconvex hregular hκ hnc
 
 /-- Spherical discrete four-vertex theorem using the shared positive
 orientation interface for convex/coherent cyclic polygons. -/
@@ -69,9 +99,10 @@ theorem discrete_four_vertex_S2_of_positiveOrientation {n : ℕ} [NeZero n]
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (horient : PositivePolygonOrientation v)
     (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger 1 v κ) :
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact discrete_four_vertex_S2 hn v κ hdisk hsimple horient hregular hκ
+  exact discrete_four_vertex_S2 hn v κ hdisk hsimple horient hregular hκ hnc
 
 /-- Spherical discrete four-vertex theorem for negatively oriented convex
 coherent cyclic polygons, stated for the naturally reversed curvature profile. -/
@@ -81,7 +112,8 @@ theorem discrete_four_vertex_S2_of_negativeOrientation_reflected
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (horient : NegativePolygonOrientation v)
     (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger 1 v κ) :
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc_reflected : ¬ ∃ c, ∀ i : ZMod n, -κ (-i) = c) :
     DahlbergFourVertex (fun i => -κ (-i)) := by
   have hdisk' : ∀ i, ‖ReverseCyclicPolygon v i‖ < 1 := by
     intro i
@@ -97,7 +129,7 @@ theorem discrete_four_vertex_S2_of_negativeOrientation_reflected
     realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation horient hκ
   exact discrete_four_vertex_S2_of_positiveOrientation
     hn (ReverseCyclicPolygon v) (fun i => -κ (-i))
-      hdisk' hsimple' horient' hregular' hκ'
+      hdisk' hsimple' horient' hregular' hκ' hnc_reflected
 
 /-- Spherical discrete four-vertex theorem for negatively oriented convex
 coherent cyclic polygons, obtained from the positive kernel by reversing the
@@ -108,12 +140,18 @@ theorem discrete_four_vertex_S2_of_negativeOrientation {n : ℕ} [NeZero n]
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (horient : NegativePolygonOrientation v)
     (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger 1 v κ) :
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
+  have hnc_reflected : ¬ ∃ c, ∀ i : ZMod n, -κ (-i) = c := by
+    rintro ⟨c, hc⟩
+    exact hnc ⟨-c, fun i => by
+      have hi := congrArg Neg.neg (hc (-i))
+      simpa using hi⟩
   have hfv_reflected :
       DahlbergFourVertex (fun i => -κ (-i)) :=
     discrete_four_vertex_S2_of_negativeOrientation_reflected
-      hn v κ hdisk hsimple horient hregular hκ
+      hn v κ hdisk hsimple horient hregular hκ hnc_reflected
   have hfv_neg : DahlbergFourVertex (fun i => -κ i) := by
     exact (dahlbergFourVertex_reflectIndex_iff
       (κ := fun i : ZMod n => -κ i) (a := 0)).mp (by
@@ -131,12 +169,13 @@ theorem discrete_four_vertex_S2_of_strict_orientation {n : ℕ} [NeZero n]
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
     (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger 1 v κ) :
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
   rcases horient with hpos | hneg
   · exact discrete_four_vertex_S2_of_positiveOrientation
-      hn v κ hdisk hsimple hpos hregular hκ
+      hn v κ hdisk hsimple hpos hregular hκ hnc
   · exact discrete_four_vertex_S2_of_negativeOrientation
-      hn v κ hdisk hsimple hneg hregular hκ
+      hn v κ hdisk hsimple hneg hregular hκ hnc
 
 end Gluck.Forward
