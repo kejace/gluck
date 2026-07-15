@@ -103,4 +103,20 @@ theorem discrete_four_vertex_S2_of_negativeOrientation {n : ℕ} [NeZero n]
         abel_nf)
   exact dahlbergFourVertex_of_neg hfv_neg
 
+/-- Spherical discrete four-vertex theorem for strictly oriented convex
+coherent cyclic polygons, packaged over the two possible orientations. -/
+theorem discrete_four_vertex_S2_of_strict_orientation {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    DahlbergFourVertex κ := by
+  rcases horient with hpos | hneg
+  · exact discrete_four_vertex_S2_of_positiveOrientation
+      hn v κ hdisk hsimple hpos hregular hκ
+  · exact discrete_four_vertex_S2_of_negativeOrientation
+      hn v κ hdisk hsimple hneg hregular hκ
+
 end Gluck.Forward

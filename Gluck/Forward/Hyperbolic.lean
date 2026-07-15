@@ -107,4 +107,23 @@ theorem discrete_four_vertex_H2_of_negativeOrientation {n : ℕ} [NeZero n]
         abel_nf)
   exact dahlbergFourVertex_of_neg hfv_neg
 
+/-- Hyperbolic discrete four-vertex theorem for strictly oriented convex
+coherent cyclic polygons, packaged with the matching proper-circle condition
+for the chosen orientation. -/
+theorem discrete_four_vertex_H2_of_strict_orientation {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient :
+      (PositivePolygonOrientation v ∧ ∀ i, 1 < κ i) ∨
+        (NegativePolygonOrientation v ∧ ∀ i, 1 < -κ i))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) :
+    DahlbergFourVertex κ := by
+  rcases horient with hpos | hneg
+  · exact discrete_four_vertex_H2_of_positiveOrientation
+      hn v κ hdisk hsimple hpos.1 hregular hκ hpos.2
+  · exact discrete_four_vertex_H2_of_negativeOrientation
+      hn v κ hdisk hsimple hneg.1 hregular hκ hneg.2
+
 end Gluck.Forward
