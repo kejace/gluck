@@ -102,6 +102,27 @@ def DahlbergFourVertex {n : ℕ} (κ : ZMod n → ℝ) : Prop :=
       DiscreteLocalMax κ (i₃ : ZMod n) ∧
       DiscreteLocalMin κ (i₄ : ZMod n)
 
+/-- Four ordered strict one-step extrema give Dahlberg's plateau-aware
+four-vertex conclusion. -/
+theorem dahlbergFourVertex_of_strict_neighbors {n : ℕ} (hn : 2 ≤ n)
+    {κ : ZMod n → ℝ} {i₁ i₂ i₃ i₄ : ℕ}
+    (hi₁₂ : i₁ < i₂) (hi₂₃ : i₂ < i₃) (hi₃₄ : i₃ < i₄)
+    (hi₄₁ : i₄ < i₁ + n)
+    (hmax₁_left : κ ((i₁ : ZMod n) - 1) < κ (i₁ : ZMod n))
+    (hmax₁_right : κ ((i₁ : ZMod n) + 1) < κ (i₁ : ZMod n))
+    (hmin₂_left : κ (i₂ : ZMod n) < κ ((i₂ : ZMod n) - 1))
+    (hmin₂_right : κ (i₂ : ZMod n) < κ ((i₂ : ZMod n) + 1))
+    (hmax₃_left : κ ((i₃ : ZMod n) - 1) < κ (i₃ : ZMod n))
+    (hmax₃_right : κ ((i₃ : ZMod n) + 1) < κ (i₃ : ZMod n))
+    (hmin₄_left : κ (i₄ : ZMod n) < κ ((i₄ : ZMod n) - 1))
+    (hmin₄_right : κ (i₄ : ZMod n) < κ ((i₄ : ZMod n) + 1)) :
+    DahlbergFourVertex κ := by
+  refine ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁, ?_, ?_, ?_, ?_⟩
+  · exact discreteLocalMax_of_neighbors hn hmax₁_left hmax₁_right
+  · exact discreteLocalMin_of_neighbors hn hmin₂_left hmin₂_right
+  · exact discreteLocalMax_of_neighbors hn hmax₃_left hmax₃_right
+  · exact discreteLocalMin_of_neighbors hn hmin₄_left hmin₄_right
+
 /-- A Euclidean circle with centre `O` and positive radius `R` through a triple. -/
 def CircumcircleR2 (A B C O : ℂ) (R : ℝ) : Prop :=
   0 < R ∧ dist O A = R ∧ dist O B = R ∧ dist O C = R
