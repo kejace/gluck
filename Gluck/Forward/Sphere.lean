@@ -34,60 +34,6 @@ theorem four_vertex_S2 {z : ℝ → ℂ} {κ : ℝ → ℝ}
   exact smoothFourVertex_of_fourVertexCondition
     (four_vertex_condition_S2_kernel hclosed hreal hκ hper)
 
-/-- Spherical convex/coherent source extraction: the `sin R` comparison
-argument for a polygon in an open hemisphere produces four ordered adjacent
-turns of the conformal Menger curvature profile. -/
-theorem exists_ordered_conformalMenger_turns_S2_kernel {n : ℕ} [NeZero n]
-    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
-    (hdisk : ∀ i, ‖v i‖ < 1)
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
-    (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger 1 v κ) :
-    OrderedAdjacentTurns κ := by
-  exact exists_ordered_conformalMenger_turns_spaceForm_kernel
-    (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
-    (by intro hlt; norm_num at hlt)
-
-/-- Spherical ordered-turn extraction using the shared positive-orientation
-interface for convex/coherent cyclic polygons. -/
-theorem exists_ordered_conformalMenger_turns_S2_of_positiveOrientation
-    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
-    (hdisk : ∀ i, ‖v i‖ < 1)
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (horient : PositivePolygonOrientation v)
-    (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger 1 v κ) :
-    OrderedAdjacentTurns κ := by
-  exact exists_ordered_conformalMenger_turns_S2_kernel
-    hn v κ hdisk hsimple horient hregular hκ
-
-/-- Spherical ordered-turn extraction for negatively oriented convex/coherent
-cyclic polygons, stated for the naturally reversed curvature profile. -/
-theorem exists_ordered_conformalMenger_turns_S2_of_negativeOrientation_reflected
-    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
-    (hdisk : ∀ i, ‖v i‖ < 1)
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (horient : NegativePolygonOrientation v)
-    (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger 1 v κ) :
-    OrderedAdjacentTurns (fun i => -κ (-i)) := by
-  have hdisk' : ∀ i, ‖ReverseCyclicPolygon v i‖ < 1 := by
-    intro i
-    simpa [ReverseCyclicPolygon] using hdisk (-i)
-  have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
-    isSimplePolygon_reverseCyclicPolygon hsimple
-  have horient' : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
-    positiveOrientation_reverseCyclicPolygon_of_negativeOrientation horient
-  have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
-    dahlbergRegular_reverseCyclicPolygon hregular
-  have hκ' :
-      RealizesConformalMenger 1 (ReverseCyclicPolygon v) (fun i => -κ (-i)) :=
-    realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation horient hκ
-  exact exists_ordered_conformalMenger_turns_S2_of_positiveOrientation
-    hn (ReverseCyclicPolygon v) (fun i => -κ (-i))
-      hdisk' hsimple' horient' hregular' hκ'
-
 /-- Deferred spherical discrete four-vertex theorem for a convex coherent
 polygon in an open hemisphere.  This is the project-derived `sin R` analogue
 of the Musin / Grant--Mogilski circumradius theorem and appears to be new. -/
@@ -137,9 +83,21 @@ theorem discrete_four_vertex_S2_of_negativeOrientation_reflected
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger 1 v κ) :
     DahlbergFourVertex (fun i => -κ (-i)) := by
-  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
-    (exists_ordered_conformalMenger_turns_S2_of_negativeOrientation_reflected
-      hn v κ hdisk hsimple horient hregular hκ)
+  have hdisk' : ∀ i, ‖ReverseCyclicPolygon v i‖ < 1 := by
+    intro i
+    simpa [ReverseCyclicPolygon] using hdisk (-i)
+  have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
+    isSimplePolygon_reverseCyclicPolygon hsimple
+  have horient' : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
+    positiveOrientation_reverseCyclicPolygon_of_negativeOrientation horient
+  have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
+    dahlbergRegular_reverseCyclicPolygon hregular
+  have hκ' :
+      RealizesConformalMenger 1 (ReverseCyclicPolygon v) (fun i => -κ (-i)) :=
+    realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation horient hκ
+  exact discrete_four_vertex_S2_of_positiveOrientation
+    hn (ReverseCyclicPolygon v) (fun i => -κ (-i))
+      hdisk' hsimple' horient' hregular' hκ'
 
 /-- Spherical discrete four-vertex theorem for negatively oriented convex
 coherent cyclic polygons, obtained from the positive kernel by reversing the

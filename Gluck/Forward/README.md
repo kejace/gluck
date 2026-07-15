@@ -31,9 +31,9 @@ the converse project's level-window condition:
    proof of Theorem 1.
 
 The formal source gate for this chain is
-`exists_ordered_signedMenger_turns_E2_dahlberg_source`; the Lemma 9 and final
-disk-reduction wrappers specialize it so downstream code can keep the paper's
-proof architecture visible.
+`signedMengerProfile_dahlbergFourVertex_E2_dahlberg_source`; the Lemma 9 and
+final disk-reduction wrappers specialize it so downstream code can keep the
+paper's proof architecture visible.
 
 `AlternatesAcrossLevel` remains available as a later corollary of the exact
 plateau-aware conclusion; it is not used as a substitute for Dahlberg's source
@@ -53,7 +53,7 @@ model-specific wrappers in `Euclidean.lean`, `Sphere.lean`, and
 discrete forward statements for `S²` and `H²` are also exposed through
 model-specific wrappers in `Sphere.lean` and `Hyperbolic.lean`, with their
 shared source gate isolated as
-`exists_ordered_conformalMenger_turns_spaceForm_kernel` in
+`discrete_four_vertex_spaceForm_kernel` in
 `SpaceFormDiscrete.lean`.  Their status is not uniform:
 
 - the smooth theorem is one unconditional space-form theorem, transported by

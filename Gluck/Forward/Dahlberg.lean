@@ -4470,69 +4470,21 @@ theorem polygonDahlbergFourVertex_of_ordered_signedMenger_turns {n : ℕ}
 
 /-! ## Dahlberg's Euclidean discrete four-vertex kernel -/
 
-/-- Dahlberg's Euclidean ordered-turn source theorem: for a simple locally
-regular nonconcyclic polygon, the signed-Menger curvature profile has four
-ordered adjacent turns, alternating
-increase/decrease/decrease/increase around the cyclic vertex set.
+/-- Dahlberg's Euclidean source theorem: for a simple locally regular
+nonconcyclic polygon, the signed-Menger curvature profile has at least two
+plateau-aware local maxima and at least two plateau-aware local minima.
 
 This is the single source gate for the Euclidean discrete theorem from
-`references/23.pdf`.  The named positive-orientation Lemma 9 wrapper and the
-final enclosing-disk reduction wrapper below are retained as documentation of
-Dahlberg's proof architecture, but both are specializations of this source
-statement at the API level. -/
-theorem exists_ordered_signedMenger_turns_E2_dahlberg_source
+`references/23.pdf`, matching Theorem 1 and Lemma 9's conclusion.  The named
+positive-orientation and final enclosing-disk wrappers below are retained as
+documentation of Dahlberg's proof architecture, but both are specializations of
+this source statement at the API level. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_dahlberg_source
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
-    OrderedAdjacentTurns (SignedMengerProfile v) := by
+    DahlbergFourVertex (SignedMengerProfile v) := by
   sorry
-
-/-- Dahlberg's Lemma 9 source extraction in the positive strictly-convex case:
-from a simple locally regular positively oriented nonconcyclic polygon one
-obtains four ordered adjacent signed-Menger turns, alternating
-increase/decrease/decrease/increase around the cyclic vertex set.
-
-This is the geometric content of Lemma 8 + Lemma 9 in `references/23.pdf`.
-The purely cyclic conversion from these turns to the plateau-aware
-`DahlbergFourVertex` conclusion is proved by
-`signedMengerProfile_dahlbergFourVertex_of_ordered_turns_four_le`. -/
-theorem exists_ordered_signedMenger_turns_of_positiveOrientation_not_concyclic
-    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (hregular : DahlbergRegular v)
-    (_horient : PositivePolygonOrientation v)
-    (hnoncircle : ¬ Concyclic v) :
-    OrderedAdjacentTurns (SignedMengerProfile v) := by
-  exact exists_ordered_signedMenger_turns_E2_dahlberg_source
-    hn hsimple hregular hnoncircle
-
-/-- Dahlberg's Lemma 9 source extraction for negatively oriented polygons,
-stated for the naturally reversed signed-Menger profile.  This is just the
-positive source extraction applied to `ReverseCyclicPolygon v`, plus the
-pointwise identity
-`SignedMengerProfile (ReverseCyclicPolygon v) i = -SignedMengerProfile v (-i)`. -/
-theorem exists_ordered_signedMenger_turns_of_negativeOrientation_reflected_not_concyclic
-    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (hregular : DahlbergRegular v)
-    (horient : NegativePolygonOrientation v)
-    (hnoncircle : ¬ Concyclic v) :
-    OrderedAdjacentTurns (fun i => -SignedMengerProfile v (-i)) := by
-  have hpos : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
-    positiveOrientation_reverseCyclicPolygon_of_negativeOrientation horient
-  have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
-    isSimplePolygon_reverseCyclicPolygon hsimple
-  have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
-    dahlbergRegular_reverseCyclicPolygon hregular
-  have hnoncircle' : ¬ Concyclic (ReverseCyclicPolygon v) := by
-    intro hcyc
-    exact hnoncircle (concyclic_reverseCyclicPolygon_iff.mp hcyc)
-  exact orderedAdjacentTurns_congr
-    (κ := SignedMengerProfile (ReverseCyclicPolygon v))
-    (μ := fun i => -SignedMengerProfile v (-i))
-    (fun i => (SignedMengerProfile_reverseCyclicPolygon v i).symm)
-    (exists_ordered_signedMenger_turns_of_positiveOrientation_not_concyclic
-      hn hsimple' hregular' hpos hnoncircle')
 
 /-- Dahlberg's positively oriented strictly-convex case, corresponding to
 Lemma 9 in `references/23.pdf`.
@@ -4545,12 +4497,11 @@ theorem signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyc
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v)
-    (horient : PositivePolygonOrientation v)
+    (_horient : PositivePolygonOrientation v)
     (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
-    (exists_ordered_signedMenger_turns_of_positiveOrientation_not_concyclic
-      hn hsimple hregular horient hnoncircle)
+  exact signedMengerProfile_dahlbergFourVertex_E2_dahlberg_source
+    hn hsimple hregular hnoncircle
 
 /-- Dahlberg's negatively oriented strictly-convex case after sign
 normalization.  The profile `-SignedMengerProfile v` has positive values; the
@@ -4563,11 +4514,24 @@ theorem neg_signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_co
     (horient : NegativePolygonOrientation v)
     (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (fun i => -SignedMengerProfile v i) := by
+  have hpos : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
+    positiveOrientation_reverseCyclicPolygon_of_negativeOrientation horient
+  have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
+    isSimplePolygon_reverseCyclicPolygon hsimple
+  have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
+    dahlbergRegular_reverseCyclicPolygon hregular
+  have hnoncircle' : ¬ Concyclic (ReverseCyclicPolygon v) := by
+    intro hcyc
+    exact hnoncircle (concyclic_reverseCyclicPolygon_iff.mp hcyc)
+  have hfv_rev :
+      DahlbergFourVertex (SignedMengerProfile (ReverseCyclicPolygon v)) :=
+    signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyclic
+      hn hsimple' hregular' hpos hnoncircle'
   have hfv_reflected :
       DahlbergFourVertex (fun i => -SignedMengerProfile v (-i)) := by
-    exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
-      (exists_ordered_signedMenger_turns_of_negativeOrientation_reflected_not_concyclic
-        hn hsimple hregular horient hnoncircle)
+    convert hfv_rev using 1
+    ext i
+    exact (SignedMengerProfile_reverseCyclicPolygon v i).symm
   exact (dahlbergFourVertex_reflectIndex_iff
     (κ := fun i : ZMod n => -SignedMengerProfile v i) (a := 0)).mp (by
       convert hfv_reflected using 1
@@ -4601,24 +4565,6 @@ theorem signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concycl
   · exact signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_concyclic
       hn hsimple hregular hneg hnoncircle
 
-/-- Dahlberg's final disk-reduction source extraction: for a general simple
-locally regular nonconcyclic polygon, the smallest-enclosing-disk argument
-produces four ordered adjacent signed-Menger turns on the original cyclic
-profile.
-
-This is the formal target corresponding to the last part of §4 of
-`references/23.pdf`: the boundary contact set of the minimal disk, Lemma 10's
-triangle-sector radius comparison, and the convex approximation together
-produce the ordered turn witness below.  The remaining conversion from this
-witness to `DahlbergFourVertex` is purely cyclic and already proved. -/
-theorem exists_ordered_signedMenger_turns_of_dahlberg_disk_reduction
-    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
-    OrderedAdjacentTurns (SignedMengerProfile v) := by
-  exact exists_ordered_signedMenger_turns_E2_dahlberg_source
-    hn hsimple hregular hnoncircle
-
 /-- Dahlberg's reduction from the general simple locally regular polygon to the
 strictly-convex auxiliary polygon used in the last part of §4 of
 `references/23.pdf`.
@@ -4633,9 +4579,8 @@ theorem signedMengerProfile_dahlbergFourVertex_of_dahlberg_disk_reduction
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
-    (exists_ordered_signedMenger_turns_of_dahlberg_disk_reduction
-      hn hsimple hregular hnoncircle)
+  exact signedMengerProfile_dahlbergFourVertex_E2_dahlberg_source
+    hn hsimple hregular hnoncircle
 
 /-- Dahlberg's geometric extraction step: Lemma 8, Lemma 9, and Lemma 10
 produce two local maxima and two local minima of signed Menger curvature for a
