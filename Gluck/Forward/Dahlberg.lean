@@ -4488,6 +4488,22 @@ theorem orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_not_cons
     OrderedAdjacentTurns (SignedMengerProfile v) := by
   sorry
 
+/-- Constant-or ordered-turn form of the positive-orientation signed-Menger
+source theorem.  The nonconstant branch is exactly
+`orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_not_constant_source`. -/
+theorem constant_or_orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_source
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) :
+    (∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) ∨
+      OrderedAdjacentTurns (SignedMengerProfile v) := by
+  by_cases hconst : ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c
+  · exact Or.inl hconst
+  · exact Or.inr
+      (orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_not_constant_source
+        hn hsimple hregular horient hconst)
+
 /-- Existential spelling of
 `orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_not_constant_source`. -/
 theorem exists_ordered_signedMenger_turns_of_positiveOrientation_not_constant_source

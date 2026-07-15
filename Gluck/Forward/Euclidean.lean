@@ -734,11 +734,15 @@ theorem constant_or_orderedAdjacentTurns_E2_of_realizesConformalMenger_zero_posi
     (hregular : DahlbergRegular v) (horient : PositivePolygonOrientation v)
     (hκ : RealizesConformalMenger 0 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ OrderedAdjacentTurns κ := by
-  by_cases hconst : ∃ c, ∀ i : ZMod n, κ i = c
-  · exact Or.inl hconst
-  · exact Or.inr
-      (orderedAdjacentTurns_E2_of_realizesConformalMenger_zero_positiveOrientation_not_constant
-        hn v κ hsimple hregular horient hκ hconst)
+  exact constant_or_orderedAdjacentTurns_of_eq_affine
+    (κ := SignedMengerProfile v) (μ := κ) (a := 1 / 2) (b := 0) (by norm_num)
+    (by
+      intro i
+      simpa [add_zero] using
+        realizesConformalMenger_zero_eq_half_signedMengerProfile_of_positiveOrientation
+          hsimple horient hκ i)
+    (constant_or_orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_source
+      hn hsimple hregular horient)
 
 /-- Nonconcyclic `ε = 0` conformal-Menger realizations inherit Dahlberg's E²
 four-vertex conclusion under strict orientation. -/

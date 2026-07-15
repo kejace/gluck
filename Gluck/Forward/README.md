@@ -51,7 +51,10 @@ nonconstant endpoint is
 `orderedAdjacentTurns_E2_of_realizesConformalMenger_zero_positiveOrientation_not_constant`.
 The corresponding constant-or turn-level endpoint is
 `constant_or_orderedAdjacentTurns_E2_of_realizesConformalMenger_zero_positiveOrientation`;
-the positive constant-or D4VT wrapper routes through it and then applies
+it is derived from
+`constant_or_orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_source`
+by the affine transport lemma `constant_or_orderedAdjacentTurns_of_eq_affine`.
+The positive constant-or D4VT wrapper routes through it and then applies
 `dahlbergFourVertex_of_orderedAdjacentTurns_four_le`.
 
 `AlternatesAcrossLevel` remains available as a later corollary of the exact

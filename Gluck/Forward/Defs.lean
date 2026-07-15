@@ -1138,6 +1138,42 @@ theorem orderedAdjacentTurns_of_eq_affine {n : ℕ} {κ μ : ZMod n → ℝ}
   ext i
   exact hμ i
 
+/-- Nonzero affine changes preserve a constant-or-ordered-turn conclusion. -/
+theorem constant_or_orderedAdjacentTurns_affine {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
+    (ha : a ≠ 0)
+    (h : (∃ c, ∀ i : ZMod n, κ i = c) ∨ OrderedAdjacentTurns κ) :
+    (∃ c, ∀ i : ZMod n, a * κ i + b = c) ∨
+      OrderedAdjacentTurns (fun i => a * κ i + b) := by
+  rcases h with hconst | hturns
+  · rcases hconst with ⟨c, hc⟩
+    exact Or.inl ⟨a * c + b, fun i => by simp [hc i]⟩
+  · exact Or.inr (orderedAdjacentTurns_affine ha hturns)
+
+/-- A profile pointwise equal to a nonzero affine change of a
+constant-or-ordered-turn profile inherits the same conclusion. -/
+theorem constant_or_orderedAdjacentTurns_of_eq_affine {n : ℕ}
+    {κ μ : ZMod n → ℝ} {a b : ℝ}
+    (ha : a ≠ 0) (hμ : ∀ i : ZMod n, μ i = a * κ i + b)
+    (h : (∃ c, ∀ i : ZMod n, κ i = c) ∨ OrderedAdjacentTurns κ) :
+    (∃ c, ∀ i : ZMod n, μ i = c) ∨ OrderedAdjacentTurns μ := by
+  rcases constant_or_orderedAdjacentTurns_affine (κ := κ) (a := a) (b := b) ha h with
+    hconst | hturns
+  · rcases hconst with ⟨c, hc⟩
+    exact Or.inl ⟨c, fun i => by rw [hμ i, hc i]⟩
+  · exact Or.inr (by
+      convert hturns using 1
+      ext i
+      exact hμ i)
+
+/-- Pointwise equal cyclic profiles have the same constant-or-ordered-turn
+conclusion. -/
+theorem constant_or_orderedAdjacentTurns_congr {n : ℕ} {κ μ : ZMod n → ℝ}
+    (hμ : ∀ i : ZMod n, μ i = κ i)
+    (h : (∃ c, ∀ i : ZMod n, κ i = c) ∨ OrderedAdjacentTurns κ) :
+    (∃ c, ∀ i : ZMod n, μ i = c) ∨ OrderedAdjacentTurns μ := by
+  exact constant_or_orderedAdjacentTurns_of_eq_affine (a := 1) (b := 0) (by norm_num)
+    (by intro i; simp [hμ i]) h
+
 /-- Translating cyclic indices preserves ordered adjacent turns. -/
 theorem orderedAdjacentTurns_translateIndex {n : ℕ} [NeZero n]
     {κ : ZMod n → ℝ} (a : ZMod n) (hturns : OrderedAdjacentTurns κ) :
