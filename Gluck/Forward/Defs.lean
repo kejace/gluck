@@ -132,21 +132,6 @@ def DahlbergFourVertex {n : ℕ} (κ : ZMod n → ℝ) : Prop :=
       DiscreteLocalMax κ (i₃ : ZMod n) ∧
       DiscreteLocalMin κ (i₄ : ZMod n)
 
-/-- Four ordered adjacent turns, alternating peak/valley/peak/valley.  This is
-the finite target produced by Dahlberg's geometric comparison lemmas before it
-is packaged as plateau-aware local extrema. -/
-def OrderedTurns {n : ℕ} (κ : ZMod n → ℝ) : Prop :=
-  ∃ i₁ i₂ i₃ i₄ : ℕ,
-    i₁ < i₂ ∧ i₂ < i₃ ∧ i₃ < i₄ ∧ i₄ < i₁ + n ∧
-      κ (i₁ : ZMod n) < κ ((i₁ : ZMod n) + 1) ∧
-      κ (((i₁ : ZMod n) + 1) + 1) < κ ((i₁ : ZMod n) + 1) ∧
-      κ ((i₂ : ZMod n) + 1) < κ (i₂ : ZMod n) ∧
-      κ ((i₂ : ZMod n) + 1) < κ (((i₂ : ZMod n) + 1) + 1) ∧
-      κ (i₃ : ZMod n) < κ ((i₃ : ZMod n) + 1) ∧
-      κ (((i₃ : ZMod n) + 1) + 1) < κ ((i₃ : ZMod n) + 1) ∧
-      κ ((i₄ : ZMod n) + 1) < κ (i₄ : ZMod n) ∧
-      κ ((i₄ : ZMod n) + 1) < κ (((i₄ : ZMod n) + 1) + 1)
-
 /-- Dahlberg's four-vertex conclusion forces the cyclic profile to be
 nonconstant. -/
 theorem not_constant_of_dahlbergFourVertex {n : ℕ} {κ : ZMod n → ℝ}
@@ -249,17 +234,6 @@ theorem dahlbergFourVertex_of_ordered_turns {n : ℕ} (hn : 2 ≤ n)
   · simpa [Nat.cast_add, add_assoc] using hdec₃
   · simpa [Nat.cast_add, sub_eq_add_neg, add_assoc] using hdec₄
   · simpa [Nat.cast_add, add_assoc] using hinc₄
-
-/-- Ordered adjacent turns package as Dahlberg's plateau-aware four-vertex
-conclusion. -/
-theorem dahlbergFourVertex_of_orderedTurns {n : ℕ} (hn : 2 ≤ n)
-    {κ : ZMod n → ℝ} (hturns : OrderedTurns κ) :
-    DahlbergFourVertex κ := by
-  rcases hturns with
-    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
-      hinc₁, hdec₁, hdec₂, hinc₂, hinc₃, hdec₃, hdec₄, hinc₄⟩
-  exact dahlbergFourVertex_of_ordered_turns hn hi₁₂ hi₂₃ hi₃₄ hi₄₁
-    hinc₁ hdec₁ hdec₂ hinc₂ hinc₃ hdec₃ hdec₄ hinc₄
 
 /-- A cyclic real profile has a global maximum. -/
 theorem exists_globalMax_zmod {n : ℕ} [NeZero n] (κ : ZMod n → ℝ) :
