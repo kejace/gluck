@@ -46,8 +46,36 @@ theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel
       exact constant_or_dahlbergFourVertex_H2_kernel
         hn v κ hdisk hsimple horient hregular hκ (hproper (by norm_num))
 
+/-- Nonconstant conformal-Menger ordered-turn theorem for positive-orientation
+convex/coherent polygons in the three project space forms. -/
+theorem orderedAdjacentTurns_conformalMenger_spaceForm_kernel
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    OrderedAdjacentTurns κ := by
+  rcases hε with hE | hrest
+  · subst ε
+    exact orderedAdjacentTurns_E2_of_realizesConformalMenger_zero_positiveOrientation_not_constant
+      hn v κ hsimple hregular horient hκ hnc
+  · rcases hrest with hS | hH
+    · subst ε
+      exact orderedAdjacentTurns_spaceForm_source
+        (Or.inl rfl)
+        hn v κ hdisk hsimple horient hregular hκ
+        (by intro hlt; norm_num at hlt) hnc
+    · subst ε
+      exact orderedAdjacentTurns_spaceForm_source
+        (Or.inr rfl)
+        hn v κ hdisk hsimple horient hregular hκ hproper hnc
+
 /-- Nonconstant conformal-Menger theorem for convex/coherent polygons in the
-three project space forms. -/
+three project space forms, derived from the ordered-turn kernel. -/
 theorem dahlbergFourVertex_conformalMenger_spaceForm_kernel
     {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
@@ -59,17 +87,9 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_kernel
     (hproper : ε < 0 → ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  rcases hε with hE | hrest
-  · subst ε
-    exact dahlbergFourVertex_E2_of_realizesConformalMenger_zero_positiveOrientation_not_constant
-      hn v κ hsimple hregular horient hκ hnc
-  · rcases hrest with hS | hH
-    · subst ε
-      exact discrete_four_vertex_S2_kernel
-        hn v κ hdisk hsimple horient hregular hκ hnc
-    · subst ε
-      exact discrete_four_vertex_H2_kernel
-        hn v κ hdisk hsimple horient hregular hκ (hproper (by norm_num)) hnc
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (orderedAdjacentTurns_conformalMenger_spaceForm_kernel
+      hε hn v κ hdisk hsimple horient hregular hκ hproper hnc)
 
 /-- Positive-orientation spelling of the all-space-form conformal-Menger
 constant-or-Dahlberg theorem. -/

@@ -704,6 +704,28 @@ theorem dahlbergFourVertex_E2_of_posAffine_signedMengerProfile_not_constant_stri
       hn v κ hsimple hregular horient ha hκ)
     hnc
 
+/-- Positive-orientation nonconstant `ε = 0` conformal-Menger realizations
+inherit the ordered-turn witness from Dahlberg's strictly convex E² source. -/
+theorem orderedAdjacentTurns_E2_of_realizesConformalMenger_zero_positiveOrientation_not_constant
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (horient : PositivePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    OrderedAdjacentTurns κ := by
+  have hscale :
+      ∀ i : ZMod n, κ i = (1 / 2) * SignedMengerProfile v i :=
+    realizesConformalMenger_zero_eq_half_signedMengerProfile_of_positiveOrientation
+      hsimple horient hκ
+  have hnc_signed : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+    intro hconst
+    rcases hconst with ⟨c, hc⟩
+    exact hnc ⟨(1 / 2) * c, fun i => by rw [hscale i, hc i]⟩
+  exact orderedAdjacentTurns_of_eq_posAffine (a := 1 / 2) (b := 0) (by norm_num)
+    (by intro i; simpa [add_zero] using hscale i)
+    (orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_not_constant_source
+      hn hsimple hregular horient hnc_signed)
+
 /-- Nonconcyclic `ε = 0` conformal-Menger realizations inherit Dahlberg's E²
 four-vertex conclusion under strict orientation. -/
 theorem dahlbergFourVertex_E2_of_realizesConformalMenger_zero_not_concyclic
