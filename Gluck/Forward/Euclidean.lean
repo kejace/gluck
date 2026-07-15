@@ -280,6 +280,17 @@ theorem vertex_mem_neighbor_segment_E2_of_constant_signedMengerProfile_zero {n :
   exact vertex_mem_neighbor_segment_of_constant_signedMengerProfile_zero
     hsimple hregular hκ
 
+/-- E² source-form Dahlberg reduction: a nonconcyclic locally regular simple
+polygon has four ordered alternating adjacent turns of signed Menger
+curvature. -/
+theorem signedMengerProfile_orderedTurns_E2_of_not_concyclic {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    OrderedTurns (SignedMengerProfile v) := by
+  exact signedMengerProfile_orderedTurns_of_not_concyclic
+    hn hsimple hregular hnoncircle
+
 /-- Dahlberg's Euclidean discrete four-vertex theorem: the signed Menger
 curvature of a locally regular simple closed polygon is constant or has an
 alternating four-vertex level window. -/
