@@ -5761,4 +5761,99 @@ theorem abs_rectRescale_le [NeZero n] (hn4 : 4 ≤ n) {κs κ : ZMod n → ℝ}
   have := mul_add (2 * Real.pi / n) |q.1| |q.2|
   linarith
 
+/-! ### The rectangle is the natural chart domain (`def:closing_rect`)
+
+Per-edge evaluation of the antisymmetric perturbation on a *nondegenerate*
+pair configuration (the four edges `a, a+m, b, b+m` pairwise distinct), and
+the wall membership: for `q` in the fixed square every chart value of
+`Ξ_t(q)` lies in its closed wall interval `[0, w_j(t)]`. -/
+
+/-- On a nondegenerate configuration, edge `a` carries exactly `α + u`. -/
+theorem chartPerturb_apply_fst (m : ℕ) {a b : ZMod n} (z : ℝ × ℝ)
+    (ham : a ≠ a + m) (hab : a ≠ b) (habm : a ≠ b + m) :
+    chartPerturb m a b z a = 2 * Real.pi / n + z.1 := by
+  simp [chartPerturb, ham, hab, habm]
+
+/-- On a nondegenerate configuration, edge `a + m` carries exactly `α − u`. -/
+theorem chartPerturb_apply_fst' (m : ℕ) {a b : ZMod n} (z : ℝ × ℝ)
+    (ham : a + m ≠ a) (hamb : a + m ≠ b) (hambm : a + m ≠ b + m) :
+    chartPerturb m a b z (a + m) = 2 * Real.pi / n - z.1 := by
+  simp [chartPerturb, ham, hamb, hambm, sub_eq_add_neg]
+
+/-- On a nondegenerate configuration, edge `b` carries exactly `α + v`. -/
+theorem chartPerturb_apply_snd (m : ℕ) {a b : ZMod n} (z : ℝ × ℝ)
+    (hba : b ≠ a) (hbam : b ≠ a + m) (hbm : b ≠ b + m) :
+    chartPerturb m a b z b = 2 * Real.pi / n + z.2 := by
+  simp [chartPerturb, hba, hbam, hbm]
+
+/-- On a nondegenerate configuration, edge `b + m` carries exactly `α − v`. -/
+theorem chartPerturb_apply_snd' (m : ℕ) {a b : ZMod n} (z : ℝ × ℝ)
+    (hbma : b + m ≠ a) (hbmam : b + m ≠ a + m) (hbm : b + m ≠ b) :
+    chartPerturb m a b z (b + m) = 2 * Real.pi / n - z.2 := by
+  simp [chartPerturb, hbma, hbmam, hbm, sub_eq_add_neg]
+
+/-- Away from the four perturbed edges the chart value is the base `α`. -/
+theorem chartPerturb_apply_of_ne (m : ℕ) {a b j : ZMod n} (z : ℝ × ℝ)
+    (hja : j ≠ a) (hjam : j ≠ a + m) (hjb : j ≠ b) (hjbm : j ≠ b + m) :
+    chartPerturb m a b z j = 2 * Real.pi / n := by
+  simp [chartPerturb, hja, hjam, hjb, hjbm]
+
+/-- **The moving rectangle is the natural chart domain** (`def:closing_rect`):
+for a nondegenerate pair configuration (`m ≠ 0` in `ZMod n`, `a ≠ b`,
+`a ≠ b + m`, `b ≠ a + m`) and any `q` in the fixed square `[-1,1]²`, every
+perturbed chart value of the normalized point `Ξ_t(q)` lies in its closed
+wall interval `[0, w_j(t)]` — the four perturbed edges by the choice of the
+rectangle endpoints, the free edges because `0 < α ≤ π/2 < w_j(t)`. -/
+theorem chartPerturb_rectRescale_mem_wall [NeZero n] (hn4 : 4 ≤ n) {m : ℕ}
+    {a b : ZMod n} (hm0 : (m : ZMod n) ≠ 0) (hab : a ≠ b) (habm : a ≠ b + m)
+    (hbam : b ≠ a + m) {κs κ : ZMod n → ℝ} (hκs : ∀ i, 0 < κs i)
+    (hκ : ∀ i, 0 < κ i) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) {q : ℝ × ℝ}
+    (hq1 : q.1 ∈ Set.Icc (-1 : ℝ) 1) (hq2 : q.2 ∈ Set.Icc (-1 : ℝ) 1)
+    (j : ZMod n) :
+    chartPerturb m a b (rectRescale κs κ m a b t q) j
+      ∈ Set.Icc 0 (wallWidth κs κ j t) := by
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast NeZero.pos n
+  have hα0 : 0 < 2 * Real.pi / n := by positivity
+  have hα2 := two_pi_div_le_pi_div_two (n := n) hn4
+  have haam : a ≠ a + m := fun h => hm0 (left_eq_add.mp h)
+  have hbbm : b ≠ b + m := fun h => hm0 (left_eq_add.mp h)
+  have hambm : a + (m : ZMod n) ≠ b + m := fun h => hab (add_right_cancel h)
+  obtain ⟨⟨hu1, hu2⟩, hv1, hv2⟩ :=
+    rectRescale_mem hn4 hκs hκ m a b ht0 ht1 hq1 hq2
+  by_cases hja : j = a
+  · rw [hja, chartPerturb_apply_fst m _ haam hab habm]
+    refine ⟨?_, ?_⟩
+    · have := neg_le_rectLo κs κ (a + m) t
+      linarith
+    · have : rectHi κs κ a t ≤ wallWidth κs κ a t - 2 * Real.pi / n :=
+        min_le_left _ _
+      linarith
+  by_cases hjam : j = a + m
+  · rw [hjam, chartPerturb_apply_fst' m _ haam.symm hbam.symm hambm]
+    refine ⟨?_, ?_⟩
+    · have := rectHi_le κs κ a t
+      linarith
+    · have : 2 * Real.pi / n - wallWidth κs κ (a + m) t
+          ≤ rectLo κs κ (a + m) t := le_max_right _ _
+      linarith
+  by_cases hjb : j = b
+  · rw [hjb, chartPerturb_apply_snd m _ hab.symm hbam hbbm]
+    refine ⟨?_, ?_⟩
+    · have := neg_le_rectLo κs κ (b + m) t
+      linarith
+    · have : rectHi κs κ b t ≤ wallWidth κs κ b t - 2 * Real.pi / n :=
+        min_le_left _ _
+      linarith
+  by_cases hjbm : j = b + m
+  · rw [hjbm, chartPerturb_apply_snd' m _ habm.symm hambm.symm hbbm.symm]
+    refine ⟨?_, ?_⟩
+    · have := rectHi_le κs κ b t
+      linarith
+    · have : 2 * Real.pi / n - wallWidth κs κ (b + m) t
+          ≤ rectLo κs κ (b + m) t := le_max_right _ _
+      linarith
+  · rw [chartPerturb_apply_of_ne m _ hja hjam hjb hjbm]
+    have hw := pi_div_two_lt_wallWidth hκs hκ ht0 ht1 j
+    exact ⟨hα0.le, by linarith⟩
+
 end Gluck.Discrete
