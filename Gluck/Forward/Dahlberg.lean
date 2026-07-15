@@ -44,6 +44,20 @@ theorem dist_directIsometryR2 {u : ℂ} (hu : ‖u‖ = 1) (w z₁ z₂ : ℂ) :
   have hsub : u * z₁ + w - (u * z₂ + w) = u * (z₁ - z₂) := by ring
   rw [hsub, norm_mul, hu, one_mul]
 
+/-- Direct Euclidean isometries carry circumcircles to circumcircles with the
+same radius. -/
+theorem circumcircleR2_directIsometry {u : ℂ} (hu : ‖u‖ = 1)
+    (w A B C O : ℂ) (R : ℝ) (hcircle : CircumcircleR2 A B C O R) :
+    CircumcircleR2 (directIsometryR2 u w A) (directIsometryR2 u w B)
+      (directIsometryR2 u w C) (directIsometryR2 u w O) R := by
+  refine ⟨hcircle.1, ?_, ?_, ?_⟩
+  · rw [dist_directIsometryR2 hu]
+    exact hcircle.2.1
+  · rw [dist_directIsometryR2 hu]
+    exact hcircle.2.2.1
+  · rw [dist_directIsometryR2 hu]
+    exact hcircle.2.2.2
+
 /-- Direct Euclidean isometries preserve the signed twice-area. -/
 theorem crossR2_directIsometry {u : ℂ} (hu : ‖u‖ = 1) (w A B C : ℂ) :
     Gluck.Discrete.crossR2 (directIsometryR2 u w A) (directIsometryR2 u w B)
@@ -63,6 +77,32 @@ theorem signedMengerR2_directIsometry {u : ℂ} (hu : ‖u‖ = 1) (w A B C : �
   rw [Gluck.Discrete.signedMengerR2_add_left,
     Gluck.Discrete.signedMengerR2_rotate hu]
 
+/-- Cyclic permutations preserve the oriented twice-area. -/
+theorem crossR2_cycle (A B C : ℂ) :
+    Gluck.Discrete.crossR2 B C A = Gluck.Discrete.crossR2 A B C := by
+  unfold Gluck.Discrete.crossR2
+  simp only [Complex.sub_re, Complex.sub_im]
+  ring_nf
+
+/-- Two cyclic steps also preserve oriented twice-area. -/
+theorem crossR2_cycle_two (A B C : ℂ) :
+    Gluck.Discrete.crossR2 C A B = Gluck.Discrete.crossR2 A B C := by
+  exact (crossR2_cycle C A B).symm
+
+/-- Cyclic permutations preserve signed Menger curvature. -/
+theorem signedMengerR2_cycle (A B C : ℂ) :
+    Gluck.Discrete.signedMengerR2 B C A =
+      Gluck.Discrete.signedMengerR2 A B C := by
+  unfold Gluck.Discrete.signedMengerR2
+  rw [crossR2_cycle]
+  ring
+
+/-- Two cyclic steps also preserve signed Menger curvature. -/
+theorem signedMengerR2_cycle_two (A B C : ℂ) :
+    Gluck.Discrete.signedMengerR2 C A B =
+      Gluck.Discrete.signedMengerR2 A B C := by
+  exact (signedMengerR2_cycle C A B).symm
+
 /-- Signed twice-area of a normalized triple. -/
 theorem crossR2_normalized (a : ℝ) (z : ℂ) :
     Gluck.Discrete.crossR2 (-a : ℂ) (a : ℂ) z = 2 * a * z.im := by
@@ -78,6 +118,17 @@ theorem directIsometryR2_injective {u : ℂ} (hu : ‖u‖ = 1) (w : ℂ) :
   have hd := dist_directIsometryR2 hu w z₁ z₂
   rw [h, dist_self] at hd
   exact dist_eq_zero.mp hd.symm
+
+/-- Direct Euclidean isometries preserve membership of a circumcentre in a
+vertex cone. -/
+theorem inVertexCone_directIsometry (u w A B C O : ℂ)
+    (hcone : InVertexCone A B C O) :
+    InVertexCone (directIsometryR2 u w A) (directIsometryR2 u w B)
+      (directIsometryR2 u w C) (directIsometryR2 u w O) := by
+  obtain ⟨α, β, hα, hβ, hcenter⟩ := hcone
+  refine ⟨α, β, hα, hβ, ?_⟩
+  unfold directIsometryR2
+  linear_combination u * hcenter
 
 /-- Image of a planar region under a direct Euclidean isometry. -/
 def directIsometryImage (u w : ℂ) (S : Set ℂ) : Set ℂ :=
@@ -96,12 +147,35 @@ noncomputable def chordHalfLength (A B : ℂ) : ℝ := ‖B - A‖ / 2
 noncomputable def edgeCoordinates (A B z : ℂ) : ℂ :=
   (starRingEnd ℂ) (chordUnit A B) * (z - chordMidpoint A B)
 
+/-- Passing to canonical edge coordinates preserves the vertex-cone
+regularity condition. -/
+theorem inVertexCone_edgeCoordinates (E₁ E₂ A B C O : ℂ)
+    (hcone : InVertexCone A B C O) :
+    InVertexCone (edgeCoordinates E₁ E₂ A) (edgeCoordinates E₁ E₂ B)
+      (edgeCoordinates E₁ E₂ C) (edgeCoordinates E₁ E₂ O) := by
+  have h := inVertexCone_directIsometry
+    ((starRingEnd ℂ) (chordUnit E₁ E₂))
+    (-((starRingEnd ℂ) (chordUnit E₁ E₂)) * chordMidpoint E₁ E₂) A B C O hcone
+  convert h using 1 <;> simp only [edgeCoordinates, directIsometryR2] <;> ring
+
 /-- The canonical chord direction has unit norm. -/
 theorem norm_chordUnit {A B : ℂ} (hAB : A ≠ B) : ‖chordUnit A B‖ = 1 := by
   unfold chordUnit
   rw [norm_div, Complex.norm_real, Real.norm_eq_abs]
   have hpos : 0 < ‖B - A‖ := norm_pos_iff.mpr (sub_ne_zero.mpr hAB.symm)
   rw [abs_of_pos hpos, div_self hpos.ne']
+
+/-- Canonical edge coordinates preserve a circumcircle and its radius. -/
+theorem circumcircleR2_edgeCoordinates {E₁ E₂ A B C O : ℂ} {R : ℝ}
+    (hE : E₁ ≠ E₂)
+    (hcircle : CircumcircleR2 A B C O R) :
+    CircumcircleR2 (edgeCoordinates E₁ E₂ A) (edgeCoordinates E₁ E₂ B)
+      (edgeCoordinates E₁ E₂ C) (edgeCoordinates E₁ E₂ O) R := by
+  have hu : ‖(starRingEnd ℂ) (chordUnit E₁ E₂)‖ = 1 := by
+    simpa using norm_chordUnit hE
+  have h := circumcircleR2_directIsometry hu
+    (-((starRingEnd ℂ) (chordUnit E₁ E₂)) * chordMidpoint E₁ E₂) A B C O R hcircle
+  convert h using 1 <;> simp only [edgeCoordinates, directIsometryR2] <;> ring
 
 /-- Canonical edge coordinates invert the direct isometry. -/
 theorem directIsometryR2_edgeCoordinates {A B : ℂ} (hAB : A ≠ B) (z : ℂ) :
@@ -178,6 +252,19 @@ theorem crossR2_pos_iff_edgeCoordinates_im_pos {A B : ℂ} (hAB : A ≠ B) (C : 
   have hcoef : 0 < 2 * chordHalfLength A B := mul_pos (by norm_num) (chordHalfLength_pos hAB)
   exact mul_pos_iff_of_pos_left hcoef
 
+/-- Negative orientation is likewise the sign of the canonical vertical
+coordinate. -/
+theorem crossR2_neg_iff_edgeCoordinates_im_neg {A B : ℂ} (hAB : A ≠ B) (C : ℂ) :
+    Gluck.Discrete.crossR2 A B C < 0 ↔ (edgeCoordinates A B C).im < 0 := by
+  rw [← crossR2_edgeCoordinates hAB C, crossR2_normalized]
+  have hcoef : 0 < 2 * chordHalfLength A B := mul_pos (by norm_num) (chordHalfLength_pos hAB)
+  constructor
+  · intro h
+    by_contra hn
+    exact (not_lt_of_ge (mul_nonneg hcoef.le (le_of_not_gt hn))) h
+  · intro h
+    exact mul_neg_of_pos_of_neg hcoef h
+
 /-- Centre of the normalized coaxial family. -/
 def normalizedCircleCenter (y : ℝ) : ℂ := ⟨0, y⟩
 
@@ -210,6 +297,32 @@ theorem circlePowerR2_normalized_parameter {a : ℝ} {z : ℂ} (hz : z.im ≠ 0)
   unfold normalizedCircumcenterParameter
   field_simp [hz]
   ring
+
+/-- A point equidistant from the endpoints and a noncollinear third point is
+the canonical normalized circumcentre. -/
+theorem eq_normalizedCircleCenter_of_equidistant {a : ℝ} (ha : a ≠ 0)
+    {z O : ℂ} (hz : z.im ≠ 0)
+    (hends : dist O (-a : ℂ) = dist O (a : ℂ))
+    (hthird : dist O z = dist O (a : ℂ)) :
+    O = normalizedCircleCenter (normalizedCircumcenterParameter a z) := by
+  have hendsSq := congrArg (fun x : ℝ => x ^ 2) hends
+  simp only [dist_eq_norm] at hendsSq
+  rw [Complex.sq_norm, Complex.sq_norm] at hendsSq
+  simp only [sub_neg_eq_add, Complex.normSq_apply, Complex.add_re, Complex.ofReal_re,
+    Complex.add_im, Complex.ofReal_im, add_zero, Complex.sub_re, Complex.sub_im,
+    sub_zero, add_left_inj] at hendsSq
+  have hOre : O.re = 0 := by
+    have hprod : O.re * a = 0 := by nlinarith
+    exact (mul_eq_zero.mp hprod).resolve_right ha
+  have hthirdSq := congrArg (fun x : ℝ => x ^ 2) hthird
+  simp only [dist_eq_norm] at hthirdSq
+  rw [Complex.sq_norm, Complex.sq_norm] at hthirdSq
+  simp [Complex.normSq_apply, hOre] at hthirdSq
+  have hOim : O.im = normalizedCircumcenterParameter a z := by
+    unfold normalizedCircumcenterParameter
+    field_simp [hz]
+    nlinarith
+  apply Complex.ext <;> simp [normalizedCircleCenter, hOre, hOim]
 
 /-- Algebraic circumradius identity for a normalized triple. -/
 theorem normalized_circumradius_sq_identity {a : ℝ} {z : ℂ} (hz : z.im ≠ 0) :
@@ -275,9 +388,93 @@ circle equation gives `x² + v² - 2yv ≤ a²`. -/
 def normalizedUpperCap (a y : ℝ) : Set ℂ :=
   {z | 0 ≤ z.im ∧ z.re ^ 2 + z.im ^ 2 - 2 * y * z.im ≤ a ^ 2}
 
+/-- Interior-side half-plane, closed disk, and closed exterior for the
+normalized shared chord. -/
+def normalizedEdgeHalfPlane : Set ℂ := {z | 0 ≤ z.im}
+
+def normalizedClosedDisk (a y : ℝ) : Set ℂ :=
+  {z | z.re ^ 2 + z.im ^ 2 - 2 * y * z.im ≤ a ^ 2}
+
+def normalizedClosedExterior (a y : ℝ) : Set ℂ :=
+  {z | a ^ 2 ≤ z.re ^ 2 + z.im ^ 2 - 2 * y * z.im}
+
+/-- Dahlberg's exact oriented region `δ(P,e)` in normalized coordinates. -/
+def normalizedDahlbergRegion (a y k : ℝ) : Set ℂ :=
+  if 0 < k then normalizedClosedDisk a y ∩ normalizedEdgeHalfPlane
+  else if k < 0 then
+    normalizedClosedExterior a y ∪ (normalizedClosedDisk a y ∩ normalizedEdgeHalfPlane)
+  else normalizedEdgeHalfPlane
+
+/-- Positive curvature selects the disk-side cap. -/
+theorem normalizedDahlbergRegion_eq_upperCap_of_pos {a y k : ℝ} (hk : 0 < k) :
+    normalizedDahlbergRegion a y k = normalizedUpperCap a y := by
+  ext z
+  simp [normalizedDahlbergRegion, hk, normalizedClosedDisk,
+    normalizedEdgeHalfPlane, normalizedUpperCap, and_comm]
+
+/-- Dahlberg Lemma 8(1): a nonnegative-curvature region lies in the interior
+half-plane. -/
+theorem normalizedDahlbergRegion_subset_halfPlane {a y k : ℝ} (hk : 0 ≤ k) :
+    normalizedDahlbergRegion a y k ⊆ normalizedEdgeHalfPlane := by
+  rcases hk.eq_or_lt with rfl | hk
+  · simp [normalizedDahlbergRegion]
+  · rw [normalizedDahlbergRegion_eq_upperCap_of_pos hk]
+    intro z hz
+    exact hz.1
+
+/-- Dahlberg Lemma 8(2): the interior half-plane lies in every
+nonpositive-curvature region. -/
+theorem normalizedHalfPlane_subset_dahlbergRegion {a y k : ℝ} (hk : k ≤ 0) :
+    normalizedEdgeHalfPlane ⊆ normalizedDahlbergRegion a y k := by
+  rcases hk.eq_or_lt with rfl | hk
+  · simp [normalizedDahlbergRegion]
+  · intro z hz
+    rw [normalizedDahlbergRegion, if_neg (not_lt_of_ge hk.le), if_pos hk]
+    by_cases hd : z ∈ normalizedClosedDisk a y
+    · exact Or.inr ⟨hd, hz⟩
+    · apply Or.inl
+      change ¬(z.re ^ 2 + z.im ^ 2 - 2 * y * z.im ≤ a ^ 2) at hd
+      change a ^ 2 ≤ z.re ^ 2 + z.im ^ 2 - 2 * y * z.im
+      exact (lt_of_not_ge hd).le
+
+/-- Mixed-sign part of Dahlberg Lemma 8(3). -/
+theorem normalizedDahlbergRegion_anti_of_nonpos_nonneg
+    {a yP yQ kP kQ : ℝ} (hP : kP ≤ 0) (hQ : 0 ≤ kQ) :
+    normalizedDahlbergRegion a yQ kQ ⊆ normalizedDahlbergRegion a yP kP := by
+  exact (normalizedDahlbergRegion_subset_halfPlane hQ).trans
+    (normalizedHalfPlane_subset_dahlbergRegion hP)
+
+/-- On the negative branch, increasing the centre parameter enlarges
+Dahlberg's oriented region. -/
+theorem normalizedDahlbergRegion_mono_of_negative {a y₁ y₂ k₁ k₂ : ℝ}
+    (hy : y₁ ≤ y₂) (hk₁ : k₁ < 0) (hk₂ : k₂ < 0) :
+    normalizedDahlbergRegion a y₁ k₁ ⊆ normalizedDahlbergRegion a y₂ k₂ := by
+  intro z hz
+  rw [normalizedDahlbergRegion, if_neg (not_lt_of_ge hk₁.le), if_pos hk₁] at hz
+  rw [normalizedDahlbergRegion, if_neg (not_lt_of_ge hk₂.le), if_pos hk₂]
+  rcases hz with hext | hcap
+  · by_cases him : 0 ≤ z.im
+    · have hhalf : z ∈ normalizedEdgeHalfPlane := him
+      have hr := normalizedHalfPlane_subset_dahlbergRegion
+        (a := a) (y := y₂) (k := k₂) hk₂.le hhalf
+      simpa [normalizedDahlbergRegion, not_lt_of_ge hk₂.le, hk₂] using hr
+    · apply Or.inl
+      change a ^ 2 ≤ z.re ^ 2 + z.im ^ 2 - 2 * y₁ * z.im at hext
+      change a ^ 2 ≤ z.re ^ 2 + z.im ^ 2 - 2 * y₂ * z.im
+      nlinarith [mul_nonpos_of_nonneg_of_nonpos (sub_nonneg.mpr hy)
+        (lt_of_not_ge him).le]
+  · have hr := normalizedHalfPlane_subset_dahlbergRegion
+      (a := a) (y := y₂) (k := k₂) hk₂.le hcap.2
+    simpa [normalizedDahlbergRegion, not_lt_of_ge hk₂.le, hk₂] using hr
+
 /-- A normalized upper cap transported to arbitrary Euclidean coordinates. -/
 def transportedUpperCap (u w : ℂ) (a y : ℝ) : Set ℂ :=
   directIsometryImage u w (normalizedUpperCap a y)
+
+/-- Dahlberg's exact oriented region transported to arbitrary Euclidean
+coordinates. -/
+def transportedDahlbergRegion (u w : ℂ) (a y k : ℝ) : Set ℂ :=
+  directIsometryImage u w (normalizedDahlbergRegion a y k)
 
 /-- Centre of the transported coaxial family. -/
 def transportedCircleCenter (u w : ℂ) (y : ℝ) : ℂ :=
@@ -295,6 +492,16 @@ noncomputable def edgeCircumcenterParameter (A B C : ℂ) : ℝ :=
 
 noncomputable def edgeUpperCap (A B : ℂ) (y : ℝ) : Set ℂ :=
   transportedUpperCap (chordUnit A B) (chordMidpoint A B) (chordHalfLength A B) y
+
+noncomputable def edgeDahlbergRegion (A B : ℂ) (y k : ℝ) : Set ℂ :=
+  transportedDahlbergRegion (chordUnit A B) (chordMidpoint A B)
+    (chordHalfLength A B) y k
+
+/-- Dahlberg's oriented region attached to a point and an oriented edge, using
+the point's signed Menger curvature with that edge. -/
+noncomputable def edgePointDahlbergRegion (A B C : ℂ) : Set ℂ :=
+  edgeDahlbergRegion A B (edgeCircumcenterParameter A B C)
+    (Gluck.Discrete.signedMengerR2 A B C)
 
 /-- The normalized upper cap is the upper-half-plane part of the corresponding
 closed Euclidean disk. -/
@@ -321,12 +528,95 @@ theorem normalizedCircle_endpoints (a y : ℝ) :
   · rw [circlePowerR2_normalized]
     simp
 
+/-- In a normalized regular vertex cone, a third point above the edge forces
+the circumcentre above the edge. -/
+theorem normalizedCenter_nonneg_of_inVertexCone {a y : ℝ} {z : ℂ}
+    (hcone : InVertexCone z (-a : ℂ) (a : ℂ) (normalizedCircleCenter y))
+    (hz : 0 < z.im) : 0 ≤ y := by
+  obtain ⟨α, β, hα, hβ, hcenter⟩ := hcone
+  have him := congrArg Complex.im hcenter
+  simp [normalizedCircleCenter] at him
+  nlinarith [mul_nonneg hα hz.le]
+
+/-- In a normalized regular vertex cone, a third point below the edge forces
+the circumcentre below the edge. -/
+theorem normalizedCenter_nonpos_of_inVertexCone {a y : ℝ} {z : ℂ}
+    (hcone : InVertexCone z (-a : ℂ) (a : ℂ) (normalizedCircleCenter y))
+    (hz : z.im < 0) : y ≤ 0 := by
+  obtain ⟨α, β, hα, hβ, hcenter⟩ := hcone
+  have him := congrArg Complex.im hcenter
+  simp [normalizedCircleCenter] at him
+  nlinarith [mul_nonpos_of_nonneg_of_nonpos hα hz.le]
+
+/-- Dahlberg regularity at the left endpoint of a normalized edge places its
+circumcentre parameter on the interior side when the preceding vertex is
+above the edge. -/
+theorem normalizedCircumcenterParameter_nonneg_of_regular {a : ℝ} (ha : a ≠ 0)
+    {z O : ℂ} {R : ℝ} (hz : 0 < z.im)
+    (hcircle : CircumcircleR2 z (-a : ℂ) (a : ℂ) O R)
+    (hcone : InVertexCone z (-a : ℂ) (a : ℂ) O) :
+    0 ≤ normalizedCircumcenterParameter a z := by
+  have hO := eq_normalizedCircleCenter_of_equidistant ha hz.ne'
+    (hcircle.2.2.1.trans hcircle.2.2.2.symm)
+    (hcircle.2.1.trans hcircle.2.2.2.symm)
+  rw [hO] at hcone
+  exact normalizedCenter_nonneg_of_inVertexCone hcone hz
+
+/-- The corresponding regularity statement below the oriented edge. -/
+theorem normalizedCircumcenterParameter_nonpos_of_regular {a : ℝ} (ha : a ≠ 0)
+    {z O : ℂ} {R : ℝ} (hz : z.im < 0)
+    (hcircle : CircumcircleR2 z (-a : ℂ) (a : ℂ) O R)
+    (hcone : InVertexCone z (-a : ℂ) (a : ℂ) O) :
+    normalizedCircumcenterParameter a z ≤ 0 := by
+  have hO := eq_normalizedCircleCenter_of_equidistant ha hz.ne
+    (hcircle.2.2.1.trans hcircle.2.2.2.symm)
+    (hcircle.2.1.trans hcircle.2.2.2.symm)
+  rw [hO] at hcone
+  exact normalizedCenter_nonpos_of_inVertexCone hcone hz
+
+/-- Dahlberg regularity at the left endpoint of an arbitrary oriented edge
+places the canonical circumcentre parameter on the interior side. -/
+theorem edgeCircumcenterParameter_nonneg_of_regular {A B C O : ℂ} {R : ℝ}
+    (hAB : A ≠ B) (hcross : 0 < Gluck.Discrete.crossR2 A B C)
+    (hcircle : CircumcircleR2 C A B O R) (hcone : InVertexCone C A B O) :
+    0 ≤ edgeCircumcenterParameter A B C := by
+  have hz := (crossR2_pos_iff_edgeCoordinates_im_pos hAB C).mp hcross
+  have hcircle' := circumcircleR2_edgeCoordinates (E₁ := A) (E₂ := B) hAB hcircle
+  rw [(edgeCoordinates_endpoints hAB).1, (edgeCoordinates_endpoints hAB).2] at hcircle'
+  have hcone' := inVertexCone_edgeCoordinates A B C A B O hcone
+  rw [(edgeCoordinates_endpoints hAB).1, (edgeCoordinates_endpoints hAB).2] at hcone'
+  have hy := normalizedCircumcenterParameter_nonneg_of_regular
+    (chordHalfLength_pos hAB).ne' hz hcircle' hcone'
+  simpa [edgeCircumcenterParameter] using hy
+
+/-- Negative Dahlberg regularity at the left endpoint of an arbitrary
+oriented edge places the canonical circumcentre parameter on the opposite
+side. -/
+theorem edgeCircumcenterParameter_nonpos_of_regular {A B C O : ℂ} {R : ℝ}
+    (hAB : A ≠ B) (hcross : Gluck.Discrete.crossR2 A B C < 0)
+    (hcircle : CircumcircleR2 C A B O R) (hcone : InVertexCone C A B O) :
+    edgeCircumcenterParameter A B C ≤ 0 := by
+  have hz := (crossR2_neg_iff_edgeCoordinates_im_neg hAB C).mp hcross
+  have hcircle' := circumcircleR2_edgeCoordinates (E₁ := A) (E₂ := B) hAB hcircle
+  rw [(edgeCoordinates_endpoints hAB).1, (edgeCoordinates_endpoints hAB).2] at hcircle'
+  have hcone' := inVertexCone_edgeCoordinates A B C A B O hcone
+  rw [(edgeCoordinates_endpoints hAB).1, (edgeCoordinates_endpoints hAB).2] at hcone'
+  have hy := normalizedCircumcenterParameter_nonpos_of_regular
+    (chordHalfLength_pos hAB).ne' hz hcircle' hcone'
+  simpa [edgeCircumcenterParameter] using hy
+
 /-- A nondegenerate normalized chord gives every member of the coaxial family
 a positive radius. -/
 theorem normalizedCircleRadius_pos {a : ℝ} (ha : a ≠ 0) (y : ℝ) :
     0 < normalizedCircleRadius a y := by
   rw [normalizedCircleRadius, Real.sqrt_pos]
   positivity
+
+/-- Positive reciprocal radius for a nondegenerate chord. -/
+theorem normalizedCircleCurvature_pos {a : ℝ} (ha : a ≠ 0) (y : ℝ) :
+    0 < normalizedCircleCurvature a y := by
+  unfold normalizedCircleCurvature
+  exact one_div_pos.mpr (normalizedCircleRadius_pos ha y)
 
 /-- Metric form of the endpoint incidence relation. -/
 theorem dist_normalizedCircleCenter_right (a y : ℝ) :
@@ -422,6 +712,91 @@ theorem signedMengerR2_edge_parameter {A B C : ℂ} (hAB : A ≠ B)
   have hn := signedMengerR2_normalized (chordHalfLength_pos hAB) hz
   simpa [edgeCircumcenterParameter] using hi.trans hn
 
+/-- Positive orientation removes the sign quotient from the edge-parameter
+formula. -/
+theorem signedMengerR2_edge_parameter_of_pos {A B C : ℂ} (hAB : A ≠ B)
+    (hcross : 0 < Gluck.Discrete.crossR2 A B C) :
+    Gluck.Discrete.signedMengerR2 A B C =
+      normalizedCircleCurvature (chordHalfLength A B) (edgeCircumcenterParameter A B C) := by
+  have h := signedMengerR2_edge_parameter hAB hcross.ne'
+  have hz := (crossR2_pos_iff_edgeCoordinates_im_pos hAB C).mp hcross
+  have hsign : (edgeCoordinates A B C).im / |(edgeCoordinates A B C).im| = 1 := by
+    rw [abs_of_pos hz]
+    field_simp [hz.ne']
+  rw [h, hsign, one_mul]
+
+/-- Negative orientation removes the sign quotient from the edge-parameter
+formula. -/
+theorem signedMengerR2_edge_parameter_of_neg {A B C : ℂ} (hAB : A ≠ B)
+    (hcross : Gluck.Discrete.crossR2 A B C < 0) :
+    Gluck.Discrete.signedMengerR2 A B C =
+      -normalizedCircleCurvature (chordHalfLength A B) (edgeCircumcenterParameter A B C) := by
+  have h := signedMengerR2_edge_parameter hAB hcross.ne
+  have hz := (crossR2_neg_iff_edgeCoordinates_im_neg hAB C).mp hcross
+  have hsign : (edgeCoordinates A B C).im / |(edgeCoordinates A B C).im| = -1 := by
+    rw [abs_of_neg hz]
+    field_simp [hz.ne]
+  rw [h, hsign]
+  ring
+
+/-- Positive orientation rewrites the point-edge Dahlberg region using the
+positive normalized curvature of its canonical circle. -/
+theorem edgePointDahlbergRegion_eq_of_pos {A B C : ℂ} (hAB : A ≠ B)
+    (hcross : 0 < Gluck.Discrete.crossR2 A B C) :
+    edgePointDahlbergRegion A B C =
+      edgeDahlbergRegion A B (edgeCircumcenterParameter A B C)
+        (normalizedCircleCurvature (chordHalfLength A B)
+          (edgeCircumcenterParameter A B C)) := by
+  unfold edgePointDahlbergRegion
+  rw [signedMengerR2_edge_parameter_of_pos hAB hcross]
+
+/-- Negative orientation rewrites the point-edge Dahlberg region using the
+negative normalized curvature of its canonical circle. -/
+theorem edgePointDahlbergRegion_eq_of_neg {A B C : ℂ} (hAB : A ≠ B)
+    (hcross : Gluck.Discrete.crossR2 A B C < 0) :
+    edgePointDahlbergRegion A B C =
+      edgeDahlbergRegion A B (edgeCircumcenterParameter A B C)
+        (-normalizedCircleCurvature (chordHalfLength A B)
+          (edgeCircumcenterParameter A B C)) := by
+  unfold edgePointDahlbergRegion
+  rw [signedMengerR2_edge_parameter_of_neg hAB hcross]
+
+/-- Collinear triples have zero signed Menger curvature. -/
+theorem signedMengerR2_eq_zero_of_cross_eq_zero {A B C : ℂ}
+    (hcross : Gluck.Discrete.crossR2 A B C = 0) :
+    Gluck.Discrete.signedMengerR2 A B C = 0 := by
+  unfold Gluck.Discrete.signedMengerR2
+  rw [hcross]
+  ring
+
+/-- Positive orientation gives positive signed Menger curvature. -/
+theorem signedMengerR2_pos_of_cross_pos {A B C : ℂ} (hAB : A ≠ B)
+    (hcross : 0 < Gluck.Discrete.crossR2 A B C) :
+    0 < Gluck.Discrete.signedMengerR2 A B C := by
+  rw [signedMengerR2_edge_parameter_of_pos hAB hcross]
+  exact normalizedCircleCurvature_pos (chordHalfLength_pos hAB).ne' _
+
+/-- Negative orientation gives negative signed Menger curvature. -/
+theorem signedMengerR2_neg_of_cross_neg {A B C : ℂ} (hAB : A ≠ B)
+    (hcross : Gluck.Discrete.crossR2 A B C < 0) :
+    Gluck.Discrete.signedMengerR2 A B C < 0 := by
+  rw [signedMengerR2_edge_parameter_of_neg hAB hcross]
+  exact neg_neg_of_pos (normalizedCircleCurvature_pos (chordHalfLength_pos hAB).ne' _)
+
+/-- A noncollinear Dahlberg-regular vertex is in the circle/cone branch. -/
+theorem dahlbergRegularAt_circle_of_cross_ne_zero {A B C : ℂ}
+    (hreg : DahlbergRegularAt C A B)
+    (hcross : Gluck.Discrete.crossR2 A B C ≠ 0) :
+    ∃ O R, CircumcircleR2 C A B O R ∧ InVertexCone C A B O := by
+  rcases hreg with hcol | hcircle
+  · exfalso
+    apply hcross
+    calc
+      Gluck.Discrete.crossR2 A B C = Gluck.Discrete.crossR2 C A B :=
+        (crossR2_cycle_two A B C).symm
+      _ = 0 := hcol.1
+  · exact hcircle
+
 /-- The disk-side cap in the lower half-plane. -/
 def normalizedLowerCap (a y : ℝ) : Set ℂ :=
   {z | z.im ≤ 0 ∧ z.re ^ 2 + z.im ^ 2 - 2 * y * z.im ≤ a ^ 2}
@@ -445,6 +820,15 @@ theorem normalizedCircleRadius_mono_of_nonneg {a y₁ y₂ : ℝ}
   apply Real.sqrt_le_sqrt
   nlinarith [mul_nonneg (sub_nonneg.mpr hy) (add_nonneg hy₁ (hy₁.trans hy))]
 
+/-- Strict radius monotonicity on the nonnegative-centre branch. -/
+theorem normalizedCircleRadius_strictMono_of_nonneg {a y₁ y₂ : ℝ}
+    (hy₁ : 0 ≤ y₁) (hy : y₁ < y₂) :
+    normalizedCircleRadius a y₁ < normalizedCircleRadius a y₂ := by
+  unfold normalizedCircleRadius
+  apply Real.sqrt_lt_sqrt (by positivity)
+  have hy₂ : 0 < y₂ := lt_of_le_of_lt hy₁ hy
+  nlinarith [mul_pos (sub_pos.mpr hy) (add_pos_of_pos_of_nonneg hy₂ hy₁)]
+
 /-- On the nonpositive-centre branch, circle radius is antitone in the centre
 parameter. -/
 theorem normalizedCircleRadius_antitone_of_nonpos {a y₁ y₂ : ℝ}
@@ -455,6 +839,16 @@ theorem normalizedCircleRadius_antitone_of_nonpos {a y₁ y₂ : ℝ}
   nlinarith [mul_nonneg_of_nonpos_of_nonpos (sub_nonpos.mpr hy)
     (add_nonpos (hy.trans hy₂) hy₂)]
 
+/-- Strict radius antitonicity on the nonpositive-centre branch. -/
+theorem normalizedCircleRadius_strictAnti_of_nonpos {a y₁ y₂ : ℝ}
+    (hy : y₁ < y₂) (hy₂ : y₂ ≤ 0) :
+    normalizedCircleRadius a y₂ < normalizedCircleRadius a y₁ := by
+  unfold normalizedCircleRadius
+  apply Real.sqrt_lt_sqrt (by positivity)
+  have hy₁ : y₁ < 0 := lt_of_lt_of_le hy hy₂
+  nlinarith [mul_pos_of_neg_of_neg (sub_neg.mpr hy)
+    (add_neg_of_neg_of_nonpos hy₁ hy₂)]
+
 /-- On the nonnegative-centre branch, positive circle curvature is antitone. -/
 theorem normalizedCircleCurvature_antitone_of_nonneg {a y₁ y₂ : ℝ}
     (ha : a ≠ 0) (hy₁ : 0 ≤ y₁) (hy : y₁ ≤ y₂) :
@@ -463,6 +857,23 @@ theorem normalizedCircleCurvature_antitone_of_nonneg {a y₁ y₂ : ℝ}
   exact one_div_le_one_div_of_le (normalizedCircleRadius_pos ha y₁)
     (normalizedCircleRadius_mono_of_nonneg hy₁ hy)
 
+/-- Strict curvature antitonicity on the nonnegative-centre branch. -/
+theorem normalizedCircleCurvature_strictAnti_of_nonneg {a y₁ y₂ : ℝ}
+    (ha : a ≠ 0) (hy₁ : 0 ≤ y₁) (hy : y₁ < y₂) :
+    normalizedCircleCurvature a y₂ < normalizedCircleCurvature a y₁ := by
+  unfold normalizedCircleCurvature
+  exact one_div_lt_one_div_of_lt (normalizedCircleRadius_pos ha y₁)
+    (normalizedCircleRadius_strictMono_of_nonneg hy₁ hy)
+
+/-- Curvature order reverses the centre-parameter order on the positive
+regular branch. -/
+theorem parameter_le_of_curvature_le_nonneg {a yP yQ : ℝ} (ha : a ≠ 0)
+    (hyP : 0 ≤ yP) (hκ : normalizedCircleCurvature a yP ≤ normalizedCircleCurvature a yQ) :
+    yQ ≤ yP := by
+  by_contra horder
+  have hlt : yP < yQ := lt_of_not_ge horder
+  exact (not_lt_of_ge hκ) (normalizedCircleCurvature_strictAnti_of_nonneg ha hyP hlt)
+
 /-- On the nonpositive-centre branch, positive circle curvature is monotone. -/
 theorem normalizedCircleCurvature_mono_of_nonpos {a y₁ y₂ : ℝ}
     (ha : a ≠ 0) (hy : y₁ ≤ y₂) (hy₂ : y₂ ≤ 0) :
@@ -470,6 +881,36 @@ theorem normalizedCircleCurvature_mono_of_nonpos {a y₁ y₂ : ℝ}
   unfold normalizedCircleCurvature
   exact one_div_le_one_div_of_le (normalizedCircleRadius_pos ha y₂)
     (normalizedCircleRadius_antitone_of_nonpos hy hy₂)
+
+/-- Strict curvature monotonicity on the nonpositive-centre branch. -/
+theorem normalizedCircleCurvature_strictMono_of_nonpos {a y₁ y₂ : ℝ}
+    (ha : a ≠ 0) (hy : y₁ < y₂) (hy₂ : y₂ ≤ 0) :
+    normalizedCircleCurvature a y₁ < normalizedCircleCurvature a y₂ := by
+  unfold normalizedCircleCurvature
+  exact one_div_lt_one_div_of_lt (normalizedCircleRadius_pos ha y₂)
+    (normalizedCircleRadius_strictAnti_of_nonpos hy hy₂)
+
+/-- Reverse curvature order gives parameter order on the negative regular
+branch. -/
+theorem parameter_le_of_curvature_ge_nonpos {a yP yQ : ℝ} (ha : a ≠ 0)
+    (hyQ : yQ ≤ 0) (hκ : normalizedCircleCurvature a yQ ≤ normalizedCircleCurvature a yP) :
+    yQ ≤ yP := by
+  by_contra horder
+  have hlt : yP < yQ := lt_of_not_ge horder
+  exact (not_lt_of_ge hκ) (normalizedCircleCurvature_strictMono_of_nonpos ha hlt hyQ)
+
+/-- Negative same-sign part of Dahlberg Lemma 8(3). -/
+theorem normalizedDahlbergRegion_anti_of_negative {a yP yQ : ℝ} (ha : a ≠ 0)
+    (hyQ : yQ ≤ 0)
+    (hκ : -normalizedCircleCurvature a yP ≤ -normalizedCircleCurvature a yQ) :
+    normalizedDahlbergRegion a yQ (-normalizedCircleCurvature a yQ) ⊆
+      normalizedDahlbergRegion a yP (-normalizedCircleCurvature a yP) := by
+  have hκ' : normalizedCircleCurvature a yQ ≤ normalizedCircleCurvature a yP := by
+    linarith
+  have hy := parameter_le_of_curvature_ge_nonpos ha hyQ hκ'
+  exact normalizedDahlbergRegion_mono_of_negative hy
+    (neg_lt_zero.mpr (normalizedCircleCurvature_pos ha yQ))
+    (neg_lt_zero.mpr (normalizedCircleCurvature_pos ha yP))
 
 /-- Moving the centre upward enlarges the disk-side upper cap. This elementary
 order statement is the normalized algebraic core of Dahlberg's nesting
@@ -483,11 +924,30 @@ theorem normalizedUpperCap_mono {a y₁ y₂ : ℝ} (hy : y₁ ≤ y₂) :
   · exact hz.1
   · nlinarith [mul_nonneg (sub_nonneg.mpr hy) hz.1]
 
+/-- Positive same-sign part of Dahlberg Lemma 8(3). -/
+theorem normalizedDahlbergRegion_anti_of_positive {a yP yQ : ℝ} (ha : a ≠ 0)
+    (hyP : 0 ≤ yP)
+    (hκ : normalizedCircleCurvature a yP ≤ normalizedCircleCurvature a yQ) :
+    normalizedDahlbergRegion a yQ (normalizedCircleCurvature a yQ) ⊆
+      normalizedDahlbergRegion a yP (normalizedCircleCurvature a yP) := by
+  have hy := parameter_le_of_curvature_le_nonneg ha hyP hκ
+  rw [normalizedDahlbergRegion_eq_upperCap_of_pos (normalizedCircleCurvature_pos ha yQ),
+    normalizedDahlbergRegion_eq_upperCap_of_pos (normalizedCircleCurvature_pos ha yP)]
+  exact normalizedUpperCap_mono hy
+
 /-- Dahlberg cap nesting after any orientation-preserving Euclidean isometry. -/
 theorem transportedUpperCap_mono (u w : ℂ) {a y₁ y₂ : ℝ} (hy : y₁ ≤ y₂) :
     transportedUpperCap u w a y₁ ⊆ transportedUpperCap u w a y₂ := by
   unfold transportedUpperCap directIsometryImage
   exact Set.image_mono (normalizedUpperCap_mono hy)
+
+/-- Normalized Dahlberg-region inclusions transport through the same direct
+Euclidean isometry. -/
+theorem transportedDahlbergRegion_mono (u w : ℂ) {a yP yQ kP kQ : ℝ}
+    (h : normalizedDahlbergRegion a yQ kQ ⊆ normalizedDahlbergRegion a yP kP) :
+    transportedDahlbergRegion u w a yQ kQ ⊆ transportedDahlbergRegion u w a yP kP := by
+  unfold transportedDahlbergRegion directIsometryImage
+  exact Set.image_mono h
 
 /-- Arbitrary-edge form of the disk-side nesting statement in Dahlberg's
 Lemma 8. -/
@@ -495,5 +955,124 @@ theorem edgeUpperCap_mono (A B : ℂ) {y₁ y₂ : ℝ} (hy : y₁ ≤ y₂) :
     edgeUpperCap A B y₁ ⊆ edgeUpperCap A B y₂ := by
   unfold edgeUpperCap
   exact transportedUpperCap_mono _ _ hy
+
+/-- Arbitrary-edge mixed-sign part of Dahlberg Lemma 8. -/
+theorem edgeDahlbergRegion_anti_of_nonpos_nonneg (A B : ℂ) {yP yQ kP kQ : ℝ}
+    (hP : kP ≤ 0) (hQ : 0 ≤ kQ) :
+    edgeDahlbergRegion A B yQ kQ ⊆ edgeDahlbergRegion A B yP kP := by
+  unfold edgeDahlbergRegion
+  exact transportedDahlbergRegion_mono _ _
+    (normalizedDahlbergRegion_anti_of_nonpos_nonneg hP hQ)
+
+/-- Arbitrary-edge positive same-sign part of Dahlberg Lemma 8. -/
+theorem edgeDahlbergRegion_anti_of_positive {A B : ℂ} (hAB : A ≠ B) {yP yQ : ℝ}
+    (hyP : 0 ≤ yP)
+    (hκ : normalizedCircleCurvature (chordHalfLength A B) yP ≤
+      normalizedCircleCurvature (chordHalfLength A B) yQ) :
+    edgeDahlbergRegion A B yQ
+        (normalizedCircleCurvature (chordHalfLength A B) yQ) ⊆
+      edgeDahlbergRegion A B yP
+        (normalizedCircleCurvature (chordHalfLength A B) yP) := by
+  unfold edgeDahlbergRegion
+  exact transportedDahlbergRegion_mono _ _
+    (normalizedDahlbergRegion_anti_of_positive (chordHalfLength_pos hAB).ne' hyP hκ)
+
+/-- Arbitrary-edge negative same-sign part of Dahlberg Lemma 8. -/
+theorem edgeDahlbergRegion_anti_of_negative {A B : ℂ} (hAB : A ≠ B) {yP yQ : ℝ}
+    (hyQ : yQ ≤ 0)
+    (hκ : -normalizedCircleCurvature (chordHalfLength A B) yP ≤
+      -normalizedCircleCurvature (chordHalfLength A B) yQ) :
+    edgeDahlbergRegion A B yQ
+        (-normalizedCircleCurvature (chordHalfLength A B) yQ) ⊆
+      edgeDahlbergRegion A B yP
+        (-normalizedCircleCurvature (chordHalfLength A B) yP) := by
+  unfold edgeDahlbergRegion
+  exact transportedDahlbergRegion_mono _ _
+    (normalizedDahlbergRegion_anti_of_negative (chordHalfLength_pos hAB).ne' hyQ hκ)
+
+/-- Point-edge mixed-sign form of Dahlberg Lemma 8. -/
+theorem edgePointDahlbergRegion_anti_of_nonpos_nonneg (A B P Q : ℂ)
+    (hP : Gluck.Discrete.signedMengerR2 A B P ≤ 0)
+    (hQ : 0 ≤ Gluck.Discrete.signedMengerR2 A B Q) :
+    edgePointDahlbergRegion A B Q ⊆ edgePointDahlbergRegion A B P := by
+  unfold edgePointDahlbergRegion
+  exact edgeDahlbergRegion_anti_of_nonpos_nonneg A B hP hQ
+
+/-- Point-edge positive same-sign form of Dahlberg Lemma 8, with Dahlberg
+regularity supplying the centre-side condition for the lower-curvature point. -/
+theorem edgePointDahlbergRegion_anti_of_positive {A B P Q O : ℂ} {R : ℝ}
+    (hAB : A ≠ B)
+    (hPcross : 0 < Gluck.Discrete.crossR2 A B P)
+    (hQcross : 0 < Gluck.Discrete.crossR2 A B Q)
+    (hcircleP : CircumcircleR2 P A B O R) (hconeP : InVertexCone P A B O)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P ≤
+      Gluck.Discrete.signedMengerR2 A B Q) :
+    edgePointDahlbergRegion A B Q ⊆ edgePointDahlbergRegion A B P := by
+  rw [edgePointDahlbergRegion_eq_of_pos hAB hQcross,
+    edgePointDahlbergRegion_eq_of_pos hAB hPcross]
+  apply edgeDahlbergRegion_anti_of_positive hAB
+  · exact edgeCircumcenterParameter_nonneg_of_regular hAB hPcross hcircleP hconeP
+  · simpa [signedMengerR2_edge_parameter_of_pos hAB hPcross,
+      signedMengerR2_edge_parameter_of_pos hAB hQcross] using hκ
+
+/-- Point-edge negative same-sign form of Dahlberg Lemma 8, with Dahlberg
+regularity supplying the centre-side condition for the higher-curvature point. -/
+theorem edgePointDahlbergRegion_anti_of_negative {A B P Q O : ℂ} {R : ℝ}
+    (hAB : A ≠ B)
+    (hPcross : Gluck.Discrete.crossR2 A B P < 0)
+    (hQcross : Gluck.Discrete.crossR2 A B Q < 0)
+    (hcircleQ : CircumcircleR2 Q A B O R) (hconeQ : InVertexCone Q A B O)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P ≤
+      Gluck.Discrete.signedMengerR2 A B Q) :
+    edgePointDahlbergRegion A B Q ⊆ edgePointDahlbergRegion A B P := by
+  rw [edgePointDahlbergRegion_eq_of_neg hAB hQcross,
+    edgePointDahlbergRegion_eq_of_neg hAB hPcross]
+  apply edgeDahlbergRegion_anti_of_negative hAB
+  · exact edgeCircumcenterParameter_nonpos_of_regular hAB hQcross hcircleQ hconeQ
+  · simpa [signedMengerR2_edge_parameter_of_neg hAB hPcross,
+      signedMengerR2_edge_parameter_of_neg hAB hQcross] using hκ
+
+/-- Dahlberg Lemma 8 for two locally regular points over the same oriented
+edge, expressed with the actual signed Menger curvatures. -/
+theorem edgePointDahlbergRegion_anti_of_regular {A B P Q : ℂ}
+    (hAB : A ≠ B)
+    (hPreg : DahlbergRegularAt P A B) (hQreg : DahlbergRegularAt Q A B)
+    (hκ : Gluck.Discrete.signedMengerR2 A B P ≤
+      Gluck.Discrete.signedMengerR2 A B Q) :
+    edgePointDahlbergRegion A B Q ⊆ edgePointDahlbergRegion A B P := by
+  rcases lt_trichotomy (Gluck.Discrete.crossR2 A B P) 0 with hPneg | hPzero | hPpos
+  · rcases lt_trichotomy (Gluck.Discrete.crossR2 A B Q) 0 with hQneg | hQzero | hQpos
+    · obtain ⟨O, R, hcircleQ, hconeQ⟩ :=
+        dahlbergRegularAt_circle_of_cross_ne_zero hQreg hQneg.ne
+      exact edgePointDahlbergRegion_anti_of_negative hAB hPneg hQneg hcircleQ hconeQ hκ
+    · apply edgePointDahlbergRegion_anti_of_nonpos_nonneg
+      · exact (signedMengerR2_neg_of_cross_neg hAB hPneg).le
+      · rw [signedMengerR2_eq_zero_of_cross_eq_zero hQzero]
+    · apply edgePointDahlbergRegion_anti_of_nonpos_nonneg
+      · exact (signedMengerR2_neg_of_cross_neg hAB hPneg).le
+      · exact (signedMengerR2_pos_of_cross_pos hAB hQpos).le
+  · rcases lt_trichotomy (Gluck.Discrete.crossR2 A B Q) 0 with hQneg | hQzero | hQpos
+    · exfalso
+      have hPκ := signedMengerR2_eq_zero_of_cross_eq_zero hPzero
+      have hQκ := signedMengerR2_neg_of_cross_neg hAB hQneg
+      nlinarith
+    · apply edgePointDahlbergRegion_anti_of_nonpos_nonneg
+      · rw [signedMengerR2_eq_zero_of_cross_eq_zero hPzero]
+      · rw [signedMengerR2_eq_zero_of_cross_eq_zero hQzero]
+    · apply edgePointDahlbergRegion_anti_of_nonpos_nonneg
+      · rw [signedMengerR2_eq_zero_of_cross_eq_zero hPzero]
+      · exact (signedMengerR2_pos_of_cross_pos hAB hQpos).le
+  · rcases lt_trichotomy (Gluck.Discrete.crossR2 A B Q) 0 with hQneg | hQzero | hQpos
+    · exfalso
+      have hPκ := signedMengerR2_pos_of_cross_pos hAB hPpos
+      have hQκ := signedMengerR2_neg_of_cross_neg hAB hQneg
+      nlinarith
+    · exfalso
+      have hPκ := signedMengerR2_pos_of_cross_pos hAB hPpos
+      have hQκ := signedMengerR2_eq_zero_of_cross_eq_zero hQzero
+      nlinarith
+    · obtain ⟨O, R, hcircleP, hconeP⟩ :=
+        dahlbergRegularAt_circle_of_cross_ne_zero hPreg hPpos.ne'
+      exact edgePointDahlbergRegion_anti_of_positive hAB hPpos hQpos hcircleP hconeP hκ
 
 end Gluck.Forward
