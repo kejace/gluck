@@ -291,6 +291,71 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_of_not_concyclic {n : ℕ} [Ne
   exact signedMengerProfile_dahlbergFourVertex_of_not_concyclic
     hn hsimple hregular hnoncircle
 
+/-- Strictly positive-orientation E² Dahlberg theorem in constant-or-four
+vertex form.  The concyclic case gives a constant signed-Menger profile; the
+nonconcyclic case gives Dahlberg's plateau-aware four-vertex conclusion. -/
+theorem signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_positiveOrientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (horient : PositivePolygonOrientation v) :
+    (∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) ∨
+      DahlbergFourVertex (SignedMengerProfile v) := by
+  by_cases hcyc : Concyclic v
+  · exact Or.inl
+      (exists_constant_signedMengerProfile_of_concyclic_positiveOrientation
+        hsimple hcyc horient)
+  · exact Or.inr
+      (signedMengerProfile_dahlbergFourVertex_E2_of_not_concyclic
+        hn v hsimple hregular hcyc)
+
+/-- Strictly negative-orientation E² Dahlberg theorem in constant-or-four
+vertex form. -/
+theorem signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_negativeOrientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (horient : NegativePolygonOrientation v) :
+    (∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) ∨
+      DahlbergFourVertex (SignedMengerProfile v) := by
+  by_cases hcyc : Concyclic v
+  · exact Or.inl
+      (exists_constant_signedMengerProfile_of_concyclic_negativeOrientation
+        hsimple hcyc horient)
+  · exact Or.inr
+      (signedMengerProfile_dahlbergFourVertex_E2_of_not_concyclic
+        hn v hsimple hregular hcyc)
+
+/-- Strict-orientation E² Dahlberg theorem in constant-or-four vertex form,
+packaged over the two possible cyclic orientations. -/
+theorem signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_strict_orientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v) :
+    (∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) ∨
+      DahlbergFourVertex (SignedMengerProfile v) := by
+  rcases horient with hpos | hneg
+  · exact signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_positiveOrientation
+      hn v hsimple hregular hpos
+  · exact signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_negativeOrientation
+      hn v hsimple hregular hneg
+
+/-- Dahlberg's Euclidean discrete four-vertex theorem in strict-orientation
+form, stated directly for the signed Menger curvature of consecutive triples. -/
+theorem dahlberg_discrete_four_vertex_E2_of_strict_orientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v) :
+    (∃ c, ∀ i : ZMod n,
+      Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) = c) ∨
+      DahlbergFourVertex
+        (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
+  change
+    (∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) ∨
+      DahlbergFourVertex (SignedMengerProfile v)
+  exact signedMengerProfile_constant_or_dahlbergFourVertex_E2_of_strict_orientation
+    hn v hsimple hregular horient
+
 /-- Dahlberg's Euclidean discrete four-vertex theorem: the signed Menger
 curvature of a locally regular simple closed polygon is constant or has an
 alternating four-vertex level window. -/
