@@ -1064,6 +1064,21 @@ theorem crossR2_neg_of_signedMengerR2_neg {A B C : ℂ} (hAB : A ≠ B)
   · have hκpos := signedMengerR2_pos_of_cross_pos hAB hpos
     nlinarith
 
+/-- Nonzero signed Menger curvature forces nonzero oriented area. -/
+theorem crossR2_ne_zero_of_signedMengerR2_ne_zero {A B C : ℂ}
+    (hκ : Gluck.Discrete.signedMengerR2 A B C ≠ 0) :
+    Gluck.Discrete.crossR2 A B C ≠ 0 := by
+  intro hcross
+  exact hκ (signedMengerR2_eq_zero_of_cross_eq_zero hcross)
+
+/-- A point with nonzero signed Menger curvature belongs to its own Dahlberg
+edge-region. -/
+theorem edgePoint_mem_own_dahlbergRegion_of_signedMenger_ne_zero {A B C : ℂ}
+    (hAB : A ≠ B) (hκ : Gluck.Discrete.signedMengerR2 A B C ≠ 0) :
+    C ∈ edgePointDahlbergRegion A B C := by
+  exact edgePoint_mem_own_dahlbergRegion hAB
+    (crossR2_ne_zero_of_signedMengerR2_ne_zero hκ)
+
 /-- A noncollinear Dahlberg-regular vertex is in the circle/cone branch. -/
 theorem dahlbergRegularAt_circle_of_cross_ne_zero {A B C : ℂ}
     (hreg : DahlbergRegularAt C A B)
@@ -1658,6 +1673,17 @@ theorem polygonEdgePrev_cross_neg_of_vertex_signedMenger_neg {n : ℕ}
       Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) < 0 := by
     rwa [← polygonSignedMenger_eq_edgePrev i]
   exact crossR2_neg_of_signedMengerR2_neg (hsimple.1 i) hκ'
+
+/-- Polygon-indexed own-region membership over the outgoing edge from nonzero
+signed Menger curvature at the left endpoint. -/
+theorem polygonEdgePrev_mem_own_dahlbergRegion_of_vertex_menger_ne_zero {n : ℕ}
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v) {i : ZMod n}
+    (hκ : Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) ≠ 0) :
+    v (i - 1) ∈ edgePointDahlbergRegion (v i) (v (i + 1)) (v (i - 1)) := by
+  have hκ' :
+      Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) ≠ 0 := by
+    rwa [← polygonSignedMenger_eq_edgePrev i]
+  exact edgePoint_mem_own_dahlbergRegion_of_signedMenger_ne_zero (hsimple.1 i) hκ'
 
 /-- Polygon-indexed form of Dahlberg Lemma 8(1) for the left endpoint of the
 edge `i → i+1`. -/
