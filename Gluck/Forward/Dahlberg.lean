@@ -9322,6 +9322,16 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
+/-- Dahlberg's strict positive-orientation Lemma 9 source gate.
+
+This is the current primitive strict-branch paper input: the strictly convex
+positive-orientation branch has ordered adjacent signed-Menger turns.  The
+separate CDFV and Lemma 8 source gates below are recovered formally from this
+single ordered-turn source, keeping the downstream audit interfaces available
+while leaving only one strict-branch source obligation. -/
+theorem dahlbergE2_lemma9_ordered_turn_source_gate : DahlbergE2Lemma9Source := by
+  sorry
+
 /-- Dahlberg's convex/CDFV signed-Menger nonconcyclic source gate.
 
 Dahlberg's Theorem 6/CDFV supplies the four extremal curvature-disk witnesses
@@ -9331,10 +9341,12 @@ witness form used by the Lean reduction is recovered formally below by
 reciprocal-radius monotonicity.
 
 Reference source: Dahlberg, *A Discrete Four Vertex Theorem*,
-`references/23.pdf`, §3 Theorem 6 (CDFV). -/
+`references/23.pdf`, §3 Theorem 6 (CDFV).  In the current formal reduction it
+is derived from the stronger Lemma 9 ordered-turn source gate above. -/
 theorem dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate :
     DahlbergE2ConvexDfvSignedNonconcyclicSource := by
-  sorry
+  exact dahlbergE2ConvexDfvSignedNonconcyclicSource_of_lemma9Source
+    dahlbergE2_lemma9_ordered_turn_source_gate
 
 /-- Dahlberg's convex/CDFV radius-witness nonconcyclic source gate, recovered
 from the signed-Menger CDFV source. -/
@@ -9359,10 +9371,13 @@ theorem dahlbergE2_convex_dfv_signed_source_gate :
 
 This is the ordered-turn refinement input: given the CDFV radius witnesses,
 Lemma 8 propagates the disk nesting to the adjacent radius turns used in
-Lemma 9. -/
+Lemma 9.  In the current formal reduction it is recovered from the stronger
+Lemma 9 ordered-turn source gate above. -/
 theorem dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate :
     DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource := by
-  sorry
+  exact
+    (dahlbergE2ConvexSignedNonconcyclicSourceComponents_of_lemma9Source
+      dahlbergE2_lemma9_ordered_turn_source_gate).2
 
 /-- Dahlberg's exact nonconcyclic signed-CDFV/Lemma 8 source components,
 split into the two paper-facing strict-branch inputs. -/
