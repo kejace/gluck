@@ -1673,9 +1673,16 @@ theorem constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_sources
     (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
     (hκ : RealizesConformalMenger 0 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
-    hn v κ hsimple hregular horient hκ
+  exact constant_or_dahlbergFourVertex_of_eq_affine
+    (κ := SignedMengerProfile v) (μ := κ) (a := 1 / 2) (b := 0)
+    (by norm_num)
+    (by
+      intro i
+      simpa [add_zero] using
+        realizesConformalMenger_zero_eq_half_signedMengerProfile_of_strict_orientation
+          hsimple horient hκ i)
+    (signedMengerProfile_constant_or_dahlbergFourVertex_E2_strict_of_sources
+      hsrc hn v hsimple hregular horient)
 
 /-- The source-parametrized strict-orientation E² conformal-Menger
 nonconstant Dahlberg theorem at `ε = 0`. -/
@@ -1704,9 +1711,10 @@ theorem dahlbergFourVertex_E2_conformalMenger_zero_strict_of_sources
     (hκ : RealizesConformalMenger 0 v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
-    hn v κ hsimple hregular horient hκ hnc
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_sources
+      hsrc hn v κ hsimple hregular horient hκ)
+    hnc
 
 /-- The source-parametrized public E² conformal-Menger discrete theorem at
 `ε = 0` in constant-or-Dahlberg form. -/
@@ -1731,9 +1739,8 @@ theorem dahlberg_discrete_four_vertex_E2_conformalMenger_zero_strict_of_sources
     (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
     (hκ : RealizesConformalMenger 0 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact dahlberg_discrete_four_vertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
-    hn v κ hsimple hregular horient hκ
+  exact constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_sources
+    hsrc hn v κ hsimple hregular horient hκ
 
 /-- The source-parametrized positive-orientation conformal-Menger ordered-turn
 kernel over `E²`, `S²`, and `H²`. -/
