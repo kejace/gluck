@@ -520,6 +520,36 @@ theorem directIsometryR2_injective {u : ℂ} (hu : ‖u‖ = 1) (w : ℂ) :
   rw [h, dist_self] at hd
   exact dist_eq_zero.mp hd.symm
 
+/-- Direct Euclidean isometries commute with affine line interpolation. -/
+theorem directIsometryR2_lineMap (u w A B : ℂ) (t : ℝ) :
+    directIsometryR2 u w (AffineMap.lineMap A B t) =
+      AffineMap.lineMap (directIsometryR2 u w A) (directIsometryR2 u w B) t := by
+  unfold directIsometryR2
+  simp [AffineMap.lineMap_apply_module]
+  ring
+
+/-- Direct Euclidean isometries preserve membership in a closed segment. -/
+theorem mem_segment_directIsometry {u : ℂ} (hu : ‖u‖ = 1)
+    (w A B z : ℂ) :
+    directIsometryR2 u w z ∈ segment ℝ (directIsometryR2 u w A)
+        (directIsometryR2 u w B) ↔
+      z ∈ segment ℝ A B := by
+  constructor
+  · intro hz
+    rw [segment_eq_image_lineMap] at hz
+    rcases hz with ⟨t, ht, hz⟩
+    rw [segment_eq_image_lineMap]
+    refine ⟨t, ht, ?_⟩
+    apply directIsometryR2_injective hu w
+    rw [directIsometryR2_lineMap]
+    exact hz
+  · intro hz
+    rw [segment_eq_image_lineMap] at hz
+    rcases hz with ⟨t, ht, hz⟩
+    rw [segment_eq_image_lineMap]
+    refine ⟨t, ht, ?_⟩
+    rw [← directIsometryR2_lineMap, hz]
+
 /-- Direct Euclidean isometries preserve membership of a circumcentre in a
 vertex cone. -/
 theorem inVertexCone_directIsometry (u w A B C O : ℂ)
@@ -530,6 +560,30 @@ theorem inVertexCone_directIsometry (u w A B C O : ℂ)
   refine ⟨α, β, hα, hβ, ?_⟩
   unfold directIsometryR2
   linear_combination u * hcenter
+
+/-- Direct Euclidean isometries preserve Dahlberg local regularity. -/
+theorem dahlbergRegularAt_directIsometry {u : ℂ} (hu : ‖u‖ = 1)
+    (w A B C : ℂ) (hregular : DahlbergRegularAt A B C) :
+    DahlbergRegularAt (directIsometryR2 u w A) (directIsometryR2 u w B)
+      (directIsometryR2 u w C) := by
+  rcases hregular with hcollinear | hcircle
+  · refine Or.inl ⟨?_, ?_⟩
+    · rw [crossR2_directIsometry hu]
+      exact hcollinear.1
+    · exact (mem_segment_directIsometry hu w A C B).mpr hcollinear.2
+  · rcases hcircle with ⟨O, R, hcircle, hcone⟩
+    exact Or.inr ⟨directIsometryR2 u w O, R,
+      circumcircleR2_directIsometry hu w A B C O R hcircle,
+      inVertexCone_directIsometry u w A B C O hcone⟩
+
+/-- Direct Euclidean isometries preserve Dahlberg regularity of cyclic
+polygons. -/
+theorem dahlbergRegular_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
+    (w : ℂ) (v : ZMod n → ℂ) (hregular : DahlbergRegular v) :
+    DahlbergRegular (fun i => directIsometryR2 u w (v i)) := by
+  intro i
+  exact dahlbergRegularAt_directIsometry hu w (v (i - 1)) (v i) (v (i + 1))
+    (hregular i)
 
 /-- Image of a planar region under a direct Euclidean isometry. -/
 def directIsometryImage (u w : ℂ) (S : Set ℂ) : Set ℂ :=
