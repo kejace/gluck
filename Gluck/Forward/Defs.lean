@@ -1599,6 +1599,45 @@ theorem exists_eq_succ_of_forall_mem_uIcc_neighbors {n : ℕ} [NeZero n]
     rcases exists_constant_of_forall_succ_le hle with ⟨c, hc⟩
     exact hne 0 (by rw [hc 0, hc (0 + 1)])
 
+/-- If a cyclic real profile has no adjacent plateau, then it has a strict
+one-step peak or a strict one-step valley.  This is the first finite cyclic
+combinatorial ingredient in Dahlberg's “too few extrema imply monotone arcs”
+argument. -/
+theorem exists_strict_neighbor_extremum_of_forall_ne_succ {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} (hne : ∀ i : ZMod n, κ i ≠ κ (i + 1)) :
+    ∃ i : ZMod n,
+      (κ (i - 1) < κ i ∧ κ (i + 1) < κ i) ∨
+        (κ i < κ (i - 1) ∧ κ i < κ (i + 1)) := by
+  by_contra hnone
+  have hbetween : ∀ i : ZMod n, κ i ∈ Set.uIcc (κ (i - 1)) (κ (i + 1)) := by
+    intro i
+    rw [Set.mem_uIcc]
+    by_cases hleft : κ (i - 1) < κ i
+    · by_cases hright : κ (i + 1) < κ i
+      · exact False.elim (hnone ⟨i, Or.inl ⟨hleft, hright⟩⟩)
+      · have hiright : κ i < κ (i + 1) := by
+          exact lt_of_le_of_ne (le_of_not_gt hright) (hne i)
+        exact Or.inl ⟨hleft.le, hiright.le⟩
+    · have hileft : κ i < κ (i - 1) := by
+        have hne_left : κ (i - 1) ≠ κ i := by
+          simpa [sub_eq_add_neg, add_assoc] using hne (i - 1)
+        exact lt_of_le_of_ne (le_of_not_gt hleft) (Ne.symm hne_left)
+      by_cases hright : κ i < κ (i + 1)
+      · exact False.elim (hnone ⟨i, Or.inr ⟨hileft, hright⟩⟩)
+      · exact Or.inr ⟨le_of_not_gt hright, hileft.le⟩
+  rcases exists_eq_succ_of_forall_mem_uIcc_neighbors hbetween with ⟨i, hi⟩
+  exact hne i hi
+
+/-- A cyclic real profile with no adjacent plateau has a plateau-aware local
+maximum or local minimum. -/
+theorem exists_discreteLocalExtremum_of_forall_ne_succ {n : ℕ} [NeZero n]
+    (hn : 2 ≤ n) {κ : ZMod n → ℝ} (hne : ∀ i : ZMod n, κ i ≠ κ (i + 1)) :
+    ∃ i : ZMod n, DiscreteLocalMax κ i ∨ DiscreteLocalMin κ i := by
+  rcases exists_strict_neighbor_extremum_of_forall_ne_succ (κ := κ) hne with
+    ⟨i, hpeak | hvalley⟩
+  · exact ⟨i, Or.inl (discreteLocalMax_of_neighbors hn hpeak.1 hpeak.2)⟩
+  · exact ⟨i, Or.inr (discreteLocalMin_of_neighbors hn hvalley.1 hvalley.2)⟩
+
 /-- A nonconstant cyclic profile has at least one strict adjacent increase. -/
 theorem exists_adjacent_lt_succ_of_not_constant {n : ℕ} [NeZero n]
     {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
