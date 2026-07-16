@@ -7489,6 +7489,19 @@ def DahlbergE2ConvexDfvRadiusSource : Prop :=
     (¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) →
     DahlbergE2ConvexDfvRadiusWitnesses v
 
+/-- Nonconcyclic spelling of Dahlberg's convex/CDFV radius-witness source.
+
+This is the closest current Lean interface to Dahlberg's Theorem 6/CDFV:
+a strictly convex, nonconcyclic polygon supplies the four extremal
+curvature-disk witnesses, recorded on the circle-radius profile. -/
+def DahlbergE2ConvexDfvRadiusNonconcyclicSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ Concyclic v) →
+    DahlbergE2ConvexDfvRadiusWitnesses v
+
 /-- Signed-Menger spelling of Dahlberg's convex/CDFV source.
 
 This is the theorem-level content of Dahlberg's strictly convex positive branch:
@@ -7535,6 +7548,64 @@ theorem dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource
   exact hsrc hn hsimple hregular horient
     (not_concyclic_of_not_constant_signedMengerProfile_positiveOrientation
       hsimple hnc horient)
+
+/-- The nonconstant radius-CDFV source implies the nonconcyclic spelling. -/
+theorem dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_radiusSource
+    (hsrc : DahlbergE2ConvexDfvRadiusSource) :
+    DahlbergE2ConvexDfvRadiusNonconcyclicSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle
+  letI : NeZero n := hne
+  exact hsrc hn hsimple hregular horient
+    (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
+      hsimple hregular horient hnoncircle)
+
+/-- The nonconcyclic radius-CDFV source implies the nonconstant spelling. -/
+theorem dahlbergE2ConvexDfvRadiusSource_of_nonconcyclicSource
+    (hsrc : DahlbergE2ConvexDfvRadiusNonconcyclicSource) :
+    DahlbergE2ConvexDfvRadiusSource := by
+  intro n hne hn v hsimple hregular horient hnc
+  letI : NeZero n := hne
+  exact hsrc hn hsimple hregular horient
+    (not_concyclic_of_not_constant_signedMengerProfile_positiveOrientation
+      hsimple hnc horient)
+
+/-- The nonconstant and nonconcyclic radius-CDFV source spellings are formally
+equivalent in the positive locally regular branch. -/
+theorem dahlbergE2ConvexDfvRadiusSource_iff_nonconcyclicSource :
+    DahlbergE2ConvexDfvRadiusSource ↔
+      DahlbergE2ConvexDfvRadiusNonconcyclicSource := by
+  constructor
+  · exact dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_radiusSource
+  · exact dahlbergE2ConvexDfvRadiusSource_of_nonconcyclicSource
+
+/-- The nonconcyclic radius-witness CDFV source implies the nonconcyclic
+signed-Menger spelling. -/
+theorem dahlbergE2ConvexDfvSignedNonconcyclicSource_of_radiusNonconcyclicSource
+    (hsrc : DahlbergE2ConvexDfvRadiusNonconcyclicSource) :
+    DahlbergE2ConvexDfvSignedNonconcyclicSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle
+  letI : NeZero n := hne
+  exact signedMengerProfile_dahlbergFourVertex_of_convexDfvRadiusWitnesses
+    hsimple horient (hsrc hn hsimple hregular horient hnoncircle)
+
+/-- The nonconcyclic signed-Menger CDFV source implies the nonconcyclic
+radius-witness spelling. -/
+theorem dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_signedNonconcyclicSource
+    (hsrc : DahlbergE2ConvexDfvSignedNonconcyclicSource) :
+    DahlbergE2ConvexDfvRadiusNonconcyclicSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle
+  letI : NeZero n := hne
+  exact convexDfvRadiusWitnesses_of_signedMengerProfile_dahlbergFourVertex
+    hsimple horient (hsrc hn hsimple hregular horient hnoncircle)
+
+/-- The nonconcyclic radius-witness and signed-Menger CDFV sources are formally
+equivalent in the positive-orientation branch. -/
+theorem dahlbergE2ConvexDfvRadiusNonconcyclicSource_iff_signedNonconcyclicSource :
+    DahlbergE2ConvexDfvRadiusNonconcyclicSource ↔
+      DahlbergE2ConvexDfvSignedNonconcyclicSource := by
+  constructor
+  · exact dahlbergE2ConvexDfvSignedNonconcyclicSource_of_radiusNonconcyclicSource
+  · exact dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_signedNonconcyclicSource
 
 /-- The nonconstant and nonconcyclic signed-CDFV source spellings are formally
 equivalent in the positive locally regular branch. -/
@@ -9030,19 +9101,26 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
-/-- Dahlberg's convex/CDFV signed-Menger nonconcyclic source gate.
+/-- Dahlberg's convex/CDFV radius-witness nonconcyclic source gate.
 
-Dahlberg's Theorem 6/CDFV supplies the plateau-aware four-vertex conclusion
-for the signed-Menger profile in the strictly convex positive-orientation
-branch.  This is the geometric paper-facing statement; the nonconstant-profile
-form is recovered formally below from the equivalence between nonconcyclicity
-and nonconstancy of signed Menger curvature in the positive-orientation branch.
+Dahlberg's Theorem 6/CDFV supplies the four extremal curvature-disk witnesses
+in the strictly convex positive-orientation branch.  This is the geometric
+paper-facing statement; signed-Menger forms are recovered formally below by
+reciprocal-radius monotonicity and the equivalence between nonconcyclicity and
+nonconstancy of signed Menger curvature in the positive-orientation branch.
 
 Reference source: Dahlberg, *A Discrete Four Vertex Theorem*,
 `references/23.pdf`, §3 Theorem 6 (CDFV). -/
+theorem dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate :
+    DahlbergE2ConvexDfvRadiusNonconcyclicSource := by
+  sorry
+
+/-- Dahlberg's convex/CDFV signed-Menger nonconcyclic source gate, recovered
+from the radius-witness CDFV source. -/
 theorem dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate :
     DahlbergE2ConvexDfvSignedNonconcyclicSource := by
-  sorry
+  exact dahlbergE2ConvexDfvSignedNonconcyclicSource_of_radiusNonconcyclicSource
+    dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate
 
 /-- Dahlberg's convex/CDFV signed-Menger source gate in nonconstant-profile
 form, recovered from the geometric nonconcyclic CDFV source.
