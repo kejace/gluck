@@ -1732,8 +1732,8 @@ theorem constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_kernel_of_sou
 
 /-- The source-parametrized positive-orientation conformal-Menger
 constant-or-Dahlberg kernel over `E²`, `S²`, and `H²`. -/
-theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
-    (hsrc : ForwardGeometricSources)
+theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
     {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
     (hdisk : ∀ i, ‖v i‖ < 1)
@@ -1745,18 +1745,52 @@ theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sourc
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
   rcases hε with hE | hrest
   · subst ε
-    exact constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_sources
+    exact constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
       hsrc hn v κ hsimple hregular (Or.inl horient) hκ
   · rcases hrest with hS | hH
     · subst ε
       exact constant_or_dahlbergFourVertex_spaceForm_kernel_of_forwardDfvSources
-        (forwardDfvGeometricSources_of_geometricSources hsrc)
-        (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple horient hregular hκ
+        hsrc (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple horient hregular hκ
         (by intro hlt; norm_num at hlt)
     · subst ε
       exact constant_or_dahlbergFourVertex_spaceForm_kernel_of_forwardDfvSources
-        (forwardDfvGeometricSources_of_geometricSources hsrc)
-        (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple horient hregular hκ hproper
+        hsrc (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple horient hregular hκ hproper
+
+/-- The source-parametrized positive-orientation conformal-Menger
+constant-or-Dahlberg kernel over `E²`, `S²`, and `H²`. -/
+theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
+    (hsrc : ForwardGeometricSources)
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_geometricSources hsrc)
+    hε hn v κ hdisk hsimple horient hregular hκ hproper
+
+/-- The source-parametrized positive-orientation conformal-Menger nonconstant
+Dahlberg kernel over `E²`, `S²`, and `H²`. -/
+theorem dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
+      hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper)
+    hnc
 
 /-- The source-parametrized positive-orientation conformal-Menger nonconstant
 Dahlberg kernel over `E²`, `S²`, and `H²`. -/
@@ -1772,10 +1806,9 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
     (hproper : ε < 0 → ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_of_constant_or_of_not_constant
-    (constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
-      hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper)
-    hnc
+  exact dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_geometricSources hsrc)
+    hε hn v κ hdisk hsimple horient hregular hκ hproper hnc
 
 /-- The source-parametrized negative-orientation conformal-Menger ordered-turn
 kernel, stated for the reflected profile `i ↦ -κ(-i)`. -/
