@@ -13,6 +13,67 @@ namespace Gluck.Forward
 
 open scoped Real
 
+/-- Uniform nonconstant ordered-turn source statement for the convex/coherent
+conformal-Menger discrete four-vertex package in `S²` (`ε = 1`) and `H²`
+(`ε = -1`). -/
+def SpaceFormDiscreteSource : Prop :=
+  ∀ {ε : ℝ}, ε = 1 ∨ ε = -1 →
+    ∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger ε v κ →
+        (ε < 0 → ∀ i, 1 < κ i) →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        OrderedAdjacentTurns κ
+
+/-- Model-specific nonconstant ordered-turn source statements for the
+convex/coherent conformal-Menger discrete four-vertex package in `S²` and `H²`.
+The hyperbolic component includes the proper-circle condition `κᵢ > 1`. -/
+def SpaceFormDiscreteModelSources : Prop :=
+  (∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger 1 v κ →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        OrderedAdjacentTurns κ) ∧
+  (∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger (-1) v κ →
+        (∀ i, 1 < κ i) →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        OrderedAdjacentTurns κ)
+
+/-- The uniform `ε ∈ {1,-1}` source is equivalent to the pair of model-specific
+`S²` and `H²` sources. -/
+theorem spaceFormDiscreteSource_iff_modelSources :
+    SpaceFormDiscreteSource ↔ SpaceFormDiscreteModelSources := by
+  constructor
+  · intro hsrc
+    constructor
+    · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hnc
+      exact hsrc (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
+        (by intro hlt; norm_num at hlt) hnc
+    · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
+      exact hsrc (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
+        (by intro _; exact hcircle) hnc
+  · intro hsrc ε hε n hne hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
+    rcases hε with hS | hH
+    · subst ε
+      exact hsrc.1 hn v κ hdisk hsimple hconvex hregular hκ hnc
+    · subst ε
+      exact hsrc.2 hn v κ hdisk hsimple hconvex hregular hκ
+        (hproper (by norm_num)) hnc
+
 /-- Uniform nonconstant ordered-turn geometric source theorem for the
 convex/coherent conformal-Menger discrete four-vertex package in `S²` (`ε = 1`)
 and `H²` (`ε = -1`).
@@ -33,6 +94,13 @@ theorem orderedAdjacentTurns_spaceForm_geometric_source {ε : ℝ}
     OrderedAdjacentTurns κ := by
   sorry
 
+/-- The current model-specific source package, obtained from the uniform
+source.  The converse direction is
+`spaceFormDiscreteSource_iff_modelSources.mpr`. -/
+theorem spaceFormDiscrete_model_sources : SpaceFormDiscreteModelSources := by
+  exact spaceFormDiscreteSource_iff_modelSources.mp
+    orderedAdjacentTurns_spaceForm_geometric_source
+
 /-- Spherical nonconstant ordered-turn geometric source theorem for the
 convex/coherent discrete four-vertex package in an open hemisphere.
 
@@ -48,9 +116,8 @@ theorem orderedAdjacentTurns_S2_geometric_source {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger 1 v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     OrderedAdjacentTurns κ := by
-  exact orderedAdjacentTurns_spaceForm_geometric_source
-    (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
-    (by intro hneg; norm_num at hneg) hnc
+  exact spaceFormDiscrete_model_sources.1
+    hn v κ hdisk hsimple hconvex hregular hκ hnc
 
 /-- Hyperbolic nonconstant ordered-turn geometric source theorem for
 Grant--Mogilski's convex coherent discrete four-vertex theorem in the
@@ -64,9 +131,8 @@ theorem orderedAdjacentTurns_H2_geometric_source {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     OrderedAdjacentTurns κ := by
-  exact orderedAdjacentTurns_spaceForm_geometric_source
-    (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
-    (by intro _; exact hcircle) hnc
+  exact spaceFormDiscrete_model_sources.2
+    hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
 
 /-- Spherical nonconstant source theorem for the convex/coherent discrete
 four-vertex package in an open hemisphere.
