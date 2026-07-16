@@ -965,7 +965,8 @@ theorem dahlbergFourVertex_spaceForm_source_of_forwardDfvSources
     (hproper : ε < 0 → ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact hsrc.2.1 hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
+  exact dahlbergFourVertex_spaceForm_of_dfvSource
+    hsrc.2.1 hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
 
 /-- The non-Euclidean discrete constant-or-D4VT endpoint from the weaker
 final-D4VT source package. -/
@@ -980,11 +981,8 @@ theorem constant_or_dahlbergFourVertex_spaceForm_kernel_of_forwardDfvSources
     (hκ : RealizesConformalMenger ε v κ)
     (hproper : ε < 0 → ∀ i, 1 < κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  by_cases hconst : ∃ c, ∀ i : ZMod n, κ i = c
-  · exact Or.inl hconst
-  · exact Or.inr
-      (dahlbergFourVertex_spaceForm_source_of_forwardDfvSources
-        hsrc hε hn v κ hdisk hsimple hconvex hregular hκ hproper hconst)
+  exact constant_or_dahlbergFourVertex_spaceForm_of_dfvSource
+    hsrc.2.1 hε hn v κ hdisk hsimple hconvex hregular hκ hproper
 
 /-- Spherical constant-or-Dahlberg theorem from the weaker final-D4VT source
 package. -/
