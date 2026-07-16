@@ -9,9 +9,12 @@ without moving existing declarations.
 2. General smooth four-vertex theorem.
 3. Dahlberg's discrete four-vertex theorem.
 
-The primary source for target 3 is `references/23.pdf`, B. E. J. Dahlberg,
-*A Discrete Four Vertex Theorem*.  The formal statement follows Theorem 1 and
-the definitions on pp. 1–3:
+The primary source for target 3 is B. E. J. Dahlberg, *A Discrete Four Vertex
+Theorem*.  The reference inventory records it as `references/23.pdf`; that PDF
+is not present in this checkout, so the local source of truth for page/section
+pointers is currently the `23.pdf` row and checkout note in
+`references/summary.md`.  The formal statement follows Theorem 1 and the
+definitions on pp. 1–3:
 
 - a counterclockwise simple closed polygon;
 - signed curvature `+1/R`, `−1/R`, or `0` from three consecutive vertices;
@@ -32,7 +35,8 @@ the converse project's level-window condition:
 
 The stronger E² geometric source gate for this chain is the package
 `DahlbergE2GeometricSources`, exposed by `dahlbergE2_geometric_sources`.  Its
-two components are exactly the external Dahlberg inputs from `references/23.pdf`:
+two components are exactly the external Dahlberg inputs from the discrete
+four-vertex paper:
 the Lemma 9 extraction of four ordered signed-Menger turns in the strictly
 convex same-orientation branch, and the final §4 non-strict disk-reduction
 construction.  This package is used for ordered-turn refinements.
