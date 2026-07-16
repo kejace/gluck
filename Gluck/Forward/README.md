@@ -130,7 +130,7 @@ primitive remaining-source audit is:
   - `spaceFormDiscrete_source_gate`.
 - `Gluck/Forward/Dahlberg.lean`
   - `dahlbergE2_lemma9_source_gate`;
-  - `dahlbergE2_disk_auxiliary_boundary_successor_rotated_construction_source_gate`.
+  - `dahlbergE2_disk_auxiliary_boundary_successor_rotated_bare_construction_source_gate`.
 
 The weak smooth and non-Euclidean final-D4VT gates are no longer primitive:
 `smoothForward_dfv_source_gate` is recovered from `smoothForward_source_gate`,
@@ -162,12 +162,14 @@ strong-to-weak implications.  The grouped component spellings are exposed as
 interfaces.  Its strict branch is currently gated at Dahlberg's Lemma 9:
 the signed-CDFV and witness-only Lemma 8 source components are recovered
 formally from `dahlbergE2_lemma9_source_gate`.  Its non-strict §4 branch is
-gated at the rotated centered normalized successor-interior interface
-`dahlbergE2_disk_auxiliary_boundary_successor_rotated_construction_source_gate`:
+gated at the bare rotated centered normalized successor-interior interface
+`dahlbergE2_disk_auxiliary_boundary_successor_rotated_bare_construction_source_gate`:
 after cyclic translation, the selected boundary vertex is `0`; after Euclidean
 translation, the minimal disk center is `0`; after Euclidean rotation, the
 boundary vertex satisfies `v 0 = (R : ℂ)`; and vertex `1` is strictly inside
-`Δ`.  Arbitrary centered boundary vertices and arbitrary disk centers are
+`Δ`.  The positive-radius fact is not a primitive input at this interface; it
+is supplied formally from minimality and simplicity where needed.  Arbitrary
+centered boundary vertices and arbitrary disk centers are
 recovered by direct-isometry transport for minimal disks, boundary incidence,
 simplicity, local regularity, non-strict orientation, concyclicity, and
 `DahlbergDiskAuxiliaryReduction`.  Arbitrary successor-interior cases are then

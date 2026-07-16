@@ -7513,6 +7513,24 @@ def DahlbergE2DiskAuxiliaryBoundarySuccessorRotatedConstructionSource : Prop :=
       dist 0 (v 1) < R →
       DahlbergDiskAuxiliaryReduction v
 
+/-- Rotated centered normalized source without an explicit radius-positivity
+hypothesis.
+
+The radius positivity is already a formal consequence of minimality and
+simplicity, so the paper-facing §4 construction does not need to assume it as
+an independent input. -/
+def DahlbergE2DiskAuxiliaryBoundarySuccessorRotatedBareConstructionSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    ∀ {R : ℝ},
+      MinimalEnclosingDiskR2 v 0 R →
+      v 0 = (R : ℂ) →
+      dist 0 (v 1) < R →
+      DahlbergDiskAuxiliaryReduction v
+
 /-- Pair-level source for Dahlberg's §4 auxiliary construction.
 
 This is sharper than `DahlbergE2DiskAuxiliaryBoundaryConstructionSource`: the
@@ -7906,6 +7924,16 @@ theorem dahlbergE2DiskAuxiliaryBoundarySuccessorMetricConstructionSource_of_norm
     (a := i)
     (hsrc hn hsimple' hregular' hnoncircle' hnonstrict' hΔ' hRpos
       hboundary' hnext')
+
+/-- The bare rotated normalized §4 auxiliary source implies the rotated source
+with an explicit radius-positivity assumption by forgetting that redundant
+input. -/
+theorem dahlbergE2DiskAuxiliaryBoundarySuccessorRotatedConstructionSource_of_bareSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundarySuccessorRotatedBareConstructionSource) :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorRotatedConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict R hΔ _hRpos hv0 hnext
+  letI : NeZero n := hne
+  exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext
 
 /-- The rotated normalized §4 auxiliary source implies the centered source by
 rotating the selected boundary vertex to the positive real radius point
@@ -8665,8 +8693,9 @@ theorem dahlbergE2RemainingSourceComponents_directIsometry
     (dahlbergE2DfvSourceComponents_of_remainingComponents hsrc)
     hu a hn hsimple hregular hnoncircle
 
-/-- Dahlberg's rotated centered normalized successor-interior auxiliary-polygon
-construction/transfer source gate for the §4 non-strict disk reduction.
+/-- Dahlberg's bare rotated centered normalized successor-interior
+auxiliary-polygon construction/transfer source gate for the §4 non-strict disk
+reduction.
 
 This is now the sharp paper-facing source gate for the §4 construction:
 after the finite minimal-disk setup, the proof uses the nonempty proper
@@ -8675,13 +8704,25 @@ selected boundary vertex is `0`, translates the Euclidean disk center to `0`,
 rotates the boundary vertex to the positive real point `(R : ℂ)`, assumes
 vertex `1` is strictly inside `Δ`, selects the corresponding complementary
 interval, and builds the auxiliary strictly convex polygon from the convex
-domain `U`.  Arbitrary centered boundary vertices are recovered formally by
-direct Euclidean rotation, arbitrary centers by direct Euclidean translation,
-arbitrary successor cases by cyclic translation, and predecessor cases by
-reversal. -/
+domain `U`.  The positive-radius fact is no longer an independent input; it is
+available formally from minimality and simplicity.  Arbitrary centered
+boundary vertices are recovered formally by direct Euclidean rotation,
+arbitrary centers by direct Euclidean translation, arbitrary successor cases by
+cyclic translation, and predecessor cases by reversal. -/
+theorem dahlbergE2_disk_auxiliary_boundary_successor_rotated_bare_construction_source_gate :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorRotatedBareConstructionSource := by
+  sorry
+
+/-- Dahlberg's rotated centered normalized successor-interior auxiliary-polygon
+construction/transfer source gate for the §4 non-strict disk reduction.
+
+This version retains the explicit positive-radius input expected by the
+existing reduction chain, but it is recovered from the sharper bare source
+above. -/
 theorem dahlbergE2_disk_auxiliary_boundary_successor_rotated_construction_source_gate :
     DahlbergE2DiskAuxiliaryBoundarySuccessorRotatedConstructionSource := by
-  sorry
+  exact dahlbergE2DiskAuxiliaryBoundarySuccessorRotatedConstructionSource_of_bareSource
+    dahlbergE2_disk_auxiliary_boundary_successor_rotated_bare_construction_source_gate
 
 /-- Dahlberg's centered normalized successor-interior auxiliary-polygon
 construction source for the §4 non-strict disk reduction, recovered from the
