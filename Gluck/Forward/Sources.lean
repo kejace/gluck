@@ -319,6 +319,33 @@ theorem forwardGeometricSources_of_remainingSources
   exact forwardGeometricSources_iff_atomicSources.mpr
     (forwardAtomicSources_of_remainingSources hsrc)
 
+/-- The bundled geometric source package implies the sharper remaining-source
+package by splitting the Euclidean Dahlberg component into its exact CDFV,
+Lemma 8, and boundary-level §4 source gates. -/
+theorem forwardRemainingSources_of_geometricSources
+    (hsrc : ForwardGeometricSources) :
+    ForwardRemainingSources := by
+  have hsmooth : SmoothForwardModelSources :=
+    smoothForwardSource_iff_modelSources.mp hsrc.1
+  have hdisc : SpaceFormDiscreteModelSources :=
+    spaceFormDiscreteSource_iff_modelSources.mp hsrc.2.1
+  have hconvex :
+      DahlbergE2ConvexRadiusSourceComponents :=
+    dahlbergE2ConvexRadiusSourceComponents_iff_convexRadiusSource.mpr hsrc.2.2.1
+  have hdisk :
+      DahlbergE2DiskAuxiliaryBoundaryConstructionSource :=
+    dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_diskReductionSource hsrc.2.2.2
+  exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
+    hdisc.1, hdisc.2, hconvex.1, hconvex.2, hdisk⟩
+
+/-- The bundled geometric source package is equivalent to the sharper
+remaining-source package. -/
+theorem forwardGeometricSources_iff_remainingSources :
+    ForwardGeometricSources ↔ ForwardRemainingSources := by
+  constructor
+  · exact forwardRemainingSources_of_geometricSources
+  · exact forwardGeometricSources_of_remainingSources
+
 /-- The sharper remaining-source package implies the weaker final-D4VT
 bundled source package. -/
 theorem forwardDfvGeometricSources_of_remainingSources
@@ -373,6 +400,29 @@ theorem forwardDfvGeometricSources_of_dfvRemainingSources
     ForwardDfvGeometricSources := by
   exact forwardDfvGeometricSources_iff_atomicSources.mpr
     (forwardDfvAtomicSources_of_dfvRemainingSources hsrc)
+
+/-- The bundled final-D4VT source package implies the sharper final-D4VT
+remaining-source package. -/
+theorem forwardDfvRemainingSources_of_dfvGeometricSources
+    (hsrc : ForwardDfvGeometricSources) :
+    ForwardDfvRemainingSources := by
+  have hsmooth : SmoothForwardDfvModelSources :=
+    smoothForwardDfvSource_iff_modelSources.mp hsrc.1
+  have hdisc : SpaceFormDiscreteDfvModelSources :=
+    spaceFormDiscreteDfvSource_iff_modelSources.mp hsrc.2.1
+  have hdisk :
+      DahlbergE2DiskAuxiliaryBoundaryConstructionSource :=
+    dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_diskReductionSource hsrc.2.2.2
+  exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
+    hdisc.1, hdisc.2, hsrc.2.2.1, hdisk⟩
+
+/-- The bundled final-D4VT source package is equivalent to the sharper
+final-D4VT remaining-source package. -/
+theorem forwardDfvGeometricSources_iff_dfvRemainingSources :
+    ForwardDfvGeometricSources ↔ ForwardDfvRemainingSources := by
+  constructor
+  · exact forwardDfvRemainingSources_of_dfvGeometricSources
+  · exact forwardDfvGeometricSources_of_dfvRemainingSources
 
 /-- Extract Dahlberg's `E²` CDFV radius-witness source from the sharper
 remaining-source package. -/
