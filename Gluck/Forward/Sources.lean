@@ -1015,10 +1015,11 @@ theorem orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_of_sourc
     (horient : PositivePolygonOrientation v)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
     OrderedAdjacentTurns (SignedMengerProfile v) := by
-  exact orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
-    hsimple horient
-    ((dahlbergE2_geometric_sources_of_sources hsrc).1
-      hn hsimple hregular horient hnc)
+  have hcomponents : ForwardRemainingSourceComponents :=
+    forwardRemainingSources_iff_components.mp
+      (forwardRemainingSources_of_geometricSources hsrc)
+  exact orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_remainingComponents
+    hcomponents.2.2 hn hsimple hregular horient hnc
 
 /-- The source-parametrized positive-orientation E² ordered-turn extraction is
 stable under direct Euclidean normalization. -/
@@ -1340,11 +1341,10 @@ theorem dahlberg_discrete_four_vertex_E2_directIsometry_of_sources
           (directIsometryR2 u a (v (i + 1)))) := by
   change DahlbergFourVertex
     (SignedMengerProfile (fun i => directIsometryR2 u a (v i)))
-  exact (dahlbergFourVertex_signedMengerProfile_directIsometry_iff hu a v).mpr
-    (signedMengerProfile_dahlbergFourVertex_E2_of_dfvSourceComponents
-      (dahlbergE2DfvSourceComponents_of_remainingSources
-        (forwardRemainingSources_of_geometricSources hsrc))
-      hn hsimple hregular hnoncircle)
+  exact signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvSourceComponents
+    (dahlbergE2DfvSourceComponents_of_remainingSources
+      (forwardRemainingSources_of_geometricSources hsrc))
+    hn hu a hsimple hregular hnoncircle
 
 /-- The source-parametrized E² Dahlberg conclusion from the weaker final-D4VT
 source package. -/
