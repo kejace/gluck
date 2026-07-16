@@ -9040,7 +9040,8 @@ recovered formally from this single ordered-turn source.
 
 Reference source: Dahlberg, *A Discrete Four Vertex Theorem*,
 `references/23.pdf`, §3 Theorem 6 (CDFV) and §4 Lemmas 8–9. -/
-axiom dahlbergE2_lemma9_source_gate : DahlbergE2Lemma9Source
+theorem dahlbergE2_lemma9_source_gate : DahlbergE2Lemma9Source := by
+  sorry
 
 /-- Dahlberg's exact signed-CDFV/Lemma 8 source components, recovered from the
 Lemma 9 source gate. -/
@@ -9903,8 +9904,9 @@ reversal.
 Reference source: Dahlberg, *A Discrete Four Vertex Theorem*,
 `references/23.pdf`, §4 proof of Theorem 1, especially the minimal-disk
 boundary reduction following Lemma 10. -/
-axiom dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate :
-    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
+theorem dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource := by
+  sorry
 
 /-- Dahlberg's bare rotated centered normalized successor-interior
 auxiliary-polygon construction source for the §4 non-strict disk reduction,

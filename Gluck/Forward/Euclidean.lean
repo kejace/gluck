@@ -19,9 +19,7 @@ theorem four_vertex_condition_E2_kernel {γ : ℝ → ℂ} {κ : ℝ → ℝ}
     (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
     Gluck.FourVertexCondition κ := by
-  exact four_vertex_condition_smooth_spaceForm_kernel
-    (ε := 0) (Or.inl rfl) hclosed
-    (by simpa [SmoothForwardRealizes] using hreal) hκ hper
+  exact four_vertex_condition_smooth_E2_kernel hclosed hreal hκ hper
 
 /-- The standard Euclidean smooth four-vertex theorem, stated in the
 value-separated form used by the converse development. -/
@@ -37,9 +35,7 @@ theorem four_vertex_E2 {γ : ℝ → ℂ} {κ : ℝ → ℝ}
     (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
     SmoothFourVertex κ := by
-  exact smoothFourVertex_spaceForm_kernel
-    (ε := 0) (Or.inl rfl) hclosed
-    (by simpa [SmoothForwardRealizes] using hreal) hκ hper
+  exact smoothFourVertex_E2_kernel hclosed hreal hκ hper
 
 /-- Nonconstant Euclidean smooth four-vertex theorem, stated in the
 value-separated form used by the converse development. -/
