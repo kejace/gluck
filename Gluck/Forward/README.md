@@ -123,7 +123,13 @@ is then recovered formally via the nonconstant-profile package
 The public Lemma 8 bridge
 `dahlbergE2_lemma8_radius_turn_bridge_from_witness_primitive_gate` is now
 recovered formally from the sharper strict previous-radius turn source via
-`positiveRadiusOrderedAdjacentTurns_of_edgePrev_strict_turns`.
+`positiveRadiusOrderedAdjacentTurns_of_edgePrev_strict_turns`.  The reverse
+conversion is also formalized as
+`edgePrev_strict_turns_of_positiveRadiusOrderedAdjacentTurns`, giving the
+source-level equivalence
+`dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_iff_strictPreviousRadiusTurnsSource`;
+the strict previous-radius source now has a direct-isometry transport theorem
+matching the older bridge source.
 The nonconstant and nonconcyclic Lemma 9 ordered-turn spellings,
 `dahlbergE2_lemma9_ordered_turn_source_gate` and
 `dahlbergE2_lemma9_ordered_turn_nonconcyclic_source_gate`, are recovered

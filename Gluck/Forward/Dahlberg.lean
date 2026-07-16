@@ -6596,6 +6596,58 @@ theorem positiveRadiusOrderedAdjacentTurns_of_edgePrev_strict_turns {n : ℕ}
   · simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
       hsimple horient (((i₄ : ZMod n) + 1)), add_assoc] using hmax₄_right
 
+/-- Dahlberg's positive-radius ordered-turn package is equivalent to the
+same eight inequalities stated only with the previous-radius profile.
+
+This is the reverse of
+`positiveRadiusOrderedAdjacentTurns_of_edgePrev_strict_turns`; it uses only
+the formal identity `EdgeNext i = EdgePrev (i + 1)` in the positive-orientation
+branch. -/
+theorem edgePrev_strict_turns_of_positiveRadiusOrderedAdjacentTurns {n : ℕ}
+    [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hturns : PositiveRadiusOrderedAdjacentTurns v) :
+    ∃ i₁ i₂ i₃ i₄ : ℕ,
+      i₁ < i₂ ∧ i₂ < i₃ ∧ i₃ < i₄ ∧ i₄ < i₁ + n ∧
+      EdgePrevCircleRadiusProfile v (((i₁ : ZMod n) + 1)) <
+        EdgePrevCircleRadiusProfile v (i₁ : ZMod n) ∧
+      EdgePrevCircleRadiusProfile v (((i₁ : ZMod n) + 1)) <
+        EdgePrevCircleRadiusProfile v ((((i₁ : ZMod n) + 1) + 1)) ∧
+      EdgePrevCircleRadiusProfile v (i₂ : ZMod n) <
+        EdgePrevCircleRadiusProfile v (((i₂ : ZMod n) + 1)) ∧
+      EdgePrevCircleRadiusProfile v ((((i₂ : ZMod n) + 1) + 1)) <
+        EdgePrevCircleRadiusProfile v (((i₂ : ZMod n) + 1)) ∧
+      EdgePrevCircleRadiusProfile v (((i₃ : ZMod n) + 1)) <
+        EdgePrevCircleRadiusProfile v (i₃ : ZMod n) ∧
+      EdgePrevCircleRadiusProfile v (((i₃ : ZMod n) + 1)) <
+        EdgePrevCircleRadiusProfile v ((((i₃ : ZMod n) + 1) + 1)) ∧
+      EdgePrevCircleRadiusProfile v (i₄ : ZMod n) <
+        EdgePrevCircleRadiusProfile v (((i₄ : ZMod n) + 1)) ∧
+      EdgePrevCircleRadiusProfile v ((((i₄ : ZMod n) + 1) + 1)) <
+        EdgePrevCircleRadiusProfile v (((i₄ : ZMod n) + 1)) := by
+  rcases hturns with
+    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
+      hmin₁_left, hmin₁_right, hmax₂_left, hmax₂_right,
+      hmin₃_left, hmin₃_right, hmax₄_left, hmax₄_right⟩
+  refine ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (i₁ : ZMod n)] using hmin₁_left
+  · simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (((i₁ : ZMod n) + 1)), add_assoc] using hmin₁_right
+  · simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (i₂ : ZMod n)] using hmax₂_left
+  · simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (((i₂ : ZMod n) + 1)), add_assoc] using hmax₂_right
+  · simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (i₃ : ZMod n)] using hmin₃_left
+  · simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (((i₃ : ZMod n) + 1)), add_assoc] using hmin₃_right
+  · simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (i₄ : ZMod n)] using hmax₄_left
+  · simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (((i₄ : ZMod n) + 1)), add_assoc] using hmax₄_right
+
 /-- Radius-profile form of the convex disk witnesses supplied by Dahlberg's
 convex discrete four-vertex theorem (Theorem 6/CDFV).
 
@@ -7901,6 +7953,20 @@ def DahlbergE2Lemma8StrictPreviousRadiusTurnsSource : Prop :=
       EdgePrevCircleRadiusProfile v ((((i₄ : ZMod n) + 1) + 1)) <
         EdgePrevCircleRadiusProfile v (((i₄ : ZMod n) + 1))
 
+/-- The public witness-only Lemma 8 radius-turn bridge implies the sharper
+previous-radius spelling.
+
+The proof is formal: after the bridge supplies `PositiveRadiusOrderedAdjacentTurns`,
+all `EdgeNext` occurrences are rewritten as shifted `EdgePrev` radii in the
+positive-orientation branch. -/
+theorem dahlbergE2Lemma8StrictPreviousRadiusTurnsSource_of_radiusTurnBridgeFromWitnessSource
+    (hsrc : DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource) :
+    DahlbergE2Lemma8StrictPreviousRadiusTurnsSource := by
+  intro n hne hn v hsimple hregular horient hwitness
+  letI : NeZero n := hne
+  exact edgePrev_strict_turns_of_positiveRadiusOrderedAdjacentTurns hsimple horient
+    (hsrc hn hsimple hregular horient hwitness)
+
 /-- The sharper strict-previous-radius Lemma 8 source implies the public
 radius-turn bridge. -/
 theorem dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_strictPreviousRadiusTurnsSource
@@ -7916,6 +7982,15 @@ theorem dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_strictPreviousRadiu
     hsimple horient hi₁₂ hi₂₃ hi₃₄ hi₄₁
     hmin₁_left hmin₁_right hmax₂_left hmax₂_right
     hmin₃_left hmin₃_right hmax₄_left hmax₄_right
+
+/-- The witness-only Lemma 8 bridge and the strict previous-radius spelling
+are formally equivalent. -/
+theorem dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_iff_strictPreviousRadiusTurnsSource :
+    DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ↔
+      DahlbergE2Lemma8StrictPreviousRadiusTurnsSource := by
+  constructor
+  · exact dahlbergE2Lemma8StrictPreviousRadiusTurnsSource_of_radiusTurnBridgeFromWitnessSource
+  · exact dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_strictPreviousRadiusTurnsSource
 
 /-- The witness-only Lemma 8 bridge implies the older bridge source with an
 explicit nonconstancy hypothesis. -/
@@ -8050,6 +8125,61 @@ theorem dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_directIsometry
   exact (positiveRadiusOrderedAdjacentTurns_directIsometry_iff hu a
     hsimple horient).mpr
     (hsrc hn hsimple₀ hregular₀ horient₀ hwitness₀)
+
+/-- The strict previous-radius Lemma 8 source can be applied after direct
+Euclidean normalization. -/
+theorem dahlbergE2Lemma8StrictPreviousRadiusTurnsSource_directIsometry
+    (hsrc : DahlbergE2Lemma8StrictPreviousRadiusTurnsSource)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (horient : PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)))
+    (hwitness :
+      DahlbergE2ConvexDfvRadiusWitnesses (fun i => directIsometryR2 u a (v i))) :
+    ∃ i₁ i₂ i₃ i₄ : ℕ,
+      i₁ < i₂ ∧ i₂ < i₃ ∧ i₃ < i₄ ∧ i₄ < i₁ + n ∧
+      EdgePrevCircleRadiusProfile (fun i => directIsometryR2 u a (v i))
+          (((i₁ : ZMod n) + 1)) <
+        EdgePrevCircleRadiusProfile (fun i => directIsometryR2 u a (v i))
+          (i₁ : ZMod n) ∧
+      EdgePrevCircleRadiusProfile (fun i => directIsometryR2 u a (v i))
+          (((i₁ : ZMod n) + 1)) <
+        EdgePrevCircleRadiusProfile (fun i => directIsometryR2 u a (v i))
+          ((((i₁ : ZMod n) + 1) + 1)) ∧
+      EdgePrevCircleRadiusProfile (fun i => directIsometryR2 u a (v i))
+          (i₂ : ZMod n) <
+        EdgePrevCircleRadiusProfile (fun i => directIsometryR2 u a (v i))
+          (((i₂ : ZMod n) + 1)) ∧
+      EdgePrevCircleRadiusProfile (fun i => directIsometryR2 u a (v i))
+          ((((i₂ : ZMod n) + 1) + 1)) <
+        EdgePrevCircleRadiusProfile (fun i => directIsometryR2 u a (v i))
+          (((i₂ : ZMod n) + 1)) ∧
+      EdgePrevCircleRadiusProfile (fun i => directIsometryR2 u a (v i))
+          (((i₃ : ZMod n) + 1)) <
+        EdgePrevCircleRadiusProfile (fun i => directIsometryR2 u a (v i))
+          (i₃ : ZMod n) ∧
+      EdgePrevCircleRadiusProfile (fun i => directIsometryR2 u a (v i))
+          (((i₃ : ZMod n) + 1)) <
+        EdgePrevCircleRadiusProfile (fun i => directIsometryR2 u a (v i))
+          ((((i₃ : ZMod n) + 1) + 1)) ∧
+      EdgePrevCircleRadiusProfile (fun i => directIsometryR2 u a (v i))
+          (i₄ : ZMod n) <
+        EdgePrevCircleRadiusProfile (fun i => directIsometryR2 u a (v i))
+          (((i₄ : ZMod n) + 1)) ∧
+      EdgePrevCircleRadiusProfile (fun i => directIsometryR2 u a (v i))
+          ((((i₄ : ZMod n) + 1) + 1)) <
+        EdgePrevCircleRadiusProfile (fun i => directIsometryR2 u a (v i))
+          (((i₄ : ZMod n) + 1)) := by
+  have hturns :
+      PositiveRadiusOrderedAdjacentTurns (fun i => directIsometryR2 u a (v i)) :=
+    dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_directIsometry
+      (dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_strictPreviousRadiusTurnsSource
+        hsrc)
+      hu a hn hsimple hregular horient hwitness
+  exact edgePrev_strict_turns_of_positiveRadiusOrderedAdjacentTurns hsimple horient
+    hturns
 
 /-- The two source components of Dahlberg's strictly convex positive branch:
 Theorem 6/CDFV gives radius witnesses, and Lemma 8 turns those witnesses into
