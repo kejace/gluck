@@ -1489,6 +1489,24 @@ theorem not_constant_neg_iff {n : ℕ} {κ : ZMod n → ℝ} :
       have hi := congrArg Neg.neg (hc i)
       simpa using hi⟩
 
+/-- A nonconstant cyclic real profile has a plateau-aware local minimum. -/
+theorem exists_discreteLocalMin_of_not_constant {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    ∃ i : ZMod n, DiscreteLocalMin κ i := by
+  have hneg : ¬ ∃ c, ∀ i : ZMod n, -κ i = c :=
+    not_constant_neg_iff.mpr hnc
+  rcases exists_discreteLocalMax_of_not_constant hneg with ⟨i, hmax⟩
+  exact ⟨i, discreteLocalMin_of_neg_localMax hmax⟩
+
+/-- A nonconstant cyclic real profile has both a plateau-aware local maximum
+and a plateau-aware local minimum. -/
+theorem exists_discreteLocalMax_and_min_of_not_constant {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    (∃ imax : ZMod n, DiscreteLocalMax κ imax) ∧
+      ∃ imin : ZMod n, DiscreteLocalMin κ imin := by
+  exact ⟨exists_discreteLocalMax_of_not_constant hnc,
+    exists_discreteLocalMin_of_not_constant hnc⟩
+
 /-- Positive affine changes preserve nonconstancy of cyclic profiles. -/
 theorem not_constant_posAffine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
     (ha : 0 < a) :
