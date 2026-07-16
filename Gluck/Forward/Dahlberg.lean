@@ -6986,6 +6986,49 @@ def DahlbergE2DiskAuxiliaryBoundaryConstructionSource : Prop :=
       DiskBoundaryIndices v O R ≠ Set.univ →
       DahlbergDiskAuxiliaryReduction v
 
+/-- Pair-level source for Dahlberg's §4 auxiliary construction.
+
+This is sharper than `DahlbergE2DiskAuxiliaryBoundaryConstructionSource`: the
+finite boundary-set facts have already been used to choose an explicit boundary
+vertex `i ∈ E` and an explicit complementary vertex `j ∉ E`. -/
+def DahlbergE2DiskAuxiliaryBoundaryPairConstructionSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    ∀ {O : ℂ} {R : ℝ},
+      MinimalEnclosingDiskR2 v O R →
+      0 < R →
+      ∀ {i j : ZMod n},
+        i ∈ DiskBoundaryIndices v O R →
+        j ∉ DiskBoundaryIndices v O R →
+        i ≠ j →
+        DahlbergDiskAuxiliaryReduction v
+
+/-- A pair-level §4 auxiliary construction source implies the boundary-set
+source by extracting one boundary vertex and one complementary vertex. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_pairSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundaryPairConstructionSource) :
+    DahlbergE2DiskAuxiliaryBoundaryConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict O R hΔ hRpos
+    hEnonempty hEproper
+  letI : NeZero n := hne
+  rcases hEnonempty with ⟨i, hi⟩
+  have hEcompl : ∃ j : ZMod n, j ∉ DiskBoundaryIndices v O R := by
+    by_contra hnone
+    apply hEproper
+    ext j
+    simp only [Set.mem_univ, iff_true]
+    by_contra hj
+    exact hnone ⟨j, hj⟩
+  rcases hEcompl with ⟨j, hj⟩
+  have hij : i ≠ j := by
+    intro h
+    subst j
+    exact hj hi
+  exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos hi hj hij
+
 /-- The boundary-set-level §4 auxiliary-construction source is compatible
 with direct Euclidean normalization. -/
 theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_directIsometry
@@ -7327,14 +7370,23 @@ theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_iff_diskReductionSourc
       (dahlbergE2DiskAuxiliaryConstructionSource_of_boundaryConstructionSource hsrc)
   · exact dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_diskReductionSource
 
+/-- Dahlberg's pair-level auxiliary-polygon construction/transfer source for
+the §4 non-strict disk reduction.  At this point the finite minimal-disk setup
+has been proved and unpacked, and the nonempty proper boundary set `E` has
+already supplied a boundary vertex `i ∈ E` and a complementary vertex `j ∉ E`.
+-/
+theorem dahlbergE2_disk_auxiliary_boundary_pair_construction_source :
+    DahlbergE2DiskAuxiliaryBoundaryPairConstructionSource := by
+  sorry
+
 /-- Dahlberg's boundary-set-level auxiliary-polygon construction/transfer
-source for the §4 non-strict disk reduction.  At this point the finite
-minimal-disk setup has been proved and unpacked: the remaining geometric input
-is the construction from a positive smallest disk and a nonempty proper
-boundary vertex set `E`. -/
+source for the §4 non-strict disk reduction, recovered from the sharper
+pair-level source by choosing one boundary vertex and one complementary
+vertex. -/
 theorem dahlbergE2_disk_auxiliary_boundary_construction_source :
     DahlbergE2DiskAuxiliaryBoundaryConstructionSource := by
-  sorry
+  exact dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_pairSource
+    dahlbergE2_disk_auxiliary_boundary_pair_construction_source
 
 /-- Dahlberg's auxiliary-polygon construction/transfer source for the §4
 non-strict disk reduction. -/
