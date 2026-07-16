@@ -9353,12 +9353,8 @@ theorem dahlbergE2_convex_radius_source_components :
 /-- Dahlberg's convex-radius Euclidean source for the positive-orientation
 branch of the discrete four-vertex paper. -/
 theorem dahlbergE2_convex_radius_source : DahlbergE2ConvexRadiusSource := by
-  intro n hne hn v hsimple hregular horient hnc
-  letI : NeZero n := hne
-  exact dahlbergE2_convex_radius_source_components.2
-    hn hsimple hregular horient hnc
-    (dahlbergE2_convex_radius_source_components.1
-      hn hsimple hregular horient hnc)
+  exact dahlbergE2ConvexRadiusWitnessSourceComponents_iff_convexRadiusSource.mp
+    dahlbergE2_convex_radius_witness_source_components_gate
 
 /-- Dahlberg's Euclidean Lemma 9 signed-Menger source, obtained from the
 radius-level convex source by reciprocal-radius monotonicity. -/
@@ -9855,8 +9851,9 @@ theorem orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_remainin
     (horient : PositivePolygonOrientation v)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
     OrderedAdjacentTurns (SignedMengerProfile v) := by
-  exact dahlbergE2Lemma9Source_of_signedComponents
-    ⟨hsrc.1, hsrc.2.1⟩ hn hsimple hregular horient hnc
+  exact dahlbergE2Lemma9Source_of_witnessComponents
+    ⟨dahlbergE2ConvexDfvRadiusSource_of_signedSource hsrc.1, hsrc.2.1⟩
+    hn hsimple hregular horient hnc
 
 /-- The exact remaining `E²` Dahlberg components imply the older bundled
 geometric source package. -/
@@ -9864,9 +9861,8 @@ theorem dahlbergE2GeometricSources_of_remainingComponents
     (hsrc : DahlbergE2RemainingSourceComponents) :
     DahlbergE2GeometricSources := by
   exact ⟨
-    dahlbergE2ConvexRadiusSource_of_components
-      ⟨dahlbergE2ConvexDfvRadiusSource_of_signedSource hsrc.1,
-        dahlbergE2Lemma8RadiusTurnBridgeSource_of_witnessSource hsrc.2.1⟩,
+    dahlbergE2ConvexRadiusWitnessSourceComponents_iff_convexRadiusSource.mp
+      ⟨dahlbergE2ConvexDfvRadiusSource_of_signedSource hsrc.1, hsrc.2.1⟩,
     dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mp
       hsrc.2.2⟩
 
@@ -9875,10 +9871,10 @@ remaining source components. -/
 theorem dahlbergE2RemainingSourceComponents_of_geometricSources
     (hsrc : DahlbergE2GeometricSources) :
     DahlbergE2RemainingSourceComponents := by
-  have hconvex : DahlbergE2ConvexRadiusSourceComponents :=
-    dahlbergE2ConvexRadiusSourceComponents_iff_convexRadiusSource.mpr hsrc.1
+  have hconvex : DahlbergE2ConvexRadiusWitnessSourceComponents :=
+    dahlbergE2ConvexRadiusWitnessSourceComponents_iff_convexRadiusSource.mpr hsrc.1
   exact ⟨dahlbergE2ConvexDfvSignedSource_of_radiusSource hconvex.1,
-    dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_source hconvex.2,
+    hconvex.2,
     dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mpr
       hsrc.2⟩
 
