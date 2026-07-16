@@ -7160,6 +7160,37 @@ theorem dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_directIsometry
     (hsrc hn hsimple₀ hregular₀ hnoncircle₀ hnonstrict₀ hΔ₀ hRpos
       hboundary₀ hinterior₀ hij hmax₀)
 
+/-- The boundary/interior §4 auxiliary-construction source is compatible with
+direct Euclidean normalization. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_directIsometry
+    (hsrc : DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (hnoncircle : ¬ Concyclic (fun i => directIsometryR2 u a (v i)))
+    (hnonstrict :
+      ¬ (PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)) ∨
+        NegativePolygonOrientation (fun i => directIsometryR2 u a (v i))))
+    {O' : ℂ} {R : ℝ}
+    (hΔ : MinimalEnclosingDiskR2 (fun i => directIsometryR2 u a (v i)) O' R)
+    {i j : ZMod n}
+    (hboundary : OnDiskBoundaryR2 (fun k => directIsometryR2 u a (v k)) O' R i)
+    (hinterior : dist O' (directIsometryR2 u a (v j)) < R)
+    (hij : i ≠ j) :
+    DahlbergDiskAuxiliaryReduction (fun i => directIsometryR2 u a (v i)) := by
+  have hRpos : 0 < R :=
+    radius_pos_of_minimalEnclosingDiskR2_of_isSimplePolygon hΔ hsimple
+  have hmax : ∀ k : ZMod n,
+      dist O' (directIsometryR2 u a (v k)) ≤
+        dist O' (directIsometryR2 u a (v i)) :=
+    fun k => dist_le_boundary_dist_of_minimalEnclosingDiskR2 hΔ hboundary
+  exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_directIsometry
+    (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_boundaryInteriorSource hsrc)
+    hu a hn hsimple hregular hnoncircle hnonstrict hΔ hRpos
+    hboundary hinterior hij hmax
+
 /-- The pair-level §4 auxiliary-construction source is compatible with direct
 Euclidean normalization. -/
 theorem dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_directIsometry
