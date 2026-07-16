@@ -6729,12 +6729,11 @@ theorem signedMengerProfile_dahlbergFourVertex_of_non_strict_dahlberg_disk_reduc
     (hnoncircle : ¬ Concyclic v)
     (hnonstrict : ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  rcases hsrc.2 hn hsimple hregular hnoncircle hnonstrict with
-    ⟨m, hne, w, hm, hsimplew, hregularw, horientw, hnoncirclew, htransfer⟩
-  letI : NeZero m := hne
-  exact htransfer
-    (signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concyclic_of_dfvSources
-      hsrc hm hsimplew hregularw horientw hnoncirclew)
+  exact dahlbergFourVertex_of_dahlbergDiskAuxiliaryReduction
+    (hsrc.2 hn hsimple hregular hnoncircle hnonstrict)
+    (fun hm hsimplew hregularw horientw hnoncirclew =>
+      signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concyclic_of_dfvSources
+        hsrc hm hsimplew hregularw horientw hnoncirclew)
 
 /-- Dahlberg's E² D4VT from the weaker final-D4VT source package. -/
 theorem signedMengerProfile_dahlbergFourVertex_E2_of_dfvSources
