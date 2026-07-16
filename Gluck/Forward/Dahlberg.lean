@@ -6826,6 +6826,41 @@ structure DahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate {n : ℕ}
   localMax₃ : DiscreteLocalMax (EdgePrevCircleRadiusProfile v) (disk.i₃ : ZMod n)
   localMin₄ : DiscreteLocalMin (EdgePrevCircleRadiusProfile v) (disk.i₄ : ZMod n)
 
+/-- Weak one-step radius inequalities formally forced by the four ordered
+curvature disks in Dahlberg's Theorem 6 / CDFV.
+
+The two containing disks give weak local-maximum inequalities; the two
+interior-missing disks give weak local-minimum inequalities.  The upgrade from
+these weak inequalities to plateau-aware local extrema is the remaining global
+cyclic/plateau extraction step in the paper. -/
+structure DahlbergE2Theorem6WeakRadiusExtremaForOrderedDiskCertificate {n : ℕ}
+    {v : ZMod n → ℂ} (disk : DahlbergE2Theorem6OrderedDiskCertificate v) :
+    Prop where
+  weakMax₁_left :
+    EdgePrevCircleRadiusProfile v ((disk.i₁ : ZMod n) - 1) ≤
+      EdgePrevCircleRadiusProfile v (disk.i₁ : ZMod n)
+  weakMax₁_right :
+    EdgePrevCircleRadiusProfile v ((disk.i₁ : ZMod n) + 1) ≤
+      EdgePrevCircleRadiusProfile v (disk.i₁ : ZMod n)
+  weakMin₂_left :
+    EdgePrevCircleRadiusProfile v (disk.i₂ : ZMod n) ≤
+      EdgePrevCircleRadiusProfile v ((disk.i₂ : ZMod n) - 1)
+  weakMin₂_right :
+    EdgePrevCircleRadiusProfile v (disk.i₂ : ZMod n) ≤
+      EdgePrevCircleRadiusProfile v ((disk.i₂ : ZMod n) + 1)
+  weakMax₃_left :
+    EdgePrevCircleRadiusProfile v ((disk.i₃ : ZMod n) - 1) ≤
+      EdgePrevCircleRadiusProfile v (disk.i₃ : ZMod n)
+  weakMax₃_right :
+    EdgePrevCircleRadiusProfile v ((disk.i₃ : ZMod n) + 1) ≤
+      EdgePrevCircleRadiusProfile v (disk.i₃ : ZMod n)
+  weakMin₄_left :
+    EdgePrevCircleRadiusProfile v (disk.i₄ : ZMod n) ≤
+      EdgePrevCircleRadiusProfile v ((disk.i₄ : ZMod n) - 1)
+  weakMin₄_right :
+    EdgePrevCircleRadiusProfile v (disk.i₄ : ZMod n) ≤
+      EdgePrevCircleRadiusProfile v ((disk.i₄ : ZMod n) + 1)
+
 /-- Boundary incidence for the four ordered curvature disks appearing in
 Dahlberg's Theorem 6 / CDFV.  Each curvature circle passes through the three
 vertices that define it. -/
@@ -7340,6 +7375,49 @@ theorem edgePrevCircleRadiusProfile_le_neighbors_of_interiorMissesAll_of_positiv
       hsimple hregular horient hmiss,
     edgePrevCircleRadiusProfile_le_succ_of_interiorMissesAll_of_positiveOrientation
       hsimple hregular horient hmiss⟩
+
+/-- Ordered CDFV disk data formally supplies the weak one-step radius
+inequalities around the four ordered disks. -/
+theorem dahlbergE2Theorem6WeakRadiusExtremaForOrderedDiskCertificate_of_orderedDiskCertificate
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (disk : DahlbergE2Theorem6OrderedDiskCertificate v) :
+    DahlbergE2Theorem6WeakRadiusExtremaForOrderedDiskCertificate disk := by
+  have hmax₁ :=
+    edgePrevCircleRadiusProfile_neighbors_le_of_containsAll_of_positiveOrientation
+      hsimple hregular horient disk.contains₁
+  have hmin₂ :=
+    edgePrevCircleRadiusProfile_le_neighbors_of_interiorMissesAll_of_positiveOrientation
+      hsimple hregular horient disk.misses₂
+  have hmax₃ :=
+    edgePrevCircleRadiusProfile_neighbors_le_of_containsAll_of_positiveOrientation
+      hsimple hregular horient disk.contains₃
+  have hmin₄ :=
+    edgePrevCircleRadiusProfile_le_neighbors_of_interiorMissesAll_of_positiveOrientation
+      hsimple hregular horient disk.misses₄
+  exact
+    { weakMax₁_left := hmax₁.1
+      weakMax₁_right := hmax₁.2
+      weakMin₂_left := hmin₂.1
+      weakMin₂_right := hmin₂.2
+      weakMax₃_left := hmax₃.1
+      weakMax₃_right := hmax₃.2
+      weakMin₄_left := hmin₄.1
+      weakMin₄_right := hmin₄.2 }
+
+/-- A geometric assembly certificate carries the formally proved weak
+one-step radius inequalities for its ordered disk data. -/
+theorem dahlbergE2Theorem6WeakRadiusExtremaForOrderedDiskCertificate_of_geometricAssemblyCertificate
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (cert : DahlbergE2Theorem6GeometricAssemblyCertificate v) :
+    DahlbergE2Theorem6WeakRadiusExtremaForOrderedDiskCertificate cert.disk :=
+  dahlbergE2Theorem6WeakRadiusExtremaForOrderedDiskCertificate_of_orderedDiskCertificate
+    hsimple hregular horient cert.disk
 
 /-- In the positive-orientation branch, signed Menger curvature is the
 reciprocal of the previous-vertex circle-radius profile. -/

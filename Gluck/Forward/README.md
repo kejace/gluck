@@ -114,8 +114,12 @@ paper-level components:
   radius-profile extrema
   (`DahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate`) and now carries
   the formal boundary-incidence certificate
-  (`DahlbergE2Theorem6OrderedDiskBoundaryIncidence`) for the defining triples;
-  it is formally equivalent to the ordered assembly interface via
+  (`DahlbergE2Theorem6OrderedDiskBoundaryIncidence`) for the defining triples.
+  The one-step weak max/min radius inequalities are now proved as
+  `DahlbergE2Theorem6WeakRadiusExtremaForOrderedDiskCertificate`; the remaining
+  §3 assembly content is the global cyclic/plateau upgrade to the
+  plateau-aware extrema certificate.  The geometric assembly interface is
+  formally equivalent to the ordered assembly interface via
   `dahlbergE2Theorem6OrderedAssemblySource_iff_geometricAssemblySource`;
 - `DahlbergE2Lemma8DiskNestingSource`: §4 Lemma 8's disk-nesting propagation,
   producing the named `DahlbergE2Lemma8DiskNestingCertificate`, i.e. the eight
@@ -243,4 +247,5 @@ formal proofs.  The relevant paper sources are:
   `DahlbergE2Theorem6GeometricAssemblySource`,
   `DahlbergE2Lemma8MonotoneArcExtractionSource`, and
   `DahlbergE2Section4AuxiliaryPolygonSource`; the local edge-region inclusion
-  in Lemma 8 is already formalized.
+  in Lemma 8 and the §3 one-step weak radius comparisons are already
+  formalized.
