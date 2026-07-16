@@ -2465,6 +2465,51 @@ theorem negativeOrientation_reverseCyclicPolygon_of_positiveOrientation {n : ℕ
     polygonCross_reverse_vertex (v := v) (-i)]
   exact neg_neg_of_pos (horient (-i))
 
+/-- If the reversed cyclic polygon is positively oriented, the original is
+negatively oriented. -/
+theorem negativeOrientation_of_positiveOrientation_reverseCyclicPolygon {n : ℕ}
+    {v : ZMod n → ℂ}
+    (horient : PositivePolygonOrientation (ReverseCyclicPolygon v)) :
+    NegativePolygonOrientation v := by
+  intro i
+  have hrev : 0 < Gluck.Discrete.crossR2 (v (i + 1)) (v i) (v (i - 1)) := by
+    have h := horient (-i)
+    change 0 < Gluck.Discrete.crossR2 (v (-(-i - 1))) (v (-(-i)))
+      (v (-(-i + 1))) at h
+    convert h using 1
+    abel_nf
+  rw [crossR2_reverse] at hrev
+  exact neg_pos.mp hrev
+
+/-- If the reversed cyclic polygon is negatively oriented, the original is
+positively oriented. -/
+theorem positiveOrientation_of_negativeOrientation_reverseCyclicPolygon {n : ℕ}
+    {v : ZMod n → ℂ}
+    (horient : NegativePolygonOrientation (ReverseCyclicPolygon v)) :
+    PositivePolygonOrientation v := by
+  intro i
+  have hrev : Gluck.Discrete.crossR2 (v (i + 1)) (v i) (v (i - 1)) < 0 := by
+    have h := horient (-i)
+    change Gluck.Discrete.crossR2 (v (-(-i - 1))) (v (-(-i)))
+      (v (-(-i + 1))) < 0 at h
+    convert h using 1
+    abel_nf
+  rw [crossR2_reverse] at hrev
+  linarith
+
+/-- Non-strict global orientation is invariant under reversing cyclic order. -/
+theorem not_strictPolygonOrientation_reverseCyclicPolygon {n : ℕ}
+    {v : ZMod n → ℂ}
+    (hnonstrict : ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) :
+    ¬ (PositivePolygonOrientation (ReverseCyclicPolygon v) ∨
+      NegativePolygonOrientation (ReverseCyclicPolygon v)) := by
+  intro horient
+  rcases horient with hpos | hneg
+  · exact hnonstrict
+      (Or.inr (negativeOrientation_of_positiveOrientation_reverseCyclicPolygon hpos))
+  · exact hnonstrict
+      (Or.inl (positiveOrientation_of_negativeOrientation_reverseCyclicPolygon hneg))
+
 /-- Reversing a strictly positively oriented conformal-Menger triple negates
 the realized curvature.  The noncollinearity hypothesis is essential because
 `ConformalMenger` chooses sign by `if 0 < cross then 1 else -1`. -/
@@ -2651,6 +2696,27 @@ theorem isSimplePolygon_reverseCyclicPolygon {n : ℕ} {v : ZMod n → ℂ}
       segment_symm ℝ (v (-j)) (v (-(j + 1)))]
     convert hsimple.2.2 (-(i + 1)) (-(j + 1)) hIJ hIJs hJIs using 1
     abel_nf
+
+/-- Reversing cyclic order preserves a chosen minimal enclosing disk exactly. -/
+theorem minimalEnclosingDiskR2_reverseCyclicPolygon_iff {n : ℕ}
+    {v : ZMod n → ℂ} {O : ℂ} {R : ℝ} :
+    MinimalEnclosingDiskR2 (ReverseCyclicPolygon v) O R ↔
+      MinimalEnclosingDiskR2 v O R := by
+  constructor
+  · intro hΔ
+    refine ⟨hΔ.1, ?_, ?_⟩
+    · intro i
+      simpa [ReverseCyclicPolygon] using hΔ.2.1 (-i)
+    · intro O' R' hR' hcontains
+      exact hΔ.2.2 O' R' hR' (fun i => by
+        simpa [ReverseCyclicPolygon] using hcontains (-i))
+  · intro hΔ
+    refine ⟨hΔ.1, ?_, ?_⟩
+    · intro i
+      simpa [ReverseCyclicPolygon] using hΔ.2.1 (-i)
+    · intro O' R' hR' hcontains
+      exact hΔ.2.2 O' R' hR' (fun i => by
+        simpa [ReverseCyclicPolygon] using hcontains (-i))
 
 /-- Positive oriented area at the actual vertex is positive over the outgoing
 edge with the previous vertex as third point. -/
@@ -6244,6 +6310,22 @@ theorem dahlbergDiskAuxiliaryReduction_directIsometry_iff {n : ℕ} [NeZero n]
         (htransfer hfv)⟩
   · exact dahlbergDiskAuxiliaryReduction_directIsometry hu a
 
+/-- If the reversed cyclic polygon has Dahlberg's auxiliary-reduction package,
+then so does the original polygon. -/
+theorem dahlbergDiskAuxiliaryReduction_of_reverseCyclicPolygon {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ}
+    (haux : DahlbergDiskAuxiliaryReduction (ReverseCyclicPolygon v)) :
+    DahlbergDiskAuxiliaryReduction v := by
+  rcases haux with
+    ⟨m, hne, w, hm, hsimple, hregular, horient, hnoncircle, htransfer⟩
+  exact ⟨m, hne, w, hm, hsimple, hregular, horient, hnoncircle, fun hfv => by
+    have hrev : DahlbergFourVertex (SignedMengerProfile (ReverseCyclicPolygon v)) :=
+      htransfer hfv
+    exact dahlbergFourVertex_of_neg_reflectIndex (κ := SignedMengerProfile v) (by
+      convert hrev using 1
+      ext i
+      exact (SignedMengerProfile_reverseCyclicPolygon v i).symm)⟩
+
 /-- Eliminate Dahlberg's auxiliary-reduction package using any strict
 oriented nonconcyclic auxiliary-polygon D4VT source. -/
 theorem dahlbergFourVertex_of_dahlbergDiskAuxiliaryReduction {n : ℕ} [NeZero n]
@@ -7203,6 +7285,27 @@ def DahlbergE2DiskAuxiliaryBoundaryMetricNeighborConstructionSource : Prop :=
         (dist O (v (i + 1)) < R ∨ dist O (v (i - 1)) < R) →
         DahlbergDiskAuxiliaryReduction v
 
+/-- One-sided metric boundary-neighbor source for Dahlberg's §4 auxiliary
+construction.
+
+By reversal symmetry it is enough to construct the auxiliary polygon when the
+successor of the selected boundary vertex is strictly inside the minimal disk;
+the predecessor-interior case is transported to this one by reversing cyclic
+order. -/
+def DahlbergE2DiskAuxiliaryBoundarySuccessorMetricConstructionSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    ∀ {O : ℂ} {R : ℝ},
+      MinimalEnclosingDiskR2 v O R →
+      0 < R →
+      ∀ {i : ZMod n},
+        OnDiskBoundaryR2 v O R i →
+        dist O (v (i + 1)) < R →
+        DahlbergDiskAuxiliaryReduction v
+
 /-- Pair-level source for Dahlberg's §4 auxiliary construction.
 
 This is sharper than `DahlbergE2DiskAuxiliaryBoundaryConstructionSource`: the
@@ -7527,6 +7630,43 @@ theorem dahlbergE2DiskAuxiliaryBoundaryNeighborConstructionSource_of_metricNeigh
         (fun hdist => hprev ((mem_diskBoundaryIndices).mpr hdist))
     exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos
       hboundary (Or.inr hprevInterior)
+
+/-- The one-sided successor-interior §4 source implies the two-sided
+metric-neighbor source.  The predecessor-interior case is obtained by applying
+the successor source to the reversed cyclic polygon and transporting the
+auxiliary-reduction package back. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryMetricNeighborConstructionSource_of_successorSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundarySuccessorMetricConstructionSource) :
+    DahlbergE2DiskAuxiliaryBoundaryMetricNeighborConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict O R hΔ hRpos i hboundary
+    hneighbor
+  letI : NeZero n := hne
+  rcases hneighbor with hnext | hprev
+  · exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos hboundary hnext
+  · have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
+      isSimplePolygon_reverseCyclicPolygon hsimple
+    have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
+      dahlbergRegular_reverseCyclicPolygon hregular
+    have hnoncircle' : ¬ Concyclic (ReverseCyclicPolygon v) := by
+      intro hcyc
+      exact hnoncircle (concyclic_reverseCyclicPolygon_iff.mp hcyc)
+    have hnonstrict' :
+        ¬ (PositivePolygonOrientation (ReverseCyclicPolygon v) ∨
+          NegativePolygonOrientation (ReverseCyclicPolygon v)) :=
+      not_strictPolygonOrientation_reverseCyclicPolygon hnonstrict
+    have hΔ' : MinimalEnclosingDiskR2 (ReverseCyclicPolygon v) O R :=
+      (minimalEnclosingDiskR2_reverseCyclicPolygon_iff).mpr hΔ
+    let j : ZMod n := -i
+    have hboundary' : OnDiskBoundaryR2 (ReverseCyclicPolygon v) O R j := by
+      simpa [OnDiskBoundaryR2, ReverseCyclicPolygon, j] using hboundary
+    have hnext' : dist O (ReverseCyclicPolygon v (j + 1)) < R := by
+      have hidx : -(j + 1) = i - 1 := by
+        dsimp [j]
+        abel
+      simpa [ReverseCyclicPolygon, hidx] using hprev
+    exact dahlbergDiskAuxiliaryReduction_of_reverseCyclicPolygon
+      (hsrc hn hsimple' hregular' hnoncircle' hnonstrict' hΔ' hRpos
+        hboundary' hnext')
 
 /-- A metric boundary-neighbor §4 source implies the setup-level auxiliary
 construction source directly, using the proved minimal-disk selection of a
@@ -8186,18 +8326,26 @@ theorem dahlbergE2RemainingSourceComponents_directIsometry
     (dahlbergE2DfvSourceComponents_of_remainingComponents hsrc)
     hu a hn hsimple hregular hnoncircle
 
-/-- Dahlberg's metric boundary-neighbor auxiliary-polygon construction/transfer
+/-- Dahlberg's one-sided successor-interior auxiliary-polygon construction/transfer
 source gate for the §4 non-strict disk reduction.
 
 This is now the sharp paper-facing source gate for the §4 construction: after
 the finite minimal-disk setup, the proof uses the nonempty proper boundary set
-`E = V(Γ) ∩ ∂Δ`, extracts a boundary vertex with a neighboring vertex outside
-`E`, converts that neighbor into a strict interior vertex of `Δ`, selects the
-corresponding complementary interval, and builds the auxiliary strictly convex
-polygon from the convex domain `U`. -/
+`E = V(Γ) ∩ ∂Δ`, extracts a boundary vertex whose successor is strictly inside
+`Δ`, selects the corresponding complementary interval, and builds the
+auxiliary strictly convex polygon from the convex domain `U`.  The predecessor
+case is recovered formally by reversing cyclic order. -/
+theorem dahlbergE2_disk_auxiliary_boundary_successor_metric_construction_source_gate :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorMetricConstructionSource := by
+  sorry
+
+/-- Dahlberg's two-sided metric boundary-neighbor auxiliary-polygon
+construction/transfer source for the §4 non-strict disk reduction, recovered
+from the one-sided successor-interior source by reversal symmetry. -/
 theorem dahlbergE2_disk_auxiliary_boundary_metric_neighbor_construction_source_gate :
     DahlbergE2DiskAuxiliaryBoundaryMetricNeighborConstructionSource := by
-  sorry
+  exact dahlbergE2DiskAuxiliaryBoundaryMetricNeighborConstructionSource_of_successorSource
+    dahlbergE2_disk_auxiliary_boundary_successor_metric_construction_source_gate
 
 /-- Dahlberg's boundary-neighbor auxiliary-polygon construction/transfer
 source for the §4 non-strict disk reduction, recovered from the metric
