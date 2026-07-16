@@ -256,6 +256,13 @@ def ForwardDfvRemainingSources : Prop :=
   DahlbergE2ConvexDfvSignedSource ∧
   DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource
 
+/-- After sharpening the `E²` non-strict component to the max/interior §4
+source, the fully expanded final-D4VT atomic package is exactly the remaining
+source package for final-D4VT endpoints. -/
+theorem forwardDfvAtomicSources_iff_dfvRemainingSources :
+    ForwardDfvAtomicSources ↔ ForwardDfvRemainingSources := by
+  rfl
+
 /-- The bundled uniform source package is equivalent to the model-specific
 source package. -/
 theorem forwardGeometricSources_iff_modelSources :
@@ -390,13 +397,19 @@ theorem forwardDfvRemainingSources_of_remainingSources
     exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
       (hdH hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc)
 
-/-- The final-D4VT remaining-source package implies the older fully expanded
+/-- The final-D4VT remaining-source package implies the fully expanded
 final-D4VT atomic source package. -/
 theorem forwardDfvAtomicSources_of_dfvRemainingSources
     (hsrc : ForwardDfvRemainingSources) :
     ForwardDfvAtomicSources := by
-  rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
-  exact ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
+  exact forwardDfvAtomicSources_iff_dfvRemainingSources.mpr hsrc
+
+/-- The fully expanded final-D4VT atomic source package implies the
+final-D4VT remaining-source package. -/
+theorem forwardDfvRemainingSources_of_dfvAtomicSources
+    (hsrc : ForwardDfvAtomicSources) :
+    ForwardDfvRemainingSources := by
+  exact forwardDfvAtomicSources_iff_dfvRemainingSources.mp hsrc
 
 /-- The final-D4VT remaining-source package implies the bundled final-D4VT
 geometric source package. -/
@@ -411,16 +424,8 @@ remaining-source package. -/
 theorem forwardDfvRemainingSources_of_dfvGeometricSources
     (hsrc : ForwardDfvGeometricSources) :
     ForwardDfvRemainingSources := by
-  have hsmooth : SmoothForwardDfvModelSources :=
-    smoothForwardDfvSource_iff_modelSources.mp hsrc.1
-  have hdisc : SpaceFormDiscreteDfvModelSources :=
-    spaceFormDiscreteDfvSource_iff_modelSources.mp hsrc.2.1
-  have hdisk :
-      DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource :=
-    dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSource
-      hsrc.2.2.2
-  exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
-    hdisc.1, hdisc.2, hsrc.2.2.1, hdisk⟩
+  exact forwardDfvRemainingSources_of_dfvAtomicSources
+    (forwardDfvGeometricSources_iff_atomicSources.mp hsrc)
 
 /-- The bundled final-D4VT source package is equivalent to the sharper
 final-D4VT remaining-source package. -/
