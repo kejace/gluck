@@ -598,8 +598,8 @@ remaining-source package by forgetting the Lemma 8 ordered-turn bridge. -/
 theorem dahlbergE2DfvSourceComponents_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     DahlbergE2DfvSourceComponents := by
-  exact dahlbergE2DfvSourceComponents_of_remainingComponents
-    (dahlbergE2RemainingSourceComponents_of_remainingSources hsrc)
+  exact dahlbergE2DfvSourceComponents_of_dfvRemainingSources
+    (forwardDfvRemainingSources_of_remainingSources hsrc)
 
 /-- Extract Dahlberg's `E²` CDFV radius-witness source from the sharper
 remaining-source package. -/
@@ -1017,9 +1017,11 @@ theorem signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyc
     (horient : PositivePolygonOrientation v)
     (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyclic_of_dfvSources
-    (dahlbergE2_dfv_geometric_sources_of_sources hsrc)
-    hn hsimple hregular horient hnoncircle
+  have hcomponents : DahlbergE2DfvSourceComponents :=
+    dahlbergE2DfvSourceComponents_of_remainingSources
+      (forwardRemainingSources_of_geometricSources hsrc)
+  exact dahlbergFourVertex_of_posOrientation_convexDfvSource
+    hcomponents.1 hn hsimple hregular horient hnoncircle
 
 /-- The source-parametrized negative-orientation E² Dahlberg conclusion after
 sign normalization. -/
@@ -1093,8 +1095,17 @@ theorem dahlbergDiskAuxiliaryReduction_of_non_strict_of_sources
     (hnoncircle : ¬ Concyclic v)
     (hnonstrict : ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) :
     DahlbergDiskAuxiliaryReduction v := by
-  exact (dahlbergE2_dfv_geometric_sources_of_sources hsrc).2
-    hn hsimple hregular hnoncircle hnonstrict
+  have hcomponents : DahlbergE2DfvSourceComponents :=
+    dahlbergE2DfvSourceComponents_of_remainingSources
+      (forwardRemainingSources_of_geometricSources hsrc)
+  rcases
+    dahlbergDiskReductionSetup_exists_boundary_max_and_interior
+      hsimple hnoncircle
+      (dahlbergE2_disk_reduction_setup_source
+        hn hsimple hregular hnoncircle hnonstrict) with
+    ⟨O, R, i, j, hΔ, _hRpos, hboundary, hinterior, hij, _hmax⟩
+  exact hcomponents.2 hn hsimple hregular hnoncircle hnonstrict
+    hΔ hboundary hinterior hij
 
 /-- The source-parametrized non-strict E² Dahlberg conclusion. -/
 theorem signedMengerProfile_dahlbergFourVertex_of_non_strict_dahlberg_disk_reduction_of_sources
@@ -1110,9 +1121,8 @@ theorem signedMengerProfile_dahlbergFourVertex_of_non_strict_dahlberg_disk_reduc
     ⟨m, hne, w, hm, hsimplew, hregularw, horientw, hnoncirclew, htransfer⟩
   letI : NeZero m := hne
   exact htransfer
-    (signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concyclic_of_dfvSources
-      (dahlbergE2_dfv_geometric_sources_of_sources hsrc)
-      hm hsimplew hregularw horientw hnoncirclew)
+    (signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concyclic_of_sources
+      hsrc hm hsimplew hregularw horientw hnoncirclew)
 
 /-- The source-parametrized E² Dahlberg conclusion. -/
 theorem signedMengerProfile_dahlbergFourVertex_E2_of_sources
@@ -1121,8 +1131,9 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_of_sources
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSources
-    (dahlbergE2_dfv_geometric_sources_of_sources hsrc)
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSourceComponents
+    (dahlbergE2DfvSourceComponents_of_remainingSources
+      (forwardRemainingSources_of_geometricSources hsrc))
     hn hsimple hregular hnoncircle
 
 /-- The source-parametrized E² discrete Dahlberg kernel. -/
@@ -1145,8 +1156,11 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_not_constant_strict_of_forward
     (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSources
-    (dahlbergE2_dfv_geometric_sources_of_dfvSources hsrc)
+  have hcomponents : ForwardDfvRemainingSourceComponents :=
+    forwardDfvRemainingSources_iff_components.mp
+      (forwardDfvRemainingSources_of_dfvGeometricSources hsrc)
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSourceComponents
+    hcomponents.2.2
     hn hsimple hregular
       (not_concyclic_of_not_constant_signedMengerProfile_strict_orientation
         hsimple hnc horient)
@@ -1296,10 +1310,11 @@ theorem dahlberg_discrete_four_vertex_E2_directIsometry_of_sources
           (directIsometryR2 u a (v (i + 1)))) := by
   change DahlbergFourVertex
     (SignedMengerProfile (fun i => directIsometryR2 u a (v i)))
-  exact signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvSources
-    (dahlbergE2_dfv_geometric_sources_of_dfvSources
-      (forwardDfvGeometricSources_of_geometricSources hsrc))
-    hn hu a hsimple hregular hnoncircle
+  exact (dahlbergFourVertex_signedMengerProfile_directIsometry_iff hu a v).mpr
+    (signedMengerProfile_dahlbergFourVertex_E2_of_dfvSourceComponents
+      (dahlbergE2DfvSourceComponents_of_remainingSources
+        (forwardRemainingSources_of_geometricSources hsrc))
+      hn hsimple hregular hnoncircle)
 
 /-- The source-parametrized E² Dahlberg conclusion from the weaker final-D4VT
 source package. -/
@@ -1350,9 +1365,13 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_forwardDfvSo
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex
       (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvSources
-    (dahlbergE2_dfv_geometric_sources_of_dfvSources hsrc)
-    hn hu a hsimple hregular hnoncircle
+  have hcomponents : ForwardDfvRemainingSourceComponents :=
+    forwardDfvRemainingSources_iff_components.mp
+      (forwardDfvRemainingSources_of_dfvGeometricSources hsrc)
+  exact (dahlbergFourVertex_signedMengerProfile_directIsometry_iff hu a v).mpr
+    (signedMengerProfile_dahlbergFourVertex_E2_of_dfvSourceComponents
+      hcomponents.2.2
+      hn hsimple hregular hnoncircle)
 
 /-- The source-parametrized public E² Dahlberg theorem for raw signed-Menger
 curvature is stable under direct Euclidean normalization from the weaker
