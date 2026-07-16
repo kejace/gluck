@@ -126,8 +126,10 @@ remaining-source audit is:
 
 - `Gluck/Forward/Smooth.lean`
   - `smoothForward_source_gate`.
+  - `smoothForward_dfv_source_gate`.
 - `Gluck/Forward/SpaceFormDiscrete.lean`
   - `spaceFormDiscrete_source_gate`.
+  - `spaceFormDiscrete_dfv_source_gate`.
 - `Gluck/Forward/Dahlberg.lean`
   - `dahlbergE2_convex_dfv_signed_source_gate`;
   - `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`;
@@ -138,10 +140,9 @@ stronger ordered-turn route, and `ForwardDfvRemainingSources`, for the final
 D4VT route.  `forward_remaining_sources` currently collects exactly the listed
 source gates.  `forward_dfv_remaining_sources` is collected through the weaker
 final-D4VT APIs, so it does not import the E² Lemma 8 ordered-turn source
-needed only by the stronger ordered-turn route.  Its non-Euclidean weak source
-is currently proved from `spaceFormDiscrete_source_gate`; a direct weak
-space-form D4VT proof can replace that later without changing the downstream
-API.  The grouped component spellings are exposed as
+needed only by the stronger ordered-turn route, nor the smooth
+value-separated or non-Euclidean ordered-turn source gates needed by stronger
+refinements.  The grouped component spellings are exposed as
 `forward_remaining_source_components` and
 `forward_dfv_remaining_source_components`, with component projections such as
 `smoothForwardModelSources_of_remainingSources`,
