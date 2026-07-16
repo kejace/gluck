@@ -7952,14 +7952,27 @@ theorem dahlbergE2RemainingSourceComponents_directIsometry
     (dahlbergE2DfvSourceComponents_of_remainingComponents hsrc)
     hu a hn hsimple hregular hnoncircle
 
+/-- Dahlberg's boundary-set auxiliary-polygon construction/transfer source
+gate for the §4 non-strict disk reduction.
+
+This is now the sharp paper-facing source gate for the §4 construction: after
+the finite minimal-disk setup, the proof uses the nonempty proper boundary set
+`E = V(Γ) ∩ ∂Δ`, proves it is disconnected, selects a complementary interval,
+and builds the auxiliary strictly convex polygon from the convex domain `U`. -/
+theorem dahlbergE2_disk_auxiliary_boundary_construction_source_gate :
+    DahlbergE2DiskAuxiliaryBoundaryConstructionSource := by
+  sorry
+
 /-- Dahlberg's boundary/interior auxiliary-polygon construction/transfer
-source for the §4 non-strict disk reduction.  At this point the finite
-minimal-disk setup and boundary-set extraction have already supplied the
-concrete data used in the paper: a minimal disk, a boundary vertex, and a
-strictly interior vertex. -/
+source for the §4 non-strict disk reduction, recovered from the sharper
+boundary-set source.  The boundary/interior interface is convenient for later
+direct-isometry and final-D4VT routing, but it is no longer the primitive §4
+source gate. -/
 theorem dahlbergE2_disk_auxiliary_boundary_interior_construction_source :
     DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource := by
-  sorry
+  exact
+    dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_boundaryConstructionSource
+      dahlbergE2_disk_auxiliary_boundary_construction_source_gate
 
 /-- Dahlberg's older metric-data auxiliary-polygon construction/transfer
 source for the §4 non-strict disk reduction, recovered from the sharper
@@ -7996,13 +8009,10 @@ theorem dahlbergE2_disk_auxiliary_boundary_pair_construction_source :
     dahlbergE2_disk_auxiliary_boundary_interior_construction_source
 
 /-- Dahlberg's boundary-set-level auxiliary-polygon construction/transfer
-source for the §4 non-strict disk reduction, recovered from the sharper
-pair-level source by choosing one boundary vertex and one complementary
-vertex. -/
+source for the §4 non-strict disk reduction. -/
 theorem dahlbergE2_disk_auxiliary_boundary_construction_source :
     DahlbergE2DiskAuxiliaryBoundaryConstructionSource := by
-  exact dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_pairSource
-    dahlbergE2_disk_auxiliary_boundary_pair_construction_source
+  exact dahlbergE2_disk_auxiliary_boundary_construction_source_gate
 
 /-- Dahlberg's auxiliary-polygon construction/transfer source for the §4
 non-strict disk reduction. -/

@@ -133,7 +133,7 @@ remaining-source audit is:
 - `Gluck/Forward/Dahlberg.lean`
   - `dahlbergE2_convex_dfv_signed_source_gate`;
   - `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`;
-  - `dahlbergE2_disk_auxiliary_boundary_interior_construction_source`.
+  - `dahlbergE2_disk_auxiliary_boundary_construction_source_gate`.
 
 The corresponding audit targets are `ForwardRemainingSources`, for the
 stronger ordered-turn route, and `ForwardDfvRemainingSources`, for the final
@@ -156,7 +156,11 @@ refinements.  The grouped component spellings are exposed as
 interfaces.  Its strict branch is split into the signed-CDFV gate
 `dahlbergE2_convex_dfv_signed_source_gate` and the Lemma 8 bridge gate
 `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`; Lemma 9 is
-then recovered formally from those two inputs.
+then recovered formally from those two inputs.  Its non-strict §4 branch is
+now gated at the boundary-set interface
+`dahlbergE2_disk_auxiliary_boundary_construction_source_gate`; the
+boundary/interior source used by direct-isometry and final-D4VT routing is
+recovered formally from that gate.
 Completing the forward program means replacing the listed gates by formal
 proofs.  It also exposes source-parametrized kernels such as
 `four_vertex_condition_smooth_spaceForm_kernel_of_sources`,
