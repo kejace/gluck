@@ -33,6 +33,22 @@ def SmoothForwardSource : Prop :=
       (¬ ∃ c, ∀ t, κ t = c) →
       Gluck.FourVertexCondition κ
 
+/-- Weaker uniform smooth forward source statement for the final smooth
+four-vertex endpoints.
+
+Unlike `SmoothForwardSource`, this only asks for the ordinary
+`SmoothFourVertex` conclusion, not the stronger value-separated
+`FourVertexCondition`. -/
+def SmoothForwardDfvSource : Prop :=
+  ∀ {ε : ℝ}, ε = 0 ∨ ε = 1 ∨ ε = -1 →
+    ∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      SmoothForwardRealizes ε γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      SmoothFourVertex κ
+
 /-- Model-specific nonconstant smooth forward four-vertex source statements
 for `E²`, `S²`, and `H²`. -/
 def SmoothForwardModelSources : Prop :=
@@ -57,6 +73,30 @@ def SmoothForwardModelSources : Prop :=
       Function.Periodic κ (2 * Real.pi) →
       (¬ ∃ c, ∀ t, κ t = c) →
       Gluck.FourVertexCondition κ)
+
+/-- Model-specific spelling of the weaker final smooth forward source package. -/
+def SmoothForwardDfvModelSources : Prop :=
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.RealizesCurvature γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      SmoothFourVertex κ) ∧
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes 1 γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      SmoothFourVertex κ) ∧
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes (-1) γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      SmoothFourVertex κ)
 
 /-- The uniform smooth source is equivalent to the three model-specific
 smooth sources. -/
@@ -86,6 +126,53 @@ theorem smoothForwardSource_iff_modelSources :
       · subst ε
         exact hsrc.2.2 hclosed
           (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+
+/-- The weaker uniform final smooth source is equivalent to its three
+model-specific components. -/
+theorem smoothForwardDfvSource_iff_modelSources :
+    SmoothForwardDfvSource ↔ SmoothForwardDfvModelSources := by
+  constructor
+  · intro hsrc
+    refine ⟨?_, ?_, ?_⟩
+    · intro γ κ hclosed hreal hκ hper hnc
+      exact hsrc (ε := 0) (Or.inl rfl) hclosed
+        (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+    · intro γ κ hclosed hreal hκ hper hnc
+      exact hsrc (ε := 1) (Or.inr (Or.inl rfl)) hclosed
+        (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+    · intro γ κ hclosed hreal hκ hper hnc
+      exact hsrc (ε := -1) (Or.inr (Or.inr rfl)) hclosed
+        (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+  · intro hsrc ε hε γ κ hclosed hreal hκ hper hnc
+    rcases hε with hE | hrest
+    · subst ε
+      exact hsrc.1 hclosed
+        (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+    · rcases hrest with hS | hH
+      · subst ε
+        exact hsrc.2.1 hclosed
+          (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+      · subst ε
+        exact hsrc.2.2 hclosed
+          (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+
+/-- The stronger value-separated smooth source implies the weaker final smooth
+source. -/
+theorem smoothForwardDfvSource_of_source
+    (hsrc : SmoothForwardSource) :
+    SmoothForwardDfvSource := by
+  intro ε hε γ κ hclosed hreal hκ hper hnc
+  exact smoothFourVertex_of_fourVertexCondition
+    (hsrc hε hclosed hreal hκ hper hnc)
+
+/-- The stronger model-specific smooth source package implies the weaker final
+model-specific smooth source package. -/
+theorem smoothForwardDfvModelSources_of_modelSources
+    (hsrc : SmoothForwardModelSources) :
+    SmoothForwardDfvModelSources := by
+  exact smoothForwardDfvSource_iff_modelSources.mp
+    (smoothForwardDfvSource_of_source
+      (smoothForwardSource_iff_modelSources.mpr hsrc))
 
 /-- Euclidean nonconstant smooth forward four-vertex geometric source gate. -/
 theorem four_vertex_condition_smooth_E2_nonconstant_source_gate

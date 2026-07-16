@@ -37,7 +37,7 @@ component: here it uses the paper-faithful final-D4VT package
 `DahlbergE2DfvGeometricSources`, not the stronger adjacent-turn package needed
 for the conformal-Menger ordered-turn refinements. -/
 def ForwardDfvGeometricSources : Prop :=
-  SmoothForwardSource ∧
+  SmoothForwardDfvSource ∧
   SpaceFormDiscreteDfvSource ∧
   DahlbergE2DfvGeometricSources
 
@@ -113,21 +113,21 @@ def ForwardDfvAtomicSources : Prop :=
       Continuous κ →
       Function.Periodic κ (2 * Real.pi) →
       (¬ ∃ c, ∀ t, κ t = c) →
-      Gluck.FourVertexCondition κ) ∧
+      SmoothFourVertex κ) ∧
   (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
       Gluck.IsSimpleClosed γ →
       Gluck.SpaceForm.Realizes 1 γ κ →
       Continuous κ →
       Function.Periodic κ (2 * Real.pi) →
       (¬ ∃ c, ∀ t, κ t = c) →
-      Gluck.FourVertexCondition κ) ∧
+      SmoothFourVertex κ) ∧
   (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
       Gluck.IsSimpleClosed γ →
       Gluck.SpaceForm.Realizes (-1) γ κ →
       Continuous κ →
       Function.Periodic κ (2 * Real.pi) →
       (¬ ∃ c, ∀ t, κ t = c) →
-      Gluck.FourVertexCondition κ) ∧
+      SmoothFourVertex κ) ∧
   (∀ {n : ℕ} [NeZero n], 4 ≤ n →
       ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
         (∀ i, ‖v i‖ < 1) →
@@ -217,21 +217,21 @@ def ForwardDfvRemainingSources : Prop :=
       Continuous κ →
       Function.Periodic κ (2 * Real.pi) →
       (¬ ∃ c, ∀ t, κ t = c) →
-      Gluck.FourVertexCondition κ) ∧
+      SmoothFourVertex κ) ∧
   (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
       Gluck.IsSimpleClosed γ →
       Gluck.SpaceForm.Realizes 1 γ κ →
       Continuous κ →
       Function.Periodic κ (2 * Real.pi) →
       (¬ ∃ c, ∀ t, κ t = c) →
-      Gluck.FourVertexCondition κ) ∧
+      SmoothFourVertex κ) ∧
   (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
       Gluck.IsSimpleClosed γ →
       Gluck.SpaceForm.Realizes (-1) γ κ →
       Continuous κ →
       Function.Periodic κ (2 * Real.pi) →
       (¬ ∃ c, ∀ t, κ t = c) →
-      Gluck.FourVertexCondition κ) ∧
+      SmoothFourVertex κ) ∧
   (∀ {n : ℕ} [NeZero n], 4 ≤ n →
       ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
         (∀ i, ‖v i‖ < 1) →
@@ -290,13 +290,13 @@ theorem forwardDfvGeometricSources_iff_atomicSources :
     ForwardDfvGeometricSources ↔ ForwardDfvAtomicSources := by
   constructor
   · intro hsrc
-    have hsmooth := smoothForwardSource_iff_modelSources.mp hsrc.1
+    have hsmooth := smoothForwardDfvSource_iff_modelSources.mp hsrc.1
     have hdisc := spaceFormDiscreteDfvSource_iff_modelSources.mp hsrc.2.1
     exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
       hdisc.1, hdisc.2, hsrc.2.2.1, hsrc.2.2.2⟩
   · intro hsrc
     rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
-    exact ⟨smoothForwardSource_iff_modelSources.mpr ⟨hE, hS, hH⟩,
+    exact ⟨smoothForwardDfvSource_iff_modelSources.mpr ⟨hE, hS, hH⟩,
       spaceFormDiscreteDfvSource_iff_modelSources.mpr ⟨hdS, hdH⟩, ⟨hC, hD⟩⟩
 
 /-- The sharper remaining-source package implies the older fully expanded
@@ -324,7 +324,8 @@ theorem forwardDfvGeometricSources_of_remainingSources
     ForwardDfvGeometricSources := by
   have hgeo : ForwardGeometricSources :=
     forwardGeometricSources_of_remainingSources hsrc
-  exact ⟨hgeo.1, spaceFormDiscreteDfvSource_of_source hgeo.2.1,
+  exact ⟨smoothForwardDfvSource_of_source hgeo.1,
+    spaceFormDiscreteDfvSource_of_source hgeo.2.1,
     dahlbergE2DfvGeometricSources_of_geometricSources hgeo.2.2⟩
 
 /-- The stronger remaining-source package implies the weaker final-D4VT
@@ -333,7 +334,16 @@ theorem forwardDfvRemainingSources_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     ForwardDfvRemainingSources := by
   rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hCDFV, _hL8, hD⟩
-  refine ⟨hE, hS, hH, ?_, ?_, hCDFV, hD⟩
+  refine ⟨?_, ?_, ?_, ?_, ?_, hCDFV, hD⟩
+  · intro γ κ hclosed hreal hκ hper hnc
+    exact smoothFourVertex_of_fourVertexCondition
+      (hE hclosed hreal hκ hper hnc)
+  · intro γ κ hclosed hreal hκ hper hnc
+    exact smoothFourVertex_of_fourVertexCondition
+      (hS hclosed hreal hκ hper hnc)
+  · intro γ κ hclosed hreal hκ hper hnc
+    exact smoothFourVertex_of_fourVertexCondition
+      (hH hclosed hreal hκ hper hnc)
   · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hnc
     letI : NeZero n := hne
     exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
@@ -528,7 +538,8 @@ theorem forwardDfvAtomicSources_of_atomicSources
   have hgeo : ForwardGeometricSources :=
     forwardGeometricSources_of_atomicSources hsrc
   exact forwardDfvAtomicSources_of_geometricSources
-    ⟨hgeo.1, spaceFormDiscreteDfvSource_of_source hgeo.2.1,
+    ⟨smoothForwardDfvSource_of_source hgeo.1,
+      spaceFormDiscreteDfvSource_of_source hgeo.2.1,
       dahlbergE2DfvGeometricSources_of_geometricSources hgeo.2.2⟩
 
 /-- Extract the smooth source component from a bundled forward source proof. -/
@@ -576,7 +587,8 @@ package. -/
 theorem forwardDfvGeometricSources_of_geometricSources
     (hsrc : ForwardGeometricSources) :
     ForwardDfvGeometricSources := by
-  exact ⟨hsrc.1, spaceFormDiscreteDfvSource_of_source hsrc.2.1,
+  exact ⟨smoothForwardDfvSource_of_source hsrc.1,
+    spaceFormDiscreteDfvSource_of_source hsrc.2.1,
     dahlbergE2DfvGeometricSources_of_geometricSources hsrc.2.2⟩
 
 /-- The source-parametrized positive-orientation E² Dahlberg ordered-turn
@@ -2264,14 +2276,17 @@ theorem forward_dfv_remaining_sources : ForwardDfvRemainingSources := by
   refine ⟨?_, ?_, ?_, ?_, ?_, dahlbergE2_convex_dfv_radius_source,
     dahlbergE2_disk_auxiliary_construction_source⟩
   · intro γ κ hclosed hreal hκ hper hnc
-    exact four_vertex_condition_smooth_E2_nonconstant_geometric_source
-      hclosed hreal hκ hper hnc
+    exact smoothFourVertex_of_fourVertexCondition
+      (four_vertex_condition_smooth_E2_nonconstant_geometric_source
+        hclosed hreal hκ hper hnc)
   · intro γ κ hclosed hreal hκ hper hnc
-    exact four_vertex_condition_smooth_S2_nonconstant_geometric_source
-      hclosed hreal hκ hper hnc
+    exact smoothFourVertex_of_fourVertexCondition
+      (four_vertex_condition_smooth_S2_nonconstant_geometric_source
+        hclosed hreal hκ hper hnc)
   · intro γ κ hclosed hreal hκ hper hnc
-    exact four_vertex_condition_smooth_H2_nonconstant_geometric_source
-      hclosed hreal hκ hper hnc
+    exact smoothFourVertex_of_fourVertexCondition
+      (four_vertex_condition_smooth_H2_nonconstant_geometric_source
+        hclosed hreal hκ hper hnc)
   · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hnc
     letI : NeZero n := hne
     exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
