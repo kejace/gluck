@@ -4419,6 +4419,18 @@ theorem constant_or_dahlbergFourVertex_spaceForm_kernel_of_dfvPrimitiveRemaining
     hε hn v κ hdisk hsimple hconvex hregular hκ hproper
 
 /-- The public E² Dahlberg theorem from the flattened primitive final-D4VT
+source-gate audit, stated for the signed-Menger profile. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveSourceComponents
+    (dahlbergE2DfvPrimitiveSourceComponents_of_dfvPrimitiveRemainingSources hsrc)
+    hn hsimple hregular hnoncircle
+
+/-- The public E² Dahlberg theorem from the flattened primitive final-D4VT
 source-gate audit. -/
 theorem dahlberg_discrete_four_vertex_E2_of_dfvPrimitiveRemainingSources
     (hsrc : ForwardDfvPrimitiveRemainingSources)
@@ -4427,9 +4439,42 @@ theorem dahlberg_discrete_four_vertex_E2_of_dfvPrimitiveRemainingSources
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex
       (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveSourceComponents
+  change DahlbergFourVertex (SignedMengerProfile v)
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveRemainingSources
+    hsrc hn hsimple hregular hnoncircle
+
+/-- The primitive-audit E² Dahlberg theorem is stable under direct Euclidean
+normalization. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {u : ℂ} (hu : ‖u‖ = 1)
+    (a : ℂ) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex
+      (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) := by
+  exact signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvPrimitiveSourceComponents
     (dahlbergE2DfvPrimitiveSourceComponents_of_dfvPrimitiveRemainingSources hsrc)
-    hn hsimple hregular hnoncircle
+    hn hu a hsimple hregular hnoncircle
+
+/-- The primitive-audit public E² Dahlberg theorem for raw signed-Menger
+curvature is stable under direct Euclidean normalization. -/
+theorem dahlberg_discrete_four_vertex_E2_directIsometry_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {u : ℂ} (hu : ‖u‖ = 1)
+    (a : ℂ) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex
+      (fun i =>
+        Gluck.Discrete.signedMengerR2
+          (directIsometryR2 u a (v (i - 1)))
+          (directIsometryR2 u a (v i))
+          (directIsometryR2 u a (v (i + 1)))) := by
+  change DahlbergFourVertex
+    (SignedMengerProfile (fun i => directIsometryR2 u a (v i)))
+  exact signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvPrimitiveRemainingSources
+    hsrc hn hu a hsimple hregular hnoncircle
 
 /-- The ordinary smooth space-form four-vertex endpoint from the flattened
 primitive final-D4VT source-gate audit. -/
