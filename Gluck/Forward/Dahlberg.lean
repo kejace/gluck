@@ -5399,6 +5399,18 @@ theorem orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacen
       hsimple horient ((i₄ : ZMod n) + 1) (by simpa [EdgePrevCircleRadiusProfile,
         EdgeNextCircleRadiusProfile] using hinc₄)⟩
 
+/-- Positive radius ordered turns imply Dahlberg's plateau-aware four-vertex
+conclusion for the signed-Menger profile. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_positiveRadiusOrderedAdjacentTurns
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hturns : PositiveRadiusOrderedAdjacentTurns v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
+      hsimple horient hturns)
+
 /-- Radius-level extraction in Dahlberg's positively oriented strictly-convex
 case with nonconstant signed-Menger profile.  This is the geometric content of
 Lemma 9 in `references/23.pdf`: Lemma 8 transfers the curvature-disk nesting to
@@ -5412,6 +5424,35 @@ theorem positiveRadiusOrderedAdjacentTurns_of_positiveOrientation_not_constant_s
     (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
     PositiveRadiusOrderedAdjacentTurns v := by
   sorry
+
+/-- Explicit existential spelling of
+`positiveRadiusOrderedAdjacentTurns_of_positiveOrientation_not_constant_source`. -/
+theorem exists_positiveRadiusOrderedAdjacentTurns_of_positiveOrientation_not_constant_source
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    ∃ i₁ i₂ i₃ i₄ : ℕ,
+      i₁ < i₂ ∧ i₂ < i₃ ∧ i₃ < i₄ ∧ i₄ < i₁ + n ∧
+      EdgeNextCircleRadiusProfile v (i₁ : ZMod n) <
+        EdgePrevCircleRadiusProfile v (i₁ : ZMod n) ∧
+      EdgePrevCircleRadiusProfile v (((i₁ : ZMod n) + 1)) <
+        EdgeNextCircleRadiusProfile v (((i₁ : ZMod n) + 1)) ∧
+      EdgePrevCircleRadiusProfile v (i₂ : ZMod n) <
+        EdgeNextCircleRadiusProfile v (i₂ : ZMod n) ∧
+      EdgeNextCircleRadiusProfile v (((i₂ : ZMod n) + 1)) <
+        EdgePrevCircleRadiusProfile v (((i₂ : ZMod n) + 1)) ∧
+      EdgeNextCircleRadiusProfile v (i₃ : ZMod n) <
+        EdgePrevCircleRadiusProfile v (i₃ : ZMod n) ∧
+      EdgePrevCircleRadiusProfile v (((i₃ : ZMod n) + 1)) <
+        EdgeNextCircleRadiusProfile v (((i₃ : ZMod n) + 1)) ∧
+      EdgePrevCircleRadiusProfile v (i₄ : ZMod n) <
+        EdgeNextCircleRadiusProfile v (i₄ : ZMod n) ∧
+      EdgeNextCircleRadiusProfile v (((i₄ : ZMod n) + 1)) <
+        EdgePrevCircleRadiusProfile v (((i₄ : ZMod n) + 1)) := by
+  exact positiveRadiusOrderedAdjacentTurns_of_positiveOrientation_not_constant_source
+    hn hsimple hregular horient hnc
 
 /-- The remaining ordered-turn extraction in Dahlberg's positively oriented
 strictly-convex case with nonconstant signed-Menger profile, corresponding to
@@ -5431,6 +5472,20 @@ theorem orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_not_cons
     OrderedAdjacentTurns (SignedMengerProfile v) := by
   exact orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
     hsimple horient
+    (positiveRadiusOrderedAdjacentTurns_of_positiveOrientation_not_constant_source
+      hn hsimple hregular horient hnc)
+
+/-- Positive-orientation nonconstant Dahlberg conclusion from the radius-level
+Lemma 9 source. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_constant_source
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact signedMengerProfile_dahlbergFourVertex_of_positiveRadiusOrderedAdjacentTurns
+    hn hsimple horient
     (positiveRadiusOrderedAdjacentTurns_of_positiveOrientation_not_constant_source
       hn hsimple hregular horient hnc)
 
