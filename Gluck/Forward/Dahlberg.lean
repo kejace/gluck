@@ -10339,29 +10339,35 @@ theorem dahlbergE2PrimitiveRemainingSourceComponents_directIsometry
   exact dahlbergE2DfvPrimitiveSourceComponents_directIsometry
     ⟨hsrc.1, hsrc.2.2⟩ hu a hn hsimple hregular hnoncircle
 
-/-- Dahlberg's broad non-strict §4 disk-reduction source gate.
+/-- Dahlberg's unit-radius rotated centered normalized successor-interior
+auxiliary-polygon construction/transfer source gate for the §4 non-strict disk
+reduction.
 
-This is the current primitive §4 paper input in its theorem-facing spelling:
-a non-strict locally regular nonconcyclic polygon admits an auxiliary
-strict-orientation polygon whose Dahlberg conclusion transfers back.  The
-normalized unit-disk successor source below is recovered formally from this
-source using the already-proved equivalence between the broad disk-reduction
-source and the normalized construction interface.
+This is the primitive remaining §4 paper input in its normalized geometric
+spelling: after translating, rotating, and scaling the minimal enclosing disk,
+we may assume the selected boundary vertex is `1 : ℂ` on the unit disk and its
+successor lies in the disk interior.  Dahlberg's construction then produces an
+auxiliary strict-orientation polygon whose four-vertex conclusion transfers
+back.
 
 Reference source: Dahlberg, *A Discrete Four Vertex Theorem*,
 `references/23.pdf`, §4 proof of Theorem 1, especially the minimal-disk
 boundary reduction following Lemma 10. -/
-theorem dahlbergE2_disk_reduction_geometric_source_gate :
-    DahlbergE2DiskReductionSource := by
-  sorry
-
-/-- Dahlberg's unit-radius rotated centered normalized successor-interior
-auxiliary-polygon construction/transfer source gate for the §4 non-strict disk
-reduction, recovered from the broad paper-facing disk-reduction source. -/
 theorem dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate :
     DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource := by
-  exact dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_diskReductionSource
-    dahlbergE2_disk_reduction_geometric_source_gate
+  sorry
+
+/-- Dahlberg's broad non-strict §4 disk-reduction source gate, recovered from
+the normalized unit-disk successor construction interface.
+
+The finite minimal-disk setup, boundary/interior normalization chain, and
+transport back to arbitrary Euclidean position are formalized above; the only
+remaining §4 source is
+`dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`. -/
+theorem dahlbergE2_disk_reduction_geometric_source_gate :
+    DahlbergE2DiskReductionSource := by
+  exact dahlbergE2DiskReductionSource_of_boundarySuccessorUnitConstructionSource
+    dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate
 
 /-- Dahlberg's bare rotated centered normalized successor-interior
 auxiliary-polygon construction source for the §4 non-strict disk reduction,
