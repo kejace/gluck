@@ -1377,6 +1377,31 @@ theorem normalizedClosedDisk_endpoints (a y : ℝ) :
   · change (-a : ℂ).re ^ 2 + (-a : ℂ).im ^ 2 - 2 * y * (-a : ℂ).im ≤ a ^ 2
     simp
 
+/-- The normalized algebraic closed disk is the metric closed disk with centre
+`normalizedCircleCenter y` and radius `normalizedCircleRadius a y`. -/
+theorem mem_normalizedClosedDisk_iff_dist_le (a y : ℝ) (z : ℂ) :
+    z ∈ normalizedClosedDisk a y ↔
+      dist (normalizedCircleCenter y) z ≤ normalizedCircleRadius a y := by
+  rw [dist_eq_norm]
+  unfold normalizedClosedDisk normalizedCircleCenter normalizedCircleRadius
+  have hnorm :
+      ‖({ re := 0, im := y } : ℂ) - z‖ ^ 2 =
+        z.re ^ 2 + z.im ^ 2 - 2 * y * z.im + y ^ 2 := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+    simp only [Complex.sub_re, Complex.sub_im]
+    ring
+  constructor
+  · intro h
+    change z.re ^ 2 + z.im ^ 2 - 2 * y * z.im ≤ a ^ 2 at h
+    apply (sq_le_sq₀ (norm_nonneg _) (Real.sqrt_nonneg _)).mp
+    rw [hnorm, Real.sq_sqrt (by positivity)]
+    nlinarith
+  · intro h
+    have hs := (sq_le_sq₀ (norm_nonneg _) (Real.sqrt_nonneg _)).mpr h
+    rw [hnorm, Real.sq_sqrt (by positivity)] at hs
+    change z.re ^ 2 + z.im ^ 2 - 2 * y * z.im ≤ a ^ 2
+    nlinarith
+
 /-- The noncollinear third point lies in the closed disk bounded by its
 normalized circumcircle. -/
 theorem normalizedCircumcenter_mem_closedDisk {a : ℝ} {z : ℂ} (hz : z.im ≠ 0) :
@@ -1526,6 +1551,36 @@ theorem edgeClosedDisk_endpoints {A B : ℂ} (hAB : A ≠ B) (y : ℝ) :
   · unfold edgeClosedDisk transportedClosedDisk directIsometryImage
     exact ⟨(chordHalfLength A B : ℂ), hnorm.1, by
       simpa [transportedChordRight] using he.2⟩
+
+/-- The transported edge closed disk is the metric closed disk with centre
+`edgeCircleCenter A B y` and radius `normalizedCircleRadius
+(chordHalfLength A B) y`. -/
+theorem mem_edgeClosedDisk_iff_dist_le {A B z : ℂ} (hAB : A ≠ B) (y : ℝ) :
+    z ∈ edgeClosedDisk A B y ↔
+      dist (edgeCircleCenter A B y) z ≤
+        normalizedCircleRadius (chordHalfLength A B) y := by
+  constructor
+  · intro hmem
+    unfold edgeClosedDisk transportedClosedDisk directIsometryImage at hmem
+    rcases hmem with ⟨z₀, hz₀, hzmap⟩
+    have hdist₀ :=
+      (mem_normalizedClosedDisk_iff_dist_le (chordHalfLength A B) y z₀).mp hz₀
+    rw [← hzmap]
+    simpa [edgeCircleCenter, transportedCircleCenter,
+      dist_directIsometryR2 (norm_chordUnit hAB)] using hdist₀
+  · intro hdist
+    have hdist₀ :
+        dist (normalizedCircleCenter y) (edgeCoordinates A B z) ≤
+          normalizedCircleRadius (chordHalfLength A B) y := by
+      have h := hdist
+      rw [← directIsometryR2_edgeCoordinates hAB z] at h
+      simpa [edgeCircleCenter, transportedCircleCenter,
+        dist_directIsometryR2 (norm_chordUnit hAB)] using h
+    unfold edgeClosedDisk transportedClosedDisk directIsometryImage
+    exact ⟨edgeCoordinates A B z,
+      (mem_normalizedClosedDisk_iff_dist_le (chordHalfLength A B) y
+        (edgeCoordinates A B z)).mpr hdist₀,
+      directIsometryR2_edgeCoordinates hAB z⟩
 
 /-- Every canonical edge half-plane contains both endpoints of the edge. -/
 theorem edgeHalfPlane_endpoints {A B : ℂ} (hAB : A ≠ B) :
@@ -6872,6 +6927,13 @@ noncomputable def EdgeNextCircleRadiusProfile {n : ℕ} (v : ZMod n → ℂ)
   normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
     (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1)))
 
+/-- Center of the circle through `v i, v (i+1), v (i+2)`, expressed over the
+outgoing edge `v i → v (i+1)`. -/
+noncomputable def EdgeNextCircleCenterProfile {n : ℕ} (v : ZMod n → ℂ)
+    (i : ZMod n) : ℂ :=
+  edgeCircleCenter (v i) (v (i + 1))
+    (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1)))
+
 /-- In a positively oriented simple polygon, the outgoing-edge next-radius
 profile is the previous-radius profile at the next vertex.  The two sides use
 different edge coordinates, so this is a genuine circumcircle-radius
@@ -6909,11 +6971,152 @@ theorem EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_posit
   simpa [EdgeNextCircleRadiusProfile, EdgePrevCircleRadiusProfile, A, B, C,
     sub_eq_add_neg, add_assoc] using hradius
 
+/-- In a positively oriented simple polygon, the outgoing-edge next-center is
+the previous-center at the next vertex. -/
+theorem EdgeNextCircleCenterProfile_eq_edgePrevCircleCenterProfile_succ_of_positiveOrientation
+    {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v) (i : ZMod n) :
+    EdgeNextCircleCenterProfile v i = EdgePrevCircleCenterProfile v (i + 1) := by
+  let A := v i
+  let B := v (i + 1)
+  let C := v (i + 1 + 1)
+  have hAB : A ≠ B := hsimple.1 i
+  have hBC : B ≠ C := by
+    simpa [A, B, C, add_assoc] using hsimple.1 (i + 1)
+  have hcross : 0 < Gluck.Discrete.crossR2 A B C := by
+    simpa [A, B, C, sub_eq_add_neg, add_assoc] using horient (i + 1)
+  have hcrossBC : Gluck.Discrete.crossR2 B C A ≠ 0 := by
+    rw [crossR2_cycle]
+    exact hcross.ne'
+  have hcircle₁ :
+      CircumcircleR2 A B C
+        (edgeCircleCenter A B (edgeCircumcenterParameter A B C))
+        (normalizedCircleRadius (chordHalfLength A B)
+          (edgeCircumcenterParameter A B C)) :=
+    circumcircleR2_edge_parameter hAB hcross.ne'
+  have hcircle₂ :
+      CircumcircleR2 B C A
+        (edgeCircleCenter B C (edgeCircumcenterParameter B C A))
+        (normalizedCircleRadius (chordHalfLength B C)
+          (edgeCircumcenterParameter B C A)) :=
+    circumcircleR2_edge_parameter hBC hcrossBC
+  have hcenter := (circumcircleR2_unique_of_cyclic_reorder hAB hcross.ne'
+    hcircle₁ hcircle₂).1
+  simpa [EdgeNextCircleCenterProfile, EdgePrevCircleCenterProfile, A, B, C,
+    sub_eq_add_neg, add_assoc] using hcenter
+
 /-- The previous-vertex circle-radius profile is positive on a simple polygon. -/
 theorem EdgePrevCircleRadiusProfile_pos {n : ℕ} {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v) (i : ZMod n) :
     0 < EdgePrevCircleRadiusProfile v i := by
   exact normalizedCircleRadius_pos (chordHalfLength_pos (hsimple.1 i)).ne' _
+
+/-- If the previous curvature disk at `i` contains the next-next vertex, then
+the next previous-radius is no larger than the radius at `i`. -/
+theorem edgePrevCircleRadiusProfile_succ_le_of_containsAll_of_positiveOrientation
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) {i : ZMod n}
+    (hcontains : EdgePrevCurvatureDiskContainsAll v i) :
+    EdgePrevCircleRadiusProfile v (i + 1) ≤ EdgePrevCircleRadiusProfile v i := by
+  have hAB : v i ≠ v (i + 1) := hsimple.1 i
+  have hcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    simpa [sub_eq_add_neg, add_assoc] using horient (i + 1)
+  obtain ⟨O, R, hcircle, hcone⟩ :=
+    dahlbergRegularAt_circle_of_cross_ne_zero_right
+      (by simpa using hregular (i + 1)) hcross.ne'
+  have hmem :
+      v (i + 1 + 1) ∈
+        edgeClosedDisk (v i) (v (i + 1))
+          (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1))) := by
+    refine (mem_edgeClosedDisk_iff_dist_le hAB
+      (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1)))).mpr ?_
+    simpa [InClosedDiskR2, EdgePrevCircleCenterProfile, EdgePrevCircleRadiusProfile] using
+      hcontains (i + 1 + 1)
+  have hleNext :
+      EdgeNextCircleRadiusProfile v i ≤ EdgePrevCircleRadiusProfile v i := by
+    simpa [EdgeNextCircleRadiusProfile, EdgePrevCircleRadiusProfile] using
+      (edgeRegularCircleRadius_le_of_mem_edgeClosedDisk_right
+        (A := v i) (B := v (i + 1)) (C := v (i + 1 + 1))
+        (O := O) (R := R)
+        hAB hcross hcircle hcone hmem)
+  calc
+    EdgePrevCircleRadiusProfile v (i + 1) = EdgeNextCircleRadiusProfile v i := by
+      exact (EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+        hsimple horient i).symm
+    _ ≤ EdgePrevCircleRadiusProfile v i := hleNext
+
+/-- If the previous curvature disk at `i` contains the previous-previous
+vertex, then the previous previous-radius is no larger than the radius at
+`i`. -/
+theorem edgePrevCircleRadiusProfile_pred_le_of_containsAll_of_positiveOrientation
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) {i : ZMod n}
+    (hcontains : EdgePrevCurvatureDiskContainsAll v i) :
+    EdgePrevCircleRadiusProfile v (i - 1) ≤ EdgePrevCircleRadiusProfile v i := by
+  have hAB : v (i - 1) ≠ v ((i - 1) + 1) := hsimple.1 (i - 1)
+  have hcross :
+      0 < Gluck.Discrete.crossR2 (v (i - 1)) (v ((i - 1) + 1))
+        (v ((i - 1) - 1)) :=
+    polygonEdgePrev_cross_pos_of_vertex_cross_pos (horient (i - 1))
+  obtain ⟨O, R, hcircle, hcone⟩ :=
+    dahlbergRegularAt_circle_of_cross_ne_zero (hregular (i - 1)) hcross.ne'
+  have hcenter :=
+    EdgeNextCircleCenterProfile_eq_edgePrevCircleCenterProfile_succ_of_positiveOrientation
+      hsimple horient (i - 1)
+  have hradius :=
+    EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (i - 1)
+  have hdist :
+      dist (EdgeNextCircleCenterProfile v (i - 1)) (v ((i - 1) - 1)) ≤
+        EdgeNextCircleRadiusProfile v (i - 1) := by
+    rw [hcenter, hradius]
+    simpa [InClosedDiskR2, sub_eq_add_neg, add_assoc] using hcontains ((i - 1) - 1)
+  have hmem :
+      v ((i - 1) - 1) ∈
+        edgeClosedDisk (v (i - 1)) (v ((i - 1) + 1))
+          (edgeCircumcenterParameter (v (i - 1)) (v ((i - 1) + 1))
+            (v ((i - 1) + 1 + 1))) := by
+    refine (mem_edgeClosedDisk_iff_dist_le hAB
+      (edgeCircumcenterParameter (v (i - 1)) (v ((i - 1) + 1))
+        (v ((i - 1) + 1 + 1)))).mpr ?_
+    simpa [EdgeNextCircleCenterProfile, EdgeNextCircleRadiusProfile,
+      sub_eq_add_neg, add_assoc] using hdist
+  have hlePrev :
+      EdgePrevCircleRadiusProfile v (i - 1) ≤ EdgeNextCircleRadiusProfile v (i - 1) := by
+    simpa [EdgePrevCircleRadiusProfile, EdgeNextCircleRadiusProfile,
+      sub_eq_add_neg, add_assoc] using
+      (edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
+        (A := v (i - 1)) (B := v ((i - 1) + 1)) (C := v ((i - 1) - 1))
+        (O := O) (R := R)
+        hAB hcross hcircle hcone hmem)
+  calc
+    EdgePrevCircleRadiusProfile v (i - 1) ≤ EdgeNextCircleRadiusProfile v (i - 1) :=
+      hlePrev
+    _ = EdgePrevCircleRadiusProfile v i := by
+      simpa [sub_eq_add_neg, add_assoc] using
+        EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+          hsimple horient (i - 1)
+
+/-- A containing previous-curvature disk gives both neighboring radius
+inequalities required for a local maximum candidate. -/
+theorem edgePrevCircleRadiusProfile_neighbors_le_of_containsAll_of_positiveOrientation
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) {i : ZMod n}
+    (hcontains : EdgePrevCurvatureDiskContainsAll v i) :
+    EdgePrevCircleRadiusProfile v (i - 1) ≤ EdgePrevCircleRadiusProfile v i ∧
+      EdgePrevCircleRadiusProfile v (i + 1) ≤ EdgePrevCircleRadiusProfile v i := by
+  exact ⟨
+    edgePrevCircleRadiusProfile_pred_le_of_containsAll_of_positiveOrientation
+      hsimple hregular horient hcontains,
+    edgePrevCircleRadiusProfile_succ_le_of_containsAll_of_positiveOrientation
+      hsimple hregular horient hcontains⟩
 
 /-- In the positive-orientation branch, signed Menger curvature is the
 reciprocal of the previous-vertex circle-radius profile. -/
