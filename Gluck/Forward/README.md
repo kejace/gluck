@@ -111,7 +111,11 @@ paper-level components:
   pairwise distinct curvature circles and radius-profile extrema;
 - `DahlbergE2Lemma8DiskNestingSource`: §4 Lemma 8's disk-nesting propagation,
   producing the named `DahlbergE2Lemma8DiskNestingCertificate`, i.e. the eight
-  ordered one-step previous-radius inequalities used by Lemma 9;
+  ordered one-step previous-radius inequalities used by Lemma 9.  The local
+  edge-region nesting part of Lemma 8 is already proved as
+  `dahlbergE2_lemma8_local_edge_nesting_source`; the remaining paper input is
+  the global monotone-arc extraction
+  `DahlbergE2Lemma8MonotoneArcExtractionSource`;
 - `DahlbergE2Section4AuxiliaryPolygonSource`: the final §4 normalized
   auxiliary-polygon construction/transfer, returning the named
   `DahlbergE2Section4AuxiliaryPolygonCertificate`.
@@ -121,6 +125,9 @@ The older compact source package `DahlbergE2PaperSourceComponents` and
 split package by `dahlbergE2PaperSourceComponents_of_paperTheoremSources`.
 The geometric CDFV certificate projects to the older radius-witness source via
 `dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_theorem6GeometricSource`.
+The current primitive discrete gate is the smaller
+`dahlbergE2_paper_remaining_theorem_sources_gate`; it no longer includes the
+local edge-region part of Lemma 8.
 
 Dahlberg's strict positive-orientation CDFV and Lemma 8 compatibility gates,
 `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate` and
@@ -211,7 +218,9 @@ formal proofs.  The relevant paper sources are:
   extrema with the two maxima value-separated above the two minima,
   `max(κ q₁, κ q₂) < min(κ p₁, κ p₂)`.
 - Dahlberg, *A Discrete Four Vertex Theorem* (`references/23.pdf`) for the
-  remaining discrete gate: §3 Theorem 6 (CDFV), §4 Lemma 8, and the §4 proof
-  of Theorem 1.  In Lean these are now named separately as
-  `DahlbergE2Theorem6CdfvSource`, `DahlbergE2Lemma8DiskNestingSource`, and
-  `DahlbergE2Section4AuxiliaryPolygonSource`.
+  remaining discrete gate: §3 Theorem 6 (CDFV), the global monotone-arc part
+  of §4 Lemma 8, and the §4 proof of Theorem 1.  In Lean these are now named
+  separately as `DahlbergE2Theorem6CdfvSource`,
+  `DahlbergE2Lemma8MonotoneArcExtractionSource`, and
+  `DahlbergE2Section4AuxiliaryPolygonSource`; the local edge-region inclusion
+  in Lemma 8 is already formalized.

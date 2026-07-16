@@ -8187,6 +8187,35 @@ def DahlbergE2Lemma8StrictPreviousRadiusTurnsSource : Prop :=
     DahlbergE2ConvexDfvRadiusWitnesses v →
     DahlbergE2Lemma8DiskNestingCertificate v
 
+/-- Local edge-region form of Dahlberg's Lemma 8.
+
+This is the already-formalized pointwise monotonicity
+`δ(Q,e) ⊆ δ(P,e)` along one oriented polygon edge, stated with the cyclic
+signed-Menger profile.  It is separate from the remaining global monotone-arc
+extraction from CDFV witnesses to the four ordered one-step radius turns. -/
+def DahlbergE2Lemma8LocalEdgeNestingSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    ∀ i : ZMod n,
+      SignedMengerProfile v i ≤ SignedMengerProfile v (i + 1) →
+      edgePointDahlbergRegion (v i) (v (i + 1)) (v (i + 1 + 1)) ⊆
+        edgePointDahlbergRegion (v i) (v (i + 1)) (v (i - 1))
+
+/-- The proved local edge-region part of Dahlberg's Lemma 8. -/
+theorem dahlbergE2_lemma8_local_edge_nesting_source :
+    DahlbergE2Lemma8LocalEdgeNestingSource := by
+  intro n hne v hsimple hregular i hκ
+  letI : NeZero n := hne
+  exact polygonEdgeDahlbergRegion_anti_of_endpoint_order hsimple hregular i
+    (by simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hκ)
+
+/-- The remaining global part of Lemma 8: applying the local nesting along the
+two monotone arcs supplied by the CDFV radius witnesses and extracting the
+ordered one-step previous-radius turns. -/
+def DahlbergE2Lemma8MonotoneArcExtractionSource : Prop :=
+  DahlbergE2Lemma8StrictPreviousRadiusTurnsSource
+
 /-- The public witness-only Lemma 8 radius-turn bridge implies the sharper
 previous-radius spelling.
 
@@ -9242,7 +9271,15 @@ Given the CDFV radius witnesses, Lemma 8 propagates the inclusions
 `δ(Q,e) ⊆ δ(P,e)` along the two monotone arcs and yields the four strict
 one-step previous-radius turns used by Lemma 9. -/
 def DahlbergE2Lemma8DiskNestingSource : Prop :=
-  DahlbergE2Lemma8StrictPreviousRadiusTurnsSource
+  DahlbergE2Lemma8LocalEdgeNestingSource ∧
+  DahlbergE2Lemma8MonotoneArcExtractionSource
+
+/-- The full Lemma 8 source package implies the strict previous-radius turn
+source used downstream. -/
+theorem dahlbergE2Lemma8StrictPreviousRadiusTurnsSource_of_diskNestingSource
+    (hsrc : DahlbergE2Lemma8DiskNestingSource) :
+    DahlbergE2Lemma8StrictPreviousRadiusTurnsSource := by
+  exact hsrc.2
 
 /-- Dahlberg's remaining §4 auxiliary-polygon construction source.
 
@@ -9309,6 +9346,28 @@ def DahlbergE2PaperTheoremSources : Prop :=
   DahlbergE2Lemma8DiskNestingSource ∧
   DahlbergE2Section4AuxiliaryPolygonSource
 
+/-- The actual remaining paper theorem sources after the local part of
+Dahlberg's Lemma 8 has been formalized:
+
+* Theorem 6 / CDFV;
+* the global monotone-arc extraction in Lemma 8;
+* the final §4 auxiliary-polygon construction.
+
+The pointwise edge-region nesting `δ(Q,e) ⊆ δ(P,e)` is supplied by
+`dahlbergE2_lemma8_local_edge_nesting_source`. -/
+def DahlbergE2PaperRemainingTheoremSources : Prop :=
+  DahlbergE2Theorem6CdfvSource ∧
+  DahlbergE2Lemma8MonotoneArcExtractionSource ∧
+  DahlbergE2Section4AuxiliaryPolygonSource
+
+/-- The smaller remaining paper sources imply the full paper-source package,
+because local Lemma 8 edge nesting is already proved. -/
+theorem dahlbergE2PaperTheoremSources_of_remainingTheoremSources
+    (hsrc : DahlbergE2PaperRemainingTheoremSources) :
+    DahlbergE2PaperTheoremSources := by
+  exact ⟨hsrc.1, ⟨dahlbergE2_lemma8_local_edge_nesting_source, hsrc.2.1⟩,
+    hsrc.2.2⟩
+
 /-- The paper theorem sources imply the current compact source surface. -/
 theorem dahlbergE2PaperSourceComponents_of_paperTheoremSources
     (hsrc : DahlbergE2PaperTheoremSources) :
@@ -9320,7 +9379,8 @@ theorem dahlbergE2PaperSourceComponents_of_paperTheoremSources
     dahlbergE2ConvexDfvSignedNonconcyclicSource_of_radiusNonconcyclicSource hradius
   have hbridge : DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource :=
     dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_strictPreviousRadiusTurnsSource
-      hlemma8
+      (dahlbergE2Lemma8StrictPreviousRadiusTurnsSource_of_diskNestingSource
+        hlemma8)
   have hlemma9 : DahlbergE2Lemma9Source :=
     dahlbergE2Lemma9Source_of_signedNonconcyclicComponents
       ⟨hsigned, hbridge⟩
@@ -10209,12 +10269,19 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
 /-- Dahlberg's current substantial paper-source gate.
 
 This is the only remaining primitive source gate for
-`Gluck/Forward/Dahlberg.lean`.  It is no longer an opaque all-purpose
-assumption: it is split into Theorem 6 / CDFV, Lemma 8 disk nesting, and the
-§4 auxiliary-polygon construction. -/
+`Gluck/Forward/Dahlberg.lean`.  Local Lemma 8 edge nesting is already proved;
+the remaining paper inputs are Theorem 6 / CDFV, Lemma 8's global monotone-arc
+extraction, and the §4 auxiliary-polygon construction. -/
+theorem dahlbergE2_paper_remaining_theorem_sources_gate :
+    DahlbergE2PaperRemainingTheoremSources := by
+  sorry
+
+/-- Full paper-source package recovered from the current smaller remaining
+source gate and the proved local Lemma 8 edge-nesting theorem. -/
 theorem dahlbergE2_paper_theorem_sources_gate :
     DahlbergE2PaperTheoremSources := by
-  sorry
+  exact dahlbergE2PaperTheoremSources_of_remainingTheoremSources
+    dahlbergE2_paper_remaining_theorem_sources_gate
 
 /-- The current full Dahlberg E² paper source package.
 
