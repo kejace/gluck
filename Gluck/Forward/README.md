@@ -129,7 +129,13 @@ Completing the current branch means replacing the three source gates above by
 formal proofs.  The relevant paper sources are:
 
 - Dahlberg, *The Converse of the Four Vertex Theorem* (`references/dahlberg.pdf`)
-  for the smooth classical forward theorem as quoted in the introduction.
+  for the smooth classical forward theorem as quoted in the introduction:
+  a nonconstant curvature profile has four cyclically ordered critical/local
+  extrema with the two maxima value-separated above the two minima,
+  `max(κ q₁, κ q₂) < min(κ p₁, κ p₂)`.
 - Dahlberg, *A Discrete Four Vertex Theorem* (`references/23.pdf`) for the
-  strict positive-orientation CDFV/Lemma 8 radius source package and the §4
-  auxiliary-polygon construction in the proof of Theorem 1.
+  strict positive-orientation source package: §3 Theorem 6 (CDFV) supplies the
+  nonconcyclic radius-witness conclusion, and §4 Lemma 8 supplies the
+  radius-turn bridge used in Lemma 9.  The same paper's §4 proof of Theorem 1
+  is the source for the normalized successor-interior auxiliary-polygon
+  construction gate.
