@@ -172,7 +172,11 @@ then recovered by orienting any crossing edge around its boundary endpoint.
 The older boundary-set source is recovered using the finite cyclic lemma
 `diskBoundaryIndices_exists_adjacent_transition`, and the boundary/interior
 source used by direct-isometry and final-D4VT routing is recovered formally
-from the boundary-set source.
+from the boundary-set source.  The setup-level auxiliary construction source
+routes directly through
+`dahlbergDiskReductionSetup_exists_boundary_adjacent_interior_of_nonconcyclic`,
+which selects the boundary vertex and adjacent strict interior neighbor from
+the minimal-disk setup.
 Completing the forward program means replacing the listed gates by formal
 proofs.  It also exposes source-parametrized kernels such as
 `four_vertex_condition_smooth_spaceForm_kernel_of_sources`,

@@ -6354,6 +6354,32 @@ theorem diskBoundaryIndices_exists_adjacent_transition {n : ℕ} [NeZero n]
   exact exists_mem_succ_not_mem_or_not_mem_succ_mem_of_nonempty_ne_univ
     (DiskBoundaryIndices v O R) hEnonempty hEproper
 
+/-- A nonempty proper boundary index set for an enclosing disk has a boundary
+vertex with a strictly interior cyclic neighbor.
+
+This is the metric form of the finite cyclic transition: nonmembership in
+`E = V(Γ) ∩ ∂Δ` is strict interiority because every vertex is contained in the
+chosen enclosing disk. -/
+theorem diskBoundaryIndices_exists_boundary_adjacent_interior {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
+    (hΔ : MinimalEnclosingDiskR2 v O R)
+    (hEnonempty : (DiskBoundaryIndices v O R).Nonempty)
+    (hEproper : DiskBoundaryIndices v O R ≠ Set.univ) :
+    ∃ i : ZMod n,
+      OnDiskBoundaryR2 v O R i ∧
+        (dist O (v (i + 1)) < R ∨ dist O (v (i - 1)) < R) := by
+  rcases diskBoundaryIndices_exists_adjacent_transition hEnonempty hEproper with
+    ⟨i, htransition⟩
+  rcases htransition with hforward | hbackward
+  · refine ⟨i, (mem_diskBoundaryIndices).mp hforward.1, Or.inl ?_⟩
+    exact lt_of_le_of_ne (hΔ.2.1 (i + 1))
+      (fun hdist => hforward.2 ((mem_diskBoundaryIndices).mpr hdist))
+  · refine ⟨i + 1, (mem_diskBoundaryIndices).mp hbackward.2, Or.inr ?_⟩
+    have hinterior : dist O (v i) < R := by
+      exact lt_of_le_of_ne (hΔ.2.1 i)
+        (fun hdist => hbackward.1 ((mem_diskBoundaryIndices).mpr hdist))
+    simpa [sub_eq_add_neg, add_assoc] using hinterior
+
 /-- Direct Euclidean isometries preserve Dahlberg's minimal-disk setup. -/
 theorem dahlbergDiskReductionSetup_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
     (w : ℂ) (v : ZMod n → ℂ) :
@@ -6501,6 +6527,24 @@ theorem dahlbergDiskReductionSetup_diskBoundaryIndices_nonempty_ne_univ_of_nonco
   have hjE : j ∈ DiskBoundaryIndices v O R := by
     simp [htop]
   exact hj hjE
+
+/-- In Dahlberg's nonconcyclic §4 branch, the chosen minimal disk has a
+boundary vertex with a strictly interior cyclic neighbor. -/
+theorem dahlbergDiskReductionSetup_exists_boundary_adjacent_interior_of_nonconcyclic
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hnoncircle : ¬ Concyclic v)
+    (hsetup : DahlbergDiskReductionSetup v) :
+    ∃ O R i, MinimalEnclosingDiskR2 v O R ∧ 0 < R ∧
+      OnDiskBoundaryR2 v O R i ∧
+      (dist O (v (i + 1)) < R ∨ dist O (v (i - 1)) < R) := by
+  rcases dahlbergDiskReductionSetup_diskBoundaryIndices_nonempty_ne_univ_of_nonconcyclic
+      hsimple hnoncircle hsetup with
+    ⟨O, R, hΔ, hRpos, hEnonempty, hEproper⟩
+  rcases diskBoundaryIndices_exists_boundary_adjacent_interior
+      hΔ hEnonempty hEproper with
+    ⟨i, hboundary, hadjacentInterior⟩
+  exact ⟨O, R, i, hΔ, hRpos, hboundary, hadjacentInterior⟩
 
 /-- Combined finite-disk data for Dahlberg's §4 nonconcyclic branch: a
 positive minimal disk, a boundary vertex realizing the maximal radius, and a
@@ -7484,6 +7528,21 @@ theorem dahlbergE2DiskAuxiliaryBoundaryNeighborConstructionSource_of_metricNeigh
     exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos
       hboundary (Or.inr hprevInterior)
 
+/-- A metric boundary-neighbor §4 source implies the setup-level auxiliary
+construction source directly, using the proved minimal-disk selection of a
+boundary vertex with a strictly interior cyclic neighbor. -/
+theorem dahlbergE2DiskAuxiliaryConstructionSource_of_metricNeighborSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundaryMetricNeighborConstructionSource) :
+    DahlbergE2DiskAuxiliaryConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict hsetup
+  letI : NeZero n := hne
+  rcases
+      dahlbergDiskReductionSetup_exists_boundary_adjacent_interior_of_nonconcyclic
+        hsimple hnoncircle hsetup with
+    ⟨O, R, i, hΔ, hRpos, hboundary, hadjacentInterior⟩
+  exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos
+    hboundary hadjacentInterior
+
 /-- The boundary-set-level §4 source implies the boundary/interior source:
 a boundary vertex and a strictly interior vertex are exactly the concrete
 nonempty/proper boundary-set data used at this stage of Dahlberg's proof. -/
@@ -8220,8 +8279,8 @@ theorem dahlbergE2_disk_auxiliary_boundary_construction_source :
 non-strict disk reduction. -/
 theorem dahlbergE2_disk_auxiliary_construction_source :
     DahlbergE2DiskAuxiliaryConstructionSource := by
-  exact dahlbergE2DiskAuxiliaryConstructionSource_of_boundaryConstructionSource
-    dahlbergE2_disk_auxiliary_boundary_construction_source
+  exact dahlbergE2DiskAuxiliaryConstructionSource_of_metricNeighborSource
+    dahlbergE2_disk_auxiliary_boundary_metric_neighbor_construction_source_gate
 
 /-- Dahlberg's source components for the §4 non-strict disk reduction:
 minimal-disk setup plus the auxiliary-polygon construction. -/
