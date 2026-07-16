@@ -11043,18 +11043,18 @@ theorem signedMengerProfile_dahlbergFourVertex_of_non_strict_dahlberg_disk_reduc
 strictly-convex auxiliary polygon used in the last part of §4 of Dahlberg's
 discrete four-vertex paper.
 
-For the final plateau-aware D4VT endpoint this routes through the weaker
-`DahlbergE2DfvGeometricSources` package: the strict branch needs only the
-signed-Menger D4VT source, while the non-strict branch uses the disk-reduction
-source.  Ordered-turn refinements remain routed through the stronger Lemma 9
-source above. -/
+For the final plateau-aware D4VT endpoint this routes through the primitive
+radius-CDFV/unit-§4 source package: the strict branch uses CDFV witnesses and
+the non-strict branch uses the normalized unit-disk construction source.
+Ordered-turn refinements remain routed through the stronger Lemma 9 source
+above. -/
 theorem signedMengerProfile_dahlbergFourVertex_of_dahlberg_disk_reduction
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSourceComponents
-    dahlbergE2_dfv_source_components hn hsimple hregular hnoncircle
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveSourceComponents
+    dahlbergE2_dfv_primitive_source_components hn hsimple hregular hnoncircle
 
 /-- Dahlberg's Euclidean source theorem: for a simple locally regular
 nonconcyclic polygon, the signed-Menger curvature profile has at least two
@@ -11085,8 +11085,8 @@ theorem signedMengerProfile_dahlbergFourVertex_of_not_concyclic {n : ℕ} [NeZer
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSourceComponents
-    dahlbergE2_dfv_source_components hn hsimple hregular hnoncircle
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveSourceComponents
+    dahlbergE2_dfv_primitive_source_components hn hsimple hregular hnoncircle
 
 /-- Dahlberg's Euclidean discrete four-vertex kernel.
 
