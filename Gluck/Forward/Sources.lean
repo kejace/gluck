@@ -1615,6 +1615,41 @@ theorem signedMengerProfile_constant_or_dahlbergFourVertex_E2_strict_of_sources
       (signedMengerProfile_dahlbergFourVertex_E2_not_constant_strict_of_sources
         hsrc hn v hsimple hregular horient hconst)
 
+/-- The strict-orientation `E²` signed-Menger theorem from the primitive
+final-D4VT source-gate audit. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_strict_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  have hcomponents :
+      DahlbergE2DfvPrimitiveSourceComponents :=
+    dahlbergE2DfvPrimitiveSourceComponents_of_dfvPrimitiveRemainingSources hsrc
+  exact dahlbergFourVertex_of_strictOrientation_convexDfvSource
+    (dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource hcomponents.1)
+    hn hsimple hregular horient
+    (not_concyclic_of_not_constant_signedMengerProfile_strict_orientation
+      hsimple hnc horient)
+
+/-- The strict-orientation `E²` constant-or-Dahlberg theorem for signed-Menger
+curvature from the primitive final-D4VT source-gate audit. -/
+theorem signedMengerProfile_constant_or_dahlbergFourVertex_E2_strict_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v) :
+    (∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) ∨
+      DahlbergFourVertex (SignedMengerProfile v) := by
+  by_cases hconst : ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c
+  · exact Or.inl hconst
+  · exact Or.inr
+      (signedMengerProfile_dahlbergFourVertex_E2_strict_of_dfvPrimitiveRemainingSources
+        hsrc hn v hsimple hregular horient hconst)
+
 /-- The source-parametrized strict-orientation E² discrete theorem for raw
 signed-Menger curvature. -/
 theorem dahlberg_discrete_four_vertex_E2_strict_of_forwardDfvSources
@@ -4591,9 +4626,16 @@ theorem
     (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
     (hκ : RealizesConformalMenger 0 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
-    hn v κ hsimple hregular horient hκ
+  exact constant_or_dahlbergFourVertex_of_eq_affine
+    (κ := SignedMengerProfile v) (μ := κ) (a := 1 / 2) (b := 0)
+    (by norm_num)
+    (by
+      intro i
+      simpa [add_zero] using
+        realizesConformalMenger_zero_eq_half_signedMengerProfile_of_strict_orientation
+          hsimple horient hκ i)
+    (signedMengerProfile_constant_or_dahlbergFourVertex_E2_strict_of_dfvPrimitiveRemainingSources
+      hsrc hn v hsimple hregular horient)
 
 /-- The exact public E² conformal-Menger nonconstant D4VT theorem at `ε = 0`
 from the flattened primitive final-D4VT source-gate audit. -/
@@ -4606,9 +4648,10 @@ theorem dahlbergFourVertex_E2_conformalMenger_zero_strict_of_dfvPrimitiveRemaini
     (hκ : RealizesConformalMenger 0 v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
-    hn v κ hsimple hregular horient hκ hnc
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_dfvPrimitiveRemainingSources
+      hsrc hn v κ hsimple hregular horient hκ)
+    hnc
 
 /-- The exact public E² conformal-Menger discrete theorem at `ε = 0`, in
 constant-or-Dahlberg form, from the flattened primitive final-D4VT source-gate
@@ -4621,9 +4664,9 @@ theorem dahlberg_discrete_four_vertex_E2_conformalMenger_zero_strict_of_dfvPrimi
     (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
     (hκ : RealizesConformalMenger 0 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact dahlberg_discrete_four_vertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
-    hn v κ hsimple hregular horient hκ
+  exact
+    constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_dfvPrimitiveRemainingSources
+      hsrc hn v κ hsimple hregular horient hκ
 
 /-- The S² positive-orientation constant-or-Dahlberg endpoint from the
 flattened primitive final-D4VT source-gate audit. -/
