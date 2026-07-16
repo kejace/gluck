@@ -1032,9 +1032,11 @@ theorem orderedAdjacentTurns_signedMengerProfile_directIsometry_of_sources
     (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
     OrderedAdjacentTurns
       (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) := by
-  exact orderedAdjacentTurns_signedMengerProfile_directIsometry_of_geometricSources
-    (dahlbergE2_geometric_sources_of_sources hsrc)
-    hn hu a hsimple hregular horient hnc
+  have hcomponents : ForwardRemainingSourceComponents :=
+    forwardRemainingSources_iff_components.mp
+      (forwardRemainingSources_of_geometricSources hsrc)
+  exact orderedAdjacentTurns_signedMengerProfile_directIsometry_of_remainingComponents
+    hcomponents.2.2 hn hu a hsimple hregular horient hnc
 
 /-- The source-parametrized positive-orientation E² Dahlberg conclusion. -/
 theorem signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyclic_of_sources
