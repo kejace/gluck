@@ -9532,6 +9532,34 @@ component is Dahlberg's theorem-level signed-Menger D4V conclusion. -/
 def DahlbergE2DfvGeometricSources : Prop :=
   DahlbergE2ConvexDfvSignedSource ∧ DahlbergE2DiskReductionSource
 
+/-- Sharper primitive strict-branch source components.
+
+This is the current paper-facing strict branch before the public Lemma 8
+bridge is formed: Theorem 6/CDFV gives the signed-Menger D4VT source, and
+Lemma 8 supplies the strict previous-radius one-step turns. -/
+def DahlbergE2PrimitiveStrictPreviousSourceComponents : Prop :=
+  DahlbergE2ConvexDfvSignedNonconcyclicSource ∧
+  DahlbergE2Lemma8StrictPreviousRadiusTurnsSource
+
+/-- The sharper strict-previous primitive branch implies the older
+signed-CDFV/Lemma 8 strict branch by forming the public Lemma 8 bridge from
+the eight previous-radius inequalities. -/
+theorem dahlbergE2ConvexSignedNonconcyclicSourceComponents_of_strictPreviousComponents
+    (hsrc : DahlbergE2PrimitiveStrictPreviousSourceComponents) :
+    DahlbergE2ConvexSignedNonconcyclicSourceComponents := by
+  exact ⟨hsrc.1,
+    dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_strictPreviousRadiusTurnsSource
+      hsrc.2⟩
+
+/-- The sharper strict-previous primitive branch implies Dahlberg's Lemma 9
+ordered-turn source. -/
+theorem dahlbergE2Lemma9Source_of_strictPreviousComponents
+    (hsrc : DahlbergE2PrimitiveStrictPreviousSourceComponents) :
+    DahlbergE2Lemma9Source := by
+  exact dahlbergE2Lemma9Source_of_signedNonconcyclicComponents
+    (dahlbergE2ConvexSignedNonconcyclicSourceComponents_of_strictPreviousComponents
+      hsrc)
+
 /-- The strong Dahlberg E² source package is compatible with direct Euclidean
 normalization in both its radius-turn strict branch and its non-strict
 disk-reduction branch. -/
@@ -9607,14 +9635,29 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
-/-- Dahlberg's strict positive-orientation CDFV radius-witness source gate.
+/-- Dahlberg's strict positive-orientation CDFV signed-Menger source gate.
 
-This is the first primitive strict-branch paper input: Dahlberg's Theorem
-6/CDFV supplies the radius-witness four-vertex package in nonconcyclic
-geometric form. -/
+This is the first primitive strict-branch paper input for the final D4VT
+route: Dahlberg's Theorem 6/CDFV supplies the plateau-aware four-vertex
+conclusion for signed Menger curvature in the nonconcyclic strictly-convex
+positive-orientation branch.
+
+The radius-profile witness spelling needed by the ordered-turn refinement is
+recovered formally below by reciprocal-radius monotonicity. -/
+theorem dahlbergE2_convex_dfv_signed_nonconcyclic_primitive_source_gate :
+    DahlbergE2ConvexDfvSignedNonconcyclicSource := by
+  sorry
+
+/-- Dahlberg's strict positive-orientation CDFV radius-witness source gate,
+recovered from the signed-Menger CDFV primitive.
+
+The conversion is formal in the positive-orientation branch: signed Menger
+curvature is the reciprocal of the previous-edge circle radius, so Dahlberg
+four-vertex witnesses transport between the signed-Menger and radius profiles. -/
 theorem dahlbergE2_convex_dfv_radius_nonconcyclic_primitive_source_gate :
     DahlbergE2ConvexDfvRadiusNonconcyclicSource := by
-  sorry
+  exact dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_signedNonconcyclicSource
+    dahlbergE2_convex_dfv_signed_nonconcyclic_primitive_source_gate
 
 /-- Dahlberg's strict positive-orientation Lemma 8 strict previous-radius turn
 source gate.
@@ -9632,6 +9675,14 @@ theorem dahlbergE2_lemma8_radius_turn_bridge_from_witness_primitive_gate :
     DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource := by
   exact dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_strictPreviousRadiusTurnsSource
     dahlbergE2_lemma8_strict_previous_radius_turns_primitive_gate
+
+/-- Dahlberg's strict positive-orientation primitive source package on the
+current sharper interface: signed CDFV plus strict previous-radius Lemma 8
+turns. -/
+theorem dahlbergE2_primitive_strict_previous_source_components_gate :
+    DahlbergE2PrimitiveStrictPreviousSourceComponents := by
+  exact ⟨dahlbergE2_convex_dfv_signed_nonconcyclic_primitive_source_gate,
+    dahlbergE2_lemma8_strict_previous_radius_turns_primitive_gate⟩
 
 /-- Dahlberg's strict positive-orientation CDFV/Lemma 8 radius source package.
 
@@ -9654,8 +9705,8 @@ theorem dahlbergE2_convex_radius_witness_source_components_primitive_gate :
 /-- Dahlberg's strict positive-orientation Lemma 9 source gate in nonconstant
 profile form, recovered from the split CDFV/Lemma 8 radius source package. -/
 theorem dahlbergE2_lemma9_ordered_turn_source_gate : DahlbergE2Lemma9Source := by
-  exact dahlbergE2Lemma9Source_of_witnessComponents
-    dahlbergE2_convex_radius_witness_source_components_primitive_gate
+  exact dahlbergE2Lemma9Source_of_strictPreviousComponents
+    dahlbergE2_primitive_strict_previous_source_components_gate
 
 /-- Dahlberg's strict positive-orientation nonconcyclic Lemma 9 source gate,
 recovered from the nonconstant-profile Lemma 9 source. -/
@@ -9677,8 +9728,7 @@ Reference source: Dahlberg, *A Discrete Four Vertex Theorem*,
 is derived from the stronger Lemma 9 ordered-turn source gate above. -/
 theorem dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate :
     DahlbergE2ConvexDfvSignedNonconcyclicSource := by
-  exact dahlbergE2ConvexDfvSignedNonconcyclicSource_of_lemma9Source
-    dahlbergE2_lemma9_ordered_turn_source_gate
+  exact dahlbergE2_convex_dfv_signed_nonconcyclic_primitive_source_gate
 
 /-- Dahlberg's convex/CDFV radius-witness nonconcyclic source gate, recovered
 from the signed-Menger CDFV source. -/
@@ -10119,6 +10169,12 @@ def DahlbergE2PrimitiveStrictUnitSourceComponents : Prop :=
   DahlbergE2ConvexSignedNonconcyclicSourceComponents ∧
   DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
 
+/-- Sharper primitive `E²` source components with the non-strict branch kept
+in normalized unit-disk form. -/
+def DahlbergE2PrimitiveStrictPreviousUnitSourceComponents : Prop :=
+  DahlbergE2PrimitiveStrictPreviousSourceComponents ∧
+  DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
+
 /-- Compatibility surface for the stronger ordered-turn route: Dahlberg's
 strict positive-orientation Lemma 9 source, plus the normalized unit-disk §4
 source for the non-strict branch.
@@ -10281,6 +10337,25 @@ theorem dahlbergE2PrimitiveRemainingSourceComponents_iff_strictUnitComponents :
   constructor
   · exact dahlbergE2PrimitiveStrictUnitSourceComponents_of_primitiveComponents
   · exact dahlbergE2PrimitiveRemainingSourceComponents_of_strictUnitComponents
+
+/-- Add the normalized unit-disk §4 source to the sharper strict-previous
+branch and recover the older primitive remaining component package. -/
+theorem dahlbergE2PrimitiveRemainingSourceComponents_of_strictPreviousUnitComponents
+    (hsrc : DahlbergE2PrimitiveStrictPreviousUnitSourceComponents) :
+    DahlbergE2PrimitiveRemainingSourceComponents := by
+  exact ⟨hsrc.1.1,
+    dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_strictPreviousRadiusTurnsSource
+      hsrc.1.2,
+    hsrc.2⟩
+
+/-- The sharper strict-previous/unit source surface also recovers the grouped
+primitive strict/unit package. -/
+theorem dahlbergE2PrimitiveStrictUnitSourceComponents_of_strictPreviousUnitComponents
+    (hsrc : DahlbergE2PrimitiveStrictPreviousUnitSourceComponents) :
+    DahlbergE2PrimitiveStrictUnitSourceComponents := by
+  exact ⟨dahlbergE2ConvexSignedNonconcyclicSourceComponents_of_strictPreviousComponents
+      hsrc.1,
+    hsrc.2⟩
 
 /-- Convert the current Lemma-9/unit primitive E² gate surface to the older
 split primitive spelling. -/

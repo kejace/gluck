@@ -92,7 +92,7 @@ The remaining primitive source gates in the current worktree are exactly:
 - `Gluck/Forward/Smooth.lean`
   - `osserman1985_smooth_E2_threshold_source_gate`;
 - `Gluck/Forward/Dahlberg.lean`
-  - `dahlbergE2_convex_dfv_radius_nonconcyclic_primitive_source_gate`;
+  - `dahlbergE2_convex_dfv_signed_nonconcyclic_primitive_source_gate`;
   - `dahlbergE2_lemma8_strict_previous_radius_turns_primitive_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_successor_unit_auxiliary_polygon_source_gate`.
 
@@ -106,11 +106,19 @@ maxima with `κ > 1 / R`, hence
 Dahlberg's strict positive-orientation CDFV and Lemma 8 compatibility gates,
 `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate` and
 `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`, are recovered
-from the product of the two primitive radius-profile sources
-`dahlbergE2_convex_dfv_radius_nonconcyclic_primitive_source_gate` and
-`dahlbergE2_lemma8_strict_previous_radius_turns_primitive_gate`, packaged as
-`dahlbergE2_convex_radius_witness_nonconcyclic_source_components_primitive_gate`,
-via the nonconstant-profile package
+from the sharper strict-branch package
+`dahlbergE2_primitive_strict_previous_source_components_gate`, whose
+components are the signed-Menger CDFV primitive
+`dahlbergE2_convex_dfv_signed_nonconcyclic_primitive_source_gate` and the
+strict previous-radius Lemma 8 primitive
+`dahlbergE2_lemma8_strict_previous_radius_turns_primitive_gate`.
+The radius-profile CDFV gate
+`dahlbergE2_convex_dfv_radius_nonconcyclic_primitive_source_gate` is no longer
+primitive: it is recovered formally from signed CDFV by reciprocal-radius
+monotonicity in the positive-orientation branch.
+The radius-witness component package
+`dahlbergE2_convex_radius_witness_nonconcyclic_source_components_primitive_gate`
+is then recovered formally via the nonconstant-profile package
 `dahlbergE2_convex_radius_witness_source_components_primitive_gate`.
 The public Lemma 8 bridge
 `dahlbergE2_lemma8_radius_turn_bridge_from_witness_primitive_gate` is now
@@ -118,9 +126,10 @@ recovered formally from the sharper strict previous-radius turn source via
 `positiveRadiusOrderedAdjacentTurns_of_edgePrev_strict_turns`.
 The nonconstant and nonconcyclic Lemma 9 ordered-turn spellings,
 `dahlbergE2_lemma9_ordered_turn_source_gate` and
-`dahlbergE2_lemma9_ordered_turn_nonconcyclic_source_gate`, are then recovered
-formally by reciprocal-radius monotonicity and the positive-branch
-nonconcyclicity/nonconstancy equivalence.  The public
+`dahlbergE2_lemma9_ordered_turn_nonconcyclic_source_gate`, are recovered
+directly from the same signed-CDFV/strict-previous-radius package, using the
+formal reciprocal-radius and positive-branch nonconcyclicity/nonconstancy
+conversions.  The public
 `dahlbergE2_lemma9_source_gate` is recovered through the same split
 compatibility interface.  The final-D4VT route remains separated from the
 stronger ordered-turn route: `dahlbergE2_dfv_primitive_source_components`
@@ -155,7 +164,8 @@ formal proofs.  The relevant paper sources are:
   `max(κ q₁, κ q₂) < min(κ p₁, κ p₂)`.
 - Dahlberg, *A Discrete Four Vertex Theorem* (`references/23.pdf`) for the
   strict positive-orientation source package: §3 Theorem 6 (CDFV) supplies the
-  nonconcyclic radius-witness conclusion, and §4 Lemma 8 supplies the
-  radius-turn bridge used in Lemma 9.  The same paper's §4 proof of Theorem 1
-  is the source for the normalized successor-interior auxiliary-polygon
-  construction gate.
+  nonconcyclic signed-Menger D4VT conclusion, and the radius-witness spelling
+  is recovered formally in Lean; §4 Lemma 8 supplies the strict previous-radius
+  turns used to form the radius-turn bridge for Lemma 9.  The same paper's §4
+  proof of Theorem 1 is the source for the normalized successor-interior
+  auxiliary-polygon construction gate.
