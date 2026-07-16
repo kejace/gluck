@@ -8472,10 +8472,10 @@ theorem signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concycl
       hn hsimple hregular hneg hnoncircle
 
 /-- The genuinely geometric source for Dahlberg's non-strict disk reduction.
-It constructs the strict-orientation auxiliary polygon from the smallest
-enclosing disk `Δ` and boundary set `E`, using the separately proved Lemma 10
-radius comparison together with the remaining polygonal approximation of the
-convex domain `U`. -/
+It constructs the strict-orientation auxiliary polygon from a smallest
+enclosing disk `Δ`, a boundary vertex, and a strictly interior vertex, using
+the separately proved Lemma 10 radius comparison together with the remaining
+polygonal approximation of the convex domain `U`. -/
 theorem dahlbergDiskAuxiliaryReduction_of_non_strict_source
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
@@ -8484,14 +8484,14 @@ theorem dahlbergDiskAuxiliaryReduction_of_non_strict_source
     (hnonstrict : ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) :
     DahlbergDiskAuxiliaryReduction v := by
   rcases
-    dahlbergDiskReductionSetup_diskBoundaryIndices_nonempty_ne_univ_of_nonconcyclic
+    dahlbergDiskReductionSetup_exists_boundary_max_and_interior
       hsimple hnoncircle
       (dahlbergE2_disk_reduction_setup_source
         hn hsimple hregular hnoncircle hnonstrict) with
-    ⟨O, R, hΔ, hRpos, hEnonempty, hEproper⟩
-  exact dahlbergE2_disk_auxiliary_boundary_construction_source
+    ⟨O, R, i, j, hΔ, _hRpos, hboundary, hinterior, hij, _hmax⟩
+  exact dahlbergE2_disk_auxiliary_boundary_interior_construction_source
     hn hsimple hregular hnoncircle hnonstrict
-    hΔ hRpos hEnonempty hEproper
+    hΔ hboundary hinterior hij
 
 /-- The remaining genuinely non-strict branch of Dahlberg's reduction from a
 general simple locally regular polygon to the strictly-convex auxiliary polygon
