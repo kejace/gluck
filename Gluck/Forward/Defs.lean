@@ -1341,6 +1341,113 @@ theorem exists_globalMinMax_strict_of_not_constant {n : ℕ} [NeZero n]
   refine ⟨κ i₀, fun j => ?_⟩
   exact le_antisymm ((hmax j).trans hle) (hmin j)
 
+/-- A nonconstant cyclic real profile has a plateau-aware local maximum.
+
+The proof chooses a global maximum and then the nearest strict drops to its
+left and right.  The two nearest-drop distances fit inside one cyclic period,
+which is the finite plateau bookkeeping needed by Dahlberg's local-extrema
+interface. -/
+theorem exists_discreteLocalMax_of_not_constant {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    ∃ i : ZMod n, DiscreteLocalMax κ i := by
+  classical
+  obtain ⟨i, hmax⟩ := exists_globalMax_zmod κ
+  have hdrop : ∃ j : ZMod n, κ j < κ i := by
+    by_contra hnone
+    apply hnc
+    refine ⟨κ i, fun j => ?_⟩
+    exact le_antisymm (hmax j) (le_of_not_gt (fun hj => hnone ⟨j, hj⟩))
+  have hright_exists :
+      ∃ r : ℕ, 0 < r ∧ r ≤ n ∧ κ (i + (r : ZMod n)) < κ i := by
+    rcases hdrop with ⟨j, hj⟩
+    let r : ℕ := (j - i).val
+    have hrpos : 0 < r := by
+      by_contra hr0not
+      have hr0 : r = 0 := Nat.eq_zero_of_not_pos hr0not
+      have hji : j - i = 0 := by
+        exact (ZMod.val_eq_zero (j - i)).mp hr0
+      have hji' : j = i := by
+        have := congrArg (fun x : ZMod n => x + i) hji
+        simpa using this
+      rw [hji'] at hj
+      exact (lt_irrefl (κ i)) hj
+    have hrle : r ≤ n := (ZMod.val_lt (j - i)).le
+    have hidx : i + (r : ZMod n) = j := by
+      dsimp [r]
+      rw [ZMod.natCast_zmod_val (j - i)]
+      abel
+    exact ⟨r, hrpos, hrle, by simpa [hidx] using hj⟩
+  have hleft_exists :
+      ∃ l : ℕ, 0 < l ∧ l ≤ n ∧ κ (i - (l : ZMod n)) < κ i := by
+    rcases hdrop with ⟨j, hj⟩
+    let l : ℕ := (i - j).val
+    have hlpos : 0 < l := by
+      by_contra hl0not
+      have hl0 : l = 0 := Nat.eq_zero_of_not_pos hl0not
+      have hij : i - j = 0 := by
+        exact (ZMod.val_eq_zero (i - j)).mp hl0
+      have hji : j = i := by
+        have := congrArg (fun x : ZMod n => x + j) hij
+        simpa using this.symm
+      rw [hji] at hj
+      exact (lt_irrefl (κ i)) hj
+    have hlle : l ≤ n := (ZMod.val_lt (i - j)).le
+    have hidx : i - (l : ZMod n) = j := by
+      dsimp [l]
+      rw [ZMod.natCast_zmod_val (i - j)]
+      abel
+    exact ⟨l, hlpos, hlle, by simpa [hidx] using hj⟩
+  let r : ℕ := Nat.find hright_exists
+  let l : ℕ := Nat.find hleft_exists
+  have hr_spec : 0 < r ∧ r ≤ n ∧ κ (i + (r : ZMod n)) < κ i := by
+    simpa [r] using Nat.find_spec hright_exists
+  have hl_spec : 0 < l ∧ l ≤ n ∧ κ (i - (l : ZMod n)) < κ i := by
+    simpa [l] using Nat.find_spec hleft_exists
+  have hright_eq : ∀ m < r, κ (i + (m : ZMod n)) = κ i := by
+    intro m hm
+    by_cases hm0 : m = 0
+    · simp [hm0]
+    · have hmpos : 0 < m := Nat.pos_of_ne_zero hm0
+      have hmle : m ≤ n := (le_of_lt hm).trans hr_spec.2.1
+      have hnotlt : ¬ κ (i + (m : ZMod n)) < κ i := by
+        intro hlt
+        exact (Nat.find_min hright_exists hm) ⟨hmpos, hmle, hlt⟩
+      exact le_antisymm (hmax _) (le_of_not_gt hnotlt)
+  have hleft_eq : ∀ m < l, κ (i - (m : ZMod n)) = κ i := by
+    intro m hm
+    by_cases hm0 : m = 0
+    · simp [hm0]
+    · have hmpos : 0 < m := Nat.pos_of_ne_zero hm0
+      have hmle : m ≤ n := (le_of_lt hm).trans hl_spec.2.1
+      have hnotlt : ¬ κ (i - (m : ZMod n)) < κ i := by
+        intro hlt
+        exact (Nat.find_min hleft_exists hm) ⟨hmpos, hmle, hlt⟩
+      exact le_antisymm (hmax _) (le_of_not_gt hnotlt)
+  have hl_lt_n : l < n := by
+    refine lt_of_le_of_ne hl_spec.2.1 ?_
+    intro hln
+    have hidx : i - (l : ZMod n) = i := by
+      rw [hln, ZMod.natCast_self, sub_zero]
+    exact (lt_irrefl (κ i)) (by simpa [hidx] using hl_spec.2.2)
+  have hlr : l + r ≤ n := by
+    by_contra hnot
+    have hlt : n < l + r := Nat.lt_of_not_ge hnot
+    let m : ℕ := n - l
+    have hmpos : 0 < m := Nat.sub_pos_of_lt hl_lt_n
+    have hmle : m ≤ n := Nat.sub_le n l
+    have hm_lt_r : m < r := by
+      dsimp [m]
+      omega
+    have hcast : ((m : ℕ) : ZMod n) = -(l : ZMod n) := by
+      dsimp [m]
+      rw [Nat.cast_sub hl_spec.2.1, ZMod.natCast_self]
+      abel
+    have hdrop_m : κ (i + (m : ZMod n)) < κ i := by
+      simpa [hcast, sub_eq_add_neg] using hl_spec.2.2
+    exact (Nat.find_min hright_exists hm_lt_r) ⟨hmpos, hmle, hdrop_m⟩
+  exact ⟨i, l, r, hl_spec.1, hr_spec.1, hlr, hleft_eq, hright_eq,
+    hl_spec.2.2, hr_spec.2.2⟩
+
 /-- If every adjacent cyclic value agrees, then the cyclic profile is
 constant. -/
 theorem exists_constant_of_forall_eq_succ {n : ℕ} [NeZero n] {κ : ZMod n → ℝ}
