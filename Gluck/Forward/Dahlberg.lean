@@ -9365,23 +9365,29 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
-/-- Dahlberg's strict positive-orientation nonconcyclic Lemma 9 source gate.
+/-- Dahlberg's strict positive-orientation CDFV/Lemma 8 radius source gate.
 
-This is the current primitive strict-branch paper input in its geometric
-spelling: a positively oriented locally regular nonconcyclic polygon has
-ordered adjacent signed-Menger turns.  The separate CDFV and Lemma 8 source
-gates below are recovered formally from this single ordered-turn source,
-keeping the downstream audit interfaces available while leaving only one
-strict-branch source obligation. -/
-theorem dahlbergE2_lemma9_ordered_turn_nonconcyclic_source_gate :
-    DahlbergE2Lemma9NonconcyclicSource := by
+This is the primitive strict-branch paper input in its split radius-profile
+spelling: Dahlberg's Theorem 6/CDFV supplies the radius-witness four-vertex
+package, and Lemma 8 turns those witnesses into the adjacent radius turns
+used by Lemma 9.  The signed-Menger Lemma 9 source below is recovered formally
+from this package by reciprocal-radius monotonicity. -/
+theorem dahlbergE2_convex_radius_witness_source_components_primitive_gate :
+    DahlbergE2ConvexRadiusWitnessSourceComponents := by
   sorry
 
 /-- Dahlberg's strict positive-orientation Lemma 9 source gate in nonconstant
-profile form, recovered from the geometric nonconcyclic source. -/
+profile form, recovered from the split CDFV/Lemma 8 radius source package. -/
 theorem dahlbergE2_lemma9_ordered_turn_source_gate : DahlbergE2Lemma9Source := by
-  exact dahlbergE2Lemma9Source_of_nonconcyclicSource
-    dahlbergE2_lemma9_ordered_turn_nonconcyclic_source_gate
+  exact dahlbergE2Lemma9Source_of_witnessComponents
+    dahlbergE2_convex_radius_witness_source_components_primitive_gate
+
+/-- Dahlberg's strict positive-orientation nonconcyclic Lemma 9 source gate,
+recovered from the nonconstant-profile Lemma 9 source. -/
+theorem dahlbergE2_lemma9_ordered_turn_nonconcyclic_source_gate :
+    DahlbergE2Lemma9NonconcyclicSource := by
+  exact dahlbergE2Lemma9NonconcyclicSource_of_source
+    dahlbergE2_lemma9_ordered_turn_source_gate
 
 /-- Dahlberg's convex/CDFV signed-Menger nonconcyclic source gate.
 
@@ -9448,9 +9454,7 @@ theorem dahlbergE2_convex_signed_source_components_gate :
 nonconcyclic signed-CDFV/Lemma 8 component package. -/
 theorem dahlbergE2_convex_radius_witness_source_components_gate :
     DahlbergE2ConvexRadiusWitnessSourceComponents := by
-  exact ⟨dahlbergE2ConvexDfvRadiusSource_of_nonconcyclicSource
-      dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate,
-    dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate⟩
+  exact dahlbergE2_convex_radius_witness_source_components_primitive_gate
 
 /-- Dahlberg's public strict positive-orientation Lemma 9 source gate,
 recovered through the split nonconcyclic signed-CDFV/Lemma 8 compatibility
