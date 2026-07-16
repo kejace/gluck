@@ -2206,6 +2206,68 @@ theorem normalizedCircleRadius_le_of_center_convexCombo_three
   exact circumcircleR2_radius_le_of_center_convexCombo_three
     hcircle hα hβ hγ hsum hcenter hS hleft hright hzmem
 
+/-- The bundled `InVertexCone` condition is equivalently a barycentric
+formula where the two outer coefficients are nonnegative and the three
+coefficients sum to one.  The middle coefficient need not be nonnegative;
+that extra condition is exactly the closed-triangle case. -/
+theorem exists_barycentric_center_of_inVertexCone {A B C O : ℂ}
+    (hcone : InVertexCone A B C O) :
+    ∃ α β γ : ℝ,
+      0 ≤ α ∧ 0 ≤ γ ∧ α + β + γ = 1 ∧
+        O = (α : ℂ) * A + (β : ℂ) * B + (γ : ℂ) * C := by
+  rcases hcone with ⟨α, γ, hα, hγ, hcenter⟩
+  refine ⟨α, 1 - α - γ, γ, hα, hγ, by ring, ?_⟩
+  have hβcast : ((1 - α - γ : ℝ) : ℂ) = 1 - (α : ℂ) - (γ : ℂ) := by
+    norm_num
+  calc
+    O = O - B + B := by abel
+    _ = (α : ℂ) * A + ((1 - α - γ : ℝ) : ℂ) * B + (γ : ℂ) * C := by
+      rw [hcenter, hβcast]
+      ring
+
+/-- Vertex-cone coefficient form of the circumradius lower bound.
+
+If the circumcentre is written as
+`O - B = α(A-B) + γ(C-B)` with `α, γ ≥ 0` and `α + γ ≤ 1`, then the centre is
+actually in the closed triangle `ABC`.  Therefore any closed disk containing
+the three vertices has radius at least the circumradius. -/
+theorem circumcircleR2_radius_le_of_center_vertexCone_coeff_sum_le_one
+    {A B C O Δ : ℂ} {R S α γ : ℝ}
+    (hcircle : CircumcircleR2 A B C O R)
+    (hα : 0 ≤ α) (hγ : 0 ≤ γ) (hαγ : α + γ ≤ 1)
+    (hcenter : O - B = (α : ℂ) * (A - B) + (γ : ℂ) * (C - B))
+    (hS : 0 ≤ S)
+    (hA : InClosedDiskR2 Δ S A) (hB : InClosedDiskR2 Δ S B)
+    (hC : InClosedDiskR2 Δ S C) :
+    R ≤ S := by
+  have hβ : 0 ≤ 1 - α - γ := by linarith
+  have hsum : α + (1 - α - γ) + γ = 1 := by ring
+  have hO : O = (α : ℂ) * A + ((1 - α - γ : ℝ) : ℂ) * B + (γ : ℂ) * C := by
+    have hβcast : ((1 - α - γ : ℝ) : ℂ) = 1 - (α : ℂ) - (γ : ℂ) := by
+      norm_num
+    calc
+      O = O - B + B := by abel
+      _ = (α : ℂ) * A + ((1 - α - γ : ℝ) : ℂ) * B + (γ : ℂ) * C := by
+        rw [hcenter, hβcast]
+        ring
+  exact circumcircleR2_radius_le_of_center_convexCombo_three
+    hcircle hα hβ hγ hsum hO hS hA hB hC
+
+/-- Vertex-cone form of the circumradius lower bound using the bundled
+`InVertexCone` witness plus an explicit bound on the chosen coefficients. -/
+theorem circumcircleR2_radius_le_of_inVertexCone_coeff_sum_le_one
+    {A B C O Δ : ℂ} {R S α γ : ℝ}
+    (hcircle : CircumcircleR2 A B C O R)
+    (hα : 0 ≤ α) (hγ : 0 ≤ γ) (hαγ : α + γ ≤ 1)
+    (hcenter : O - B = (α : ℂ) * (A - B) + (γ : ℂ) * (C - B))
+    (_hcone : InVertexCone A B C O)
+    (hS : 0 ≤ S)
+    (hA : InClosedDiskR2 Δ S A) (hB : InClosedDiskR2 Δ S B)
+    (hC : InClosedDiskR2 Δ S C) :
+    R ≤ S :=
+  circumcircleR2_radius_le_of_center_vertexCone_coeff_sum_le_one
+    hcircle hα hγ hαγ hcenter hS hA hB hC
+
 /-- Propagation primitive: two adjacent four-point windows whose common
 circles overlap in a noncollinear triple determine the same circle. -/
 theorem edgeCommonCircumcircle_overlap_unique {A B C P Q O₁ O₂ : ℂ} {R₁ R₂ : ℝ}
