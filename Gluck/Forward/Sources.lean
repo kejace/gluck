@@ -286,6 +286,50 @@ def ForwardDfvRemainingSourceComponents : Prop :=
   SpaceFormDiscreteDfvModelSources ∧
   DahlbergE2DfvSourceComponents
 
+/-- Uniform component spelling of the actual remaining source obligations.
+
+This is the non-flattened source surface: the single smooth source, the single
+non-Euclidean ordered-turn source, and the exact three E² Dahlberg gates. -/
+def ForwardUniformRemainingSourceComponents : Prop :=
+  SmoothForwardSource ∧
+  SpaceFormDiscreteSource ∧
+  DahlbergE2RemainingSourceComponents
+
+/-- Uniform component spelling of the actual remaining source obligations for
+final D4VT endpoints.
+
+This is the non-flattened weak source surface: the ordinary smooth D4VT source,
+the non-Euclidean D4VT source, and the sharp E² final-D4VT source package. -/
+def ForwardUniformDfvRemainingSourceComponents : Prop :=
+  SmoothForwardDfvSource ∧
+  SpaceFormDiscreteDfvSource ∧
+  DahlbergE2DfvSourceComponents
+
+/-- The uniform remaining-source components are equivalent to the
+model-specific component spelling. -/
+theorem forwardUniformRemainingSourceComponents_iff_components :
+    ForwardUniformRemainingSourceComponents ↔ ForwardRemainingSourceComponents := by
+  constructor
+  · intro hsrc
+    exact ⟨smoothForwardSource_iff_modelSources.mp hsrc.1,
+      spaceFormDiscreteSource_iff_modelSources.mp hsrc.2.1, hsrc.2.2⟩
+  · intro hsrc
+    exact ⟨smoothForwardSource_iff_modelSources.mpr hsrc.1,
+      spaceFormDiscreteSource_iff_modelSources.mpr hsrc.2.1, hsrc.2.2⟩
+
+/-- The uniform final-D4VT remaining-source components are equivalent to the
+model-specific final-D4VT component spelling. -/
+theorem forwardUniformDfvRemainingSourceComponents_iff_components :
+    ForwardUniformDfvRemainingSourceComponents ↔
+      ForwardDfvRemainingSourceComponents := by
+  constructor
+  · intro hsrc
+    exact ⟨smoothForwardDfvSource_iff_modelSources.mp hsrc.1,
+      spaceFormDiscreteDfvSource_iff_modelSources.mp hsrc.2.1, hsrc.2.2⟩
+  · intro hsrc
+    exact ⟨smoothForwardDfvSource_iff_modelSources.mpr hsrc.1,
+      spaceFormDiscreteDfvSource_iff_modelSources.mpr hsrc.2.1, hsrc.2.2⟩
+
 /-- The flattened remaining-source audit is equivalent to the named component
 spelling. -/
 theorem forwardRemainingSources_iff_components :
@@ -321,6 +365,20 @@ theorem forwardDfvRemainingSources_iff_components :
       hdisc.1, hdisc.2, hDahlberg.1,
       dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_boundaryInteriorSource
         hDahlberg.2⟩
+
+/-- The flattened remaining-source audit is equivalent to the uniform
+component spelling. -/
+theorem forwardRemainingSources_iff_uniformComponents :
+    ForwardRemainingSources ↔ ForwardUniformRemainingSourceComponents := by
+  exact forwardRemainingSources_iff_components.trans
+    forwardUniformRemainingSourceComponents_iff_components.symm
+
+/-- The flattened final-D4VT remaining-source audit is equivalent to the
+uniform final-D4VT component spelling. -/
+theorem forwardDfvRemainingSources_iff_uniformComponents :
+    ForwardDfvRemainingSources ↔ ForwardUniformDfvRemainingSourceComponents := by
+  exact forwardDfvRemainingSources_iff_components.trans
+    forwardUniformDfvRemainingSourceComponents_iff_components.symm
 
 /-- After sharpening the `E²` non-strict component to the max/interior §4
 compatibility interface, the fully expanded final-D4VT atomic package is
@@ -2979,9 +3037,8 @@ actual remaining source gates.
 The Euclidean Dahlberg disk setup is no longer included here, since the finite
 least-enclosing-disk and boundary-vertex facts have been proved. -/
 theorem forward_remaining_sources : ForwardRemainingSources := by
-  exact forwardRemainingSources_iff_components.mpr
-    ⟨smoothForwardSource_iff_modelSources.mp smoothForward_source_gate,
-      spaceFormDiscreteSource_iff_modelSources.mp spaceFormDiscrete_source_gate,
+  exact forwardRemainingSources_iff_uniformComponents.mpr
+    ⟨smoothForward_source_gate, spaceFormDiscrete_source_gate,
       dahlbergE2_remaining_source_components⟩
 
 /-- The current forward development is reduced to the bundled geometric source
@@ -3001,10 +3058,9 @@ proved directly from the weaker gates, so the final D4VT audit does not depend
 on the stronger E² Lemma 8 ordered-turn source used only by conformal-Menger
 ordered-turn refinements. -/
 theorem forward_dfv_remaining_sources : ForwardDfvRemainingSources := by
-  exact forwardDfvRemainingSources_iff_components.mpr
-    ⟨smoothForwardDfvSource_iff_modelSources.mp
-        (smoothForwardDfvSource_of_source smoothForward_source_gate),
-      spaceFormDiscreteDfvSource_iff_modelSources.mp spaceFormDiscrete_dfv_source_gate,
+  exact forwardDfvRemainingSources_iff_uniformComponents.mpr
+    ⟨smoothForwardDfvSource_of_source smoothForward_source_gate,
+      spaceFormDiscrete_dfv_source_gate,
       dahlbergE2_dfv_source_components⟩
 
 /-- Weaker final-D4VT source package, routed through the actual weaker
