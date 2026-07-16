@@ -7228,6 +7228,32 @@ theorem discreteLocalMax_of_plateauLocalMaxResolution {n : ℕ}
   exact ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq,
     hleft_drop, hright_drop⟩
 
+/-- A plateau-aware local maximum is exactly explicit plateau-resolution
+data.  Since the local-maximum predicate is `Prop`-valued while the explicit
+resolution is data-carrying, extracting the witnesses uses classical choice. -/
+noncomputable def plateauLocalMaxResolution_of_discreteLocalMax {n : ℕ}
+    {κ : ZMod n → ℝ} {i : ZMod n}
+    (h : DiscreteLocalMax κ i) :
+    PlateauLocalMaxResolution κ i := by
+  let l : ℕ := Classical.choose h
+  let hl : ∃ r : ℕ, 0 < l ∧ 0 < r ∧ l + r ≤ n ∧
+      (∀ m < l, κ (i - (m : ZMod n)) = κ i) ∧
+      (∀ m < r, κ (i + (m : ZMod n)) = κ i) ∧
+      κ (i - (l : ZMod n)) < κ i ∧
+      κ (i + (r : ZMod n)) < κ i := Classical.choose_spec h
+  let r : ℕ := Classical.choose hl
+  let hr := Classical.choose_spec hl
+  exact
+    { leftSteps := l
+      rightSteps := r
+      left_pos := hr.1
+      right_pos := hr.2.1
+      span_le := hr.2.2.1
+      left_eq := hr.2.2.2.1
+      right_eq := hr.2.2.2.2.1
+      left_drop := hr.2.2.2.2.2.1
+      right_drop := hr.2.2.2.2.2.2 }
+
 /-- Plateau-resolution data is exactly the witness package needed by the
 plateau-aware local-minimum definition. -/
 theorem discreteLocalMin_of_plateauLocalMinResolution {n : ℕ}
@@ -7238,6 +7264,32 @@ theorem discreteLocalMin_of_plateauLocalMinResolution {n : ℕ}
     ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq, hleft_rise, hright_rise⟩
   exact ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq,
     hleft_rise, hright_rise⟩
+
+/-- A plateau-aware local minimum is exactly explicit plateau-resolution
+data.  Since the local-minimum predicate is `Prop`-valued while the explicit
+resolution is data-carrying, extracting the witnesses uses classical choice. -/
+noncomputable def plateauLocalMinResolution_of_discreteLocalMin {n : ℕ}
+    {κ : ZMod n → ℝ} {i : ZMod n}
+    (h : DiscreteLocalMin κ i) :
+    PlateauLocalMinResolution κ i := by
+  let l : ℕ := Classical.choose h
+  let hl : ∃ r : ℕ, 0 < l ∧ 0 < r ∧ l + r ≤ n ∧
+      (∀ m < l, κ (i - (m : ZMod n)) = κ i) ∧
+      (∀ m < r, κ (i + (m : ZMod n)) = κ i) ∧
+      κ i < κ (i - (l : ZMod n)) ∧
+      κ i < κ (i + (r : ZMod n)) := Classical.choose_spec h
+  let r : ℕ := Classical.choose hl
+  let hr := Classical.choose_spec hl
+  exact
+    { leftSteps := l
+      rightSteps := r
+      left_pos := hr.1
+      right_pos := hr.2.1
+      span_le := hr.2.2.1
+      left_eq := hr.2.2.2.1
+      right_eq := hr.2.2.2.2.1
+      left_rise := hr.2.2.2.2.2.1
+      right_rise := hr.2.2.2.2.2.2 }
 
 /-- Plateau-resolution data attached to the four ordered disks in Dahlberg's
 Theorem 6.
@@ -7274,6 +7326,18 @@ theorem dahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate_of_plateauResol
       localMin₂ := discreteLocalMin_of_plateauLocalMinResolution h.min₂
       localMax₃ := discreteLocalMax_of_plateauLocalMaxResolution h.max₃
       localMin₄ := discreteLocalMin_of_plateauLocalMinResolution h.min₄ }
+
+/-- The local-extremum package for a fixed ordered disk certificate supplies
+the explicit plateau-resolution data. -/
+noncomputable def dahlbergE2Theorem6PlateauResolution_of_radiusExtremaForOrderedDiskCertificate
+    {n : ℕ} {v : ZMod n → ℂ}
+    {disk : DahlbergE2Theorem6OrderedDiskCertificate v}
+    (h : DahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate disk) :
+    DahlbergE2Theorem6PlateauResolutionForOrderedDiskCertificate disk :=
+  { max₁ := plateauLocalMaxResolution_of_discreteLocalMax h.localMax₁
+    min₂ := plateauLocalMinResolution_of_discreteLocalMin h.localMin₂
+    max₃ := plateauLocalMaxResolution_of_discreteLocalMax h.localMax₃
+    min₄ := plateauLocalMinResolution_of_discreteLocalMin h.localMin₄ }
 
 /-- Boundary incidence for the four ordered curvature disks appearing in
 Dahlberg's Theorem 6 / CDFV.  Each curvature circle passes through the three
@@ -8342,6 +8406,28 @@ theorem dahlbergE2Theorem6PlateauExtremaUpgradeSource_of_plateauResolutionUpgrad
   exact ⟨
     dahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate_of_plateauResolution
       hres⟩
+
+/-- The plateau-extrema upgrade source also supplies explicit plateau
+resolution, because `DiscreteLocalMax` and `DiscreteLocalMin` are exactly the
+left/right plateau-exit witness packages. -/
+theorem dahlbergE2Theorem6PlateauResolutionUpgradeSource_of_plateauExtremaUpgradeSource
+    (hsrc : DahlbergE2Theorem6PlateauExtremaUpgradeSource) :
+    DahlbergE2Theorem6PlateauResolutionUpgradeSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle weak
+  letI : NeZero n := hne
+  rcases hsrc hn hsimple hregular horient hnoncircle weak with ⟨hext⟩
+  exact ⟨
+    dahlbergE2Theorem6PlateauResolution_of_radiusExtremaForOrderedDiskCertificate
+      hext⟩
+
+/-- The explicit plateau-resolution and local-extrema upgrade interfaces are
+formally equivalent. -/
+theorem dahlbergE2Theorem6PlateauResolutionUpgradeSource_iff_plateauExtremaUpgradeSource :
+    DahlbergE2Theorem6PlateauResolutionUpgradeSource ↔
+      DahlbergE2Theorem6PlateauExtremaUpgradeSource := by
+  constructor
+  · exact dahlbergE2Theorem6PlateauExtremaUpgradeSource_of_plateauResolutionUpgradeSource
+  · exact dahlbergE2Theorem6PlateauResolutionUpgradeSource_of_plateauExtremaUpgradeSource
 
 /-- The sharper plateau-extrema source implies the older plateau-upgrade
 source by rebuilding a geometric assembly certificate from the upgraded
