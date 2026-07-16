@@ -93,7 +93,7 @@ The remaining primitive source gates in the current worktree are exactly:
   - `osserman1985_smooth_E2_threshold_source_gate`;
 - `Gluck/Forward/Dahlberg.lean`
   - `dahlbergE2_convex_dfv_radius_nonconcyclic_primitive_source_gate`;
-  - `dahlbergE2_lemma8_radius_turn_bridge_from_witness_primitive_gate`;
+  - `dahlbergE2_lemma8_strict_previous_radius_turns_primitive_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
 
 The public smooth value-separated gate
@@ -108,10 +108,14 @@ Dahlberg's strict positive-orientation CDFV and Lemma 8 compatibility gates,
 `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`, are recovered
 from the product of the two primitive radius-profile sources
 `dahlbergE2_convex_dfv_radius_nonconcyclic_primitive_source_gate` and
-`dahlbergE2_lemma8_radius_turn_bridge_from_witness_primitive_gate`, packaged as
+`dahlbergE2_lemma8_strict_previous_radius_turns_primitive_gate`, packaged as
 `dahlbergE2_convex_radius_witness_nonconcyclic_source_components_primitive_gate`,
 via the nonconstant-profile package
 `dahlbergE2_convex_radius_witness_source_components_primitive_gate`.
+The public Lemma 8 bridge
+`dahlbergE2_lemma8_radius_turn_bridge_from_witness_primitive_gate` is now
+recovered formally from the sharper strict previous-radius turn source via
+`positiveRadiusOrderedAdjacentTurns_of_edgePrev_strict_turns`.
 The nonconstant and nonconcyclic Lemma 9 ordered-turn spellings,
 `dahlbergE2_lemma9_ordered_turn_source_gate` and
 `dahlbergE2_lemma9_ordered_turn_nonconcyclic_source_gate`, are then recovered
