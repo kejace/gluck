@@ -676,6 +676,38 @@ theorem constant_or_orderedAdjacentTurns_S2_neg_reflected_of_sources
     hsrc (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple horient hregular hκ
     (by intro hlt; norm_num at hlt)
 
+/-- The source-parametrized S² negative-orientation constant-or-Dahlberg
+endpoint, stated for the reflected profile `i ↦ -κ(-i)`. -/
+theorem constant_or_dahlbergFourVertex_S2_neg_reflected_of_sources
+    (hsrc : ForwardGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, -κ (-i) = c) ∨
+      DahlbergFourVertex (fun i => -κ (-i)) := by
+  exact constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns hn
+    (constant_or_orderedAdjacentTurns_S2_neg_reflected_of_sources
+      hsrc hn v κ hdisk hsimple horient hregular hκ)
+
+/-- The source-parametrized S² negative-orientation nonconstant D4VT endpoint,
+stated for the reflected profile `i ↦ -κ(-i)`. -/
+theorem dahlbergFourVertex_S2_neg_reflected_of_sources
+    (hsrc : ForwardGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc_reflected : ¬ ∃ c, ∀ i : ZMod n, -κ (-i) = c) :
+    DahlbergFourVertex (fun i => -κ (-i)) := by
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (orderedAdjacentTurns_S2_neg_reflected_of_sources
+      hsrc hn v κ hdisk hsimple horient hregular hκ hnc_reflected)
+
 /-- The source-parametrized S² positive-orientation constant-or-Dahlberg
 endpoint. -/
 theorem constant_or_dahlbergFourVertex_S2_pos_of_sources
@@ -832,6 +864,38 @@ theorem constant_or_orderedAdjacentTurns_H2_neg_reflected_of_sources
   exact constant_or_orderedAdjacentTurns_conformalMenger_neg_reflected_of_sources
     hsrc (ε := -1) (Or.inr (Or.inr rfl)) hn v κ hdisk hsimple horient hregular hκ
     (by intro _; exact hcircle)
+
+/-- The source-parametrized H² negative-orientation constant-or-Dahlberg
+endpoint, stated for the reflected profile `i ↦ -κ(-i)`. -/
+theorem constant_or_dahlbergFourVertex_H2_neg_reflected_of_sources
+    (hsrc : ForwardGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i) :
+    (∃ c, ∀ i : ZMod n, -κ (-i) = c) ∨
+      DahlbergFourVertex (fun i => -κ (-i)) := by
+  exact constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns hn
+    (constant_or_orderedAdjacentTurns_H2_neg_reflected_of_sources
+      hsrc hn v κ hdisk hsimple horient hregular hκ hcircle)
+
+/-- The source-parametrized H² negative-orientation nonconstant D4VT endpoint,
+stated for the reflected profile `i ↦ -κ(-i)`. -/
+theorem dahlbergFourVertex_H2_neg_reflected_of_sources
+    (hsrc : ForwardGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i)
+    (hnc_reflected : ¬ ∃ c, ∀ i : ZMod n, -κ (-i) = c) :
+    DahlbergFourVertex (fun i => -κ (-i)) := by
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (orderedAdjacentTurns_H2_neg_reflected_of_sources
+      hsrc hn v κ hdisk hsimple horient hregular hκ hcircle hnc_reflected)
 
 /-- The source-parametrized H² positive-orientation constant-or-Dahlberg
 endpoint. -/

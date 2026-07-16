@@ -111,6 +111,7 @@ source-parametrized positive, negative, and strict-orientation S²/H²
 conformal-Menger endpoints such as
 `orderedAdjacentTurns_S2_pos_of_sources`,
 `orderedAdjacentTurns_H2_neg_reflected_of_sources`,
+`dahlbergFourVertex_S2_neg_reflected_of_sources`,
 `constant_or_dahlbergFourVertex_S2_strict_of_sources` and
 `constant_or_dahlbergFourVertex_H2_strict_of_sources`; for the unified
 conformal-Menger dispatch it exposes
