@@ -98,7 +98,8 @@ same ordered-turn source.  The post-import audit file `Sources.lean` bundles the
 three remaining geometric imports as `ForwardGeometricSources`, with
 `forward_geometric_sources` collecting the current source gates into that single
 target.  It also exposes source-parametrized kernels such as
-`four_vertex_condition_smooth_spaceForm_kernel_of_sources` and
+`four_vertex_condition_smooth_spaceForm_kernel_of_sources`,
+`dahlberg_discrete_four_vertex_E2_kernel_of_sources`, and
 `constant_or_dahlbergFourVertex_spaceForm_kernel_of_sources`, so a future proof
 of `ForwardGeometricSources` can be used directly without depending on the
 current placeholder gates.  The public S²/H² wrapper files

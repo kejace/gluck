@@ -77,6 +77,149 @@ theorem dahlbergE2_geometric_sources_of_sources (hsrc : ForwardGeometricSources)
     DahlbergE2GeometricSources := by
   exact hsrc.2.2
 
+/-- The source-parametrized positive-orientation E² Dahlberg ordered-turn
+extraction. -/
+theorem orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_of_sources
+    (hsrc : ForwardGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    OrderedAdjacentTurns (SignedMengerProfile v) := by
+  exact (dahlbergE2_geometric_sources_of_sources hsrc).1
+    hn hsimple hregular horient hnc
+
+/-- The source-parametrized positive-orientation E² Dahlberg conclusion. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyclic_of_sources
+    (hsrc : ForwardGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_of_sources
+      hsrc hn hsimple hregular horient
+      (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
+        hsimple hregular horient hnoncircle))
+
+/-- The source-parametrized negative-orientation E² Dahlberg conclusion after
+sign normalization. -/
+theorem neg_signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_concyclic_of_sources
+    (hsrc : ForwardGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : NegativePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (fun i => -SignedMengerProfile v i) := by
+  have hpos : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
+    positiveOrientation_reverseCyclicPolygon_of_negativeOrientation horient
+  have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
+    isSimplePolygon_reverseCyclicPolygon hsimple
+  have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
+    dahlbergRegular_reverseCyclicPolygon hregular
+  have hnoncircle' : ¬ Concyclic (ReverseCyclicPolygon v) := by
+    intro hcyc
+    exact hnoncircle (concyclic_reverseCyclicPolygon_iff.mp hcyc)
+  have hfv_rev :
+      DahlbergFourVertex (SignedMengerProfile (ReverseCyclicPolygon v)) :=
+    signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyclic_of_sources
+      hsrc hn hsimple' hregular' hpos hnoncircle'
+  have hfv_reflected :
+      DahlbergFourVertex (fun i => -SignedMengerProfile v (-i)) := by
+    convert hfv_rev using 1
+    ext i
+    exact (SignedMengerProfile_reverseCyclicPolygon v i).symm
+  exact (dahlbergFourVertex_reflectIndex_iff
+    (κ := fun i : ZMod n => -SignedMengerProfile v i) (a := 0)).mp (by
+      convert hfv_reflected using 1
+      ext i
+      congr 1
+      abel_nf)
+
+/-- The source-parametrized negative-orientation E² Dahlberg conclusion. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_concyclic_of_sources
+    (hsrc : ForwardGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : NegativePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact dahlbergFourVertex_of_neg
+    (neg_signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_concyclic_of_sources
+      hsrc hn hsimple hregular horient hnoncircle)
+
+/-- The source-parametrized strict-orientation E² Dahlberg conclusion. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concyclic_of_sources
+    (hsrc : ForwardGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  rcases horient with hpos | hneg
+  · exact signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyclic_of_sources
+      hsrc hn hsimple hregular hpos hnoncircle
+  · exact signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_concyclic_of_sources
+      hsrc hn hsimple hregular hneg hnoncircle
+
+/-- The source-parametrized non-strict E² Dahlberg disk-reduction package. -/
+theorem dahlbergDiskAuxiliaryReduction_of_non_strict_of_sources
+    (hsrc : ForwardGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v)
+    (hnonstrict : ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) :
+    DahlbergDiskAuxiliaryReduction v := by
+  exact (dahlbergE2_geometric_sources_of_sources hsrc).2
+    hn hsimple hregular hnoncircle hnonstrict
+
+/-- The source-parametrized non-strict E² Dahlberg conclusion. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_non_strict_dahlberg_disk_reduction_of_sources
+    (hsrc : ForwardGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v)
+    (hnonstrict : ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  rcases dahlbergDiskAuxiliaryReduction_of_non_strict_of_sources
+      hsrc hn hsimple hregular hnoncircle hnonstrict with
+    ⟨m, hne, w, hm, hsimplew, hregularw, horientw, hnoncirclew, htransfer⟩
+  letI : NeZero m := hne
+  exact htransfer
+    (signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concyclic_of_sources
+      hsrc hm hsimplew hregularw horientw hnoncirclew)
+
+/-- The source-parametrized E² Dahlberg conclusion. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_of_sources
+    (hsrc : ForwardGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  by_cases horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v
+  · exact signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concyclic_of_sources
+      hsrc hn hsimple hregular horient hnoncircle
+  · exact signedMengerProfile_dahlbergFourVertex_of_non_strict_dahlberg_disk_reduction_of_sources
+      hsrc hn hsimple hregular hnoncircle horient
+
+/-- The source-parametrized E² discrete Dahlberg kernel. -/
+theorem dahlberg_discrete_four_vertex_E2_kernel_of_sources
+    (hsrc : ForwardGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_sources
+    hsrc hn hsimple hregular hnoncircle
+
 /-- The source-parametrized nonconstant smooth kernel. -/
 theorem four_vertex_condition_smooth_spaceForm_nonconstant_source_of_sources
     (hsrc : ForwardGeometricSources) {ε : ℝ}
