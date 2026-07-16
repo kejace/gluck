@@ -7509,6 +7509,16 @@ theorem dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSou
   letI : NeZero n := hne
   exact hsrc hn hsimple hregular hnoncircle hnonstrict
 
+/-- The metric-data §4 auxiliary source implies Dahlberg's non-strict
+disk-reduction source. -/
+theorem dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource
+    (hsrc : DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource) :
+    DahlbergE2DiskReductionSource := by
+  exact dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource
+    (dahlbergE2DiskAuxiliaryConstructionSource_of_boundaryConstructionSource
+      (dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_pairSource
+        (dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_maxInteriorSource hsrc)))
+
 /-- The boundary-level §4 auxiliary source is formally equivalent to
 Dahlberg's non-strict disk-reduction source.  The nontrivial direction uses the
 proved finite minimal-disk setup; the reverse direction ignores the supplied
@@ -7520,6 +7530,14 @@ theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_iff_diskReductionSourc
     exact dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource
       (dahlbergE2DiskAuxiliaryConstructionSource_of_boundaryConstructionSource hsrc)
   · exact dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_diskReductionSource
+
+/-- The sharpened metric-data §4 auxiliary source is formally equivalent to
+Dahlberg's older non-strict disk-reduction source. -/
+theorem dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_iff_diskReductionSource :
+    DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource ↔ DahlbergE2DiskReductionSource := by
+  constructor
+  · exact dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource
+  · exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSource
 
 /-- Dahlberg's metric-data auxiliary-polygon construction/transfer source for
 the §4 non-strict disk reduction.  At this point the finite minimal-disk setup

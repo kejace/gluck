@@ -489,8 +489,8 @@ remaining-source package. -/
 theorem dahlbergE2DiskReductionSource_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     DahlbergE2DiskReductionSource := by
-  exact dahlbergE2DiskAuxiliaryBoundaryConstructionSource_iff_diskReductionSource.mp
-    (dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_remainingSources hsrc)
+  exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_iff_diskReductionSource.mp
+    (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_remainingSources hsrc)
 
 /-- Extract Dahlberg's `E²` signed-CDFV source from the weaker final-D4VT
 remaining-source package. -/
@@ -520,8 +520,8 @@ final-D4VT remaining-source package. -/
 theorem dahlbergE2DiskReductionSource_of_dfvRemainingSources
     (hsrc : ForwardDfvRemainingSources) :
     DahlbergE2DiskReductionSource := by
-  exact dahlbergE2DiskAuxiliaryBoundaryConstructionSource_iff_diskReductionSource.mp
-    (dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_dfvRemainingSources hsrc)
+  exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_iff_diskReductionSource.mp
+    (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_dfvRemainingSources hsrc)
 
 /-- Extract the smooth `E²` source gate from the fully expanded source
 package. -/
