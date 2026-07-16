@@ -317,7 +317,10 @@ needed only for final D4VT endpoints.
 
 Compared with `ForwardDfvRemainingSources`, the Euclidean Dahlberg block is
 recorded exactly at the current primitive final-D4VT gates: nonconcyclic
-signed-CDFV and the normalized unit-disk §4 source. -/
+signed-CDFV and the normalized unit-disk §4 source.  The smooth and
+non-Euclidean components are the weak final-D4VT source surface; the current
+global proof of these weak components is still recovered from the stronger
+smooth value-separated and non-Euclidean ordered-turn source gates. -/
 def ForwardDfvPrimitiveRemainingSources : Prop :=
   (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
       Gluck.IsSimpleClosed γ →
@@ -5107,8 +5110,13 @@ theorem forward_geometric_sources : ForwardGeometricSources := by
   exact forwardGeometricSources_of_remainingSources forward_remaining_sources
 
 /-- Primitive grouped component spelling of the current final-D4VT source
-audit.  This exposes the exact primitive E² final-D4VT source gates:
-nonconcyclic CDFV and the normalized unit-disk §4 construction. -/
+audit.
+
+This exposes the exact primitive E² final-D4VT source gates: nonconcyclic CDFV
+and the normalized unit-disk §4 construction.  The smooth and non-Euclidean
+weak final-D4VT components are collected through their weak model-source
+packages, which are currently proved from the stronger smooth
+value-separated and non-Euclidean ordered-turn source gates. -/
 theorem forward_dfv_primitive_remaining_source_components :
     ForwardDfvPrimitiveRemainingSourceComponents := by
   exact ⟨smoothForward_dfv_model_sources,
