@@ -5769,6 +5769,26 @@ theorem signedMengerProfile_exists_globalMinMax_strict_of_not_constant
       SignedMengerProfile v i₀ < SignedMengerProfile v i₁ := by
   exact exists_globalMinMax_strict_of_not_constant (κ := SignedMengerProfile v) hnc
 
+/-- A chosen global maximum of a nonconstant signed-Menger profile is a
+plateau-aware local maximum. -/
+theorem signedMengerProfile_discreteLocalMax_of_globalMax_of_not_constant
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {i : ZMod n}
+    (hmax : ∀ j : ZMod n, SignedMengerProfile v j ≤ SignedMengerProfile v i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    DiscreteLocalMax (SignedMengerProfile v) i := by
+  exact discreteLocalMax_of_globalMax_of_not_constant
+    (κ := SignedMengerProfile v) hmax hnc
+
+/-- A chosen global minimum of a nonconstant signed-Menger profile is a
+plateau-aware local minimum. -/
+theorem signedMengerProfile_discreteLocalMin_of_globalMin_of_not_constant
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {i : ZMod n}
+    (hmin : ∀ j : ZMod n, SignedMengerProfile v i ≤ SignedMengerProfile v j)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    DiscreteLocalMin (SignedMengerProfile v) i := by
+  exact discreteLocalMin_of_globalMin_of_not_constant
+    (κ := SignedMengerProfile v) hmin hnc
+
 /-- A nonconstant signed-Menger profile has both a plateau-aware local maximum
 and a plateau-aware local minimum. -/
 theorem signedMengerProfile_exists_discreteLocalMax_and_min_of_not_constant

@@ -1341,22 +1341,18 @@ theorem exists_globalMinMax_strict_of_not_constant {n : ℕ} [NeZero n]
   refine ⟨κ i₀, fun j => ?_⟩
   exact le_antisymm ((hmax j).trans hle) (hmin j)
 
-/-- A nonconstant cyclic real profile has a plateau-aware local maximum.
+/-- A global maximum with some strictly lower value is a plateau-aware local
+maximum.
 
-The proof chooses a global maximum and then the nearest strict drops to its
-left and right.  The two nearest-drop distances fit inside one cyclic period,
+The proof chooses the nearest strict drops to the left and right of the chosen
+global maximum.  The two nearest-drop distances fit inside one cyclic period,
 which is the finite plateau bookkeeping needed by Dahlberg's local-extrema
 interface. -/
-theorem exists_discreteLocalMax_of_not_constant {n : ℕ} [NeZero n]
-    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
-    ∃ i : ZMod n, DiscreteLocalMax κ i := by
+theorem discreteLocalMax_of_globalMax_of_exists_lt {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} {i : ZMod n} (hmax : ∀ j : ZMod n, κ j ≤ κ i)
+    (hdrop : ∃ j : ZMod n, κ j < κ i) :
+    DiscreteLocalMax κ i := by
   classical
-  obtain ⟨i, hmax⟩ := exists_globalMax_zmod κ
-  have hdrop : ∃ j : ZMod n, κ j < κ i := by
-    by_contra hnone
-    apply hnc
-    refine ⟨κ i, fun j => ?_⟩
-    exact le_antisymm (hmax j) (le_of_not_gt (fun hj => hnone ⟨j, hj⟩))
   have hright_exists :
       ∃ r : ℕ, 0 < r ∧ r ≤ n ∧ κ (i + (r : ZMod n)) < κ i := by
     rcases hdrop with ⟨j, hj⟩
@@ -1445,8 +1441,28 @@ theorem exists_discreteLocalMax_of_not_constant {n : ℕ} [NeZero n]
     have hdrop_m : κ (i + (m : ZMod n)) < κ i := by
       simpa [hcast, sub_eq_add_neg] using hl_spec.2.2
     exact (Nat.find_min hright_exists hm_lt_r) ⟨hmpos, hmle, hdrop_m⟩
-  exact ⟨i, l, r, hl_spec.1, hr_spec.1, hlr, hleft_eq, hright_eq,
+  exact ⟨l, r, hl_spec.1, hr_spec.1, hlr, hleft_eq, hright_eq,
     hl_spec.2.2, hr_spec.2.2⟩
+
+/-- A chosen global maximum of a nonconstant cyclic real profile is a
+plateau-aware local maximum. -/
+theorem discreteLocalMax_of_globalMax_of_not_constant {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} {i : ZMod n} (hmax : ∀ j : ZMod n, κ j ≤ κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DiscreteLocalMax κ i := by
+  have hdrop : ∃ j : ZMod n, κ j < κ i := by
+    by_contra hnone
+    apply hnc
+    refine ⟨κ i, fun j => ?_⟩
+    exact le_antisymm (hmax j) (le_of_not_gt (fun hj => hnone ⟨j, hj⟩))
+  exact discreteLocalMax_of_globalMax_of_exists_lt hmax hdrop
+
+/-- A nonconstant cyclic real profile has a plateau-aware local maximum. -/
+theorem exists_discreteLocalMax_of_not_constant {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    ∃ i : ZMod n, DiscreteLocalMax κ i := by
+  obtain ⟨i, hmax⟩ := exists_globalMax_zmod κ
+  exact ⟨i, discreteLocalMax_of_globalMax_of_not_constant hmax hnc⟩
 
 /-- If every adjacent cyclic value agrees, then the cyclic profile is
 constant. -/
@@ -1497,6 +1513,20 @@ theorem exists_discreteLocalMin_of_not_constant {n : ℕ} [NeZero n]
     not_constant_neg_iff.mpr hnc
   rcases exists_discreteLocalMax_of_not_constant hneg with ⟨i, hmax⟩
   exact ⟨i, discreteLocalMin_of_neg_localMax hmax⟩
+
+/-- A chosen global minimum of a nonconstant cyclic real profile is a
+plateau-aware local minimum. -/
+theorem discreteLocalMin_of_globalMin_of_not_constant {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} {i : ZMod n} (hmin : ∀ j : ZMod n, κ i ≤ κ j)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DiscreteLocalMin κ i := by
+  have hneg : ¬ ∃ c, ∀ i : ZMod n, -κ i = c :=
+    not_constant_neg_iff.mpr hnc
+  have hmax_neg : ∀ j : ZMod n, -κ j ≤ -κ i := by
+    intro j
+    exact neg_le_neg (hmin j)
+  exact discreteLocalMin_of_neg_localMax
+    (discreteLocalMax_of_globalMax_of_not_constant hmax_neg hneg)
 
 /-- A nonconstant cyclic real profile has both a plateau-aware local maximum
 and a plateau-aware local minimum. -/
