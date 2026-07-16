@@ -9014,6 +9014,29 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
+/-- Dahlberg's strict positive-orientation Lemma 9 source gate.
+
+This is the combined strict-convex source input from Dahlberg's discrete
+four-vertex paper: the convex CDFV source supplies the signed-Menger
+four-vertex conclusion, and Lemma 8 propagates the radius witnesses to the
+adjacent turns used by Lemma 9.  The split CDFV and Lemma 8 APIs below are
+recovered formally from this single ordered-turn source. -/
+theorem dahlbergE2_lemma9_source_gate : DahlbergE2Lemma9Source := by
+  sorry
+
+/-- Dahlberg's exact signed-CDFV/Lemma 8 source components, recovered from the
+Lemma 9 source gate. -/
+theorem dahlbergE2_convex_signed_source_components_gate :
+    DahlbergE2ConvexSignedSourceComponents := by
+  exact dahlbergE2ConvexSignedSourceComponents_of_lemma9Source
+    dahlbergE2_lemma9_source_gate
+
+/-- Dahlberg's convex/CDFV signed-Menger source gate in nonconstant-profile
+form, recovered formally from the Lemma 9 source gate. -/
+theorem dahlbergE2_convex_dfv_signed_source_gate :
+    DahlbergE2ConvexDfvSignedSource := by
+  exact dahlbergE2_convex_signed_source_components_gate.1
+
 /-- Dahlberg's convex/CDFV signed-Menger nonconcyclic source gate, recovered
 from the strict convex discrete four-vertex theorem.
 
@@ -9023,14 +9046,8 @@ the plateau-aware signed-Menger conclusion directly for the nonconcyclic
 strictly convex branch. -/
 theorem dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate :
     DahlbergE2ConvexDfvSignedNonconcyclicSource := by
-  sorry
-
-/-- Dahlberg's convex/CDFV signed-Menger source gate in nonconstant-profile
-form, recovered formally from the nonconcyclic CDFV source gate. -/
-theorem dahlbergE2_convex_dfv_signed_source_gate :
-    DahlbergE2ConvexDfvSignedSource := by
-  exact dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource
-    dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate
+  exact dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource
+    dahlbergE2_convex_dfv_signed_source_gate
 
 /-- Dahlberg's Lemma 8 monotonicity bridge source gate.
 
@@ -9039,17 +9056,7 @@ Lemma 8 propagates the disk nesting to the adjacent radius turns used in
 Lemma 9. -/
 theorem dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate :
     DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource := by
-  sorry
-
-/-- Dahlberg's strict positive-orientation Lemma 9 source.
-
-The actual primitive inputs are split into the theorem-level CDFV source and
-the Lemma 8 witness-to-adjacent-turn bridge; Lemma 9 is recovered formally
-from those two components. -/
-theorem dahlbergE2_lemma9_source_gate : DahlbergE2Lemma9Source := by
-  exact dahlbergE2Lemma9Source_of_signedComponents
-    ⟨dahlbergE2_convex_dfv_signed_source_gate,
-      dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate⟩
+  exact dahlbergE2_convex_signed_source_components_gate.2
 
 /-- Dahlberg's convex/CDFV signed-Menger source, extracted directly from
 Theorem 6/CDFV in Dahlberg's discrete four-vertex paper.
