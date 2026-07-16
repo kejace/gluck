@@ -146,7 +146,7 @@ primitive remaining-source audit is:
   - `orderedAdjacentTurns_S2_model_source_gate`;
   - `orderedAdjacentTurns_H2_model_source_gate`.
 - `Gluck/Forward/Dahlberg.lean`
-  - `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate`;
+  - `dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate`;
   - `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
 
@@ -165,8 +165,8 @@ Dahlberg's strict positive-orientation Lemma 9 source
 the theorem-level strict CDFV wrapper
 `dahlbergE2_convex_dfv_signed_source_gate`, which is itself recovered from
 the primitive nonconcyclic CDFV gate
-`dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate`, together with the
-witness-only Lemma 8 bridge
+`dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate` through the formal
+radius/signed-Menger equivalence, together with the witness-only Lemma 8 bridge
 `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`.
 
 The corresponding audit targets are `ForwardRemainingSources`, for the
@@ -177,7 +177,7 @@ the weaker final-D4VT APIs, so its E² component does not import the Lemma 8
 ordered-turn source needed only by the stronger ordered-turn route.  The exact
 primitive final-D4VT E² gates are:
 
-- `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate`;
+- `dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate`;
 - `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
 
 Its smooth and non-Euclidean components currently inherit the stronger
@@ -194,11 +194,13 @@ grouped component spellings are exposed as
 `dahlbergE2DfvSourceComponents_of_dfvRemainingSources`.  On the E² side,
 `DahlbergE2RemainingSourceComponents` is equivalent to the older bundled
 `DahlbergE2GeometricSources` package, but names the exact current Dahlberg
-interfaces.  Its strict branch is split into Dahlberg's theorem-level strict
-CDFV input and the Lemma 8 bridge from CDFV radius witnesses to adjacent
-radius turns.  The final-D4VT route only needs the CDFV input; the stronger
-ordered-turn route additionally needs the Lemma 8 bridge.  Its non-strict §4
-branch is gated at the unit-radius rotated centered normalized
+interfaces.  Its primitive strict branch is split into Dahlberg's nonconcyclic
+radius-witness CDFV input and the Lemma 8 bridge from CDFV radius witnesses to
+adjacent radius turns; the older signed-CDFV and boundary/interior component
+packages are derived compatibility layers.  The final-D4VT route only needs
+the radius-CDFV input; the stronger ordered-turn route additionally needs the
+Lemma 8 bridge.  Its non-strict §4 branch is gated at the unit-radius rotated
+centered normalized
 successor-interior interface
 `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`:
 after cyclic translation, the selected boundary vertex is `0`; after Euclidean
