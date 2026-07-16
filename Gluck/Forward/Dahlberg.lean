@@ -7891,6 +7891,20 @@ theorem dahlbergE2_dfv_geometric_sources : DahlbergE2DfvGeometricSources := by
   exact dahlbergE2DfvGeometricSources_of_remainingComponents
     dahlbergE2_remaining_source_components
 
+/-- The positively oriented strict branch of Dahlberg's E² D4VT from just the
+strict convex signed-Menger CDFV source. -/
+theorem dahlbergFourVertex_of_posOrientation_convexDfvSource
+    (hsrc : DahlbergE2ConvexDfvSignedSource)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact hsrc hn hsimple hregular horient
+    (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
+      hsimple hregular horient hnoncircle)
+
 /-- The positively oriented strict branch of Dahlberg's E² D4VT from the weaker
 final-D4VT source package. -/
 theorem signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyclic_of_dfvSources
@@ -7901,9 +7915,8 @@ theorem signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyc
     (horient : PositivePolygonOrientation v)
     (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact hsrc.1 hn hsimple hregular horient
-    (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
-      hsimple hregular horient hnoncircle)
+  exact dahlbergFourVertex_of_posOrientation_convexDfvSource
+    hsrc.1 hn hsimple hregular horient hnoncircle
 
 /-- The negatively oriented strict branch of Dahlberg's E² D4VT from the weaker
 final-D4VT source package, after reversal to the positive branch. -/
@@ -7968,6 +7981,71 @@ theorem signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concycl
   · exact signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyclic_of_dfvSources
       hsrc hn hsimple hregular hpos hnoncircle
   · exact signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_concyclic_of_dfvSources
+      hsrc hn hsimple hregular hneg hnoncircle
+
+/-- The negatively oriented strict branch of Dahlberg's E² D4VT from just the
+strict convex signed-Menger CDFV source, after reversal to the positive branch. -/
+theorem neg_dahlbergFourVertex_of_negOrientation_convexDfvSource
+    (hsrc : DahlbergE2ConvexDfvSignedSource)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : NegativePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (fun i => -SignedMengerProfile v i) := by
+  have hpos : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
+    positiveOrientation_reverseCyclicPolygon_of_negativeOrientation horient
+  have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
+    isSimplePolygon_reverseCyclicPolygon hsimple
+  have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
+    dahlbergRegular_reverseCyclicPolygon hregular
+  have hnoncircle' : ¬ Concyclic (ReverseCyclicPolygon v) := by
+    intro hcyc
+    exact hnoncircle (concyclic_reverseCyclicPolygon_iff.mp hcyc)
+  have hfv_rev :
+      DahlbergFourVertex (SignedMengerProfile (ReverseCyclicPolygon v)) :=
+    dahlbergFourVertex_of_posOrientation_convexDfvSource
+      hsrc hn hsimple' hregular' hpos hnoncircle'
+  have hfv_reflected :
+      DahlbergFourVertex (fun i => -SignedMengerProfile v (-i)) := by
+    convert hfv_rev using 1
+    ext i
+    exact (SignedMengerProfile_reverseCyclicPolygon v i).symm
+  exact (dahlbergFourVertex_reflectIndex_iff
+    (κ := fun i : ZMod n => -SignedMengerProfile v i) (a := 0)).mp (by
+      convert hfv_reflected using 1
+      ext i
+      congr 1
+      abel_nf)
+
+/-- The negatively oriented strict branch of Dahlberg's E² D4VT from just the
+strict convex signed-Menger CDFV source. -/
+theorem dahlbergFourVertex_of_negOrientation_convexDfvSource
+    (hsrc : DahlbergE2ConvexDfvSignedSource)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : NegativePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact dahlbergFourVertex_of_neg
+    (neg_dahlbergFourVertex_of_negOrientation_convexDfvSource
+      hsrc hn hsimple hregular horient hnoncircle)
+
+/-- The strict-orientation branch of Dahlberg's E² D4VT from just the strict
+convex signed-Menger CDFV source. -/
+theorem dahlbergFourVertex_of_strictOrientation_convexDfvSource
+    (hsrc : DahlbergE2ConvexDfvSignedSource)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  rcases horient with hpos | hneg
+  · exact dahlbergFourVertex_of_posOrientation_convexDfvSource
+      hsrc hn hsimple hregular hpos hnoncircle
+  · exact dahlbergFourVertex_of_negOrientation_convexDfvSource
       hsrc hn hsimple hregular hneg hnoncircle
 
 /-- The non-strict disk-reduction branch of Dahlberg's E² D4VT from the weaker
@@ -8362,8 +8440,8 @@ theorem signedMengerProfile_dahlbergFourVertex_of_non_strict_dahlberg_disk_reduc
     ⟨m, hne, w, hm, hsimplew, hregularw, horientw, hnoncirclew, htransfer⟩
   letI : NeZero m := hne
   exact htransfer
-    (signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concyclic_of_dfvSources
-      dahlbergE2_dfv_geometric_sources hm hsimplew hregularw horientw hnoncirclew)
+    (dahlbergFourVertex_of_strictOrientation_convexDfvSource
+      dahlbergE2_convex_dfv_signed_source hm hsimplew hregularw horientw hnoncirclew)
 
 /-- Dahlberg's reduction from the general simple locally regular polygon to the
 strictly-convex auxiliary polygon used in the last part of §4 of Dahlberg's
