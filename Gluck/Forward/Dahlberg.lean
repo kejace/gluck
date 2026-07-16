@@ -7585,6 +7585,51 @@ than the older disk-reduction interface. -/
 def DahlbergE2DfvSourceComponents : Prop :=
   DahlbergE2ConvexDfvSignedSource ∧ DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource
 
+/-- The exact `E²` Dahlberg source components still needed for the stronger
+ordered-turn route.
+
+This refines `DahlbergE2GeometricSources` into the three paper-level gates
+which remain after the formal finite-disk and radius/curvature transport
+lemmas have been proved:
+
+* the strict convex theorem-level signed-Menger CDFV input;
+* Dahlberg's Lemma 8 witness-to-adjacent-radius-turn bridge;
+* the metric-data §4 auxiliary construction for the non-strict branch. -/
+def DahlbergE2RemainingSourceComponents : Prop :=
+  DahlbergE2ConvexDfvSignedSource ∧
+  DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
+  DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource
+
+/-- The exact remaining `E²` Dahlberg components imply the older bundled
+geometric source package. -/
+theorem dahlbergE2GeometricSources_of_remainingComponents
+    (hsrc : DahlbergE2RemainingSourceComponents) :
+    DahlbergE2GeometricSources := by
+  exact ⟨
+    dahlbergE2ConvexRadiusSource_of_components
+      ⟨dahlbergE2ConvexDfvRadiusSource_of_signedSource hsrc.1,
+        dahlbergE2Lemma8RadiusTurnBridgeSource_of_witnessSource hsrc.2.1⟩,
+    dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource hsrc.2.2⟩
+
+/-- The older bundled `E²` Dahlberg geometric source package implies the exact
+remaining source components. -/
+theorem dahlbergE2RemainingSourceComponents_of_geometricSources
+    (hsrc : DahlbergE2GeometricSources) :
+    DahlbergE2RemainingSourceComponents := by
+  have hconvex : DahlbergE2ConvexRadiusSourceComponents :=
+    dahlbergE2ConvexRadiusSourceComponents_iff_convexRadiusSource.mpr hsrc.1
+  exact ⟨dahlbergE2ConvexDfvSignedSource_of_radiusSource hconvex.1,
+    dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_source hconvex.2,
+    dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSource hsrc.2⟩
+
+/-- The bundled `E²` Dahlberg geometric source package is equivalent to the
+exact three remaining source components. -/
+theorem dahlbergE2GeometricSources_iff_remainingComponents :
+    DahlbergE2GeometricSources ↔ DahlbergE2RemainingSourceComponents := by
+  constructor
+  · exact dahlbergE2RemainingSourceComponents_of_geometricSources
+  · exact dahlbergE2GeometricSources_of_remainingComponents
+
 /-- The sharp final-D4VT Euclidean source components imply the older
 final-D4VT geometric package. -/
 theorem dahlbergE2DfvGeometricSources_of_components
@@ -7618,6 +7663,14 @@ interior vertex. -/
 theorem dahlbergE2_disk_auxiliary_max_interior_construction_source :
     DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource := by
   sorry
+
+/-- The exact three remaining `E²` Dahlberg source gates currently used by the
+stronger ordered-turn route. -/
+theorem dahlbergE2_remaining_source_components :
+    DahlbergE2RemainingSourceComponents := by
+  exact ⟨dahlbergE2_convex_dfv_signed_source,
+    dahlbergE2_lemma8_radius_turn_bridge_from_witness_source,
+    dahlbergE2_disk_auxiliary_max_interior_construction_source⟩
 
 /-- Dahlberg's pair-level auxiliary-polygon construction/transfer source for
 the §4 non-strict disk reduction, recovered from the metric-data source by
@@ -7667,7 +7720,8 @@ This is the only remaining E² geometric import in the formal chain: Lemma 9
 for the strict same-orientation branch, together with the final §4 disk
 reduction for the non-strict branch. -/
 theorem dahlbergE2_geometric_sources : DahlbergE2GeometricSources := by
-  exact ⟨dahlbergE2_convex_radius_source, dahlbergE2_disk_reduction_source⟩
+  exact dahlbergE2GeometricSources_of_remainingComponents
+    dahlbergE2_remaining_source_components
 
 /-- The stronger Dahlberg source package implies the weaker final-D4VT source
 package. -/

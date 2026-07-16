@@ -140,11 +140,14 @@ gates.  Their grouped component spellings are exposed as
 `forward_dfv_remaining_source_components`, with component projections such as
 `smoothForwardModelSources_of_remainingSources`,
 `spaceFormDiscreteModelSources_of_remainingSources`,
+`dahlbergE2RemainingSourceComponents_of_remainingSources`,
 `smoothForwardDfvModelSources_of_dfvRemainingSources`,
 `spaceFormDiscreteDfvModelSources_of_dfvRemainingSources`, and
-`dahlbergE2DfvSourceComponents_of_dfvRemainingSources`.  Completing the
-forward program means replacing those gates by formal proofs.  It also exposes
-source-parametrized kernels such as
+`dahlbergE2DfvSourceComponents_of_dfvRemainingSources`.  On the E² side,
+`DahlbergE2RemainingSourceComponents` is equivalent to the older bundled
+`DahlbergE2GeometricSources` package, but names the exact three current
+Dahlberg gates.  Completing the forward program means replacing those gates by
+formal proofs.  It also exposes source-parametrized kernels such as
 `four_vertex_condition_smooth_spaceForm_kernel_of_sources`,
 `dahlberg_discrete_four_vertex_E2_kernel_of_sources`, and
 `constant_or_dahlbergFourVertex_spaceForm_kernel_of_sources`, together with
