@@ -3734,7 +3734,7 @@ proved from the stronger ordered-turn source. -/
 theorem forward_dfv_remaining_sources : ForwardDfvRemainingSources := by
   exact forwardDfvRemainingSources_iff_uniformComponents.mpr
     ⟨smoothForward_dfv_source,
-      spaceFormDiscrete_dfv_source_gate,
+      spaceFormDiscrete_dfv_source,
       dahlbergE2_dfv_source_components⟩
 
 /-- Weaker final-D4VT source package, routed through the actual weaker

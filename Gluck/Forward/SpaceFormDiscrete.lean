@@ -315,6 +315,11 @@ refinements continue to use `spaceFormDiscrete_model_sources` directly. -/
 theorem spaceFormDiscrete_dfv_source : SpaceFormDiscreteDfvSource := by
   exact spaceFormDiscrete_dfv_source_gate
 
+/-- Model-specific spelling of the current non-Euclidean discrete final-D4VT
+source package. -/
+theorem spaceFormDiscrete_dfv_model_sources : SpaceFormDiscreteDfvModelSources := by
+  exact spaceFormDiscreteDfvSource_iff_modelSources.mp spaceFormDiscrete_dfv_source
+
 /-- Uniform nonconstant ordered-turn geometric source theorem for the
 convex/coherent conformal-Menger discrete four-vertex package in `S²` (`ε = 1`)
 and `H²` (`ε = -1`).
