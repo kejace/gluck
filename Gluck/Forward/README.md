@@ -92,8 +92,7 @@ The remaining primitive source gates in the current worktree are exactly:
 - `Gluck/Forward/Smooth.lean`
   - `osserman1985_smooth_E2_threshold_source_gate`;
 - `Gluck/Forward/Dahlberg.lean`
-  - `dahlbergE2_convex_dfv_signed_constant_or_primitive_source_gate`;
-  - `dahlbergE2_lemma8_strict_previous_radius_turns_primitive_gate`;
+  - `dahlbergE2_lemma9_constant_or_ordered_primitive_source_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_successor_unit_auxiliary_polygon_source_gate`.
 
 The public smooth value-separated gate
@@ -106,12 +105,17 @@ maxima with `κ > 1 / R`, hence
 Dahlberg's strict positive-orientation CDFV and Lemma 8 compatibility gates,
 `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate` and
 `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`, are recovered
-from the sharper strict-branch package
-`dahlbergE2_primitive_strict_previous_source_components_gate`, whose
-components are the signed-Menger CDFV primitive
-`dahlbergE2_convex_dfv_signed_constant_or_primitive_source_gate` and the
-strict previous-radius Lemma 8 primitive
-`dahlbergE2_lemma8_strict_previous_radius_turns_primitive_gate`.
+from the combined strict-branch Lemma 9 primitive
+`dahlbergE2_lemma9_constant_or_ordered_primitive_source_gate`.  This source
+states that the positive strictly-convex branch has constant signed-Menger
+profile or four cyclically ordered adjacent signed-Menger turns.
+The constant-or signed-CDFV gate
+`dahlbergE2_convex_dfv_signed_constant_or_primitive_source_gate` is recovered
+from the combined source by forgetting that the four vertices came from strict
+adjacent turns.  The strict previous-radius Lemma 8 gate
+`dahlbergE2_lemma8_strict_previous_radius_turns_primitive_gate` is recovered
+from the nonconstant branch by reciprocal-radius monotonicity and the formal
+`EdgeNext = EdgePrev ∘ succ` conversion.
 The nonconcyclic signed-CDFV gate
 `dahlbergE2_convex_dfv_signed_nonconcyclic_primitive_source_gate` is recovered
 from the constant-or primitive by the formal
@@ -139,11 +143,9 @@ matching the older bridge source.
 The nonconstant and nonconcyclic Lemma 9 ordered-turn spellings,
 `dahlbergE2_lemma9_ordered_turn_source_gate` and
 `dahlbergE2_lemma9_ordered_turn_nonconcyclic_source_gate`, are recovered
-directly from the same signed-CDFV/strict-previous-radius package, using the
-formal reciprocal-radius and positive-branch nonconcyclicity/nonconstancy
-conversions.  The public
-`dahlbergE2_lemma9_source_gate` is recovered through the same split
-compatibility interface.  The final-D4VT route remains separated from the
+directly from the combined constant-or source.  The public
+`dahlbergE2_lemma9_source_gate` is recovered from this same source surface.
+The final-D4VT route remains separated from the
 stronger ordered-turn route: `dahlbergE2_dfv_primitive_source_components`
 contains the signed-CDFV gate recovered from this strict source package, its
 formally recovered radius witness, and the §4 unit-disk construction gate; the
@@ -170,7 +172,7 @@ Euclidean translation/rotation, positive homothety, reversal, the
 boundary-neighbor/transition reductions, and the boundary/interior and
 disk-reduction compatibility layers.
 
-Completing the current branch means replacing the three source gates above by
+Completing the current branch means replacing the source gates above by
 formal proofs.  The relevant paper sources are:
 
 - Dahlberg, *The Converse of the Four Vertex Theorem* (`references/dahlberg.pdf`)
@@ -179,9 +181,9 @@ formal proofs.  The relevant paper sources are:
   extrema with the two maxima value-separated above the two minima,
   `max(κ q₁, κ q₂) < min(κ p₁, κ p₂)`.
 - Dahlberg, *A Discrete Four Vertex Theorem* (`references/23.pdf`) for the
-  strict positive-orientation source package: §3 Theorem 6 (CDFV) supplies the
-  constant-or signed-Menger D4VT conclusion; the nonconcyclic spelling and the
-  radius-witness spelling are recovered formally in Lean.  §4 Lemma 8 supplies
-  the strict previous-radius turns used to form the radius-turn bridge for
-  Lemma 9.  The same paper's §4 proof of Theorem 1 is the source for the
-  normalized successor-interior auxiliary-polygon construction gate.
+  strict positive-orientation source package: §3 Theorem 6 (CDFV) and §4
+  Lemma 8 combine in Lemma 9 to supply the constant-or ordered-turn strict
+  branch.  The split CDFV and Lemma 8 interfaces are recovered formally in
+  Lean from this combined source.  The same paper's §4 proof of Theorem 1 is
+  the source for the normalized successor-interior auxiliary-polygon
+  construction gate.

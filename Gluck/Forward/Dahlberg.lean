@@ -8429,6 +8429,78 @@ def DahlbergE2Lemma9Source : Prop :=
     (¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) →
     OrderedAdjacentTurns (SignedMengerProfile v)
 
+/-- Constant-or spelling of Dahlberg's strictly convex same-orientation
+Lemma 9 extraction.
+
+This packages the same theorem without a separate nonconstancy hypothesis:
+either the signed-Menger profile is constant, or it has four cyclically ordered
+adjacent signed-Menger turns. -/
+def DahlbergE2Lemma9ConstantOrSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) ∨
+      OrderedAdjacentTurns (SignedMengerProfile v)
+
+/-- The nonconstant Lemma 9 source implies the constant-or spelling. -/
+theorem dahlbergE2Lemma9ConstantOrSource_of_source
+    (hsrc : DahlbergE2Lemma9Source) :
+    DahlbergE2Lemma9ConstantOrSource := by
+  intro n hne hn v hsimple hregular horient
+  letI : NeZero n := hne
+  by_cases hconst : ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c
+  · exact Or.inl hconst
+  · exact Or.inr (hsrc hn hsimple hregular horient hconst)
+
+/-- The constant-or Lemma 9 source implies the nonconstant spelling. -/
+theorem dahlbergE2Lemma9Source_of_constantOrSource
+    (hsrc : DahlbergE2Lemma9ConstantOrSource) :
+    DahlbergE2Lemma9Source := by
+  intro n hne hn v hsimple hregular horient hnc
+  letI : NeZero n := hne
+  rcases hsrc hn hsimple hregular horient with hconst | hturns
+  · exact False.elim (hnc hconst)
+  · exact hturns
+
+/-- The constant-or and nonconstant Lemma 9 source spellings are formally
+equivalent. -/
+theorem dahlbergE2Lemma9ConstantOrSource_iff_source :
+    DahlbergE2Lemma9ConstantOrSource ↔ DahlbergE2Lemma9Source := by
+  constructor
+  · exact dahlbergE2Lemma9Source_of_constantOrSource
+  · exact dahlbergE2Lemma9ConstantOrSource_of_source
+
+/-- Constant-or Lemma 9 implies the constant-or signed-CDFV theorem shape by
+forgetting that the four vertices came from strict adjacent turns. -/
+theorem dahlbergE2ConvexDfvSignedConstantOrSource_of_lemma9ConstantOrSource
+    (hsrc : DahlbergE2Lemma9ConstantOrSource) :
+    DahlbergE2ConvexDfvSignedConstantOrSource := by
+  intro n hne hn v hsimple hregular horient
+  letI : NeZero n := hne
+  exact constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns
+    hn (hsrc hn hsimple hregular horient)
+
+/-- Constant-or Lemma 9 implies the strict previous-radius Lemma 8 interface.
+
+Given CDFV radius witnesses, the profile is nonconstant; the nonconstant
+branch of Lemma 9 gives ordered signed-Menger turns, which are formally
+equivalent to positive radius turns and then to the previous-radius spelling. -/
+theorem dahlbergE2Lemma8StrictPreviousRadiusTurnsSource_of_lemma9ConstantOrSource
+    (hsrc : DahlbergE2Lemma9ConstantOrSource) :
+    DahlbergE2Lemma8StrictPreviousRadiusTurnsSource := by
+  intro n hne hn v hsimple hregular horient hwitness
+  letI : NeZero n := hne
+  have hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c :=
+    not_constant_signedMengerProfile_of_convexDfvRadiusWitnesses
+      hsimple horient hwitness
+  have hordered : OrderedAdjacentTurns (SignedMengerProfile v) :=
+    dahlbergE2Lemma9Source_of_constantOrSource hsrc
+      hn hsimple hregular horient hnc
+  exact edgePrev_strict_turns_of_positiveRadiusOrderedAdjacentTurns hsimple horient
+    (positiveRadiusOrderedAdjacentTurns_of_orderedAdjacentTurns_signedMengerProfile
+      hsimple horient hordered)
+
 /-- Nonconcyclic spelling of Dahlberg's strictly convex same-orientation
 Lemma 9 extraction.
 
@@ -9859,13 +9931,21 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
-/-- Dahlberg's strict positive-orientation CDFV constant-or signed-Menger
+/-- Dahlberg's strict positive-orientation Lemma 9 constant-or ordered-turn
 source gate.
 
-This is the first primitive strict-branch paper input for the final D4VT
-route: Dahlberg's Theorem 6/CDFV supplies either constant signed-Menger
-curvature or the plateau-aware four-vertex conclusion in the strictly-convex
-positive-orientation branch.
+This is the combined strict-branch paper input: Dahlberg's Lemma 9 says that
+the signed-Menger profile of a strictly convex locally regular polygon is
+constant or has four cyclically ordered adjacent turns.
+
+The CDFV theorem-level conclusion and the previous-radius Lemma 8 interface
+below are recovered formally from this source. -/
+theorem dahlbergE2_lemma9_constant_or_ordered_primitive_source_gate :
+    DahlbergE2Lemma9ConstantOrSource := by
+  sorry
+
+/-- Dahlberg's strict positive-orientation CDFV constant-or signed-Menger
+source gate, recovered from the combined Lemma 9 strict-branch source.
 
 The nonconcyclic spelling used by the final D4VT route is recovered below by
 the already-formal fact that nonconcyclic positive locally regular polygons
@@ -9875,7 +9955,8 @@ The radius-profile witness spelling needed by the ordered-turn refinement is
 then recovered formally by reciprocal-radius monotonicity. -/
 theorem dahlbergE2_convex_dfv_signed_constant_or_primitive_source_gate :
     DahlbergE2ConvexDfvSignedConstantOrSource := by
-  sorry
+  exact dahlbergE2ConvexDfvSignedConstantOrSource_of_lemma9ConstantOrSource
+    dahlbergE2_lemma9_constant_or_ordered_primitive_source_gate
 
 /-- Dahlberg's strict positive-orientation CDFV signed-Menger source gate,
 recovered from the constant-or CDFV primitive. -/
@@ -9903,7 +9984,8 @@ radius witnesses supplied by the convex D4VT/CDFV source into ordered strict
 one-step previous-radius turns. -/
 theorem dahlbergE2_lemma8_strict_previous_radius_turns_primitive_gate :
     DahlbergE2Lemma8StrictPreviousRadiusTurnsSource := by
-  sorry
+  exact dahlbergE2Lemma8StrictPreviousRadiusTurnsSource_of_lemma9ConstantOrSource
+    dahlbergE2_lemma9_constant_or_ordered_primitive_source_gate
 
 /-- Dahlberg's strict positive-orientation Lemma 8 radius-turn bridge source
 gate, recovered from the sharper previous-radius turn source. -/
@@ -9941,8 +10023,8 @@ theorem dahlbergE2_convex_radius_witness_source_components_primitive_gate :
 /-- Dahlberg's strict positive-orientation Lemma 9 source gate in nonconstant
 profile form, recovered from the split CDFV/Lemma 8 radius source package. -/
 theorem dahlbergE2_lemma9_ordered_turn_source_gate : DahlbergE2Lemma9Source := by
-  exact dahlbergE2Lemma9Source_of_strictPreviousComponents
-    dahlbergE2_primitive_strict_previous_source_components_gate
+  exact dahlbergE2Lemma9Source_of_constantOrSource
+    dahlbergE2_lemma9_constant_or_ordered_primitive_source_gate
 
 /-- Dahlberg's strict positive-orientation nonconcyclic Lemma 9 source gate,
 recovered from the nonconstant-profile Lemma 9 source. -/
