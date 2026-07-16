@@ -7139,6 +7139,26 @@ def DahlbergE2DiskAuxiliaryBoundaryNeighborConstructionSource : Prop :=
         (i + 1 ∉ DiskBoundaryIndices v O R ∨ i - 1 ∉ DiskBoundaryIndices v O R) →
         DahlbergDiskAuxiliaryReduction v
 
+/-- Metric boundary-neighbor source for Dahlberg's §4 auxiliary construction.
+
+This is the same local endpoint data as the boundary-neighbor source, but with
+the set-theoretic neighbor outside `E` already converted into the metric fact
+used in the disk construction: the neighboring vertex lies strictly inside the
+minimal enclosing disk. -/
+def DahlbergE2DiskAuxiliaryBoundaryMetricNeighborConstructionSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    ∀ {O : ℂ} {R : ℝ},
+      MinimalEnclosingDiskR2 v O R →
+      0 < R →
+      ∀ {i : ZMod n},
+        OnDiskBoundaryR2 v O R i →
+        (dist O (v (i + 1)) < R ∨ dist O (v (i - 1)) < R) →
+        DahlbergDiskAuxiliaryReduction v
+
 /-- Pair-level source for Dahlberg's §4 auxiliary construction.
 
 This is sharper than `DahlbergE2DiskAuxiliaryBoundaryConstructionSource`: the
@@ -7442,6 +7462,27 @@ theorem dahlbergE2DiskAuxiliaryBoundaryTransitionConstructionSource_of_neighborS
       hbackward.2 (Or.inr ?_)
     intro hprev
     exact hbackward.1 (by simpa [sub_eq_add_neg, add_assoc] using hprev)
+
+/-- A metric boundary-neighbor §4 source implies the set-level
+boundary-neighbor source by converting `j ∉ E` into `dist O (v j) < R`, using
+minimal-disk containment. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryNeighborConstructionSource_of_metricNeighborSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundaryMetricNeighborConstructionSource) :
+    DahlbergE2DiskAuxiliaryBoundaryNeighborConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict O R hΔ hRpos i hi hneighbor
+  letI : NeZero n := hne
+  have hboundary : OnDiskBoundaryR2 v O R i := (mem_diskBoundaryIndices).mp hi
+  rcases hneighbor with hnext | hprev
+  · have hnextInterior : dist O (v (i + 1)) < R := by
+      exact lt_of_le_of_ne (hΔ.2.1 (i + 1))
+        (fun hdist => hnext ((mem_diskBoundaryIndices).mpr hdist))
+    exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos
+      hboundary (Or.inl hnextInterior)
+  · have hprevInterior : dist O (v (i - 1)) < R := by
+      exact lt_of_le_of_ne (hΔ.2.1 (i - 1))
+        (fun hdist => hprev ((mem_diskBoundaryIndices).mpr hdist))
+    exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos
+      hboundary (Or.inr hprevInterior)
 
 /-- The boundary-set-level §4 source implies the boundary/interior source:
 a boundary vertex and a strictly interior vertex are exactly the concrete
@@ -8086,17 +8127,27 @@ theorem dahlbergE2RemainingSourceComponents_directIsometry
     (dahlbergE2DfvSourceComponents_of_remainingComponents hsrc)
     hu a hn hsimple hregular hnoncircle
 
-/-- Dahlberg's boundary-neighbor auxiliary-polygon construction/transfer
+/-- Dahlberg's metric boundary-neighbor auxiliary-polygon construction/transfer
 source gate for the §4 non-strict disk reduction.
 
 This is now the sharp paper-facing source gate for the §4 construction: after
 the finite minimal-disk setup, the proof uses the nonempty proper boundary set
 `E = V(Γ) ∩ ∂Δ`, extracts a boundary vertex with a neighboring vertex outside
-`E`, selects the corresponding complementary interval, and builds the
-auxiliary strictly convex polygon from the convex domain `U`. -/
+`E`, converts that neighbor into a strict interior vertex of `Δ`, selects the
+corresponding complementary interval, and builds the auxiliary strictly convex
+polygon from the convex domain `U`. -/
+theorem dahlbergE2_disk_auxiliary_boundary_metric_neighbor_construction_source_gate :
+    DahlbergE2DiskAuxiliaryBoundaryMetricNeighborConstructionSource := by
+  sorry
+
+/-- Dahlberg's boundary-neighbor auxiliary-polygon construction/transfer
+source for the §4 non-strict disk reduction, recovered from the metric
+boundary-neighbor source by converting nonmembership in `E` to strict
+interiority in the minimal disk. -/
 theorem dahlbergE2_disk_auxiliary_boundary_neighbor_construction_source_gate :
     DahlbergE2DiskAuxiliaryBoundaryNeighborConstructionSource := by
-  sorry
+  exact dahlbergE2DiskAuxiliaryBoundaryNeighborConstructionSource_of_metricNeighborSource
+    dahlbergE2_disk_auxiliary_boundary_metric_neighbor_construction_source_gate
 
 /-- Dahlberg's adjacent-transition auxiliary-polygon construction/transfer
 source for the §4 non-strict disk reduction, recovered by orienting a crossing
