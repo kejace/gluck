@@ -5828,6 +5828,32 @@ def DahlbergE2ConvexDfvRadiusSource : Prop :=
     (¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) →
     DahlbergE2ConvexDfvRadiusWitnesses v
 
+/-- Signed-Menger spelling of Dahlberg's convex/CDFV source.
+
+This is the theorem-level content of Dahlberg's strictly convex positive branch:
+the CDFV disk witnesses give the plateau-aware Dahlberg conclusion for signed
+Menger curvature.  It is equivalent to the radius-witness source by reciprocal
+radius monotonicity in the positive-orientation branch. -/
+def DahlbergE2ConvexDfvSignedSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) →
+    DahlbergFourVertex (SignedMengerProfile v)
+
+/-- The radius-profile and signed-Menger forms of the convex/CDFV source are
+equivalent in the positive-orientation branch. -/
+theorem dahlbergE2_convexDfvRadiusSource_iff_signedSource :
+    DahlbergE2ConvexDfvRadiusSource ↔ DahlbergE2ConvexDfvSignedSource := by
+  constructor
+  · intro hsrc n hne hn v hsimple hregular horient hnc
+    exact (dahlbergE2ConvexDfvRadiusWitnesses_iff_signedMengerProfile_dahlbergFourVertex
+      hsimple horient).mp (hsrc hn hsimple hregular horient hnc)
+  · intro hsrc n hne hn v hsimple hregular horient hnc
+    exact (dahlbergE2ConvexDfvRadiusWitnesses_iff_signedMengerProfile_dahlbergFourVertex
+      hsimple horient).mpr (hsrc hn hsimple hregular horient hnc)
+
 /-- Dahlberg's Lemma 8 monotonicity bridge in the convex positive-orientation
 branch.
 
@@ -5905,6 +5931,13 @@ Theorem 6/CDFV plus the Lemma 8 monotonicity bridge. -/
 theorem dahlbergE2_convex_radius_source_components :
     DahlbergE2ConvexRadiusSourceComponents := by
   sorry
+
+/-- Dahlberg's convex/CDFV signed-Menger source, extracted from the first
+component of the convex-radius source package. -/
+theorem dahlbergE2_convex_dfv_signed_source :
+    DahlbergE2ConvexDfvSignedSource := by
+  exact dahlbergE2_convexDfvRadiusSource_iff_signedSource.mp
+    dahlbergE2_convex_radius_source_components.1
 
 /-- Dahlberg's convex-radius Euclidean source for the positive-orientation
 branch of the discrete four-vertex paper. -/
