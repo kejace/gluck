@@ -7667,6 +7667,14 @@ theorem dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_iff_diskReductionSo
   · exact dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource
   · exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSource
 
+/-- The sharpened boundary/interior §4 auxiliary source is formally equivalent
+to Dahlberg's older non-strict disk-reduction source. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource :
+    DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource ↔
+      DahlbergE2DiskReductionSource := by
+  exact dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_maxInteriorSource.trans
+    dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_iff_diskReductionSource
+
 /-- The exact Euclidean source components needed for the final plateau-aware
 D4VT endpoint: Dahlberg's strict convex signed-Menger CDFV theorem, plus the
 boundary/interior §4 non-strict auxiliary construction.
@@ -7703,9 +7711,8 @@ theorem dahlbergE2GeometricSources_of_remainingComponents
     dahlbergE2ConvexRadiusSource_of_components
       ⟨dahlbergE2ConvexDfvRadiusSource_of_signedSource hsrc.1,
         dahlbergE2Lemma8RadiusTurnBridgeSource_of_witnessSource hsrc.2.1⟩,
-    dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource
-      (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_boundaryInteriorSource
-        hsrc.2.2)⟩
+    dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mp
+      hsrc.2.2⟩
 
 /-- The older bundled `E²` Dahlberg geometric source package implies the exact
 remaining source components. -/
@@ -7716,8 +7723,8 @@ theorem dahlbergE2RemainingSourceComponents_of_geometricSources
     dahlbergE2ConvexRadiusSourceComponents_iff_convexRadiusSource.mpr hsrc.1
   exact ⟨dahlbergE2ConvexDfvSignedSource_of_radiusSource hconvex.1,
     dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_source hconvex.2,
-    dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_maxInteriorSource
-      (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSource hsrc.2)⟩
+    dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mpr
+      hsrc.2⟩
 
 /-- The bundled `E²` Dahlberg geometric source package is equivalent to the
 exact three remaining source components. -/
@@ -7733,9 +7740,8 @@ theorem dahlbergE2DfvGeometricSources_of_components
     (hsrc : DahlbergE2DfvSourceComponents) :
     DahlbergE2DfvGeometricSources := by
   exact ⟨hsrc.1,
-    dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource
-      (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_boundaryInteriorSource
-        hsrc.2)⟩
+    dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mp
+      hsrc.2⟩
 
 /-- The older final-D4VT geometric package implies the sharp final-D4VT source
 components by unpacking its disk-reduction branch to the boundary/interior
@@ -7744,11 +7750,11 @@ theorem dahlbergE2DfvSourceComponents_of_geometricSources
     (hsrc : DahlbergE2DfvGeometricSources) :
     DahlbergE2DfvSourceComponents := by
   exact ⟨hsrc.1,
-    dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_maxInteriorSource
-      (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSource hsrc.2)⟩
+    dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mpr
+      hsrc.2⟩
 
 /-- The older final-D4VT geometric package is formally equivalent to the sharp
-signed-CDFV/max-interior source-component package. -/
+signed-CDFV/boundary-interior source-component package. -/
 theorem dahlbergE2DfvGeometricSources_iff_components :
     DahlbergE2DfvGeometricSources ↔ DahlbergE2DfvSourceComponents := by
   constructor
