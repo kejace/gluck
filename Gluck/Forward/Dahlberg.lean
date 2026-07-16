@@ -6262,6 +6262,27 @@ def DahlbergDiskReductionSetup {n : ℕ} (v : ZMod n → ℂ) : Prop :=
   ∃ O R, MinimalEnclosingDiskR2 v O R ∧
     ∃ i : ZMod n, OnDiskBoundaryR2 v O R i
 
+/-- The index set of vertices lying on the boundary of a chosen Euclidean
+disk.  This is Dahlberg's set `E = V(Γ) ∩ ∂Δ`, recorded at the cyclic-index
+level. -/
+def DiskBoundaryIndices {n : ℕ} (v : ZMod n → ℂ) (O : ℂ) (R : ℝ) :
+    Set (ZMod n) :=
+  {i | OnDiskBoundaryR2 v O R i}
+
+theorem mem_diskBoundaryIndices {n : ℕ} {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
+    {i : ZMod n} :
+    i ∈ DiskBoundaryIndices v O R ↔ OnDiskBoundaryR2 v O R i := by
+  rfl
+
+/-- Direct Euclidean isometries preserve Dahlberg's boundary index set. -/
+theorem diskBoundaryIndices_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
+    (w O : ℂ) (R : ℝ) (v : ZMod n → ℂ) :
+    DiskBoundaryIndices (fun i => directIsometryR2 u w (v i))
+        (directIsometryR2 u w O) R =
+      DiskBoundaryIndices v O R := by
+  ext i
+  exact onDiskBoundaryR2_directIsometry hu w O R v i
+
 /-- Direct Euclidean isometries preserve Dahlberg's minimal-disk setup. -/
 theorem dahlbergDiskReductionSetup_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
     (w : ℂ) (v : ZMod n → ℂ) :
@@ -6311,6 +6332,15 @@ theorem dahlbergDiskReductionSetup_exists_boundary_max {n : ℕ}
   exact ⟨O, R, i, hΔ, hboundary,
     fun j => dist_le_boundary_dist_of_minimalEnclosingDiskR2 hΔ hboundary⟩
 
+/-- The boundary index set `E` in Dahlberg's §4 setup is nonempty. -/
+theorem dahlbergDiskReductionSetup_diskBoundaryIndices_nonempty {n : ℕ}
+    {v : ZMod n → ℂ}
+    (hsetup : DahlbergDiskReductionSetup v) :
+    ∃ O R, MinimalEnclosingDiskR2 v O R ∧
+      (DiskBoundaryIndices v O R).Nonempty := by
+  rcases hsetup with ⟨O, R, hΔ, i, hi⟩
+  exact ⟨O, R, hΔ, i, hi⟩
+
 /-- In the nonconcyclic §4 branch, not every vertex can lie on the boundary
 of the minimal enclosing disk; otherwise the polygon would be concyclic. -/
 theorem dahlbergDiskReductionSetup_exists_interior_vertex_of_nonconcyclic
@@ -6329,6 +6359,24 @@ theorem dahlbergDiskReductionSetup_exists_interior_vertex_of_nonconcyclic
     intro j
     exact le_antisymm (hΔ.2.1 j) (not_lt.mp (fun hj => hnoInterior ⟨j, hj⟩))
   exact hnoncircle ⟨O, R, hRpos, hall⟩
+
+/-- In the nonconcyclic §4 branch, Dahlberg's boundary index set `E` is a
+nonempty proper subset of the cyclic vertex indices. -/
+theorem dahlbergDiskReductionSetup_diskBoundaryIndices_nonempty_proper_of_nonconcyclic
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hnoncircle : ¬ Concyclic v)
+    (hsetup : DahlbergDiskReductionSetup v) :
+    ∃ O R, MinimalEnclosingDiskR2 v O R ∧ 0 < R ∧
+      (DiskBoundaryIndices v O R).Nonempty ∧
+      ∃ j : ZMod n, j ∉ DiskBoundaryIndices v O R := by
+  rcases dahlbergDiskReductionSetup_exists_interior_vertex_of_nonconcyclic
+      hsimple hnoncircle hsetup with
+    ⟨O, R, hΔ, hRpos, hboundary, hinterior⟩
+  rcases hboundary with ⟨i, hi⟩
+  rcases hinterior with ⟨j, hj⟩
+  exact ⟨O, R, hΔ, hRpos, ⟨i, hi⟩, j,
+    not_onDiskBoundaryR2_of_dist_lt hj⟩
 
 /-- Combined finite-disk data for Dahlberg's §4 nonconcyclic branch: a
 positive minimal disk, a boundary vertex realizing the maximal radius, and a
@@ -6354,6 +6402,24 @@ theorem dahlbergDiskReductionSetup_exists_boundary_max_and_interior
   exact ⟨O, R, i, j, hΔ, hRpos, hi, hj,
     ne_of_onDiskBoundaryR2_of_dist_lt hi hj,
     fun k => dist_le_boundary_dist_of_minimalEnclosingDiskR2 hΔ hi⟩
+
+/-- Dahlberg's §4 nonconcyclic branch can choose a maximal boundary index and
+a complementary interior index. -/
+theorem dahlbergDiskReductionSetup_diskBoundaryIndices_boundary_max_and_complement
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hnoncircle : ¬ Concyclic v)
+    (hsetup : DahlbergDiskReductionSetup v) :
+    ∃ O R i j, MinimalEnclosingDiskR2 v O R ∧ 0 < R ∧
+      i ∈ DiskBoundaryIndices v O R ∧
+      j ∉ DiskBoundaryIndices v O R ∧
+      i ≠ j ∧
+      ∀ k : ZMod n, dist O (v k) ≤ dist O (v i) := by
+  rcases dahlbergDiskReductionSetup_exists_boundary_max_and_interior
+      hsimple hnoncircle hsetup with
+    ⟨O, R, i, j, hΔ, hRpos, hi, hj, hij, hmax⟩
+  exact ⟨O, R, i, j, hΔ, hRpos, hi,
+    not_onDiskBoundaryR2_of_dist_lt hj, hij, hmax⟩
 
 /-- Radius of the smallest closed disk with fixed centre `O` containing the
 finite cyclic vertex set `v`. -/
