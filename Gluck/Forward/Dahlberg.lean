@@ -5448,6 +5448,41 @@ for the previous-vertex curvature-radius profile. -/
 def DahlbergE2ConvexDfvRadiusWitnesses {n : ℕ} (v : ZMod n → ℂ) : Prop :=
   DahlbergFourVertex (EdgePrevCircleRadiusProfile v)
 
+/-- In the positive-orientation branch, the radius-profile CDFV witness form is
+equivalent to Dahlberg's conclusion for signed Menger curvature.
+
+The forward implication is reciprocal-radius monotonicity.  The reverse
+implication applies the same monotonicity to the positive signed-Menger profile
+and uses `(ρ⁻¹)⁻¹ = ρ`. -/
+theorem dahlbergE2ConvexDfvRadiusWitnesses_iff_signedMengerProfile_dahlbergFourVertex
+    {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v) :
+    DahlbergE2ConvexDfvRadiusWitnesses v ↔
+      DahlbergFourVertex (SignedMengerProfile v) := by
+  constructor
+  · intro hfv
+    exact signedMengerProfile_dahlbergFourVertex_of_positiveRadiusProfile
+      hsimple horient hfv
+  · intro hfv
+    have hρpos : ∀ i : ZMod n, 0 < EdgePrevCircleRadiusProfile v i :=
+      EdgePrevCircleRadiusProfile_pos hsimple
+    have hκpos : ∀ i : ZMod n, 0 < SignedMengerProfile v i := by
+      intro i
+      rw [signedMengerProfile_eq_inv_edgePrevCircleRadiusProfile_of_positiveOrientation
+        hsimple horient i]
+      exact inv_pos.mpr (hρpos i)
+    have hinv : DahlbergFourVertex (fun i => (SignedMengerProfile v i)⁻¹) :=
+      dahlbergFourVertex_inv_of_pos hκpos hfv
+    exact dahlbergFourVertex_congr (κ := fun i => (SignedMengerProfile v i)⁻¹)
+      (μ := EdgePrevCircleRadiusProfile v)
+      (by
+        intro i
+        rw [signedMengerProfile_eq_inv_edgePrevCircleRadiusProfile_of_positiveOrientation
+          hsimple horient i]
+        exact (inv_inv (EdgePrevCircleRadiusProfile v i)).symm)
+      hinv
+
 /-- Adjacent positive radius turns imply the radius-profile witness form of
 Dahlberg's convex discrete four-vertex theorem.
 
