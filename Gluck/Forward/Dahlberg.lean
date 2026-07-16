@@ -9428,6 +9428,16 @@ def DahlbergE2Lemma9UnitRemainingSourceComponents : Prop :=
   DahlbergE2Lemma9Source ∧
   DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
 
+/-- The current E² source-gate surface is also sufficient for the final D4VT
+route: Lemma 9 implies the nonconcyclic signed-CDFV source, and the unit-disk
+§4 source is shared with the stronger ordered-turn route.
+
+This is intentionally one-way: final D4VT's CDFV source alone does not recover
+the ordered-turn content of Lemma 9. -/
+def DahlbergE2Lemma9DfvUnitSourceComponents : Prop :=
+  DahlbergE2Lemma9Source ∧
+  DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
+
 /-- Convert normalized-unit final-D4VT E² components to the existing
 boundary/interior component package. -/
 theorem dahlbergE2DfvSourceComponents_of_unitComponents
@@ -9478,6 +9488,16 @@ theorem dahlbergE2DfvSourceComponents_iff_primitiveComponents :
   constructor
   · exact dahlbergE2DfvPrimitiveSourceComponents_of_components
   · exact dahlbergE2DfvSourceComponents_of_primitiveComponents
+
+/-- The current Lemma-9/unit E² source surface implies the primitive
+final-D4VT E² component package. -/
+theorem dahlbergE2DfvPrimitiveSourceComponents_of_lemma9DfvUnitComponents
+    (hsrc : DahlbergE2Lemma9DfvUnitSourceComponents) :
+    DahlbergE2DfvPrimitiveSourceComponents := by
+  have hsplit : DahlbergE2ConvexSignedSourceComponents :=
+    dahlbergE2ConvexSignedSourceComponents_of_lemma9Source hsrc.1
+  exact ⟨dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource hsplit.1,
+    hsrc.2⟩
 
 /-- Convert normalized-unit remaining E² components to the existing
 boundary/interior component package. -/

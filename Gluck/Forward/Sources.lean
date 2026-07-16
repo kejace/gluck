@@ -476,6 +476,17 @@ def ForwardUniformDfvPrimitiveRemainingSourceComponents : Prop :=
   SpaceFormDiscreteDfvSource ∧
   DahlbergE2DfvPrimitiveSourceComponents
 
+/-- Uniform component spelling showing that the actual current source-gate
+surface is sufficient for final D4VT endpoints.
+
+The smooth and non-Euclidean components are the weak final-D4VT source
+packages; the E² component is still recorded by the actual Lemma 9 gate plus
+the unit-disk §4 source, which formally implies final-D4VT's CDFV source. -/
+def ForwardUniformLemma9DfvPrimitiveRemainingSourceComponents : Prop :=
+  SmoothForwardDfvSource ∧
+  SpaceFormDiscreteDfvSource ∧
+  DahlbergE2Lemma9DfvUnitSourceComponents
+
 /-- The uniform remaining-source components are equivalent to the
 model-specific component spelling. -/
 theorem forwardUniformRemainingSourceComponents_iff_components :
@@ -541,6 +552,15 @@ theorem forwardUniformDfvPrimitiveRemainingSourceComponents_iff_components :
   · intro hsrc
     exact ⟨smoothForwardDfvSource_iff_modelSources.mpr hsrc.1,
       spaceFormDiscreteDfvSource_iff_modelSources.mpr hsrc.2.1, hsrc.2.2⟩
+
+/-- The actual current uniform source-gate surface implies the uniform
+primitive final-D4VT source surface. -/
+theorem forwardUniformDfvPrimitiveRemainingSourceComponents_of_lemma9Components
+    (hsrc : ForwardUniformLemma9DfvPrimitiveRemainingSourceComponents) :
+    ForwardUniformDfvPrimitiveRemainingSourceComponents := by
+  exact ⟨hsrc.1, hsrc.2.1,
+    dahlbergE2DfvPrimitiveSourceComponents_of_lemma9DfvUnitComponents
+      hsrc.2.2⟩
 
 /-- The existing named remaining-source package is equivalent to the
 normalized-unit spelling. -/
@@ -5273,14 +5293,22 @@ theorem forward_geometric_sources : ForwardGeometricSources := by
 /-- Uniform primitive grouped component spelling of the current final-D4VT
 source audit.
 
-This exposes the exact primitive E² final-D4VT source gates: nonconcyclic CDFV
-and the normalized unit-disk §4 construction, together with the unified weak
-smooth and non-Euclidean final-D4VT source packages. -/
-theorem forward_uniform_dfv_primitive_remaining_source_components :
-    ForwardUniformDfvPrimitiveRemainingSourceComponents := by
+This uses the actual current source-gate surface: the weak smooth and
+non-Euclidean final-D4VT source packages, plus Dahlberg's E² Lemma 9 source
+and the normalized unit-disk §4 construction. -/
+theorem forward_uniform_lemma9_dfv_primitive_remaining_source_components :
+    ForwardUniformLemma9DfvPrimitiveRemainingSourceComponents := by
   exact ⟨smoothForward_dfv_source_gate,
     spaceFormDiscrete_dfv_source_gate,
-    dahlbergE2_dfv_primitive_source_components⟩
+    dahlbergE2_lemma9_source_gate,
+    dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate⟩
+
+/-- Uniform primitive grouped component spelling of the current final-D4VT
+source audit, expanded to the final-D4VT primitive compatibility surface. -/
+theorem forward_uniform_dfv_primitive_remaining_source_components :
+    ForwardUniformDfvPrimitiveRemainingSourceComponents := by
+  exact forwardUniformDfvPrimitiveRemainingSourceComponents_of_lemma9Components
+    forward_uniform_lemma9_dfv_primitive_remaining_source_components
 
 /-- Primitive grouped component spelling of the current final-D4VT source
 audit, expanded to the model-specific compatibility surface. -/
