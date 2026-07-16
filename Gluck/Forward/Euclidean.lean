@@ -41,6 +41,25 @@ theorem four_vertex_E2 {γ : ℝ → ℂ} {κ : ℝ → ℝ}
     (ε := 0) (Or.inl rfl) hclosed
     (by simpa [SmoothForwardRealizes] using hreal) hκ hper
 
+/-- Nonconstant Euclidean smooth four-vertex theorem, stated in the
+value-separated form used by the converse development. -/
+theorem four_vertex_condition_E2_nonconstant {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    Gluck.FourVertexCondition κ := by
+  exact four_vertex_condition_smooth_E2_nonconstant_source
+    hclosed hreal hκ hper hnc
+
+/-- Nonconstant Euclidean smooth four-vertex theorem. -/
+theorem four_vertex_E2_nonconstant {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_of_fourVertexCondition
+    (four_vertex_condition_E2_nonconstant hclosed hreal hκ hper hnc)
+
 /-- The convex Euclidean four-vertex theorem.  At the API level this is an
 immediate specialization of the standard theorem; the source-level convex
 argument will supply the principal lemma used in the proof of `four_vertex_E2`. -/

@@ -35,6 +35,28 @@ theorem four_vertex_S2 {z : ℝ → ℂ} {κ : ℝ → ℝ}
     (ε := 1) (Or.inr (Or.inl rfl)) hclosed
     (by simpa [SmoothForwardRealizes] using hreal) hκ hper
 
+/-- Nonconstant spherical smooth four-vertex theorem in stereographic
+coordinates, stated in the value-separated form. -/
+theorem four_vertex_condition_S2_nonconstant {z : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed z)
+    (hreal : Gluck.SpaceForm.Realizes 1 z κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    Gluck.FourVertexCondition κ := by
+  exact four_vertex_condition_smooth_S2_nonconstant_source
+    hclosed hreal hκ hper hnc
+
+/-- Nonconstant spherical smooth four-vertex theorem in stereographic
+coordinates. -/
+theorem four_vertex_S2_nonconstant {z : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed z)
+    (hreal : Gluck.SpaceForm.Realizes 1 z κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_of_fourVertexCondition
+    (four_vertex_condition_S2_nonconstant hclosed hreal hκ hper hnc)
+
 /-- Deferred spherical constant-or-Dahlberg theorem for a convex coherent
 polygon in an open hemisphere.  This is the project-derived `sin R` analogue
 of the Musin / Grant--Mogilski circumradius theorem and appears to be new. -/

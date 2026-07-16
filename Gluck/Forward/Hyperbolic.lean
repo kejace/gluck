@@ -35,6 +35,27 @@ theorem four_vertex_H2 {z : ℝ → ℂ} {κ : ℝ → ℝ}
     (ε := -1) (Or.inr (Or.inr rfl)) hclosed
     (by simpa [SmoothForwardRealizes] using hreal) hκ hper
 
+/-- Nonconstant hyperbolic smooth four-vertex theorem in the Poincaré disk,
+stated in the value-separated form. -/
+theorem four_vertex_condition_H2_nonconstant {z : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed z)
+    (hreal : Gluck.SpaceForm.Realizes (-1) z κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    Gluck.FourVertexCondition κ := by
+  exact four_vertex_condition_smooth_H2_nonconstant_source
+    hclosed hreal hκ hper hnc
+
+/-- Nonconstant hyperbolic smooth four-vertex theorem in the Poincaré disk. -/
+theorem four_vertex_H2_nonconstant {z : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed z)
+    (hreal : Gluck.SpaceForm.Realizes (-1) z κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_of_fourVertexCondition
+    (four_vertex_condition_H2_nonconstant hclosed hreal hκ hper hnc)
+
 /-- Grant--Mogilski's hyperbolic constant-or-Dahlberg theorem for a convex
 coherent polygon whose consecutive triples lie on proper hyperbolic circles
 (`κᵢ > 1`). -/
