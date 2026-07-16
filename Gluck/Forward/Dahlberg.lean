@@ -5799,6 +5799,17 @@ def DahlbergDiskAuxiliaryReduction {n : ℕ} [NeZero n] (v : ZMod n → ℂ) : P
     (DahlbergFourVertex (SignedMengerProfile w) →
       DahlbergFourVertex (SignedMengerProfile v))
 
+/-- Minimal-disk setup used in Dahlberg's §4 non-strict reduction.
+
+Dahlberg starts the final proof by choosing the smallest closed disk `Δ`
+containing the polygon and its boundary vertex set `E = V(Γ) ∩ ∂Δ`.  This
+predicate records the part of that setup currently represented in the formal
+API: a minimal enclosing disk together with at least one vertex on its
+boundary. -/
+def DahlbergDiskReductionSetup {n : ℕ} (v : ZMod n → ℂ) : Prop :=
+  ∃ O R, MinimalEnclosingDiskR2 v O R ∧
+    ∃ i : ZMod n, OnDiskBoundaryR2 v O R i
+
 /-- Dahlberg's convex-radius input for the positive-orientation branch.
 
 This is the radius-level extraction from Lemma 8 plus the convex discrete
@@ -5914,6 +5925,37 @@ def DahlbergE2DiskReductionSource : Prop :=
     (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
     DahlbergDiskAuxiliaryReduction v
 
+/-- Source for the minimal-disk setup in Dahlberg's §4 non-strict reduction. -/
+def DahlbergE2DiskReductionSetupSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    DahlbergDiskReductionSetup v
+
+/-- Source for constructing the strict-orientation auxiliary polygon from the
+minimal-disk setup in Dahlberg's §4 non-strict reduction.
+
+This is where Dahlberg uses the disconnected boundary set, Lemma 10's
+triangle-sector radius comparison, the convex domain `U`, and a polygonal
+approximation of `∂U` to build the auxiliary strictly oriented polygon whose
+D4VT conclusion transfers back to the original polygon. -/
+def DahlbergE2DiskAuxiliaryConstructionSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    DahlbergDiskReductionSetup v →
+    DahlbergDiskAuxiliaryReduction v
+
+/-- The two source components of Dahlberg's §4 non-strict disk reduction:
+the minimal-disk/boundary setup and the auxiliary-polygon construction from
+that setup. -/
+def DahlbergE2DiskReductionSourceComponents : Prop :=
+  DahlbergE2DiskReductionSetupSource ∧ DahlbergE2DiskAuxiliaryConstructionSource
+
 /-- The genuinely Euclidean geometric inputs in Dahlberg's discrete
 four-vertex proof.
 
@@ -5963,10 +6005,21 @@ theorem dahlbergE2_lemma9_source : DahlbergE2Lemma9Source := by
   exact dahlbergE2_convexRadiusSource_iff_lemma9Source.mp
     dahlbergE2_convex_radius_source
 
+/-- Dahlberg's source components for the §4 non-strict disk reduction:
+minimal-disk setup plus the auxiliary-polygon construction. -/
+theorem dahlbergE2_disk_reduction_source_components :
+    DahlbergE2DiskReductionSourceComponents := by
+  sorry
+
 /-- Dahlberg's Euclidean non-strict §4 disk-reduction geometric source for the
 discrete four-vertex paper. -/
 theorem dahlbergE2_disk_reduction_source : DahlbergE2DiskReductionSource := by
-  sorry
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict
+  letI : NeZero n := hne
+  exact dahlbergE2_disk_reduction_source_components.2
+    hn hsimple hregular hnoncircle hnonstrict
+    (dahlbergE2_disk_reduction_source_components.1
+      hn hsimple hregular hnoncircle hnonstrict)
 
 /-- Dahlberg's Euclidean geometric source package for the discrete
 four-vertex paper recorded as `23.pdf` in `references/summary.md`.
