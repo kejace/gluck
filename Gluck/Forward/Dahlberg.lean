@@ -8019,6 +8019,14 @@ theorem dahlbergE2Lemma9Source_of_components
   exact dahlbergE2_convexRadiusSource_iff_lemma9Source.mp
     (dahlbergE2ConvexRadiusSource_of_components hsrc)
 
+/-- The sharpened witness-only CDFV/Lemma 8 source components imply
+Dahlberg's Lemma 9 signed-Menger ordered-turn source. -/
+theorem dahlbergE2Lemma9Source_of_witnessComponents
+    (hsrc : DahlbergE2ConvexRadiusWitnessSourceComponents) :
+    DahlbergE2Lemma9Source := by
+  exact dahlbergE2_convexRadiusSource_iff_lemma9Source.mp
+    (dahlbergE2ConvexRadiusWitnessSourceComponents_iff_convexRadiusSource.mp hsrc)
+
 /-- Dahlberg's Lemma 9 source implies the split CDFV/Lemma 8 source package,
 formally, by converting Lemma 9 back to ordered radius turns. -/
 theorem dahlbergE2ConvexRadiusSourceComponents_of_lemma9Source
@@ -9266,11 +9274,19 @@ theorem dahlbergE2_convex_signed_source_components_gate :
   exact ⟨dahlbergE2_convex_dfv_signed_source_gate,
     dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate⟩
 
+/-- Dahlberg's exact radius-CDFV/Lemma 8 source components, split into the two
+paper-facing strict-branch inputs. -/
+theorem dahlbergE2_convex_radius_witness_source_components_gate :
+    DahlbergE2ConvexRadiusWitnessSourceComponents := by
+  exact ⟨dahlbergE2ConvexDfvRadiusSource_of_nonconcyclicSource
+      dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate,
+    dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate⟩
+
 /-- Dahlberg's strict positive-orientation Lemma 9 source gate, recovered from
-the split CDFV/Lemma 8 source components. -/
+the split radius-CDFV/Lemma 8 source components. -/
 theorem dahlbergE2_lemma9_source_gate : DahlbergE2Lemma9Source := by
-  exact dahlbergE2Lemma9Source_of_signedComponents
-    dahlbergE2_convex_signed_source_components_gate
+  exact dahlbergE2Lemma9Source_of_witnessComponents
+    dahlbergE2_convex_radius_witness_source_components_gate
 
 /-- Dahlberg's strict positive-orientation radius-turn source gate, recovered
 from the split CDFV/Lemma 8 source components.
@@ -9331,8 +9347,8 @@ theorem dahlbergE2_lemma8_radius_turn_bridge_source :
 Theorem 6/CDFV plus the Lemma 8 monotonicity bridge. -/
 theorem dahlbergE2_convex_radius_source_components :
     DahlbergE2ConvexRadiusSourceComponents := by
-  exact ⟨dahlbergE2_convex_dfv_radius_source,
-    dahlbergE2_lemma8_radius_turn_bridge_source⟩
+  exact dahlbergE2ConvexRadiusSourceComponents_of_witnessComponents
+    dahlbergE2_convex_radius_witness_source_components_gate
 
 /-- Dahlberg's convex-radius Euclidean source for the positive-orientation
 branch of the discrete four-vertex paper. -/
