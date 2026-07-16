@@ -7641,6 +7641,30 @@ theorem dahlbergE2ConvexDfvSignedSource_directIsometry
   exact (dahlbergFourVertex_signedMengerProfile_directIsometry_iff hu a v).mpr
     (hsrc hn hsimple₀ hregular₀ horient₀ hnc₀)
 
+/-- The nonconcyclic signed CDFV source can be applied after direct Euclidean
+normalization. -/
+theorem dahlbergE2ConvexDfvSignedNonconcyclicSource_directIsometry
+    (hsrc : DahlbergE2ConvexDfvSignedNonconcyclicSource)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (horient : PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)))
+    (hnoncircle : ¬ Concyclic (fun i => directIsometryR2 u a (v i))) :
+    DahlbergFourVertex
+      (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) := by
+  have hsimple₀ : Gluck.Discrete.IsSimplePolygon v :=
+    (isSimplePolygon_directIsometry_iff hu a v).mp hsimple
+  have hregular₀ : DahlbergRegular v :=
+    (dahlbergRegular_directIsometry_iff hu a v).mp hregular
+  have horient₀ : PositivePolygonOrientation v :=
+    (positivePolygonOrientation_directIsometry hu a v).mp horient
+  have hnoncircle₀ : ¬ Concyclic v :=
+    (not_concyclic_directIsometry hu a v).mp hnoncircle
+  exact (dahlbergFourVertex_signedMengerProfile_directIsometry_iff hu a v).mpr
+    (hsrc hn hsimple₀ hregular₀ horient₀ hnoncircle₀)
+
 /-- The radius-profile and signed-Menger forms of the convex/CDFV source are
 equivalent in the positive-orientation branch. -/
 theorem dahlbergE2_convexDfvRadiusSource_iff_signedSource :
@@ -10157,7 +10181,8 @@ theorem dahlbergE2DfvPrimitiveSourceComponents_directIsometry
           (fun i => directIsometryR2 u a (v i))) := by
   refine ⟨?_, ?_⟩
   · intro horient
-    exact hsrc.1 hn hsimple hregular horient hnoncircle
+    exact dahlbergE2ConvexDfvSignedNonconcyclicSource_directIsometry
+      hsrc.1 hu a hn hsimple hregular horient hnoncircle
   · intro hnonstrict
     rcases
       dahlbergDiskReductionSetup_exists_boundary_max_and_interior
