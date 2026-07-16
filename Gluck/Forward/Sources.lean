@@ -2758,20 +2758,6 @@ theorem discrete_four_vertex_H2_of_dfvAtomicSources
     (forwardDfvGeometricSources_of_atomicSources hsrc)
     hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
 
-/-- The current forward development is reduced to the bundled geometric source
-package.  This theorem is intentionally proved by collecting the existing
-source gates; completing the forward program means proving the components of
-`ForwardGeometricSources`. -/
-theorem forward_geometric_sources : ForwardGeometricSources := by
-  refine ⟨?_, ?_, dahlbergE2_geometric_sources⟩
-  · intro ε hε γ κ hclosed hreal hκ hper hnc
-    exact four_vertex_condition_smooth_spaceForm_nonconstant_geometric_source
-      hε hclosed hreal hκ hper hnc
-  · intro ε hε n hne hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
-    letI : NeZero n := hne
-    exact orderedAdjacentTurns_spaceForm_geometric_source
-      hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
-
 /-- Sharper audit theorem: the current forward development is reduced to the
 actual remaining source gates.
 
@@ -2798,6 +2784,11 @@ theorem forward_remaining_sources : ForwardRemainingSources := by
     letI : NeZero n := hne
     exact orderedAdjacentTurns_H2_geometric_source
       hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
+
+/-- The current forward development is reduced to the bundled geometric source
+package, routed through the sharper exact remaining-source audit. -/
+theorem forward_geometric_sources : ForwardGeometricSources := by
+  exact forwardGeometricSources_of_remainingSources forward_remaining_sources
 
 /-- Sharper audit theorem for the final D4VT endpoints.  Its Euclidean
 Dahlberg strict convex component is the theorem-level signed-Menger source,
