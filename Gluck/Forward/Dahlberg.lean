@@ -9767,6 +9767,47 @@ theorem dahlbergE2DfvUnitSourceComponents_directIsometry
     (dahlbergE2DfvSourceComponents_of_unitComponents hsrc)
     hu a hn hsimple hregular hnoncircle
 
+/-- The current Lemma-9/unit final-D4VT E² gate surface is compatible with
+direct Euclidean normalization.
+
+This keeps the final-D4VT transport on the exact current gate surface: the
+positive branch uses Lemma 9 only to obtain ordered signed-Menger turns, while
+the non-strict branch uses the normalized unit-disk §4 source transported
+through the already-proved boundary/interior interface. -/
+theorem dahlbergE2Lemma9DfvUnitSourceComponents_directIsometry
+    (hsrc : DahlbergE2Lemma9DfvUnitSourceComponents)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (hnoncircle : ¬ Concyclic (fun i => directIsometryR2 u a (v i))) :
+    (PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)) →
+        DahlbergFourVertex
+          (SignedMengerProfile (fun i => directIsometryR2 u a (v i)))) ∧
+      (¬ (PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)) ∨
+          NegativePolygonOrientation (fun i => directIsometryR2 u a (v i))) →
+        DahlbergDiskAuxiliaryReduction
+          (fun i => directIsometryR2 u a (v i))) := by
+  refine ⟨?_, ?_⟩
+  · intro horient
+    exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+      (hsrc.1 hn hsimple hregular horient
+        (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
+          hsimple hregular horient hnoncircle))
+  · intro hnonstrict
+    rcases
+      dahlbergDiskReductionSetup_exists_boundary_max_and_interior
+        hsimple hnoncircle
+        (dahlbergE2_disk_reduction_setup_source
+          hn hsimple hregular hnoncircle hnonstrict) with
+      ⟨O, R, i, j, hΔ, _hRpos, hboundary, hinterior, hij, _hmax⟩
+    exact dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_directIsometry
+      (dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_boundaryInteriorSource.mp
+        hsrc.2)
+      hu a hn hsimple hregular hnoncircle hnonstrict hΔ hboundary
+      hinterior hij
+
 /-- The primitive final-D4VT E² source components are compatible with direct
 Euclidean normalization. -/
 theorem dahlbergE2DfvPrimitiveSourceComponents_directIsometry
