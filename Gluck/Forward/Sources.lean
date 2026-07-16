@@ -2298,9 +2298,12 @@ theorem forward_dfv_remaining_sources : ForwardDfvRemainingSources := by
       (orderedAdjacentTurns_H2_geometric_source
         hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc)
 
-/-- Weaker final-D4VT spelling of `forward_geometric_sources`. -/
+/-- Weaker final-D4VT source package, routed through the actual weaker
+final-D4VT remaining-source audit rather than through the stronger full
+geometric source package. -/
 theorem forward_dfv_geometric_sources : ForwardDfvGeometricSources := by
-  exact forwardDfvGeometricSources_of_geometricSources forward_geometric_sources
+  exact forwardDfvGeometricSources_of_dfvRemainingSources
+    forward_dfv_remaining_sources
 
 /-- Model-specific spelling of `forward_geometric_sources`. -/
 theorem forward_model_sources : ForwardModelSources := by
