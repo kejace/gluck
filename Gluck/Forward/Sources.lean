@@ -5246,8 +5246,7 @@ theorem forward_uniform_lemma9_primitive_remaining_source_components :
     ForwardUniformLemma9PrimitiveRemainingSourceComponents := by
   exact ⟨smoothForward_source_gate,
     spaceFormDiscrete_source_gate,
-    dahlbergE2_lemma9_source_gate,
-    dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate⟩
+    dahlbergE2_lemma9_unit_remaining_source_components⟩
 
 /-- Uniform primitive grouped component spelling of the current forward source
 audit, expanded to the split strict-branch compatibility surface. -/
@@ -5300,8 +5299,7 @@ theorem forward_uniform_lemma9_dfv_primitive_remaining_source_components :
     ForwardUniformLemma9DfvPrimitiveRemainingSourceComponents := by
   exact ⟨smoothForward_dfv_source_gate,
     spaceFormDiscrete_dfv_source_gate,
-    dahlbergE2_lemma9_source_gate,
-    dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate⟩
+    dahlbergE2_lemma9_dfv_unit_source_components⟩
 
 /-- Uniform primitive grouped component spelling of the current final-D4VT
 source audit, expanded to the final-D4VT primitive compatibility surface. -/
