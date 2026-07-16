@@ -6458,6 +6458,34 @@ theorem edgePrevCircle_circumcircleR2_of_positiveOrientation {n : ℕ}
       (circumcircleR2_edge_parameter (hsimple.1 i) hcross.ne')
   exact ⟨hcircle.1, hcircle.2.2.2, hcircle.2.1, hcircle.2.2.1⟩
 
+/-- The previous defining vertex lies on the previous-vertex curvature
+circle. -/
+theorem edgePrevCircle_dist_prev_eq_radius_of_positiveOrientation {n : ℕ}
+    {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v) (i : ZMod n) :
+    dist (EdgePrevCircleCenterProfile v i) (v (i - 1)) =
+      EdgePrevCircleRadiusProfile v i := by
+  exact (edgePrevCircle_circumcircleR2_of_positiveOrientation hsimple horient i).2.1
+
+/-- The center vertex lies on the previous-vertex curvature circle. -/
+theorem edgePrevCircle_dist_self_eq_radius_of_positiveOrientation {n : ℕ}
+    {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v) (i : ZMod n) :
+    dist (EdgePrevCircleCenterProfile v i) (v i) =
+      EdgePrevCircleRadiusProfile v i := by
+  exact (edgePrevCircle_circumcircleR2_of_positiveOrientation hsimple horient i).2.2.1
+
+/-- The next defining vertex lies on the previous-vertex curvature circle. -/
+theorem edgePrevCircle_dist_next_eq_radius_of_positiveOrientation {n : ℕ}
+    {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v) (i : ZMod n) :
+    dist (EdgePrevCircleCenterProfile v i) (v (i + 1)) =
+      EdgePrevCircleRadiusProfile v i := by
+  exact (edgePrevCircle_circumcircleR2_of_positiveOrientation hsimple horient i).2.2.2
+
 /-- The previous-vertex curvature disk contains all vertices.  This is the
 Lean-side spelling of Dahlberg's conclusion `V(γ) ⊆ ω(P)`. -/
 def EdgePrevCurvatureDiskContainsAll {n : ℕ} (v : ZMod n → ℂ)
@@ -6508,6 +6536,36 @@ theorem edgePrevCurvatureDiskContainsAll_self {n : ℕ}
     dist (EdgePrevCircleCenterProfile v i) (v i) ≤
       EdgePrevCircleRadiusProfile v i := by
   exact hcontains i
+
+/-- In the positive-orientation branch, a previous curvature disk has its
+center vertex on the disk boundary. -/
+theorem edgePrevCurvatureDisk_self_boundary_of_positiveOrientation {n : ℕ}
+    {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v) (i : ZMod n) :
+    OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v i)
+      (EdgePrevCircleRadiusProfile v i) i := by
+  exact edgePrevCircle_dist_self_eq_radius_of_positiveOrientation hsimple horient i
+
+/-- In the positive-orientation branch, the previous defining vertex of a
+curvature disk is on the disk boundary. -/
+theorem edgePrevCurvatureDisk_prev_boundary_of_positiveOrientation {n : ℕ}
+    {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v) (i : ZMod n) :
+    OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v i)
+      (EdgePrevCircleRadiusProfile v i) (i - 1) := by
+  exact edgePrevCircle_dist_prev_eq_radius_of_positiveOrientation hsimple horient i
+
+/-- In the positive-orientation branch, the next defining vertex of a
+curvature disk is on the disk boundary. -/
+theorem edgePrevCurvatureDisk_next_boundary_of_positiveOrientation {n : ℕ}
+    {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v) (i : ZMod n) :
+    OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v i)
+      (EdgePrevCircleRadiusProfile v i) (i + 1) := by
+  exact edgePrevCircle_dist_next_eq_radius_of_positiveOrientation hsimple horient i
 
 /-- Dahlberg §3 Lemma 5 certificate: two distinct curvature disks contain all
 vertices. -/
@@ -6604,6 +6662,103 @@ structure DahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate {n : ℕ}
   localMax₃ : DiscreteLocalMax (EdgePrevCircleRadiusProfile v) (disk.i₃ : ZMod n)
   localMin₄ : DiscreteLocalMin (EdgePrevCircleRadiusProfile v) (disk.i₄ : ZMod n)
 
+/-- Boundary incidence for the four ordered curvature disks appearing in
+Dahlberg's Theorem 6 / CDFV.  Each curvature circle passes through the three
+vertices that define it. -/
+structure DahlbergE2Theorem6OrderedDiskBoundaryIncidence {n : ℕ}
+    {v : ZMod n → ℂ} (disk : DahlbergE2Theorem6OrderedDiskCertificate v) :
+    Prop where
+  boundary₁_prev :
+    OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v (disk.i₁ : ZMod n))
+      (EdgePrevCircleRadiusProfile v (disk.i₁ : ZMod n))
+      ((disk.i₁ : ZMod n) - 1)
+  boundary₁_self :
+    OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v (disk.i₁ : ZMod n))
+      (EdgePrevCircleRadiusProfile v (disk.i₁ : ZMod n)) (disk.i₁ : ZMod n)
+  boundary₁_next :
+    OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v (disk.i₁ : ZMod n))
+      (EdgePrevCircleRadiusProfile v (disk.i₁ : ZMod n))
+      ((disk.i₁ : ZMod n) + 1)
+  boundary₂_prev :
+    OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v (disk.i₂ : ZMod n))
+      (EdgePrevCircleRadiusProfile v (disk.i₂ : ZMod n))
+      ((disk.i₂ : ZMod n) - 1)
+  boundary₂_self :
+    OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v (disk.i₂ : ZMod n))
+      (EdgePrevCircleRadiusProfile v (disk.i₂ : ZMod n)) (disk.i₂ : ZMod n)
+  boundary₂_next :
+    OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v (disk.i₂ : ZMod n))
+      (EdgePrevCircleRadiusProfile v (disk.i₂ : ZMod n))
+      ((disk.i₂ : ZMod n) + 1)
+  boundary₃_prev :
+    OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v (disk.i₃ : ZMod n))
+      (EdgePrevCircleRadiusProfile v (disk.i₃ : ZMod n))
+      ((disk.i₃ : ZMod n) - 1)
+  boundary₃_self :
+    OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v (disk.i₃ : ZMod n))
+      (EdgePrevCircleRadiusProfile v (disk.i₃ : ZMod n)) (disk.i₃ : ZMod n)
+  boundary₃_next :
+    OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v (disk.i₃ : ZMod n))
+      (EdgePrevCircleRadiusProfile v (disk.i₃ : ZMod n))
+      ((disk.i₃ : ZMod n) + 1)
+  boundary₄_prev :
+    OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v (disk.i₄ : ZMod n))
+      (EdgePrevCircleRadiusProfile v (disk.i₄ : ZMod n))
+      ((disk.i₄ : ZMod n) - 1)
+  boundary₄_self :
+    OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v (disk.i₄ : ZMod n))
+      (EdgePrevCircleRadiusProfile v (disk.i₄ : ZMod n)) (disk.i₄ : ZMod n)
+  boundary₄_next :
+    OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v (disk.i₄ : ZMod n))
+      (EdgePrevCircleRadiusProfile v (disk.i₄ : ZMod n))
+      ((disk.i₄ : ZMod n) + 1)
+
+/-- Ordered CDFV disk data automatically carries the boundary-incidence facts
+for its four defining triples in the positive-orientation branch. -/
+theorem dahlbergE2Theorem6OrderedDiskBoundaryIncidence_of_positiveOrientation
+    {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (disk : DahlbergE2Theorem6OrderedDiskCertificate v) :
+    DahlbergE2Theorem6OrderedDiskBoundaryIncidence disk := by
+  exact
+    { boundary₁_prev :=
+        edgePrevCurvatureDisk_prev_boundary_of_positiveOrientation hsimple horient
+          (disk.i₁ : ZMod n)
+      boundary₁_self :=
+        edgePrevCurvatureDisk_self_boundary_of_positiveOrientation hsimple horient
+          (disk.i₁ : ZMod n)
+      boundary₁_next :=
+        edgePrevCurvatureDisk_next_boundary_of_positiveOrientation hsimple horient
+          (disk.i₁ : ZMod n)
+      boundary₂_prev :=
+        edgePrevCurvatureDisk_prev_boundary_of_positiveOrientation hsimple horient
+          (disk.i₂ : ZMod n)
+      boundary₂_self :=
+        edgePrevCurvatureDisk_self_boundary_of_positiveOrientation hsimple horient
+          (disk.i₂ : ZMod n)
+      boundary₂_next :=
+        edgePrevCurvatureDisk_next_boundary_of_positiveOrientation hsimple horient
+          (disk.i₂ : ZMod n)
+      boundary₃_prev :=
+        edgePrevCurvatureDisk_prev_boundary_of_positiveOrientation hsimple horient
+          (disk.i₃ : ZMod n)
+      boundary₃_self :=
+        edgePrevCurvatureDisk_self_boundary_of_positiveOrientation hsimple horient
+          (disk.i₃ : ZMod n)
+      boundary₃_next :=
+        edgePrevCurvatureDisk_next_boundary_of_positiveOrientation hsimple horient
+          (disk.i₃ : ZMod n)
+      boundary₄_prev :=
+        edgePrevCurvatureDisk_prev_boundary_of_positiveOrientation hsimple horient
+          (disk.i₄ : ZMod n)
+      boundary₄_self :=
+        edgePrevCurvatureDisk_self_boundary_of_positiveOrientation hsimple horient
+          (disk.i₄ : ZMod n)
+      boundary₄_next :=
+        edgePrevCurvatureDisk_next_boundary_of_positiveOrientation hsimple horient
+          (disk.i₄ : ZMod n) }
+
 /-- Forget the radius-profile extrema from a full CDFV certificate. -/
 def dahlbergE2Theorem6OrderedDiskCertificate_of_cdfvCertificate {n : ℕ}
     {v : ZMod n → ℂ} (cert : DahlbergE2Theorem6CdfvCertificate v) :
@@ -6663,6 +6818,52 @@ def dahlbergE2Theorem6CdfvCertificate_of_orderedDiskCertificate {n : ℕ}
     localMin₂ := hext.localMin₂
     localMax₃ := hext.localMax₃
     localMin₄ := hext.localMin₄ }
+
+/-- Geometric assembly certificate for Dahlberg §3 Theorem 6 / CDFV: ordered
+disk data, the formal incidence of each curvature circle with its defining
+triple, and the matching radius-profile local extrema. -/
+structure DahlbergE2Theorem6GeometricAssemblyCertificate {n : ℕ}
+    (v : ZMod n → ℂ) where
+  disk : DahlbergE2Theorem6OrderedDiskCertificate v
+  incidence : DahlbergE2Theorem6OrderedDiskBoundaryIncidence disk
+  extrema : DahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate disk
+
+/-- Ordered disk data plus radius extrema automatically form the geometric
+assembly certificate once positive orientation supplies the boundary
+incidence facts. -/
+def dahlbergE2Theorem6GeometricAssemblyCertificate_of_orderedDiskCertificate
+    {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (disk : DahlbergE2Theorem6OrderedDiskCertificate v)
+    (hext : DahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate disk) :
+    DahlbergE2Theorem6GeometricAssemblyCertificate v :=
+  { disk := disk
+    incidence :=
+      dahlbergE2Theorem6OrderedDiskBoundaryIncidence_of_positiveOrientation
+        hsimple horient disk
+    extrema := hext }
+
+/-- A full CDFV certificate gives the sharper geometric assembly certificate
+in the positive-orientation branch. -/
+def dahlbergE2Theorem6GeometricAssemblyCertificate_of_cdfvCertificate
+    {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (cert : DahlbergE2Theorem6CdfvCertificate v) :
+    DahlbergE2Theorem6GeometricAssemblyCertificate v :=
+  dahlbergE2Theorem6GeometricAssemblyCertificate_of_orderedDiskCertificate
+    hsimple horient
+    (dahlbergE2Theorem6OrderedDiskCertificate_of_cdfvCertificate cert)
+    (dahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate_of_cdfvCertificate cert)
+
+/-- Forget the boundary-incidence proof from the sharper geometric assembly
+certificate and recover the full CDFV certificate used downstream. -/
+def dahlbergE2Theorem6CdfvCertificate_of_geometricAssemblyCertificate
+    {n : ℕ} {v : ZMod n → ℂ}
+    (cert : DahlbergE2Theorem6GeometricAssemblyCertificate v) :
+    DahlbergE2Theorem6CdfvCertificate v :=
+  dahlbergE2Theorem6CdfvCertificate_of_orderedDiskCertificate cert.disk cert.extrema
 
 /-- Radius of the circle through `v i, v (i+1), v (i+2)`, expressed over the
 outgoing edge `v i → v (i+1)`. -/
@@ -6949,6 +7150,19 @@ def DahlbergE2Theorem6OrderedAssemblySource : Prop :=
       { disk : DahlbergE2Theorem6OrderedDiskCertificate v //
         DahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate disk }
 
+/-- Geometric assembly interface for Dahlberg §3 Theorem 6: the final
+assembly step returns ordered disk data, the formal boundary-incidence facts
+for the defining triples, and the matching radius extrema. -/
+def DahlbergE2Theorem6GeometricAssemblySource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ Concyclic v) →
+    Nonempty (DahlbergE2Theorem6ContainingDisksCertificate v) →
+    Nonempty (DahlbergE2Theorem6InteriorMissingDisksCertificate v) →
+    Nonempty (DahlbergE2Theorem6GeometricAssemblyCertificate v)
+
 /-- The sharper ordered assembly source implies the older full-CDFV assembly
 source. -/
 theorem dahlbergE2Theorem6AssemblySource_of_orderedAssemblySource
@@ -6972,6 +7186,41 @@ theorem dahlbergE2Theorem6OrderedAssemblySource_of_assemblySource
   exact ⟨⟨dahlbergE2Theorem6OrderedDiskCertificate_of_cdfvCertificate cert,
     dahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate_of_cdfvCertificate cert⟩⟩
 
+/-- The geometric assembly source implies the ordered assembly source by
+forgetting the boundary-incidence proof. -/
+theorem dahlbergE2Theorem6OrderedAssemblySource_of_geometricAssemblySource
+    (hsrc : DahlbergE2Theorem6GeometricAssemblySource) :
+    DahlbergE2Theorem6OrderedAssemblySource := by
+  intro n hne hn v hsimple hregular horient hnoncircle hcontains hmisses
+  letI : NeZero n := hne
+  rcases hsrc hn hsimple hregular horient hnoncircle hcontains hmisses with
+    ⟨cert⟩
+  exact ⟨⟨cert.disk, cert.extrema⟩⟩
+
+/-- The ordered assembly source implies the geometric assembly source because
+boundary incidence of the four defining triples is already formal in the
+positive-orientation branch. -/
+theorem dahlbergE2Theorem6GeometricAssemblySource_of_orderedAssemblySource
+    (hsrc : DahlbergE2Theorem6OrderedAssemblySource) :
+    DahlbergE2Theorem6GeometricAssemblySource := by
+  intro n hne hn v hsimple hregular horient hnoncircle hcontains hmisses
+  letI : NeZero n := hne
+  rcases hsrc hn hsimple hregular horient hnoncircle hcontains hmisses with
+    ⟨⟨disk, hext⟩⟩
+  exact ⟨
+    dahlbergE2Theorem6GeometricAssemblyCertificate_of_orderedDiskCertificate
+      hsimple horient disk hext⟩
+
+/-- The ordered and geometric §3 assembly interfaces are formally equivalent:
+the geometric interface only adds boundary-incidence data that is now proved
+from the local circumcircle construction. -/
+theorem dahlbergE2Theorem6OrderedAssemblySource_iff_geometricAssemblySource :
+    DahlbergE2Theorem6OrderedAssemblySource ↔
+      DahlbergE2Theorem6GeometricAssemblySource := by
+  constructor
+  · exact dahlbergE2Theorem6GeometricAssemblySource_of_orderedAssemblySource
+  · exact dahlbergE2Theorem6OrderedAssemblySource_of_geometricAssemblySource
+
 /-- The older and sharper §3 assembly interfaces are formally equivalent. -/
 theorem dahlbergE2Theorem6AssemblySource_iff_orderedAssemblySource :
     DahlbergE2Theorem6AssemblySource ↔ DahlbergE2Theorem6OrderedAssemblySource := by
@@ -6984,7 +7233,7 @@ Lemma 7, and their final assembly. -/
 def DahlbergE2Theorem6PaperSources : Prop :=
   DahlbergE2Theorem6Lemma5ContainingDisksSource ∧
   DahlbergE2Theorem6Lemma7InteriorMissingDisksSource ∧
-  DahlbergE2Theorem6OrderedAssemblySource
+  DahlbergE2Theorem6GeometricAssemblySource
 
 /-- The split §3 paper sources imply the current geometric CDFV source. -/
 theorem dahlbergE2Theorem6GeometricCdfvSource_of_paperSources
@@ -6992,7 +7241,8 @@ theorem dahlbergE2Theorem6GeometricCdfvSource_of_paperSources
     DahlbergE2Theorem6GeometricCdfvSource := by
   intro n hne hn v hsimple hregular horient hnoncircle
   letI : NeZero n := hne
-  exact dahlbergE2Theorem6AssemblySource_of_orderedAssemblySource hsrc.2.2
+  exact dahlbergE2Theorem6AssemblySource_of_orderedAssemblySource
+    (dahlbergE2Theorem6OrderedAssemblySource_of_geometricAssemblySource hsrc.2.2)
     hn hsimple hregular horient hnoncircle
     (hsrc.1 hn hsimple hregular horient hnoncircle)
     (hsrc.2.1 hn hsimple hregular horient hnoncircle)
@@ -7040,8 +7290,8 @@ theorem dahlbergE2Theorem6PaperSources_of_geometricCdfvSource
   · intro n hne hn v hsimple hregular horient hnoncircle _hcontains _hmisses
     letI : NeZero n := hne
     rcases hsrc hn hsimple hregular horient hnoncircle with ⟨cert⟩
-    exact ⟨⟨dahlbergE2Theorem6OrderedDiskCertificate_of_cdfvCertificate cert,
-      dahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate_of_cdfvCertificate cert⟩⟩
+    exact ⟨dahlbergE2Theorem6GeometricAssemblyCertificate_of_cdfvCertificate
+      hsimple horient cert⟩
 
 /-- The split §3 paper-source package is formally equivalent to the geometric
 CDFV source used by the reduction. -/
