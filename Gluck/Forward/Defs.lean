@@ -1628,6 +1628,28 @@ theorem exists_strict_neighbor_extremum_of_forall_ne_succ {n : ℕ} [NeZero n]
   rcases exists_eq_succ_of_forall_mem_uIcc_neighbors hbetween with ⟨i, hi⟩
   exact hne i hi
 
+/-- If a cyclic real profile has no adjacent plateau, then a global maximum
+is a strict one-step peak and a global minimum is a strict one-step valley. -/
+theorem exists_strict_neighbor_peak_and_valley_of_forall_ne_succ {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} (hne : ∀ i : ZMod n, κ i ≠ κ (i + 1)) :
+    ∃ imax imin : ZMod n,
+      (κ (imax - 1) < κ imax ∧ κ (imax + 1) < κ imax) ∧
+        (κ imin < κ (imin - 1) ∧ κ imin < κ (imin + 1)) := by
+  obtain ⟨imax, hmax⟩ := exists_globalMax_zmod κ
+  obtain ⟨imin, hmin⟩ := exists_globalMin_zmod κ
+  have hmax_left_ne : κ (imax - 1) ≠ κ imax := by
+    simpa [sub_eq_add_neg, add_assoc] using hne (imax - 1)
+  have hmax_right_ne : κ (imax + 1) ≠ κ imax := Ne.symm (hne imax)
+  have hmin_left_ne : κ imin ≠ κ (imin - 1) := by
+    have h : κ (imin - 1) ≠ κ imin := by
+      simpa [sub_eq_add_neg, add_assoc] using hne (imin - 1)
+    exact Ne.symm h
+  refine ⟨imax, imin, ⟨?_, ?_⟩, ⟨?_, ?_⟩⟩
+  · exact lt_of_le_of_ne (hmax (imax - 1)) hmax_left_ne
+  · exact lt_of_le_of_ne (hmax (imax + 1)) hmax_right_ne
+  · exact lt_of_le_of_ne (hmin (imin - 1)) hmin_left_ne
+  · exact lt_of_le_of_ne (hmin (imin + 1)) (hne imin)
+
 /-- A cyclic real profile with no adjacent plateau has a plateau-aware local
 maximum or local minimum. -/
 theorem exists_discreteLocalExtremum_of_forall_ne_succ {n : ℕ} [NeZero n]
@@ -1637,6 +1659,17 @@ theorem exists_discreteLocalExtremum_of_forall_ne_succ {n : ℕ} [NeZero n]
     ⟨i, hpeak | hvalley⟩
   · exact ⟨i, Or.inl (discreteLocalMax_of_neighbors hn hpeak.1 hpeak.2)⟩
   · exact ⟨i, Or.inr (discreteLocalMin_of_neighbors hn hvalley.1 hvalley.2)⟩
+
+/-- A cyclic real profile with no adjacent plateau has both a plateau-aware
+local maximum and a plateau-aware local minimum. -/
+theorem exists_discreteLocalMax_and_min_of_forall_ne_succ {n : ℕ} [NeZero n]
+    (hn : 2 ≤ n) {κ : ZMod n → ℝ} (hne : ∀ i : ZMod n, κ i ≠ κ (i + 1)) :
+    (∃ imax : ZMod n, DiscreteLocalMax κ imax) ∧
+      ∃ imin : ZMod n, DiscreteLocalMin κ imin := by
+  rcases exists_strict_neighbor_peak_and_valley_of_forall_ne_succ (κ := κ) hne with
+    ⟨imax, imin, hpeak, hvalley⟩
+  exact ⟨⟨imax, discreteLocalMax_of_neighbors hn hpeak.1 hpeak.2⟩,
+    ⟨imin, discreteLocalMin_of_neighbors hn hvalley.1 hvalley.2⟩⟩
 
 /-- A nonconstant cyclic profile has at least one strict adjacent increase. -/
 theorem exists_adjacent_lt_succ_of_not_constant {n : ℕ} [NeZero n]
