@@ -9558,6 +9558,15 @@ theorem dahlbergE2_remaining_source_components :
     dahlbergE2_lemma8_radius_turn_bridge_from_witness_source,
     dahlbergE2_disk_auxiliary_boundary_interior_construction_source⟩
 
+/-- Primitive spelling of the exact remaining `E²` Dahlberg source
+components: nonconcyclic CDFV, Lemma 8's witness-to-radius-turn bridge, and
+the normalized unit-disk §4 construction. -/
+theorem dahlbergE2_primitive_remaining_source_components :
+    DahlbergE2PrimitiveRemainingSourceComponents := by
+  exact ⟨dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate,
+    dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate,
+    dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate⟩
+
 /-- The exact `E²` source components currently used by the weaker final-D4VT
 route, using only the theorem-level signed-CDFV source and the sharp
 boundary/interior §4 source. -/
@@ -9565,6 +9574,14 @@ theorem dahlbergE2_dfv_source_components :
     DahlbergE2DfvSourceComponents := by
   exact ⟨dahlbergE2_convex_dfv_signed_source,
     dahlbergE2_disk_auxiliary_boundary_interior_construction_source⟩
+
+/-- Primitive spelling of the exact `E²` source components currently used by
+the weaker final-D4VT route: nonconcyclic CDFV and the normalized unit-disk
+§4 construction. -/
+theorem dahlbergE2_dfv_primitive_source_components :
+    DahlbergE2DfvPrimitiveSourceComponents := by
+  exact ⟨dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate,
+    dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate⟩
 
 /-- Dahlberg's pair-level auxiliary-polygon construction/transfer source for
 the §4 non-strict disk reduction, recovered from the metric-data source by

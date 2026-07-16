@@ -3907,6 +3907,15 @@ theorem forward_remaining_source_components :
     ForwardRemainingSourceComponents := by
   exact forwardRemainingSources_iff_components.mp forward_remaining_sources
 
+/-- Primitive grouped component spelling of the current forward source audit.
+
+This exposes the exact primitive E² source gates: nonconcyclic CDFV, Lemma 8,
+and the normalized unit-disk §4 construction. -/
+theorem forward_primitive_remaining_source_components :
+    ForwardPrimitiveRemainingSourceComponents := by
+  exact forwardRemainingSourceComponents_iff_primitiveComponents.mp
+    forward_remaining_source_components
+
 /-- Sharper audit theorem for the final D4VT endpoints.
 
 The package itself records the weaker final-D4VT obligations.  The E²
@@ -3936,6 +3945,14 @@ theorem forward_dfv_remaining_source_components :
     ForwardDfvRemainingSourceComponents := by
   exact forwardDfvRemainingSources_iff_components.mp
     forward_dfv_remaining_sources
+
+/-- Primitive grouped component spelling of the current final-D4VT source
+audit.  This exposes the exact primitive E² final-D4VT source gates:
+nonconcyclic CDFV and the normalized unit-disk §4 construction. -/
+theorem forward_dfv_primitive_remaining_source_components :
+    ForwardDfvPrimitiveRemainingSourceComponents := by
+  exact forwardDfvRemainingSourceComponents_iff_primitiveComponents.mp
+    forward_dfv_remaining_source_components
 
 /-- Model-specific spelling of `forward_remaining_sources`, routed through the
 sharper exact-source audit. -/
