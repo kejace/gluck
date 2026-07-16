@@ -5884,7 +5884,7 @@ theorem dahlbergDiskReductionSetup_exists_boundary_max_and_interior
     (hnoncircle : ¬ Concyclic v)
     (hsetup : DahlbergDiskReductionSetup v) :
     ∃ O R i j, MinimalEnclosingDiskR2 v O R ∧ 0 < R ∧
-      OnDiskBoundaryR2 v O R i ∧ dist O (v j) < R ∧
+      OnDiskBoundaryR2 v O R i ∧ dist O (v j) < R ∧ i ≠ j ∧
       ∀ k : ZMod n, dist O (v k) ≤ dist O (v i) := by
   rcases dahlbergDiskReductionSetup_exists_radius_pos hsimple hsetup with
     ⟨O, R, hΔ, hRpos, i, hi⟩
@@ -5897,6 +5897,7 @@ theorem dahlbergDiskReductionSetup_exists_boundary_max_and_interior
     exact hnoncircle ⟨O, R, hRpos, hall⟩
   rcases hinterior with ⟨j, hj⟩
   exact ⟨O, R, i, j, hΔ, hRpos, hi, hj,
+    ne_of_onDiskBoundaryR2_of_dist_lt hi hj,
     fun k => dist_le_boundary_dist_of_minimalEnclosingDiskR2 hΔ hi⟩
 
 /-- Radius of the smallest closed disk with fixed centre `O` containing the

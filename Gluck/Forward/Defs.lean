@@ -1744,6 +1744,25 @@ theorem dist_le_boundary_dist_of_minimalEnclosingDiskR2 {n : ℕ}
   rw [hboundary]
   exact hΔ.2.1 j
 
+/-- A strictly interior vertex is not on the disk boundary. -/
+theorem not_onDiskBoundaryR2_of_dist_lt {n : ℕ}
+    {v : ZMod n → ℂ} {O : ℂ} {R : ℝ} {i : ZMod n}
+    (hinterior : dist O (v i) < R) :
+    ¬ OnDiskBoundaryR2 v O R i := by
+  intro hboundary
+  exact (ne_of_lt hinterior) hboundary
+
+/-- A boundary vertex and a strictly interior vertex of the same disk are
+distinct. -/
+theorem ne_of_onDiskBoundaryR2_of_dist_lt {n : ℕ}
+    {v : ZMod n → ℂ} {O : ℂ} {R : ℝ} {i j : ZMod n}
+    (hboundary : OnDiskBoundaryR2 v O R i)
+    (hinterior : dist O (v j) < R) :
+    i ≠ j := by
+  intro hij
+  subst j
+  exact (not_onDiskBoundaryR2_of_dist_lt hinterior) hboundary
+
 /-- The signed-Menger curvature profile of a cyclic Euclidean polygon. -/
 noncomputable def SignedMengerProfile {n : ℕ} (v : ZMod n → ℂ) : ZMod n → ℝ :=
   fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))
