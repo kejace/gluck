@@ -7767,6 +7767,29 @@ theorem dahlbergE2ConvexDfvRadiusSource_directIsometry
   exact (dahlbergE2ConvexDfvRadiusWitnesses_directIsometry_iff hu a
     hsimple horient).mpr (hsrc hn hsimple₀ hregular₀ horient₀ hnc₀)
 
+/-- The nonconcyclic radius-witness CDFV source can be applied after direct
+Euclidean normalization. -/
+theorem dahlbergE2ConvexDfvRadiusNonconcyclicSource_directIsometry
+    (hsrc : DahlbergE2ConvexDfvRadiusNonconcyclicSource)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (horient : PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)))
+    (hnoncircle : ¬ Concyclic (fun i => directIsometryR2 u a (v i))) :
+    DahlbergE2ConvexDfvRadiusWitnesses (fun i => directIsometryR2 u a (v i)) := by
+  have hsimple₀ : Gluck.Discrete.IsSimplePolygon v :=
+    (isSimplePolygon_directIsometry_iff hu a v).mp hsimple
+  have hregular₀ : DahlbergRegular v :=
+    (dahlbergRegular_directIsometry_iff hu a v).mp hregular
+  have horient₀ : PositivePolygonOrientation v :=
+    (positivePolygonOrientation_directIsometry hu a v).mp horient
+  have hnoncircle₀ : ¬ Concyclic v :=
+    (not_concyclic_directIsometry hu a v).mp hnoncircle
+  exact (dahlbergE2ConvexDfvRadiusWitnesses_directIsometry_iff hu a
+    hsimple horient).mpr (hsrc hn hsimple₀ hregular₀ horient₀ hnoncircle₀)
+
 /-- The Lemma 8 radius-turn bridge source can be applied after direct
 Euclidean normalization. -/
 theorem dahlbergE2Lemma8RadiusTurnBridgeSource_directIsometry
@@ -9941,9 +9964,24 @@ theorem dahlbergE2DfvPrimitiveSourceComponents_directIsometry
           NegativePolygonOrientation (fun i => directIsometryR2 u a (v i))) →
         DahlbergDiskAuxiliaryReduction
           (fun i => directIsometryR2 u a (v i))) := by
-  exact dahlbergE2DfvSourceComponents_directIsometry
-    (dahlbergE2DfvSourceComponents_of_primitiveComponents hsrc)
-    hu a hn hsimple hregular hnoncircle
+  refine ⟨?_, ?_⟩
+  · intro horient
+    exact signedMengerProfile_dahlbergFourVertex_of_convexDfvRadiusWitnesses
+      hsimple horient
+      (dahlbergE2ConvexDfvRadiusNonconcyclicSource_directIsometry
+        hsrc.1 hu a hn hsimple hregular horient hnoncircle)
+  · intro hnonstrict
+    rcases
+      dahlbergDiskReductionSetup_exists_boundary_max_and_interior
+        hsimple hnoncircle
+        (dahlbergE2_disk_reduction_setup_source
+          hn hsimple hregular hnoncircle hnonstrict) with
+      ⟨O, R, i, j, hΔ, _hRpos, hboundary, hinterior, hij, _hmax⟩
+    exact dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_directIsometry
+      (dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_boundaryInteriorSource.mp
+        hsrc.2)
+      hu a hn hsimple hregular hnoncircle hnonstrict hΔ hboundary
+      hinterior hij
 
 /-- The normalized-unit remaining E² source components are compatible with
 direct Euclidean normalization after forgetting the Lemma 8 ordered-turn
