@@ -3009,11 +3009,30 @@ theorem forward_remaining_source_components :
 
 /-- Sharper audit theorem for the final D4VT endpoints.
 
-The package itself records the weaker final-D4VT obligations; the current
-concrete theorem is obtained from `forward_remaining_sources`, forgetting the
-extra ordered-turn data where possible. -/
+The package itself records the weaker final-D4VT obligations.  This theorem is
+proved directly from the weaker gates, so the final D4VT audit does not depend
+on the stronger E² Lemma 8 ordered-turn source used only by conformal-Menger
+ordered-turn refinements. -/
 theorem forward_dfv_remaining_sources : ForwardDfvRemainingSources := by
-  exact forwardDfvRemainingSources_of_remainingSources forward_remaining_sources
+  refine ⟨?_, ?_, ?_, ?_, ?_, dahlbergE2_convex_dfv_signed_source,
+    dahlbergE2_disk_auxiliary_max_interior_construction_source⟩
+  · intro γ κ hclosed hreal hκ hper hnc
+    exact smoothFourVertex_E2_nonconstant_geometric_source
+      hclosed hreal hκ hper hnc
+  · intro γ κ hclosed hreal hκ hper hnc
+    exact smoothFourVertex_S2_nonconstant_geometric_source
+      hclosed hreal hκ hper hnc
+  · intro γ κ hclosed hreal hκ hper hnc
+    exact smoothFourVertex_H2_nonconstant_geometric_source
+      hclosed hreal hκ hper hnc
+  · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hnc
+    letI : NeZero n := hne
+    exact dahlbergFourVertex_S2_geometric_source
+      hn v κ hdisk hsimple hconvex hregular hκ hnc
+  · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
+    letI : NeZero n := hne
+    exact dahlbergFourVertex_H2_geometric_source
+      hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
 
 /-- Weaker final-D4VT source package, routed through the actual weaker
 final-D4VT remaining-source audit rather than through the stronger full
