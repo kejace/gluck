@@ -6700,6 +6700,39 @@ the adjacent radius turns needed for Lemma 9. -/
 def DahlbergE2ConvexRadiusSourceComponents : Prop :=
   DahlbergE2ConvexDfvRadiusSource ∧ DahlbergE2Lemma8RadiusTurnBridgeSource
 
+/-- The combined convex-radius source gives the CDFV radius-witness source:
+ordered adjacent radius turns imply the plateau-aware radius-profile four
+vertex witness. -/
+theorem dahlbergE2ConvexDfvRadiusSource_of_convexRadiusSource
+    (hsrc : DahlbergE2ConvexRadiusSource) :
+    DahlbergE2ConvexDfvRadiusSource := by
+  intro n hne hn v hsimple hregular horient hnc
+  letI : NeZero n := hne
+  exact dahlbergE2ConvexDfvRadiusWitnesses_of_positiveRadiusOrderedAdjacentTurns
+    hn hsimple horient (hsrc hn hsimple hregular horient hnc)
+
+/-- The combined convex-radius source gives a Lemma 8 bridge source by
+returning its ordered adjacent radius turns directly. -/
+theorem dahlbergE2Lemma8RadiusTurnBridgeSource_of_convexRadiusSource
+    (hsrc : DahlbergE2ConvexRadiusSource) :
+    DahlbergE2Lemma8RadiusTurnBridgeSource := by
+  intro n hne hn v hsimple hregular horient hnc _hwitness
+  letI : NeZero n := hne
+  exact hsrc hn hsimple hregular horient hnc
+
+/-- The split CDFV/Lemma 8 source package is formally equivalent to the
+combined convex-radius source. -/
+theorem dahlbergE2ConvexRadiusSourceComponents_iff_convexRadiusSource :
+    DahlbergE2ConvexRadiusSourceComponents ↔ DahlbergE2ConvexRadiusSource := by
+  constructor
+  · intro hsrc n hne hn v hsimple hregular horient hnc
+    letI : NeZero n := hne
+    exact hsrc.2 hn hsimple hregular horient hnc
+      (hsrc.1 hn hsimple hregular horient hnc)
+  · intro hsrc
+    exact ⟨dahlbergE2ConvexDfvRadiusSource_of_convexRadiusSource hsrc,
+      dahlbergE2Lemma8RadiusTurnBridgeSource_of_convexRadiusSource hsrc⟩
+
 /-- The split convex-radius source package is compatible with direct
 Euclidean normalization. -/
 theorem dahlbergE2ConvexRadiusSourceComponents_directIsometry
