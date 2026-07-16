@@ -6079,18 +6079,35 @@ component is Dahlberg's theorem-level signed-Menger D4V conclusion. -/
 def DahlbergE2DfvGeometricSources : Prop :=
   DahlbergE2ConvexDfvSignedSource ∧ DahlbergE2DiskReductionSource
 
+/-- Dahlberg's convex/CDFV radius-witness source, extracted directly from
+Theorem 6/CDFV in `references/23.pdf`.
+
+This is the Euclidean strict-convex source needed for the final D4VT endpoint;
+the stronger ordered-turn refinements additionally use
+`dahlbergE2_lemma8_radius_turn_bridge_source`. -/
+theorem dahlbergE2_convex_dfv_radius_source :
+    DahlbergE2ConvexDfvRadiusSource := by
+  sorry
+
+/-- Dahlberg's Lemma 8 monotonicity bridge from CDFV radius witnesses to the
+ordered adjacent radius turns used in Lemma 9. -/
+theorem dahlbergE2_lemma8_radius_turn_bridge_source :
+    DahlbergE2Lemma8RadiusTurnBridgeSource := by
+  sorry
+
 /-- Dahlberg's source components for the convex-radius Euclidean branch:
 Theorem 6/CDFV plus the Lemma 8 monotonicity bridge. -/
 theorem dahlbergE2_convex_radius_source_components :
     DahlbergE2ConvexRadiusSourceComponents := by
-  sorry
+  exact ⟨dahlbergE2_convex_dfv_radius_source,
+    dahlbergE2_lemma8_radius_turn_bridge_source⟩
 
 /-- Dahlberg's convex/CDFV signed-Menger source, extracted from the first
 component of the convex-radius source package. -/
 theorem dahlbergE2_convex_dfv_signed_source :
     DahlbergE2ConvexDfvSignedSource := by
   exact dahlbergE2_convexDfvRadiusSource_iff_signedSource.mp
-    dahlbergE2_convex_radius_source_components.1
+    dahlbergE2_convex_dfv_radius_source
 
 /-- Dahlberg's convex-radius Euclidean source for the positive-orientation
 branch of the discrete four-vertex paper. -/

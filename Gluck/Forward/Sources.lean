@@ -2248,7 +2248,25 @@ theorem forward_remaining_sources : ForwardRemainingSources := by
 Dahlberg strict convex component is the theorem-level signed-Menger source,
 not the stronger radius-turn source used for ordered-turn refinements. -/
 theorem forward_dfv_remaining_sources : ForwardDfvRemainingSources := by
-  exact forwardDfvRemainingSources_of_remainingSources forward_remaining_sources
+  refine ⟨?_, ?_, ?_, ?_, ?_, dahlbergE2_convex_dfv_radius_source,
+    dahlbergE2_disk_auxiliary_construction_source⟩
+  · intro γ κ hclosed hreal hκ hper hnc
+    exact four_vertex_condition_smooth_E2_nonconstant_geometric_source
+      hclosed hreal hκ hper hnc
+  · intro γ κ hclosed hreal hκ hper hnc
+    exact four_vertex_condition_smooth_S2_nonconstant_geometric_source
+      hclosed hreal hκ hper hnc
+  · intro γ κ hclosed hreal hκ hper hnc
+    exact four_vertex_condition_smooth_H2_nonconstant_geometric_source
+      hclosed hreal hκ hper hnc
+  · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hnc
+    letI : NeZero n := hne
+    exact orderedAdjacentTurns_S2_geometric_source
+      hn v κ hdisk hsimple hconvex hregular hκ hnc
+  · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
+    letI : NeZero n := hne
+    exact orderedAdjacentTurns_H2_geometric_source
+      hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
 
 /-- Weaker final-D4VT spelling of `forward_geometric_sources`. -/
 theorem forward_dfv_geometric_sources : ForwardDfvGeometricSources := by
