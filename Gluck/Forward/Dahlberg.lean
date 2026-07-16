@@ -1402,6 +1402,31 @@ theorem mem_normalizedClosedDisk_iff_dist_le (a y : ℝ) (z : ℂ) :
     change z.re ^ 2 + z.im ^ 2 - 2 * y * z.im ≤ a ^ 2
     nlinarith
 
+/-- The normalized algebraic closed exterior is the metric closed exterior
+with centre `normalizedCircleCenter y` and radius `normalizedCircleRadius a y`. -/
+theorem mem_normalizedClosedExterior_iff_radius_le_dist (a y : ℝ) (z : ℂ) :
+    z ∈ normalizedClosedExterior a y ↔
+      normalizedCircleRadius a y ≤ dist (normalizedCircleCenter y) z := by
+  rw [dist_eq_norm]
+  unfold normalizedClosedExterior normalizedCircleCenter normalizedCircleRadius
+  have hnorm :
+      ‖({ re := 0, im := y } : ℂ) - z‖ ^ 2 =
+        z.re ^ 2 + z.im ^ 2 - 2 * y * z.im + y ^ 2 := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+    simp only [Complex.sub_re, Complex.sub_im]
+    ring
+  constructor
+  · intro h
+    change a ^ 2 ≤ z.re ^ 2 + z.im ^ 2 - 2 * y * z.im at h
+    apply (sq_le_sq₀ (Real.sqrt_nonneg _) (norm_nonneg _)).mp
+    rw [hnorm, Real.sq_sqrt (by positivity)]
+    nlinarith
+  · intro h
+    have hs := (sq_le_sq₀ (Real.sqrt_nonneg _) (norm_nonneg _)).mpr h
+    rw [hnorm, Real.sq_sqrt (by positivity)] at hs
+    change a ^ 2 ≤ z.re ^ 2 + z.im ^ 2 - 2 * y * z.im
+    nlinarith
+
 /-- The noncollinear third point lies in the closed disk bounded by its
 normalized circumcircle. -/
 theorem normalizedCircumcenter_mem_closedDisk {a : ℝ} {z : ℂ} (hz : z.im ≠ 0) :
@@ -1526,6 +1551,10 @@ noncomputable def edgeUpperCap (A B : ℂ) (y : ℝ) : Set ℂ :=
 noncomputable def edgeClosedDisk (A B : ℂ) (y : ℝ) : Set ℂ :=
   transportedClosedDisk (chordUnit A B) (chordMidpoint A B) (chordHalfLength A B) y
 
+noncomputable def edgeClosedExterior (A B : ℂ) (y : ℝ) : Set ℂ :=
+  directIsometryImage (chordUnit A B) (chordMidpoint A B)
+    (normalizedClosedExterior (chordHalfLength A B) y)
+
 noncomputable def edgeHalfPlane (A B : ℂ) : Set ℂ :=
   transportedEdgeHalfPlane (chordUnit A B) (chordMidpoint A B)
 
@@ -1579,6 +1608,38 @@ theorem mem_edgeClosedDisk_iff_dist_le {A B z : ℂ} (hAB : A ≠ B) (y : ℝ) :
     unfold edgeClosedDisk transportedClosedDisk directIsometryImage
     exact ⟨edgeCoordinates A B z,
       (mem_normalizedClosedDisk_iff_dist_le (chordHalfLength A B) y
+        (edgeCoordinates A B z)).mpr hdist₀,
+      directIsometryR2_edgeCoordinates hAB z⟩
+
+/-- The transported edge closed exterior is the metric closed exterior with
+centre `edgeCircleCenter A B y` and radius `normalizedCircleRadius
+(chordHalfLength A B) y`. -/
+theorem mem_edgeClosedExterior_iff_radius_le_dist {A B z : ℂ} (hAB : A ≠ B)
+    (y : ℝ) :
+    z ∈ edgeClosedExterior A B y ↔
+      normalizedCircleRadius (chordHalfLength A B) y ≤
+        dist (edgeCircleCenter A B y) z := by
+  constructor
+  · intro hmem
+    unfold edgeClosedExterior directIsometryImage at hmem
+    rcases hmem with ⟨z₀, hz₀, hzmap⟩
+    have hdist₀ :=
+      (mem_normalizedClosedExterior_iff_radius_le_dist
+        (chordHalfLength A B) y z₀).mp hz₀
+    rw [← hzmap]
+    simpa [edgeCircleCenter, transportedCircleCenter,
+      dist_directIsometryR2 (norm_chordUnit hAB)] using hdist₀
+  · intro hdist
+    have hdist₀ :
+        normalizedCircleRadius (chordHalfLength A B) y ≤
+          dist (normalizedCircleCenter y) (edgeCoordinates A B z) := by
+      have h := hdist
+      rw [← directIsometryR2_edgeCoordinates hAB z] at h
+      simpa [edgeCircleCenter, transportedCircleCenter,
+        dist_directIsometryR2 (norm_chordUnit hAB)] using h
+    unfold edgeClosedExterior directIsometryImage
+    exact ⟨edgeCoordinates A B z,
+      (mem_normalizedClosedExterior_iff_radius_le_dist (chordHalfLength A B) y
         (edgeCoordinates A B z)).mpr hdist₀,
       directIsometryR2_edgeCoordinates hAB z⟩
 
@@ -2324,6 +2385,21 @@ theorem normalizedCircleRadius_le_of_mem_closedDisk {a yρ yΔ : ℝ} {z : ℂ}
     nlinarith [hz]
   exact normalizedCircleRadius_mono_of_nonneg hyρ hy
 
+/-- Exterior-side normalized radius comparison: if `z` lies on the circle with
+centre parameter `yρ` and outside the closed disk with centre parameter `yΔ`,
+then the latter circle has no larger radius, on the nonnegative-centre branch. -/
+theorem normalizedCircleRadius_le_of_mem_closedExterior {a yρ yΔ : ℝ} {z : ℂ}
+    (hyΔ : 0 ≤ yΔ) (hz : 0 < z.im)
+    (hρ : circlePowerR2 (normalizedCircleCenter yρ) z
+      (normalizedCircleRadius a yρ) = 0)
+    (hΔ : z ∈ normalizedClosedExterior a yΔ) :
+    normalizedCircleRadius a yΔ ≤ normalizedCircleRadius a yρ := by
+  rw [circlePowerR2_normalized] at hρ
+  change a ^ 2 ≤ z.re ^ 2 + z.im ^ 2 - 2 * yΔ * z.im at hΔ
+  have hy : yΔ ≤ yρ := by
+    nlinarith [hz]
+  exact normalizedCircleRadius_mono_of_nonneg hyΔ hy
+
 /-- Strict radius monotonicity on the nonnegative-centre branch. -/
 theorem normalizedCircleRadius_strictMono_of_nonneg {a y₁ y₂ : ℝ}
     (hy₁ : 0 ≤ y₁) (hy : y₁ < y₂) :
@@ -2537,6 +2613,19 @@ theorem edgeCoordinates_mem_normalizedClosedDisk_of_mem_edgeClosedDisk {A B C : 
     rw [hzC, directIsometryR2_edgeCoordinates hAB]
   simpa [← hz_eq] using hz
 
+/-- Membership in an arbitrary edge exterior is membership in the normalized
+exterior after passing to canonical edge coordinates. -/
+theorem edgeCoordinates_mem_normalizedClosedExterior_of_mem_edgeClosedExterior
+    {A B C : ℂ} {y : ℝ} (hAB : A ≠ B)
+    (hmem : C ∈ edgeClosedExterior A B y) :
+    edgeCoordinates A B C ∈ normalizedClosedExterior (chordHalfLength A B) y := by
+  unfold edgeClosedExterior directIsometryImage at hmem
+  rcases hmem with ⟨z, hz, hzC⟩
+  have hz_eq : z = edgeCoordinates A B C := by
+    apply directIsometryR2_injective (norm_chordUnit hAB) (chordMidpoint A B)
+    rw [hzC, directIsometryR2_edgeCoordinates hAB]
+  simpa [← hz_eq] using hz
+
 /-- Arbitrary-edge form of the normalized radius comparison behind Dahlberg
 Lemma 10. -/
 theorem edgeCircleRadius_le_of_mem_edgeClosedDisk {A B C : ℂ} {yΔ : ℝ}
@@ -2553,6 +2642,26 @@ theorem edgeCircleRadius_le_of_mem_edgeClosedDisk {A B C : ℂ} {yΔ : ℝ}
     (normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B C)) = 0 at hρ
   have hmem' := edgeCoordinates_mem_normalizedClosedDisk_of_mem_edgeClosedDisk hAB hmem
   exact normalizedCircleRadius_le_of_mem_closedDisk hyρ hz hρ hmem'
+
+/-- Arbitrary-edge exterior form of the normalized radius comparison: if the
+point `C` lies outside the coaxial disk with parameter `yΔ`, then that disk's
+radius is no larger than the canonical circle through `A`, `B`, and `C`, on
+the positive/nonnegative branch. -/
+theorem edgeCircleRadius_le_of_mem_edgeClosedExterior {A B C : ℂ} {yΔ : ℝ}
+    (hAB : A ≠ B) (hcross : 0 < Gluck.Discrete.crossR2 A B C)
+    (hyΔ : 0 ≤ yΔ)
+    (hmem : C ∈ edgeClosedExterior A B yΔ) :
+    normalizedCircleRadius (chordHalfLength A B) yΔ ≤
+      normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B C) := by
+  have hz := (crossR2_pos_iff_edgeCoordinates_im_pos hAB C).mp hcross
+  have hρ := circlePowerR2_normalized_parameter
+    (a := chordHalfLength A B) (z := edgeCoordinates A B C) hz.ne'
+  change circlePowerR2 (normalizedCircleCenter (edgeCircumcenterParameter A B C))
+    (edgeCoordinates A B C)
+    (normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B C)) = 0 at hρ
+  have hmem' :=
+    edgeCoordinates_mem_normalizedClosedExterior_of_mem_edgeClosedExterior hAB hmem
+  exact normalizedCircleRadius_le_of_mem_closedExterior hyΔ hz hρ hmem'
 
 /-- Regular point-edge form of the radius comparison behind Dahlberg Lemma 10. -/
 theorem edgeRegularCircleRadius_le_of_mem_edgeClosedDisk {A B C O : ℂ} {R yΔ : ℝ}
@@ -7117,6 +7226,120 @@ theorem edgePrevCircleRadiusProfile_neighbors_le_of_containsAll_of_positiveOrien
       hsimple hregular horient hcontains,
     edgePrevCircleRadiusProfile_succ_le_of_containsAll_of_positiveOrientation
       hsimple hregular horient hcontains⟩
+
+/-- If the previous curvature disk at `i` has no vertices in its interior,
+then the radius at `i` is no larger than the next previous-radius. -/
+theorem edgePrevCircleRadiusProfile_le_succ_of_interiorMissesAll_of_positiveOrientation
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) {i : ZMod n}
+    (hmiss : EdgePrevCurvatureDiskInteriorMissesAll v i) :
+    EdgePrevCircleRadiusProfile v i ≤ EdgePrevCircleRadiusProfile v (i + 1) := by
+  have hAB : v i ≠ v (i + 1) := hsimple.1 i
+  have hcrossPrev : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) :=
+    polygonEdgePrev_cross_pos_of_vertex_cross_pos (horient i)
+  obtain ⟨OΔ, RΔ, hcircleΔ, hconeΔ⟩ :=
+    dahlbergRegularAt_circle_of_cross_ne_zero (hregular i) hcrossPrev.ne'
+  have hyΔ : 0 ≤ edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1)) :=
+    edgeCircumcenterParameter_nonneg_of_regular hAB hcrossPrev hcircleΔ hconeΔ
+  have hcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i + 1 + 1)) := by
+    simpa [sub_eq_add_neg, add_assoc] using horient (i + 1)
+  have hmem :
+      v (i + 1 + 1) ∈
+        edgeClosedExterior (v i) (v (i + 1))
+          (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1))) := by
+    refine (mem_edgeClosedExterior_iff_radius_le_dist hAB
+      (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1)))).mpr ?_
+    simpa [InClosedDiskR2, EdgePrevCircleCenterProfile, EdgePrevCircleRadiusProfile] using
+      hmiss (i + 1 + 1)
+  have hleNext :
+      EdgePrevCircleRadiusProfile v i ≤ EdgeNextCircleRadiusProfile v i := by
+    simpa [EdgePrevCircleRadiusProfile, EdgeNextCircleRadiusProfile] using
+      (edgeCircleRadius_le_of_mem_edgeClosedExterior
+        (A := v i) (B := v (i + 1)) (C := v (i + 1 + 1))
+        hAB hcross hyΔ hmem)
+  calc
+    EdgePrevCircleRadiusProfile v i ≤ EdgeNextCircleRadiusProfile v i := hleNext
+    _ = EdgePrevCircleRadiusProfile v (i + 1) :=
+      EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+        hsimple horient i
+
+/-- If the previous curvature disk at `i` has no vertices in its interior,
+then the radius at `i` is no larger than the previous previous-radius. -/
+theorem edgePrevCircleRadiusProfile_le_pred_of_interiorMissesAll_of_positiveOrientation
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) {i : ZMod n}
+    (hmiss : EdgePrevCurvatureDiskInteriorMissesAll v i) :
+    EdgePrevCircleRadiusProfile v i ≤ EdgePrevCircleRadiusProfile v (i - 1) := by
+  have hAB : v (i - 1) ≠ v ((i - 1) + 1) := hsimple.1 (i - 1)
+  have hcrossΔ :
+      0 < Gluck.Discrete.crossR2 (v (i - 1)) (v ((i - 1) + 1))
+        (v ((i - 1) + 1 + 1)) := by
+    simpa [sub_eq_add_neg, add_assoc] using horient i
+  obtain ⟨OΔ, RΔ, hcircleΔ, hconeΔ⟩ :=
+    dahlbergRegularAt_circle_of_cross_ne_zero_right
+      (by simpa [sub_eq_add_neg, add_assoc] using hregular i) hcrossΔ.ne'
+  have hyΔ :
+      0 ≤ edgeCircumcenterParameter (v (i - 1)) (v ((i - 1) + 1))
+        (v ((i - 1) + 1 + 1)) :=
+    edgeCircumcenterParameter_nonneg_of_regular_right hAB hcrossΔ hcircleΔ hconeΔ
+  have hcross :
+      0 < Gluck.Discrete.crossR2 (v (i - 1)) (v ((i - 1) + 1))
+        (v ((i - 1) - 1)) :=
+    polygonEdgePrev_cross_pos_of_vertex_cross_pos (horient (i - 1))
+  have hcenter :=
+    EdgeNextCircleCenterProfile_eq_edgePrevCircleCenterProfile_succ_of_positiveOrientation
+      hsimple horient (i - 1)
+  have hradius :=
+    EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (i - 1)
+  have hdist :
+      EdgeNextCircleRadiusProfile v (i - 1) ≤
+        dist (EdgeNextCircleCenterProfile v (i - 1)) (v ((i - 1) - 1)) := by
+    rw [hcenter, hradius]
+    simpa [InClosedDiskR2, sub_eq_add_neg, add_assoc] using hmiss ((i - 1) - 1)
+  have hmem :
+      v ((i - 1) - 1) ∈
+        edgeClosedExterior (v (i - 1)) (v ((i - 1) + 1))
+          (edgeCircumcenterParameter (v (i - 1)) (v ((i - 1) + 1))
+            (v ((i - 1) + 1 + 1))) := by
+    refine (mem_edgeClosedExterior_iff_radius_le_dist hAB
+      (edgeCircumcenterParameter (v (i - 1)) (v ((i - 1) + 1))
+        (v ((i - 1) + 1 + 1)))).mpr ?_
+    simpa [EdgeNextCircleCenterProfile, EdgeNextCircleRadiusProfile,
+      sub_eq_add_neg, add_assoc] using hdist
+  have hlePrev :
+      EdgeNextCircleRadiusProfile v (i - 1) ≤ EdgePrevCircleRadiusProfile v (i - 1) := by
+    simpa [EdgeNextCircleRadiusProfile, EdgePrevCircleRadiusProfile,
+      sub_eq_add_neg, add_assoc] using
+      (edgeCircleRadius_le_of_mem_edgeClosedExterior
+        (A := v (i - 1)) (B := v ((i - 1) + 1)) (C := v ((i - 1) - 1))
+        hAB hcross hyΔ hmem)
+  calc
+    EdgePrevCircleRadiusProfile v i = EdgeNextCircleRadiusProfile v (i - 1) := by
+      simpa [sub_eq_add_neg, add_assoc] using
+        (EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+          hsimple horient (i - 1)).symm
+    _ ≤ EdgePrevCircleRadiusProfile v (i - 1) := hlePrev
+
+/-- An interior-missing previous-curvature disk gives both neighboring radius
+inequalities required for a local minimum candidate. -/
+theorem edgePrevCircleRadiusProfile_le_neighbors_of_interiorMissesAll_of_positiveOrientation
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) {i : ZMod n}
+    (hmiss : EdgePrevCurvatureDiskInteriorMissesAll v i) :
+    EdgePrevCircleRadiusProfile v i ≤ EdgePrevCircleRadiusProfile v (i - 1) ∧
+      EdgePrevCircleRadiusProfile v i ≤ EdgePrevCircleRadiusProfile v (i + 1) := by
+  exact ⟨
+    edgePrevCircleRadiusProfile_le_pred_of_interiorMissesAll_of_positiveOrientation
+      hsimple hregular horient hmiss,
+    edgePrevCircleRadiusProfile_le_succ_of_interiorMissesAll_of_positiveOrientation
+      hsimple hregular horient hmiss⟩
 
 /-- In the positive-orientation branch, signed Menger curvature is the
 reciprocal of the previous-vertex circle-radius profile. -/
