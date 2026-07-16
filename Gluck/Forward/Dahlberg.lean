@@ -5810,6 +5810,41 @@ def DahlbergDiskReductionSetup {n : ℕ} (v : ZMod n → ℂ) : Prop :=
   ∃ O R, MinimalEnclosingDiskR2 v O R ∧
     ∃ i : ZMod n, OnDiskBoundaryR2 v O R i
 
+/-- Radius of the smallest closed disk with fixed centre `O` containing the
+finite cyclic vertex set `v`. -/
+noncomputable def finiteEnclosingRadius {n : ℕ} [NeZero n] (v : ZMod n → ℂ)
+    (O : ℂ) : ℝ :=
+  (Finset.univ : Finset (ZMod n)).sup' Finset.univ_nonempty (fun i => dist O (v i))
+
+/-- The fixed-centre enclosing radius varies continuously with the centre. -/
+theorem continuous_finiteEnclosingRadius {n : ℕ} [NeZero n] (v : ZMod n → ℂ) :
+    Continuous (finiteEnclosingRadius v) := by
+  unfold finiteEnclosingRadius
+  exact Continuous.finset_sup'_apply Finset.univ_nonempty
+    (fun i _ => continuous_id.dist (continuous_const : Continuous fun _ : ℂ => v i))
+
+/-- The fixed-centre enclosing radius tends to infinity as the centre leaves
+every compact set. -/
+theorem tendsto_finiteEnclosingRadius_cocompact_atTop {n : ℕ} [NeZero n]
+    (v : ZMod n → ℂ) :
+    Filter.Tendsto (finiteEnclosingRadius v) (Filter.cocompact ℂ) Filter.atTop := by
+  have hdist : Filter.Tendsto (fun O : ℂ => dist O (v 0))
+      (Filter.cocompact ℂ) Filter.atTop :=
+    tendsto_dist_right_cocompact_atTop (v 0)
+  refine Filter.tendsto_atTop_mono ?_ hdist
+  intro O
+  unfold finiteEnclosingRadius
+  exact Finset.le_sup' (fun i : ZMod n => dist O (v i)) (Finset.mem_univ 0)
+
+/-- Every vertex lies in the disk of radius `finiteEnclosingRadius v O`
+centred at `O`. -/
+theorem polygonInClosedDiskR2_finiteEnclosingRadius {n : ℕ} [NeZero n]
+    (v : ZMod n → ℂ) (O : ℂ) :
+    PolygonInClosedDiskR2 v O (finiteEnclosingRadius v O) := by
+  intro i
+  unfold finiteEnclosingRadius
+  exact Finset.le_sup' (fun j : ZMod n => dist O (v j)) (Finset.mem_univ i)
+
 /-- Dahlberg's convex-radius input for the positive-orientation branch.
 
 This is the radius-level extraction from Lemma 8 plus the convex discrete
@@ -6055,7 +6090,19 @@ theorem dahlbergE2_lemma9_source : DahlbergE2Lemma9Source := by
 set. -/
 theorem minimalEnclosingDiskExists_source :
     MinimalEnclosingDiskExistsSource := by
-  sorry
+  intro n hne v
+  letI : NeZero n := hne
+  obtain ⟨O, hmin⟩ :=
+    (continuous_finiteEnclosingRadius v).exists_forall_le
+      (tendsto_finiteEnclosingRadius_cocompact_atTop v)
+  refine ⟨O, finiteEnclosingRadius v O, ?_, ?_, ?_⟩
+  · exact (dist_nonneg.trans
+      (Finset.le_sup' (fun i : ZMod n => dist O (v i)) (Finset.mem_univ 0)))
+  · exact polygonInClosedDiskR2_finiteEnclosingRadius v O
+  · intro O' R' _hR' hpoly
+    exact (hmin O').trans
+      (Finset.sup'_le Finset.univ_nonempty
+        (fun i : ZMod n => dist O' (v i)) (fun i _hi => hpoly i))
 
 /-- Finite minimal-disk source components for Dahlberg's §4 setup. -/
 theorem dahlbergE2_disk_reduction_setup_source_components :
