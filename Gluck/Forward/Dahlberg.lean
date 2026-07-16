@@ -166,6 +166,52 @@ theorem crossR2_directIsometry {u : ℂ} (hu : ‖u‖ = 1) (w A B C : ℂ) :
   unfold directIsometryR2
   rw [Gluck.Discrete.crossR2_add_left, Gluck.Discrete.crossR2_rotate hu2]
 
+/-- Direct Euclidean isometries preserve positive polygon orientation. -/
+theorem positivePolygonOrientation_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
+    (w : ℂ) (v : ZMod n → ℂ) :
+    PositivePolygonOrientation (fun i => directIsometryR2 u w (v i)) ↔
+      PositivePolygonOrientation v := by
+  constructor
+  · intro h i
+    have hi := h i
+    rw [crossR2_directIsometry hu] at hi
+    exact hi
+  · intro h i
+    rw [crossR2_directIsometry hu]
+    exact h i
+
+/-- Direct Euclidean isometries preserve negative polygon orientation. -/
+theorem negativePolygonOrientation_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
+    (w : ℂ) (v : ZMod n → ℂ) :
+    NegativePolygonOrientation (fun i => directIsometryR2 u w (v i)) ↔
+      NegativePolygonOrientation v := by
+  constructor
+  · intro h i
+    have hi := h i
+    rw [crossR2_directIsometry hu] at hi
+    exact hi
+  · intro h i
+    rw [crossR2_directIsometry hu]
+    exact h i
+
+/-- Direct Euclidean isometries preserve having strict polygon orientation in
+either direction. -/
+theorem strictPolygonOrientation_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
+    (w : ℂ) (v : ZMod n → ℂ) :
+    (PositivePolygonOrientation (fun i => directIsometryR2 u w (v i)) ∨
+        NegativePolygonOrientation (fun i => directIsometryR2 u w (v i))) ↔
+      (PositivePolygonOrientation v ∨ NegativePolygonOrientation v) := by
+  rw [positivePolygonOrientation_directIsometry hu w v,
+    negativePolygonOrientation_directIsometry hu w v]
+
+/-- Direct Euclidean isometries preserve the non-strict orientation branch. -/
+theorem not_strictPolygonOrientation_directIsometry {n : ℕ} {u : ℂ}
+    (hu : ‖u‖ = 1) (w : ℂ) (v : ZMod n → ℂ) :
+    (¬ (PositivePolygonOrientation (fun i => directIsometryR2 u w (v i)) ∨
+        NegativePolygonOrientation (fun i => directIsometryR2 u w (v i)))) ↔
+      ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v) := by
+  rw [strictPolygonOrientation_directIsometry hu w v]
+
 /-- Direct Euclidean isometries preserve signed Menger curvature. -/
 theorem signedMengerR2_directIsometry {u : ℂ} (hu : ‖u‖ = 1) (w A B C : ℂ) :
     Gluck.Discrete.signedMengerR2 (directIsometryR2 u w A) (directIsometryR2 u w B)
