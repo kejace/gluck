@@ -1137,6 +1137,22 @@ theorem dahlberg_discrete_four_vertex_E2_kernel_of_sources
 
 /-- The source-parametrized strict-orientation E² Dahlberg conclusion from
 nonconstant signed-Menger curvature. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_not_constant_strict_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSources
+    (dahlbergE2_dfv_geometric_sources_of_dfvSources hsrc)
+    hn hsimple hregular
+      (not_concyclic_of_not_constant_signedMengerProfile_strict_orientation
+        hsimple hnc horient)
+
+/-- The source-parametrized strict-orientation E² Dahlberg conclusion from
+nonconstant signed-Menger curvature. -/
 theorem signedMengerProfile_dahlbergFourVertex_E2_not_constant_strict_of_sources
     (hsrc : ForwardGeometricSources)
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
@@ -1145,10 +1161,25 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_not_constant_strict_of_sources
     (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_of_sources
-    hsrc hn hsimple hregular
-      (not_concyclic_of_not_constant_signedMengerProfile_strict_orientation
-        hsimple hnc horient)
+  exact signedMengerProfile_dahlbergFourVertex_E2_not_constant_strict_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_geometricSources hsrc)
+    hn v hsimple hregular horient hnc
+
+/-- The source-parametrized strict-orientation E² constant-or-Dahlberg theorem
+for signed-Menger curvature. -/
+theorem signedMengerProfile_constant_or_dahlbergFourVertex_E2_strict_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v) :
+    (∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) ∨
+      DahlbergFourVertex (SignedMengerProfile v) := by
+  by_cases hconst : ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c
+  · exact Or.inl hconst
+  · exact Or.inr
+      (signedMengerProfile_dahlbergFourVertex_E2_not_constant_strict_of_forwardDfvSources
+        hsrc hn v hsimple hregular horient hconst)
 
 /-- The source-parametrized strict-orientation E² constant-or-Dahlberg theorem
 for signed-Menger curvature. -/
@@ -1160,11 +1191,27 @@ theorem signedMengerProfile_constant_or_dahlbergFourVertex_E2_strict_of_sources
     (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v) :
     (∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) ∨
       DahlbergFourVertex (SignedMengerProfile v) := by
-  by_cases hconst : ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c
-  · exact Or.inl hconst
-  · exact Or.inr
-      (signedMengerProfile_dahlbergFourVertex_E2_not_constant_strict_of_sources
-        hsrc hn v hsimple hregular horient hconst)
+  exact signedMengerProfile_constant_or_dahlbergFourVertex_E2_strict_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_geometricSources hsrc)
+    hn v hsimple hregular horient
+
+/-- The source-parametrized strict-orientation E² discrete theorem for raw
+signed-Menger curvature. -/
+theorem dahlberg_discrete_four_vertex_E2_strict_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v) :
+    (∃ c, ∀ i : ZMod n,
+      Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) = c) ∨
+      DahlbergFourVertex
+        (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
+  change
+    (∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) ∨
+      DahlbergFourVertex (SignedMengerProfile v)
+  exact signedMengerProfile_constant_or_dahlbergFourVertex_E2_strict_of_forwardDfvSources
+    hsrc hn v hsimple hregular horient
 
 /-- The source-parametrized strict-orientation E² discrete theorem for raw
 signed-Menger curvature. -/
@@ -1181,8 +1228,26 @@ theorem dahlberg_discrete_four_vertex_E2_strict_of_sources
   change
     (∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) ∨
       DahlbergFourVertex (SignedMengerProfile v)
-  exact signedMengerProfile_constant_or_dahlbergFourVertex_E2_strict_of_sources
-    hsrc hn v hsimple hregular horient
+  exact signedMengerProfile_constant_or_dahlbergFourVertex_E2_strict_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_geometricSources hsrc)
+    hn v hsimple hregular horient
+
+/-- The source-parametrized strict-orientation E² discrete theorem for
+nonconstant raw signed-Menger curvature. -/
+theorem dahlberg_discrete_four_vertex_E2_strict_not_constant_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n,
+      Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1)) = c) :
+    DahlbergFourVertex
+      (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
+  change DahlbergFourVertex (SignedMengerProfile v)
+  change ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c at hnc
+  exact signedMengerProfile_dahlbergFourVertex_E2_not_constant_strict_of_forwardDfvSources
+    hsrc hn v hsimple hregular horient hnc
 
 /-- The source-parametrized strict-orientation E² discrete theorem for
 nonconstant raw signed-Menger curvature. -/
@@ -1198,8 +1263,9 @@ theorem dahlberg_discrete_four_vertex_E2_strict_not_constant_of_sources
       (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
   change DahlbergFourVertex (SignedMengerProfile v)
   change ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c at hnc
-  exact signedMengerProfile_dahlbergFourVertex_E2_not_constant_strict_of_sources
-    hsrc hn v hsimple hregular horient hnc
+  exact signedMengerProfile_dahlbergFourVertex_E2_not_constant_strict_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_geometricSources hsrc)
+    hn v hsimple hregular horient hnc
 
 /-- The source-parametrized public E² Dahlberg theorem for raw signed-Menger
 curvature. -/
@@ -1525,8 +1591,8 @@ theorem orderedAdjacentTurns_E2_conformalMenger_pos_of_sources
 
 /-- The source-parametrized strict-orientation E² conformal-Menger
 constant-or-Dahlberg theorem at `ε = 0`. -/
-theorem constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_sources
-    (hsrc : ForwardGeometricSources)
+theorem constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v)
@@ -1541,8 +1607,38 @@ theorem constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_sources
       simpa [add_zero] using
         realizesConformalMenger_zero_eq_half_signedMengerProfile_of_strict_orientation
           hsimple horient hκ i)
-    (signedMengerProfile_constant_or_dahlbergFourVertex_E2_strict_of_sources
+    (signedMengerProfile_constant_or_dahlbergFourVertex_E2_strict_of_forwardDfvSources
       hsrc hn v hsimple hregular horient)
+
+/-- The source-parametrized strict-orientation E² conformal-Menger
+constant-or-Dahlberg theorem at `ε = 0`. -/
+theorem constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_sources
+    (hsrc : ForwardGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_geometricSources hsrc)
+    hn v κ hsimple hregular horient hκ
+
+/-- The source-parametrized strict-orientation E² conformal-Menger
+nonconstant Dahlberg theorem at `ε = 0`. -/
+theorem dahlbergFourVertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
+      hsrc hn v κ hsimple hregular horient hκ)
+    hnc
 
 /-- The source-parametrized strict-orientation E² conformal-Menger
 nonconstant Dahlberg theorem at `ε = 0`. -/
@@ -1555,10 +1651,22 @@ theorem dahlbergFourVertex_E2_conformalMenger_zero_strict_of_sources
     (hκ : RealizesConformalMenger 0 v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_of_constant_or_of_not_constant
-    (constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_sources
-      hsrc hn v κ hsimple hregular horient hκ)
-    hnc
+  exact dahlbergFourVertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_geometricSources hsrc)
+    hn v κ hsimple hregular horient hκ hnc
+
+/-- The source-parametrized public E² conformal-Menger discrete theorem at
+`ε = 0` in constant-or-Dahlberg form. -/
+theorem dahlberg_discrete_four_vertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
+    hsrc hn v κ hsimple hregular horient hκ
 
 /-- The source-parametrized public E² conformal-Menger discrete theorem at
 `ε = 0` in constant-or-Dahlberg form. -/
@@ -1570,8 +1678,9 @@ theorem dahlberg_discrete_four_vertex_E2_conformalMenger_zero_strict_of_sources
     (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
     (hκ : RealizesConformalMenger 0 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_sources
-    hsrc hn v κ hsimple hregular horient hκ
+  exact dahlberg_discrete_four_vertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_geometricSources hsrc)
+    hn v κ hsimple hregular horient hκ
 
 /-- The source-parametrized positive-orientation conformal-Menger ordered-turn
 kernel over `E²`, `S²`, and `H²`. -/
