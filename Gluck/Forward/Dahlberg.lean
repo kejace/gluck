@@ -5810,6 +5810,18 @@ def DahlbergDiskReductionSetup {n : ℕ} (v : ZMod n → ℂ) : Prop :=
   ∃ O R, MinimalEnclosingDiskR2 v O R ∧
     ∃ i : ZMod n, OnDiskBoundaryR2 v O R i
 
+/-- In the §4 minimal-disk setup for a simple polygon, the smallest disk has
+positive radius. -/
+theorem dahlbergDiskReductionSetup_exists_radius_pos {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hsetup : DahlbergDiskReductionSetup v) :
+    ∃ O R, MinimalEnclosingDiskR2 v O R ∧ 0 < R ∧
+      ∃ i : ZMod n, OnDiskBoundaryR2 v O R i := by
+  rcases hsetup with ⟨O, R, hΔ, hboundary⟩
+  exact ⟨O, R, hΔ, radius_pos_of_minimalEnclosingDiskR2_of_isSimplePolygon hΔ hsimple,
+    hboundary⟩
+
 /-- Radius of the smallest closed disk with fixed centre `O` containing the
 finite cyclic vertex set `v`. -/
 noncomputable def finiteEnclosingRadius {n : ℕ} [NeZero n] (v : ZMod n → ℂ)

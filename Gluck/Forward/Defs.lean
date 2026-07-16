@@ -1706,6 +1706,27 @@ theorem minimalEnclosingDiskR2_le_of_polygonInClosedDiskR2 {n : ℕ}
     R ≤ R' := by
   exact hΔ.2.2 O' R' hR' hcontains
 
+/-- A minimal enclosing disk for a simple cyclic polygon has positive radius:
+two adjacent distinct vertices are contained in the disk, so the radius cannot
+be zero. -/
+theorem radius_pos_of_minimalEnclosingDiskR2_of_isSimplePolygon {n : ℕ}
+    [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
+    (hΔ : MinimalEnclosingDiskR2 v O R)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) :
+    0 < R := by
+  rcases lt_or_eq_of_le hΔ.1 with hRpos | hRzero
+  · exact hRpos
+  · have hdist₀ : dist O (v 0) = 0 := by
+      exact le_antisymm (by simpa [InClosedDiskR2, hRzero] using hΔ.2.1 (0 : ZMod n))
+        dist_nonneg
+    have hdist₁ : dist O (v ((0 : ZMod n) + 1)) = 0 := by
+      exact le_antisymm
+        (by simpa [InClosedDiskR2, hRzero] using hΔ.2.1 ((0 : ZMod n) + 1))
+        dist_nonneg
+    have hO₀ : O = v 0 := dist_eq_zero.mp hdist₀
+    have hO₁ : O = v ((0 : ZMod n) + 1) := dist_eq_zero.mp hdist₁
+    exact False.elim ((hsimple.1 (0 : ZMod n)) (hO₀.symm.trans hO₁))
+
 /-- A boundary vertex of a disk is, in particular, contained in that disk. -/
 theorem inClosedDiskR2_of_onDiskBoundaryR2 {n : ℕ} {v : ZMod n → ℂ}
     {O : ℂ} {R : ℝ} {i : ZMod n}
