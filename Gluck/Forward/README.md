@@ -104,8 +104,11 @@ target.  It also exposes source-parametrized kernels such as
 conformal-Menger dispatch it exposes
 `orderedAdjacentTurns_conformalMenger_spaceForm_kernel_of_sources` and
 `constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources`,
-so a future proof of `ForwardGeometricSources` can be used directly without
-depending on the current placeholder gates.  The public S²/H² wrapper files
+plus the negative and strict-orientation forms
+`constant_or_dahlbergFourVertex_conformalMenger_neg_of_sources` and
+`constant_or_dahlbergFourVertex_conformalMenger_strict_of_sources`, so a future
+proof of `ForwardGeometricSources` can be used directly without depending on
+the current placeholder gates.  The public S²/H² wrapper files
 also expose positive-orientation ordered-turn endpoints
 `orderedAdjacentTurns_S2_of_positiveOrientation` and
 `orderedAdjacentTurns_H2_of_positiveOrientation`, together with reflected
