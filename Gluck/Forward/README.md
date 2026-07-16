@@ -28,7 +28,8 @@ the converse project's level-window condition:
 1. Formalize the convex extremal-circle theorem (paper Theorem 6).
 2. Prove monotonic nesting of the regions `δ(P,e)` along an edge (Lemma 8).
 3. Establish the strictly convex locally regular case (Lemma 9).
-4. Formalize the smallest-enclosing-disk radius comparison (Lemma 10).
+4. Use the already-formalized smallest-enclosing-disk radius comparison
+   (Lemma 10).
 5. Reduce the general locally regular polygon to the convex theorem as in the
    proof of Theorem 1.
 
@@ -92,7 +93,7 @@ The remaining primitive source gates in the current worktree are exactly:
 - `Gluck/Forward/Smooth.lean`
   - `osserman1985_smooth_E2_threshold_source_gate`;
 - `Gluck/Forward/Dahlberg.lean`
-  - `dahlbergE2_paper_source_components_gate`.
+  - `dahlbergE2_paper_theorem_sources_gate`.
 
 The public smooth value-separated gate
 `four_vertex_condition_smooth_E2_source_gate` is now recovered formally from
@@ -100,6 +101,20 @@ Osserman's threshold formulation: Theorem 1′ of
 `references/osserman1985.pdf` gives local minima with `κ < 1 / R` and local
 maxima with `κ > 1 / R`, hence
 `max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂)`.
+
+The Dahlberg gate is now split as `DahlbergE2PaperTheoremSources`, with three
+paper-level components:
+
+- `DahlbergE2Theorem6CdfvSource`: §3 Theorem 6 / CDFV, in the current
+  radius-witness interface;
+- `DahlbergE2Lemma8DiskNestingSource`: §4 Lemma 8's disk-nesting propagation,
+  in the strict previous-radius-turn interface;
+- `DahlbergE2Section4AuxiliaryPolygonSource`: the final §4 normalized
+  auxiliary-polygon construction/transfer.
+
+The older compact source package `DahlbergE2PaperSourceComponents` and
+`dahlbergE2_paper_source_components_gate` are now recovered formally from this
+split package by `dahlbergE2PaperSourceComponents_of_paperTheoremSources`.
 
 Dahlberg's strict positive-orientation CDFV and Lemma 8 compatibility gates,
 `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate` and
@@ -145,6 +160,9 @@ The nonconstant and nonconcyclic Lemma 9 ordered-turn spellings,
 `dahlbergE2_lemma9_ordered_turn_nonconcyclic_source_gate`, are recovered
 directly from the combined constant-or source.  The public
 `dahlbergE2_lemma9_source_gate` is recovered from this same source surface.
+The current typed paper-source package is formally equivalent to the
+theorem-facing Lemma-9/unit package via
+`dahlbergE2PaperSourceComponents_iff_lemma9UnitComponents`.
 The final-D4VT route remains separated from the
 stronger ordered-turn route: `dahlbergE2_dfv_primitive_source_components`
 contains the signed-CDFV gate recovered from this strict source package, its
@@ -183,9 +201,7 @@ formal proofs.  The relevant paper sources are:
   extrema with the two maxima value-separated above the two minima,
   `max(κ q₁, κ q₂) < min(κ p₁, κ p₂)`.
 - Dahlberg, *A Discrete Four Vertex Theorem* (`references/23.pdf`) for the
-  strict positive-orientation source package: §3 Theorem 6 (CDFV) and §4
-  Lemma 8 combine in Lemma 9 to supply the constant-or ordered-turn strict
-  branch.  The split CDFV and Lemma 8 interfaces are recovered formally in
-  Lean from this combined source.  The same paper's §4 proof of Theorem 1 is
-  the source for the normalized successor-interior auxiliary-polygon
-  construction gate.
+  remaining discrete gate: §3 Theorem 6 (CDFV), §4 Lemma 8, and the §4 proof
+  of Theorem 1.  In Lean these are now named separately as
+  `DahlbergE2Theorem6CdfvSource`, `DahlbergE2Lemma8DiskNestingSource`, and
+  `DahlbergE2Section4AuxiliaryPolygonSource`.

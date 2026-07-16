@@ -9066,6 +9066,67 @@ def DahlbergE2PaperSourceComponents : Prop :=
   DahlbergE2Lemma9ConstantOrSource ∧
   DahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource
 
+/-- Dahlberg's Theorem 6 / CDFV source, in the current radius-witness
+interface.
+
+The paper states this as two curvature disks containing all vertices, two
+curvature disks whose interiors contain no vertices, and pairwise distinctness
+of the four circles.  The Lean interface records the equivalent
+plateau-aware four-vertex statement for the previous curvature-radius
+profile. -/
+def DahlbergE2Theorem6CdfvSource : Prop :=
+  DahlbergE2ConvexDfvRadiusNonconcyclicSource
+
+/-- Dahlberg's Lemma 8 disk-nesting source in the current proof interface.
+
+Given the CDFV radius witnesses, Lemma 8 propagates the inclusions
+`δ(Q,e) ⊆ δ(P,e)` along the two monotone arcs and yields the four strict
+one-step previous-radius turns used by Lemma 9. -/
+def DahlbergE2Lemma8DiskNestingSource : Prop :=
+  DahlbergE2Lemma8StrictPreviousRadiusTurnsSource
+
+/-- Dahlberg's remaining §4 auxiliary-polygon construction source.
+
+This is the unit-normalized form of the non-strict branch: after choosing a
+smallest enclosing disk, a boundary vertex, an adjacent interior vertex, and
+normalizing by a direct Euclidean motion and positive homothety, the proof
+constructs the strictly convex auxiliary polygon whose D4VT conclusion
+transfers back to the original polygon. -/
+def DahlbergE2Section4AuxiliaryPolygonSource : Prop :=
+  DahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource
+
+/-- The three substantial paper theorem sources still needed for a complete
+source-free proof of the Euclidean discrete Dahlberg theorem:
+
+* Theorem 6 / CDFV for strictly convex polygons;
+* Lemma 8's disk-nesting propagation from CDFV witnesses to ordered
+  adjacent-radius turns;
+* the final §4 auxiliary-polygon construction/transfer in the normalized
+  unit-disk setup.
+
+All normalization, radius-transport, sign/orientation transport, and
+conversion between radius and signed-Menger formulations is already
+formalized around this package. -/
+def DahlbergE2PaperTheoremSources : Prop :=
+  DahlbergE2Theorem6CdfvSource ∧
+  DahlbergE2Lemma8DiskNestingSource ∧
+  DahlbergE2Section4AuxiliaryPolygonSource
+
+/-- The paper theorem sources imply the current compact source surface. -/
+theorem dahlbergE2PaperSourceComponents_of_paperTheoremSources
+    (hsrc : DahlbergE2PaperTheoremSources) :
+    DahlbergE2PaperSourceComponents := by
+  rcases hsrc with ⟨hcdfv, hlemma8, hsection4⟩
+  have hsigned : DahlbergE2ConvexDfvSignedNonconcyclicSource :=
+    dahlbergE2ConvexDfvSignedNonconcyclicSource_of_radiusNonconcyclicSource hcdfv
+  have hbridge : DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource :=
+    dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_strictPreviousRadiusTurnsSource
+      hlemma8
+  have hlemma9 : DahlbergE2Lemma9Source :=
+    dahlbergE2Lemma9Source_of_signedNonconcyclicComponents
+      ⟨hsigned, hbridge⟩
+  exact ⟨dahlbergE2Lemma9ConstantOrSource_of_source hlemma9, hsection4⟩
+
 /-- The typed unit source implies the older raw existential unit source. -/
 theorem dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_auxiliaryPolygonSource
     (hsrc : DahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource) :
@@ -9944,14 +10005,26 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
+/-- Dahlberg's current substantial paper-source gate.
+
+This is the only remaining primitive source gate for
+`Gluck/Forward/Dahlberg.lean`.  It is no longer an opaque all-purpose
+assumption: it is split into Theorem 6 / CDFV, Lemma 8 disk nesting, and the
+§4 auxiliary-polygon construction. -/
+theorem dahlbergE2_paper_theorem_sources_gate :
+    DahlbergE2PaperTheoremSources := by
+  sorry
+
 /-- The current full Dahlberg E² paper source package.
 
 This is the only remaining primitive source gate for
 `Gluck/Forward/Dahlberg.lean`: it packages the strict Lemma 9 branch and the
-non-strict §4 auxiliary-polygon construction branch. -/
+non-strict §4 auxiliary-polygon construction branch, and is now recovered from
+the explicit paper theorem source package above. -/
 theorem dahlbergE2_paper_source_components_gate :
     DahlbergE2PaperSourceComponents := by
-  sorry
+  exact dahlbergE2PaperSourceComponents_of_paperTheoremSources
+    dahlbergE2_paper_theorem_sources_gate
 
 /-- Dahlberg's strict positive-orientation Lemma 9 constant-or ordered-turn
 source gate.
@@ -10523,6 +10596,33 @@ The primitive spelling below splits Lemma 9 into signed CDFV plus Lemma 8. -/
 def DahlbergE2Lemma9UnitRemainingSourceComponents : Prop :=
   DahlbergE2Lemma9Source ∧
   DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
+
+/-- The theorem-facing Lemma-9/unit source package implies the current typed
+paper-source surface. -/
+theorem dahlbergE2PaperSourceComponents_of_lemma9UnitComponents
+    (hsrc : DahlbergE2Lemma9UnitRemainingSourceComponents) :
+    DahlbergE2PaperSourceComponents := by
+  exact ⟨dahlbergE2Lemma9ConstantOrSource_of_source hsrc.1,
+    dahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource_of_constructionSource
+      hsrc.2⟩
+
+/-- The current typed paper-source surface implies the theorem-facing
+Lemma-9/unit package. -/
+theorem dahlbergE2Lemma9UnitRemainingSourceComponents_of_paperSourceComponents
+    (hsrc : DahlbergE2PaperSourceComponents) :
+    DahlbergE2Lemma9UnitRemainingSourceComponents := by
+  exact ⟨dahlbergE2Lemma9Source_of_constantOrSource hsrc.1,
+    dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_auxiliaryPolygonSource
+      hsrc.2⟩
+
+/-- The current typed paper-source surface is formally equivalent to the
+theorem-facing Lemma-9/unit source package. -/
+theorem dahlbergE2PaperSourceComponents_iff_lemma9UnitComponents :
+    DahlbergE2PaperSourceComponents ↔
+      DahlbergE2Lemma9UnitRemainingSourceComponents := by
+  constructor
+  · exact dahlbergE2Lemma9UnitRemainingSourceComponents_of_paperSourceComponents
+  · exact dahlbergE2PaperSourceComponents_of_lemma9UnitComponents
 
 /-- The current E² source-gate surface is also sufficient for the final D4VT
 route: Lemma 9 implies the nonconcyclic signed-CDFV source, and the unit-disk
