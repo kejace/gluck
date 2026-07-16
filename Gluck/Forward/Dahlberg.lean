@@ -5844,6 +5844,61 @@ theorem dahlbergDiskReductionSetup_exists_radius_pos {n : ℕ} [NeZero n]
   exact ⟨O, R, hΔ, radius_pos_of_minimalEnclosingDiskR2_of_isSimplePolygon hΔ hsimple,
     hboundary⟩
 
+/-- In Dahlberg's §4 minimal-disk setup, any selected boundary vertex realizes
+the maximal distance from the disk centre among all polygon vertices. -/
+theorem dahlbergDiskReductionSetup_exists_boundary_max {n : ℕ}
+    {v : ZMod n → ℂ}
+    (hsetup : DahlbergDiskReductionSetup v) :
+    ∃ O R i, MinimalEnclosingDiskR2 v O R ∧
+      OnDiskBoundaryR2 v O R i ∧
+      ∀ j : ZMod n, dist O (v j) ≤ dist O (v i) := by
+  rcases hsetup with ⟨O, R, hΔ, i, hboundary⟩
+  exact ⟨O, R, i, hΔ, hboundary,
+    fun j => dist_le_boundary_dist_of_minimalEnclosingDiskR2 hΔ hboundary⟩
+
+/-- In the nonconcyclic §4 branch, not every vertex can lie on the boundary
+of the minimal enclosing disk; otherwise the polygon would be concyclic. -/
+theorem dahlbergDiskReductionSetup_exists_interior_vertex_of_nonconcyclic
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hnoncircle : ¬ Concyclic v)
+    (hsetup : DahlbergDiskReductionSetup v) :
+    ∃ O R, MinimalEnclosingDiskR2 v O R ∧ 0 < R ∧
+      (∃ i : ZMod n, OnDiskBoundaryR2 v O R i) ∧
+      ∃ j : ZMod n, dist O (v j) < R := by
+  rcases dahlbergDiskReductionSetup_exists_radius_pos hsimple hsetup with
+    ⟨O, R, hΔ, hRpos, hboundary⟩
+  refine ⟨O, R, hΔ, hRpos, hboundary, ?_⟩
+  by_contra hnoInterior
+  have hall : ∀ j : ZMod n, dist O (v j) = R := by
+    intro j
+    exact le_antisymm (hΔ.2.1 j) (not_lt.mp (fun hj => hnoInterior ⟨j, hj⟩))
+  exact hnoncircle ⟨O, R, hRpos, hall⟩
+
+/-- Combined finite-disk data for Dahlberg's §4 nonconcyclic branch: a
+positive minimal disk, a boundary vertex realizing the maximal radius, and a
+strictly interior vertex. -/
+theorem dahlbergDiskReductionSetup_exists_boundary_max_and_interior
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hnoncircle : ¬ Concyclic v)
+    (hsetup : DahlbergDiskReductionSetup v) :
+    ∃ O R i j, MinimalEnclosingDiskR2 v O R ∧ 0 < R ∧
+      OnDiskBoundaryR2 v O R i ∧ dist O (v j) < R ∧
+      ∀ k : ZMod n, dist O (v k) ≤ dist O (v i) := by
+  rcases dahlbergDiskReductionSetup_exists_radius_pos hsimple hsetup with
+    ⟨O, R, hΔ, hRpos, i, hi⟩
+  have hinterior : ∃ j : ZMod n, dist O (v j) < R := by
+    by_contra hnoInterior
+    have hall : ∀ j : ZMod n, dist O (v j) = R := by
+      intro j
+      exact le_antisymm (hΔ.2.1 j)
+        (not_lt.mp (fun hj => hnoInterior ⟨j, hj⟩))
+    exact hnoncircle ⟨O, R, hRpos, hall⟩
+  rcases hinterior with ⟨j, hj⟩
+  exact ⟨O, R, i, j, hΔ, hRpos, hi, hj,
+    fun k => dist_le_boundary_dist_of_minimalEnclosingDiskR2 hΔ hi⟩
+
 /-- Radius of the smallest closed disk with fixed centre `O` containing the
 finite cyclic vertex set `v`. -/
 noncomputable def finiteEnclosingRadius {n : ℕ} [NeZero n] (v : ZMod n → ℂ)

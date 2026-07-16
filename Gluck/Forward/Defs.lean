@@ -1734,6 +1734,16 @@ theorem inClosedDiskR2_of_onDiskBoundaryR2 {n : ℕ} {v : ZMod n → ℂ}
     InClosedDiskR2 O R (v i) := by
   exact le_of_eq hboundary
 
+/-- A boundary vertex of a minimal enclosing disk has maximal distance from
+the disk centre among the polygon vertices. -/
+theorem dist_le_boundary_dist_of_minimalEnclosingDiskR2 {n : ℕ}
+    {v : ZMod n → ℂ} {O : ℂ} {R : ℝ} {i j : ZMod n}
+    (hΔ : MinimalEnclosingDiskR2 v O R)
+    (hboundary : OnDiskBoundaryR2 v O R i) :
+    dist O (v j) ≤ dist O (v i) := by
+  rw [hboundary]
+  exact hΔ.2.1 j
+
 /-- The signed-Menger curvature profile of a cyclic Euclidean polygon. -/
 noncomputable def SignedMengerProfile {n : ℕ} (v : ZMod n → ℂ) : ZMod n → ℝ :=
   fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))
