@@ -8809,15 +8809,23 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
-/-- Dahlberg's convex/CDFV signed-Menger source gate, recovered from the
-strict convex discrete four-vertex theorem.
+/-- Dahlberg's convex/CDFV signed-Menger nonconcyclic source gate, recovered
+from the strict convex discrete four-vertex theorem.
 
 This is the theorem-level Euclidean strict-convex input used by the final
 D4VT route: Theorem 6/CDFV in Dahlberg's discrete four-vertex paper supplies
-the plateau-aware signed-Menger conclusion directly. -/
+the plateau-aware signed-Menger conclusion directly for the nonconcyclic
+strictly convex branch. -/
+theorem dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate :
+    DahlbergE2ConvexDfvSignedNonconcyclicSource := by
+  sorry
+
+/-- Dahlberg's convex/CDFV signed-Menger source gate in nonconstant-profile
+form, recovered formally from the nonconcyclic CDFV source gate. -/
 theorem dahlbergE2_convex_dfv_signed_source_gate :
     DahlbergE2ConvexDfvSignedSource := by
-  sorry
+  exact dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource
+    dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate
 
 /-- Dahlberg's Lemma 8 monotonicity bridge source gate.
 
@@ -9132,6 +9140,12 @@ def DahlbergE2DfvUnitSourceComponents : Prop :=
   DahlbergE2ConvexDfvSignedSource ∧
   DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
 
+/-- The primitive Euclidean source components for final D4VT: nonconcyclic
+strict-convex signed CDFV, plus the normalized unit-disk §4 source. -/
+def DahlbergE2DfvPrimitiveSourceComponents : Prop :=
+  DahlbergE2ConvexDfvSignedNonconcyclicSource ∧
+  DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
+
 /-- The exact `E²` Dahlberg source components still needed for the stronger
 ordered-turn route.
 
@@ -9153,6 +9167,14 @@ route, with the non-strict §4 component stated in the normalized unit-disk
 successor form. -/
 def DahlbergE2UnitRemainingSourceComponents : Prop :=
   DahlbergE2ConvexDfvSignedSource ∧
+  DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
+  DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
+
+/-- The primitive `E²` source components for the stronger ordered-turn route:
+nonconcyclic strict-convex signed CDFV, Lemma 8's witness bridge, and the
+normalized unit-disk §4 source. -/
+def DahlbergE2PrimitiveRemainingSourceComponents : Prop :=
+  DahlbergE2ConvexDfvSignedNonconcyclicSource ∧
   DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
   DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
 
@@ -9182,6 +9204,31 @@ theorem dahlbergE2DfvSourceComponents_iff_unitComponents :
   · exact dahlbergE2DfvUnitSourceComponents_of_components
   · exact dahlbergE2DfvSourceComponents_of_unitComponents
 
+/-- Convert primitive final-D4VT E² components to the existing
+boundary/interior component package. -/
+theorem dahlbergE2DfvSourceComponents_of_primitiveComponents
+    (hsrc : DahlbergE2DfvPrimitiveSourceComponents) :
+    DahlbergE2DfvSourceComponents := by
+  exact ⟨dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource hsrc.1,
+    dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_boundaryInteriorSource.mp
+      hsrc.2⟩
+
+/-- Convert existing final-D4VT E² components to the primitive source package. -/
+theorem dahlbergE2DfvPrimitiveSourceComponents_of_components
+    (hsrc : DahlbergE2DfvSourceComponents) :
+    DahlbergE2DfvPrimitiveSourceComponents := by
+  exact ⟨dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource hsrc.1,
+    dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_boundaryInteriorSource.mpr
+      hsrc.2⟩
+
+/-- The existing final-D4VT E² component package is equivalent to the
+primitive spelling. -/
+theorem dahlbergE2DfvSourceComponents_iff_primitiveComponents :
+    DahlbergE2DfvSourceComponents ↔ DahlbergE2DfvPrimitiveSourceComponents := by
+  constructor
+  · exact dahlbergE2DfvPrimitiveSourceComponents_of_components
+  · exact dahlbergE2DfvSourceComponents_of_primitiveComponents
+
 /-- Convert normalized-unit remaining E² components to the existing
 boundary/interior component package. -/
 theorem dahlbergE2RemainingSourceComponents_of_unitComponents
@@ -9207,6 +9254,34 @@ theorem dahlbergE2RemainingSourceComponents_iff_unitComponents :
   constructor
   · exact dahlbergE2UnitRemainingSourceComponents_of_components
   · exact dahlbergE2RemainingSourceComponents_of_unitComponents
+
+/-- Convert primitive remaining E² components to the existing
+boundary/interior component package. -/
+theorem dahlbergE2RemainingSourceComponents_of_primitiveComponents
+    (hsrc : DahlbergE2PrimitiveRemainingSourceComponents) :
+    DahlbergE2RemainingSourceComponents := by
+  exact ⟨dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource hsrc.1,
+    hsrc.2.1,
+    dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_boundaryInteriorSource.mp
+      hsrc.2.2⟩
+
+/-- Convert existing remaining E² components to the primitive source package. -/
+theorem dahlbergE2PrimitiveRemainingSourceComponents_of_components
+    (hsrc : DahlbergE2RemainingSourceComponents) :
+    DahlbergE2PrimitiveRemainingSourceComponents := by
+  exact ⟨dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource hsrc.1,
+    hsrc.2.1,
+    dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_boundaryInteriorSource.mpr
+      hsrc.2.2⟩
+
+/-- The existing remaining E² component package is equivalent to the
+primitive spelling. -/
+theorem dahlbergE2RemainingSourceComponents_iff_primitiveComponents :
+    DahlbergE2RemainingSourceComponents ↔
+      DahlbergE2PrimitiveRemainingSourceComponents := by
+  constructor
+  · exact dahlbergE2PrimitiveRemainingSourceComponents_of_components
+  · exact dahlbergE2RemainingSourceComponents_of_primitiveComponents
 
 /-- The sharp remaining `E²` source components imply the positive-orientation
 ordered-turn extraction directly, without routing through the older bundled

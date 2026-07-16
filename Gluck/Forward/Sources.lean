@@ -282,6 +282,14 @@ def ForwardUnitRemainingSourceComponents : Prop :=
   SpaceFormDiscreteModelSources ∧
   DahlbergE2UnitRemainingSourceComponents
 
+/-- Named component spelling of the actual remaining source obligations, with
+the Euclidean discrete block recorded in its primitive source form:
+nonconcyclic CDFV, Lemma 8, and the normalized unit-disk §4 source. -/
+def ForwardPrimitiveRemainingSourceComponents : Prop :=
+  SmoothForwardModelSources ∧
+  SpaceFormDiscreteModelSources ∧
+  DahlbergE2PrimitiveRemainingSourceComponents
+
 /-- Named component spelling of the actual remaining source obligations needed
 only for the final D4VT endpoints.
 
@@ -300,6 +308,15 @@ def ForwardDfvUnitRemainingSourceComponents : Prop :=
   SmoothForwardDfvModelSources ∧
   SpaceFormDiscreteDfvModelSources ∧
   DahlbergE2DfvUnitSourceComponents
+
+/-- Named component spelling of the actual remaining source obligations needed
+only for final D4VT endpoints, with the Euclidean discrete block recorded in
+its primitive source form: nonconcyclic CDFV and the normalized unit-disk §4
+source. -/
+def ForwardDfvPrimitiveRemainingSourceComponents : Prop :=
+  SmoothForwardDfvModelSources ∧
+  SpaceFormDiscreteDfvModelSources ∧
+  DahlbergE2DfvPrimitiveSourceComponents
 
 /-- Uniform component spelling of the actual remaining source obligations.
 
@@ -370,6 +387,32 @@ theorem forwardDfvRemainingSourceComponents_iff_unitComponents :
   · intro hsrc
     exact ⟨hsrc.1, hsrc.2.1,
       dahlbergE2DfvSourceComponents_iff_unitComponents.mpr hsrc.2.2⟩
+
+/-- The existing named remaining-source package is equivalent to the primitive
+source spelling. -/
+theorem forwardRemainingSourceComponents_iff_primitiveComponents :
+    ForwardRemainingSourceComponents ↔
+      ForwardPrimitiveRemainingSourceComponents := by
+  constructor
+  · intro hsrc
+    exact ⟨hsrc.1, hsrc.2.1,
+      dahlbergE2RemainingSourceComponents_iff_primitiveComponents.mp hsrc.2.2⟩
+  · intro hsrc
+    exact ⟨hsrc.1, hsrc.2.1,
+      dahlbergE2RemainingSourceComponents_iff_primitiveComponents.mpr hsrc.2.2⟩
+
+/-- The existing named final-D4VT remaining-source package is equivalent to
+the primitive source spelling. -/
+theorem forwardDfvRemainingSourceComponents_iff_primitiveComponents :
+    ForwardDfvRemainingSourceComponents ↔
+      ForwardDfvPrimitiveRemainingSourceComponents := by
+  constructor
+  · intro hsrc
+    exact ⟨hsrc.1, hsrc.2.1,
+      dahlbergE2DfvSourceComponents_iff_primitiveComponents.mp hsrc.2.2⟩
+  · intro hsrc
+    exact ⟨hsrc.1, hsrc.2.1,
+      dahlbergE2DfvSourceComponents_iff_primitiveComponents.mpr hsrc.2.2⟩
 
 /-- The flattened remaining-source audit is equivalent to the named component
 spelling. -/
