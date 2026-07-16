@@ -102,9 +102,10 @@ target.  It also exposes source-parametrized kernels such as
 `dahlberg_discrete_four_vertex_E2_kernel_of_sources`, and
 `constant_or_dahlbergFourVertex_spaceForm_kernel_of_sources`; for the unified
 conformal-Menger dispatch it exposes
-`orderedAdjacentTurns_conformalMenger_spaceForm_kernel_of_sources`, so a future
-proof of `ForwardGeometricSources` can be used directly without depending on
-the current placeholder gates.  The public S²/H² wrapper files
+`orderedAdjacentTurns_conformalMenger_spaceForm_kernel_of_sources` and
+`constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources`,
+so a future proof of `ForwardGeometricSources` can be used directly without
+depending on the current placeholder gates.  The public S²/H² wrapper files
 also expose positive-orientation ordered-turn endpoints
 `orderedAdjacentTurns_S2_of_positiveOrientation` and
 `orderedAdjacentTurns_H2_of_positiveOrientation`, together with reflected

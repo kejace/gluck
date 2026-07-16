@@ -272,6 +272,60 @@ theorem orderedAdjacentTurns_conformalMenger_spaceForm_kernel_of_sources
         hsrc (Or.inr rfl)
         hn v κ hdisk hsimple horient hregular hκ hproper hnc
 
+/-- The source-parametrized positive-orientation conformal-Menger constant-or
+ordered-turn kernel over `E²`, `S²`, and `H²`. -/
+theorem constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_kernel_of_sources
+    (hsrc : ForwardGeometricSources)
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ OrderedAdjacentTurns κ := by
+  by_cases hconst : ∃ c, ∀ i : ZMod n, κ i = c
+  · exact Or.inl hconst
+  · exact Or.inr
+      (orderedAdjacentTurns_conformalMenger_spaceForm_kernel_of_sources
+        hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper hconst)
+
+/-- The source-parametrized positive-orientation conformal-Menger
+constant-or-Dahlberg kernel over `E²`, `S²`, and `H²`. -/
+theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
+    (hsrc : ForwardGeometricSources)
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns hn
+    (constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_kernel_of_sources
+      hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper)
+
+/-- The source-parametrized positive-orientation conformal-Menger nonconstant
+Dahlberg kernel over `E²`, `S²`, and `H²`. -/
+theorem dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
+    (hsrc : ForwardGeometricSources)
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (orderedAdjacentTurns_conformalMenger_spaceForm_kernel_of_sources
+      hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper hnc)
+
 /-- The source-parametrized nonconstant smooth kernel. -/
 theorem four_vertex_condition_smooth_spaceForm_nonconstant_source_of_sources
     (hsrc : ForwardGeometricSources) {ε : ℝ}
