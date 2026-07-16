@@ -9030,31 +9030,31 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
-/-- Dahlberg's convex/CDFV signed-Menger source gate in nonconstant-profile
-form.
+/-- Dahlberg's convex/CDFV signed-Menger nonconcyclic source gate.
 
 Dahlberg's Theorem 6/CDFV supplies the plateau-aware four-vertex conclusion
 for the signed-Menger profile in the strictly convex positive-orientation
-branch.  Radius-witness spellings are recovered formally below by reciprocal
-radius monotonicity.
+branch.  This is the geometric paper-facing statement; the nonconstant-profile
+form is recovered formally below from the equivalence between nonconcyclicity
+and nonconstancy of signed Menger curvature in the positive-orientation branch.
 
 Reference source: Dahlberg, *A Discrete Four Vertex Theorem*,
 `references/23.pdf`, §3 Theorem 6 (CDFV). -/
-theorem dahlbergE2_convex_dfv_signed_source_gate :
-    DahlbergE2ConvexDfvSignedSource := by
+theorem dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate :
+    DahlbergE2ConvexDfvSignedNonconcyclicSource := by
   sorry
 
-/-- Dahlberg's convex/CDFV signed-Menger nonconcyclic source gate, recovered
-from the strict convex discrete four-vertex theorem.
+/-- Dahlberg's convex/CDFV signed-Menger source gate in nonconstant-profile
+form, recovered from the geometric nonconcyclic CDFV source.
 
 This is the theorem-level Euclidean strict-convex input used by the final
 D4VT route: Theorem 6/CDFV in Dahlberg's discrete four-vertex paper supplies
 the plateau-aware signed-Menger conclusion directly for the nonconcyclic
 strictly convex branch. -/
-theorem dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate :
-    DahlbergE2ConvexDfvSignedNonconcyclicSource := by
-  exact dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource
-    dahlbergE2_convex_dfv_signed_source_gate
+theorem dahlbergE2_convex_dfv_signed_source_gate :
+    DahlbergE2ConvexDfvSignedSource := by
+  exact dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource
+    dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate
 
 /-- Dahlberg's Lemma 8 monotonicity bridge source gate.
 
