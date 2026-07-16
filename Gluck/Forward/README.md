@@ -130,7 +130,7 @@ primitive remaining-source audit is:
   - `spaceFormDiscrete_source_gate`.
 - `Gluck/Forward/Dahlberg.lean`
   - `dahlbergE2_lemma9_source_gate`;
-  - `dahlbergE2_disk_auxiliary_boundary_successor_normalized_construction_source_gate`.
+  - `dahlbergE2_disk_auxiliary_boundary_successor_centered_construction_source_gate`.
 
 The weak smooth and non-Euclidean final-D4VT gates are no longer primitive:
 `smoothForward_dfv_source_gate` is recovered from `smoothForward_source_gate`,
@@ -162,14 +162,16 @@ strong-to-weak implications.  The grouped component spellings are exposed as
 interfaces.  Its strict branch is currently gated at Dahlberg's Lemma 9:
 the signed-CDFV and witness-only Lemma 8 source components are recovered
 formally from `dahlbergE2_lemma9_source_gate`.  Its non-strict §4 branch is
-gated at the normalized successor-interior interface
-`dahlbergE2_disk_auxiliary_boundary_successor_normalized_construction_source_gate`:
-after cyclic translation, the selected boundary vertex is `0` and vertex `1`
-is strictly inside `Δ`.  Arbitrary successor-interior cases are recovered by
-cyclic translation, using transport for minimal disks, simplicity, local
-regularity, non-strict orientation, concyclicity, and
-`DahlbergDiskAuxiliaryReduction`.  The predecessor-interior case is recovered
-by reversing cyclic order, using the analogous reversal transport.  The
+gated at the centered normalized successor-interior interface
+`dahlbergE2_disk_auxiliary_boundary_successor_centered_construction_source_gate`:
+after cyclic translation, the selected boundary vertex is `0`; after Euclidean
+translation, the minimal disk center is `0`; and vertex `1` is strictly inside
+`Δ`.  Arbitrary disk centers are recovered by direct-isometry transport for
+minimal disks, boundary incidence, simplicity, local regularity, non-strict
+orientation, concyclicity, and `DahlbergDiskAuxiliaryReduction`.  Arbitrary
+successor-interior cases are then recovered by cyclic translation, using the
+same transported structures.  The predecessor-interior case is recovered by
+reversing cyclic order, using the analogous reversal transport.  The
 set-level boundary-neighbor source is recovered by converting nonmembership in
 `E` to strict interiority using minimal-disk containment.  The
 adjacent-transition source is then recovered by orienting any crossing edge

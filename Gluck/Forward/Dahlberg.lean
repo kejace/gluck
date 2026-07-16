@@ -7475,6 +7475,25 @@ def DahlbergE2DiskAuxiliaryBoundarySuccessorNormalizedConstructionSource : Prop 
       dist O (v 1) < R →
       DahlbergDiskAuxiliaryReduction v
 
+/-- Centered normalized one-sided source for Dahlberg's §4 auxiliary
+construction.
+
+After direct Euclidean translation, the minimal enclosing disk center may be
+assumed to be `0`, in addition to the cyclic normalization sending the selected
+boundary vertex to index `0`. -/
+def DahlbergE2DiskAuxiliaryBoundarySuccessorCenteredConstructionSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    ∀ {R : ℝ},
+      MinimalEnclosingDiskR2 v 0 R →
+      0 < R →
+      OnDiskBoundaryR2 v 0 R 0 →
+      dist 0 (v 1) < R →
+      DahlbergDiskAuxiliaryReduction v
+
 /-- Pair-level source for Dahlberg's §4 auxiliary construction.
 
 This is sharper than `DahlbergE2DiskAuxiliaryBoundaryConstructionSource`: the
@@ -7868,6 +7887,54 @@ theorem dahlbergE2DiskAuxiliaryBoundarySuccessorMetricConstructionSource_of_norm
     (a := i)
     (hsrc hn hsimple' hregular' hnoncircle' hnonstrict' hΔ' hRpos
       hboundary' hnext')
+
+/-- The centered normalized §4 auxiliary source implies the normalized source
+by translating the minimal enclosing disk center to `0`. -/
+theorem dahlbergE2DiskAuxiliaryBoundarySuccessorNormalizedConstructionSource_of_centeredSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundarySuccessorCenteredConstructionSource) :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorNormalizedConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict O R hΔ hRpos hboundary hnext
+  letI : NeZero n := hne
+  let w : ZMod n → ℂ := fun i => directIsometryR2 (1 : ℂ) (-O) (v i)
+  have h1norm : ‖(1 : ℂ)‖ = 1 := norm_one
+  have hO0 : directIsometryR2 (1 : ℂ) (-O) O = 0 := by
+    unfold directIsometryR2
+    ring
+  have hsimple' : Gluck.Discrete.IsSimplePolygon w := by
+    simpa [w] using isSimplePolygon_directIsometry h1norm (-O) hsimple
+  have hregular' : DahlbergRegular w := by
+    simpa [w] using dahlbergRegular_directIsometry h1norm (-O) v hregular
+  have hnoncircle' : ¬ Concyclic w := by
+    simpa [w] using (not_concyclic_directIsometry h1norm (-O) v).mpr hnoncircle
+  have hnonstrict' :
+      ¬ (PositivePolygonOrientation w ∨ NegativePolygonOrientation w) := by
+    simpa [w] using
+      (not_strictPolygonOrientation_directIsometry h1norm (-O) v).mpr hnonstrict
+  have hΔ' : MinimalEnclosingDiskR2 w 0 R := by
+    have hΔimg :
+        MinimalEnclosingDiskR2
+          (fun i => directIsometryR2 (1 : ℂ) (-O) (v i))
+          (directIsometryR2 (1 : ℂ) (-O) O) R :=
+      (minimalEnclosingDiskR2_directIsometry h1norm (-O) O R v).mpr hΔ
+    simpa [w, hO0] using hΔimg
+  have hboundary' : OnDiskBoundaryR2 w 0 R 0 := by
+    have hbimg :
+        OnDiskBoundaryR2
+          (fun j => directIsometryR2 (1 : ℂ) (-O) (v j))
+          (directIsometryR2 (1 : ℂ) (-O) O) R 0 :=
+      (onDiskBoundaryR2_directIsometry h1norm (-O) O R v 0).mpr hboundary
+    simpa [w, hO0] using hbimg
+  have hnext' : dist 0 (w 1) < R := by
+    have hnext_img :
+        dist (directIsometryR2 (1 : ℂ) (-O) O)
+            (directIsometryR2 (1 : ℂ) (-O) (v 1)) < R := by
+      simpa [dist_directIsometryR2 h1norm] using hnext
+    simpa [w, hO0] using hnext_img
+  have haux_w : DahlbergDiskAuxiliaryReduction w :=
+    hsrc hn hsimple' hregular' hnoncircle' hnonstrict' hΔ' hRpos
+      hboundary' hnext'
+  exact (dahlbergDiskAuxiliaryReduction_directIsometry_iff h1norm (-O) v).mp
+    (by simpa [w] using haux_w)
 
 /-- A metric boundary-neighbor §4 source implies the setup-level auxiliary
 construction source directly, using the proved minimal-disk selection of a
@@ -8527,19 +8594,29 @@ theorem dahlbergE2RemainingSourceComponents_directIsometry
     (dahlbergE2DfvSourceComponents_of_remainingComponents hsrc)
     hu a hn hsimple hregular hnoncircle
 
-/-- Dahlberg's normalized successor-interior auxiliary-polygon
+/-- Dahlberg's centered normalized successor-interior auxiliary-polygon
 construction/transfer source gate for the §4 non-strict disk reduction.
 
-This is now the sharp paper-facing source gate for the §4 construction: after
-the finite minimal-disk setup, the proof uses the nonempty proper boundary set
-`E = V(Γ) ∩ ∂Δ`, translates the cyclic index origin so the selected boundary
-vertex is `0`, assumes vertex `1` is strictly inside `Δ`, selects the
-corresponding complementary interval, and builds the auxiliary strictly convex
-polygon from the convex domain `U`.  Arbitrary successor cases are recovered
-formally by cyclic translation, and predecessor cases by reversal. -/
+This is now the sharp paper-facing source gate for the §4 construction:
+after the finite minimal-disk setup, the proof uses the nonempty proper
+boundary set `E = V(Γ) ∩ ∂Δ`, translates the cyclic index origin so the
+selected boundary vertex is `0`, translates the Euclidean disk center to `0`,
+assumes vertex `1` is strictly inside `Δ`, selects the corresponding
+complementary interval, and builds the auxiliary strictly convex polygon from
+the convex domain `U`.  Arbitrary centers are recovered formally by direct
+Euclidean translation, arbitrary successor cases by cyclic translation, and
+predecessor cases by reversal. -/
+theorem dahlbergE2_disk_auxiliary_boundary_successor_centered_construction_source_gate :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorCenteredConstructionSource := by
+  sorry
+
+/-- Dahlberg's normalized successor-interior auxiliary-polygon construction
+source for the §4 non-strict disk reduction, recovered from the centered source
+by translating the minimal disk center to `0`. -/
 theorem dahlbergE2_disk_auxiliary_boundary_successor_normalized_construction_source_gate :
     DahlbergE2DiskAuxiliaryBoundarySuccessorNormalizedConstructionSource := by
-  sorry
+  exact dahlbergE2DiskAuxiliaryBoundarySuccessorNormalizedConstructionSource_of_centeredSource
+    dahlbergE2_disk_auxiliary_boundary_successor_centered_construction_source_gate
 
 /-- Dahlberg's one-sided successor-interior auxiliary-polygon construction
 source for the §4 non-strict disk reduction, recovered from the normalized
