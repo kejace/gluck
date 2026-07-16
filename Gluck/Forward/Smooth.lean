@@ -325,6 +325,19 @@ and hyperbolic space-form analogues. -/
 theorem smoothForward_model_sources : SmoothForwardModelSources := by
   exact smoothForwardSource_iff_modelSources.mp smoothForward_source_gate
 
+/-- The current weaker final smooth source package.
+
+This is the ordinary D4VT source used by final smooth endpoints; it is exposed
+separately from `smoothForward_source_gate` so final-D4VT audits can depend on
+the weaker `SmoothFourVertex` interface rather than naming the stronger
+value-separated source directly. -/
+theorem smoothForward_dfv_source : SmoothForwardDfvSource := by
+  exact smoothForwardDfvSource_of_source smoothForward_source_gate
+
+/-- Model-specific spelling of the current weaker final smooth source package. -/
+theorem smoothForward_dfv_model_sources : SmoothForwardDfvModelSources := by
+  exact smoothForwardDfvSource_iff_modelSources.mp smoothForward_dfv_source
+
 /-- Uniform nonconstant smooth forward four-vertex geometric source theorem for
 the project space forms `E²`, `S²`, and `H²`.
 

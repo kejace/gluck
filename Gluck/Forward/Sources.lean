@@ -3733,7 +3733,7 @@ ordered-turn refinements.  The current non-Euclidean weak source is itself
 proved from the stronger ordered-turn source. -/
 theorem forward_dfv_remaining_sources : ForwardDfvRemainingSources := by
   exact forwardDfvRemainingSources_iff_uniformComponents.mpr
-    ⟨smoothForwardDfvSource_of_source smoothForward_source_gate,
+    ⟨smoothForward_dfv_source,
       spaceFormDiscrete_dfv_source_gate,
       dahlbergE2_dfv_source_components⟩
 
