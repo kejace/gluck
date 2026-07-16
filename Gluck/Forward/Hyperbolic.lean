@@ -53,8 +53,8 @@ theorem four_vertex_H2_nonconstant {z : ℝ → ℂ} {κ : ℝ → ℝ}
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     SmoothFourVertex κ := by
-  exact smoothFourVertex_of_fourVertexCondition
-    (four_vertex_condition_H2_nonconstant hclosed hreal hκ hper hnc)
+  exact smoothFourVertex_H2_nonconstant_geometric_source
+    hclosed hreal hκ hper hnc
 
 /-- Grant--Mogilski's hyperbolic constant-or-Dahlberg theorem for a convex
 coherent polygon whose consecutive triples lie on proper hyperbolic circles

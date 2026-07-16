@@ -57,8 +57,8 @@ theorem four_vertex_E2_nonconstant {γ : ℝ → ℂ} {κ : ℝ → ℝ}
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     SmoothFourVertex κ := by
-  exact smoothFourVertex_of_fourVertexCondition
-    (four_vertex_condition_E2_nonconstant hclosed hreal hκ hper hnc)
+  exact smoothFourVertex_E2_nonconstant_geometric_source
+    hclosed hreal hκ hper hnc
 
 /-- The convex Euclidean four-vertex theorem in value-separated form.  At the
 API level this is an immediate specialization of the standard theorem. -/
@@ -91,10 +91,9 @@ theorem convex_four_vertex_E2 {γ : ℝ → ℂ} {κ : ℝ → ℝ}
 theorem convex_four_vertex_E2_nonconstant {γ : ℝ → ℂ} {κ : ℝ → ℝ}
     (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
-    (hpos : ∀ t, 0 < κ t) (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    (_hpos : ∀ t, 0 < κ t) (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     SmoothFourVertex κ := by
-  exact smoothFourVertex_of_fourVertexCondition
-    (convex_four_vertex_condition_E2_nonconstant hclosed hreal hκ hper hpos hnc)
+  exact four_vertex_E2_nonconstant hclosed hreal hκ hper hnc
 
 /-! ## Same-sign Euclidean discrete reductions -/
 

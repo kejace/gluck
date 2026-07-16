@@ -401,9 +401,8 @@ theorem smoothFourVertex_E2_nonconstant_geometric_source
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     SmoothFourVertex κ := by
-  exact smoothFourVertex_of_fourVertexCondition
-    (four_vertex_condition_smooth_E2_nonconstant_geometric_source
-      hclosed hreal hκ hper hnc)
+  exact smoothFourVertex_E2_nonconstant_of_dfvSource
+    smoothForward_dfv_source hclosed hreal hκ hper hnc
 
 /-- Spherical nonconstant ordinary smooth forward four-vertex geometric source
 theorem in stereographic coordinates.
@@ -417,9 +416,8 @@ theorem smoothFourVertex_S2_nonconstant_geometric_source
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     SmoothFourVertex κ := by
-  exact smoothFourVertex_of_fourVertexCondition
-    (four_vertex_condition_smooth_S2_nonconstant_geometric_source
-      hclosed hreal hκ hper hnc)
+  exact smoothFourVertex_S2_nonconstant_of_dfvSource
+    smoothForward_dfv_source hclosed hreal hκ hper hnc
 
 /-- Hyperbolic nonconstant ordinary smooth forward four-vertex geometric source
 theorem in the Poincaré disk.
@@ -433,9 +431,8 @@ theorem smoothFourVertex_H2_nonconstant_geometric_source
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     SmoothFourVertex κ := by
-  exact smoothFourVertex_of_fourVertexCondition
-    (four_vertex_condition_smooth_H2_nonconstant_geometric_source
-      hclosed hreal hκ hper hnc)
+  exact smoothFourVertex_H2_nonconstant_of_dfvSource
+    smoothForward_dfv_source hclosed hreal hκ hper hnc
 
 /-- Euclidean nonconstant smooth forward four-vertex source theorem. -/
 theorem four_vertex_condition_smooth_E2_nonconstant_source
@@ -505,16 +502,16 @@ theorem four_vertex_condition_smooth_spaceForm_kernel {ε : ℝ}
 /-- Uniform ordinary smooth forward four-vertex theorem for the project space
 forms `E²`, `S²`, and `H²`.
 
-This is the ordinary local-extrema conclusion obtained from the stronger
-value-separated kernel `four_vertex_condition_smooth_spaceForm_kernel`. -/
+This is the ordinary local-extrema conclusion obtained directly from the
+weaker final-D4VT source package. -/
 theorem smoothFourVertex_spaceForm_kernel {ε : ℝ}
     (hε : ε = 0 ∨ ε = 1 ∨ ε = -1) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
     (hclosed : Gluck.IsSimpleClosed γ)
     (hreal : SmoothForwardRealizes ε γ κ)
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
     SmoothFourVertex κ := by
-  exact smoothFourVertex_of_fourVertexCondition
-    (four_vertex_condition_smooth_spaceForm_kernel hε hclosed hreal hκ hper)
+  exact smoothFourVertex_spaceForm_kernel_of_dfvSource
+    smoothForward_dfv_source hε hclosed hreal hκ hper
 
 /-- Nonconstant ordinary smooth forward four-vertex theorem for the project
 space forms `E²`, `S²`, and `H²`, dispatching directly to the nonconstant
@@ -526,8 +523,7 @@ theorem smoothFourVertex_spaceForm_nonconstant {ε : ℝ}
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     SmoothFourVertex κ := by
-  exact smoothFourVertex_of_fourVertexCondition
-    (four_vertex_condition_smooth_spaceForm_nonconstant_source
-      hε hclosed hreal hκ hper hnc)
+  exact smoothFourVertex_spaceForm_nonconstant_of_dfvSource
+    smoothForward_dfv_source hε hclosed hreal hκ hper hnc
 
 end Gluck.Forward
