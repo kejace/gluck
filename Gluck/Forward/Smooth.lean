@@ -31,6 +31,53 @@ def SmoothForwardE2DfvSource : Prop :=
     (¬ ∃ c, ∀ t, κ t = c) →
     SmoothFourVertex κ
 
+/-- Osserman's threshold form of the Euclidean smooth forward theorem.
+
+This packages the part of Osserman, *The four-or-more vertex theorem* (1985),
+Theorem 1′, needed for the project-level value-separated condition.  In the
+notation of the paper the threshold is `1 / R`, where `R` is the radius of the
+circumscribed circle: the theorem gives two local minima below that threshold
+and two local maxima above it.  We state the cyclically ordered, translated
+source conclusion directly because the surrounding files use curvature profiles
+on one fundamental period. -/
+def SmoothForwardE2OssermanThresholdSource : Prop :=
+  ∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+    Gluck.IsSimpleClosed γ →
+    Gluck.RealizesCurvature γ κ →
+    Continuous κ →
+    Function.Periodic κ (2 * Real.pi) →
+    (¬ ∃ c, ∀ t, κ t = c) →
+    ∃ p₁ q₁ p₂ q₂ τ,
+      p₁ < q₁ ∧ q₁ < p₂ ∧ p₂ < q₂ ∧ q₂ < p₁ + 2 * Real.pi ∧
+      IsLocalMax κ p₁ ∧ IsLocalMax κ p₂ ∧
+      IsLocalMin κ q₁ ∧ IsLocalMin κ q₂ ∧
+      max (κ q₁) (κ q₂) < τ ∧ τ < min (κ p₁) (κ p₂)
+
+/-- A cyclic Osserman threshold package implies the project-level
+value-separated four-vertex condition. -/
+theorem fourVertexCondition_of_ossermanThreshold {κ : ℝ → ℝ}
+    (hosserman :
+      ∃ p₁ q₁ p₂ q₂ τ,
+        p₁ < q₁ ∧ q₁ < p₂ ∧ p₂ < q₂ ∧ q₂ < p₁ + 2 * Real.pi ∧
+        IsLocalMax κ p₁ ∧ IsLocalMax κ p₂ ∧
+        IsLocalMin κ q₁ ∧ IsLocalMin κ q₂ ∧
+        max (κ q₁) (κ q₂) < τ ∧ τ < min (κ p₁) (κ p₂)) :
+    Gluck.FourVertexCondition κ := by
+  rcases hosserman with
+    ⟨p₁, q₁, p₂, q₂, τ, hp₁q₁, hq₁p₂, hp₂q₂, hq₂p₁,
+      hmax₁, hmax₂, hmin₁, hmin₂, hbelow, habove⟩
+  exact Or.inr ⟨p₁, q₁, p₂, q₂, hp₁q₁, hq₁p₂, hp₂q₂, hq₂p₁,
+    hmax₁, hmax₂, hmin₁, hmin₂, lt_trans hbelow habove⟩
+
+/-- Osserman's threshold form implies the value-separated source package used
+by the converse development. -/
+theorem smoothForwardE2Source_of_ossermanThresholdSource
+    (hsrc : SmoothForwardE2OssermanThresholdSource) :
+    SmoothForwardE2Source := by
+  intro γ κ hclosed hreal hκ hper hnc
+  exact fourVertexCondition_of_ossermanThreshold
+    (hsrc hclosed hreal hκ hper hnc)
+
 /-- The stronger value-separated Euclidean smooth source implies the weaker
 ordinary smooth source. -/
 theorem smoothForwardE2DfvSource_of_source
@@ -64,14 +111,25 @@ theorem smoothFourVertex_E2_kernel_of_dfvSource
   · exact smoothFourVertex_E2_nonconstant_of_dfvSource
       hsrc hclosed hreal hκ hper hconst
 
+/-- Euclidean nonconstant smooth forward Osserman threshold source package.
+
+Reference source: Osserman, *The four-or-more vertex theorem*,
+`references/osserman1985.pdf`, Theorem 1′ and its proof.  For two contact
+points with the circumscribed circle, the proof gives two local minima with
+`κ < 1 / R` and two local maxima with `κ > 1 / R`; these inequalities are the
+threshold separation encoded by `SmoothForwardE2OssermanThresholdSource`. -/
+theorem osserman1985_smooth_E2_threshold_source_gate :
+    SmoothForwardE2OssermanThresholdSource := by
+  sorry
+
 /-- Euclidean nonconstant smooth forward four-vertex geometric source package.
 
-Reference source: Dahlberg, *The converse of the four vertex theorem*,
-`references/dahlberg.pdf`, Introduction, where the classical smooth
-four-vertex theorem is stated in the value-separated form used here. -/
+This is the formal bridge from Osserman's threshold form to the
+value-separated `FourVertexCondition` used by the converse development. -/
 theorem four_vertex_condition_smooth_E2_source_gate :
     SmoothForwardE2Source := by
-  sorry
+  exact smoothForwardE2Source_of_ossermanThresholdSource
+    osserman1985_smooth_E2_threshold_source_gate
 
 /-- Euclidean nonconstant smooth forward four-vertex geometric source theorem,
 recovered from the source package. -/

@@ -90,10 +90,17 @@ in earlier notes has been moved out of this worktree.  Do not look for
 The remaining primitive source gates in the current worktree are exactly:
 
 - `Gluck/Forward/Smooth.lean`
-  - `four_vertex_condition_smooth_E2_source_gate`;
+  - `osserman1985_smooth_E2_threshold_source_gate`;
 - `Gluck/Forward/Dahlberg.lean`
   - `dahlbergE2_convex_radius_witness_nonconcyclic_source_components_primitive_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
+
+The public smooth value-separated gate
+`four_vertex_condition_smooth_E2_source_gate` is now recovered formally from
+Osserman's threshold formulation: Theorem 1′ of
+`references/osserman1985.pdf` gives local minima with `κ < 1 / R` and local
+maxima with `κ > 1 / R`, hence
+`max (κ q₁) (κ q₂) < min (κ p₁) (κ p₂)`.
 
 Dahlberg's strict positive-orientation CDFV and Lemma 8 compatibility gates,
 `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate` and
