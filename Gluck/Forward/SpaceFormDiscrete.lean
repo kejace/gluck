@@ -74,6 +74,13 @@ theorem spaceFormDiscreteSource_iff_modelSources :
       exact hsrc.2 hn v κ hdisk hsimple hconvex hregular hκ
         (hproper (by norm_num)) hnc
 
+/-- The current model-specific non-Euclidean discrete source package.
+
+This is the discrete space-form source gate: the spherical convex/coherent
+source and the hyperbolic Grant--Mogilski proper-circle source. -/
+theorem spaceFormDiscrete_model_sources : SpaceFormDiscreteModelSources := by
+  sorry
+
 /-- Uniform nonconstant ordered-turn geometric source theorem for the
 convex/coherent conformal-Menger discrete four-vertex package in `S²` (`ε = 1`)
 and `H²` (`ε = -1`).
@@ -92,14 +99,8 @@ theorem orderedAdjacentTurns_spaceForm_geometric_source {ε : ℝ}
     (hproper : ε < 0 → ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     OrderedAdjacentTurns κ := by
-  sorry
-
-/-- The current model-specific source package, obtained from the uniform
-source.  The converse direction is
-`spaceFormDiscreteSource_iff_modelSources.mpr`. -/
-theorem spaceFormDiscrete_model_sources : SpaceFormDiscreteModelSources := by
-  exact spaceFormDiscreteSource_iff_modelSources.mp
-    orderedAdjacentTurns_spaceForm_geometric_source
+  exact (spaceFormDiscreteSource_iff_modelSources.mpr spaceFormDiscrete_model_sources)
+    hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
 
 /-- Spherical nonconstant ordered-turn geometric source theorem for the
 convex/coherent discrete four-vertex package in an open hemisphere.

@@ -87,6 +87,13 @@ theorem smoothForwardSource_iff_modelSources :
         exact hsrc.2.2 hclosed
           (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
 
+/-- The current model-specific smooth source package.
+
+This is the smooth geometric source gate: the Euclidean classical smooth
+four-vertex theorem, plus its spherical and hyperbolic space-form analogues. -/
+theorem smoothForward_model_sources : SmoothForwardModelSources := by
+  sorry
+
 /-- Uniform nonconstant smooth forward four-vertex geometric source theorem for
 the project space forms `E²`, `S²`, and `H²`.
 
@@ -100,14 +107,8 @@ theorem four_vertex_condition_smooth_spaceForm_nonconstant_geometric_source {ε 
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     Gluck.FourVertexCondition κ := by
-  sorry
-
-/-- The current model-specific smooth source package, obtained from the
-uniform smooth source.  The converse direction is
-`smoothForwardSource_iff_modelSources.mpr`. -/
-theorem smoothForward_model_sources : SmoothForwardModelSources := by
-  exact smoothForwardSource_iff_modelSources.mp
-    four_vertex_condition_smooth_spaceForm_nonconstant_geometric_source
+  exact (smoothForwardSource_iff_modelSources.mpr smoothForward_model_sources)
+    hε hclosed hreal hκ hper hnc
 
 /-- Euclidean nonconstant smooth forward four-vertex geometric source theorem. -/
 theorem four_vertex_condition_smooth_E2_nonconstant_geometric_source
