@@ -32,10 +32,13 @@ def ForwardGeometricSources : Prop :=
 
 /-- Weaker bundled source package for the final forward D4VT statements.
 
-The only difference from `ForwardGeometricSources` is the Euclidean Dahlberg
-component: here it uses the paper-faithful final-D4VT package
-`DahlbergE2DfvGeometricSources`, not the stronger adjacent-turn package needed
-for the conformal-Menger ordered-turn refinements. -/
+Compared with `ForwardGeometricSources`, all three components are weakened to
+the conclusions actually needed by final D4VT endpoints: ordinary smooth
+`SmoothFourVertex` instead of the value-separated `FourVertexCondition`,
+non-Euclidean `DahlbergFourVertex` instead of ordered adjacent turns, and the
+paper-faithful Euclidean final-D4VT package `DahlbergE2DfvGeometricSources`
+instead of the stronger adjacent-turn package needed for the conformal-Menger
+ordered-turn refinements. -/
 def ForwardDfvGeometricSources : Prop :=
   SmoothForwardDfvSource ∧
   SpaceFormDiscreteDfvSource ∧
@@ -104,11 +107,10 @@ def ForwardAtomicSources : Prop :=
 
 /-- Fully expanded spelling of the weaker final-D4VT source package.
 
-This is the audit target for final D4VT statements: it keeps the same uniform
-smooth source projected to the three model-specific endpoints, uses the weak
-uniform non-Euclidean D4VT source projected to `S²` and `H²`, and replaces
-Dahlberg's stronger adjacent-turn source by the theorem-level signed-Menger
-CDFV source. -/
+This is the audit target for final D4VT statements: it projects the weak
+ordinary smooth source to the three model-specific endpoints, uses the weak
+non-Euclidean D4VT source projected to `S²` and `H²`, and replaces Dahlberg's
+stronger adjacent-turn source by the theorem-level signed-Menger CDFV source. -/
 def ForwardDfvAtomicSources : Prop :=
   (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
       Gluck.IsSimpleClosed γ →
@@ -992,17 +994,16 @@ bundled forward source proof. -/
 theorem dahlbergE2_dfv_geometric_sources_of_sources
     (hsrc : ForwardGeometricSources) :
     DahlbergE2DfvGeometricSources := by
-  exact dahlbergE2DfvGeometricSources_of_geometricSources
-    (dahlbergE2_geometric_sources_of_sources hsrc)
+  exact (forwardDfvGeometricSources_of_remainingSources
+    (forwardRemainingSources_of_geometricSources hsrc)).2.2
 
 /-- The stronger bundled source package implies the weaker final-D4VT source
 package. -/
 theorem forwardDfvGeometricSources_of_geometricSources
     (hsrc : ForwardGeometricSources) :
     ForwardDfvGeometricSources := by
-  exact ⟨smoothForwardDfvSource_of_source hsrc.1,
-    spaceFormDiscreteDfvSource_of_source hsrc.2.1,
-    dahlbergE2DfvGeometricSources_of_geometricSources hsrc.2.2⟩
+  exact forwardDfvGeometricSources_of_remainingSources
+    (forwardRemainingSources_of_geometricSources hsrc)
 
 /-- The source-parametrized positive-orientation E² Dahlberg ordered-turn
 extraction. -/
