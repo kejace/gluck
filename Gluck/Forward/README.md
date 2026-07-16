@@ -30,23 +30,16 @@ the converse project's level-window condition:
 5. Reduce the general locally regular polygon to the convex theorem as in the
    proof of Theorem 1.
 
-The formal source gate for this chain is now
-`signedMengerProfile_dahlbergFourVertex_of_dahlberg_disk_reduction`; the public
-endpoint `signedMengerProfile_dahlbergFourVertex_E2_dahlberg_source` is proved
-from that named §4 disk-reduction gate so downstream code can keep the paper's
-proof architecture visible.  The same-orientation strictly convex branch is
-isolated separately as
-`signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_lemma9_source`,
-which is now proved from the narrower ordered-turn extraction gate
-`orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_not_constant_source`
-and the general cyclic constructor
-`dahlbergFourVertex_of_orderedAdjacentTurns_four_le`.  Thus the
-remaining Lemma 9 gap is exactly the geometric source
-`orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_geometric_source`:
-the extraction of four ordered adjacent curvature turns from the nonconstant
-strictly convex profile, not the nonconcyclic-to-nonconstant reduction, the
-reciprocal radius/sign conversion, or the final conversion from turns to
-Dahlberg's plateau-aware conclusion.
+The formal E² geometric source gate for this chain is now the package
+`DahlbergE2GeometricSources`, exposed by
+`dahlbergE2_geometric_sources`.  Its two components are exactly the external
+Dahlberg inputs from `references/23.pdf`: the Lemma 9 extraction of four
+ordered signed-Menger turns in the strictly convex same-orientation branch, and
+the final §4 non-strict disk-reduction construction.  The public endpoint
+`signedMengerProfile_dahlbergFourVertex_E2_dahlberg_source` is proved from
+those package components plus the already-formalized cyclic/order,
+nonconcyclic-to-nonconstant, reciprocal-radius/sign, reflection, and
+plateau-aware conversion lemmas.
 
 For `ε = 0` conformal-Menger realizations, the positive-orientation
 nonconstant endpoint is

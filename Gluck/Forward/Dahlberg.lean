@@ -5655,6 +5655,49 @@ theorem signedMengerProfile_dahlbergFourVertex_of_positiveRadiusOrderedAdjacentT
     (orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
       hsimple horient hturns)
 
+/-- Auxiliary-polygon package produced by Dahlberg's non-strict disk
+reduction.  The auxiliary polygon is in the already-proved strict-orientation
+case, and its Dahlberg conclusion transfers back to the original polygon. -/
+def DahlbergDiskAuxiliaryReduction {n : ℕ} [NeZero n] (v : ZMod n → ℂ) : Prop :=
+  ∃ m : ℕ, ∃ _hne : NeZero m, ∃ w : ZMod m → ℂ,
+    4 ≤ m ∧
+    Gluck.Discrete.IsSimplePolygon w ∧
+    DahlbergRegular w ∧
+    (PositivePolygonOrientation w ∨ NegativePolygonOrientation w) ∧
+    ¬ Concyclic w ∧
+    (DahlbergFourVertex (SignedMengerProfile w) →
+      DahlbergFourVertex (SignedMengerProfile v))
+
+/-- The genuinely Euclidean geometric inputs in Dahlberg's discrete
+four-vertex proof.
+
+The first component is the strictly convex same-orientation Lemma 9 extraction
+of four ordered signed-Menger turns.  The second component is the non-strict
+§4 disk-reduction construction of an auxiliary strict-orientation polygon.
+All other declarations in this section are formal reductions from these two
+geometric statements plus the already-proved cyclic/order infrastructure. -/
+def DahlbergE2GeometricSources : Prop :=
+  (∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) →
+    OrderedAdjacentTurns (SignedMengerProfile v)) ∧
+  (∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    DahlbergDiskAuxiliaryReduction v)
+
+/-- Dahlberg's Euclidean geometric source package for `references/23.pdf`.
+
+This is the only remaining E² geometric import in the formal chain: Lemma 9
+for the strict same-orientation branch, together with the final §4 disk
+reduction for the non-strict branch. -/
+theorem dahlbergE2_geometric_sources : DahlbergE2GeometricSources := by
+  sorry
+
 /-- Ordered-turn extraction in Dahlberg's positively oriented strictly-convex
 case with nonconstant signed-Menger profile.  This is the geometric content of
 Lemma 9 in `references/23.pdf`: Lemma 8 transfers the curvature-disk nesting to
@@ -5667,7 +5710,7 @@ theorem orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_geometri
     (horient : PositivePolygonOrientation v)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
     OrderedAdjacentTurns (SignedMengerProfile v) := by
-  sorry
+  exact dahlbergE2_geometric_sources.1 hn hsimple hregular horient hnc
 
 /-- Radius-level spelling of Dahlberg's positively oriented strictly-convex
 case with nonconstant signed-Menger profile.  The geometric input is the
@@ -5932,19 +5975,6 @@ theorem signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concycl
   · exact signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_concyclic
       hn hsimple hregular hneg hnoncircle
 
-/-- Auxiliary-polygon package produced by Dahlberg's non-strict disk
-reduction.  The auxiliary polygon is in the already-proved strict-orientation
-case, and its Dahlberg conclusion transfers back to the original polygon. -/
-def DahlbergDiskAuxiliaryReduction {n : ℕ} [NeZero n] (v : ZMod n → ℂ) : Prop :=
-  ∃ m : ℕ, ∃ _hne : NeZero m, ∃ w : ZMod m → ℂ,
-    4 ≤ m ∧
-    Gluck.Discrete.IsSimplePolygon w ∧
-    DahlbergRegular w ∧
-    (PositivePolygonOrientation w ∨ NegativePolygonOrientation w) ∧
-    ¬ Concyclic w ∧
-    (DahlbergFourVertex (SignedMengerProfile w) →
-      DahlbergFourVertex (SignedMengerProfile v))
-
 /-- The genuinely geometric source for Dahlberg's non-strict disk reduction.
 It constructs the strict-orientation auxiliary polygon from the smallest
 enclosing disk `Δ`, boundary set `E`, Lemma 10's triangle-sector comparison,
@@ -5956,7 +5986,7 @@ theorem dahlbergDiskAuxiliaryReduction_of_non_strict_source
     (hnoncircle : ¬ Concyclic v)
     (hnonstrict : ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) :
     DahlbergDiskAuxiliaryReduction v := by
-  sorry
+  exact dahlbergE2_geometric_sources.2 hn hsimple hregular hnoncircle hnonstrict
 
 /-- The remaining genuinely non-strict branch of Dahlberg's reduction from a
 general simple locally regular polygon to the strictly-convex auxiliary polygon
