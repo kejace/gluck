@@ -7574,6 +7574,42 @@ theorem dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_iff_diskReductionSo
   · exact dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource
   · exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSource
 
+/-- The exact Euclidean source components needed for the final plateau-aware
+D4VT endpoint: Dahlberg's strict convex signed-Menger CDFV theorem, plus the
+metric-data §4 non-strict auxiliary construction.
+
+Unlike `DahlbergE2GeometricSources`, this package does not include the Lemma 8
+ordered-turn refinement.  Unlike `DahlbergE2DfvGeometricSources`, it keeps the
+non-strict branch at the sharper max/interior construction interface rather
+than the older disk-reduction interface. -/
+def DahlbergE2DfvSourceComponents : Prop :=
+  DahlbergE2ConvexDfvSignedSource ∧ DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource
+
+/-- The sharp final-D4VT Euclidean source components imply the older
+final-D4VT geometric package. -/
+theorem dahlbergE2DfvGeometricSources_of_components
+    (hsrc : DahlbergE2DfvSourceComponents) :
+    DahlbergE2DfvGeometricSources := by
+  exact ⟨hsrc.1,
+    dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource hsrc.2⟩
+
+/-- The older final-D4VT geometric package implies the sharp final-D4VT source
+components by unpacking its disk-reduction branch to the max/interior
+interface. -/
+theorem dahlbergE2DfvSourceComponents_of_geometricSources
+    (hsrc : DahlbergE2DfvGeometricSources) :
+    DahlbergE2DfvSourceComponents := by
+  exact ⟨hsrc.1,
+    dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSource hsrc.2⟩
+
+/-- The older final-D4VT geometric package is formally equivalent to the sharp
+signed-CDFV/max-interior source-component package. -/
+theorem dahlbergE2DfvGeometricSources_iff_components :
+    DahlbergE2DfvGeometricSources ↔ DahlbergE2DfvSourceComponents := by
+  constructor
+  · exact dahlbergE2DfvSourceComponents_of_geometricSources
+  · exact dahlbergE2DfvGeometricSources_of_components
+
 /-- Dahlberg's metric-data auxiliary-polygon construction/transfer source for
 the §4 non-strict disk reduction.  At this point the finite minimal-disk setup
 and boundary-set extraction have already supplied the concrete data used in the
@@ -7647,7 +7683,9 @@ theorem dahlbergE2DfvGeometricSources_of_geometricSources
 /-- Dahlberg's weaker final-D4VT source package, extracted from the convex CDFV
 signed source and the §4 disk-reduction source. -/
 theorem dahlbergE2_dfv_geometric_sources : DahlbergE2DfvGeometricSources := by
-  exact ⟨dahlbergE2_convex_dfv_signed_source, dahlbergE2_disk_reduction_source⟩
+  exact dahlbergE2DfvGeometricSources_of_components
+    ⟨dahlbergE2_convex_dfv_signed_source,
+      dahlbergE2_disk_auxiliary_max_interior_construction_source⟩
 
 /-- The positively oriented strict branch of Dahlberg's E² D4VT from the weaker
 final-D4VT source package. -/
