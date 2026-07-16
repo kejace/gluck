@@ -9489,6 +9489,14 @@ theorem dahlbergE2DfvSourceComponents_of_primitiveComponents
     dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_boundaryInteriorSource.mp
       hsrc.2⟩
 
+/-- Convert primitive final-D4VT E² components to the normalized-unit source
+package. -/
+theorem dahlbergE2DfvUnitSourceComponents_of_primitiveComponents
+    (hsrc : DahlbergE2DfvPrimitiveSourceComponents) :
+    DahlbergE2DfvUnitSourceComponents := by
+  exact ⟨dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource hsrc.1,
+    hsrc.2⟩
+
 /-- Convert existing final-D4VT E² components to the primitive source package. -/
 theorem dahlbergE2DfvPrimitiveSourceComponents_of_components
     (hsrc : DahlbergE2DfvSourceComponents) :
@@ -10351,6 +10359,21 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_of_dfvSourceComponents
         dahlbergFourVertex_of_strictOrientation_convexDfvSource
           hsrc.1 hm hsimplew hregularw horientw hnoncirclew)
 
+/-- Dahlberg's E² D4VT from the normalized-unit final-D4VT source components.
+
+The arbitrary polygon is first transported through the proved equivalence
+between the normalized unit-disk §4 source and the boundary/interior §4
+interface. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_of_dfvUnitSourceComponents
+    (hsrc : DahlbergE2DfvUnitSourceComponents)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSourceComponents
+    (dahlbergE2DfvSourceComponents_of_unitComponents hsrc)
+    hn hsimple hregular hnoncircle
+
 /-- Dahlberg's E² D4VT from the primitive final-D4VT source components:
 nonconcyclic strict signed-Menger CDFV and the normalized unit-disk §4
 construction source. -/
@@ -10360,8 +10383,8 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveSourceComponent
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSourceComponents
-    (dahlbergE2DfvSourceComponents_of_primitiveComponents hsrc)
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvUnitSourceComponents
+    (dahlbergE2DfvUnitSourceComponents_of_primitiveComponents hsrc)
     hn hsimple hregular hnoncircle
 
 /-- Dahlberg's E² D4VT is invariant under direct Euclidean normalization. -/
