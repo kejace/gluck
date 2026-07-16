@@ -530,6 +530,14 @@ theorem dahlbergE2DiskReductionSource_of_dfvRemainingSources
   exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_iff_diskReductionSource.mp
     (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_dfvRemainingSources hsrc)
 
+/-- Extract the sharp `E²` final-D4VT source-component package from the weaker
+final-D4VT remaining-source package. -/
+theorem dahlbergE2DfvSourceComponents_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources) :
+    DahlbergE2DfvSourceComponents := by
+  exact ⟨dahlbergE2ConvexDfvSignedSource_of_dfvRemainingSources hsrc,
+    dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_dfvRemainingSources hsrc⟩
+
 /-- Extract the smooth `E²` source gate from the fully expanded source
 package. -/
 theorem smoothE2_source_of_atomicSources (hsrc : ForwardAtomicSources) :
@@ -628,6 +636,14 @@ theorem dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_dfvAtomicSources
     (hsrc : ForwardDfvAtomicSources) :
     DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource := by
   exact hsrc.2.2.2.2.2.2
+
+/-- Extract the sharp `E²` final-D4VT source-component package from the fully
+expanded final-D4VT source package. -/
+theorem dahlbergE2DfvSourceComponents_of_dfvAtomicSources
+    (hsrc : ForwardDfvAtomicSources) :
+    DahlbergE2DfvSourceComponents := by
+  exact ⟨dahlbergE2ConvexDfvSignedSource_of_dfvAtomicSources hsrc,
+    dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_dfvAtomicSources hsrc⟩
 
 /-- Extract the smooth model-source package from the expanded forward source
 package. -/
