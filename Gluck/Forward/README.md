@@ -100,8 +100,12 @@ three remaining geometric imports as `ForwardGeometricSources`, with
 target.  It also exposes source-parametrized kernels such as
 `four_vertex_condition_smooth_spaceForm_kernel_of_sources`,
 `dahlberg_discrete_four_vertex_E2_kernel_of_sources`, and
-`constant_or_dahlbergFourVertex_spaceForm_kernel_of_sources`; for the unified
-conformal-Menger dispatch it exposes
+`constant_or_dahlbergFourVertex_spaceForm_kernel_of_sources`, together with
+model-specific public shapes such as `four_vertex_E2_of_sources`,
+`four_vertex_S2_of_sources`, `four_vertex_H2_of_sources`,
+`discrete_four_vertex_S2_kernel_of_sources`, and
+`discrete_four_vertex_H2_kernel_of_sources`; for the unified conformal-Menger
+dispatch it exposes
 `orderedAdjacentTurns_conformalMenger_spaceForm_kernel_of_sources` and
 `constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources`,
 plus the negative and strict-orientation forms

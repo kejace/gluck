@@ -510,6 +510,98 @@ theorem four_vertex_condition_smooth_spaceForm_kernel_of_sources
   · exact four_vertex_condition_smooth_spaceForm_nonconstant_of_sources
       hsrc hε hclosed hreal hκ hper hconst
 
+/-- The source-parametrized Euclidean smooth four-vertex condition. -/
+theorem four_vertex_condition_E2_kernel_of_sources
+    (hsrc : ForwardGeometricSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    Gluck.FourVertexCondition κ := by
+  exact four_vertex_condition_smooth_spaceForm_kernel_of_sources
+    hsrc (ε := 0) (Or.inl rfl) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper
+
+/-- The source-parametrized Euclidean smooth four-vertex theorem. -/
+theorem four_vertex_E2_of_sources
+    (hsrc : ForwardGeometricSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_of_fourVertexCondition
+    (four_vertex_condition_E2_kernel_of_sources hsrc hclosed hreal hκ hper)
+
+/-- The source-parametrized nonconstant Euclidean smooth four-vertex condition. -/
+theorem four_vertex_condition_E2_nonconstant_of_sources
+    (hsrc : ForwardGeometricSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    Gluck.FourVertexCondition κ := by
+  exact four_vertex_condition_smooth_spaceForm_nonconstant_source_of_sources
+    hsrc (ε := 0) (Or.inl rfl) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+
+/-- The source-parametrized convex Euclidean smooth four-vertex condition. -/
+theorem convex_four_vertex_condition_E2_of_sources
+    (hsrc : ForwardGeometricSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (_hpos : ∀ t, 0 < κ t) :
+    Gluck.FourVertexCondition κ := by
+  exact four_vertex_condition_E2_kernel_of_sources hsrc hclosed hreal hκ hper
+
+/-- The source-parametrized convex Euclidean smooth four-vertex theorem. -/
+theorem convex_four_vertex_E2_of_sources
+    (hsrc : ForwardGeometricSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hpos : ∀ t, 0 < κ t) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_of_fourVertexCondition
+    (convex_four_vertex_condition_E2_of_sources
+      hsrc hclosed hreal hκ hper hpos)
+
+/-- The source-parametrized spherical smooth four-vertex condition. -/
+theorem four_vertex_condition_S2_kernel_of_sources
+    (hsrc : ForwardGeometricSources) {z : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed z)
+    (hreal : Gluck.SpaceForm.Realizes 1 z κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    Gluck.FourVertexCondition κ := by
+  exact four_vertex_condition_smooth_spaceForm_kernel_of_sources
+    hsrc (ε := 1) (Or.inr (Or.inl rfl)) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper
+
+/-- The source-parametrized spherical smooth four-vertex theorem. -/
+theorem four_vertex_S2_of_sources
+    (hsrc : ForwardGeometricSources) {z : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed z)
+    (hreal : Gluck.SpaceForm.Realizes 1 z κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_of_fourVertexCondition
+    (four_vertex_condition_S2_kernel_of_sources hsrc hclosed hreal hκ hper)
+
+/-- The source-parametrized hyperbolic smooth four-vertex condition. -/
+theorem four_vertex_condition_H2_kernel_of_sources
+    (hsrc : ForwardGeometricSources) {z : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed z)
+    (hreal : Gluck.SpaceForm.Realizes (-1) z κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    Gluck.FourVertexCondition κ := by
+  exact four_vertex_condition_smooth_spaceForm_kernel_of_sources
+    hsrc (ε := -1) (Or.inr (Or.inr rfl)) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper
+
+/-- The source-parametrized hyperbolic smooth four-vertex theorem. -/
+theorem four_vertex_H2_of_sources
+    (hsrc : ForwardGeometricSources) {z : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed z)
+    (hreal : Gluck.SpaceForm.Realizes (-1) z κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_of_fourVertexCondition
+    (four_vertex_condition_H2_kernel_of_sources hsrc hclosed hreal hκ hper)
+
 /-- The source-parametrized non-Euclidean discrete D4VT kernel. -/
 theorem dahlbergFourVertex_spaceForm_source_of_sources
     (hsrc : ForwardGeometricSources) {ε : ℝ}
@@ -544,6 +636,64 @@ theorem constant_or_dahlbergFourVertex_spaceForm_kernel_of_sources
   · exact Or.inr
       (dahlbergFourVertex_spaceForm_source_of_sources
         hsrc hε hn v κ hdisk hsimple hconvex hregular hκ hproper hconst)
+
+/-- The source-parametrized spherical constant-or-Dahlberg kernel. -/
+theorem constant_or_dahlbergFourVertex_S2_kernel_of_sources
+    (hsrc : ForwardGeometricSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_spaceForm_kernel_of_sources
+    hsrc (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro hlt; norm_num at hlt)
+
+/-- The source-parametrized spherical nonconstant discrete four-vertex kernel. -/
+theorem discrete_four_vertex_S2_kernel_of_sources
+    (hsrc : ForwardGeometricSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_spaceForm_source_of_sources
+    hsrc (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro hlt; norm_num at hlt) hnc
+
+/-- The source-parametrized hyperbolic constant-or-Dahlberg kernel. -/
+theorem constant_or_dahlbergFourVertex_H2_kernel_of_sources
+    (hsrc : ForwardGeometricSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_spaceForm_kernel_of_sources
+    hsrc (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro _; exact hcircle)
+
+/-- The source-parametrized hyperbolic nonconstant discrete four-vertex kernel. -/
+theorem discrete_four_vertex_H2_kernel_of_sources
+    (hsrc : ForwardGeometricSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_spaceForm_source_of_sources
+    hsrc (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro _; exact hcircle) hnc
 
 /-- The current forward development is reduced to the bundled geometric source
 package.  This theorem is intentionally proved by collecting the existing
