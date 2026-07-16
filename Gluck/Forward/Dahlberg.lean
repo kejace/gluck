@@ -2206,6 +2206,60 @@ theorem normalizedCircleRadius_le_of_center_convexCombo_three
   exact circumcircleR2_radius_le_of_center_convexCombo_three
     hcircle hα hβ hγ hsum hcenter hS hleft hright hzmem
 
+/-- Closed Euclidean triangle membership in explicit barycentric
+coordinates. -/
+def InClosedTriangleR2 (A B C P : ℂ) : Prop :=
+  ∃ α β γ : ℝ,
+    0 ≤ α ∧ 0 ≤ β ∧ 0 ≤ γ ∧ α + β + γ = 1 ∧
+      P = (α : ℂ) * A + (β : ℂ) * B + (γ : ℂ) * C
+
+/-- A circumcircle whose centre lies in the closed triangle has radius no
+larger than any disk containing the three triangle vertices. -/
+theorem circumcircleR2_radius_le_of_center_mem_closedTriangle
+    {A B C O Δ : ℂ} {R S : ℝ}
+    (hcircle : CircumcircleR2 A B C O R)
+    (hcenter : InClosedTriangleR2 A B C O)
+    (hS : 0 ≤ S)
+    (hA : InClosedDiskR2 Δ S A) (hB : InClosedDiskR2 Δ S B)
+    (hC : InClosedDiskR2 Δ S C) :
+    R ≤ S := by
+  rcases hcenter with ⟨α, β, γ, hα, hβ, hγ, hsum, hO⟩
+  exact circumcircleR2_radius_le_of_center_convexCombo_three
+    hcircle hα hβ hγ hsum hO hS hA hB hC
+
+/-- Explicit vertex-cone coefficients with sum at most one put the point in
+the closed triangle. -/
+theorem inClosedTriangleR2_of_vertexCone_coeff_sum_le_one
+    {A B C O : ℂ} {α γ : ℝ}
+    (hα : 0 ≤ α) (hγ : 0 ≤ γ) (hαγ : α + γ ≤ 1)
+    (hcenter : O - B = (α : ℂ) * (A - B) + (γ : ℂ) * (C - B)) :
+    InClosedTriangleR2 A B C O := by
+  have hβ : 0 ≤ 1 - α - γ := by linarith
+  have hsum : α + (1 - α - γ) + γ = 1 := by ring
+  have hO : O = (α : ℂ) * A + ((1 - α - γ : ℝ) : ℂ) * B + (γ : ℂ) * C := by
+    have hβcast : ((1 - α - γ : ℝ) : ℂ) = 1 - (α : ℂ) - (γ : ℂ) := by
+      norm_num
+    calc
+      O = O - B + B := by abel
+      _ = (α : ℂ) * A + ((1 - α - γ : ℝ) : ℂ) * B + (γ : ℂ) * C := by
+        rw [hcenter, hβcast]
+        ring
+  exact ⟨α, 1 - α - γ, γ, hα, hβ, hγ, hsum, hO⟩
+
+/-- If every vertex-cone representation of `O` has coefficient sum at most
+one, then the bundled vertex-cone condition puts `O` in the closed triangle. -/
+theorem inClosedTriangleR2_of_inVertexCone_coeff_sum_le_one
+    {A B C O : ℂ}
+    (hcone : InVertexCone A B C O)
+    (hsum_le :
+      ∀ {α γ : ℝ}, 0 ≤ α → 0 ≤ γ →
+        O - B = (α : ℂ) * (A - B) + (γ : ℂ) * (C - B) →
+        α + γ ≤ 1) :
+    InClosedTriangleR2 A B C O := by
+  rcases hcone with ⟨α, γ, hα, hγ, hcenter⟩
+  exact inClosedTriangleR2_of_vertexCone_coeff_sum_le_one hα hγ
+    (hsum_le hα hγ hcenter) hcenter
+
 /-- The bundled `InVertexCone` condition is equivalently a barycentric
 formula where the two outer coefficients are nonnegative and the three
 coefficients sum to one.  The middle coefficient need not be nonnegative;
@@ -2240,18 +2294,9 @@ theorem circumcircleR2_radius_le_of_center_vertexCone_coeff_sum_le_one
     (hA : InClosedDiskR2 Δ S A) (hB : InClosedDiskR2 Δ S B)
     (hC : InClosedDiskR2 Δ S C) :
     R ≤ S := by
-  have hβ : 0 ≤ 1 - α - γ := by linarith
-  have hsum : α + (1 - α - γ) + γ = 1 := by ring
-  have hO : O = (α : ℂ) * A + ((1 - α - γ : ℝ) : ℂ) * B + (γ : ℂ) * C := by
-    have hβcast : ((1 - α - γ : ℝ) : ℂ) = 1 - (α : ℂ) - (γ : ℂ) := by
-      norm_num
-    calc
-      O = O - B + B := by abel
-      _ = (α : ℂ) * A + ((1 - α - γ : ℝ) : ℂ) * B + (γ : ℂ) * C := by
-        rw [hcenter, hβcast]
-        ring
-  exact circumcircleR2_radius_le_of_center_convexCombo_three
-    hcircle hα hβ hγ hsum hO hS hA hB hC
+  exact circumcircleR2_radius_le_of_center_mem_closedTriangle hcircle
+    (inClosedTriangleR2_of_vertexCone_coeff_sum_le_one hα hγ hαγ hcenter)
+    hS hA hB hC
 
 /-- Vertex-cone form of the circumradius lower bound using the bundled
 `InVertexCone` witness plus an explicit bound on the chosen coefficients. -/
@@ -2267,6 +2312,25 @@ theorem circumcircleR2_radius_le_of_inVertexCone_coeff_sum_le_one
     R ≤ S :=
   circumcircleR2_radius_le_of_center_vertexCone_coeff_sum_le_one
     hcircle hα hγ hαγ hcenter hS hA hB hC
+
+/-- Bundled vertex-cone form of the circumradius lower bound.  The additional
+side condition is exactly that the vertex-cone centre lies in the closed
+triangle rather than beyond the opposite side. -/
+theorem circumcircleR2_radius_le_of_inVertexCone_closedTriangle
+    {A B C O Δ : ℂ} {R S : ℝ}
+    (hcircle : CircumcircleR2 A B C O R)
+    (hcone : InVertexCone A B C O)
+    (hsum_le :
+      ∀ {α γ : ℝ}, 0 ≤ α → 0 ≤ γ →
+        O - B = (α : ℂ) * (A - B) + (γ : ℂ) * (C - B) →
+        α + γ ≤ 1)
+    (hS : 0 ≤ S)
+    (hA : InClosedDiskR2 Δ S A) (hB : InClosedDiskR2 Δ S B)
+    (hC : InClosedDiskR2 Δ S C) :
+    R ≤ S := by
+  exact circumcircleR2_radius_le_of_center_mem_closedTriangle hcircle
+    (inClosedTriangleR2_of_inVertexCone_coeff_sum_le_one hcone hsum_le)
+    hS hA hB hC
 
 /-- Propagation primitive: two adjacent four-point windows whose common
 circles overlap in a noncollinear triple determine the same circle. -/
