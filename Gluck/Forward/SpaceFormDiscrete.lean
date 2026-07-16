@@ -252,11 +252,29 @@ theorem constant_or_dahlbergFourVertex_H2_of_dfvSource
     hsrc (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
     (by intro _; exact hcircle)
 
-/-- Model-specific nonconstant ordered-turn geometric source gate for the
+/-- Uniform nonconstant ordered-turn geometric source gate for the
 convex/coherent conformal-Menger package in `S²` and `H²`.
 
-This is the primitive non-Euclidean discrete source package: the spherical
-convex/coherent source and the hyperbolic Grant--Mogilski proper-circle source. -/
+This is the primitive non-Euclidean discrete source theorem, stated once over
+`ε ∈ {1,-1}`.  The spherical and hyperbolic model-specific gates below are
+formal specializations; the hyperbolic branch carries the proper-circle
+condition through `ε < 0`. -/
+theorem orderedAdjacentTurns_spaceForm_model_source_gate {ε : ℝ}
+    (hε : ε = 1 ∨ ε = -1) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    OrderedAdjacentTurns κ := by
+  sorry
+
+/-- Spherical nonconstant ordered-turn primitive model source gate for the
+convex/coherent conformal-Menger package, recovered from the uniform
+space-form source gate. -/
 theorem orderedAdjacentTurns_S2_model_source_gate {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
     (hdisk : ∀ i, ‖v i‖ < 1)
@@ -266,11 +284,14 @@ theorem orderedAdjacentTurns_S2_model_source_gate {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger 1 v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     OrderedAdjacentTurns κ := by
-  sorry
+  exact orderedAdjacentTurns_spaceForm_model_source_gate
+    (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro hlt; norm_num at hlt) hnc
 
 /-- Hyperbolic nonconstant ordered-turn primitive model source gate for
 Grant--Mogilski's convex coherent discrete four-vertex theorem in the
-proper-circle regime `κᵢ > 1`. -/
+proper-circle regime `κᵢ > 1`, recovered from the uniform space-form source
+gate. -/
 theorem orderedAdjacentTurns_H2_model_source_gate {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
     (hdisk : ∀ i, ‖v i‖ < 1)
@@ -280,7 +301,9 @@ theorem orderedAdjacentTurns_H2_model_source_gate {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     OrderedAdjacentTurns κ := by
-  sorry
+  exact orderedAdjacentTurns_spaceForm_model_source_gate
+    (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro _; exact hcircle) hnc
 
 /-- Model-specific nonconstant ordered-turn geometric source package,
 recovered from the individual `S²` and `H²` source gates. -/

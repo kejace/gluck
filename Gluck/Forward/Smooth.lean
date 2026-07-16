@@ -275,11 +275,24 @@ theorem smoothFourVertex_H2_nonconstant_of_dfvSource
     hsrc (ε := -1) (Or.inr (Or.inr rfl)) hclosed
     (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
 
-/-- Model-specific nonconstant smooth forward four-vertex geometric source
-gate.
+/-- Uniform nonconstant smooth forward four-vertex geometric source gate.
 
-This is the primitive smooth geometric input: the Euclidean classical smooth
-four-vertex theorem, plus its spherical and hyperbolic space-form analogues. -/
+This is the primitive smooth geometric input: the classical smooth
+four-vertex theorem, stated once for the three simply connected space forms
+used by the project.  The model-specific gates below are formal
+specializations of this statement. -/
+theorem four_vertex_condition_smooth_spaceForm_model_source_gate
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : SmoothForwardRealizes ε γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    Gluck.FourVertexCondition κ := by
+  sorry
+
+/-- Euclidean nonconstant smooth forward four-vertex primitive model source
+gate, recovered from the uniform space-form source gate. -/
 theorem four_vertex_condition_smooth_E2_model_source_gate
     {γ : ℝ → ℂ} {κ : ℝ → ℝ}
     (hclosed : Gluck.IsSimpleClosed γ)
@@ -287,10 +300,13 @@ theorem four_vertex_condition_smooth_E2_model_source_gate
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     Gluck.FourVertexCondition κ := by
-  sorry
+  exact four_vertex_condition_smooth_spaceForm_model_source_gate
+    (ε := 0) (Or.inl rfl) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
 
 /-- Spherical nonconstant smooth forward four-vertex primitive model source
-gate in stereographic coordinates. -/
+gate in stereographic coordinates, recovered from the uniform space-form
+source gate. -/
 theorem four_vertex_condition_smooth_S2_model_source_gate
     {γ : ℝ → ℂ} {κ : ℝ → ℝ}
     (hclosed : Gluck.IsSimpleClosed γ)
@@ -298,10 +314,12 @@ theorem four_vertex_condition_smooth_S2_model_source_gate
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     Gluck.FourVertexCondition κ := by
-  sorry
+  exact four_vertex_condition_smooth_spaceForm_model_source_gate
+    (ε := 1) (Or.inr (Or.inl rfl)) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
 
 /-- Hyperbolic nonconstant smooth forward four-vertex primitive model source
-gate in the Poincaré disk. -/
+gate in the Poincaré disk, recovered from the uniform space-form source gate. -/
 theorem four_vertex_condition_smooth_H2_model_source_gate
     {γ : ℝ → ℂ} {κ : ℝ → ℝ}
     (hclosed : Gluck.IsSimpleClosed γ)
@@ -309,7 +327,9 @@ theorem four_vertex_condition_smooth_H2_model_source_gate
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     Gluck.FourVertexCondition κ := by
-  sorry
+  exact four_vertex_condition_smooth_spaceForm_model_source_gate
+    (ε := -1) (Or.inr (Or.inr rfl)) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
 
 /-- Euclidean nonconstant ordinary smooth four-vertex primitive model source
 gate. -/
