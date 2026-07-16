@@ -44,6 +44,13 @@ theorem dist_directIsometryR2 {u : ℂ} (hu : ‖u‖ = 1) (w z₁ z₂ : ℂ) :
   have hsub : u * z₁ + w - (u * z₂ + w) = u * (z₁ - z₂) := by ring
   rw [hsub, norm_mul, hu, one_mul]
 
+/-- Positive real homotheties scale distances linearly. -/
+theorem dist_posRealHomothety {r : ℝ} (hr : 0 < r) (A B : ℂ) :
+    dist ((r : ℂ) * A) ((r : ℂ) * B) = r * dist A B := by
+  rw [dist_eq_norm, dist_eq_norm]
+  have hsub : (r : ℂ) * A - (r : ℂ) * B = (r : ℂ) * (A - B) := by ring
+  rw [hsub, norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hr]
+
 /-- Direct Euclidean isometries preserve membership in a closed disk. -/
 theorem inClosedDiskR2_directIsometry {u : ℂ} (hu : ‖u‖ = 1)
     (w O z : ℂ) (R : ℝ) :
@@ -73,6 +80,38 @@ theorem onDiskBoundaryR2_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
       OnDiskBoundaryR2 v O R i := by
   unfold OnDiskBoundaryR2
   rw [dist_directIsometryR2 hu]
+
+/-- Positive real homotheties preserve membership in a closed disk, scaling
+the radius by the same factor. -/
+theorem inClosedDiskR2_posRealHomothety {r : ℝ} (hr : 0 < r)
+    (O z : ℂ) (R : ℝ) :
+    InClosedDiskR2 ((r : ℂ) * O) (r * R) ((r : ℂ) * z) ↔
+      InClosedDiskR2 O R z := by
+  unfold InClosedDiskR2
+  rw [dist_posRealHomothety hr]
+  constructor <;> intro h <;> nlinarith [hr]
+
+/-- Positive real homotheties preserve finite polygon containment in a closed
+disk, scaling the radius by the same factor. -/
+theorem polygonInClosedDiskR2_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
+    (O : ℂ) (R : ℝ) (v : ZMod n → ℂ) :
+    PolygonInClosedDiskR2 (fun i => (r : ℂ) * v i) ((r : ℂ) * O) (r * R) ↔
+      PolygonInClosedDiskR2 v O R := by
+  constructor
+  · intro h i
+    exact (inClosedDiskR2_posRealHomothety hr O (v i) R).mp (h i)
+  · intro h i
+    exact (inClosedDiskR2_posRealHomothety hr O (v i) R).mpr (h i)
+
+/-- Positive real homotheties preserve disk-boundary incidence, scaling the
+radius by the same factor. -/
+theorem onDiskBoundaryR2_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
+    (O : ℂ) (R : ℝ) (v : ZMod n → ℂ) (i : ZMod n) :
+    OnDiskBoundaryR2 (fun j => (r : ℂ) * v j) ((r : ℂ) * O) (r * R) i ↔
+      OnDiskBoundaryR2 v O R i := by
+  unfold OnDiskBoundaryR2
+  rw [dist_posRealHomothety hr]
+  constructor <;> intro h <;> nlinarith [hr]
 
 /-- The explicit inverse centre for a direct Euclidean isometry. -/
 theorem directIsometryR2_inverse_center {u : ℂ} (hu : ‖u‖ = 1) (w O' : ℂ) :
@@ -124,6 +163,35 @@ theorem minimalEnclosingDiskR2_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ 
         exact (inClosedDiskR2_directIsometry hu w Oinv (v i) R').mp hi
       exact hΔ.2.2 Oinv R' hR' hcontains'
 
+/-- Positive real homotheties preserve minimal enclosing disks, scaling the
+radius by the same factor. -/
+theorem minimalEnclosingDiskR2_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
+    (O : ℂ) (R : ℝ) (v : ZMod n → ℂ)
+    (hΔ : MinimalEnclosingDiskR2 v O R) :
+    MinimalEnclosingDiskR2 (fun i => (r : ℂ) * v i) ((r : ℂ) * O) (r * R) := by
+  refine ⟨mul_nonneg hr.le hΔ.1, ?_, ?_⟩
+  · exact (polygonInClosedDiskR2_posRealHomothety hr O R v).mpr hΔ.2.1
+  · intro O' R' hR' hcontains
+    let Opre : ℂ := ((r : ℂ)⁻¹) * O'
+    have hcenter : (r : ℂ) * Opre = O' := by
+      dsimp [Opre]
+      rw [← mul_assoc, mul_inv_cancel₀ (Complex.ofReal_ne_zero.mpr hr.ne'), one_mul]
+    have hcontains_pre : PolygonInClosedDiskR2 v Opre (r⁻¹ * R') := by
+      intro i
+      have hi : InClosedDiskR2 O' R' ((r : ℂ) * v i) := hcontains i
+      have hi' : InClosedDiskR2 ((r : ℂ) * Opre) R' ((r : ℂ) * v i) := by
+        simpa [hcenter] using hi
+      unfold InClosedDiskR2 at hi' ⊢
+      rw [dist_posRealHomothety hr] at hi'
+      have hscale : r * (r⁻¹ * R') = R' := by
+        field_simp [hr.ne']
+      nlinarith [hr, hscale]
+    have hRpre : 0 ≤ r⁻¹ * R' := mul_nonneg (inv_nonneg.mpr hr.le) hR'
+    have hmin := hΔ.2.2 Opre (r⁻¹ * R') hRpre hcontains_pre
+    have hscale : r * (r⁻¹ * R') = R' := by
+      field_simp [hr.ne']
+    nlinarith [hr, hscale]
+
 /-- Direct Euclidean isometries preserve concyclicity. -/
 theorem concyclic_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
     (w : ℂ) (v : ZMod n → ℂ) :
@@ -151,6 +219,35 @@ theorem not_concyclic_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
     (w : ℂ) (v : ZMod n → ℂ) :
     (¬ Concyclic (fun i => directIsometryR2 u w (v i))) ↔ ¬ Concyclic v := by
   rw [concyclic_directIsometry hu w v]
+
+/-- If a positive real homothety of a cyclic polygon is concyclic, then the
+original polygon is concyclic. -/
+theorem concyclic_of_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
+    (v : ZMod n → ℂ)
+    (hcircle : Concyclic (fun i => (r : ℂ) * v i)) :
+    Concyclic v := by
+  rcases hcircle with ⟨O', R', hR', hall⟩
+  let Opre : ℂ := ((r : ℂ)⁻¹) * O'
+  have hcenter : (r : ℂ) * Opre = O' := by
+    dsimp [Opre]
+    rw [← mul_assoc, mul_inv_cancel₀ (Complex.ofReal_ne_zero.mpr hr.ne'), one_mul]
+  refine ⟨Opre, r⁻¹ * R', mul_pos (inv_pos.mpr hr) hR', ?_⟩
+  intro i
+  have hi : dist ((r : ℂ) * Opre) ((r : ℂ) * v i) = R' := by
+    simpa [hcenter] using hall i
+  rw [dist_posRealHomothety hr] at hi
+  have hscale : r * (r⁻¹ * R') = R' := by
+    field_simp [hr.ne']
+  nlinarith [hr, hscale]
+
+/-- Positive real homotheties preserve nonconcyclicity in the forward
+direction needed for normalized source gates. -/
+theorem not_concyclic_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
+    (v : ZMod n → ℂ) :
+    ¬ Concyclic v →
+      ¬ Concyclic (fun i => (r : ℂ) * v i) := by
+  intro hnon hcircle
+  exact hnon (concyclic_of_posRealHomothety hr v hcircle)
 
 /-- Direct Euclidean isometries carry circumcircles to circumcircles with the
 same radius. -/
@@ -241,13 +338,6 @@ theorem crossR2_posRealHomothety (r : ℝ) (A B C : ℂ) :
   simp only [h1, h2, Complex.mul_re, Complex.mul_im, Complex.ofReal_re,
     Complex.ofReal_im, zero_mul, sub_zero]
   ring
-
-/-- Positive real homotheties scale distances linearly. -/
-theorem dist_posRealHomothety {r : ℝ} (hr : 0 < r) (A B : ℂ) :
-    dist ((r : ℂ) * A) ((r : ℂ) * B) = r * dist A B := by
-  rw [dist_eq_norm, dist_eq_norm]
-  have hsub : (r : ℂ) * A - (r : ℂ) * B = (r : ℂ) * (A - B) := by ring
-  rw [hsub, norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hr]
 
 /-- Positive real homotheties scale signed Menger curvature by the reciprocal
 scale. -/
@@ -610,6 +700,40 @@ theorem mem_segment_directIsometry {u : ℂ} (hu : ‖u‖ = 1)
     refine ⟨t, ht, ?_⟩
     rw [← directIsometryR2_lineMap, hz]
 
+/-- Positive real homotheties are injective. -/
+theorem posRealHomothety_injective {r : ℝ} (hr : 0 < r) :
+    Function.Injective fun z : ℂ => (r : ℂ) * z := by
+  intro z₁ z₂ h
+  exact mul_left_cancel₀ (Complex.ofReal_ne_zero.mpr hr.ne') h
+
+/-- Positive real homotheties commute with affine line interpolation. -/
+theorem posRealHomothety_lineMap (r : ℝ) (A B : ℂ) (t : ℝ) :
+    (r : ℂ) * AffineMap.lineMap A B t =
+      AffineMap.lineMap ((r : ℂ) * A) ((r : ℂ) * B) t := by
+  simp [AffineMap.lineMap_apply_module]
+  ring
+
+/-- Positive real homotheties preserve membership in a closed segment. -/
+theorem mem_segment_posRealHomothety {r : ℝ} (hr : 0 < r) (A B z : ℂ) :
+    (r : ℂ) * z ∈ segment ℝ ((r : ℂ) * A) ((r : ℂ) * B) ↔
+      z ∈ segment ℝ A B := by
+  constructor
+  · intro hz
+    rw [segment_eq_image_lineMap] at hz
+    rcases hz with ⟨t, ht, hz⟩
+    rw [segment_eq_image_lineMap]
+    refine ⟨t, ht, ?_⟩
+    apply posRealHomothety_injective hr
+    change (r : ℂ) * AffineMap.lineMap A B t = (r : ℂ) * z
+    rw [posRealHomothety_lineMap]
+    exact hz
+  · intro hz
+    rw [segment_eq_image_lineMap] at hz
+    rcases hz with ⟨t, ht, hz⟩
+    rw [segment_eq_image_lineMap]
+    refine ⟨t, ht, ?_⟩
+    rw [← posRealHomothety_lineMap, hz]
+
 /-- Direct Euclidean isometries preserve simple cyclic polygons. -/
 theorem isSimplePolygon_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
     (w : ℂ) {v : ZMod n → ℂ}
@@ -684,6 +808,66 @@ theorem isSimplePolygon_directIsometry_iff {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1
     simpa [directIsometryR2_inverse_apply hu w] using hpre
   · exact isSimplePolygon_directIsometry hu w
 
+/-- Positive real homotheties preserve simple cyclic polygons. -/
+theorem isSimplePolygon_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
+    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v) :
+    Gluck.Discrete.IsSimplePolygon (fun i => (r : ℂ) * v i) := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro i h
+    exact hsimple.1 i ((posRealHomothety_injective hr) h)
+  · intro i
+    ext z
+    constructor
+    · intro hz
+      let z₀ : ℂ := ((r : ℂ)⁻¹) * z
+      have hzcenter : (r : ℂ) * z₀ = z := by
+        dsimp [z₀]
+        rw [← mul_assoc, mul_inv_cancel₀ (Complex.ofReal_ne_zero.mpr hr.ne'), one_mul]
+      have hzleft : z₀ ∈ segment ℝ (v i) (v (i + 1)) := by
+        rw [← mem_segment_posRealHomothety hr (v i) (v (i + 1)) z₀]
+        simpa [hzcenter] using hz.1
+      have hzright : z₀ ∈ segment ℝ (v (i + 1)) (v (i + 1 + 1)) := by
+        rw [← mem_segment_posRealHomothety hr (v (i + 1)) (v (i + 1 + 1)) z₀]
+        simpa [hzcenter] using hz.2
+      have hz₀ :
+          z₀ ∈ segment ℝ (v i) (v (i + 1)) ∩
+              segment ℝ (v (i + 1)) (v (i + 1 + 1)) := ⟨hzleft, hzright⟩
+      rw [hsimple.2.1 i] at hz₀
+      have hz₀eq : z₀ = v (i + 1) := by
+        simpa using hz₀
+      rw [← hzcenter, hz₀eq]
+      exact Set.mem_singleton _
+    · intro hz
+      have hz_eq : z = (r : ℂ) * v (i + 1) := by
+        simpa using hz
+      rw [hz_eq]
+      refine ⟨?_, ?_⟩
+      · exact (mem_segment_posRealHomothety hr (v i) (v (i + 1)) (v (i + 1))).mpr
+          (right_mem_segment ℝ (v i) (v (i + 1)))
+      · exact (mem_segment_posRealHomothety hr (v (i + 1)) (v (i + 1 + 1)) (v (i + 1))).mpr
+          (left_mem_segment ℝ (v (i + 1)) (v (i + 1 + 1)))
+  · intro i j hij hij_next hji_next
+    ext z
+    constructor
+    · intro hz
+      let z₀ : ℂ := ((r : ℂ)⁻¹) * z
+      have hzcenter : (r : ℂ) * z₀ = z := by
+        dsimp [z₀]
+        rw [← mul_assoc, mul_inv_cancel₀ (Complex.ofReal_ne_zero.mpr hr.ne'), one_mul]
+      have hzleft : z₀ ∈ segment ℝ (v i) (v (i + 1)) := by
+        rw [← mem_segment_posRealHomothety hr (v i) (v (i + 1)) z₀]
+        simpa [hzcenter] using hz.1
+      have hzright : z₀ ∈ segment ℝ (v j) (v (j + 1)) := by
+        rw [← mem_segment_posRealHomothety hr (v j) (v (j + 1)) z₀]
+        simpa [hzcenter] using hz.2
+      have hz₀ :
+          z₀ ∈ segment ℝ (v i) (v (i + 1)) ∩
+              segment ℝ (v j) (v (j + 1)) := ⟨hzleft, hzright⟩
+      rw [hsimple.2.2 i j hij hij_next hji_next] at hz₀
+      exact hz₀.elim
+    · intro hz
+      exact hz.elim
+
 /-- Direct Euclidean isometries preserve membership of a circumcentre in a
 vertex cone. -/
 theorem inVertexCone_directIsometry (u w A B C O : ℂ)
@@ -694,6 +878,28 @@ theorem inVertexCone_directIsometry (u w A B C O : ℂ)
   refine ⟨α, β, hα, hβ, ?_⟩
   unfold directIsometryR2
   linear_combination u * hcenter
+
+/-- Positive real homotheties preserve membership of a circumcentre in a
+vertex cone. -/
+theorem inVertexCone_posRealHomothety (r : ℝ) (A B C O : ℂ)
+    (hcone : InVertexCone A B C O) :
+    InVertexCone ((r : ℂ) * A) ((r : ℂ) * B)
+      ((r : ℂ) * C) ((r : ℂ) * O) := by
+  obtain ⟨α, β, hα, hβ, hcenter⟩ := hcone
+  refine ⟨α, β, hα, hβ, ?_⟩
+  linear_combination (r : ℂ) * hcenter
+
+/-- Positive real homotheties carry circumcircles to circumcircles, scaling
+the radius by the same positive factor. -/
+theorem circumcircleR2_posRealHomothety {r : ℝ} (hr : 0 < r)
+    (A B C O : ℂ) (R : ℝ) (hcircle : CircumcircleR2 A B C O R) :
+    CircumcircleR2 ((r : ℂ) * A) ((r : ℂ) * B) ((r : ℂ) * C)
+      ((r : ℂ) * O) (r * R) := by
+  rcases hcircle with ⟨hR, hA, hB, hC⟩
+  refine ⟨mul_pos hr hR, ?_, ?_, ?_⟩
+  · rw [dist_posRealHomothety hr, hA]
+  · rw [dist_posRealHomothety hr, hB]
+  · rw [dist_posRealHomothety hr, hC]
 
 /-- Direct Euclidean isometries preserve Dahlberg local regularity. -/
 theorem dahlbergRegularAt_directIsometry {u : ℂ} (hu : ‖u‖ = 1)
@@ -718,6 +924,74 @@ theorem dahlbergRegular_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
   intro i
   exact dahlbergRegularAt_directIsometry hu w (v (i - 1)) (v i) (v (i + 1))
     (hregular i)
+
+/-- Positive real homotheties preserve Dahlberg local regularity. -/
+theorem dahlbergRegularAt_posRealHomothety {r : ℝ} (hr : 0 < r)
+    (A B C : ℂ) (hregular : DahlbergRegularAt A B C) :
+    DahlbergRegularAt ((r : ℂ) * A) ((r : ℂ) * B) ((r : ℂ) * C) := by
+  rcases hregular with hcollinear | hcircle
+  · refine Or.inl ⟨?_, ?_⟩
+    · rw [crossR2_posRealHomothety r A B C, hcollinear.1, mul_zero]
+    · exact (mem_segment_posRealHomothety hr A C B).mpr hcollinear.2
+  · rcases hcircle with ⟨O, R, hcircle, hcone⟩
+    exact Or.inr ⟨(r : ℂ) * O, r * R,
+      circumcircleR2_posRealHomothety hr A B C O R hcircle,
+      inVertexCone_posRealHomothety r A B C O hcone⟩
+
+/-- Positive real homotheties preserve Dahlberg regularity of cyclic
+polygons. -/
+theorem dahlbergRegular_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
+    (v : ZMod n → ℂ) (hregular : DahlbergRegular v) :
+    DahlbergRegular (fun i => (r : ℂ) * v i) := by
+  intro i
+  exact dahlbergRegularAt_posRealHomothety hr (v (i - 1)) (v i) (v (i + 1))
+    (hregular i)
+
+/-- Positive real homotheties preserve positive polygon orientation exactly. -/
+theorem positivePolygonOrientation_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
+    (v : ZMod n → ℂ) :
+    PositivePolygonOrientation (fun i => (r : ℂ) * v i) ↔
+      PositivePolygonOrientation v := by
+  constructor
+  · intro h i
+    have hi := h i
+    rw [crossR2_posRealHomothety r (v (i - 1)) (v i) (v (i + 1))] at hi
+    nlinarith [sq_pos_of_pos hr]
+  · intro h i
+    rw [crossR2_posRealHomothety r (v (i - 1)) (v i) (v (i + 1))]
+    nlinarith [sq_pos_of_pos hr, h i]
+
+/-- Positive real homotheties preserve negative polygon orientation exactly. -/
+theorem negativePolygonOrientation_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
+    (v : ZMod n → ℂ) :
+    NegativePolygonOrientation (fun i => (r : ℂ) * v i) ↔
+      NegativePolygonOrientation v := by
+  constructor
+  · intro h i
+    have hi := h i
+    rw [crossR2_posRealHomothety r (v (i - 1)) (v i) (v (i + 1))] at hi
+    nlinarith [sq_pos_of_pos hr]
+  · intro h i
+    rw [crossR2_posRealHomothety r (v (i - 1)) (v i) (v (i + 1))]
+    nlinarith [sq_pos_of_pos hr, h i]
+
+/-- Positive real homotheties preserve having strict polygon orientation in
+either direction. -/
+theorem strictPolygonOrientation_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
+    (v : ZMod n → ℂ) :
+    (PositivePolygonOrientation (fun i => (r : ℂ) * v i) ∨
+        NegativePolygonOrientation (fun i => (r : ℂ) * v i)) ↔
+      (PositivePolygonOrientation v ∨ NegativePolygonOrientation v) := by
+  rw [positivePolygonOrientation_posRealHomothety hr v,
+    negativePolygonOrientation_posRealHomothety hr v]
+
+/-- Positive real homotheties preserve the non-strict orientation branch. -/
+theorem not_strictPolygonOrientation_posRealHomothety {n : ℕ} {r : ℝ}
+    (hr : 0 < r) (v : ZMod n → ℂ) :
+    (¬ (PositivePolygonOrientation (fun i => (r : ℂ) * v i) ∨
+        NegativePolygonOrientation (fun i => (r : ℂ) * v i))) ↔
+      ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v) := by
+  rw [strictPolygonOrientation_posRealHomothety hr v]
 
 /-- Direct Euclidean isometries preserve Dahlberg local regularity exactly. -/
 theorem dahlbergRegularAt_directIsometry_iff {u : ℂ} (hu : ‖u‖ = 1)
@@ -7602,6 +7876,22 @@ def DahlbergE2DiskAuxiliaryBoundarySuccessorRotatedBareConstructionSource : Prop
       dist 0 (v 1) < R →
       DahlbergDiskAuxiliaryReduction v
 
+/-- Unit-radius rotated centered normalized source for Dahlberg's §4 auxiliary
+construction.
+
+After positive real homothety, the minimal disk radius may be assumed to be
+`1`; the selected boundary vertex is then the point `1 : ℂ`. -/
+def DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    MinimalEnclosingDiskR2 v 0 1 →
+    v 0 = 1 →
+    dist 0 (v 1) < 1 →
+    DahlbergDiskAuxiliaryReduction v
+
 /-- Pair-level source for Dahlberg's §4 auxiliary construction.
 
 This is sharper than `DahlbergE2DiskAuxiliaryBoundaryConstructionSource`: the
@@ -7995,6 +8285,54 @@ theorem dahlbergE2DiskAuxiliaryBoundarySuccessorMetricConstructionSource_of_norm
     (a := i)
     (hsrc hn hsimple' hregular' hnoncircle' hnonstrict' hΔ' hRpos
       hboundary' hnext')
+
+/-- The unit-radius rotated normalized §4 auxiliary source implies the bare
+rotated source by scaling the minimal disk by the positive factor `R⁻¹`. -/
+theorem dahlbergE2DiskAuxiliaryBoundarySuccessorRotatedBareConstructionSource_of_unitSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource) :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorRotatedBareConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict R hΔ hv0 hnext
+  letI : NeZero n := hne
+  have hRpos : 0 < R :=
+    radius_pos_of_minimalEnclosingDiskR2_of_isSimplePolygon hΔ hsimple
+  let r : ℝ := R⁻¹
+  let w : ZMod n → ℂ := fun i => (r : ℂ) * v i
+  have hr : 0 < r := by
+    dsimp [r]
+    exact inv_pos.mpr hRpos
+  have hscaleR : r * R = 1 := by
+    dsimp [r]
+    exact inv_mul_cancel₀ hRpos.ne'
+  have hsimple' : Gluck.Discrete.IsSimplePolygon w := by
+    simpa [w] using isSimplePolygon_posRealHomothety hr hsimple
+  have hregular' : DahlbergRegular w := by
+    simpa [w] using dahlbergRegular_posRealHomothety hr v hregular
+  have hnoncircle' : ¬ Concyclic w := by
+    simpa [w] using not_concyclic_posRealHomothety hr v hnoncircle
+  have hnonstrict' :
+      ¬ (PositivePolygonOrientation w ∨ NegativePolygonOrientation w) := by
+    simpa [w] using
+      (not_strictPolygonOrientation_posRealHomothety hr v).mpr hnonstrict
+  have hΔ' : MinimalEnclosingDiskR2 w 0 1 := by
+    have hscaled :
+        MinimalEnclosingDiskR2 (fun i => (r : ℂ) * v i) ((r : ℂ) * 0) (r * R) :=
+      minimalEnclosingDiskR2_posRealHomothety hr 0 R v hΔ
+    simpa [w, hscaleR] using hscaled
+  have hv0' : w 0 = 1 := by
+    dsimp [w]
+    rw [hv0]
+    rw [← Complex.ofReal_mul, hscaleR]
+    norm_num
+  have hnext' : dist 0 (w 1) < 1 := by
+    have hdist : dist 0 (w 1) = r * dist 0 (v 1) := by
+      have h := dist_posRealHomothety hr 0 (v 1)
+      simpa [w] using h
+    rw [hdist]
+    nlinarith [hr, hnext, hscaleR]
+  have haux_w : DahlbergDiskAuxiliaryReduction w :=
+    hsrc hn hsimple' hregular' hnoncircle' hnonstrict' hΔ' hv0' hnext'
+  exact (dahlbergDiskAuxiliaryReduction_posRealHomothety_iff hr v).mp
+    (by simpa [w] using haux_w)
 
 /-- The bare rotated normalized §4 auxiliary source implies the rotated source
 with an explicit radius-positivity assumption by forgetting that redundant
@@ -8764,7 +9102,7 @@ theorem dahlbergE2RemainingSourceComponents_directIsometry
     (dahlbergE2DfvSourceComponents_of_remainingComponents hsrc)
     hu a hn hsimple hregular hnoncircle
 
-/-- Dahlberg's bare rotated centered normalized successor-interior
+/-- Dahlberg's unit-radius rotated centered normalized successor-interior
 auxiliary-polygon construction/transfer source gate for the §4 non-strict disk
 reduction.
 
@@ -8772,17 +9110,25 @@ This is now the sharp paper-facing source gate for the §4 construction:
 after the finite minimal-disk setup, the proof uses the nonempty proper
 boundary set `E = V(Γ) ∩ ∂Δ`, translates the cyclic index origin so the
 selected boundary vertex is `0`, translates the Euclidean disk center to `0`,
-rotates the boundary vertex to the positive real point `(R : ℂ)`, assumes
-vertex `1` is strictly inside `Δ`, selects the corresponding complementary
-interval, and builds the auxiliary strictly convex polygon from the convex
-domain `U`.  The positive-radius fact is no longer an independent input; it is
-available formally from minimality and simplicity.  Arbitrary centered
-boundary vertices are recovered formally by direct Euclidean rotation,
-arbitrary centers by direct Euclidean translation, arbitrary successor cases by
-cyclic translation, and predecessor cases by reversal. -/
+rotates the boundary vertex to the positive real radius point, and then scales
+the minimal disk to unit radius.  The primitive case has disk centre `0`,
+radius `1`, selected boundary vertex `1 : ℂ`, and successor vertex strictly
+inside the unit disk.  Arbitrary positive radii are recovered formally by
+positive real homothety, arbitrary centered boundary vertices by direct
+Euclidean rotation, arbitrary centers by direct Euclidean translation,
+arbitrary successor cases by cyclic translation, and predecessor cases by
+reversal. -/
+theorem dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource := by
+  sorry
+
+/-- Dahlberg's bare rotated centered normalized successor-interior
+auxiliary-polygon construction source for the §4 non-strict disk reduction,
+recovered from the unit-radius source by positive real homothety. -/
 theorem dahlbergE2_disk_auxiliary_boundary_successor_rotated_bare_construction_source_gate :
     DahlbergE2DiskAuxiliaryBoundarySuccessorRotatedBareConstructionSource := by
-  sorry
+  exact dahlbergE2DiskAuxiliaryBoundarySuccessorRotatedBareConstructionSource_of_unitSource
+    dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate
 
 /-- Dahlberg's rotated centered normalized successor-interior auxiliary-polygon
 construction/transfer source gate for the §4 non-strict disk reduction.
