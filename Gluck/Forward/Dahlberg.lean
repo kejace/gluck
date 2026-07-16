@@ -11468,6 +11468,43 @@ def DahlbergE2PaperRemainingTheoremSources : Prop :=
   DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
   DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
 
+/-- Clean primitive source surface for the remaining Dahlberg paper inputs:
+the geometric CDFV source, Lemma 8's witness-only bridge, and the normalized
+unit-disk §4 construction source. -/
+def DahlbergE2PaperPrimitiveSources : Prop :=
+  DahlbergE2Theorem6GeometricCdfvSource ∧
+  DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
+  DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
+
+/-- The clean primitive source surface implies the current remaining-source
+package by converting geometric CDFV to the direct ordered-disk-plus-plateau
+§3 package. -/
+theorem dahlbergE2PaperRemainingTheoremSources_of_primitiveSources
+    (hsrc : DahlbergE2PaperPrimitiveSources) :
+    DahlbergE2PaperRemainingTheoremSources := by
+  exact ⟨
+    dahlbergE2Theorem6OrderedDiskPlateauPaperSources_of_geometricCdfvSource
+      hsrc.1,
+    hsrc.2⟩
+
+/-- The current remaining-source package implies the clean primitive source
+surface by converting the direct §3 package back to geometric CDFV. -/
+theorem dahlbergE2PaperPrimitiveSources_of_remainingTheoremSources
+    (hsrc : DahlbergE2PaperRemainingTheoremSources) :
+    DahlbergE2PaperPrimitiveSources := by
+  exact ⟨
+    dahlbergE2Theorem6GeometricCdfvSource_of_orderedDiskPlateauPaperSources
+      hsrc.1,
+    hsrc.2⟩
+
+/-- The current remaining-source package and the clean primitive source
+surface are formally equivalent. -/
+theorem dahlbergE2PaperRemainingTheoremSources_iff_primitiveSources :
+    DahlbergE2PaperRemainingTheoremSources ↔ DahlbergE2PaperPrimitiveSources := by
+  constructor
+  · exact dahlbergE2PaperPrimitiveSources_of_remainingTheoremSources
+  · exact dahlbergE2PaperRemainingTheoremSources_of_primitiveSources
+
 /-- The smaller remaining paper sources imply the full paper-source package,
 because local Lemma 8 edge nesting is already proved. -/
 theorem dahlbergE2PaperTheoremSources_of_remainingTheoremSources
@@ -12398,15 +12435,22 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
-/-- Dahlberg's current substantial paper-source gate.
+/-- Dahlberg's current substantial primitive paper-source gate.
 
 This is the only remaining primitive source gate for
-`Gluck/Forward/Dahlberg.lean`.  Local Lemma 8 edge nesting is already proved;
-the remaining paper inputs are Theorem 6 / CDFV, Lemma 8's global monotone-arc
-extraction, and the §4 auxiliary-polygon construction. -/
+`Gluck/Forward/Dahlberg.lean`.  Local Lemma 8 edge nesting and all conversion
+interfaces above are already proved; the remaining paper inputs are geometric
+CDFV, Lemma 8's witness bridge, and the normalized §4 unit construction. -/
+theorem dahlbergE2_paper_primitive_sources_gate :
+    DahlbergE2PaperPrimitiveSources := by
+  sorry
+
+/-- The current remaining theorem-source package, recovered from the clean
+primitive source gate. -/
 theorem dahlbergE2_paper_remaining_theorem_sources_gate :
     DahlbergE2PaperRemainingTheoremSources := by
-  sorry
+  exact dahlbergE2PaperRemainingTheoremSources_of_primitiveSources
+    dahlbergE2_paper_primitive_sources_gate
 
 /-- Full paper-source package recovered from the current smaller remaining
 source gate and the proved local Lemma 8 edge-nesting theorem. -/
