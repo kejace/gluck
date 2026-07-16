@@ -369,8 +369,8 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_of_not_concyclic {n : ℕ} [Ne
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_of_not_concyclic
-    hn hsimple hregular hnoncircle
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSources
+    dahlbergE2_dfv_geometric_sources hn hsimple hregular hnoncircle
 
 /-- E² strict-orientation Dahlberg reduction from the curvature-side
 nonconstancy condition.  The nonconstant signed-Menger profile rules out
@@ -943,9 +943,8 @@ theorem constant_or_dahlbergFourVertex_E2_of_realizesConformalMenger_zero_positi
     (hregular : DahlbergRegular v) (horient : PositivePolygonOrientation v)
     (hκ : RealizesConformalMenger 0 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns hn
-    (constant_or_orderedAdjacentTurns_E2_of_realizesConformalMenger_zero_positiveOrientation
-      hn v κ hsimple hregular horient hκ)
+  exact constant_or_dahlbergFourVertex_E2_of_realizesConformalMenger_zero_strict_orientation
+    hn v κ hsimple hregular (Or.inl horient) hκ
 
 /-- Negative-orientation `ε = 0` conformal-Menger endpoint in
 constant-or-four-vertex form. -/
@@ -955,11 +954,8 @@ theorem constant_or_dahlbergFourVertex_E2_of_realizesConformalMenger_zero_negati
     (hregular : DahlbergRegular v) (horient : NegativePolygonOrientation v)
     (hκ : RealizesConformalMenger 0 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact
-    constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns_neg_reflectIndex
-      hn
-      (constant_or_orderedAdjacentTurns_E2_of_negativeOrientation_reflected
-        hn v κ hsimple hregular horient hκ)
+  exact constant_or_dahlbergFourVertex_E2_of_realizesConformalMenger_zero_strict_orientation
+    hn v κ hsimple hregular (Or.inr horient) hκ
 
 /-- Public `ε = 0` conformal-Menger discrete four-vertex theorem in the same
 constant-or-four-vertex shape as the strict E² signed-Menger endpoint. -/
