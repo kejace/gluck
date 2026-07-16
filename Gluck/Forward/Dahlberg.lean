@@ -5325,15 +5325,103 @@ theorem polygonDahlbergFourVertex_of_ordered_signedMenger_turns {n : ℕ}
 
 /-! ## Dahlberg's Euclidean discrete four-vertex kernel -/
 
+/-- Radius of the circle through `v (i-1), v i, v (i+1)`, expressed over the
+outgoing edge `v i → v (i+1)`. -/
+noncomputable def EdgePrevCircleRadiusProfile {n : ℕ} (v : ZMod n → ℂ)
+    (i : ZMod n) : ℝ :=
+  normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+    (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1)))
+
+/-- Radius of the circle through `v i, v (i+1), v (i+2)`, expressed over the
+outgoing edge `v i → v (i+1)`. -/
+noncomputable def EdgeNextCircleRadiusProfile {n : ℕ} (v : ZMod n → ℂ)
+    (i : ZMod n) : ℝ :=
+  normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+    (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1)))
+
+/-- Radius-level ordered adjacent turns in the positive-orientation branch.
+Because positive signed Menger curvature is reciprocal radius, the inequalities
+are opposite to the corresponding signed-Menger turns. -/
+def PositiveRadiusOrderedAdjacentTurns {n : ℕ} (v : ZMod n → ℂ) : Prop :=
+  ∃ i₁ i₂ i₃ i₄ : ℕ,
+    i₁ < i₂ ∧ i₂ < i₃ ∧ i₃ < i₄ ∧ i₄ < i₁ + n ∧
+      EdgeNextCircleRadiusProfile v (i₁ : ZMod n) <
+        EdgePrevCircleRadiusProfile v (i₁ : ZMod n) ∧
+      EdgePrevCircleRadiusProfile v (((i₁ : ZMod n) + 1)) <
+        EdgeNextCircleRadiusProfile v (((i₁ : ZMod n) + 1)) ∧
+      EdgePrevCircleRadiusProfile v (i₂ : ZMod n) <
+        EdgeNextCircleRadiusProfile v (i₂ : ZMod n) ∧
+      EdgeNextCircleRadiusProfile v (((i₂ : ZMod n) + 1)) <
+        EdgePrevCircleRadiusProfile v (((i₂ : ZMod n) + 1)) ∧
+      EdgeNextCircleRadiusProfile v (i₃ : ZMod n) <
+        EdgePrevCircleRadiusProfile v (i₃ : ZMod n) ∧
+      EdgePrevCircleRadiusProfile v (((i₃ : ZMod n) + 1)) <
+        EdgeNextCircleRadiusProfile v (((i₃ : ZMod n) + 1)) ∧
+      EdgePrevCircleRadiusProfile v (i₄ : ZMod n) <
+        EdgeNextCircleRadiusProfile v (i₄ : ZMod n) ∧
+      EdgeNextCircleRadiusProfile v (((i₄ : ZMod n) + 1)) <
+        EdgePrevCircleRadiusProfile v (((i₄ : ZMod n) + 1))
+
+/-- Positive radius ordered turns imply the corresponding signed-Menger
+ordered turns. -/
+theorem orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hturns : PositiveRadiusOrderedAdjacentTurns v) :
+    OrderedAdjacentTurns (SignedMengerProfile v) := by
+  rcases hturns with
+    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
+      hinc₁, hdec₁, hdec₂, hinc₂, hinc₃, hdec₃, hdec₄, hinc₄⟩
+  exact ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
+    signedMengerProfile_lt_of_edgeCircleRadius_lt_positiveOrientation
+      hsimple horient (i₁ : ZMod n) (by simpa [EdgePrevCircleRadiusProfile,
+        EdgeNextCircleRadiusProfile] using hinc₁),
+    signedMengerProfile_lt_of_edgeCircleRadius_lt_positiveOrientation_rev
+      hsimple horient ((i₁ : ZMod n) + 1) (by simpa [EdgePrevCircleRadiusProfile,
+        EdgeNextCircleRadiusProfile] using hdec₁),
+    signedMengerProfile_lt_of_edgeCircleRadius_lt_positiveOrientation_rev
+      hsimple horient (i₂ : ZMod n) (by simpa [EdgePrevCircleRadiusProfile,
+        EdgeNextCircleRadiusProfile] using hdec₂),
+    signedMengerProfile_lt_of_edgeCircleRadius_lt_positiveOrientation
+      hsimple horient ((i₂ : ZMod n) + 1) (by simpa [EdgePrevCircleRadiusProfile,
+        EdgeNextCircleRadiusProfile] using hinc₂),
+    signedMengerProfile_lt_of_edgeCircleRadius_lt_positiveOrientation
+      hsimple horient (i₃ : ZMod n) (by simpa [EdgePrevCircleRadiusProfile,
+        EdgeNextCircleRadiusProfile] using hinc₃),
+    signedMengerProfile_lt_of_edgeCircleRadius_lt_positiveOrientation_rev
+      hsimple horient ((i₃ : ZMod n) + 1) (by simpa [EdgePrevCircleRadiusProfile,
+        EdgeNextCircleRadiusProfile] using hdec₃),
+    signedMengerProfile_lt_of_edgeCircleRadius_lt_positiveOrientation_rev
+      hsimple horient (i₄ : ZMod n) (by simpa [EdgePrevCircleRadiusProfile,
+        EdgeNextCircleRadiusProfile] using hdec₄),
+    signedMengerProfile_lt_of_edgeCircleRadius_lt_positiveOrientation
+      hsimple horient ((i₄ : ZMod n) + 1) (by simpa [EdgePrevCircleRadiusProfile,
+        EdgeNextCircleRadiusProfile] using hinc₄)⟩
+
+/-- Radius-level extraction in Dahlberg's positively oriented strictly-convex
+case with nonconstant signed-Menger profile.  This is the geometric content of
+Lemma 9 in `references/23.pdf`: Lemma 8 transfers the curvature-disk nesting to
+radius inequalities, and the convex discrete four-vertex theorem supplies four
+cyclically ordered radius turns. -/
+theorem positiveRadiusOrderedAdjacentTurns_of_positiveOrientation_not_constant_source
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    PositiveRadiusOrderedAdjacentTurns v := by
+  sorry
+
 /-- The remaining ordered-turn extraction in Dahlberg's positively oriented
 strictly-convex case with nonconstant signed-Menger profile, corresponding to
 the geometric content of Lemma 9 in `references/23.pdf`.
 
-Dahlberg's Lemma 8 nesting and the convex discrete four-vertex theorem are
-expected to produce four cyclically ordered adjacent signed-Menger turns.  The
-profile-level constructor
-`signedMengerProfile_dahlbergFourVertex_of_ordered_turns_four_le` then turns
-these inequalities into the plateau-aware Dahlberg four-vertex conclusion. -/
+Dahlberg's Lemma 8 nesting and the convex discrete four-vertex theorem now
+enter through
+`positiveRadiusOrderedAdjacentTurns_of_positiveOrientation_not_constant_source`;
+the radius-to-curvature comparison lemmas above convert those radius turns into
+signed-Menger turns. -/
 theorem orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_not_constant_source
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
@@ -5341,7 +5429,10 @@ theorem orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_not_cons
     (horient : PositivePolygonOrientation v)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
     OrderedAdjacentTurns (SignedMengerProfile v) := by
-  sorry
+  exact orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
+    hsimple horient
+    (positiveRadiusOrderedAdjacentTurns_of_positiveOrientation_not_constant_source
+      hn hsimple hregular horient hnc)
 
 /-- Constant-or ordered-turn form of the positive-orientation signed-Menger
 source theorem.  The nonconstant branch is exactly
