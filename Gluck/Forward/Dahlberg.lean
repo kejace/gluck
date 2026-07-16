@@ -7262,6 +7262,41 @@ theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_pairSource
     exact hj hi
   exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos hi hj hij
 
+/-- The boundary-set-level §4 source implies the boundary/interior source:
+a boundary vertex and a strictly interior vertex are exactly the concrete
+nonempty/proper boundary-set data used at this stage of Dahlberg's proof. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_boundaryConstructionSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundaryConstructionSource) :
+    DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict O R hΔ i j hboundary
+    hinterior _hij
+  letI : NeZero n := hne
+  have hRpos : 0 < R :=
+    radius_pos_of_minimalEnclosingDiskR2_of_isSimplePolygon hΔ hsimple
+  have hEnonempty : (DiskBoundaryIndices v O R).Nonempty :=
+    ⟨i, (mem_diskBoundaryIndices).mpr hboundary⟩
+  have hEproper : DiskBoundaryIndices v O R ≠ Set.univ := by
+    intro htop
+    have hjE : j ∈ DiskBoundaryIndices v O R := by
+      simp [htop]
+    exact (not_onDiskBoundaryR2_of_dist_lt hinterior)
+      ((mem_diskBoundaryIndices).mp hjE)
+  exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos
+    hEnonempty hEproper
+
+/-- The boundary-set-level and boundary/interior §4 auxiliary-source
+interfaces are formally equivalent.  The forward direction chooses any
+boundary/complement pair; the reverse direction rebuilds the nonempty/proper
+boundary-set hypotheses from a boundary vertex and a strictly interior vertex. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_boundaryConstructionSource :
+    DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource ↔
+      DahlbergE2DiskAuxiliaryBoundaryConstructionSource := by
+  constructor
+  · intro hsrc
+    exact dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_pairSource
+      (dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_boundaryInteriorSource hsrc)
+  · exact dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_boundaryConstructionSource
+
 /-- The boundary-set-level §4 auxiliary-construction source is compatible
 with direct Euclidean normalization. -/
 theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_directIsometry
@@ -7706,8 +7741,9 @@ to Dahlberg's older non-strict disk-reduction source. -/
 theorem dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource :
     DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource ↔
       DahlbergE2DiskReductionSource := by
-  exact dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_maxInteriorSource.trans
-    dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_iff_diskReductionSource
+  exact
+    dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_boundaryConstructionSource.trans
+      dahlbergE2DiskAuxiliaryBoundaryConstructionSource_iff_diskReductionSource
 
 /-- The exact Euclidean source components needed for the final plateau-aware
 D4VT endpoint: Dahlberg's strict convex signed-Menger CDFV theorem, plus the
