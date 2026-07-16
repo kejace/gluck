@@ -10023,9 +10023,8 @@ theorem dahlbergE2PrimitiveRemainingSourceComponents_directIsometry
           NegativePolygonOrientation (fun i => directIsometryR2 u a (v i))) →
         DahlbergDiskAuxiliaryReduction
           (fun i => directIsometryR2 u a (v i))) := by
-  exact dahlbergE2RemainingSourceComponents_directIsometry
-    (dahlbergE2RemainingSourceComponents_of_primitiveComponents hsrc)
-    hu a hn hsimple hregular hnoncircle
+  exact dahlbergE2DfvPrimitiveSourceComponents_directIsometry
+    ⟨hsrc.1, hsrc.2.2⟩ hu a hn hsimple hregular hnoncircle
 
 /-- Dahlberg's unit-radius rotated centered normalized successor-interior
 auxiliary-polygon construction/transfer source gate for the §4 non-strict disk
