@@ -116,6 +116,8 @@ The nonconcyclic signed-CDFV gate
 `dahlbergE2_convex_dfv_signed_nonconcyclic_primitive_source_gate` is recovered
 from the constant-or primitive by the formal
 nonconcyclicity/nonconstancy result for positive locally regular polygons.
+The constant-or and older nonconstant source spellings are formally equivalent
+via `dahlbergE2ConvexDfvSignedConstantOrSource_iff_signedSource`.
 The radius-profile CDFV gate
 `dahlbergE2_convex_dfv_radius_nonconcyclic_primitive_source_gate` is no longer
 primitive: it is recovered formally from signed CDFV by reciprocal-radius

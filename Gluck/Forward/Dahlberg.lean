@@ -7735,6 +7735,24 @@ theorem dahlbergE2ConvexDfvSignedSource_of_constantOrSource
   exact dahlbergFourVertex_of_constant_or_of_not_constant
     (hsrc hn hsimple hregular horient) hnc
 
+/-- The nonconstant signed-CDFV source implies the constant-or spelling. -/
+theorem dahlbergE2ConvexDfvSignedConstantOrSource_of_signedSource
+    (hsrc : DahlbergE2ConvexDfvSignedSource) :
+    DahlbergE2ConvexDfvSignedConstantOrSource := by
+  intro n hne hn v hsimple hregular horient
+  letI : NeZero n := hne
+  by_cases hconst : ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c
+  · exact Or.inl hconst
+  · exact Or.inr (hsrc hn hsimple hregular horient hconst)
+
+/-- The nonconstant and constant-or signed-CDFV source spellings are formally
+equivalent. -/
+theorem dahlbergE2ConvexDfvSignedConstantOrSource_iff_signedSource :
+    DahlbergE2ConvexDfvSignedConstantOrSource ↔ DahlbergE2ConvexDfvSignedSource := by
+  constructor
+  · exact dahlbergE2ConvexDfvSignedSource_of_constantOrSource
+  · exact dahlbergE2ConvexDfvSignedConstantOrSource_of_signedSource
+
 /-- The constant-or signed-CDFV source implies the nonconcyclic spelling. -/
 theorem dahlbergE2ConvexDfvSignedNonconcyclicSource_of_constantOrSource
     (hsrc : DahlbergE2ConvexDfvSignedConstantOrSource) :
