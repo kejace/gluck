@@ -6974,6 +6974,63 @@ def DahlbergDiskAuxiliaryReduction {n : ℕ} [NeZero n] (v : ZMod n → ℂ) : P
     (DahlbergFourVertex (SignedMengerProfile w) →
       DahlbergFourVertex (SignedMengerProfile v))
 
+/-- Typed version of the auxiliary-polygon package in Dahlberg's non-strict
+disk reduction.
+
+This is definitionally the same data as `DahlbergDiskAuxiliaryReduction`, but
+with named fields.  It is the target shape for formalizing the final §4
+construction: construct a strict-orientation auxiliary polygon `w`, prove it is
+nonconcyclic, and prove that its D4VT conclusion transfers back to the original
+polygon. -/
+structure DahlbergAuxiliaryPolygon {n : ℕ} [NeZero n] (v : ZMod n → ℂ) where
+  m : ℕ
+  hne : NeZero m
+  w : ZMod m → ℂ
+  four_le : 4 ≤ m
+  simple : Gluck.Discrete.IsSimplePolygon w
+  regular : DahlbergRegular w
+  strictOrientation : PositivePolygonOrientation w ∨ NegativePolygonOrientation w
+  nonconcyclic : ¬ Concyclic w
+  transfer :
+    DahlbergFourVertex (SignedMengerProfile w) →
+      DahlbergFourVertex (SignedMengerProfile v)
+
+/-- The typed auxiliary-polygon package implies the old existential package. -/
+theorem dahlbergDiskAuxiliaryReduction_of_auxiliaryPolygon {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ} (aux : DahlbergAuxiliaryPolygon v) :
+    DahlbergDiskAuxiliaryReduction v := by
+  exact ⟨aux.m, aux.hne, aux.w, aux.four_le, aux.simple, aux.regular,
+    aux.strictOrientation, aux.nonconcyclic, aux.transfer⟩
+
+/-- The old existential auxiliary-reduction package can be repackaged as a
+typed auxiliary polygon. -/
+theorem exists_dahlbergAuxiliaryPolygon_of_diskAuxiliaryReduction {n : ℕ}
+    [NeZero n] {v : ZMod n → ℂ} (haux : DahlbergDiskAuxiliaryReduction v) :
+    Nonempty (DahlbergAuxiliaryPolygon v) := by
+  rcases haux with
+    ⟨m, hne, w, hm, hsimple, hregular, horient, hnoncircle, htransfer⟩
+  exact ⟨({
+    m := m
+    hne := hne
+    w := w
+    four_le := hm
+    simple := hsimple
+    regular := hregular
+    strictOrientation := horient
+    nonconcyclic := hnoncircle
+    transfer := htransfer } : DahlbergAuxiliaryPolygon v)⟩
+
+/-- Typed and existential forms of Dahlberg's auxiliary-reduction package are
+equivalent. -/
+theorem dahlbergDiskAuxiliaryReduction_iff_exists_auxiliaryPolygon {n : ℕ}
+    [NeZero n] {v : ZMod n → ℂ} :
+    DahlbergDiskAuxiliaryReduction v ↔
+      Nonempty (DahlbergAuxiliaryPolygon v) := by
+  constructor
+  · exact exists_dahlbergAuxiliaryPolygon_of_diskAuxiliaryReduction
+  · rintro ⟨aux⟩
+    exact dahlbergDiskAuxiliaryReduction_of_auxiliaryPolygon aux
+
 /-- Direct Euclidean isometries preserve Dahlberg's auxiliary-reduction
 package.  The auxiliary polygon itself is unchanged; only the final transfer
 to the original polygon is transported through the signed-Menger profile
@@ -9400,17 +9457,34 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
-/-- Dahlberg's strict positive-orientation CDFV/Lemma 8 radius source gate.
+/-- Dahlberg's strict positive-orientation CDFV radius-witness source gate.
 
-This is the primitive strict-branch paper input in its split radius-profile
-spelling: Dahlberg's Theorem 6/CDFV supplies the radius-witness four-vertex
-package in nonconcyclic geometric form, and Lemma 8 turns those witnesses into
-the adjacent radius turns used by Lemma 9.  The signed-Menger Lemma 9 source
-below is recovered formally from this package by reciprocal-radius
-monotonicity. -/
+This is the first primitive strict-branch paper input: Dahlberg's Theorem
+6/CDFV supplies the radius-witness four-vertex package in nonconcyclic
+geometric form. -/
+theorem dahlbergE2_convex_dfv_radius_nonconcyclic_primitive_source_gate :
+    DahlbergE2ConvexDfvRadiusNonconcyclicSource := by
+  sorry
+
+/-- Dahlberg's strict positive-orientation Lemma 8 radius-turn bridge source
+gate.
+
+This is the second primitive strict-branch paper input: Lemma 8 turns the
+radius witnesses supplied by the convex D4VT/CDFV source into the adjacent
+radius turns used by Lemma 9. -/
+theorem dahlbergE2_lemma8_radius_turn_bridge_from_witness_primitive_gate :
+    DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource := by
+  sorry
+
+/-- Dahlberg's strict positive-orientation CDFV/Lemma 8 radius source package.
+
+This package is now a formal product of the two paper inputs above.  The
+signed-Menger Lemma 9 source below is recovered formally from it by
+reciprocal-radius monotonicity. -/
 theorem dahlbergE2_convex_radius_witness_nonconcyclic_source_components_primitive_gate :
     DahlbergE2ConvexRadiusWitnessNonconcyclicSourceComponents := by
-  sorry
+  exact ⟨dahlbergE2_convex_dfv_radius_nonconcyclic_primitive_source_gate,
+    dahlbergE2_lemma8_radius_turn_bridge_from_witness_primitive_gate⟩
 
 /-- Dahlberg's strict positive-orientation CDFV/Lemma 8 radius source gate in
 nonconstant-profile form, recovered from the nonconcyclic geometric source

@@ -92,7 +92,8 @@ The remaining primitive source gates in the current worktree are exactly:
 - `Gluck/Forward/Smooth.lean`
   - `osserman1985_smooth_E2_threshold_source_gate`;
 - `Gluck/Forward/Dahlberg.lean`
-  - `dahlbergE2_convex_radius_witness_nonconcyclic_source_components_primitive_gate`;
+  - `dahlbergE2_convex_dfv_radius_nonconcyclic_primitive_source_gate`;
+  - `dahlbergE2_lemma8_radius_turn_bridge_from_witness_primitive_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
 
 The public smooth value-separated gate
@@ -105,7 +106,9 @@ maxima with `κ > 1 / R`, hence
 Dahlberg's strict positive-orientation CDFV and Lemma 8 compatibility gates,
 `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate` and
 `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`, are recovered
-from the single split nonconcyclic radius-profile source
+from the product of the two primitive radius-profile sources
+`dahlbergE2_convex_dfv_radius_nonconcyclic_primitive_source_gate` and
+`dahlbergE2_lemma8_radius_turn_bridge_from_witness_primitive_gate`, packaged as
 `dahlbergE2_convex_radius_witness_nonconcyclic_source_components_primitive_gate`,
 via the nonconstant-profile package
 `dahlbergE2_convex_radius_witness_source_components_primitive_gate`.
@@ -125,6 +128,10 @@ public E² D4VT endpoints route through
 The non-strict §4 branch is now gated at the unit-radius rotated centered
 normalized successor-interior interface
 `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
+The auxiliary polygon produced by this gate is also exposed as the typed
+structure `DahlbergAuxiliaryPolygon`, which is formally equivalent to the older
+existential `DahlbergDiskAuxiliaryReduction` package and is the target shape for
+formalizing Dahlberg's polygonal approximation/transfer argument.
 The broad theorem-facing disk-reduction source
 `dahlbergE2_disk_reduction_geometric_source_gate` is recovered formally from
 it.  The reverse normalization chain is also formalized: cyclic translation,
