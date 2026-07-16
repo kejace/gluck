@@ -6127,6 +6127,45 @@ theorem positiveRadiusOrderedAdjacentTurns_iff_orderedAdjacentTurns_signedMenger
   · exact positiveRadiusOrderedAdjacentTurns_of_orderedAdjacentTurns_signedMengerProfile
       hsimple horient
 
+/-- Direct Euclidean isometries preserve positive radius ordered turns in the
+positive-orientation branch. -/
+theorem positiveRadiusOrderedAdjacentTurns_directIsometry_iff {n : ℕ} [NeZero n]
+    {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (horient : PositivePolygonOrientation (fun i => directIsometryR2 u a (v i))) :
+    PositiveRadiusOrderedAdjacentTurns (fun i => directIsometryR2 u a (v i)) ↔
+      PositiveRadiusOrderedAdjacentTurns v := by
+  have hsimple₀ : Gluck.Discrete.IsSimplePolygon v :=
+    (isSimplePolygon_directIsometry_iff hu a v).mp hsimple
+  have horient₀ : PositivePolygonOrientation v :=
+    (positivePolygonOrientation_directIsometry hu a v).mp horient
+  constructor
+  · intro hturns
+    have hsigned :
+        OrderedAdjacentTurns
+          (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) :=
+      (positiveRadiusOrderedAdjacentTurns_iff_orderedAdjacentTurns_signedMengerProfile
+        hsimple horient).mp hturns
+    have hsigned₀ : OrderedAdjacentTurns (SignedMengerProfile v) :=
+      orderedAdjacentTurns_congr
+        (fun i => (congrFun (SignedMengerProfile_directIsometry hu a v) i).symm)
+        hsigned
+    exact (positiveRadiusOrderedAdjacentTurns_iff_orderedAdjacentTurns_signedMengerProfile
+      hsimple₀ horient₀).mpr hsigned₀
+  · intro hturns
+    have hsigned₀ : OrderedAdjacentTurns (SignedMengerProfile v) :=
+      (positiveRadiusOrderedAdjacentTurns_iff_orderedAdjacentTurns_signedMengerProfile
+        hsimple₀ horient₀).mp hturns
+    have hsigned :
+        OrderedAdjacentTurns
+          (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) :=
+      orderedAdjacentTurns_congr
+        (fun i => congrFun (SignedMengerProfile_directIsometry hu a v) i)
+        hsigned₀
+    exact (positiveRadiusOrderedAdjacentTurns_iff_orderedAdjacentTurns_signedMengerProfile
+      hsimple horient).mpr hsigned
+
 /-- Positive radius ordered turns force nonconstancy of the signed-Menger
 profile. -/
 theorem not_constant_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
@@ -6438,6 +6477,25 @@ theorem dahlbergE2ConvexDfvSignedSource_of_radiusSource
     DahlbergE2ConvexDfvSignedSource := by
   exact dahlbergE2_convexDfvRadiusSource_iff_signedSource.mp hsrc
 
+/-- Direct Euclidean isometries preserve Dahlberg's convex radius-witness
+package in the positive-orientation branch. -/
+theorem dahlbergE2ConvexDfvRadiusWitnesses_directIsometry_iff {n : ℕ}
+    [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (horient : PositivePolygonOrientation (fun i => directIsometryR2 u a (v i))) :
+    DahlbergE2ConvexDfvRadiusWitnesses (fun i => directIsometryR2 u a (v i)) ↔
+      DahlbergE2ConvexDfvRadiusWitnesses v := by
+  have hsimple₀ : Gluck.Discrete.IsSimplePolygon v :=
+    (isSimplePolygon_directIsometry_iff hu a v).mp hsimple
+  have horient₀ : PositivePolygonOrientation v :=
+    (positivePolygonOrientation_directIsometry hu a v).mp horient
+  rw [dahlbergE2ConvexDfvRadiusWitnesses_iff_signedMengerProfile_dahlbergFourVertex
+      hsimple horient,
+    dahlbergE2ConvexDfvRadiusWitnesses_iff_signedMengerProfile_dahlbergFourVertex
+      hsimple₀ horient₀,
+    dahlbergFourVertex_signedMengerProfile_directIsometry_iff hu a v]
+
 /-- Source-level conversion from Dahlberg's signed-Menger CDFV source back to
 the radius-witness source used by ordered-turn refinements. -/
 theorem dahlbergE2ConvexDfvRadiusSource_of_signedSource
@@ -6461,11 +6519,88 @@ def DahlbergE2Lemma8RadiusTurnBridgeSource : Prop :=
     DahlbergE2ConvexDfvRadiusWitnesses v →
     PositiveRadiusOrderedAdjacentTurns v
 
+/-- The radius-witness CDFV source can be applied after direct Euclidean
+normalization. -/
+theorem dahlbergE2ConvexDfvRadiusSource_directIsometry
+    (hsrc : DahlbergE2ConvexDfvRadiusSource)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (horient : PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)))
+    (hnc :
+      ¬ ∃ c, ∀ i : ZMod n,
+        SignedMengerProfile (fun j => directIsometryR2 u a (v j)) i = c) :
+    DahlbergE2ConvexDfvRadiusWitnesses (fun i => directIsometryR2 u a (v i)) := by
+  have hsimple₀ : Gluck.Discrete.IsSimplePolygon v :=
+    (isSimplePolygon_directIsometry_iff hu a v).mp hsimple
+  have hregular₀ : DahlbergRegular v :=
+    (dahlbergRegular_directIsometry_iff hu a v).mp hregular
+  have horient₀ : PositivePolygonOrientation v :=
+    (positivePolygonOrientation_directIsometry hu a v).mp horient
+  have hnc₀ : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c :=
+    (not_constant_signedMengerProfile_directIsometry_iff hu a v).mp hnc
+  exact (dahlbergE2ConvexDfvRadiusWitnesses_directIsometry_iff hu a
+    hsimple horient).mpr (hsrc hn hsimple₀ hregular₀ horient₀ hnc₀)
+
+/-- The Lemma 8 radius-turn bridge source can be applied after direct
+Euclidean normalization. -/
+theorem dahlbergE2Lemma8RadiusTurnBridgeSource_directIsometry
+    (hsrc : DahlbergE2Lemma8RadiusTurnBridgeSource)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (horient : PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)))
+    (hnc :
+      ¬ ∃ c, ∀ i : ZMod n,
+        SignedMengerProfile (fun j => directIsometryR2 u a (v j)) i = c)
+    (hwitness :
+      DahlbergE2ConvexDfvRadiusWitnesses (fun i => directIsometryR2 u a (v i))) :
+    PositiveRadiusOrderedAdjacentTurns (fun i => directIsometryR2 u a (v i)) := by
+  have hsimple₀ : Gluck.Discrete.IsSimplePolygon v :=
+    (isSimplePolygon_directIsometry_iff hu a v).mp hsimple
+  have hregular₀ : DahlbergRegular v :=
+    (dahlbergRegular_directIsometry_iff hu a v).mp hregular
+  have horient₀ : PositivePolygonOrientation v :=
+    (positivePolygonOrientation_directIsometry hu a v).mp horient
+  have hnc₀ : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c :=
+    (not_constant_signedMengerProfile_directIsometry_iff hu a v).mp hnc
+  have hwitness₀ : DahlbergE2ConvexDfvRadiusWitnesses v :=
+    (dahlbergE2ConvexDfvRadiusWitnesses_directIsometry_iff hu a hsimple horient).mp
+      hwitness
+  exact (positiveRadiusOrderedAdjacentTurns_directIsometry_iff hu a
+    hsimple horient).mpr
+    (hsrc hn hsimple₀ hregular₀ horient₀ hnc₀ hwitness₀)
+
 /-- The two source components of Dahlberg's strictly convex positive branch:
 Theorem 6/CDFV gives radius witnesses, and Lemma 8 turns those witnesses into
 the adjacent radius turns needed for Lemma 9. -/
 def DahlbergE2ConvexRadiusSourceComponents : Prop :=
   DahlbergE2ConvexDfvRadiusSource ∧ DahlbergE2Lemma8RadiusTurnBridgeSource
+
+/-- The split convex-radius source package is compatible with direct
+Euclidean normalization. -/
+theorem dahlbergE2ConvexRadiusSourceComponents_directIsometry
+    (hsrc : DahlbergE2ConvexRadiusSourceComponents)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (horient : PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)))
+    (hnc :
+      ¬ ∃ c, ∀ i : ZMod n,
+        SignedMengerProfile (fun j => directIsometryR2 u a (v j)) i = c) :
+    PositiveRadiusOrderedAdjacentTurns (fun i => directIsometryR2 u a (v i)) := by
+  have hwitness :
+      DahlbergE2ConvexDfvRadiusWitnesses (fun i => directIsometryR2 u a (v i)) :=
+    dahlbergE2ConvexDfvRadiusSource_directIsometry hsrc.1 hu a hn
+      hsimple hregular horient hnc
+  exact dahlbergE2Lemma8RadiusTurnBridgeSource_directIsometry hsrc.2 hu a hn
+    hsimple hregular horient hnc hwitness
 
 /-- Dahlberg's strictly convex same-orientation Lemma 9 extraction: under
 positive orientation and nonconstant signed-Menger profile, the profile has
