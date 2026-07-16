@@ -69,9 +69,22 @@ theorem smoothFourVertex_E2_kernel_of_dfvSource
 Reference source: Dahlberg, *The converse of the four vertex theorem*,
 `references/dahlberg.pdf`, Introduction, where the classical smooth
 four-vertex theorem is stated in the value-separated form used here. -/
+theorem four_vertex_condition_smooth_E2_nonconstant_classical
+    {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    Gluck.FourVertexCondition κ := by
+  sorry
+
+/-- Euclidean nonconstant smooth forward four-vertex geometric source package,
+recovered from the direct classical source theorem. -/
 theorem four_vertex_condition_smooth_E2_source_gate :
     SmoothForwardE2Source := by
-  sorry
+  intro γ κ hclosed hreal hκ hper hnc
+  exact four_vertex_condition_smooth_E2_nonconstant_classical
+    hclosed hreal hκ hper hnc
 
 /-- Euclidean nonconstant smooth forward four-vertex primitive source gate. -/
 theorem four_vertex_condition_smooth_E2_nonconstant_source_gate
