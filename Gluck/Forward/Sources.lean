@@ -50,6 +50,36 @@ theorem forwardGeometricSources_iff_modelSources :
     exact ⟨smoothForwardSource_iff_modelSources.mpr hsrc.1,
       spaceFormDiscreteSource_iff_modelSources.mpr hsrc.2.1, hsrc.2.2⟩
 
+/-- Extract the smooth model-source package from the expanded forward source
+package. -/
+theorem smoothForwardModelSources_of_modelSources (hsrc : ForwardModelSources) :
+    SmoothForwardModelSources := by
+  exact hsrc.1
+
+/-- Extract the non-Euclidean discrete model-source package from the expanded
+forward source package. -/
+theorem spaceFormDiscreteModelSources_of_modelSources (hsrc : ForwardModelSources) :
+    SpaceFormDiscreteModelSources := by
+  exact hsrc.2.1
+
+/-- Extract Dahlberg's E² discrete source package from the expanded forward
+source package. -/
+theorem dahlbergE2_geometric_sources_of_modelSources (hsrc : ForwardModelSources) :
+    DahlbergE2GeometricSources := by
+  exact hsrc.2.2
+
+/-- Convert a bundled uniform forward source package to the expanded
+model-specific package. -/
+theorem forwardModelSources_of_geometricSources (hsrc : ForwardGeometricSources) :
+    ForwardModelSources := by
+  exact forwardGeometricSources_iff_modelSources.mp hsrc
+
+/-- Convert an expanded model-specific source package to the bundled uniform
+forward source package. -/
+theorem forwardGeometricSources_of_modelSources (hsrc : ForwardModelSources) :
+    ForwardGeometricSources := by
+  exact forwardGeometricSources_iff_modelSources.mpr hsrc
+
 /-- Extract the smooth source component from a bundled forward source proof. -/
 theorem four_vertex_condition_smooth_spaceForm_nonconstant_of_sources
     (hsrc : ForwardGeometricSources) {ε : ℝ}
