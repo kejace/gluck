@@ -137,9 +137,11 @@ remaining-source audit is:
 
 The corresponding audit targets are `ForwardRemainingSources`, for the
 stronger ordered-turn route, and `ForwardDfvRemainingSources`, for the final
-D4VT route.  `forward_remaining_sources` and
-`forward_dfv_remaining_sources` currently collect exactly the listed source
-gates.  Their grouped component spellings are exposed as
+D4VT route.  `forward_remaining_sources` currently collects exactly the listed
+source gates.  `forward_dfv_remaining_sources` is derived from it by forgetting
+the extra ordered-turn data where possible; its grouped component spelling
+records the weaker final-D4VT obligations.  The grouped component spellings are
+exposed as
 `forward_remaining_source_components` and
 `forward_dfv_remaining_source_components`, with component projections such as
 `smoothForwardModelSources_of_remainingSources`,
