@@ -253,6 +253,16 @@ theorem dahlbergFourVertex_signedMengerProfile_directIsometry_iff {n : ℕ}
     exact dahlbergFourVertex_congr
       (fun i => congrFun (SignedMengerProfile_directIsometry hu w v) i) hfv
 
+/-- Direct Euclidean isometries preserve nonconstancy of the signed-Menger
+profile. -/
+theorem not_constant_signedMengerProfile_directIsometry_iff {n : ℕ}
+    {u : ℂ} (hu : ‖u‖ = 1) (w : ℂ) (v : ZMod n → ℂ) :
+    (¬ ∃ c, ∀ i : ZMod n,
+        SignedMengerProfile (fun j => directIsometryR2 u w (v j)) i = c) ↔
+      ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  exact not_constant_congr_iff
+    (fun i => congrFun (SignedMengerProfile_directIsometry hu w v) i)
+
 /-- Cyclic permutations preserve the oriented twice-area. -/
 theorem crossR2_cycle (A B C : ℂ) :
     Gluck.Discrete.crossR2 B C A = Gluck.Discrete.crossR2 A B C := by
@@ -6384,6 +6394,31 @@ def DahlbergE2ConvexDfvSignedSource : Prop :=
     (¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) →
     DahlbergFourVertex (SignedMengerProfile v)
 
+/-- The signed CDFV source can be applied after direct Euclidean
+normalization. -/
+theorem dahlbergE2ConvexDfvSignedSource_directIsometry
+    (hsrc : DahlbergE2ConvexDfvSignedSource)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (horient : PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)))
+    (hnc :
+      ¬ ∃ c, ∀ i : ZMod n,
+        SignedMengerProfile (fun j => directIsometryR2 u a (v j)) i = c) :
+    DahlbergFourVertex (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) := by
+  have hsimple₀ : Gluck.Discrete.IsSimplePolygon v :=
+    (isSimplePolygon_directIsometry_iff hu a v).mp hsimple
+  have hregular₀ : DahlbergRegular v :=
+    (dahlbergRegular_directIsometry_iff hu a v).mp hregular
+  have horient₀ : PositivePolygonOrientation v :=
+    (positivePolygonOrientation_directIsometry hu a v).mp horient
+  have hnc₀ : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c :=
+    (not_constant_signedMengerProfile_directIsometry_iff hu a v).mp hnc
+  exact (dahlbergFourVertex_signedMengerProfile_directIsometry_iff hu a v).mpr
+    (hsrc hn hsimple₀ hregular₀ horient₀ hnc₀)
+
 /-- The radius-profile and signed-Menger forms of the convex/CDFV source are
 equivalent in the positive-orientation branch. -/
 theorem dahlbergE2_convexDfvRadiusSource_iff_signedSource :
@@ -6630,6 +6665,33 @@ adjacent-turn output used for conformal-Menger refinements.  Its strict convex
 component is Dahlberg's theorem-level signed-Menger D4V conclusion. -/
 def DahlbergE2DfvGeometricSources : Prop :=
   DahlbergE2ConvexDfvSignedSource ∧ DahlbergE2DiskReductionSource
+
+/-- The weak final-D4VT Dahlberg source package is compatible with direct
+Euclidean normalization in both its strict and non-strict branches. -/
+theorem dahlbergE2DfvGeometricSources_directIsometry
+    (hsrc : DahlbergE2DfvGeometricSources)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (hnoncircle : ¬ Concyclic (fun i => directIsometryR2 u a (v i))) :
+    (PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)) →
+        DahlbergFourVertex
+          (SignedMengerProfile (fun i => directIsometryR2 u a (v i)))) ∧
+      (¬ (PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)) ∨
+          NegativePolygonOrientation (fun i => directIsometryR2 u a (v i))) →
+        DahlbergDiskAuxiliaryReduction
+          (fun i => directIsometryR2 u a (v i))) := by
+  refine ⟨?_, ?_⟩
+  · intro horient
+    exact dahlbergE2ConvexDfvSignedSource_directIsometry hsrc.1 hu a hn
+      hsimple hregular horient
+      (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
+        hsimple hregular horient hnoncircle)
+  · intro hnonstrict
+    exact dahlbergE2DiskReductionSource_directIsometry hsrc.2 hu a hn
+      hsimple hregular hnoncircle hnonstrict
 
 /-- Dahlberg's convex/CDFV signed-Menger source, extracted directly from
 Theorem 6/CDFV in Dahlberg's discrete four-vertex paper.
