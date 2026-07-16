@@ -5483,6 +5483,28 @@ theorem dahlbergE2ConvexDfvRadiusWitnesses_iff_signedMengerProfile_dahlbergFourV
         exact (inv_inv (EdgePrevCircleRadiusProfile v i)).symm)
       hinv
 
+/-- Dahlberg's radius-witness form gives the signed-Menger D4VT conclusion in
+the positive-orientation branch. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_convexDfvRadiusWitnesses
+    {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hfv : DahlbergE2ConvexDfvRadiusWitnesses v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact (dahlbergE2ConvexDfvRadiusWitnesses_iff_signedMengerProfile_dahlbergFourVertex
+    hsimple horient).mp hfv
+
+/-- The signed-Menger D4VT conclusion gives Dahlberg's radius-witness form in
+the positive-orientation branch. -/
+theorem convexDfvRadiusWitnesses_of_signedMengerProfile_dahlbergFourVertex
+    {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hfv : DahlbergFourVertex (SignedMengerProfile v)) :
+    DahlbergE2ConvexDfvRadiusWitnesses v := by
+  exact (dahlbergE2ConvexDfvRadiusWitnesses_iff_signedMengerProfile_dahlbergFourVertex
+    hsimple horient).mpr hfv
+
 /-- Adjacent positive radius turns imply the radius-profile witness form of
 Dahlberg's convex discrete four-vertex theorem.
 
@@ -5906,11 +5928,25 @@ theorem dahlbergE2_convexDfvRadiusSource_iff_signedSource :
     DahlbergE2ConvexDfvRadiusSource ↔ DahlbergE2ConvexDfvSignedSource := by
   constructor
   · intro hsrc n hne hn v hsimple hregular horient hnc
-    exact (dahlbergE2ConvexDfvRadiusWitnesses_iff_signedMengerProfile_dahlbergFourVertex
-      hsimple horient).mp (hsrc hn hsimple hregular horient hnc)
+    exact signedMengerProfile_dahlbergFourVertex_of_convexDfvRadiusWitnesses
+      hsimple horient (hsrc hn hsimple hregular horient hnc)
   · intro hsrc n hne hn v hsimple hregular horient hnc
-    exact (dahlbergE2ConvexDfvRadiusWitnesses_iff_signedMengerProfile_dahlbergFourVertex
-      hsimple horient).mpr (hsrc hn hsimple hregular horient hnc)
+    exact convexDfvRadiusWitnesses_of_signedMengerProfile_dahlbergFourVertex
+      hsimple horient (hsrc hn hsimple hregular horient hnc)
+
+/-- Source-level conversion from Dahlberg's CDFV radius-witness source to the
+signed-Menger source used by the final E² D4VT route. -/
+theorem dahlbergE2ConvexDfvSignedSource_of_radiusSource
+    (hsrc : DahlbergE2ConvexDfvRadiusSource) :
+    DahlbergE2ConvexDfvSignedSource := by
+  exact dahlbergE2_convexDfvRadiusSource_iff_signedSource.mp hsrc
+
+/-- Source-level conversion from Dahlberg's signed-Menger CDFV source back to
+the radius-witness source used by ordered-turn refinements. -/
+theorem dahlbergE2ConvexDfvRadiusSource_of_signedSource
+    (hsrc : DahlbergE2ConvexDfvSignedSource) :
+    DahlbergE2ConvexDfvRadiusSource := by
+  exact dahlbergE2_convexDfvRadiusSource_iff_signedSource.mpr hsrc
 
 /-- Dahlberg's Lemma 8 monotonicity bridge in the convex positive-orientation
 branch.
@@ -6094,7 +6130,7 @@ theorem dahlbergE2_convex_dfv_signed_source :
 theorem-level signed-Menger CDFV source by reciprocal-radius monotonicity. -/
 theorem dahlbergE2_convex_dfv_radius_source :
     DahlbergE2ConvexDfvRadiusSource := by
-  exact dahlbergE2_convexDfvRadiusSource_iff_signedSource.mpr
+  exact dahlbergE2ConvexDfvRadiusSource_of_signedSource
     dahlbergE2_convex_dfv_signed_source
 
 /-- Dahlberg's Lemma 8 monotonicity bridge from CDFV radius witnesses to the
