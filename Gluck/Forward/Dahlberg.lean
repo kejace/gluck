@@ -7853,6 +7853,38 @@ the adjacent radius turns needed for Lemma 9. -/
 def DahlbergE2ConvexRadiusSourceComponents : Prop :=
   DahlbergE2ConvexDfvRadiusSource ∧ DahlbergE2Lemma8RadiusTurnBridgeSource
 
+/-- The sharpened split CDFV/Lemma 8 source package: Theorem 6/CDFV gives
+radius witnesses, and the witness-only Lemma 8 source turns those witnesses
+into adjacent radius turns without carrying a redundant nonconstancy
+hypothesis. -/
+def DahlbergE2ConvexRadiusWitnessSourceComponents : Prop :=
+  DahlbergE2ConvexDfvRadiusSource ∧ DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource
+
+/-- The sharpened witness-only convex-radius source package implies the older
+component package with an explicit nonconstancy hypothesis. -/
+theorem dahlbergE2ConvexRadiusSourceComponents_of_witnessComponents
+    (hsrc : DahlbergE2ConvexRadiusWitnessSourceComponents) :
+    DahlbergE2ConvexRadiusSourceComponents := by
+  exact ⟨hsrc.1,
+    dahlbergE2Lemma8RadiusTurnBridgeSource_of_witnessSource hsrc.2⟩
+
+/-- The older split convex-radius source package implies the sharpened
+witness-only component package. -/
+theorem dahlbergE2ConvexRadiusWitnessSourceComponents_of_components
+    (hsrc : DahlbergE2ConvexRadiusSourceComponents) :
+    DahlbergE2ConvexRadiusWitnessSourceComponents := by
+  exact ⟨hsrc.1,
+    dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_source hsrc.2⟩
+
+/-- The older and witness-only split convex-radius source packages are
+formally equivalent. -/
+theorem dahlbergE2ConvexRadiusSourceComponents_iff_witnessComponents :
+    DahlbergE2ConvexRadiusSourceComponents ↔
+      DahlbergE2ConvexRadiusWitnessSourceComponents := by
+  constructor
+  · exact dahlbergE2ConvexRadiusWitnessSourceComponents_of_components
+  · exact dahlbergE2ConvexRadiusSourceComponents_of_witnessComponents
+
 /-- The combined convex-radius source gives the CDFV radius-witness source:
 ordered adjacent radius turns imply the plateau-aware radius-profile four
 vertex witness. -/
@@ -7886,10 +7918,10 @@ theorem dahlbergE2ConvexRadiusSourceComponents_iff_convexRadiusSource :
     exact ⟨dahlbergE2ConvexDfvRadiusSource_of_convexRadiusSource hsrc,
       dahlbergE2Lemma8RadiusTurnBridgeSource_of_convexRadiusSource hsrc⟩
 
-/-- The split convex-radius source package is compatible with direct
-Euclidean normalization. -/
-theorem dahlbergE2ConvexRadiusSourceComponents_directIsometry
-    (hsrc : DahlbergE2ConvexRadiusSourceComponents)
+/-- The sharpened witness-only split convex-radius source package is
+compatible with direct Euclidean normalization. -/
+theorem dahlbergE2ConvexRadiusWitnessSourceComponents_directIsometry
+    (hsrc : DahlbergE2ConvexRadiusWitnessSourceComponents)
     {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
     (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon
@@ -7904,8 +7936,26 @@ theorem dahlbergE2ConvexRadiusSourceComponents_directIsometry
       DahlbergE2ConvexDfvRadiusWitnesses (fun i => directIsometryR2 u a (v i)) :=
     dahlbergE2ConvexDfvRadiusSource_directIsometry hsrc.1 hu a hn
       hsimple hregular horient hnc
-  exact dahlbergE2Lemma8RadiusTurnBridgeSource_directIsometry hsrc.2 hu a hn
-    hsimple hregular horient hnc hwitness
+  exact dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_directIsometry
+    hsrc.2 hu a hn hsimple hregular horient hwitness
+
+/-- The split convex-radius source package is compatible with direct
+Euclidean normalization. -/
+theorem dahlbergE2ConvexRadiusSourceComponents_directIsometry
+    (hsrc : DahlbergE2ConvexRadiusSourceComponents)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (horient : PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)))
+    (hnc :
+      ¬ ∃ c, ∀ i : ZMod n,
+        SignedMengerProfile (fun j => directIsometryR2 u a (v j)) i = c) :
+    PositiveRadiusOrderedAdjacentTurns (fun i => directIsometryR2 u a (v i)) := by
+  exact dahlbergE2ConvexRadiusWitnessSourceComponents_directIsometry
+    (dahlbergE2ConvexRadiusWitnessSourceComponents_of_components hsrc)
+    hu a hn hsimple hregular horient hnc
 
 /-- Dahlberg's strictly convex same-orientation Lemma 9 extraction: under
 positive orientation and nonconstant signed-Menger profile, the profile has
