@@ -6550,6 +6550,24 @@ for the previous-vertex curvature-radius profile. -/
 def DahlbergE2ConvexDfvRadiusWitnesses {n : ℕ} (v : ZMod n → ℂ) : Prop :=
   DahlbergFourVertex (EdgePrevCircleRadiusProfile v)
 
+/-- Dahlberg's radius-witness package already contains strict adjacent
+boundary turns around the extremal radius plateaux.
+
+This is the purely cyclic part of the Lemma 8/Lemma 9 bridge: it extracts
+actual strict one-edge turns from the plateau-aware CDFV radius witnesses, but
+does not yet assert Dahlberg's stronger ordered-adjacent-turn conclusion. -/
+theorem dahlbergE2ConvexDfvRadiusWitnesses_exists_boundary_turns {n : ℕ}
+    {v : ZMod n → ℂ} (hwitness : DahlbergE2ConvexDfvRadiusWitnesses v) :
+    (∃ i : ZMod n,
+        EdgePrevCircleRadiusProfile v i < EdgePrevCircleRadiusProfile v (i + 1)) ∧
+      (∃ i : ZMod n,
+        EdgePrevCircleRadiusProfile v (i + 1) < EdgePrevCircleRadiusProfile v i) ∧
+      (∃ i : ZMod n,
+        EdgePrevCircleRadiusProfile v i < EdgePrevCircleRadiusProfile v (i + 1)) ∧
+      (∃ i : ZMod n,
+        EdgePrevCircleRadiusProfile v (i + 1) < EdgePrevCircleRadiusProfile v i) := by
+  exact hwitness.exists_boundary_turns
+
 /-- In the positive-orientation branch, the radius-profile CDFV witness form is
 equivalent to Dahlberg's conclusion for signed Menger curvature.
 

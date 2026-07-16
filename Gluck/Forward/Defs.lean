@@ -358,6 +358,86 @@ theorem discreteLocalMin_of_succ_turn {n : ℕ} (hn : 2 ≤ n) {κ : ZMod n → 
   · simpa [sub_eq_add_neg, add_assoc] using hdec
   · simpa [add_assoc] using hinc
 
+/-- A plateau-aware local maximum has a strict adjacent increase at its left
+boundary. -/
+theorem DiscreteLocalMax.exists_left_boundary_increase {n : ℕ} {κ : ZMod n → ℝ}
+    {i : ZMod n} (hmax : DiscreteLocalMax κ i) :
+    ∃ j : ZMod n, κ j < κ (j + 1) := by
+  rcases hmax with
+    ⟨l, _r, hlpos, _hrpos, _hlr, hleft, _hright, hdrop, _⟩
+  refine ⟨i - (l : ZMod n), ?_⟩
+  have hlpred_lt : l - 1 < l := Nat.sub_one_lt (Nat.ne_of_gt hlpos)
+  have hplateau : κ (i - ((l - 1 : ℕ) : ZMod n)) = κ i :=
+    hleft (l - 1) hlpred_lt
+  have hpred : ((l - 1 : ℕ) : ZMod n) = (l : ZMod n) - 1 := by
+    have hl : l = l - 1 + 1 := (Nat.sub_add_cancel hlpos).symm
+    rw [hl, Nat.cast_add, Nat.cast_one]
+    abel
+  have hsucc : i - ((l - 1 : ℕ) : ZMod n) = i - (l : ZMod n) + 1 := by
+    rw [hpred]
+    abel
+  rwa [← hsucc, hplateau]
+
+/-- A plateau-aware local maximum has a strict adjacent decrease at its right
+boundary. -/
+theorem DiscreteLocalMax.exists_right_boundary_decrease {n : ℕ} {κ : ZMod n → ℝ}
+    {i : ZMod n} (hmax : DiscreteLocalMax κ i) :
+    ∃ j : ZMod n, κ (j + 1) < κ j := by
+  rcases hmax with
+    ⟨_l, r, _hlpos, hrpos, _hlr, _hleft, hright, _hdrop_left, hdrop⟩
+  refine ⟨i + ((r - 1 : ℕ) : ZMod n), ?_⟩
+  have hrpred_lt : r - 1 < r := Nat.sub_one_lt (Nat.ne_of_gt hrpos)
+  have hplateau : κ (i + ((r - 1 : ℕ) : ZMod n)) = κ i :=
+    hright (r - 1) hrpred_lt
+  have hpred : ((r - 1 : ℕ) : ZMod n) = (r : ZMod n) - 1 := by
+    have hr : r = r - 1 + 1 := (Nat.sub_add_cancel hrpos).symm
+    rw [hr, Nat.cast_add, Nat.cast_one]
+    abel
+  have hsucc : i + ((r - 1 : ℕ) : ZMod n) + 1 = i + (r : ZMod n) := by
+    rw [hpred]
+    abel
+  rwa [hsucc, hplateau]
+
+/-- A plateau-aware local minimum has a strict adjacent decrease at its left
+boundary. -/
+theorem DiscreteLocalMin.exists_left_boundary_decrease {n : ℕ} {κ : ZMod n → ℝ}
+    {i : ZMod n} (hmin : DiscreteLocalMin κ i) :
+    ∃ j : ZMod n, κ (j + 1) < κ j := by
+  rcases hmin with
+    ⟨l, _r, hlpos, _hrpos, _hlr, hleft, _hright, hdrop, _⟩
+  refine ⟨i - (l : ZMod n), ?_⟩
+  have hlpred_lt : l - 1 < l := Nat.sub_one_lt (Nat.ne_of_gt hlpos)
+  have hplateau : κ (i - ((l - 1 : ℕ) : ZMod n)) = κ i :=
+    hleft (l - 1) hlpred_lt
+  have hpred : ((l - 1 : ℕ) : ZMod n) = (l : ZMod n) - 1 := by
+    have hl : l = l - 1 + 1 := (Nat.sub_add_cancel hlpos).symm
+    rw [hl, Nat.cast_add, Nat.cast_one]
+    abel
+  have hsucc : i - ((l - 1 : ℕ) : ZMod n) = i - (l : ZMod n) + 1 := by
+    rw [hpred]
+    abel
+  rwa [← hsucc, hplateau]
+
+/-- A plateau-aware local minimum has a strict adjacent increase at its right
+boundary. -/
+theorem DiscreteLocalMin.exists_right_boundary_increase {n : ℕ} {κ : ZMod n → ℝ}
+    {i : ZMod n} (hmin : DiscreteLocalMin κ i) :
+    ∃ j : ZMod n, κ j < κ (j + 1) := by
+  rcases hmin with
+    ⟨_l, r, _hlpos, hrpos, _hlr, _hleft, hright, _hdrop_left, hdrop⟩
+  refine ⟨i + ((r - 1 : ℕ) : ZMod n), ?_⟩
+  have hrpred_lt : r - 1 < r := Nat.sub_one_lt (Nat.ne_of_gt hrpos)
+  have hplateau : κ (i + ((r - 1 : ℕ) : ZMod n)) = κ i :=
+    hright (r - 1) hrpred_lt
+  have hpred : ((r - 1 : ℕ) : ZMod n) = (r : ZMod n) - 1 := by
+    have hr : r = r - 1 + 1 := (Nat.sub_add_cancel hrpos).symm
+    rw [hr, Nat.cast_add, Nat.cast_one]
+    abel
+  have hsucc : i + ((r - 1 : ℕ) : ZMod n) + 1 = i + (r : ZMod n) := by
+    rw [hpred]
+    abel
+  rwa [hsucc, hplateau]
+
 /-- Dahlberg's source-form conclusion: two distinct local maxima and two
 distinct local minima, alternating around the cyclic vertex set. -/
 def DahlbergFourVertex {n : ℕ} (κ : ZMod n → ℝ) : Prop :=
@@ -367,6 +447,28 @@ def DahlbergFourVertex {n : ℕ} (κ : ZMod n → ℝ) : Prop :=
       DiscreteLocalMin κ (i₂ : ZMod n) ∧
       DiscreteLocalMax κ (i₃ : ZMod n) ∧
       DiscreteLocalMin κ (i₄ : ZMod n)
+
+/-- Dahlberg's plateau-aware four-vertex conclusion contains actual strict
+adjacent boundary turns around its extremal plateaux.
+
+This does not claim the stronger ordered-adjacent-turn package used by
+Dahlberg's Lemma 8/Lemma 9 route; it records the purely combinatorial
+boundary-turn information that is already present in the plateau-aware local
+extrema. -/
+theorem DahlbergFourVertex.exists_boundary_turns {n : ℕ} {κ : ZMod n → ℝ}
+    (hfv : DahlbergFourVertex κ) :
+    (∃ i : ZMod n, κ i < κ (i + 1)) ∧
+      (∃ i : ZMod n, κ (i + 1) < κ i) ∧
+      (∃ i : ZMod n, κ i < κ (i + 1)) ∧
+      (∃ i : ZMod n, κ (i + 1) < κ i) := by
+  rcases hfv with
+    ⟨_i₁, _i₂, _i₃, _i₄, _hi₁₂, _hi₂₃, _hi₃₄, _hi₄₁,
+      hmax₁, hmin₂, hmax₃, _hmin₄⟩
+  exact ⟨
+    hmax₁.exists_left_boundary_increase,
+    hmin₂.exists_left_boundary_decrease,
+    hmin₂.exists_right_boundary_increase,
+    hmax₃.exists_right_boundary_decrease⟩
 
 /-- Dahlberg's four-vertex conclusion forces the cyclic profile to be
 nonconstant. -/
