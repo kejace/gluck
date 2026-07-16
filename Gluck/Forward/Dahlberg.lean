@@ -10437,13 +10437,10 @@ theorem orderedAdjacentTurns_signedMengerProfile_directIsometry_of_remainingComp
   exact orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_remainingComponents
     hsrc hn hsimple' hregular' horient' hnc'
 
-/-- Dahlberg's positive strict ordered-turn branch is invariant under direct
-Euclidean normalization from the exact current Lemma-9/unit source gate.
-
-The unit-disk §4 component is unused here; it is carried by the package for
-the final-D4VT non-strict branch. -/
-theorem orderedAdjacentTurns_signedMengerProfile_directIsometry_of_lemma9UnitComponents
-    (hsrc : DahlbergE2Lemma9UnitRemainingSourceComponents)
+/-- Dahlberg's Lemma 9 ordered-turn source is invariant under direct Euclidean
+normalization. -/
+theorem orderedAdjacentTurns_signedMengerProfile_directIsometry_of_lemma9Source
+    (hsrc : DahlbergE2Lemma9Source)
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {u : ℂ} (hu : ‖u‖ = 1)
     (a : ℂ) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
@@ -10465,7 +10462,25 @@ theorem orderedAdjacentTurns_signedMengerProfile_directIsometry_of_lemma9UnitCom
       ¬ ∃ c, ∀ i : ZMod n,
         SignedMengerProfile (fun j => directIsometryR2 u a (v j)) i = c :=
     (not_constant_signedMengerProfile_directIsometry_iff hu a v).mpr hnc
-  exact hsrc.1 hn hsimple' hregular' horient' hnc'
+  exact hsrc hn hsimple' hregular' horient' hnc'
+
+/-- Dahlberg's positive strict ordered-turn branch is invariant under direct
+Euclidean normalization from the exact current Lemma-9/unit source gate.
+
+The unit-disk §4 component is unused here; it is carried by the package for
+the final-D4VT non-strict branch. -/
+theorem orderedAdjacentTurns_signedMengerProfile_directIsometry_of_lemma9UnitComponents
+    (hsrc : DahlbergE2Lemma9UnitRemainingSourceComponents)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {u : ℂ} (hu : ‖u‖ = 1)
+    (a : ℂ) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    OrderedAdjacentTurns
+      (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) := by
+  exact orderedAdjacentTurns_signedMengerProfile_directIsometry_of_lemma9Source
+    hsrc.1 hn hu a hsimple hregular horient hnc
 
 /-- Ordered-turn extraction in Dahlberg's positively oriented strictly-convex
 case with nonconstant signed-Menger profile.  This is the geometric content of
