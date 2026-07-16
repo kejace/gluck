@@ -5769,6 +5769,31 @@ theorem signedMengerProfile_exists_globalMinMax_strict_of_not_constant
       SignedMengerProfile v i₀ < SignedMengerProfile v i₁ := by
   exact exists_globalMinMax_strict_of_not_constant (κ := SignedMengerProfile v) hnc
 
+/-- A signed-Menger profile with no adjacent plateau has both a plateau-aware
+local maximum and a plateau-aware local minimum. -/
+theorem signedMengerProfile_exists_discreteLocalMax_and_min_of_forall_ne_succ
+    {n : ℕ} [NeZero n] (hn : 2 ≤ n) {v : ZMod n → ℂ}
+    (hne : ∀ i : ZMod n,
+      SignedMengerProfile v i ≠ SignedMengerProfile v (i + 1)) :
+    (∃ imax : ZMod n, DiscreteLocalMax (SignedMengerProfile v) imax) ∧
+      ∃ imin : ZMod n, DiscreteLocalMin (SignedMengerProfile v) imin := by
+  exact exists_discreteLocalMax_and_min_of_forall_ne_succ
+    (κ := SignedMengerProfile v) hn hne
+
+/-- A no-plateau signed-Menger profile has explicit strict one-step global
+peak and valley witnesses. -/
+theorem signedMengerProfile_exists_strict_neighbor_peak_and_valley_of_forall_ne_succ
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hne : ∀ i : ZMod n,
+      SignedMengerProfile v i ≠ SignedMengerProfile v (i + 1)) :
+    ∃ imax imin : ZMod n,
+      (SignedMengerProfile v (imax - 1) < SignedMengerProfile v imax ∧
+          SignedMengerProfile v (imax + 1) < SignedMengerProfile v imax) ∧
+        (SignedMengerProfile v imin < SignedMengerProfile v (imin - 1) ∧
+          SignedMengerProfile v imin < SignedMengerProfile v (imin + 1)) := by
+  exact exists_strict_neighbor_peak_and_valley_of_forall_ne_succ
+    (κ := SignedMengerProfile v) hne
+
 /-- A nonconcyclic locally regular simple polygon has both an adjacent strict
 increase and an adjacent strict decrease. -/
 theorem signedMengerProfile_exists_adjacent_increase_and_decrease_of_not_concyclic
