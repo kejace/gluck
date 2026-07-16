@@ -9053,6 +9053,19 @@ def DahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource : Prop :=
     dist 0 (v 1) < 1 →
     Nonempty (DahlbergAuxiliaryPolygon v)
 
+/-- The current complete Euclidean paper source surface for Dahlberg's
+discrete four-vertex theorem.
+
+The first component is the strict positive-orientation branch, packaged as
+Lemma 9's constant-or ordered-turn conclusion.  The second component is the
+non-strict §4 normalized unit-disk auxiliary-polygon construction.  All other
+Dahlberg E² source declarations in this file are formal consequences of these
+two components plus the already-proved finite disk, normalization, and
+radius/curvature transport lemmas. -/
+def DahlbergE2PaperSourceComponents : Prop :=
+  DahlbergE2Lemma9ConstantOrSource ∧
+  DahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource
+
 /-- The typed unit source implies the older raw existential unit source. -/
 theorem dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_auxiliaryPolygonSource
     (hsrc : DahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource) :
@@ -9931,6 +9944,15 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
+/-- The current full Dahlberg E² paper source package.
+
+This is the only remaining primitive source gate for
+`Gluck/Forward/Dahlberg.lean`: it packages the strict Lemma 9 branch and the
+non-strict §4 auxiliary-polygon construction branch. -/
+theorem dahlbergE2_paper_source_components_gate :
+    DahlbergE2PaperSourceComponents := by
+  sorry
+
 /-- Dahlberg's strict positive-orientation Lemma 9 constant-or ordered-turn
 source gate.
 
@@ -9942,7 +9964,7 @@ The CDFV theorem-level conclusion and the previous-radius Lemma 8 interface
 below are recovered formally from this source. -/
 theorem dahlbergE2_lemma9_constant_or_ordered_primitive_source_gate :
     DahlbergE2Lemma9ConstantOrSource := by
-  sorry
+  exact dahlbergE2_paper_source_components_gate.1
 
 /-- Dahlberg's strict positive-orientation CDFV constant-or signed-Menger
 source gate, recovered from the combined Lemma 9 strict-branch source.
@@ -11026,7 +11048,7 @@ Reference source: Dahlberg, *A Discrete Four Vertex Theorem*,
 boundary reduction following Lemma 10. -/
 theorem dahlbergE2_disk_auxiliary_boundary_successor_unit_auxiliary_polygon_source_gate :
     DahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource := by
-  sorry
+  exact dahlbergE2_paper_source_components_gate.2
 
 /-- Dahlberg's unit-radius rotated centered normalized successor-interior
 auxiliary-polygon construction/transfer source gate for the §4 non-strict disk

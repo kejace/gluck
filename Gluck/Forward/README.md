@@ -92,8 +92,7 @@ The remaining primitive source gates in the current worktree are exactly:
 - `Gluck/Forward/Smooth.lean`
   - `osserman1985_smooth_E2_threshold_source_gate`;
 - `Gluck/Forward/Dahlberg.lean`
-  - `dahlbergE2_lemma9_constant_or_ordered_primitive_source_gate`;
-  - `dahlbergE2_disk_auxiliary_boundary_successor_unit_auxiliary_polygon_source_gate`.
+  - `dahlbergE2_paper_source_components_gate`.
 
 The public smooth value-separated gate
 `four_vertex_condition_smooth_E2_source_gate` is now recovered formally from
@@ -105,7 +104,8 @@ maxima with `κ > 1 / R`, hence
 Dahlberg's strict positive-orientation CDFV and Lemma 8 compatibility gates,
 `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate` and
 `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`, are recovered
-from the combined strict-branch Lemma 9 primitive
+from the combined strict-branch Lemma 9 component of
+`dahlbergE2_paper_source_components_gate`, exposed as
 `dahlbergE2_lemma9_constant_or_ordered_primitive_source_gate`.  This source
 states that the positive strictly-convex branch has constant signed-Menger
 profile or four cyclically ordered adjacent signed-Menger turns.
@@ -167,7 +167,9 @@ the reverse direction repackages `DahlbergDiskAuxiliaryReduction` using
 `exists_dahlbergAuxiliaryPolygon_of_diskAuxiliaryReduction`.
 The broad theorem-facing disk-reduction source
 `dahlbergE2_disk_reduction_geometric_source_gate` is recovered formally from
-it.  The reverse normalization chain is also formalized: cyclic translation,
+the §4 component of `dahlbergE2_paper_source_components_gate`, exposed as
+`dahlbergE2_disk_auxiliary_boundary_successor_unit_auxiliary_polygon_source_gate`.
+The reverse normalization chain is also formalized: cyclic translation,
 Euclidean translation/rotation, positive homothety, reversal, the
 boundary-neighbor/transition reductions, and the boundary/interior and
 disk-reduction compatibility layers.
