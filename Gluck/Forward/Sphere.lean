@@ -154,9 +154,8 @@ theorem constant_or_dahlbergFourVertex_S2_of_positiveOrientation
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger 1 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns hn
-    (constant_or_orderedAdjacentTurns_S2_of_positiveOrientation
-      hn v κ hdisk hsimple horient hregular hκ)
+  exact constant_or_dahlbergFourVertex_S2_kernel
+    hn v κ hdisk hsimple horient hregular hκ
 
 /-- Spherical discrete four-vertex theorem using the shared positive
 orientation interface for convex/coherent cyclic polygons. -/
@@ -169,9 +168,8 @@ theorem discrete_four_vertex_S2_of_positiveOrientation {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger 1 v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
-    (orderedAdjacentTurns_S2_of_positiveOrientation
-      hn v κ hdisk hsimple horient hregular hκ hnc)
+  exact discrete_four_vertex_S2_kernel
+    hn v κ hdisk hsimple horient hregular hκ hnc
 
 /-- Spherical constant-or-Dahlberg theorem for negatively oriented
 convex/coherent cyclic polygons, stated for the naturally reversed curvature
@@ -283,11 +281,9 @@ theorem constant_or_dahlbergFourVertex_S2_of_negativeOrientation
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger 1 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact
-    constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns_neg_reflectIndex
-      hn
-      (constant_or_orderedAdjacentTurns_S2_of_negativeOrientation_reflected
-        hn v κ hdisk hsimple horient hregular hκ)
+  exact constant_or_dahlbergFourVertex_of_neg_reflectIndex
+    (constant_or_dahlbergFourVertex_S2_of_negativeOrientation_reflected
+      hn v κ hdisk hsimple horient hregular hκ)
 
 /-- Spherical discrete four-vertex theorem for negatively oriented convex
 coherent cyclic polygons, obtained from the positive kernel by reversing the
@@ -303,11 +299,9 @@ theorem discrete_four_vertex_S2_of_negativeOrientation {n : ℕ} [NeZero n]
     DahlbergFourVertex κ := by
   have hnc_reflected : ¬ ∃ c, ∀ i : ZMod n, -κ (-i) = c :=
     (not_constant_neg_reflectIndex_iff (κ := κ)).mpr hnc
-  have hfv_reflected :
-      DahlbergFourVertex (fun i => -κ (-i)) :=
-    dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
-      (orderedAdjacentTurns_S2_of_negativeOrientation_reflected
-        hn v κ hdisk hsimple horient hregular hκ hnc_reflected)
+  have hfv_reflected : DahlbergFourVertex (fun i => -κ (-i)) :=
+    discrete_four_vertex_S2_of_negativeOrientation_reflected
+      hn v κ hdisk hsimple horient hregular hκ hnc_reflected
   exact dahlbergFourVertex_of_neg_reflectIndex hfv_reflected
 
 /-- Spherical constant-or-Dahlberg theorem for strictly oriented

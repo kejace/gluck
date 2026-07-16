@@ -360,8 +360,7 @@ theorem orderedAdjacentTurns_S2_source {n : ℕ} [NeZero n]
     hn v κ hdisk hsimple hconvex hregular hκ hnc
 
 /-- Spherical nonconstant source theorem for the convex/coherent discrete
-four-vertex package in an open hemisphere, derived from the ordered-turn
-source and the general cyclic conversion. -/
+four-vertex package in an open hemisphere. -/
 theorem dahlbergFourVertex_S2_source {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
     (hdisk : ∀ i, ‖v i‖ < 1)
@@ -371,9 +370,10 @@ theorem dahlbergFourVertex_S2_source {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger 1 v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
-    (orderedAdjacentTurns_S2_source
-      hn v κ hdisk hsimple hconvex hregular hκ hnc)
+  exact dahlbergFourVertex_S2_of_dfvSource
+    (spaceFormDiscreteDfvSource_of_source
+      (spaceFormDiscreteSource_iff_modelSources.mpr spaceFormDiscrete_model_sources))
+    hn v κ hdisk hsimple hconvex hregular hκ hnc
 
 /-- Spherical constant-or ordered-turn theorem obtained from the nonconstant
 ordered-turn source by splitting off the constant profile case. -/
@@ -390,8 +390,7 @@ theorem constant_or_orderedAdjacentTurns_S2_source {n : ℕ} [NeZero n]
   · exact Or.inr (orderedAdjacentTurns_S2_source
       hn v κ hdisk hsimple hconvex hregular hκ hconst)
 
-/-- Spherical constant-or theorem obtained from the nonconstant source by
-splitting off the constant profile case. -/
+/-- Spherical constant-or D4VT source theorem. -/
 theorem constant_or_dahlbergFourVertex_S2_source {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
     (hdisk : ∀ i, ‖v i‖ < 1)
@@ -400,9 +399,10 @@ theorem constant_or_dahlbergFourVertex_S2_source {n : ℕ} [NeZero n]
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger 1 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns hn
-    (constant_or_orderedAdjacentTurns_S2_source
-      hn v κ hdisk hsimple hconvex hregular hκ)
+  exact constant_or_dahlbergFourVertex_S2_of_dfvSource
+    (spaceFormDiscreteDfvSource_of_source
+      (spaceFormDiscreteSource_iff_modelSources.mpr spaceFormDiscrete_model_sources))
+    hn v κ hdisk hsimple hconvex hregular hκ
 
 /-- Hyperbolic ordered-turn source theorem for Grant--Mogilski's convex
 coherent discrete four-vertex theorem in the proper-circle regime `κᵢ > 1`. -/
@@ -436,8 +436,7 @@ theorem orderedAdjacentTurns_spaceForm_source {ε : ℝ}
     hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
 
 /-- Hyperbolic nonconstant source theorem for Grant--Mogilski's convex
-coherent discrete four-vertex theorem in the proper-circle regime `κᵢ > 1`,
-derived from the ordered-turn source and the general cyclic conversion. -/
+coherent discrete four-vertex theorem in the proper-circle regime `κᵢ > 1`. -/
 theorem dahlbergFourVertex_H2_source {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
     (hdisk : ∀ i, ‖v i‖ < 1)
@@ -447,9 +446,10 @@ theorem dahlbergFourVertex_H2_source {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
-    (orderedAdjacentTurns_H2_source
-      hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc)
+  exact dahlbergFourVertex_H2_of_dfvSource
+    (spaceFormDiscreteDfvSource_of_source
+      (spaceFormDiscreteSource_iff_modelSources.mpr spaceFormDiscrete_model_sources))
+    hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
 
 /-- Hyperbolic constant-or ordered-turn theorem obtained from the nonconstant
 ordered-turn source by splitting off the constant profile case. -/
@@ -466,8 +466,7 @@ theorem constant_or_orderedAdjacentTurns_H2_source {n : ℕ} [NeZero n]
   · exact Or.inr (orderedAdjacentTurns_H2_source
       hn v κ hdisk hsimple hconvex hregular hκ hcircle hconst)
 
-/-- Hyperbolic constant-or theorem obtained from the nonconstant source by
-splitting off the constant profile case. -/
+/-- Hyperbolic constant-or D4VT source theorem. -/
 theorem constant_or_dahlbergFourVertex_H2_source {n : ℕ} [NeZero n]
     (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
     (hdisk : ∀ i, ‖v i‖ < 1)
@@ -476,9 +475,10 @@ theorem constant_or_dahlbergFourVertex_H2_source {n : ℕ} [NeZero n]
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns hn
-    (constant_or_orderedAdjacentTurns_H2_source
-      hn v κ hdisk hsimple hconvex hregular hκ hcircle)
+  exact constant_or_dahlbergFourVertex_H2_of_dfvSource
+    (spaceFormDiscreteDfvSource_of_source
+      (spaceFormDiscreteSource_iff_modelSources.mpr spaceFormDiscrete_model_sources))
+    hn v κ hdisk hsimple hconvex hregular hκ hcircle
 
 /-- Uniform constant-or ordered-turn source theorem for the convex/coherent
 discrete four-vertex package in `S²` (`ε = 1`) and `H²` (`ε = -1`),
@@ -514,9 +514,10 @@ theorem constant_or_dahlbergFourVertex_spaceForm_kernel {ε : ℝ}
     (hκ : RealizesConformalMenger ε v κ)
     (hproper : ε < 0 → ∀ i, 1 < κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns hn
-    (constant_or_orderedAdjacentTurns_spaceForm_kernel
-      hε hn v κ hdisk hsimple hconvex hregular hκ hproper)
+  exact constant_or_dahlbergFourVertex_spaceForm_of_dfvSource
+    (spaceFormDiscreteDfvSource_of_source
+      (spaceFormDiscreteSource_iff_modelSources.mpr spaceFormDiscrete_model_sources))
+    hε hn v κ hdisk hsimple hconvex hregular hκ hproper
 
 /-- Uniform nonconstant source theorem for the convex/coherent discrete
 four-vertex package in `S²` (`ε = 1`) and `H²` (`ε = -1`), obtained from the
@@ -532,9 +533,10 @@ theorem dahlbergFourVertex_spaceForm_source {ε : ℝ}
     (hproper : ε < 0 → ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
-    (orderedAdjacentTurns_spaceForm_source
-      hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc)
+  exact dahlbergFourVertex_spaceForm_of_dfvSource
+    (spaceFormDiscreteDfvSource_of_source
+      (spaceFormDiscreteSource_iff_modelSources.mpr spaceFormDiscrete_model_sources))
+    hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
 
 /-- Uniform nonconstant convex/coherent discrete four-vertex theorem in `S²`
 and `H²`, obtained from the nonconstant source package. -/
