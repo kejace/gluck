@@ -275,6 +275,13 @@ theorem smoothFourVertex_H2_nonconstant_of_dfvSource
     hsrc (ε := -1) (Or.inr (Or.inr rfl)) hclosed
     (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
 
+/-- Uniform nonconstant smooth forward four-vertex geometric source gate.
+
+This is the single smooth geometric input for `E²`, `S²`, and `H²`.  The
+model-specific gates below are projections of this uniform statement. -/
+theorem smoothForward_source_gate : SmoothForwardSource := by
+  sorry
+
 /-- Euclidean nonconstant smooth forward four-vertex geometric source gate. -/
 theorem four_vertex_condition_smooth_E2_nonconstant_source_gate
     {γ : ℝ → ℂ} {κ : ℝ → ℝ}
@@ -283,7 +290,8 @@ theorem four_vertex_condition_smooth_E2_nonconstant_source_gate
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     Gluck.FourVertexCondition κ := by
-  sorry
+  exact smoothForward_source_gate (ε := 0) (Or.inl rfl) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
 
 /-- Spherical nonconstant smooth forward four-vertex geometric source gate in
 stereographic coordinates. -/
@@ -294,7 +302,8 @@ theorem four_vertex_condition_smooth_S2_nonconstant_source_gate
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     Gluck.FourVertexCondition κ := by
-  sorry
+  exact smoothForward_source_gate (ε := 1) (Or.inr (Or.inl rfl)) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
 
 /-- Hyperbolic nonconstant smooth forward four-vertex geometric source gate in
 the Poincaré disk. -/
@@ -305,17 +314,16 @@ theorem four_vertex_condition_smooth_H2_nonconstant_source_gate
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     Gluck.FourVertexCondition κ := by
-  sorry
+  exact smoothForward_source_gate (ε := -1) (Or.inr (Or.inr rfl)) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
 
 /-- The current model-specific smooth source package.
 
-This packages the three smooth geometric source gates: the Euclidean classical
-smooth four-vertex theorem, plus its spherical and hyperbolic space-form
-analogues. -/
+This is the model-specific projection of the single uniform smooth source
+gate: the Euclidean classical smooth four-vertex theorem, plus its spherical
+and hyperbolic space-form analogues. -/
 theorem smoothForward_model_sources : SmoothForwardModelSources := by
-  exact ⟨four_vertex_condition_smooth_E2_nonconstant_source_gate,
-    four_vertex_condition_smooth_S2_nonconstant_source_gate,
-    four_vertex_condition_smooth_H2_nonconstant_source_gate⟩
+  exact smoothForwardSource_iff_modelSources.mp smoothForward_source_gate
 
 /-- Uniform nonconstant smooth forward four-vertex geometric source theorem for
 the project space forms `E²`, `S²`, and `H²`.

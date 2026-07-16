@@ -85,9 +85,10 @@ The smooth forward statements for `E²`, `S²`, and `H²` are exposed through
 model-specific wrappers in `Euclidean.lean`, `Sphere.lean`, and
 `Hyperbolic.lean`.  The shared dispatch theorem
 `four_vertex_condition_smooth_spaceForm_kernel` in `Smooth.lean` is proved from
-the single uniform geometric source gate
-`four_vertex_condition_smooth_spaceForm_nonconstant_geometric_source`, through
-the public nonconstant source theorem
+the single uniform source gate `smoothForward_source_gate`, exposed through
+the uniform geometric theorem
+`four_vertex_condition_smooth_spaceForm_nonconstant_geometric_source` and the
+public nonconstant source theorem
 `four_vertex_condition_smooth_spaceForm_nonconstant_source`; the
 model-specific source names
 `four_vertex_condition_smooth_E2_nonconstant_source`,
@@ -96,7 +97,7 @@ model-specific source names
 same uniform geometric input.  The ordinary local-extrema conclusion is exposed uniformly as
 `smoothFourVertex_spaceForm_kernel`, with the nonconstant branch available as
 `smoothFourVertex_spaceForm_nonconstant`; both are derived directly from the
-value-separated smooth source gates.  The
+value-separated smooth source.  The
 discrete forward statements for `S²` and `H²` are also exposed through
 model-specific wrappers in `Sphere.lean` and `Hyperbolic.lean`.  The shared
 dispatch theorem `constant_or_dahlbergFourVertex_spaceForm_kernel` in
@@ -124,9 +125,7 @@ is the weaker package sufficient for final D4VT endpoints.  The fully expanded
 remaining-source audit is:
 
 - `Gluck/Forward/Smooth.lean`
-  - `four_vertex_condition_smooth_E2_nonconstant_source_gate`;
-  - `four_vertex_condition_smooth_S2_nonconstant_source_gate`;
-  - `four_vertex_condition_smooth_H2_nonconstant_source_gate`.
+  - `smoothForward_source_gate`.
 - `Gluck/Forward/SpaceFormDiscrete.lean`
   - `orderedAdjacentTurns_S2_source_gate`;
   - `orderedAdjacentTurns_H2_source_gate`.

@@ -50,12 +50,14 @@ def ForwardModelSources : Prop :=
   SpaceFormDiscreteModelSources ∧
   DahlbergE2GeometricSources
 
-/-- Fully expanded spelling of the remaining forward geometric source package.
+/-- Fully expanded model-specific spelling of the remaining forward geometric
+source package.
 
-This is the audit target with no nested source packages: three smooth source
-gates (`E²`, `S²`, `H²`), two non-Euclidean discrete source gates (`S²`, `H²`),
-and the two Euclidean Dahlberg discrete source gates from the discrete
-four-vertex paper recorded in `references/summary.md` as `23.pdf`. -/
+This is the audit target with no nested source packages: the uniform smooth
+source projected to `E²`, `S²`, and `H²`, two non-Euclidean discrete source
+gates (`S²`, `H²`), and the two Euclidean Dahlberg discrete source gates from
+the discrete four-vertex paper recorded in `references/summary.md` as
+`23.pdf`. -/
 def ForwardAtomicSources : Prop :=
   (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
       Gluck.IsSimpleClosed γ →
@@ -102,10 +104,11 @@ def ForwardAtomicSources : Prop :=
 
 /-- Fully expanded spelling of the weaker final-D4VT source package.
 
-This is the audit target for final D4VT statements: it keeps the same three
-smooth source gates, weakens the two non-Euclidean discrete source gates from
-ordered turns to Dahlberg's four-vertex conclusion, and replaces Dahlberg's
-stronger adjacent-turn source by the theorem-level signed-Menger CDFV source. -/
+This is the audit target for final D4VT statements: it keeps the same uniform
+smooth source projected to the three model-specific endpoints, weakens the two
+non-Euclidean discrete source gates from ordered turns to Dahlberg's
+four-vertex conclusion, and replaces Dahlberg's stronger adjacent-turn source
+by the theorem-level signed-Menger CDFV source. -/
 def ForwardDfvAtomicSources : Prop :=
   (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
       Gluck.IsSimpleClosed γ →
