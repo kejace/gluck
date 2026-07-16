@@ -311,6 +311,39 @@ theorem four_vertex_condition_smooth_H2_model_source_gate
     Gluck.FourVertexCondition κ := by
   sorry
 
+/-- Euclidean nonconstant ordinary smooth four-vertex primitive model source
+gate. -/
+theorem smoothFourVertex_E2_model_source_gate
+    {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  sorry
+
+/-- Spherical nonconstant ordinary smooth four-vertex primitive model source
+gate in stereographic coordinates. -/
+theorem smoothFourVertex_S2_model_source_gate
+    {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes 1 γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  sorry
+
+/-- Hyperbolic nonconstant ordinary smooth four-vertex primitive model source
+gate in the Poincaré disk. -/
+theorem smoothFourVertex_H2_model_source_gate
+    {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes (-1) γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  sorry
+
 /-- Model-specific nonconstant smooth forward four-vertex geometric source
 package, recovered from the individual model source gates. -/
 theorem smoothForward_model_sources_gate : SmoothForwardModelSources := by
@@ -318,19 +351,24 @@ theorem smoothForward_model_sources_gate : SmoothForwardModelSources := by
     four_vertex_condition_smooth_S2_model_source_gate,
     four_vertex_condition_smooth_H2_model_source_gate⟩
 
+/-- Model-specific nonconstant ordinary smooth four-vertex source package,
+recovered from the individual weak model source gates. -/
+theorem smoothForward_dfv_model_sources_gate :
+    SmoothForwardDfvModelSources := by
+  exact ⟨smoothFourVertex_E2_model_source_gate,
+    smoothFourVertex_S2_model_source_gate,
+    smoothFourVertex_H2_model_source_gate⟩
+
 /-- Uniform nonconstant smooth forward four-vertex geometric source gate,
 recovered formally from the model-specific source package. -/
 theorem smoothForward_source_gate : SmoothForwardSource := by
   exact smoothForwardSource_iff_modelSources.mpr smoothForward_model_sources_gate
 
 /-- Weaker uniform nonconstant smooth forward four-vertex source for
-final-D4VT endpoints, recovered from the stronger value-separated source.
-
-This keeps the remaining primitive smooth obligation at
-`smoothForward_source_gate`: ordinary `SmoothFourVertex` follows formally from
-`FourVertexCondition`. -/
+final-D4VT endpoints, recovered from the weak model-specific source gates. -/
 theorem smoothForward_dfv_source_gate : SmoothForwardDfvSource := by
-  exact smoothForwardDfvSource_of_source smoothForward_source_gate
+  exact smoothForwardDfvSource_iff_modelSources.mpr
+    smoothForward_dfv_model_sources_gate
 
 /-- Euclidean nonconstant smooth forward four-vertex geometric source gate. -/
 theorem four_vertex_condition_smooth_E2_nonconstant_source_gate
@@ -367,18 +405,18 @@ theorem four_vertex_condition_smooth_H2_nonconstant_source_gate
   exact four_vertex_condition_smooth_H2_model_source_gate
     hclosed hreal hκ hper hnc
 
-/-- The current model-specific smooth source package.
+/-- The current model-specific smooth value-separated source package.
 
-This is the primitive model-specific smooth source package. -/
+This is the stronger primitive model-specific smooth source package used by
+value-separated `FourVertexCondition` endpoints. -/
 theorem smoothForward_model_sources : SmoothForwardModelSources := by
   exact smoothForward_model_sources_gate
 
 /-- The current weaker final smooth source package.
 
-This is the ordinary D4VT source used by final smooth endpoints; it is exposed
-separately from `smoothForward_source_gate` so final-D4VT audits can depend on
-the weaker `SmoothFourVertex` interface rather than naming the stronger
-value-separated source directly. -/
+This is the ordinary D4VT source used by final smooth endpoints, recovered
+from weak model-specific D4VT gates; value-separated refinements continue to
+use `smoothForward_model_sources` directly. -/
 theorem smoothForward_dfv_source : SmoothForwardDfvSource := by
   exact smoothForward_dfv_source_gate
 
