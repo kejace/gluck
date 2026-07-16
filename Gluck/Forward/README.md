@@ -140,7 +140,8 @@ primitive remaining-source audit is:
   - `orderedAdjacentTurns_S2_model_source_gate`;
   - `orderedAdjacentTurns_H2_model_source_gate`.
 - `Gluck/Forward/Dahlberg.lean`
-  - `dahlbergE2_lemma9_source_gate`;
+  - `dahlbergE2_convex_dfv_signed_source_gate`;
+  - `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
 
 The smooth and non-Euclidean package/uniform gates are no longer primitive:
@@ -149,11 +150,12 @@ smooth model gates, `smoothForward_source_gate` is recovered from that package,
 `spaceFormDiscrete_model_sources_gate` is recovered from the two individual
 non-Euclidean discrete model gates, and `spaceFormDiscrete_source_gate` is
 recovered from that package.  The weak smooth and non-Euclidean final-D4VT
-gates are also recovered formally from those stronger sources.  The split
-strict Dahlberg components
-`dahlbergE2_convex_dfv_signed_source_gate` and
-`dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate` are recovered
-from `dahlbergE2_lemma9_source_gate`.
+gates are also recovered formally from those stronger sources.  Dahlberg's
+strict positive-orientation Lemma 9 source
+`dahlbergE2_lemma9_source_gate` is no longer primitive: it is recovered from
+the theorem-level strict CDFV gate
+`dahlbergE2_convex_dfv_signed_source_gate` and the witness-only Lemma 8 bridge
+`dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`.
 
 The corresponding audit targets are `ForwardRemainingSources`, for the
 stronger ordered-turn route, and `ForwardDfvRemainingSources`, for the final
@@ -174,11 +176,12 @@ strong-to-weak implications.  The grouped component spellings are exposed as
 `dahlbergE2DfvSourceComponents_of_dfvRemainingSources`.  On the E² side,
 `DahlbergE2RemainingSourceComponents` is equivalent to the older bundled
 `DahlbergE2GeometricSources` package, but names the exact current Dahlberg
-interfaces.  Its strict branch is currently gated at Dahlberg's Lemma 9:
-the signed-CDFV and witness-only Lemma 8 source components are recovered
-formally from `dahlbergE2_lemma9_source_gate`.  Its non-strict §4 branch is
-gated at the unit-radius rotated centered normalized successor-interior
-interface
+interfaces.  Its strict branch is split into Dahlberg's theorem-level strict
+CDFV input and the Lemma 8 bridge from CDFV radius witnesses to adjacent
+radius turns.  The final-D4VT route only needs the CDFV input; the stronger
+ordered-turn route additionally needs the Lemma 8 bridge.  Its non-strict §4
+branch is gated at the unit-radius rotated centered normalized
+successor-interior interface
 `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`:
 after cyclic translation, the selected boundary vertex is `0`; after Euclidean
 translation, the minimal disk center is `0`; after Euclidean rotation, the
