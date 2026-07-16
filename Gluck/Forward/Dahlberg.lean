@@ -6378,6 +6378,59 @@ theorem dahlbergDiskReductionSetup_diskBoundaryIndices_nonempty_proper_of_noncon
   exact ⟨O, R, hΔ, hRpos, ⟨i, hi⟩, j,
     not_onDiskBoundaryR2_of_dist_lt hj⟩
 
+/-- If every vertex lies on a positive-radius disk boundary, the polygon is
+concyclic with that disk as witness. -/
+theorem concyclic_of_forall_onDiskBoundaryR2 {n : ℕ} {v : ZMod n → ℂ}
+    {O : ℂ} {R : ℝ} (hRpos : 0 < R)
+    (hall : ∀ i : ZMod n, OnDiskBoundaryR2 v O R i) :
+    Concyclic v := by
+  exact ⟨O, R, hRpos, hall⟩
+
+/-- For a nonconcyclic polygon, no positive-radius disk can have every vertex
+on its boundary. -/
+theorem exists_not_onDiskBoundaryR2_of_not_concyclic {n : ℕ}
+    {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
+    (hRpos : 0 < R) (hnoncircle : ¬ Concyclic v) :
+    ∃ j : ZMod n, ¬ OnDiskBoundaryR2 v O R j := by
+  by_contra hnone
+  have hall : ∀ j : ZMod n, OnDiskBoundaryR2 v O R j := by
+    intro j
+    by_contra hj
+    exact hnone ⟨j, hj⟩
+  exact hnoncircle (concyclic_of_forall_onDiskBoundaryR2 hRpos hall)
+
+/-- The boundary index set of any positive-radius disk witnessing a
+nonconcyclic polygon is not the full cyclic index set. -/
+theorem diskBoundaryIndices_ne_univ_of_not_concyclic {n : ℕ}
+    {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
+    (hRpos : 0 < R) (hnoncircle : ¬ Concyclic v) :
+    DiskBoundaryIndices v O R ≠ Set.univ := by
+  rcases exists_not_onDiskBoundaryR2_of_not_concyclic hRpos hnoncircle with
+    ⟨j, hj⟩
+  intro hE
+  have hjE : j ∈ DiskBoundaryIndices v O R := by
+    simp [hE]
+  exact hj ((mem_diskBoundaryIndices).mp hjE)
+
+/-- In Dahlberg's nonconcyclic §4 branch, the chosen boundary index set `E`
+is nonempty and not all of `ZMod n`. -/
+theorem dahlbergDiskReductionSetup_diskBoundaryIndices_nonempty_ne_univ_of_nonconcyclic
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hnoncircle : ¬ Concyclic v)
+    (hsetup : DahlbergDiskReductionSetup v) :
+    ∃ O R, MinimalEnclosingDiskR2 v O R ∧ 0 < R ∧
+      (DiskBoundaryIndices v O R).Nonempty ∧
+      DiskBoundaryIndices v O R ≠ Set.univ := by
+  rcases dahlbergDiskReductionSetup_diskBoundaryIndices_nonempty_proper_of_nonconcyclic
+      hsimple hnoncircle hsetup with
+    ⟨O, R, hΔ, hRpos, hE, j, hj⟩
+  refine ⟨O, R, hΔ, hRpos, hE, ?_⟩
+  intro htop
+  have hjE : j ∈ DiskBoundaryIndices v O R := by
+    simp [htop]
+  exact hj hjE
+
 /-- Combined finite-disk data for Dahlberg's §4 nonconcyclic branch: a
 positive minimal disk, a boundary vertex realizing the maximal radius, and a
 strictly interior vertex. -/
