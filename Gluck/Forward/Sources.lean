@@ -352,6 +352,17 @@ theorem forwardDfvGeometricSources_of_atomicSources
     ForwardDfvGeometricSources := by
   exact forwardDfvGeometricSources_iff_atomicSources.mpr hsrc
 
+/-- The stronger fully expanded source package implies the weaker final-D4VT
+atomic source package. -/
+theorem forwardDfvAtomicSources_of_atomicSources
+    (hsrc : ForwardAtomicSources) :
+    ForwardDfvAtomicSources := by
+  have hgeo : ForwardGeometricSources :=
+    forwardGeometricSources_of_atomicSources hsrc
+  exact forwardDfvAtomicSources_of_geometricSources
+    ⟨hgeo.1, hgeo.2.1,
+      dahlbergE2DfvGeometricSources_of_geometricSources hgeo.2.2⟩
+
 /-- Extract the smooth source component from a bundled forward source proof. -/
 theorem four_vertex_condition_smooth_spaceForm_nonconstant_of_sources
     (hsrc : ForwardGeometricSources) {ε : ℝ}
