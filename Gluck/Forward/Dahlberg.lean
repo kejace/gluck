@@ -5448,6 +5448,91 @@ for the previous-vertex curvature-radius profile. -/
 def DahlbergE2ConvexDfvRadiusWitnesses {n : ℕ} (v : ZMod n → ℂ) : Prop :=
   DahlbergFourVertex (EdgePrevCircleRadiusProfile v)
 
+/-- Adjacent positive radius turns imply the radius-profile witness form of
+Dahlberg's convex discrete four-vertex theorem.
+
+This is a formal compatibility lemma between the source interface used for
+Lemma 9 and the CDFV witness interface above: the radius turns occur in
+`min-max-min-max` order, so the cyclic conclusion is obtained with the
+corresponding rotated constructor. -/
+theorem dahlbergE2ConvexDfvRadiusWitnesses_of_positiveRadiusOrderedAdjacentTurns
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hturns : PositiveRadiusOrderedAdjacentTurns v) :
+    DahlbergE2ConvexDfvRadiusWitnesses v := by
+  rcases hturns with
+    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
+      hmin₁_left, hmin₁_right, hmax₂_left, hmax₂_right,
+      hmin₃_left, hmin₃_right, hmax₄_left, hmax₄_right⟩
+  have hi₁₂' : i₁ + 1 < i₂ + 1 := Nat.succ_lt_succ hi₁₂
+  have hi₂₃' : i₂ + 1 < i₃ + 1 := Nat.succ_lt_succ hi₂₃
+  have hi₃₄' : i₃ + 1 < i₄ + 1 := Nat.succ_lt_succ hi₃₄
+  have hi₄₁' : i₄ + 1 < (i₁ + 1) + n := by
+    omega
+  have hmin₁_left' :
+      EdgePrevCircleRadiusProfile v ((i₁ + 1 : ℕ) : ZMod n) <
+        EdgePrevCircleRadiusProfile v (((i₁ + 1 : ℕ) : ZMod n) - 1) := by
+    have h :
+        EdgePrevCircleRadiusProfile v ((i₁ : ZMod n) + 1) <
+          EdgePrevCircleRadiusProfile v (i₁ : ZMod n) := by
+      simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+        hsimple horient (i₁ : ZMod n)] using hmin₁_left
+    simpa [sub_eq_add_neg, add_assoc] using h
+  have hmin₁_right' :
+      EdgePrevCircleRadiusProfile v ((i₁ + 1 : ℕ) : ZMod n) <
+        EdgePrevCircleRadiusProfile v (((i₁ + 1 : ℕ) : ZMod n) + 1) := by
+    simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (((i₁ : ZMod n) + 1)), add_assoc] using hmin₁_right
+  have hmax₂_left' :
+      EdgePrevCircleRadiusProfile v (((i₂ + 1 : ℕ) : ZMod n) - 1) <
+        EdgePrevCircleRadiusProfile v ((i₂ + 1 : ℕ) : ZMod n) := by
+    have h :
+        EdgePrevCircleRadiusProfile v (i₂ : ZMod n) <
+          EdgePrevCircleRadiusProfile v ((i₂ : ZMod n) + 1) := by
+      simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+        hsimple horient (i₂ : ZMod n)] using hmax₂_left
+    simpa [sub_eq_add_neg, add_assoc] using h
+  have hmax₂_right' :
+      EdgePrevCircleRadiusProfile v (((i₂ + 1 : ℕ) : ZMod n) + 1) <
+        EdgePrevCircleRadiusProfile v ((i₂ + 1 : ℕ) : ZMod n) := by
+    simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (((i₂ : ZMod n) + 1)), add_assoc] using hmax₂_right
+  have hmin₃_left' :
+      EdgePrevCircleRadiusProfile v ((i₃ + 1 : ℕ) : ZMod n) <
+        EdgePrevCircleRadiusProfile v (((i₃ + 1 : ℕ) : ZMod n) - 1) := by
+    have h :
+        EdgePrevCircleRadiusProfile v ((i₃ : ZMod n) + 1) <
+          EdgePrevCircleRadiusProfile v (i₃ : ZMod n) := by
+      simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+        hsimple horient (i₃ : ZMod n)] using hmin₃_left
+    simpa [sub_eq_add_neg, add_assoc] using h
+  have hmin₃_right' :
+      EdgePrevCircleRadiusProfile v ((i₃ + 1 : ℕ) : ZMod n) <
+        EdgePrevCircleRadiusProfile v (((i₃ + 1 : ℕ) : ZMod n) + 1) := by
+    simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (((i₃ : ZMod n) + 1)), add_assoc] using hmin₃_right
+  have hmax₄_left' :
+      EdgePrevCircleRadiusProfile v (((i₄ + 1 : ℕ) : ZMod n) - 1) <
+        EdgePrevCircleRadiusProfile v ((i₄ + 1 : ℕ) : ZMod n) := by
+    have h :
+        EdgePrevCircleRadiusProfile v (i₄ : ZMod n) <
+          EdgePrevCircleRadiusProfile v ((i₄ : ZMod n) + 1) := by
+      simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+        hsimple horient (i₄ : ZMod n)] using hmax₄_left
+    simpa [sub_eq_add_neg, add_assoc] using h
+  have hmax₄_right' :
+      EdgePrevCircleRadiusProfile v (((i₄ + 1 : ℕ) : ZMod n) + 1) <
+        EdgePrevCircleRadiusProfile v ((i₄ + 1 : ℕ) : ZMod n) := by
+    simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (((i₄ : ZMod n) + 1)), add_assoc] using hmax₄_right
+  exact dahlbergFourVertex_of_strict_neighbors_min_max (two_le_of_four_le hn)
+    hi₁₂' hi₂₃' hi₃₄' hi₄₁'
+    hmin₁_left' hmin₁_right'
+    hmax₂_left' hmax₂_right'
+    hmin₃_left' hmin₃_right'
+    hmax₄_left' hmax₄_right'
+
 /-- Positive radius ordered turns are ordered turns of the reciprocal previous
 radius profile. -/
 theorem orderedAdjacentTurns_inv_edgePrevCircleRadiusProfile_of_positiveRadiusOrderedAdjacentTurns
