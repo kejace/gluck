@@ -7133,6 +7133,27 @@ structure DahlbergE2Theorem6AlternatingDiskCertificate {n : ℕ}
   misses_distinct :
     EdgePrevCurvatureCirclesDistinct v (i₂ : ZMod n) (i₄ : ZMod n)
 
+/-- Forget the formally filled cross-distinctness fields from an ordered-disk
+certificate, leaving the alternating data and same-type distinctness. -/
+def dahlbergE2Theorem6AlternatingDiskCertificate_of_orderedDiskCertificate
+    {n : ℕ} {v : ZMod n → ℂ}
+    (cert : DahlbergE2Theorem6OrderedDiskCertificate v) :
+    DahlbergE2Theorem6AlternatingDiskCertificate v :=
+  { i₁ := cert.i₁
+    i₂ := cert.i₂
+    i₃ := cert.i₃
+    i₄ := cert.i₄
+    i₁_lt_i₂ := cert.i₁_lt_i₂
+    i₂_lt_i₃ := cert.i₂_lt_i₃
+    i₃_lt_i₄ := cert.i₃_lt_i₄
+    i₄_lt_wrap := cert.i₄_lt_wrap
+    contains₁ := cert.contains₁
+    misses₂ := cert.misses₂
+    contains₃ := cert.contains₃
+    misses₄ := cert.misses₄
+    contains_distinct := cert.circle₁_ne₃
+    misses_distinct := cert.circle₂_ne₄ }
+
 /-- Radius-profile local-extremum proof attached to a fixed ordered CDFV disk
 certificate. -/
 structure DahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate {n : ℕ}
@@ -8335,6 +8356,27 @@ theorem dahlbergE2Theorem6OrderedDiskSelectionSource_of_alternatingDiskSelection
   exact ⟨
     dahlbergE2Theorem6OrderedDiskCertificate_of_alternatingDiskCertificate
       hsimple hnoncircle cert⟩
+
+/-- Ordered-disk selection implies alternating-disk selection by forgetting
+the cross-distinctness fields. -/
+theorem dahlbergE2Theorem6AlternatingDiskSelectionSource_of_orderedDiskSelectionSource
+    (hsrc : DahlbergE2Theorem6OrderedDiskSelectionSource) :
+    DahlbergE2Theorem6AlternatingDiskSelectionSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle hcontains hmisses
+  letI : NeZero n := hne
+  rcases hsrc hn hsimple hregular horient hnoncircle hcontains hmisses with
+    ⟨cert⟩
+  exact ⟨dahlbergE2Theorem6AlternatingDiskCertificate_of_orderedDiskCertificate cert⟩
+
+/-- At the selection-source level, alternating and ordered disk certificates
+are formally equivalent; the only nontrivial added fields in the ordered
+certificate are cross distinctness, already proved from nonconcyclicity. -/
+theorem dahlbergE2Theorem6AlternatingDiskSelectionSource_iff_orderedDiskSelectionSource :
+    DahlbergE2Theorem6AlternatingDiskSelectionSource ↔
+      DahlbergE2Theorem6OrderedDiskSelectionSource := by
+  constructor
+  · exact dahlbergE2Theorem6OrderedDiskSelectionSource_of_alternatingDiskSelectionSource
+  · exact dahlbergE2Theorem6AlternatingDiskSelectionSource_of_orderedDiskSelectionSource
 
 /-- Ordered disk selection is enough for the weak geometric assembly source,
 because boundary incidence and the weak radius inequalities have already been
