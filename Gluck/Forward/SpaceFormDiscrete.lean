@@ -155,6 +155,103 @@ theorem spaceFormDiscreteDfvModelSources_of_modelSources
     (spaceFormDiscreteDfvSource_of_source
       (spaceFormDiscreteSource_iff_modelSources.mpr hsrc))
 
+/-- Extract the nonconstant non-Euclidean discrete D4VT conclusion from the
+weaker final-D4VT source package. -/
+theorem dahlbergFourVertex_spaceForm_of_dfvSource
+    (hsrc : SpaceFormDiscreteDfvSource) {ε : ℝ}
+    (hε : ε = 1 ∨ ε = -1) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact hsrc hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
+
+/-- Extract the constant-or non-Euclidean discrete D4VT conclusion from the
+weaker final-D4VT source package. -/
+theorem constant_or_dahlbergFourVertex_spaceForm_of_dfvSource
+    (hsrc : SpaceFormDiscreteDfvSource) {ε : ℝ}
+    (hε : ε = 1 ∨ ε = -1) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  by_cases hconst : ∃ c, ∀ i : ZMod n, κ i = c
+  · exact Or.inl hconst
+  · exact Or.inr
+      (dahlbergFourVertex_spaceForm_of_dfvSource
+        hsrc hε hn v κ hdisk hsimple hconvex hregular hκ hproper hconst)
+
+/-- Spherical nonconstant D4VT conclusion from the weaker final-D4VT source
+package. -/
+theorem dahlbergFourVertex_S2_of_dfvSource
+    (hsrc : SpaceFormDiscreteDfvSource) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_spaceForm_of_dfvSource
+    hsrc (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro hlt; norm_num at hlt) hnc
+
+/-- Spherical constant-or-D4VT conclusion from the weaker final-D4VT source
+package. -/
+theorem constant_or_dahlbergFourVertex_S2_of_dfvSource
+    (hsrc : SpaceFormDiscreteDfvSource) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_spaceForm_of_dfvSource
+    hsrc (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro hlt; norm_num at hlt)
+
+/-- Hyperbolic nonconstant D4VT conclusion from the weaker final-D4VT source
+package. -/
+theorem dahlbergFourVertex_H2_of_dfvSource
+    (hsrc : SpaceFormDiscreteDfvSource) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_spaceForm_of_dfvSource
+    hsrc (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro _; exact hcircle) hnc
+
+/-- Hyperbolic constant-or-D4VT conclusion from the weaker final-D4VT source
+package. -/
+theorem constant_or_dahlbergFourVertex_H2_of_dfvSource
+    (hsrc : SpaceFormDiscreteDfvSource) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_spaceForm_of_dfvSource
+    hsrc (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro _; exact hcircle)
+
 /-- Spherical nonconstant ordered-turn geometric source gate for the
 convex/coherent discrete four-vertex package in an open hemisphere. -/
 theorem orderedAdjacentTurns_S2_source_gate {n : ℕ} [NeZero n]
