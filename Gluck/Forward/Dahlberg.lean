@@ -7482,6 +7482,15 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
+/-- Dahlberg's strict positive-orientation Lemma 9 source.
+
+This is the single strict-branch input from Dahlberg's discrete four-vertex
+paper: the convex CDFV theorem and Lemma 8 nesting combine to give ordered
+adjacent signed-Menger turns.  The theorem-level CDFV source and the Lemma 8
+bridge interfaces below are recovered formally from this gate. -/
+theorem dahlbergE2_lemma9_source_gate : DahlbergE2Lemma9Source := by
+  sorry
+
 /-- Dahlberg's convex/CDFV signed-Menger source, extracted directly from
 Theorem 6/CDFV in Dahlberg's discrete four-vertex paper.
 
@@ -7492,7 +7501,9 @@ needed by the ordered-turn refinement is recovered formally below by reciprocal
 radius monotonicity in the positive-orientation branch. -/
 theorem dahlbergE2_convex_dfv_signed_source :
     DahlbergE2ConvexDfvSignedSource := by
-  sorry
+  exact dahlbergE2ConvexDfvSignedSource_of_radiusSource
+    (dahlbergE2ConvexRadiusSourceComponents_of_lemma9Source
+      dahlbergE2_lemma9_source_gate).1
 
 /-- Dahlberg's convex/CDFV radius-witness source, recovered from the
 theorem-level signed-Menger source by reciprocal-radius monotonicity.
@@ -7514,7 +7525,9 @@ signed-Menger nonconstancy, so no separate nonconstancy hypothesis is included
 in the geometric input. -/
 theorem dahlbergE2_lemma8_radius_turn_bridge_from_witness_source :
     DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource := by
-  sorry
+  exact dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_source
+    (dahlbergE2ConvexRadiusSourceComponents_of_lemma9Source
+      dahlbergE2_lemma9_source_gate).2
 
 /-- Dahlberg's older Lemma 8 bridge source with an explicit nonconstancy
 hypothesis, recovered from the witness-only source. -/
@@ -7543,8 +7556,7 @@ theorem dahlbergE2_convex_radius_source : DahlbergE2ConvexRadiusSource := by
 /-- Dahlberg's Euclidean Lemma 9 signed-Menger source, obtained from the
 radius-level convex source by reciprocal-radius monotonicity. -/
 theorem dahlbergE2_lemma9_source : DahlbergE2Lemma9Source := by
-  exact dahlbergE2_convexRadiusSource_iff_lemma9Source.mp
-    dahlbergE2_convex_radius_source
+  exact dahlbergE2_lemma9_source_gate
 
 /-- Finite source: existence of a least enclosing disk for a cyclic vertex
 set. -/
@@ -7690,9 +7702,10 @@ def DahlbergE2DfvSourceComponents : Prop :=
 /-- The exact `E²` Dahlberg source components still needed for the stronger
 ordered-turn route.
 
-This refines `DahlbergE2GeometricSources` into the three paper-level gates
+This refines `DahlbergE2GeometricSources` into the paper-level interfaces
 which remain after the formal finite-disk and radius/curvature transport
-lemmas have been proved:
+lemmas have been proved.  The first two interfaces are currently recovered from
+the single strict-branch Lemma 9 gate `dahlbergE2_lemma9_source_gate`:
 
 * the strict convex theorem-level signed-Menger CDFV input;
 * Dahlberg's Lemma 8 witness-to-adjacent-radius-turn bridge;
@@ -7794,8 +7807,9 @@ theorem dahlbergE2_disk_auxiliary_max_interior_construction_source :
   exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_boundaryInteriorSource
     dahlbergE2_disk_auxiliary_boundary_interior_construction_source
 
-/-- The exact three remaining `E²` Dahlberg source gates currently used by the
-stronger ordered-turn route. -/
+/-- The exact remaining `E²` Dahlberg source components currently used by the
+stronger ordered-turn route.  The strict signed-CDFV and Lemma 8 components are
+both derived from `dahlbergE2_lemma9_source_gate`. -/
 theorem dahlbergE2_remaining_source_components :
     DahlbergE2RemainingSourceComponents := by
   exact ⟨dahlbergE2_convex_dfv_signed_source,

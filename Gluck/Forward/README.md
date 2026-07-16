@@ -129,8 +129,7 @@ remaining-source audit is:
 - `Gluck/Forward/SpaceFormDiscrete.lean`
   - `spaceFormDiscrete_source_gate`.
 - `Gluck/Forward/Dahlberg.lean`
-  - `dahlbergE2_convex_dfv_signed_source`;
-  - `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source`;
+  - `dahlbergE2_lemma9_source_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_interior_construction_source`.
 
 The corresponding audit targets are `ForwardRemainingSources`, for the
@@ -151,9 +150,11 @@ API.  The grouped component spellings are exposed as
 `spaceFormDiscreteDfvModelSources_of_dfvRemainingSources`, and
 `dahlbergE2DfvSourceComponents_of_dfvRemainingSources`.  On the E² side,
 `DahlbergE2RemainingSourceComponents` is equivalent to the older bundled
-`DahlbergE2GeometricSources` package, but names the exact three current
-Dahlberg gates.  Completing the forward program means replacing those gates by
-formal proofs.  It also exposes source-parametrized kernels such as
+`DahlbergE2GeometricSources` package, but names the exact current Dahlberg
+interfaces.  Its strict signed-CDFV and Lemma 8 interfaces are now derived
+from the single unproved Lemma 9 gate `dahlbergE2_lemma9_source_gate`.
+Completing the forward program means replacing the listed gates by formal
+proofs.  It also exposes source-parametrized kernels such as
 `four_vertex_condition_smooth_spaceForm_kernel_of_sources`,
 `dahlberg_discrete_four_vertex_E2_kernel_of_sources`, and
 `constant_or_dahlbergFourVertex_spaceForm_kernel_of_sources`, together with

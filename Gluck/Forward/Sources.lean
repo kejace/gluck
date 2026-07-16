@@ -265,11 +265,11 @@ def ForwardDfvRemainingSources : Prop :=
 the finite Euclidean disk setup has been proved.
 
 This groups the flattened `ForwardRemainingSources` audit by geometry: smooth
-sources, non-Euclidean discrete ordered-turn sources, and the exact three E²
-Dahlberg gates.  The flattened audit stores the strict-convex component in
+sources, non-Euclidean discrete ordered-turn sources, and the exact E² Dahlberg
+source interfaces.  The flattened audit stores the strict-convex component in
 radius-witness form because the stronger ordered-turn route consumes that
-shape; this component spelling records the actual theorem-level signed-CDFV
-gate together with the formal radius conversion. -/
+shape; this component spelling records the theorem-level signed-CDFV interface
+together with the formal radius conversion. -/
 def ForwardRemainingSourceComponents : Prop :=
   SmoothForwardModelSources ∧
   SpaceFormDiscreteModelSources ∧
@@ -289,7 +289,8 @@ def ForwardDfvRemainingSourceComponents : Prop :=
 /-- Uniform component spelling of the actual remaining source obligations.
 
 This is the non-flattened source surface: the single smooth source, the single
-non-Euclidean ordered-turn source, and the exact three E² Dahlberg gates. -/
+non-Euclidean ordered-turn source, and the exact E² Dahlberg source
+interfaces. -/
 def ForwardUniformRemainingSourceComponents : Prop :=
   SmoothForwardSource ∧
   SpaceFormDiscreteSource ∧
