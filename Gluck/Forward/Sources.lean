@@ -791,6 +791,66 @@ theorem forwardDfvGeometricSources_iff_dfvRemainingSources :
   · exact forwardDfvRemainingSources_of_dfvGeometricSources
   · exact forwardDfvGeometricSources_of_dfvRemainingSources
 
+/-- Convert the flattened primitive source-gate audit to the sharp remaining
+source package. -/
+theorem forwardRemainingSources_of_primitiveRemainingSources
+    (hsrc : ForwardPrimitiveRemainingSources) :
+    ForwardRemainingSources := by
+  exact forwardRemainingSources_iff_primitiveRemainingSources.mpr hsrc
+
+/-- Convert the sharp remaining source package to the flattened primitive
+source-gate audit. -/
+theorem forwardPrimitiveRemainingSources_of_remainingSources
+    (hsrc : ForwardRemainingSources) :
+    ForwardPrimitiveRemainingSources := by
+  exact forwardRemainingSources_iff_primitiveRemainingSources.mp hsrc
+
+/-- Convert the flattened primitive final-D4VT source-gate audit to the sharp
+final-D4VT remaining source package. -/
+theorem forwardDfvRemainingSources_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) :
+    ForwardDfvRemainingSources := by
+  exact forwardDfvRemainingSources_iff_dfvPrimitiveRemainingSources.mpr hsrc
+
+/-- Convert the sharp final-D4VT remaining source package to the flattened
+primitive final-D4VT source-gate audit. -/
+theorem forwardDfvPrimitiveRemainingSources_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources) :
+    ForwardDfvPrimitiveRemainingSources := by
+  exact forwardDfvRemainingSources_iff_dfvPrimitiveRemainingSources.mp hsrc
+
+/-- The flattened primitive source-gate audit implies the bundled forward
+geometric source package. -/
+theorem forwardGeometricSources_of_primitiveRemainingSources
+    (hsrc : ForwardPrimitiveRemainingSources) :
+    ForwardGeometricSources := by
+  exact forwardGeometricSources_of_remainingSources
+    (forwardRemainingSources_of_primitiveRemainingSources hsrc)
+
+/-- The bundled forward geometric source package implies the flattened
+primitive source-gate audit. -/
+theorem forwardPrimitiveRemainingSources_of_geometricSources
+    (hsrc : ForwardGeometricSources) :
+    ForwardPrimitiveRemainingSources := by
+  exact forwardPrimitiveRemainingSources_of_remainingSources
+    (forwardRemainingSources_of_geometricSources hsrc)
+
+/-- The flattened primitive final-D4VT source-gate audit implies the bundled
+final-D4VT geometric source package. -/
+theorem forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) :
+    ForwardDfvGeometricSources := by
+  exact forwardDfvGeometricSources_of_dfvRemainingSources
+    (forwardDfvRemainingSources_of_dfvPrimitiveRemainingSources hsrc)
+
+/-- The bundled final-D4VT geometric source package implies the flattened
+primitive final-D4VT source-gate audit. -/
+theorem forwardDfvPrimitiveRemainingSources_of_dfvGeometricSources
+    (hsrc : ForwardDfvGeometricSources) :
+    ForwardDfvPrimitiveRemainingSources := by
+  exact forwardDfvPrimitiveRemainingSources_of_dfvRemainingSources
+    (forwardDfvRemainingSources_of_dfvGeometricSources hsrc)
+
 /-- Extract the smooth model-source block from the sharp remaining-source
 package. -/
 theorem smoothForwardModelSources_of_remainingSources
