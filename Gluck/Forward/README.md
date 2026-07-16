@@ -102,6 +102,8 @@ target.  It also exposes source-parametrized kernels such as
 `dahlberg_discrete_four_vertex_E2_kernel_of_sources`, and
 `constant_or_dahlbergFourVertex_spaceForm_kernel_of_sources`, together with
 model-specific public shapes such as `four_vertex_E2_of_sources`,
+`dahlberg_discrete_four_vertex_E2_of_sources`,
+`dahlberg_discrete_four_vertex_E2_conformalMenger_zero_strict_of_sources`,
 `four_vertex_S2_of_sources`, `four_vertex_H2_of_sources`,
 `discrete_four_vertex_S2_kernel_of_sources`, and
 `discrete_four_vertex_H2_kernel_of_sources`; for the unified conformal-Menger
