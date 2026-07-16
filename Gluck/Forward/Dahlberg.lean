@@ -8743,6 +8743,57 @@ theorem dahlbergE2Theorem6PaperSources_iff_geometricCdfvSource :
   · exact dahlbergE2Theorem6GeometricCdfvSource_of_paperSources
   · exact dahlbergE2Theorem6PaperSources_of_geometricCdfvSource
 
+/-- Direct §3 assembly source for Dahlberg's Theorem 6 / CDFV.
+
+After Lemma 5 and Lemma 7 have supplied the actual containing and
+interior-missing disk certificates, the remaining §3 argument only has to
+choose an ordered disk certificate and attach the matching plateau-resolution
+data for that chosen certificate.  This avoids the stronger interface which
+upgrades every possible weak certificate. -/
+def DahlbergE2Theorem6OrderedDiskPlateauAssemblySource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ Concyclic v) →
+    DahlbergE2Theorem6ContainingDisksCertificate v →
+    DahlbergE2Theorem6InteriorMissingDisksCertificate v →
+    Nonempty
+      (Σ disk : DahlbergE2Theorem6OrderedDiskCertificate v,
+        DahlbergE2Theorem6PlateauResolutionForOrderedDiskCertificate disk)
+
+/-- Paper-facing §3 Theorem 6 sources with the final assembly stated directly
+as one ordered-disk-plus-plateau certificate. -/
+def DahlbergE2Theorem6OrderedDiskPlateauPaperSources : Prop :=
+  DahlbergE2Theorem6Lemma5ContainingDisksSource ∧
+  DahlbergE2Theorem6Lemma7InteriorMissingDisksSource ∧
+  DahlbergE2Theorem6OrderedDiskPlateauAssemblySource
+
+/-- The direct ordered-disk-plus-plateau §3 package implies Dahlberg's
+geometric CDFV source. -/
+theorem dahlbergE2Theorem6GeometricCdfvSource_of_orderedDiskPlateauPaperSources
+    (hsrc : DahlbergE2Theorem6OrderedDiskPlateauPaperSources) :
+    DahlbergE2Theorem6GeometricCdfvSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle
+  letI : NeZero n := hne
+  rcases hsrc.1 hn hsimple hregular horient hnoncircle with ⟨contains⟩
+  rcases hsrc.2.1 hn hsimple hregular horient hnoncircle with ⟨misses⟩
+  rcases hsrc.2.2 hn hsimple hregular horient hnoncircle contains misses with
+    ⟨⟨disk, hres⟩⟩
+  exact ⟨
+    dahlbergE2Theorem6CdfvCertificate_of_orderedDiskCertificate disk
+      (dahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate_of_plateauResolution
+        hres)⟩
+
+/-- The direct ordered-disk-plus-plateau §3 package implies the older full
+Theorem 6 paper-source package. -/
+theorem dahlbergE2Theorem6PaperSources_of_orderedDiskPlateauPaperSources
+    (hsrc : DahlbergE2Theorem6OrderedDiskPlateauPaperSources) :
+    DahlbergE2Theorem6PaperSources := by
+  exact dahlbergE2Theorem6PaperSources_of_geometricCdfvSource
+    (dahlbergE2Theorem6GeometricCdfvSource_of_orderedDiskPlateauPaperSources
+      hsrc)
+
 /-- A CDFV certificate projects to the radius-profile four-vertex witness
 used by the formal reduction. -/
 theorem dahlbergE2ConvexDfvRadiusWitnesses_of_theorem6Certificate {n : ℕ}
@@ -11365,10 +11416,9 @@ def DahlbergE2PaperTheoremSources : Prop :=
 /-- The actual remaining paper theorem sources after the local part of
 Dahlberg's Lemma 8 has been formalized:
 
-* Theorem 6 / CDFV, sharpened to certificate-level alternating disk
-  arrangement plus explicit plateau-resolution data for the selected weak
-  certificate; cross distinctness, weak/geometric assembly, and
-  local-extremum reconstruction are then formal;
+* Theorem 6 / CDFV, sharpened to direct ordered-disk-plus-plateau assembly
+  from the actual Lemma 5 and Lemma 7 certificates; local-extremum
+  reconstruction is then formal;
 * Lemma 8's witness-only radius-turn bridge, equivalent to the internal
   monotone-arc extraction source;
 * the final §4 normalized unit-disk construction, in the raw existential
@@ -11377,7 +11427,7 @@ Dahlberg's Lemma 8 has been formalized:
 The pointwise edge-region nesting `δ(Q,e) ⊆ δ(P,e)` is supplied by
 `dahlbergE2_lemma8_local_edge_nesting_source`. -/
 def DahlbergE2PaperRemainingTheoremSources : Prop :=
-  DahlbergE2Theorem6SharpOrderedDiskPaperSources ∧
+  DahlbergE2Theorem6OrderedDiskPlateauPaperSources ∧
   DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
   DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
 
@@ -11387,8 +11437,7 @@ theorem dahlbergE2PaperTheoremSources_of_remainingTheoremSources
     (hsrc : DahlbergE2PaperRemainingTheoremSources) :
     DahlbergE2PaperTheoremSources := by
   exact ⟨
-    dahlbergE2Theorem6PaperSources_of_orderedDiskPaperSources
-      (dahlbergE2Theorem6OrderedDiskPaperSources_of_sharpOrderedDiskPaperSources hsrc.1),
+    dahlbergE2Theorem6PaperSources_of_orderedDiskPlateauPaperSources hsrc.1,
     ⟨dahlbergE2_lemma8_local_edge_nesting_source,
       dahlbergE2Lemma8MonotoneArcExtractionSource_of_radiusTurnBridgeFromWitnessSource
         hsrc.2.1⟩,
