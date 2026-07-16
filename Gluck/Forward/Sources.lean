@@ -38,7 +38,7 @@ component: here it uses the paper-faithful final-D4VT package
 for the conformal-Menger ordered-turn refinements. -/
 def ForwardDfvGeometricSources : Prop :=
   SmoothForwardSource ∧
-  SpaceFormDiscreteSource ∧
+  SpaceFormDiscreteDfvSource ∧
   DahlbergE2DfvGeometricSources
 
 /-- Model-specific spelling of the remaining forward geometric source package.
@@ -103,9 +103,9 @@ def ForwardAtomicSources : Prop :=
 /-- Fully expanded spelling of the weaker final-D4VT source package.
 
 This is the audit target for final D4VT statements: it keeps the same three
-smooth source gates and two non-Euclidean discrete ordered-turn source gates,
-but replaces Dahlberg's stronger adjacent-turn source by the theorem-level
-signed-Menger CDFV source. -/
+smooth source gates, weakens the two non-Euclidean discrete source gates from
+ordered turns to Dahlberg's four-vertex conclusion, and replaces Dahlberg's
+stronger adjacent-turn source by the theorem-level signed-Menger CDFV source. -/
 def ForwardDfvAtomicSources : Prop :=
   (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
       Gluck.IsSimpleClosed γ →
@@ -136,7 +136,7 @@ def ForwardDfvAtomicSources : Prop :=
         DahlbergRegular v →
         RealizesConformalMenger 1 v κ →
         (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
-        OrderedAdjacentTurns κ) ∧
+        DahlbergFourVertex κ) ∧
   (∀ {n : ℕ} [NeZero n], 4 ≤ n →
       ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
         (∀ i, ‖v i‖ < 1) →
@@ -146,7 +146,7 @@ def ForwardDfvAtomicSources : Prop :=
         RealizesConformalMenger (-1) v κ →
         (∀ i, 1 < κ i) →
         (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
-        OrderedAdjacentTurns κ) ∧
+        DahlbergFourVertex κ) ∧
   DahlbergE2ConvexDfvSignedSource ∧
   DahlbergE2DiskReductionSource
 
@@ -207,8 +207,9 @@ only for the final D4VT endpoints.
 
 Compared with `ForwardRemainingSources`, the Euclidean strict convex component
 is Dahlberg's CDFV radius-witness source rather than the stronger
-radius-turn/Lemma 8 source package.  This matches the final D4VT route, which
-does not need the ordered-turn refinement. -/
+radius-turn/Lemma 8 source package, and the non-Euclidean discrete components
+ask only for Dahlberg's four-vertex conclusion.  This matches the final D4VT
+route, which does not need the ordered-turn refinement. -/
 def ForwardDfvRemainingSources : Prop :=
   (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
       Gluck.IsSimpleClosed γ →
@@ -239,7 +240,7 @@ def ForwardDfvRemainingSources : Prop :=
         DahlbergRegular v →
         RealizesConformalMenger 1 v κ →
         (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
-        OrderedAdjacentTurns κ) ∧
+        DahlbergFourVertex κ) ∧
   (∀ {n : ℕ} [NeZero n], 4 ≤ n →
       ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
         (∀ i, ‖v i‖ < 1) →
@@ -249,7 +250,7 @@ def ForwardDfvRemainingSources : Prop :=
         RealizesConformalMenger (-1) v κ →
         (∀ i, 1 < κ i) →
         (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
-        OrderedAdjacentTurns κ) ∧
+        DahlbergFourVertex κ) ∧
   DahlbergE2ConvexDfvRadiusSource ∧
   DahlbergE2DiskAuxiliaryConstructionSource
 
@@ -290,13 +291,13 @@ theorem forwardDfvGeometricSources_iff_atomicSources :
   constructor
   · intro hsrc
     have hsmooth := smoothForwardSource_iff_modelSources.mp hsrc.1
-    have hdisc := spaceFormDiscreteSource_iff_modelSources.mp hsrc.2.1
+    have hdisc := spaceFormDiscreteDfvSource_iff_modelSources.mp hsrc.2.1
     exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
       hdisc.1, hdisc.2, hsrc.2.2.1, hsrc.2.2.2⟩
   · intro hsrc
     rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
     exact ⟨smoothForwardSource_iff_modelSources.mpr ⟨hE, hS, hH⟩,
-      spaceFormDiscreteSource_iff_modelSources.mpr ⟨hdS, hdH⟩, ⟨hC, hD⟩⟩
+      spaceFormDiscreteDfvSource_iff_modelSources.mpr ⟨hdS, hdH⟩, ⟨hC, hD⟩⟩
 
 /-- The sharper remaining-source package implies the older fully expanded
 atomic source package. -/
@@ -323,7 +324,7 @@ theorem forwardDfvGeometricSources_of_remainingSources
     ForwardDfvGeometricSources := by
   have hgeo : ForwardGeometricSources :=
     forwardGeometricSources_of_remainingSources hsrc
-  exact ⟨hgeo.1, hgeo.2.1,
+  exact ⟨hgeo.1, spaceFormDiscreteDfvSource_of_source hgeo.2.1,
     dahlbergE2DfvGeometricSources_of_geometricSources hgeo.2.2⟩
 
 /-- The stronger remaining-source package implies the weaker final-D4VT
@@ -332,7 +333,15 @@ theorem forwardDfvRemainingSources_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     ForwardDfvRemainingSources := by
   rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hCDFV, _hL8, hD⟩
-  exact ⟨hE, hS, hH, hdS, hdH, hCDFV, hD⟩
+  refine ⟨hE, hS, hH, ?_, ?_, hCDFV, hD⟩
+  · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hnc
+    letI : NeZero n := hne
+    exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+      (hdS hn v κ hdisk hsimple hconvex hregular hκ hnc)
+  · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
+    letI : NeZero n := hne
+    exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+      (hdH hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc)
 
 /-- The final-D4VT remaining-source package implies the older fully expanded
 final-D4VT atomic source package. -/
@@ -519,7 +528,7 @@ theorem forwardDfvAtomicSources_of_atomicSources
   have hgeo : ForwardGeometricSources :=
     forwardGeometricSources_of_atomicSources hsrc
   exact forwardDfvAtomicSources_of_geometricSources
-    ⟨hgeo.1, hgeo.2.1,
+    ⟨hgeo.1, spaceFormDiscreteDfvSource_of_source hgeo.2.1,
       dahlbergE2DfvGeometricSources_of_geometricSources hgeo.2.2⟩
 
 /-- Extract the smooth source component from a bundled forward source proof. -/
@@ -567,7 +576,7 @@ package. -/
 theorem forwardDfvGeometricSources_of_geometricSources
     (hsrc : ForwardGeometricSources) :
     ForwardDfvGeometricSources := by
-  exact ⟨hsrc.1, hsrc.2.1,
+  exact ⟨hsrc.1, spaceFormDiscreteDfvSource_of_source hsrc.2.1,
     dahlbergE2DfvGeometricSources_of_geometricSources hsrc.2.2⟩
 
 /-- The source-parametrized positive-orientation E² Dahlberg ordered-turn
@@ -2265,12 +2274,14 @@ theorem forward_dfv_remaining_sources : ForwardDfvRemainingSources := by
       hclosed hreal hκ hper hnc
   · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hnc
     letI : NeZero n := hne
-    exact orderedAdjacentTurns_S2_geometric_source
-      hn v κ hdisk hsimple hconvex hregular hκ hnc
+    exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+      (orderedAdjacentTurns_S2_geometric_source
+        hn v κ hdisk hsimple hconvex hregular hκ hnc)
   · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
     letI : NeZero n := hne
-    exact orderedAdjacentTurns_H2_geometric_source
-      hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
+    exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+      (orderedAdjacentTurns_H2_geometric_source
+        hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc)
 
 /-- Weaker final-D4VT spelling of `forward_geometric_sources`. -/
 theorem forward_dfv_geometric_sources : ForwardDfvGeometricSources := by

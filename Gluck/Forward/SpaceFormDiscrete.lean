@@ -29,6 +29,24 @@ def SpaceFormDiscreteSource : Prop :=
         (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
         OrderedAdjacentTurns κ
 
+/-- Weaker final-D4VT source statement for the convex/coherent
+conformal-Menger package in `S²` (`ε = 1`) and `H²` (`ε = -1`).
+
+Unlike `SpaceFormDiscreteSource`, this only asks for Dahlberg's four-vertex
+conclusion, not the stronger ordered-turn refinement. -/
+def SpaceFormDiscreteDfvSource : Prop :=
+  ∀ {ε : ℝ}, ε = 1 ∨ ε = -1 →
+    ∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger ε v κ →
+        (ε < 0 → ∀ i, 1 < κ i) →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        DahlbergFourVertex κ
+
 /-- Model-specific nonconstant ordered-turn source statements for the
 convex/coherent conformal-Menger discrete four-vertex package in `S²` and `H²`.
 The hyperbolic component includes the proper-circle condition `κᵢ > 1`. -/
@@ -53,6 +71,29 @@ def SpaceFormDiscreteModelSources : Prop :=
         (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
         OrderedAdjacentTurns κ)
 
+/-- Model-specific spelling of the weaker final-D4VT non-Euclidean discrete
+source package. -/
+def SpaceFormDiscreteDfvModelSources : Prop :=
+  (∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger 1 v κ →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        DahlbergFourVertex κ) ∧
+  (∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger (-1) v κ →
+        (∀ i, 1 < κ i) →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        DahlbergFourVertex κ)
+
 /-- The uniform `ε ∈ {1,-1}` source is equivalent to the pair of model-specific
 `S²` and `H²` sources. -/
 theorem spaceFormDiscreteSource_iff_modelSources :
@@ -73,6 +114,46 @@ theorem spaceFormDiscreteSource_iff_modelSources :
     · subst ε
       exact hsrc.2 hn v κ hdisk hsimple hconvex hregular hκ
         (hproper (by norm_num)) hnc
+
+/-- The weaker uniform final-D4VT source is equivalent to the pair of
+model-specific final-D4VT sources. -/
+theorem spaceFormDiscreteDfvSource_iff_modelSources :
+    SpaceFormDiscreteDfvSource ↔ SpaceFormDiscreteDfvModelSources := by
+  constructor
+  · intro hsrc
+    constructor
+    · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hnc
+      exact hsrc (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
+        (by intro hlt; norm_num at hlt) hnc
+    · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
+      exact hsrc (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
+        (by intro _; exact hcircle) hnc
+  · intro hsrc ε hε n hne hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
+    rcases hε with hS | hH
+    · subst ε
+      exact hsrc.1 hn v κ hdisk hsimple hconvex hregular hκ hnc
+    · subst ε
+      exact hsrc.2 hn v κ hdisk hsimple hconvex hregular hκ
+        (hproper (by norm_num)) hnc
+
+/-- The ordered-turn source package implies the weaker final-D4VT source
+package. -/
+theorem spaceFormDiscreteDfvSource_of_source
+    (hsrc : SpaceFormDiscreteSource) :
+    SpaceFormDiscreteDfvSource := by
+  intro ε hε n hne hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
+  letI : NeZero n := hne
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (hsrc hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc)
+
+/-- The ordered-turn model-source package implies the weaker final-D4VT
+model-source package. -/
+theorem spaceFormDiscreteDfvModelSources_of_modelSources
+    (hsrc : SpaceFormDiscreteModelSources) :
+    SpaceFormDiscreteDfvModelSources := by
+  exact spaceFormDiscreteDfvSource_iff_modelSources.mp
+    (spaceFormDiscreteDfvSource_of_source
+      (spaceFormDiscreteSource_iff_modelSources.mpr hsrc))
 
 /-- Spherical nonconstant ordered-turn geometric source gate for the
 convex/coherent discrete four-vertex package in an open hemisphere. -/
