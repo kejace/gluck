@@ -85,6 +85,17 @@ theorem directIsometryR2_inverse_center {u : ℂ} (hu : ‖u‖ = 1) (w O' : ℂ
   rw [← mul_assoc, mul_inv_cancel₀ hu0, one_mul]
   ring
 
+/-- The inverse direct isometry undoes a direct Euclidean isometry. -/
+theorem directIsometryR2_inverse_apply {u : ℂ} (hu : ‖u‖ = 1) (w z : ℂ) :
+    directIsometryR2 u⁻¹ (-(u⁻¹ * w)) (directIsometryR2 u w z) = z := by
+  have hu0 : u ≠ 0 := by
+    intro hzero
+    rw [hzero, norm_zero] at hu
+    norm_num at hu
+  unfold directIsometryR2
+  rw [mul_add, ← mul_assoc, inv_mul_cancel₀ hu0, one_mul]
+  ring
+
 /-- Direct Euclidean isometries preserve minimal enclosing disks. -/
 theorem minimalEnclosingDiskR2_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
     (w O : ℂ) (R : ℝ) (v : ZMod n → ℂ) :
@@ -584,6 +595,35 @@ theorem dahlbergRegular_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
   intro i
   exact dahlbergRegularAt_directIsometry hu w (v (i - 1)) (v i) (v (i + 1))
     (hregular i)
+
+/-- Direct Euclidean isometries preserve Dahlberg local regularity exactly. -/
+theorem dahlbergRegularAt_directIsometry_iff {u : ℂ} (hu : ‖u‖ = 1)
+    (w A B C : ℂ) :
+    DahlbergRegularAt (directIsometryR2 u w A) (directIsometryR2 u w B)
+        (directIsometryR2 u w C) ↔
+      DahlbergRegularAt A B C := by
+  constructor
+  · intro hregular
+    have huinv : ‖u⁻¹‖ = 1 := by
+      rw [norm_inv, hu, inv_one]
+    have hpre :=
+      dahlbergRegularAt_directIsometry (u := u⁻¹) huinv (-(u⁻¹ * w))
+        (directIsometryR2 u w A) (directIsometryR2 u w B)
+        (directIsometryR2 u w C) hregular
+    simpa [directIsometryR2_inverse_apply hu w] using hpre
+  · exact dahlbergRegularAt_directIsometry hu w A B C
+
+/-- Direct Euclidean isometries preserve Dahlberg regularity of cyclic
+polygons exactly. -/
+theorem dahlbergRegular_directIsometry_iff {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
+    (w : ℂ) (v : ZMod n → ℂ) :
+    DahlbergRegular (fun i => directIsometryR2 u w (v i)) ↔
+      DahlbergRegular v := by
+  constructor
+  · intro hregular i
+    exact (dahlbergRegularAt_directIsometry_iff hu w (v (i - 1)) (v i) (v (i + 1))).mp
+      (hregular i)
+  · exact dahlbergRegular_directIsometry hu w v
 
 /-- Image of a planar region under a direct Euclidean isometry. -/
 def directIsometryImage (u w : ℂ) (S : Set ℂ) : Set ℂ :=
