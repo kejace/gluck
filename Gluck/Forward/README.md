@@ -94,7 +94,7 @@ The remaining primitive source gates in the current worktree are exactly:
 - `Gluck/Forward/Dahlberg.lean`
   - `dahlbergE2_convex_dfv_radius_nonconcyclic_primitive_source_gate`;
   - `dahlbergE2_lemma8_strict_previous_radius_turns_primitive_gate`;
-  - `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
+  - `dahlbergE2_disk_auxiliary_boundary_successor_unit_auxiliary_polygon_source_gate`.
 
 The public smooth value-separated gate
 `four_vertex_condition_smooth_E2_source_gate` is now recovered formally from
@@ -131,11 +131,13 @@ public E² D4VT endpoints route through
 
 The non-strict §4 branch is now gated at the unit-radius rotated centered
 normalized successor-interior interface
-`dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
-The auxiliary polygon produced by this gate is also exposed as the typed
-structure `DahlbergAuxiliaryPolygon`, which is formally equivalent to the older
-existential `DahlbergDiskAuxiliaryReduction` package and is the target shape for
-formalizing Dahlberg's polygonal approximation/transfer argument.
+`dahlbergE2_disk_auxiliary_boundary_successor_unit_auxiliary_polygon_source_gate`,
+which returns the typed structure `DahlbergAuxiliaryPolygon`.  This structure
+is formally equivalent to the older existential `DahlbergDiskAuxiliaryReduction`
+package and is the target shape for formalizing Dahlberg's polygonal
+approximation/transfer argument.  The older unit construction gate
+`dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate` is
+recovered from the typed source.
 The broad theorem-facing disk-reduction source
 `dahlbergE2_disk_reduction_geometric_source_gate` is recovered formally from
 it.  The reverse normalization chain is also formalized: cyclic translation,

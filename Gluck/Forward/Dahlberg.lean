@@ -8758,6 +8758,33 @@ def DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource : Prop :=
     dist 0 (v 1) < 1 →
     DahlbergDiskAuxiliaryReduction v
 
+/-- Typed unit-radius rotated centered normalized source for Dahlberg's §4
+auxiliary construction.
+
+This is the same final normalized geometric construction as
+`DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource`, but it
+returns the named auxiliary-polygon package rather than the older existential
+reduction. -/
+def DahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    MinimalEnclosingDiskR2 v 0 1 →
+    v 0 = 1 →
+    dist 0 (v 1) < 1 →
+    Nonempty (DahlbergAuxiliaryPolygon v)
+
+/-- The typed unit source implies the older raw existential unit source. -/
+theorem dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_auxiliaryPolygonSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource) :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext
+  letI : NeZero n := hne
+  rcases hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext with ⟨aux⟩
+  exact dahlbergDiskAuxiliaryReduction_of_auxiliaryPolygon aux
+
 /-- Pair-level source for Dahlberg's §4 auxiliary construction.
 
 This is sharper than `DahlbergE2DiskAuxiliaryBoundaryConstructionSource`: the
@@ -10591,23 +10618,30 @@ theorem dahlbergE2PrimitiveRemainingSourceComponents_directIsometry
   exact dahlbergE2DfvPrimitiveSourceComponents_directIsometry
     ⟨hsrc.1, hsrc.2.2⟩ hu a hn hsimple hregular hnoncircle
 
-/-- Dahlberg's unit-radius rotated centered normalized successor-interior
-auxiliary-polygon construction/transfer source gate for the §4 non-strict disk
-reduction.
+/-- Dahlberg's unit-radius rotated centered normalized successor-interior typed
+auxiliary-polygon source gate for the §4 non-strict disk reduction.
 
 This is the primitive remaining §4 paper input in its normalized geometric
 spelling: after translating, rotating, and scaling the minimal enclosing disk,
 we may assume the selected boundary vertex is `1 : ℂ` on the unit disk and its
-successor lies in the disk interior.  Dahlberg's construction then produces an
-auxiliary strict-orientation polygon whose four-vertex conclusion transfers
-back.
+successor lies in the disk interior.  Dahlberg's construction then produces the
+typed auxiliary strict-orientation polygon whose four-vertex conclusion
+transfers back.
 
 Reference source: Dahlberg, *A Discrete Four Vertex Theorem*,
 `references/23.pdf`, §4 proof of Theorem 1, especially the minimal-disk
 boundary reduction following Lemma 10. -/
+theorem dahlbergE2_disk_auxiliary_boundary_successor_unit_auxiliary_polygon_source_gate :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource := by
+  sorry
+
+/-- Dahlberg's unit-radius rotated centered normalized successor-interior
+auxiliary-polygon construction/transfer source gate for the §4 non-strict disk
+reduction, recovered from the typed auxiliary-polygon source. -/
 theorem dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate :
     DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource := by
-  sorry
+  exact dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_auxiliaryPolygonSource
+    dahlbergE2_disk_auxiliary_boundary_successor_unit_auxiliary_polygon_source_gate
 
 /-- Dahlberg's broad non-strict §4 disk-reduction source gate, recovered from
 the normalized unit-disk successor construction interface.
