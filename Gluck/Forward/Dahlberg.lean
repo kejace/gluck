@@ -5668,6 +5668,22 @@ def DahlbergDiskAuxiliaryReduction {n : ℕ} [NeZero n] (v : ZMod n → ℂ) : P
     (DahlbergFourVertex (SignedMengerProfile w) →
       DahlbergFourVertex (SignedMengerProfile v))
 
+/-- Dahlberg's convex-radius input for the positive-orientation branch.
+
+This is the radius-level extraction from Lemma 8 plus the convex discrete
+four-vertex theorem (Theorem 6) in Dahlberg's paper.  It says that the
+nonconstant strictly convex branch supplies four cyclically ordered adjacent
+radius turns.  The conversion from these radius turns to signed-Menger turns is
+formalized below, so this is the smaller Euclidean geometric source gate for
+Lemma 9. -/
+def DahlbergE2ConvexRadiusSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) →
+    PositiveRadiusOrderedAdjacentTurns v
+
 /-- Dahlberg's strictly convex same-orientation Lemma 9 extraction: under
 positive orientation and nonconstant signed-Menger profile, the profile has
 four cyclically ordered adjacent signed-Menger turns. -/
@@ -5693,18 +5709,27 @@ def DahlbergE2DiskReductionSource : Prop :=
 /-- The genuinely Euclidean geometric inputs in Dahlberg's discrete
 four-vertex proof.
 
-The first component is the strictly convex same-orientation Lemma 9 extraction
-of four ordered signed-Menger turns.  The second component is the non-strict
-§4 disk-reduction construction of an auxiliary strict-orientation polygon.
-All other declarations in this section are formal reductions from these two
-geometric statements plus the already-proved cyclic/order infrastructure. -/
+The first component is the strictly convex same-orientation radius-turn
+extraction from Lemma 8 plus the convex discrete four-vertex theorem
+(Theorem 6).  The second component is the non-strict §4 disk-reduction
+construction of an auxiliary strict-orientation polygon.  All other
+declarations in this section are formal reductions from these two geometric
+statements plus the already-proved cyclic/order infrastructure. -/
 def DahlbergE2GeometricSources : Prop :=
-  DahlbergE2Lemma9Source ∧ DahlbergE2DiskReductionSource
+  DahlbergE2ConvexRadiusSource ∧ DahlbergE2DiskReductionSource
 
-/-- Dahlberg's Euclidean Lemma 9 geometric source for the discrete
-four-vertex paper. -/
-theorem dahlbergE2_lemma9_source : DahlbergE2Lemma9Source := by
+/-- Dahlberg's convex-radius Euclidean source for the positive-orientation
+branch of the discrete four-vertex paper. -/
+theorem dahlbergE2_convex_radius_source : DahlbergE2ConvexRadiusSource := by
   sorry
+
+/-- Dahlberg's Euclidean Lemma 9 signed-Menger source, obtained from the
+radius-level convex source by reciprocal-radius monotonicity. -/
+theorem dahlbergE2_lemma9_source : DahlbergE2Lemma9Source := by
+  intro n hne hn v hsimple hregular horient hnc
+  exact orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
+    hsimple horient
+    (dahlbergE2_convex_radius_source hn hsimple hregular horient hnc)
 
 /-- Dahlberg's Euclidean non-strict §4 disk-reduction geometric source for the
 discrete four-vertex paper. -/
@@ -5718,7 +5743,7 @@ This is the only remaining E² geometric import in the formal chain: Lemma 9
 for the strict same-orientation branch, together with the final §4 disk
 reduction for the non-strict branch. -/
 theorem dahlbergE2_geometric_sources : DahlbergE2GeometricSources := by
-  exact ⟨dahlbergE2_lemma9_source, dahlbergE2_disk_reduction_source⟩
+  exact ⟨dahlbergE2_convex_radius_source, dahlbergE2_disk_reduction_source⟩
 
 /-- Ordered-turn extraction in Dahlberg's positively oriented strictly-convex
 case with nonconstant signed-Menger profile.  This is the geometric content of
@@ -5732,7 +5757,7 @@ theorem orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_geometri
     (horient : PositivePolygonOrientation v)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
     OrderedAdjacentTurns (SignedMengerProfile v) := by
-  exact dahlbergE2_geometric_sources.1 hn hsimple hregular horient hnc
+  exact dahlbergE2_lemma9_source hn hsimple hregular horient hnc
 
 /-- Radius-level spelling of Dahlberg's positively oriented strictly-convex
 case with nonconstant signed-Menger profile.  The geometric input is the

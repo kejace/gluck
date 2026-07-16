@@ -87,8 +87,10 @@ theorem orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_of_sourc
     (horient : PositivePolygonOrientation v)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
     OrderedAdjacentTurns (SignedMengerProfile v) := by
-  exact (dahlbergE2_geometric_sources_of_sources hsrc).1
-    hn hsimple hregular horient hnc
+  exact orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
+    hsimple horient
+    ((dahlbergE2_geometric_sources_of_sources hsrc).1
+      hn hsimple hregular horient hnc)
 
 /-- The source-parametrized positive-orientation E² Dahlberg conclusion. -/
 theorem signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyclic_of_sources
