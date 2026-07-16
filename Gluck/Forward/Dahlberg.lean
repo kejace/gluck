@@ -2697,6 +2697,138 @@ theorem isSimplePolygon_reverseCyclicPolygon {n : ℕ} {v : ZMod n → ℂ}
     convert hsimple.2.2 (-(i + 1)) (-(j + 1)) hIJ hIJs hJIs using 1
     abel_nf
 
+/-- Cyclic translation of a polygon's index origin. -/
+def TranslateCyclicPolygon {n : ℕ} (v : ZMod n → ℂ) (a : ZMod n) :
+    ZMod n → ℂ :=
+  fun i => v (i + a)
+
+/-- Signed Menger curvature is translated with the cyclic index origin. -/
+theorem SignedMengerProfile_translateCyclicPolygon {n : ℕ} (v : ZMod n → ℂ)
+    (a i : ZMod n) :
+    SignedMengerProfile (TranslateCyclicPolygon v a) i =
+      SignedMengerProfile v (i + a) := by
+  simp [SignedMengerProfile, TranslateCyclicPolygon, sub_eq_add_neg, add_assoc,
+    add_comm]
+
+/-- Cyclic translation preserves a chosen minimal enclosing disk exactly. -/
+theorem minimalEnclosingDiskR2_translateCyclicPolygon_iff {n : ℕ}
+    {v : ZMod n → ℂ} {a : ZMod n} {O : ℂ} {R : ℝ} :
+    MinimalEnclosingDiskR2 (TranslateCyclicPolygon v a) O R ↔
+      MinimalEnclosingDiskR2 v O R := by
+  constructor
+  · intro hΔ
+    refine ⟨hΔ.1, ?_, ?_⟩
+    · intro i
+      simpa [TranslateCyclicPolygon] using hΔ.2.1 (i - a)
+    · intro O' R' hR' hcontains
+      exact hΔ.2.2 O' R' hR' (fun i => by
+        simpa [TranslateCyclicPolygon] using hcontains (i + a))
+  · intro hΔ
+    refine ⟨hΔ.1, ?_, ?_⟩
+    · intro i
+      exact hΔ.2.1 (i + a)
+    · intro O' R' hR' hcontains
+      exact hΔ.2.2 O' R' hR' (fun i => by
+        simpa [TranslateCyclicPolygon] using hcontains (i - a))
+
+/-- Cyclic translation preserves simplicity. -/
+theorem isSimplePolygon_translateCyclicPolygon {n : ℕ} {v : ZMod n → ℂ}
+    (a : ZMod n) (hsimple : Gluck.Discrete.IsSimplePolygon v) :
+    Gluck.Discrete.IsSimplePolygon (TranslateCyclicPolygon v a) := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro i
+    convert hsimple.1 (i + a) using 1
+    all_goals simp [TranslateCyclicPolygon]
+    all_goals abel_nf
+  · intro i
+    convert hsimple.2.1 (i + a) using 1
+    all_goals simp [TranslateCyclicPolygon]
+    all_goals abel_nf
+  · intro i j hij hij_next hji_next
+    have hij' : i + a ≠ j + a := by
+      intro h
+      apply hij
+      exact add_right_cancel h
+    have hij_next' : i + a + 1 ≠ j + a := by
+      intro h
+      apply hij_next
+      have h' := congrArg (fun x : ZMod n => x - a) h
+      convert h' using 1
+      all_goals abel_nf
+    have hji_next' : j + a + 1 ≠ i + a := by
+      intro h
+      apply hji_next
+      have h' := congrArg (fun x : ZMod n => x - a) h
+      convert h' using 1
+      all_goals abel_nf
+    convert hsimple.2.2 (i + a) (j + a) hij' hij_next' hji_next' using 1
+    all_goals simp [TranslateCyclicPolygon]
+    all_goals abel_nf
+
+/-- Cyclic translation preserves positive orientation. -/
+theorem positivePolygonOrientation_translateCyclicPolygon {n : ℕ}
+    {v : ZMod n → ℂ} (a : ZMod n)
+    (horient : PositivePolygonOrientation v) :
+    PositivePolygonOrientation (TranslateCyclicPolygon v a) := by
+  intro i
+  convert horient (i + a) using 1
+  all_goals simp [TranslateCyclicPolygon]
+  all_goals abel_nf
+
+/-- Cyclic translation preserves negative orientation. -/
+theorem negativePolygonOrientation_translateCyclicPolygon {n : ℕ}
+    {v : ZMod n → ℂ} (a : ZMod n)
+    (horient : NegativePolygonOrientation v) :
+    NegativePolygonOrientation (TranslateCyclicPolygon v a) := by
+  intro i
+  convert horient (i + a) using 1
+  all_goals simp [TranslateCyclicPolygon]
+  all_goals abel_nf
+
+/-- Non-strict global orientation is invariant under cyclic translation. -/
+theorem not_strictPolygonOrientation_translateCyclicPolygon {n : ℕ}
+    {v : ZMod n → ℂ} (a : ZMod n)
+    (hnonstrict : ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) :
+    ¬ (PositivePolygonOrientation (TranslateCyclicPolygon v a) ∨
+      NegativePolygonOrientation (TranslateCyclicPolygon v a)) := by
+  intro horient
+  rcases horient with hpos | hneg
+  · apply hnonstrict
+    left
+    intro i
+    convert hpos (i - a) using 1
+    all_goals simp [TranslateCyclicPolygon]
+    all_goals abel_nf
+  · apply hnonstrict
+    right
+    intro i
+    convert hneg (i - a) using 1
+    all_goals simp [TranslateCyclicPolygon]
+    all_goals abel_nf
+
+/-- Cyclic translation preserves Dahlberg regularity. -/
+theorem dahlbergRegular_translateCyclicPolygon {n : ℕ} {v : ZMod n → ℂ}
+    (a : ZMod n) (hregular : DahlbergRegular v) :
+    DahlbergRegular (TranslateCyclicPolygon v a) := by
+  intro i
+  convert hregular (i + a) using 1
+  all_goals simp [TranslateCyclicPolygon, sub_eq_add_neg]
+  all_goals abel_nf
+
+/-- Cyclic translation preserves concyclicity. -/
+theorem concyclic_translateCyclicPolygon_iff {n : ℕ} {v : ZMod n → ℂ}
+    {a : ZMod n} :
+    Concyclic (TranslateCyclicPolygon v a) ↔ Concyclic v := by
+  constructor
+  · intro hcyc
+    rcases hcyc with ⟨O, R, hR, hdist⟩
+    exact ⟨O, R, hR, fun i => by
+      simpa [TranslateCyclicPolygon] using hdist (i - a)⟩
+  · intro hcyc
+    rcases hcyc with ⟨O, R, hR, hdist⟩
+    exact ⟨O, R, hR, fun i => by
+      simpa [TranslateCyclicPolygon] using hdist (i + a)⟩
+
 /-- Reversing cyclic order preserves a chosen minimal enclosing disk exactly. -/
 theorem minimalEnclosingDiskR2_reverseCyclicPolygon_iff {n : ℕ}
     {v : ZMod n → ℂ} {O : ℂ} {R : ℝ} :
@@ -6326,6 +6458,25 @@ theorem dahlbergDiskAuxiliaryReduction_of_reverseCyclicPolygon {n : ℕ} [NeZero
       ext i
       exact (SignedMengerProfile_reverseCyclicPolygon v i).symm)⟩
 
+/-- If a cyclic translate of a polygon has Dahlberg's auxiliary-reduction
+package, then so does the original polygon. -/
+theorem dahlbergDiskAuxiliaryReduction_of_translateCyclicPolygon {n : ℕ}
+    [NeZero n] {v : ZMod n → ℂ} {a : ZMod n}
+    (haux : DahlbergDiskAuxiliaryReduction (TranslateCyclicPolygon v a)) :
+    DahlbergDiskAuxiliaryReduction v := by
+  rcases haux with
+    ⟨m, hne, w, hm, hsimple, hregular, horient, hnoncircle, htransfer⟩
+  exact ⟨m, hne, w, hm, hsimple, hregular, horient, hnoncircle, fun hfv => by
+    have htrans : DahlbergFourVertex
+        (SignedMengerProfile (TranslateCyclicPolygon v a)) :=
+      htransfer hfv
+    have hshift : DahlbergFourVertex (fun i => SignedMengerProfile v (i + a)) := by
+      convert htrans using 1
+      ext i
+      exact (SignedMengerProfile_translateCyclicPolygon v a i).symm
+    exact (dahlbergFourVertex_translateIndex_iff (κ := SignedMengerProfile v)
+      (a := a)).mp hshift⟩
+
 /-- Eliminate Dahlberg's auxiliary-reduction package using any strict
 oriented nonconcyclic auxiliary-polygon D4VT source. -/
 theorem dahlbergFourVertex_of_dahlbergDiskAuxiliaryReduction {n : ℕ} [NeZero n]
@@ -7306,6 +7457,24 @@ def DahlbergE2DiskAuxiliaryBoundarySuccessorMetricConstructionSource : Prop :=
         dist O (v (i + 1)) < R →
         DahlbergDiskAuxiliaryReduction v
 
+/-- Normalized one-sided source for Dahlberg's §4 auxiliary construction.
+
+After cyclic translation of the vertex indices, the selected boundary vertex
+may be assumed to be `0`; the successor-interior hypothesis then concerns
+vertex `1`. -/
+def DahlbergE2DiskAuxiliaryBoundarySuccessorNormalizedConstructionSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    ∀ {O : ℂ} {R : ℝ},
+      MinimalEnclosingDiskR2 v O R →
+      0 < R →
+      OnDiskBoundaryR2 v O R 0 →
+      dist O (v 1) < R →
+      DahlbergDiskAuxiliaryReduction v
+
 /-- Pair-level source for Dahlberg's §4 auxiliary construction.
 
 This is sharper than `DahlbergE2DiskAuxiliaryBoundaryConstructionSource`: the
@@ -7667,6 +7836,38 @@ theorem dahlbergE2DiskAuxiliaryBoundaryMetricNeighborConstructionSource_of_succe
     exact dahlbergDiskAuxiliaryReduction_of_reverseCyclicPolygon
       (hsrc hn hsimple' hregular' hnoncircle' hnonstrict' hΔ' hRpos
         hboundary' hnext')
+
+/-- The normalized successor-interior §4 source implies the arbitrary
+successor-interior source by translating the cyclic index origin to the
+selected boundary vertex. -/
+theorem dahlbergE2DiskAuxiliaryBoundarySuccessorMetricConstructionSource_of_normalizedSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundarySuccessorNormalizedConstructionSource) :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorMetricConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict O R hΔ hRpos i hboundary hnext
+  letI : NeZero n := hne
+  let w : ZMod n → ℂ := TranslateCyclicPolygon v i
+  have hsimple' : Gluck.Discrete.IsSimplePolygon w :=
+    isSimplePolygon_translateCyclicPolygon i hsimple
+  have hregular' : DahlbergRegular w :=
+    dahlbergRegular_translateCyclicPolygon i hregular
+  have hnoncircle' : ¬ Concyclic w := by
+    intro hcyc
+    exact hnoncircle (concyclic_translateCyclicPolygon_iff.mp hcyc)
+  have hnonstrict' :
+      ¬ (PositivePolygonOrientation w ∨ NegativePolygonOrientation w) :=
+    not_strictPolygonOrientation_translateCyclicPolygon i hnonstrict
+  have hΔ' : MinimalEnclosingDiskR2 w O R :=
+    (minimalEnclosingDiskR2_translateCyclicPolygon_iff).mpr hΔ
+  have hboundary' : OnDiskBoundaryR2 w O R 0 := by
+    simpa [OnDiskBoundaryR2, w, TranslateCyclicPolygon] using hboundary
+  have hnext' : dist O (w 1) < R := by
+    convert hnext using 2
+    simp [w, TranslateCyclicPolygon]
+    abel_nf
+  exact dahlbergDiskAuxiliaryReduction_of_translateCyclicPolygon
+    (a := i)
+    (hsrc hn hsimple' hregular' hnoncircle' hnonstrict' hΔ' hRpos
+      hboundary' hnext')
 
 /-- A metric boundary-neighbor §4 source implies the setup-level auxiliary
 construction source directly, using the proved minimal-disk selection of a
@@ -8326,18 +8527,27 @@ theorem dahlbergE2RemainingSourceComponents_directIsometry
     (dahlbergE2DfvSourceComponents_of_remainingComponents hsrc)
     hu a hn hsimple hregular hnoncircle
 
-/-- Dahlberg's one-sided successor-interior auxiliary-polygon construction/transfer
-source gate for the §4 non-strict disk reduction.
+/-- Dahlberg's normalized successor-interior auxiliary-polygon
+construction/transfer source gate for the §4 non-strict disk reduction.
 
 This is now the sharp paper-facing source gate for the §4 construction: after
 the finite minimal-disk setup, the proof uses the nonempty proper boundary set
-`E = V(Γ) ∩ ∂Δ`, extracts a boundary vertex whose successor is strictly inside
-`Δ`, selects the corresponding complementary interval, and builds the
-auxiliary strictly convex polygon from the convex domain `U`.  The predecessor
-case is recovered formally by reversing cyclic order. -/
+`E = V(Γ) ∩ ∂Δ`, translates the cyclic index origin so the selected boundary
+vertex is `0`, assumes vertex `1` is strictly inside `Δ`, selects the
+corresponding complementary interval, and builds the auxiliary strictly convex
+polygon from the convex domain `U`.  Arbitrary successor cases are recovered
+formally by cyclic translation, and predecessor cases by reversal. -/
+theorem dahlbergE2_disk_auxiliary_boundary_successor_normalized_construction_source_gate :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorNormalizedConstructionSource := by
+  sorry
+
+/-- Dahlberg's one-sided successor-interior auxiliary-polygon construction
+source for the §4 non-strict disk reduction, recovered from the normalized
+index-`0` source by cyclic translation. -/
 theorem dahlbergE2_disk_auxiliary_boundary_successor_metric_construction_source_gate :
     DahlbergE2DiskAuxiliaryBoundarySuccessorMetricConstructionSource := by
-  sorry
+  exact dahlbergE2DiskAuxiliaryBoundarySuccessorMetricConstructionSource_of_normalizedSource
+    dahlbergE2_disk_auxiliary_boundary_successor_normalized_construction_source_gate
 
 /-- Dahlberg's two-sided metric boundary-neighbor auxiliary-polygon
 construction/transfer source for the §4 non-strict disk reduction, recovered
