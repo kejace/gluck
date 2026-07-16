@@ -8056,6 +8056,34 @@ def DahlbergE2Theorem6PlateauUpgradeSource : Prop :=
     Nonempty (DahlbergE2Theorem6WeakGeometricAssemblyCertificate v) →
     Nonempty (DahlbergE2Theorem6GeometricAssemblyCertificate v)
 
+/-- Sharper plateau upgrade for Dahlberg §3 Theorem 6: once ordered disk
+selection and the formal weak assembly construction have fixed a weak
+certificate, the remaining global cyclic/plateau argument only has to upgrade
+that same ordered disk's weak one-step inequalities to the plateau-aware
+radius-extrema certificate. -/
+def DahlbergE2Theorem6PlateauExtremaUpgradeSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ Concyclic v) →
+    ∀ weak : DahlbergE2Theorem6WeakGeometricAssemblyCertificate v,
+      Nonempty (DahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate weak.disk)
+
+/-- The sharper plateau-extrema source implies the older plateau-upgrade
+source by rebuilding a geometric assembly certificate from the upgraded
+extrema for the weak certificate's own ordered disk. -/
+theorem dahlbergE2Theorem6PlateauUpgradeSource_of_plateauExtremaUpgradeSource
+    (hsrc : DahlbergE2Theorem6PlateauExtremaUpgradeSource) :
+    DahlbergE2Theorem6PlateauUpgradeSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle _hcontains _hmisses hweak
+  letI : NeZero n := hne
+  rcases hweak with ⟨weak⟩
+  rcases hsrc hn hsimple hregular horient hnoncircle weak with ⟨hext⟩
+  exact ⟨
+    dahlbergE2Theorem6GeometricAssemblyCertificate_of_orderedDiskCertificate
+      hsimple horient weak.disk hext⟩
+
 /-- The sharper ordered assembly source implies the older full-CDFV assembly
 source. -/
 theorem dahlbergE2Theorem6AssemblySource_of_orderedAssemblySource
@@ -8145,6 +8173,24 @@ def DahlbergE2Theorem6OrderedDiskPaperSources : Prop :=
   DahlbergE2Theorem6Lemma7InteriorMissingDisksSource ∧
   DahlbergE2Theorem6OrderedDiskSelectionSource ∧
   DahlbergE2Theorem6PlateauUpgradeSource
+
+/-- Sharpest current §3 paper-facing source package: Lemma 5, Lemma 7,
+ordered disk selection, and the plateau-extrema upgrade for the selected weak
+certificate.  Everything else in weak/geometric assembly is formal. -/
+def DahlbergE2Theorem6SharpOrderedDiskPaperSources : Prop :=
+  DahlbergE2Theorem6Lemma5ContainingDisksSource ∧
+  DahlbergE2Theorem6Lemma7InteriorMissingDisksSource ∧
+  DahlbergE2Theorem6OrderedDiskSelectionSource ∧
+  DahlbergE2Theorem6PlateauExtremaUpgradeSource
+
+/-- The sharpest current §3 package implies the ordered-disk package by
+wrapping the plateau-extrema upgrade as the older plateau-upgrade source. -/
+theorem dahlbergE2Theorem6OrderedDiskPaperSources_of_sharpOrderedDiskPaperSources
+    (hsrc : DahlbergE2Theorem6SharpOrderedDiskPaperSources) :
+    DahlbergE2Theorem6OrderedDiskPaperSources := by
+  exact ⟨hsrc.1, hsrc.2.1, hsrc.2.2.1,
+    dahlbergE2Theorem6PlateauUpgradeSource_of_plateauExtremaUpgradeSource
+      hsrc.2.2.2⟩
 
 /-- The ordered-disk §3 source package implies the older weak package by
 constructing the weak geometric assembly certificate formally. -/
@@ -10853,14 +10899,15 @@ def DahlbergE2PaperTheoremSources : Prop :=
 Dahlberg's Lemma 8 has been formalized:
 
 * Theorem 6 / CDFV, sharpened to ordered-disk selection plus the plateau
-  upgrade; weak geometric assembly is then formal;
+  extrema upgrade for the selected weak certificate; weak/geometric assembly
+  is then formal;
 * the global monotone-arc extraction in Lemma 8;
 * the final §4 auxiliary-polygon construction.
 
 The pointwise edge-region nesting `δ(Q,e) ⊆ δ(P,e)` is supplied by
 `dahlbergE2_lemma8_local_edge_nesting_source`. -/
 def DahlbergE2PaperRemainingTheoremSources : Prop :=
-  DahlbergE2Theorem6OrderedDiskPaperSources ∧
+  DahlbergE2Theorem6SharpOrderedDiskPaperSources ∧
   DahlbergE2Lemma8MonotoneArcExtractionSource ∧
   DahlbergE2Section4AuxiliaryPolygonSource
 
@@ -10869,28 +10916,18 @@ because local Lemma 8 edge nesting is already proved. -/
 theorem dahlbergE2PaperTheoremSources_of_remainingTheoremSources
     (hsrc : DahlbergE2PaperRemainingTheoremSources) :
     DahlbergE2PaperTheoremSources := by
-  exact ⟨dahlbergE2Theorem6PaperSources_of_orderedDiskPaperSources hsrc.1,
+  exact ⟨
+    dahlbergE2Theorem6PaperSources_of_orderedDiskPaperSources
+      (dahlbergE2Theorem6OrderedDiskPaperSources_of_sharpOrderedDiskPaperSources hsrc.1),
     ⟨dahlbergE2_lemma8_local_edge_nesting_source, hsrc.2.1⟩, hsrc.2.2⟩
 
-/-- The full paper-source package implies the smaller remaining-source
-package by forgetting the local Lemma 8 edge-nesting component, which is now
-proved separately. -/
-theorem dahlbergE2PaperRemainingTheoremSources_of_paperTheoremSources
-    (hsrc : DahlbergE2PaperTheoremSources) :
-    DahlbergE2PaperRemainingTheoremSources := by
-  exact ⟨dahlbergE2Theorem6OrderedDiskPaperSources_of_paperSources hsrc.1,
-    hsrc.2.1.2, hsrc.2.2⟩
-
-/-- The current smaller remaining-source package is formally equivalent to
-the full paper-source package: the only omitted components are the local
-edge-region part of Lemma 8, proved by
-`dahlbergE2_lemma8_local_edge_nesting_source`, plus the already-formal
-boundary incidence and weak one-step radius comparisons inside §3 CDFV. -/
-theorem dahlbergE2PaperRemainingTheoremSources_iff_paperTheoremSources :
-    DahlbergE2PaperRemainingTheoremSources ↔ DahlbergE2PaperTheoremSources := by
-  constructor
-  · exact dahlbergE2PaperTheoremSources_of_remainingTheoremSources
-  · exact dahlbergE2PaperRemainingTheoremSources_of_paperTheoremSources
+/-- The current remaining-source package implies the full paper-source
+package.  The converse is intentionally not stated for the sharp plateau
+interface: an arbitrary full geometric assembly source need not upgrade every
+preselected weak certificate's own ordered disk. -/
+theorem dahlbergE2PaperRemainingTheoremSources_to_paperTheoremSources :
+    DahlbergE2PaperRemainingTheoremSources → DahlbergE2PaperTheoremSources :=
+  dahlbergE2PaperTheoremSources_of_remainingTheoremSources
 
 /-- The paper theorem sources imply the current compact source surface. -/
 theorem dahlbergE2PaperSourceComponents_of_paperTheoremSources
