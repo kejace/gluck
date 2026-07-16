@@ -151,8 +151,10 @@ API.  The grouped component spellings are exposed as
 `dahlbergE2DfvSourceComponents_of_dfvRemainingSources`.  On the E² side,
 `DahlbergE2RemainingSourceComponents` is equivalent to the older bundled
 `DahlbergE2GeometricSources` package, but names the exact current Dahlberg
-interfaces.  Its strict signed-CDFV and Lemma 8 interfaces are now derived
-from the single unproved Lemma 9 gate `dahlbergE2_lemma9_source_gate`.
+interfaces.  Its strict branch is split into the signed-CDFV gate
+`dahlbergE2_convex_dfv_signed_source_gate` and the Lemma 8 bridge gate
+`dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`; Lemma 9 is
+then recovered formally from those two inputs.
 Completing the forward program means replacing the listed gates by formal
 proofs.  It also exposes source-parametrized kernels such as
 `four_vertex_condition_smooth_spaceForm_kernel_of_sources`,
