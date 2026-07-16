@@ -5848,6 +5848,28 @@ theorem signedMengerProfile_exists_globalMinMax_strict_of_not_concyclic
   exact signedMengerProfile_exists_globalMinMax_strict_of_not_constant
     (not_constant_signedMengerProfile_of_not_concyclic hsimple hregular hnoncircle)
 
+/-- A chosen global maximum of a nonconcyclic locally regular simple polygon's
+signed-Menger profile is a plateau-aware local maximum. -/
+theorem signedMengerProfile_discreteLocalMax_of_globalMax_of_not_concyclic
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {i : ZMod n}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v)
+    (hmax : ∀ j : ZMod n, SignedMengerProfile v j ≤ SignedMengerProfile v i) :
+    DiscreteLocalMax (SignedMengerProfile v) i := by
+  exact signedMengerProfile_discreteLocalMax_of_globalMax_of_not_constant hmax
+    (not_constant_signedMengerProfile_of_not_concyclic hsimple hregular hnoncircle)
+
+/-- A chosen global minimum of a nonconcyclic locally regular simple polygon's
+signed-Menger profile is a plateau-aware local minimum. -/
+theorem signedMengerProfile_discreteLocalMin_of_globalMin_of_not_concyclic
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {i : ZMod n}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v)
+    (hmin : ∀ j : ZMod n, SignedMengerProfile v i ≤ SignedMengerProfile v j) :
+    DiscreteLocalMin (SignedMengerProfile v) i := by
+  exact signedMengerProfile_discreteLocalMin_of_globalMin_of_not_constant hmin
+    (not_constant_signedMengerProfile_of_not_concyclic hsimple hregular hnoncircle)
+
 /-- A nonconcyclic locally regular simple polygon has at least one
 plateau-aware local maximum and one plateau-aware local minimum of signed
 Menger curvature. -/
