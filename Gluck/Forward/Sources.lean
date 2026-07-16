@@ -851,6 +851,204 @@ theorem dahlberg_discrete_four_vertex_E2_of_forwardDfvSources
   exact dahlberg_discrete_four_vertex_E2_kernel_of_forwardDfvSources
     hsrc hn v hsimple hregular hnoncircle
 
+/-! ## Final-D4VT endpoints from weaker source packages -/
+
+/-- Extract the ordinary smooth four-vertex conclusion from the weaker
+final-D4VT source package in a nonconstant space-form branch. -/
+theorem smoothFourVertex_spaceForm_nonconstant_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources) {ε : ℝ}
+    (hε : ε = 0 ∨ ε = 1 ∨ ε = -1) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : SmoothForwardRealizes ε γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact hsrc.1 hε hclosed hreal hκ hper hnc
+
+/-- The ordinary smooth four-vertex endpoint from the weaker final-D4VT source
+package, including the constant profile branch. -/
+theorem smoothFourVertex_spaceForm_kernel_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources) {ε : ℝ}
+    (hε : ε = 0 ∨ ε = 1 ∨ ε = -1) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : SmoothForwardRealizes ε γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  by_cases hconst : ∃ c, ∀ t, κ t = c
+  · exact Or.inl hconst
+  · exact smoothFourVertex_spaceForm_nonconstant_of_forwardDfvSources
+      hsrc hε hclosed hreal hκ hper hconst
+
+/-- Euclidean smooth four-vertex theorem from the weaker final-D4VT source
+package. -/
+theorem four_vertex_E2_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_spaceForm_kernel_of_forwardDfvSources
+    hsrc (ε := 0) (Or.inl rfl) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper
+
+/-- Nonconstant Euclidean smooth four-vertex theorem from the weaker
+final-D4VT source package. -/
+theorem four_vertex_E2_nonconstant_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_spaceForm_nonconstant_of_forwardDfvSources
+    hsrc (ε := 0) (Or.inl rfl) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+
+/-- Spherical smooth four-vertex theorem from the weaker final-D4VT source
+package. -/
+theorem four_vertex_S2_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes 1 γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_spaceForm_kernel_of_forwardDfvSources
+    hsrc (ε := 1) (Or.inr (Or.inl rfl)) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper
+
+/-- Nonconstant spherical smooth four-vertex theorem from the weaker
+final-D4VT source package. -/
+theorem four_vertex_S2_nonconstant_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes 1 γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_spaceForm_nonconstant_of_forwardDfvSources
+    hsrc (ε := 1) (Or.inr (Or.inl rfl)) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+
+/-- Hyperbolic smooth four-vertex theorem from the weaker final-D4VT source
+package. -/
+theorem four_vertex_H2_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes (-1) γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_spaceForm_kernel_of_forwardDfvSources
+    hsrc (ε := -1) (Or.inr (Or.inr rfl)) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper
+
+/-- Nonconstant hyperbolic smooth four-vertex theorem from the weaker
+final-D4VT source package. -/
+theorem four_vertex_H2_nonconstant_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes (-1) γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_spaceForm_nonconstant_of_forwardDfvSources
+    hsrc (ε := -1) (Or.inr (Or.inr rfl)) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+
+/-- Extract the non-Euclidean discrete D4VT conclusion from the weaker
+final-D4VT source package. -/
+theorem dahlbergFourVertex_spaceForm_source_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources) {ε : ℝ}
+    (hε : ε = 1 ∨ ε = -1) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact hsrc.2.1 hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
+
+/-- The non-Euclidean discrete constant-or-D4VT endpoint from the weaker
+final-D4VT source package. -/
+theorem constant_or_dahlbergFourVertex_spaceForm_kernel_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources) {ε : ℝ}
+    (hε : ε = 1 ∨ ε = -1) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  by_cases hconst : ∃ c, ∀ i : ZMod n, κ i = c
+  · exact Or.inl hconst
+  · exact Or.inr
+      (dahlbergFourVertex_spaceForm_source_of_forwardDfvSources
+        hsrc hε hn v κ hdisk hsimple hconvex hregular hκ hproper hconst)
+
+/-- Spherical constant-or-Dahlberg theorem from the weaker final-D4VT source
+package. -/
+theorem constant_or_dahlbergFourVertex_S2_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_spaceForm_kernel_of_forwardDfvSources
+    hsrc (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro hlt; norm_num at hlt)
+
+/-- Spherical nonconstant discrete four-vertex theorem from the weaker
+final-D4VT source package. -/
+theorem discrete_four_vertex_S2_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_spaceForm_source_of_forwardDfvSources
+    hsrc (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro hlt; norm_num at hlt) hnc
+
+/-- Hyperbolic constant-or-Dahlberg theorem from the weaker final-D4VT source
+package. -/
+theorem constant_or_dahlbergFourVertex_H2_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_spaceForm_kernel_of_forwardDfvSources
+    hsrc (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro _; exact hcircle)
+
+/-- Hyperbolic nonconstant discrete four-vertex theorem from the weaker
+final-D4VT source package. -/
+theorem discrete_four_vertex_H2_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_spaceForm_source_of_forwardDfvSources
+    hsrc (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro _; exact hcircle) hnc
+
 /-- The source-parametrized positive-orientation E² conformal-Menger
 ordered-turn endpoint. -/
 theorem orderedAdjacentTurns_E2_conformalMenger_pos_of_sources
@@ -2166,6 +2364,73 @@ theorem dahlberg_discrete_four_vertex_E2_of_dfvAtomicSources
     (forwardDfvGeometricSources_of_atomicSources hsrc)
     hn v hsimple hregular hnoncircle
 
+/-- The Euclidean smooth four-vertex theorem from the fully expanded weaker
+final-D4VT atomic source package. -/
+theorem four_vertex_E2_of_dfvAtomicSources
+    (hsrc : ForwardDfvAtomicSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact four_vertex_E2_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_atomicSources hsrc) hclosed hreal hκ hper
+
+/-- The nonconstant Euclidean smooth four-vertex theorem from the fully
+expanded weaker final-D4VT atomic source package. -/
+theorem four_vertex_E2_nonconstant_of_dfvAtomicSources
+    (hsrc : ForwardDfvAtomicSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact four_vertex_E2_nonconstant_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_atomicSources hsrc) hclosed hreal hκ hper hnc
+
+/-- The spherical smooth four-vertex theorem from the fully expanded weaker
+final-D4VT atomic source package. -/
+theorem four_vertex_S2_of_dfvAtomicSources
+    (hsrc : ForwardDfvAtomicSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes 1 γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact four_vertex_S2_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_atomicSources hsrc) hclosed hreal hκ hper
+
+/-- The nonconstant spherical smooth four-vertex theorem from the fully
+expanded weaker final-D4VT atomic source package. -/
+theorem four_vertex_S2_nonconstant_of_dfvAtomicSources
+    (hsrc : ForwardDfvAtomicSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes 1 γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact four_vertex_S2_nonconstant_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_atomicSources hsrc) hclosed hreal hκ hper hnc
+
+/-- The hyperbolic smooth four-vertex theorem from the fully expanded weaker
+final-D4VT atomic source package. -/
+theorem four_vertex_H2_of_dfvAtomicSources
+    (hsrc : ForwardDfvAtomicSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes (-1) γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact four_vertex_H2_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_atomicSources hsrc) hclosed hreal hκ hper
+
+/-- The nonconstant hyperbolic smooth four-vertex theorem from the fully
+expanded weaker final-D4VT atomic source package. -/
+theorem four_vertex_H2_nonconstant_of_dfvAtomicSources
+    (hsrc : ForwardDfvAtomicSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes (-1) γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact four_vertex_H2_nonconstant_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_atomicSources hsrc) hclosed hreal hκ hper hnc
+
 /-- The spherical constant-or-Dahlberg theorem from the fully expanded atomic
 source package. -/
 theorem constant_or_dahlbergFourVertex_S2_of_atomicSources
@@ -2226,6 +2491,68 @@ theorem discrete_four_vertex_H2_of_atomicSources
     DahlbergFourVertex κ := by
   exact discrete_four_vertex_H2_of_sources
     (forwardGeometricSources_of_atomicSources hsrc)
+    hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
+
+/-- The spherical constant-or-Dahlberg theorem from the fully expanded weaker
+final-D4VT atomic source package. -/
+theorem constant_or_dahlbergFourVertex_S2_of_dfvAtomicSources
+    (hsrc : ForwardDfvAtomicSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_S2_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_atomicSources hsrc)
+    hn v κ hdisk hsimple hconvex hregular hκ
+
+/-- The spherical nonconstant discrete four-vertex theorem from the fully
+expanded weaker final-D4VT atomic source package. -/
+theorem discrete_four_vertex_S2_of_dfvAtomicSources
+    (hsrc : ForwardDfvAtomicSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact discrete_four_vertex_S2_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_atomicSources hsrc)
+    hn v κ hdisk hsimple hconvex hregular hκ hnc
+
+/-- The hyperbolic constant-or-Dahlberg theorem from the fully expanded weaker
+final-D4VT atomic source package. -/
+theorem constant_or_dahlbergFourVertex_H2_of_dfvAtomicSources
+    (hsrc : ForwardDfvAtomicSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_H2_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_atomicSources hsrc)
+    hn v κ hdisk hsimple hconvex hregular hκ hcircle
+
+/-- The hyperbolic nonconstant discrete four-vertex theorem from the fully
+expanded weaker final-D4VT atomic source package. -/
+theorem discrete_four_vertex_H2_of_dfvAtomicSources
+    (hsrc : ForwardDfvAtomicSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact discrete_four_vertex_H2_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_atomicSources hsrc)
     hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
 
 /-- The current forward development is reduced to the bundled geometric source
