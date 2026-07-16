@@ -10433,6 +10433,21 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvSourceCom
       hsrc hn hsimple hregular hnoncircle)
 
 /-- Dahlberg's E² D4VT is invariant under direct Euclidean normalization from
+the normalized-unit final-D4VT source components. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvUnitSourceComponents
+    (hsrc : DahlbergE2DfvUnitSourceComponents)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {u : ℂ} (hu : ‖u‖ = 1)
+    (a : ℂ) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex
+      (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) := by
+  exact (dahlbergFourVertex_signedMengerProfile_directIsometry_iff hu a v).mpr
+    (signedMengerProfile_dahlbergFourVertex_E2_of_dfvUnitSourceComponents
+      hsrc hn hsimple hregular hnoncircle)
+
+/-- Dahlberg's E² D4VT is invariant under direct Euclidean normalization from
 the primitive final-D4VT source components. -/
 theorem signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvPrimitiveSourceComponents
     (hsrc : DahlbergE2DfvPrimitiveSourceComponents)
@@ -10443,9 +10458,9 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvPrimitive
     (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex
       (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) := by
-  exact (dahlbergFourVertex_signedMengerProfile_directIsometry_iff hu a v).mpr
-    (signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveSourceComponents
-      hsrc hn hsimple hregular hnoncircle)
+  exact signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvUnitSourceComponents
+    (dahlbergE2DfvUnitSourceComponents_of_primitiveComponents hsrc)
+    hn hu a hsimple hregular hnoncircle
 
 /-- Dahlberg's positive strict ordered-turn branch is invariant under direct
 Euclidean normalization. -/
