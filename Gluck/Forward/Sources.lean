@@ -157,7 +157,7 @@ def ForwardDfvAtomicSources : Prop :=
 the finite Euclidean disk setup has been proved.
 
 Compared with `ForwardAtomicSources`, the Euclidean Dahlberg part is split down
-to the three still-geometric inputs: the CDFV radius-witness source, the
+to the three still-geometric inputs: the signed-Menger CDFV source, the
 Lemma 8 radius-turn bridge, and the §4 auxiliary-polygon construction.  The
 non-strict input is stored in the sharp boundary/interior shape: the
 least-enclosing-disk setup, boundary-set nonemptiness/properness, positive
@@ -203,7 +203,7 @@ def ForwardRemainingSources : Prop :=
         (∀ i, 1 < κ i) →
         (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
         OrderedAdjacentTurns κ) ∧
-  DahlbergE2ConvexDfvRadiusSource ∧
+  DahlbergE2ConvexDfvSignedSource ∧
   DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
   DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource
 
@@ -264,10 +264,9 @@ the finite Euclidean disk setup has been proved.
 
 This groups the flattened `ForwardRemainingSources` audit by geometry: smooth
 sources, non-Euclidean discrete ordered-turn sources, and the exact E² Dahlberg
-source interfaces.  The flattened audit stores the strict-convex component in
-radius-witness form because the stronger ordered-turn route consumes that
-shape; this component spelling records the theorem-level signed-CDFV interface
-together with the formal radius conversion. -/
+source interfaces.  The strict-convex component is stored in theorem-level
+signed-CDFV form; the radius-witness interface needed by the stronger
+ordered-turn route is recovered formally by reciprocal-radius monotonicity. -/
 def ForwardRemainingSourceComponents : Prop :=
   SmoothForwardModelSources ∧
   SpaceFormDiscreteModelSources ∧
@@ -336,14 +335,11 @@ theorem forwardRemainingSources_iff_components :
   constructor
   · intro hsrc
     rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hCDFV, hL8, hD⟩
-    exact ⟨⟨hE, hS, hH⟩, ⟨hdS, hdH⟩,
-      ⟨dahlbergE2ConvexDfvSignedSource_of_radiusSource hCDFV, hL8, hD⟩⟩
+    exact ⟨⟨hE, hS, hH⟩, ⟨hdS, hdH⟩, ⟨hCDFV, hL8, hD⟩⟩
   · intro hsrc
     rcases hsrc with ⟨hsmooth, hdisc, hDahlberg⟩
     exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
-      hdisc.1, hdisc.2,
-      dahlbergE2ConvexDfvRadiusSource_of_signedSource hDahlberg.1,
-      hDahlberg.2.1, hDahlberg.2.2⟩
+      hdisc.1, hdisc.2, hDahlberg.1, hDahlberg.2.1, hDahlberg.2.2⟩
 
 /-- The flattened final-D4VT remaining-source audit is equivalent to the named
 component spelling. -/
@@ -436,7 +432,8 @@ theorem forwardAtomicSources_of_remainingSources
   rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hCDFV, hL8, hD⟩
   exact ⟨hE, hS, hH, hdS, hdH,
     dahlbergE2ConvexRadiusSource_of_components
-      ⟨hCDFV, dahlbergE2Lemma8RadiusTurnBridgeSource_of_witnessSource hL8⟩,
+      ⟨dahlbergE2ConvexDfvRadiusSource_of_signedSource hCDFV,
+        dahlbergE2Lemma8RadiusTurnBridgeSource_of_witnessSource hL8⟩,
     dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mp hD⟩
 
 /-- The sharper remaining-source package implies the bundled geometric source
@@ -465,7 +462,7 @@ theorem forwardRemainingSources_of_geometricSources
     dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mpr
       hsrc.2.2.2
   exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
-    hdisc.1, hdisc.2, hconvex.1,
+    hdisc.1, hdisc.2, dahlbergE2ConvexDfvSignedSource_of_radiusSource hconvex.1,
     dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_source hconvex.2, hdisk⟩
 
 /-- The bundled geometric source package is equivalent to the sharper
@@ -493,8 +490,7 @@ theorem forwardDfvRemainingSources_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     ForwardDfvRemainingSources := by
   rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hCDFV, _hL8, hD⟩
-  refine ⟨?_, ?_, ?_, ?_, ?_,
-    dahlbergE2_convexDfvRadiusSource_iff_signedSource.mp hCDFV, hD⟩
+  refine ⟨?_, ?_, ?_, ?_, ?_, hCDFV, hD⟩
   · intro γ κ hclosed hreal hκ hper hnc
     exact smoothFourVertex_of_fourVertexCondition
       (hE hclosed hreal hκ hper hnc)
@@ -606,7 +602,8 @@ remaining-source package. -/
 theorem dahlbergE2ConvexDfvRadiusSource_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     DahlbergE2ConvexDfvRadiusSource := by
-  exact hsrc.2.2.2.2.2.1
+  exact dahlbergE2ConvexDfvRadiusSource_of_signedSource
+    (forwardRemainingSources_iff_components.mp hsrc).2.2.1
 
 /-- Extract Dahlberg's `E²` signed-CDFV source from the sharper
 remaining-source package. -/

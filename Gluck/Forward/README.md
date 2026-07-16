@@ -129,7 +129,8 @@ remaining-source audit is:
 - `Gluck/Forward/SpaceFormDiscrete.lean`
   - `spaceFormDiscrete_source_gate`.
 - `Gluck/Forward/Dahlberg.lean`
-  - `dahlbergE2_lemma9_source_gate`;
+  - `dahlbergE2_convex_dfv_signed_source_gate`;
+  - `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_interior_construction_source`.
 
 The corresponding audit targets are `ForwardRemainingSources`, for the
