@@ -10214,6 +10214,31 @@ theorem dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_iff_strictPreviousRadi
   · exact dahlbergE2Lemma8StrictPreviousRadiusTurnsSource_of_radiusTurnBridgeFromWitnessSource
   · exact dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_strictPreviousRadiusTurnsSource
 
+/-- The public witness-only Lemma 8 bridge implies the current monotone-arc
+extraction source interface. -/
+theorem dahlbergE2Lemma8MonotoneArcExtractionSource_of_radiusTurnBridgeFromWitnessSource
+    (hsrc : DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource) :
+    DahlbergE2Lemma8MonotoneArcExtractionSource := by
+  exact dahlbergE2Lemma8StrictPreviousRadiusTurnsSource_of_radiusTurnBridgeFromWitnessSource
+    hsrc
+
+/-- The current monotone-arc extraction source implies the public witness-only
+Lemma 8 bridge. -/
+theorem dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_monotoneArcExtractionSource
+    (hsrc : DahlbergE2Lemma8MonotoneArcExtractionSource) :
+    DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource := by
+  exact dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_strictPreviousRadiusTurnsSource
+    hsrc
+
+/-- The remaining monotone-arc extraction source and the public witness-only
+Lemma 8 bridge are formally equivalent. -/
+theorem dahlbergE2Lemma8MonotoneArcExtractionSource_iff_radiusTurnBridgeFromWitnessSource :
+    DahlbergE2Lemma8MonotoneArcExtractionSource ↔
+      DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource := by
+  constructor
+  · exact dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_monotoneArcExtractionSource
+  · exact dahlbergE2Lemma8MonotoneArcExtractionSource_of_radiusTurnBridgeFromWitnessSource
+
 /-- The witness-only Lemma 8 bridge implies the older bridge source with an
 explicit nonconstancy hypothesis. -/
 theorem dahlbergE2Lemma8RadiusTurnBridgeSource_of_witnessSource
@@ -11344,7 +11369,8 @@ Dahlberg's Lemma 8 has been formalized:
   arrangement plus explicit plateau-resolution data for the selected weak
   certificate; cross distinctness, weak/geometric assembly, and
   local-extremum reconstruction are then formal;
-* the global monotone-arc extraction in Lemma 8;
+* Lemma 8's witness-only radius-turn bridge, equivalent to the internal
+  monotone-arc extraction source;
 * the final §4 normalized unit-disk construction, in the raw existential
   auxiliary-reduction interface.
 
@@ -11352,7 +11378,7 @@ The pointwise edge-region nesting `δ(Q,e) ⊆ δ(P,e)` is supplied by
 `dahlbergE2_lemma8_local_edge_nesting_source`. -/
 def DahlbergE2PaperRemainingTheoremSources : Prop :=
   DahlbergE2Theorem6SharpOrderedDiskPaperSources ∧
-  DahlbergE2Lemma8MonotoneArcExtractionSource ∧
+  DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
   DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
 
 /-- The smaller remaining paper sources imply the full paper-source package,
@@ -11363,7 +11389,9 @@ theorem dahlbergE2PaperTheoremSources_of_remainingTheoremSources
   exact ⟨
     dahlbergE2Theorem6PaperSources_of_orderedDiskPaperSources
       (dahlbergE2Theorem6OrderedDiskPaperSources_of_sharpOrderedDiskPaperSources hsrc.1),
-    ⟨dahlbergE2_lemma8_local_edge_nesting_source, hsrc.2.1⟩,
+    ⟨dahlbergE2_lemma8_local_edge_nesting_source,
+      dahlbergE2Lemma8MonotoneArcExtractionSource_of_radiusTurnBridgeFromWitnessSource
+        hsrc.2.1⟩,
     dahlbergE2Section4AuxiliaryPolygonSource_of_unitConstructionSource
       hsrc.2.2⟩
 
