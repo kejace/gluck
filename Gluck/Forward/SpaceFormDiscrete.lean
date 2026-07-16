@@ -252,6 +252,40 @@ theorem constant_or_dahlbergFourVertex_H2_of_dfvSource
     hsrc (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
     (by intro _; exact hcircle)
 
+/-- Spherical nonconstant final-D4VT primitive model source gate for the
+convex/coherent conformal-Menger package in an open hemisphere. -/
+theorem dahlbergFourVertex_S2_model_source_gate {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  sorry
+
+/-- Hyperbolic nonconstant final-D4VT primitive model source gate for
+Grant--Mogilski's convex coherent theorem in the proper-circle regime
+`κᵢ > 1`. -/
+theorem dahlbergFourVertex_H2_model_source_gate {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  sorry
+
+/-- Model-specific nonconstant final-D4VT geometric source package, recovered
+from the individual weak `S²` and `H²` source gates. -/
+theorem spaceFormDiscrete_dfv_model_sources_gate :
+    SpaceFormDiscreteDfvModelSources := by
+  exact ⟨dahlbergFourVertex_S2_model_source_gate,
+    dahlbergFourVertex_H2_model_source_gate⟩
+
 /-- Model-specific nonconstant ordered-turn geometric source gate for the
 convex/coherent conformal-Menger package in `S²` and `H²`.
 
@@ -297,14 +331,11 @@ theorem spaceFormDiscrete_source_gate : SpaceFormDiscreteSource := by
     spaceFormDiscrete_model_sources_gate
 
 /-- Weaker uniform final-D4VT geometric source for the convex/coherent
-conformal-Menger package in `S²` and `H²`, recovered from the stronger
-ordered-turn source.
-
-This keeps the remaining primitive non-Euclidean discrete obligation at
-`spaceFormDiscrete_source_gate`: plateau-aware `DahlbergFourVertex` follows
-formally from ordered adjacent turns. -/
+conformal-Menger package in `S²` and `H²`, recovered from the weak
+model-specific D4VT source gates. -/
 theorem spaceFormDiscrete_dfv_source_gate : SpaceFormDiscreteDfvSource := by
-  exact spaceFormDiscreteDfvSource_of_source spaceFormDiscrete_source_gate
+  exact spaceFormDiscreteDfvSource_iff_modelSources.mpr
+    spaceFormDiscrete_dfv_model_sources_gate
 
 /-- Spherical nonconstant ordered-turn geometric source gate for the
 convex/coherent discrete four-vertex package in an open hemisphere. -/
@@ -335,16 +366,19 @@ theorem orderedAdjacentTurns_H2_source_gate {n : ℕ} [NeZero n]
   exact orderedAdjacentTurns_H2_model_source_gate
     hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
 
-/-- The current model-specific non-Euclidean discrete source package.
+/-- The current model-specific non-Euclidean discrete ordered-turn source
+package.
 
-This is the primitive model-specific non-Euclidean discrete source package. -/
+This is the stronger primitive model-specific non-Euclidean discrete source
+package used by ordered-turn refinements. -/
 theorem spaceFormDiscrete_model_sources : SpaceFormDiscreteModelSources := by
   exact spaceFormDiscrete_model_sources_gate
 
 /-- The current non-Euclidean discrete final-D4VT source package.
 
-This is the weak D4VT source used by public final-D4VT wrappers; ordered-turn
-refinements continue to use `spaceFormDiscrete_model_sources` directly. -/
+This is the weak D4VT source used by public final-D4VT wrappers, recovered
+from weak model-specific D4VT gates; ordered-turn refinements continue to use
+`spaceFormDiscrete_model_sources` directly. -/
 theorem spaceFormDiscrete_dfv_source : SpaceFormDiscreteDfvSource := by
   exact spaceFormDiscrete_dfv_source_gate
 
