@@ -5935,7 +5935,7 @@ def MinimalEnclosingDiskExistsSource : Prop :=
 on its boundary.  Otherwise the radius could be decreased, contradicting
 minimality. -/
 def MinimalEnclosingDiskBoundaryVertexSource : Prop :=
-  ∀ {n : ℕ} {v : ZMod n → ℂ} {O : ℂ} {R : ℝ},
+  ∀ {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ},
     MinimalEnclosingDiskR2 v O R → ∃ i : ZMod n, OnDiskBoundaryR2 v O R i
 
 /-- The finite-geometry sources needed to set up Dahlberg's smallest disk
@@ -5983,6 +5983,24 @@ theorem dahlbergE2DiskReductionSetupSource_of_components
   letI : NeZero n := hne
   rcases hsrc.1 v with ⟨O, R, hΔ⟩
   exact ⟨O, R, hΔ, hsrc.2 hΔ⟩
+
+/-- A minimal enclosing disk for a nonempty finite cyclic vertex set has a
+boundary vertex. -/
+theorem minimalEnclosingDiskBoundaryVertex_source :
+    MinimalEnclosingDiskBoundaryVertexSource := by
+  intro n hne v O R hΔ
+  letI : NeZero n := hne
+  by_contra hnone
+  have hstrict : ∀ i : ZMod n, dist O (v i) < R := by
+    intro i
+    exact lt_of_le_of_ne (hΔ.2.1 i) (fun hdist => hnone ⟨i, hdist⟩)
+  obtain ⟨i, hmax⟩ := exists_globalMax_zmod (fun j : ZMod n => dist O (v j))
+  have hR'nonneg : 0 ≤ dist O (v i) := dist_nonneg
+  have hpoly : PolygonInClosedDiskR2 v O (dist O (v i)) := by
+    intro j
+    exact hmax j
+  have hminimal := hΔ.2.2 O (dist O (v i)) hR'nonneg hpoly
+  exact (not_lt_of_ge hminimal) (hstrict i)
 
 /-- The genuinely Euclidean geometric inputs in Dahlberg's discrete
 four-vertex proof.
@@ -6033,10 +6051,17 @@ theorem dahlbergE2_lemma9_source : DahlbergE2Lemma9Source := by
   exact dahlbergE2_convexRadiusSource_iff_lemma9Source.mp
     dahlbergE2_convex_radius_source
 
+/-- Finite source: existence of a least enclosing disk for a cyclic vertex
+set. -/
+theorem minimalEnclosingDiskExists_source :
+    MinimalEnclosingDiskExistsSource := by
+  sorry
+
 /-- Finite minimal-disk source components for Dahlberg's §4 setup. -/
 theorem dahlbergE2_disk_reduction_setup_source_components :
     DahlbergE2DiskReductionSetupSourceComponents := by
-  sorry
+  exact ⟨minimalEnclosingDiskExists_source,
+    minimalEnclosingDiskBoundaryVertex_source⟩
 
 /-- Dahlberg's minimal-disk setup source, obtained from the finite
 least-enclosing-disk facts. -/
