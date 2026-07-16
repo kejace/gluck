@@ -863,7 +863,8 @@ theorem smoothFourVertex_spaceForm_nonconstant_of_forwardDfvSources
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     SmoothFourVertex κ := by
-  exact hsrc.1 hε hclosed hreal hκ hper hnc
+  exact smoothFourVertex_spaceForm_nonconstant_of_dfvSource
+    hsrc.1 hε hclosed hreal hκ hper hnc
 
 /-- The ordinary smooth four-vertex endpoint from the weaker final-D4VT source
 package, including the constant profile branch. -/
@@ -874,10 +875,8 @@ theorem smoothFourVertex_spaceForm_kernel_of_forwardDfvSources
     (hreal : SmoothForwardRealizes ε γ κ)
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
     SmoothFourVertex κ := by
-  by_cases hconst : ∃ c, ∀ t, κ t = c
-  · exact Or.inl hconst
-  · exact smoothFourVertex_spaceForm_nonconstant_of_forwardDfvSources
-      hsrc hε hclosed hreal hκ hper hconst
+  exact smoothFourVertex_spaceForm_kernel_of_dfvSource
+    hsrc.1 hε hclosed hreal hκ hper
 
 /-- Euclidean smooth four-vertex theorem from the weaker final-D4VT source
 package. -/
