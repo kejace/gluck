@@ -2671,8 +2671,8 @@ theorem constant_or_dahlbergFourVertex_S2_neg_reflected_of_forwardDfvSources
   have hκ' :
       RealizesConformalMenger 1 (ReverseCyclicPolygon v) (fun i => -κ (-i)) :=
     realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation horient hκ
-  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
-    hsrc (ε := 1) (Or.inr (Or.inl rfl)) hn (ReverseCyclicPolygon v)
+  exact constant_or_dahlbergFourVertex_spaceForm_kernel_of_forwardDfvSources
+    hsrc (ε := 1) (Or.inl rfl) hn (ReverseCyclicPolygon v)
     (fun i => -κ (-i)) hdisk' hsimple' horient' hregular' hκ'
     (by intro hlt; norm_num at hlt)
 
@@ -2704,8 +2704,8 @@ theorem constant_or_dahlbergFourVertex_S2_pos_of_forwardDfvSources
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger 1 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
-    hsrc (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple horient hregular hκ
+  exact constant_or_dahlbergFourVertex_spaceForm_kernel_of_forwardDfvSources
+    hsrc (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple horient hregular hκ
     (by intro hlt; norm_num at hlt)
 
 /-- The DFV-source-parametrized S² positive-orientation nonconstant D4VT
@@ -2720,8 +2720,8 @@ theorem dahlbergFourVertex_S2_pos_of_forwardDfvSources
     (hκ : RealizesConformalMenger 1 v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
-    hsrc (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple horient hregular hκ
+  exact dahlbergFourVertex_spaceForm_source_of_forwardDfvSources
+    hsrc (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple horient hregular hκ
     (by intro hlt; norm_num at hlt) hnc
 
 /-- The DFV-source-parametrized S² negative-orientation constant-or-Dahlberg
@@ -3024,8 +3024,8 @@ theorem constant_or_dahlbergFourVertex_H2_neg_reflected_of_forwardDfvSources
   have hκ' :
       RealizesConformalMenger (-1) (ReverseCyclicPolygon v) (fun i => -κ (-i)) :=
     realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation horient hκ
-  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
-    hsrc (ε := -1) (Or.inr (Or.inr rfl)) hn (ReverseCyclicPolygon v)
+  exact constant_or_dahlbergFourVertex_spaceForm_kernel_of_forwardDfvSources
+    hsrc (ε := -1) (Or.inr rfl) hn (ReverseCyclicPolygon v)
     (fun i => -κ (-i)) hdisk' hsimple' horient' hregular' hκ'
     (by intro _ i; exact hcircle (-i))
 
@@ -3057,8 +3057,8 @@ theorem constant_or_dahlbergFourVertex_H2_pos_of_forwardDfvSources
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
-    hsrc (ε := -1) (Or.inr (Or.inr rfl)) hn v κ hdisk hsimple horient hregular hκ
+  exact constant_or_dahlbergFourVertex_spaceForm_kernel_of_forwardDfvSources
+    hsrc (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple horient hregular hκ
     (by intro _; exact hcircle)
 
 /-- The DFV-source-parametrized H² positive-orientation nonconstant D4VT
@@ -3073,8 +3073,8 @@ theorem dahlbergFourVertex_H2_pos_of_forwardDfvSources
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
-    hsrc (ε := -1) (Or.inr (Or.inr rfl)) hn v κ hdisk hsimple horient hregular hκ
+  exact dahlbergFourVertex_spaceForm_source_of_forwardDfvSources
+    hsrc (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple horient hregular hκ
     (by intro _; exact hcircle) hnc
 
 /-- The DFV-source-parametrized H² negative-orientation constant-or-Dahlberg
