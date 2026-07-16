@@ -5837,6 +5837,18 @@ theorem signedMengerProfile_dahlbergFourVertex_of_convexDfvRadiusWitnesses
   exact (dahlbergE2ConvexDfvRadiusWitnesses_iff_signedMengerProfile_dahlbergFourVertex
     hsimple horient).mp hfv
 
+/-- A CDFV radius-witness package already forces the signed-Menger profile to
+be nonconstant in the positive-orientation branch. -/
+theorem not_constant_signedMengerProfile_of_convexDfvRadiusWitnesses
+    {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hfv : DahlbergE2ConvexDfvRadiusWitnesses v) :
+    ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  exact not_constant_of_dahlbergFourVertex
+    (signedMengerProfile_dahlbergFourVertex_of_convexDfvRadiusWitnesses
+      hsimple horient hfv)
+
 /-- The signed-Menger D4VT conclusion gives Dahlberg's radius-witness form in
 the positive-orientation branch. -/
 theorem convexDfvRadiusWitnesses_of_signedMengerProfile_dahlbergFourVertex
@@ -6637,6 +6649,46 @@ def DahlbergE2Lemma8RadiusTurnBridgeSource : Prop :=
     (¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) →
     DahlbergE2ConvexDfvRadiusWitnesses v →
     PositiveRadiusOrderedAdjacentTurns v
+
+/-- Variant of Dahlberg's Lemma 8 bridge with the redundant nonconstancy
+hypothesis removed: nonconstancy follows from the supplied CDFV radius
+witnesses. -/
+def DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    DahlbergE2ConvexDfvRadiusWitnesses v →
+    PositiveRadiusOrderedAdjacentTurns v
+
+/-- The witness-only Lemma 8 bridge implies the older bridge source with an
+explicit nonconstancy hypothesis. -/
+theorem dahlbergE2Lemma8RadiusTurnBridgeSource_of_witnessSource
+    (hsrc : DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource) :
+    DahlbergE2Lemma8RadiusTurnBridgeSource := by
+  intro n hne hn v hsimple hregular horient _hnc hwitness
+  letI : NeZero n := hne
+  exact hsrc hn hsimple hregular horient hwitness
+
+/-- The older Lemma 8 bridge source implies the witness-only bridge source,
+because CDFV radius witnesses already force signed-Menger nonconstancy. -/
+theorem dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_source
+    (hsrc : DahlbergE2Lemma8RadiusTurnBridgeSource) :
+    DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource := by
+  intro n hne hn v hsimple hregular horient hwitness
+  letI : NeZero n := hne
+  exact hsrc hn hsimple hregular horient
+    (not_constant_signedMengerProfile_of_convexDfvRadiusWitnesses
+      hsimple horient hwitness)
+    hwitness
+
+/-- The two Lemma 8 bridge source spellings are formally equivalent. -/
+theorem dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_iff_source :
+    DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ↔
+      DahlbergE2Lemma8RadiusTurnBridgeSource := by
+  constructor
+  · exact dahlbergE2Lemma8RadiusTurnBridgeSource_of_witnessSource
+  · exact dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_source
 
 /-- The radius-witness CDFV source can be applied after direct Euclidean
 normalization. -/

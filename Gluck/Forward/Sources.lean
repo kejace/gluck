@@ -200,7 +200,7 @@ def ForwardRemainingSources : Prop :=
         (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
         OrderedAdjacentTurns κ) ∧
   DahlbergE2ConvexDfvRadiusSource ∧
-  DahlbergE2Lemma8RadiusTurnBridgeSource ∧
+  DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
   DahlbergE2DiskAuxiliaryBoundaryConstructionSource
 
 /-- Fully expanded spelling of the actual remaining source obligations needed
@@ -307,7 +307,8 @@ theorem forwardAtomicSources_of_remainingSources
     ForwardAtomicSources := by
   rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hCDFV, hL8, hD⟩
   exact ⟨hE, hS, hH, hdS, hdH,
-    dahlbergE2ConvexRadiusSource_of_components ⟨hCDFV, hL8⟩,
+    dahlbergE2ConvexRadiusSource_of_components
+      ⟨hCDFV, dahlbergE2Lemma8RadiusTurnBridgeSource_of_witnessSource hL8⟩,
     dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource
       (dahlbergE2DiskAuxiliaryConstructionSource_of_boundaryConstructionSource hD)⟩
 
@@ -336,7 +337,8 @@ theorem forwardRemainingSources_of_geometricSources
       DahlbergE2DiskAuxiliaryBoundaryConstructionSource :=
     dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_diskReductionSource hsrc.2.2.2
   exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
-    hdisc.1, hdisc.2, hconvex.1, hconvex.2, hdisk⟩
+    hdisc.1, hdisc.2, hconvex.1,
+    dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_source hconvex.2, hdisk⟩
 
 /-- The bundled geometric source package is equivalent to the sharper
 remaining-source package. -/
@@ -431,12 +433,20 @@ theorem dahlbergE2ConvexDfvRadiusSource_of_remainingSources
     DahlbergE2ConvexDfvRadiusSource := by
   exact hsrc.2.2.2.2.2.1
 
-/-- Extract Dahlberg's `E²` Lemma 8 radius-turn bridge source from the sharper
+/-- Extract Dahlberg's `E²` witness-only Lemma 8 radius-turn bridge source
+from the sharper remaining-source package. -/
+theorem dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_remainingSources
+    (hsrc : ForwardRemainingSources) :
+    DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource := by
+  exact hsrc.2.2.2.2.2.2.1
+
+/-- Extract Dahlberg's older `E²` Lemma 8 bridge source from the sharper
 remaining-source package. -/
 theorem dahlbergE2Lemma8RadiusTurnBridgeSource_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     DahlbergE2Lemma8RadiusTurnBridgeSource := by
-  exact hsrc.2.2.2.2.2.2.1
+  exact dahlbergE2Lemma8RadiusTurnBridgeSource_of_witnessSource
+    (dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_remainingSources hsrc)
 
 /-- Extract Dahlberg's `E²` Lemma 9 ordered-turn source from the sharper
 remaining-source package. -/
@@ -2765,7 +2775,8 @@ The Euclidean Dahlberg disk setup is no longer included here, since the finite
 least-enclosing-disk and boundary-vertex facts have been proved. -/
 theorem forward_remaining_sources : ForwardRemainingSources := by
   refine ⟨?_, ?_, ?_, ?_, ?_, dahlbergE2_convex_dfv_radius_source,
-    dahlbergE2_lemma8_radius_turn_bridge_source,
+    dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_source
+      dahlbergE2_lemma8_radius_turn_bridge_source,
     dahlbergE2_disk_auxiliary_boundary_construction_source⟩
   · intro γ κ hclosed hreal hκ hper hnc
     exact four_vertex_condition_smooth_E2_nonconstant_geometric_source
