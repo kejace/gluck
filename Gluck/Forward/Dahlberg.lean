@@ -8092,6 +8092,21 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_geometricSou
       (dahlbergE2DfvGeometricSources_of_geometricSources hsrc)
       hn hsimple hregular hnoncircle)
 
+/-- Dahlberg's E² D4VT is invariant under direct Euclidean normalization from
+the weaker final-D4VT source package. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvSources
+    (hsrc : DahlbergE2DfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {u : ℂ} (hu : ‖u‖ = 1)
+    (a : ℂ) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex
+      (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) := by
+  exact (dahlbergFourVertex_signedMengerProfile_directIsometry_iff hu a v).mpr
+    (signedMengerProfile_dahlbergFourVertex_E2_of_dfvSources
+      hsrc hn hsimple hregular hnoncircle)
+
 /-- Dahlberg's positive strict ordered-turn branch is invariant under direct
 Euclidean normalization. -/
 theorem orderedAdjacentTurns_signedMengerProfile_directIsometry_of_geometricSources

@@ -1230,8 +1230,9 @@ theorem dahlberg_discrete_four_vertex_E2_directIsometry_of_sources
           (directIsometryR2 u a (v (i + 1)))) := by
   change DahlbergFourVertex
     (SignedMengerProfile (fun i => directIsometryR2 u a (v i)))
-  exact signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_geometricSources
-    (dahlbergE2_geometric_sources_of_sources hsrc)
+  exact signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvSources
+    (dahlbergE2_dfv_geometric_sources_of_dfvSources
+      (forwardDfvGeometricSources_of_geometricSources hsrc))
     hn hu a hsimple hregular hnoncircle
 
 /-- The source-parametrized E² Dahlberg conclusion from the weaker final-D4VT
@@ -1269,6 +1270,40 @@ theorem dahlberg_discrete_four_vertex_E2_of_forwardDfvSources
   change DahlbergFourVertex (SignedMengerProfile v)
   exact dahlberg_discrete_four_vertex_E2_kernel_of_forwardDfvSources
     hsrc hn v hsimple hregular hnoncircle
+
+/-- The source-parametrized public E² Dahlberg theorem is stable under direct
+Euclidean normalization from the weaker final-D4VT source package. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {u : ℂ} (hu : ‖u‖ = 1)
+    (a : ℂ) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex
+      (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) := by
+  exact signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvSources
+    (dahlbergE2_dfv_geometric_sources_of_dfvSources hsrc)
+    hn hu a hsimple hregular hnoncircle
+
+/-- The source-parametrized public E² Dahlberg theorem for raw signed-Menger
+curvature is stable under direct Euclidean normalization from the weaker
+final-D4VT source package. -/
+theorem dahlberg_discrete_four_vertex_E2_directIsometry_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {u : ℂ} (hu : ‖u‖ = 1)
+    (a : ℂ) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex
+      (fun i =>
+        Gluck.Discrete.signedMengerR2
+          (directIsometryR2 u a (v (i - 1)))
+          (directIsometryR2 u a (v i))
+          (directIsometryR2 u a (v (i + 1)))) := by
+  change DahlbergFourVertex
+    (SignedMengerProfile (fun i => directIsometryR2 u a (v i)))
+  exact signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_forwardDfvSources
+    hsrc hn hu a hsimple hregular hnoncircle
 
 /-! ## Final-D4VT endpoints from weaker source packages -/
 
