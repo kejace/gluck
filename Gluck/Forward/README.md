@@ -13,7 +13,9 @@ The primary source for target 3 is B. E. J. Dahlberg, *A Discrete Four Vertex
 Theorem*.  The reference inventory records it as `references/23.pdf`; that PDF
 is not present in this checkout, so the local source of truth for page/section
 pointers is currently the `23.pdf` row and checkout note in
-`references/summary.md`.  The formal statement follows Theorem 1 and the
+`references/summary.md`.  The local file `references/dahlberg.pdf` is
+Dahlberg's different 2005 converse paper, not this discrete paper.  The formal
+statement follows Theorem 1 and the
 definitions on pp. 1–3:
 
 - a counterclockwise simple closed polygon;

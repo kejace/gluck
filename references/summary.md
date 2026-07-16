@@ -42,4 +42,5 @@
   discrete forward theorem, but it is not present in the current
   `/tmp/gluck-feat-forward/references/` checkout.  The current Lean source
   comments therefore refer to Dahlberg's discrete four-vertex paper rather than
-  to a local file path.
+  to a local file path.  Do not substitute `dahlberg.pdf`: that file is
+  Dahlberg's 2005 converse paper, not the 2008 discrete paper.
