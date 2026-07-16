@@ -614,6 +614,22 @@ theorem orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_of_sourc
     ((dahlbergE2_geometric_sources_of_sources hsrc).1
       hn hsimple hregular horient hnc)
 
+/-- The source-parametrized positive-orientation E² ordered-turn extraction is
+stable under direct Euclidean normalization. -/
+theorem orderedAdjacentTurns_signedMengerProfile_directIsometry_of_sources
+    (hsrc : ForwardGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {u : ℂ} (hu : ‖u‖ = 1)
+    (a : ℂ) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    OrderedAdjacentTurns
+      (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) := by
+  exact orderedAdjacentTurns_signedMengerProfile_directIsometry_of_geometricSources
+    (dahlbergE2_geometric_sources_of_sources hsrc)
+    hn hu a hsimple hregular horient hnc
+
 /-- The source-parametrized positive-orientation E² Dahlberg conclusion. -/
 theorem signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_not_concyclic_of_sources
     (hsrc : ForwardGeometricSources)
@@ -819,6 +835,26 @@ theorem dahlberg_discrete_four_vertex_E2_of_sources
   change DahlbergFourVertex (SignedMengerProfile v)
   exact dahlberg_discrete_four_vertex_E2_kernel_of_sources
     hsrc hn v hsimple hregular hnoncircle
+
+/-- The source-parametrized public E² Dahlberg theorem is stable under direct
+Euclidean normalization. -/
+theorem dahlberg_discrete_four_vertex_E2_directIsometry_of_sources
+    (hsrc : ForwardGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {u : ℂ} (hu : ‖u‖ = 1)
+    (a : ℂ) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex
+      (fun i =>
+        Gluck.Discrete.signedMengerR2
+          (directIsometryR2 u a (v (i - 1)))
+          (directIsometryR2 u a (v i))
+          (directIsometryR2 u a (v (i + 1)))) := by
+  change DahlbergFourVertex
+    (SignedMengerProfile (fun i => directIsometryR2 u a (v i)))
+  exact signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_geometricSources
+    (dahlbergE2_geometric_sources_of_sources hsrc)
+    hn hu a hsimple hregular hnoncircle
 
 /-- The source-parametrized E² Dahlberg conclusion from the weaker final-D4VT
 source package. -/
