@@ -1396,10 +1396,8 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_forwardDfvSo
   have hcomponents : ForwardDfvRemainingSourceComponents :=
     forwardDfvRemainingSources_iff_components.mp
       (forwardDfvRemainingSources_of_dfvGeometricSources hsrc)
-  exact (dahlbergFourVertex_signedMengerProfile_directIsometry_iff hu a v).mpr
-    (signedMengerProfile_dahlbergFourVertex_E2_of_dfvSourceComponents
-      hcomponents.2.2
-      hn hsimple hregular hnoncircle)
+  exact signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvSourceComponents
+    hcomponents.2.2 hn hu a hsimple hregular hnoncircle
 
 /-- The source-parametrized public E² Dahlberg theorem for raw signed-Menger
 curvature is stable under direct Euclidean normalization from the weaker
