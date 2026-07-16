@@ -7789,6 +7789,55 @@ theorem dahlbergE2DfvGeometricSources_of_remainingComponents
   exact dahlbergE2DfvGeometricSources_of_components
     (dahlbergE2DfvSourceComponents_of_remainingComponents hsrc)
 
+/-- The sharp final-D4VT source components are compatible with direct
+Euclidean normalization.
+
+This is the component-level version of
+`dahlbergE2DfvGeometricSources_directIsometry`: callers that have already
+reduced the remaining E² source surface to the signed-CDFV and
+boundary/interior §4 components do not need to pass through the older
+disk-reduction package explicitly. -/
+theorem dahlbergE2DfvSourceComponents_directIsometry
+    (hsrc : DahlbergE2DfvSourceComponents)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (hnoncircle : ¬ Concyclic (fun i => directIsometryR2 u a (v i))) :
+    (PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)) →
+        DahlbergFourVertex
+          (SignedMengerProfile (fun i => directIsometryR2 u a (v i)))) ∧
+      (¬ (PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)) ∨
+          NegativePolygonOrientation (fun i => directIsometryR2 u a (v i))) →
+        DahlbergDiskAuxiliaryReduction
+          (fun i => directIsometryR2 u a (v i))) := by
+  exact dahlbergE2DfvGeometricSources_directIsometry
+    (dahlbergE2DfvGeometricSources_of_components hsrc)
+    hu a hn hsimple hregular hnoncircle
+
+/-- The stronger exact remaining E² source components are compatible with
+direct Euclidean normalization after forgetting the Lemma 8 ordered-turn
+component that final D4VT does not need. -/
+theorem dahlbergE2RemainingSourceComponents_directIsometry
+    (hsrc : DahlbergE2RemainingSourceComponents)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (hnoncircle : ¬ Concyclic (fun i => directIsometryR2 u a (v i))) :
+    (PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)) →
+        DahlbergFourVertex
+          (SignedMengerProfile (fun i => directIsometryR2 u a (v i)))) ∧
+      (¬ (PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)) ∨
+          NegativePolygonOrientation (fun i => directIsometryR2 u a (v i))) →
+        DahlbergDiskAuxiliaryReduction
+          (fun i => directIsometryR2 u a (v i))) := by
+  exact dahlbergE2DfvSourceComponents_directIsometry
+    (dahlbergE2DfvSourceComponents_of_remainingComponents hsrc)
+    hu a hn hsimple hregular hnoncircle
+
 /-- Dahlberg's boundary/interior auxiliary-polygon construction/transfer
 source for the §4 non-strict disk reduction.  At this point the finite
 minimal-disk setup and boundary-set extraction have already supplied the
