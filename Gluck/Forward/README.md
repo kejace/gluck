@@ -105,8 +105,10 @@ maxima with `κ > 1 / R`, hence
 The Dahlberg gate is now split as `DahlbergE2PaperTheoremSources`, with three
 paper-level components:
 
-- `DahlbergE2Theorem6CdfvSource`: §3 Theorem 6 / CDFV, in the current
-  radius-witness interface;
+- `DahlbergE2Theorem6CdfvSource`: §3 Theorem 6 / CDFV, as a geometric
+  curvature-disk certificate retaining the two disks that contain all vertices,
+  the two disks whose interiors miss all vertices, and the corresponding
+  radius-profile extrema;
 - `DahlbergE2Lemma8DiskNestingSource`: §4 Lemma 8's disk-nesting propagation,
   in the strict previous-radius-turn interface;
 - `DahlbergE2Section4AuxiliaryPolygonSource`: the final §4 normalized
@@ -115,6 +117,8 @@ paper-level components:
 The older compact source package `DahlbergE2PaperSourceComponents` and
 `dahlbergE2_paper_source_components_gate` are now recovered formally from this
 split package by `dahlbergE2PaperSourceComponents_of_paperTheoremSources`.
+The geometric CDFV certificate projects to the older radius-witness source via
+`dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_theorem6GeometricSource`.
 
 Dahlberg's strict positive-orientation CDFV and Lemma 8 compatibility gates,
 `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate` and

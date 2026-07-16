@@ -6434,6 +6434,88 @@ noncomputable def EdgePrevCircleRadiusProfile {n : ℕ} (v : ZMod n → ℂ)
   normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
     (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1)))
 
+/-- Center of the circle through `v (i-1), v i, v (i+1)`, expressed over the
+outgoing edge `v i → v (i+1)`. -/
+noncomputable def EdgePrevCircleCenterProfile {n : ℕ} (v : ZMod n → ℂ)
+    (i : ZMod n) : ℂ :=
+  edgeCircleCenter (v i) (v (i + 1))
+    (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1)))
+
+/-- The canonical previous-vertex circle is the circumcircle of the three
+adjacent vertices in the positive-orientation branch. -/
+theorem edgePrevCircle_circumcircleR2_of_positiveOrientation {n : ℕ}
+    {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v) (i : ZMod n) :
+    CircumcircleR2 (v (i - 1)) (v i) (v (i + 1))
+      (EdgePrevCircleCenterProfile v i) (EdgePrevCircleRadiusProfile v i) := by
+  have hcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) :=
+    polygonEdgePrev_cross_pos_of_vertex_cross_pos (horient i)
+  have hcircle :
+      CircumcircleR2 (v i) (v (i + 1)) (v (i - 1))
+        (EdgePrevCircleCenterProfile v i) (EdgePrevCircleRadiusProfile v i) := by
+    simpa [EdgePrevCircleCenterProfile, EdgePrevCircleRadiusProfile] using
+      (circumcircleR2_edge_parameter (hsimple.1 i) hcross.ne')
+  exact ⟨hcircle.1, hcircle.2.2.2, hcircle.2.1, hcircle.2.2.1⟩
+
+/-- The previous-vertex curvature disk contains all vertices.  This is the
+Lean-side spelling of Dahlberg's conclusion `V(γ) ⊆ ω(P)`. -/
+def EdgePrevCurvatureDiskContainsAll {n : ℕ} (v : ZMod n → ℂ)
+    (i : ZMod n) : Prop :=
+  PolygonInClosedDiskR2 v (EdgePrevCircleCenterProfile v i)
+    (EdgePrevCircleRadiusProfile v i)
+
+/-- The previous-vertex curvature disk has no vertex in its interior.  This is
+the Lean-side spelling of Dahlberg's conclusion
+`Int(ω(P)) ∩ V(γ) = ∅`. -/
+def EdgePrevCurvatureDiskInteriorMissesAll {n : ℕ} (v : ZMod n → ℂ)
+    (i : ZMod n) : Prop :=
+  ∀ j : ZMod n, EdgePrevCircleRadiusProfile v i ≤
+    dist (EdgePrevCircleCenterProfile v i) (v j)
+
+/-- A previous-vertex curvature disk that misses all vertex interiors also
+contains its own three defining vertices on the boundary. -/
+theorem edgePrevCurvatureDiskInteriorMissesAll_self {n : ℕ}
+    {v : ZMod n → ℂ} {i : ZMod n}
+    (hmiss : EdgePrevCurvatureDiskInteriorMissesAll v i) :
+    EdgePrevCircleRadiusProfile v i ≤
+      dist (EdgePrevCircleCenterProfile v i) (v i) := by
+  exact hmiss i
+
+/-- A previous-vertex curvature disk containing all vertices contains its own
+vertex. -/
+theorem edgePrevCurvatureDiskContainsAll_self {n : ℕ}
+    {v : ZMod n → ℂ} {i : ZMod n}
+    (hcontains : EdgePrevCurvatureDiskContainsAll v i) :
+    dist (EdgePrevCircleCenterProfile v i) (v i) ≤
+      EdgePrevCircleRadiusProfile v i := by
+  exact hcontains i
+
+/-- A Lean-side certificate for Dahlberg's Theorem 6 / CDFV.
+
+The paper states the result using four curvature disks: two whose interiors
+miss all vertices and two which contain all vertices, with pairwise distinct
+curvature circles.  This certificate keeps those geometric facts and records
+the corresponding plateau-aware extrema of the previous-radius profile, which
+is the formal interface used by the rest of the file. -/
+structure DahlbergE2Theorem6CdfvCertificate {n : ℕ} (v : ZMod n → ℂ) where
+  i₁ : ℕ
+  i₂ : ℕ
+  i₃ : ℕ
+  i₄ : ℕ
+  i₁_lt_i₂ : i₁ < i₂
+  i₂_lt_i₃ : i₂ < i₃
+  i₃_lt_i₄ : i₃ < i₄
+  i₄_lt_wrap : i₄ < i₁ + n
+  contains₁ : EdgePrevCurvatureDiskContainsAll v (i₁ : ZMod n)
+  misses₂ : EdgePrevCurvatureDiskInteriorMissesAll v (i₂ : ZMod n)
+  contains₃ : EdgePrevCurvatureDiskContainsAll v (i₃ : ZMod n)
+  misses₄ : EdgePrevCurvatureDiskInteriorMissesAll v (i₄ : ZMod n)
+  localMax₁ : DiscreteLocalMax (EdgePrevCircleRadiusProfile v) (i₁ : ZMod n)
+  localMin₂ : DiscreteLocalMin (EdgePrevCircleRadiusProfile v) (i₂ : ZMod n)
+  localMax₃ : DiscreteLocalMax (EdgePrevCircleRadiusProfile v) (i₃ : ZMod n)
+  localMin₄ : DiscreteLocalMin (EdgePrevCircleRadiusProfile v) (i₄ : ZMod n)
+
 /-- Radius of the circle through `v i, v (i+1), v (i+2)`, expressed over the
 outgoing edge `v i → v (i+1)`. -/
 noncomputable def EdgeNextCircleRadiusProfile {n : ℕ} (v : ZMod n → ℂ)
@@ -6658,6 +6740,28 @@ is recorded as the corresponding plateau-aware Dahlberg four-vertex statement
 for the previous-vertex curvature-radius profile. -/
 def DahlbergE2ConvexDfvRadiusWitnesses {n : ℕ} (v : ZMod n → ℂ) : Prop :=
   DahlbergFourVertex (EdgePrevCircleRadiusProfile v)
+
+/-- Geometric CDFV source matching Dahlberg's Theorem 6 statement.
+
+This is stronger-looking only because it keeps the paper's curvature-disk
+data instead of immediately projecting to the radius-profile
+`DahlbergFourVertex` statement used downstream. -/
+def DahlbergE2Theorem6GeometricCdfvSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ Concyclic v) →
+    Nonempty (DahlbergE2Theorem6CdfvCertificate v)
+
+/-- A CDFV certificate projects to the radius-profile four-vertex witness
+used by the formal reduction. -/
+theorem dahlbergE2ConvexDfvRadiusWitnesses_of_theorem6Certificate {n : ℕ}
+    {v : ZMod n → ℂ} (cert : DahlbergE2Theorem6CdfvCertificate v) :
+    DahlbergE2ConvexDfvRadiusWitnesses v := by
+  exact ⟨cert.i₁, cert.i₂, cert.i₃, cert.i₄,
+    cert.i₁_lt_i₂, cert.i₂_lt_i₃, cert.i₃_lt_i₄, cert.i₄_lt_wrap,
+    cert.localMax₁, cert.localMin₂, cert.localMax₃, cert.localMin₄⟩
 
 /-- Dahlberg's radius-witness package already contains strict adjacent
 boundary turns around the extremal radius plateaux.
@@ -7685,6 +7789,16 @@ def DahlbergE2ConvexDfvRadiusNonconcyclicSource : Prop :=
     PositivePolygonOrientation v →
     (¬ Concyclic v) →
     DahlbergE2ConvexDfvRadiusWitnesses v
+
+/-- The geometric CDFV source implies the radius-witness source used by the
+rest of the file. -/
+theorem dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_theorem6GeometricSource
+    (hsrc : DahlbergE2Theorem6GeometricCdfvSource) :
+    DahlbergE2ConvexDfvRadiusNonconcyclicSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle
+  letI : NeZero n := hne
+  rcases hsrc hn hsimple hregular horient hnoncircle with ⟨cert⟩
+  exact dahlbergE2ConvexDfvRadiusWitnesses_of_theorem6Certificate cert
 
 /-- Signed-Menger spelling of Dahlberg's convex/CDFV source.
 
@@ -9075,7 +9189,7 @@ of the four circles.  The Lean interface records the equivalent
 plateau-aware four-vertex statement for the previous curvature-radius
 profile. -/
 def DahlbergE2Theorem6CdfvSource : Prop :=
-  DahlbergE2ConvexDfvRadiusNonconcyclicSource
+  DahlbergE2Theorem6GeometricCdfvSource
 
 /-- Dahlberg's Lemma 8 disk-nesting source in the current proof interface.
 
@@ -9117,8 +9231,10 @@ theorem dahlbergE2PaperSourceComponents_of_paperTheoremSources
     (hsrc : DahlbergE2PaperTheoremSources) :
     DahlbergE2PaperSourceComponents := by
   rcases hsrc with ⟨hcdfv, hlemma8, hsection4⟩
+  have hradius : DahlbergE2ConvexDfvRadiusNonconcyclicSource :=
+    dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_theorem6GeometricSource hcdfv
   have hsigned : DahlbergE2ConvexDfvSignedNonconcyclicSource :=
-    dahlbergE2ConvexDfvSignedNonconcyclicSource_of_radiusNonconcyclicSource hcdfv
+    dahlbergE2ConvexDfvSignedNonconcyclicSource_of_radiusNonconcyclicSource hradius
   have hbridge : DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource :=
     dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_strictPreviousRadiusTurnsSource
       hlemma8
