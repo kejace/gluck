@@ -4498,6 +4498,260 @@ theorem dahlberg_discrete_four_vertex_E2_conformalMenger_zero_strict_of_dfvPrimi
     (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
     hn v κ hsimple hregular horient hκ
 
+/-- The S² positive-orientation constant-or-Dahlberg endpoint from the
+flattened primitive final-D4VT source-gate audit. -/
+theorem constant_or_dahlbergFourVertex_S2_pos_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_S2_pos_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple horient hregular hκ
+
+/-- The S² positive-orientation nonconstant D4VT endpoint from the flattened
+primitive final-D4VT source-gate audit. -/
+theorem dahlbergFourVertex_S2_pos_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_S2_pos_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple horient hregular hκ hnc
+
+/-- The S² negative-orientation constant-or-Dahlberg endpoint, stated for the
+reflected profile, from the flattened primitive final-D4VT source-gate audit. -/
+theorem constant_or_dahlbergFourVertex_S2_neg_reflected_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, -κ (-i) = c) ∨
+      DahlbergFourVertex (fun i => -κ (-i)) := by
+  exact constant_or_dahlbergFourVertex_S2_neg_reflected_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple horient hregular hκ
+
+/-- The S² negative-orientation nonconstant D4VT endpoint, stated for the
+reflected profile, from the flattened primitive final-D4VT source-gate audit. -/
+theorem dahlbergFourVertex_S2_neg_reflected_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc_reflected : ¬ ∃ c, ∀ i : ZMod n, -κ (-i) = c) :
+    DahlbergFourVertex (fun i => -κ (-i)) := by
+  exact dahlbergFourVertex_S2_neg_reflected_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple horient hregular hκ hnc_reflected
+
+/-- The S² negative-orientation constant-or-Dahlberg endpoint from the
+flattened primitive final-D4VT source-gate audit. -/
+theorem constant_or_dahlbergFourVertex_S2_neg_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_S2_neg_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple horient hregular hκ
+
+/-- The S² negative-orientation nonconstant D4VT endpoint from the flattened
+primitive final-D4VT source-gate audit. -/
+theorem dahlbergFourVertex_S2_neg_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_S2_neg_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple horient hregular hκ hnc
+
+/-- The S² strict-orientation constant-or-Dahlberg endpoint from the flattened
+primitive final-D4VT source-gate audit. -/
+theorem constant_or_dahlbergFourVertex_S2_strict_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_S2_strict_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple horient hregular hκ
+
+/-- The S² strict-orientation nonconstant D4VT endpoint from the flattened
+primitive final-D4VT source-gate audit. -/
+theorem dahlbergFourVertex_S2_strict_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_S2_strict_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple horient hregular hκ hnc
+
+/-- The H² positive-orientation constant-or-Dahlberg endpoint from the
+flattened primitive final-D4VT source-gate audit. -/
+theorem constant_or_dahlbergFourVertex_H2_pos_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_H2_pos_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple horient hregular hκ hcircle
+
+/-- The H² positive-orientation nonconstant D4VT endpoint from the flattened
+primitive final-D4VT source-gate audit. -/
+theorem dahlbergFourVertex_H2_pos_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_H2_pos_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple horient hregular hκ hcircle hnc
+
+/-- The H² negative-orientation constant-or-Dahlberg endpoint, stated for the
+reflected profile, from the flattened primitive final-D4VT source-gate audit. -/
+theorem constant_or_dahlbergFourVertex_H2_neg_reflected_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i) :
+    (∃ c, ∀ i : ZMod n, -κ (-i) = c) ∨
+      DahlbergFourVertex (fun i => -κ (-i)) := by
+  exact constant_or_dahlbergFourVertex_H2_neg_reflected_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple horient hregular hκ hcircle
+
+/-- The H² negative-orientation nonconstant D4VT endpoint, stated for the
+reflected profile, from the flattened primitive final-D4VT source-gate audit. -/
+theorem dahlbergFourVertex_H2_neg_reflected_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i)
+    (hnc_reflected : ¬ ∃ c, ∀ i : ZMod n, -κ (-i) = c) :
+    DahlbergFourVertex (fun i => -κ (-i)) := by
+  exact dahlbergFourVertex_H2_neg_reflected_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple horient hregular hκ hcircle hnc_reflected
+
+/-- The H² negative-orientation constant-or-Dahlberg endpoint from the
+flattened primitive final-D4VT source-gate audit. -/
+theorem constant_or_dahlbergFourVertex_H2_neg_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_H2_neg_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple horient hregular hκ hcircle
+
+/-- The H² negative-orientation nonconstant D4VT endpoint from the flattened
+primitive final-D4VT source-gate audit. -/
+theorem dahlbergFourVertex_H2_neg_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_H2_neg_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple horient hregular hκ hcircle hnc
+
+/-- The H² strict-orientation constant-or-Dahlberg endpoint from the flattened
+primitive final-D4VT source-gate audit. -/
+theorem constant_or_dahlbergFourVertex_H2_strict_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient :
+      (PositivePolygonOrientation v ∧ ∀ i, 1 < κ i) ∨
+        (NegativePolygonOrientation v ∧ ∀ i, 1 < -κ i))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_H2_strict_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple horient hregular hκ
+
+/-- The H² strict-orientation nonconstant D4VT endpoint from the flattened
+primitive final-D4VT source-gate audit. -/
+theorem dahlbergFourVertex_H2_strict_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient :
+      (PositivePolygonOrientation v ∧ ∀ i, 1 < κ i) ∨
+        (NegativePolygonOrientation v ∧ ∀ i, 1 < -κ i))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_H2_strict_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple horient hregular hκ hnc
+
 /-- Primitive grouped component spelling of the current forward source audit.
 
 This exposes the exact primitive E² source gates: nonconcyclic CDFV, Lemma 8,
