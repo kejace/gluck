@@ -7006,6 +7006,44 @@ def DahlbergE2DiskAuxiliaryBoundaryPairConstructionSource : Prop :=
         i ≠ j →
         DahlbergDiskAuxiliaryReduction v
 
+/-- Metric-data source for Dahlberg's §4 auxiliary construction.
+
+This is sharper than the pair-level boundary source: the boundary/complement
+indices have already been converted to the concrete metric facts used in the
+paper — `i` lies on the minimal disk boundary, `j` lies strictly inside, and
+`i` realizes the maximal distance from the disk centre. -/
+def DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    ∀ {O : ℂ} {R : ℝ},
+      MinimalEnclosingDiskR2 v O R →
+      0 < R →
+      ∀ {i j : ZMod n},
+        OnDiskBoundaryR2 v O R i →
+        dist O (v j) < R →
+        i ≠ j →
+        (∀ k : ZMod n, dist O (v k) ≤ dist O (v i)) →
+        DahlbergDiskAuxiliaryReduction v
+
+/-- The metric-data §4 auxiliary source implies the pair-level source by
+turning `i ∈ E` into boundary incidence and `j ∉ E` into strict interiority. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_maxInteriorSource
+    (hsrc : DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource) :
+    DahlbergE2DiskAuxiliaryBoundaryPairConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict O R hΔ hRpos i j hi hj hij
+  letI : NeZero n := hne
+  have hboundary : OnDiskBoundaryR2 v O R i := (mem_diskBoundaryIndices).mp hi
+  have hinterior : dist O (v j) < R := by
+    exact lt_of_le_of_ne (hΔ.2.1 j)
+      (fun hdist => hj ((mem_diskBoundaryIndices).mpr hdist))
+  have hmax : ∀ k : ZMod n, dist O (v k) ≤ dist O (v i) :=
+    fun k => dist_le_boundary_dist_of_minimalEnclosingDiskR2 hΔ hboundary
+  exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos
+    hboundary hinterior hij hmax
+
 /-- A pair-level §4 auxiliary construction source implies the boundary-set
 source by extracting one boundary vertex and one complementary vertex. -/
 theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_pairSource
@@ -7370,14 +7408,22 @@ theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_iff_diskReductionSourc
       (dahlbergE2DiskAuxiliaryConstructionSource_of_boundaryConstructionSource hsrc)
   · exact dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_diskReductionSource
 
-/-- Dahlberg's pair-level auxiliary-polygon construction/transfer source for
+/-- Dahlberg's metric-data auxiliary-polygon construction/transfer source for
 the §4 non-strict disk reduction.  At this point the finite minimal-disk setup
-has been proved and unpacked, and the nonempty proper boundary set `E` has
-already supplied a boundary vertex `i ∈ E` and a complementary vertex `j ∉ E`.
--/
+and boundary-set extraction have already supplied the concrete data used in the
+paper: a positive minimal disk, a boundary/maximal vertex, and a strictly
+interior vertex. -/
+theorem dahlbergE2_disk_auxiliary_max_interior_construction_source :
+    DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource := by
+  sorry
+
+/-- Dahlberg's pair-level auxiliary-polygon construction/transfer source for
+the §4 non-strict disk reduction, recovered from the metric-data source by
+turning `i ∈ E` and `j ∉ E` into boundary/interiority facts. -/
 theorem dahlbergE2_disk_auxiliary_boundary_pair_construction_source :
     DahlbergE2DiskAuxiliaryBoundaryPairConstructionSource := by
-  sorry
+  exact dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_maxInteriorSource
+    dahlbergE2_disk_auxiliary_max_interior_construction_source
 
 /-- Dahlberg's boundary-set-level auxiliary-polygon construction/transfer
 source for the §4 non-strict disk reduction, recovered from the sharper
