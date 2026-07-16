@@ -7298,6 +7298,48 @@ def DahlbergE2ConvexDfvSignedSource : Prop :=
     (¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) →
     DahlbergFourVertex (SignedMengerProfile v)
 
+/-- Nonconcyclic spelling of Dahlberg's convex/CDFV source.
+
+In the positive locally regular branch, nonconcyclicity is formally equivalent
+to nonconstancy of the signed-Menger profile, so this is only a geometric
+restatement of `DahlbergE2ConvexDfvSignedSource`. -/
+def DahlbergE2ConvexDfvSignedNonconcyclicSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ Concyclic v) →
+    DahlbergFourVertex (SignedMengerProfile v)
+
+/-- The nonconstant signed-CDFV source implies the nonconcyclic spelling. -/
+theorem dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource
+    (hsrc : DahlbergE2ConvexDfvSignedSource) :
+    DahlbergE2ConvexDfvSignedNonconcyclicSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle
+  letI : NeZero n := hne
+  exact hsrc hn hsimple hregular horient
+    (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
+      hsimple hregular horient hnoncircle)
+
+/-- The nonconcyclic signed-CDFV source implies the nonconstant spelling. -/
+theorem dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource
+    (hsrc : DahlbergE2ConvexDfvSignedNonconcyclicSource) :
+    DahlbergE2ConvexDfvSignedSource := by
+  intro n hne hn v hsimple hregular horient hnc
+  letI : NeZero n := hne
+  exact hsrc hn hsimple hregular horient
+    (not_concyclic_of_not_constant_signedMengerProfile_positiveOrientation
+      hsimple hnc horient)
+
+/-- The nonconstant and nonconcyclic signed-CDFV source spellings are formally
+equivalent in the positive locally regular branch. -/
+theorem dahlbergE2ConvexDfvSignedSource_iff_nonconcyclicSource :
+    DahlbergE2ConvexDfvSignedSource ↔
+      DahlbergE2ConvexDfvSignedNonconcyclicSource := by
+  constructor
+  · exact dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource
+  · exact dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource
+
 /-- The signed CDFV source can be applied after direct Euclidean
 normalization. -/
 theorem dahlbergE2ConvexDfvSignedSource_directIsometry
