@@ -5949,6 +5949,16 @@ theorem dahlbergE2_convexRadiusSource_iff_lemma9Source :
       hsimple horient
       (hsrc hn hsimple hregular horient hnc)
 
+/-- The split CDFV/Lemma 8 source components imply Dahlberg's convex-radius
+Euclidean source. -/
+theorem dahlbergE2ConvexRadiusSource_of_components
+    (hsrc : DahlbergE2ConvexRadiusSourceComponents) :
+    DahlbergE2ConvexRadiusSource := by
+  intro n hne hn v hsimple hregular horient hnc
+  letI : NeZero n := hne
+  exact hsrc.2 hn hsimple hregular horient hnc
+    (hsrc.1 hn hsimple hregular horient hnc)
+
 /-- Dahlberg's non-strict §4 disk-reduction source: a non-strict locally
 regular nonconcyclic polygon admits an auxiliary strict-orientation polygon
 whose Dahlberg conclusion transfers back. -/
@@ -6116,6 +6126,17 @@ theorem dahlbergE2_disk_reduction_setup_source :
     DahlbergE2DiskReductionSetupSource := by
   exact dahlbergE2DiskReductionSetupSource_of_components
     dahlbergE2_disk_reduction_setup_source_components
+
+/-- The already-proved minimal-disk setup plus an auxiliary-construction
+source imply Dahlberg's full non-strict disk-reduction source. -/
+theorem dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource
+    (hsrc : DahlbergE2DiskAuxiliaryConstructionSource) :
+    DahlbergE2DiskReductionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict
+  letI : NeZero n := hne
+  exact hsrc hn hsimple hregular hnoncircle hnonstrict
+    (dahlbergE2_disk_reduction_setup_source
+      hn hsimple hregular hnoncircle hnonstrict)
 
 /-- Dahlberg's auxiliary-polygon construction/transfer source for the §4
 non-strict disk reduction. -/

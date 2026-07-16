@@ -148,6 +148,57 @@ def ForwardDfvAtomicSources : Prop :=
   DahlbergE2ConvexDfvSignedSource ∧
   DahlbergE2DiskReductionSource
 
+/-- Fully expanded spelling of the actual remaining source obligations after
+the finite Euclidean disk setup has been proved.
+
+Compared with `ForwardAtomicSources`, the Euclidean Dahlberg part is split down
+to the two still-geometric inputs: the CDFV/Lemma 8 convex-radius components
+and the §4 auxiliary-polygon construction.  The least-enclosing-disk setup is
+no longer an assumption. -/
+def ForwardRemainingSources : Prop :=
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.RealizesCurvature γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ) ∧
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes 1 γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ) ∧
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes (-1) γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ) ∧
+  (∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger 1 v κ →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        OrderedAdjacentTurns κ) ∧
+  (∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger (-1) v κ →
+        (∀ i, 1 < κ i) →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        OrderedAdjacentTurns κ) ∧
+  DahlbergE2ConvexRadiusSourceComponents ∧
+  DahlbergE2DiskAuxiliaryConstructionSource
+
 /-- The bundled uniform source package is equivalent to the model-specific
 source package. -/
 theorem forwardGeometricSources_iff_modelSources :
@@ -192,6 +243,34 @@ theorem forwardDfvGeometricSources_iff_atomicSources :
     rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
     exact ⟨smoothForwardSource_iff_modelSources.mpr ⟨hE, hS, hH⟩,
       spaceFormDiscreteSource_iff_modelSources.mpr ⟨hdS, hdH⟩, ⟨hC, hD⟩⟩
+
+/-- The sharper remaining-source package implies the older fully expanded
+atomic source package. -/
+theorem forwardAtomicSources_of_remainingSources
+    (hsrc : ForwardRemainingSources) :
+    ForwardAtomicSources := by
+  rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
+  exact ⟨hE, hS, hH, hdS, hdH,
+    dahlbergE2ConvexRadiusSource_of_components hC,
+    dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource hD⟩
+
+/-- The sharper remaining-source package implies the bundled geometric source
+package. -/
+theorem forwardGeometricSources_of_remainingSources
+    (hsrc : ForwardRemainingSources) :
+    ForwardGeometricSources := by
+  exact forwardGeometricSources_iff_atomicSources.mpr
+    (forwardAtomicSources_of_remainingSources hsrc)
+
+/-- The sharper remaining-source package implies the weaker final-D4VT
+bundled source package. -/
+theorem forwardDfvGeometricSources_of_remainingSources
+    (hsrc : ForwardRemainingSources) :
+    ForwardDfvGeometricSources := by
+  have hgeo : ForwardGeometricSources :=
+    forwardGeometricSources_of_remainingSources hsrc
+  exact ⟨hgeo.1, hgeo.2.1,
+    dahlbergE2DfvGeometricSources_of_geometricSources hgeo.2.2⟩
 
 /-- Extract the smooth `E²` source gate from the fully expanded source
 package. -/
@@ -2061,6 +2140,32 @@ theorem forward_geometric_sources : ForwardGeometricSources := by
     letI : NeZero n := hne
     exact orderedAdjacentTurns_spaceForm_geometric_source
       hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
+
+/-- Sharper audit theorem: the current forward development is reduced to the
+actual remaining source gates.
+
+The Euclidean Dahlberg disk setup is no longer included here, since the finite
+least-enclosing-disk and boundary-vertex facts have been proved. -/
+theorem forward_remaining_sources : ForwardRemainingSources := by
+  refine ⟨?_, ?_, ?_, ?_, ?_, dahlbergE2_convex_radius_source_components,
+    dahlbergE2_disk_auxiliary_construction_source⟩
+  · intro γ κ hclosed hreal hκ hper hnc
+    exact four_vertex_condition_smooth_E2_nonconstant_geometric_source
+      hclosed hreal hκ hper hnc
+  · intro γ κ hclosed hreal hκ hper hnc
+    exact four_vertex_condition_smooth_S2_nonconstant_geometric_source
+      hclosed hreal hκ hper hnc
+  · intro γ κ hclosed hreal hκ hper hnc
+    exact four_vertex_condition_smooth_H2_nonconstant_geometric_source
+      hclosed hreal hκ hper hnc
+  · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hnc
+    letI : NeZero n := hne
+    exact orderedAdjacentTurns_S2_geometric_source
+      hn v κ hdisk hsimple hconvex hregular hκ hnc
+  · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
+    letI : NeZero n := hne
+    exact orderedAdjacentTurns_H2_geometric_source
+      hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
 
 /-- Weaker final-D4VT spelling of `forward_geometric_sources`. -/
 theorem forward_dfv_geometric_sources : ForwardDfvGeometricSources := by
