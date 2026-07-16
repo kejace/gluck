@@ -6080,6 +6080,54 @@ def DahlbergDiskAuxiliaryReduction {n : ℕ} [NeZero n] (v : ZMod n → ℂ) : P
     (DahlbergFourVertex (SignedMengerProfile w) →
       DahlbergFourVertex (SignedMengerProfile v))
 
+/-- Direct Euclidean isometries preserve Dahlberg's auxiliary-reduction
+package.  The auxiliary polygon itself is unchanged; only the final transfer
+to the original polygon is transported through the signed-Menger profile
+invariance. -/
+theorem dahlbergDiskAuxiliaryReduction_directIsometry {n : ℕ} [NeZero n]
+    {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ) {v : ZMod n → ℂ}
+    (haux : DahlbergDiskAuxiliaryReduction v) :
+    DahlbergDiskAuxiliaryReduction (fun i => directIsometryR2 u a (v i)) := by
+  rcases haux with
+    ⟨m, hne, w, hm, hsimple, hregular, horient, hnoncircle, htransfer⟩
+  exact ⟨m, hne, w, hm, hsimple, hregular, horient, hnoncircle,
+    fun hfv => (dahlbergFourVertex_signedMengerProfile_directIsometry_iff hu a v).mpr
+      (htransfer hfv)⟩
+
+/-- Direct Euclidean isometries preserve Dahlberg's auxiliary-reduction
+package exactly. -/
+theorem dahlbergDiskAuxiliaryReduction_directIsometry_iff {n : ℕ} [NeZero n]
+    {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ) (v : ZMod n → ℂ) :
+    DahlbergDiskAuxiliaryReduction (fun i => directIsometryR2 u a (v i)) ↔
+      DahlbergDiskAuxiliaryReduction v := by
+  constructor
+  · intro haux
+    rcases haux with
+      ⟨m, hne, w, hm, hsimple, hregular, horient, hnoncircle, htransfer⟩
+    exact ⟨m, hne, w, hm, hsimple, hregular, horient, hnoncircle,
+      fun hfv => (dahlbergFourVertex_signedMengerProfile_directIsometry_iff hu a v).mp
+        (htransfer hfv)⟩
+  · exact dahlbergDiskAuxiliaryReduction_directIsometry hu a
+
+/-- Eliminate Dahlberg's auxiliary-reduction package using any strict
+oriented nonconcyclic auxiliary-polygon D4VT source. -/
+theorem dahlbergFourVertex_of_dahlbergDiskAuxiliaryReduction {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ}
+    (haux : DahlbergDiskAuxiliaryReduction v)
+    (hstrict :
+      ∀ {m : ℕ} [NeZero m] {w : ZMod m → ℂ},
+        4 ≤ m →
+        Gluck.Discrete.IsSimplePolygon w →
+        DahlbergRegular w →
+        (PositivePolygonOrientation w ∨ NegativePolygonOrientation w) →
+        ¬ Concyclic w →
+        DahlbergFourVertex (SignedMengerProfile w)) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  rcases haux with
+    ⟨m, hne, w, hm, hsimple, hregular, horient, hnoncircle, htransfer⟩
+  letI : NeZero m := hne
+  exact htransfer (hstrict hm hsimple hregular horient hnoncircle)
+
 /-- Minimal-disk setup used in Dahlberg's §4 non-strict reduction.
 
 Dahlberg starts the final proof by choosing the smallest closed disk `Δ`
