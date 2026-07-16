@@ -5399,6 +5399,18 @@ theorem orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacen
       hsimple horient ((i₄ : ZMod n) + 1) (by simpa [EdgePrevCircleRadiusProfile,
         EdgeNextCircleRadiusProfile] using hinc₄)⟩
 
+/-- Positive radius ordered turns force nonconstancy of the signed-Menger
+profile. -/
+theorem not_constant_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hturns : PositiveRadiusOrderedAdjacentTurns v) :
+    ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+  exact not_constant_of_orderedAdjacentTurns
+    (orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
+      hsimple horient hturns)
+
 /-- Positive radius ordered turns imply Dahlberg's plateau-aware four-vertex
 conclusion for the signed-Menger profile. -/
 theorem signedMengerProfile_dahlbergFourVertex_of_positiveRadiusOrderedAdjacentTurns
