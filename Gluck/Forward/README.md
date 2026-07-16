@@ -76,253 +76,51 @@ ordered-turn source.
 plateau-aware conclusion; it is not used as a substitute for Dahlberg's source
 statement.
 
-## Deferred targets
+## Current source audit
 
-See `MixedSpaceFormTransport.md` for the dedicated research pass on extending
-Dahlberg's mixed, nonconvex theorem to `S²` and `H²`, including candidate
-statements, the coaxial-pencil nesting calculation, and the remaining proof
-gates.
+This branch currently contains the E² forward work only:
 
-The smooth forward statements for `E²`, `S²`, and `H²` are exposed through
-model-specific wrappers in `Euclidean.lean`, `Sphere.lean`, and
-`Hyperbolic.lean`.  The shared dispatch theorem
-`four_vertex_condition_smooth_spaceForm_kernel` in `Smooth.lean` is proved from
-the individual model primitive gates
-`four_vertex_condition_smooth_E2_model_source_gate`,
-`four_vertex_condition_smooth_S2_model_source_gate`, and
-`four_vertex_condition_smooth_H2_model_source_gate`; the package gate
-`smoothForward_model_sources_gate`, the uniform gate
-`smoothForward_source_gate`, and the uniform geometric theorem
-`four_vertex_condition_smooth_spaceForm_nonconstant_geometric_source` are
-formal dispatch wrappers.  The public nonconstant source theorem
-`four_vertex_condition_smooth_spaceForm_nonconstant_source` and the
-model-specific source names
-`four_vertex_condition_smooth_E2_nonconstant_source`,
-`four_vertex_condition_smooth_S2_nonconstant_source`, and
-`four_vertex_condition_smooth_H2_nonconstant_source` are wrappers around the
-same uniform geometric input.  The ordinary local-extrema conclusion is exposed uniformly as
-`smoothFourVertex_spaceForm_kernel`, with the nonconstant branch available as
-`smoothFourVertex_spaceForm_nonconstant`; both are derived from the weak
-smooth final-D4VT source `smoothForward_dfv_source_gate`; its model-specific
-weak gates are currently formal consequences of the stronger value-separated
-smooth gates.  The
-discrete forward statements for `S²` and `H²` are also exposed through
-model-specific wrappers in `Sphere.lean` and `Hyperbolic.lean`.  The shared
-dispatch theorem `constant_or_dahlbergFourVertex_spaceForm_kernel` in
-`SpaceFormDiscrete.lean` is proved from the weak final-D4VT source
-`spaceFormDiscrete_dfv_source_gate`.  Ordered-turn refinements use the
-separate stronger individual model sources
-`orderedAdjacentTurns_S2_model_source_gate` and
-`orderedAdjacentTurns_H2_model_source_gate`; the package gate
-`spaceFormDiscrete_model_sources_gate`, the uniform source
-`spaceFormDiscrete_source_gate`, the uniform theorem
-`orderedAdjacentTurns_spaceForm_geometric_source`, and the public source
-theorem `orderedAdjacentTurns_spaceForm_source` are formal dispatch wrappers.  The
-model-specific source names `orderedAdjacentTurns_S2_source` and
-`orderedAdjacentTurns_H2_source` are wrappers around it.  D4VT can also be
-derived from ordered turns by the general cyclic constructor
-`dahlbergFourVertex_of_orderedAdjacentTurns_four_le`; the weak
-non-Euclidean final-D4VT gate
-`spaceFormDiscrete_dfv_source_gate` is now recovered from the separate
-model-specific weak gates `dahlbergFourVertex_S2_model_source_gate` and
-`dahlbergFourVertex_H2_model_source_gate`, and those weak gates are currently
-formal consequences of the stronger ordered-turn gates.
-The local weak-source API
-`dahlbergFourVertex_spaceForm_of_dfvSource` and
-`constant_or_dahlbergFourVertex_spaceForm_of_dfvSource` records the final-D4VT
-consequence of `SpaceFormDiscreteDfvSource` without requiring ordered turns.
+- `Defs.lean` — shared forward definitions and cyclic finite-profile lemmas;
+- `Smooth.lean` — Euclidean smooth forward API;
+- `Dahlberg.lean` — Euclidean discrete Dahlberg/D4VT route;
+- `Euclidean.lean` — public E² wrappers.
 
-The post-import audit file `Sources.lean` bundles the remaining geometric
-imports in two layers.  `ForwardGeometricSources` is the stronger package used
-for ordered-turn and conformal-Menger refinements; `ForwardDfvGeometricSources`
-is the weaker package sufficient for final D4VT endpoints.  The fully expanded
-primitive remaining-source audit is:
+The space-form, conformal-Menger, and deferred Gluck/Forward material described
+in earlier notes has been moved out of this worktree.  Do not look for
+`Sphere.lean`, `Hyperbolic.lean`, `SpaceFormDiscrete.lean`,
+`ConformalMenger.lean`, or `Sources.lean` on this branch.
+
+The remaining primitive source gates in the current worktree are exactly:
 
 - `Gluck/Forward/Smooth.lean`
-  - `four_vertex_condition_smooth_E2_model_source_gate`;
-  - `four_vertex_condition_smooth_S2_model_source_gate`;
-  - `four_vertex_condition_smooth_H2_model_source_gate`.
-- `Gluck/Forward/SpaceFormDiscrete.lean`
-  - `orderedAdjacentTurns_S2_model_source_gate`;
-  - `orderedAdjacentTurns_H2_model_source_gate`.
+  - `four_vertex_condition_smooth_E2_nonconstant_classical`;
 - `Gluck/Forward/Dahlberg.lean`
   - `dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate`;
   - `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
 
-The smooth and non-Euclidean package/uniform gates are no longer primitive:
-`smoothForward_model_sources_gate` is recovered from the three individual
-smooth model gates, `smoothForward_source_gate` is recovered from that package,
-`smoothForward_dfv_source_gate` is recovered through weak model gates that are
-formal consequences of the stronger smooth gates,
-`spaceFormDiscrete_model_sources_gate` is recovered from the two individual
-non-Euclidean discrete model gates, and `spaceFormDiscrete_source_gate` is
-recovered from that package.  The weak non-Euclidean final-D4VT package
-`spaceFormDiscrete_dfv_source_gate` is recovered through weak model gates that
-are formal consequences of the stronger ordered-turn gates.
 Dahlberg's strict positive-orientation Lemma 9 source
-`dahlbergE2_lemma9_source_gate` is no longer primitive: it is recovered from
-the theorem-level strict CDFV wrapper
-`dahlbergE2_convex_dfv_signed_source_gate`, which is itself recovered from
-the primitive nonconcyclic CDFV gate
-`dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate` through the formal
-radius/signed-Menger equivalence, together with the witness-only Lemma 8 bridge
-`dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`.
+`dahlbergE2_lemma9_source_gate` is not primitive: it is recovered from the
+radius-CDFV gate, the formal radius/signed-Menger equivalence, and the
+witness-only Lemma 8 bridge.  The final-D4VT route is also separated from this
+stronger ordered-turn route: `dahlbergE2_dfv_primitive_source_components`
+contains only the radius-CDFV gate and the normalized unit-disk §4 gate, and
+the public E² D4VT endpoints route through
+`signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveSourceComponents`.
 
-The corresponding audit targets are `ForwardRemainingSources`, for the
-stronger ordered-turn route, and `ForwardDfvRemainingSources`, for the final
-D4VT route.  `forward_remaining_sources` currently collects exactly the listed
-primitive source gates.  `forward_dfv_remaining_sources` is collected through
-the weaker final-D4VT APIs, so its E² component does not import the Lemma 8
-ordered-turn source needed only by the stronger ordered-turn route.  The exact
-primitive final-D4VT E² gates are:
+The non-strict §4 branch is gated at the unit-radius rotated centered
+normalized successor-interior interface
+`dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
+All normalizations away from that primitive case are formalized: cyclic
+translation, Euclidean translation/rotation, positive homothety, reversal, the
+boundary-neighbor/transition reductions, and the boundary/interior and
+disk-reduction compatibility layers.
 
-- `dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate`;
-- `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
+Completing the current branch means replacing the four source gates above by
+formal proofs.  The relevant paper sources are:
 
-Its smooth and non-Euclidean components currently inherit the stronger
-value-separated and ordered-turn gates through formal implications, while
-keeping weak API boundaries for future direct proofs.  The
-grouped component spellings are exposed as
-`forward_remaining_source_components` and
-`forward_dfv_remaining_source_components`, with component projections such as
-`smoothForwardModelSources_of_remainingSources`,
-`spaceFormDiscreteModelSources_of_remainingSources`,
-`dahlbergE2RemainingSourceComponents_of_remainingSources`,
-`smoothForwardDfvModelSources_of_dfvRemainingSources`,
-`spaceFormDiscreteDfvModelSources_of_dfvRemainingSources`, and
-`dahlbergE2DfvSourceComponents_of_dfvRemainingSources`.  On the E² side,
-`DahlbergE2RemainingSourceComponents` is equivalent to the older bundled
-`DahlbergE2GeometricSources` package, but names the exact current Dahlberg
-interfaces.  Its primitive strict branch is split into Dahlberg's nonconcyclic
-radius-witness CDFV input and the Lemma 8 bridge from CDFV radius witnesses to
-adjacent radius turns; the older signed-CDFV and boundary/interior component
-packages are derived compatibility layers.  The final-D4VT route only needs
-the radius-CDFV input; the stronger ordered-turn route additionally needs the
-Lemma 8 bridge.  Its non-strict §4 branch is gated at the unit-radius rotated
-centered normalized
-successor-interior interface
-`dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`:
-after cyclic translation, the selected boundary vertex is `0`; after Euclidean
-translation, the minimal disk center is `0`; after Euclidean rotation, the
-boundary vertex lies on the positive real radius; after positive real
-homothety, the minimal disk has radius `1`, the boundary vertex satisfies
-`v 0 = 1`, and vertex `1` is strictly inside the unit disk.  Arbitrary positive
-radii are recovered by homothety transport for minimal disks, simplicity,
-local regularity, non-strict orientation, concyclicity, and
-`DahlbergDiskAuxiliaryReduction`; the latter uses positive-affine invariance
-because signed Menger curvature scales by the reciprocal homothety factor.
-Arbitrary centered boundary vertices and arbitrary disk centers are recovered
-by direct-isometry transport.  Arbitrary successor-interior cases are then
-recovered by cyclic translation, using the same transported structures.  The
-predecessor-interior case is recovered by reversing cyclic order, using the
-analogous reversal transport.  The
-set-level boundary-neighbor source is recovered by converting nonmembership in
-`E` to strict interiority using minimal-disk containment.  The
-adjacent-transition source is then recovered by orienting any crossing edge
-around its boundary endpoint.  The older boundary-set source is recovered
-using the finite cyclic lemma
-`diskBoundaryIndices_exists_adjacent_transition`, and the boundary/interior
-source used by direct-isometry and final-D4VT routing is recovered formally
-from the boundary-set source.  The setup-level auxiliary construction source
-routes directly through
-`dahlbergDiskReductionSetup_exists_boundary_adjacent_interior_of_nonconcyclic`,
-which selects the boundary vertex and adjacent strict interior neighbor from
-the minimal-disk setup.
-Completing the forward program means replacing the listed gates by formal
-proofs.  It also exposes source-parametrized kernels such as
-`four_vertex_condition_smooth_spaceForm_kernel_of_sources`,
-`dahlberg_discrete_four_vertex_E2_kernel_of_sources`, and
-`constant_or_dahlbergFourVertex_spaceForm_kernel_of_sources`, together with
-model-specific public shapes such as `four_vertex_E2_of_sources`,
-`four_vertex_E2_nonconstant_of_sources`,
-`dahlberg_discrete_four_vertex_E2_of_sources`,
-`dahlberg_discrete_four_vertex_E2_conformalMenger_zero_strict_of_sources`,
-`four_vertex_S2_of_sources`, `four_vertex_H2_nonconstant_of_sources`,
-`discrete_four_vertex_S2_kernel_of_sources`, and
-`discrete_four_vertex_H2_kernel_of_sources`.  It also includes
-source-parametrized positive, negative, and strict-orientation S²/H²
-conformal-Menger endpoints such as
-`orderedAdjacentTurns_S2_pos_of_sources`,
-`orderedAdjacentTurns_H2_neg_reflected_of_sources`,
-`dahlbergFourVertex_S2_neg_reflected_of_sources`,
-`constant_or_dahlbergFourVertex_S2_strict_of_sources` and
-`constant_or_dahlbergFourVertex_H2_strict_of_sources`; for the unified
-conformal-Menger dispatch it exposes
-`orderedAdjacentTurns_conformalMenger_spaceForm_kernel_of_sources` and
-`constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources`,
-plus the negative and strict-orientation forms
-`constant_or_dahlbergFourVertex_conformalMenger_neg_of_sources` and
-`constant_or_dahlbergFourVertex_conformalMenger_strict_of_sources`, so a future
-proof of `ForwardGeometricSources` can be used directly without depending on
-the current placeholder gates.  The public S²/H² wrapper files
-also expose positive-orientation ordered-turn endpoints
-`orderedAdjacentTurns_S2_of_positiveOrientation` and
-`orderedAdjacentTurns_H2_of_positiveOrientation`, together with reflected
-negative-orientation endpoints
-`orderedAdjacentTurns_S2_of_negativeOrientation_reflected` and
-`orderedAdjacentTurns_H2_of_negativeOrientation_reflected`.  The
-`discrete_four_vertex_*` wrappers expose the D4VT conclusions with the usual
-model-specific hypotheses.  The model-specific negative-orientation reflected
-turn endpoints also have constant-or forms:
-`constant_or_orderedAdjacentTurns_S2_of_negativeOrientation_reflected` and
-`constant_or_orderedAdjacentTurns_H2_of_negativeOrientation_reflected`.
-`ConformalMenger.lean` adds the proved
-`ε ∈ {0,1,-1}` dispatch layer over the E²/S²/H² conformal-Menger wrappers,
-using common positive-orientation, negative-orientation, and
-strict-orientation interfaces, plus a bundled orientation/properness interface
-matching the H² public API shape.  Its positive-orientation nonconstant kernel
-now first dispatches to the ordered-turn endpoint
-`orderedAdjacentTurns_conformalMenger_spaceForm_kernel`; the public spelling is
-`orderedAdjacentTurns_conformalMenger_spaceForm_of_positiveOrientation`, and
-D4VT is derived by `dahlbergFourVertex_of_orderedAdjacentTurns_four_le`.  The
-constant-or positive-orientation spelling also has a turn-level endpoint,
-`constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_kernel`, with public
-spelling
-`constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_of_positiveOrientation`;
-the positive-orientation constant-or D4VT kernel and public wrapper route
-through that endpoint before applying the same cyclic constructor.  The
-negative-orientation turn-level
-endpoint is exposed in reflected-sign form as
-`orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected`,
-which is then converted to the public negative D4VT theorem by
-`dahlbergFourVertex_of_neg_reflectIndex`; its constant-or analogue is
-`constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected`,
-with the constant branch stated for the same reflected-sign profile
-`i ↦ -κ(-i)`.
-The bundled turn-level endpoint is
-`orderedAdjacentTurns_conformalMenger_spaceForm_of_oriented_proper`, returning
-either turns for `κ` or turns for the reflected-sign profile according to the
-orientation branch; the constant-or bundled form is
-`constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_of_oriented_proper`.
-Their status is not uniform:
-
-- the smooth theorem is one unconditional space-form theorem, transported by
-  the Möbius-invariant osculating-cycle contact condition;
-- the H² discrete statement is the published convex coherent proper-circle
-  theorem of Grant–Mogilski (`κᵢ > 1`), in constant-or-D4VT form unless
-  nonconstancy is supplied;
-- the S² discrete statement is the project-derived, apparently new, open-
-  hemisphere `sin R` analogue described in the project notes, with the same
-  constant-or/nonconstant split;
-- no full nonconvex Dahlberg transport to S²/H² is asserted here.
-
-The detailed internal source is the common conformal proof route recorded in
-the project notes; the formalization keeps curvature extrema separate from the
-unrelated spherical inflection theorems.
-
-Primary online orientation references:
-
-- DeTurck–Gluck–Pomerleano–Vick, *The Four Vertex Theorem and its Converse*,
-  arXiv:math/0609268, for the Euclidean smooth history and formulation.
-- Pinkall's immersed-disk theorem and the simply connected space-form
-  extension, as summarized with original citations in Ghomi,
-  *A Riemannian Four Vertex Theorem*.
-- Scherk's stereographic transfer for the smooth spherical theorem, cited in
-  Grant–Mogilski, *A Discrete Four Vertex Theorem for Hyperbolic Polygons*.
-- Grant–Mogilski, arXiv:2302.04159, for the proved **convex coherent**
-  hyperbolic discrete theorem.  It does not establish the full nonconvex
-  Dahlberg analogue declared here as a deferred research target.
-- Pacitti Gentil, arXiv:2404.08077, concerns spherical inflection theorems;
-  those are not silently identified with the geodesic-curvature-extrema
-  theorem declared in this subtree.
+- Dahlberg, *The Converse of the Four Vertex Theorem* (`references/dahlberg.pdf`)
+  for the smooth classical forward theorem as quoted in the introduction.
+- Dahlberg, *A Discrete Four Vertex Theorem* (`references/23.pdf`) for CDFV
+  (§3 Theorem 6), Lemma 8, and the §4 auxiliary-polygon construction in the
+  proof of Theorem 1.
