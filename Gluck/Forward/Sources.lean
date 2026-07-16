@@ -607,8 +607,8 @@ the sharper remaining-source package. -/
 theorem dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     DahlbergE2DiskAuxiliaryBoundaryPairConstructionSource := by
-  exact dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_maxInteriorSource
-    (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_remainingSources hsrc)
+  exact dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_boundaryInteriorSource
+    (dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_remainingSources hsrc)
 
 /-- Extract Dahlberg's `E²` boundary-level §4 auxiliary-construction source
 from the sharper remaining-source package. -/
@@ -623,8 +623,8 @@ remaining-source package. -/
 theorem dahlbergE2DiskReductionSource_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     DahlbergE2DiskReductionSource := by
-  exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_iff_diskReductionSource.mp
-    (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_remainingSources hsrc)
+  exact dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mp
+    (dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_remainingSources hsrc)
 
 /-- Extract Dahlberg's `E²` signed-CDFV source from the weaker final-D4VT
 remaining-source package. -/
@@ -653,8 +653,8 @@ the weaker final-D4VT remaining-source package. -/
 theorem dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_dfvRemainingSources
     (hsrc : ForwardDfvRemainingSources) :
     DahlbergE2DiskAuxiliaryBoundaryPairConstructionSource := by
-  exact dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_maxInteriorSource
-    (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_dfvRemainingSources hsrc)
+  exact dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_boundaryInteriorSource
+    (dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_dfvRemainingSources hsrc)
 
 /-- Extract Dahlberg's `E²` boundary-level §4 auxiliary-construction source
 from the weaker final-D4VT remaining-source package. -/
@@ -669,8 +669,8 @@ final-D4VT remaining-source package. -/
 theorem dahlbergE2DiskReductionSource_of_dfvRemainingSources
     (hsrc : ForwardDfvRemainingSources) :
     DahlbergE2DiskReductionSource := by
-  exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_iff_diskReductionSource.mp
-    (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_dfvRemainingSources hsrc)
+  exact dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mp
+    (dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_dfvRemainingSources hsrc)
 
 /-- Extract the smooth `E²` source gate from the fully expanded source
 package. -/
@@ -756,14 +756,6 @@ theorem dahlbergE2ConvexDfvSignedSource_of_dfvAtomicSources
     DahlbergE2ConvexDfvSignedSource := by
   exact hsrc.2.2.2.2.2.1
 
-/-- Extract Dahlberg's `E²` disk-reduction source gate from the fully expanded
-final-D4VT source package. -/
-theorem dahlbergE2DiskReductionSource_of_dfvAtomicSources
-    (hsrc : ForwardDfvAtomicSources) :
-    DahlbergE2DiskReductionSource := by
-  exact dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource
-    hsrc.2.2.2.2.2.2
-
 /-- Extract Dahlberg's `E²` metric-data §4 source gate from the fully expanded
 final-D4VT source package. -/
 theorem dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_dfvAtomicSources
@@ -778,6 +770,14 @@ theorem dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_dfvAtomicSo
     DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource := by
   exact dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_maxInteriorSource
     (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_dfvAtomicSources hsrc)
+
+/-- Extract Dahlberg's `E²` disk-reduction source gate from the fully expanded
+final-D4VT source package. -/
+theorem dahlbergE2DiskReductionSource_of_dfvAtomicSources
+    (hsrc : ForwardDfvAtomicSources) :
+    DahlbergE2DiskReductionSource := by
+  exact dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mp
+    (dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_dfvAtomicSources hsrc)
 
 /-- Extract the sharp `E²` final-D4VT source-component package from the fully
 expanded final-D4VT source package. -/
