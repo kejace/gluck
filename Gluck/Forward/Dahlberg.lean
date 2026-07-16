@@ -6566,6 +6566,104 @@ structure DahlbergE2Theorem6CdfvCertificate {n : ℕ} (v : ZMod n → ℂ) where
   localMax₃ : DiscreteLocalMax (EdgePrevCircleRadiusProfile v) (i₃ : ZMod n)
   localMin₄ : DiscreteLocalMin (EdgePrevCircleRadiusProfile v) (i₄ : ZMod n)
 
+/-- Ordered geometric disk data in Dahlberg's Theorem 6 / CDFV, before
+attaching the radius-profile local-extremum proof. -/
+structure DahlbergE2Theorem6OrderedDiskCertificate {n : ℕ} (v : ZMod n → ℂ) where
+  i₁ : ℕ
+  i₂ : ℕ
+  i₃ : ℕ
+  i₄ : ℕ
+  i₁_lt_i₂ : i₁ < i₂
+  i₂_lt_i₃ : i₂ < i₃
+  i₃_lt_i₄ : i₃ < i₄
+  i₄_lt_wrap : i₄ < i₁ + n
+  contains₁ : EdgePrevCurvatureDiskContainsAll v (i₁ : ZMod n)
+  misses₂ : EdgePrevCurvatureDiskInteriorMissesAll v (i₂ : ZMod n)
+  contains₃ : EdgePrevCurvatureDiskContainsAll v (i₃ : ZMod n)
+  misses₄ : EdgePrevCurvatureDiskInteriorMissesAll v (i₄ : ZMod n)
+  circle₁_ne₂ :
+    EdgePrevCurvatureCirclesDistinct v (i₁ : ZMod n) (i₂ : ZMod n)
+  circle₁_ne₃ :
+    EdgePrevCurvatureCirclesDistinct v (i₁ : ZMod n) (i₃ : ZMod n)
+  circle₁_ne₄ :
+    EdgePrevCurvatureCirclesDistinct v (i₁ : ZMod n) (i₄ : ZMod n)
+  circle₂_ne₃ :
+    EdgePrevCurvatureCirclesDistinct v (i₂ : ZMod n) (i₃ : ZMod n)
+  circle₂_ne₄ :
+    EdgePrevCurvatureCirclesDistinct v (i₂ : ZMod n) (i₄ : ZMod n)
+  circle₃_ne₄ :
+    EdgePrevCurvatureCirclesDistinct v (i₃ : ZMod n) (i₄ : ZMod n)
+
+/-- Radius-profile local-extremum proof attached to a fixed ordered CDFV disk
+certificate. -/
+structure DahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate {n : ℕ}
+    {v : ZMod n → ℂ} (disk : DahlbergE2Theorem6OrderedDiskCertificate v) :
+    Prop where
+  localMax₁ : DiscreteLocalMax (EdgePrevCircleRadiusProfile v) (disk.i₁ : ZMod n)
+  localMin₂ : DiscreteLocalMin (EdgePrevCircleRadiusProfile v) (disk.i₂ : ZMod n)
+  localMax₃ : DiscreteLocalMax (EdgePrevCircleRadiusProfile v) (disk.i₃ : ZMod n)
+  localMin₄ : DiscreteLocalMin (EdgePrevCircleRadiusProfile v) (disk.i₄ : ZMod n)
+
+/-- Forget the radius-profile extrema from a full CDFV certificate. -/
+def dahlbergE2Theorem6OrderedDiskCertificate_of_cdfvCertificate {n : ℕ}
+    {v : ZMod n → ℂ} (cert : DahlbergE2Theorem6CdfvCertificate v) :
+    DahlbergE2Theorem6OrderedDiskCertificate v :=
+  { i₁ := cert.i₁
+    i₂ := cert.i₂
+    i₃ := cert.i₃
+    i₄ := cert.i₄
+    i₁_lt_i₂ := cert.i₁_lt_i₂
+    i₂_lt_i₃ := cert.i₂_lt_i₃
+    i₃_lt_i₄ := cert.i₃_lt_i₄
+    i₄_lt_wrap := cert.i₄_lt_wrap
+    contains₁ := cert.contains₁
+    misses₂ := cert.misses₂
+    contains₃ := cert.contains₃
+    misses₄ := cert.misses₄
+    circle₁_ne₂ := cert.circle₁_ne₂
+    circle₁_ne₃ := cert.circle₁_ne₃
+    circle₁_ne₄ := cert.circle₁_ne₄
+    circle₂_ne₃ := cert.circle₂_ne₃
+    circle₂_ne₄ := cert.circle₂_ne₄
+    circle₃_ne₄ := cert.circle₃_ne₄ }
+
+/-- A full CDFV certificate supplies the radius-extremum proof for its ordered
+disk certificate. -/
+theorem dahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate_of_cdfvCertificate
+    {n : ℕ} {v : ZMod n → ℂ} (cert : DahlbergE2Theorem6CdfvCertificate v) :
+    DahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate
+      (dahlbergE2Theorem6OrderedDiskCertificate_of_cdfvCertificate cert) := by
+  exact ⟨cert.localMax₁, cert.localMin₂, cert.localMax₃, cert.localMin₄⟩
+
+/-- Rebuild a full CDFV certificate from ordered disk data and the matching
+radius-profile local-extremum proof. -/
+def dahlbergE2Theorem6CdfvCertificate_of_orderedDiskCertificate {n : ℕ}
+    {v : ZMod n → ℂ} (disk : DahlbergE2Theorem6OrderedDiskCertificate v)
+    (hext : DahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate disk) :
+    DahlbergE2Theorem6CdfvCertificate v :=
+  { i₁ := disk.i₁
+    i₂ := disk.i₂
+    i₃ := disk.i₃
+    i₄ := disk.i₄
+    i₁_lt_i₂ := disk.i₁_lt_i₂
+    i₂_lt_i₃ := disk.i₂_lt_i₃
+    i₃_lt_i₄ := disk.i₃_lt_i₄
+    i₄_lt_wrap := disk.i₄_lt_wrap
+    contains₁ := disk.contains₁
+    misses₂ := disk.misses₂
+    contains₃ := disk.contains₃
+    misses₄ := disk.misses₄
+    circle₁_ne₂ := disk.circle₁_ne₂
+    circle₁_ne₃ := disk.circle₁_ne₃
+    circle₁_ne₄ := disk.circle₁_ne₄
+    circle₂_ne₃ := disk.circle₂_ne₃
+    circle₂_ne₄ := disk.circle₂_ne₄
+    circle₃_ne₄ := disk.circle₃_ne₄
+    localMax₁ := hext.localMax₁
+    localMin₂ := hext.localMin₂
+    localMax₃ := hext.localMax₃
+    localMin₄ := hext.localMin₄ }
+
 /-- Radius of the circle through `v i, v (i+1), v (i+2)`, expressed over the
 outgoing edge `v i → v (i+1)`. -/
 noncomputable def EdgeNextCircleRadiusProfile {n : ℕ} (v : ZMod n → ℂ)
@@ -6837,12 +6935,56 @@ def DahlbergE2Theorem6AssemblySource : Prop :=
     Nonempty (DahlbergE2Theorem6InteriorMissingDisksCertificate v) →
     Nonempty (DahlbergE2Theorem6CdfvCertificate v)
 
+/-- Sharper assembly interface for Dahlberg §3 Theorem 6: construct ordered
+disk data and prove the matching radius-profile extrema separately. -/
+def DahlbergE2Theorem6OrderedAssemblySource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ Concyclic v) →
+    Nonempty (DahlbergE2Theorem6ContainingDisksCertificate v) →
+    Nonempty (DahlbergE2Theorem6InteriorMissingDisksCertificate v) →
+    Nonempty
+      { disk : DahlbergE2Theorem6OrderedDiskCertificate v //
+        DahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate disk }
+
+/-- The sharper ordered assembly source implies the older full-CDFV assembly
+source. -/
+theorem dahlbergE2Theorem6AssemblySource_of_orderedAssemblySource
+    (hsrc : DahlbergE2Theorem6OrderedAssemblySource) :
+    DahlbergE2Theorem6AssemblySource := by
+  intro n hne hn v hsimple hregular horient hnoncircle hcontains hmisses
+  letI : NeZero n := hne
+  rcases hsrc hn hsimple hregular horient hnoncircle hcontains hmisses with
+    ⟨⟨disk, hext⟩⟩
+  exact ⟨dahlbergE2Theorem6CdfvCertificate_of_orderedDiskCertificate disk hext⟩
+
+/-- The older full-CDFV assembly source implies the sharper ordered assembly
+source by projecting the ordered disk data and local-extrema proof from the
+full certificate. -/
+theorem dahlbergE2Theorem6OrderedAssemblySource_of_assemblySource
+    (hsrc : DahlbergE2Theorem6AssemblySource) :
+    DahlbergE2Theorem6OrderedAssemblySource := by
+  intro n hne hn v hsimple hregular horient hnoncircle hcontains hmisses
+  letI : NeZero n := hne
+  rcases hsrc hn hsimple hregular horient hnoncircle hcontains hmisses with ⟨cert⟩
+  exact ⟨⟨dahlbergE2Theorem6OrderedDiskCertificate_of_cdfvCertificate cert,
+    dahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate_of_cdfvCertificate cert⟩⟩
+
+/-- The older and sharper §3 assembly interfaces are formally equivalent. -/
+theorem dahlbergE2Theorem6AssemblySource_iff_orderedAssemblySource :
+    DahlbergE2Theorem6AssemblySource ↔ DahlbergE2Theorem6OrderedAssemblySource := by
+  constructor
+  · exact dahlbergE2Theorem6OrderedAssemblySource_of_assemblySource
+  · exact dahlbergE2Theorem6AssemblySource_of_orderedAssemblySource
+
 /-- Paper-facing sources for Dahlberg's §3 Theorem 6 / CDFV: Lemma 5,
 Lemma 7, and their final assembly. -/
 def DahlbergE2Theorem6PaperSources : Prop :=
   DahlbergE2Theorem6Lemma5ContainingDisksSource ∧
   DahlbergE2Theorem6Lemma7InteriorMissingDisksSource ∧
-  DahlbergE2Theorem6AssemblySource
+  DahlbergE2Theorem6OrderedAssemblySource
 
 /-- The split §3 paper sources imply the current geometric CDFV source. -/
 theorem dahlbergE2Theorem6GeometricCdfvSource_of_paperSources
@@ -6850,7 +6992,8 @@ theorem dahlbergE2Theorem6GeometricCdfvSource_of_paperSources
     DahlbergE2Theorem6GeometricCdfvSource := by
   intro n hne hn v hsimple hregular horient hnoncircle
   letI : NeZero n := hne
-  exact hsrc.2.2 hn hsimple hregular horient hnoncircle
+  exact dahlbergE2Theorem6AssemblySource_of_orderedAssemblySource hsrc.2.2
+    hn hsimple hregular horient hnoncircle
     (hsrc.1 hn hsimple hregular horient hnoncircle)
     (hsrc.2.1 hn hsimple hregular horient hnoncircle)
 
@@ -6896,7 +7039,9 @@ theorem dahlbergE2Theorem6PaperSources_of_geometricCdfvSource
     exact ⟨dahlbergE2Theorem6InteriorMissingDisksCertificate_of_cdfvCertificate cert⟩
   · intro n hne hn v hsimple hregular horient hnoncircle _hcontains _hmisses
     letI : NeZero n := hne
-    exact hsrc hn hsimple hregular horient hnoncircle
+    rcases hsrc hn hsimple hregular horient hnoncircle with ⟨cert⟩
+    exact ⟨⟨dahlbergE2Theorem6OrderedDiskCertificate_of_cdfvCertificate cert,
+      dahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate_of_cdfvCertificate cert⟩⟩
 
 /-- The split §3 paper-source package is formally equivalent to the geometric
 CDFV source used by the reduction. -/

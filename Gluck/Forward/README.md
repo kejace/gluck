@@ -108,9 +108,13 @@ paper-level components:
 - `DahlbergE2Theorem6CdfvSource`: §3 Theorem 6 / CDFV, now split into
   `DahlbergE2Theorem6Lemma5ContainingDisksSource`,
   `DahlbergE2Theorem6Lemma7InteriorMissingDisksSource`, and
-  `DahlbergE2Theorem6AssemblySource`.  These retain the paper's two
-  containing curvature disks, two interior-missing curvature disks, pairwise
-  distinct curvature circles, and the radius-profile extrema used downstream;
+  `DahlbergE2Theorem6OrderedAssemblySource`.  The ordered assembly separates
+  the paper's ordered disk data
+  (`DahlbergE2Theorem6OrderedDiskCertificate`) from the matching
+  radius-profile extrema
+  (`DahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate`); it is formally
+  equivalent to the older `DahlbergE2Theorem6AssemblySource` via
+  `dahlbergE2Theorem6AssemblySource_iff_orderedAssemblySource`;
 - `DahlbergE2Lemma8DiskNestingSource`: §4 Lemma 8's disk-nesting propagation,
   producing the named `DahlbergE2Lemma8DiskNestingCertificate`, i.e. the eight
   ordered one-step previous-radius inequalities used by Lemma 9.  The local
@@ -234,7 +238,7 @@ formal proofs.  The relevant paper sources are:
   proof of Theorem 1.  In Lean these are now named separately as
   `DahlbergE2Theorem6Lemma5ContainingDisksSource`,
   `DahlbergE2Theorem6Lemma7InteriorMissingDisksSource`,
-  `DahlbergE2Theorem6AssemblySource`,
+  `DahlbergE2Theorem6OrderedAssemblySource`,
   `DahlbergE2Lemma8MonotoneArcExtractionSource`, and
   `DahlbergE2Section4AuxiliaryPolygonSource`; the local edge-region inclusion
   in Lemma 8 is already formalized.
