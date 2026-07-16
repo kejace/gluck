@@ -133,7 +133,7 @@ remaining-source audit is:
 - `Gluck/Forward/Dahlberg.lean`
   - `dahlbergE2_convex_dfv_signed_source`;
   - `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source`;
-  - `dahlbergE2_disk_auxiliary_max_interior_construction_source`.
+  - `dahlbergE2_disk_auxiliary_boundary_interior_construction_source`.
 
 The corresponding audit targets are `ForwardRemainingSources`, for the
 stronger ordered-turn route, and `ForwardDfvRemainingSources`, for the final

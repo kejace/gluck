@@ -7028,6 +7028,62 @@ def DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource : Prop :=
         (∀ k : ZMod n, dist O (v k) ≤ dist O (v i)) →
         DahlbergDiskAuxiliaryReduction v
 
+/-- Boundary/interior source for Dahlberg's §4 auxiliary construction.
+
+This is the sharpest metric-data interface used here: a minimal disk, a
+boundary vertex, and a strictly interior vertex.  Positivity of the radius and
+maximality of the boundary vertex are formal consequences of these hypotheses
+and are supplied by conversion lemmas below. -/
+def DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    ∀ {O : ℂ} {R : ℝ},
+      MinimalEnclosingDiskR2 v O R →
+      ∀ {i j : ZMod n},
+        OnDiskBoundaryR2 v O R i →
+        dist O (v j) < R →
+        i ≠ j →
+        DahlbergDiskAuxiliaryReduction v
+
+/-- The boundary/interior §4 auxiliary source implies the older metric-data
+source by forgetting the redundant positive-radius and maximality inputs. -/
+theorem dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_boundaryInteriorSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource) :
+    DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict O R hΔ _hRpos
+    i j hboundary hinterior hij _hmax
+  letI : NeZero n := hne
+  exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ
+    hboundary hinterior hij
+
+/-- The older metric-data §4 auxiliary source implies the boundary/interior
+source because positivity of the minimal radius and boundary maximality are
+already formal consequences. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_maxInteriorSource
+    (hsrc : DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource) :
+    DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict O R hΔ
+    i j hboundary hinterior hij
+  letI : NeZero n := hne
+  have hRpos : 0 < R :=
+    radius_pos_of_minimalEnclosingDiskR2_of_isSimplePolygon hΔ hsimple
+  have hmax : ∀ k : ZMod n, dist O (v k) ≤ dist O (v i) :=
+    fun k => dist_le_boundary_dist_of_minimalEnclosingDiskR2 hΔ hboundary
+  exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos
+    hboundary hinterior hij hmax
+
+/-- The boundary/interior and older max/interior §4 auxiliary source
+interfaces are formally equivalent. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_maxInteriorSource :
+    DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource ↔
+      DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource := by
+  constructor
+  · exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_boundaryInteriorSource
+  · exact dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_maxInteriorSource
+
 /-- The metric-data §4 auxiliary source implies the pair-level source by
 turning `i ∈ E` into boundary incidence and `j ∉ E` into strict interiority. -/
 theorem dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_maxInteriorSource
@@ -7576,14 +7632,15 @@ theorem dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_iff_diskReductionSo
 
 /-- The exact Euclidean source components needed for the final plateau-aware
 D4VT endpoint: Dahlberg's strict convex signed-Menger CDFV theorem, plus the
-metric-data §4 non-strict auxiliary construction.
+boundary/interior §4 non-strict auxiliary construction.
 
 Unlike `DahlbergE2GeometricSources`, this package does not include the Lemma 8
 ordered-turn refinement.  Unlike `DahlbergE2DfvGeometricSources`, it keeps the
-non-strict branch at the sharper max/interior construction interface rather
+non-strict branch at the sharper boundary/interior construction interface rather
 than the older disk-reduction interface. -/
 def DahlbergE2DfvSourceComponents : Prop :=
-  DahlbergE2ConvexDfvSignedSource ∧ DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource
+  DahlbergE2ConvexDfvSignedSource ∧
+  DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource
 
 /-- The exact `E²` Dahlberg source components still needed for the stronger
 ordered-turn route.
@@ -7594,11 +7651,11 @@ lemmas have been proved:
 
 * the strict convex theorem-level signed-Menger CDFV input;
 * Dahlberg's Lemma 8 witness-to-adjacent-radius-turn bridge;
-* the metric-data §4 auxiliary construction for the non-strict branch. -/
+* the boundary/interior §4 auxiliary construction for the non-strict branch. -/
 def DahlbergE2RemainingSourceComponents : Prop :=
   DahlbergE2ConvexDfvSignedSource ∧
   DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
-  DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource
+  DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource
 
 /-- The exact remaining `E²` Dahlberg components imply the older bundled
 geometric source package. -/
@@ -7609,7 +7666,9 @@ theorem dahlbergE2GeometricSources_of_remainingComponents
     dahlbergE2ConvexRadiusSource_of_components
       ⟨dahlbergE2ConvexDfvRadiusSource_of_signedSource hsrc.1,
         dahlbergE2Lemma8RadiusTurnBridgeSource_of_witnessSource hsrc.2.1⟩,
-    dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource hsrc.2.2⟩
+    dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource
+      (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_boundaryInteriorSource
+        hsrc.2.2)⟩
 
 /-- The older bundled `E²` Dahlberg geometric source package implies the exact
 remaining source components. -/
@@ -7620,7 +7679,8 @@ theorem dahlbergE2RemainingSourceComponents_of_geometricSources
     dahlbergE2ConvexRadiusSourceComponents_iff_convexRadiusSource.mpr hsrc.1
   exact ⟨dahlbergE2ConvexDfvSignedSource_of_radiusSource hconvex.1,
     dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_source hconvex.2,
-    dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSource hsrc.2⟩
+    dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_maxInteriorSource
+      (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSource hsrc.2)⟩
 
 /-- The bundled `E²` Dahlberg geometric source package is equivalent to the
 exact three remaining source components. -/
@@ -7636,16 +7696,19 @@ theorem dahlbergE2DfvGeometricSources_of_components
     (hsrc : DahlbergE2DfvSourceComponents) :
     DahlbergE2DfvGeometricSources := by
   exact ⟨hsrc.1,
-    dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource hsrc.2⟩
+    dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource
+      (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_boundaryInteriorSource
+        hsrc.2)⟩
 
 /-- The older final-D4VT geometric package implies the sharp final-D4VT source
-components by unpacking its disk-reduction branch to the max/interior
+components by unpacking its disk-reduction branch to the boundary/interior
 interface. -/
 theorem dahlbergE2DfvSourceComponents_of_geometricSources
     (hsrc : DahlbergE2DfvGeometricSources) :
     DahlbergE2DfvSourceComponents := by
   exact ⟨hsrc.1,
-    dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSource hsrc.2⟩
+    dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_maxInteriorSource
+      (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSource hsrc.2)⟩
 
 /-- The older final-D4VT geometric package is formally equivalent to the sharp
 signed-CDFV/max-interior source-component package. -/
@@ -7670,14 +7733,23 @@ theorem dahlbergE2DfvGeometricSources_of_remainingComponents
   exact dahlbergE2DfvGeometricSources_of_components
     (dahlbergE2DfvSourceComponents_of_remainingComponents hsrc)
 
-/-- Dahlberg's metric-data auxiliary-polygon construction/transfer source for
-the §4 non-strict disk reduction.  At this point the finite minimal-disk setup
-and boundary-set extraction have already supplied the concrete data used in the
-paper: a positive minimal disk, a boundary/maximal vertex, and a strictly
-interior vertex. -/
+/-- Dahlberg's boundary/interior auxiliary-polygon construction/transfer
+source for the §4 non-strict disk reduction.  At this point the finite
+minimal-disk setup and boundary-set extraction have already supplied the
+concrete data used in the paper: a minimal disk, a boundary vertex, and a
+strictly interior vertex. -/
+theorem dahlbergE2_disk_auxiliary_boundary_interior_construction_source :
+    DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource := by
+  sorry
+
+/-- Dahlberg's older metric-data auxiliary-polygon construction/transfer
+source for the §4 non-strict disk reduction, recovered from the sharper
+boundary/interior source by supplying the already-proved positive-radius and
+boundary-maximality facts. -/
 theorem dahlbergE2_disk_auxiliary_max_interior_construction_source :
     DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource := by
-  sorry
+  exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_boundaryInteriorSource
+    dahlbergE2_disk_auxiliary_boundary_interior_construction_source
 
 /-- The exact three remaining `E²` Dahlberg source gates currently used by the
 stronger ordered-turn route. -/
@@ -7685,7 +7757,7 @@ theorem dahlbergE2_remaining_source_components :
     DahlbergE2RemainingSourceComponents := by
   exact ⟨dahlbergE2_convex_dfv_signed_source,
     dahlbergE2_lemma8_radius_turn_bridge_from_witness_source,
-    dahlbergE2_disk_auxiliary_max_interior_construction_source⟩
+    dahlbergE2_disk_auxiliary_boundary_interior_construction_source⟩
 
 /-- The exact `E²` source components currently used by the weaker final-D4VT
 route, obtained from the stronger remaining-source component package. -/
