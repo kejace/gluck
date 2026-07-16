@@ -29,6 +29,27 @@ def ForwardGeometricSources : Prop :=
   SpaceFormDiscreteSource ∧
   DahlbergE2GeometricSources
 
+/-- Model-specific spelling of the remaining forward geometric source package.
+
+This expands the two uniform source packages into their model-specific
+components while keeping Dahlberg's E² discrete package unchanged. -/
+def ForwardModelSources : Prop :=
+  SmoothForwardModelSources ∧
+  SpaceFormDiscreteModelSources ∧
+  DahlbergE2GeometricSources
+
+/-- The bundled uniform source package is equivalent to the model-specific
+source package. -/
+theorem forwardGeometricSources_iff_modelSources :
+    ForwardGeometricSources ↔ ForwardModelSources := by
+  constructor
+  · intro hsrc
+    exact ⟨smoothForwardSource_iff_modelSources.mp hsrc.1,
+      spaceFormDiscreteSource_iff_modelSources.mp hsrc.2.1, hsrc.2.2⟩
+  · intro hsrc
+    exact ⟨smoothForwardSource_iff_modelSources.mpr hsrc.1,
+      spaceFormDiscreteSource_iff_modelSources.mpr hsrc.2.1, hsrc.2.2⟩
+
 /-- Extract the smooth source component from a bundled forward source proof. -/
 theorem four_vertex_condition_smooth_spaceForm_nonconstant_of_sources
     (hsrc : ForwardGeometricSources) {ε : ℝ}
@@ -1498,5 +1519,9 @@ theorem forward_geometric_sources : ForwardGeometricSources := by
     letI : NeZero n := hne
     exact orderedAdjacentTurns_spaceForm_geometric_source
       hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
+
+/-- Model-specific spelling of `forward_geometric_sources`. -/
+theorem forward_model_sources : ForwardModelSources := by
+  exact forwardGeometricSources_iff_modelSources.mp forward_geometric_sources
 
 end Gluck.Forward
