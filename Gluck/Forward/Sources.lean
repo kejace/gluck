@@ -3887,34 +3887,52 @@ theorem discrete_four_vertex_H2_of_dfvAtomicSources
     (forwardDfvGeometricSources_of_atomicSources hsrc)
     hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
 
-/-- Sharper audit theorem: the current forward development is reduced to the
-actual remaining source gates.
-
-The Euclidean Dahlberg disk setup is no longer included here, since the finite
-least-enclosing-disk and boundary-vertex facts have been proved. -/
-theorem forward_remaining_sources : ForwardRemainingSources := by
-  exact forwardRemainingSources_iff_uniformComponents.mpr
-    ⟨smoothForward_source_gate, spaceFormDiscrete_source_gate,
-      dahlbergE2_remaining_source_components⟩
-
-/-- The current forward development is reduced to the bundled geometric source
-package, routed through the sharper exact remaining-source audit. -/
-theorem forward_geometric_sources : ForwardGeometricSources := by
-  exact forwardGeometricSources_of_remainingSources forward_remaining_sources
-
-/-- Grouped component spelling of `forward_remaining_sources`. -/
-theorem forward_remaining_source_components :
-    ForwardRemainingSourceComponents := by
-  exact forwardRemainingSources_iff_components.mp forward_remaining_sources
-
 /-- Primitive grouped component spelling of the current forward source audit.
 
 This exposes the exact primitive E² source gates: nonconcyclic CDFV, Lemma 8,
 and the normalized unit-disk §4 construction. -/
 theorem forward_primitive_remaining_source_components :
     ForwardPrimitiveRemainingSourceComponents := by
-  exact forwardRemainingSourceComponents_iff_primitiveComponents.mp
+  exact ⟨smoothForward_model_sources_gate,
+    spaceFormDiscrete_model_sources_gate,
+    dahlbergE2_primitive_remaining_source_components⟩
+
+/-- Grouped component spelling of `forward_remaining_sources`, recovered from
+the primitive source audit. -/
+theorem forward_remaining_source_components :
+    ForwardRemainingSourceComponents := by
+  exact forwardRemainingSourceComponents_iff_primitiveComponents.mpr
+    forward_primitive_remaining_source_components
+
+/-- Sharper audit theorem: the current forward development is reduced to the
+actual remaining source gates.
+
+The Euclidean Dahlberg disk setup is no longer included here, since the finite
+least-enclosing-disk and boundary-vertex facts have been proved. -/
+theorem forward_remaining_sources : ForwardRemainingSources := by
+  exact forwardRemainingSources_iff_components.mpr
     forward_remaining_source_components
+
+/-- The current forward development is reduced to the bundled geometric source
+package, routed through the sharper exact remaining-source audit. -/
+theorem forward_geometric_sources : ForwardGeometricSources := by
+  exact forwardGeometricSources_of_remainingSources forward_remaining_sources
+
+/-- Primitive grouped component spelling of the current final-D4VT source
+audit.  This exposes the exact primitive E² final-D4VT source gates:
+nonconcyclic CDFV and the normalized unit-disk §4 construction. -/
+theorem forward_dfv_primitive_remaining_source_components :
+    ForwardDfvPrimitiveRemainingSourceComponents := by
+  exact ⟨smoothForward_dfv_model_sources,
+    spaceFormDiscrete_dfv_model_sources,
+    dahlbergE2_dfv_primitive_source_components⟩
+
+/-- Grouped component spelling of `forward_dfv_remaining_sources`, recovered
+from the primitive final-D4VT source audit. -/
+theorem forward_dfv_remaining_source_components :
+    ForwardDfvRemainingSourceComponents := by
+  exact forwardDfvRemainingSourceComponents_iff_primitiveComponents.mpr
+    forward_dfv_primitive_remaining_source_components
 
 /-- Sharper audit theorem for the final D4VT endpoints.
 
@@ -3928,10 +3946,8 @@ ordered-turn gates.  The smooth component is similarly collected through weak
 E²/S²/H² smooth D4VT gates that are currently proved from the stronger
 value-separated gates. -/
 theorem forward_dfv_remaining_sources : ForwardDfvRemainingSources := by
-  exact forwardDfvRemainingSources_iff_uniformComponents.mpr
-    ⟨smoothForward_dfv_source,
-      spaceFormDiscrete_dfv_source,
-      dahlbergE2_dfv_source_components⟩
+  exact forwardDfvRemainingSources_iff_components.mpr
+    forward_dfv_remaining_source_components
 
 /-- Weaker final-D4VT source package, routed through the actual weaker
 final-D4VT remaining-source audit rather than through the stronger full
@@ -3939,20 +3955,6 @@ geometric source package. -/
 theorem forward_dfv_geometric_sources : ForwardDfvGeometricSources := by
   exact forwardDfvGeometricSources_of_dfvRemainingSources
     forward_dfv_remaining_sources
-
-/-- Grouped component spelling of `forward_dfv_remaining_sources`. -/
-theorem forward_dfv_remaining_source_components :
-    ForwardDfvRemainingSourceComponents := by
-  exact forwardDfvRemainingSources_iff_components.mp
-    forward_dfv_remaining_sources
-
-/-- Primitive grouped component spelling of the current final-D4VT source
-audit.  This exposes the exact primitive E² final-D4VT source gates:
-nonconcyclic CDFV and the normalized unit-disk §4 construction. -/
-theorem forward_dfv_primitive_remaining_source_components :
-    ForwardDfvPrimitiveRemainingSourceComponents := by
-  exact forwardDfvRemainingSourceComponents_iff_primitiveComponents.mp
-    forward_dfv_remaining_source_components
 
 /-- Model-specific spelling of `forward_remaining_sources`, routed through the
 sharper exact-source audit. -/
