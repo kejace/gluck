@@ -1866,9 +1866,10 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
     (hproper : ε < 0 → ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
-    hε hn v κ hdisk hsimple horient hregular hκ hproper hnc
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
+      hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper)
+    hnc
 
 /-- The source-parametrized negative-orientation conformal-Menger ordered-turn
 kernel, stated for the reflected profile `i ↦ -κ(-i)`. -/
@@ -1972,9 +1973,25 @@ theorem constant_or_dahlbergFourVertex_conformalMenger_neg_of_sources
     (hκ : RealizesConformalMenger ε v κ)
     (hproper : ε < 0 → ∀ i, 1 < -κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_conformalMenger_neg_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
-    hε hn v κ hdisk hsimple horient hregular hκ hproper
+  have hdisk' : ∀ i, ‖ReverseCyclicPolygon v i‖ < 1 := by
+    intro i
+    exact hdisk (-i)
+  have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
+    isSimplePolygon_reverseCyclicPolygon hsimple
+  have horient' : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
+    positiveOrientation_reverseCyclicPolygon_of_negativeOrientation horient
+  have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
+    dahlbergRegular_reverseCyclicPolygon hregular
+  have hκ' :
+      RealizesConformalMenger ε (ReverseCyclicPolygon v) (fun i => -κ (-i)) :=
+    realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation horient hκ
+  have hproper' : ε < 0 → ∀ i, 1 < -κ (-i) := by
+    intro hlt i
+    exact hproper hlt (-i)
+  exact constant_or_dahlbergFourVertex_of_neg_reflectIndex
+    (constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
+      hsrc hε hn (ReverseCyclicPolygon v) (fun i => -κ (-i))
+      hdisk' hsimple' horient' hregular' hκ' hproper')
 
 /-- The source-parametrized strict-orientation conformal-Menger
 constant-or-Dahlberg kernel with bundled orientation-specific properness. -/
@@ -2010,9 +2027,11 @@ theorem constant_or_dahlbergFourVertex_conformalMenger_oriented_of_sources
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger ε v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_conformalMenger_oriented_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
-    hε hn v κ hdisk hsimple horient hregular hκ
+  rcases horient with hpos | hneg
+  · exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
+      hsrc hε hn v κ hdisk hsimple hpos.1 hregular hκ hpos.2
+  · exact constant_or_dahlbergFourVertex_conformalMenger_neg_of_sources
+      hsrc hε hn v κ hdisk hsimple hneg.1 hregular hκ hneg.2
 
 /-- The source-parametrized strict-orientation conformal-Menger nonconstant
 Dahlberg kernel with bundled orientation-specific properness. -/
@@ -2049,9 +2068,10 @@ theorem dahlbergFourVertex_conformalMenger_oriented_of_sources
     (hκ : RealizesConformalMenger ε v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_oriented_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
-    hε hn v κ hdisk hsimple horient hregular hκ hnc
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_conformalMenger_oriented_of_sources
+      hsrc hε hn v κ hdisk hsimple horient hregular hκ)
+    hnc
 
 /-- The source-parametrized strict-orientation conformal-Menger
 constant-or-Dahlberg kernel. -/
@@ -2090,9 +2110,14 @@ theorem constant_or_dahlbergFourVertex_conformalMenger_strict_of_sources
     (hproper_pos : ε < 0 → PositivePolygonOrientation v → ∀ i, 1 < κ i)
     (hproper_neg : ε < 0 → NegativePolygonOrientation v → ∀ i, 1 < -κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_conformalMenger_strict_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
-    hε hn v κ hdisk hsimple horient hregular hκ hproper_pos hproper_neg
+  have horient_proper :
+      (PositivePolygonOrientation v ∧ (ε < 0 → ∀ i, 1 < κ i)) ∨
+        (NegativePolygonOrientation v ∧ (ε < 0 → ∀ i, 1 < -κ i)) := by
+    rcases horient with hpos | hneg
+    · exact Or.inl ⟨hpos, fun hlt => hproper_pos hlt hpos⟩
+    · exact Or.inr ⟨hneg, fun hlt => hproper_neg hlt hneg⟩
+  exact constant_or_dahlbergFourVertex_conformalMenger_oriented_of_sources
+    hsrc hε hn v κ hdisk hsimple horient_proper hregular hκ
 
 /-- The source-parametrized strict-orientation conformal-Menger nonconstant
 Dahlberg kernel. -/
@@ -2129,9 +2154,10 @@ theorem dahlbergFourVertex_conformalMenger_strict_of_sources
     (hproper_neg : ε < 0 → NegativePolygonOrientation v → ∀ i, 1 < -κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_strict_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
-    hε hn v κ hdisk hsimple horient hregular hκ hproper_pos hproper_neg hnc
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_conformalMenger_strict_of_sources
+      hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper_pos hproper_neg)
+    hnc
 
 /-- Exact public-name alias for the DFV-source-parametrized
 positive-orientation conformal-Menger constant-or-Dahlberg theorem. -/
@@ -2253,10 +2279,8 @@ theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_positiveOrie
     (hκ : RealizesConformalMenger ε v κ)
     (hproper : ε < 0 → ∀ i, 1 < κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact
-    constant_or_dahlbergFourVertex_conformalMenger_spaceForm_pos_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
-    hε hn v κ hdisk hsimple horient hregular hκ hproper
+  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
+    hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper
 
 /-- Exact public-name alias for the source-parametrized positive-orientation
 conformal-Menger ordered-turn theorem. -/
@@ -2305,9 +2329,8 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_of_positiveOrientation_of_s
     (hproper : ε < 0 → ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_spaceForm_pos_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
-    hε hn v κ hdisk hsimple horient hregular hκ hproper hnc
+  exact dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
+    hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper hnc
 
 /-- Exact public-name alias for the source-parametrized negative-orientation
 conformal-Menger ordered-turn theorem in reflected form. -/
@@ -2339,10 +2362,8 @@ theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_negativeOrie
     (hκ : RealizesConformalMenger ε v κ)
     (hproper : ε < 0 → ∀ i, 1 < -κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact
-    constant_or_dahlbergFourVertex_conformalMenger_spaceForm_neg_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
-    hε hn v κ hdisk hsimple horient hregular hκ hproper
+  exact constant_or_dahlbergFourVertex_conformalMenger_neg_of_sources
+    hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper
 
 /-- Exact public-name alias for the source-parametrized negative-orientation
 conformal-Menger nonconstant D4VT theorem. -/
@@ -2358,9 +2379,10 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_of_negativeOrientation_of_s
     (hproper : ε < 0 → ∀ i, 1 < -κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_spaceForm_neg_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
-    hε hn v κ hdisk hsimple horient hregular hκ hproper hnc
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_conformalMenger_neg_of_sources
+      hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper)
+    hnc
 
 /-- Exact public-name alias for the source-parametrized strict-orientation
 conformal-Menger constant-or-Dahlberg theorem. -/
@@ -2376,10 +2398,8 @@ theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_strict_orien
     (hproper_pos : ε < 0 → PositivePolygonOrientation v → ∀ i, 1 < κ i)
     (hproper_neg : ε < 0 → NegativePolygonOrientation v → ∀ i, 1 < -κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact
-    constant_or_dahlbergFourVertex_conformalMenger_spaceForm_strict_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
-    hε hn v κ hdisk hsimple horient hregular hκ hproper_pos hproper_neg
+  exact constant_or_dahlbergFourVertex_conformalMenger_strict_of_sources
+    hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper_pos hproper_neg
 
 /-- Exact public-name alias for the source-parametrized strict-orientation
 conformal-Menger nonconstant D4VT theorem. -/
@@ -2396,9 +2416,8 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_of_strict_orientation_of_so
     (hproper_neg : ε < 0 → NegativePolygonOrientation v → ∀ i, 1 < -κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_spaceForm_strict_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
-    hε hn v κ hdisk hsimple horient hregular hκ hproper_pos hproper_neg hnc
+  exact dahlbergFourVertex_conformalMenger_strict_of_sources
+    hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper_pos hproper_neg hnc
 
 /-- The source-parametrized S² positive-orientation ordered-turn endpoint. -/
 theorem orderedAdjacentTurns_S2_pos_of_sources
@@ -2487,8 +2506,8 @@ theorem constant_or_dahlbergFourVertex_S2_neg_reflected_of_sources
   have hκ' :
       RealizesConformalMenger 1 (ReverseCyclicPolygon v) (fun i => -κ (-i)) :=
     realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation horient hκ
-  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
+  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
+    hsrc
     (ε := 1) (Or.inr (Or.inl rfl)) hn (ReverseCyclicPolygon v)
     (fun i => -κ (-i)) hdisk' hsimple' horient' hregular' hκ'
     (by intro hlt; norm_num at hlt)
@@ -2521,8 +2540,8 @@ theorem constant_or_dahlbergFourVertex_S2_pos_of_sources
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger 1 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
+  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
+    hsrc
     (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple horient hregular hκ
     (by intro hlt; norm_num at hlt)
 
@@ -2538,8 +2557,8 @@ theorem dahlbergFourVertex_S2_pos_of_sources
     (hκ : RealizesConformalMenger 1 v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
+  exact dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
+    hsrc
     (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple horient hregular hκ
     (by intro hlt; norm_num at hlt) hnc
 
@@ -2554,8 +2573,8 @@ theorem constant_or_dahlbergFourVertex_S2_neg_of_sources
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger 1 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_conformalMenger_neg_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
+  exact constant_or_dahlbergFourVertex_conformalMenger_neg_of_sources
+    hsrc
     (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple horient hregular hκ
     (by intro hlt; norm_num at hlt)
 
@@ -2571,8 +2590,8 @@ theorem dahlbergFourVertex_S2_neg_of_sources
     (hκ : RealizesConformalMenger 1 v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_oriented_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
+  exact dahlbergFourVertex_conformalMenger_oriented_of_sources
+    hsrc
     (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple
     (Or.inr ⟨horient, by intro hlt; norm_num at hlt⟩) hregular hκ hnc
 
@@ -2587,8 +2606,8 @@ theorem constant_or_dahlbergFourVertex_S2_strict_of_sources
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger 1 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_conformalMenger_strict_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
+  exact constant_or_dahlbergFourVertex_conformalMenger_strict_of_sources
+    hsrc
     (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple horient hregular hκ
     (by intro hlt; norm_num at hlt)
     (by intro hlt; norm_num at hlt)
@@ -2604,8 +2623,8 @@ theorem dahlbergFourVertex_S2_strict_of_sources
     (hκ : RealizesConformalMenger 1 v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_strict_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
+  exact dahlbergFourVertex_conformalMenger_strict_of_sources
+    hsrc
     (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple horient hregular hκ
     (by intro hlt; norm_num at hlt)
     (by intro hlt; norm_num at hlt) hnc
@@ -2837,8 +2856,8 @@ theorem constant_or_dahlbergFourVertex_H2_neg_reflected_of_sources
   have hκ' :
       RealizesConformalMenger (-1) (ReverseCyclicPolygon v) (fun i => -κ (-i)) :=
     realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation horient hκ
-  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
+  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
+    hsrc
     (ε := -1) (Or.inr (Or.inr rfl)) hn (ReverseCyclicPolygon v)
     (fun i => -κ (-i)) hdisk' hsimple' horient' hregular' hκ'
     (by intro _ i; exact hcircle (-i))
@@ -2871,8 +2890,8 @@ theorem constant_or_dahlbergFourVertex_H2_pos_of_sources
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
+  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
+    hsrc
     (ε := -1) (Or.inr (Or.inr rfl)) hn v κ hdisk hsimple horient hregular hκ
     (by intro _; exact hcircle)
 
@@ -2888,8 +2907,8 @@ theorem dahlbergFourVertex_H2_pos_of_sources
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
+  exact dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
+    hsrc
     (ε := -1) (Or.inr (Or.inr rfl)) hn v κ hdisk hsimple horient hregular hκ
     (by intro _; exact hcircle) hnc
 
@@ -2904,8 +2923,8 @@ theorem constant_or_dahlbergFourVertex_H2_neg_of_sources
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_conformalMenger_neg_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
+  exact constant_or_dahlbergFourVertex_conformalMenger_neg_of_sources
+    hsrc
     (ε := -1) (Or.inr (Or.inr rfl)) hn v κ hdisk hsimple horient hregular hκ
     (by intro _; exact hcircle)
 
@@ -2921,8 +2940,8 @@ theorem dahlbergFourVertex_H2_neg_of_sources
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_oriented_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
+  exact dahlbergFourVertex_conformalMenger_oriented_of_sources
+    hsrc
     (ε := -1) (Or.inr (Or.inr rfl)) hn v κ hdisk hsimple
     (Or.inr ⟨horient, by intro _; exact hcircle⟩) hregular hκ hnc
 
@@ -3323,9 +3342,9 @@ theorem dahlbergFourVertex_spaceForm_source_of_sources
     (hproper : ε < 0 → ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_spaceForm_source_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
-    hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (orderedAdjacentTurns_spaceForm_of_sources
+      hsrc hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc)
 
 /-- The source-parametrized non-Euclidean discrete constant-or D4VT kernel. -/
 theorem constant_or_dahlbergFourVertex_spaceForm_kernel_of_sources
@@ -3339,9 +3358,11 @@ theorem constant_or_dahlbergFourVertex_spaceForm_kernel_of_sources
     (hκ : RealizesConformalMenger ε v κ)
     (hproper : ε < 0 → ∀ i, 1 < κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_spaceForm_kernel_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_geometricSources hsrc)
-    hε hn v κ hdisk hsimple hconvex hregular hκ hproper
+  by_cases hconst : ∃ c, ∀ i : ZMod n, κ i = c
+  · exact Or.inl hconst
+  · exact Or.inr
+      (dahlbergFourVertex_spaceForm_source_of_sources
+        hsrc hε hn v κ hdisk hsimple hconvex hregular hκ hproper hconst)
 
 /-- The source-parametrized spherical constant-or-Dahlberg kernel. -/
 theorem constant_or_dahlbergFourVertex_S2_kernel_of_sources
