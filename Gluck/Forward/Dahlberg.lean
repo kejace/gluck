@@ -8915,6 +8915,25 @@ theorem dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_auxili
   rcases hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext with ⟨aux⟩
   exact dahlbergDiskAuxiliaryReduction_of_auxiliaryPolygon aux
 
+/-- The older raw existential unit source implies the typed auxiliary-polygon
+unit source. -/
+theorem dahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource_of_constructionSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource) :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext
+  letI : NeZero n := hne
+  exact exists_dahlbergAuxiliaryPolygon_of_diskAuxiliaryReduction
+    (hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext)
+
+/-- The typed and raw normalized unit-disk §4 source interfaces are formally
+equivalent. -/
+theorem dahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource_iff_constructionSource :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource ↔
+      DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource := by
+  constructor
+  · exact dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_auxiliaryPolygonSource
+  · exact dahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource_of_constructionSource
+
 /-- Pair-level source for Dahlberg's §4 auxiliary construction.
 
 This is sharper than `DahlbergE2DiskAuxiliaryBoundaryConstructionSource`: the

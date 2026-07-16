@@ -152,7 +152,11 @@ is formally equivalent to the older existential `DahlbergDiskAuxiliaryReduction`
 package and is the target shape for formalizing Dahlberg's polygonal
 approximation/transfer argument.  The older unit construction gate
 `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate` is
-recovered from the typed source.
+recovered from the typed source, and the reverse source-level direction is also
+formalized.  The equivalence is
+`dahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource_iff_constructionSource`;
+the reverse direction repackages `DahlbergDiskAuxiliaryReduction` using
+`exists_dahlbergAuxiliaryPolygon_of_diskAuxiliaryReduction`.
 The broad theorem-facing disk-reduction source
 `dahlbergE2_disk_reduction_geometric_source_gate` is recovered formally from
 it.  The reverse normalization chain is also formalized: cyclic translation,
