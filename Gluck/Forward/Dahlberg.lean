@@ -5508,6 +5508,87 @@ theorem orderedAdjacentTurns_inv_edgePrevCircleRadiusProfile_of_positiveRadiusOr
   · exact (inv_lt_inv₀ (hpos ((i₄ : ZMod n) + 1))
         (hpos (((i₄ : ZMod n) + 1) + 1))).mpr hinc₄'
 
+/-- Ordered turns of the reciprocal previous-radius profile are positive
+radius ordered turns. -/
+theorem positiveRadiusOrderedAdjacentTurns_of_orderedAdjacentTurns_inv_edgePrevCircleRadiusProfile
+    {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hturns : OrderedAdjacentTurns (fun i => (EdgePrevCircleRadiusProfile v i)⁻¹)) :
+    PositiveRadiusOrderedAdjacentTurns v := by
+  have hpos : ∀ i : ZMod n, 0 < EdgePrevCircleRadiusProfile v i :=
+    EdgePrevCircleRadiusProfile_pos hsimple
+  rcases hturns with
+    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
+      hinc₁, hdec₁, hdec₂, hinc₂, hinc₃, hdec₃, hdec₄, hinc₄⟩
+  have hinc₁' :
+      EdgePrevCircleRadiusProfile v ((i₁ : ZMod n) + 1) <
+        EdgePrevCircleRadiusProfile v (i₁ : ZMod n) :=
+    (inv_lt_inv₀ (hpos (i₁ : ZMod n)) (hpos ((i₁ : ZMod n) + 1))).mp hinc₁
+  have hdec₁' :
+      EdgePrevCircleRadiusProfile v ((i₁ : ZMod n) + 1) <
+        EdgePrevCircleRadiusProfile v (((i₁ : ZMod n) + 1) + 1) :=
+    (inv_lt_inv₀ (hpos (((i₁ : ZMod n) + 1) + 1))
+      (hpos ((i₁ : ZMod n) + 1))).mp hdec₁
+  have hdec₂' :
+      EdgePrevCircleRadiusProfile v (i₂ : ZMod n) <
+        EdgePrevCircleRadiusProfile v ((i₂ : ZMod n) + 1) :=
+    (inv_lt_inv₀ (hpos ((i₂ : ZMod n) + 1)) (hpos (i₂ : ZMod n))).mp hdec₂
+  have hinc₂' :
+      EdgePrevCircleRadiusProfile v (((i₂ : ZMod n) + 1) + 1) <
+        EdgePrevCircleRadiusProfile v ((i₂ : ZMod n) + 1) :=
+    (inv_lt_inv₀ (hpos ((i₂ : ZMod n) + 1))
+      (hpos (((i₂ : ZMod n) + 1) + 1))).mp hinc₂
+  have hinc₃' :
+      EdgePrevCircleRadiusProfile v ((i₃ : ZMod n) + 1) <
+        EdgePrevCircleRadiusProfile v (i₃ : ZMod n) :=
+    (inv_lt_inv₀ (hpos (i₃ : ZMod n)) (hpos ((i₃ : ZMod n) + 1))).mp hinc₃
+  have hdec₃' :
+      EdgePrevCircleRadiusProfile v ((i₃ : ZMod n) + 1) <
+        EdgePrevCircleRadiusProfile v (((i₃ : ZMod n) + 1) + 1) :=
+    (inv_lt_inv₀ (hpos (((i₃ : ZMod n) + 1) + 1))
+      (hpos ((i₃ : ZMod n) + 1))).mp hdec₃
+  have hdec₄' :
+      EdgePrevCircleRadiusProfile v (i₄ : ZMod n) <
+        EdgePrevCircleRadiusProfile v ((i₄ : ZMod n) + 1) :=
+    (inv_lt_inv₀ (hpos ((i₄ : ZMod n) + 1)) (hpos (i₄ : ZMod n))).mp hdec₄
+  have hinc₄' :
+      EdgePrevCircleRadiusProfile v (((i₄ : ZMod n) + 1) + 1) <
+        EdgePrevCircleRadiusProfile v ((i₄ : ZMod n) + 1) :=
+    (inv_lt_inv₀ (hpos ((i₄ : ZMod n) + 1))
+      (hpos (((i₄ : ZMod n) + 1) + 1))).mp hinc₄
+  refine ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (i₁ : ZMod n)] using hinc₁'
+  · simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient ((i₁ : ZMod n) + 1), add_assoc] using hdec₁'
+  · simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (i₂ : ZMod n)] using hdec₂'
+  · simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient ((i₂ : ZMod n) + 1), add_assoc] using hinc₂'
+  · simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (i₃ : ZMod n)] using hinc₃'
+  · simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient ((i₃ : ZMod n) + 1), add_assoc] using hdec₃'
+  · simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (i₄ : ZMod n)] using hdec₄'
+  · simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient ((i₄ : ZMod n) + 1), add_assoc] using hinc₄'
+
+/-- Positive radius ordered turns are equivalent to ordered turns of the
+reciprocal previous-radius profile. -/
+theorem positiveRadiusOrderedAdjacentTurns_iff_orderedAdjacentTurns_inv_edgePrevCircleRadiusProfile
+    {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v) :
+    PositiveRadiusOrderedAdjacentTurns v ↔
+      OrderedAdjacentTurns (fun i => (EdgePrevCircleRadiusProfile v i)⁻¹) := by
+  constructor
+  · exact orderedAdjacentTurns_inv_edgePrevCircleRadiusProfile_of_positiveRadiusOrderedAdjacentTurns
+      hsimple horient
+  · exact positiveRadiusOrderedAdjacentTurns_of_orderedAdjacentTurns_inv_edgePrevCircleRadiusProfile
+      hsimple horient
+
 /-- Positive radius ordered turns imply the corresponding signed-Menger
 ordered turns. -/
 theorem orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
@@ -5521,6 +5602,34 @@ theorem orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacen
       hsimple horient i)
     (orderedAdjacentTurns_inv_edgePrevCircleRadiusProfile_of_positiveRadiusOrderedAdjacentTurns
       hsimple horient hturns)
+
+/-- Signed-Menger ordered turns imply positive radius ordered turns in the
+positive-orientation branch. -/
+theorem positiveRadiusOrderedAdjacentTurns_of_orderedAdjacentTurns_signedMengerProfile
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hturns : OrderedAdjacentTurns (SignedMengerProfile v)) :
+    PositiveRadiusOrderedAdjacentTurns v := by
+  exact positiveRadiusOrderedAdjacentTurns_of_orderedAdjacentTurns_inv_edgePrevCircleRadiusProfile
+    hsimple horient
+    (orderedAdjacentTurns_congr
+      (fun i => (signedMengerProfile_eq_inv_edgePrevCircleRadiusProfile_of_positiveOrientation
+        hsimple horient i).symm)
+      hturns)
+
+/-- In the positive-orientation branch, positive radius ordered turns are
+equivalent to signed-Menger ordered turns. -/
+theorem positiveRadiusOrderedAdjacentTurns_iff_orderedAdjacentTurns_signedMengerProfile
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v) :
+    PositiveRadiusOrderedAdjacentTurns v ↔ OrderedAdjacentTurns (SignedMengerProfile v) := by
+  constructor
+  · exact orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
+      hsimple horient
+  · exact positiveRadiusOrderedAdjacentTurns_of_orderedAdjacentTurns_signedMengerProfile
+      hsimple horient
 
 /-- Positive radius ordered turns force nonconstancy of the signed-Menger
 profile. -/
@@ -5546,11 +5655,24 @@ theorem signedMengerProfile_dahlbergFourVertex_of_positiveRadiusOrderedAdjacentT
     (orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
       hsimple horient hturns)
 
-/-- Radius-level extraction in Dahlberg's positively oriented strictly-convex
+/-- Ordered-turn extraction in Dahlberg's positively oriented strictly-convex
 case with nonconstant signed-Menger profile.  This is the geometric content of
 Lemma 9 in `references/23.pdf`: Lemma 8 transfers the curvature-disk nesting to
-radius inequalities, and the convex discrete four-vertex theorem supplies four
-cyclically ordered radius turns. -/
+adjacent curvature turns, and the convex discrete four-vertex theorem supplies
+four cyclically ordered turns. -/
+theorem orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_geometric_source
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    OrderedAdjacentTurns (SignedMengerProfile v) := by
+  sorry
+
+/-- Radius-level spelling of Dahlberg's positively oriented strictly-convex
+case with nonconstant signed-Menger profile.  The geometric input is the
+ordered signed-Menger turn source above; reciprocal-radius monotonicity converts
+that conclusion to the equivalent radius-turn statement. -/
 theorem positiveRadiusOrderedAdjacentTurns_of_positiveOrientation_not_constant_source
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
@@ -5558,7 +5680,10 @@ theorem positiveRadiusOrderedAdjacentTurns_of_positiveOrientation_not_constant_s
     (horient : PositivePolygonOrientation v)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
     PositiveRadiusOrderedAdjacentTurns v := by
-  sorry
+  exact positiveRadiusOrderedAdjacentTurns_of_orderedAdjacentTurns_signedMengerProfile
+    hsimple horient
+    (orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_geometric_source
+      hn hsimple hregular horient hnc)
 
 /-- Explicit existential spelling of
 `positiveRadiusOrderedAdjacentTurns_of_positiveOrientation_not_constant_source`. -/
@@ -5605,10 +5730,8 @@ theorem orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_not_cons
     (horient : PositivePolygonOrientation v)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
     OrderedAdjacentTurns (SignedMengerProfile v) := by
-  exact orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
-    hsimple horient
-    (positiveRadiusOrderedAdjacentTurns_of_positiveOrientation_not_constant_source
-      hn hsimple hregular horient hnc)
+  exact orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_geometric_source
+    hn hsimple hregular horient hnc
 
 /-- Positive-orientation nonconstant Dahlberg conclusion from the radius-level
 Lemma 9 source. -/

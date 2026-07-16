@@ -41,9 +41,11 @@ which is now proved from the narrower ordered-turn extraction gate
 `orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_not_constant_source`
 and the general cyclic constructor
 `dahlbergFourVertex_of_orderedAdjacentTurns_four_le`.  Thus the
-remaining Lemma 9 gap is exactly the geometric extraction of four ordered
-adjacent curvature turns from the nonconstant strictly convex profile, not the
-nonconcyclic-to-nonconstant reduction or the final conversion from turns to
+remaining Lemma 9 gap is exactly the geometric source
+`orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_geometric_source`:
+the extraction of four ordered adjacent curvature turns from the nonconstant
+strictly convex profile, not the nonconcyclic-to-nonconstant reduction, the
+reciprocal radius/sign conversion, or the final conversion from turns to
 Dahlberg's plateau-aware conclusion.
 
 For `ε = 0` conformal-Menger realizations, the positive-orientation
