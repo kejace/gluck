@@ -9621,9 +9621,9 @@ def DahlbergE2DfvUnitSourceComponents : Prop :=
   DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
 
 /-- The primitive Euclidean source components for final D4VT: nonconcyclic
-strict-convex radius-witness CDFV, plus the normalized unit-disk §4 source. -/
+strict-convex signed-Menger CDFV, plus the normalized unit-disk §4 source. -/
 def DahlbergE2DfvPrimitiveSourceComponents : Prop :=
-  DahlbergE2ConvexDfvRadiusNonconcyclicSource ∧
+  DahlbergE2ConvexDfvSignedNonconcyclicSource ∧
   DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
 
 /-- The exact `E²` Dahlberg source components still needed for the stronger
@@ -9651,19 +9651,19 @@ def DahlbergE2UnitRemainingSourceComponents : Prop :=
   DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
 
 /-- The primitive `E²` source components for the stronger ordered-turn route:
-nonconcyclic strict-convex radius-witness CDFV, Lemma 8's witness bridge, and
-the normalized unit-disk §4 source. -/
+nonconcyclic strict-convex signed-Menger CDFV, Lemma 8's witness bridge, and
+the normalized unit-disk §4 source.  Radius witnesses are recovered formally
+from the signed CDFV source when applying Lemma 8. -/
 def DahlbergE2PrimitiveRemainingSourceComponents : Prop :=
-  DahlbergE2ConvexDfvRadiusNonconcyclicSource ∧
+  DahlbergE2ConvexDfvSignedNonconcyclicSource ∧
   DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
   DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
 
-/-- The actual current primitive `E²` source-gate surface for the stronger
-ordered-turn route: Dahlberg's strict positive-orientation Lemma 9 source,
-plus the normalized unit-disk §4 source for the non-strict branch.
+/-- Compatibility surface for the stronger ordered-turn route: Dahlberg's
+strict positive-orientation Lemma 9 source, plus the normalized unit-disk §4
+source for the non-strict branch.
 
-The older primitive spelling splits Lemma 9 into signed CDFV plus Lemma 8;
-that split is kept below as a compatibility surface. -/
+The primitive spelling below splits Lemma 9 into signed CDFV plus Lemma 8. -/
 def DahlbergE2Lemma9UnitRemainingSourceComponents : Prop :=
   DahlbergE2Lemma9Source ∧
   DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
@@ -9709,9 +9709,7 @@ boundary/interior component package. -/
 theorem dahlbergE2DfvSourceComponents_of_primitiveComponents
     (hsrc : DahlbergE2DfvPrimitiveSourceComponents) :
     DahlbergE2DfvSourceComponents := by
-  exact ⟨dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource
-      (dahlbergE2ConvexDfvSignedNonconcyclicSource_of_radiusNonconcyclicSource
-        hsrc.1),
+  exact ⟨dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource hsrc.1,
     dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_boundaryInteriorSource.mp
       hsrc.2⟩
 
@@ -9720,17 +9718,14 @@ package. -/
 theorem dahlbergE2DfvUnitSourceComponents_of_primitiveComponents
     (hsrc : DahlbergE2DfvPrimitiveSourceComponents) :
     DahlbergE2DfvUnitSourceComponents := by
-  exact ⟨dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource
-      (dahlbergE2ConvexDfvSignedNonconcyclicSource_of_radiusNonconcyclicSource
-        hsrc.1),
+  exact ⟨dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource hsrc.1,
     hsrc.2⟩
 
 /-- Convert existing final-D4VT E² components to the primitive source package. -/
 theorem dahlbergE2DfvPrimitiveSourceComponents_of_components
     (hsrc : DahlbergE2DfvSourceComponents) :
     DahlbergE2DfvPrimitiveSourceComponents := by
-  exact ⟨dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_signedNonconcyclicSource
-      (dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource hsrc.1),
+  exact ⟨dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource hsrc.1,
     dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_boundaryInteriorSource.mpr
       hsrc.2⟩
 
@@ -9747,8 +9742,7 @@ final-D4VT E² component package. -/
 theorem dahlbergE2DfvPrimitiveSourceComponents_of_lemma9DfvUnitComponents
     (hsrc : DahlbergE2Lemma9DfvUnitSourceComponents) :
     DahlbergE2DfvPrimitiveSourceComponents := by
-  exact ⟨dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_signedNonconcyclicSource
-      (dahlbergE2ConvexDfvSignedNonconcyclicSource_of_lemma9Source hsrc.1),
+  exact ⟨dahlbergE2ConvexDfvSignedNonconcyclicSource_of_lemma9Source hsrc.1,
     hsrc.2⟩
 
 /-- Convert normalized-unit remaining E² components to the existing
@@ -9782,9 +9776,7 @@ boundary/interior component package. -/
 theorem dahlbergE2RemainingSourceComponents_of_primitiveComponents
     (hsrc : DahlbergE2PrimitiveRemainingSourceComponents) :
     DahlbergE2RemainingSourceComponents := by
-  exact ⟨dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource
-      (dahlbergE2ConvexDfvSignedNonconcyclicSource_of_radiusNonconcyclicSource
-        hsrc.1),
+  exact ⟨dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource hsrc.1,
     hsrc.2.1,
     dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_boundaryInteriorSource.mp
       hsrc.2.2⟩
@@ -9793,8 +9785,7 @@ theorem dahlbergE2RemainingSourceComponents_of_primitiveComponents
 theorem dahlbergE2PrimitiveRemainingSourceComponents_of_components
     (hsrc : DahlbergE2RemainingSourceComponents) :
     DahlbergE2PrimitiveRemainingSourceComponents := by
-  exact ⟨dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_signedNonconcyclicSource
-      (dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource hsrc.1),
+  exact ⟨dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource hsrc.1,
     hsrc.2.1,
     dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_boundaryInteriorSource.mpr
       hsrc.2.2⟩
@@ -9815,8 +9806,7 @@ theorem dahlbergE2PrimitiveRemainingSourceComponents_of_lemma9UnitComponents
     DahlbergE2PrimitiveRemainingSourceComponents := by
   have hsplit : DahlbergE2ConvexSignedSourceComponents :=
     dahlbergE2ConvexSignedSourceComponents_of_lemma9Source hsrc.1
-  exact ⟨dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_signedNonconcyclicSource
-      (dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource hsplit.1),
+  exact ⟨dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource hsplit.1,
     hsplit.2, hsrc.2⟩
 
 /-- Convert the older split primitive E² spelling back to the current
@@ -9825,7 +9815,9 @@ theorem dahlbergE2Lemma9UnitRemainingSourceComponents_of_primitiveComponents
     (hsrc : DahlbergE2PrimitiveRemainingSourceComponents) :
     DahlbergE2Lemma9UnitRemainingSourceComponents := by
   exact ⟨dahlbergE2Lemma9Source_of_witnessComponents
-      ⟨dahlbergE2ConvexDfvRadiusSource_of_nonconcyclicSource hsrc.1,
+      ⟨dahlbergE2ConvexDfvRadiusSource_of_nonconcyclicSource
+          (dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_signedNonconcyclicSource
+            hsrc.1),
         hsrc.2.1⟩,
     hsrc.2.2⟩
 
@@ -10085,10 +10077,7 @@ theorem dahlbergE2DfvPrimitiveSourceComponents_directIsometry
           (fun i => directIsometryR2 u a (v i))) := by
   refine ⟨?_, ?_⟩
   · intro horient
-    exact signedMengerProfile_dahlbergFourVertex_of_convexDfvRadiusWitnesses
-      hsimple horient
-      (dahlbergE2ConvexDfvRadiusNonconcyclicSource_directIsometry
-        hsrc.1 hu a hn hsimple hregular horient hnoncircle)
+    exact hsrc.1 hn hsimple hregular horient hnoncircle
   · intro hnonstrict
     rcases
       dahlbergDiskReductionSetup_exists_boundary_max_and_interior
@@ -10267,40 +10256,40 @@ theorem dahlbergE2_disk_auxiliary_max_interior_construction_source :
 
 /-- Compatibility spelling of the stronger Lemma-9/unit source-gate surface:
 Lemma 9 and the normalized unit-disk §4 construction.  The primitive remaining
-package below now uses the split radius-CDFV/Lemma 8 inputs directly. -/
+package below now uses the split signed-CDFV/Lemma 8 inputs directly. -/
 theorem dahlbergE2_lemma9_unit_remaining_source_components :
     DahlbergE2Lemma9UnitRemainingSourceComponents := by
   exact ⟨dahlbergE2_lemma9_source_gate,
     dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate⟩
 
 /-- Primitive spelling of the exact remaining `E²` Dahlberg source
-components: nonconcyclic radius-CDFV, Lemma 8's witness bridge, and the
+components: nonconcyclic signed-CDFV, Lemma 8's witness bridge, and the
 normalized unit-disk §4 construction source. -/
 theorem dahlbergE2_primitive_remaining_source_components :
     DahlbergE2PrimitiveRemainingSourceComponents := by
-  exact ⟨dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate,
+  exact ⟨dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate,
     dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate,
     dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate⟩
 
 /-- The exact remaining `E²` Dahlberg source components currently used by the
 stronger ordered-turn route, recovered from the primitive nonconcyclic
-radius-CDFV, Lemma 8, and normalized unit-disk §4 sources. -/
+signed-CDFV, Lemma 8, and normalized unit-disk §4 sources. -/
 theorem dahlbergE2_remaining_source_components :
     DahlbergE2RemainingSourceComponents := by
   exact dahlbergE2RemainingSourceComponents_of_primitiveComponents
     dahlbergE2_primitive_remaining_source_components
 
 /-- Primitive spelling of the exact `E²` source components currently used by
-the weaker final-D4VT route: nonconcyclic radius-CDFV and the normalized
+the weaker final-D4VT route: nonconcyclic signed-CDFV and the normalized
 unit-disk §4 construction source.  This deliberately avoids the stronger
 Lemma 9 ordered-turn source. -/
 theorem dahlbergE2_dfv_primitive_source_components :
     DahlbergE2DfvPrimitiveSourceComponents := by
-  exact ⟨dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate,
+  exact ⟨dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate,
     dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate⟩
 
 /-- The exact `E²` source components currently used by the weaker final-D4VT
-route, recovered from the primitive nonconcyclic radius-CDFV and normalized
+route, recovered from the primitive nonconcyclic signed-CDFV and normalized
 unit-disk §4 sources. -/
 theorem dahlbergE2_dfv_source_components :
     DahlbergE2DfvSourceComponents := by
@@ -10310,7 +10299,7 @@ theorem dahlbergE2_dfv_source_components :
 /-- Compatibility spelling of the stronger Lemma-9/unit source-gate surface
 for the weaker final-D4VT route.  This is retained for users who want to route
 final D4VT through the ordered-turn theorem, but the primitive final-D4VT
-package below now uses radius-CDFV directly. -/
+package below now uses signed-CDFV directly. -/
 theorem dahlbergE2_lemma9_dfv_unit_source_components :
     DahlbergE2Lemma9DfvUnitSourceComponents := by
   exact ⟨dahlbergE2_lemma9_source_gate,
@@ -11172,10 +11161,10 @@ strictly-convex auxiliary polygon used in the last part of §4 of Dahlberg's
 discrete four-vertex paper.
 
 For the final plateau-aware D4VT endpoint this routes through the primitive
-radius-CDFV/unit-§4 source package: the strict branch uses CDFV witnesses and
-the non-strict branch uses the normalized unit-disk construction source.
-Ordered-turn refinements remain routed through the stronger Lemma 9 source
-above. -/
+signed-CDFV/unit-§4 source package: the strict branch uses the signed-Menger
+CDFV theorem and the non-strict branch uses the normalized unit-disk
+construction source.  Ordered-turn refinements remain routed through the
+stronger Lemma 9 source above. -/
 theorem signedMengerProfile_dahlbergFourVertex_of_dahlberg_disk_reduction
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
