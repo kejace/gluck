@@ -5695,6 +5695,22 @@ def DahlbergE2Lemma9Source : Prop :=
     (¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) →
     OrderedAdjacentTurns (SignedMengerProfile v)
 
+/-- The convex-radius source and the signed-Menger Lemma 9 source are the same
+formal content.  Positive signed Menger curvature is reciprocal radius, so the
+ordered radius turns are exactly ordered signed-Menger turns after reversing the
+strict inequalities by `r ↦ r⁻¹`. -/
+theorem dahlbergE2_convexRadiusSource_iff_lemma9Source :
+    DahlbergE2ConvexRadiusSource ↔ DahlbergE2Lemma9Source := by
+  constructor
+  · intro hsrc n hne hn v hsimple hregular horient hnc
+    exact orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
+      hsimple horient
+      (hsrc hn hsimple hregular horient hnc)
+  · intro hsrc n hne hn v hsimple hregular horient hnc
+    exact positiveRadiusOrderedAdjacentTurns_of_orderedAdjacentTurns_signedMengerProfile
+      hsimple horient
+      (hsrc hn hsimple hregular horient hnc)
+
 /-- Dahlberg's non-strict §4 disk-reduction source: a non-strict locally
 regular nonconcyclic polygon admits an auxiliary strict-orientation polygon
 whose Dahlberg conclusion transfers back. -/
@@ -5726,10 +5742,8 @@ theorem dahlbergE2_convex_radius_source : DahlbergE2ConvexRadiusSource := by
 /-- Dahlberg's Euclidean Lemma 9 signed-Menger source, obtained from the
 radius-level convex source by reciprocal-radius monotonicity. -/
 theorem dahlbergE2_lemma9_source : DahlbergE2Lemma9Source := by
-  intro n hne hn v hsimple hregular horient hnc
-  exact orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
-    hsimple horient
-    (dahlbergE2_convex_radius_source hn hsimple hregular horient hnc)
+  exact dahlbergE2_convexRadiusSource_iff_lemma9Source.mp
+    dahlbergE2_convex_radius_source
 
 /-- Dahlberg's Euclidean non-strict §4 disk-reduction geometric source for the
 discrete four-vertex paper. -/
