@@ -2835,13 +2835,16 @@ theorem forward_dfv_geometric_sources : ForwardDfvGeometricSources := by
   exact forwardDfvGeometricSources_of_dfvRemainingSources
     forward_dfv_remaining_sources
 
-/-- Model-specific spelling of `forward_geometric_sources`. -/
+/-- Model-specific spelling of `forward_remaining_sources`, routed through the
+sharper exact-source audit. -/
 theorem forward_model_sources : ForwardModelSources := by
-  exact forwardGeometricSources_iff_modelSources.mp forward_geometric_sources
+  exact forwardGeometricSources_iff_modelSources.mp
+    (forwardGeometricSources_of_remainingSources forward_remaining_sources)
 
-/-- Fully expanded atomic spelling of `forward_geometric_sources`. -/
+/-- Fully expanded atomic spelling of `forward_remaining_sources`, routed
+through the sharper exact-source audit. -/
 theorem forward_atomic_sources : ForwardAtomicSources := by
-  exact forwardGeometricSources_iff_atomicSources.mp forward_geometric_sources
+  exact forwardAtomicSources_of_remainingSources forward_remaining_sources
 
 /-- Fully expanded atomic spelling of `forward_dfv_geometric_sources`. -/
 theorem forward_dfv_atomic_sources : ForwardDfvAtomicSources := by
