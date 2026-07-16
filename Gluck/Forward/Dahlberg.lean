@@ -9824,10 +9824,8 @@ Lemma-9/unit primitive gate surface. -/
 theorem dahlbergE2Lemma9UnitRemainingSourceComponents_of_primitiveComponents
     (hsrc : DahlbergE2PrimitiveRemainingSourceComponents) :
     DahlbergE2Lemma9UnitRemainingSourceComponents := by
-  exact ⟨dahlbergE2Lemma9Source_of_signedComponents
-      ⟨dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource
-          (dahlbergE2ConvexDfvSignedNonconcyclicSource_of_radiusNonconcyclicSource
-            hsrc.1),
+  exact ⟨dahlbergE2Lemma9Source_of_witnessComponents
+      ⟨dahlbergE2ConvexDfvRadiusSource_of_nonconcyclicSource hsrc.1,
         hsrc.2.1⟩,
     hsrc.2.2⟩
 
@@ -9886,6 +9884,14 @@ theorem dahlbergE2GeometricSources_iff_remainingComponents :
   · exact dahlbergE2RemainingSourceComponents_of_geometricSources
   · exact dahlbergE2GeometricSources_of_remainingComponents
 
+/-- The primitive remaining E² source package implies the older bundled
+geometric source package. -/
+theorem dahlbergE2GeometricSources_of_primitiveRemainingComponents
+    (hsrc : DahlbergE2PrimitiveRemainingSourceComponents) :
+    DahlbergE2GeometricSources := by
+  exact dahlbergE2GeometricSources_of_remainingComponents
+    (dahlbergE2RemainingSourceComponents_of_primitiveComponents hsrc)
+
 /-- The sharp final-D4VT Euclidean source components imply the older
 final-D4VT geometric package. -/
 theorem dahlbergE2DfvGeometricSources_of_components
@@ -9912,6 +9918,14 @@ theorem dahlbergE2DfvGeometricSources_iff_components :
   constructor
   · exact dahlbergE2DfvSourceComponents_of_geometricSources
   · exact dahlbergE2DfvGeometricSources_of_components
+
+/-- The primitive final-D4VT E² source package implies the older final-D4VT
+geometric source package. -/
+theorem dahlbergE2DfvGeometricSources_of_primitiveComponents
+    (hsrc : DahlbergE2DfvPrimitiveSourceComponents) :
+    DahlbergE2DfvGeometricSources := by
+  exact dahlbergE2DfvGeometricSources_of_components
+    (dahlbergE2DfvSourceComponents_of_primitiveComponents hsrc)
 
 /-- The stronger exact `E²` remaining source package implies the weaker
 final-D4VT component package by forgetting the Lemma 8 ordered-turn bridge. -/
@@ -10347,8 +10361,8 @@ This is the only remaining E² geometric import in the formal chain: Lemma 9
 for the strict same-orientation branch, together with the final §4 disk
 reduction for the non-strict branch. -/
 theorem dahlbergE2_geometric_sources : DahlbergE2GeometricSources := by
-  exact dahlbergE2GeometricSources_of_remainingComponents
-    dahlbergE2_remaining_source_components
+  exact dahlbergE2GeometricSources_of_primitiveRemainingComponents
+    dahlbergE2_primitive_remaining_source_components
 
 /-- The stronger Dahlberg source package implies the weaker final-D4VT source
 package. -/
@@ -10364,8 +10378,8 @@ theorem dahlbergE2DfvGeometricSources_of_geometricSources
 /-- Dahlberg's weaker final-D4VT source package, extracted from the convex CDFV
 signed source and the §4 disk-reduction source. -/
 theorem dahlbergE2_dfv_geometric_sources : DahlbergE2DfvGeometricSources := by
-  exact dahlbergE2DfvGeometricSources_of_components
-    dahlbergE2_dfv_source_components
+  exact dahlbergE2DfvGeometricSources_of_primitiveComponents
+    dahlbergE2_dfv_primitive_source_components
 
 /-- The positively oriented strict branch of Dahlberg's E² D4VT from just the
 strict convex signed-Menger CDFV source. -/
