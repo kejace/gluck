@@ -374,6 +374,41 @@ theorem forwardDfvGeometricSources_of_dfvRemainingSources
   exact forwardDfvGeometricSources_iff_atomicSources.mpr
     (forwardDfvAtomicSources_of_dfvRemainingSources hsrc)
 
+/-- Extract Dahlberg's `E²` CDFV radius-witness source from the sharper
+remaining-source package. -/
+theorem dahlbergE2ConvexDfvRadiusSource_of_remainingSources
+    (hsrc : ForwardRemainingSources) :
+    DahlbergE2ConvexDfvRadiusSource := by
+  exact hsrc.2.2.2.2.2.1
+
+/-- Extract Dahlberg's `E²` Lemma 8 radius-turn bridge source from the sharper
+remaining-source package. -/
+theorem dahlbergE2Lemma8RadiusTurnBridgeSource_of_remainingSources
+    (hsrc : ForwardRemainingSources) :
+    DahlbergE2Lemma8RadiusTurnBridgeSource := by
+  exact hsrc.2.2.2.2.2.2.1
+
+/-- Extract Dahlberg's `E²` boundary-level §4 auxiliary-construction source
+from the sharper remaining-source package. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_remainingSources
+    (hsrc : ForwardRemainingSources) :
+    DahlbergE2DiskAuxiliaryBoundaryConstructionSource := by
+  exact hsrc.2.2.2.2.2.2.2
+
+/-- Extract Dahlberg's `E²` signed-CDFV source from the weaker final-D4VT
+remaining-source package. -/
+theorem dahlbergE2ConvexDfvSignedSource_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources) :
+    DahlbergE2ConvexDfvSignedSource := by
+  exact hsrc.2.2.2.2.2.1
+
+/-- Extract Dahlberg's `E²` boundary-level §4 auxiliary-construction source
+from the weaker final-D4VT remaining-source package. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources) :
+    DahlbergE2DiskAuxiliaryBoundaryConstructionSource := by
+  exact hsrc.2.2.2.2.2.2
+
 /-- Extract the smooth `E²` source gate from the fully expanded source
 package. -/
 theorem smoothE2_source_of_atomicSources (hsrc : ForwardAtomicSources) :
