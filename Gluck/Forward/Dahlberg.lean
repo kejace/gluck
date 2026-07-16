@@ -10573,8 +10573,8 @@ theorem dahlbergE2DfvGeometricSources_of_geometricSources
 /-- Dahlberg's weaker final-D4VT source package, extracted from the convex CDFV
 signed source and the §4 disk-reduction source. -/
 theorem dahlbergE2_dfv_geometric_sources : DahlbergE2DfvGeometricSources := by
-  exact dahlbergE2DfvGeometricSources_of_primitiveComponents
-    dahlbergE2_dfv_primitive_source_components
+  exact ⟨dahlbergE2_convex_dfv_signed_source_gate,
+    dahlbergE2_disk_reduction_geometric_source_gate⟩
 
 /-- The positively oriented strict branch of Dahlberg's E² D4VT from just the
 strict convex signed-Menger CDFV source. -/
@@ -11405,18 +11405,17 @@ theorem signedMengerProfile_dahlbergFourVertex_of_non_strict_dahlberg_disk_reduc
 strictly-convex auxiliary polygon used in the last part of §4 of Dahlberg's
 discrete four-vertex paper.
 
-For the final plateau-aware D4VT endpoint this routes through the primitive
-signed-CDFV/unit-§4 source package: the strict branch uses the signed-Menger
-CDFV theorem and the non-strict branch uses the normalized unit-disk
-construction source.  Ordered-turn refinements remain routed through the
-stronger Lemma 9 source above. -/
+For the final plateau-aware D4VT endpoint this routes through the weaker
+geometric source package: the strict branch uses the signed-Menger CDFV theorem
+and the non-strict branch uses the broad §4 disk-reduction source.  Ordered-turn
+refinements remain routed through the stronger Lemma 9 source above. -/
 theorem signedMengerProfile_dahlbergFourVertex_of_dahlberg_disk_reduction
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveSourceComponents
-    dahlbergE2_dfv_primitive_source_components hn hsimple hregular hnoncircle
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSources
+    dahlbergE2_dfv_geometric_sources hn hsimple hregular hnoncircle
 
 /-- Dahlberg's Euclidean source theorem: for a simple locally regular
 nonconcyclic polygon, the signed-Menger curvature profile has at least two
@@ -11447,8 +11446,8 @@ theorem signedMengerProfile_dahlbergFourVertex_of_not_concyclic {n : ℕ} [NeZer
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveSourceComponents
-    dahlbergE2_dfv_primitive_source_components hn hsimple hregular hnoncircle
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSources
+    dahlbergE2_dfv_geometric_sources hn hsimple hregular hnoncircle
 
 /-- Dahlberg's Euclidean discrete four-vertex kernel.
 
