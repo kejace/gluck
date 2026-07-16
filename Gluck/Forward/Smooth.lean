@@ -275,12 +275,18 @@ theorem smoothFourVertex_H2_nonconstant_of_dfvSource
     hsrc (ε := -1) (Or.inr (Or.inr rfl)) hclosed
     (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
 
-/-- Uniform nonconstant smooth forward four-vertex geometric source gate.
+/-- Model-specific nonconstant smooth forward four-vertex geometric source
+gate.
 
-This is the single smooth geometric input for `E²`, `S²`, and `H²`.  The
-model-specific gates below are projections of this uniform statement. -/
-theorem smoothForward_source_gate : SmoothForwardSource := by
+This is the primitive smooth geometric input: the Euclidean classical smooth
+four-vertex theorem, plus its spherical and hyperbolic space-form analogues. -/
+theorem smoothForward_model_sources_gate : SmoothForwardModelSources := by
   sorry
+
+/-- Uniform nonconstant smooth forward four-vertex geometric source gate,
+recovered formally from the model-specific source package. -/
+theorem smoothForward_source_gate : SmoothForwardSource := by
+  exact smoothForwardSource_iff_modelSources.mpr smoothForward_model_sources_gate
 
 /-- Weaker uniform nonconstant smooth forward four-vertex source for
 final-D4VT endpoints, recovered from the stronger value-separated source.
@@ -328,11 +334,9 @@ theorem four_vertex_condition_smooth_H2_nonconstant_source_gate
 
 /-- The current model-specific smooth source package.
 
-This is the model-specific projection of the single uniform smooth source
-gate: the Euclidean classical smooth four-vertex theorem, plus its spherical
-and hyperbolic space-form analogues. -/
+This is the primitive model-specific smooth source package. -/
 theorem smoothForward_model_sources : SmoothForwardModelSources := by
-  exact smoothForwardSource_iff_modelSources.mp smoothForward_source_gate
+  exact smoothForward_model_sources_gate
 
 /-- The current weaker final smooth source package.
 

@@ -252,14 +252,21 @@ theorem constant_or_dahlbergFourVertex_H2_of_dfvSource
     hsrc (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
     (by intro _; exact hcircle)
 
-/-- Uniform nonconstant ordered-turn geometric source gate for the
+/-- Model-specific nonconstant ordered-turn geometric source gate for the
 convex/coherent conformal-Menger package in `S²` and `H²`.
 
-This is the stronger non-Euclidean discrete source used by ordered-turn and
-conformal-Menger refinements.  The model-specific ordered-turn gates below are
-projections of this uniform statement. -/
-theorem spaceFormDiscrete_source_gate : SpaceFormDiscreteSource := by
+This is the primitive non-Euclidean discrete source package: the spherical
+convex/coherent source and the hyperbolic Grant--Mogilski proper-circle source. -/
+theorem spaceFormDiscrete_model_sources_gate :
+    SpaceFormDiscreteModelSources := by
   sorry
+
+/-- Uniform nonconstant ordered-turn geometric source gate for the
+convex/coherent conformal-Menger package in `S²` and `H²`, recovered formally
+from the model-specific source package. -/
+theorem spaceFormDiscrete_source_gate : SpaceFormDiscreteSource := by
+  exact spaceFormDiscreteSource_iff_modelSources.mpr
+    spaceFormDiscrete_model_sources_gate
 
 /-- Weaker uniform final-D4VT geometric source for the convex/coherent
 conformal-Menger package in `S²` and `H²`, recovered from the stronger
@@ -304,10 +311,9 @@ theorem orderedAdjacentTurns_H2_source_gate {n : ℕ} [NeZero n]
 
 /-- The current model-specific non-Euclidean discrete source package.
 
-This packages the spherical convex/coherent source and the hyperbolic
-Grant--Mogilski proper-circle source. -/
+This is the primitive model-specific non-Euclidean discrete source package. -/
 theorem spaceFormDiscrete_model_sources : SpaceFormDiscreteModelSources := by
-  exact spaceFormDiscreteSource_iff_modelSources.mp spaceFormDiscrete_source_gate
+  exact spaceFormDiscrete_model_sources_gate
 
 /-- The current non-Euclidean discrete final-D4VT source package.
 
