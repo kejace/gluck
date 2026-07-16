@@ -130,7 +130,7 @@ primitive remaining-source audit is:
   - `spaceFormDiscrete_source_gate`.
 - `Gluck/Forward/Dahlberg.lean`
   - `dahlbergE2_lemma9_source_gate`;
-  - `dahlbergE2_disk_auxiliary_boundary_transition_construction_source_gate`.
+  - `dahlbergE2_disk_auxiliary_boundary_neighbor_construction_source_gate`.
 
 The weak smooth and non-Euclidean final-D4VT gates are no longer primitive:
 `smoothForward_dfv_source_gate` is recovered from `smoothForward_source_gate`,
@@ -162,13 +162,15 @@ strong-to-weak implications.  The grouped component spellings are exposed as
 interfaces.  Its strict branch is currently gated at Dahlberg's Lemma 9:
 the signed-CDFV and witness-only Lemma 8 source components are recovered
 formally from `dahlbergE2_lemma9_source_gate`.  Its non-strict §4 branch is
-gated at the adjacent-transition interface
-`dahlbergE2_disk_auxiliary_boundary_transition_construction_source_gate`.
-The older boundary-set source is recovered from that gate using the finite
-cyclic lemma
+gated at the boundary-neighbor interface
+`dahlbergE2_disk_auxiliary_boundary_neighbor_construction_source_gate`: a
+boundary vertex of `E = V(Γ) ∩ ∂Δ` is supplied together with a neighboring
+vertex outside `E`.  The adjacent-transition source is recovered from that
+gate by orienting any crossing edge around its boundary endpoint.  The older
+boundary-set source is then recovered using the finite cyclic lemma
 `diskBoundaryIndices_exists_adjacent_transition`, and the boundary/interior
-source used by direct-isometry and final-D4VT routing is then recovered
-formally from the boundary-set source.
+source used by direct-isometry and final-D4VT routing is recovered formally
+from the boundary-set source.
 Completing the forward program means replacing the listed gates by formal
 proofs.  It also exposes source-parametrized kernels such as
 `four_vertex_condition_smooth_spaceForm_kernel_of_sources`,

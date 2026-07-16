@@ -7118,6 +7118,27 @@ def DahlbergE2DiskAuxiliaryBoundaryTransitionConstructionSource : Prop :=
           (i ∉ DiskBoundaryIndices v O R ∧ i + 1 ∈ DiskBoundaryIndices v O R)) →
         DahlbergDiskAuxiliaryReduction v
 
+/-- Boundary-neighbor source for Dahlberg's §4 auxiliary construction.
+
+This orients the adjacent-transition source around an actual boundary vertex:
+the remaining construction starts from a vertex of `E = V(Γ) ∩ ∂Δ` with one
+cyclic neighbor outside `E`.  That is the local endpoint data for the
+complementary interval used in Dahlberg's construction of the convex domain
+`U`. -/
+def DahlbergE2DiskAuxiliaryBoundaryNeighborConstructionSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    ∀ {O : ℂ} {R : ℝ},
+      MinimalEnclosingDiskR2 v O R →
+      0 < R →
+      ∀ {i : ZMod n},
+        i ∈ DiskBoundaryIndices v O R →
+        (i + 1 ∉ DiskBoundaryIndices v O R ∨ i - 1 ∉ DiskBoundaryIndices v O R) →
+        DahlbergDiskAuxiliaryReduction v
+
 /-- Pair-level source for Dahlberg's §4 auxiliary construction.
 
 This is sharper than `DahlbergE2DiskAuxiliaryBoundaryConstructionSource`: the
@@ -7406,6 +7427,21 @@ theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_transitionSource
     ⟨i, htransition⟩
   exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos
     htransition
+
+/-- A boundary-neighbor §4 auxiliary source implies the adjacent-transition
+source by orienting any crossing edge around its boundary endpoint. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryTransitionConstructionSource_of_neighborSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundaryNeighborConstructionSource) :
+    DahlbergE2DiskAuxiliaryBoundaryTransitionConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict O R hΔ hRpos i htransition
+  letI : NeZero n := hne
+  rcases htransition with hforward | hbackward
+  · exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos
+      hforward.1 (Or.inl hforward.2)
+  · refine hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos
+      hbackward.2 (Or.inr ?_)
+    intro hprev
+    exact hbackward.1 (by simpa [sub_eq_add_neg, add_assoc] using hprev)
 
 /-- The boundary-set-level §4 source implies the boundary/interior source:
 a boundary vertex and a strictly interior vertex are exactly the concrete
@@ -8050,17 +8086,25 @@ theorem dahlbergE2RemainingSourceComponents_directIsometry
     (dahlbergE2DfvSourceComponents_of_remainingComponents hsrc)
     hu a hn hsimple hregular hnoncircle
 
-/-- Dahlberg's adjacent-transition auxiliary-polygon construction/transfer
+/-- Dahlberg's boundary-neighbor auxiliary-polygon construction/transfer
 source gate for the §4 non-strict disk reduction.
 
 This is now the sharp paper-facing source gate for the §4 construction: after
 the finite minimal-disk setup, the proof uses the nonempty proper boundary set
-`E = V(Γ) ∩ ∂Δ`, extracts an adjacent transition across `E`, selects the
-corresponding complementary interval, and builds the auxiliary strictly convex
-polygon from the convex domain `U`. -/
+`E = V(Γ) ∩ ∂Δ`, extracts a boundary vertex with a neighboring vertex outside
+`E`, selects the corresponding complementary interval, and builds the
+auxiliary strictly convex polygon from the convex domain `U`. -/
+theorem dahlbergE2_disk_auxiliary_boundary_neighbor_construction_source_gate :
+    DahlbergE2DiskAuxiliaryBoundaryNeighborConstructionSource := by
+  sorry
+
+/-- Dahlberg's adjacent-transition auxiliary-polygon construction/transfer
+source for the §4 non-strict disk reduction, recovered by orienting a crossing
+edge around its boundary endpoint. -/
 theorem dahlbergE2_disk_auxiliary_boundary_transition_construction_source_gate :
     DahlbergE2DiskAuxiliaryBoundaryTransitionConstructionSource := by
-  sorry
+  exact dahlbergE2DiskAuxiliaryBoundaryTransitionConstructionSource_of_neighborSource
+    dahlbergE2_disk_auxiliary_boundary_neighbor_construction_source_gate
 
 /-- Dahlberg's boundary-set auxiliary-polygon construction/transfer source
 for the §4 non-strict disk reduction, recovered from the sharper
