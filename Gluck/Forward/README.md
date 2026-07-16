@@ -85,8 +85,12 @@ The smooth forward statements for `E²`, `S²`, and `H²` are exposed through
 model-specific wrappers in `Euclidean.lean`, `Sphere.lean`, and
 `Hyperbolic.lean`.  The shared dispatch theorem
 `four_vertex_condition_smooth_spaceForm_kernel` in `Smooth.lean` is proved from
-the model-specific primitive gate `smoothForward_model_sources_gate`; the
-uniform gate `smoothForward_source_gate` and the uniform geometric theorem
+the individual model primitive gates
+`four_vertex_condition_smooth_E2_model_source_gate`,
+`four_vertex_condition_smooth_S2_model_source_gate`, and
+`four_vertex_condition_smooth_H2_model_source_gate`; the package gate
+`smoothForward_model_sources_gate`, the uniform gate
+`smoothForward_source_gate`, and the uniform geometric theorem
 `four_vertex_condition_smooth_spaceForm_nonconstant_geometric_source` are
 formal dispatch wrappers.  The public nonconstant source theorem
 `four_vertex_condition_smooth_spaceForm_nonconstant_source` and the
@@ -103,8 +107,10 @@ model-specific wrappers in `Sphere.lean` and `Hyperbolic.lean`.  The shared
 dispatch theorem `constant_or_dahlbergFourVertex_spaceForm_kernel` in
 `SpaceFormDiscrete.lean` is proved from the weak final-D4VT source
 `spaceFormDiscrete_dfv_source_gate`.  Ordered-turn refinements use the
-separate stronger model-specific source
-`spaceFormDiscrete_model_sources_gate`; the uniform source
+separate stronger individual model sources
+`orderedAdjacentTurns_S2_model_source_gate` and
+`orderedAdjacentTurns_H2_model_source_gate`; the package gate
+`spaceFormDiscrete_model_sources_gate`, the uniform source
 `spaceFormDiscrete_source_gate`, the uniform theorem
 `orderedAdjacentTurns_spaceForm_geometric_source`, and the public source
 theorem `orderedAdjacentTurns_spaceForm_source` are formal dispatch wrappers.  The
@@ -127,19 +133,24 @@ is the weaker package sufficient for final D4VT endpoints.  The fully expanded
 primitive remaining-source audit is:
 
 - `Gluck/Forward/Smooth.lean`
-  - `smoothForward_model_sources_gate`.
+  - `four_vertex_condition_smooth_E2_model_source_gate`;
+  - `four_vertex_condition_smooth_S2_model_source_gate`;
+  - `four_vertex_condition_smooth_H2_model_source_gate`.
 - `Gluck/Forward/SpaceFormDiscrete.lean`
-  - `spaceFormDiscrete_model_sources_gate`.
+  - `orderedAdjacentTurns_S2_model_source_gate`;
+  - `orderedAdjacentTurns_H2_model_source_gate`.
 - `Gluck/Forward/Dahlberg.lean`
   - `dahlbergE2_lemma9_source_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
 
-The uniform smooth and non-Euclidean gates are no longer primitive:
-`smoothForward_source_gate` is recovered from `smoothForward_model_sources_gate`,
-and `spaceFormDiscrete_source_gate` is recovered from
-`spaceFormDiscrete_model_sources_gate`.  The weak smooth and non-Euclidean
-final-D4VT gates are also recovered formally from those stronger sources.  The
-split strict Dahlberg components
+The smooth and non-Euclidean package/uniform gates are no longer primitive:
+`smoothForward_model_sources_gate` is recovered from the three individual
+smooth model gates, `smoothForward_source_gate` is recovered from that package,
+`spaceFormDiscrete_model_sources_gate` is recovered from the two individual
+non-Euclidean discrete model gates, and `spaceFormDiscrete_source_gate` is
+recovered from that package.  The weak smooth and non-Euclidean final-D4VT
+gates are also recovered formally from those stronger sources.  The split
+strict Dahlberg components
 `dahlbergE2_convex_dfv_signed_source_gate` and
 `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate` are recovered
 from `dahlbergE2_lemma9_source_gate`.
