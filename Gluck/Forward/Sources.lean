@@ -117,6 +117,83 @@ theorem forwardGeometricSources_iff_atomicSources :
     ForwardGeometricSources ↔ ForwardAtomicSources := by
   exact forwardGeometricSources_iff_modelSources.trans forwardModelSources_iff_atomicSources
 
+/-- Extract the smooth `E²` source gate from the fully expanded source
+package. -/
+theorem smoothE2_source_of_atomicSources (hsrc : ForwardAtomicSources) :
+    ∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.RealizesCurvature γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ := by
+  exact hsrc.1
+
+/-- Extract the smooth `S²` source gate from the fully expanded source
+package. -/
+theorem smoothS2_source_of_atomicSources (hsrc : ForwardAtomicSources) :
+    ∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes 1 γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ := by
+  exact hsrc.2.1
+
+/-- Extract the smooth `H²` source gate from the fully expanded source
+package. -/
+theorem smoothH2_source_of_atomicSources (hsrc : ForwardAtomicSources) :
+    ∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes (-1) γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ := by
+  exact hsrc.2.2.1
+
+/-- Extract the discrete `S²` source gate from the fully expanded source
+package. -/
+theorem discreteS2_source_of_atomicSources (hsrc : ForwardAtomicSources) :
+    ∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger 1 v κ →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        OrderedAdjacentTurns κ := by
+  exact hsrc.2.2.2.1
+
+/-- Extract the discrete `H²` source gate from the fully expanded source
+package. -/
+theorem discreteH2_source_of_atomicSources (hsrc : ForwardAtomicSources) :
+    ∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger (-1) v κ →
+        (∀ i, 1 < κ i) →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        OrderedAdjacentTurns κ := by
+  exact hsrc.2.2.2.2.1
+
+/-- Extract Dahlberg's `E²` convex-radius source gate from the fully expanded
+source package. -/
+theorem dahlbergE2ConvexRadiusSource_of_atomicSources (hsrc : ForwardAtomicSources) :
+    DahlbergE2ConvexRadiusSource := by
+  exact hsrc.2.2.2.2.2.1
+
+/-- Extract Dahlberg's `E²` disk-reduction source gate from the fully expanded
+source package. -/
+theorem dahlbergE2DiskReductionSource_of_atomicSources (hsrc : ForwardAtomicSources) :
+    DahlbergE2DiskReductionSource := by
+  exact hsrc.2.2.2.2.2.2
+
 /-- Extract the smooth model-source package from the expanded forward source
 package. -/
 theorem smoothForwardModelSources_of_modelSources (hsrc : ForwardModelSources) :
