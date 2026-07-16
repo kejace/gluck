@@ -5668,6 +5668,28 @@ def DahlbergDiskAuxiliaryReduction {n : ℕ} [NeZero n] (v : ZMod n → ℂ) : P
     (DahlbergFourVertex (SignedMengerProfile w) →
       DahlbergFourVertex (SignedMengerProfile v))
 
+/-- Dahlberg's strictly convex same-orientation Lemma 9 extraction: under
+positive orientation and nonconstant signed-Menger profile, the profile has
+four cyclically ordered adjacent signed-Menger turns. -/
+def DahlbergE2Lemma9Source : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) →
+    OrderedAdjacentTurns (SignedMengerProfile v)
+
+/-- Dahlberg's non-strict §4 disk-reduction source: a non-strict locally
+regular nonconcyclic polygon admits an auxiliary strict-orientation polygon
+whose Dahlberg conclusion transfers back. -/
+def DahlbergE2DiskReductionSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    DahlbergDiskAuxiliaryReduction v
+
 /-- The genuinely Euclidean geometric inputs in Dahlberg's discrete
 four-vertex proof.
 
@@ -5677,18 +5699,17 @@ of four ordered signed-Menger turns.  The second component is the non-strict
 All other declarations in this section are formal reductions from these two
 geometric statements plus the already-proved cyclic/order infrastructure. -/
 def DahlbergE2GeometricSources : Prop :=
-  (∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
-    Gluck.Discrete.IsSimplePolygon v →
-    DahlbergRegular v →
-    PositivePolygonOrientation v →
-    (¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) →
-    OrderedAdjacentTurns (SignedMengerProfile v)) ∧
-  (∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
-    Gluck.Discrete.IsSimplePolygon v →
-    DahlbergRegular v →
-    (¬ Concyclic v) →
-    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
-    DahlbergDiskAuxiliaryReduction v)
+  DahlbergE2Lemma9Source ∧ DahlbergE2DiskReductionSource
+
+/-- Dahlberg's Euclidean Lemma 9 geometric source for the discrete
+four-vertex paper. -/
+theorem dahlbergE2_lemma9_source : DahlbergE2Lemma9Source := by
+  sorry
+
+/-- Dahlberg's Euclidean non-strict §4 disk-reduction geometric source for the
+discrete four-vertex paper. -/
+theorem dahlbergE2_disk_reduction_source : DahlbergE2DiskReductionSource := by
+  sorry
 
 /-- Dahlberg's Euclidean geometric source package for the discrete
 four-vertex paper recorded as `23.pdf` in `references/summary.md`.
@@ -5697,7 +5718,7 @@ This is the only remaining E² geometric import in the formal chain: Lemma 9
 for the strict same-orientation branch, together with the final §4 disk
 reduction for the non-strict branch. -/
 theorem dahlbergE2_geometric_sources : DahlbergE2GeometricSources := by
-  sorry
+  exact ⟨dahlbergE2_lemma9_source, dahlbergE2_disk_reduction_source⟩
 
 /-- Ordered-turn extraction in Dahlberg's positively oriented strictly-convex
 case with nonconstant signed-Menger profile.  This is the geometric content of
