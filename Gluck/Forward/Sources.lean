@@ -1008,6 +1008,22 @@ theorem spaceFormDiscreteDfvModelSources_of_dfvRemainingSources
     SpaceFormDiscreteDfvModelSources := by
   exact (forwardDfvRemainingSources_iff_components.mp hsrc).2.1
 
+/-- Extract the smooth final-D4VT uniform source from the sharp final-D4VT
+remaining-source package. -/
+theorem smoothForwardDfvSource_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources) :
+    SmoothForwardDfvSource := by
+  exact smoothForwardDfvSource_iff_modelSources.mpr
+    (smoothForwardDfvModelSources_of_dfvRemainingSources hsrc)
+
+/-- Extract the non-Euclidean discrete final-D4VT uniform source from the
+sharp final-D4VT remaining-source package. -/
+theorem spaceFormDiscreteDfvSource_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources) :
+    SpaceFormDiscreteDfvSource := by
+  exact spaceFormDiscreteDfvSource_iff_modelSources.mpr
+    (spaceFormDiscreteDfvModelSources_of_dfvRemainingSources hsrc)
+
 /-- Extract the sharp `E²` Dahlberg block from the final-D4VT remaining-source
 package. -/
 theorem dahlbergE2DfvSourceComponents_of_dfvRemainingSources
