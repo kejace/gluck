@@ -93,7 +93,9 @@ dispatch theorem `constant_or_dahlbergFourVertex_spaceForm_kernel` in
 theorem `constant_or_orderedAdjacentTurns_spaceForm_kernel`, whose
 model-specific branches are `constant_or_orderedAdjacentTurns_S2_source` and
 `constant_or_orderedAdjacentTurns_H2_source`.  The nonconstant ordered-turn
-source gate is the uniform theorem `orderedAdjacentTurns_spaceForm_source`; the
+geometric source gate is the uniform theorem
+`orderedAdjacentTurns_spaceForm_geometric_source`, exposed through the public
+source theorem `orderedAdjacentTurns_spaceForm_source`; the
 model-specific source names `orderedAdjacentTurns_S2_source` and
 `orderedAdjacentTurns_H2_source` are wrappers around it.  D4VT is derived from
 ordered turns by the general cyclic constructor
