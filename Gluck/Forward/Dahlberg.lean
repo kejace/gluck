@@ -231,6 +231,45 @@ theorem signedMengerR2_directIsometry {u : ℂ} (hu : ‖u‖ = 1) (w A B C : �
   rw [Gluck.Discrete.signedMengerR2_add_left,
     Gluck.Discrete.signedMengerR2_rotate hu]
 
+/-- Positive real homotheties scale signed twice-area quadratically. -/
+theorem crossR2_posRealHomothety (r : ℝ) (A B C : ℂ) :
+    Gluck.Discrete.crossR2 ((r : ℂ) * A) ((r : ℂ) * B) ((r : ℂ) * C) =
+      r ^ 2 * Gluck.Discrete.crossR2 A B C := by
+  have h1 : (r : ℂ) * B - (r : ℂ) * A = (r : ℂ) * (B - A) := by ring
+  have h2 : (r : ℂ) * C - (r : ℂ) * A = (r : ℂ) * (C - A) := by ring
+  unfold Gluck.Discrete.crossR2
+  simp only [h1, h2, Complex.mul_re, Complex.mul_im, Complex.ofReal_re,
+    Complex.ofReal_im, zero_mul, sub_zero]
+  ring
+
+/-- Positive real homotheties scale distances linearly. -/
+theorem dist_posRealHomothety {r : ℝ} (hr : 0 < r) (A B : ℂ) :
+    dist ((r : ℂ) * A) ((r : ℂ) * B) = r * dist A B := by
+  rw [dist_eq_norm, dist_eq_norm]
+  have hsub : (r : ℂ) * A - (r : ℂ) * B = (r : ℂ) * (A - B) := by ring
+  rw [hsub, norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hr]
+
+/-- Positive real homotheties scale signed Menger curvature by the reciprocal
+scale. -/
+theorem signedMengerR2_posRealHomothety {r : ℝ} (hr : 0 < r) (A B C : ℂ) :
+    Gluck.Discrete.signedMengerR2 ((r : ℂ) * A) ((r : ℂ) * B) ((r : ℂ) * C) =
+      r⁻¹ * Gluck.Discrete.signedMengerR2 A B C := by
+  unfold Gluck.Discrete.signedMengerR2
+  rw [crossR2_posRealHomothety r A B C,
+    dist_posRealHomothety hr A B,
+    dist_posRealHomothety hr B C,
+    dist_posRealHomothety hr C A]
+  field_simp [hr.ne']
+
+/-- Positive real homotheties scale signed-Menger profiles by the reciprocal
+scale. -/
+theorem SignedMengerProfile_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
+    (v : ZMod n → ℂ) :
+    SignedMengerProfile (fun i => (r : ℂ) * v i) =
+      fun i => r⁻¹ * SignedMengerProfile v i := by
+  funext i
+  exact signedMengerR2_posRealHomothety hr (v (i - 1)) (v i) (v (i + 1))
+
 /-- Direct Euclidean isometries preserve the signed-Menger profile. -/
 theorem SignedMengerProfile_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
     (w : ℂ) (v : ZMod n → ℂ) :
@@ -6441,6 +6480,38 @@ theorem dahlbergDiskAuxiliaryReduction_directIsometry_iff {n : ℕ} [NeZero n]
       fun hfv => (dahlbergFourVertex_signedMengerProfile_directIsometry_iff hu a v).mp
         (htransfer hfv)⟩
   · exact dahlbergDiskAuxiliaryReduction_directIsometry hu a
+
+/-- Positive real homotheties preserve Dahlberg's auxiliary-reduction package
+exactly.  The final transfer is adjusted by positive-affine invariance of the
+signed-Menger profile, since signed Menger curvature scales by `r⁻¹`. -/
+theorem dahlbergDiskAuxiliaryReduction_posRealHomothety_iff {n : ℕ} [NeZero n]
+    {r : ℝ} (hr : 0 < r) (v : ZMod n → ℂ) :
+    DahlbergDiskAuxiliaryReduction (fun i => (r : ℂ) * v i) ↔
+      DahlbergDiskAuxiliaryReduction v := by
+  constructor
+  · intro haux
+    rcases haux with
+      ⟨m, hne, w, hm, hsimple, hregular, horient, hnoncircle, htransfer⟩
+    exact ⟨m, hne, w, hm, hsimple, hregular, horient, hnoncircle, fun hfv => by
+      have hscaled : DahlbergFourVertex
+          (SignedMengerProfile (fun i => (r : ℂ) * v i)) :=
+        htransfer hfv
+      have hscaled' : DahlbergFourVertex
+          (fun i => r⁻¹ * SignedMengerProfile v i + 0) := by
+        simpa [SignedMengerProfile_posRealHomothety hr v] using hscaled
+      exact (dahlbergFourVertex_posAffine_iff (κ := SignedMengerProfile v)
+        (a := r⁻¹) (b := 0) (inv_pos.mpr hr)).mp hscaled'⟩
+  · intro haux
+    rcases haux with
+      ⟨m, hne, w, hm, hsimple, hregular, horient, hnoncircle, htransfer⟩
+    exact ⟨m, hne, w, hm, hsimple, hregular, horient, hnoncircle, fun hfv => by
+      have hbase : DahlbergFourVertex (SignedMengerProfile v) :=
+        htransfer hfv
+      have hscaled' : DahlbergFourVertex
+          (fun i => r⁻¹ * SignedMengerProfile v i + 0) :=
+        (dahlbergFourVertex_posAffine_iff (κ := SignedMengerProfile v)
+          (a := r⁻¹) (b := 0) (inv_pos.mpr hr)).mpr hbase
+      simpa [SignedMengerProfile_posRealHomothety hr v] using hscaled'⟩
 
 /-- If the reversed cyclic polygon has Dahlberg's auxiliary-reduction package,
 then so does the original polygon. -/
