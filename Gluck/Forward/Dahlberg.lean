@@ -6867,6 +6867,57 @@ theorem dahlbergE2ConvexRadiusSourceComponents_iff_lemma9Source :
   · exact dahlbergE2Lemma9Source_of_components
   · exact dahlbergE2ConvexRadiusSourceComponents_of_lemma9Source
 
+/-- The exact split source package currently used for Dahlberg's strict
+positive-orientation branch: theorem-level signed CDFV plus the witness-only
+Lemma 8 bridge. -/
+def DahlbergE2ConvexSignedSourceComponents : Prop :=
+  DahlbergE2ConvexDfvSignedSource ∧
+  DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource
+
+/-- The exact signed-CDFV/Lemma 8 source components imply Dahlberg's Lemma 9
+ordered-turn source. -/
+theorem dahlbergE2Lemma9Source_of_signedComponents
+    (hsrc : DahlbergE2ConvexSignedSourceComponents) :
+    DahlbergE2Lemma9Source := by
+  intro n hne hn v hsimple hregular horient hnc
+  letI : NeZero n := hne
+  have hwitness : DahlbergE2ConvexDfvRadiusWitnesses v :=
+    dahlbergE2ConvexDfvRadiusSource_of_signedSource hsrc.1
+      hn hsimple hregular horient hnc
+  have hturns : PositiveRadiusOrderedAdjacentTurns v :=
+    hsrc.2 hn hsimple hregular horient hwitness
+  exact orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
+    hsimple horient hturns
+
+/-- Dahlberg's Lemma 9 ordered-turn source implies the exact signed-CDFV/Lemma
+8 source components.  The signed-CDFV part is the plateau-aware consequence of
+ordered turns; the witness-only Lemma 8 bridge is recovered by converting
+Lemma 9's signed-Menger turns back to radius turns, using the supplied witness
+to obtain nonconstancy. -/
+theorem dahlbergE2ConvexSignedSourceComponents_of_lemma9Source
+    (hsrc : DahlbergE2Lemma9Source) :
+    DahlbergE2ConvexSignedSourceComponents := by
+  refine ⟨?_, ?_⟩
+  · intro n hne hn v hsimple hregular horient hnc
+    letI : NeZero n := hne
+    exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+      (hsrc hn hsimple hregular horient hnc)
+  · intro n hne hn v hsimple hregular horient hwitness
+    letI : NeZero n := hne
+    have hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c :=
+      not_constant_signedMengerProfile_of_convexDfvRadiusWitnesses
+        hsimple horient hwitness
+    exact positiveRadiusOrderedAdjacentTurns_of_orderedAdjacentTurns_signedMengerProfile
+      hsimple horient (hsrc hn hsimple hregular horient hnc)
+
+/-- The exact signed-CDFV/Lemma 8 source components are formally equivalent to
+Dahlberg's Lemma 9 ordered-turn source. -/
+theorem dahlbergE2ConvexSignedSourceComponents_iff_lemma9Source :
+    DahlbergE2ConvexSignedSourceComponents ↔ DahlbergE2Lemma9Source := by
+  constructor
+  · exact dahlbergE2Lemma9Source_of_signedComponents
+  · exact dahlbergE2ConvexSignedSourceComponents_of_lemma9Source
+
 /-- Dahlberg's non-strict §4 disk-reduction source: a non-strict locally
 regular nonconcyclic polygon admits an auxiliary strict-orientation polygon
 whose Dahlberg conclusion transfers back. -/
@@ -7540,17 +7591,9 @@ theorem dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate :
 This is now derived from the two paper-level strict-branch inputs: the
 theorem-level CDFV signed-Menger source and Lemma 8's radius-turn bridge. -/
 theorem dahlbergE2_lemma9_source_gate : DahlbergE2Lemma9Source := by
-  intro n hne hn v hsimple hregular horient hnc
-  letI : NeZero n := hne
-  have hwitness : DahlbergE2ConvexDfvRadiusWitnesses v :=
-    dahlbergE2ConvexDfvRadiusSource_of_signedSource
-      dahlbergE2_convex_dfv_signed_source_gate
-      hn hsimple hregular horient hnc
-  have hturns : PositiveRadiusOrderedAdjacentTurns v :=
-    dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate
-      hn hsimple hregular horient hwitness
-  exact orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
-    hsimple horient hturns
+  exact dahlbergE2Lemma9Source_of_signedComponents
+    ⟨dahlbergE2_convex_dfv_signed_source_gate,
+      dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate⟩
 
 /-- Dahlberg's convex/CDFV signed-Menger source, extracted directly from
 Theorem 6/CDFV in Dahlberg's discrete four-vertex paper.
