@@ -203,9 +203,9 @@ def ForwardRemainingSources : Prop :=
 only for the final D4VT endpoints.
 
 Compared with `ForwardRemainingSources`, the Euclidean strict convex component
-is theorem-level signed-Menger CDFV rather than the stronger radius-turn source
-package.  This matches the final D4VT route, which does not need the ordered
-turn refinement. -/
+is Dahlberg's CDFV radius-witness source rather than the stronger
+radius-turn/Lemma 8 source package.  This matches the final D4VT route, which
+does not need the ordered-turn refinement. -/
 def ForwardDfvRemainingSources : Prop :=
   (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
       Gluck.IsSimpleClosed γ →
@@ -247,7 +247,7 @@ def ForwardDfvRemainingSources : Prop :=
         (∀ i, 1 < κ i) →
         (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
         OrderedAdjacentTurns κ) ∧
-  DahlbergE2ConvexDfvSignedSource ∧
+  DahlbergE2ConvexDfvRadiusSource ∧
   DahlbergE2DiskAuxiliaryConstructionSource
 
 /-- The bundled uniform source package is equivalent to the model-specific
@@ -329,8 +329,7 @@ theorem forwardDfvRemainingSources_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     ForwardDfvRemainingSources := by
   rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
-  exact ⟨hE, hS, hH, hdS, hdH,
-    dahlbergE2_convexDfvRadiusSource_iff_signedSource.mp hC.1, hD⟩
+  exact ⟨hE, hS, hH, hdS, hdH, hC.1, hD⟩
 
 /-- The final-D4VT remaining-source package implies the older fully expanded
 final-D4VT atomic source package. -/
@@ -338,7 +337,8 @@ theorem forwardDfvAtomicSources_of_dfvRemainingSources
     (hsrc : ForwardDfvRemainingSources) :
     ForwardDfvAtomicSources := by
   rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
-  exact ⟨hE, hS, hH, hdS, hdH, hC,
+  exact ⟨hE, hS, hH, hdS, hdH,
+    dahlbergE2_convexDfvRadiusSource_iff_signedSource.mp hC,
     dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource hD⟩
 
 /-- The final-D4VT remaining-source package implies the bundled final-D4VT
