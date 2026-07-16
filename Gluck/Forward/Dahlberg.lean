@@ -10146,15 +10146,6 @@ theorem dahlbergE2_disk_auxiliary_max_interior_construction_source :
   exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_boundaryInteriorSource
     dahlbergE2_disk_auxiliary_boundary_interior_construction_source
 
-/-- The exact remaining `E²` Dahlberg source components currently used by the
-stronger ordered-turn route: the strict signed-CDFV source, Lemma 8's
-witness-to-radius-turn bridge, and the §4 boundary/interior construction. -/
-theorem dahlbergE2_remaining_source_components :
-    DahlbergE2RemainingSourceComponents := by
-  exact ⟨dahlbergE2_convex_dfv_signed_source,
-    dahlbergE2_lemma8_radius_turn_bridge_from_witness_source,
-    dahlbergE2_disk_auxiliary_boundary_interior_construction_source⟩
-
 /-- Compatibility spelling of the stronger Lemma-9/unit source-gate surface:
 Lemma 9 and the normalized unit-disk §4 construction.  The primitive remaining
 package below now uses the split radius-CDFV/Lemma 8 inputs directly. -/
@@ -10171,6 +10162,14 @@ theorem dahlbergE2_primitive_remaining_source_components :
   exact ⟨dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate,
     dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate,
     dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate⟩
+
+/-- The exact remaining `E²` Dahlberg source components currently used by the
+stronger ordered-turn route, recovered from the primitive nonconcyclic
+radius-CDFV, Lemma 8, and normalized unit-disk §4 sources. -/
+theorem dahlbergE2_remaining_source_components :
+    DahlbergE2RemainingSourceComponents := by
+  exact dahlbergE2RemainingSourceComponents_of_primitiveComponents
+    dahlbergE2_primitive_remaining_source_components
 
 /-- Primitive spelling of the exact `E²` source components currently used by
 the weaker final-D4VT route: nonconcyclic radius-CDFV and the normalized
