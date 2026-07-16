@@ -199,6 +199,57 @@ def ForwardRemainingSources : Prop :=
   DahlbergE2ConvexRadiusSourceComponents ∧
   DahlbergE2DiskAuxiliaryConstructionSource
 
+/-- Fully expanded spelling of the actual remaining source obligations needed
+only for the final D4VT endpoints.
+
+Compared with `ForwardRemainingSources`, the Euclidean strict convex component
+is theorem-level signed-Menger CDFV rather than the stronger radius-turn source
+package.  This matches the final D4VT route, which does not need the ordered
+turn refinement. -/
+def ForwardDfvRemainingSources : Prop :=
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.RealizesCurvature γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ) ∧
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes 1 γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ) ∧
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes (-1) γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ) ∧
+  (∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger 1 v κ →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        OrderedAdjacentTurns κ) ∧
+  (∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger (-1) v κ →
+        (∀ i, 1 < κ i) →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        OrderedAdjacentTurns κ) ∧
+  DahlbergE2ConvexDfvSignedSource ∧
+  DahlbergE2DiskAuxiliaryConstructionSource
+
 /-- The bundled uniform source package is equivalent to the model-specific
 source package. -/
 theorem forwardGeometricSources_iff_modelSources :
@@ -271,6 +322,32 @@ theorem forwardDfvGeometricSources_of_remainingSources
     forwardGeometricSources_of_remainingSources hsrc
   exact ⟨hgeo.1, hgeo.2.1,
     dahlbergE2DfvGeometricSources_of_geometricSources hgeo.2.2⟩
+
+/-- The stronger remaining-source package implies the weaker final-D4VT
+remaining-source package. -/
+theorem forwardDfvRemainingSources_of_remainingSources
+    (hsrc : ForwardRemainingSources) :
+    ForwardDfvRemainingSources := by
+  rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
+  exact ⟨hE, hS, hH, hdS, hdH,
+    dahlbergE2_convexDfvRadiusSource_iff_signedSource.mp hC.1, hD⟩
+
+/-- The final-D4VT remaining-source package implies the older fully expanded
+final-D4VT atomic source package. -/
+theorem forwardDfvAtomicSources_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources) :
+    ForwardDfvAtomicSources := by
+  rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
+  exact ⟨hE, hS, hH, hdS, hdH, hC,
+    dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource hD⟩
+
+/-- The final-D4VT remaining-source package implies the bundled final-D4VT
+geometric source package. -/
+theorem forwardDfvGeometricSources_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources) :
+    ForwardDfvGeometricSources := by
+  exact forwardDfvGeometricSources_iff_atomicSources.mpr
+    (forwardDfvAtomicSources_of_dfvRemainingSources hsrc)
 
 /-- Extract the smooth `E²` source gate from the fully expanded source
 package. -/
@@ -2166,6 +2243,12 @@ theorem forward_remaining_sources : ForwardRemainingSources := by
     letI : NeZero n := hne
     exact orderedAdjacentTurns_H2_geometric_source
       hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
+
+/-- Sharper audit theorem for the final D4VT endpoints.  Its Euclidean
+Dahlberg strict convex component is the theorem-level signed-Menger source,
+not the stronger radius-turn source used for ordered-turn refinements. -/
+theorem forward_dfv_remaining_sources : ForwardDfvRemainingSources := by
+  exact forwardDfvRemainingSources_of_remainingSources forward_remaining_sources
 
 /-- Weaker final-D4VT spelling of `forward_geometric_sources`. -/
 theorem forward_dfv_geometric_sources : ForwardDfvGeometricSources := by
