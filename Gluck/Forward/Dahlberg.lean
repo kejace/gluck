@@ -8794,6 +8794,43 @@ theorem dahlbergE2Theorem6PaperSources_of_orderedDiskPlateauPaperSources
     (dahlbergE2Theorem6GeometricCdfvSource_of_orderedDiskPlateauPaperSources
       hsrc)
 
+/-- The geometric CDFV source also implies the direct
+ordered-disk-plus-plateau §3 package: Lemma 5 and Lemma 7 are projected from
+the full CDFV certificate, while the assembly component keeps the ordered disk
+and extracts explicit plateau-resolution data from the certificate's local
+extrema. -/
+theorem dahlbergE2Theorem6OrderedDiskPlateauPaperSources_of_geometricCdfvSource
+    (hsrc : DahlbergE2Theorem6GeometricCdfvSource) :
+    DahlbergE2Theorem6OrderedDiskPlateauPaperSources := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro n hne hn v hsimple hregular horient hnoncircle
+    letI : NeZero n := hne
+    rcases hsrc hn hsimple hregular horient hnoncircle with ⟨cert⟩
+    exact ⟨dahlbergE2Theorem6ContainingDisksCertificate_of_cdfvCertificate cert⟩
+  · intro n hne hn v hsimple hregular horient hnoncircle
+    letI : NeZero n := hne
+    rcases hsrc hn hsimple hregular horient hnoncircle with ⟨cert⟩
+    exact ⟨dahlbergE2Theorem6InteriorMissingDisksCertificate_of_cdfvCertificate cert⟩
+  · intro n hne hn v hsimple hregular horient hnoncircle _contains _misses
+    letI : NeZero n := hne
+    rcases hsrc hn hsimple hregular horient hnoncircle with ⟨cert⟩
+    let disk := dahlbergE2Theorem6OrderedDiskCertificate_of_cdfvCertificate cert
+    let hext :=
+      dahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate_of_cdfvCertificate
+        cert
+    exact ⟨⟨disk,
+      dahlbergE2Theorem6PlateauResolution_of_radiusExtremaForOrderedDiskCertificate
+        hext⟩⟩
+
+/-- The direct ordered-disk-plus-plateau §3 package is formally equivalent to
+the geometric CDFV source. -/
+theorem dahlbergE2Theorem6OrderedDiskPlateauPaperSources_iff_geometricCdfvSource :
+    DahlbergE2Theorem6OrderedDiskPlateauPaperSources ↔
+      DahlbergE2Theorem6GeometricCdfvSource := by
+  constructor
+  · exact dahlbergE2Theorem6GeometricCdfvSource_of_orderedDiskPlateauPaperSources
+  · exact dahlbergE2Theorem6OrderedDiskPlateauPaperSources_of_geometricCdfvSource
+
 /-- A CDFV certificate projects to the radius-profile four-vertex witness
 used by the formal reduction. -/
 theorem dahlbergE2ConvexDfvRadiusWitnesses_of_theorem6Certificate {n : ℕ}
