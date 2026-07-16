@@ -2885,14 +2885,12 @@ theorem forward_dfv_remaining_sources : ForwardDfvRemainingSources := by
         hclosed hreal hκ hper hnc)
   · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hnc
     letI : NeZero n := hne
-    exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
-      (orderedAdjacentTurns_S2_geometric_source
-        hn v κ hdisk hsimple hconvex hregular hκ hnc)
+    exact dahlbergFourVertex_S2_geometric_source
+      hn v κ hdisk hsimple hconvex hregular hκ hnc
   · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
     letI : NeZero n := hne
-    exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
-      (orderedAdjacentTurns_H2_geometric_source
-        hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc)
+    exact dahlbergFourVertex_H2_geometric_source
+      hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
 
 /-- Weaker final-D4VT source package, routed through the actual weaker
 final-D4VT remaining-source audit rather than through the stronger full

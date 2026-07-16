@@ -541,6 +541,42 @@ theorem dahlbergFourVertex_spaceForm_source {ε : ℝ}
     spaceFormDiscrete_dfv_source
     hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
 
+/-- Spherical nonconstant D4VT source theorem for the convex/coherent
+discrete four-vertex package in an open hemisphere.
+
+This is the final-D4VT interface; the stronger ordered-turn refinement remains
+available as `orderedAdjacentTurns_S2_source`. -/
+theorem dahlbergFourVertex_S2_geometric_source {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_spaceForm_source
+    (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro hlt; norm_num at hlt) hnc
+
+/-- Hyperbolic nonconstant D4VT source theorem for Grant--Mogilski's convex
+coherent discrete four-vertex theorem in the proper-circle regime `κᵢ > 1`.
+
+This is the final-D4VT interface; the stronger ordered-turn refinement remains
+available as `orderedAdjacentTurns_H2_source`. -/
+theorem dahlbergFourVertex_H2_geometric_source {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_spaceForm_source
+    (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
+    (by intro _; exact hcircle) hnc
+
 /-- Uniform nonconstant convex/coherent discrete four-vertex theorem in `S²`
 and `H²`, obtained from the nonconstant source package. -/
 theorem discrete_four_vertex_spaceForm_kernel {ε : ℝ}
