@@ -6295,6 +6295,65 @@ theorem diskBoundaryIndices_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1
   ext i
   exact onDiskBoundaryR2_directIsometry hu w O R v i
 
+/-- A nonempty proper cyclic index set has an adjacent transition across its
+boundary.
+
+This is the finite cyclic selection used at the start of Dahlberg's §4
+complementary-interval step: the boundary vertex set `E` cannot be constant as
+a cyclic `0/1` profile, so some adjacent pair crosses from `E` to its
+complement or from the complement back into `E`. -/
+theorem exists_mem_succ_not_mem_or_not_mem_succ_mem_of_nonempty_ne_univ
+    {n : ℕ} [NeZero n] (E : Set (ZMod n))
+    (hE : E.Nonempty) (hproper : E ≠ Set.univ) :
+    ∃ i : ZMod n, (i ∈ E ∧ i + 1 ∉ E) ∨ (i ∉ E ∧ i + 1 ∈ E) := by
+  classical
+  let χ : ZMod n → ℝ := fun i => if i ∈ E then 1 else 0
+  have hcompl : ∃ i : ZMod n, i ∉ E := by
+    by_contra hnone
+    apply hproper
+    ext i
+    constructor
+    · intro _hi
+      trivial
+    · intro _hi
+      by_contra hiE
+      exact hnone ⟨i, hiE⟩
+  have hnc : ¬ ∃ c, ∀ i : ZMod n, χ i = c := by
+    rintro ⟨c, hc⟩
+    rcases hE with ⟨i, hi⟩
+    rcases hcompl with ⟨j, hj⟩
+    have hiχ : χ i = 1 := by simp [χ, hi]
+    have hjχ : χ j = 0 := by simp [χ, hj]
+    have h10 : (1 : ℝ) = 0 := by
+      calc
+        (1 : ℝ) = χ i := hiχ.symm
+        _ = c := hc i
+        _ = χ j := (hc j).symm
+        _ = 0 := hjχ
+    norm_num at h10
+  rcases exists_ne_succ_of_not_constant (κ := χ) hnc with ⟨i, hneq⟩
+  by_cases hi : i ∈ E
+  · by_cases hsucc : i + 1 ∈ E
+    · exfalso
+      exact hneq (by simp [χ, hi, hsucc])
+    · exact ⟨i, Or.inl ⟨hi, hsucc⟩⟩
+  · by_cases hsucc : i + 1 ∈ E
+    · exact ⟨i, Or.inr ⟨hi, hsucc⟩⟩
+    · exfalso
+      exact hneq (by simp [χ, hi, hsucc])
+
+/-- Dahlberg's minimal-disk boundary set has an adjacent cyclic transition
+whenever it is nonempty and proper. -/
+theorem diskBoundaryIndices_exists_adjacent_transition {n : ℕ} [NeZero n]
+    {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
+    (hEnonempty : (DiskBoundaryIndices v O R).Nonempty)
+    (hEproper : DiskBoundaryIndices v O R ≠ Set.univ) :
+    ∃ i : ZMod n,
+      (i ∈ DiskBoundaryIndices v O R ∧ i + 1 ∉ DiskBoundaryIndices v O R) ∨
+        (i ∉ DiskBoundaryIndices v O R ∧ i + 1 ∈ DiskBoundaryIndices v O R) := by
+  exact exists_mem_succ_not_mem_or_not_mem_succ_mem_of_nonempty_ne_univ
+    (DiskBoundaryIndices v O R) hEnonempty hEproper
+
 /-- Direct Euclidean isometries preserve Dahlberg's minimal-disk setup. -/
 theorem dahlbergDiskReductionSetup_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
     (w : ℂ) (v : ZMod n → ℂ) :
@@ -7037,6 +7096,28 @@ def DahlbergE2DiskAuxiliaryBoundaryConstructionSource : Prop :=
       DiskBoundaryIndices v O R ≠ Set.univ →
       DahlbergDiskAuxiliaryReduction v
 
+/-- Adjacent-transition source for Dahlberg's §4 auxiliary construction.
+
+This sharpens the boundary-set interface by making the first cyclic selection
+step explicit: after the minimal disk and the nonempty proper boundary set
+`E = V(Γ) ∩ ∂Δ` are fixed, the proof starts from an adjacent transition across
+`E`.  This is the finite cyclic shadow of Dahlberg's complementary-interval
+choice before constructing the convex domain `U` and its polygonal
+approximation. -/
+def DahlbergE2DiskAuxiliaryBoundaryTransitionConstructionSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    ∀ {O : ℂ} {R : ℝ},
+      MinimalEnclosingDiskR2 v O R →
+      0 < R →
+      ∀ {i : ZMod n},
+        ((i ∈ DiskBoundaryIndices v O R ∧ i + 1 ∉ DiskBoundaryIndices v O R) ∨
+          (i ∉ DiskBoundaryIndices v O R ∧ i + 1 ∈ DiskBoundaryIndices v O R)) →
+        DahlbergDiskAuxiliaryReduction v
+
 /-- Pair-level source for Dahlberg's §4 auxiliary construction.
 
 This is sharper than `DahlbergE2DiskAuxiliaryBoundaryConstructionSource`: the
@@ -7312,6 +7393,19 @@ theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_pairSource
     subst j
     exact hj hi
   exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos hi hj hij
+
+/-- An adjacent-transition §4 auxiliary source implies the boundary-set source
+by extracting an adjacent transition from the nonempty proper boundary set. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_transitionSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundaryTransitionConstructionSource) :
+    DahlbergE2DiskAuxiliaryBoundaryConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict O R hΔ hRpos
+    hEnonempty hEproper
+  letI : NeZero n := hne
+  rcases diskBoundaryIndices_exists_adjacent_transition hEnonempty hEproper with
+    ⟨i, htransition⟩
+  exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos
+    htransition
 
 /-- The boundary-set-level §4 source implies the boundary/interior source:
 a boundary vertex and a strictly interior vertex are exactly the concrete
@@ -7956,16 +8050,25 @@ theorem dahlbergE2RemainingSourceComponents_directIsometry
     (dahlbergE2DfvSourceComponents_of_remainingComponents hsrc)
     hu a hn hsimple hregular hnoncircle
 
-/-- Dahlberg's boundary-set auxiliary-polygon construction/transfer source
-gate for the §4 non-strict disk reduction.
+/-- Dahlberg's adjacent-transition auxiliary-polygon construction/transfer
+source gate for the §4 non-strict disk reduction.
 
 This is now the sharp paper-facing source gate for the §4 construction: after
 the finite minimal-disk setup, the proof uses the nonempty proper boundary set
-`E = V(Γ) ∩ ∂Δ`, proves it is disconnected, selects a complementary interval,
-and builds the auxiliary strictly convex polygon from the convex domain `U`. -/
+`E = V(Γ) ∩ ∂Δ`, extracts an adjacent transition across `E`, selects the
+corresponding complementary interval, and builds the auxiliary strictly convex
+polygon from the convex domain `U`. -/
+theorem dahlbergE2_disk_auxiliary_boundary_transition_construction_source_gate :
+    DahlbergE2DiskAuxiliaryBoundaryTransitionConstructionSource := by
+  sorry
+
+/-- Dahlberg's boundary-set auxiliary-polygon construction/transfer source
+for the §4 non-strict disk reduction, recovered from the sharper
+adjacent-transition source and the finite cyclic transition lemma. -/
 theorem dahlbergE2_disk_auxiliary_boundary_construction_source_gate :
     DahlbergE2DiskAuxiliaryBoundaryConstructionSource := by
-  sorry
+  exact dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_transitionSource
+    dahlbergE2_disk_auxiliary_boundary_transition_construction_source_gate
 
 /-- Dahlberg's boundary/interior auxiliary-polygon construction/transfer
 source for the §4 non-strict disk reduction, recovered from the sharper
