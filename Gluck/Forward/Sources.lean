@@ -261,6 +261,107 @@ def ForwardDfvRemainingSources : Prop :=
   DahlbergE2ConvexDfvSignedSource ∧
   DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource
 
+/-- Fully expanded primitive spelling of the actual remaining source
+obligations.
+
+Compared with `ForwardRemainingSources`, the Euclidean Dahlberg block is
+recorded exactly at the current primitive gates: nonconcyclic signed-CDFV,
+Lemma 8's witness bridge, and the normalized unit-disk §4 source. -/
+def ForwardPrimitiveRemainingSources : Prop :=
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.RealizesCurvature γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ) ∧
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes 1 γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ) ∧
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes (-1) γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ) ∧
+  (∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger 1 v κ →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        OrderedAdjacentTurns κ) ∧
+  (∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger (-1) v κ →
+        (∀ i, 1 < κ i) →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        OrderedAdjacentTurns κ) ∧
+  DahlbergE2ConvexDfvSignedNonconcyclicSource ∧
+  DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
+  DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
+
+/-- Fully expanded primitive spelling of the remaining source obligations
+needed only for final D4VT endpoints.
+
+Compared with `ForwardDfvRemainingSources`, the Euclidean Dahlberg block is
+recorded exactly at the current primitive final-D4VT gates: nonconcyclic
+signed-CDFV and the normalized unit-disk §4 source. -/
+def ForwardDfvPrimitiveRemainingSources : Prop :=
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.RealizesCurvature γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      SmoothFourVertex κ) ∧
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes 1 γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      SmoothFourVertex κ) ∧
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes (-1) γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      SmoothFourVertex κ) ∧
+  (∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger 1 v κ →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        DahlbergFourVertex κ) ∧
+  (∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger (-1) v κ →
+        (∀ i, 1 < κ i) →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        DahlbergFourVertex κ) ∧
+  DahlbergE2ConvexDfvSignedNonconcyclicSource ∧
+  DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
+
 /-- Named component spelling of the actual remaining source obligations after
 the finite Euclidean disk setup has been proved.
 
@@ -431,6 +532,33 @@ theorem forwardRemainingSources_iff_components :
 component spelling. -/
 theorem forwardDfvRemainingSources_iff_components :
     ForwardDfvRemainingSources ↔ ForwardDfvRemainingSourceComponents := by
+  constructor
+  · intro hsrc
+    rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
+    exact ⟨⟨hE, hS, hH⟩, ⟨hdS, hdH⟩, ⟨hC, hD⟩⟩
+  · intro hsrc
+    rcases hsrc with ⟨hsmooth, hdisc, hDahlberg⟩
+    exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
+      hdisc.1, hdisc.2, hDahlberg.1, hDahlberg.2⟩
+
+/-- The flattened primitive remaining-source audit is equivalent to the named
+primitive component spelling. -/
+theorem forwardPrimitiveRemainingSources_iff_components :
+    ForwardPrimitiveRemainingSources ↔ ForwardPrimitiveRemainingSourceComponents := by
+  constructor
+  · intro hsrc
+    rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hCDFV, hL8, hD⟩
+    exact ⟨⟨hE, hS, hH⟩, ⟨hdS, hdH⟩, ⟨hCDFV, hL8, hD⟩⟩
+  · intro hsrc
+    rcases hsrc with ⟨hsmooth, hdisc, hDahlberg⟩
+    exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
+      hdisc.1, hdisc.2, hDahlberg.1, hDahlberg.2.1, hDahlberg.2.2⟩
+
+/-- The flattened primitive final-D4VT remaining-source audit is equivalent to
+the named primitive component spelling. -/
+theorem forwardDfvPrimitiveRemainingSources_iff_components :
+    ForwardDfvPrimitiveRemainingSources ↔
+      ForwardDfvPrimitiveRemainingSourceComponents := by
   constructor
   · intro hsrc
     rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
@@ -3897,6 +4025,12 @@ theorem forward_primitive_remaining_source_components :
     spaceFormDiscrete_model_sources_gate,
     dahlbergE2_primitive_remaining_source_components⟩
 
+/-- Fully flattened primitive spelling of the current forward source audit. -/
+theorem forward_primitive_remaining_sources :
+    ForwardPrimitiveRemainingSources := by
+  exact forwardPrimitiveRemainingSources_iff_components.mpr
+    forward_primitive_remaining_source_components
+
 /-- Grouped component spelling of `forward_remaining_sources`, recovered from
 the primitive source audit. -/
 theorem forward_remaining_source_components :
@@ -3926,6 +4060,13 @@ theorem forward_dfv_primitive_remaining_source_components :
   exact ⟨smoothForward_dfv_model_sources,
     spaceFormDiscrete_dfv_model_sources,
     dahlbergE2_dfv_primitive_source_components⟩
+
+/-- Fully flattened primitive spelling of the current final-D4VT source
+audit. -/
+theorem forward_dfv_primitive_remaining_sources :
+    ForwardDfvPrimitiveRemainingSources := by
+  exact forwardDfvPrimitiveRemainingSources_iff_components.mpr
+    forward_dfv_primitive_remaining_source_components
 
 /-- Grouped component spelling of `forward_dfv_remaining_sources`, recovered
 from the primitive final-D4VT source audit. -/
