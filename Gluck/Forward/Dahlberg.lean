@@ -5339,6 +5339,43 @@ noncomputable def EdgeNextCircleRadiusProfile {n : ℕ} (v : ZMod n → ℂ)
   normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
     (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1)))
 
+/-- In a positively oriented simple polygon, the outgoing-edge next-radius
+profile is the previous-radius profile at the next vertex.  The two sides use
+different edge coordinates, so this is a genuine circumcircle-radius
+uniqueness statement rather than a definitional rewrite. -/
+theorem EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+    {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v) (i : ZMod n) :
+    EdgeNextCircleRadiusProfile v i = EdgePrevCircleRadiusProfile v (i + 1) := by
+  let A := v i
+  let B := v (i + 1)
+  let C := v (i + 1 + 1)
+  have hAB : A ≠ B := hsimple.1 i
+  have hBC : B ≠ C := by
+    simpa [A, B, C, add_assoc] using hsimple.1 (i + 1)
+  have hcross : 0 < Gluck.Discrete.crossR2 A B C := by
+    simpa [A, B, C, sub_eq_add_neg, add_assoc] using horient (i + 1)
+  have hcrossBC : Gluck.Discrete.crossR2 B C A ≠ 0 := by
+    rw [crossR2_cycle]
+    exact hcross.ne'
+  have hcircle₁ :
+      CircumcircleR2 A B C
+        (edgeCircleCenter A B (edgeCircumcenterParameter A B C))
+        (normalizedCircleRadius (chordHalfLength A B)
+          (edgeCircumcenterParameter A B C)) :=
+    circumcircleR2_edge_parameter hAB hcross.ne'
+  have hcircle₂ :
+      CircumcircleR2 B C A
+        (edgeCircleCenter B C (edgeCircumcenterParameter B C A))
+        (normalizedCircleRadius (chordHalfLength B C)
+          (edgeCircumcenterParameter B C A)) :=
+    circumcircleR2_edge_parameter hBC hcrossBC
+  have hradius := (circumcircleR2_unique_of_cyclic_reorder hAB hcross.ne'
+    hcircle₁ hcircle₂).2
+  simpa [EdgeNextCircleRadiusProfile, EdgePrevCircleRadiusProfile, A, B, C,
+    sub_eq_add_neg, add_assoc] using hradius
+
 /-- The previous-vertex circle-radius profile is positive on a simple polygon. -/
 theorem EdgePrevCircleRadiusProfile_pos {n : ℕ} {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v) (i : ZMod n) :
@@ -5400,6 +5437,77 @@ def PositiveRadiusOrderedAdjacentTurns {n : ℕ} (v : ZMod n → ℂ) : Prop :=
       EdgeNextCircleRadiusProfile v (((i₄ : ZMod n) + 1)) <
         EdgePrevCircleRadiusProfile v (((i₄ : ZMod n) + 1))
 
+/-- Positive radius ordered turns are ordered turns of the reciprocal previous
+radius profile. -/
+theorem orderedAdjacentTurns_inv_edgePrevCircleRadiusProfile_of_positiveRadiusOrderedAdjacentTurns
+    {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hturns : PositiveRadiusOrderedAdjacentTurns v) :
+    OrderedAdjacentTurns (fun i => (EdgePrevCircleRadiusProfile v i)⁻¹) := by
+  have hpos : ∀ i : ZMod n, 0 < EdgePrevCircleRadiusProfile v i :=
+    EdgePrevCircleRadiusProfile_pos hsimple
+  rcases hturns with
+    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
+      hinc₁, hdec₁, hdec₂, hinc₂, hinc₃, hdec₃, hdec₄, hinc₄⟩
+  have hinc₁' :
+      EdgePrevCircleRadiusProfile v ((i₁ : ZMod n) + 1) <
+        EdgePrevCircleRadiusProfile v (i₁ : ZMod n) := by
+    simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (i₁ : ZMod n)] using hinc₁
+  have hdec₁' :
+      EdgePrevCircleRadiusProfile v ((i₁ : ZMod n) + 1) <
+        EdgePrevCircleRadiusProfile v (((i₁ : ZMod n) + 1) + 1) := by
+    simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient ((i₁ : ZMod n) + 1), add_assoc] using hdec₁
+  have hdec₂' :
+      EdgePrevCircleRadiusProfile v (i₂ : ZMod n) <
+        EdgePrevCircleRadiusProfile v ((i₂ : ZMod n) + 1) := by
+    simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (i₂ : ZMod n)] using hdec₂
+  have hinc₂' :
+      EdgePrevCircleRadiusProfile v (((i₂ : ZMod n) + 1) + 1) <
+        EdgePrevCircleRadiusProfile v ((i₂ : ZMod n) + 1) := by
+    simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient ((i₂ : ZMod n) + 1), add_assoc] using hinc₂
+  have hinc₃' :
+      EdgePrevCircleRadiusProfile v ((i₃ : ZMod n) + 1) <
+        EdgePrevCircleRadiusProfile v (i₃ : ZMod n) := by
+    simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (i₃ : ZMod n)] using hinc₃
+  have hdec₃' :
+      EdgePrevCircleRadiusProfile v ((i₃ : ZMod n) + 1) <
+        EdgePrevCircleRadiusProfile v (((i₃ : ZMod n) + 1) + 1) := by
+    simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient ((i₃ : ZMod n) + 1), add_assoc] using hdec₃
+  have hdec₄' :
+      EdgePrevCircleRadiusProfile v (i₄ : ZMod n) <
+        EdgePrevCircleRadiusProfile v ((i₄ : ZMod n) + 1) := by
+    simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient (i₄ : ZMod n)] using hdec₄
+  have hinc₄' :
+      EdgePrevCircleRadiusProfile v (((i₄ : ZMod n) + 1) + 1) <
+        EdgePrevCircleRadiusProfile v ((i₄ : ZMod n) + 1) := by
+    simpa [EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+      hsimple horient ((i₄ : ZMod n) + 1), add_assoc] using hinc₄
+  refine ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · exact (inv_lt_inv₀ (hpos (i₁ : ZMod n)) (hpos ((i₁ : ZMod n) + 1))).mpr
+      hinc₁'
+  · exact (inv_lt_inv₀ (hpos (((i₁ : ZMod n) + 1) + 1))
+        (hpos ((i₁ : ZMod n) + 1))).mpr hdec₁'
+  · exact (inv_lt_inv₀ (hpos ((i₂ : ZMod n) + 1)) (hpos (i₂ : ZMod n))).mpr
+      hdec₂'
+  · exact (inv_lt_inv₀ (hpos ((i₂ : ZMod n) + 1))
+        (hpos (((i₂ : ZMod n) + 1) + 1))).mpr hinc₂'
+  · exact (inv_lt_inv₀ (hpos (i₃ : ZMod n)) (hpos ((i₃ : ZMod n) + 1))).mpr
+      hinc₃'
+  · exact (inv_lt_inv₀ (hpos (((i₃ : ZMod n) + 1) + 1))
+        (hpos ((i₃ : ZMod n) + 1))).mpr hdec₃'
+  · exact (inv_lt_inv₀ (hpos ((i₄ : ZMod n) + 1)) (hpos (i₄ : ZMod n))).mpr
+      hdec₄'
+  · exact (inv_lt_inv₀ (hpos ((i₄ : ZMod n) + 1))
+        (hpos (((i₄ : ZMod n) + 1) + 1))).mpr hinc₄'
+
 /-- Positive radius ordered turns imply the corresponding signed-Menger
 ordered turns. -/
 theorem orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
@@ -5408,34 +5516,11 @@ theorem orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacen
     (horient : PositivePolygonOrientation v)
     (hturns : PositiveRadiusOrderedAdjacentTurns v) :
     OrderedAdjacentTurns (SignedMengerProfile v) := by
-  rcases hturns with
-    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
-      hinc₁, hdec₁, hdec₂, hinc₂, hinc₃, hdec₃, hdec₄, hinc₄⟩
-  exact ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
-    signedMengerProfile_lt_of_edgeCircleRadius_lt_positiveOrientation
-      hsimple horient (i₁ : ZMod n) (by simpa [EdgePrevCircleRadiusProfile,
-        EdgeNextCircleRadiusProfile] using hinc₁),
-    signedMengerProfile_lt_of_edgeCircleRadius_lt_positiveOrientation_rev
-      hsimple horient ((i₁ : ZMod n) + 1) (by simpa [EdgePrevCircleRadiusProfile,
-        EdgeNextCircleRadiusProfile] using hdec₁),
-    signedMengerProfile_lt_of_edgeCircleRadius_lt_positiveOrientation_rev
-      hsimple horient (i₂ : ZMod n) (by simpa [EdgePrevCircleRadiusProfile,
-        EdgeNextCircleRadiusProfile] using hdec₂),
-    signedMengerProfile_lt_of_edgeCircleRadius_lt_positiveOrientation
-      hsimple horient ((i₂ : ZMod n) + 1) (by simpa [EdgePrevCircleRadiusProfile,
-        EdgeNextCircleRadiusProfile] using hinc₂),
-    signedMengerProfile_lt_of_edgeCircleRadius_lt_positiveOrientation
-      hsimple horient (i₃ : ZMod n) (by simpa [EdgePrevCircleRadiusProfile,
-        EdgeNextCircleRadiusProfile] using hinc₃),
-    signedMengerProfile_lt_of_edgeCircleRadius_lt_positiveOrientation_rev
-      hsimple horient ((i₃ : ZMod n) + 1) (by simpa [EdgePrevCircleRadiusProfile,
-        EdgeNextCircleRadiusProfile] using hdec₃),
-    signedMengerProfile_lt_of_edgeCircleRadius_lt_positiveOrientation_rev
-      hsimple horient (i₄ : ZMod n) (by simpa [EdgePrevCircleRadiusProfile,
-        EdgeNextCircleRadiusProfile] using hdec₄),
-    signedMengerProfile_lt_of_edgeCircleRadius_lt_positiveOrientation
-      hsimple horient ((i₄ : ZMod n) + 1) (by simpa [EdgePrevCircleRadiusProfile,
-        EdgeNextCircleRadiusProfile] using hinc₄)⟩
+  exact orderedAdjacentTurns_congr
+    (fun i => signedMengerProfile_eq_inv_edgePrevCircleRadiusProfile_of_positiveOrientation
+      hsimple horient i)
+    (orderedAdjacentTurns_inv_edgePrevCircleRadiusProfile_of_positiveRadiusOrderedAdjacentTurns
+      hsimple horient hturns)
 
 /-- Positive radius ordered turns force nonconstancy of the signed-Menger
 profile. -/
