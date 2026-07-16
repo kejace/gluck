@@ -1,6 +1,6 @@
 import Gluck.Forward.Euclidean
-import Gluck.Forward.Sphere
-import Gluck.Forward.Hyperbolic
+import Gluck.Forward.Deferred.Sphere
+import Gluck.Forward.Deferred.Hyperbolic
 
 /-!
 # Unified conformal-Menger forward discrete wrappers
@@ -14,7 +14,7 @@ gates remain model-specific:
 * `ε = -1`: hyperbolic convex/coherent proper-circle source.
 -/
 
-namespace Gluck.Forward
+namespace Gluck.Forward.Deferred
 
 open scoped Real
 
@@ -446,4 +446,4 @@ theorem dahlbergFourVertex_conformalMenger_spaceForm_of_negativeOrientation
       hε hn v κ hdisk hsimple horient hregular hκ hproper)
     hnc
 
-end Gluck.Forward
+end Gluck.Forward.Deferred

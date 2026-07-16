@@ -1,16 +1,16 @@
 import Gluck.Forward.Dahlberg
 import Gluck.Forward.Smooth
-import Gluck.Forward.SpaceFormDiscrete
 import Gluck.Forward.Euclidean
-import Gluck.Forward.Sphere
-import Gluck.Forward.Hyperbolic
-import Gluck.Forward.ConformalMenger
-import Gluck.Forward.Sources
 
 /-!
 # Forward four-vertex theorems
 
-This module re-exports the isolated forward-theorem development.  The active
-proof targets are Euclidean; spherical and hyperbolic statements are present as
-explicitly deferred declarations.
+This module re-exports only the active forward-theorem development:
+
+* the smooth forward four-vertex theorem, sourced from `references/dahlberg.pdf`;
+* the Euclidean discrete Dahlberg four-vertex theorem, sourced from
+  `references/23.pdf`.
+
+Space-form discrete, conformal-Menger, and non-Euclidean wrapper work has been
+parked under `Gluck.Forward.Deferred`.
 -/

@@ -9,7 +9,7 @@ keep model-specific wrappers; the shared `ε`-parameterized theorem below is a
 dispatch layer over the two model-specific geometric source gates.
 -/
 
-namespace Gluck.Forward
+namespace Gluck.Forward.Deferred
 
 open scoped Real
 
@@ -710,4 +710,4 @@ theorem discrete_four_vertex_spaceForm_kernel {ε : ℝ}
   exact dahlbergFourVertex_spaceForm_source
     hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
 
-end Gluck.Forward
+end Gluck.Forward.Deferred

@@ -1,4 +1,4 @@
-import Gluck.Forward.ConformalMenger
+import Gluck.Forward.Deferred.ConformalMenger
 
 /-!
 # Bundled forward geometric sources
@@ -9,7 +9,7 @@ replace the real geometry; it gives the next proof pass a single bundled target
 while preserving the model-specific source gates used by the public API.
 -/
 
-namespace Gluck.Forward
+namespace Gluck.Forward.Deferred
 
 open scoped Real
 
@@ -5448,4 +5448,4 @@ theorem forward_atomic_sources : ForwardAtomicSources := by
 theorem forward_dfv_atomic_sources : ForwardDfvAtomicSources := by
   exact forwardDfvGeometricSources_iff_atomicSources.mp forward_dfv_geometric_sources
 
-end Gluck.Forward
+end Gluck.Forward.Deferred
