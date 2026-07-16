@@ -10,12 +10,9 @@ without moving existing declarations.
 3. Dahlberg's discrete four-vertex theorem.
 
 The primary source for target 3 is B. E. J. Dahlberg, *A Discrete Four Vertex
-Theorem*.  The reference inventory records it as `references/23.pdf`; that PDF
-is not present in this checkout, so the local source of truth for page/section
-pointers is currently the `23.pdf` row and checkout note in
-`references/summary.md`.  The local file `references/dahlberg.pdf` is
-Dahlberg's different 2005 converse paper, not this discrete paper.  The formal
-statement follows Theorem 1 and the
+Theorem*.  The reference inventory records it as `references/23.pdf`; the local
+file `references/dahlberg.pdf` is Dahlberg's different 2005 converse paper, not
+this discrete paper.  The formal statement follows Theorem 1 and the
 definitions on pp. 1–3:
 
 - a counterclockwise simple closed polygon;
@@ -95,17 +92,17 @@ The remaining primitive source gates in the current worktree are exactly:
 - `Gluck/Forward/Smooth.lean`
   - `four_vertex_condition_smooth_E2_nonconstant_classical`;
 - `Gluck/Forward/Dahlberg.lean`
-  - `dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate`;
+  - `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate`;
   - `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
 
 Dahlberg's strict positive-orientation Lemma 9 source
 `dahlbergE2_lemma9_source_gate` is not primitive: it is recovered from the
-radius-CDFV gate, the formal radius/signed-Menger equivalence, and the
+signed-Menger CDFV gate, the formal radius/signed-Menger equivalence, and the
 witness-only Lemma 8 bridge.  The final-D4VT route is also separated from this
 stronger ordered-turn route: `dahlbergE2_dfv_primitive_source_components`
-contains only the radius-CDFV gate and the normalized unit-disk §4 gate, and
-the public E² D4VT endpoints route through
+contains only the signed-CDFV gate, its formally recovered radius witness, and
+the normalized unit-disk §4 gate; the public E² D4VT endpoints route through
 `signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveSourceComponents`.
 
 The non-strict §4 branch is gated at the unit-radius rotated centered
