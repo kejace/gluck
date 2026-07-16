@@ -155,7 +155,8 @@ the finite Euclidean disk setup has been proved.
 
 Compared with `ForwardAtomicSources`, the Euclidean Dahlberg part is split down
 to the three still-geometric inputs: the CDFV radius-witness source, the
-Lemma 8 radius-turn bridge, and the §4 auxiliary-polygon construction.  The
+Lemma 8 radius-turn bridge, and the §4 auxiliary-polygon construction from a
+positive minimal disk with nonempty proper boundary set.  The
 least-enclosing-disk setup is no longer an assumption. -/
 def ForwardRemainingSources : Prop :=
   (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
@@ -200,7 +201,7 @@ def ForwardRemainingSources : Prop :=
         OrderedAdjacentTurns κ) ∧
   DahlbergE2ConvexDfvRadiusSource ∧
   DahlbergE2Lemma8RadiusTurnBridgeSource ∧
-  DahlbergE2DiskAuxiliaryConstructionSource
+  DahlbergE2DiskAuxiliaryBoundaryConstructionSource
 
 /-- Fully expanded spelling of the actual remaining source obligations needed
 only for the final D4VT endpoints.
@@ -252,7 +253,7 @@ def ForwardDfvRemainingSources : Prop :=
         (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
         DahlbergFourVertex κ) ∧
   DahlbergE2ConvexDfvSignedSource ∧
-  DahlbergE2DiskAuxiliaryConstructionSource
+  DahlbergE2DiskAuxiliaryBoundaryConstructionSource
 
 /-- The bundled uniform source package is equivalent to the model-specific
 source package. -/
@@ -307,7 +308,8 @@ theorem forwardAtomicSources_of_remainingSources
   rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hCDFV, hL8, hD⟩
   exact ⟨hE, hS, hH, hdS, hdH,
     dahlbergE2ConvexRadiusSource_of_components ⟨hCDFV, hL8⟩,
-    dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource hD⟩
+    dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource
+      (dahlbergE2DiskAuxiliaryConstructionSource_of_boundaryConstructionSource hD)⟩
 
 /-- The sharper remaining-source package implies the bundled geometric source
 package. -/
@@ -361,7 +363,8 @@ theorem forwardDfvAtomicSources_of_dfvRemainingSources
     ForwardDfvAtomicSources := by
   rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
   exact ⟨hE, hS, hH, hdS, hdH, hC,
-    dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource hD⟩
+    dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource
+      (dahlbergE2DiskAuxiliaryConstructionSource_of_boundaryConstructionSource hD)⟩
 
 /-- The final-D4VT remaining-source package implies the bundled final-D4VT
 geometric source package. -/
@@ -2667,7 +2670,7 @@ least-enclosing-disk and boundary-vertex facts have been proved. -/
 theorem forward_remaining_sources : ForwardRemainingSources := by
   refine ⟨?_, ?_, ?_, ?_, ?_, dahlbergE2_convex_dfv_radius_source,
     dahlbergE2_lemma8_radius_turn_bridge_source,
-    dahlbergE2_disk_auxiliary_construction_source⟩
+    dahlbergE2_disk_auxiliary_boundary_construction_source⟩
   · intro γ κ hclosed hreal hκ hper hnc
     exact four_vertex_condition_smooth_E2_nonconstant_geometric_source
       hclosed hreal hκ hper hnc
@@ -2691,7 +2694,7 @@ Dahlberg strict convex component is the theorem-level signed-Menger source,
 not the stronger radius-turn source used for ordered-turn refinements. -/
 theorem forward_dfv_remaining_sources : ForwardDfvRemainingSources := by
   refine ⟨?_, ?_, ?_, ?_, ?_, dahlbergE2_convex_dfv_signed_source,
-    dahlbergE2_disk_auxiliary_construction_source⟩
+    dahlbergE2_disk_auxiliary_boundary_construction_source⟩
   · intro γ κ hclosed hreal hκ hper hnc
     exact smoothFourVertex_of_fourVertexCondition
       (four_vertex_condition_smooth_E2_nonconstant_geometric_source

@@ -6837,6 +6837,39 @@ def DahlbergE2DiskAuxiliaryConstructionSource : Prop :=
     DahlbergDiskReductionSetup v →
     DahlbergDiskAuxiliaryReduction v
 
+/-- Boundary-set-level source for Dahlberg's §4 auxiliary construction.
+
+This is a sharper version of `DahlbergE2DiskAuxiliaryConstructionSource`: the
+finite minimal-disk setup has already been unpacked, and the source receives a
+chosen positive minimal disk together with the proved facts that Dahlberg's
+boundary index set `E = V(Γ) ∩ ∂Δ` is nonempty and proper. -/
+def DahlbergE2DiskAuxiliaryBoundaryConstructionSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    ∀ {O : ℂ} {R : ℝ},
+      MinimalEnclosingDiskR2 v O R →
+      0 < R →
+      (DiskBoundaryIndices v O R).Nonempty →
+      DiskBoundaryIndices v O R ≠ Set.univ →
+      DahlbergDiskAuxiliaryReduction v
+
+/-- The boundary-set-level §4 construction source implies the setup-level
+auxiliary construction source. -/
+theorem dahlbergE2DiskAuxiliaryConstructionSource_of_boundaryConstructionSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundaryConstructionSource) :
+    DahlbergE2DiskAuxiliaryConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict hsetup
+  letI : NeZero n := hne
+  rcases
+    dahlbergDiskReductionSetup_diskBoundaryIndices_nonempty_ne_univ_of_nonconcyclic
+      hsimple hnoncircle hsetup with
+    ⟨O, R, hΔ, hRpos, hEnonempty, hEproper⟩
+  exact hsrc hn hsimple hregular hnoncircle hnonstrict
+    hΔ hRpos hEnonempty hEproper
+
 /-- A §4 auxiliary-construction source may be applied after a direct Euclidean
 normalization.  All input hypotheses are pulled back by the inverse isometry,
 and the resulting auxiliary-reduction package is transported forward. -/
@@ -7073,11 +7106,21 @@ theorem dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource
     (dahlbergE2_disk_reduction_setup_source
       hn hsimple hregular hnoncircle hnonstrict)
 
+/-- Dahlberg's boundary-set-level auxiliary-polygon construction/transfer
+source for the §4 non-strict disk reduction.  At this point the finite
+minimal-disk setup has been proved and unpacked: the remaining geometric input
+is the construction from a positive smallest disk and a nonempty proper
+boundary vertex set `E`. -/
+theorem dahlbergE2_disk_auxiliary_boundary_construction_source :
+    DahlbergE2DiskAuxiliaryBoundaryConstructionSource := by
+  sorry
+
 /-- Dahlberg's auxiliary-polygon construction/transfer source for the §4
 non-strict disk reduction. -/
 theorem dahlbergE2_disk_auxiliary_construction_source :
     DahlbergE2DiskAuxiliaryConstructionSource := by
-  sorry
+  exact dahlbergE2DiskAuxiliaryConstructionSource_of_boundaryConstructionSource
+    dahlbergE2_disk_auxiliary_boundary_construction_source
 
 /-- Dahlberg's source components for the §4 non-strict disk reduction:
 minimal-disk setup plus the auxiliary-polygon construction. -/
