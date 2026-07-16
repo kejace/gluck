@@ -7107,6 +7107,32 @@ structure DahlbergE2Theorem6OrderedDiskCertificate {n : ℕ} (v : ZMod n → ℂ
   circle₃_ne₄ :
     EdgePrevCurvatureCirclesDistinct v (i₃ : ZMod n) (i₄ : ZMod n)
 
+/-- Alternating ordered disk data before the formally automatic
+cross-distinctness fields are attached.
+
+The two same-type distinctness assumptions are exactly the distinctness data
+coming from Dahlberg's Lemma 5 (the two containing disks) and Lemma 7 (the two
+interior-missing disks).  Distinctness between a containing disk and an
+interior-missing disk is proved below from nonconcyclicity. -/
+structure DahlbergE2Theorem6AlternatingDiskCertificate {n : ℕ}
+    (v : ZMod n → ℂ) where
+  i₁ : ℕ
+  i₂ : ℕ
+  i₃ : ℕ
+  i₄ : ℕ
+  i₁_lt_i₂ : i₁ < i₂
+  i₂_lt_i₃ : i₂ < i₃
+  i₃_lt_i₄ : i₃ < i₄
+  i₄_lt_wrap : i₄ < i₁ + n
+  contains₁ : EdgePrevCurvatureDiskContainsAll v (i₁ : ZMod n)
+  misses₂ : EdgePrevCurvatureDiskInteriorMissesAll v (i₂ : ZMod n)
+  contains₃ : EdgePrevCurvatureDiskContainsAll v (i₃ : ZMod n)
+  misses₄ : EdgePrevCurvatureDiskInteriorMissesAll v (i₄ : ZMod n)
+  contains_distinct :
+    EdgePrevCurvatureCirclesDistinct v (i₁ : ZMod n) (i₃ : ZMod n)
+  misses_distinct :
+    EdgePrevCurvatureCirclesDistinct v (i₂ : ZMod n) (i₄ : ZMod n)
+
 /-- Radius-profile local-extremum proof attached to a fixed ordered CDFV disk
 certificate. -/
 structure DahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate {n : ℕ}
@@ -7555,6 +7581,69 @@ theorem EdgePrevCircleRadiusProfile_pos {n : ℕ} {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v) (i : ZMod n) :
     0 < EdgePrevCircleRadiusProfile v i := by
   exact normalizedCircleRadius_pos (chordHalfLength_pos (hsimple.1 i)).ne' _
+
+/-- A containing curvature disk and an interior-missing curvature disk cannot
+be the same circle in the nonconcyclic branch.
+
+If the two centre/radius data agreed, the containing inequality and the
+interior-missing inequality would squeeze every vertex onto that common
+circle, making the polygon concyclic. -/
+theorem edgePrevCurvatureCirclesDistinct_of_containsAll_of_interiorMissesAll
+    {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hnoncircle : ¬ Concyclic v) {i j : ZMod n}
+    (hcontains : EdgePrevCurvatureDiskContainsAll v i)
+    (hmisses : EdgePrevCurvatureDiskInteriorMissesAll v j) :
+    EdgePrevCurvatureCirclesDistinct v i j := by
+  intro heq
+  apply hnoncircle
+  have hcenter :
+      EdgePrevCircleCenterProfile v i = EdgePrevCircleCenterProfile v j :=
+    congrArg Prod.fst heq
+  have hradius :
+      EdgePrevCircleRadiusProfile v i = EdgePrevCircleRadiusProfile v j :=
+    congrArg Prod.snd heq
+  refine ⟨EdgePrevCircleCenterProfile v i, EdgePrevCircleRadiusProfile v i,
+    EdgePrevCircleRadiusProfile_pos hsimple i, ?_⟩
+  intro k
+  exact le_antisymm (hcontains k)
+    (by simpa [hcenter, hradius] using hmisses k)
+
+/-- Alternating containing/missing disk data upgrades to the full ordered-disk
+certificate: the only missing fields are the four cross distinctness
+statements, and these follow formally from nonconcyclicity. -/
+def dahlbergE2Theorem6OrderedDiskCertificate_of_alternatingDiskCertificate
+    {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hnoncircle : ¬ Concyclic v)
+    (cert : DahlbergE2Theorem6AlternatingDiskCertificate v) :
+    DahlbergE2Theorem6OrderedDiskCertificate v :=
+  { i₁ := cert.i₁
+    i₂ := cert.i₂
+    i₃ := cert.i₃
+    i₄ := cert.i₄
+    i₁_lt_i₂ := cert.i₁_lt_i₂
+    i₂_lt_i₃ := cert.i₂_lt_i₃
+    i₃_lt_i₄ := cert.i₃_lt_i₄
+    i₄_lt_wrap := cert.i₄_lt_wrap
+    contains₁ := cert.contains₁
+    misses₂ := cert.misses₂
+    contains₃ := cert.contains₃
+    misses₄ := cert.misses₄
+    circle₁_ne₂ :=
+      edgePrevCurvatureCirclesDistinct_of_containsAll_of_interiorMissesAll
+        hsimple hnoncircle cert.contains₁ cert.misses₂
+    circle₁_ne₃ := cert.contains_distinct
+    circle₁_ne₄ :=
+      edgePrevCurvatureCirclesDistinct_of_containsAll_of_interiorMissesAll
+        hsimple hnoncircle cert.contains₁ cert.misses₄
+    circle₂_ne₃ :=
+      (edgePrevCurvatureCirclesDistinct_of_containsAll_of_interiorMissesAll
+        hsimple hnoncircle cert.contains₃ cert.misses₂).symm
+    circle₂_ne₄ := cert.misses_distinct
+    circle₃_ne₄ :=
+      edgePrevCurvatureCirclesDistinct_of_containsAll_of_interiorMissesAll
+        hsimple hnoncircle cert.contains₃ cert.misses₄ }
 
 /-- If the previous curvature disk at `i` contains the next-next vertex, then
 the next previous-radius is no larger than the radius at `i`. -/
@@ -8125,6 +8214,36 @@ def DahlbergE2Theorem6OrderedDiskSelectionSource : Prop :=
     Nonempty (DahlbergE2Theorem6InteriorMissingDisksCertificate v) →
     Nonempty (DahlbergE2Theorem6OrderedDiskCertificate v)
 
+/-- Sharper ordered-disk selection interface for Dahlberg §3 Theorem 6:
+the paper-level ordering step only has to choose the two containing and two
+interior-missing disks in alternating cyclic order and carry the same-type
+distinctness supplied by Lemmas 5 and 7.
+
+All cross distinctness between a containing disk and an interior-missing disk
+is now formal from nonconcyclicity. -/
+def DahlbergE2Theorem6AlternatingDiskSelectionSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ Concyclic v) →
+    Nonempty (DahlbergE2Theorem6ContainingDisksCertificate v) →
+    Nonempty (DahlbergE2Theorem6InteriorMissingDisksCertificate v) →
+    Nonempty (DahlbergE2Theorem6AlternatingDiskCertificate v)
+
+/-- Alternating disk selection implies the older ordered-disk selection source
+by formally filling the cross-distinctness fields. -/
+theorem dahlbergE2Theorem6OrderedDiskSelectionSource_of_alternatingDiskSelectionSource
+    (hsrc : DahlbergE2Theorem6AlternatingDiskSelectionSource) :
+    DahlbergE2Theorem6OrderedDiskSelectionSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle hcontains hmisses
+  letI : NeZero n := hne
+  rcases hsrc hn hsimple hregular horient hnoncircle hcontains hmisses with
+    ⟨cert⟩
+  exact ⟨
+    dahlbergE2Theorem6OrderedDiskCertificate_of_alternatingDiskCertificate
+      hsimple hnoncircle cert⟩
+
 /-- Ordered disk selection is enough for the weak geometric assembly source,
 because boundary incidence and the weak radius inequalities have already been
 proved from positive orientation, regularity, and the disk hypotheses. -/
@@ -8301,21 +8420,27 @@ def DahlbergE2Theorem6OrderedDiskPaperSources : Prop :=
   DahlbergE2Theorem6PlateauUpgradeSource
 
 /-- Sharpest current §3 paper-facing source package: Lemma 5, Lemma 7,
-ordered disk selection, and explicit plateau-resolution data for the selected
-weak certificate.  Everything else in weak/geometric assembly is formal. -/
+alternating disk selection, and explicit plateau-resolution data for the
+selected weak certificate.
+
+Cross distinctness between containing and interior-missing disks, weak
+geometric assembly, and local-extremum reconstruction are formal. -/
 def DahlbergE2Theorem6SharpOrderedDiskPaperSources : Prop :=
   DahlbergE2Theorem6Lemma5ContainingDisksSource ∧
   DahlbergE2Theorem6Lemma7InteriorMissingDisksSource ∧
-  DahlbergE2Theorem6OrderedDiskSelectionSource ∧
+  DahlbergE2Theorem6AlternatingDiskSelectionSource ∧
   DahlbergE2Theorem6PlateauResolutionUpgradeSource
 
 /-- The sharpest current §3 package implies the ordered-disk package by
-turning explicit plateau exits into local extrema and then wrapping that as
-the older plateau-upgrade source. -/
+turning alternating selection into ordered selection, explicit plateau exits
+into local extrema, and then wrapping that as the older plateau-upgrade
+source. -/
 theorem dahlbergE2Theorem6OrderedDiskPaperSources_of_sharpOrderedDiskPaperSources
     (hsrc : DahlbergE2Theorem6SharpOrderedDiskPaperSources) :
     DahlbergE2Theorem6OrderedDiskPaperSources := by
-  exact ⟨hsrc.1, hsrc.2.1, hsrc.2.2.1,
+  exact ⟨hsrc.1, hsrc.2.1,
+    dahlbergE2Theorem6OrderedDiskSelectionSource_of_alternatingDiskSelectionSource
+      hsrc.2.2.1,
     dahlbergE2Theorem6PlateauUpgradeSource_of_plateauExtremaUpgradeSource
       (dahlbergE2Theorem6PlateauExtremaUpgradeSource_of_plateauResolutionUpgradeSource
         hsrc.2.2.2)⟩
@@ -11026,9 +11151,10 @@ def DahlbergE2PaperTheoremSources : Prop :=
 /-- The actual remaining paper theorem sources after the local part of
 Dahlberg's Lemma 8 has been formalized:
 
-* Theorem 6 / CDFV, sharpened to ordered-disk selection plus explicit
-  plateau-resolution data for the selected weak certificate; weak/geometric
-  assembly and local-extremum reconstruction are then formal;
+* Theorem 6 / CDFV, sharpened to alternating disk selection plus explicit
+  plateau-resolution data for the selected weak certificate; cross
+  distinctness, weak/geometric assembly, and local-extremum reconstruction are
+  then formal;
 * the global monotone-arc extraction in Lemma 8;
 * the final §4 auxiliary-polygon construction.
 
