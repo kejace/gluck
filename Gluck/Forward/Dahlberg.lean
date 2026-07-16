@@ -9030,18 +9030,25 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
-/-- Dahlberg's strict positive-orientation Lemma 9 source gate.
+/-- Dahlberg's strict positive-orientation radius-turn source gate.
 
-This is the combined strict-convex source input from Dahlberg's discrete
-four-vertex paper: the convex CDFV source supplies the signed-Menger
-four-vertex conclusion, and Lemma 8 propagates the radius witnesses to the
-adjacent turns used by Lemma 9.  The split CDFV and Lemma 8 APIs below are
-recovered formally from this single ordered-turn source.
+This is the smaller geometric source behind Lemma 9 in Dahlberg's discrete
+four-vertex paper: the convex CDFV source supplies radius witnesses, and
+Lemma 8 propagates those witnesses to the adjacent radius turns.  The
+conversion from positive radius turns to signed-Menger ordered turns is fully
+formalized by `dahlbergE2_convexRadiusSource_iff_lemma9Source`.
 
 Reference source: Dahlberg, *A Discrete Four Vertex Theorem*,
 `references/23.pdf`, §3 Theorem 6 (CDFV) and §4 Lemmas 8–9. -/
-theorem dahlbergE2_lemma9_source_gate : DahlbergE2Lemma9Source := by
+theorem dahlbergE2_convex_radius_source_gate :
+    DahlbergE2ConvexRadiusSource := by
   sorry
+
+/-- Dahlberg's strict positive-orientation Lemma 9 source gate, recovered from
+the smaller radius-turn source. -/
+theorem dahlbergE2_lemma9_source_gate : DahlbergE2Lemma9Source := by
+  exact dahlbergE2_convexRadiusSource_iff_lemma9Source.mp
+    dahlbergE2_convex_radius_source_gate
 
 /-- Dahlberg's exact signed-CDFV/Lemma 8 source components, recovered from the
 Lemma 9 source gate. -/
