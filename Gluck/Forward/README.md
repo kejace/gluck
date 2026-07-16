@@ -110,7 +110,8 @@ paper-level components:
   the two disks whose interiors miss all vertices, and the corresponding
   radius-profile extrema;
 - `DahlbergE2Lemma8DiskNestingSource`: §4 Lemma 8's disk-nesting propagation,
-  in the strict previous-radius-turn interface;
+  producing the named `DahlbergE2Lemma8DiskNestingCertificate`, i.e. the eight
+  ordered one-step previous-radius inequalities used by Lemma 9;
 - `DahlbergE2Section4AuxiliaryPolygonSource`: the final §4 normalized
   auxiliary-polygon construction/transfer.
 

@@ -8110,19 +8110,13 @@ def DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource : Prop :=
     DahlbergE2ConvexDfvRadiusWitnesses v →
     PositiveRadiusOrderedAdjacentTurns v
 
-/-- Sharper Lemma 8 source: the disk-inclusion geometry produces four ordered
-one-step extrema of the previous-radius profile.
+/-- Certificate extracted from Dahlberg's Lemma 8 disk-nesting propagation:
+four ordered one-step extrema of the previous-radius profile.
 
-This is the geometric part that remains after the formal conversion
-`positiveRadiusOrderedAdjacentTurns_of_edgePrev_strict_turns`: once these eight
-inequalities are known, the public positive-radius ordered-turn bridge is
-purely algebraic. -/
-def DahlbergE2Lemma8StrictPreviousRadiusTurnsSource : Prop :=
-  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
-    Gluck.Discrete.IsSimplePolygon v →
-    DahlbergRegular v →
-    PositivePolygonOrientation v →
-    DahlbergE2ConvexDfvRadiusWitnesses v →
+The global proof still needs the monotone-arc extraction from CDFV witnesses
+to this certificate.  Once the eight inequalities below are available, the
+conversion to `PositiveRadiusOrderedAdjacentTurns` is purely algebraic. -/
+def DahlbergE2Lemma8DiskNestingCertificate {n : ℕ} (v : ZMod n → ℂ) : Prop :=
     ∃ i₁ i₂ i₃ i₄ : ℕ,
       i₁ < i₂ ∧ i₂ < i₃ ∧ i₃ < i₄ ∧ i₄ < i₁ + n ∧
       EdgePrevCircleRadiusProfile v (((i₁ : ZMod n) + 1)) <
@@ -8141,6 +8135,16 @@ def DahlbergE2Lemma8StrictPreviousRadiusTurnsSource : Prop :=
         EdgePrevCircleRadiusProfile v (((i₄ : ZMod n) + 1)) ∧
       EdgePrevCircleRadiusProfile v ((((i₄ : ZMod n) + 1) + 1)) <
         EdgePrevCircleRadiusProfile v (((i₄ : ZMod n) + 1))
+
+/-- Sharper Lemma 8 source: the disk-inclusion geometry produces the
+disk-nesting certificate from the CDFV radius witnesses. -/
+def DahlbergE2Lemma8StrictPreviousRadiusTurnsSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    DahlbergE2ConvexDfvRadiusWitnesses v →
+    DahlbergE2Lemma8DiskNestingCertificate v
 
 /-- The public witness-only Lemma 8 radius-turn bridge implies the sharper
 previous-radius spelling.
