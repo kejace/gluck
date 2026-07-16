@@ -38,6 +38,55 @@ def ForwardModelSources : Prop :=
   SpaceFormDiscreteModelSources ∧
   DahlbergE2GeometricSources
 
+/-- Fully expanded spelling of the remaining forward geometric source package.
+
+This is the audit target with no nested source packages: three smooth source
+gates (`E²`, `S²`, `H²`), two non-Euclidean discrete source gates (`S²`, `H²`),
+and the two Euclidean Dahlberg discrete source gates from `references/23.pdf`. -/
+def ForwardAtomicSources : Prop :=
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.RealizesCurvature γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ) ∧
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes 1 γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ) ∧
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes (-1) γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ) ∧
+  (∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger 1 v κ →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        OrderedAdjacentTurns κ) ∧
+  (∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger (-1) v κ →
+        (∀ i, 1 < κ i) →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        OrderedAdjacentTurns κ) ∧
+  DahlbergE2ConvexRadiusSource ∧
+  DahlbergE2DiskReductionSource
+
 /-- The bundled uniform source package is equivalent to the model-specific
 source package. -/
 theorem forwardGeometricSources_iff_modelSources :
@@ -49,6 +98,24 @@ theorem forwardGeometricSources_iff_modelSources :
   · intro hsrc
     exact ⟨smoothForwardSource_iff_modelSources.mpr hsrc.1,
       spaceFormDiscreteSource_iff_modelSources.mpr hsrc.2.1, hsrc.2.2⟩
+
+/-- The model-specific source package is equivalent to the fully expanded
+atomic source package. -/
+theorem forwardModelSources_iff_atomicSources :
+    ForwardModelSources ↔ ForwardAtomicSources := by
+  constructor
+  · intro hsrc
+    exact ⟨hsrc.1.1, hsrc.1.2.1, hsrc.1.2.2,
+      hsrc.2.1.1, hsrc.2.1.2, hsrc.2.2.1, hsrc.2.2.2⟩
+  · intro hsrc
+    rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
+    exact ⟨⟨hE, hS, hH⟩, ⟨hdS, hdH⟩, ⟨hC, hD⟩⟩
+
+/-- The bundled uniform source package is equivalent to the fully expanded
+atomic source package. -/
+theorem forwardGeometricSources_iff_atomicSources :
+    ForwardGeometricSources ↔ ForwardAtomicSources := by
+  exact forwardGeometricSources_iff_modelSources.trans forwardModelSources_iff_atomicSources
 
 /-- Extract the smooth model-source package from the expanded forward source
 package. -/
@@ -79,6 +146,30 @@ forward source package. -/
 theorem forwardGeometricSources_of_modelSources (hsrc : ForwardModelSources) :
     ForwardGeometricSources := by
   exact forwardGeometricSources_iff_modelSources.mpr hsrc
+
+/-- Convert an expanded model-specific source package to the fully expanded
+atomic source package. -/
+theorem forwardAtomicSources_of_modelSources (hsrc : ForwardModelSources) :
+    ForwardAtomicSources := by
+  exact forwardModelSources_iff_atomicSources.mp hsrc
+
+/-- Convert a fully expanded atomic source package to the expanded
+model-specific source package. -/
+theorem forwardModelSources_of_atomicSources (hsrc : ForwardAtomicSources) :
+    ForwardModelSources := by
+  exact forwardModelSources_iff_atomicSources.mpr hsrc
+
+/-- Convert a bundled uniform forward source package to the fully expanded
+atomic source package. -/
+theorem forwardAtomicSources_of_geometricSources (hsrc : ForwardGeometricSources) :
+    ForwardAtomicSources := by
+  exact forwardGeometricSources_iff_atomicSources.mp hsrc
+
+/-- Convert a fully expanded atomic source package to the bundled uniform
+forward source package. -/
+theorem forwardGeometricSources_of_atomicSources (hsrc : ForwardAtomicSources) :
+    ForwardGeometricSources := by
+  exact forwardGeometricSources_iff_atomicSources.mpr hsrc
 
 /-- Extract the smooth source component from a bundled forward source proof. -/
 theorem four_vertex_condition_smooth_spaceForm_nonconstant_of_sources
@@ -1553,5 +1644,9 @@ theorem forward_geometric_sources : ForwardGeometricSources := by
 /-- Model-specific spelling of `forward_geometric_sources`. -/
 theorem forward_model_sources : ForwardModelSources := by
   exact forwardGeometricSources_iff_modelSources.mp forward_geometric_sources
+
+/-- Fully expanded atomic spelling of `forward_geometric_sources`. -/
+theorem forward_atomic_sources : ForwardAtomicSources := by
+  exact forwardGeometricSources_iff_atomicSources.mp forward_geometric_sources
 
 end Gluck.Forward
