@@ -101,19 +101,16 @@ value-separated smooth source.  The
 discrete forward statements for `S²` and `H²` are also exposed through
 model-specific wrappers in `Sphere.lean` and `Hyperbolic.lean`.  The shared
 dispatch theorem `constant_or_dahlbergFourVertex_spaceForm_kernel` in
-`SpaceFormDiscrete.lean` is proved from the uniform constant-or ordered-turn
-theorem `constant_or_orderedAdjacentTurns_spaceForm_kernel`, whose
-model-specific branches are `constant_or_orderedAdjacentTurns_S2_source` and
-`constant_or_orderedAdjacentTurns_H2_source`.  The nonconstant ordered-turn
-geometric source gate is the uniform theorem
-`orderedAdjacentTurns_spaceForm_geometric_source`, exposed through the public
-source theorem `orderedAdjacentTurns_spaceForm_source`; the
+`SpaceFormDiscrete.lean` is proved from the weak final-D4VT source
+`spaceFormDiscrete_dfv_source_gate`.  Ordered-turn refinements use the
+separate stronger source `spaceFormDiscrete_source_gate`, exposed through the
+uniform theorem `orderedAdjacentTurns_spaceForm_geometric_source` and the
+public source theorem `orderedAdjacentTurns_spaceForm_source`; the
 model-specific source names `orderedAdjacentTurns_S2_source` and
-`orderedAdjacentTurns_H2_source` are wrappers around it.  D4VT is derived from
-ordered turns by the general cyclic constructor
-`dahlbergFourVertex_of_orderedAdjacentTurns_four_le`, and the uniform
-nonconstant theorem `dahlbergFourVertex_spaceForm_source` is derived from the
-same ordered-turn source.  The local weak-source API
+`orderedAdjacentTurns_H2_source` are wrappers around it.  D4VT can also be
+derived from ordered turns by the general cyclic constructor
+`dahlbergFourVertex_of_orderedAdjacentTurns_four_le`, but the final-D4VT route
+does not require that stronger input.  The local weak-source API
 `dahlbergFourVertex_spaceForm_of_dfvSource` and
 `constant_or_dahlbergFourVertex_spaceForm_of_dfvSource` records the final-D4VT
 consequence of `SpaceFormDiscreteDfvSource` without requiring ordered turns.
@@ -127,8 +124,8 @@ remaining-source audit is:
 - `Gluck/Forward/Smooth.lean`
   - `smoothForward_source_gate`.
 - `Gluck/Forward/SpaceFormDiscrete.lean`
-  - `orderedAdjacentTurns_S2_source_gate`;
-  - `orderedAdjacentTurns_H2_source_gate`.
+  - `spaceFormDiscrete_source_gate`;
+  - `spaceFormDiscrete_dfv_source_gate`.
 - `Gluck/Forward/Dahlberg.lean`
   - `dahlbergE2_convex_dfv_signed_source`;
   - `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source`;

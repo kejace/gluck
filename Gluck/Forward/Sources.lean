@@ -54,10 +54,10 @@ def ForwardModelSources : Prop :=
 source package.
 
 This is the audit target with no nested source packages: the uniform smooth
-source projected to `E²`, `S²`, and `H²`, two non-Euclidean discrete source
-gates (`S²`, `H²`), and the two Euclidean Dahlberg discrete source gates from
-the discrete four-vertex paper recorded in `references/summary.md` as
-`23.pdf`. -/
+source projected to `E²`, `S²`, and `H²`, the uniform non-Euclidean ordered-turn
+source projected to `S²` and `H²`, and the two Euclidean Dahlberg discrete
+source gates from the discrete four-vertex paper recorded in
+`references/summary.md` as `23.pdf`. -/
 def ForwardAtomicSources : Prop :=
   (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
       Gluck.IsSimpleClosed γ →
@@ -105,10 +105,10 @@ def ForwardAtomicSources : Prop :=
 /-- Fully expanded spelling of the weaker final-D4VT source package.
 
 This is the audit target for final D4VT statements: it keeps the same uniform
-smooth source projected to the three model-specific endpoints, weakens the two
-non-Euclidean discrete source gates from ordered turns to Dahlberg's
-four-vertex conclusion, and replaces Dahlberg's stronger adjacent-turn source
-by the theorem-level signed-Menger CDFV source. -/
+smooth source projected to the three model-specific endpoints, uses the weak
+uniform non-Euclidean D4VT source projected to `S²` and `H²`, and replaces
+Dahlberg's stronger adjacent-turn source by the theorem-level signed-Menger
+CDFV source. -/
 def ForwardDfvAtomicSources : Prop :=
   (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
       Gluck.IsSimpleClosed γ →

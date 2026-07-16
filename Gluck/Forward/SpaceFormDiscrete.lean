@@ -252,6 +252,23 @@ theorem constant_or_dahlbergFourVertex_H2_of_dfvSource
     hsrc (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
     (by intro _; exact hcircle)
 
+/-- Uniform nonconstant ordered-turn geometric source gate for the
+convex/coherent conformal-Menger package in `S²` and `H²`.
+
+This is the stronger non-Euclidean discrete source used by ordered-turn and
+conformal-Menger refinements.  The model-specific ordered-turn gates below are
+projections of this uniform statement. -/
+theorem spaceFormDiscrete_source_gate : SpaceFormDiscreteSource := by
+  sorry
+
+/-- Weaker uniform final-D4VT geometric source gate for the convex/coherent
+conformal-Menger package in `S²` and `H²`.
+
+This is the source used by final D4VT endpoints.  It does not assert the
+stronger ordered-turn conclusion. -/
+theorem spaceFormDiscrete_dfv_source_gate : SpaceFormDiscreteDfvSource := by
+  sorry
+
 /-- Spherical nonconstant ordered-turn geometric source gate for the
 convex/coherent discrete four-vertex package in an open hemisphere. -/
 theorem orderedAdjacentTurns_S2_source_gate {n : ℕ} [NeZero n]
@@ -263,7 +280,9 @@ theorem orderedAdjacentTurns_S2_source_gate {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger 1 v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     OrderedAdjacentTurns κ := by
-  sorry
+  exact spaceFormDiscrete_source_gate (ε := 1) (Or.inl rfl) hn
+    v κ hdisk hsimple hconvex hregular hκ
+    (by intro hlt; norm_num at hlt) hnc
 
 /-- Hyperbolic nonconstant ordered-turn geometric source gate for
 Grant--Mogilski's convex coherent discrete four-vertex theorem in the
@@ -277,23 +296,23 @@ theorem orderedAdjacentTurns_H2_source_gate {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     OrderedAdjacentTurns κ := by
-  sorry
+  exact spaceFormDiscrete_source_gate (ε := -1) (Or.inr rfl) hn
+    v κ hdisk hsimple hconvex hregular hκ
+    (by intro _; exact hcircle) hnc
 
 /-- The current model-specific non-Euclidean discrete source package.
 
 This packages the spherical convex/coherent source and the hyperbolic
 Grant--Mogilski proper-circle source. -/
 theorem spaceFormDiscrete_model_sources : SpaceFormDiscreteModelSources := by
-  exact ⟨orderedAdjacentTurns_S2_source_gate, orderedAdjacentTurns_H2_source_gate⟩
+  exact spaceFormDiscreteSource_iff_modelSources.mp spaceFormDiscrete_source_gate
 
 /-- The current non-Euclidean discrete final-D4VT source package.
 
-This is the weak D4VT source obtained from the ordered-turn model-specific
-source gates.  Public final-D4VT wrappers route through this theorem; ordered
-turn refinements continue to use `spaceFormDiscrete_model_sources` directly. -/
+This is the weak D4VT source used by public final-D4VT wrappers; ordered-turn
+refinements continue to use `spaceFormDiscrete_model_sources` directly. -/
 theorem spaceFormDiscrete_dfv_source : SpaceFormDiscreteDfvSource := by
-  exact spaceFormDiscreteDfvSource_of_source
-    (spaceFormDiscreteSource_iff_modelSources.mpr spaceFormDiscrete_model_sources)
+  exact spaceFormDiscrete_dfv_source_gate
 
 /-- Uniform nonconstant ordered-turn geometric source theorem for the
 convex/coherent conformal-Menger discrete four-vertex package in `S²` (`ε = 1`)
