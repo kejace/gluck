@@ -2212,6 +2212,64 @@ theorem discrete_four_vertex_H2_of_forwardDfvSources
     hsrc (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
     (by intro _; exact hcircle) hnc
 
+/-! ## Final-D4VT endpoints from sharp remaining-source packages -/
+
+/-- The ordinary smooth space-form four-vertex endpoint from the sharp
+final-D4VT remaining-source package. -/
+theorem smoothFourVertex_spaceForm_kernel_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources) {ε : ℝ}
+    (hε : ε = 0 ∨ ε = 1 ∨ ε = -1) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : SmoothForwardRealizes ε γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_spaceForm_kernel_of_dfvSource
+    (smoothForwardDfvSource_of_dfvRemainingSources hsrc)
+    hε hclosed hreal hκ hper
+
+/-- The non-Euclidean discrete constant-or-D4VT kernel from the sharp
+final-D4VT remaining-source package. -/
+theorem constant_or_dahlbergFourVertex_spaceForm_kernel_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources) {ε : ℝ}
+    (hε : ε = 1 ∨ ε = -1) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_spaceForm_of_dfvSource
+    (spaceFormDiscreteDfvSource_of_dfvRemainingSources hsrc)
+    hε hn v κ hdisk hsimple hconvex hregular hκ hproper
+
+/-- The public E² Dahlberg theorem from the sharp final-D4VT remaining-source
+package, stated for the signed-Menger profile. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSourceComponents
+    (dahlbergE2DfvSourceComponents_of_dfvRemainingSources hsrc)
+    hn hsimple hregular hnoncircle
+
+/-- The sharp final-D4VT remaining-source E² Dahlberg theorem is stable under
+direct Euclidean normalization. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {u : ℂ} (hu : ‖u‖ = 1)
+    (a : ℂ) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex
+      (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) := by
+  exact signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvSourceComponents
+    (dahlbergE2DfvSourceComponents_of_dfvRemainingSources hsrc)
+    hn hu a hsimple hregular hnoncircle
+
 /-- The source-parametrized positive-orientation E² conformal-Menger
 ordered-turn endpoint. -/
 theorem orderedAdjacentTurns_E2_conformalMenger_pos_of_sources
@@ -4562,8 +4620,8 @@ theorem constant_or_dahlbergFourVertex_spaceForm_kernel_of_dfvPrimitiveRemaining
     (hκ : RealizesConformalMenger ε v κ)
     (hproper : ε < 0 → ∀ i, 1 < κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_spaceForm_of_dfvSource
-    (spaceFormDiscreteDfvSource_of_dfvPrimitiveRemainingSources hsrc)
+  exact constant_or_dahlbergFourVertex_spaceForm_kernel_of_dfvRemainingSources
+    (forwardDfvRemainingSources_of_dfvPrimitiveRemainingSources hsrc)
     hε hn v κ hdisk hsimple hconvex hregular hκ hproper
 
 /-- The public E² Dahlberg theorem from the flattened primitive final-D4VT
@@ -4574,8 +4632,8 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveRemainingSource
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveSourceComponents
-    (dahlbergE2DfvPrimitiveSourceComponents_of_dfvPrimitiveRemainingSources hsrc)
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvRemainingSources
+    (forwardDfvRemainingSources_of_dfvPrimitiveRemainingSources hsrc)
     hn hsimple hregular hnoncircle
 
 /-- The public E² Dahlberg theorem from the flattened primitive final-D4VT
@@ -4601,8 +4659,8 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvPrimitive
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex
       (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvPrimitiveSourceComponents
-    (dahlbergE2DfvPrimitiveSourceComponents_of_dfvPrimitiveRemainingSources hsrc)
+  exact signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_dfvRemainingSources
+    (forwardDfvRemainingSources_of_dfvPrimitiveRemainingSources hsrc)
     hn hu a hsimple hregular hnoncircle
 
 /-- The primitive-audit public E² Dahlberg theorem for raw signed-Menger
@@ -4633,8 +4691,8 @@ theorem smoothFourVertex_spaceForm_kernel_of_dfvPrimitiveRemainingSources
     (hreal : SmoothForwardRealizes ε γ κ)
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
     SmoothFourVertex κ := by
-  exact smoothFourVertex_spaceForm_kernel_of_dfvSource
-    (smoothForwardDfvSource_of_dfvPrimitiveRemainingSources hsrc)
+  exact smoothFourVertex_spaceForm_kernel_of_dfvRemainingSources
+    (forwardDfvRemainingSources_of_dfvPrimitiveRemainingSources hsrc)
     hε hclosed hreal hκ hper
 
 /-- The Euclidean smooth four-vertex theorem from the flattened primitive
