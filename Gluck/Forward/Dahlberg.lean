@@ -7789,7 +7789,15 @@ theorem dahlbergDiskAuxiliaryReduction_of_non_strict_source
     (hnoncircle : ¬ Concyclic v)
     (hnonstrict : ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) :
     DahlbergDiskAuxiliaryReduction v := by
-  exact dahlbergE2_dfv_geometric_sources.2 hn hsimple hregular hnoncircle hnonstrict
+  rcases
+    dahlbergDiskReductionSetup_diskBoundaryIndices_nonempty_ne_univ_of_nonconcyclic
+      hsimple hnoncircle
+      (dahlbergE2_disk_reduction_setup_source
+        hn hsimple hregular hnoncircle hnonstrict) with
+    ⟨O, R, hΔ, hRpos, hEnonempty, hEproper⟩
+  exact dahlbergE2_disk_auxiliary_boundary_construction_source
+    hn hsimple hregular hnoncircle hnonstrict
+    hΔ hRpos hEnonempty hEproper
 
 /-- The remaining genuinely non-strict branch of Dahlberg's reduction from a
 general simple locally regular polygon to the strictly-convex auxiliary polygon
