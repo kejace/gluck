@@ -2942,6 +2942,11 @@ package, routed through the sharper exact remaining-source audit. -/
 theorem forward_geometric_sources : ForwardGeometricSources := by
   exact forwardGeometricSources_of_remainingSources forward_remaining_sources
 
+/-- Grouped component spelling of `forward_remaining_sources`. -/
+theorem forward_remaining_source_components :
+    ForwardRemainingSourceComponents := by
+  exact forwardRemainingSources_iff_components.mp forward_remaining_sources
+
 /-- Sharper audit theorem for the final D4VT endpoints.  Its Euclidean
 Dahlberg strict convex component is the theorem-level signed-Menger source,
 not the stronger radius-turn source used for ordered-turn refinements. -/
@@ -2971,6 +2976,12 @@ final-D4VT remaining-source audit rather than through the stronger full
 geometric source package. -/
 theorem forward_dfv_geometric_sources : ForwardDfvGeometricSources := by
   exact forwardDfvGeometricSources_of_dfvRemainingSources
+    forward_dfv_remaining_sources
+
+/-- Grouped component spelling of `forward_dfv_remaining_sources`. -/
+theorem forward_dfv_remaining_source_components :
+    ForwardDfvRemainingSourceComponents := by
+  exact forwardDfvRemainingSources_iff_components.mp
     forward_dfv_remaining_sources
 
 /-- Model-specific spelling of `forward_remaining_sources`, routed through the
