@@ -10274,6 +10274,46 @@ theorem signedMengerProfile_dahlbergFourVertex_of_non_strict_dahlberg_disk_reduc
       signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concyclic_of_dfvSources
         hsrc hm hsimplew hregularw horientw hnoncirclew)
 
+/-- The normalized unit-disk §4 construction source gives Dahlberg's
+non-strict E² D4VT branch once the strict signed-CDFV source is available.
+
+This is the direct elimination form for the sharp primitive §4 gate: it
+specializes to a minimal disk centered at `0` with radius `1`, boundary vertex
+`v 0 = 1`, and successor vertex strictly inside the unit disk, then eliminates
+the auxiliary-reduction package using the strict-orientation branch. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_non_strict_unitConstructionSource
+    (hstrict : DahlbergE2ConvexDfvSignedSource)
+    (hunit : DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v)
+    (hnonstrict : ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v))
+    (hΔ : MinimalEnclosingDiskR2 v 0 1)
+    (hv0 : v 0 = 1)
+    (hnext : dist 0 (v 1) < 1) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact dahlbergFourVertex_of_dahlbergDiskAuxiliaryReduction
+    (hunit hn hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext)
+    (fun hm hsimplew hregularw horientw hnoncirclew =>
+      dahlbergFourVertex_of_strictOrientation_convexDfvSource
+        hstrict hm hsimplew hregularw horientw hnoncirclew)
+
+/-- Unit-component spelling of the normalized non-strict §4 branch. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_non_strict_unitComponents
+    (hsrc : DahlbergE2DfvUnitSourceComponents)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v)
+    (hnonstrict : ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v))
+    (hΔ : MinimalEnclosingDiskR2 v 0 1)
+    (hv0 : v 0 = 1)
+    (hnext : dist 0 (v 1) < 1) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact signedMengerProfile_dahlbergFourVertex_of_non_strict_unitConstructionSource
+    hsrc.1 hsrc.2 hn hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext
+
 /-- Dahlberg's E² D4VT from the weaker final-D4VT source package. -/
 theorem signedMengerProfile_dahlbergFourVertex_E2_of_dfvSources
     (hsrc : DahlbergE2DfvGeometricSources)
