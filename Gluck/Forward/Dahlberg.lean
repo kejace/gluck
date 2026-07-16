@@ -11122,6 +11122,38 @@ theorem dahlbergE2Section4AuxiliaryPolygonSource_of_unitAuxiliaryPolygonSource
   rcases hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext with ⟨aux⟩
   exact ⟨⟨aux⟩⟩
 
+/-- The raw normalized unit-disk construction source implies the named §4
+certificate source by repackaging its existential auxiliary reduction. -/
+theorem dahlbergE2Section4AuxiliaryPolygonSource_of_unitConstructionSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource) :
+    DahlbergE2Section4AuxiliaryPolygonSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext
+  letI : NeZero n := hne
+  rcases exists_dahlbergAuxiliaryPolygon_of_diskAuxiliaryReduction
+      (hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext) with
+    ⟨aux⟩
+  exact ⟨⟨aux⟩⟩
+
+/-- The named §4 certificate source implies the raw normalized unit-disk
+construction source by forgetting the typed auxiliary-polygon wrapper. -/
+theorem dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_section4Source
+    (hsrc : DahlbergE2Section4AuxiliaryPolygonSource) :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext
+  letI : NeZero n := hne
+  rcases hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext with
+    ⟨cert⟩
+  exact dahlbergDiskAuxiliaryReduction_of_auxiliaryPolygon cert.aux
+
+/-- The named §4 certificate source is also equivalent to the raw normalized
+unit-disk construction source. -/
+theorem dahlbergE2Section4AuxiliaryPolygonSource_iff_unitConstructionSource :
+    DahlbergE2Section4AuxiliaryPolygonSource ↔
+      DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource := by
+  constructor
+  · exact dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_section4Source
+  · exact dahlbergE2Section4AuxiliaryPolygonSource_of_unitConstructionSource
+
 /-- The named §4 certificate source is equivalent to the older unit
 auxiliary-polygon source. -/
 theorem dahlbergE2Section4AuxiliaryPolygonSource_iff_unitAuxiliaryPolygonSource :
@@ -11156,14 +11188,15 @@ Dahlberg's Lemma 8 has been formalized:
   distinctness, weak/geometric assembly, and local-extremum reconstruction are
   then formal;
 * the global monotone-arc extraction in Lemma 8;
-* the final §4 auxiliary-polygon construction.
+* the final §4 normalized unit-disk construction, in the raw existential
+  auxiliary-reduction interface.
 
 The pointwise edge-region nesting `δ(Q,e) ⊆ δ(P,e)` is supplied by
 `dahlbergE2_lemma8_local_edge_nesting_source`. -/
 def DahlbergE2PaperRemainingTheoremSources : Prop :=
   DahlbergE2Theorem6SharpOrderedDiskPaperSources ∧
   DahlbergE2Lemma8MonotoneArcExtractionSource ∧
-  DahlbergE2Section4AuxiliaryPolygonSource
+  DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
 
 /-- The smaller remaining paper sources imply the full paper-source package,
 because local Lemma 8 edge nesting is already proved. -/
@@ -11173,7 +11206,9 @@ theorem dahlbergE2PaperTheoremSources_of_remainingTheoremSources
   exact ⟨
     dahlbergE2Theorem6PaperSources_of_orderedDiskPaperSources
       (dahlbergE2Theorem6OrderedDiskPaperSources_of_sharpOrderedDiskPaperSources hsrc.1),
-    ⟨dahlbergE2_lemma8_local_edge_nesting_source, hsrc.2.1⟩, hsrc.2.2⟩
+    ⟨dahlbergE2_lemma8_local_edge_nesting_source, hsrc.2.1⟩,
+    dahlbergE2Section4AuxiliaryPolygonSource_of_unitConstructionSource
+      hsrc.2.2⟩
 
 /-- The current remaining-source package implies the full paper-source
 package.  The converse is intentionally not stated for the sharp plateau
