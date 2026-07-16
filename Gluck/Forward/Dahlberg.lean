@@ -8050,6 +8050,39 @@ def DahlbergE2ConvexSignedSourceComponents : Prop :=
   DahlbergE2ConvexDfvSignedSource ∧
   DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource
 
+/-- Nonconcyclic spelling of the exact split source package for Dahlberg's
+strict positive-orientation branch: theorem-level signed CDFV plus the
+witness-only Lemma 8 bridge.  This is the spelling matching the current
+primitive source gates. -/
+def DahlbergE2ConvexSignedNonconcyclicSourceComponents : Prop :=
+  DahlbergE2ConvexDfvSignedNonconcyclicSource ∧
+  DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource
+
+/-- The nonconstant signed-CDFV/Lemma 8 component package implies the
+nonconcyclic spelling. -/
+theorem dahlbergE2ConvexSignedNonconcyclicSourceComponents_of_signedComponents
+    (hsrc : DahlbergE2ConvexSignedSourceComponents) :
+    DahlbergE2ConvexSignedNonconcyclicSourceComponents := by
+  exact ⟨dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource hsrc.1,
+    hsrc.2⟩
+
+/-- The nonconcyclic signed-CDFV/Lemma 8 component package implies the
+nonconstant spelling. -/
+theorem dahlbergE2ConvexSignedSourceComponents_of_nonconcyclicComponents
+    (hsrc : DahlbergE2ConvexSignedNonconcyclicSourceComponents) :
+    DahlbergE2ConvexSignedSourceComponents := by
+  exact ⟨dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource hsrc.1,
+    hsrc.2⟩
+
+/-- The nonconstant and nonconcyclic signed-CDFV/Lemma 8 component packages are
+formally equivalent in the positive locally regular branch. -/
+theorem dahlbergE2ConvexSignedSourceComponents_iff_nonconcyclicComponents :
+    DahlbergE2ConvexSignedSourceComponents ↔
+      DahlbergE2ConvexSignedNonconcyclicSourceComponents := by
+  constructor
+  · exact dahlbergE2ConvexSignedNonconcyclicSourceComponents_of_signedComponents
+  · exact dahlbergE2ConvexSignedSourceComponents_of_nonconcyclicComponents
+
 /-- The exact signed-CDFV/Lemma 8 source components imply Dahlberg's Lemma 9
 ordered-turn source. -/
 theorem dahlbergE2Lemma9Source_of_signedComponents
@@ -8064,6 +8097,14 @@ theorem dahlbergE2Lemma9Source_of_signedComponents
     hsrc.2 hn hsimple hregular horient hwitness
   exact orderedAdjacentTurns_signedMengerProfile_of_positiveRadiusOrderedAdjacentTurns
     hsimple horient hturns
+
+/-- The nonconcyclic signed-CDFV/Lemma 8 source components imply Dahlberg's
+Lemma 9 ordered-turn source. -/
+theorem dahlbergE2Lemma9Source_of_signedNonconcyclicComponents
+    (hsrc : DahlbergE2ConvexSignedNonconcyclicSourceComponents) :
+    DahlbergE2Lemma9Source := by
+  exact dahlbergE2Lemma9Source_of_signedComponents
+    (dahlbergE2ConvexSignedSourceComponents_of_nonconcyclicComponents hsrc)
 
 /-- Dahlberg's Lemma 9 ordered-turn source implies the exact signed-CDFV/Lemma
 8 source components.  The signed-CDFV part is the plateau-aware consequence of
@@ -8085,6 +8126,14 @@ theorem dahlbergE2ConvexSignedSourceComponents_of_lemma9Source
         hsimple horient hwitness
     exact positiveRadiusOrderedAdjacentTurns_of_orderedAdjacentTurns_signedMengerProfile
       hsimple horient (hsrc hn hsimple hregular horient hnc)
+
+/-- Dahlberg's Lemma 9 ordered-turn source implies the nonconcyclic
+signed-CDFV/Lemma 8 source components. -/
+theorem dahlbergE2ConvexSignedNonconcyclicSourceComponents_of_lemma9Source
+    (hsrc : DahlbergE2Lemma9Source) :
+    DahlbergE2ConvexSignedNonconcyclicSourceComponents := by
+  exact dahlbergE2ConvexSignedNonconcyclicSourceComponents_of_signedComponents
+    (dahlbergE2ConvexSignedSourceComponents_of_lemma9Source hsrc)
 
 /-- Dahlberg's Lemma 9 source directly implies the nonconcyclic signed-CDFV
 source needed by the final-D4VT route.
@@ -8109,6 +8158,30 @@ theorem dahlbergE2ConvexSignedSourceComponents_iff_lemma9Source :
   constructor
   · exact dahlbergE2Lemma9Source_of_signedComponents
   · exact dahlbergE2ConvexSignedSourceComponents_of_lemma9Source
+
+/-- The nonconcyclic signed-CDFV/Lemma 8 source components are formally
+equivalent to Dahlberg's Lemma 9 ordered-turn source. -/
+theorem dahlbergE2ConvexSignedNonconcyclicSourceComponents_iff_lemma9Source :
+    DahlbergE2ConvexSignedNonconcyclicSourceComponents ↔
+      DahlbergE2Lemma9Source := by
+  constructor
+  · exact dahlbergE2Lemma9Source_of_signedNonconcyclicComponents
+  · exact dahlbergE2ConvexSignedNonconcyclicSourceComponents_of_lemma9Source
+
+/-- The exact signed-CDFV/Lemma 8 source components are formally equivalent to
+the combined convex-radius source. -/
+theorem dahlbergE2ConvexSignedSourceComponents_iff_convexRadiusSource :
+    DahlbergE2ConvexSignedSourceComponents ↔ DahlbergE2ConvexRadiusSource := by
+  exact dahlbergE2ConvexSignedSourceComponents_iff_lemma9Source.trans
+    dahlbergE2_convexRadiusSource_iff_lemma9Source.symm
+
+/-- The nonconcyclic signed-CDFV/Lemma 8 source components are formally
+equivalent to the combined convex-radius source. -/
+theorem dahlbergE2ConvexSignedNonconcyclicSourceComponents_iff_convexRadiusSource :
+    DahlbergE2ConvexSignedNonconcyclicSourceComponents ↔
+      DahlbergE2ConvexRadiusSource := by
+  exact dahlbergE2ConvexSignedNonconcyclicSourceComponents_iff_lemma9Source.trans
+    dahlbergE2_convexRadiusSource_iff_lemma9Source.symm
 
 /-- Dahlberg's non-strict §4 disk-reduction source: a non-strict locally
 regular nonconcyclic polygon admits an auxiliary strict-orientation polygon
@@ -9267,15 +9340,22 @@ theorem dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate :
     DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource := by
   sorry
 
-/-- Dahlberg's exact signed-CDFV/Lemma 8 source components, split into the two
-paper-facing strict-branch inputs. -/
-theorem dahlbergE2_convex_signed_source_components_gate :
-    DahlbergE2ConvexSignedSourceComponents := by
-  exact ⟨dahlbergE2_convex_dfv_signed_source_gate,
+/-- Dahlberg's exact nonconcyclic signed-CDFV/Lemma 8 source components,
+split into the two paper-facing strict-branch inputs. -/
+theorem dahlbergE2_convex_signed_nonconcyclic_source_components_gate :
+    DahlbergE2ConvexSignedNonconcyclicSourceComponents := by
+  exact ⟨dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate,
     dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate⟩
 
-/-- Dahlberg's exact radius-CDFV/Lemma 8 source components, split into the two
-paper-facing strict-branch inputs. -/
+/-- Dahlberg's exact signed-CDFV/Lemma 8 source components in nonconstant
+profile form, recovered from the nonconcyclic component package. -/
+theorem dahlbergE2_convex_signed_source_components_gate :
+    DahlbergE2ConvexSignedSourceComponents := by
+  exact dahlbergE2ConvexSignedSourceComponents_of_nonconcyclicComponents
+    dahlbergE2_convex_signed_nonconcyclic_source_components_gate
+
+/-- Dahlberg's exact radius-CDFV/Lemma 8 source components, recovered from the
+nonconcyclic signed-CDFV/Lemma 8 component package. -/
 theorem dahlbergE2_convex_radius_witness_source_components_gate :
     DahlbergE2ConvexRadiusWitnessSourceComponents := by
   exact ⟨dahlbergE2ConvexDfvRadiusSource_of_nonconcyclicSource
@@ -9283,10 +9363,10 @@ theorem dahlbergE2_convex_radius_witness_source_components_gate :
     dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate⟩
 
 /-- Dahlberg's strict positive-orientation Lemma 9 source gate, recovered from
-the split radius-CDFV/Lemma 8 source components. -/
+the split nonconcyclic signed-CDFV/Lemma 8 source components. -/
 theorem dahlbergE2_lemma9_source_gate : DahlbergE2Lemma9Source := by
-  exact dahlbergE2Lemma9Source_of_witnessComponents
-    dahlbergE2_convex_radius_witness_source_components_gate
+  exact dahlbergE2Lemma9Source_of_signedNonconcyclicComponents
+    dahlbergE2_convex_signed_nonconcyclic_source_components_gate
 
 /-- Dahlberg's strict positive-orientation radius-turn source gate, recovered
 from the split CDFV/Lemma 8 source components.
