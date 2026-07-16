@@ -220,6 +220,58 @@ theorem dahlberg_discrete_four_vertex_E2_kernel_of_sources
   exact signedMengerProfile_dahlbergFourVertex_E2_of_sources
     hsrc hn hsimple hregular hnoncircle
 
+/-- The source-parametrized positive-orientation E² conformal-Menger
+ordered-turn endpoint. -/
+theorem orderedAdjacentTurns_E2_conformalMenger_pos_of_sources
+    (hsrc : ForwardGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (horient : PositivePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    OrderedAdjacentTurns κ := by
+  have hscale :
+      ∀ i : ZMod n, κ i = (1 / 2) * SignedMengerProfile v i :=
+    realizesConformalMenger_zero_eq_half_signedMengerProfile_of_positiveOrientation
+      hsimple horient hκ
+  have hnc_signed : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c := by
+    intro hconst
+    rcases hconst with ⟨c, hc⟩
+    exact hnc ⟨(1 / 2) * c, fun i => by rw [hscale i, hc i]⟩
+  exact orderedAdjacentTurns_of_eq_posAffine (a := 1 / 2) (b := 0) (by norm_num)
+    (by intro i; simpa [add_zero] using hscale i)
+    (orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_of_sources
+      hsrc hn hsimple hregular horient hnc_signed)
+
+/-- The source-parametrized positive-orientation conformal-Menger ordered-turn
+kernel over `E²`, `S²`, and `H²`. -/
+theorem orderedAdjacentTurns_conformalMenger_spaceForm_kernel_of_sources
+    (hsrc : ForwardGeometricSources)
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    OrderedAdjacentTurns κ := by
+  rcases hε with hE | hrest
+  · subst ε
+    exact orderedAdjacentTurns_E2_conformalMenger_pos_of_sources
+      hsrc hn v κ hsimple hregular horient hκ hnc
+  · rcases hrest with hS | hH
+    · subst ε
+      exact orderedAdjacentTurns_spaceForm_of_sources
+        hsrc (Or.inl rfl)
+        hn v κ hdisk hsimple horient hregular hκ
+        (by intro hlt; norm_num at hlt) hnc
+    · subst ε
+      exact orderedAdjacentTurns_spaceForm_of_sources
+        hsrc (Or.inr rfl)
+        hn v κ hdisk hsimple horient hregular hκ hproper hnc
+
 /-- The source-parametrized nonconstant smooth kernel. -/
 theorem four_vertex_condition_smooth_spaceForm_nonconstant_source_of_sources
     (hsrc : ForwardGeometricSources) {ε : ℝ}
