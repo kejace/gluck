@@ -404,6 +404,14 @@ theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_remainingSources
     DahlbergE2DiskAuxiliaryBoundaryConstructionSource := by
   exact hsrc.2.2.2.2.2.2.2
 
+/-- Extract Dahlberg's `E²` non-strict disk-reduction source from the sharper
+remaining-source package. -/
+theorem dahlbergE2DiskReductionSource_of_remainingSources
+    (hsrc : ForwardRemainingSources) :
+    DahlbergE2DiskReductionSource := by
+  exact dahlbergE2DiskAuxiliaryBoundaryConstructionSource_iff_diskReductionSource.mp
+    (dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_remainingSources hsrc)
+
 /-- Extract Dahlberg's `E²` signed-CDFV source from the weaker final-D4VT
 remaining-source package. -/
 theorem dahlbergE2ConvexDfvSignedSource_of_dfvRemainingSources
@@ -417,6 +425,14 @@ theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_dfvRemainingSources
     (hsrc : ForwardDfvRemainingSources) :
     DahlbergE2DiskAuxiliaryBoundaryConstructionSource := by
   exact hsrc.2.2.2.2.2.2
+
+/-- Extract Dahlberg's `E²` non-strict disk-reduction source from the weaker
+final-D4VT remaining-source package. -/
+theorem dahlbergE2DiskReductionSource_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources) :
+    DahlbergE2DiskReductionSource := by
+  exact dahlbergE2DiskAuxiliaryBoundaryConstructionSource_iff_diskReductionSource.mp
+    (dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_dfvRemainingSources hsrc)
 
 /-- Extract the smooth `E²` source gate from the fully expanded source
 package. -/

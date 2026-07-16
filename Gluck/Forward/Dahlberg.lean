@@ -7210,6 +7210,28 @@ theorem dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource
     (dahlbergE2_disk_reduction_setup_source
       hn hsimple hregular hnoncircle hnonstrict)
 
+/-- The older disk-reduction source implies the boundary-level §4 auxiliary
+construction source by ignoring the already-supplied disk data. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_diskReductionSource
+    (hsrc : DahlbergE2DiskReductionSource) :
+    DahlbergE2DiskAuxiliaryBoundaryConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict O R _hΔ _hRpos
+    _hEnonempty _hEproper
+  letI : NeZero n := hne
+  exact hsrc hn hsimple hregular hnoncircle hnonstrict
+
+/-- The boundary-level §4 auxiliary source is formally equivalent to
+Dahlberg's non-strict disk-reduction source.  The nontrivial direction uses the
+proved finite minimal-disk setup; the reverse direction ignores the supplied
+minimal disk and boundary set. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_iff_diskReductionSource :
+    DahlbergE2DiskAuxiliaryBoundaryConstructionSource ↔ DahlbergE2DiskReductionSource := by
+  constructor
+  · intro hsrc
+    exact dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource
+      (dahlbergE2DiskAuxiliaryConstructionSource_of_boundaryConstructionSource hsrc)
+  · exact dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_diskReductionSource
+
 /-- Dahlberg's boundary-set-level auxiliary-polygon construction/transfer
 source for the §4 non-strict disk reduction.  At this point the finite
 minimal-disk setup has been proved and unpacked: the remaining geometric input
