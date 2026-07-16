@@ -144,7 +144,7 @@ primitive remaining-source audit is:
   - `orderedAdjacentTurns_S2_model_source_gate`;
   - `orderedAdjacentTurns_H2_model_source_gate`.
 - `Gluck/Forward/Dahlberg.lean`
-  - `dahlbergE2_convex_dfv_signed_source_gate`;
+  - `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate`;
   - `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
 
@@ -160,19 +160,27 @@ recovered from that package.  The weak non-Euclidean final-D4VT package
 are formal consequences of the stronger ordered-turn gates.
 Dahlberg's strict positive-orientation Lemma 9 source
 `dahlbergE2_lemma9_source_gate` is no longer primitive: it is recovered from
-the theorem-level strict CDFV gate
-`dahlbergE2_convex_dfv_signed_source_gate` and the witness-only Lemma 8 bridge
+the theorem-level strict CDFV wrapper
+`dahlbergE2_convex_dfv_signed_source_gate`, which is itself recovered from
+the primitive nonconcyclic CDFV gate
+`dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate`, together with the
+witness-only Lemma 8 bridge
 `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`.
 
 The corresponding audit targets are `ForwardRemainingSources`, for the
 stronger ordered-turn route, and `ForwardDfvRemainingSources`, for the final
 D4VT route.  `forward_remaining_sources` currently collects exactly the listed
 primitive source gates.  `forward_dfv_remaining_sources` is collected through
-the weaker final-D4VT APIs, so it does not import the E² Lemma 8 ordered-turn
-source needed only by the stronger ordered-turn route.  Its smooth and
-non-Euclidean components currently inherit the stronger value-separated and
-ordered-turn gates through formal implications, while keeping weak API
-boundaries for future direct proofs.  The
+the weaker final-D4VT APIs, so its E² component does not import the Lemma 8
+ordered-turn source needed only by the stronger ordered-turn route.  The exact
+primitive final-D4VT E² gates are:
+
+- `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate`;
+- `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
+
+Its smooth and non-Euclidean components currently inherit the stronger
+value-separated and ordered-turn gates through formal implications, while
+keeping weak API boundaries for future direct proofs.  The
 grouped component spellings are exposed as
 `forward_remaining_source_components` and
 `forward_dfv_remaining_source_components`, with component projections such as
