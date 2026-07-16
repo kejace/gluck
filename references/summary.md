@@ -35,3 +35,11 @@
 <!--   * When in doubt, prefer the cheapest tool that gives you the part -->
 <!--     you actually need (a page range, a single table) over loading   -->
 <!--     the whole file.                                                 -->
+
+## Checkout notes
+
+- `23.pdf` is referenced by this inventory as the source for Dahlberg's
+  discrete forward theorem, but it is not present in the current
+  `/tmp/gluck-feat-forward/references/` checkout.  The current Lean source
+  comments therefore refer to Dahlberg's discrete four-vertex paper rather than
+  to a local file path.

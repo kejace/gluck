@@ -5690,7 +5690,8 @@ def DahlbergE2GeometricSources : Prop :=
     (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
     DahlbergDiskAuxiliaryReduction v)
 
-/-- Dahlberg's Euclidean geometric source package for `references/23.pdf`.
+/-- Dahlberg's Euclidean geometric source package for the discrete
+four-vertex paper recorded as `23.pdf` in `references/summary.md`.
 
 This is the only remaining E² geometric import in the formal chain: Lemma 9
 for the strict same-orientation branch, together with the final §4 disk
@@ -5700,9 +5701,9 @@ theorem dahlbergE2_geometric_sources : DahlbergE2GeometricSources := by
 
 /-- Ordered-turn extraction in Dahlberg's positively oriented strictly-convex
 case with nonconstant signed-Menger profile.  This is the geometric content of
-Lemma 9 in `references/23.pdf`: Lemma 8 transfers the curvature-disk nesting to
-adjacent curvature turns, and the convex discrete four-vertex theorem supplies
-four cyclically ordered turns. -/
+Lemma 9 in Dahlberg's discrete four-vertex paper: Lemma 8 transfers the
+curvature-disk nesting to adjacent curvature turns, and the convex discrete
+four-vertex theorem supplies four cyclically ordered turns. -/
 theorem orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_geometric_source
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
@@ -5759,7 +5760,7 @@ theorem exists_positiveRadiusOrderedAdjacentTurns_of_positiveOrientation_not_con
 
 /-- The remaining ordered-turn extraction in Dahlberg's positively oriented
 strictly-convex case with nonconstant signed-Menger profile, corresponding to
-the geometric content of Lemma 9 in `references/23.pdf`.
+the geometric content of Lemma 9 in Dahlberg's discrete four-vertex paper.
 
 Dahlberg's Lemma 8 nesting and the convex discrete four-vertex theorem now
 enter through
@@ -5880,7 +5881,7 @@ theorem exists_ordered_signedMenger_turns_of_positiveOrientation_lemma9_source
     hn hsimple hregular horient hnoncircle
 
 /-- Dahlberg's positively oriented strictly-convex case, corresponding to
-Lemma 9 in `references/23.pdf`.
+Lemma 9 in the discrete four-vertex paper.
 
 This is a smaller source gate than the full §4 disk reduction: it covers the
 strictly convex same-orientation case using Lemma 8's nesting of the regions
@@ -5897,7 +5898,7 @@ theorem signedMengerProfile_dahlbergFourVertex_of_positiveOrientation_lemma9_sou
       hn hsimple hregular horient hnoncircle)
 
 /-- Dahlberg's positively oriented strictly-convex case, corresponding to
-Lemma 9 in `references/23.pdf`.
+Lemma 9 in the discrete four-vertex paper.
 
 The hypotheses use the existing orientation interfaces as the Lean-side
 strict-convexity proxy.  Dahlberg proves this case by combining Lemma 8's
@@ -5990,7 +5991,7 @@ theorem dahlbergDiskAuxiliaryReduction_of_non_strict_source
 
 /-- The remaining genuinely non-strict branch of Dahlberg's reduction from a
 general simple locally regular polygon to the strictly-convex auxiliary polygon
-used in the last part of §4 of `references/23.pdf`.
+used in the last part of §4 of Dahlberg's discrete four-vertex paper.
 
 The strict-orientation cases have already been discharged by Lemma 9 above.
 This source gate isolates the part of Dahlberg's final disk argument where the
@@ -6015,7 +6016,7 @@ theorem signedMengerProfile_dahlbergFourVertex_of_non_strict_dahlberg_disk_reduc
 
 /-- Dahlberg's reduction from the general simple locally regular polygon to the
 strictly-convex auxiliary polygon used in the last part of §4 of
-`references/23.pdf`.
+Dahlberg's discrete four-vertex paper.
 
 The proof now splits off the strict-orientation case, which is already covered
 by Dahlberg's Lemma 9 package above.  The remaining source gate is precisely the
@@ -6037,7 +6038,8 @@ plateau-aware local maxima and at least two plateau-aware local minima.
 
 The public source theorem is now proved from the §4 disk-reduction gate above;
 that gate dispatches the already-proved strict-orientation branch before
-entering the remaining non-strict disk geometry from `references/23.pdf`. -/
+entering the remaining non-strict disk geometry from Dahlberg's discrete
+four-vertex paper. -/
 theorem signedMengerProfile_dahlbergFourVertex_E2_dahlberg_source
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
