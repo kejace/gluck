@@ -9418,6 +9418,16 @@ def DahlbergE2PrimitiveRemainingSourceComponents : Prop :=
   DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
   DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
 
+/-- The actual current primitive `E²` source-gate surface for the stronger
+ordered-turn route: Dahlberg's strict positive-orientation Lemma 9 source,
+plus the normalized unit-disk §4 source for the non-strict branch.
+
+The older primitive spelling splits Lemma 9 into signed CDFV plus Lemma 8;
+that split is kept below as a compatibility surface. -/
+def DahlbergE2Lemma9UnitRemainingSourceComponents : Prop :=
+  DahlbergE2Lemma9Source ∧
+  DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
+
 /-- Convert normalized-unit final-D4VT E² components to the existing
 boundary/interior component package. -/
 theorem dahlbergE2DfvSourceComponents_of_unitComponents
@@ -9522,6 +9532,35 @@ theorem dahlbergE2RemainingSourceComponents_iff_primitiveComponents :
   constructor
   · exact dahlbergE2PrimitiveRemainingSourceComponents_of_components
   · exact dahlbergE2RemainingSourceComponents_of_primitiveComponents
+
+/-- Convert the current Lemma-9/unit primitive E² gate surface to the older
+split primitive spelling. -/
+theorem dahlbergE2PrimitiveRemainingSourceComponents_of_lemma9UnitComponents
+    (hsrc : DahlbergE2Lemma9UnitRemainingSourceComponents) :
+    DahlbergE2PrimitiveRemainingSourceComponents := by
+  have hsplit : DahlbergE2ConvexSignedSourceComponents :=
+    dahlbergE2ConvexSignedSourceComponents_of_lemma9Source hsrc.1
+  exact ⟨dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource hsplit.1,
+    hsplit.2, hsrc.2⟩
+
+/-- Convert the older split primitive E² spelling back to the current
+Lemma-9/unit primitive gate surface. -/
+theorem dahlbergE2Lemma9UnitRemainingSourceComponents_of_primitiveComponents
+    (hsrc : DahlbergE2PrimitiveRemainingSourceComponents) :
+    DahlbergE2Lemma9UnitRemainingSourceComponents := by
+  exact ⟨dahlbergE2Lemma9Source_of_signedComponents
+      ⟨dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource hsrc.1,
+        hsrc.2.1⟩,
+    hsrc.2.2⟩
+
+/-- The current Lemma-9/unit primitive E² gate surface is equivalent to the
+older split primitive spelling. -/
+theorem dahlbergE2Lemma9UnitRemainingSourceComponents_iff_primitiveComponents :
+    DahlbergE2Lemma9UnitRemainingSourceComponents ↔
+      DahlbergE2PrimitiveRemainingSourceComponents := by
+  constructor
+  · exact dahlbergE2PrimitiveRemainingSourceComponents_of_lemma9UnitComponents
+  · exact dahlbergE2Lemma9UnitRemainingSourceComponents_of_primitiveComponents
 
 /-- The sharp remaining `E²` source components imply the positive-orientation
 ordered-turn extraction directly, without routing through the older bundled

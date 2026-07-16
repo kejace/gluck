@@ -453,6 +453,17 @@ def ForwardUniformPrimitiveRemainingSourceComponents : Prop :=
   SpaceFormDiscreteSource ∧
   DahlbergE2PrimitiveRemainingSourceComponents
 
+/-- Uniform component spelling of the actual current primitive remaining
+source gates.
+
+This is sharper than `ForwardUniformPrimitiveRemainingSourceComponents`:
+the E² strict branch is recorded as the single Lemma 9 ordered-turn source,
+rather than as the formally equivalent split signed-CDFV/Lemma 8 package. -/
+def ForwardUniformLemma9PrimitiveRemainingSourceComponents : Prop :=
+  SmoothForwardSource ∧
+  SpaceFormDiscreteSource ∧
+  DahlbergE2Lemma9UnitRemainingSourceComponents
+
 /-- Uniform component spelling of the primitive remaining source obligations
 needed only for final D4VT endpoints.
 
@@ -502,6 +513,21 @@ theorem forwardUniformPrimitiveRemainingSourceComponents_iff_components :
   · intro hsrc
     exact ⟨smoothForwardSource_iff_modelSources.mpr hsrc.1,
       spaceFormDiscreteSource_iff_modelSources.mpr hsrc.2.1, hsrc.2.2⟩
+
+/-- The actual current uniform Lemma-9 primitive source surface is equivalent
+to the older uniform split primitive component spelling. -/
+theorem forwardUniformLemma9PrimitiveRemainingSourceComponents_iff_components :
+    ForwardUniformLemma9PrimitiveRemainingSourceComponents ↔
+      ForwardUniformPrimitiveRemainingSourceComponents := by
+  constructor
+  · intro hsrc
+    exact ⟨hsrc.1, hsrc.2.1,
+      dahlbergE2Lemma9UnitRemainingSourceComponents_iff_primitiveComponents.mp
+        hsrc.2.2⟩
+  · intro hsrc
+    exact ⟨hsrc.1, hsrc.2.1,
+      dahlbergE2Lemma9UnitRemainingSourceComponents_iff_primitiveComponents.mpr
+        hsrc.2.2⟩
 
 /-- The uniform primitive final-D4VT remaining-source components are
 equivalent to the model-specific primitive final-D4VT component spelling. -/
@@ -657,6 +683,14 @@ theorem forwardPrimitiveRemainingSources_iff_uniformComponents :
       ForwardUniformPrimitiveRemainingSourceComponents := by
   exact forwardPrimitiveRemainingSources_iff_components.trans
     forwardUniformPrimitiveRemainingSourceComponents_iff_components.symm
+
+/-- The flattened primitive remaining-source audit is equivalent to the actual
+current uniform Lemma-9 primitive source surface. -/
+theorem forwardPrimitiveRemainingSources_iff_uniformLemma9Components :
+    ForwardPrimitiveRemainingSources ↔
+      ForwardUniformLemma9PrimitiveRemainingSourceComponents := by
+  exact forwardPrimitiveRemainingSources_iff_uniformComponents.trans
+    forwardUniformLemma9PrimitiveRemainingSourceComponents_iff_components.symm
 
 /-- The flattened primitive final-D4VT remaining-source audit is equivalent to
 the uniform primitive final-D4VT component spelling. -/
@@ -5182,17 +5216,25 @@ theorem dahlbergFourVertex_H2_strict_of_dfvPrimitiveRemainingSources
       hsrc hn v κ hdisk hsimple horient hregular hκ)
     hnc
 
-/-- Uniform primitive grouped component spelling of the current forward source
-audit.
+/-- Uniform primitive grouped component spelling of the actual current forward
+source-gate audit.
 
-This exposes the exact primitive E² source gates: nonconcyclic CDFV, Lemma 8,
-and the normalized unit-disk §4 construction, together with the unified smooth
-and non-Euclidean space-form source gates. -/
-theorem forward_uniform_primitive_remaining_source_components :
-    ForwardUniformPrimitiveRemainingSourceComponents := by
+This exposes the four current source gates: the unified smooth source, the
+unified non-Euclidean ordered-turn source, Dahlberg's E² Lemma 9 source, and
+the normalized unit-disk §4 construction source. -/
+theorem forward_uniform_lemma9_primitive_remaining_source_components :
+    ForwardUniformLemma9PrimitiveRemainingSourceComponents := by
   exact ⟨smoothForward_source_gate,
     spaceFormDiscrete_source_gate,
-    dahlbergE2_primitive_remaining_source_components⟩
+    dahlbergE2_lemma9_source_gate,
+    dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate⟩
+
+/-- Uniform primitive grouped component spelling of the current forward source
+audit, expanded to the split strict-branch compatibility surface. -/
+theorem forward_uniform_primitive_remaining_source_components :
+    ForwardUniformPrimitiveRemainingSourceComponents := by
+  exact forwardUniformLemma9PrimitiveRemainingSourceComponents_iff_components.mp
+    forward_uniform_lemma9_primitive_remaining_source_components
 
 /-- Primitive grouped component spelling of the current forward source audit,
 expanded to the model-specific compatibility surface. -/
@@ -5204,8 +5246,8 @@ theorem forward_primitive_remaining_source_components :
 /-- Fully flattened primitive spelling of the current forward source audit. -/
 theorem forward_primitive_remaining_sources :
     ForwardPrimitiveRemainingSources := by
-  exact forwardPrimitiveRemainingSources_iff_uniformComponents.mpr
-    forward_uniform_primitive_remaining_source_components
+  exact forwardPrimitiveRemainingSources_iff_uniformLemma9Components.mpr
+    forward_uniform_lemma9_primitive_remaining_source_components
 
 /-- Grouped component spelling of `forward_remaining_sources`, recovered from
 the primitive source audit. -/
