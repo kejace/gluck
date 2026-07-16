@@ -9225,26 +9225,26 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
-/-- Dahlberg's convex/CDFV radius-witness nonconcyclic source gate.
+/-- Dahlberg's convex/CDFV signed-Menger nonconcyclic source gate.
 
 Dahlberg's Theorem 6/CDFV supplies the four extremal curvature-disk witnesses
-in the strictly convex positive-orientation branch.  This is the geometric
-paper-facing statement; signed-Menger forms are recovered formally below by
-reciprocal-radius monotonicity and the equivalence between nonconcyclicity and
-nonconstancy of signed Menger curvature in the positive-orientation branch.
+in the strictly convex positive-orientation branch.  The paper-facing theorem
+is stated here at the signed-Menger conclusion level; the radius-profile
+witness form used by the Lean reduction is recovered formally below by
+reciprocal-radius monotonicity.
 
 Reference source: Dahlberg, *A Discrete Four Vertex Theorem*,
 `references/23.pdf`, §3 Theorem 6 (CDFV). -/
-theorem dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate :
-    DahlbergE2ConvexDfvRadiusNonconcyclicSource := by
-  sorry
-
-/-- Dahlberg's convex/CDFV signed-Menger nonconcyclic source gate, recovered
-from the radius-witness CDFV source. -/
 theorem dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate :
     DahlbergE2ConvexDfvSignedNonconcyclicSource := by
-  exact dahlbergE2ConvexDfvSignedNonconcyclicSource_of_radiusNonconcyclicSource
-    dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate
+  sorry
+
+/-- Dahlberg's convex/CDFV radius-witness nonconcyclic source gate, recovered
+from the signed-Menger CDFV source. -/
+theorem dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate :
+    DahlbergE2ConvexDfvRadiusNonconcyclicSource := by
+  exact dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_signedNonconcyclicSource
+    dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate
 
 /-- Dahlberg's convex/CDFV signed-Menger source gate in nonconstant-profile
 form, recovered from the geometric nonconcyclic CDFV source.
