@@ -1309,8 +1309,11 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_of_forwardDfvSources
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSources
-    (dahlbergE2_dfv_geometric_sources_of_dfvSources hsrc)
+  have hcomponents : ForwardDfvRemainingSourceComponents :=
+    forwardDfvRemainingSources_iff_components.mp
+      (forwardDfvRemainingSources_of_dfvGeometricSources hsrc)
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSourceComponents
+    hcomponents.2.2
     hn hsimple hregular hnoncircle
 
 /-- The source-parametrized E² discrete Dahlberg kernel from the weaker

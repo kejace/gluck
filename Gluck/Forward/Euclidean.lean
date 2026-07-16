@@ -368,8 +368,8 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_of_not_concyclic {n : ℕ} [Ne
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSources
-    dahlbergE2_dfv_geometric_sources hn hsimple hregular hnoncircle
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSourceComponents
+    dahlbergE2_dfv_source_components hn hsimple hregular hnoncircle
 
 /-- E² strict-orientation Dahlberg reduction from the curvature-side
 nonconstancy condition.  The nonconstant signed-Menger profile rules out
