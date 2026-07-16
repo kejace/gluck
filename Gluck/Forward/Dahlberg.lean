@@ -220,6 +220,15 @@ theorem not_concyclic_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
     (¬ Concyclic (fun i => directIsometryR2 u w (v i))) ↔ ¬ Concyclic v := by
   rw [concyclic_directIsometry hu w v]
 
+/-- Positive real homotheties preserve concyclicity. -/
+theorem concyclic_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
+    (v : ZMod n → ℂ) :
+    Concyclic v →
+      Concyclic (fun i => (r : ℂ) * v i) := by
+  rintro ⟨O, R, hR, hall⟩
+  exact ⟨(r : ℂ) * O, r * R, mul_pos hr hR, fun i => by
+    rw [dist_posRealHomothety hr, hall i]⟩
+
 /-- If a positive real homothety of a cyclic polygon is concyclic, then the
 original polygon is concyclic. -/
 theorem concyclic_of_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
@@ -240,6 +249,14 @@ theorem concyclic_of_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
     field_simp [hr.ne']
   nlinarith [hr, hscale]
 
+/-- Positive real homotheties preserve concyclicity exactly. -/
+theorem concyclic_posRealHomothety_iff {n : ℕ} {r : ℝ} (hr : 0 < r)
+    (v : ZMod n → ℂ) :
+    Concyclic (fun i => (r : ℂ) * v i) ↔ Concyclic v := by
+  constructor
+  · exact concyclic_of_posRealHomothety hr v
+  · exact concyclic_posRealHomothety hr v
+
 /-- Positive real homotheties preserve nonconcyclicity in the forward
 direction needed for normalized source gates. -/
 theorem not_concyclic_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
@@ -248,6 +265,12 @@ theorem not_concyclic_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
       ¬ Concyclic (fun i => (r : ℂ) * v i) := by
   intro hnon hcircle
   exact hnon (concyclic_of_posRealHomothety hr v hcircle)
+
+/-- Positive real homotheties preserve nonconcyclicity exactly. -/
+theorem not_concyclic_posRealHomothety_iff {n : ℕ} {r : ℝ} (hr : 0 < r)
+    (v : ZMod n → ℂ) :
+    (¬ Concyclic (fun i => (r : ℂ) * v i)) ↔ ¬ Concyclic v := by
+  rw [concyclic_posRealHomothety_iff hr v]
 
 /-- Direct Euclidean isometries carry circumcircles to circumcircles with the
 same radius. -/
@@ -6982,6 +7005,16 @@ theorem dahlbergDiskReductionSetup_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u
     exact ⟨directIsometryR2 u w O, R,
       (minimalEnclosingDiskR2_directIsometry hu w O R v).mpr hΔ,
       i, (onDiskBoundaryR2_directIsometry hu w O R v i).mpr hi⟩
+
+/-- Positive real homotheties preserve Dahlberg's minimal-disk setup. -/
+theorem dahlbergDiskReductionSetup_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
+    (v : ZMod n → ℂ) :
+    DahlbergDiskReductionSetup v →
+      DahlbergDiskReductionSetup (fun i => (r : ℂ) * v i) := by
+  rintro ⟨O, R, hΔ, i, hi⟩
+  exact ⟨(r : ℂ) * O, r * R,
+    minimalEnclosingDiskR2_posRealHomothety hr O R v hΔ,
+    i, (onDiskBoundaryR2_posRealHomothety hr O R v i).mpr hi⟩
 
 /-- In the §4 minimal-disk setup for a simple polygon, the smallest disk has
 positive radius. -/
