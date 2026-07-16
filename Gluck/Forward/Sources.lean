@@ -531,6 +531,14 @@ theorem dahlbergE2DfvSourceComponents_of_dfvRemainingSources
     DahlbergE2DfvSourceComponents := by
   exact (forwardDfvRemainingSources_iff_components.mp hsrc).2.2
 
+/-- Extract the sharp `E²` final-D4VT component package from the stronger
+remaining-source package by forgetting the Lemma 8 ordered-turn bridge. -/
+theorem dahlbergE2DfvSourceComponents_of_remainingSources
+    (hsrc : ForwardRemainingSources) :
+    DahlbergE2DfvSourceComponents := by
+  exact dahlbergE2DfvSourceComponents_of_remainingComponents
+    (dahlbergE2RemainingSourceComponents_of_remainingSources hsrc)
+
 /-- Extract Dahlberg's `E²` CDFV radius-witness source from the sharper
 remaining-source package. -/
 theorem dahlbergE2ConvexDfvRadiusSource_of_remainingSources
