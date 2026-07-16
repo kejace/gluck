@@ -29,6 +29,17 @@ def ForwardGeometricSources : Prop :=
   SpaceFormDiscreteSource ∧
   DahlbergE2GeometricSources
 
+/-- Weaker bundled source package for the final forward D4VT statements.
+
+The only difference from `ForwardGeometricSources` is the Euclidean Dahlberg
+component: here it uses the paper-faithful final-D4VT package
+`DahlbergE2DfvGeometricSources`, not the stronger adjacent-turn package needed
+for the conformal-Menger ordered-turn refinements. -/
+def ForwardDfvGeometricSources : Prop :=
+  SmoothForwardSource ∧
+  SpaceFormDiscreteSource ∧
+  DahlbergE2DfvGeometricSources
+
 /-- Model-specific spelling of the remaining forward geometric source package.
 
 This expands the two uniform source packages into their model-specific
@@ -281,6 +292,21 @@ theorem dahlbergE2_geometric_sources_of_sources (hsrc : ForwardGeometricSources)
     DahlbergE2GeometricSources := by
   exact hsrc.2.2
 
+/-- Extract Dahlberg's weaker E² final-D4VT source package from a bundled
+weaker forward source proof. -/
+theorem dahlbergE2_dfv_geometric_sources_of_dfvSources
+    (hsrc : ForwardDfvGeometricSources) :
+    DahlbergE2DfvGeometricSources := by
+  exact hsrc.2.2
+
+/-- The stronger bundled source package implies the weaker final-D4VT source
+package. -/
+theorem forwardDfvGeometricSources_of_geometricSources
+    (hsrc : ForwardGeometricSources) :
+    ForwardDfvGeometricSources := by
+  exact ⟨hsrc.1, hsrc.2.1,
+    dahlbergE2DfvGeometricSources_of_geometricSources hsrc.2.2⟩
+
 /-- The source-parametrized positive-orientation E² Dahlberg ordered-turn
 extraction. -/
 theorem orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_of_sources
@@ -503,6 +529,42 @@ theorem dahlberg_discrete_four_vertex_E2_of_sources
       (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
   change DahlbergFourVertex (SignedMengerProfile v)
   exact dahlberg_discrete_four_vertex_E2_kernel_of_sources
+    hsrc hn v hsimple hregular hnoncircle
+
+/-- The source-parametrized E² Dahlberg conclusion from the weaker final-D4VT
+source package. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSources
+    (dahlbergE2_dfv_geometric_sources_of_dfvSources hsrc)
+    hn hsimple hregular hnoncircle
+
+/-- The source-parametrized E² discrete Dahlberg kernel from the weaker
+final-D4VT source package. -/
+theorem dahlberg_discrete_four_vertex_E2_kernel_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_forwardDfvSources
+    hsrc hn hsimple hregular hnoncircle
+
+/-- The source-parametrized public E² Dahlberg theorem for raw signed-Menger
+curvature from the weaker final-D4VT source package. -/
+theorem dahlberg_discrete_four_vertex_E2_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex
+      (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
+  change DahlbergFourVertex (SignedMengerProfile v)
+  exact dahlberg_discrete_four_vertex_E2_kernel_of_forwardDfvSources
     hsrc hn v hsimple hregular hnoncircle
 
 /-- The source-parametrized positive-orientation E² conformal-Menger
@@ -1882,6 +1944,10 @@ theorem forward_geometric_sources : ForwardGeometricSources := by
     letI : NeZero n := hne
     exact orderedAdjacentTurns_spaceForm_geometric_source
       hε hn v κ hdisk hsimple hconvex hregular hκ hproper hnc
+
+/-- Weaker final-D4VT spelling of `forward_geometric_sources`. -/
+theorem forward_dfv_geometric_sources : ForwardDfvGeometricSources := by
+  exact forwardDfvGeometricSources_of_geometricSources forward_geometric_sources
 
 /-- Model-specific spelling of `forward_geometric_sources`. -/
 theorem forward_model_sources : ForwardModelSources := by

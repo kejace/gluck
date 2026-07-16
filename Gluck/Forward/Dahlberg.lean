@@ -5977,6 +5977,17 @@ reduction for the non-strict branch. -/
 theorem dahlbergE2_geometric_sources : DahlbergE2GeometricSources := by
   exact ⟨dahlbergE2_convex_radius_source, dahlbergE2_disk_reduction_source⟩
 
+/-- The stronger Dahlberg source package implies the weaker final-D4VT source
+package. -/
+theorem dahlbergE2DfvGeometricSources_of_geometricSources
+    (hsrc : DahlbergE2GeometricSources) :
+    DahlbergE2DfvGeometricSources := by
+  refine ⟨?_, hsrc.2⟩
+  intro n hne hn v hsimple hregular horient hnc
+  letI : NeZero n := hne
+  exact signedMengerProfile_dahlbergFourVertex_of_positiveRadiusOrderedAdjacentTurns
+    hn hsimple horient (hsrc.1 hn hsimple hregular horient hnc)
+
 /-- Dahlberg's weaker final-D4VT source package, extracted from the convex CDFV
 signed source and the §4 disk-reduction source. -/
 theorem dahlbergE2_dfv_geometric_sources : DahlbergE2DfvGeometricSources := by
