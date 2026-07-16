@@ -93,7 +93,7 @@ The remaining primitive source gates in the current worktree are exactly:
   - `four_vertex_condition_smooth_E2_nonconstant_classical`;
 - `Gluck/Forward/Dahlberg.lean`
   - `dahlbergE2_lemma9_ordered_turn_nonconcyclic_source_gate`;
-  - `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
+  - `dahlbergE2_disk_reduction_geometric_source_gate`.
 
 Dahlberg's strict positive-orientation CDFV and Lemma 8 compatibility gates,
 `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate` and
@@ -107,16 +107,18 @@ through the same split compatibility interface.  The final-D4VT route remains
 separated from the stronger ordered-turn route:
 `dahlbergE2_dfv_primitive_source_components` contains the signed-CDFV gate
 recovered from Lemma 9, its formally recovered radius witness, and the
-normalized unit-disk §4 gate; the public E² D4VT endpoints route through
+normalized unit-disk §4 gate recovered from the broad disk-reduction source;
+the public E² D4VT endpoints route through
 `signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveSourceComponents`.
 
-The non-strict §4 branch is gated at the unit-radius rotated centered
-normalized successor-interior interface
-`dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
-All normalizations away from that primitive case are formalized: cyclic
-translation, Euclidean translation/rotation, positive homothety, reversal, the
-boundary-neighbor/transition reductions, and the boundary/interior and
-disk-reduction compatibility layers.
+The non-strict §4 branch is now gated at the broad theorem-facing
+disk-reduction source `dahlbergE2_disk_reduction_geometric_source_gate`.  The
+unit-radius rotated centered normalized successor-interior interface
+`dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`
+is recovered formally from it.  The reverse normalization chain is also
+formalized: cyclic translation, Euclidean translation/rotation, positive
+homothety, reversal, the boundary-neighbor/transition reductions, and the
+boundary/interior and disk-reduction compatibility layers.
 
 Completing the current branch means replacing the three source gates above by
 formal proofs.  The relevant paper sources are:
