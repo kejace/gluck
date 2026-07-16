@@ -461,6 +461,51 @@ theorem dahlbergFourVertex_neg_iff {n : ℕ} {κ : ZMod n → ℝ} :
       simpa using hfv
     exact dahlbergFourVertex_of_neg (κ := fun i => -κ i) hfv'
 
+/-- Taking positive reciprocals turns a plateau-aware local maximum into a
+plateau-aware local minimum. -/
+theorem discreteLocalMin_of_inv_localMax {n : ℕ} {ρ : ZMod n → ℝ} {i : ZMod n}
+    (hpos : ∀ j, 0 < ρ j) (hmax : DiscreteLocalMax ρ i) :
+    DiscreteLocalMin (fun j => (ρ j)⁻¹) i := by
+  rcases hmax with ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq, hleft, hright⟩
+  refine ⟨l, r, hlpos, hrpos, hlr, ?_, ?_, ?_, ?_⟩
+  · intro m hm
+    change (ρ (i - (m : ZMod n)))⁻¹ = (ρ i)⁻¹
+    rw [hleft_eq m hm]
+  · intro m hm
+    change (ρ (i + (m : ZMod n)))⁻¹ = (ρ i)⁻¹
+    rw [hright_eq m hm]
+  · exact (inv_lt_inv₀ (hpos i) (hpos (i - (l : ZMod n)))).mpr hleft
+  · exact (inv_lt_inv₀ (hpos i) (hpos (i + (r : ZMod n)))).mpr hright
+
+/-- Taking positive reciprocals turns a plateau-aware local minimum into a
+plateau-aware local maximum. -/
+theorem discreteLocalMax_of_inv_localMin {n : ℕ} {ρ : ZMod n → ℝ} {i : ZMod n}
+    (hpos : ∀ j, 0 < ρ j) (hmin : DiscreteLocalMin ρ i) :
+    DiscreteLocalMax (fun j => (ρ j)⁻¹) i := by
+  rcases hmin with ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq, hleft, hright⟩
+  refine ⟨l, r, hlpos, hrpos, hlr, ?_, ?_, ?_, ?_⟩
+  · intro m hm
+    change (ρ (i - (m : ZMod n)))⁻¹ = (ρ i)⁻¹
+    rw [hleft_eq m hm]
+  · intro m hm
+    change (ρ (i + (m : ZMod n)))⁻¹ = (ρ i)⁻¹
+    rw [hright_eq m hm]
+  · exact (inv_lt_inv₀ (hpos (i - (l : ZMod n))) (hpos i)).mpr hleft
+  · exact (inv_lt_inv₀ (hpos (i + (r : ZMod n))) (hpos i)).mpr hright
+
+/-- Dahlberg's four-vertex conclusion is preserved by taking positive
+reciprocals, with maxima/minima swapped and the cyclic order rotated. -/
+theorem dahlbergFourVertex_inv_of_pos {n : ℕ} {ρ : ZMod n → ℝ}
+    (hpos : ∀ i, 0 < ρ i) (hfv : DahlbergFourVertex ρ) :
+    DahlbergFourVertex (fun i => (ρ i)⁻¹) := by
+  rcases hfv with
+    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁, hmax₁, hmin₂, hmax₃, hmin₄⟩
+  exact dahlbergFourVertex_of_localExtrema_min_max hi₁₂ hi₂₃ hi₃₄ hi₄₁
+    (discreteLocalMin_of_inv_localMax hpos hmax₁)
+    (discreteLocalMax_of_inv_localMin hpos hmin₂)
+    (discreteLocalMin_of_inv_localMax hpos hmax₃)
+    (discreteLocalMax_of_inv_localMin hpos hmin₄)
+
 /-- Positive affine changes of a cyclic profile preserve plateau-aware local
 maxima. -/
 theorem discreteLocalMax_posAffine {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}

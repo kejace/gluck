@@ -5339,6 +5339,44 @@ noncomputable def EdgeNextCircleRadiusProfile {n : ℕ} (v : ZMod n → ℂ)
   normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
     (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i + 1 + 1)))
 
+/-- The previous-vertex circle-radius profile is positive on a simple polygon. -/
+theorem EdgePrevCircleRadiusProfile_pos {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (i : ZMod n) :
+    0 < EdgePrevCircleRadiusProfile v i := by
+  exact normalizedCircleRadius_pos (chordHalfLength_pos (hsimple.1 i)).ne' _
+
+/-- In the positive-orientation branch, signed Menger curvature is the
+reciprocal of the previous-vertex circle-radius profile. -/
+theorem signedMengerProfile_eq_inv_edgePrevCircleRadiusProfile_of_positiveOrientation
+    {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v) (i : ZMod n) :
+    SignedMengerProfile v i = (EdgePrevCircleRadiusProfile v i)⁻¹ := by
+  have hcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) :=
+    polygonEdgePrev_cross_pos_of_vertex_cross_pos (horient i)
+  calc
+    SignedMengerProfile v i
+        = Gluck.Discrete.signedMengerR2 (v i) (v (i + 1)) (v (i - 1)) := by
+          exact (signedMengerR2_cycle (v (i - 1)) (v i) (v (i + 1))).symm
+    _ = normalizedCircleCurvature (chordHalfLength (v i) (v (i + 1)))
+        (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1))) :=
+          signedMengerR2_edge_parameter_of_pos (hsimple.1 i) hcross
+    _ = (EdgePrevCircleRadiusProfile v i)⁻¹ := by
+      simp [normalizedCircleCurvature, EdgePrevCircleRadiusProfile, one_div]
+
+/-- A Dahlberg four-vertex theorem for the positive radius profile transfers
+to signed Menger curvature by reciprocal monotonicity. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_positiveRadiusProfile
+    {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hfv : DahlbergFourVertex (EdgePrevCircleRadiusProfile v)) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  exact dahlbergFourVertex_congr
+    (fun i => signedMengerProfile_eq_inv_edgePrevCircleRadiusProfile_of_positiveOrientation
+      hsimple horient i)
+    (dahlbergFourVertex_inv_of_pos (EdgePrevCircleRadiusProfile_pos hsimple) hfv)
+
 /-- Radius-level ordered adjacent turns in the positive-orientation branch.
 Because positive signed Menger curvature is reciprocal radius, the inequalities
 are opposite to the corresponding signed-Menger turns. -/
