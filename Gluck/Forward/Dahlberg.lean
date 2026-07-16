@@ -5674,6 +5674,32 @@ theorem signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concycl
   · exact signedMengerProfile_dahlbergFourVertex_of_negativeOrientation_not_concyclic
       hn hsimple hregular hneg hnoncircle
 
+/-- Auxiliary-polygon package produced by Dahlberg's non-strict disk
+reduction.  The auxiliary polygon is in the already-proved strict-orientation
+case, and its Dahlberg conclusion transfers back to the original polygon. -/
+def DahlbergDiskAuxiliaryReduction {n : ℕ} [NeZero n] (v : ZMod n → ℂ) : Prop :=
+  ∃ m : ℕ, ∃ _hne : NeZero m, ∃ w : ZMod m → ℂ,
+    4 ≤ m ∧
+    Gluck.Discrete.IsSimplePolygon w ∧
+    DahlbergRegular w ∧
+    (PositivePolygonOrientation w ∨ NegativePolygonOrientation w) ∧
+    ¬ Concyclic w ∧
+    (DahlbergFourVertex (SignedMengerProfile w) →
+      DahlbergFourVertex (SignedMengerProfile v))
+
+/-- The genuinely geometric source for Dahlberg's non-strict disk reduction.
+It constructs the strict-orientation auxiliary polygon from the smallest
+enclosing disk `Δ`, boundary set `E`, Lemma 10's triangle-sector comparison,
+and a polygonal approximation of the convex domain `U`. -/
+theorem dahlbergDiskAuxiliaryReduction_of_non_strict_source
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v)
+    (hnonstrict : ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) :
+    DahlbergDiskAuxiliaryReduction v := by
+  sorry
+
 /-- The remaining genuinely non-strict branch of Dahlberg's reduction from a
 general simple locally regular polygon to the strictly-convex auxiliary polygon
 used in the last part of §4 of `references/23.pdf`.
@@ -5691,7 +5717,13 @@ theorem signedMengerProfile_dahlbergFourVertex_of_non_strict_dahlberg_disk_reduc
     (hnoncircle : ¬ Concyclic v)
     (hnonstrict : ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  sorry
+  rcases dahlbergDiskAuxiliaryReduction_of_non_strict_source
+      hn hsimple hregular hnoncircle hnonstrict with
+    ⟨m, hne, w, hm, hsimplew, hregularw, horientw, hnoncirclew, htransfer⟩
+  letI : NeZero m := hne
+  exact htransfer
+    (signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concyclic
+      hm hsimplew hregularw horientw hnoncirclew)
 
 /-- Dahlberg's reduction from the general simple locally regular polygon to the
 strictly-convex auxiliary polygon used in the last part of §4 of
