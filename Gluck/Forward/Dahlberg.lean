@@ -7450,6 +7450,17 @@ theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_diskReductionSource
   letI : NeZero n := hne
   exact hsrc hn hsimple hregular hnoncircle hnonstrict
 
+/-- The older disk-reduction source implies the metric-data §4 auxiliary
+construction source by ignoring the already-supplied minimal disk and
+boundary/interior data. -/
+theorem dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSource
+    (hsrc : DahlbergE2DiskReductionSource) :
+    DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict O R _hΔ _hRpos
+    i j _hboundary _hinterior _hij _hmax
+  letI : NeZero n := hne
+  exact hsrc hn hsimple hregular hnoncircle hnonstrict
+
 /-- The boundary-level §4 auxiliary source is formally equivalent to
 Dahlberg's non-strict disk-reduction source.  The nontrivial direction uses the
 proved finite minimal-disk setup; the reverse direction ignores the supplied
