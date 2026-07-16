@@ -4173,6 +4173,62 @@ theorem discrete_four_vertex_H2_of_dfvAtomicSources
     (forwardDfvGeometricSources_of_atomicSources hsrc)
     hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
 
+/-- The smooth space-form four-vertex condition from the flattened primitive
+source-gate audit. -/
+theorem four_vertex_condition_smooth_spaceForm_kernel_of_primitiveRemainingSources
+    (hsrc : ForwardPrimitiveRemainingSources) {ε : ℝ}
+    (hε : ε = 0 ∨ ε = 1 ∨ ε = -1) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : SmoothForwardRealizes ε γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    Gluck.FourVertexCondition κ := by
+  exact four_vertex_condition_smooth_spaceForm_kernel_of_sources
+    (forwardGeometricSources_of_primitiveRemainingSources hsrc)
+    hε hclosed hreal hκ hper
+
+/-- The public E² Dahlberg theorem from the flattened primitive source-gate
+audit. -/
+theorem dahlberg_discrete_four_vertex_E2_of_primitiveRemainingSources
+    (hsrc : ForwardPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex
+      (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
+  exact dahlberg_discrete_four_vertex_E2_of_sources
+    (forwardGeometricSources_of_primitiveRemainingSources hsrc)
+    hn v hsimple hregular hnoncircle
+
+/-- The non-Euclidean discrete constant-or-D4VT kernel from the flattened
+primitive final-D4VT source-gate audit. -/
+theorem constant_or_dahlbergFourVertex_spaceForm_kernel_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) {ε : ℝ}
+    (hε : ε = 1 ∨ ε = -1) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_spaceForm_kernel_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hε hn v κ hdisk hsimple hconvex hregular hκ hproper
+
+/-- The public E² Dahlberg theorem from the flattened primitive final-D4VT
+source-gate audit. -/
+theorem dahlberg_discrete_four_vertex_E2_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex
+      (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
+  exact dahlberg_discrete_four_vertex_E2_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v hsimple hregular hnoncircle
+
 /-- Primitive grouped component spelling of the current forward source audit.
 
 This exposes the exact primitive E² source gates: nonconcyclic CDFV, Lemma 8,
