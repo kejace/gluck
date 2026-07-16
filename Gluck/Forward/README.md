@@ -30,23 +30,24 @@ the converse project's level-window condition:
 5. Reduce the general locally regular polygon to the convex theorem as in the
    proof of Theorem 1.
 
-The formal E² geometric source gate for this chain is now the package
-`DahlbergE2GeometricSources`, exposed by
-`dahlbergE2_geometric_sources`.  Its two components are exactly the external
-Dahlberg inputs from `references/23.pdf`: the Lemma 9 extraction of four
-ordered signed-Menger turns in the strictly convex same-orientation branch, and
-the final §4 non-strict disk-reduction construction.  The public endpoint
-`signedMengerProfile_dahlbergFourVertex_E2_dahlberg_source` is proved from
-those package components plus the already-formalized cyclic/order,
-nonconcyclic-to-nonconstant, reciprocal-radius/sign, reflection, and
-plateau-aware conversion lemmas.
+The stronger E² geometric source gate for this chain is the package
+`DahlbergE2GeometricSources`, exposed by `dahlbergE2_geometric_sources`.  Its
+two components are exactly the external Dahlberg inputs from `references/23.pdf`:
+the Lemma 9 extraction of four ordered signed-Menger turns in the strictly
+convex same-orientation branch, and the final §4 non-strict disk-reduction
+construction.  This package is used for ordered-turn refinements.
 
 The final E² D4VT route is intentionally separated from the stronger ordered-
-turn route.  The theorem-level strict-convex input is
-`DahlbergE2ConvexDfvSignedSource`; it is equivalent to the radius-witness form
-`DahlbergE2ConvexDfvRadiusSource` by reciprocal-radius monotonicity, exposed by
-`dahlbergE2_convexDfvRadiusSource_iff_signedSource` and the named conversion
-lemmas `dahlbergE2ConvexDfvSignedSource_of_radiusSource` and
+turn route.  Its source package is `DahlbergE2DfvGeometricSources`, exposed by
+`dahlbergE2_dfv_geometric_sources`; the public final endpoints
+`signedMengerProfile_dahlbergFourVertex_E2_dahlberg_source`,
+`signedMengerProfile_dahlbergFourVertex_of_not_concyclic`, and the E² wrappers
+in `Euclidean.lean` route through this weaker package.  The theorem-level
+strict-convex input is `DahlbergE2ConvexDfvSignedSource`; it is equivalent to
+the radius-witness form `DahlbergE2ConvexDfvRadiusSource` by reciprocal-radius
+monotonicity, exposed by `dahlbergE2_convexDfvRadiusSource_iff_signedSource`
+and the named conversion lemmas
+`dahlbergE2ConvexDfvSignedSource_of_radiusSource` and
 `dahlbergE2ConvexDfvRadiusSource_of_signedSource`.  The stronger conformal-
 Menger ordered-turn refinements additionally require
 `DahlbergE2Lemma8RadiusTurnBridgeSource`, because a plateau-aware
@@ -61,8 +62,9 @@ The corresponding constant-or turn-level endpoint is
 it is derived from
 `constant_or_orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_source`
 by the affine transport lemma `constant_or_orderedAdjacentTurns_of_eq_affine`.
-The positive constant-or D4VT wrapper routes through it and then applies
-`dahlbergFourVertex_of_orderedAdjacentTurns_four_le`.
+The positive and negative constant-or D4VT wrappers now route through the
+strict-orientation final-D4VT endpoint, so they do not require the stronger
+ordered-turn source.
 
 `AlternatesAcrossLevel` remains available as a later corollary of the exact
 plateau-aware conclusion; it is not used as a substitute for Dahlberg's source

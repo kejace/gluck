@@ -6649,7 +6649,7 @@ theorem dahlbergDiskAuxiliaryReduction_of_non_strict_source
     (hnoncircle : ¬ Concyclic v)
     (hnonstrict : ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) :
     DahlbergDiskAuxiliaryReduction v := by
-  exact dahlbergE2_geometric_sources.2 hn hsimple hregular hnoncircle hnonstrict
+  exact dahlbergE2_dfv_geometric_sources.2 hn hsimple hregular hnoncircle hnonstrict
 
 /-- The remaining genuinely non-strict branch of Dahlberg's reduction from a
 general simple locally regular polygon to the strictly-convex auxiliary polygon
@@ -6673,26 +6673,25 @@ theorem signedMengerProfile_dahlbergFourVertex_of_non_strict_dahlberg_disk_reduc
     ⟨m, hne, w, hm, hsimplew, hregularw, horientw, hnoncirclew, htransfer⟩
   letI : NeZero m := hne
   exact htransfer
-    (signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concyclic
-      hm hsimplew hregularw horientw hnoncirclew)
+    (signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concyclic_of_dfvSources
+      dahlbergE2_dfv_geometric_sources hm hsimplew hregularw horientw hnoncirclew)
 
 /-- Dahlberg's reduction from the general simple locally regular polygon to the
-strictly-convex auxiliary polygon used in the last part of §4 of
-Dahlberg's discrete four-vertex paper.
+strictly-convex auxiliary polygon used in the last part of §4 of Dahlberg's
+discrete four-vertex paper.
 
-The proof now splits off the strict-orientation case, which is already covered
-by Dahlberg's Lemma 9 package above.  The remaining source gate is precisely the
-non-strict disk-reduction branch. -/
+For the final plateau-aware D4VT endpoint this routes through the weaker
+`DahlbergE2DfvGeometricSources` package: the strict branch needs only the
+signed-Menger D4VT source, while the non-strict branch uses the disk-reduction
+source.  Ordered-turn refinements remain routed through the stronger Lemma 9
+source above. -/
 theorem signedMengerProfile_dahlbergFourVertex_of_dahlberg_disk_reduction
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  by_cases horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v
-  · exact signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concyclic
-      hn hsimple hregular horient hnoncircle
-  · exact signedMengerProfile_dahlbergFourVertex_of_non_strict_dahlberg_disk_reduction
-      hn hsimple hregular hnoncircle horient
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSources
+    dahlbergE2_dfv_geometric_sources hn hsimple hregular hnoncircle
 
 /-- Dahlberg's Euclidean source theorem: for a simple locally regular
 nonconcyclic polygon, the signed-Menger curvature profile has at least two
@@ -6722,8 +6721,8 @@ theorem signedMengerProfile_dahlbergFourVertex_of_not_concyclic {n : ℕ} [NeZer
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_of_dahlberg_disk_reduction
-    hn hsimple hregular hnoncircle
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSources
+    dahlbergE2_dfv_geometric_sources hn hsimple hregular hnoncircle
 
 /-- Dahlberg's Euclidean discrete four-vertex kernel.
 
