@@ -206,7 +206,7 @@ def ForwardRemainingSources : Prop :=
 only for the final D4VT endpoints.
 
 Compared with `ForwardRemainingSources`, the Euclidean strict convex component
-is Dahlberg's CDFV radius-witness source rather than the stronger
+is Dahlberg's theorem-level signed-Menger CDFV source rather than the stronger
 radius-turn/Lemma 8 source package, and the non-Euclidean discrete components
 ask only for Dahlberg's four-vertex conclusion.  This matches the final D4VT
 route, which does not need the ordered-turn refinement. -/
@@ -251,7 +251,7 @@ def ForwardDfvRemainingSources : Prop :=
         (∀ i, 1 < κ i) →
         (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
         DahlbergFourVertex κ) ∧
-  DahlbergE2ConvexDfvRadiusSource ∧
+  DahlbergE2ConvexDfvSignedSource ∧
   DahlbergE2DiskAuxiliaryConstructionSource
 
 /-- The bundled uniform source package is equivalent to the model-specific
@@ -334,7 +334,8 @@ theorem forwardDfvRemainingSources_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     ForwardDfvRemainingSources := by
   rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hCDFV, _hL8, hD⟩
-  refine ⟨?_, ?_, ?_, ?_, ?_, hCDFV, hD⟩
+  refine ⟨?_, ?_, ?_, ?_, ?_,
+    dahlbergE2_convexDfvRadiusSource_iff_signedSource.mp hCDFV, hD⟩
   · intro γ κ hclosed hreal hκ hper hnc
     exact smoothFourVertex_of_fourVertexCondition
       (hE hclosed hreal hκ hper hnc)
@@ -359,8 +360,7 @@ theorem forwardDfvAtomicSources_of_dfvRemainingSources
     (hsrc : ForwardDfvRemainingSources) :
     ForwardDfvAtomicSources := by
   rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
-  exact ⟨hE, hS, hH, hdS, hdH,
-    dahlbergE2_convexDfvRadiusSource_iff_signedSource.mp hC,
+  exact ⟨hE, hS, hH, hdS, hdH, hC,
     dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource hD⟩
 
 /-- The final-D4VT remaining-source package implies the bundled final-D4VT
@@ -2273,7 +2273,7 @@ theorem forward_remaining_sources : ForwardRemainingSources := by
 Dahlberg strict convex component is the theorem-level signed-Menger source,
 not the stronger radius-turn source used for ordered-turn refinements. -/
 theorem forward_dfv_remaining_sources : ForwardDfvRemainingSources := by
-  refine ⟨?_, ?_, ?_, ?_, ?_, dahlbergE2_convex_dfv_radius_source,
+  refine ⟨?_, ?_, ?_, ?_, ?_, dahlbergE2_convex_dfv_signed_source,
     dahlbergE2_disk_auxiliary_construction_source⟩
   · intro γ κ hclosed hreal hκ hper hnc
     exact smoothFourVertex_of_fourVertexCondition
