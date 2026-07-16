@@ -92,33 +92,36 @@ The remaining primitive source gates in the current worktree are exactly:
 - `Gluck/Forward/Smooth.lean`
   - `four_vertex_condition_smooth_E2_nonconstant_classical`;
 - `Gluck/Forward/Dahlberg.lean`
-  - `dahlbergE2_lemma9_ordered_turn_nonconcyclic_source_gate`;
-  - `dahlbergE2_disk_reduction_geometric_source_gate`.
+  - `dahlbergE2_convex_radius_witness_source_components_primitive_gate`;
+  - `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
 
 Dahlberg's strict positive-orientation CDFV and Lemma 8 compatibility gates,
 `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate` and
-`dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`, are no longer
-primitive: both are recovered from the single ordered-turn Lemma 9 source
-`dahlbergE2_lemma9_ordered_turn_nonconcyclic_source_gate`; the nonconstant
-profile spelling `dahlbergE2_lemma9_ordered_turn_source_gate` is recovered
-formally using nonconcyclicity/nonconstancy equivalence in the positive locally
-regular branch.  The public `dahlbergE2_lemma9_source_gate` is then recovered
-through the same split compatibility interface.  The final-D4VT route remains
-separated from the stronger ordered-turn route:
-`dahlbergE2_dfv_primitive_source_components` contains the signed-CDFV gate
-recovered from Lemma 9, its formally recovered radius witness, and the
-normalized unit-disk §4 gate recovered from the broad disk-reduction source;
-the public E² D4VT endpoints route through
+`dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`, are recovered
+from the single split radius-profile source
+`dahlbergE2_convex_radius_witness_source_components_primitive_gate`.
+The nonconstant and nonconcyclic Lemma 9 ordered-turn spellings,
+`dahlbergE2_lemma9_ordered_turn_source_gate` and
+`dahlbergE2_lemma9_ordered_turn_nonconcyclic_source_gate`, are then recovered
+formally by reciprocal-radius monotonicity and the positive-branch
+nonconcyclicity/nonconstancy equivalence.  The public
+`dahlbergE2_lemma9_source_gate` is recovered through the same split
+compatibility interface.  The final-D4VT route remains separated from the
+stronger ordered-turn route: `dahlbergE2_dfv_primitive_source_components`
+contains the signed-CDFV gate recovered from this strict source package, its
+formally recovered radius witness, and the §4 unit-disk construction gate; the
+public E² D4VT endpoints route through
 `signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveSourceComponents`.
 
-The non-strict §4 branch is now gated at the broad theorem-facing
-disk-reduction source `dahlbergE2_disk_reduction_geometric_source_gate`.  The
-unit-radius rotated centered normalized successor-interior interface
-`dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`
-is recovered formally from it.  The reverse normalization chain is also
-formalized: cyclic translation, Euclidean translation/rotation, positive
-homothety, reversal, the boundary-neighbor/transition reductions, and the
-boundary/interior and disk-reduction compatibility layers.
+The non-strict §4 branch is now gated at the unit-radius rotated centered
+normalized successor-interior interface
+`dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
+The broad theorem-facing disk-reduction source
+`dahlbergE2_disk_reduction_geometric_source_gate` is recovered formally from
+it.  The reverse normalization chain is also formalized: cyclic translation,
+Euclidean translation/rotation, positive homothety, reversal, the
+boundary-neighbor/transition reductions, and the boundary/interior and
+disk-reduction compatibility layers.
 
 Completing the current branch means replacing the three source gates above by
 formal proofs.  The relevant paper sources are:
@@ -126,6 +129,5 @@ formal proofs.  The relevant paper sources are:
 - Dahlberg, *The Converse of the Four Vertex Theorem* (`references/dahlberg.pdf`)
   for the smooth classical forward theorem as quoted in the introduction.
 - Dahlberg, *A Discrete Four Vertex Theorem* (`references/23.pdf`) for the
-  strict positive-orientation Lemma 9 ordered-turn source (built in the paper
-  from CDFV, §3 Theorem 6, and Lemma 8) and the §4 auxiliary-polygon
-  construction in the proof of Theorem 1.
+  strict positive-orientation CDFV/Lemma 8 radius source package and the §4
+  auxiliary-polygon construction in the proof of Theorem 1.
