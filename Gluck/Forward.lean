@@ -5,6 +5,7 @@ import Gluck.Forward.Euclidean
 import Gluck.Forward.Sphere
 import Gluck.Forward.Hyperbolic
 import Gluck.Forward.ConformalMenger
+import Gluck.Forward.Sources
 
 /-!
 # Forward four-vertex theorems

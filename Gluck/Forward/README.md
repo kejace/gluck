@@ -94,7 +94,10 @@ model-specific source names `orderedAdjacentTurns_S2_source` and
 ordered turns by the general cyclic constructor
 `dahlbergFourVertex_of_orderedAdjacentTurns_four_le`, and the uniform
 nonconstant theorem `dahlbergFourVertex_spaceForm_source` is derived from the
-same ordered-turn source.  The public S²/H² wrapper files
+same ordered-turn source.  The post-import audit file `Sources.lean` bundles the
+three remaining geometric imports as `ForwardGeometricSources`, with
+`forward_geometric_sources` collecting the current source gates into that single
+target.  The public S²/H² wrapper files
 also expose positive-orientation ordered-turn endpoints
 `orderedAdjacentTurns_S2_of_positiveOrientation` and
 `orderedAdjacentTurns_H2_of_positiveOrientation`, together with reflected
