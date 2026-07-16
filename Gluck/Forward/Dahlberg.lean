@@ -10890,6 +10890,45 @@ theorem orderedAdjacentTurns_signedMengerProfile_directIsometry_of_remainingComp
   exact (positiveRadiusOrderedAdjacentTurns_iff_orderedAdjacentTurns_signedMengerProfile
     hsimple' horient').mp hturns'
 
+/-- Dahlberg's positive strict ordered-turn branch is invariant under direct
+Euclidean normalization from the nonconcyclic signed-CDFV/Lemma 8 source
+components. -/
+theorem orderedAdjacentTurns_signedMengerProfile_directIsometry_of_signedNonconcyclicComponents
+    (hsrc : DahlbergE2ConvexSignedNonconcyclicSourceComponents)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {u : ℂ} (hu : ‖u‖ = 1)
+    (a : ℂ) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) :
+    OrderedAdjacentTurns
+      (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) := by
+  have hsimple' : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)) :=
+    isSimplePolygon_directIsometry hu a hsimple
+  have hregular' : DahlbergRegular
+      (fun i => directIsometryR2 u a (v i)) :=
+    dahlbergRegular_directIsometry hu a v hregular
+  have horient' : PositivePolygonOrientation
+      (fun i => directIsometryR2 u a (v i)) :=
+    (positivePolygonOrientation_directIsometry hu a v).mpr horient
+  have hnoncircle' : ¬ Concyclic (fun i => directIsometryR2 u a (v i)) :=
+    (not_concyclic_directIsometry hu a v).mpr hnoncircle
+  have hfv' :
+      DahlbergFourVertex
+        (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) :=
+    dahlbergE2ConvexDfvSignedNonconcyclicSource_directIsometry
+      hsrc.1 hu a hn hsimple' hregular' horient' hnoncircle'
+  have hwitness' :
+      DahlbergE2ConvexDfvRadiusWitnesses (fun i => directIsometryR2 u a (v i)) :=
+    convexDfvRadiusWitnesses_of_signedMengerProfile_dahlbergFourVertex
+      hsimple' horient' hfv'
+  have hturns' :
+      PositiveRadiusOrderedAdjacentTurns (fun i => directIsometryR2 u a (v i)) :=
+    hsrc.2 hn hsimple' hregular' horient' hwitness'
+  exact (positiveRadiusOrderedAdjacentTurns_iff_orderedAdjacentTurns_signedMengerProfile
+    hsimple' horient').mp hturns'
+
 /-- Dahlberg's Lemma 9 ordered-turn source is invariant under direct Euclidean
 normalization. -/
 theorem orderedAdjacentTurns_signedMengerProfile_directIsometry_of_lemma9Source
