@@ -282,14 +282,14 @@ model-specific gates below are projections of this uniform statement. -/
 theorem smoothForward_source_gate : SmoothForwardSource := by
   sorry
 
-/-- Weaker uniform nonconstant smooth forward four-vertex source gate for
-final-D4VT endpoints.
+/-- Weaker uniform nonconstant smooth forward four-vertex source for
+final-D4VT endpoints, recovered from the stronger value-separated source.
 
-This is separated from `smoothForward_source_gate` so final smooth theorems
-can depend only on the ordinary `SmoothFourVertex` conclusion.  The stronger
-value-separated source remains available for converse-facing refinements. -/
+This keeps the remaining primitive smooth obligation at
+`smoothForward_source_gate`: ordinary `SmoothFourVertex` follows formally from
+`FourVertexCondition`. -/
 theorem smoothForward_dfv_source_gate : SmoothForwardDfvSource := by
-  sorry
+  exact smoothForwardDfvSource_of_source smoothForward_source_gate
 
 /-- Euclidean nonconstant smooth forward four-vertex geometric source gate. -/
 theorem four_vertex_condition_smooth_E2_nonconstant_source_gate

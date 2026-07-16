@@ -261,15 +261,15 @@ projections of this uniform statement. -/
 theorem spaceFormDiscrete_source_gate : SpaceFormDiscreteSource := by
   sorry
 
-/-- Weaker uniform final-D4VT geometric source gate for the convex/coherent
-conformal-Menger package in `S²` and `H²`.
+/-- Weaker uniform final-D4VT geometric source for the convex/coherent
+conformal-Menger package in `S²` and `H²`, recovered from the stronger
+ordered-turn source.
 
-This is separated from `spaceFormDiscrete_source_gate` so final D4VT endpoints
-can depend only on the plateau-aware `DahlbergFourVertex` conclusion.  The
-stronger ordered-turn source remains available for conformal-Menger
-refinements. -/
+This keeps the remaining primitive non-Euclidean discrete obligation at
+`spaceFormDiscrete_source_gate`: plateau-aware `DahlbergFourVertex` follows
+formally from ordered adjacent turns. -/
 theorem spaceFormDiscrete_dfv_source_gate : SpaceFormDiscreteDfvSource := by
-  sorry
+  exact spaceFormDiscreteDfvSource_of_source spaceFormDiscrete_source_gate
 
 /-- Spherical nonconstant ordered-turn geometric source gate for the
 convex/coherent discrete four-vertex package in an open hemisphere. -/
