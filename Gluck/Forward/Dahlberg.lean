@@ -9122,6 +9122,34 @@ theorem dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_bound
       hEnonempty hEproper
   · exact dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_boundaryInteriorSource
 
+/-- A disk-reduction source implies the normalized unit-disk successor source
+by unpacking the disk reduction to the boundary/interior construction source
+and then specializing to the normalized unit setup. -/
+theorem dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_diskReductionSource
+    (hsrc : DahlbergE2DiskReductionSource) :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict _hΔ _hv0 _hnext
+  letI : NeZero n := hne
+  exact hsrc hn hsimple hregular hnoncircle hnonstrict
+
+/-- A normalized unit-disk successor source implies the older disk-reduction
+source by transporting it through the boundary/interior construction interface. -/
+theorem dahlbergE2DiskReductionSource_of_boundarySuccessorUnitConstructionSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource) :
+    DahlbergE2DiskReductionSource := by
+  exact dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mp
+    (dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_boundaryInteriorSource.mp
+      hsrc)
+
+/-- The normalized unit-disk successor source is exactly the older
+disk-reduction source, not an additional geometric assumption. -/
+theorem dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_diskReductionSource :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource ↔
+      DahlbergE2DiskReductionSource := by
+  constructor
+  · exact dahlbergE2DiskReductionSource_of_boundarySuccessorUnitConstructionSource
+  · exact dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_diskReductionSource
+
 /-- The exact Euclidean source components needed for the final plateau-aware
 D4VT endpoint: Dahlberg's strict convex signed-Menger CDFV theorem, plus the
 boundary/interior §4 non-strict auxiliary construction.
