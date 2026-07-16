@@ -46,6 +46,30 @@ theorem orderedAdjacentTurns_conformalMenger_spaceForm_kernel
         (Or.inr rfl)
         hn v κ hdisk hsimple horient hregular hκ hproper hnc
 
+/-- Nonconstant conformal-Menger ordered-turn theorem together with exact
+global extremal witnesses for positive-orientation convex/coherent polygons in
+the three project space forms. -/
+theorem orderedAdjacentTurns_and_globalMinMax_localExtrema_conformalMenger_spaceForm_kernel
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    OrderedAdjacentTurns κ ∧
+      ∃ i₀ i₁ : ZMod n,
+        (∀ j : ZMod n, κ i₀ ≤ κ j) ∧
+        (∀ j : ZMod n, κ j ≤ κ i₁) ∧
+        κ i₀ < κ i₁ ∧
+        DiscreteLocalMin κ i₀ ∧
+        DiscreteLocalMax κ i₁ := by
+  exact ⟨orderedAdjacentTurns_conformalMenger_spaceForm_kernel
+      hε hn v κ hdisk hsimple horient hregular hκ hproper hnc,
+    exists_globalMinMax_localExtrema_of_not_constant hnc⟩
+
 /-- Constant-or ordered-turn conformal-Menger theorem for positive-orientation
 convex/coherent polygons in the three project space forms. -/
 theorem constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_kernel
