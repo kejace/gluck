@@ -8989,6 +8989,89 @@ theorem dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReduct
     dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_boundaryConstructionSource.trans
       dahlbergE2DiskAuxiliaryBoundaryConstructionSource_iff_diskReductionSource
 
+/-- The broad boundary/interior §4 source implies the normalized unit-disk
+successor source by specializing to the boundary vertex `0` and interior
+successor `1`. -/
+theorem dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_boundaryInteriorSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource) :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext
+  letI : NeZero n := hne
+  have hboundary : OnDiskBoundaryR2 v 0 1 0 := by
+    simp [OnDiskBoundaryR2, dist_eq_norm, hv0]
+  have h01 : (0 : ZMod n) ≠ 1 := by
+    intro h
+    have hcast : ((0 : ℕ) : ZMod n) = ((1 : ℕ) : ZMod n) := by
+      simpa using h
+    have hval : ((0 : ℕ) : ZMod n).val = ((1 : ℕ) : ZMod n).val := by
+      exact congrArg ZMod.val hcast
+    rw [ZMod.val_natCast_of_lt (by omega : 0 < n),
+      ZMod.val_natCast_of_lt (by omega : 1 < n)] at hval
+    omega
+  exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ
+    hboundary hnext h01
+
+/-- The normalized unit-disk successor source is formally equivalent to the
+boundary/interior §4 construction source used by the existing audit packages.
+The nontrivial direction is the already-formal normalization chain from the
+unit source back to arbitrary boundary/interior data. -/
+theorem dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_boundaryInteriorSource :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource ↔
+      DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource := by
+  constructor
+  · intro hsrc
+    have hbare :
+        DahlbergE2DiskAuxiliaryBoundarySuccessorRotatedBareConstructionSource :=
+      dahlbergE2DiskAuxiliaryBoundarySuccessorRotatedBareConstructionSource_of_unitSource
+        hsrc
+    have hrotated :
+        DahlbergE2DiskAuxiliaryBoundarySuccessorRotatedConstructionSource :=
+      dahlbergE2DiskAuxiliaryBoundarySuccessorRotatedConstructionSource_of_bareSource
+        hbare
+    have hcentered :
+        DahlbergE2DiskAuxiliaryBoundarySuccessorCenteredConstructionSource :=
+      dahlbergE2DiskAuxiliaryBoundarySuccessorCenteredConstructionSource_of_rotatedSource
+        hrotated
+    have hnormalized :
+        DahlbergE2DiskAuxiliaryBoundarySuccessorNormalizedConstructionSource :=
+      dahlbergE2DiskAuxiliaryBoundarySuccessorNormalizedConstructionSource_of_centeredSource
+        hcentered
+    have hsuccessor :
+        DahlbergE2DiskAuxiliaryBoundarySuccessorMetricConstructionSource :=
+      dahlbergE2DiskAuxiliaryBoundarySuccessorMetricConstructionSource_of_normalizedSource
+        hnormalized
+    have hmetricNeighbor :
+        DahlbergE2DiskAuxiliaryBoundaryMetricNeighborConstructionSource :=
+      dahlbergE2DiskAuxiliaryBoundaryMetricNeighborConstructionSource_of_successorSource
+        hsuccessor
+    have hneighbor :
+        DahlbergE2DiskAuxiliaryBoundaryNeighborConstructionSource :=
+      dahlbergE2DiskAuxiliaryBoundaryNeighborConstructionSource_of_metricNeighborSource
+        hmetricNeighbor
+    have htransition :
+        DahlbergE2DiskAuxiliaryBoundaryTransitionConstructionSource :=
+      dahlbergE2DiskAuxiliaryBoundaryTransitionConstructionSource_of_neighborSource
+        hneighbor
+    have hboundary :
+        DahlbergE2DiskAuxiliaryBoundaryConstructionSource :=
+      dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_transitionSource
+        htransition
+    intro n hne hn v hsimple hregular hnoncircle hnonstrict O R hΔ i j
+      hi hj _hij
+    letI : NeZero n := hne
+    have hRpos : 0 < R :=
+      radius_pos_of_minimalEnclosingDiskR2_of_isSimplePolygon hΔ hsimple
+    have hEnonempty : (DiskBoundaryIndices v O R).Nonempty :=
+      ⟨i, (mem_diskBoundaryIndices).mpr hi⟩
+    have hEproper : DiskBoundaryIndices v O R ≠ Set.univ := by
+      intro htop
+      have hjE : j ∈ DiskBoundaryIndices v O R := by
+        simp [htop]
+      exact (not_onDiskBoundaryR2_of_dist_lt hj) ((mem_diskBoundaryIndices).mp hjE)
+    exact hboundary hn hsimple hregular hnoncircle hnonstrict hΔ hRpos
+      hEnonempty hEproper
+  · exact dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_boundaryInteriorSource
+
 /-- The exact Euclidean source components needed for the final plateau-aware
 D4VT endpoint: Dahlberg's strict convex signed-Menger CDFV theorem, plus the
 boundary/interior §4 non-strict auxiliary construction.
@@ -9000,6 +9083,12 @@ than the older disk-reduction interface. -/
 def DahlbergE2DfvSourceComponents : Prop :=
   DahlbergE2ConvexDfvSignedSource ∧
   DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource
+
+/-- The exact Euclidean source components for final D4VT, with the non-strict
+§4 component stated in the normalized unit-disk successor form. -/
+def DahlbergE2DfvUnitSourceComponents : Prop :=
+  DahlbergE2ConvexDfvSignedSource ∧
+  DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
 
 /-- The exact `E²` Dahlberg source components still needed for the stronger
 ordered-turn route.
@@ -9016,6 +9105,66 @@ def DahlbergE2RemainingSourceComponents : Prop :=
   DahlbergE2ConvexDfvSignedSource ∧
   DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
   DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource
+
+/-- The exact `E²` Dahlberg source components for the stronger ordered-turn
+route, with the non-strict §4 component stated in the normalized unit-disk
+successor form. -/
+def DahlbergE2UnitRemainingSourceComponents : Prop :=
+  DahlbergE2ConvexDfvSignedSource ∧
+  DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
+  DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
+
+/-- Convert normalized-unit final-D4VT E² components to the existing
+boundary/interior component package. -/
+theorem dahlbergE2DfvSourceComponents_of_unitComponents
+    (hsrc : DahlbergE2DfvUnitSourceComponents) :
+    DahlbergE2DfvSourceComponents := by
+  exact ⟨hsrc.1,
+    dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_boundaryInteriorSource.mp
+      hsrc.2⟩
+
+/-- Convert existing boundary/interior final-D4VT E² components to the
+normalized-unit component package. -/
+theorem dahlbergE2DfvUnitSourceComponents_of_components
+    (hsrc : DahlbergE2DfvSourceComponents) :
+    DahlbergE2DfvUnitSourceComponents := by
+  exact ⟨hsrc.1,
+    dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_boundaryInteriorSource.mpr
+      hsrc.2⟩
+
+/-- The existing final-D4VT E² component package is equivalent to the
+normalized-unit spelling. -/
+theorem dahlbergE2DfvSourceComponents_iff_unitComponents :
+    DahlbergE2DfvSourceComponents ↔ DahlbergE2DfvUnitSourceComponents := by
+  constructor
+  · exact dahlbergE2DfvUnitSourceComponents_of_components
+  · exact dahlbergE2DfvSourceComponents_of_unitComponents
+
+/-- Convert normalized-unit remaining E² components to the existing
+boundary/interior component package. -/
+theorem dahlbergE2RemainingSourceComponents_of_unitComponents
+    (hsrc : DahlbergE2UnitRemainingSourceComponents) :
+    DahlbergE2RemainingSourceComponents := by
+  exact ⟨hsrc.1, hsrc.2.1,
+    dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_boundaryInteriorSource.mp
+      hsrc.2.2⟩
+
+/-- Convert existing boundary/interior remaining E² components to the
+normalized-unit component package. -/
+theorem dahlbergE2UnitRemainingSourceComponents_of_components
+    (hsrc : DahlbergE2RemainingSourceComponents) :
+    DahlbergE2UnitRemainingSourceComponents := by
+  exact ⟨hsrc.1, hsrc.2.1,
+    dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_iff_boundaryInteriorSource.mpr
+      hsrc.2.2⟩
+
+/-- The existing remaining E² component package is equivalent to the
+normalized-unit spelling. -/
+theorem dahlbergE2RemainingSourceComponents_iff_unitComponents :
+    DahlbergE2RemainingSourceComponents ↔ DahlbergE2UnitRemainingSourceComponents := by
+  constructor
+  · exact dahlbergE2UnitRemainingSourceComponents_of_components
+  · exact dahlbergE2RemainingSourceComponents_of_unitComponents
 
 /-- The sharp remaining `E²` source components imply the positive-orientation
 ordered-turn extraction directly, without routing through the older bundled

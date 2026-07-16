@@ -274,6 +274,14 @@ def ForwardRemainingSourceComponents : Prop :=
   SpaceFormDiscreteModelSources ∧
   DahlbergE2RemainingSourceComponents
 
+/-- Named component spelling of the actual remaining source obligations, with
+the Euclidean non-strict §4 source recorded in its normalized unit-disk
+successor form. -/
+def ForwardUnitRemainingSourceComponents : Prop :=
+  SmoothForwardModelSources ∧
+  SpaceFormDiscreteModelSources ∧
+  DahlbergE2UnitRemainingSourceComponents
+
 /-- Named component spelling of the actual remaining source obligations needed
 only for the final D4VT endpoints.
 
@@ -284,6 +292,14 @@ def ForwardDfvRemainingSourceComponents : Prop :=
   SmoothForwardDfvModelSources ∧
   SpaceFormDiscreteDfvModelSources ∧
   DahlbergE2DfvSourceComponents
+
+/-- Named component spelling of the actual remaining source obligations needed
+only for the final D4VT endpoints, with the Euclidean non-strict §4 source
+recorded in its normalized unit-disk successor form. -/
+def ForwardDfvUnitRemainingSourceComponents : Prop :=
+  SmoothForwardDfvModelSources ∧
+  SpaceFormDiscreteDfvModelSources ∧
+  DahlbergE2DfvUnitSourceComponents
 
 /-- Uniform component spelling of the actual remaining source obligations.
 
@@ -329,6 +345,31 @@ theorem forwardUniformDfvRemainingSourceComponents_iff_components :
   · intro hsrc
     exact ⟨smoothForwardDfvSource_iff_modelSources.mpr hsrc.1,
       spaceFormDiscreteDfvSource_iff_modelSources.mpr hsrc.2.1, hsrc.2.2⟩
+
+/-- The existing named remaining-source package is equivalent to the
+normalized-unit spelling. -/
+theorem forwardRemainingSourceComponents_iff_unitComponents :
+    ForwardRemainingSourceComponents ↔ ForwardUnitRemainingSourceComponents := by
+  constructor
+  · intro hsrc
+    exact ⟨hsrc.1, hsrc.2.1,
+      dahlbergE2RemainingSourceComponents_iff_unitComponents.mp hsrc.2.2⟩
+  · intro hsrc
+    exact ⟨hsrc.1, hsrc.2.1,
+      dahlbergE2RemainingSourceComponents_iff_unitComponents.mpr hsrc.2.2⟩
+
+/-- The existing named final-D4VT remaining-source package is equivalent to
+the normalized-unit spelling. -/
+theorem forwardDfvRemainingSourceComponents_iff_unitComponents :
+    ForwardDfvRemainingSourceComponents ↔
+      ForwardDfvUnitRemainingSourceComponents := by
+  constructor
+  · intro hsrc
+    exact ⟨hsrc.1, hsrc.2.1,
+      dahlbergE2DfvSourceComponents_iff_unitComponents.mp hsrc.2.2⟩
+  · intro hsrc
+    exact ⟨hsrc.1, hsrc.2.1,
+      dahlbergE2DfvSourceComponents_iff_unitComponents.mpr hsrc.2.2⟩
 
 /-- The flattened remaining-source audit is equivalent to the named component
 spelling. -/
