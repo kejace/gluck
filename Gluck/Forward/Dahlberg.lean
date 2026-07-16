@@ -7821,6 +7821,32 @@ theorem dahlbergE2Lemma8RadiusTurnBridgeSource_directIsometry
     hsimple horient).mpr
     (hsrc hn hsimple₀ hregular₀ horient₀ hnc₀ hwitness₀)
 
+/-- The witness-only Lemma 8 radius-turn bridge source can be applied after
+direct Euclidean normalization. -/
+theorem dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_directIsometry
+    (hsrc : DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (horient : PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)))
+    (hwitness :
+      DahlbergE2ConvexDfvRadiusWitnesses (fun i => directIsometryR2 u a (v i))) :
+    PositiveRadiusOrderedAdjacentTurns (fun i => directIsometryR2 u a (v i)) := by
+  have hsimple₀ : Gluck.Discrete.IsSimplePolygon v :=
+    (isSimplePolygon_directIsometry_iff hu a v).mp hsimple
+  have hregular₀ : DahlbergRegular v :=
+    (dahlbergRegular_directIsometry_iff hu a v).mp hregular
+  have horient₀ : PositivePolygonOrientation v :=
+    (positivePolygonOrientation_directIsometry hu a v).mp horient
+  have hwitness₀ : DahlbergE2ConvexDfvRadiusWitnesses v :=
+    (dahlbergE2ConvexDfvRadiusWitnesses_directIsometry_iff hu a hsimple horient).mp
+      hwitness
+  exact (positiveRadiusOrderedAdjacentTurns_directIsometry_iff hu a
+    hsimple horient).mpr
+    (hsrc hn hsimple₀ hregular₀ horient₀ hwitness₀)
+
 /-- The two source components of Dahlberg's strictly convex positive branch:
 Theorem 6/CDFV gives radius witnesses, and Lemma 8 turns those witnesses into
 the adjacent radius turns needed for Lemma 9. -/
@@ -10665,8 +10691,17 @@ theorem orderedAdjacentTurns_signedMengerProfile_directIsometry_of_remainingComp
       ¬ ∃ c, ∀ i : ZMod n,
         SignedMengerProfile (fun j => directIsometryR2 u a (v j)) i = c :=
     (not_constant_signedMengerProfile_directIsometry_iff hu a v).mpr hnc
-  exact orderedAdjacentTurns_signedMengerProfile_of_positiveOrientation_remainingComponents
-    hsrc hn hsimple' hregular' horient' hnc'
+  have hwitness' :
+      DahlbergE2ConvexDfvRadiusWitnesses (fun i => directIsometryR2 u a (v i)) :=
+    dahlbergE2ConvexDfvRadiusSource_directIsometry
+      (dahlbergE2ConvexDfvRadiusSource_of_signedSource hsrc.1)
+      hu a hn hsimple' hregular' horient' hnc'
+  have hturns' :
+      PositiveRadiusOrderedAdjacentTurns (fun i => directIsometryR2 u a (v i)) :=
+    dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_directIsometry
+      hsrc.2.1 hu a hn hsimple' hregular' horient' hwitness'
+  exact (positiveRadiusOrderedAdjacentTurns_iff_orderedAdjacentTurns_signedMengerProfile
+    hsimple' horient').mp hturns'
 
 /-- Dahlberg's Lemma 9 ordered-turn source is invariant under direct Euclidean
 normalization. -/
