@@ -8013,6 +8013,35 @@ def DahlbergE2Theorem6WeakGeometricAssemblySource : Prop :=
     Nonempty (DahlbergE2Theorem6InteriorMissingDisksCertificate v) →
     Nonempty (DahlbergE2Theorem6WeakGeometricAssemblyCertificate v)
 
+/-- Minimal ordered-disk selection interface for Dahlberg §3 Theorem 6:
+after Lemma 5 and Lemma 7 supply two containing and two interior-missing
+curvature disks, the remaining ordering step chooses the four disks in cyclic
+order and proves their pairwise circle distinctness.  Boundary incidence and
+weak one-step radius inequalities are then formal consequences of this data. -/
+def DahlbergE2Theorem6OrderedDiskSelectionSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ Concyclic v) →
+    Nonempty (DahlbergE2Theorem6ContainingDisksCertificate v) →
+    Nonempty (DahlbergE2Theorem6InteriorMissingDisksCertificate v) →
+    Nonempty (DahlbergE2Theorem6OrderedDiskCertificate v)
+
+/-- Ordered disk selection is enough for the weak geometric assembly source,
+because boundary incidence and the weak radius inequalities have already been
+proved from positive orientation, regularity, and the disk hypotheses. -/
+theorem dahlbergE2Theorem6WeakGeometricAssemblySource_of_orderedDiskSelectionSource
+    (hsrc : DahlbergE2Theorem6OrderedDiskSelectionSource) :
+    DahlbergE2Theorem6WeakGeometricAssemblySource := by
+  intro n hne hn v hsimple hregular horient hnoncircle hcontains hmisses
+  letI : NeZero n := hne
+  rcases hsrc hn hsimple hregular horient hnoncircle hcontains hmisses with
+    ⟨disk⟩
+  exact ⟨
+    dahlbergE2Theorem6WeakGeometricAssemblyCertificate_of_orderedDiskCertificate
+      hsimple hregular horient disk⟩
+
 /-- Remaining §3 plateau upgrade: the global cyclic/plateau argument upgrades
 weak one-step radius inequalities around the ordered curvature disks to the
 plateau-aware local extrema certificate used by the Lean CDFV reduction. -/
@@ -8107,6 +8136,26 @@ def DahlbergE2Theorem6WeakPaperSources : Prop :=
   DahlbergE2Theorem6WeakGeometricAssemblySource ∧
   DahlbergE2Theorem6PlateauUpgradeSource
 
+/-- Sharper §3 paper-facing source package: Lemma 5, Lemma 7, the purely
+geometric ordered-disk selection, and the remaining plateau upgrade.  Compared
+with `DahlbergE2Theorem6WeakPaperSources`, the weak boundary/incidence and
+one-step radius facts are no longer imported from the paper. -/
+def DahlbergE2Theorem6OrderedDiskPaperSources : Prop :=
+  DahlbergE2Theorem6Lemma5ContainingDisksSource ∧
+  DahlbergE2Theorem6Lemma7InteriorMissingDisksSource ∧
+  DahlbergE2Theorem6OrderedDiskSelectionSource ∧
+  DahlbergE2Theorem6PlateauUpgradeSource
+
+/-- The ordered-disk §3 source package implies the older weak package by
+constructing the weak geometric assembly certificate formally. -/
+theorem dahlbergE2Theorem6WeakPaperSources_of_orderedDiskPaperSources
+    (hsrc : DahlbergE2Theorem6OrderedDiskPaperSources) :
+    DahlbergE2Theorem6WeakPaperSources := by
+  exact ⟨hsrc.1, hsrc.2.1,
+    dahlbergE2Theorem6WeakGeometricAssemblySource_of_orderedDiskSelectionSource
+      hsrc.2.2.1,
+    hsrc.2.2.2⟩
+
 /-- The weak §3 paper-source package implies the older full paper-source
 package by applying the plateau upgrade to the weak assembly certificate. -/
 theorem dahlbergE2Theorem6PaperSources_of_weakPaperSources
@@ -8135,6 +8184,35 @@ theorem dahlbergE2Theorem6WeakPaperSources_of_paperSources
   · intro n hne hn v hsimple hregular horient hnoncircle hcontains hmisses _hweak
     letI : NeZero n := hne
     exact hsrc.2.2 hn hsimple hregular horient hnoncircle hcontains hmisses
+
+/-- The full §3 paper-source package implies the sharper ordered-disk package
+by projecting the ordered disk data from the geometric assembly certificate. -/
+theorem dahlbergE2Theorem6OrderedDiskPaperSources_of_paperSources
+    (hsrc : DahlbergE2Theorem6PaperSources) :
+    DahlbergE2Theorem6OrderedDiskPaperSources := by
+  refine ⟨hsrc.1, hsrc.2.1, ?_, ?_⟩
+  · intro n hne hn v hsimple hregular horient hnoncircle hcontains hmisses
+    letI : NeZero n := hne
+    rcases hsrc.2.2 hn hsimple hregular horient hnoncircle hcontains hmisses with
+      ⟨cert⟩
+    exact ⟨cert.disk⟩
+  · intro n hne hn v hsimple hregular horient hnoncircle hcontains hmisses _hweak
+    letI : NeZero n := hne
+    exact hsrc.2.2 hn hsimple hregular horient hnoncircle hcontains hmisses
+
+/-- The sharper ordered-disk package implies the full §3 paper-source package. -/
+theorem dahlbergE2Theorem6PaperSources_of_orderedDiskPaperSources
+    (hsrc : DahlbergE2Theorem6OrderedDiskPaperSources) :
+    DahlbergE2Theorem6PaperSources :=
+  dahlbergE2Theorem6PaperSources_of_weakPaperSources
+    (dahlbergE2Theorem6WeakPaperSources_of_orderedDiskPaperSources hsrc)
+
+/-- The sharper ordered-disk and full §3 paper-source packages are equivalent. -/
+theorem dahlbergE2Theorem6OrderedDiskPaperSources_iff_paperSources :
+    DahlbergE2Theorem6OrderedDiskPaperSources ↔ DahlbergE2Theorem6PaperSources := by
+  constructor
+  · exact dahlbergE2Theorem6PaperSources_of_orderedDiskPaperSources
+  · exact dahlbergE2Theorem6OrderedDiskPaperSources_of_paperSources
 
 /-- The older and sharper §3 paper-source packages are equivalent. -/
 theorem dahlbergE2Theorem6WeakPaperSources_iff_paperSources :
@@ -10774,15 +10852,15 @@ def DahlbergE2PaperTheoremSources : Prop :=
 /-- The actual remaining paper theorem sources after the local part of
 Dahlberg's Lemma 8 has been formalized:
 
-* Theorem 6 / CDFV, sharpened to weak geometric assembly plus the plateau
-  upgrade;
+* Theorem 6 / CDFV, sharpened to ordered-disk selection plus the plateau
+  upgrade; weak geometric assembly is then formal;
 * the global monotone-arc extraction in Lemma 8;
 * the final §4 auxiliary-polygon construction.
 
 The pointwise edge-region nesting `δ(Q,e) ⊆ δ(P,e)` is supplied by
 `dahlbergE2_lemma8_local_edge_nesting_source`. -/
 def DahlbergE2PaperRemainingTheoremSources : Prop :=
-  DahlbergE2Theorem6WeakPaperSources ∧
+  DahlbergE2Theorem6OrderedDiskPaperSources ∧
   DahlbergE2Lemma8MonotoneArcExtractionSource ∧
   DahlbergE2Section4AuxiliaryPolygonSource
 
@@ -10791,7 +10869,7 @@ because local Lemma 8 edge nesting is already proved. -/
 theorem dahlbergE2PaperTheoremSources_of_remainingTheoremSources
     (hsrc : DahlbergE2PaperRemainingTheoremSources) :
     DahlbergE2PaperTheoremSources := by
-  exact ⟨dahlbergE2Theorem6PaperSources_of_weakPaperSources hsrc.1,
+  exact ⟨dahlbergE2Theorem6PaperSources_of_orderedDiskPaperSources hsrc.1,
     ⟨dahlbergE2_lemma8_local_edge_nesting_source, hsrc.2.1⟩, hsrc.2.2⟩
 
 /-- The full paper-source package implies the smaller remaining-source
@@ -10800,14 +10878,14 @@ proved separately. -/
 theorem dahlbergE2PaperRemainingTheoremSources_of_paperTheoremSources
     (hsrc : DahlbergE2PaperTheoremSources) :
     DahlbergE2PaperRemainingTheoremSources := by
-  exact ⟨dahlbergE2Theorem6WeakPaperSources_of_paperSources hsrc.1,
+  exact ⟨dahlbergE2Theorem6OrderedDiskPaperSources_of_paperSources hsrc.1,
     hsrc.2.1.2, hsrc.2.2⟩
 
 /-- The current smaller remaining-source package is formally equivalent to
 the full paper-source package: the only omitted components are the local
 edge-region part of Lemma 8, proved by
-`dahlbergE2_lemma8_local_edge_nesting_source`, and the already-formal weak
-one-step radius comparisons inside §3 CDFV. -/
+`dahlbergE2_lemma8_local_edge_nesting_source`, plus the already-formal
+boundary incidence and weak one-step radius comparisons inside §3 CDFV. -/
 theorem dahlbergE2PaperRemainingTheoremSources_iff_paperTheoremSources :
     DahlbergE2PaperRemainingTheoremSources ↔ DahlbergE2PaperTheoremSources := by
   constructor
