@@ -148,7 +148,7 @@ def ForwardDfvAtomicSources : Prop :=
         (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
         DahlbergFourVertex κ) ∧
   DahlbergE2ConvexDfvSignedSource ∧
-  DahlbergE2DiskReductionSource
+  DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource
 
 /-- Fully expanded spelling of the actual remaining source obligations after
 the finite Euclidean disk setup has been proved.
@@ -294,12 +294,16 @@ theorem forwardDfvGeometricSources_iff_atomicSources :
   · intro hsrc
     have hsmooth := smoothForwardDfvSource_iff_modelSources.mp hsrc.1
     have hdisc := spaceFormDiscreteDfvSource_iff_modelSources.mp hsrc.2.1
+    have hD : DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource :=
+      dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSource
+        hsrc.2.2.2
     exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
-      hdisc.1, hdisc.2, hsrc.2.2.1, hsrc.2.2.2⟩
+      hdisc.1, hdisc.2, hsrc.2.2.1, hD⟩
   · intro hsrc
     rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
     exact ⟨smoothForwardDfvSource_iff_modelSources.mpr ⟨hE, hS, hH⟩,
-      spaceFormDiscreteDfvSource_iff_modelSources.mpr ⟨hdS, hdH⟩, ⟨hC, hD⟩⟩
+      spaceFormDiscreteDfvSource_iff_modelSources.mpr ⟨hdS, hdH⟩,
+      dahlbergE2DfvGeometricSources_of_components ⟨hC, hD⟩⟩
 
 /-- The sharper remaining-source package implies the older fully expanded
 atomic source package. -/
@@ -392,8 +396,7 @@ theorem forwardDfvAtomicSources_of_dfvRemainingSources
     (hsrc : ForwardDfvRemainingSources) :
     ForwardDfvAtomicSources := by
   rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
-  exact ⟨hE, hS, hH, hdS, hdH, hC,
-    dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource hD⟩
+  exact ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
 
 /-- The final-D4VT remaining-source package implies the bundled final-D4VT
 geometric source package. -/
@@ -616,6 +619,14 @@ final-D4VT source package. -/
 theorem dahlbergE2DiskReductionSource_of_dfvAtomicSources
     (hsrc : ForwardDfvAtomicSources) :
     DahlbergE2DiskReductionSource := by
+  exact dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource
+    hsrc.2.2.2.2.2.2
+
+/-- Extract Dahlberg's `E²` metric-data §4 source gate from the fully expanded
+final-D4VT source package. -/
+theorem dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_dfvAtomicSources
+    (hsrc : ForwardDfvAtomicSources) :
+    DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource := by
   exact hsrc.2.2.2.2.2.2
 
 /-- Extract the smooth model-source package from the expanded forward source
