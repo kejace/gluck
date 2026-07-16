@@ -256,6 +256,56 @@ def ForwardDfvRemainingSources : Prop :=
   DahlbergE2ConvexDfvSignedSource ∧
   DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource
 
+/-- Named component spelling of the actual remaining source obligations after
+the finite Euclidean disk setup has been proved.
+
+This groups the flattened `ForwardRemainingSources` audit by geometry: smooth
+sources, non-Euclidean discrete ordered-turn sources, and the three sharp E²
+Dahlberg inputs. -/
+def ForwardRemainingSourceComponents : Prop :=
+  SmoothForwardModelSources ∧
+  SpaceFormDiscreteModelSources ∧
+  DahlbergE2ConvexDfvRadiusSource ∧
+  DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
+  DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource
+
+/-- Named component spelling of the actual remaining source obligations needed
+only for the final D4VT endpoints.
+
+This groups the flattened `ForwardDfvRemainingSources` audit by geometry:
+ordinary smooth D4VT sources, non-Euclidean discrete D4VT sources, and the sharp
+E² signed-CDFV/max-interior Dahlberg package. -/
+def ForwardDfvRemainingSourceComponents : Prop :=
+  SmoothForwardDfvModelSources ∧
+  SpaceFormDiscreteDfvModelSources ∧
+  DahlbergE2DfvSourceComponents
+
+/-- The flattened remaining-source audit is equivalent to the named component
+spelling. -/
+theorem forwardRemainingSources_iff_components :
+    ForwardRemainingSources ↔ ForwardRemainingSourceComponents := by
+  constructor
+  · intro hsrc
+    rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hCDFV, hL8, hD⟩
+    exact ⟨⟨hE, hS, hH⟩, ⟨hdS, hdH⟩, hCDFV, hL8, hD⟩
+  · intro hsrc
+    rcases hsrc with ⟨hsmooth, hdisc, hCDFV, hL8, hD⟩
+    exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
+      hdisc.1, hdisc.2, hCDFV, hL8, hD⟩
+
+/-- The flattened final-D4VT remaining-source audit is equivalent to the named
+component spelling. -/
+theorem forwardDfvRemainingSources_iff_components :
+    ForwardDfvRemainingSources ↔ ForwardDfvRemainingSourceComponents := by
+  constructor
+  · intro hsrc
+    rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
+    exact ⟨⟨hE, hS, hH⟩, ⟨hdS, hdH⟩, ⟨hC, hD⟩⟩
+  · intro hsrc
+    rcases hsrc with ⟨hsmooth, hdisc, hDahlberg⟩
+    exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
+      hdisc.1, hdisc.2, hDahlberg.1, hDahlberg.2⟩
+
 /-- After sharpening the `E²` non-strict component to the max/interior §4
 source, the fully expanded final-D4VT atomic package is exactly the remaining
 source package for final-D4VT endpoints. -/
@@ -435,6 +485,41 @@ theorem forwardDfvGeometricSources_iff_dfvRemainingSources :
   · exact forwardDfvRemainingSources_of_dfvGeometricSources
   · exact forwardDfvGeometricSources_of_dfvRemainingSources
 
+/-- Extract the smooth model-source block from the sharp remaining-source
+package. -/
+theorem smoothForwardModelSources_of_remainingSources
+    (hsrc : ForwardRemainingSources) :
+    SmoothForwardModelSources := by
+  exact (forwardRemainingSources_iff_components.mp hsrc).1
+
+/-- Extract the non-Euclidean discrete model-source block from the sharp
+remaining-source package. -/
+theorem spaceFormDiscreteModelSources_of_remainingSources
+    (hsrc : ForwardRemainingSources) :
+    SpaceFormDiscreteModelSources := by
+  exact (forwardRemainingSources_iff_components.mp hsrc).2.1
+
+/-- Extract the smooth final-D4VT model-source block from the sharp
+final-D4VT remaining-source package. -/
+theorem smoothForwardDfvModelSources_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources) :
+    SmoothForwardDfvModelSources := by
+  exact (forwardDfvRemainingSources_iff_components.mp hsrc).1
+
+/-- Extract the non-Euclidean discrete final-D4VT model-source block from the
+sharp final-D4VT remaining-source package. -/
+theorem spaceFormDiscreteDfvModelSources_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources) :
+    SpaceFormDiscreteDfvModelSources := by
+  exact (forwardDfvRemainingSources_iff_components.mp hsrc).2.1
+
+/-- Extract the sharp `E²` Dahlberg block from the final-D4VT remaining-source
+package. -/
+theorem dahlbergE2DfvSourceComponents_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources) :
+    DahlbergE2DfvSourceComponents := by
+  exact (forwardDfvRemainingSources_iff_components.mp hsrc).2.2
+
 /-- Extract Dahlberg's `E²` CDFV radius-witness source from the sharper
 remaining-source package. -/
 theorem dahlbergE2ConvexDfvRadiusSource_of_remainingSources
@@ -534,14 +619,6 @@ theorem dahlbergE2DiskReductionSource_of_dfvRemainingSources
     DahlbergE2DiskReductionSource := by
   exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_iff_diskReductionSource.mp
     (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_dfvRemainingSources hsrc)
-
-/-- Extract the sharp `E²` final-D4VT source-component package from the weaker
-final-D4VT remaining-source package. -/
-theorem dahlbergE2DfvSourceComponents_of_dfvRemainingSources
-    (hsrc : ForwardDfvRemainingSources) :
-    DahlbergE2DfvSourceComponents := by
-  exact ⟨dahlbergE2ConvexDfvSignedSource_of_dfvRemainingSources hsrc,
-    dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_dfvRemainingSources hsrc⟩
 
 /-- Extract the smooth `E²` source gate from the fully expanded source
 package. -/
