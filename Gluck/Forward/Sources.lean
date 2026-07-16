@@ -154,9 +154,9 @@ def ForwardDfvAtomicSources : Prop :=
 the finite Euclidean disk setup has been proved.
 
 Compared with `ForwardAtomicSources`, the Euclidean Dahlberg part is split down
-to the two still-geometric inputs: the CDFV/Lemma 8 convex-radius components
-and the §4 auxiliary-polygon construction.  The least-enclosing-disk setup is
-no longer an assumption. -/
+to the three still-geometric inputs: the CDFV radius-witness source, the
+Lemma 8 radius-turn bridge, and the §4 auxiliary-polygon construction.  The
+least-enclosing-disk setup is no longer an assumption. -/
 def ForwardRemainingSources : Prop :=
   (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
       Gluck.IsSimpleClosed γ →
@@ -198,7 +198,8 @@ def ForwardRemainingSources : Prop :=
         (∀ i, 1 < κ i) →
         (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
         OrderedAdjacentTurns κ) ∧
-  DahlbergE2ConvexRadiusSourceComponents ∧
+  DahlbergE2ConvexDfvRadiusSource ∧
+  DahlbergE2Lemma8RadiusTurnBridgeSource ∧
   DahlbergE2DiskAuxiliaryConstructionSource
 
 /-- Fully expanded spelling of the actual remaining source obligations needed
@@ -302,9 +303,9 @@ atomic source package. -/
 theorem forwardAtomicSources_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     ForwardAtomicSources := by
-  rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
+  rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hCDFV, hL8, hD⟩
   exact ⟨hE, hS, hH, hdS, hdH,
-    dahlbergE2ConvexRadiusSource_of_components hC,
+    dahlbergE2ConvexRadiusSource_of_components ⟨hCDFV, hL8⟩,
     dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource hD⟩
 
 /-- The sharper remaining-source package implies the bundled geometric source
@@ -330,8 +331,8 @@ remaining-source package. -/
 theorem forwardDfvRemainingSources_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     ForwardDfvRemainingSources := by
-  rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
-  exact ⟨hE, hS, hH, hdS, hdH, hC.1, hD⟩
+  rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hCDFV, _hL8, hD⟩
+  exact ⟨hE, hS, hH, hdS, hdH, hCDFV, hD⟩
 
 /-- The final-D4VT remaining-source package implies the older fully expanded
 final-D4VT atomic source package. -/
@@ -2226,7 +2227,8 @@ actual remaining source gates.
 The Euclidean Dahlberg disk setup is no longer included here, since the finite
 least-enclosing-disk and boundary-vertex facts have been proved. -/
 theorem forward_remaining_sources : ForwardRemainingSources := by
-  refine ⟨?_, ?_, ?_, ?_, ?_, dahlbergE2_convex_radius_source_components,
+  refine ⟨?_, ?_, ?_, ?_, ?_, dahlbergE2_convex_dfv_radius_source,
+    dahlbergE2_lemma8_radius_turn_bridge_source,
     dahlbergE2_disk_auxiliary_construction_source⟩
   · intro γ κ hclosed hreal hκ hper hnc
     exact four_vertex_condition_smooth_E2_nonconstant_geometric_source
