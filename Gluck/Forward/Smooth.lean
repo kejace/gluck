@@ -368,6 +368,54 @@ theorem four_vertex_condition_smooth_H2_nonconstant_geometric_source
   exact four_vertex_condition_smooth_H2_nonconstant_source_gate
     hclosed hreal hκ hper hnc
 
+/-- Euclidean nonconstant ordinary smooth forward four-vertex geometric source
+theorem.
+
+This is the final-D4VT interface; the stronger value-separated source remains
+available as `four_vertex_condition_smooth_E2_nonconstant_geometric_source`. -/
+theorem smoothFourVertex_E2_nonconstant_geometric_source
+    {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_of_fourVertexCondition
+    (four_vertex_condition_smooth_E2_nonconstant_geometric_source
+      hclosed hreal hκ hper hnc)
+
+/-- Spherical nonconstant ordinary smooth forward four-vertex geometric source
+theorem in stereographic coordinates.
+
+This is the final-D4VT interface; the stronger value-separated source remains
+available as `four_vertex_condition_smooth_S2_nonconstant_geometric_source`. -/
+theorem smoothFourVertex_S2_nonconstant_geometric_source
+    {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes 1 γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_of_fourVertexCondition
+    (four_vertex_condition_smooth_S2_nonconstant_geometric_source
+      hclosed hreal hκ hper hnc)
+
+/-- Hyperbolic nonconstant ordinary smooth forward four-vertex geometric source
+theorem in the Poincaré disk.
+
+This is the final-D4VT interface; the stronger value-separated source remains
+available as `four_vertex_condition_smooth_H2_nonconstant_geometric_source`. -/
+theorem smoothFourVertex_H2_nonconstant_geometric_source
+    {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes (-1) γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_of_fourVertexCondition
+    (four_vertex_condition_smooth_H2_nonconstant_geometric_source
+      hclosed hreal hκ hper hnc)
+
 /-- Euclidean nonconstant smooth forward four-vertex source theorem. -/
 theorem four_vertex_condition_smooth_E2_nonconstant_source
     {γ : ℝ → ℂ} {κ : ℝ → ℝ}

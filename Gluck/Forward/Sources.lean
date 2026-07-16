@@ -2872,17 +2872,14 @@ theorem forward_dfv_remaining_sources : ForwardDfvRemainingSources := by
   refine ⟨?_, ?_, ?_, ?_, ?_, dahlbergE2_convex_dfv_signed_source,
     dahlbergE2_disk_auxiliary_max_interior_construction_source⟩
   · intro γ κ hclosed hreal hκ hper hnc
-    exact smoothFourVertex_of_fourVertexCondition
-      (four_vertex_condition_smooth_E2_nonconstant_geometric_source
-        hclosed hreal hκ hper hnc)
+    exact smoothFourVertex_E2_nonconstant_geometric_source
+      hclosed hreal hκ hper hnc
   · intro γ κ hclosed hreal hκ hper hnc
-    exact smoothFourVertex_of_fourVertexCondition
-      (four_vertex_condition_smooth_S2_nonconstant_geometric_source
-        hclosed hreal hκ hper hnc)
+    exact smoothFourVertex_S2_nonconstant_geometric_source
+      hclosed hreal hκ hper hnc
   · intro γ κ hclosed hreal hκ hper hnc
-    exact smoothFourVertex_of_fourVertexCondition
-      (four_vertex_condition_smooth_H2_nonconstant_geometric_source
-        hclosed hreal hκ hper hnc)
+    exact smoothFourVertex_H2_nonconstant_geometric_source
+      hclosed hreal hκ hper hnc
   · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hnc
     letI : NeZero n := hne
     exact dahlbergFourVertex_S2_geometric_source
