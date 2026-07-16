@@ -7084,21 +7084,27 @@ theorem dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_maxInterio
   · exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_boundaryInteriorSource
   · exact dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_maxInteriorSource
 
-/-- The metric-data §4 auxiliary source implies the pair-level source by
+/-- The boundary/interior §4 auxiliary source implies the pair-level source by
 turning `i ∈ E` into boundary incidence and `j ∉ E` into strict interiority. -/
-theorem dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_maxInteriorSource
-    (hsrc : DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource) :
+theorem dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_boundaryInteriorSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource) :
     DahlbergE2DiskAuxiliaryBoundaryPairConstructionSource := by
-  intro n hne hn v hsimple hregular hnoncircle hnonstrict O R hΔ hRpos i j hi hj hij
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict O R hΔ _hRpos i j hi hj hij
   letI : NeZero n := hne
   have hboundary : OnDiskBoundaryR2 v O R i := (mem_diskBoundaryIndices).mp hi
   have hinterior : dist O (v j) < R := by
     exact lt_of_le_of_ne (hΔ.2.1 j)
       (fun hdist => hj ((mem_diskBoundaryIndices).mpr hdist))
-  have hmax : ∀ k : ZMod n, dist O (v k) ≤ dist O (v i) :=
-    fun k => dist_le_boundary_dist_of_minimalEnclosingDiskR2 hΔ hboundary
-  exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos
-    hboundary hinterior hij hmax
+  exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ
+    hboundary hinterior hij
+
+/-- The metric-data §4 auxiliary source implies the pair-level source by
+turning `i ∈ E` into boundary incidence and `j ∉ E` into strict interiority. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_maxInteriorSource
+    (hsrc : DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource) :
+    DahlbergE2DiskAuxiliaryBoundaryPairConstructionSource := by
+  exact dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_boundaryInteriorSource
+    (dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_maxInteriorSource hsrc)
 
 /-- The metric-data §4 auxiliary-construction source is compatible with
 direct Euclidean normalization. -/
@@ -7771,8 +7777,8 @@ the §4 non-strict disk reduction, recovered from the metric-data source by
 turning `i ∈ E` and `j ∉ E` into boundary/interiority facts. -/
 theorem dahlbergE2_disk_auxiliary_boundary_pair_construction_source :
     DahlbergE2DiskAuxiliaryBoundaryPairConstructionSource := by
-  exact dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_maxInteriorSource
-    dahlbergE2_disk_auxiliary_max_interior_construction_source
+  exact dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_boundaryInteriorSource
+    dahlbergE2_disk_auxiliary_boundary_interior_construction_source
 
 /-- Dahlberg's boundary-set-level auxiliary-polygon construction/transfer
 source for the §4 non-strict disk reduction, recovered from the sharper
