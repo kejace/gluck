@@ -1528,6 +1528,22 @@ theorem discreteLocalMin_of_globalMin_of_not_constant {n : ℕ} [NeZero n]
   exact discreteLocalMin_of_neg_localMax
     (discreteLocalMax_of_globalMax_of_not_constant hmax_neg hneg)
 
+/-- A nonconstant cyclic real profile has global minimum and maximum witnesses
+which are also plateau-aware local extrema at the same indices. -/
+theorem exists_globalMinMax_localExtrema_of_not_constant {n : ℕ} [NeZero n]
+    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    ∃ i₀ i₁ : ZMod n,
+      (∀ j : ZMod n, κ i₀ ≤ κ j) ∧
+      (∀ j : ZMod n, κ j ≤ κ i₁) ∧
+      κ i₀ < κ i₁ ∧
+      DiscreteLocalMin κ i₀ ∧
+      DiscreteLocalMax κ i₁ := by
+  rcases exists_globalMinMax_strict_of_not_constant hnc with
+    ⟨i₀, i₁, hmin, hmax, hlt⟩
+  exact ⟨i₀, i₁, hmin, hmax, hlt,
+    discreteLocalMin_of_globalMin_of_not_constant hmin hnc,
+    discreteLocalMax_of_globalMax_of_not_constant hmax hnc⟩
+
 /-- A nonconstant cyclic real profile has both a plateau-aware local maximum
 and a plateau-aware local minimum. -/
 theorem exists_discreteLocalMax_and_min_of_not_constant {n : ℕ} [NeZero n]

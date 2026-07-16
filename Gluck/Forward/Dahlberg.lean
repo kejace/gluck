@@ -5789,6 +5789,20 @@ theorem signedMengerProfile_discreteLocalMin_of_globalMin_of_not_constant
   exact discreteLocalMin_of_globalMin_of_not_constant
     (κ := SignedMengerProfile v) hmin hnc
 
+/-- A nonconstant signed-Menger profile has global minimum and maximum
+witnesses which are also plateau-aware local extrema at the same indices. -/
+theorem signedMengerProfile_exists_globalMinMax_localExtrema_of_not_constant
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    ∃ i₀ i₁ : ZMod n,
+      (∀ j : ZMod n, SignedMengerProfile v i₀ ≤ SignedMengerProfile v j) ∧
+      (∀ j : ZMod n, SignedMengerProfile v j ≤ SignedMengerProfile v i₁) ∧
+      SignedMengerProfile v i₀ < SignedMengerProfile v i₁ ∧
+      DiscreteLocalMin (SignedMengerProfile v) i₀ ∧
+      DiscreteLocalMax (SignedMengerProfile v) i₁ := by
+  exact exists_globalMinMax_localExtrema_of_not_constant
+    (κ := SignedMengerProfile v) hnc
+
 /-- A nonconstant signed-Menger profile has both a plateau-aware local maximum
 and a plateau-aware local minimum. -/
 theorem signedMengerProfile_exists_discreteLocalMax_and_min_of_not_constant
@@ -5868,6 +5882,22 @@ theorem signedMengerProfile_discreteLocalMin_of_globalMin_of_not_concyclic
     (hmin : ∀ j : ZMod n, SignedMengerProfile v i ≤ SignedMengerProfile v j) :
     DiscreteLocalMin (SignedMengerProfile v) i := by
   exact signedMengerProfile_discreteLocalMin_of_globalMin_of_not_constant hmin
+    (not_constant_signedMengerProfile_of_not_concyclic hsimple hregular hnoncircle)
+
+/-- A nonconcyclic locally regular simple polygon has global signed-Menger
+minimum and maximum witnesses which are also plateau-aware local extrema at
+the same indices. -/
+theorem signedMengerProfile_exists_globalMinMax_localExtrema_of_not_concyclic
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v) :
+    ∃ i₀ i₁ : ZMod n,
+      (∀ j : ZMod n, SignedMengerProfile v i₀ ≤ SignedMengerProfile v j) ∧
+      (∀ j : ZMod n, SignedMengerProfile v j ≤ SignedMengerProfile v i₁) ∧
+      SignedMengerProfile v i₀ < SignedMengerProfile v i₁ ∧
+      DiscreteLocalMin (SignedMengerProfile v) i₀ ∧
+      DiscreteLocalMax (SignedMengerProfile v) i₁ := by
+  exact signedMengerProfile_exists_globalMinMax_localExtrema_of_not_constant
     (not_constant_signedMengerProfile_of_not_concyclic hsimple hregular hnoncircle)
 
 /-- A nonconcyclic locally regular simple polygon has at least one
@@ -5978,6 +6008,23 @@ theorem signedMengerProfile_discreteLocalMin_of_globalMin_of_not_concyclic_pos
     (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
       hsimple hregular horient hnoncircle)
 
+/-- A positive-orientation nonconcyclic locally regular simple polygon has
+global signed-Menger minimum and maximum witnesses which are also
+plateau-aware local extrema at the same indices. -/
+theorem signedMengerProfile_exists_globalMinMax_localExtrema_of_not_concyclic_pos
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) (hnoncircle : ¬ Concyclic v) :
+    ∃ i₀ i₁ : ZMod n,
+      (∀ j : ZMod n, SignedMengerProfile v i₀ ≤ SignedMengerProfile v j) ∧
+      (∀ j : ZMod n, SignedMengerProfile v j ≤ SignedMengerProfile v i₁) ∧
+      SignedMengerProfile v i₀ < SignedMengerProfile v i₁ ∧
+      DiscreteLocalMin (SignedMengerProfile v) i₀ ∧
+      DiscreteLocalMax (SignedMengerProfile v) i₁ := by
+  exact signedMengerProfile_exists_globalMinMax_localExtrema_of_not_constant
+    (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
+      hsimple hregular horient hnoncircle)
+
 /-- A negative-orientation nonconcyclic locally regular simple polygon has
 strictly separated global minimum and maximum signed-Menger values. -/
 theorem signedMengerProfile_exists_globalMinMax_strict_of_not_concyclic_neg
@@ -6015,6 +6062,23 @@ theorem signedMengerProfile_discreteLocalMin_of_globalMin_of_not_concyclic_neg
     (hmin : ∀ j : ZMod n, SignedMengerProfile v i ≤ SignedMengerProfile v j) :
     DiscreteLocalMin (SignedMengerProfile v) i := by
   exact signedMengerProfile_discreteLocalMin_of_globalMin_of_not_constant hmin
+    (not_constant_signedMengerProfile_of_not_concyclic_negativeOrientation
+      hsimple hregular horient hnoncircle)
+
+/-- A negative-orientation nonconcyclic locally regular simple polygon has
+global signed-Menger minimum and maximum witnesses which are also
+plateau-aware local extrema at the same indices. -/
+theorem signedMengerProfile_exists_globalMinMax_localExtrema_of_not_concyclic_neg
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (horient : NegativePolygonOrientation v) (hnoncircle : ¬ Concyclic v) :
+    ∃ i₀ i₁ : ZMod n,
+      (∀ j : ZMod n, SignedMengerProfile v i₀ ≤ SignedMengerProfile v j) ∧
+      (∀ j : ZMod n, SignedMengerProfile v j ≤ SignedMengerProfile v i₁) ∧
+      SignedMengerProfile v i₀ < SignedMengerProfile v i₁ ∧
+      DiscreteLocalMin (SignedMengerProfile v) i₀ ∧
+      DiscreteLocalMax (SignedMengerProfile v) i₁ := by
+  exact signedMengerProfile_exists_globalMinMax_localExtrema_of_not_constant
     (not_constant_signedMengerProfile_of_not_concyclic_negativeOrientation
       hsimple hregular horient hnoncircle)
 
