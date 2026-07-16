@@ -7918,6 +7918,23 @@ theorem dahlbergE2ConvexRadiusSourceComponents_iff_convexRadiusSource :
     exact ⟨dahlbergE2ConvexDfvRadiusSource_of_convexRadiusSource hsrc,
       dahlbergE2Lemma8RadiusTurnBridgeSource_of_convexRadiusSource hsrc⟩
 
+/-- The sharpened witness-only split CDFV/Lemma 8 source package is formally
+equivalent to the combined convex-radius source. -/
+theorem dahlbergE2ConvexRadiusWitnessSourceComponents_iff_convexRadiusSource :
+    DahlbergE2ConvexRadiusWitnessSourceComponents ↔ DahlbergE2ConvexRadiusSource := by
+  constructor
+  · intro hsrc n hne hn v hsimple hregular horient hnc
+    letI : NeZero n := hne
+    exact hsrc.2 hn hsimple hregular horient
+      (hsrc.1 hn hsimple hregular horient hnc)
+  · intro hsrc
+    refine ⟨dahlbergE2ConvexDfvRadiusSource_of_convexRadiusSource hsrc, ?_⟩
+    intro n hne hn v hsimple hregular horient hwitness
+    letI : NeZero n := hne
+    exact hsrc hn hsimple hregular horient
+      (not_constant_signedMengerProfile_of_convexDfvRadiusWitnesses
+        hsimple horient hwitness)
+
 /-- The sharpened witness-only split convex-radius source package is
 compatible with direct Euclidean normalization. -/
 theorem dahlbergE2ConvexRadiusWitnessSourceComponents_directIsometry
