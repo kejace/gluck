@@ -4352,9 +4352,9 @@ theorem dahlberg_discrete_four_vertex_E2_of_dfvPrimitiveRemainingSources
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex
       (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
-  exact dahlberg_discrete_four_vertex_E2_of_forwardDfvSources
-    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
-    hn v hsimple hregular hnoncircle
+  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveSourceComponents
+    (dahlbergE2DfvPrimitiveSourceComponents_of_dfvPrimitiveRemainingSources hsrc)
+    hn hsimple hregular hnoncircle
 
 /-- The ordinary smooth space-form four-vertex endpoint from the flattened
 primitive final-D4VT source-gate audit. -/
