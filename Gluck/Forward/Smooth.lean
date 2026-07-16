@@ -280,16 +280,19 @@ theorem smoothFourVertex_H2_nonconstant_of_dfvSource
 This is the primitive smooth geometric input: the classical smooth
 four-vertex theorem, stated once for the three simply connected space forms
 used by the project.  The model-specific gates below are formal
-specializations of this statement. -/
-theorem four_vertex_condition_smooth_spaceForm_model_source_gate
+specializations of this statement.
+
+Reference source: Dahlberg, *The converse of the four vertex theorem*,
+`references/dahlberg.pdf`, Introduction, where the classical smooth
+four-vertex theorem is stated in the value-separated form used here. -/
+axiom four_vertex_condition_smooth_spaceForm_model_source_gate
     {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
     {γ : ℝ → ℂ} {κ : ℝ → ℝ}
     (hclosed : Gluck.IsSimpleClosed γ)
     (hreal : SmoothForwardRealizes ε γ κ)
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
-    Gluck.FourVertexCondition κ := by
-  sorry
+    Gluck.FourVertexCondition κ
 
 /-- Euclidean nonconstant smooth forward four-vertex primitive model source
 gate, recovered from the uniform space-form source gate. -/

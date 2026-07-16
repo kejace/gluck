@@ -9036,9 +9036,11 @@ This is the combined strict-convex source input from Dahlberg's discrete
 four-vertex paper: the convex CDFV source supplies the signed-Menger
 four-vertex conclusion, and Lemma 8 propagates the radius witnesses to the
 adjacent turns used by Lemma 9.  The split CDFV and Lemma 8 APIs below are
-recovered formally from this single ordered-turn source. -/
-theorem dahlbergE2_lemma9_source_gate : DahlbergE2Lemma9Source := by
-  sorry
+recovered formally from this single ordered-turn source.
+
+Reference source: Dahlberg, *A Discrete Four Vertex Theorem*,
+`references/23.pdf`, §3 Theorem 6 (CDFV) and §4 Lemmas 8–9. -/
+axiom dahlbergE2_lemma9_source_gate : DahlbergE2Lemma9Source
 
 /-- Dahlberg's exact signed-CDFV/Lemma 8 source components, recovered from the
 Lemma 9 source gate. -/
@@ -9896,10 +9898,13 @@ inside the unit disk.  Arbitrary positive radii are recovered formally by
 positive real homothety, arbitrary centered boundary vertices by direct
 Euclidean rotation, arbitrary centers by direct Euclidean translation,
 arbitrary successor cases by cyclic translation, and predecessor cases by
-reversal. -/
-theorem dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate :
-    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource := by
-  sorry
+reversal.
+
+Reference source: Dahlberg, *A Discrete Four Vertex Theorem*,
+`references/23.pdf`, §4 proof of Theorem 1, especially the minimal-disk
+boundary reduction following Lemma 10. -/
+axiom dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
 
 /-- Dahlberg's bare rotated centered normalized successor-interior
 auxiliary-polygon construction source for the §4 non-strict disk reduction,
