@@ -92,17 +92,20 @@ The remaining primitive source gates in the current worktree are exactly:
 - `Gluck/Forward/Smooth.lean`
   - `four_vertex_condition_smooth_E2_nonconstant_classical`;
 - `Gluck/Forward/Dahlberg.lean`
-  - `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate`;
-  - `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`;
+  - `dahlbergE2_lemma9_ordered_turn_source_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
 
-Dahlberg's strict positive-orientation Lemma 9 source
-`dahlbergE2_lemma9_source_gate` is not primitive: it is recovered from the
-signed-Menger CDFV gate, the formal radius/signed-Menger equivalence, and the
-witness-only Lemma 8 bridge.  The final-D4VT route is also separated from this
+Dahlberg's strict positive-orientation CDFV and Lemma 8 compatibility gates,
+`dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate` and
+`dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`, are no longer
+primitive: both are recovered from the single ordered-turn Lemma 9 source
+`dahlbergE2_lemma9_ordered_turn_source_gate`.  The public
+`dahlbergE2_lemma9_source_gate` is then recovered through the same split
+compatibility interface.  The final-D4VT route remains separated from the
 stronger ordered-turn route: `dahlbergE2_dfv_primitive_source_components`
-contains only the signed-CDFV gate, its formally recovered radius witness, and
-the normalized unit-disk §4 gate; the public E² D4VT endpoints route through
+contains the signed-CDFV gate recovered from Lemma 9, its formally recovered
+radius witness, and the normalized unit-disk §4 gate; the public E² D4VT
+endpoints route through
 `signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveSourceComponents`.
 
 The non-strict §4 branch is gated at the unit-radius rotated centered
@@ -113,11 +116,12 @@ translation, Euclidean translation/rotation, positive homothety, reversal, the
 boundary-neighbor/transition reductions, and the boundary/interior and
 disk-reduction compatibility layers.
 
-Completing the current branch means replacing the four source gates above by
+Completing the current branch means replacing the three source gates above by
 formal proofs.  The relevant paper sources are:
 
 - Dahlberg, *The Converse of the Four Vertex Theorem* (`references/dahlberg.pdf`)
   for the smooth classical forward theorem as quoted in the introduction.
-- Dahlberg, *A Discrete Four Vertex Theorem* (`references/23.pdf`) for CDFV
-  (§3 Theorem 6), Lemma 8, and the §4 auxiliary-polygon construction in the
-  proof of Theorem 1.
+- Dahlberg, *A Discrete Four Vertex Theorem* (`references/23.pdf`) for the
+  strict positive-orientation Lemma 9 ordered-turn source (built in the paper
+  from CDFV, §3 Theorem 6, and Lemma 8) and the §4 auxiliary-polygon
+  construction in the proof of Theorem 1.

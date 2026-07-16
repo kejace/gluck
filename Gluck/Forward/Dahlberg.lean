@@ -9401,18 +9401,22 @@ theorem dahlbergE2_convex_radius_witness_source_components_gate :
       dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate,
     dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate⟩
 
-/-- Dahlberg's strict positive-orientation Lemma 9 source gate, recovered from
-the split nonconcyclic signed-CDFV/Lemma 8 source components. -/
+/-- Dahlberg's public strict positive-orientation Lemma 9 source gate,
+recovered through the split nonconcyclic signed-CDFV/Lemma 8 compatibility
+interface.  Those split components are themselves derived from the primitive
+ordered-turn Lemma 9 gate above. -/
 theorem dahlbergE2_lemma9_source_gate : DahlbergE2Lemma9Source := by
   exact dahlbergE2Lemma9Source_of_signedNonconcyclicComponents
     dahlbergE2_convex_signed_nonconcyclic_source_components_gate
 
 /-- Dahlberg's strict positive-orientation radius-turn source gate, recovered
-from the split CDFV/Lemma 8 source components.
+from the primitive Lemma 9 ordered-turn source via the split CDFV/Lemma 8
+compatibility components.
 
 The conversion from positive radius turns to signed-Menger ordered turns is
 fully formalized by `dahlbergE2_convexRadiusSource_iff_lemma9Source`; the
-remaining paper inputs are exactly CDFV and Lemma 8 above.
+current remaining strict-branch paper input is exactly
+`dahlbergE2_lemma9_ordered_turn_source_gate`.
 
 Reference source: Dahlberg, *A Discrete Four Vertex Theorem*,
 `references/23.pdf`, §3 Theorem 6 (CDFV) and §4 Lemmas 8–9. -/
