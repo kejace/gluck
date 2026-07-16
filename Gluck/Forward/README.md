@@ -109,6 +109,8 @@ model-specific public shapes such as `four_vertex_E2_of_sources`,
 `discrete_four_vertex_H2_kernel_of_sources`.  It also includes
 source-parametrized positive, negative, and strict-orientation S²/H²
 conformal-Menger endpoints such as
+`orderedAdjacentTurns_S2_pos_of_sources`,
+`orderedAdjacentTurns_H2_neg_reflected_of_sources`,
 `constant_or_dahlbergFourVertex_S2_strict_of_sources` and
 `constant_or_dahlbergFourVertex_H2_strict_of_sources`; for the unified
 conformal-Menger dispatch it exposes
