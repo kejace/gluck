@@ -10140,21 +10140,23 @@ theorem dahlbergE2_dfv_source_components :
   exact ⟨dahlbergE2_convex_dfv_signed_source,
     dahlbergE2_disk_auxiliary_boundary_interior_construction_source⟩
 
-/-- Primitive spelling of the actual current `E²` source-gate surface used by
-the weaker final-D4VT route: Lemma 9 and the normalized unit-disk §4
-construction. -/
+/-- Compatibility spelling of the stronger Lemma-9/unit source-gate surface
+for the weaker final-D4VT route.  This is retained for users who want to route
+final D4VT through the ordered-turn theorem, but the primitive final-D4VT
+package below now uses radius-CDFV directly. -/
 theorem dahlbergE2_lemma9_dfv_unit_source_components :
     DahlbergE2Lemma9DfvUnitSourceComponents := by
   exact ⟨dahlbergE2_lemma9_source_gate,
     dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate⟩
 
 /-- Primitive spelling of the exact `E²` source components currently used by
-the weaker final-D4VT route, expanded to the final-D4VT CDFV compatibility
-surface. -/
+the weaker final-D4VT route: nonconcyclic radius-CDFV and the normalized
+unit-disk §4 construction source.  This deliberately avoids the stronger
+Lemma 9 ordered-turn source. -/
 theorem dahlbergE2_dfv_primitive_source_components :
     DahlbergE2DfvPrimitiveSourceComponents := by
-  exact dahlbergE2DfvPrimitiveSourceComponents_of_lemma9DfvUnitComponents
-    dahlbergE2_lemma9_dfv_unit_source_components
+  exact ⟨dahlbergE2_convex_dfv_radius_nonconcyclic_source_gate,
+    dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate⟩
 
 /-- Dahlberg's pair-level auxiliary-polygon construction/transfer source for
 the §4 non-strict disk reduction, recovered from the metric-data source by
