@@ -7509,6 +7509,26 @@ theorem dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSou
   letI : NeZero n := hne
   exact hsrc hn hsimple hregular hnoncircle hnonstrict
 
+/-- The older disk-reduction source implies the pair-level §4 auxiliary
+construction source by ignoring the already-supplied boundary/complement
+indices. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_diskReductionSource
+    (hsrc : DahlbergE2DiskReductionSource) :
+    DahlbergE2DiskAuxiliaryBoundaryPairConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict O R _hΔ _hRpos
+    i j _hi _hj _hij
+  letI : NeZero n := hne
+  exact hsrc hn hsimple hregular hnoncircle hnonstrict
+
+/-- The pair-level §4 auxiliary source implies Dahlberg's non-strict
+disk-reduction source. -/
+theorem dahlbergE2DiskReductionSource_of_boundaryPairConstructionSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundaryPairConstructionSource) :
+    DahlbergE2DiskReductionSource := by
+  exact dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource
+    (dahlbergE2DiskAuxiliaryConstructionSource_of_boundaryConstructionSource
+      (dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_pairSource hsrc))
+
 /-- The metric-data §4 auxiliary source implies Dahlberg's non-strict
 disk-reduction source. -/
 theorem dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource
@@ -7530,6 +7550,14 @@ theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_iff_diskReductionSourc
     exact dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource
       (dahlbergE2DiskAuxiliaryConstructionSource_of_boundaryConstructionSource hsrc)
   · exact dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_diskReductionSource
+
+/-- The pair-level §4 auxiliary source is formally equivalent to Dahlberg's
+older non-strict disk-reduction source. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_iff_diskReductionSource :
+    DahlbergE2DiskAuxiliaryBoundaryPairConstructionSource ↔ DahlbergE2DiskReductionSource := by
+  constructor
+  · exact dahlbergE2DiskReductionSource_of_boundaryPairConstructionSource
+  · exact dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_diskReductionSource
 
 /-- The sharpened metric-data §4 auxiliary source is formally equivalent to
 Dahlberg's older non-strict disk-reduction source. -/
