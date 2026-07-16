@@ -6801,6 +6801,43 @@ component is Dahlberg's theorem-level signed-Menger D4V conclusion. -/
 def DahlbergE2DfvGeometricSources : Prop :=
   DahlbergE2ConvexDfvSignedSource ∧ DahlbergE2DiskReductionSource
 
+/-- The strong Dahlberg E² source package is compatible with direct Euclidean
+normalization in both its radius-turn strict branch and its non-strict
+disk-reduction branch. -/
+theorem dahlbergE2GeometricSources_directIsometry
+    (hsrc : DahlbergE2GeometricSources)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (hnoncircle : ¬ Concyclic (fun i => directIsometryR2 u a (v i))) :
+    (PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)) →
+        (¬ ∃ c, ∀ i : ZMod n,
+          SignedMengerProfile (fun j => directIsometryR2 u a (v j)) i = c) →
+        PositiveRadiusOrderedAdjacentTurns
+          (fun i => directIsometryR2 u a (v i))) ∧
+      (¬ (PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)) ∨
+          NegativePolygonOrientation (fun i => directIsometryR2 u a (v i))) →
+        DahlbergDiskAuxiliaryReduction
+          (fun i => directIsometryR2 u a (v i))) := by
+  refine ⟨?_, ?_⟩
+  · intro horient hnc
+    have hsimple₀ : Gluck.Discrete.IsSimplePolygon v :=
+      (isSimplePolygon_directIsometry_iff hu a v).mp hsimple
+    have hregular₀ : DahlbergRegular v :=
+      (dahlbergRegular_directIsometry_iff hu a v).mp hregular
+    have horient₀ : PositivePolygonOrientation v :=
+      (positivePolygonOrientation_directIsometry hu a v).mp horient
+    have hnc₀ : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c :=
+      (not_constant_signedMengerProfile_directIsometry_iff hu a v).mp hnc
+    exact (positiveRadiusOrderedAdjacentTurns_directIsometry_iff hu a
+      hsimple horient).mpr
+      (hsrc.1 hn hsimple₀ hregular₀ horient₀ hnc₀)
+  · intro hnonstrict
+    exact dahlbergE2DiskReductionSource_directIsometry hsrc.2 hu a hn
+      hsimple hregular hnoncircle hnonstrict
+
 /-- The weak final-D4VT Dahlberg source package is compatible with direct
 Euclidean normalization in both its strict and non-strict branches. -/
 theorem dahlbergE2DfvGeometricSources_directIsometry
@@ -7072,6 +7109,46 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_of_dfvSources
       hsrc hn hsimple hregular horient hnoncircle
   · exact signedMengerProfile_dahlbergFourVertex_of_non_strict_dahlberg_disk_reduction_of_dfvSources
       hsrc hn hsimple hregular hnoncircle horient
+
+/-- Dahlberg's E² D4VT is invariant under direct Euclidean normalization. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_geometricSources
+    (hsrc : DahlbergE2GeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {u : ℂ} (hu : ‖u‖ = 1)
+    (a : ℂ) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex
+      (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) := by
+  exact (dahlbergFourVertex_signedMengerProfile_directIsometry_iff hu a v).mpr
+    (signedMengerProfile_dahlbergFourVertex_E2_of_dfvSources
+      (dahlbergE2DfvGeometricSources_of_geometricSources hsrc)
+      hn hsimple hregular hnoncircle)
+
+/-- Dahlberg's positive strict ordered-turn branch is invariant under direct
+Euclidean normalization. -/
+theorem orderedAdjacentTurns_signedMengerProfile_directIsometry_of_geometricSources
+    (hsrc : DahlbergE2GeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {u : ℂ} (hu : ‖u‖ = 1)
+    (a : ℂ) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    OrderedAdjacentTurns
+      (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) := by
+  have hsimple' : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)) :=
+    isSimplePolygon_directIsometry hu a hsimple
+  have horient' : PositivePolygonOrientation
+      (fun i => directIsometryR2 u a (v i)) :=
+    (positivePolygonOrientation_directIsometry hu a v).mpr horient
+  have hturns' : PositiveRadiusOrderedAdjacentTurns
+      (fun i => directIsometryR2 u a (v i)) :=
+    (positiveRadiusOrderedAdjacentTurns_directIsometry_iff hu a hsimple' horient').mpr
+      (hsrc.1 hn hsimple hregular horient hnc)
+  exact (positiveRadiusOrderedAdjacentTurns_iff_orderedAdjacentTurns_signedMengerProfile
+    hsimple' horient').mp hturns'
 
 /-- Ordered-turn extraction in Dahlberg's positively oriented strictly-convex
 case with nonconstant signed-Menger profile.  This is the geometric content of
