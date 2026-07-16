@@ -568,6 +568,22 @@ theorem forwardDfvPrimitiveRemainingSources_iff_components :
     exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
       hdisc.1, hdisc.2, hDahlberg.1, hDahlberg.2⟩
 
+/-- The sharp flattened remaining-source audit is equivalent to the flattened
+primitive source-gate audit. -/
+theorem forwardRemainingSources_iff_primitiveRemainingSources :
+    ForwardRemainingSources ↔ ForwardPrimitiveRemainingSources := by
+  exact forwardRemainingSources_iff_components.trans
+    (forwardRemainingSourceComponents_iff_primitiveComponents.trans
+      forwardPrimitiveRemainingSources_iff_components.symm)
+
+/-- The sharp flattened final-D4VT remaining-source audit is equivalent to the
+flattened primitive final-D4VT source-gate audit. -/
+theorem forwardDfvRemainingSources_iff_dfvPrimitiveRemainingSources :
+    ForwardDfvRemainingSources ↔ ForwardDfvPrimitiveRemainingSources := by
+  exact forwardDfvRemainingSources_iff_components.trans
+    (forwardDfvRemainingSourceComponents_iff_primitiveComponents.trans
+      forwardDfvPrimitiveRemainingSources_iff_components.symm)
+
 /-- The flattened remaining-source audit is equivalent to the uniform
 component spelling. -/
 theorem forwardRemainingSources_iff_uniformComponents :
