@@ -174,6 +174,107 @@ theorem smoothForwardDfvModelSources_of_modelSources
     (smoothForwardDfvSource_of_source
       (smoothForwardSource_iff_modelSources.mpr hsrc))
 
+/-- Extract the nonconstant ordinary smooth four-vertex conclusion from the
+weaker final-D4VT smooth source package. -/
+theorem smoothFourVertex_spaceForm_nonconstant_of_dfvSource
+    (hsrc : SmoothForwardDfvSource) {ε : ℝ}
+    (hε : ε = 0 ∨ ε = 1 ∨ ε = -1) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : SmoothForwardRealizes ε γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact hsrc hε hclosed hreal hκ hper hnc
+
+/-- Extract the ordinary smooth four-vertex conclusion from the weaker
+final-D4VT smooth source package, including the constant profile branch. -/
+theorem smoothFourVertex_spaceForm_kernel_of_dfvSource
+    (hsrc : SmoothForwardDfvSource) {ε : ℝ}
+    (hε : ε = 0 ∨ ε = 1 ∨ ε = -1) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : SmoothForwardRealizes ε γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  by_cases hconst : ∃ c, ∀ t, κ t = c
+  · exact Or.inl hconst
+  · exact smoothFourVertex_spaceForm_nonconstant_of_dfvSource
+      hsrc hε hclosed hreal hκ hper hconst
+
+/-- Euclidean ordinary smooth four-vertex theorem from the weaker final-D4VT
+smooth source package. -/
+theorem smoothFourVertex_E2_of_dfvSource
+    (hsrc : SmoothForwardDfvSource) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_spaceForm_kernel_of_dfvSource
+    hsrc (ε := 0) (Or.inl rfl) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper
+
+/-- Nonconstant Euclidean ordinary smooth four-vertex theorem from the weaker
+final-D4VT smooth source package. -/
+theorem smoothFourVertex_E2_nonconstant_of_dfvSource
+    (hsrc : SmoothForwardDfvSource) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_spaceForm_nonconstant_of_dfvSource
+    hsrc (ε := 0) (Or.inl rfl) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+
+/-- Spherical ordinary smooth four-vertex theorem from the weaker final-D4VT
+smooth source package. -/
+theorem smoothFourVertex_S2_of_dfvSource
+    (hsrc : SmoothForwardDfvSource) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes 1 γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_spaceForm_kernel_of_dfvSource
+    hsrc (ε := 1) (Or.inr (Or.inl rfl)) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper
+
+/-- Nonconstant spherical ordinary smooth four-vertex theorem from the weaker
+final-D4VT smooth source package. -/
+theorem smoothFourVertex_S2_nonconstant_of_dfvSource
+    (hsrc : SmoothForwardDfvSource) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes 1 γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_spaceForm_nonconstant_of_dfvSource
+    hsrc (ε := 1) (Or.inr (Or.inl rfl)) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+
+/-- Hyperbolic ordinary smooth four-vertex theorem from the weaker final-D4VT
+smooth source package. -/
+theorem smoothFourVertex_H2_of_dfvSource
+    (hsrc : SmoothForwardDfvSource) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes (-1) γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_spaceForm_kernel_of_dfvSource
+    hsrc (ε := -1) (Or.inr (Or.inr rfl)) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper
+
+/-- Nonconstant hyperbolic ordinary smooth four-vertex theorem from the weaker
+final-D4VT smooth source package. -/
+theorem smoothFourVertex_H2_nonconstant_of_dfvSource
+    (hsrc : SmoothForwardDfvSource) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes (-1) γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_spaceForm_nonconstant_of_dfvSource
+    hsrc (ε := -1) (Or.inr (Or.inr rfl)) hclosed
+    (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+
 /-- Euclidean nonconstant smooth forward four-vertex geometric source gate. -/
 theorem four_vertex_condition_smooth_E2_nonconstant_source_gate
     {γ : ℝ → ℂ} {κ : ℝ → ℝ}
