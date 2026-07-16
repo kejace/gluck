@@ -5437,6 +5437,17 @@ def PositiveRadiusOrderedAdjacentTurns {n : ℕ} (v : ZMod n → ℂ) : Prop :=
       EdgeNextCircleRadiusProfile v (((i₄ : ZMod n) + 1)) <
         EdgePrevCircleRadiusProfile v (((i₄ : ZMod n) + 1))
 
+/-- Radius-profile form of the convex disk witnesses supplied by Dahlberg's
+convex discrete four-vertex theorem (Theorem 6/CDFV).
+
+The theorem is stated geometrically in terms of two curvature disks whose
+interiors miss the polygon and two curvature disks which contain the polygon,
+with the four circles pairwise distinct.  In the current formal interface, this
+is recorded as the corresponding plateau-aware Dahlberg four-vertex statement
+for the previous-vertex curvature-radius profile. -/
+def DahlbergE2ConvexDfvRadiusWitnesses {n : ℕ} (v : ZMod n → ℂ) : Prop :=
+  DahlbergFourVertex (EdgePrevCircleRadiusProfile v)
+
 /-- Positive radius ordered turns are ordered turns of the reciprocal previous
 radius profile. -/
 theorem orderedAdjacentTurns_inv_edgePrevCircleRadiusProfile_of_positiveRadiusOrderedAdjacentTurns
@@ -5684,6 +5695,41 @@ def DahlbergE2ConvexRadiusSource : Prop :=
     (¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) →
     PositiveRadiusOrderedAdjacentTurns v
 
+/-- Dahlberg's convex/CDFV radius-witness source.
+
+This is the part of Lemma 9 that uses Theorem 6: a strictly convex,
+nonconcyclic polygon supplies the four extremal curvature-disk witnesses,
+recorded here on the circle-radius profile. -/
+def DahlbergE2ConvexDfvRadiusSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) →
+    DahlbergE2ConvexDfvRadiusWitnesses v
+
+/-- Dahlberg's Lemma 8 monotonicity bridge in the convex positive-orientation
+branch.
+
+Given the CDFV radius witnesses, Lemma 8 propagates disk nesting along the two
+monotone arcs between a global radius minimum and maximum.  The resulting
+contradiction to the failure of four extrema gives the adjacent radius turns
+used by the signed-Menger reduction below. -/
+def DahlbergE2Lemma8RadiusTurnBridgeSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) →
+    DahlbergE2ConvexDfvRadiusWitnesses v →
+    PositiveRadiusOrderedAdjacentTurns v
+
+/-- The two source components of Dahlberg's strictly convex positive branch:
+Theorem 6/CDFV gives radius witnesses, and Lemma 8 turns those witnesses into
+the adjacent radius turns needed for Lemma 9. -/
+def DahlbergE2ConvexRadiusSourceComponents : Prop :=
+  DahlbergE2ConvexDfvRadiusSource ∧ DahlbergE2Lemma8RadiusTurnBridgeSource
+
 /-- Dahlberg's strictly convex same-orientation Lemma 9 extraction: under
 positive orientation and nonconstant signed-Menger profile, the profile has
 four cyclically ordered adjacent signed-Menger turns. -/
@@ -5734,10 +5780,21 @@ statements plus the already-proved cyclic/order infrastructure. -/
 def DahlbergE2GeometricSources : Prop :=
   DahlbergE2ConvexRadiusSource ∧ DahlbergE2DiskReductionSource
 
+/-- Dahlberg's source components for the convex-radius Euclidean branch:
+Theorem 6/CDFV plus the Lemma 8 monotonicity bridge. -/
+theorem dahlbergE2_convex_radius_source_components :
+    DahlbergE2ConvexRadiusSourceComponents := by
+  sorry
+
 /-- Dahlberg's convex-radius Euclidean source for the positive-orientation
 branch of the discrete four-vertex paper. -/
 theorem dahlbergE2_convex_radius_source : DahlbergE2ConvexRadiusSource := by
-  sorry
+  intro n hne hn v hsimple hregular horient hnc
+  letI : NeZero n := hne
+  exact dahlbergE2_convex_radius_source_components.2
+    hn hsimple hregular horient hnc
+    (dahlbergE2_convex_radius_source_components.1
+      hn hsimple hregular horient hnc)
 
 /-- Dahlberg's Euclidean Lemma 9 signed-Menger source, obtained from the
 radius-level convex source by reciprocal-radius monotonicity. -/
