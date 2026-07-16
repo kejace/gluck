@@ -8214,6 +8214,23 @@ def DahlbergE2Theorem6OrderedDiskSelectionSource : Prop :=
     Nonempty (DahlbergE2Theorem6InteriorMissingDisksCertificate v) →
     Nonempty (DahlbergE2Theorem6OrderedDiskCertificate v)
 
+/-- Certificate-level alternating arrangement interface for Dahlberg §3
+Theorem 6.
+
+After Lemma 5 and Lemma 7 have supplied the actual two containing disks and
+the actual two interior-missing disks, the remaining ordering step chooses
+them in alternating cyclic order.  The same-type distinctness fields are
+already part of those two certificates. -/
+def DahlbergE2Theorem6AlternatingDiskArrangementSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ Concyclic v) →
+    DahlbergE2Theorem6ContainingDisksCertificate v →
+    DahlbergE2Theorem6InteriorMissingDisksCertificate v →
+    Nonempty (DahlbergE2Theorem6AlternatingDiskCertificate v)
+
 /-- Sharper ordered-disk selection interface for Dahlberg §3 Theorem 6:
 the paper-level ordering step only has to choose the two containing and two
 interior-missing disks in alternating cyclic order and carry the same-type
@@ -8230,6 +8247,17 @@ def DahlbergE2Theorem6AlternatingDiskSelectionSource : Prop :=
     Nonempty (DahlbergE2Theorem6ContainingDisksCertificate v) →
     Nonempty (DahlbergE2Theorem6InteriorMissingDisksCertificate v) →
     Nonempty (DahlbergE2Theorem6AlternatingDiskCertificate v)
+
+/-- A certificate-level arrangement source implies the older selection source
+by unpacking the Lemma 5 and Lemma 7 existence packages. -/
+theorem dahlbergE2Theorem6AlternatingDiskSelectionSource_of_arrangementSource
+    (hsrc : DahlbergE2Theorem6AlternatingDiskArrangementSource) :
+    DahlbergE2Theorem6AlternatingDiskSelectionSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle hcontains hmisses
+  letI : NeZero n := hne
+  rcases hcontains with ⟨contains⟩
+  rcases hmisses with ⟨misses⟩
+  exact hsrc hn hsimple hregular horient hnoncircle contains misses
 
 /-- Alternating disk selection implies the older ordered-disk selection source
 by formally filling the cross-distinctness fields. -/
@@ -8420,27 +8448,28 @@ def DahlbergE2Theorem6OrderedDiskPaperSources : Prop :=
   DahlbergE2Theorem6PlateauUpgradeSource
 
 /-- Sharpest current §3 paper-facing source package: Lemma 5, Lemma 7,
-alternating disk selection, and explicit plateau-resolution data for the
-selected weak certificate.
+certificate-level alternating disk arrangement, and explicit
+plateau-resolution data for the selected weak certificate.
 
 Cross distinctness between containing and interior-missing disks, weak
 geometric assembly, and local-extremum reconstruction are formal. -/
 def DahlbergE2Theorem6SharpOrderedDiskPaperSources : Prop :=
   DahlbergE2Theorem6Lemma5ContainingDisksSource ∧
   DahlbergE2Theorem6Lemma7InteriorMissingDisksSource ∧
-  DahlbergE2Theorem6AlternatingDiskSelectionSource ∧
+  DahlbergE2Theorem6AlternatingDiskArrangementSource ∧
   DahlbergE2Theorem6PlateauResolutionUpgradeSource
 
 /-- The sharpest current §3 package implies the ordered-disk package by
-turning alternating selection into ordered selection, explicit plateau exits
-into local extrema, and then wrapping that as the older plateau-upgrade
-source. -/
+turning certificate-level alternating arrangement into ordered selection,
+explicit plateau exits into local extrema, and then wrapping that as the older
+plateau-upgrade source. -/
 theorem dahlbergE2Theorem6OrderedDiskPaperSources_of_sharpOrderedDiskPaperSources
     (hsrc : DahlbergE2Theorem6SharpOrderedDiskPaperSources) :
     DahlbergE2Theorem6OrderedDiskPaperSources := by
   exact ⟨hsrc.1, hsrc.2.1,
     dahlbergE2Theorem6OrderedDiskSelectionSource_of_alternatingDiskSelectionSource
-      hsrc.2.2.1,
+      (dahlbergE2Theorem6AlternatingDiskSelectionSource_of_arrangementSource
+        hsrc.2.2.1),
     dahlbergE2Theorem6PlateauUpgradeSource_of_plateauExtremaUpgradeSource
       (dahlbergE2Theorem6PlateauExtremaUpgradeSource_of_plateauResolutionUpgradeSource
         hsrc.2.2.2)⟩
@@ -11183,10 +11212,10 @@ def DahlbergE2PaperTheoremSources : Prop :=
 /-- The actual remaining paper theorem sources after the local part of
 Dahlberg's Lemma 8 has been formalized:
 
-* Theorem 6 / CDFV, sharpened to alternating disk selection plus explicit
-  plateau-resolution data for the selected weak certificate; cross
-  distinctness, weak/geometric assembly, and local-extremum reconstruction are
-  then formal;
+* Theorem 6 / CDFV, sharpened to certificate-level alternating disk
+  arrangement plus explicit plateau-resolution data for the selected weak
+  certificate; cross distinctness, weak/geometric assembly, and
+  local-extremum reconstruction are then formal;
 * the global monotone-arc extraction in Lemma 8;
 * the final §4 normalized unit-disk construction, in the raw existential
   auxiliary-reduction interface.
