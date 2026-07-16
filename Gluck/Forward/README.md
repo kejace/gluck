@@ -128,15 +128,23 @@ remaining-source audit is:
   - `orderedAdjacentTurns_H2_source_gate`.
 - `Gluck/Forward/Dahlberg.lean`
   - `dahlbergE2_convex_dfv_signed_source`;
-  - `dahlbergE2_lemma8_radius_turn_bridge_source`;
-  - `dahlbergE2_disk_auxiliary_construction_source`.
+  - `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source`;
+  - `dahlbergE2_disk_auxiliary_max_interior_construction_source`.
 
 The corresponding audit targets are `ForwardRemainingSources`, for the
 stronger ordered-turn route, and `ForwardDfvRemainingSources`, for the final
 D4VT route.  `forward_remaining_sources` and
 `forward_dfv_remaining_sources` currently collect exactly the listed source
-gates; completing the forward program means replacing those gates by formal
-proofs.  It also exposes source-parametrized kernels such as
+gates.  Their grouped component spellings are exposed as
+`forward_remaining_source_components` and
+`forward_dfv_remaining_source_components`, with component projections such as
+`smoothForwardModelSources_of_remainingSources`,
+`spaceFormDiscreteModelSources_of_remainingSources`,
+`smoothForwardDfvModelSources_of_dfvRemainingSources`,
+`spaceFormDiscreteDfvModelSources_of_dfvRemainingSources`, and
+`dahlbergE2DfvSourceComponents_of_dfvRemainingSources`.  Completing the
+forward program means replacing those gates by formal proofs.  It also exposes
+source-parametrized kernels such as
 `four_vertex_condition_smooth_spaceForm_kernel_of_sources`,
 `dahlberg_discrete_four_vertex_E2_kernel_of_sources`, and
 `constant_or_dahlbergFourVertex_spaceForm_kernel_of_sources`, together with
