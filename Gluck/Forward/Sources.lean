@@ -307,15 +307,10 @@ theorem forwardAtomicSources_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     ForwardAtomicSources := by
   rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hCDFV, hL8, hD⟩
-  have hD_boundary : DahlbergE2DiskAuxiliaryBoundaryConstructionSource :=
-    dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_pairSource
-      (dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_maxInteriorSource hD)
   exact ⟨hE, hS, hH, hdS, hdH,
     dahlbergE2ConvexRadiusSource_of_components
       ⟨hCDFV, dahlbergE2Lemma8RadiusTurnBridgeSource_of_witnessSource hL8⟩,
-    dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource
-      (dahlbergE2DiskAuxiliaryConstructionSource_of_boundaryConstructionSource
-        hD_boundary)⟩
+    dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource hD⟩
 
 /-- The sharper remaining-source package implies the bundled geometric source
 package. -/
@@ -397,13 +392,8 @@ theorem forwardDfvAtomicSources_of_dfvRemainingSources
     (hsrc : ForwardDfvRemainingSources) :
     ForwardDfvAtomicSources := by
   rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
-  have hD_boundary : DahlbergE2DiskAuxiliaryBoundaryConstructionSource :=
-    dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_pairSource
-      (dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_maxInteriorSource hD)
   exact ⟨hE, hS, hH, hdS, hdH, hC,
-    dahlbergE2DiskReductionSource_of_auxiliaryConstructionSource
-      (dahlbergE2DiskAuxiliaryConstructionSource_of_boundaryConstructionSource
-        hD_boundary)⟩
+    dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource hD⟩
 
 /-- The final-D4VT remaining-source package implies the bundled final-D4VT
 geometric source package. -/
@@ -468,21 +458,28 @@ theorem dahlbergE2Lemma9Source_of_remainingSources
     ⟨dahlbergE2ConvexDfvRadiusSource_of_remainingSources hsrc,
       dahlbergE2Lemma8RadiusTurnBridgeSource_of_remainingSources hsrc⟩
 
-/-- Extract Dahlberg's `E²` boundary-level §4 auxiliary-construction source
-from the sharper remaining-source package. -/
-theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_remainingSources
-    (hsrc : ForwardRemainingSources) :
-    DahlbergE2DiskAuxiliaryBoundaryConstructionSource := by
-  exact dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_pairSource
-    (dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_maxInteriorSource
-      hsrc.2.2.2.2.2.2.2)
-
 /-- Extract Dahlberg's `E²` metric-data §4 auxiliary-construction source from
 the sharper remaining-source package. -/
 theorem dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource := by
   exact hsrc.2.2.2.2.2.2.2
+
+/-- Extract Dahlberg's `E²` pair-level §4 auxiliary-construction source from
+the sharper remaining-source package. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_remainingSources
+    (hsrc : ForwardRemainingSources) :
+    DahlbergE2DiskAuxiliaryBoundaryPairConstructionSource := by
+  exact dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_maxInteriorSource
+    (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_remainingSources hsrc)
+
+/-- Extract Dahlberg's `E²` boundary-level §4 auxiliary-construction source
+from the sharper remaining-source package. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_remainingSources
+    (hsrc : ForwardRemainingSources) :
+    DahlbergE2DiskAuxiliaryBoundaryConstructionSource := by
+  exact dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_pairSource
+    (dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_remainingSources hsrc)
 
 /-- Extract Dahlberg's `E²` non-strict disk-reduction source from the sharper
 remaining-source package. -/
@@ -499,21 +496,28 @@ theorem dahlbergE2ConvexDfvSignedSource_of_dfvRemainingSources
     DahlbergE2ConvexDfvSignedSource := by
   exact hsrc.2.2.2.2.2.1
 
-/-- Extract Dahlberg's `E²` boundary-level §4 auxiliary-construction source
-from the weaker final-D4VT remaining-source package. -/
-theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_dfvRemainingSources
-    (hsrc : ForwardDfvRemainingSources) :
-    DahlbergE2DiskAuxiliaryBoundaryConstructionSource := by
-  exact dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_pairSource
-    (dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_maxInteriorSource
-      hsrc.2.2.2.2.2.2)
-
 /-- Extract Dahlberg's `E²` metric-data §4 auxiliary-construction source from
 the weaker final-D4VT remaining-source package. -/
 theorem dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_dfvRemainingSources
     (hsrc : ForwardDfvRemainingSources) :
     DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource := by
   exact hsrc.2.2.2.2.2.2
+
+/-- Extract Dahlberg's `E²` pair-level §4 auxiliary-construction source from
+the weaker final-D4VT remaining-source package. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources) :
+    DahlbergE2DiskAuxiliaryBoundaryPairConstructionSource := by
+  exact dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_maxInteriorSource
+    (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_dfvRemainingSources hsrc)
+
+/-- Extract Dahlberg's `E²` boundary-level §4 auxiliary-construction source
+from the weaker final-D4VT remaining-source package. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_dfvRemainingSources
+    (hsrc : ForwardDfvRemainingSources) :
+    DahlbergE2DiskAuxiliaryBoundaryConstructionSource := by
+  exact dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_pairSource
+    (dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_dfvRemainingSources hsrc)
 
 /-- Extract Dahlberg's `E²` non-strict disk-reduction source from the weaker
 final-D4VT remaining-source package. -/
