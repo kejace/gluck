@@ -109,8 +109,11 @@ public source theorem `orderedAdjacentTurns_spaceForm_source`; the
 model-specific source names `orderedAdjacentTurns_S2_source` and
 `orderedAdjacentTurns_H2_source` are wrappers around it.  D4VT can also be
 derived from ordered turns by the general cyclic constructor
-`dahlbergFourVertex_of_orderedAdjacentTurns_four_le`, but the final-D4VT route
-does not require that stronger input.  The local weak-source API
+`dahlbergFourVertex_of_orderedAdjacentTurns_four_le`; the current proof of
+`spaceFormDiscrete_dfv_source_gate` uses this formal implication, so the
+concrete non-Euclidean final-D4VT source still depends on the stronger
+ordered-turn source until a direct weak proof replaces it.  The local
+weak-source API
 `dahlbergFourVertex_spaceForm_of_dfvSource` and
 `constant_or_dahlbergFourVertex_spaceForm_of_dfvSource` records the final-D4VT
 consequence of `SpaceFormDiscreteDfvSource` without requiring ordered turns.

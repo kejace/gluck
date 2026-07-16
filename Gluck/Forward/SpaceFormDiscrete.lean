@@ -264,10 +264,11 @@ theorem spaceFormDiscrete_source_gate : SpaceFormDiscreteSource := by
 /-- Weaker uniform final-D4VT geometric source gate for the convex/coherent
 conformal-Menger package in `S²` and `H²`.
 
-This is the source used by final D4VT endpoints.  It does not assert the
-stronger ordered-turn conclusion. -/
+At present this is obtained from the stronger ordered-turn source.  A future
+sharpening can replace this proof by a direct D4VT argument without changing
+the downstream final-D4VT API. -/
 theorem spaceFormDiscrete_dfv_source_gate : SpaceFormDiscreteDfvSource := by
-  sorry
+  exact spaceFormDiscreteDfvSource_of_source spaceFormDiscrete_source_gate
 
 /-- Spherical nonconstant ordered-turn geometric source gate for the
 convex/coherent discrete four-vertex package in an open hemisphere. -/

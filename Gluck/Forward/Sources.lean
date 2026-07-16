@@ -3054,9 +3054,10 @@ theorem forward_remaining_source_components :
 /-- Sharper audit theorem for the final D4VT endpoints.
 
 The package itself records the weaker final-D4VT obligations.  This theorem is
-proved directly from the weaker gates, so the final D4VT audit does not depend
+collected through the weak source APIs, so the final D4VT audit does not depend
 on the stronger E² Lemma 8 ordered-turn source used only by conformal-Menger
-ordered-turn refinements. -/
+ordered-turn refinements.  The current non-Euclidean weak source is itself
+proved from the stronger ordered-turn source. -/
 theorem forward_dfv_remaining_sources : ForwardDfvRemainingSources := by
   exact forwardDfvRemainingSources_iff_uniformComponents.mpr
     ⟨smoothForwardDfvSource_of_source smoothForward_source_gate,
