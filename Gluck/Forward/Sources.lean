@@ -4453,6 +4453,51 @@ theorem dahlbergFourVertex_conformalMenger_strict_of_dfvPrimitiveRemainingSource
     (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
     hε hn v κ hdisk hsimple horient hregular hκ hproper_pos hproper_neg hnc
 
+/-- The exact public E² conformal-Menger constant-or-Dahlberg theorem at
+`ε = 0` from the flattened primitive final-D4VT source-gate audit. -/
+theorem
+    constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hsimple hregular horient hκ
+
+/-- The exact public E² conformal-Menger nonconstant D4VT theorem at `ε = 0`
+from the flattened primitive final-D4VT source-gate audit. -/
+theorem dahlbergFourVertex_E2_conformalMenger_zero_strict_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hsimple hregular horient hκ hnc
+
+/-- The exact public E² conformal-Menger discrete theorem at `ε = 0`, in
+constant-or-Dahlberg form, from the flattened primitive final-D4VT source-gate
+audit. -/
+theorem dahlberg_discrete_four_vertex_E2_conformalMenger_zero_strict_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hκ : RealizesConformalMenger 0 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact dahlberg_discrete_four_vertex_E2_conformalMenger_zero_strict_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hsimple hregular horient hκ
+
 /-- Primitive grouped component spelling of the current forward source audit.
 
 This exposes the exact primitive E² source gates: nonconcyclic CDFV, Lemma 8,
