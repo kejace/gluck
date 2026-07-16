@@ -2591,10 +2591,9 @@ theorem constant_or_dahlbergFourVertex_S2_neg_of_sources
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger 1 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_conformalMenger_neg_of_sources
-    hsrc
-    (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple horient hregular hκ
-    (by intro hlt; norm_num at hlt)
+  exact constant_or_dahlbergFourVertex_of_neg_reflectIndex
+    (constant_or_dahlbergFourVertex_S2_neg_reflected_of_sources
+      hsrc hn v κ hdisk hsimple horient hregular hκ)
 
 /-- The source-parametrized S² negative-orientation nonconstant D4VT
 endpoint. -/
@@ -2608,10 +2607,10 @@ theorem dahlbergFourVertex_S2_neg_of_sources
     (hκ : RealizesConformalMenger 1 v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_oriented_of_sources
-    hsrc
-    (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple
-    (Or.inr ⟨horient, by intro hlt; norm_num at hlt⟩) hregular hκ hnc
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_S2_neg_of_sources
+      hsrc hn v κ hdisk hsimple horient hregular hκ)
+    hnc
 
 /-- The source-parametrized S² strict-orientation constant-or-Dahlberg
 endpoint. -/
@@ -2735,9 +2734,9 @@ theorem constant_or_dahlbergFourVertex_S2_neg_of_forwardDfvSources
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger 1 v κ) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_conformalMenger_neg_of_forwardDfvSources
-    hsrc (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple horient hregular hκ
-    (by intro hlt; norm_num at hlt)
+  exact constant_or_dahlbergFourVertex_of_neg_reflectIndex
+    (constant_or_dahlbergFourVertex_S2_neg_reflected_of_forwardDfvSources
+      hsrc hn v κ hdisk hsimple horient hregular hκ)
 
 /-- The DFV-source-parametrized S² negative-orientation nonconstant D4VT
 endpoint. -/
@@ -2751,9 +2750,10 @@ theorem dahlbergFourVertex_S2_neg_of_forwardDfvSources
     (hκ : RealizesConformalMenger 1 v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_oriented_of_forwardDfvSources
-    hsrc (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple
-    (Or.inr ⟨horient, by intro hlt; norm_num at hlt⟩) hregular hκ hnc
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_S2_neg_of_forwardDfvSources
+      hsrc hn v κ hdisk hsimple horient hregular hκ)
+    hnc
 
 /-- The DFV-source-parametrized S² strict-orientation constant-or-Dahlberg
 endpoint. -/
@@ -2941,10 +2941,9 @@ theorem constant_or_dahlbergFourVertex_H2_neg_of_sources
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_conformalMenger_neg_of_sources
-    hsrc
-    (ε := -1) (Or.inr (Or.inr rfl)) hn v κ hdisk hsimple horient hregular hκ
-    (by intro _; exact hcircle)
+  exact constant_or_dahlbergFourVertex_of_neg_reflectIndex
+    (constant_or_dahlbergFourVertex_H2_neg_reflected_of_sources
+      hsrc hn v κ hdisk hsimple horient hregular hκ hcircle)
 
 /-- The source-parametrized H² negative-orientation nonconstant D4VT
 endpoint. -/
@@ -2958,10 +2957,10 @@ theorem dahlbergFourVertex_H2_neg_of_sources
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_oriented_of_sources
-    hsrc
-    (ε := -1) (Or.inr (Or.inr rfl)) hn v κ hdisk hsimple
-    (Or.inr ⟨horient, by intro _; exact hcircle⟩) hregular hκ hnc
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_H2_neg_of_sources
+      hsrc hn v κ hdisk hsimple horient hregular hκ hcircle)
+    hnc
 
 /-- The source-parametrized H² strict-orientation constant-or-Dahlberg
 endpoint. -/
@@ -3088,9 +3087,9 @@ theorem constant_or_dahlbergFourVertex_H2_neg_of_forwardDfvSources
     (hregular : DahlbergRegular v)
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  exact constant_or_dahlbergFourVertex_conformalMenger_neg_of_forwardDfvSources
-    hsrc (ε := -1) (Or.inr (Or.inr rfl)) hn v κ hdisk hsimple horient hregular hκ
-    (by intro _; exact hcircle)
+  exact constant_or_dahlbergFourVertex_of_neg_reflectIndex
+    (constant_or_dahlbergFourVertex_H2_neg_reflected_of_forwardDfvSources
+      hsrc hn v κ hdisk hsimple horient hregular hκ hcircle)
 
 /-- The DFV-source-parametrized H² negative-orientation nonconstant D4VT
 endpoint. -/
@@ -3104,9 +3103,10 @@ theorem dahlbergFourVertex_H2_neg_of_forwardDfvSources
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_conformalMenger_oriented_of_forwardDfvSources
-    hsrc (ε := -1) (Or.inr (Or.inr rfl)) hn v κ hdisk hsimple
-    (Or.inr ⟨horient, by intro _; exact hcircle⟩) hregular hκ hnc
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_H2_neg_of_forwardDfvSources
+      hsrc hn v κ hdisk hsimple horient hregular hκ hcircle)
+    hnc
 
 /-- The DFV-source-parametrized H² strict-orientation constant-or-Dahlberg
 endpoint. -/
