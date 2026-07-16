@@ -6473,6 +6473,24 @@ def EdgePrevCurvatureDiskInteriorMissesAll {n : ℕ} (v : ZMod n → ℂ)
   ∀ j : ZMod n, EdgePrevCircleRadiusProfile v i ≤
     dist (EdgePrevCircleCenterProfile v i) (v j)
 
+/-- The centre/radius data of the previous-vertex curvature circle. -/
+noncomputable def EdgePrevCurvatureCircleData {n : ℕ} (v : ZMod n → ℂ)
+    (i : ZMod n) : ℂ × ℝ :=
+  (EdgePrevCircleCenterProfile v i, EdgePrevCircleRadiusProfile v i)
+
+/-- Two previous-vertex curvature circles are distinct when their centre/radius
+data differ. -/
+def EdgePrevCurvatureCirclesDistinct {n : ℕ} (v : ZMod n → ℂ)
+    (i j : ZMod n) : Prop :=
+  EdgePrevCurvatureCircleData v i ≠ EdgePrevCurvatureCircleData v j
+
+/-- Distinctness of previous-vertex curvature circles is symmetric. -/
+theorem EdgePrevCurvatureCirclesDistinct.symm {n : ℕ} {v : ZMod n → ℂ}
+    {i j : ZMod n} (h : EdgePrevCurvatureCirclesDistinct v i j) :
+    EdgePrevCurvatureCirclesDistinct v j i := by
+  intro hji
+  exact h hji.symm
+
 /-- A previous-vertex curvature disk that misses all vertex interiors also
 contains its own three defining vertices on the boundary. -/
 theorem edgePrevCurvatureDiskInteriorMissesAll_self {n : ℕ}
@@ -6511,6 +6529,18 @@ structure DahlbergE2Theorem6CdfvCertificate {n : ℕ} (v : ZMod n → ℂ) where
   misses₂ : EdgePrevCurvatureDiskInteriorMissesAll v (i₂ : ZMod n)
   contains₃ : EdgePrevCurvatureDiskContainsAll v (i₃ : ZMod n)
   misses₄ : EdgePrevCurvatureDiskInteriorMissesAll v (i₄ : ZMod n)
+  circle₁_ne₂ :
+    EdgePrevCurvatureCirclesDistinct v (i₁ : ZMod n) (i₂ : ZMod n)
+  circle₁_ne₃ :
+    EdgePrevCurvatureCirclesDistinct v (i₁ : ZMod n) (i₃ : ZMod n)
+  circle₁_ne₄ :
+    EdgePrevCurvatureCirclesDistinct v (i₁ : ZMod n) (i₄ : ZMod n)
+  circle₂_ne₃ :
+    EdgePrevCurvatureCirclesDistinct v (i₂ : ZMod n) (i₃ : ZMod n)
+  circle₂_ne₄ :
+    EdgePrevCurvatureCirclesDistinct v (i₂ : ZMod n) (i₄ : ZMod n)
+  circle₃_ne₄ :
+    EdgePrevCurvatureCirclesDistinct v (i₃ : ZMod n) (i₄ : ZMod n)
   localMax₁ : DiscreteLocalMax (EdgePrevCircleRadiusProfile v) (i₁ : ZMod n)
   localMin₂ : DiscreteLocalMin (EdgePrevCircleRadiusProfile v) (i₂ : ZMod n)
   localMax₃ : DiscreteLocalMax (EdgePrevCircleRadiusProfile v) (i₃ : ZMod n)

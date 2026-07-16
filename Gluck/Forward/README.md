@@ -108,7 +108,7 @@ paper-level components:
 - `DahlbergE2Theorem6CdfvSource`: §3 Theorem 6 / CDFV, as a geometric
   curvature-disk certificate retaining the two disks that contain all vertices,
   the two disks whose interiors miss all vertices, and the corresponding
-  radius-profile extrema;
+  pairwise distinct curvature circles and radius-profile extrema;
 - `DahlbergE2Lemma8DiskNestingSource`: §4 Lemma 8's disk-nesting propagation,
   producing the named `DahlbergE2Lemma8DiskNestingCertificate`, i.e. the eight
   ordered one-step previous-radius inequalities used by Lemma 9;
