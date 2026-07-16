@@ -2427,6 +2427,146 @@ theorem dahlbergFourVertex_S2_strict_of_sources
     (by intro hlt; norm_num at hlt)
     (by intro hlt; norm_num at hlt) hnc
 
+/-- The DFV-source-parametrized S² negative-orientation constant-or-Dahlberg
+endpoint, stated for the reflected profile `i ↦ -κ(-i)`. -/
+theorem constant_or_dahlbergFourVertex_S2_neg_reflected_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, -κ (-i) = c) ∨
+      DahlbergFourVertex (fun i => -κ (-i)) := by
+  have hdisk' : ∀ i, ‖ReverseCyclicPolygon v i‖ < 1 := by
+    intro i
+    exact hdisk (-i)
+  have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
+    isSimplePolygon_reverseCyclicPolygon hsimple
+  have horient' : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
+    positiveOrientation_reverseCyclicPolygon_of_negativeOrientation horient
+  have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
+    dahlbergRegular_reverseCyclicPolygon hregular
+  have hκ' :
+      RealizesConformalMenger 1 (ReverseCyclicPolygon v) (fun i => -κ (-i)) :=
+    realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation horient hκ
+  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
+    hsrc (ε := 1) (Or.inr (Or.inl rfl)) hn (ReverseCyclicPolygon v)
+    (fun i => -κ (-i)) hdisk' hsimple' horient' hregular' hκ'
+    (by intro hlt; norm_num at hlt)
+
+/-- The DFV-source-parametrized S² negative-orientation nonconstant D4VT
+endpoint, stated for the reflected profile `i ↦ -κ(-i)`. -/
+theorem dahlbergFourVertex_S2_neg_reflected_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc_reflected : ¬ ∃ c, ∀ i : ZMod n, -κ (-i) = c) :
+    DahlbergFourVertex (fun i => -κ (-i)) := by
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_S2_neg_reflected_of_forwardDfvSources
+      hsrc hn v κ hdisk hsimple horient hregular hκ)
+    hnc_reflected
+
+/-- The DFV-source-parametrized S² positive-orientation constant-or-Dahlberg
+endpoint. -/
+theorem constant_or_dahlbergFourVertex_S2_pos_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
+    hsrc (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple horient hregular hκ
+    (by intro hlt; norm_num at hlt)
+
+/-- The DFV-source-parametrized S² positive-orientation nonconstant D4VT
+endpoint. -/
+theorem dahlbergFourVertex_S2_pos_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
+    hsrc (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple horient hregular hκ
+    (by intro hlt; norm_num at hlt) hnc
+
+/-- The DFV-source-parametrized S² negative-orientation constant-or-Dahlberg
+endpoint. -/
+theorem constant_or_dahlbergFourVertex_S2_neg_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_conformalMenger_neg_of_forwardDfvSources
+    hsrc (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple horient hregular hκ
+    (by intro hlt; norm_num at hlt)
+
+/-- The DFV-source-parametrized S² negative-orientation nonconstant D4VT
+endpoint. -/
+theorem dahlbergFourVertex_S2_neg_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_conformalMenger_oriented_of_forwardDfvSources
+    hsrc (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple
+    (Or.inr ⟨horient, by intro hlt; norm_num at hlt⟩) hregular hκ hnc
+
+/-- The DFV-source-parametrized S² strict-orientation constant-or-Dahlberg
+endpoint. -/
+theorem constant_or_dahlbergFourVertex_S2_strict_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_conformalMenger_strict_of_forwardDfvSources
+    hsrc (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple horient hregular hκ
+    (by intro hlt; norm_num at hlt)
+    (by intro hlt; norm_num at hlt)
+
+/-- The DFV-source-parametrized S² strict-orientation nonconstant D4VT endpoint. -/
+theorem dahlbergFourVertex_S2_strict_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_conformalMenger_strict_of_forwardDfvSources
+    hsrc (ε := 1) (Or.inr (Or.inl rfl)) hn v κ hdisk hsimple horient hregular hκ
+    (by intro hlt; norm_num at hlt)
+    (by intro hlt; norm_num at hlt) hnc
+
 /-- The source-parametrized H² positive-orientation ordered-turn endpoint. -/
 theorem orderedAdjacentTurns_H2_pos_of_sources
     (hsrc : ForwardGeometricSources)
@@ -2632,6 +2772,151 @@ theorem dahlbergFourVertex_H2_strict_of_sources
     DahlbergFourVertex κ := by
   exact dahlbergFourVertex_of_constant_or_of_not_constant
     (constant_or_dahlbergFourVertex_H2_strict_of_sources
+      hsrc hn v κ hdisk hsimple horient hregular hκ)
+    hnc
+
+/-- The DFV-source-parametrized H² negative-orientation constant-or-Dahlberg
+endpoint, stated for the reflected profile `i ↦ -κ(-i)`. -/
+theorem constant_or_dahlbergFourVertex_H2_neg_reflected_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i) :
+    (∃ c, ∀ i : ZMod n, -κ (-i) = c) ∨
+      DahlbergFourVertex (fun i => -κ (-i)) := by
+  have hdisk' : ∀ i, ‖ReverseCyclicPolygon v i‖ < 1 := by
+    intro i
+    exact hdisk (-i)
+  have hsimple' : Gluck.Discrete.IsSimplePolygon (ReverseCyclicPolygon v) :=
+    isSimplePolygon_reverseCyclicPolygon hsimple
+  have horient' : PositivePolygonOrientation (ReverseCyclicPolygon v) :=
+    positiveOrientation_reverseCyclicPolygon_of_negativeOrientation horient
+  have hregular' : DahlbergRegular (ReverseCyclicPolygon v) :=
+    dahlbergRegular_reverseCyclicPolygon hregular
+  have hκ' :
+      RealizesConformalMenger (-1) (ReverseCyclicPolygon v) (fun i => -κ (-i)) :=
+    realizesConformalMenger_reverseCyclicPolygon_of_negativeOrientation horient hκ
+  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
+    hsrc (ε := -1) (Or.inr (Or.inr rfl)) hn (ReverseCyclicPolygon v)
+    (fun i => -κ (-i)) hdisk' hsimple' horient' hregular' hκ'
+    (by intro _ i; exact hcircle (-i))
+
+/-- The DFV-source-parametrized H² negative-orientation nonconstant D4VT endpoint,
+stated for the reflected profile `i ↦ -κ(-i)`. -/
+theorem dahlbergFourVertex_H2_neg_reflected_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i)
+    (hnc_reflected : ¬ ∃ c, ∀ i : ZMod n, -κ (-i) = c) :
+    DahlbergFourVertex (fun i => -κ (-i)) := by
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_H2_neg_reflected_of_forwardDfvSources
+      hsrc hn v κ hdisk hsimple horient hregular hκ hcircle)
+    hnc_reflected
+
+/-- The DFV-source-parametrized H² positive-orientation constant-or-Dahlberg
+endpoint. -/
+theorem constant_or_dahlbergFourVertex_H2_pos_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
+    hsrc (ε := -1) (Or.inr (Or.inr rfl)) hn v κ hdisk hsimple horient hregular hκ
+    (by intro _; exact hcircle)
+
+/-- The DFV-source-parametrized H² positive-orientation nonconstant D4VT
+endpoint. -/
+theorem dahlbergFourVertex_H2_pos_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_forwardDfvSources
+    hsrc (ε := -1) (Or.inr (Or.inr rfl)) hn v κ hdisk hsimple horient hregular hκ
+    (by intro _; exact hcircle) hnc
+
+/-- The DFV-source-parametrized H² negative-orientation constant-or-Dahlberg
+endpoint. -/
+theorem constant_or_dahlbergFourVertex_H2_neg_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_conformalMenger_neg_of_forwardDfvSources
+    hsrc (ε := -1) (Or.inr (Or.inr rfl)) hn v κ hdisk hsimple horient hregular hκ
+    (by intro _; exact hcircle)
+
+/-- The DFV-source-parametrized H² negative-orientation nonconstant D4VT
+endpoint. -/
+theorem dahlbergFourVertex_H2_neg_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < -κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_conformalMenger_oriented_of_forwardDfvSources
+    hsrc (ε := -1) (Or.inr (Or.inr rfl)) hn v κ hdisk hsimple
+    (Or.inr ⟨horient, by intro _; exact hcircle⟩) hregular hκ hnc
+
+/-- The DFV-source-parametrized H² strict-orientation constant-or-Dahlberg
+endpoint. -/
+theorem constant_or_dahlbergFourVertex_H2_strict_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient :
+      (PositivePolygonOrientation v ∧ ∀ i, 1 < κ i) ∨
+        (NegativePolygonOrientation v ∧ ∀ i, 1 < -κ i))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  rcases horient with hpos | hneg
+  · exact constant_or_dahlbergFourVertex_H2_pos_of_forwardDfvSources
+      hsrc hn v κ hdisk hsimple hpos.1 hregular hκ hpos.2
+  · exact constant_or_dahlbergFourVertex_H2_neg_of_forwardDfvSources
+      hsrc hn v κ hdisk hsimple hneg.1 hregular hκ hneg.2
+
+/-- The DFV-source-parametrized H² strict-orientation nonconstant D4VT endpoint. -/
+theorem dahlbergFourVertex_H2_strict_of_forwardDfvSources
+    (hsrc : ForwardDfvGeometricSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient :
+      (PositivePolygonOrientation v ∧ ∀ i, 1 < κ i) ∨
+        (NegativePolygonOrientation v ∧ ∀ i, 1 < -κ i))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (constant_or_dahlbergFourVertex_H2_strict_of_forwardDfvSources
       hsrc hn v κ hdisk hsimple horient hregular hκ)
     hnc
 
