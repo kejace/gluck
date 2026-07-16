@@ -2041,6 +2041,171 @@ theorem circumcircleR2_unique_of_cyclic_reorder {A B C O₁ O₂ : ℂ} {R₁ R�
     ⟨h₂.1, h₂.2.2.2, h₂.2.1, h₂.2.2.1⟩
   exact circumcircleR2_unique_of_noncollinear hAB hcross h₁ h₂'
 
+/-- If the centre of a circumcircle is a convex combination of its three
+vertices, then any closed disk containing the three vertices has radius at
+least the circumradius.
+
+This is the algebraic Euclidean core used when the regularity/convexity
+hypotheses put the curvature-circle centre inside the relevant triangle: the
+weighted variance identity gives
+`R² + dist Δ O²` as the weighted average of the squared distances from `Δ` to
+the three vertices. -/
+theorem circumcircleR2_radius_le_of_center_convexCombo_three
+    {A B C O Δ : ℂ} {R S α β γ : ℝ}
+    (hcircle : CircumcircleR2 A B C O R)
+    (hα : 0 ≤ α) (hβ : 0 ≤ β) (hγ : 0 ≤ γ)
+    (hsum : α + β + γ = 1)
+    (hO : O = (α : ℂ) * A + (β : ℂ) * B + (γ : ℂ) * C)
+    (hS : 0 ≤ S)
+    (hA : InClosedDiskR2 Δ S A) (hB : InClosedDiskR2 Δ S B)
+    (hC : InClosedDiskR2 Δ S C) :
+    R ≤ S := by
+  have hγeq : γ = 1 - α - β := by linarith
+  have hR : 0 ≤ R := hcircle.1.le
+  have hOre := congrArg Complex.re hO
+  have hOim := congrArg Complex.im hO
+  simp only [Complex.add_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im,
+    zero_mul, sub_zero] at hOre
+  simp only [Complex.add_im, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im,
+    zero_mul] at hOim
+  ring_nf at hOre hOim
+  have hAO : (A.re - O.re) ^ 2 + (A.im - O.im) ^ 2 = R ^ 2 := by
+    have h := congrArg (fun x : ℝ => x ^ 2) hcircle.2.1
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
+    simp only [Complex.sub_re, Complex.sub_im] at h
+    have hre : (O.re - A.re) ^ 2 = (A.re - O.re) ^ 2 := by ring
+    have him : (O.im - A.im) ^ 2 = (A.im - O.im) ^ 2 := by ring
+    nlinarith
+  have hBO : (B.re - O.re) ^ 2 + (B.im - O.im) ^ 2 = R ^ 2 := by
+    have h := congrArg (fun x : ℝ => x ^ 2) hcircle.2.2.1
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
+    simp only [Complex.sub_re, Complex.sub_im] at h
+    have hre : (O.re - B.re) ^ 2 = (B.re - O.re) ^ 2 := by ring
+    have him : (O.im - B.im) ^ 2 = (B.im - O.im) ^ 2 := by ring
+    nlinarith
+  have hCO : (C.re - O.re) ^ 2 + (C.im - O.im) ^ 2 = R ^ 2 := by
+    have h := congrArg (fun x : ℝ => x ^ 2) hcircle.2.2.2
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
+    simp only [Complex.sub_re, Complex.sub_im] at h
+    have hre : (O.re - C.re) ^ 2 = (C.re - O.re) ^ 2 := by ring
+    have him : (O.im - C.im) ^ 2 = (C.im - O.im) ^ 2 := by ring
+    nlinarith
+  have hAΔ : (A.re - Δ.re) ^ 2 + (A.im - Δ.im) ^ 2 ≤ S ^ 2 := by
+    have hsq := (sq_le_sq₀ dist_nonneg hS).mpr hA
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at hsq
+    simp only [Complex.sub_re, Complex.sub_im] at hsq
+    have hre : (Δ.re - A.re) ^ 2 = (A.re - Δ.re) ^ 2 := by ring
+    have him : (Δ.im - A.im) ^ 2 = (A.im - Δ.im) ^ 2 := by ring
+    nlinarith
+  have hBΔ : (B.re - Δ.re) ^ 2 + (B.im - Δ.im) ^ 2 ≤ S ^ 2 := by
+    have hsq := (sq_le_sq₀ dist_nonneg hS).mpr hB
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at hsq
+    simp only [Complex.sub_re, Complex.sub_im] at hsq
+    have hre : (Δ.re - B.re) ^ 2 = (B.re - Δ.re) ^ 2 := by ring
+    have him : (Δ.im - B.im) ^ 2 = (B.im - Δ.im) ^ 2 := by ring
+    nlinarith
+  have hCΔ : (C.re - Δ.re) ^ 2 + (C.im - Δ.im) ^ 2 ≤ S ^ 2 := by
+    have hsq := (sq_le_sq₀ dist_nonneg hS).mpr hC
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at hsq
+    simp only [Complex.sub_re, Complex.sub_im] at hsq
+    have hre : (Δ.re - C.re) ^ 2 = (C.re - Δ.re) ^ 2 := by ring
+    have him : (Δ.im - C.im) ^ 2 = (C.im - Δ.im) ^ 2 := by ring
+    nlinarith
+  have hweighted_le :
+      α * ((A.re - Δ.re) ^ 2 + (A.im - Δ.im) ^ 2) +
+          β * ((B.re - Δ.re) ^ 2 + (B.im - Δ.im) ^ 2) +
+          γ * ((C.re - Δ.re) ^ 2 + (C.im - Δ.im) ^ 2) ≤ S ^ 2 := by
+    have hαA :
+        α * ((A.re - Δ.re) ^ 2 + (A.im - Δ.im) ^ 2) ≤ α * S ^ 2 :=
+      mul_le_mul_of_nonneg_left hAΔ hα
+    have hβB :
+        β * ((B.re - Δ.re) ^ 2 + (B.im - Δ.im) ^ 2) ≤ β * S ^ 2 :=
+      mul_le_mul_of_nonneg_left hBΔ hβ
+    have hγC :
+        γ * ((C.re - Δ.re) ^ 2 + (C.im - Δ.im) ^ 2) ≤ γ * S ^ 2 :=
+      mul_le_mul_of_nonneg_left hCΔ hγ
+    calc
+      α * ((A.re - Δ.re) ^ 2 + (A.im - Δ.im) ^ 2) +
+          β * ((B.re - Δ.re) ^ 2 + (B.im - Δ.im) ^ 2) +
+          γ * ((C.re - Δ.re) ^ 2 + (C.im - Δ.im) ^ 2)
+          ≤ α * S ^ 2 + β * S ^ 2 + γ * S ^ 2 := by
+            exact add_le_add (add_le_add hαA hβB) hγC
+      _ = S ^ 2 := by
+        rw [hγeq]
+        ring
+  have hvariance :
+      α * ((A.re - Δ.re) ^ 2 + (A.im - Δ.im) ^ 2) +
+          β * ((B.re - Δ.re) ^ 2 + (B.im - Δ.im) ^ 2) +
+          γ * ((C.re - Δ.re) ^ 2 + (C.im - Δ.im) ^ 2) =
+        R ^ 2 + ((O.re - Δ.re) ^ 2 + (O.im - Δ.im) ^ 2) := by
+    have hRweighted : R ^ 2 = α * R ^ 2 + β * R ^ 2 + γ * R ^ 2 := by
+      rw [hγeq]
+      ring
+    have hRweighted' :
+        R ^ 2 =
+          α * ((A.re - O.re) ^ 2 + (A.im - O.im) ^ 2) +
+          β * ((B.re - O.re) ^ 2 + (B.im - O.im) ^ 2) +
+          γ * ((C.re - O.re) ^ 2 + (C.im - O.im) ^ 2) := by
+      rw [hRweighted, hAO, hBO, hCO]
+    have hreVariance :
+        α * (A.re - Δ.re) ^ 2 + β * (B.re - Δ.re) ^ 2 +
+            γ * (C.re - Δ.re) ^ 2 =
+          α * (A.re - O.re) ^ 2 + β * (B.re - O.re) ^ 2 +
+              γ * (C.re - O.re) ^ 2 + (O.re - Δ.re) ^ 2 := by
+      rw [hOre]
+      rw [hγeq]
+      ring
+    have himVariance :
+        α * (A.im - Δ.im) ^ 2 + β * (B.im - Δ.im) ^ 2 +
+            γ * (C.im - Δ.im) ^ 2 =
+          α * (A.im - O.im) ^ 2 + β * (B.im - O.im) ^ 2 +
+              γ * (C.im - O.im) ^ 2 + (O.im - Δ.im) ^ 2 := by
+      rw [hOim]
+      rw [hγeq]
+      ring
+    rw [hRweighted']
+    linear_combination hreVariance + himVariance
+  have hRsq : R ^ 2 ≤ S ^ 2 := by
+    have hOD : 0 ≤ (O.re - Δ.re) ^ 2 + (O.im - Δ.im) ^ 2 :=
+      add_nonneg (sq_nonneg _) (sq_nonneg _)
+    have hsum_le : R ^ 2 + ((O.re - Δ.re) ^ 2 + (O.im - Δ.im) ^ 2) ≤ S ^ 2 := by
+      rw [← hvariance]
+      exact hweighted_le
+    exact le_trans (le_add_of_nonneg_right hOD) hsum_le
+  exact (sq_le_sq₀ hR hS).mp hRsq
+
+/-- Normalized version of
+`circumcircleR2_radius_le_of_center_convexCombo_three`.
+
+If a member of the normalized coaxial family has its centre in the convex hull
+of the two chord endpoints and a third point on the circle, then any disk
+containing those three points has radius at least the normalized circle
+radius. -/
+theorem normalizedCircleRadius_le_of_center_convexCombo_three
+    {a y S α β γ : ℝ} {z Δ : ℂ}
+    (ha : a ≠ 0)
+    (hz : circlePowerR2 (normalizedCircleCenter y) z
+      (normalizedCircleRadius a y) = 0)
+    (hα : 0 ≤ α) (hβ : 0 ≤ β) (hγ : 0 ≤ γ)
+    (hsum : α + β + γ = 1)
+    (hcenter :
+      normalizedCircleCenter y = (α : ℂ) * (-a : ℂ) +
+        (β : ℂ) * (a : ℂ) + (γ : ℂ) * z)
+    (hS : 0 ≤ S)
+    (hleft : InClosedDiskR2 Δ S (-a : ℂ))
+    (hright : InClosedDiskR2 Δ S (a : ℂ))
+    (hzmem : InClosedDiskR2 Δ S z) :
+    normalizedCircleRadius a y ≤ S := by
+  have hcircle :
+      CircumcircleR2 (-a : ℂ) (a : ℂ) z
+        (normalizedCircleCenter y) (normalizedCircleRadius a y) := by
+    refine ⟨normalizedCircleRadius_pos ha y, ?_, ?_, ?_⟩
+    · exact dist_normalizedCircleCenter_left a y
+    · exact dist_normalizedCircleCenter_right a y
+    · exact dist_eq_of_circlePowerR2_eq_zero (Real.sqrt_nonneg _) hz
+  exact circumcircleR2_radius_le_of_center_convexCombo_three
+    hcircle hα hβ hγ hsum hcenter hS hleft hright hzmem
+
 /-- Propagation primitive: two adjacent four-point windows whose common
 circles overlap in a noncollinear triple determine the same circle. -/
 theorem edgeCommonCircumcircle_overlap_unique {A B C P Q O₁ O₂ : ℂ} {R₁ R₂ : ℝ}
