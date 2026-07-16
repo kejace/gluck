@@ -386,9 +386,9 @@ theorem smoothForward_dfv_model_sources_gate :
     smoothFourVertex_H2_model_source_gate⟩
 
 /-- Uniform nonconstant smooth forward four-vertex geometric source gate,
-recovered formally from the model-specific source package. -/
+recovered directly from the uniform space-form source gate. -/
 theorem smoothForward_source_gate : SmoothForwardSource := by
-  exact smoothForwardSource_iff_modelSources.mpr smoothForward_model_sources_gate
+  exact four_vertex_condition_smooth_spaceForm_model_source_gate
 
 /-- Weaker uniform nonconstant smooth forward four-vertex source for
 final-D4VT endpoints, recovered from the weak model-specific source gates. -/

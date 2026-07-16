@@ -313,11 +313,10 @@ theorem spaceFormDiscrete_model_sources_gate :
     orderedAdjacentTurns_H2_model_source_gate⟩
 
 /-- Uniform nonconstant ordered-turn geometric source gate for the
-convex/coherent conformal-Menger package in `S²` and `H²`, recovered formally
-from the model-specific source package. -/
+convex/coherent conformal-Menger package in `S²` and `H²`, recovered directly
+from the uniform space-form source gate. -/
 theorem spaceFormDiscrete_source_gate : SpaceFormDiscreteSource := by
-  exact spaceFormDiscreteSource_iff_modelSources.mpr
-    spaceFormDiscrete_model_sources_gate
+  exact orderedAdjacentTurns_spaceForm_model_source_gate
 
 /-- Spherical nonconstant final-D4VT model source gate, recovered from the
 stronger ordered-turn source gate. -/

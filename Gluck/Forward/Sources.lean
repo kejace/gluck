@@ -442,6 +442,29 @@ def ForwardUniformDfvRemainingSourceComponents : Prop :=
   SpaceFormDiscreteDfvSource ∧
   DahlbergE2DfvSourceComponents
 
+/-- Uniform component spelling of the actual primitive remaining source
+obligations.
+
+This is the sharp source surface after the space-form gates have been
+unified: one smooth source, one non-Euclidean ordered-turn source, and the
+primitive E² Dahlberg block. -/
+def ForwardUniformPrimitiveRemainingSourceComponents : Prop :=
+  SmoothForwardSource ∧
+  SpaceFormDiscreteSource ∧
+  DahlbergE2PrimitiveRemainingSourceComponents
+
+/-- Uniform component spelling of the primitive remaining source obligations
+needed only for final D4VT endpoints.
+
+This is the weak final-D4VT analogue of
+`ForwardUniformPrimitiveRemainingSourceComponents`: one smooth D4VT source,
+one non-Euclidean D4VT source, and the primitive E² final-D4VT Dahlberg
+block. -/
+def ForwardUniformDfvPrimitiveRemainingSourceComponents : Prop :=
+  SmoothForwardDfvSource ∧
+  SpaceFormDiscreteDfvSource ∧
+  DahlbergE2DfvPrimitiveSourceComponents
+
 /-- The uniform remaining-source components are equivalent to the
 model-specific component spelling. -/
 theorem forwardUniformRemainingSourceComponents_iff_components :
@@ -459,6 +482,32 @@ model-specific final-D4VT component spelling. -/
 theorem forwardUniformDfvRemainingSourceComponents_iff_components :
     ForwardUniformDfvRemainingSourceComponents ↔
       ForwardDfvRemainingSourceComponents := by
+  constructor
+  · intro hsrc
+    exact ⟨smoothForwardDfvSource_iff_modelSources.mp hsrc.1,
+      spaceFormDiscreteDfvSource_iff_modelSources.mp hsrc.2.1, hsrc.2.2⟩
+  · intro hsrc
+    exact ⟨smoothForwardDfvSource_iff_modelSources.mpr hsrc.1,
+      spaceFormDiscreteDfvSource_iff_modelSources.mpr hsrc.2.1, hsrc.2.2⟩
+
+/-- The uniform primitive remaining-source components are equivalent to the
+model-specific primitive component spelling. -/
+theorem forwardUniformPrimitiveRemainingSourceComponents_iff_components :
+    ForwardUniformPrimitiveRemainingSourceComponents ↔
+      ForwardPrimitiveRemainingSourceComponents := by
+  constructor
+  · intro hsrc
+    exact ⟨smoothForwardSource_iff_modelSources.mp hsrc.1,
+      spaceFormDiscreteSource_iff_modelSources.mp hsrc.2.1, hsrc.2.2⟩
+  · intro hsrc
+    exact ⟨smoothForwardSource_iff_modelSources.mpr hsrc.1,
+      spaceFormDiscreteSource_iff_modelSources.mpr hsrc.2.1, hsrc.2.2⟩
+
+/-- The uniform primitive final-D4VT remaining-source components are
+equivalent to the model-specific primitive final-D4VT component spelling. -/
+theorem forwardUniformDfvPrimitiveRemainingSourceComponents_iff_components :
+    ForwardUniformDfvPrimitiveRemainingSourceComponents ↔
+      ForwardDfvPrimitiveRemainingSourceComponents := by
   constructor
   · intro hsrc
     exact ⟨smoothForwardDfvSource_iff_modelSources.mp hsrc.1,
@@ -600,6 +649,22 @@ theorem forwardDfvRemainingSources_iff_uniformComponents :
     ForwardDfvRemainingSources ↔ ForwardUniformDfvRemainingSourceComponents := by
   exact forwardDfvRemainingSources_iff_components.trans
     forwardUniformDfvRemainingSourceComponents_iff_components.symm
+
+/-- The flattened primitive remaining-source audit is equivalent to the
+uniform primitive component spelling. -/
+theorem forwardPrimitiveRemainingSources_iff_uniformComponents :
+    ForwardPrimitiveRemainingSources ↔
+      ForwardUniformPrimitiveRemainingSourceComponents := by
+  exact forwardPrimitiveRemainingSources_iff_components.trans
+    forwardUniformPrimitiveRemainingSourceComponents_iff_components.symm
+
+/-- The flattened primitive final-D4VT remaining-source audit is equivalent to
+the uniform primitive final-D4VT component spelling. -/
+theorem forwardDfvPrimitiveRemainingSources_iff_uniformComponents :
+    ForwardDfvPrimitiveRemainingSources ↔
+      ForwardUniformDfvPrimitiveRemainingSourceComponents := by
+  exact forwardDfvPrimitiveRemainingSources_iff_components.trans
+    forwardUniformDfvPrimitiveRemainingSourceComponents_iff_components.symm
 
 /-- After sharpening the `E²` non-strict component to the boundary/interior §4
 compatibility interface, the fully expanded final-D4VT atomic package is
@@ -5117,21 +5182,30 @@ theorem dahlbergFourVertex_H2_strict_of_dfvPrimitiveRemainingSources
       hsrc hn v κ hdisk hsimple horient hregular hκ)
     hnc
 
-/-- Primitive grouped component spelling of the current forward source audit.
+/-- Uniform primitive grouped component spelling of the current forward source
+audit.
 
 This exposes the exact primitive E² source gates: nonconcyclic CDFV, Lemma 8,
-and the normalized unit-disk §4 construction. -/
+and the normalized unit-disk §4 construction, together with the unified smooth
+and non-Euclidean space-form source gates. -/
+theorem forward_uniform_primitive_remaining_source_components :
+    ForwardUniformPrimitiveRemainingSourceComponents := by
+  exact ⟨smoothForward_source_gate,
+    spaceFormDiscrete_source_gate,
+    dahlbergE2_primitive_remaining_source_components⟩
+
+/-- Primitive grouped component spelling of the current forward source audit,
+expanded to the model-specific compatibility surface. -/
 theorem forward_primitive_remaining_source_components :
     ForwardPrimitiveRemainingSourceComponents := by
-  exact ⟨smoothForward_model_sources_gate,
-    spaceFormDiscrete_model_sources_gate,
-    dahlbergE2_primitive_remaining_source_components⟩
+  exact forwardUniformPrimitiveRemainingSourceComponents_iff_components.mp
+    forward_uniform_primitive_remaining_source_components
 
 /-- Fully flattened primitive spelling of the current forward source audit. -/
 theorem forward_primitive_remaining_sources :
     ForwardPrimitiveRemainingSources := by
-  exact forwardPrimitiveRemainingSources_iff_components.mpr
-    forward_primitive_remaining_source_components
+  exact forwardPrimitiveRemainingSources_iff_uniformComponents.mpr
+    forward_uniform_primitive_remaining_source_components
 
 /-- Grouped component spelling of `forward_remaining_sources`, recovered from
 the primitive source audit. -/
@@ -5154,26 +5228,31 @@ package, routed through the sharper exact remaining-source audit. -/
 theorem forward_geometric_sources : ForwardGeometricSources := by
   exact forwardGeometricSources_of_remainingSources forward_remaining_sources
 
-/-- Primitive grouped component spelling of the current final-D4VT source
-audit.
+/-- Uniform primitive grouped component spelling of the current final-D4VT
+source audit.
 
 This exposes the exact primitive E² final-D4VT source gates: nonconcyclic CDFV
-and the normalized unit-disk §4 construction.  The smooth and non-Euclidean
-weak final-D4VT components are collected through their weak model-source
-packages, which are currently proved from the stronger smooth
-value-separated and non-Euclidean ordered-turn source gates. -/
+and the normalized unit-disk §4 construction, together with the unified weak
+smooth and non-Euclidean final-D4VT source packages. -/
+theorem forward_uniform_dfv_primitive_remaining_source_components :
+    ForwardUniformDfvPrimitiveRemainingSourceComponents := by
+  exact ⟨smoothForward_dfv_source_gate,
+    spaceFormDiscrete_dfv_source_gate,
+    dahlbergE2_dfv_primitive_source_components⟩
+
+/-- Primitive grouped component spelling of the current final-D4VT source
+audit, expanded to the model-specific compatibility surface. -/
 theorem forward_dfv_primitive_remaining_source_components :
     ForwardDfvPrimitiveRemainingSourceComponents := by
-  exact ⟨smoothForward_dfv_model_sources,
-    spaceFormDiscrete_dfv_model_sources,
-    dahlbergE2_dfv_primitive_source_components⟩
+  exact forwardUniformDfvPrimitiveRemainingSourceComponents_iff_components.mp
+    forward_uniform_dfv_primitive_remaining_source_components
 
 /-- Fully flattened primitive spelling of the current final-D4VT source
 audit. -/
 theorem forward_dfv_primitive_remaining_sources :
     ForwardDfvPrimitiveRemainingSources := by
-  exact forwardDfvPrimitiveRemainingSources_iff_components.mpr
-    forward_dfv_primitive_remaining_source_components
+  exact forwardDfvPrimitiveRemainingSources_iff_uniformComponents.mpr
+    forward_uniform_dfv_primitive_remaining_source_components
 
 /-- Grouped component spelling of `forward_dfv_remaining_sources`, recovered
 from the primitive final-D4VT source audit. -/
