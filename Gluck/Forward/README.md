@@ -129,14 +129,16 @@ primitive remaining-source audit is:
 - `Gluck/Forward/SpaceFormDiscrete.lean`
   - `spaceFormDiscrete_source_gate`.
 - `Gluck/Forward/Dahlberg.lean`
-  - `dahlbergE2_convex_dfv_signed_source_gate`;
-  - `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`;
+  - `dahlbergE2_lemma9_source_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_construction_source_gate`.
 
 The weak smooth and non-Euclidean final-D4VT gates are no longer primitive:
 `smoothForward_dfv_source_gate` is recovered from `smoothForward_source_gate`,
 and `spaceFormDiscrete_dfv_source_gate` is recovered from
-`spaceFormDiscrete_source_gate`.
+`spaceFormDiscrete_source_gate`.  The split strict Dahlberg components
+`dahlbergE2_convex_dfv_signed_source_gate` and
+`dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate` are recovered
+from `dahlbergE2_lemma9_source_gate`.
 
 The corresponding audit targets are `ForwardRemainingSources`, for the
 stronger ordered-turn route, and `ForwardDfvRemainingSources`, for the final
@@ -157,11 +159,10 @@ strong-to-weak implications.  The grouped component spellings are exposed as
 `dahlbergE2DfvSourceComponents_of_dfvRemainingSources`.  On the E² side,
 `DahlbergE2RemainingSourceComponents` is equivalent to the older bundled
 `DahlbergE2GeometricSources` package, but names the exact current Dahlberg
-interfaces.  Its strict branch is split into the signed-CDFV gate
-`dahlbergE2_convex_dfv_signed_source_gate` and the Lemma 8 bridge gate
-`dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`; Lemma 9 is
-then recovered formally from those two inputs.  Its non-strict §4 branch is
-now gated at the boundary-set interface
+interfaces.  Its strict branch is currently gated at Dahlberg's Lemma 9:
+the signed-CDFV and witness-only Lemma 8 source components are recovered
+formally from `dahlbergE2_lemma9_source_gate`.  Its non-strict §4 branch is
+gated at the boundary-set interface
 `dahlbergE2_disk_auxiliary_boundary_construction_source_gate`; the
 boundary/interior source used by direct-isometry and final-D4VT routing is
 recovered formally from that gate.

@@ -7568,32 +7568,36 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
-/-- Dahlberg's convex/CDFV signed-Menger source gate.
+/-- Dahlberg's strict positive-orientation Lemma 9 source.
+
+This is the current primitive strict-branch input from Dahlberg's discrete
+four-vertex paper.  The split theorem-level signed-CDFV and witness-only
+Lemma 8 source components are recovered from it by the formal equivalence
+`dahlbergE2ConvexSignedSourceComponents_iff_lemma9Source`. -/
+theorem dahlbergE2_lemma9_source_gate : DahlbergE2Lemma9Source := by
+  sorry
+
+/-- Dahlberg's convex/CDFV signed-Menger source gate, recovered from the
+primitive Lemma 9 source.
 
 This is the theorem-level Euclidean strict-convex input used by the final
 D4VT route: Theorem 6/CDFV in Dahlberg's discrete four-vertex paper supplies
 the plateau-aware signed-Menger conclusion directly. -/
 theorem dahlbergE2_convex_dfv_signed_source_gate :
     DahlbergE2ConvexDfvSignedSource := by
-  sorry
+  exact (dahlbergE2ConvexSignedSourceComponents_of_lemma9Source
+    dahlbergE2_lemma9_source_gate).1
 
-/-- Dahlberg's Lemma 8 monotonicity bridge source gate.
+/-- Dahlberg's Lemma 8 monotonicity bridge source gate, recovered from the
+primitive Lemma 9 source.
 
 This is the ordered-turn refinement input: given the CDFV radius witnesses,
 Lemma 8 propagates the disk nesting to the adjacent radius turns used in
 Lemma 9. -/
 theorem dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate :
     DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource := by
-  sorry
-
-/-- Dahlberg's strict positive-orientation Lemma 9 source.
-
-This is now derived from the two paper-level strict-branch inputs: the
-theorem-level CDFV signed-Menger source and Lemma 8's radius-turn bridge. -/
-theorem dahlbergE2_lemma9_source_gate : DahlbergE2Lemma9Source := by
-  exact dahlbergE2Lemma9Source_of_signedComponents
-    ⟨dahlbergE2_convex_dfv_signed_source_gate,
-      dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate⟩
+  exact (dahlbergE2ConvexSignedSourceComponents_of_lemma9Source
+    dahlbergE2_lemma9_source_gate).2
 
 /-- Dahlberg's convex/CDFV signed-Menger source, extracted directly from
 Theorem 6/CDFV in Dahlberg's discrete four-vertex paper.
