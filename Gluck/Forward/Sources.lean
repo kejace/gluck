@@ -1704,6 +1704,171 @@ theorem discrete_four_vertex_H2_of_sources
   exact discrete_four_vertex_H2_kernel_of_sources
     hsrc hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
 
+/-! ## Public endpoints from fully expanded atomic sources -/
+
+/-- The Euclidean smooth four-vertex theorem from the fully expanded atomic
+source package. -/
+theorem four_vertex_E2_of_atomicSources
+    (hsrc : ForwardAtomicSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact four_vertex_E2_of_sources
+    (forwardGeometricSources_of_atomicSources hsrc) hclosed hreal hκ hper
+
+/-- The nonconstant Euclidean smooth four-vertex theorem from the fully
+expanded atomic source package. -/
+theorem four_vertex_E2_nonconstant_of_atomicSources
+    (hsrc : ForwardAtomicSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact four_vertex_E2_nonconstant_of_sources
+    (forwardGeometricSources_of_atomicSources hsrc) hclosed hreal hκ hper hnc
+
+/-- The convex Euclidean smooth four-vertex theorem from the fully expanded
+atomic source package. -/
+theorem convex_four_vertex_E2_of_atomicSources
+    (hsrc : ForwardAtomicSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hpos : ∀ t, 0 < κ t) :
+    SmoothFourVertex κ := by
+  exact convex_four_vertex_E2_of_sources
+    (forwardGeometricSources_of_atomicSources hsrc) hclosed hreal hκ hper hpos
+
+/-- The nonconstant convex Euclidean smooth four-vertex theorem from the fully
+expanded atomic source package. -/
+theorem convex_four_vertex_E2_nonconstant_of_atomicSources
+    (hsrc : ForwardAtomicSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hpos : ∀ t, 0 < κ t) (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact convex_four_vertex_E2_nonconstant_of_sources
+    (forwardGeometricSources_of_atomicSources hsrc) hclosed hreal hκ hper hpos hnc
+
+/-- The spherical smooth four-vertex theorem from the fully expanded atomic
+source package. -/
+theorem four_vertex_S2_of_atomicSources
+    (hsrc : ForwardAtomicSources) {z : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed z)
+    (hreal : Gluck.SpaceForm.Realizes 1 z κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact four_vertex_S2_of_sources
+    (forwardGeometricSources_of_atomicSources hsrc) hclosed hreal hκ hper
+
+/-- The nonconstant spherical smooth four-vertex theorem from the fully
+expanded atomic source package. -/
+theorem four_vertex_S2_nonconstant_of_atomicSources
+    (hsrc : ForwardAtomicSources) {z : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed z)
+    (hreal : Gluck.SpaceForm.Realizes 1 z κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact four_vertex_S2_nonconstant_of_sources
+    (forwardGeometricSources_of_atomicSources hsrc) hclosed hreal hκ hper hnc
+
+/-- The hyperbolic smooth four-vertex theorem from the fully expanded atomic
+source package. -/
+theorem four_vertex_H2_of_atomicSources
+    (hsrc : ForwardAtomicSources) {z : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed z)
+    (hreal : Gluck.SpaceForm.Realizes (-1) z κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact four_vertex_H2_of_sources
+    (forwardGeometricSources_of_atomicSources hsrc) hclosed hreal hκ hper
+
+/-- The nonconstant hyperbolic smooth four-vertex theorem from the fully
+expanded atomic source package. -/
+theorem four_vertex_H2_nonconstant_of_atomicSources
+    (hsrc : ForwardAtomicSources) {z : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed z)
+    (hreal : Gluck.SpaceForm.Realizes (-1) z κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
+    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
+    SmoothFourVertex κ := by
+  exact four_vertex_H2_nonconstant_of_sources
+    (forwardGeometricSources_of_atomicSources hsrc) hclosed hreal hκ hper hnc
+
+/-- The public Euclidean Dahlberg D4VT from the fully expanded atomic source
+package. -/
+theorem dahlberg_discrete_four_vertex_E2_of_atomicSources
+    (hsrc : ForwardAtomicSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex
+      (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
+  exact dahlberg_discrete_four_vertex_E2_of_sources
+    (forwardGeometricSources_of_atomicSources hsrc) hn v hsimple hregular hnoncircle
+
+/-- The spherical constant-or-Dahlberg theorem from the fully expanded atomic
+source package. -/
+theorem constant_or_dahlbergFourVertex_S2_of_atomicSources
+    (hsrc : ForwardAtomicSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_S2_of_sources
+    (forwardGeometricSources_of_atomicSources hsrc)
+    hn v κ hdisk hsimple hconvex hregular hκ
+
+/-- The spherical nonconstant discrete four-vertex theorem from the fully
+expanded atomic source package. -/
+theorem discrete_four_vertex_S2_of_atomicSources
+    (hsrc : ForwardAtomicSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact discrete_four_vertex_S2_of_sources
+    (forwardGeometricSources_of_atomicSources hsrc)
+    hn v κ hdisk hsimple hconvex hregular hκ hnc
+
+/-- The hyperbolic constant-or-Dahlberg theorem from the fully expanded atomic
+source package. -/
+theorem constant_or_dahlbergFourVertex_H2_of_atomicSources
+    (hsrc : ForwardAtomicSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_H2_of_sources
+    (forwardGeometricSources_of_atomicSources hsrc)
+    hn v κ hdisk hsimple hconvex hregular hκ hcircle
+
+/-- The hyperbolic nonconstant discrete four-vertex theorem from the fully
+expanded atomic source package. -/
+theorem discrete_four_vertex_H2_of_atomicSources
+    (hsrc : ForwardAtomicSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact discrete_four_vertex_H2_of_sources
+    (forwardGeometricSources_of_atomicSources hsrc)
+    hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
+
 /-- The current forward development is reduced to the bundled geometric source
 package.  This theorem is intentionally proved by collecting the existing
 source gates; completing the forward program means proving the components of
