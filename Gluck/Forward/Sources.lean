@@ -4229,6 +4229,116 @@ theorem dahlberg_discrete_four_vertex_E2_of_dfvPrimitiveRemainingSources
     (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
     hn v hsimple hregular hnoncircle
 
+/-- The ordinary smooth space-form four-vertex endpoint from the flattened
+primitive final-D4VT source-gate audit. -/
+theorem smoothFourVertex_spaceForm_kernel_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) {ε : ℝ}
+    (hε : ε = 0 ∨ ε = 1 ∨ ε = -1) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : SmoothForwardRealizes ε γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact smoothFourVertex_spaceForm_kernel_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hε hclosed hreal hκ hper
+
+/-- The Euclidean smooth four-vertex theorem from the flattened primitive
+final-D4VT source-gate audit. -/
+theorem four_vertex_E2_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ) (hreal : Gluck.RealizesCurvature γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact four_vertex_E2_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hclosed hreal hκ hper
+
+/-- The spherical smooth four-vertex theorem from the flattened primitive
+final-D4VT source-gate audit. -/
+theorem four_vertex_S2_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes 1 γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact four_vertex_S2_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hclosed hreal hκ hper
+
+/-- The hyperbolic smooth four-vertex theorem from the flattened primitive
+final-D4VT source-gate audit. -/
+theorem four_vertex_H2_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) {γ : ℝ → ℂ} {κ : ℝ → ℝ}
+    (hclosed : Gluck.IsSimpleClosed γ)
+    (hreal : Gluck.SpaceForm.Realizes (-1) γ κ)
+    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
+    SmoothFourVertex κ := by
+  exact four_vertex_H2_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hclosed hreal hκ hper
+
+/-- The spherical discrete constant-or-Dahlberg theorem from the flattened
+primitive final-D4VT source-gate audit. -/
+theorem constant_or_dahlbergFourVertex_S2_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_S2_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple hconvex hregular hκ
+
+/-- The spherical nonconstant discrete four-vertex theorem from the flattened
+primitive final-D4VT source-gate audit. -/
+theorem discrete_four_vertex_S2_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact discrete_four_vertex_S2_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple hconvex hregular hκ hnc
+
+/-- The hyperbolic discrete constant-or-Dahlberg theorem from the flattened
+primitive final-D4VT source-gate audit. -/
+theorem constant_or_dahlbergFourVertex_H2_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_H2_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple hconvex hregular hκ hcircle
+
+/-- The hyperbolic nonconstant discrete four-vertex theorem from the flattened
+primitive final-D4VT source-gate audit. -/
+theorem discrete_four_vertex_H2_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact discrete_four_vertex_H2_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_dfvPrimitiveRemainingSources hsrc)
+    hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
+
 /-- Primitive grouped component spelling of the current forward source audit.
 
 This exposes the exact primitive E² source gates: nonconcyclic CDFV, Lemma 8,
