@@ -6080,7 +6080,7 @@ def DahlbergE2DfvGeometricSources : Prop :=
   DahlbergE2ConvexDfvSignedSource ∧ DahlbergE2DiskReductionSource
 
 /-- Dahlberg's convex/CDFV radius-witness source, extracted directly from
-Theorem 6/CDFV in `references/23.pdf`.
+Theorem 6/CDFV in Dahlberg's discrete four-vertex paper.
 
 This is the Euclidean strict-convex source needed for the final D4VT endpoint;
 the stronger ordered-turn refinements additionally use

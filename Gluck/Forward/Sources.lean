@@ -22,7 +22,8 @@ The three components are:
   (`SmoothForwardSource`);
 * the uniform convex/coherent conformal-Menger source for `S²` and `H²`
   (`SpaceFormDiscreteSource`);
-* Dahlberg's Euclidean discrete source package from `references/23.pdf`.
+* Dahlberg's Euclidean discrete source package from the discrete four-vertex
+  paper recorded in `references/summary.md` as `23.pdf`.
 -/
 def ForwardGeometricSources : Prop :=
   SmoothForwardSource ∧
@@ -53,7 +54,8 @@ def ForwardModelSources : Prop :=
 
 This is the audit target with no nested source packages: three smooth source
 gates (`E²`, `S²`, `H²`), two non-Euclidean discrete source gates (`S²`, `H²`),
-and the two Euclidean Dahlberg discrete source gates from `references/23.pdf`. -/
+and the two Euclidean Dahlberg discrete source gates from the discrete
+four-vertex paper recorded in `references/summary.md` as `23.pdf`. -/
 def ForwardAtomicSources : Prop :=
   (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
       Gluck.IsSimpleClosed γ →
