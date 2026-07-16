@@ -252,40 +252,6 @@ theorem constant_or_dahlbergFourVertex_H2_of_dfvSource
     hsrc (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
     (by intro _; exact hcircle)
 
-/-- Spherical nonconstant final-D4VT primitive model source gate for the
-convex/coherent conformal-Menger package in an open hemisphere. -/
-theorem dahlbergFourVertex_S2_model_source_gate {n : ℕ} [NeZero n]
-    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
-    (hdisk : ∀ i, ‖v i‖ < 1)
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
-    (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger 1 v κ)
-    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
-    DahlbergFourVertex κ := by
-  sorry
-
-/-- Hyperbolic nonconstant final-D4VT primitive model source gate for
-Grant--Mogilski's convex coherent theorem in the proper-circle regime
-`κᵢ > 1`. -/
-theorem dahlbergFourVertex_H2_model_source_gate {n : ℕ} [NeZero n]
-    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
-    (hdisk : ∀ i, ‖v i‖ < 1)
-    (hsimple : Gluck.Discrete.IsSimplePolygon v)
-    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
-    (hregular : DahlbergRegular v)
-    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
-    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
-    DahlbergFourVertex κ := by
-  sorry
-
-/-- Model-specific nonconstant final-D4VT geometric source package, recovered
-from the individual weak `S²` and `H²` source gates. -/
-theorem spaceFormDiscrete_dfv_model_sources_gate :
-    SpaceFormDiscreteDfvModelSources := by
-  exact ⟨dahlbergFourVertex_S2_model_source_gate,
-    dahlbergFourVertex_H2_model_source_gate⟩
-
 /-- Model-specific nonconstant ordered-turn geometric source gate for the
 convex/coherent conformal-Menger package in `S²` and `H²`.
 
@@ -329,6 +295,43 @@ from the model-specific source package. -/
 theorem spaceFormDiscrete_source_gate : SpaceFormDiscreteSource := by
   exact spaceFormDiscreteSource_iff_modelSources.mpr
     spaceFormDiscrete_model_sources_gate
+
+/-- Spherical nonconstant final-D4VT model source gate, recovered from the
+stronger ordered-turn source gate. -/
+theorem dahlbergFourVertex_S2_model_source_gate {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (orderedAdjacentTurns_S2_model_source_gate
+      hn v κ hdisk hsimple hconvex hregular hκ hnc)
+
+/-- Hyperbolic nonconstant final-D4VT model source gate, recovered from the
+stronger ordered-turn source gate. -/
+theorem dahlbergFourVertex_H2_model_source_gate {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (orderedAdjacentTurns_H2_model_source_gate
+      hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc)
+
+/-- Model-specific nonconstant final-D4VT geometric source package, recovered
+from the individual weak `S²` and `H²` source gates. -/
+theorem spaceFormDiscrete_dfv_model_sources_gate :
+    SpaceFormDiscreteDfvModelSources := by
+  exact ⟨dahlbergFourVertex_S2_model_source_gate,
+    dahlbergFourVertex_H2_model_source_gate⟩
 
 /-- Weaker uniform final-D4VT geometric source for the convex/coherent
 conformal-Menger package in `S²` and `H²`, recovered from the weak

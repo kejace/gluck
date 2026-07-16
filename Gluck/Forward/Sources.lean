@@ -3781,8 +3781,10 @@ Dahlberg component is collected through the weak source APIs, so the final
 D4VT audit does not depend on the stronger E² Lemma 8 ordered-turn source used
 only by conformal-Menger ordered-turn refinements.  The non-Euclidean discrete
 component is also collected through weak S²/H² D4VT gates rather than the
-ordered-turn gates.  The smooth component is also collected through weak
-E²/S²/H² smooth D4VT gates rather than the stronger value-separated gates. -/
+ordered-turn gates, although those weak gates are currently proved from the
+ordered-turn gates.  The smooth component is similarly collected through weak
+E²/S²/H² smooth D4VT gates that are currently proved from the stronger
+value-separated gates. -/
 theorem forward_dfv_remaining_sources : ForwardDfvRemainingSources := by
   exact forwardDfvRemainingSources_iff_uniformComponents.mpr
     ⟨smoothForward_dfv_source,

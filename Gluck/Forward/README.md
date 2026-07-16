@@ -101,10 +101,9 @@ model-specific source names
 same uniform geometric input.  The ordinary local-extrema conclusion is exposed uniformly as
 `smoothFourVertex_spaceForm_kernel`, with the nonconstant branch available as
 `smoothFourVertex_spaceForm_nonconstant`; both are derived from the weak
-smooth final-D4VT source `smoothForward_dfv_source_gate`, whose model-specific
-primitive gates are `smoothFourVertex_E2_model_source_gate`,
-`smoothFourVertex_S2_model_source_gate`, and
-`smoothFourVertex_H2_model_source_gate`.  The
+smooth final-D4VT source `smoothForward_dfv_source_gate`; its model-specific
+weak gates are currently formal consequences of the stronger value-separated
+smooth gates.  The
 discrete forward statements for `S²` and `H²` are also exposed through
 model-specific wrappers in `Sphere.lean` and `Hyperbolic.lean`.  The shared
 dispatch theorem `constant_or_dahlbergFourVertex_spaceForm_kernel` in
@@ -120,11 +119,12 @@ theorem `orderedAdjacentTurns_spaceForm_source` are formal dispatch wrappers.  T
 model-specific source names `orderedAdjacentTurns_S2_source` and
 `orderedAdjacentTurns_H2_source` are wrappers around it.  D4VT can also be
 derived from ordered turns by the general cyclic constructor
-`dahlbergFourVertex_of_orderedAdjacentTurns_four_le`, but the weak
+`dahlbergFourVertex_of_orderedAdjacentTurns_four_le`; the weak
 non-Euclidean final-D4VT gate
 `spaceFormDiscrete_dfv_source_gate` is now recovered from the separate
 model-specific weak gates `dahlbergFourVertex_S2_model_source_gate` and
-`dahlbergFourVertex_H2_model_source_gate`, not from the ordered-turn gates.
+`dahlbergFourVertex_H2_model_source_gate`, and those weak gates are currently
+formal consequences of the stronger ordered-turn gates.
 The local weak-source API
 `dahlbergFourVertex_spaceForm_of_dfvSource` and
 `constant_or_dahlbergFourVertex_spaceForm_of_dfvSource` records the final-D4VT
@@ -137,15 +137,10 @@ is the weaker package sufficient for final D4VT endpoints.  The fully expanded
 primitive remaining-source audit is:
 
 - `Gluck/Forward/Smooth.lean`
-  - `smoothFourVertex_E2_model_source_gate`;
-  - `smoothFourVertex_S2_model_source_gate`;
-  - `smoothFourVertex_H2_model_source_gate`;
   - `four_vertex_condition_smooth_E2_model_source_gate`;
   - `four_vertex_condition_smooth_S2_model_source_gate`;
   - `four_vertex_condition_smooth_H2_model_source_gate`.
 - `Gluck/Forward/SpaceFormDiscrete.lean`
-  - `dahlbergFourVertex_S2_model_source_gate`;
-  - `dahlbergFourVertex_H2_model_source_gate`;
   - `orderedAdjacentTurns_S2_model_source_gate`;
   - `orderedAdjacentTurns_H2_model_source_gate`.
 - `Gluck/Forward/Dahlberg.lean`
@@ -156,14 +151,13 @@ primitive remaining-source audit is:
 The smooth and non-Euclidean package/uniform gates are no longer primitive:
 `smoothForward_model_sources_gate` is recovered from the three individual
 smooth model gates, `smoothForward_source_gate` is recovered from that package,
-`smoothForward_dfv_source_gate` is recovered separately from the three weak
-smooth model gates,
+`smoothForward_dfv_source_gate` is recovered through weak model gates that are
+formal consequences of the stronger smooth gates,
 `spaceFormDiscrete_model_sources_gate` is recovered from the two individual
 non-Euclidean discrete model gates, and `spaceFormDiscrete_source_gate` is
 recovered from that package.  The weak non-Euclidean final-D4VT package
-`spaceFormDiscrete_dfv_source_gate` is recovered separately from the two weak
-model gates `dahlbergFourVertex_S2_model_source_gate` and
-`dahlbergFourVertex_H2_model_source_gate`.
+`spaceFormDiscrete_dfv_source_gate` is recovered through weak model gates that
+are formal consequences of the stronger ordered-turn gates.
 Dahlberg's strict positive-orientation Lemma 9 source
 `dahlbergE2_lemma9_source_gate` is no longer primitive: it is recovered from
 the theorem-level strict CDFV gate
@@ -175,9 +169,10 @@ stronger ordered-turn route, and `ForwardDfvRemainingSources`, for the final
 D4VT route.  `forward_remaining_sources` currently collects exactly the listed
 primitive source gates.  `forward_dfv_remaining_sources` is collected through
 the weaker final-D4VT APIs, so it does not import the E² Lemma 8 ordered-turn
-source or the non-Euclidean ordered-turn gates needed only by the stronger
-ordered-turn route, and it also does not import the stronger smooth
-value-separated gates needed only by `FourVertexCondition` endpoints.  The
+source needed only by the stronger ordered-turn route.  Its smooth and
+non-Euclidean components currently inherit the stronger value-separated and
+ordered-turn gates through formal implications, while keeping weak API
+boundaries for future direct proofs.  The
 grouped component spellings are exposed as
 `forward_remaining_source_components` and
 `forward_dfv_remaining_source_components`, with component projections such as

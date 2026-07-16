@@ -320,7 +320,9 @@ theorem smoothFourVertex_E2_model_source_gate
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     SmoothFourVertex κ := by
-  sorry
+  exact smoothFourVertex_of_fourVertexCondition
+    (four_vertex_condition_smooth_E2_model_source_gate
+      hclosed hreal hκ hper hnc)
 
 /-- Spherical nonconstant ordinary smooth four-vertex primitive model source
 gate in stereographic coordinates. -/
@@ -331,7 +333,9 @@ theorem smoothFourVertex_S2_model_source_gate
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     SmoothFourVertex κ := by
-  sorry
+  exact smoothFourVertex_of_fourVertexCondition
+    (four_vertex_condition_smooth_S2_model_source_gate
+      hclosed hreal hκ hper hnc)
 
 /-- Hyperbolic nonconstant ordinary smooth four-vertex primitive model source
 gate in the Poincaré disk. -/
@@ -342,7 +346,9 @@ theorem smoothFourVertex_H2_model_source_gate
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     SmoothFourVertex κ := by
-  sorry
+  exact smoothFourVertex_of_fourVertexCondition
+    (four_vertex_condition_smooth_H2_model_source_gate
+      hclosed hreal hκ hper hnc)
 
 /-- Model-specific nonconstant smooth forward four-vertex geometric source
 package, recovered from the individual model source gates. -/
