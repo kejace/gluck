@@ -90,7 +90,7 @@ in earlier notes has been moved out of this worktree.  Do not look for
 The remaining primitive source gates in the current worktree are exactly:
 
 - `Gluck/Forward/Smooth.lean`
-  - `four_vertex_condition_smooth_E2_nonconstant_classical`;
+  - `four_vertex_condition_smooth_E2_source_gate`;
 - `Gluck/Forward/Dahlberg.lean`
   - `dahlbergE2_convex_radius_witness_source_components_primitive_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
