@@ -21,6 +21,72 @@ space-form predicate. -/
 def SmoothForwardRealizes (ε : ℝ) (γ : ℝ → ℂ) (κ : ℝ → ℝ) : Prop :=
   if ε = 0 then Gluck.RealizesCurvature γ κ else Gluck.SpaceForm.Realizes ε γ κ
 
+/-- Uniform nonconstant smooth forward four-vertex source statement for the
+project space forms `E²`, `S²`, and `H²`. -/
+def SmoothForwardSource : Prop :=
+  ∀ {ε : ℝ}, ε = 0 ∨ ε = 1 ∨ ε = -1 →
+    ∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      SmoothForwardRealizes ε γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ
+
+/-- Model-specific nonconstant smooth forward four-vertex source statements
+for `E²`, `S²`, and `H²`. -/
+def SmoothForwardModelSources : Prop :=
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.RealizesCurvature γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ) ∧
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes 1 γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ) ∧
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes (-1) γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ)
+
+/-- The uniform smooth source is equivalent to the three model-specific
+smooth sources. -/
+theorem smoothForwardSource_iff_modelSources :
+    SmoothForwardSource ↔ SmoothForwardModelSources := by
+  constructor
+  · intro hsrc
+    refine ⟨?_, ?_, ?_⟩
+    · intro γ κ hclosed hreal hκ hper hnc
+      exact hsrc (ε := 0) (Or.inl rfl) hclosed
+        (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+    · intro γ κ hclosed hreal hκ hper hnc
+      exact hsrc (ε := 1) (Or.inr (Or.inl rfl)) hclosed
+        (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+    · intro γ κ hclosed hreal hκ hper hnc
+      exact hsrc (ε := -1) (Or.inr (Or.inr rfl)) hclosed
+        (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+  · intro hsrc ε hε γ κ hclosed hreal hκ hper hnc
+    rcases hε with hE | hrest
+    · subst ε
+      exact hsrc.1 hclosed
+        (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+    · rcases hrest with hS | hH
+      · subst ε
+        exact hsrc.2.1 hclosed
+          (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+      · subst ε
+        exact hsrc.2.2 hclosed
+          (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+
 /-- Uniform nonconstant smooth forward four-vertex geometric source theorem for
 the project space forms `E²`, `S²`, and `H²`.
 
@@ -36,6 +102,13 @@ theorem four_vertex_condition_smooth_spaceForm_nonconstant_geometric_source {ε 
     Gluck.FourVertexCondition κ := by
   sorry
 
+/-- The current model-specific smooth source package, obtained from the
+uniform smooth source.  The converse direction is
+`smoothForwardSource_iff_modelSources.mpr`. -/
+theorem smoothForward_model_sources : SmoothForwardModelSources := by
+  exact smoothForwardSource_iff_modelSources.mp
+    four_vertex_condition_smooth_spaceForm_nonconstant_geometric_source
+
 /-- Euclidean nonconstant smooth forward four-vertex geometric source theorem. -/
 theorem four_vertex_condition_smooth_E2_nonconstant_geometric_source
     {γ : ℝ → ℂ} {κ : ℝ → ℝ}
@@ -44,9 +117,7 @@ theorem four_vertex_condition_smooth_E2_nonconstant_geometric_source
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     Gluck.FourVertexCondition κ := by
-  exact four_vertex_condition_smooth_spaceForm_nonconstant_geometric_source
-    (ε := 0) (Or.inl rfl) hclosed
-    (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+  exact smoothForward_model_sources.1 hclosed hreal hκ hper hnc
 
 /-- Spherical nonconstant smooth forward four-vertex geometric source theorem
 in stereographic coordinates. -/
@@ -57,9 +128,7 @@ theorem four_vertex_condition_smooth_S2_nonconstant_geometric_source
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     Gluck.FourVertexCondition κ := by
-  exact four_vertex_condition_smooth_spaceForm_nonconstant_geometric_source
-    (ε := 1) (Or.inr (Or.inl rfl)) hclosed
-    (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+  exact smoothForward_model_sources.2.1 hclosed hreal hκ hper hnc
 
 /-- Hyperbolic nonconstant smooth forward four-vertex geometric source theorem
 in the Poincaré disk. -/
@@ -70,9 +139,7 @@ theorem four_vertex_condition_smooth_H2_nonconstant_geometric_source
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
     (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     Gluck.FourVertexCondition κ := by
-  exact four_vertex_condition_smooth_spaceForm_nonconstant_geometric_source
-    (ε := -1) (Or.inr (Or.inr rfl)) hclosed
-    (by simpa [SmoothForwardRealizes] using hreal) hκ hper hnc
+  exact smoothForward_model_sources.2.2 hclosed hreal hκ hper hnc
 
 /-- Euclidean nonconstant smooth forward four-vertex source theorem. -/
 theorem four_vertex_condition_smooth_E2_nonconstant_source

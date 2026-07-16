@@ -18,20 +18,14 @@ open scoped Real
 
 The three components are:
 
-* the uniform smooth source for `E²`, `S²`, and `H²`;
+* the uniform smooth source for `E²`, `S²`, and `H²`
+  (`SmoothForwardSource`);
 * the uniform convex/coherent conformal-Menger source for `S²` and `H²`
   (`SpaceFormDiscreteSource`);
 * Dahlberg's Euclidean discrete source package from `references/23.pdf`.
 -/
 def ForwardGeometricSources : Prop :=
-  (∀ {ε : ℝ}, ε = 0 ∨ ε = 1 ∨ ε = -1 →
-    ∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
-      Gluck.IsSimpleClosed γ →
-      SmoothForwardRealizes ε γ κ →
-      Continuous κ →
-      Function.Periodic κ (2 * Real.pi) →
-      (¬ ∃ c, ∀ t, κ t = c) →
-      Gluck.FourVertexCondition κ) ∧
+  SmoothForwardSource ∧
   SpaceFormDiscreteSource ∧
   DahlbergE2GeometricSources
 
