@@ -7152,6 +7152,103 @@ structure DahlbergE2Theorem6WeakRadiusExtremaForOrderedDiskCertificate {n : ℕ}
     EdgePrevCircleRadiusProfile v (disk.i₄ : ZMod n) ≤
       EdgePrevCircleRadiusProfile v ((disk.i₄ : ZMod n) + 1)
 
+/-- Explicit plateau-resolution data for a local maximum of a cyclic real
+profile.
+
+This is the finite bookkeeping hidden in the plateau-aware definition:
+moving left and right from the chosen index, the profile stays constant until
+it exits the plateau strictly downward.  Keeping the data as a named
+structure gives the remaining Dahlberg §3 plateau argument a concrete target
+which is finer than simply asserting `DiscreteLocalMax`. -/
+structure PlateauLocalMaxResolution {n : ℕ} (κ : ZMod n → ℝ)
+    (i : ZMod n) where
+  leftSteps : ℕ
+  rightSteps : ℕ
+  left_pos : 0 < leftSteps
+  right_pos : 0 < rightSteps
+  span_le : leftSteps + rightSteps ≤ n
+  left_eq :
+    ∀ m < leftSteps, κ (i - (m : ZMod n)) = κ i
+  right_eq :
+    ∀ m < rightSteps, κ (i + (m : ZMod n)) = κ i
+  left_drop : κ (i - (leftSteps : ZMod n)) < κ i
+  right_drop : κ (i + (rightSteps : ZMod n)) < κ i
+
+/-- Explicit plateau-resolution data for a local minimum of a cyclic real
+profile.  The profile stays constant across the selected plateau and exits
+strictly upward on both sides. -/
+structure PlateauLocalMinResolution {n : ℕ} (κ : ZMod n → ℝ)
+    (i : ZMod n) where
+  leftSteps : ℕ
+  rightSteps : ℕ
+  left_pos : 0 < leftSteps
+  right_pos : 0 < rightSteps
+  span_le : leftSteps + rightSteps ≤ n
+  left_eq :
+    ∀ m < leftSteps, κ (i - (m : ZMod n)) = κ i
+  right_eq :
+    ∀ m < rightSteps, κ (i + (m : ZMod n)) = κ i
+  left_rise : κ i < κ (i - (leftSteps : ZMod n))
+  right_rise : κ i < κ (i + (rightSteps : ZMod n))
+
+/-- Plateau-resolution data is exactly the witness package needed by the
+plateau-aware local-maximum definition. -/
+theorem discreteLocalMax_of_plateauLocalMaxResolution {n : ℕ}
+    {κ : ZMod n → ℝ} {i : ZMod n}
+    (h : PlateauLocalMaxResolution κ i) :
+    DiscreteLocalMax κ i := by
+  rcases h with
+    ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq, hleft_drop, hright_drop⟩
+  exact ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq,
+    hleft_drop, hright_drop⟩
+
+/-- Plateau-resolution data is exactly the witness package needed by the
+plateau-aware local-minimum definition. -/
+theorem discreteLocalMin_of_plateauLocalMinResolution {n : ℕ}
+    {κ : ZMod n → ℝ} {i : ZMod n}
+    (h : PlateauLocalMinResolution κ i) :
+    DiscreteLocalMin κ i := by
+  rcases h with
+    ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq, hleft_rise, hright_rise⟩
+  exact ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq,
+    hleft_rise, hright_rise⟩
+
+/-- Plateau-resolution data attached to the four ordered disks in Dahlberg's
+Theorem 6.
+
+The weak one-step inequalities from the disk-containment/missing hypotheses
+are proved formally above.  What remains from Dahlberg's §3 plateau argument
+is precisely the existence of these four left/right plateau exits for the
+same ordered disks. -/
+structure DahlbergE2Theorem6PlateauResolutionForOrderedDiskCertificate
+    {n : ℕ} {v : ZMod n → ℂ}
+    (disk : DahlbergE2Theorem6OrderedDiskCertificate v) where
+  max₁ :
+    PlateauLocalMaxResolution (EdgePrevCircleRadiusProfile v)
+      (disk.i₁ : ZMod n)
+  min₂ :
+    PlateauLocalMinResolution (EdgePrevCircleRadiusProfile v)
+      (disk.i₂ : ZMod n)
+  max₃ :
+    PlateauLocalMaxResolution (EdgePrevCircleRadiusProfile v)
+      (disk.i₃ : ZMod n)
+  min₄ :
+    PlateauLocalMinResolution (EdgePrevCircleRadiusProfile v)
+      (disk.i₄ : ZMod n)
+
+/-- The explicit plateau-resolution certificate supplies the local-extremum
+package used by the CDFV certificate. -/
+theorem dahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate_of_plateauResolution
+    {n : ℕ} {v : ZMod n → ℂ}
+    {disk : DahlbergE2Theorem6OrderedDiskCertificate v}
+    (h : DahlbergE2Theorem6PlateauResolutionForOrderedDiskCertificate disk) :
+    DahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate disk := by
+  exact
+    { localMax₁ := discreteLocalMax_of_plateauLocalMaxResolution h.max₁
+      localMin₂ := discreteLocalMin_of_plateauLocalMinResolution h.min₂
+      localMax₃ := discreteLocalMax_of_plateauLocalMaxResolution h.max₃
+      localMin₄ := discreteLocalMin_of_plateauLocalMinResolution h.min₄ }
+
 /-- Boundary incidence for the four ordered curvature disks appearing in
 Dahlberg's Theorem 6 / CDFV.  Each curvature circle passes through the three
 vertices that define it. -/
@@ -8070,6 +8167,35 @@ def DahlbergE2Theorem6PlateauExtremaUpgradeSource : Prop :=
     ∀ weak : DahlbergE2Theorem6WeakGeometricAssemblyCertificate v,
       Nonempty (DahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate weak.disk)
 
+/-- Finer plateau upgrade for Dahlberg §3 Theorem 6: for the fixed weak
+ordered-disk certificate, the remaining argument produces explicit
+left/right plateau exits at the four ordered disks.
+
+This source is closer to the paper proof than
+`DahlbergE2Theorem6PlateauExtremaUpgradeSource`: it does not directly assert
+local extrema, but asserts the finite plateau-resolution data from which the
+local-extremum package is formally reconstructed. -/
+def DahlbergE2Theorem6PlateauResolutionUpgradeSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ Concyclic v) →
+    ∀ weak : DahlbergE2Theorem6WeakGeometricAssemblyCertificate v,
+      Nonempty
+        (DahlbergE2Theorem6PlateauResolutionForOrderedDiskCertificate weak.disk)
+
+/-- Explicit plateau exits imply the sharper local-extrema upgrade source. -/
+theorem dahlbergE2Theorem6PlateauExtremaUpgradeSource_of_plateauResolutionUpgradeSource
+    (hsrc : DahlbergE2Theorem6PlateauResolutionUpgradeSource) :
+    DahlbergE2Theorem6PlateauExtremaUpgradeSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle weak
+  letI : NeZero n := hne
+  rcases hsrc hn hsimple hregular horient hnoncircle weak with ⟨hres⟩
+  exact ⟨
+    dahlbergE2Theorem6RadiusExtremaForOrderedDiskCertificate_of_plateauResolution
+      hres⟩
+
 /-- The sharper plateau-extrema source implies the older plateau-upgrade
 source by rebuilding a geometric assembly certificate from the upgraded
 extrema for the weak certificate's own ordered disk. -/
@@ -8175,22 +8301,24 @@ def DahlbergE2Theorem6OrderedDiskPaperSources : Prop :=
   DahlbergE2Theorem6PlateauUpgradeSource
 
 /-- Sharpest current §3 paper-facing source package: Lemma 5, Lemma 7,
-ordered disk selection, and the plateau-extrema upgrade for the selected weak
-certificate.  Everything else in weak/geometric assembly is formal. -/
+ordered disk selection, and explicit plateau-resolution data for the selected
+weak certificate.  Everything else in weak/geometric assembly is formal. -/
 def DahlbergE2Theorem6SharpOrderedDiskPaperSources : Prop :=
   DahlbergE2Theorem6Lemma5ContainingDisksSource ∧
   DahlbergE2Theorem6Lemma7InteriorMissingDisksSource ∧
   DahlbergE2Theorem6OrderedDiskSelectionSource ∧
-  DahlbergE2Theorem6PlateauExtremaUpgradeSource
+  DahlbergE2Theorem6PlateauResolutionUpgradeSource
 
 /-- The sharpest current §3 package implies the ordered-disk package by
-wrapping the plateau-extrema upgrade as the older plateau-upgrade source. -/
+turning explicit plateau exits into local extrema and then wrapping that as
+the older plateau-upgrade source. -/
 theorem dahlbergE2Theorem6OrderedDiskPaperSources_of_sharpOrderedDiskPaperSources
     (hsrc : DahlbergE2Theorem6SharpOrderedDiskPaperSources) :
     DahlbergE2Theorem6OrderedDiskPaperSources := by
   exact ⟨hsrc.1, hsrc.2.1, hsrc.2.2.1,
     dahlbergE2Theorem6PlateauUpgradeSource_of_plateauExtremaUpgradeSource
-      hsrc.2.2.2⟩
+      (dahlbergE2Theorem6PlateauExtremaUpgradeSource_of_plateauResolutionUpgradeSource
+        hsrc.2.2.2)⟩
 
 /-- The ordered-disk §3 source package implies the older weak package by
 constructing the weak geometric assembly certificate formally. -/
@@ -10898,9 +11026,9 @@ def DahlbergE2PaperTheoremSources : Prop :=
 /-- The actual remaining paper theorem sources after the local part of
 Dahlberg's Lemma 8 has been formalized:
 
-* Theorem 6 / CDFV, sharpened to ordered-disk selection plus the plateau
-  extrema upgrade for the selected weak certificate; weak/geometric assembly
-  is then formal;
+* Theorem 6 / CDFV, sharpened to ordered-disk selection plus explicit
+  plateau-resolution data for the selected weak certificate; weak/geometric
+  assembly and local-extremum reconstruction are then formal;
 * the global monotone-arc extraction in Lemma 8;
 * the final §4 auxiliary-polygon construction.
 
