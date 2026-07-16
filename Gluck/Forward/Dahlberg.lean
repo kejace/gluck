@@ -192,6 +192,26 @@ theorem minimalEnclosingDiskR2_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
       field_simp [hr.ne']
     nlinarith [hr, hscale]
 
+/-- Positive real homotheties preserve minimal enclosing disks exactly,
+scaling the radius by the same factor. -/
+theorem minimalEnclosingDiskR2_posRealHomothety_iff {n : ℕ} {r : ℝ} (hr : 0 < r)
+    (O : ℂ) (R : ℝ) (v : ZMod n → ℂ) :
+    MinimalEnclosingDiskR2 (fun i => (r : ℂ) * v i) ((r : ℂ) * O) (r * R) ↔
+      MinimalEnclosingDiskR2 v O R := by
+  constructor
+  · intro hΔ
+    refine ⟨?_, ?_, ?_⟩
+    · nlinarith [hr, hΔ.1]
+    · exact (polygonInClosedDiskR2_posRealHomothety hr O R v).mp hΔ.2.1
+    · intro O' R' hR' hcontains
+      have hcontains_scaled :
+          PolygonInClosedDiskR2 (fun i => (r : ℂ) * v i) ((r : ℂ) * O') (r * R') :=
+        (polygonInClosedDiskR2_posRealHomothety hr O' R' v).mpr hcontains
+      have hmin := hΔ.2.2 ((r : ℂ) * O') (r * R')
+        (mul_nonneg hr.le hR') hcontains_scaled
+      nlinarith [hr]
+  · exact minimalEnclosingDiskR2_posRealHomothety hr O R v
+
 /-- Direct Euclidean isometries preserve concyclicity. -/
 theorem concyclic_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
     (w : ℂ) (v : ZMod n → ℂ) :
