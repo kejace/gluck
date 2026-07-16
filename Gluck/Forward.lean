@@ -12,5 +12,5 @@ This module re-exports only the active forward-theorem development:
   `references/23.pdf`.
 
 Space-form discrete, conformal-Menger, and non-Euclidean wrapper work has been
-parked under `Gluck.Forward.Deferred`.
+moved out to the separate `feat-deferred` worktree.
 -/
