@@ -1082,6 +1082,20 @@ theorem spaceFormDiscreteDfvModelSources_of_dfvPrimitiveRemainingSources
     SpaceFormDiscreteDfvModelSources := by
   exact (forwardDfvPrimitiveRemainingSources_iff_components.mp hsrc).2.1
 
+/-- Extract the smooth final-D4VT uniform source from the primitive
+final-D4VT remaining-source package. -/
+theorem smoothForwardDfvSource_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) :
+    SmoothForwardDfvSource := by
+  exact (forwardDfvPrimitiveRemainingSources_iff_uniformComponents.mp hsrc).1
+
+/-- Extract the non-Euclidean discrete final-D4VT uniform source from the
+primitive final-D4VT remaining-source package. -/
+theorem spaceFormDiscreteDfvSource_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) :
+    SpaceFormDiscreteDfvSource := by
+  exact (forwardDfvPrimitiveRemainingSources_iff_uniformComponents.mp hsrc).2.1
+
 /-- Extract the primitive `E²` final-D4VT Dahlberg block from the primitive
 final-D4VT remaining-source package. -/
 theorem dahlbergE2DfvPrimitiveSourceComponents_of_dfvPrimitiveRemainingSources
@@ -4533,8 +4547,7 @@ theorem constant_or_dahlbergFourVertex_spaceForm_kernel_of_dfvPrimitiveRemaining
     (hproper : ε < 0 → ∀ i, 1 < κ i) :
     (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
   exact constant_or_dahlbergFourVertex_spaceForm_of_dfvSource
-    (spaceFormDiscreteDfvSource_iff_modelSources.mpr
-      (spaceFormDiscreteDfvModelSources_of_dfvPrimitiveRemainingSources hsrc))
+    (spaceFormDiscreteDfvSource_of_dfvPrimitiveRemainingSources hsrc)
     hε hn v κ hdisk hsimple hconvex hregular hκ hproper
 
 /-- The public E² Dahlberg theorem from the flattened primitive final-D4VT
@@ -4605,8 +4618,7 @@ theorem smoothFourVertex_spaceForm_kernel_of_dfvPrimitiveRemainingSources
     (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi)) :
     SmoothFourVertex κ := by
   exact smoothFourVertex_spaceForm_kernel_of_dfvSource
-    (smoothForwardDfvSource_iff_modelSources.mpr
-      (smoothForwardDfvModelSources_of_dfvPrimitiveRemainingSources hsrc))
+    (smoothForwardDfvSource_of_dfvPrimitiveRemainingSources hsrc)
     hε hclosed hreal hκ hper
 
 /-- The Euclidean smooth four-vertex theorem from the flattened primitive
@@ -4672,8 +4684,7 @@ theorem discrete_four_vertex_S2_of_dfvPrimitiveRemainingSources
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
   exact dahlbergFourVertex_spaceForm_of_dfvSource
-    (spaceFormDiscreteDfvSource_iff_modelSources.mpr
-      (spaceFormDiscreteDfvModelSources_of_dfvPrimitiveRemainingSources hsrc))
+    (spaceFormDiscreteDfvSource_of_dfvPrimitiveRemainingSources hsrc)
     (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple hconvex hregular hκ
     (by intro hlt; norm_num at hlt) hnc
 
@@ -4705,8 +4716,7 @@ theorem discrete_four_vertex_H2_of_dfvPrimitiveRemainingSources
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     DahlbergFourVertex κ := by
   exact dahlbergFourVertex_spaceForm_of_dfvSource
-    (spaceFormDiscreteDfvSource_iff_modelSources.mpr
-      (spaceFormDiscreteDfvModelSources_of_dfvPrimitiveRemainingSources hsrc))
+    (spaceFormDiscreteDfvSource_of_dfvPrimitiveRemainingSources hsrc)
     (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple hconvex hregular hκ
     (by intro _; exact hcircle) hnc
 
@@ -4739,14 +4749,12 @@ private theorem cod4v_conformal_kernel_of_dfvPrimitiveRemainingSources
   · rcases hrest with hS | hH
     · subst ε
       exact constant_or_dahlbergFourVertex_spaceForm_of_dfvSource
-        (spaceFormDiscreteDfvSource_iff_modelSources.mpr
-          (spaceFormDiscreteDfvModelSources_of_dfvPrimitiveRemainingSources hsrc))
+        (spaceFormDiscreteDfvSource_of_dfvPrimitiveRemainingSources hsrc)
         (ε := 1) (Or.inl rfl) hn v κ hdisk hsimple horient hregular hκ
         (by intro hlt; norm_num at hlt)
     · subst ε
       exact constant_or_dahlbergFourVertex_spaceForm_of_dfvSource
-        (spaceFormDiscreteDfvSource_iff_modelSources.mpr
-          (spaceFormDiscreteDfvModelSources_of_dfvPrimitiveRemainingSources hsrc))
+        (spaceFormDiscreteDfvSource_of_dfvPrimitiveRemainingSources hsrc)
         (ε := -1) (Or.inr rfl) hn v κ hdisk hsimple horient hregular hκ hproper
 
 /-- The conformal-Menger constant-or-Dahlberg kernel over `E²`, `S²`, and
