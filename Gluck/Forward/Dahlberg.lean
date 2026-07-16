@@ -561,6 +561,80 @@ theorem mem_segment_directIsometry {u : ℂ} (hu : ‖u‖ = 1)
     refine ⟨t, ht, ?_⟩
     rw [← directIsometryR2_lineMap, hz]
 
+/-- Direct Euclidean isometries preserve simple cyclic polygons. -/
+theorem isSimplePolygon_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
+    (w : ℂ) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) :
+    Gluck.Discrete.IsSimplePolygon (fun i => directIsometryR2 u w (v i)) := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro i h
+    exact hsimple.1 i ((directIsometryR2_injective hu w) h)
+  · intro i
+    ext z
+    constructor
+    · intro hz
+      let z₀ : ℂ := u⁻¹ * (z - w)
+      have hzcenter : directIsometryR2 u w z₀ = z := by
+        exact directIsometryR2_inverse_center hu w z
+      have hzleft : z₀ ∈ segment ℝ (v i) (v (i + 1)) := by
+        rw [← mem_segment_directIsometry hu w (v i) (v (i + 1)) z₀]
+        simpa [hzcenter] using hz.1
+      have hzright : z₀ ∈ segment ℝ (v (i + 1)) (v (i + 1 + 1)) := by
+        rw [← mem_segment_directIsometry hu w (v (i + 1)) (v (i + 1 + 1)) z₀]
+        simpa [hzcenter] using hz.2
+      have hz₀ :
+          z₀ ∈ segment ℝ (v i) (v (i + 1)) ∩
+              segment ℝ (v (i + 1)) (v (i + 1 + 1)) := ⟨hzleft, hzright⟩
+      rw [hsimple.2.1 i] at hz₀
+      have hz₀eq : z₀ = v (i + 1) := by
+        simpa using hz₀
+      rw [← hzcenter, hz₀eq]
+      exact Set.mem_singleton _
+    · intro hz
+      have hz_eq : z = directIsometryR2 u w (v (i + 1)) := by
+        simpa using hz
+      rw [hz_eq]
+      refine ⟨?_, ?_⟩
+      · exact (mem_segment_directIsometry hu w (v i) (v (i + 1)) (v (i + 1))).mpr
+          (right_mem_segment ℝ (v i) (v (i + 1)))
+      · exact (mem_segment_directIsometry hu w (v (i + 1)) (v (i + 1 + 1)) (v (i + 1))).mpr
+          (left_mem_segment ℝ (v (i + 1)) (v (i + 1 + 1)))
+  · intro i j hij hij_next hji_next
+    ext z
+    constructor
+    · intro hz
+      let z₀ : ℂ := u⁻¹ * (z - w)
+      have hzcenter : directIsometryR2 u w z₀ = z := by
+        exact directIsometryR2_inverse_center hu w z
+      have hzleft : z₀ ∈ segment ℝ (v i) (v (i + 1)) := by
+        rw [← mem_segment_directIsometry hu w (v i) (v (i + 1)) z₀]
+        simpa [hzcenter] using hz.1
+      have hzright : z₀ ∈ segment ℝ (v j) (v (j + 1)) := by
+        rw [← mem_segment_directIsometry hu w (v j) (v (j + 1)) z₀]
+        simpa [hzcenter] using hz.2
+      have hz₀ :
+          z₀ ∈ segment ℝ (v i) (v (i + 1)) ∩
+              segment ℝ (v j) (v (j + 1)) := ⟨hzleft, hzright⟩
+      rw [hsimple.2.2 i j hij hij_next hji_next] at hz₀
+      exact hz₀.elim
+    · intro hz
+      exact hz.elim
+
+/-- Direct Euclidean isometries preserve simple cyclic polygons exactly. -/
+theorem isSimplePolygon_directIsometry_iff {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
+    (w : ℂ) (v : ZMod n → ℂ) :
+    Gluck.Discrete.IsSimplePolygon (fun i => directIsometryR2 u w (v i)) ↔
+      Gluck.Discrete.IsSimplePolygon v := by
+  constructor
+  · intro hsimple
+    have huinv : ‖u⁻¹‖ = 1 := by
+      rw [norm_inv, hu, inv_one]
+    have hpre :=
+      isSimplePolygon_directIsometry (u := u⁻¹) huinv (-(u⁻¹ * w))
+        (v := fun i => directIsometryR2 u w (v i)) hsimple
+    simpa [directIsometryR2_inverse_apply hu w] using hpre
+  · exact isSimplePolygon_directIsometry hu w
+
 /-- Direct Euclidean isometries preserve membership of a circumcentre in a
 vertex cone. -/
 theorem inVertexCone_directIsometry (u w A B C O : ℂ)
@@ -6406,6 +6480,31 @@ def DahlbergE2DiskReductionSource : Prop :=
     (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
     DahlbergDiskAuxiliaryReduction v
 
+/-- A non-strict disk-reduction source is compatible with direct Euclidean
+normalization. -/
+theorem dahlbergE2DiskReductionSource_directIsometry
+    (hsrc : DahlbergE2DiskReductionSource)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (hnoncircle : ¬ Concyclic (fun i => directIsometryR2 u a (v i)))
+    (hnonstrict :
+      ¬ (PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)) ∨
+        NegativePolygonOrientation (fun i => directIsometryR2 u a (v i)))) :
+    DahlbergDiskAuxiliaryReduction (fun i => directIsometryR2 u a (v i)) := by
+  have hsimple₀ : Gluck.Discrete.IsSimplePolygon v :=
+    (isSimplePolygon_directIsometry_iff hu a v).mp hsimple
+  have hregular₀ : DahlbergRegular v :=
+    (dahlbergRegular_directIsometry_iff hu a v).mp hregular
+  have hnoncircle₀ : ¬ Concyclic v :=
+    (not_concyclic_directIsometry hu a v).mp hnoncircle
+  have hnonstrict₀ : ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v) :=
+    (not_strictPolygonOrientation_directIsometry hu a v).mp hnonstrict
+  exact dahlbergDiskAuxiliaryReduction_directIsometry hu a
+    (hsrc hn hsimple₀ hregular₀ hnoncircle₀ hnonstrict₀)
+
 /-- Finite Euclidean source: every cyclic vertex set has a least enclosing
 closed disk.  This is the first compactness/finite-set input in Dahlberg's
 §4 proof. -/
@@ -6448,6 +6547,35 @@ def DahlbergE2DiskAuxiliaryConstructionSource : Prop :=
     (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
     DahlbergDiskReductionSetup v →
     DahlbergDiskAuxiliaryReduction v
+
+/-- A §4 auxiliary-construction source may be applied after a direct Euclidean
+normalization.  All input hypotheses are pulled back by the inverse isometry,
+and the resulting auxiliary-reduction package is transported forward. -/
+theorem dahlbergE2DiskAuxiliaryConstructionSource_directIsometry
+    (hsrc : DahlbergE2DiskAuxiliaryConstructionSource)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (hnoncircle : ¬ Concyclic (fun i => directIsometryR2 u a (v i)))
+    (hnonstrict :
+      ¬ (PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)) ∨
+        NegativePolygonOrientation (fun i => directIsometryR2 u a (v i))))
+    (hsetup : DahlbergDiskReductionSetup (fun i => directIsometryR2 u a (v i))) :
+    DahlbergDiskAuxiliaryReduction (fun i => directIsometryR2 u a (v i)) := by
+  have hsimple₀ : Gluck.Discrete.IsSimplePolygon v :=
+    (isSimplePolygon_directIsometry_iff hu a v).mp hsimple
+  have hregular₀ : DahlbergRegular v :=
+    (dahlbergRegular_directIsometry_iff hu a v).mp hregular
+  have hnoncircle₀ : ¬ Concyclic v :=
+    (not_concyclic_directIsometry hu a v).mp hnoncircle
+  have hnonstrict₀ : ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v) :=
+    (not_strictPolygonOrientation_directIsometry hu a v).mp hnonstrict
+  have hsetup₀ : DahlbergDiskReductionSetup v :=
+    (dahlbergDiskReductionSetup_directIsometry hu a v).mp hsetup
+  exact dahlbergDiskAuxiliaryReduction_directIsometry hu a
+    (hsrc hn hsimple₀ hregular₀ hnoncircle₀ hnonstrict₀ hsetup₀)
 
 /-- The two source components of Dahlberg's §4 non-strict disk reduction:
 the minimal-disk/boundary setup and the auxiliary-polygon construction from
