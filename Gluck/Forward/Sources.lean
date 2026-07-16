@@ -825,6 +825,88 @@ theorem dahlbergE2DfvSourceComponents_of_remainingSources
   exact dahlbergE2DfvSourceComponents_of_dfvRemainingSources
     (forwardDfvRemainingSources_of_remainingSources hsrc)
 
+/-- Extract the smooth model-source block from the primitive remaining-source
+package. -/
+theorem smoothForwardModelSources_of_primitiveRemainingSources
+    (hsrc : ForwardPrimitiveRemainingSources) :
+    SmoothForwardModelSources := by
+  exact (forwardPrimitiveRemainingSources_iff_components.mp hsrc).1
+
+/-- Extract the non-Euclidean discrete model-source block from the primitive
+remaining-source package. -/
+theorem spaceFormDiscreteModelSources_of_primitiveRemainingSources
+    (hsrc : ForwardPrimitiveRemainingSources) :
+    SpaceFormDiscreteModelSources := by
+  exact (forwardPrimitiveRemainingSources_iff_components.mp hsrc).2.1
+
+/-- Extract the primitive `E²` Dahlberg block from the primitive
+remaining-source package. -/
+theorem dahlbergE2PrimitiveRemainingSourceComponents_of_primitiveRemainingSources
+    (hsrc : ForwardPrimitiveRemainingSources) :
+    DahlbergE2PrimitiveRemainingSourceComponents := by
+  exact (forwardPrimitiveRemainingSources_iff_components.mp hsrc).2.2
+
+/-- Extract Dahlberg's primitive nonconcyclic signed-CDFV source from the
+primitive remaining-source package. -/
+theorem dahlbergE2ConvexDfvSignedNonconcyclicSource_of_primitiveRemainingSources
+    (hsrc : ForwardPrimitiveRemainingSources) :
+    DahlbergE2ConvexDfvSignedNonconcyclicSource := by
+  exact (dahlbergE2PrimitiveRemainingSourceComponents_of_primitiveRemainingSources
+    hsrc).1
+
+/-- Extract Dahlberg's primitive witness-only Lemma 8 bridge source from the
+primitive remaining-source package. -/
+theorem dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_primitiveRemainingSources
+    (hsrc : ForwardPrimitiveRemainingSources) :
+    DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource := by
+  exact (dahlbergE2PrimitiveRemainingSourceComponents_of_primitiveRemainingSources
+    hsrc).2.1
+
+/-- Extract Dahlberg's primitive normalized unit-disk §4 source from the
+primitive remaining-source package. -/
+theorem dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_primitiveRemainingSources
+    (hsrc : ForwardPrimitiveRemainingSources) :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource := by
+  exact (dahlbergE2PrimitiveRemainingSourceComponents_of_primitiveRemainingSources
+    hsrc).2.2
+
+/-- Extract the smooth final-D4VT model-source block from the primitive
+final-D4VT remaining-source package. -/
+theorem smoothForwardDfvModelSources_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) :
+    SmoothForwardDfvModelSources := by
+  exact (forwardDfvPrimitiveRemainingSources_iff_components.mp hsrc).1
+
+/-- Extract the non-Euclidean discrete final-D4VT model-source block from the
+primitive final-D4VT remaining-source package. -/
+theorem spaceFormDiscreteDfvModelSources_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) :
+    SpaceFormDiscreteDfvModelSources := by
+  exact (forwardDfvPrimitiveRemainingSources_iff_components.mp hsrc).2.1
+
+/-- Extract the primitive `E²` final-D4VT Dahlberg block from the primitive
+final-D4VT remaining-source package. -/
+theorem dahlbergE2DfvPrimitiveSourceComponents_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) :
+    DahlbergE2DfvPrimitiveSourceComponents := by
+  exact (forwardDfvPrimitiveRemainingSources_iff_components.mp hsrc).2.2
+
+/-- Extract Dahlberg's primitive final-D4VT nonconcyclic signed-CDFV source
+from the primitive final-D4VT remaining-source package. -/
+theorem dahlbergE2ConvexDfvSignedNonconcyclicSource_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) :
+    DahlbergE2ConvexDfvSignedNonconcyclicSource := by
+  exact (dahlbergE2DfvPrimitiveSourceComponents_of_dfvPrimitiveRemainingSources
+    hsrc).1
+
+/-- Extract Dahlberg's primitive final-D4VT normalized unit-disk §4 source from
+the primitive final-D4VT remaining-source package. -/
+theorem dahlbergE2UnitConstructionSource_of_dfvPrimitiveRemainingSources
+    (hsrc : ForwardDfvPrimitiveRemainingSources) :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource := by
+  exact (dahlbergE2DfvPrimitiveSourceComponents_of_dfvPrimitiveRemainingSources
+    hsrc).2
+
 /-- Extract Dahlberg's `E²` CDFV radius-witness source from the sharper
 remaining-source package. -/
 theorem dahlbergE2ConvexDfvRadiusSource_of_remainingSources
