@@ -105,10 +105,12 @@ maxima with `κ > 1 / R`, hence
 The Dahlberg gate is now split as `DahlbergE2PaperTheoremSources`, with three
 paper-level components:
 
-- `DahlbergE2Theorem6CdfvSource`: §3 Theorem 6 / CDFV, as a geometric
-  curvature-disk certificate retaining the two disks that contain all vertices,
-  the two disks whose interiors miss all vertices, and the corresponding
-  pairwise distinct curvature circles and radius-profile extrema;
+- `DahlbergE2Theorem6CdfvSource`: §3 Theorem 6 / CDFV, now split into
+  `DahlbergE2Theorem6Lemma5ContainingDisksSource`,
+  `DahlbergE2Theorem6Lemma7InteriorMissingDisksSource`, and
+  `DahlbergE2Theorem6AssemblySource`.  These retain the paper's two
+  containing curvature disks, two interior-missing curvature disks, pairwise
+  distinct curvature circles, and the radius-profile extrema used downstream;
 - `DahlbergE2Lemma8DiskNestingSource`: §4 Lemma 8's disk-nesting propagation,
   producing the named `DahlbergE2Lemma8DiskNestingCertificate`, i.e. the eight
   ordered one-step previous-radius inequalities used by Lemma 9.  The local
@@ -123,7 +125,9 @@ paper-level components:
 The older compact source package `DahlbergE2PaperSourceComponents` and
 `dahlbergE2_paper_source_components_gate` are now recovered formally from this
 split package by `dahlbergE2PaperSourceComponents_of_paperTheoremSources`.
-The geometric CDFV certificate projects to the older radius-witness source via
+The split §3 CDFV sources project to the geometric CDFV certificate via
+`dahlbergE2Theorem6GeometricCdfvSource_of_paperSources`, and then to the older
+radius-witness source via
 `dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_theorem6GeometricSource`.
 The current primitive discrete gate is the smaller
 `dahlbergE2_paper_remaining_theorem_sources_gate`; it no longer includes the
@@ -218,9 +222,12 @@ formal proofs.  The relevant paper sources are:
   extrema with the two maxima value-separated above the two minima,
   `max(κ q₁, κ q₂) < min(κ p₁, κ p₂)`.
 - Dahlberg, *A Discrete Four Vertex Theorem* (`references/23.pdf`) for the
-  remaining discrete gate: §3 Theorem 6 (CDFV), the global monotone-arc part
-  of §4 Lemma 8, and the §4 proof of Theorem 1.  In Lean these are now named
-  separately as `DahlbergE2Theorem6CdfvSource`,
+  remaining discrete gate: §3 Lemma 5, §3 Lemma 7, the assembly step of §3
+  Theorem 6 (CDFV), the global monotone-arc part of §4 Lemma 8, and the §4
+  proof of Theorem 1.  In Lean these are now named separately as
+  `DahlbergE2Theorem6Lemma5ContainingDisksSource`,
+  `DahlbergE2Theorem6Lemma7InteriorMissingDisksSource`,
+  `DahlbergE2Theorem6AssemblySource`,
   `DahlbergE2Lemma8MonotoneArcExtractionSource`, and
   `DahlbergE2Section4AuxiliaryPolygonSource`; the local edge-region inclusion
   in Lemma 8 is already formalized.

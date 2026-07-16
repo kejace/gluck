@@ -6509,6 +6509,26 @@ theorem edgePrevCurvatureDiskContainsAll_self {n : ℕ}
       EdgePrevCircleRadiusProfile v i := by
   exact hcontains i
 
+/-- Dahlberg §3 Lemma 5 certificate: two distinct curvature disks contain all
+vertices. -/
+structure DahlbergE2Theorem6ContainingDisksCertificate {n : ℕ}
+    (v : ZMod n → ℂ) where
+  i : ZMod n
+  j : ZMod n
+  contains_i : EdgePrevCurvatureDiskContainsAll v i
+  contains_j : EdgePrevCurvatureDiskContainsAll v j
+  distinct : EdgePrevCurvatureCirclesDistinct v i j
+
+/-- Dahlberg §3 Lemma 7 certificate: two distinct curvature disks have no
+vertex in their interiors. -/
+structure DahlbergE2Theorem6InteriorMissingDisksCertificate {n : ℕ}
+    (v : ZMod n → ℂ) where
+  i : ZMod n
+  j : ZMod n
+  misses_i : EdgePrevCurvatureDiskInteriorMissesAll v i
+  misses_j : EdgePrevCurvatureDiskInteriorMissesAll v j
+  distinct : EdgePrevCurvatureCirclesDistinct v i j
+
 /-- A Lean-side certificate for Dahlberg's Theorem 6 / CDFV.
 
 The paper states the result using four curvature disks: two whose interiors
@@ -6783,6 +6803,56 @@ def DahlbergE2Theorem6GeometricCdfvSource : Prop :=
     PositivePolygonOrientation v →
     (¬ Concyclic v) →
     Nonempty (DahlbergE2Theorem6CdfvCertificate v)
+
+/-- Dahlberg §3 Lemma 5 source: in the strictly convex nonconcyclic branch,
+there are two distinct curvature disks containing all vertices. -/
+def DahlbergE2Theorem6Lemma5ContainingDisksSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ Concyclic v) →
+    Nonempty (DahlbergE2Theorem6ContainingDisksCertificate v)
+
+/-- Dahlberg §3 Lemma 7 source: in the strictly convex nonconcyclic branch,
+there are two distinct curvature disks whose interiors contain no vertices. -/
+def DahlbergE2Theorem6Lemma7InteriorMissingDisksSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ Concyclic v) →
+    Nonempty (DahlbergE2Theorem6InteriorMissingDisksCertificate v)
+
+/-- The final §3 assembly step in Dahlberg's proof of Theorem 6: the two
+Lemma 5 disks and two Lemma 7 disks are arranged into the ordered CDFV
+certificate used by the Lean reduction. -/
+def DahlbergE2Theorem6AssemblySource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ Concyclic v) →
+    Nonempty (DahlbergE2Theorem6ContainingDisksCertificate v) →
+    Nonempty (DahlbergE2Theorem6InteriorMissingDisksCertificate v) →
+    Nonempty (DahlbergE2Theorem6CdfvCertificate v)
+
+/-- Paper-facing sources for Dahlberg's §3 Theorem 6 / CDFV: Lemma 5,
+Lemma 7, and their final assembly. -/
+def DahlbergE2Theorem6PaperSources : Prop :=
+  DahlbergE2Theorem6Lemma5ContainingDisksSource ∧
+  DahlbergE2Theorem6Lemma7InteriorMissingDisksSource ∧
+  DahlbergE2Theorem6AssemblySource
+
+/-- The split §3 paper sources imply the current geometric CDFV source. -/
+theorem dahlbergE2Theorem6GeometricCdfvSource_of_paperSources
+    (hsrc : DahlbergE2Theorem6PaperSources) :
+    DahlbergE2Theorem6GeometricCdfvSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle
+  letI : NeZero n := hne
+  exact hsrc.2.2 hn hsimple hregular horient hnoncircle
+    (hsrc.1 hn hsimple hregular horient hnoncircle)
+    (hsrc.2.1 hn hsimple hregular horient hnoncircle)
 
 /-- A CDFV certificate projects to the radius-profile four-vertex witness
 used by the formal reduction. -/
@@ -9263,7 +9333,7 @@ of the four circles.  The Lean interface records the equivalent
 plateau-aware four-vertex statement for the previous curvature-radius
 profile. -/
 def DahlbergE2Theorem6CdfvSource : Prop :=
-  DahlbergE2Theorem6GeometricCdfvSource
+  DahlbergE2Theorem6PaperSources
 
 /-- Dahlberg's Lemma 8 disk-nesting source in the current proof interface.
 
@@ -9373,8 +9443,11 @@ theorem dahlbergE2PaperSourceComponents_of_paperTheoremSources
     (hsrc : DahlbergE2PaperTheoremSources) :
     DahlbergE2PaperSourceComponents := by
   rcases hsrc with ⟨hcdfv, hlemma8, hsection4⟩
+  have hcdfvGeom : DahlbergE2Theorem6GeometricCdfvSource :=
+    dahlbergE2Theorem6GeometricCdfvSource_of_paperSources hcdfv
   have hradius : DahlbergE2ConvexDfvRadiusNonconcyclicSource :=
-    dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_theorem6GeometricSource hcdfv
+    dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_theorem6GeometricSource
+      hcdfvGeom
   have hsigned : DahlbergE2ConvexDfvSignedNonconcyclicSource :=
     dahlbergE2ConvexDfvSignedNonconcyclicSource_of_radiusNonconcyclicSource hradius
   have hbridge : DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource :=
