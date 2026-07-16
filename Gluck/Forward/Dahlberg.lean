@@ -7501,9 +7501,10 @@ needed by the ordered-turn refinement is recovered formally below by reciprocal
 radius monotonicity in the positive-orientation branch. -/
 theorem dahlbergE2_convex_dfv_signed_source :
     DahlbergE2ConvexDfvSignedSource := by
-  exact dahlbergE2ConvexDfvSignedSource_of_radiusSource
-    (dahlbergE2ConvexRadiusSourceComponents_of_lemma9Source
-      dahlbergE2_lemma9_source_gate).1
+  intro n hne hn v hsimple hregular horient hnc
+  letI : NeZero n := hne
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (dahlbergE2_lemma9_source_gate hn hsimple hregular horient hnc)
 
 /-- Dahlberg's convex/CDFV radius-witness source, recovered from the
 theorem-level signed-Menger source by reciprocal-radius monotonicity.
@@ -7812,9 +7813,17 @@ theorem dahlbergE2DfvSourceComponents_directIsometry
           NegativePolygonOrientation (fun i => directIsometryR2 u a (v i))) →
         DahlbergDiskAuxiliaryReduction
           (fun i => directIsometryR2 u a (v i))) := by
-  exact dahlbergE2DfvGeometricSources_directIsometry
-    (dahlbergE2DfvGeometricSources_of_components hsrc)
-    hu a hn hsimple hregular hnoncircle
+  refine ⟨?_, ?_⟩
+  · intro horient
+    exact dahlbergE2ConvexDfvSignedSource_directIsometry
+      hsrc.1 hu a hn hsimple hregular horient
+      (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
+        hsimple hregular horient hnoncircle)
+  · intro hnonstrict
+    exact dahlbergE2DiskReductionSource_directIsometry
+      (dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mp
+        hsrc.2)
+      hu a hn hsimple hregular hnoncircle hnonstrict
 
 /-- The stronger exact remaining E² source components are compatible with
 direct Euclidean normalization after forgetting the Lemma 8 ordered-turn
@@ -7866,11 +7875,12 @@ theorem dahlbergE2_remaining_source_components :
     dahlbergE2_disk_auxiliary_boundary_interior_construction_source⟩
 
 /-- The exact `E²` source components currently used by the weaker final-D4VT
-route, obtained from the stronger remaining-source component package. -/
+route, using only the theorem-level signed-CDFV source and the sharp
+boundary/interior §4 source. -/
 theorem dahlbergE2_dfv_source_components :
     DahlbergE2DfvSourceComponents := by
-  exact dahlbergE2DfvSourceComponents_of_remainingComponents
-    dahlbergE2_remaining_source_components
+  exact ⟨dahlbergE2_convex_dfv_signed_source,
+    dahlbergE2_disk_auxiliary_boundary_interior_construction_source⟩
 
 /-- Dahlberg's pair-level auxiliary-polygon construction/transfer source for
 the §4 non-strict disk reduction, recovered from the metric-data source by
