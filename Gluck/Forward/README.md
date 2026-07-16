@@ -135,6 +135,10 @@ Conversely, the geometric CDFV source projects back to the split §3 package via
 The current primitive discrete gate is the smaller
 `dahlbergE2_paper_remaining_theorem_sources_gate`; it no longer includes the
 local edge-region part of Lemma 8.
+The equivalence with the full paper-source package is
+`dahlbergE2PaperRemainingTheoremSources_iff_paperTheoremSources`, and the
+direct projection to the compact source surface is
+`dahlbergE2PaperSourceComponents_of_remainingTheoremSources`.
 
 Dahlberg's strict positive-orientation CDFV and Lemma 8 compatibility gates,
 `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate` and

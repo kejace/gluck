@@ -9490,6 +9490,24 @@ theorem dahlbergE2PaperTheoremSources_of_remainingTheoremSources
   exact ⟨hsrc.1, ⟨dahlbergE2_lemma8_local_edge_nesting_source, hsrc.2.1⟩,
     hsrc.2.2⟩
 
+/-- The full paper-source package implies the smaller remaining-source
+package by forgetting the local Lemma 8 edge-nesting component, which is now
+proved separately. -/
+theorem dahlbergE2PaperRemainingTheoremSources_of_paperTheoremSources
+    (hsrc : DahlbergE2PaperTheoremSources) :
+    DahlbergE2PaperRemainingTheoremSources := by
+  exact ⟨hsrc.1, hsrc.2.1.2, hsrc.2.2⟩
+
+/-- The current smaller remaining-source package is formally equivalent to
+the full paper-source package: the only omitted component is the local
+edge-region part of Lemma 8, proved by
+`dahlbergE2_lemma8_local_edge_nesting_source`. -/
+theorem dahlbergE2PaperRemainingTheoremSources_iff_paperTheoremSources :
+    DahlbergE2PaperRemainingTheoremSources ↔ DahlbergE2PaperTheoremSources := by
+  constructor
+  · exact dahlbergE2PaperTheoremSources_of_remainingTheoremSources
+  · exact dahlbergE2PaperRemainingTheoremSources_of_paperTheoremSources
+
 /-- The paper theorem sources imply the current compact source surface. -/
 theorem dahlbergE2PaperSourceComponents_of_paperTheoremSources
     (hsrc : DahlbergE2PaperTheoremSources) :
@@ -9512,6 +9530,14 @@ theorem dahlbergE2PaperSourceComponents_of_paperTheoremSources
   exact ⟨dahlbergE2Lemma9ConstantOrSource_of_source hlemma9,
     dahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource_of_section4Source
       hsection4⟩
+
+/-- Direct route from the smaller remaining paper-source package to the
+compact source surface used by the rest of the file. -/
+theorem dahlbergE2PaperSourceComponents_of_remainingTheoremSources
+    (hsrc : DahlbergE2PaperRemainingTheoremSources) :
+    DahlbergE2PaperSourceComponents := by
+  exact dahlbergE2PaperSourceComponents_of_paperTheoremSources
+    (dahlbergE2PaperTheoremSources_of_remainingTheoremSources hsrc)
 
 /-- The typed unit source implies the older raw existential unit source. -/
 theorem dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_auxiliaryPolygonSource
