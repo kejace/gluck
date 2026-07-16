@@ -6930,13 +6930,31 @@ def DahlbergE2DiskReductionSetupSource : Prop :=
     (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
     DahlbergDiskReductionSetup v
 
+/-- Source-level spelling of Dahlberg's Lemma 10 radius comparison.
+
+This is already proved in the local edge-coordinate geometry.  It says that
+if the circumcentre of the triangle `C A B` lies in the Dahlberg vertex cone
+at `C`, then any coaxial disk through `A` and `B` whose closed disk contains
+`C` has radius at least the circumradius. -/
+def DahlbergE2Lemma10RadiusComparisonSource : Prop :=
+  ∀ {A B C O : ℂ} {R yΔ : ℝ},
+    A ≠ B →
+    0 < Gluck.Discrete.crossR2 A B C →
+    CircumcircleR2 C A B O R →
+    InVertexCone C A B O →
+    C ∈ edgeClosedDisk A B yΔ →
+    normalizedCircleRadius (chordHalfLength A B) (edgeCircumcenterParameter A B C) ≤
+      normalizedCircleRadius (chordHalfLength A B) yΔ
+
 /-- Source for constructing the strict-orientation auxiliary polygon from the
 minimal-disk setup in Dahlberg's §4 non-strict reduction.
 
-This is where Dahlberg uses the disconnected boundary set, Lemma 10's
-triangle-sector radius comparison, the convex domain `U`, and a polygonal
-approximation of `∂U` to build the auxiliary strictly oriented polygon whose
-D4VT conclusion transfers back to the original polygon. -/
+At this point Lemma 10's triangle-sector radius comparison is formalized by
+`dahlbergE2_lemma10_radius_comparison_source`.  The remaining geometric
+construction is Dahlberg's disconnected-boundary-set argument, the convex
+domain `U`, and the polygonal approximation of `∂U` used to build the
+auxiliary strictly oriented polygon whose D4VT conclusion transfers back to
+the original polygon. -/
 def DahlbergE2DiskAuxiliaryConstructionSource : Prop :=
   ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
     Gluck.Discrete.IsSimplePolygon v →
@@ -6951,7 +6969,10 @@ def DahlbergE2DiskAuxiliaryConstructionSource : Prop :=
 This is a sharper version of `DahlbergE2DiskAuxiliaryConstructionSource`: the
 finite minimal-disk setup has already been unpacked, and the source receives a
 chosen positive minimal disk together with the proved facts that Dahlberg's
-boundary index set `E = V(Γ) ∩ ∂Δ` is nonempty and proper. -/
+boundary index set `E = V(Γ) ∩ ∂Δ` is nonempty and proper.  The Lemma 10
+radius comparison used inside Dahlberg's construction is no longer part of
+this source gate; it is proved separately as
+`dahlbergE2_lemma10_radius_comparison_source`. -/
 def DahlbergE2DiskAuxiliaryBoundaryConstructionSource : Prop :=
   ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
     Gluck.Discrete.IsSimplePolygon v →
@@ -7173,6 +7194,17 @@ theorem dahlbergE2DfvGeometricSources_directIsometry
   · intro hnonstrict
     exact dahlbergE2DiskReductionSource_directIsometry hsrc.2 hu a hn
       hsimple hregular hnoncircle hnonstrict
+
+/-- Dahlberg's Lemma 10 radius comparison, discharged from the local
+edge-coordinate geometry.
+
+This theorem is the formal replacement for treating Lemma 10 as an external
+geometric source in the final §4 disk argument. -/
+theorem dahlbergE2_lemma10_radius_comparison_source :
+    DahlbergE2Lemma10RadiusComparisonSource := by
+  intro A B C O R yΔ hAB hcross hcircle hcone hmem
+  exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
+    hAB hcross hcircle hcone hmem
 
 /-- Dahlberg's convex/CDFV radius-witness source, extracted directly from
 Theorem 6/CDFV in Dahlberg's discrete four-vertex paper.
@@ -7780,8 +7812,9 @@ theorem signedMengerProfile_dahlbergFourVertex_of_strict_orientation_not_concycl
 
 /-- The genuinely geometric source for Dahlberg's non-strict disk reduction.
 It constructs the strict-orientation auxiliary polygon from the smallest
-enclosing disk `Δ`, boundary set `E`, Lemma 10's triangle-sector comparison,
-and a polygonal approximation of the convex domain `U`. -/
+enclosing disk `Δ` and boundary set `E`, using the separately proved Lemma 10
+radius comparison together with the remaining polygonal approximation of the
+convex domain `U`. -/
 theorem dahlbergDiskAuxiliaryReduction_of_non_strict_source
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
@@ -7807,8 +7840,10 @@ The strict-orientation cases have already been discharged by Lemma 9 above.
 This source gate isolates the part of Dahlberg's final disk argument where the
 polygon is not globally positive or globally negative in the local
 orientation/strict-convexity proxy: the smallest enclosing disk `Δ`, its
-boundary set `E`, Lemma 10's triangle-sector radius comparison, and the
-polygonal approximation of the convex domain `U` enter here. -/
+boundary set `E`, the disconnected-boundary interval selection, and the
+polygonal approximation of the convex domain `U` enter here.  Lemma 10's
+triangle-sector radius comparison is already discharged separately by
+`dahlbergE2_lemma10_radius_comparison_source`. -/
 theorem signedMengerProfile_dahlbergFourVertex_of_non_strict_dahlberg_disk_reduction
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
@@ -7857,7 +7892,8 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_dahlberg_source
   exact signedMengerProfile_dahlbergFourVertex_of_dahlberg_disk_reduction
     hn hsimple hregular hnoncircle
 
-/-- Dahlberg's geometric extraction step: Lemma 8, Lemma 9, and Lemma 10
+/-- Dahlberg's geometric extraction step: the CDFV/Lemma 8 strict branch, the
+proved Lemma 10 radius comparison, and the remaining §4 disk construction
 produce two local maxima and two local minima of signed Menger curvature for a
 nonconcyclic locally regular simple polygon.
 
