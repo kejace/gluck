@@ -478,11 +478,25 @@ bundled source package. -/
 theorem forwardDfvGeometricSources_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     ForwardDfvGeometricSources := by
-  have hgeo : ForwardGeometricSources :=
-    forwardGeometricSources_of_remainingSources hsrc
-  exact ⟨smoothForwardDfvSource_of_source hgeo.1,
-    spaceFormDiscreteDfvSource_of_source hgeo.2.1,
-    dahlbergE2DfvGeometricSources_of_geometricSources hgeo.2.2⟩
+  rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hCDFV, _hL8, hD⟩
+  refine ⟨?_, ?_, dahlbergE2DfvGeometricSources_of_components ⟨hCDFV, hD⟩⟩
+  · exact smoothForwardDfvSource_iff_modelSources.mpr
+      ⟨fun hclosed hreal hκ hper hnc =>
+          smoothFourVertex_of_fourVertexCondition
+            (hE hclosed hreal hκ hper hnc),
+        fun hclosed hreal hκ hper hnc =>
+          smoothFourVertex_of_fourVertexCondition
+            (hS hclosed hreal hκ hper hnc),
+        fun hclosed hreal hκ hper hnc =>
+          smoothFourVertex_of_fourVertexCondition
+            (hH hclosed hreal hκ hper hnc)⟩
+  · exact spaceFormDiscreteDfvSource_iff_modelSources.mpr
+      ⟨(fun hn v κ hdisk hsimple hconvex hregular hκ hnc =>
+          dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+            (hdS hn v κ hdisk hsimple hconvex hregular hκ hnc)),
+        (fun hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc =>
+          dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+            (hdH hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc))⟩
 
 /-- The stronger remaining-source package implies the weaker final-D4VT
 remaining-source package. -/
@@ -910,12 +924,28 @@ atomic source package. -/
 theorem forwardDfvAtomicSources_of_atomicSources
     (hsrc : ForwardAtomicSources) :
     ForwardDfvAtomicSources := by
-  have hgeo : ForwardGeometricSources :=
-    forwardGeometricSources_of_atomicSources hsrc
-  exact forwardDfvAtomicSources_of_geometricSources
-    ⟨smoothForwardDfvSource_of_source hgeo.1,
-      spaceFormDiscreteDfvSource_of_source hgeo.2.1,
-      dahlbergE2DfvGeometricSources_of_geometricSources hgeo.2.2⟩
+  rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · intro γ κ hclosed hreal hκ hper hnc
+    exact smoothFourVertex_of_fourVertexCondition
+      (hE hclosed hreal hκ hper hnc)
+  · intro γ κ hclosed hreal hκ hper hnc
+    exact smoothFourVertex_of_fourVertexCondition
+      (hS hclosed hreal hκ hper hnc)
+  · intro γ κ hclosed hreal hκ hper hnc
+    exact smoothFourVertex_of_fourVertexCondition
+      (hH hclosed hreal hκ hper hnc)
+  · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hnc
+    letI : NeZero n := hne
+    exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+      (hdS hn v κ hdisk hsimple hconvex hregular hκ hnc)
+  · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
+    letI : NeZero n := hne
+    exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+      (hdH hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc)
+  · exact dahlbergE2ConvexDfvSignedSource_of_radiusSource
+      (dahlbergE2ConvexDfvRadiusSource_of_convexRadiusSource hC)
+  · exact dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mpr hD
 
 /-- Extract the smooth source component from a bundled forward source proof. -/
 theorem four_vertex_condition_smooth_spaceForm_nonconstant_of_sources
