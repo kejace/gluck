@@ -6856,6 +6856,54 @@ def DahlbergE2DiskAuxiliaryBoundaryConstructionSource : Prop :=
       DiskBoundaryIndices v O R ≠ Set.univ →
       DahlbergDiskAuxiliaryReduction v
 
+/-- The boundary-set-level §4 auxiliary-construction source is compatible
+with direct Euclidean normalization. -/
+theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_directIsometry
+    (hsrc : DahlbergE2DiskAuxiliaryBoundaryConstructionSource)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (hnoncircle : ¬ Concyclic (fun i => directIsometryR2 u a (v i)))
+    (hnonstrict :
+      ¬ (PositivePolygonOrientation (fun i => directIsometryR2 u a (v i)) ∨
+        NegativePolygonOrientation (fun i => directIsometryR2 u a (v i))))
+    {O' : ℂ} {R : ℝ}
+    (hΔ : MinimalEnclosingDiskR2 (fun i => directIsometryR2 u a (v i)) O' R)
+    (hRpos : 0 < R)
+    (hEnonempty :
+      (DiskBoundaryIndices (fun i => directIsometryR2 u a (v i)) O' R).Nonempty)
+    (hEproper :
+      DiskBoundaryIndices (fun i => directIsometryR2 u a (v i)) O' R ≠ Set.univ) :
+    DahlbergDiskAuxiliaryReduction (fun i => directIsometryR2 u a (v i)) := by
+  let O : ℂ := u⁻¹ * (O' - a)
+  have hcenter : directIsometryR2 u a O = O' := by
+    exact directIsometryR2_inverse_center hu a O'
+  have hΔ₀ : MinimalEnclosingDiskR2 v O R := by
+    exact (minimalEnclosingDiskR2_directIsometry hu a O R v).mp
+      (by simpa [hcenter] using hΔ)
+  have hEeq :
+      DiskBoundaryIndices (fun i => directIsometryR2 u a (v i)) O' R =
+        DiskBoundaryIndices v O R := by
+    simpa [hcenter] using diskBoundaryIndices_directIsometry hu a O R v
+  have hEnonempty₀ : (DiskBoundaryIndices v O R).Nonempty := by
+    simpa [hEeq] using hEnonempty
+  have hEproper₀ : DiskBoundaryIndices v O R ≠ Set.univ := by
+    intro htop
+    exact hEproper (hEeq.trans htop)
+  have hsimple₀ : Gluck.Discrete.IsSimplePolygon v :=
+    (isSimplePolygon_directIsometry_iff hu a v).mp hsimple
+  have hregular₀ : DahlbergRegular v :=
+    (dahlbergRegular_directIsometry_iff hu a v).mp hregular
+  have hnoncircle₀ : ¬ Concyclic v :=
+    (not_concyclic_directIsometry hu a v).mp hnoncircle
+  have hnonstrict₀ : ¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v) :=
+    (not_strictPolygonOrientation_directIsometry hu a v).mp hnonstrict
+  exact dahlbergDiskAuxiliaryReduction_directIsometry hu a
+    (hsrc hn hsimple₀ hregular₀ hnoncircle₀ hnonstrict₀
+      hΔ₀ hRpos hEnonempty₀ hEproper₀)
+
 /-- The boundary-set-level §4 construction source implies the setup-level
 auxiliary construction source. -/
 theorem dahlbergE2DiskAuxiliaryConstructionSource_of_boundaryConstructionSource
