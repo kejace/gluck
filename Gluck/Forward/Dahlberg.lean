@@ -5925,6 +5925,24 @@ def DahlbergE2DiskReductionSource : Prop :=
     (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
     DahlbergDiskAuxiliaryReduction v
 
+/-- Finite Euclidean source: every cyclic vertex set has a least enclosing
+closed disk.  This is the first compactness/finite-set input in Dahlberg's
+§4 proof. -/
+def MinimalEnclosingDiskExistsSource : Prop :=
+  ∀ {n : ℕ} [NeZero n] (v : ZMod n → ℂ), ∃ O R, MinimalEnclosingDiskR2 v O R
+
+/-- Finite Euclidean source: a minimal enclosing disk has at least one vertex
+on its boundary.  Otherwise the radius could be decreased, contradicting
+minimality. -/
+def MinimalEnclosingDiskBoundaryVertexSource : Prop :=
+  ∀ {n : ℕ} {v : ZMod n → ℂ} {O : ℂ} {R : ℝ},
+    MinimalEnclosingDiskR2 v O R → ∃ i : ZMod n, OnDiskBoundaryR2 v O R i
+
+/-- The finite-geometry sources needed to set up Dahlberg's smallest disk
+`Δ` and boundary vertex set `E`. -/
+def DahlbergE2DiskReductionSetupSourceComponents : Prop :=
+  MinimalEnclosingDiskExistsSource ∧ MinimalEnclosingDiskBoundaryVertexSource
+
 /-- Source for the minimal-disk setup in Dahlberg's §4 non-strict reduction. -/
 def DahlbergE2DiskReductionSetupSource : Prop :=
   ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
@@ -5955,6 +5973,16 @@ the minimal-disk/boundary setup and the auxiliary-polygon construction from
 that setup. -/
 def DahlbergE2DiskReductionSourceComponents : Prop :=
   DahlbergE2DiskReductionSetupSource ∧ DahlbergE2DiskAuxiliaryConstructionSource
+
+/-- The finite minimal-disk sources imply the setup used in Dahlberg's §4
+non-strict reduction. -/
+theorem dahlbergE2DiskReductionSetupSource_of_components
+    (hsrc : DahlbergE2DiskReductionSetupSourceComponents) :
+    DahlbergE2DiskReductionSetupSource := by
+  intro n hne _hn v _hsimple _hregular _hnoncircle _hnonstrict
+  letI : NeZero n := hne
+  rcases hsrc.1 v with ⟨O, R, hΔ⟩
+  exact ⟨O, R, hΔ, hsrc.2 hΔ⟩
 
 /-- The genuinely Euclidean geometric inputs in Dahlberg's discrete
 four-vertex proof.
@@ -6005,11 +6033,30 @@ theorem dahlbergE2_lemma9_source : DahlbergE2Lemma9Source := by
   exact dahlbergE2_convexRadiusSource_iff_lemma9Source.mp
     dahlbergE2_convex_radius_source
 
+/-- Finite minimal-disk source components for Dahlberg's §4 setup. -/
+theorem dahlbergE2_disk_reduction_setup_source_components :
+    DahlbergE2DiskReductionSetupSourceComponents := by
+  sorry
+
+/-- Dahlberg's minimal-disk setup source, obtained from the finite
+least-enclosing-disk facts. -/
+theorem dahlbergE2_disk_reduction_setup_source :
+    DahlbergE2DiskReductionSetupSource := by
+  exact dahlbergE2DiskReductionSetupSource_of_components
+    dahlbergE2_disk_reduction_setup_source_components
+
+/-- Dahlberg's auxiliary-polygon construction/transfer source for the §4
+non-strict disk reduction. -/
+theorem dahlbergE2_disk_auxiliary_construction_source :
+    DahlbergE2DiskAuxiliaryConstructionSource := by
+  sorry
+
 /-- Dahlberg's source components for the §4 non-strict disk reduction:
 minimal-disk setup plus the auxiliary-polygon construction. -/
 theorem dahlbergE2_disk_reduction_source_components :
     DahlbergE2DiskReductionSourceComponents := by
-  sorry
+  exact ⟨dahlbergE2_disk_reduction_setup_source,
+    dahlbergE2_disk_auxiliary_construction_source⟩
 
 /-- Dahlberg's Euclidean non-strict §4 disk-reduction geometric source for the
 discrete four-vertex paper. -/
