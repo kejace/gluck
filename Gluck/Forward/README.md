@@ -113,7 +113,8 @@ paper-level components:
   producing the named `DahlbergE2Lemma8DiskNestingCertificate`, i.e. the eight
   ordered one-step previous-radius inequalities used by Lemma 9;
 - `DahlbergE2Section4AuxiliaryPolygonSource`: the final §4 normalized
-  auxiliary-polygon construction/transfer.
+  auxiliary-polygon construction/transfer, returning the named
+  `DahlbergE2Section4AuxiliaryPolygonCertificate`.
 
 The older compact source package `DahlbergE2PaperSourceComponents` and
 `dahlbergE2_paper_source_components_gate` are now recovered formally from this
@@ -188,6 +189,10 @@ formalized.  The equivalence is
 `dahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource_iff_constructionSource`;
 the reverse direction repackages `DahlbergDiskAuxiliaryReduction` using
 `exists_dahlbergAuxiliaryPolygon_of_diskAuxiliaryReduction`.
+The paper-facing §4 source additionally has the certificate spelling
+`DahlbergE2Section4AuxiliaryPolygonCertificate`, equivalent to the older unit
+auxiliary-polygon source via
+`dahlbergE2Section4AuxiliaryPolygonSource_iff_unitAuxiliaryPolygonSource`.
 The broad theorem-facing disk-reduction source
 `dahlbergE2_disk_reduction_geometric_source_gate` is recovered formally from
 the §4 component of `dahlbergE2_paper_source_components_gate`, exposed as

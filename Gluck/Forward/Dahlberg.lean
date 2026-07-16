@@ -7256,6 +7256,17 @@ structure DahlbergAuxiliaryPolygon {n : ℕ} [NeZero n] (v : ZMod n → ℂ) whe
     DahlbergFourVertex (SignedMengerProfile w) →
       DahlbergFourVertex (SignedMengerProfile v)
 
+/-- Certificate form of the final normalized §4 auxiliary-polygon
+construction.
+
+The surrounding source includes the normalized hypotheses
+`MinimalEnclosingDiskR2 v 0 1`, `v 0 = 1`, and `dist 0 (v 1) < 1`.
+This certificate is the output: a strict-orientation auxiliary polygon whose
+Dahlberg conclusion transfers back to the original polygon. -/
+structure DahlbergE2Section4AuxiliaryPolygonCertificate {n : ℕ} [NeZero n]
+    (v : ZMod n → ℂ) where
+  aux : DahlbergAuxiliaryPolygon v
+
 /-- The typed auxiliary-polygon package implies the old existential package. -/
 theorem dahlbergDiskAuxiliaryReduction_of_auxiliaryPolygon {n : ℕ} [NeZero n]
     {v : ZMod n → ℂ} (aux : DahlbergAuxiliaryPolygon v) :
@@ -9241,7 +9252,45 @@ normalizing by a direct Euclidean motion and positive homothety, the proof
 constructs the strictly convex auxiliary polygon whose D4VT conclusion
 transfers back to the original polygon. -/
 def DahlbergE2Section4AuxiliaryPolygonSource : Prop :=
-  DahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    (¬ Concyclic v) →
+    (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+    MinimalEnclosingDiskR2 v 0 1 →
+    v 0 = 1 →
+    dist 0 (v 1) < 1 →
+    Nonempty (DahlbergE2Section4AuxiliaryPolygonCertificate v)
+
+/-- The §4 certificate source projects to the unit auxiliary-polygon source
+used by the existing reduction chain. -/
+theorem dahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource_of_section4Source
+    (hsrc : DahlbergE2Section4AuxiliaryPolygonSource) :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext
+  letI : NeZero n := hne
+  rcases hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext with
+    ⟨cert⟩
+  exact ⟨cert.aux⟩
+
+/-- The older unit auxiliary-polygon source can be repackaged as the named
+§4 certificate source. -/
+theorem dahlbergE2Section4AuxiliaryPolygonSource_of_unitAuxiliaryPolygonSource
+    (hsrc : DahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource) :
+    DahlbergE2Section4AuxiliaryPolygonSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext
+  letI : NeZero n := hne
+  rcases hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext with ⟨aux⟩
+  exact ⟨⟨aux⟩⟩
+
+/-- The named §4 certificate source is equivalent to the older unit
+auxiliary-polygon source. -/
+theorem dahlbergE2Section4AuxiliaryPolygonSource_iff_unitAuxiliaryPolygonSource :
+    DahlbergE2Section4AuxiliaryPolygonSource ↔
+      DahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource := by
+  constructor
+  · exact dahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource_of_section4Source
+  · exact dahlbergE2Section4AuxiliaryPolygonSource_of_unitAuxiliaryPolygonSource
 
 /-- The three substantial paper theorem sources still needed for a complete
 source-free proof of the Euclidean discrete Dahlberg theorem:
@@ -9275,7 +9324,9 @@ theorem dahlbergE2PaperSourceComponents_of_paperTheoremSources
   have hlemma9 : DahlbergE2Lemma9Source :=
     dahlbergE2Lemma9Source_of_signedNonconcyclicComponents
       ⟨hsigned, hbridge⟩
-  exact ⟨dahlbergE2Lemma9ConstantOrSource_of_source hlemma9, hsection4⟩
+  exact ⟨dahlbergE2Lemma9ConstantOrSource_of_source hlemma9,
+    dahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource_of_section4Source
+      hsection4⟩
 
 /-- The typed unit source implies the older raw existential unit source. -/
 theorem dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_auxiliaryPolygonSource
