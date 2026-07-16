@@ -7713,6 +7713,39 @@ def DahlbergE2ConvexDfvSignedNonconcyclicSource : Prop :=
     (¬ Concyclic v) →
     DahlbergFourVertex (SignedMengerProfile v)
 
+/-- Constant-or-Dahlberg spelling of the convex/CDFV signed-Menger source.
+
+This is closer to the theorem-level positive strictly-convex branch: without a
+separate nonconcyclic/nonconstant hypothesis, the conclusion is either constant
+signed-Menger curvature or the plateau-aware Dahlberg four-vertex conclusion. -/
+def DahlbergE2ConvexDfvSignedConstantOrSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) ∨
+      DahlbergFourVertex (SignedMengerProfile v)
+
+/-- The constant-or signed-CDFV source implies the nonconstant spelling. -/
+theorem dahlbergE2ConvexDfvSignedSource_of_constantOrSource
+    (hsrc : DahlbergE2ConvexDfvSignedConstantOrSource) :
+    DahlbergE2ConvexDfvSignedSource := by
+  intro n hne hn v hsimple hregular horient hnc
+  letI : NeZero n := hne
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (hsrc hn hsimple hregular horient) hnc
+
+/-- The constant-or signed-CDFV source implies the nonconcyclic spelling. -/
+theorem dahlbergE2ConvexDfvSignedNonconcyclicSource_of_constantOrSource
+    (hsrc : DahlbergE2ConvexDfvSignedConstantOrSource) :
+    DahlbergE2ConvexDfvSignedNonconcyclicSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle
+  letI : NeZero n := hne
+  exact dahlbergFourVertex_of_constant_or_of_not_constant
+    (hsrc hn hsimple hregular horient)
+    (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
+      hsimple hregular horient hnoncircle)
+
 /-- The nonconstant signed-CDFV source implies the nonconcyclic spelling. -/
 theorem dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource
     (hsrc : DahlbergE2ConvexDfvSignedSource) :
@@ -7799,6 +7832,30 @@ theorem dahlbergE2ConvexDfvSignedSource_iff_nonconcyclicSource :
   constructor
   · exact dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource
   · exact dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource
+
+/-- The constant-or signed CDFV source can be applied after direct Euclidean
+normalization. -/
+theorem dahlbergE2ConvexDfvSignedConstantOrSource_directIsometry
+    (hsrc : DahlbergE2ConvexDfvSignedConstantOrSource)
+    {n : ℕ} [NeZero n] {u : ℂ} (hu : ‖u‖ = 1) (a : ℂ)
+    (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon
+      (fun i => directIsometryR2 u a (v i)))
+    (hregular : DahlbergRegular (fun i => directIsometryR2 u a (v i)))
+    (horient : PositivePolygonOrientation (fun i => directIsometryR2 u a (v i))) :
+    (∃ c, ∀ i : ZMod n,
+        SignedMengerProfile (fun j => directIsometryR2 u a (v j)) i = c) ∨
+      DahlbergFourVertex
+        (SignedMengerProfile (fun i => directIsometryR2 u a (v i))) := by
+  have hsimple₀ : Gluck.Discrete.IsSimplePolygon v :=
+    (isSimplePolygon_directIsometry_iff hu a v).mp hsimple
+  have hregular₀ : DahlbergRegular v :=
+    (dahlbergRegular_directIsometry_iff hu a v).mp hregular
+  have horient₀ : PositivePolygonOrientation v :=
+    (positivePolygonOrientation_directIsometry hu a v).mp horient
+  exact constant_or_dahlbergFourVertex_congr
+    (fun i => congrFun (SignedMengerProfile_directIsometry hu a v) i)
+    (hsrc hn hsimple₀ hregular₀ horient₀)
 
 /-- The signed CDFV source can be applied after direct Euclidean
 normalization. -/
@@ -9784,18 +9841,30 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
-/-- Dahlberg's strict positive-orientation CDFV signed-Menger source gate.
+/-- Dahlberg's strict positive-orientation CDFV constant-or signed-Menger
+source gate.
 
 This is the first primitive strict-branch paper input for the final D4VT
-route: Dahlberg's Theorem 6/CDFV supplies the plateau-aware four-vertex
-conclusion for signed Menger curvature in the nonconcyclic strictly-convex
+route: Dahlberg's Theorem 6/CDFV supplies either constant signed-Menger
+curvature or the plateau-aware four-vertex conclusion in the strictly-convex
 positive-orientation branch.
 
+The nonconcyclic spelling used by the final D4VT route is recovered below by
+the already-formal fact that nonconcyclic positive locally regular polygons
+have nonconstant signed-Menger profile.
+
 The radius-profile witness spelling needed by the ordered-turn refinement is
-recovered formally below by reciprocal-radius monotonicity. -/
+then recovered formally by reciprocal-radius monotonicity. -/
+theorem dahlbergE2_convex_dfv_signed_constant_or_primitive_source_gate :
+    DahlbergE2ConvexDfvSignedConstantOrSource := by
+  sorry
+
+/-- Dahlberg's strict positive-orientation CDFV signed-Menger source gate,
+recovered from the constant-or CDFV primitive. -/
 theorem dahlbergE2_convex_dfv_signed_nonconcyclic_primitive_source_gate :
     DahlbergE2ConvexDfvSignedNonconcyclicSource := by
-  sorry
+  exact dahlbergE2ConvexDfvSignedNonconcyclicSource_of_constantOrSource
+    dahlbergE2_convex_dfv_signed_constant_or_primitive_source_gate
 
 /-- Dahlberg's strict positive-orientation CDFV radius-witness source gate,
 recovered from the signed-Menger CDFV primitive.

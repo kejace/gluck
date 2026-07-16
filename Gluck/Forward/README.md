@@ -92,7 +92,7 @@ The remaining primitive source gates in the current worktree are exactly:
 - `Gluck/Forward/Smooth.lean`
   - `osserman1985_smooth_E2_threshold_source_gate`;
 - `Gluck/Forward/Dahlberg.lean`
-  - `dahlbergE2_convex_dfv_signed_nonconcyclic_primitive_source_gate`;
+  - `dahlbergE2_convex_dfv_signed_constant_or_primitive_source_gate`;
   - `dahlbergE2_lemma8_strict_previous_radius_turns_primitive_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_successor_unit_auxiliary_polygon_source_gate`.
 
@@ -109,9 +109,13 @@ Dahlberg's strict positive-orientation CDFV and Lemma 8 compatibility gates,
 from the sharper strict-branch package
 `dahlbergE2_primitive_strict_previous_source_components_gate`, whose
 components are the signed-Menger CDFV primitive
-`dahlbergE2_convex_dfv_signed_nonconcyclic_primitive_source_gate` and the
+`dahlbergE2_convex_dfv_signed_constant_or_primitive_source_gate` and the
 strict previous-radius Lemma 8 primitive
 `dahlbergE2_lemma8_strict_previous_radius_turns_primitive_gate`.
+The nonconcyclic signed-CDFV gate
+`dahlbergE2_convex_dfv_signed_nonconcyclic_primitive_source_gate` is recovered
+from the constant-or primitive by the formal
+nonconcyclicity/nonconstancy result for positive locally regular polygons.
 The radius-profile CDFV gate
 `dahlbergE2_convex_dfv_radius_nonconcyclic_primitive_source_gate` is no longer
 primitive: it is recovered formally from signed CDFV by reciprocal-radius
@@ -174,8 +178,8 @@ formal proofs.  The relevant paper sources are:
   `max(κ q₁, κ q₂) < min(κ p₁, κ p₂)`.
 - Dahlberg, *A Discrete Four Vertex Theorem* (`references/23.pdf`) for the
   strict positive-orientation source package: §3 Theorem 6 (CDFV) supplies the
-  nonconcyclic signed-Menger D4VT conclusion, and the radius-witness spelling
-  is recovered formally in Lean; §4 Lemma 8 supplies the strict previous-radius
-  turns used to form the radius-turn bridge for Lemma 9.  The same paper's §4
-  proof of Theorem 1 is the source for the normalized successor-interior
-  auxiliary-polygon construction gate.
+  constant-or signed-Menger D4VT conclusion; the nonconcyclic spelling and the
+  radius-witness spelling are recovered formally in Lean.  §4 Lemma 8 supplies
+  the strict previous-radius turns used to form the radius-turn bridge for
+  Lemma 9.  The same paper's §4 proof of Theorem 1 is the source for the
+  normalized successor-interior auxiliary-polygon construction gate.
