@@ -2775,8 +2775,7 @@ The Euclidean Dahlberg disk setup is no longer included here, since the finite
 least-enclosing-disk and boundary-vertex facts have been proved. -/
 theorem forward_remaining_sources : ForwardRemainingSources := by
   refine ⟨?_, ?_, ?_, ?_, ?_, dahlbergE2_convex_dfv_radius_source,
-    dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_source
-      dahlbergE2_lemma8_radius_turn_bridge_source,
+    dahlbergE2_lemma8_radius_turn_bridge_from_witness_source,
     dahlbergE2_disk_auxiliary_boundary_construction_source⟩
   · intro γ κ hclosed hreal hκ hper hnc
     exact four_vertex_condition_smooth_E2_nonconstant_geometric_source

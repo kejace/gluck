@@ -7192,10 +7192,21 @@ theorem dahlbergE2_convex_dfv_signed_source :
     dahlbergE2_convex_dfv_radius_source
 
 /-- Dahlberg's Lemma 8 monotonicity bridge from CDFV radius witnesses to the
-ordered adjacent radius turns used in Lemma 9. -/
+ordered adjacent radius turns used in Lemma 9.
+
+This is the sharp source form: the CDFV radius-witness package already implies
+signed-Menger nonconstancy, so no separate nonconstancy hypothesis is included
+in the geometric input. -/
+theorem dahlbergE2_lemma8_radius_turn_bridge_from_witness_source :
+    DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource := by
+  sorry
+
+/-- Dahlberg's older Lemma 8 bridge source with an explicit nonconstancy
+hypothesis, recovered from the witness-only source. -/
 theorem dahlbergE2_lemma8_radius_turn_bridge_source :
     DahlbergE2Lemma8RadiusTurnBridgeSource := by
-  sorry
+  exact dahlbergE2Lemma8RadiusTurnBridgeSource_of_witnessSource
+    dahlbergE2_lemma8_radius_turn_bridge_from_witness_source
 
 /-- Dahlberg's source components for the convex-radius Euclidean branch:
 Theorem 6/CDFV plus the Lemma 8 monotonicity bridge. -/
