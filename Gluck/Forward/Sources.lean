@@ -1190,9 +1190,8 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_not_constant_strict_of_forward
   have hcomponents : ForwardDfvRemainingSourceComponents :=
     forwardDfvRemainingSources_iff_components.mp
       (forwardDfvRemainingSources_of_dfvGeometricSources hsrc)
-  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSourceComponents
-    hcomponents.2.2
-    hn hsimple hregular
+  exact dahlbergFourVertex_of_strictOrientation_convexDfvSource
+    hcomponents.2.2.1 hn hsimple hregular horient
       (not_concyclic_of_not_constant_signedMengerProfile_strict_orientation
         hsimple hnc horient)
 
@@ -1206,10 +1205,11 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_not_constant_strict_of_sources
     (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSourceComponents
-    (dahlbergE2DfvSourceComponents_of_remainingSources
-      (forwardRemainingSources_of_geometricSources hsrc))
-    hn hsimple hregular
+  have hcomponents : ForwardRemainingSourceComponents :=
+    forwardRemainingSources_iff_components.mp
+      (forwardRemainingSources_of_geometricSources hsrc)
+  exact dahlbergFourVertex_of_strictOrientation_convexDfvSource
+    hcomponents.2.2.1 hn hsimple hregular horient
       (not_concyclic_of_not_constant_signedMengerProfile_strict_orientation
         hsimple hnc horient)
 
