@@ -5769,6 +5769,16 @@ theorem signedMengerProfile_exists_globalMinMax_strict_of_not_constant
       SignedMengerProfile v i₀ < SignedMengerProfile v i₁ := by
   exact exists_globalMinMax_strict_of_not_constant (κ := SignedMengerProfile v) hnc
 
+/-- A nonconstant signed-Menger profile has both a plateau-aware local maximum
+and a plateau-aware local minimum. -/
+theorem signedMengerProfile_exists_discreteLocalMax_and_min_of_not_constant
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) :
+    (∃ imax : ZMod n, DiscreteLocalMax (SignedMengerProfile v) imax) ∧
+      ∃ imin : ZMod n, DiscreteLocalMin (SignedMengerProfile v) imin := by
+  exact exists_discreteLocalMax_and_min_of_not_constant
+    (κ := SignedMengerProfile v) hnc
+
 /-- A signed-Menger profile with no adjacent plateau has both a plateau-aware
 local maximum and a plateau-aware local minimum. -/
 theorem signedMengerProfile_exists_discreteLocalMax_and_min_of_forall_ne_succ
@@ -5816,6 +5826,18 @@ theorem signedMengerProfile_exists_globalMinMax_strict_of_not_concyclic
       (∀ j : ZMod n, SignedMengerProfile v j ≤ SignedMengerProfile v i₁) ∧
       SignedMengerProfile v i₀ < SignedMengerProfile v i₁ := by
   exact signedMengerProfile_exists_globalMinMax_strict_of_not_constant
+    (not_constant_signedMengerProfile_of_not_concyclic hsimple hregular hnoncircle)
+
+/-- A nonconcyclic locally regular simple polygon has at least one
+plateau-aware local maximum and one plateau-aware local minimum of signed
+Menger curvature. -/
+theorem signedMengerProfile_exists_discreteLocalMax_and_min_of_not_concyclic
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v) :
+    (∃ imax : ZMod n, DiscreteLocalMax (SignedMengerProfile v) imax) ∧
+      ∃ imin : ZMod n, DiscreteLocalMin (SignedMengerProfile v) imin := by
+  exact signedMengerProfile_exists_discreteLocalMax_and_min_of_not_constant
     (not_constant_signedMengerProfile_of_not_concyclic hsimple hregular hnoncircle)
 
 /-- A nonconcyclic locally regular simple polygon with at least one nonzero
