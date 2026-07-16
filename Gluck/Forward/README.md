@@ -92,13 +92,15 @@ The remaining primitive source gates in the current worktree are exactly:
 - `Gluck/Forward/Smooth.lean`
   - `four_vertex_condition_smooth_E2_source_gate`;
 - `Gluck/Forward/Dahlberg.lean`
-  - `dahlbergE2_convex_radius_witness_source_components_primitive_gate`;
+  - `dahlbergE2_convex_radius_witness_nonconcyclic_source_components_primitive_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
 
 Dahlberg's strict positive-orientation CDFV and Lemma 8 compatibility gates,
 `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate` and
 `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`, are recovered
-from the single split radius-profile source
+from the single split nonconcyclic radius-profile source
+`dahlbergE2_convex_radius_witness_nonconcyclic_source_components_primitive_gate`,
+via the nonconstant-profile package
 `dahlbergE2_convex_radius_witness_source_components_primitive_gate`.
 The nonconstant and nonconcyclic Lemma 9 ordered-turn spellings,
 `dahlbergE2_lemma9_ordered_turn_source_gate` and

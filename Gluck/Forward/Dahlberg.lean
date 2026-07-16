@@ -7884,6 +7884,16 @@ hypothesis. -/
 def DahlbergE2ConvexRadiusWitnessSourceComponents : Prop :=
   DahlbergE2ConvexDfvRadiusSource ∧ DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource
 
+/-- Nonconcyclic spelling of the sharpened split CDFV/Lemma 8 source package.
+
+This is closer to Dahlberg's geometric statement: the CDFV radius-witness input
+uses nonconcyclicity of the polygon rather than nonconstancy of the resulting
+signed-Menger profile.  The second component is unchanged because the supplied
+radius witnesses already force nonconstancy. -/
+def DahlbergE2ConvexRadiusWitnessNonconcyclicSourceComponents : Prop :=
+  DahlbergE2ConvexDfvRadiusNonconcyclicSource ∧
+  DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource
+
 /-- The sharpened witness-only convex-radius source package implies the older
 component package with an explicit nonconstancy hypothesis. -/
 theorem dahlbergE2ConvexRadiusSourceComponents_of_witnessComponents
@@ -7900,6 +7910,22 @@ theorem dahlbergE2ConvexRadiusWitnessSourceComponents_of_components
   exact ⟨hsrc.1,
     dahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource_of_source hsrc.2⟩
 
+/-- The nonconcyclic split radius source package implies the nonconstant
+profile spelling. -/
+theorem dahlbergE2ConvexRadiusWitnessSourceComponents_of_nonconcyclicComponents
+    (hsrc : DahlbergE2ConvexRadiusWitnessNonconcyclicSourceComponents) :
+    DahlbergE2ConvexRadiusWitnessSourceComponents := by
+  exact ⟨dahlbergE2ConvexDfvRadiusSource_of_nonconcyclicSource hsrc.1,
+    hsrc.2⟩
+
+/-- The nonconstant-profile split radius source package implies the
+nonconcyclic geometric spelling. -/
+theorem dahlbergE2ConvexRadiusWitnessNonconcyclicSourceComponents_of_components
+    (hsrc : DahlbergE2ConvexRadiusWitnessSourceComponents) :
+    DahlbergE2ConvexRadiusWitnessNonconcyclicSourceComponents := by
+  exact ⟨dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_radiusSource hsrc.1,
+    hsrc.2⟩
+
 /-- The older and witness-only split convex-radius source packages are
 formally equivalent. -/
 theorem dahlbergE2ConvexRadiusSourceComponents_iff_witnessComponents :
@@ -7908,6 +7934,15 @@ theorem dahlbergE2ConvexRadiusSourceComponents_iff_witnessComponents :
   constructor
   · exact dahlbergE2ConvexRadiusWitnessSourceComponents_of_components
   · exact dahlbergE2ConvexRadiusSourceComponents_of_witnessComponents
+
+/-- The nonconstant-profile and nonconcyclic geometric split radius source
+packages are formally equivalent. -/
+theorem dahlbergE2ConvexRadiusWitnessSourceComponents_iff_nonconcyclicComponents :
+    DahlbergE2ConvexRadiusWitnessSourceComponents ↔
+      DahlbergE2ConvexRadiusWitnessNonconcyclicSourceComponents := by
+  constructor
+  · exact dahlbergE2ConvexRadiusWitnessNonconcyclicSourceComponents_of_components
+  · exact dahlbergE2ConvexRadiusWitnessSourceComponents_of_nonconcyclicComponents
 
 /-- The combined convex-radius source gives the CDFV radius-witness source:
 ordered adjacent radius turns imply the plateau-aware radius-profile four
@@ -9369,12 +9404,21 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
 
 This is the primitive strict-branch paper input in its split radius-profile
 spelling: Dahlberg's Theorem 6/CDFV supplies the radius-witness four-vertex
-package, and Lemma 8 turns those witnesses into the adjacent radius turns
-used by Lemma 9.  The signed-Menger Lemma 9 source below is recovered formally
-from this package by reciprocal-radius monotonicity. -/
+package in nonconcyclic geometric form, and Lemma 8 turns those witnesses into
+the adjacent radius turns used by Lemma 9.  The signed-Menger Lemma 9 source
+below is recovered formally from this package by reciprocal-radius
+monotonicity. -/
+theorem dahlbergE2_convex_radius_witness_nonconcyclic_source_components_primitive_gate :
+    DahlbergE2ConvexRadiusWitnessNonconcyclicSourceComponents := by
+  sorry
+
+/-- Dahlberg's strict positive-orientation CDFV/Lemma 8 radius source gate in
+nonconstant-profile form, recovered from the nonconcyclic geometric source
+package. -/
 theorem dahlbergE2_convex_radius_witness_source_components_primitive_gate :
     DahlbergE2ConvexRadiusWitnessSourceComponents := by
-  sorry
+  exact dahlbergE2ConvexRadiusWitnessSourceComponents_of_nonconcyclicComponents
+    dahlbergE2_convex_radius_witness_nonconcyclic_source_components_primitive_gate
 
 /-- Dahlberg's strict positive-orientation Lemma 9 source gate in nonconstant
 profile form, recovered from the split CDFV/Lemma 8 radius source package. -/
