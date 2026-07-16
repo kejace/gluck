@@ -151,19 +151,17 @@ def ForwardDfvAtomicSources : Prop :=
         (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
         DahlbergFourVertex κ) ∧
   DahlbergE2ConvexDfvSignedSource ∧
-  DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource
+  DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource
 
 /-- Fully expanded spelling of the actual remaining source obligations after
 the finite Euclidean disk setup has been proved.
 
 Compared with `ForwardAtomicSources`, the Euclidean Dahlberg part is split down
 to the three still-geometric inputs: the CDFV radius-witness source, the
-Lemma 8 radius-turn bridge, and the §4 auxiliary-polygon construction.  This
-flat compatibility package stores the non-strict input in the older
-max/interior shape; the grouped component spelling below converts it to the
-sharper boundary/interior source.  The least-enclosing-disk setup,
-boundary-set nonemptiness/properness, and metric extraction are no longer
-assumptions. -/
+Lemma 8 radius-turn bridge, and the §4 auxiliary-polygon construction.  The
+non-strict input is stored in the sharp boundary/interior shape: the
+least-enclosing-disk setup, boundary-set nonemptiness/properness, positive
+radius, and boundary maximality are no longer assumptions. -/
 def ForwardRemainingSources : Prop :=
   (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
       Gluck.IsSimpleClosed γ →
@@ -207,7 +205,7 @@ def ForwardRemainingSources : Prop :=
         OrderedAdjacentTurns κ) ∧
   DahlbergE2ConvexDfvRadiusSource ∧
   DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
-  DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource
+  DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource
 
 /-- Fully expanded spelling of the actual remaining source obligations needed
 only for the final D4VT endpoints.
@@ -259,7 +257,7 @@ def ForwardDfvRemainingSources : Prop :=
         (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
         DahlbergFourVertex κ) ∧
   DahlbergE2ConvexDfvSignedSource ∧
-  DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource
+  DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource
 
 /-- Named component spelling of the actual remaining source obligations after
 the finite Euclidean disk setup has been proved.
@@ -280,7 +278,7 @@ only for the final D4VT endpoints.
 
 This groups the flattened `ForwardDfvRemainingSources` audit by geometry:
 ordinary smooth D4VT sources, non-Euclidean discrete D4VT sources, and the sharp
-E² signed-CDFV/max-interior Dahlberg package. -/
+E² signed-CDFV/boundary-interior Dahlberg package. -/
 def ForwardDfvRemainingSourceComponents : Prop :=
   SmoothForwardDfvModelSources ∧
   SpaceFormDiscreteDfvModelSources ∧
@@ -339,16 +337,13 @@ theorem forwardRemainingSources_iff_components :
   · intro hsrc
     rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hCDFV, hL8, hD⟩
     exact ⟨⟨hE, hS, hH⟩, ⟨hdS, hdH⟩,
-      ⟨dahlbergE2ConvexDfvSignedSource_of_radiusSource hCDFV, hL8,
-        dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_maxInteriorSource hD⟩⟩
+      ⟨dahlbergE2ConvexDfvSignedSource_of_radiusSource hCDFV, hL8, hD⟩⟩
   · intro hsrc
     rcases hsrc with ⟨hsmooth, hdisc, hDahlberg⟩
     exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
       hdisc.1, hdisc.2,
       dahlbergE2ConvexDfvRadiusSource_of_signedSource hDahlberg.1,
-      hDahlberg.2.1,
-      dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_boundaryInteriorSource
-        hDahlberg.2.2⟩
+      hDahlberg.2.1, hDahlberg.2.2⟩
 
 /-- The flattened final-D4VT remaining-source audit is equivalent to the named
 component spelling. -/
@@ -357,15 +352,11 @@ theorem forwardDfvRemainingSources_iff_components :
   constructor
   · intro hsrc
     rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
-    exact ⟨⟨hE, hS, hH⟩, ⟨hdS, hdH⟩,
-      ⟨hC,
-        dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_maxInteriorSource hD⟩⟩
+    exact ⟨⟨hE, hS, hH⟩, ⟨hdS, hdH⟩, ⟨hC, hD⟩⟩
   · intro hsrc
     rcases hsrc with ⟨hsmooth, hdisc, hDahlberg⟩
     exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
-      hdisc.1, hdisc.2, hDahlberg.1,
-      dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_boundaryInteriorSource
-        hDahlberg.2⟩
+      hdisc.1, hdisc.2, hDahlberg.1, hDahlberg.2⟩
 
 /-- The flattened remaining-source audit is equivalent to the uniform
 component spelling. -/
@@ -381,7 +372,7 @@ theorem forwardDfvRemainingSources_iff_uniformComponents :
   exact forwardDfvRemainingSources_iff_components.trans
     forwardUniformDfvRemainingSourceComponents_iff_components.symm
 
-/-- After sharpening the `E²` non-strict component to the max/interior §4
+/-- After sharpening the `E²` non-strict component to the boundary/interior §4
 compatibility interface, the fully expanded final-D4VT atomic package is
 exactly the remaining source package for final-D4VT endpoints. -/
 theorem forwardDfvAtomicSources_iff_dfvRemainingSources :
@@ -426,8 +417,8 @@ theorem forwardDfvGeometricSources_iff_atomicSources :
   · intro hsrc
     have hsmooth := smoothForwardDfvSource_iff_modelSources.mp hsrc.1
     have hdisc := spaceFormDiscreteDfvSource_iff_modelSources.mp hsrc.2.1
-    have hD : DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource :=
-      dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSource
+    have hD : DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource :=
+      dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mpr
         hsrc.2.2.2
     exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
       hdisc.1, hdisc.2, hsrc.2.2.1, hD⟩
@@ -435,9 +426,7 @@ theorem forwardDfvGeometricSources_iff_atomicSources :
     rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
     exact ⟨smoothForwardDfvSource_iff_modelSources.mpr ⟨hE, hS, hH⟩,
       spaceFormDiscreteDfvSource_iff_modelSources.mpr ⟨hdS, hdH⟩,
-      dahlbergE2DfvGeometricSources_of_components
-        ⟨hC,
-          dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_maxInteriorSource hD⟩⟩
+      dahlbergE2DfvGeometricSources_of_components ⟨hC, hD⟩⟩
 
 /-- The sharper remaining-source package implies the older fully expanded
 atomic source package. -/
@@ -448,7 +437,7 @@ theorem forwardAtomicSources_of_remainingSources
   exact ⟨hE, hS, hH, hdS, hdH,
     dahlbergE2ConvexRadiusSource_of_components
       ⟨hCDFV, dahlbergE2Lemma8RadiusTurnBridgeSource_of_witnessSource hL8⟩,
-    dahlbergE2DiskReductionSource_of_maxInteriorConstructionSource hD⟩
+    dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mp hD⟩
 
 /-- The sharper remaining-source package implies the bundled geometric source
 package. -/
@@ -472,8 +461,8 @@ theorem forwardRemainingSources_of_geometricSources
       DahlbergE2ConvexRadiusSourceComponents :=
     dahlbergE2ConvexRadiusSourceComponents_iff_convexRadiusSource.mpr hsrc.2.2.1
   have hdisk :
-      DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource :=
-    dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_diskReductionSource
+      DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource :=
+    dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mpr
       hsrc.2.2.2
   exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
     hdisc.1, hdisc.2, hconvex.1,
@@ -655,14 +644,15 @@ the sharper remaining-source package. -/
 theorem dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource := by
-  exact hsrc.2.2.2.2.2.2.2
+  exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_boundaryInteriorSource
+    hsrc.2.2.2.2.2.2.2
 
 /-- Extract Dahlberg's sharper `E²` boundary/interior §4
 auxiliary-construction source from the remaining-source package. -/
 theorem dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_remainingSources
     (hsrc : ForwardRemainingSources) :
     DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource := by
-  exact (dahlbergE2RemainingSourceComponents_of_remainingSources hsrc).2.2
+  exact hsrc.2.2.2.2.2.2.2
 
 /-- Extract Dahlberg's `E²` pair-level §4 auxiliary-construction source from
 the sharper remaining-source package. -/
@@ -700,7 +690,8 @@ the weaker final-D4VT remaining-source package. -/
 theorem dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_dfvRemainingSources
     (hsrc : ForwardDfvRemainingSources) :
     DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource := by
-  exact hsrc.2.2.2.2.2.2
+  exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_boundaryInteriorSource
+    hsrc.2.2.2.2.2.2
 
 /-- Extract Dahlberg's sharper `E²` boundary/interior §4
 auxiliary-construction source from the weaker final-D4VT remaining-source
@@ -708,7 +699,7 @@ package. -/
 theorem dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_dfvRemainingSources
     (hsrc : ForwardDfvRemainingSources) :
     DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource := by
-  exact (dahlbergE2DfvSourceComponents_of_dfvRemainingSources hsrc).2
+  exact hsrc.2.2.2.2.2.2
 
 /-- Extract Dahlberg's `E²` pair-level §4 auxiliary-construction source from
 the weaker final-D4VT remaining-source package. -/
@@ -823,15 +814,15 @@ final-D4VT source package. -/
 theorem dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_dfvAtomicSources
     (hsrc : ForwardDfvAtomicSources) :
     DahlbergE2DiskAuxiliaryMaxInteriorConstructionSource := by
-  exact hsrc.2.2.2.2.2.2
+  exact dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_boundaryInteriorSource
+    hsrc.2.2.2.2.2.2
 
 /-- Extract Dahlberg's sharper `E²` boundary/interior §4 source gate from the
 fully expanded final-D4VT source package. -/
 theorem dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_dfvAtomicSources
     (hsrc : ForwardDfvAtomicSources) :
     DahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource := by
-  exact dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_of_maxInteriorSource
-    (dahlbergE2DiskAuxiliaryMaxInteriorConstructionSource_of_dfvAtomicSources hsrc)
+  exact hsrc.2.2.2.2.2.2
 
 /-- Extract Dahlberg's `E²` disk-reduction source gate from the fully expanded
 final-D4VT source package. -/
