@@ -44,6 +44,103 @@ theorem dist_directIsometryR2 {u : ℂ} (hu : ‖u‖ = 1) (w z₁ z₂ : ℂ) :
   have hsub : u * z₁ + w - (u * z₂ + w) = u * (z₁ - z₂) := by ring
   rw [hsub, norm_mul, hu, one_mul]
 
+/-- Direct Euclidean isometries preserve membership in a closed disk. -/
+theorem inClosedDiskR2_directIsometry {u : ℂ} (hu : ‖u‖ = 1)
+    (w O z : ℂ) (R : ℝ) :
+    InClosedDiskR2 (directIsometryR2 u w O) R (directIsometryR2 u w z) ↔
+      InClosedDiskR2 O R z := by
+  unfold InClosedDiskR2
+  rw [dist_directIsometryR2 hu]
+
+/-- Direct Euclidean isometries preserve finite polygon containment in a
+closed disk. -/
+theorem polygonInClosedDiskR2_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
+    (w O : ℂ) (R : ℝ) (v : ZMod n → ℂ) :
+    PolygonInClosedDiskR2 (fun i => directIsometryR2 u w (v i))
+        (directIsometryR2 u w O) R ↔
+      PolygonInClosedDiskR2 v O R := by
+  constructor
+  · intro h i
+    exact (inClosedDiskR2_directIsometry hu w O (v i) R).mp (h i)
+  · intro h i
+    exact (inClosedDiskR2_directIsometry hu w O (v i) R).mpr (h i)
+
+/-- Direct Euclidean isometries preserve disk-boundary incidence. -/
+theorem onDiskBoundaryR2_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
+    (w O : ℂ) (R : ℝ) (v : ZMod n → ℂ) (i : ZMod n) :
+    OnDiskBoundaryR2 (fun j => directIsometryR2 u w (v j))
+        (directIsometryR2 u w O) R i ↔
+      OnDiskBoundaryR2 v O R i := by
+  unfold OnDiskBoundaryR2
+  rw [dist_directIsometryR2 hu]
+
+/-- The explicit inverse centre for a direct Euclidean isometry. -/
+theorem directIsometryR2_inverse_center {u : ℂ} (hu : ‖u‖ = 1) (w O' : ℂ) :
+    directIsometryR2 u w (u⁻¹ * (O' - w)) = O' := by
+  have hu0 : u ≠ 0 := by
+    intro hzero
+    rw [hzero, norm_zero] at hu
+    norm_num at hu
+  unfold directIsometryR2
+  rw [← mul_assoc, mul_inv_cancel₀ hu0, one_mul]
+  ring
+
+/-- Direct Euclidean isometries preserve minimal enclosing disks. -/
+theorem minimalEnclosingDiskR2_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
+    (w O : ℂ) (R : ℝ) (v : ZMod n → ℂ) :
+    MinimalEnclosingDiskR2 (fun i => directIsometryR2 u w (v i))
+        (directIsometryR2 u w O) R ↔
+      MinimalEnclosingDiskR2 v O R := by
+  constructor
+  · intro hΔ
+    refine ⟨hΔ.1, ?_, ?_⟩
+    · exact (polygonInClosedDiskR2_directIsometry hu w O R v).mp hΔ.2.1
+    · intro O' R' hR' hcontains
+      exact hΔ.2.2 (directIsometryR2 u w O') R' hR'
+        ((polygonInClosedDiskR2_directIsometry hu w O' R' v).mpr hcontains)
+  · intro hΔ
+    refine ⟨hΔ.1, ?_, ?_⟩
+    · exact (polygonInClosedDiskR2_directIsometry hu w O R v).mpr hΔ.2.1
+    · intro O' R' hR' hcontains
+      let Oinv : ℂ := u⁻¹ * (O' - w)
+      have hcenter : directIsometryR2 u w Oinv = O' := by
+        exact directIsometryR2_inverse_center hu w O'
+      have hcontains' : PolygonInClosedDiskR2 v Oinv R' := by
+        intro i
+        have hi : InClosedDiskR2 O' R'
+            (directIsometryR2 u w (v i)) := hcontains i
+        rw [← hcenter] at hi
+        exact (inClosedDiskR2_directIsometry hu w Oinv (v i) R').mp hi
+      exact hΔ.2.2 Oinv R' hR' hcontains'
+
+/-- Direct Euclidean isometries preserve concyclicity. -/
+theorem concyclic_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
+    (w : ℂ) (v : ZMod n → ℂ) :
+    Concyclic (fun i => directIsometryR2 u w (v i)) ↔ Concyclic v := by
+  constructor
+  · intro hcircle
+    rcases hcircle with ⟨O', R, hR, hall⟩
+    let O : ℂ := u⁻¹ * (O' - w)
+    have hcenter : directIsometryR2 u w O = O' := by
+      exact directIsometryR2_inverse_center hu w O'
+    refine ⟨O, R, hR, ?_⟩
+    intro i
+    have hi := hall i
+    rw [← hcenter] at hi
+    rw [dist_directIsometryR2 hu] at hi
+    exact hi
+  · intro hcircle
+    rcases hcircle with ⟨O, R, hR, hall⟩
+    exact ⟨directIsometryR2 u w O, R, hR, fun i => by
+      rw [dist_directIsometryR2 hu]
+      exact hall i⟩
+
+/-- Direct Euclidean isometries preserve nonconcyclicity. -/
+theorem not_concyclic_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
+    (w : ℂ) (v : ZMod n → ℂ) :
+    (¬ Concyclic (fun i => directIsometryR2 u w (v i))) ↔ ¬ Concyclic v := by
+  rw [concyclic_directIsometry hu w v]
+
 /-- Direct Euclidean isometries carry circumcircles to circumcircles with the
 same radius. -/
 theorem circumcircleR2_directIsometry {u : ℂ} (hu : ‖u‖ = 1)
@@ -76,6 +173,28 @@ theorem signedMengerR2_directIsometry {u : ℂ} (hu : ‖u‖ = 1) (w A B C : �
   unfold directIsometryR2
   rw [Gluck.Discrete.signedMengerR2_add_left,
     Gluck.Discrete.signedMengerR2_rotate hu]
+
+/-- Direct Euclidean isometries preserve the signed-Menger profile. -/
+theorem SignedMengerProfile_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
+    (w : ℂ) (v : ZMod n → ℂ) :
+    SignedMengerProfile (fun i => directIsometryR2 u w (v i)) =
+      SignedMengerProfile v := by
+  funext i
+  exact signedMengerR2_directIsometry hu w (v (i - 1)) (v i) (v (i + 1))
+
+/-- Direct Euclidean isometries preserve the Dahlberg four-vertex conclusion
+for the signed-Menger profile. -/
+theorem dahlbergFourVertex_signedMengerProfile_directIsometry_iff {n : ℕ}
+    {u : ℂ} (hu : ‖u‖ = 1) (w : ℂ) (v : ZMod n → ℂ) :
+    DahlbergFourVertex (SignedMengerProfile (fun i => directIsometryR2 u w (v i))) ↔
+      DahlbergFourVertex (SignedMengerProfile v) := by
+  constructor
+  · intro hfv
+    exact dahlbergFourVertex_congr
+      (fun i => (congrFun (SignedMengerProfile_directIsometry hu w v) i).symm) hfv
+  · intro hfv
+    exact dahlbergFourVertex_congr
+      (fun i => congrFun (SignedMengerProfile_directIsometry hu w v) i) hfv
 
 /-- Cyclic permutations preserve the oriented twice-area. -/
 theorem crossR2_cycle (A B C : ℂ) :
@@ -5831,6 +5950,31 @@ boundary. -/
 def DahlbergDiskReductionSetup {n : ℕ} (v : ZMod n → ℂ) : Prop :=
   ∃ O R, MinimalEnclosingDiskR2 v O R ∧
     ∃ i : ZMod n, OnDiskBoundaryR2 v O R i
+
+/-- Direct Euclidean isometries preserve Dahlberg's minimal-disk setup. -/
+theorem dahlbergDiskReductionSetup_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
+    (w : ℂ) (v : ZMod n → ℂ) :
+    DahlbergDiskReductionSetup (fun i => directIsometryR2 u w (v i)) ↔
+      DahlbergDiskReductionSetup v := by
+  constructor
+  · intro hsetup
+    rcases hsetup with ⟨O', R, hΔ, i, hi⟩
+    let O : ℂ := u⁻¹ * (O' - w)
+    have hcenter : directIsometryR2 u w O = O' := by
+      exact directIsometryR2_inverse_center hu w O'
+    have hΔ' : MinimalEnclosingDiskR2 (fun i => directIsometryR2 u w (v i))
+        (directIsometryR2 u w O) R := by
+      simpa [hcenter] using hΔ
+    have hi' : OnDiskBoundaryR2 (fun j => directIsometryR2 u w (v j))
+        (directIsometryR2 u w O) R i := by
+      simpa [hcenter] using hi
+    exact ⟨O, R, (minimalEnclosingDiskR2_directIsometry hu w O R v).mp hΔ',
+      i, (onDiskBoundaryR2_directIsometry hu w O R v i).mp hi'⟩
+  · intro hsetup
+    rcases hsetup with ⟨O, R, hΔ, i, hi⟩
+    exact ⟨directIsometryR2 u w O, R,
+      (minimalEnclosingDiskR2_directIsometry hu w O R v).mpr hΔ,
+      i, (onDiskBoundaryR2_directIsometry hu w O R v i).mpr hi⟩
 
 /-- In the §4 minimal-disk setup for a simple polygon, the smallest disk has
 positive radius. -/
