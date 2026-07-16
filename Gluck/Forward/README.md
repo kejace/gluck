@@ -92,20 +92,22 @@ The remaining primitive source gates in the current worktree are exactly:
 - `Gluck/Forward/Smooth.lean`
   - `four_vertex_condition_smooth_E2_nonconstant_classical`;
 - `Gluck/Forward/Dahlberg.lean`
-  - `dahlbergE2_lemma9_ordered_turn_source_gate`;
+  - `dahlbergE2_lemma9_ordered_turn_nonconcyclic_source_gate`;
   - `dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate`.
 
 Dahlberg's strict positive-orientation CDFV and Lemma 8 compatibility gates,
 `dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate` and
 `dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate`, are no longer
 primitive: both are recovered from the single ordered-turn Lemma 9 source
-`dahlbergE2_lemma9_ordered_turn_source_gate`.  The public
-`dahlbergE2_lemma9_source_gate` is then recovered through the same split
-compatibility interface.  The final-D4VT route remains separated from the
-stronger ordered-turn route: `dahlbergE2_dfv_primitive_source_components`
-contains the signed-CDFV gate recovered from Lemma 9, its formally recovered
-radius witness, and the normalized unit-disk §4 gate; the public E² D4VT
-endpoints route through
+`dahlbergE2_lemma9_ordered_turn_nonconcyclic_source_gate`; the nonconstant
+profile spelling `dahlbergE2_lemma9_ordered_turn_source_gate` is recovered
+formally using nonconcyclicity/nonconstancy equivalence in the positive locally
+regular branch.  The public `dahlbergE2_lemma9_source_gate` is then recovered
+through the same split compatibility interface.  The final-D4VT route remains
+separated from the stronger ordered-turn route:
+`dahlbergE2_dfv_primitive_source_components` contains the signed-CDFV gate
+recovered from Lemma 9, its formally recovered radius witness, and the
+normalized unit-disk §4 gate; the public E² D4VT endpoints route through
 `signedMengerProfile_dahlbergFourVertex_E2_of_dfvPrimitiveSourceComponents`.
 
 The non-strict §4 branch is gated at the unit-radius rotated centered

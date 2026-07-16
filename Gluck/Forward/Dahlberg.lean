@@ -8009,6 +8009,49 @@ def DahlbergE2Lemma9Source : Prop :=
     (¬ ∃ c, ∀ i : ZMod n, SignedMengerProfile v i = c) →
     OrderedAdjacentTurns (SignedMengerProfile v)
 
+/-- Nonconcyclic spelling of Dahlberg's strictly convex same-orientation
+Lemma 9 extraction.
+
+This is the closer paper-facing form: under positive orientation and
+nonconcyclicity, the signed-Menger profile has four cyclically ordered adjacent
+turns.  In the positive locally regular branch, nonconcyclicity is formally
+equivalent to nonconstancy of the signed-Menger profile. -/
+def DahlbergE2Lemma9NonconcyclicSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ Concyclic v) →
+    OrderedAdjacentTurns (SignedMengerProfile v)
+
+/-- The nonconstant Lemma 9 source implies the nonconcyclic spelling. -/
+theorem dahlbergE2Lemma9NonconcyclicSource_of_source
+    (hsrc : DahlbergE2Lemma9Source) :
+    DahlbergE2Lemma9NonconcyclicSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle
+  letI : NeZero n := hne
+  exact hsrc hn hsimple hregular horient
+    (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
+      hsimple hregular horient hnoncircle)
+
+/-- The nonconcyclic Lemma 9 source implies the nonconstant spelling. -/
+theorem dahlbergE2Lemma9Source_of_nonconcyclicSource
+    (hsrc : DahlbergE2Lemma9NonconcyclicSource) :
+    DahlbergE2Lemma9Source := by
+  intro n hne hn v hsimple hregular horient hnc
+  letI : NeZero n := hne
+  exact hsrc hn hsimple hregular horient
+    (not_concyclic_of_not_constant_signedMengerProfile_positiveOrientation
+      hsimple hnc horient)
+
+/-- The nonconstant and nonconcyclic Lemma 9 source spellings are formally
+equivalent in the positive locally regular branch. -/
+theorem dahlbergE2Lemma9Source_iff_nonconcyclicSource :
+    DahlbergE2Lemma9Source ↔ DahlbergE2Lemma9NonconcyclicSource := by
+  constructor
+  · exact dahlbergE2Lemma9NonconcyclicSource_of_source
+  · exact dahlbergE2Lemma9Source_of_nonconcyclicSource
+
 /-- The convex-radius source and the signed-Menger Lemma 9 source are the same
 formal content.  Positive signed Menger curvature is reciprocal radius, so the
 ordered radius turns are exactly ordered signed-Menger turns after reversing the
@@ -9322,15 +9365,23 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
-/-- Dahlberg's strict positive-orientation Lemma 9 source gate.
+/-- Dahlberg's strict positive-orientation nonconcyclic Lemma 9 source gate.
 
-This is the current primitive strict-branch paper input: the strictly convex
-positive-orientation branch has ordered adjacent signed-Menger turns.  The
-separate CDFV and Lemma 8 source gates below are recovered formally from this
-single ordered-turn source, keeping the downstream audit interfaces available
-while leaving only one strict-branch source obligation. -/
-theorem dahlbergE2_lemma9_ordered_turn_source_gate : DahlbergE2Lemma9Source := by
+This is the current primitive strict-branch paper input in its geometric
+spelling: a positively oriented locally regular nonconcyclic polygon has
+ordered adjacent signed-Menger turns.  The separate CDFV and Lemma 8 source
+gates below are recovered formally from this single ordered-turn source,
+keeping the downstream audit interfaces available while leaving only one
+strict-branch source obligation. -/
+theorem dahlbergE2_lemma9_ordered_turn_nonconcyclic_source_gate :
+    DahlbergE2Lemma9NonconcyclicSource := by
   sorry
+
+/-- Dahlberg's strict positive-orientation Lemma 9 source gate in nonconstant
+profile form, recovered from the geometric nonconcyclic source. -/
+theorem dahlbergE2_lemma9_ordered_turn_source_gate : DahlbergE2Lemma9Source := by
+  exact dahlbergE2Lemma9Source_of_nonconcyclicSource
+    dahlbergE2_lemma9_ordered_turn_nonconcyclic_source_gate
 
 /-- Dahlberg's convex/CDFV signed-Menger nonconcyclic source gate.
 
