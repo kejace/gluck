@@ -7891,6 +7891,22 @@ theorem dahlbergE2ConvexSignedSourceComponents_of_lemma9Source
     exact positiveRadiusOrderedAdjacentTurns_of_orderedAdjacentTurns_signedMengerProfile
       hsimple horient (hsrc hn hsimple hregular horient hnc)
 
+/-- Dahlberg's Lemma 9 source directly implies the nonconcyclic signed-CDFV
+source needed by the final-D4VT route.
+
+This avoids routing the weaker final-D4VT branch through the witness-only
+Lemma 8 component, which is needed for the stronger ordered-turn route but not
+for the final four-vertex conclusion. -/
+theorem dahlbergE2ConvexDfvSignedNonconcyclicSource_of_lemma9Source
+    (hsrc : DahlbergE2Lemma9Source) :
+    DahlbergE2ConvexDfvSignedNonconcyclicSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle
+  letI : NeZero n := hne
+  exact dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn
+    (hsrc hn hsimple hregular horient
+      (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
+        hsimple hregular horient hnoncircle))
+
 /-- The exact signed-CDFV/Lemma 8 source components are formally equivalent to
 Dahlberg's Lemma 9 ordered-turn source. -/
 theorem dahlbergE2ConvexSignedSourceComponents_iff_lemma9Source :
@@ -9494,9 +9510,7 @@ final-D4VT E² component package. -/
 theorem dahlbergE2DfvPrimitiveSourceComponents_of_lemma9DfvUnitComponents
     (hsrc : DahlbergE2Lemma9DfvUnitSourceComponents) :
     DahlbergE2DfvPrimitiveSourceComponents := by
-  have hsplit : DahlbergE2ConvexSignedSourceComponents :=
-    dahlbergE2ConvexSignedSourceComponents_of_lemma9Source hsrc.1
-  exact ⟨dahlbergE2ConvexDfvSignedNonconcyclicSource_of_signedSource hsplit.1,
+  exact ⟨dahlbergE2ConvexDfvSignedNonconcyclicSource_of_lemma9Source hsrc.1,
     hsrc.2⟩
 
 /-- Convert normalized-unit remaining E² components to the existing
