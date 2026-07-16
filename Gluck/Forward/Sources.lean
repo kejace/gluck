@@ -98,6 +98,56 @@ def ForwardAtomicSources : Prop :=
   DahlbergE2ConvexRadiusSource ∧
   DahlbergE2DiskReductionSource
 
+/-- Fully expanded spelling of the weaker final-D4VT source package.
+
+This is the audit target for final D4VT statements: it keeps the same three
+smooth source gates and two non-Euclidean discrete ordered-turn source gates,
+but replaces Dahlberg's stronger adjacent-turn source by the theorem-level
+signed-Menger CDFV source. -/
+def ForwardDfvAtomicSources : Prop :=
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.RealizesCurvature γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ) ∧
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes 1 γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ) ∧
+  (∀ {γ : ℝ → ℂ} {κ : ℝ → ℝ},
+      Gluck.IsSimpleClosed γ →
+      Gluck.SpaceForm.Realizes (-1) γ κ →
+      Continuous κ →
+      Function.Periodic κ (2 * Real.pi) →
+      (¬ ∃ c, ∀ t, κ t = c) →
+      Gluck.FourVertexCondition κ) ∧
+  (∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger 1 v κ →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        OrderedAdjacentTurns κ) ∧
+  (∀ {n : ℕ} [NeZero n], 4 ≤ n →
+      ∀ (v : ZMod n → ℂ) (κ : ZMod n → ℝ),
+        (∀ i, ‖v i‖ < 1) →
+        Gluck.Discrete.IsSimplePolygon v →
+        (∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) →
+        DahlbergRegular v →
+        RealizesConformalMenger (-1) v κ →
+        (∀ i, 1 < κ i) →
+        (¬ ∃ c, ∀ i : ZMod n, κ i = c) →
+        OrderedAdjacentTurns κ) ∧
+  DahlbergE2ConvexDfvSignedSource ∧
+  DahlbergE2DiskReductionSource
+
 /-- The bundled uniform source package is equivalent to the model-specific
 source package. -/
 theorem forwardGeometricSources_iff_modelSources :
@@ -127,6 +177,21 @@ atomic source package. -/
 theorem forwardGeometricSources_iff_atomicSources :
     ForwardGeometricSources ↔ ForwardAtomicSources := by
   exact forwardGeometricSources_iff_modelSources.trans forwardModelSources_iff_atomicSources
+
+/-- The weaker bundled final-D4VT source package is equivalent to the fully
+expanded weaker final-D4VT atomic package. -/
+theorem forwardDfvGeometricSources_iff_atomicSources :
+    ForwardDfvGeometricSources ↔ ForwardDfvAtomicSources := by
+  constructor
+  · intro hsrc
+    have hsmooth := smoothForwardSource_iff_modelSources.mp hsrc.1
+    have hdisc := spaceFormDiscreteSource_iff_modelSources.mp hsrc.2.1
+    exact ⟨hsmooth.1, hsmooth.2.1, hsmooth.2.2,
+      hdisc.1, hdisc.2, hsrc.2.2.1, hsrc.2.2.2⟩
+  · intro hsrc
+    rcases hsrc with ⟨hE, hS, hH, hdS, hdH, hC, hD⟩
+    exact ⟨smoothForwardSource_iff_modelSources.mpr ⟨hE, hS, hH⟩,
+      spaceFormDiscreteSource_iff_modelSources.mpr ⟨hdS, hdH⟩, ⟨hC, hD⟩⟩
 
 /-- Extract the smooth `E²` source gate from the fully expanded source
 package. -/
@@ -205,6 +270,20 @@ theorem dahlbergE2DiskReductionSource_of_atomicSources (hsrc : ForwardAtomicSour
     DahlbergE2DiskReductionSource := by
   exact hsrc.2.2.2.2.2.2
 
+/-- Extract Dahlberg's weaker signed-CDFV source gate from the fully expanded
+final-D4VT source package. -/
+theorem dahlbergE2ConvexDfvSignedSource_of_dfvAtomicSources
+    (hsrc : ForwardDfvAtomicSources) :
+    DahlbergE2ConvexDfvSignedSource := by
+  exact hsrc.2.2.2.2.2.1
+
+/-- Extract Dahlberg's `E²` disk-reduction source gate from the fully expanded
+final-D4VT source package. -/
+theorem dahlbergE2DiskReductionSource_of_dfvAtomicSources
+    (hsrc : ForwardDfvAtomicSources) :
+    DahlbergE2DiskReductionSource := by
+  exact hsrc.2.2.2.2.2.2
+
 /-- Extract the smooth model-source package from the expanded forward source
 package. -/
 theorem smoothForwardModelSources_of_modelSources (hsrc : ForwardModelSources) :
@@ -258,6 +337,20 @@ forward source package. -/
 theorem forwardGeometricSources_of_atomicSources (hsrc : ForwardAtomicSources) :
     ForwardGeometricSources := by
   exact forwardGeometricSources_iff_atomicSources.mpr hsrc
+
+/-- Convert a weaker bundled final-D4VT source package to its fully expanded
+atomic spelling. -/
+theorem forwardDfvAtomicSources_of_geometricSources
+    (hsrc : ForwardDfvGeometricSources) :
+    ForwardDfvAtomicSources := by
+  exact forwardDfvGeometricSources_iff_atomicSources.mp hsrc
+
+/-- Convert a fully expanded weaker final-D4VT source package to the bundled
+source spelling. -/
+theorem forwardDfvGeometricSources_of_atomicSources
+    (hsrc : ForwardDfvAtomicSources) :
+    ForwardDfvGeometricSources := by
+  exact forwardDfvGeometricSources_iff_atomicSources.mpr hsrc
 
 /-- Extract the smooth source component from a bundled forward source proof. -/
 theorem four_vertex_condition_smooth_spaceForm_nonconstant_of_sources
@@ -1869,6 +1962,19 @@ theorem dahlberg_discrete_four_vertex_E2_of_atomicSources
   exact dahlberg_discrete_four_vertex_E2_of_sources
     (forwardGeometricSources_of_atomicSources hsrc) hn v hsimple hregular hnoncircle
 
+/-- The public Euclidean Dahlberg D4VT from the fully expanded weaker
+final-D4VT atomic source package. -/
+theorem dahlberg_discrete_four_vertex_E2_of_dfvAtomicSources
+    (hsrc : ForwardDfvAtomicSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex
+      (fun i => Gluck.Discrete.signedMengerR2 (v (i - 1)) (v i) (v (i + 1))) := by
+  exact dahlberg_discrete_four_vertex_E2_of_forwardDfvSources
+    (forwardDfvGeometricSources_of_atomicSources hsrc)
+    hn v hsimple hregular hnoncircle
+
 /-- The spherical constant-or-Dahlberg theorem from the fully expanded atomic
 source package. -/
 theorem constant_or_dahlbergFourVertex_S2_of_atomicSources
@@ -1956,5 +2062,9 @@ theorem forward_model_sources : ForwardModelSources := by
 /-- Fully expanded atomic spelling of `forward_geometric_sources`. -/
 theorem forward_atomic_sources : ForwardAtomicSources := by
   exact forwardGeometricSources_iff_atomicSources.mp forward_geometric_sources
+
+/-- Fully expanded atomic spelling of `forward_dfv_geometric_sources`. -/
+theorem forward_dfv_atomic_sources : ForwardDfvAtomicSources := by
+  exact forwardDfvGeometricSources_iff_atomicSources.mp forward_dfv_geometric_sources
 
 end Gluck.Forward
