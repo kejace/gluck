@@ -613,6 +613,157 @@ theorem dahlbergFourVertex_conformalMenger_strict_of_sources
       hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper_pos hproper_neg)
     hnc
 
+/-- Exact public-name alias for the source-parametrized positive-orientation
+conformal-Menger constant-or-Dahlberg theorem. -/
+theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_positiveOrientation_of_sources
+    (hsrc : ForwardGeometricSources)
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
+    hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper
+
+/-- Exact public-name alias for the source-parametrized positive-orientation
+conformal-Menger ordered-turn theorem. -/
+theorem orderedAdjacentTurns_conformalMenger_spaceForm_of_positiveOrientation_of_sources
+    (hsrc : ForwardGeometricSources)
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    OrderedAdjacentTurns κ := by
+  exact orderedAdjacentTurns_conformalMenger_spaceForm_kernel_of_sources
+    hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper hnc
+
+/-- Exact public-name alias for the source-parametrized positive-orientation
+conformal-Menger constant-or ordered-turn theorem. -/
+theorem constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_of_positiveOrientation_of_sources
+    (hsrc : ForwardGeometricSources)
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ OrderedAdjacentTurns κ := by
+  exact constant_or_orderedAdjacentTurns_conformalMenger_spaceForm_kernel_of_sources
+    hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper
+
+/-- Exact public-name alias for the source-parametrized positive-orientation
+conformal-Menger nonconstant D4VT theorem. -/
+theorem dahlbergFourVertex_conformalMenger_spaceForm_of_positiveOrientation_of_sources
+    (hsrc : ForwardGeometricSources)
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_conformalMenger_spaceForm_kernel_of_sources
+    hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper hnc
+
+/-- Exact public-name alias for the source-parametrized negative-orientation
+conformal-Menger ordered-turn theorem in reflected form. -/
+theorem orderedAdjacentTurns_conformalMenger_spaceForm_of_negativeOrientation_reflected_of_sources
+    (hsrc : ForwardGeometricSources)
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < -κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    OrderedAdjacentTurns (fun i => -κ (-i)) := by
+  exact orderedAdjacentTurns_conformalMenger_neg_reflected_of_sources
+    hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper hnc
+
+/-- Exact public-name alias for the source-parametrized negative-orientation
+conformal-Menger constant-or-Dahlberg theorem. -/
+theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_negativeOrientation_of_sources
+    (hsrc : ForwardGeometricSources)
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < -κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_conformalMenger_neg_of_sources
+    hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper
+
+/-- Exact public-name alias for the source-parametrized negative-orientation
+conformal-Menger nonconstant D4VT theorem. -/
+theorem dahlbergFourVertex_conformalMenger_spaceForm_of_negativeOrientation_of_sources
+    (hsrc : ForwardGeometricSources)
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper : ε < 0 → ∀ i, 1 < -κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_conformalMenger_oriented_of_sources
+    hsrc hε hn v κ hdisk hsimple (Or.inr ⟨horient, hproper⟩) hregular hκ hnc
+
+/-- Exact public-name alias for the source-parametrized strict-orientation
+conformal-Menger constant-or-Dahlberg theorem. -/
+theorem constant_or_dahlbergFourVertex_conformalMenger_spaceForm_of_strict_orientation_of_sources
+    (hsrc : ForwardGeometricSources)
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper_pos : ε < 0 → PositivePolygonOrientation v → ∀ i, 1 < κ i)
+    (hproper_neg : ε < 0 → NegativePolygonOrientation v → ∀ i, 1 < -κ i) :
+    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
+  exact constant_or_dahlbergFourVertex_conformalMenger_strict_of_sources
+    hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper_pos hproper_neg
+
+/-- Exact public-name alias for the source-parametrized strict-orientation
+conformal-Menger nonconstant D4VT theorem. -/
+theorem dahlbergFourVertex_conformalMenger_spaceForm_of_strict_orientation_of_sources
+    (hsrc : ForwardGeometricSources)
+    {ε : ℝ} (hε : ε = 0 ∨ ε = 1 ∨ ε = -1)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v)
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger ε v κ)
+    (hproper_pos : ε < 0 → PositivePolygonOrientation v → ∀ i, 1 < κ i)
+    (hproper_neg : ε < 0 → NegativePolygonOrientation v → ∀ i, 1 < -κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    DahlbergFourVertex κ := by
+  exact dahlbergFourVertex_conformalMenger_strict_of_sources
+    hsrc hε hn v κ hdisk hsimple horient hregular hκ hproper_pos hproper_neg hnc
+
 /-- The source-parametrized S² positive-orientation ordered-turn endpoint. -/
 theorem orderedAdjacentTurns_S2_pos_of_sources
     (hsrc : ForwardGeometricSources)
