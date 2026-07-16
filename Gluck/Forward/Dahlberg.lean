@@ -7389,22 +7389,29 @@ theorem dahlbergE2_lemma10_radius_comparison_source :
   exact edgeRegularCircleRadius_le_of_mem_edgeClosedDisk
     hAB hcross hcircle hcone hmem
 
-/-- Dahlberg's convex/CDFV radius-witness source, extracted directly from
+/-- Dahlberg's convex/CDFV signed-Menger source, extracted directly from
 Theorem 6/CDFV in Dahlberg's discrete four-vertex paper.
 
-This is the Euclidean strict-convex source used by the ordered-turn refinement:
-the convex discrete four-vertex theorem supplies the four extremal curvature
-disk/radius witnesses before Lemma 8 converts them to adjacent radius turns. -/
-theorem dahlbergE2_convex_dfv_radius_source :
-    DahlbergE2ConvexDfvRadiusSource := by
-  sorry
-
-/-- Dahlberg's convex/CDFV signed-Menger source, recovered from the
-radius-witness source by reciprocal-radius monotonicity. -/
+This is the theorem-level Euclidean strict-convex source used by the final
+D4VT route: the convex discrete four-vertex theorem supplies the
+plateau-aware signed-Menger conclusion directly.  The radius-witness spelling
+needed by the ordered-turn refinement is recovered formally below by reciprocal
+radius monotonicity in the positive-orientation branch. -/
 theorem dahlbergE2_convex_dfv_signed_source :
     DahlbergE2ConvexDfvSignedSource := by
-  exact dahlbergE2ConvexDfvSignedSource_of_radiusSource
-    dahlbergE2_convex_dfv_radius_source
+  sorry
+
+/-- Dahlberg's convex/CDFV radius-witness source, recovered from the
+theorem-level signed-Menger source by reciprocal-radius monotonicity.
+
+This is the stronger interface needed by the ordered-turn refinement: once the
+strict convex D4VT conclusion is known for signed Menger curvature, the
+positive-orientation radius profile has the equivalent plateau-aware four
+vertices. -/
+theorem dahlbergE2_convex_dfv_radius_source :
+    DahlbergE2ConvexDfvRadiusSource := by
+  exact dahlbergE2ConvexDfvRadiusSource_of_signedSource
+    dahlbergE2_convex_dfv_signed_source
 
 /-- Dahlberg's Lemma 8 monotonicity bridge from CDFV radius witnesses to the
 ordered adjacent radius turns used in Lemma 9.
