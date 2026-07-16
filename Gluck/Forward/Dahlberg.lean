@@ -6791,6 +6791,30 @@ theorem dahlbergE2ConvexRadiusSource_of_components
   exact hsrc.2 hn hsimple hregular horient hnc
     (hsrc.1 hn hsimple hregular horient hnc)
 
+/-- The split CDFV/Lemma 8 source components imply Dahlberg's Lemma 9
+signed-Menger ordered-turn source. -/
+theorem dahlbergE2Lemma9Source_of_components
+    (hsrc : DahlbergE2ConvexRadiusSourceComponents) :
+    DahlbergE2Lemma9Source := by
+  exact dahlbergE2_convexRadiusSource_iff_lemma9Source.mp
+    (dahlbergE2ConvexRadiusSource_of_components hsrc)
+
+/-- Dahlberg's Lemma 9 source implies the split CDFV/Lemma 8 source package,
+formally, by converting Lemma 9 back to ordered radius turns. -/
+theorem dahlbergE2ConvexRadiusSourceComponents_of_lemma9Source
+    (hsrc : DahlbergE2Lemma9Source) :
+    DahlbergE2ConvexRadiusSourceComponents := by
+  exact dahlbergE2ConvexRadiusSourceComponents_iff_convexRadiusSource.mpr
+    (dahlbergE2_convexRadiusSource_iff_lemma9Source.mpr hsrc)
+
+/-- The split CDFV/Lemma 8 source components are formally equivalent to
+Dahlberg's Lemma 9 signed-Menger ordered-turn source. -/
+theorem dahlbergE2ConvexRadiusSourceComponents_iff_lemma9Source :
+    DahlbergE2ConvexRadiusSourceComponents ↔ DahlbergE2Lemma9Source := by
+  constructor
+  · exact dahlbergE2Lemma9Source_of_components
+  · exact dahlbergE2ConvexRadiusSourceComponents_of_lemma9Source
+
 /-- Dahlberg's non-strict §4 disk-reduction source: a non-strict locally
 regular nonconcyclic polygon admits an auxiliary strict-orientation polygon
 whose Dahlberg conclusion transfers back. -/

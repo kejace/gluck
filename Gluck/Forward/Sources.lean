@@ -388,6 +388,15 @@ theorem dahlbergE2Lemma8RadiusTurnBridgeSource_of_remainingSources
     DahlbergE2Lemma8RadiusTurnBridgeSource := by
   exact hsrc.2.2.2.2.2.2.1
 
+/-- Extract Dahlberg's `E²` Lemma 9 ordered-turn source from the sharper
+remaining-source package. -/
+theorem dahlbergE2Lemma9Source_of_remainingSources
+    (hsrc : ForwardRemainingSources) :
+    DahlbergE2Lemma9Source := by
+  exact dahlbergE2Lemma9Source_of_components
+    ⟨dahlbergE2ConvexDfvRadiusSource_of_remainingSources hsrc,
+      dahlbergE2Lemma8RadiusTurnBridgeSource_of_remainingSources hsrc⟩
+
 /-- Extract Dahlberg's `E²` boundary-level §4 auxiliary-construction source
 from the sharper remaining-source package. -/
 theorem dahlbergE2DiskAuxiliaryBoundaryConstructionSource_of_remainingSources
