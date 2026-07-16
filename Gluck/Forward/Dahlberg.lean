@@ -7065,23 +7065,22 @@ theorem dahlbergE2DfvGeometricSources_directIsometry
     exact dahlbergE2DiskReductionSource_directIsometry hsrc.2 hu a hn
       hsimple hregular hnoncircle hnonstrict
 
-/-- Dahlberg's convex/CDFV signed-Menger source, extracted directly from
+/-- Dahlberg's convex/CDFV radius-witness source, extracted directly from
 Theorem 6/CDFV in Dahlberg's discrete four-vertex paper.
 
-This is the Euclidean strict-convex source needed for the final D4VT endpoint;
-the radius-witness source below is formally equivalent and is recovered from
-this theorem-level statement when the stronger ordered-turn refinements need
-radius data. -/
-theorem dahlbergE2_convex_dfv_signed_source :
-    DahlbergE2ConvexDfvSignedSource := by
-  sorry
-
-/-- Dahlberg's convex/CDFV radius-witness source, recovered from the
-theorem-level signed-Menger CDFV source by reciprocal-radius monotonicity. -/
+This is the Euclidean strict-convex source used by the ordered-turn refinement:
+the convex discrete four-vertex theorem supplies the four extremal curvature
+disk/radius witnesses before Lemma 8 converts them to adjacent radius turns. -/
 theorem dahlbergE2_convex_dfv_radius_source :
     DahlbergE2ConvexDfvRadiusSource := by
-  exact dahlbergE2ConvexDfvRadiusSource_of_signedSource
-    dahlbergE2_convex_dfv_signed_source
+  sorry
+
+/-- Dahlberg's convex/CDFV signed-Menger source, recovered from the
+radius-witness source by reciprocal-radius monotonicity. -/
+theorem dahlbergE2_convex_dfv_signed_source :
+    DahlbergE2ConvexDfvSignedSource := by
+  exact dahlbergE2ConvexDfvSignedSource_of_radiusSource
+    dahlbergE2_convex_dfv_radius_source
 
 /-- Dahlberg's Lemma 8 monotonicity bridge from CDFV radius witnesses to the
 ordered adjacent radius turns used in Lemma 9. -/
