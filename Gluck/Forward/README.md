@@ -41,6 +41,18 @@ those package components plus the already-formalized cyclic/order,
 nonconcyclic-to-nonconstant, reciprocal-radius/sign, reflection, and
 plateau-aware conversion lemmas.
 
+The final E² D4VT route is intentionally separated from the stronger ordered-
+turn route.  The theorem-level strict-convex input is
+`DahlbergE2ConvexDfvSignedSource`; it is equivalent to the radius-witness form
+`DahlbergE2ConvexDfvRadiusSource` by reciprocal-radius monotonicity, exposed by
+`dahlbergE2_convexDfvRadiusSource_iff_signedSource` and the named conversion
+lemmas `dahlbergE2ConvexDfvSignedSource_of_radiusSource` and
+`dahlbergE2ConvexDfvRadiusSource_of_signedSource`.  The stronger conformal-
+Menger ordered-turn refinements additionally require
+`DahlbergE2Lemma8RadiusTurnBridgeSource`, because a plateau-aware
+`DahlbergFourVertex` witness does not by itself produce four strict adjacent
+turns.
+
 For `ε = 0` conformal-Menger realizations, the positive-orientation
 nonconstant endpoint is
 `orderedAdjacentTurns_E2_of_realizesConformalMenger_zero_positiveOrientation_not_constant`.
@@ -94,10 +106,35 @@ model-specific source names `orderedAdjacentTurns_S2_source` and
 ordered turns by the general cyclic constructor
 `dahlbergFourVertex_of_orderedAdjacentTurns_four_le`, and the uniform
 nonconstant theorem `dahlbergFourVertex_spaceForm_source` is derived from the
-same ordered-turn source.  The post-import audit file `Sources.lean` bundles the
-three remaining geometric imports as `ForwardGeometricSources`, with
-`forward_geometric_sources` collecting the current source gates into that single
-target.  It also exposes source-parametrized kernels such as
+same ordered-turn source.  The local weak-source API
+`dahlbergFourVertex_spaceForm_of_dfvSource` and
+`constant_or_dahlbergFourVertex_spaceForm_of_dfvSource` records the final-D4VT
+consequence of `SpaceFormDiscreteDfvSource` without requiring ordered turns.
+
+The post-import audit file `Sources.lean` bundles the remaining geometric
+imports in two layers.  `ForwardGeometricSources` is the stronger package used
+for ordered-turn and conformal-Menger refinements; `ForwardDfvGeometricSources`
+is the weaker package sufficient for final D4VT endpoints.  The fully expanded
+remaining-source audit is:
+
+- `Gluck/Forward/Smooth.lean`
+  - `four_vertex_condition_smooth_E2_nonconstant_source_gate`;
+  - `four_vertex_condition_smooth_S2_nonconstant_source_gate`;
+  - `four_vertex_condition_smooth_H2_nonconstant_source_gate`.
+- `Gluck/Forward/SpaceFormDiscrete.lean`
+  - `orderedAdjacentTurns_S2_source_gate`;
+  - `orderedAdjacentTurns_H2_source_gate`.
+- `Gluck/Forward/Dahlberg.lean`
+  - `dahlbergE2_convex_dfv_signed_source`;
+  - `dahlbergE2_lemma8_radius_turn_bridge_source`;
+  - `dahlbergE2_disk_auxiliary_construction_source`.
+
+The corresponding audit targets are `ForwardRemainingSources`, for the
+stronger ordered-turn route, and `ForwardDfvRemainingSources`, for the final
+D4VT route.  `forward_remaining_sources` and
+`forward_dfv_remaining_sources` currently collect exactly the listed source
+gates; completing the forward program means replacing those gates by formal
+proofs.  It also exposes source-parametrized kernels such as
 `four_vertex_condition_smooth_spaceForm_kernel_of_sources`,
 `dahlberg_discrete_four_vertex_E2_kernel_of_sources`, and
 `constant_or_dahlbergFourVertex_spaceForm_kernel_of_sources`, together with
