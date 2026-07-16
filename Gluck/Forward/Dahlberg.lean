@@ -9763,6 +9763,13 @@ def DahlbergE2PrimitiveRemainingSourceComponents : Prop :=
   DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
   DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
 
+/-- Primitive `E²` source components grouped by paper branch: the strict branch
+is the nonconcyclic signed-CDFV/Lemma 8 component package, and the non-strict
+branch is the normalized unit-disk §4 source. -/
+def DahlbergE2PrimitiveStrictUnitSourceComponents : Prop :=
+  DahlbergE2ConvexSignedNonconcyclicSourceComponents ∧
+  DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
+
 /-- Compatibility surface for the stronger ordered-turn route: Dahlberg's
 strict positive-orientation Lemma 9 source, plus the normalized unit-disk §4
 source for the non-strict branch.
@@ -9902,6 +9909,29 @@ theorem dahlbergE2RemainingSourceComponents_iff_primitiveComponents :
   constructor
   · exact dahlbergE2PrimitiveRemainingSourceComponents_of_components
   · exact dahlbergE2RemainingSourceComponents_of_primitiveComponents
+
+/-- Convert the branch-grouped primitive source package to the triple-shaped
+primitive remaining package. -/
+theorem dahlbergE2PrimitiveRemainingSourceComponents_of_strictUnitComponents
+    (hsrc : DahlbergE2PrimitiveStrictUnitSourceComponents) :
+    DahlbergE2PrimitiveRemainingSourceComponents := by
+  exact ⟨hsrc.1.1, hsrc.1.2, hsrc.2⟩
+
+/-- Convert the triple-shaped primitive remaining package to the branch-grouped
+primitive source package. -/
+theorem dahlbergE2PrimitiveStrictUnitSourceComponents_of_primitiveComponents
+    (hsrc : DahlbergE2PrimitiveRemainingSourceComponents) :
+    DahlbergE2PrimitiveStrictUnitSourceComponents := by
+  exact ⟨⟨hsrc.1, hsrc.2.1⟩, hsrc.2.2⟩
+
+/-- The triple-shaped and branch-grouped primitive remaining source packages
+are formally equivalent. -/
+theorem dahlbergE2PrimitiveRemainingSourceComponents_iff_strictUnitComponents :
+    DahlbergE2PrimitiveRemainingSourceComponents ↔
+      DahlbergE2PrimitiveStrictUnitSourceComponents := by
+  constructor
+  · exact dahlbergE2PrimitiveStrictUnitSourceComponents_of_primitiveComponents
+  · exact dahlbergE2PrimitiveRemainingSourceComponents_of_strictUnitComponents
 
 /-- Convert the current Lemma-9/unit primitive E² gate surface to the older
 split primitive spelling. -/
@@ -10367,14 +10397,20 @@ theorem dahlbergE2_lemma9_unit_remaining_source_components :
   exact ⟨dahlbergE2_lemma9_source_gate,
     dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate⟩
 
-/-- Primitive spelling of the exact remaining `E²` Dahlberg source
-components: nonconcyclic signed-CDFV, Lemma 8's witness bridge, and the
-normalized unit-disk §4 construction source. -/
+/-- Branch-grouped primitive spelling of the exact remaining `E²` Dahlberg
+source components: the strict nonconcyclic signed-CDFV/Lemma 8 package, plus
+the normalized unit-disk §4 construction source. -/
+theorem dahlbergE2_primitive_strict_unit_source_components :
+    DahlbergE2PrimitiveStrictUnitSourceComponents := by
+  exact ⟨dahlbergE2_convex_signed_nonconcyclic_source_components_gate,
+    dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate⟩
+
+/-- Triple-shaped primitive spelling of the exact remaining `E²` Dahlberg
+source components, recovered from the branch-grouped primitive package. -/
 theorem dahlbergE2_primitive_remaining_source_components :
     DahlbergE2PrimitiveRemainingSourceComponents := by
-  exact ⟨dahlbergE2_convex_dfv_signed_nonconcyclic_source_gate,
-    dahlbergE2_lemma8_radius_turn_bridge_from_witness_source_gate,
-    dahlbergE2_disk_auxiliary_boundary_successor_unit_construction_source_gate⟩
+  exact dahlbergE2PrimitiveRemainingSourceComponents_of_strictUnitComponents
+    dahlbergE2_primitive_strict_unit_source_components
 
 /-- The exact remaining `E²` Dahlberg source components currently used by the
 stronger ordered-turn route, recovered from the primitive nonconcyclic
