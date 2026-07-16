@@ -2979,26 +2979,10 @@ actual remaining source gates.
 The Euclidean Dahlberg disk setup is no longer included here, since the finite
 least-enclosing-disk and boundary-vertex facts have been proved. -/
 theorem forward_remaining_sources : ForwardRemainingSources := by
-  refine ⟨?_, ?_, ?_, ?_, ?_, dahlbergE2_convex_dfv_radius_source,
-    dahlbergE2_lemma8_radius_turn_bridge_from_witness_source,
-    dahlbergE2_disk_auxiliary_max_interior_construction_source⟩
-  · intro γ κ hclosed hreal hκ hper hnc
-    exact four_vertex_condition_smooth_E2_nonconstant_geometric_source
-      hclosed hreal hκ hper hnc
-  · intro γ κ hclosed hreal hκ hper hnc
-    exact four_vertex_condition_smooth_S2_nonconstant_geometric_source
-      hclosed hreal hκ hper hnc
-  · intro γ κ hclosed hreal hκ hper hnc
-    exact four_vertex_condition_smooth_H2_nonconstant_geometric_source
-      hclosed hreal hκ hper hnc
-  · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hnc
-    letI : NeZero n := hne
-    exact orderedAdjacentTurns_S2_geometric_source
-      hn v κ hdisk hsimple hconvex hregular hκ hnc
-  · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
-    letI : NeZero n := hne
-    exact orderedAdjacentTurns_H2_geometric_source
-      hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
+  exact forwardRemainingSources_iff_components.mpr
+    ⟨smoothForwardSource_iff_modelSources.mp smoothForward_source_gate,
+      spaceFormDiscreteSource_iff_modelSources.mp spaceFormDiscrete_source_gate,
+      dahlbergE2_remaining_source_components⟩
 
 /-- The current forward development is reduced to the bundled geometric source
 package, routed through the sharper exact remaining-source audit. -/
@@ -3017,25 +3001,11 @@ proved directly from the weaker gates, so the final D4VT audit does not depend
 on the stronger E² Lemma 8 ordered-turn source used only by conformal-Menger
 ordered-turn refinements. -/
 theorem forward_dfv_remaining_sources : ForwardDfvRemainingSources := by
-  refine ⟨?_, ?_, ?_, ?_, ?_, dahlbergE2_convex_dfv_signed_source,
-    dahlbergE2_disk_auxiliary_max_interior_construction_source⟩
-  · intro γ κ hclosed hreal hκ hper hnc
-    exact smoothFourVertex_E2_nonconstant_geometric_source
-      hclosed hreal hκ hper hnc
-  · intro γ κ hclosed hreal hκ hper hnc
-    exact smoothFourVertex_S2_nonconstant_geometric_source
-      hclosed hreal hκ hper hnc
-  · intro γ κ hclosed hreal hκ hper hnc
-    exact smoothFourVertex_H2_nonconstant_geometric_source
-      hclosed hreal hκ hper hnc
-  · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hnc
-    letI : NeZero n := hne
-    exact dahlbergFourVertex_S2_geometric_source
-      hn v κ hdisk hsimple hconvex hregular hκ hnc
-  · intro n hne hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
-    letI : NeZero n := hne
-    exact dahlbergFourVertex_H2_geometric_source
-      hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
+  exact forwardDfvRemainingSources_iff_components.mpr
+    ⟨smoothForwardDfvSource_iff_modelSources.mp
+        (smoothForwardDfvSource_of_source smoothForward_source_gate),
+      spaceFormDiscreteDfvSource_iff_modelSources.mp spaceFormDiscrete_dfv_source_gate,
+      dahlbergE2_dfv_source_components⟩
 
 /-- Weaker final-D4VT source package, routed through the actual weaker
 final-D4VT remaining-source audit rather than through the stronger full
