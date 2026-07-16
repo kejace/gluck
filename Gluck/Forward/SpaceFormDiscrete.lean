@@ -74,12 +74,39 @@ theorem spaceFormDiscreteSource_iff_modelSources :
       exact hsrc.2 hn v κ hdisk hsimple hconvex hregular hκ
         (hproper (by norm_num)) hnc
 
+/-- Spherical nonconstant ordered-turn geometric source gate for the
+convex/coherent discrete four-vertex package in an open hemisphere. -/
+theorem orderedAdjacentTurns_S2_source_gate {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger 1 v κ)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    OrderedAdjacentTurns κ := by
+  sorry
+
+/-- Hyperbolic nonconstant ordered-turn geometric source gate for
+Grant--Mogilski's convex coherent discrete four-vertex theorem in the
+proper-circle regime `κᵢ > 1`. -/
+theorem orderedAdjacentTurns_H2_source_gate {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (v : ZMod n → ℂ) (κ : ZMod n → ℝ)
+    (hdisk : ∀ i, ‖v i‖ < 1)
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hconvex : ∀ i, 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
+    (hregular : DahlbergRegular v)
+    (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
+    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
+    OrderedAdjacentTurns κ := by
+  sorry
+
 /-- The current model-specific non-Euclidean discrete source package.
 
-This is the discrete space-form source gate: the spherical convex/coherent
-source and the hyperbolic Grant--Mogilski proper-circle source. -/
+This packages the spherical convex/coherent source and the hyperbolic
+Grant--Mogilski proper-circle source. -/
 theorem spaceFormDiscrete_model_sources : SpaceFormDiscreteModelSources := by
-  sorry
+  exact ⟨orderedAdjacentTurns_S2_source_gate, orderedAdjacentTurns_H2_source_gate⟩
 
 /-- Uniform nonconstant ordered-turn geometric source theorem for the
 convex/coherent conformal-Menger discrete four-vertex package in `S²` (`ε = 1`)
@@ -117,7 +144,7 @@ theorem orderedAdjacentTurns_S2_geometric_source {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger 1 v κ)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     OrderedAdjacentTurns κ := by
-  exact spaceFormDiscrete_model_sources.1
+  exact orderedAdjacentTurns_S2_source_gate
     hn v κ hdisk hsimple hconvex hregular hκ hnc
 
 /-- Hyperbolic nonconstant ordered-turn geometric source theorem for
@@ -132,7 +159,7 @@ theorem orderedAdjacentTurns_H2_geometric_source {n : ℕ} [NeZero n]
     (hκ : RealizesConformalMenger (-1) v κ) (hcircle : ∀ i, 1 < κ i)
     (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
     OrderedAdjacentTurns κ := by
-  exact spaceFormDiscrete_model_sources.2
+  exact orderedAdjacentTurns_H2_source_gate
     hn v κ hdisk hsimple hconvex hregular hκ hcircle hnc
 
 /-- Spherical nonconstant source theorem for the convex/coherent discrete
