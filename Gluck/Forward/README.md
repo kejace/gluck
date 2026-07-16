@@ -129,6 +129,9 @@ The split §3 CDFV sources project to the geometric CDFV certificate via
 `dahlbergE2Theorem6GeometricCdfvSource_of_paperSources`, and then to the older
 radius-witness source via
 `dahlbergE2ConvexDfvRadiusNonconcyclicSource_of_theorem6GeometricSource`.
+Conversely, the geometric CDFV source projects back to the split §3 package via
+`dahlbergE2Theorem6PaperSources_of_geometricCdfvSource`; the equivalence is
+`dahlbergE2Theorem6PaperSources_iff_geometricCdfvSource`.
 The current primitive discrete gate is the smaller
 `dahlbergE2_paper_remaining_theorem_sources_gate`; it no longer includes the
 local edge-region part of Lemma 8.

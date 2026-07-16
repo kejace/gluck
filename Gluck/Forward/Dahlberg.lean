@@ -6854,6 +6854,58 @@ theorem dahlbergE2Theorem6GeometricCdfvSource_of_paperSources
     (hsrc.1 hn hsimple hregular horient hnoncircle)
     (hsrc.2.1 hn hsimple hregular horient hnoncircle)
 
+/-- A full CDFV certificate contains Dahlberg §3 Lemma 5's two containing
+curvature disks. -/
+def dahlbergE2Theorem6ContainingDisksCertificate_of_cdfvCertificate
+    {n : ℕ} {v : ZMod n → ℂ}
+    (cert : DahlbergE2Theorem6CdfvCertificate v) :
+    DahlbergE2Theorem6ContainingDisksCertificate v := by
+  exact
+    { i := cert.i₁
+      j := cert.i₃
+      contains_i := cert.contains₁
+      contains_j := cert.contains₃
+      distinct := cert.circle₁_ne₃ }
+
+/-- A full CDFV certificate contains Dahlberg §3 Lemma 7's two
+interior-missing curvature disks. -/
+def dahlbergE2Theorem6InteriorMissingDisksCertificate_of_cdfvCertificate
+    {n : ℕ} {v : ZMod n → ℂ}
+    (cert : DahlbergE2Theorem6CdfvCertificate v) :
+    DahlbergE2Theorem6InteriorMissingDisksCertificate v := by
+  exact
+    { i := cert.i₂
+      j := cert.i₄
+      misses_i := cert.misses₂
+      misses_j := cert.misses₄
+      distinct := cert.circle₂_ne₄ }
+
+/-- The geometric CDFV source implies the split §3 paper sources.  The assembly
+component is immediate because the full CDFV certificate is already supplied. -/
+theorem dahlbergE2Theorem6PaperSources_of_geometricCdfvSource
+    (hsrc : DahlbergE2Theorem6GeometricCdfvSource) :
+    DahlbergE2Theorem6PaperSources := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro n hne hn v hsimple hregular horient hnoncircle
+    letI : NeZero n := hne
+    rcases hsrc hn hsimple hregular horient hnoncircle with ⟨cert⟩
+    exact ⟨dahlbergE2Theorem6ContainingDisksCertificate_of_cdfvCertificate cert⟩
+  · intro n hne hn v hsimple hregular horient hnoncircle
+    letI : NeZero n := hne
+    rcases hsrc hn hsimple hregular horient hnoncircle with ⟨cert⟩
+    exact ⟨dahlbergE2Theorem6InteriorMissingDisksCertificate_of_cdfvCertificate cert⟩
+  · intro n hne hn v hsimple hregular horient hnoncircle _hcontains _hmisses
+    letI : NeZero n := hne
+    exact hsrc hn hsimple hregular horient hnoncircle
+
+/-- The split §3 paper-source package is formally equivalent to the geometric
+CDFV source used by the reduction. -/
+theorem dahlbergE2Theorem6PaperSources_iff_geometricCdfvSource :
+    DahlbergE2Theorem6PaperSources ↔ DahlbergE2Theorem6GeometricCdfvSource := by
+  constructor
+  · exact dahlbergE2Theorem6GeometricCdfvSource_of_paperSources
+  · exact dahlbergE2Theorem6PaperSources_of_geometricCdfvSource
+
 /-- A CDFV certificate projects to the radius-profile four-vertex witness
 used by the formal reduction. -/
 theorem dahlbergE2ConvexDfvRadiusWitnesses_of_theorem6Certificate {n : ℕ}
