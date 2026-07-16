@@ -7820,10 +7820,15 @@ theorem dahlbergE2DfvSourceComponents_directIsometry
       (not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
         hsimple hregular horient hnoncircle)
   · intro hnonstrict
-    exact dahlbergE2DiskReductionSource_directIsometry
-      (dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_iff_diskReductionSource.mp
-        hsrc.2)
-      hu a hn hsimple hregular hnoncircle hnonstrict
+    rcases
+      dahlbergDiskReductionSetup_exists_boundary_max_and_interior
+        hsimple hnoncircle
+        (dahlbergE2_disk_reduction_setup_source
+          hn hsimple hregular hnoncircle hnonstrict) with
+      ⟨O, R, i, j, hΔ, _hRpos, hboundary, hinterior, hij, _hmax⟩
+    exact dahlbergE2DiskAuxiliaryBoundaryInteriorConstructionSource_directIsometry
+      hsrc.2 hu a hn hsimple hregular hnoncircle hnonstrict
+      hΔ hboundary hinterior hij
 
 /-- The stronger exact remaining E² source components are compatible with
 direct Euclidean normalization after forgetting the Lemma 8 ordered-turn
@@ -8145,9 +8150,20 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_of_dfvSourceComponents
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_of_dfvSources
-    (dahlbergE2DfvGeometricSources_of_components hsrc)
-    hn hsimple hregular hnoncircle
+  by_cases horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v
+  · exact dahlbergFourVertex_of_strictOrientation_convexDfvSource
+      hsrc.1 hn hsimple hregular horient hnoncircle
+  · rcases
+      dahlbergDiskReductionSetup_exists_boundary_max_and_interior
+        hsimple hnoncircle
+        (dahlbergE2_disk_reduction_setup_source
+          hn hsimple hregular hnoncircle horient) with
+      ⟨O, R, i, j, hΔ, _hRpos, hboundary, hinterior, hij, _hmax⟩
+    exact dahlbergFourVertex_of_dahlbergDiskAuxiliaryReduction
+      (hsrc.2 hn hsimple hregular hnoncircle horient hΔ hboundary hinterior hij)
+      (fun hm hsimplew hregularw horientw hnoncirclew =>
+        dahlbergFourVertex_of_strictOrientation_convexDfvSource
+          hsrc.1 hm hsimplew hregularw horientw hnoncirclew)
 
 /-- Dahlberg's E² D4VT is invariant under direct Euclidean normalization. -/
 theorem signedMengerProfile_dahlbergFourVertex_E2_directIsometry_of_geometricSources
