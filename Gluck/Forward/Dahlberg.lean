@@ -3164,6 +3164,235 @@ theorem edgeCoordinates_mem_normalizedClosedExterior_of_mem_edgeClosedExterior
     rw [hzC, directIsometryR2_edgeCoordinates hAB]
   simpa [← hz_eq] using hz
 
+/-! ### Coaxial edge envelopes for strictly convex polygons -/
+
+/-- A point strictly above the normalized chord belongs to the coaxial closed
+disk with centre parameter `y` exactly when its own circumcentre parameter is
+at most `y`. -/
+theorem mem_normalizedClosedDisk_circumcenterParameter_iff
+    {a y : ℝ} {z : ℂ} (hz : 0 < z.im) :
+    z ∈ normalizedClosedDisk a y ↔
+      normalizedCircumcenterParameter a z ≤ y := by
+  have hzero := circlePowerR2_normalized_parameter (a := a) (z := z) hz.ne'
+  rw [circlePowerR2_normalized] at hzero
+  constructor
+  · intro hmem
+    change z.re ^ 2 + z.im ^ 2 - 2 * y * z.im ≤ a ^ 2 at hmem
+    nlinarith
+  · intro hy
+    change z.re ^ 2 + z.im ^ 2 - 2 * y * z.im ≤ a ^ 2
+    nlinarith
+
+/-- The corresponding closed-exterior criterion has the reverse parameter
+order. -/
+theorem mem_normalizedClosedExterior_circumcenterParameter_iff
+    {a y : ℝ} {z : ℂ} (hz : 0 < z.im) :
+    z ∈ normalizedClosedExterior a y ↔
+      y ≤ normalizedCircumcenterParameter a z := by
+  have hzero := circlePowerR2_normalized_parameter (a := a) (z := z) hz.ne'
+  rw [circlePowerR2_normalized] at hzero
+  constructor
+  · intro hmem
+    change a ^ 2 ≤ z.re ^ 2 + z.im ^ 2 - 2 * y * z.im at hmem
+    nlinarith
+  · intro hy
+    change a ^ 2 ≤ z.re ^ 2 + z.im ^ 2 - 2 * y * z.im
+    nlinarith
+
+/-- Transported coaxial disk criterion for a point strictly left of the
+oriented edge `A → B`. -/
+theorem mem_edgeClosedDisk_circumcenterParameter_iff
+    {A B C : ℂ} {y : ℝ} (hAB : A ≠ B)
+    (hcross : 0 < Gluck.Discrete.crossR2 A B C) :
+    C ∈ edgeClosedDisk A B y ↔ edgeCircumcenterParameter A B C ≤ y := by
+  have hz := (crossR2_pos_iff_edgeCoordinates_im_pos hAB C).mp hcross
+  constructor
+  · intro hmem
+    have hnorm := edgeCoordinates_mem_normalizedClosedDisk_of_mem_edgeClosedDisk
+      hAB hmem
+    exact (mem_normalizedClosedDisk_circumcenterParameter_iff hz).mp hnorm
+  · intro hy
+    unfold edgeClosedDisk transportedClosedDisk directIsometryImage
+    refine ⟨edgeCoordinates A B C, ?_, directIsometryR2_edgeCoordinates hAB C⟩
+    exact (mem_normalizedClosedDisk_circumcenterParameter_iff hz).mpr hy
+
+/-- Transported coaxial exterior criterion for a point strictly left of the
+oriented edge `A → B`. -/
+theorem mem_edgeClosedExterior_circumcenterParameter_iff
+    {A B C : ℂ} {y : ℝ} (hAB : A ≠ B)
+    (hcross : 0 < Gluck.Discrete.crossR2 A B C) :
+    C ∈ edgeClosedExterior A B y ↔ y ≤ edgeCircumcenterParameter A B C := by
+  have hz := (crossR2_pos_iff_edgeCoordinates_im_pos hAB C).mp hcross
+  constructor
+  · intro hmem
+    have hnorm := edgeCoordinates_mem_normalizedClosedExterior_of_mem_edgeClosedExterior
+      hAB hmem
+    exact (mem_normalizedClosedExterior_circumcenterParameter_iff hz).mp hnorm
+  · intro hy
+    unfold edgeClosedExterior directIsometryImage
+    refine ⟨edgeCoordinates A B C, ?_, directIsometryR2_edgeCoordinates hAB C⟩
+    exact (mem_normalizedClosedExterior_circumcenterParameter_iff hz).mpr hy
+
+/-- Both normalized chord endpoints belong to every coaxial closed exterior,
+on its boundary. -/
+theorem normalizedClosedExterior_endpoints (a y : ℝ) :
+    (a : ℂ) ∈ normalizedClosedExterior a y ∧
+      (-a : ℂ) ∈ normalizedClosedExterior a y := by
+  constructor
+  · change a ^ 2 ≤ (a : ℂ).re ^ 2 + (a : ℂ).im ^ 2 - 2 * y * (a : ℂ).im
+    simp
+  · change a ^ 2 ≤ (-a : ℂ).re ^ 2 + (-a : ℂ).im ^ 2 - 2 * y * (-a : ℂ).im
+    simp
+
+/-- Both endpoints of an arbitrary edge belong to every coaxial closed
+exterior, on its boundary. -/
+theorem edgeClosedExterior_endpoints {A B : ℂ} (hAB : A ≠ B) (y : ℝ) :
+    A ∈ edgeClosedExterior A B y ∧ B ∈ edgeClosedExterior A B y := by
+  have he := canonicalChord_endpoints hAB
+  have hnorm := normalizedClosedExterior_endpoints (chordHalfLength A B) y
+  constructor
+  · unfold edgeClosedExterior directIsometryImage
+    exact ⟨(-chordHalfLength A B : ℂ), hnorm.2, by
+      simpa [transportedChordLeft] using he.1⟩
+  · unfold edgeClosedExterior directIsometryImage
+    exact ⟨(chordHalfLength A B : ℂ), hnorm.1, by
+      simpa [transportedChordRight] using he.2⟩
+
+/-- Every vertex not on an oriented edge lies strictly to its left.  This is
+the explicit global support property needed by the finite part of Dahlberg's
+strictly convex argument. -/
+def StrictConvexEdgeSupport {n : ℕ} (v : ZMod n → ℂ) : Prop :=
+  ∀ i j : ZMod n, j ≠ i → j ≠ i + 1 →
+    0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v j)
+
+/-- Indices of vertices other than the endpoints of an oriented edge. -/
+def edgeThirdVertexIndices {n : ℕ} [NeZero n] (i : ZMod n) :
+    Finset (ZMod n) :=
+  (Finset.univ.erase i).erase (i + 1)
+
+theorem mem_edgeThirdVertexIndices_iff {n : ℕ} [NeZero n]
+    {i j : ZMod n} :
+    j ∈ edgeThirdVertexIndices i ↔ j ≠ i ∧ j ≠ i + 1 := by
+  simp [edgeThirdVertexIndices, and_comm]
+
+/-- For a polygon with at least four vertices, every edge has a third vertex. -/
+theorem edgeThirdVertexIndices_nonempty {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) (i : ZMod n) :
+    (edgeThirdVertexIndices i).Nonempty := by
+  letI : Fact (1 < n) := ⟨by omega⟩
+  have hsucc : i + 1 ≠ i := by
+    intro h
+    have h10 : (1 : ZMod n) = 0 := calc
+      (1 : ZMod n) = (i + 1) - i := by ring
+      _ = i - i := congrArg (fun z : ZMod n ↦ z - i) h
+      _ = 0 := sub_self i
+    exact one_ne_zero h10
+  rw [← Finset.card_pos]
+  unfold edgeThirdVertexIndices
+  rw [Finset.card_erase_of_mem (Finset.mem_erase.mpr ⟨hsucc, Finset.mem_univ _⟩),
+    Finset.card_erase_of_mem (Finset.mem_univ i), Finset.card_univ, ZMod.card]
+  omega
+
+/-- Global strict edge support forces every edge to be nondegenerate. -/
+theorem strictConvexEdgeSupport_edge_ne {n : ℕ} [NeZero n]
+    (hn : 4 ≤ n) {v : ZMod n → ℂ} (hsupport : StrictConvexEdgeSupport v)
+    (i : ZMod n) : v i ≠ v (i + 1) := by
+  rcases edgeThirdVertexIndices_nonempty hn i with ⟨j, hj⟩
+  have hjne := mem_edgeThirdVertexIndices_iff.mp hj
+  have hcross := hsupport i j hjne.1 hjne.2
+  intro hAB
+  have hzero : Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v j) = 0 := by
+    rw [hAB]
+    unfold Gluck.Discrete.crossR2
+    simp
+  linarith
+
+/-- The maximum coaxial parameter among the third vertices gives a circle
+through the edge and a third vertex whose closed disk contains every vertex. -/
+theorem exists_edgeThirdVertex_circle_containsAll_of_strictConvexEdgeSupport
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsupport : StrictConvexEdgeSupport v) (i : ZMod n) :
+    ∃ j : ZMod n,
+      j ≠ i ∧ j ≠ i + 1 ∧
+      (∀ k : ZMod n,
+        v k ∈ edgeClosedDisk (v i) (v (i + 1))
+          (edgeCircumcenterParameter (v i) (v (i + 1)) (v j))) ∧
+      CircumcircleR2 (v i) (v (i + 1)) (v j)
+        (edgeCircleCenter (v i) (v (i + 1))
+          (edgeCircumcenterParameter (v i) (v (i + 1)) (v j)))
+        (normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+          (edgeCircumcenterParameter (v i) (v (i + 1)) (v j))) := by
+  let s := edgeThirdVertexIndices i
+  have hs : s.Nonempty := edgeThirdVertexIndices_nonempty hn i
+  obtain ⟨j, hjs, hsup⟩ := Finset.exists_mem_eq_sup' hs
+    (fun k : ZMod n ↦ edgeCircumcenterParameter (v i) (v (i + 1)) (v k))
+  have hjne : j ≠ i ∧ j ≠ i + 1 := mem_edgeThirdVertexIndices_iff.mp hjs
+  have hAB : v i ≠ v (i + 1) := strictConvexEdgeSupport_edge_ne hn hsupport i
+  have hjcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v j) :=
+    hsupport i j hjne.1 hjne.2
+  have hmax : ∀ k ∈ s,
+      edgeCircumcenterParameter (v i) (v (i + 1)) (v k) ≤
+        edgeCircumcenterParameter (v i) (v (i + 1)) (v j) := by
+    intro k hk
+    rw [← hsup]
+    exact Finset.le_sup'
+      (fun q : ZMod n ↦ edgeCircumcenterParameter (v i) (v (i + 1)) (v q)) hk
+  refine ⟨j, hjne.1, hjne.2, ?_, circumcircleR2_edge_parameter hAB hjcross.ne'⟩
+  intro k
+  by_cases hki : k = i
+  · subst k
+    exact (edgeClosedDisk_endpoints hAB _).1
+  by_cases hksucc : k = i + 1
+  · subst k
+    exact (edgeClosedDisk_endpoints hAB _).2
+  · have hkcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v k) :=
+      hsupport i k hki hksucc
+    apply (mem_edgeClosedDisk_circumcenterParameter_iff hAB hkcross).mpr
+    exact hmax k (mem_edgeThirdVertexIndices_iff.mpr ⟨hki, hksucc⟩)
+
+/-- The minimum coaxial parameter among the third vertices gives a circle
+through the edge and a third vertex whose open interior contains no vertex. -/
+theorem exists_edgeThirdVertex_circle_interiorMissesAll_of_strictConvexEdgeSupport
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsupport : StrictConvexEdgeSupport v) (i : ZMod n) :
+    ∃ j : ZMod n,
+      j ≠ i ∧ j ≠ i + 1 ∧
+      (∀ k : ZMod n,
+        v k ∈ edgeClosedExterior (v i) (v (i + 1))
+          (edgeCircumcenterParameter (v i) (v (i + 1)) (v j))) ∧
+      CircumcircleR2 (v i) (v (i + 1)) (v j)
+        (edgeCircleCenter (v i) (v (i + 1))
+          (edgeCircumcenterParameter (v i) (v (i + 1)) (v j)))
+        (normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))
+          (edgeCircumcenterParameter (v i) (v (i + 1)) (v j))) := by
+  let s := edgeThirdVertexIndices i
+  have hs : s.Nonempty := edgeThirdVertexIndices_nonempty hn i
+  obtain ⟨j, hjs, hinf⟩ := Finset.exists_mem_eq_inf' hs
+    (fun k : ZMod n ↦ edgeCircumcenterParameter (v i) (v (i + 1)) (v k))
+  have hjne : j ≠ i ∧ j ≠ i + 1 := mem_edgeThirdVertexIndices_iff.mp hjs
+  have hAB : v i ≠ v (i + 1) := strictConvexEdgeSupport_edge_ne hn hsupport i
+  have hjcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v j) :=
+    hsupport i j hjne.1 hjne.2
+  have hmin : ∀ k ∈ s,
+      edgeCircumcenterParameter (v i) (v (i + 1)) (v j) ≤
+        edgeCircumcenterParameter (v i) (v (i + 1)) (v k) := by
+    intro k hk
+    rw [← hinf]
+    exact Finset.inf'_le
+      (fun q : ZMod n ↦ edgeCircumcenterParameter (v i) (v (i + 1)) (v q)) hk
+  refine ⟨j, hjne.1, hjne.2, ?_, circumcircleR2_edge_parameter hAB hjcross.ne'⟩
+  intro k
+  by_cases hki : k = i
+  · subst k
+    exact (edgeClosedExterior_endpoints hAB _).1
+  by_cases hksucc : k = i + 1
+  · subst k
+    exact (edgeClosedExterior_endpoints hAB _).2
+  · have hkcross : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v k) :=
+      hsupport i k hki hksucc
+    apply (mem_edgeClosedExterior_circumcenterParameter_iff hAB hkcross).mpr
+    exact hmin k (mem_edgeThirdVertexIndices_iff.mpr ⟨hki, hksucc⟩)
+
 /-- Arbitrary-edge form of the normalized radius comparison behind Dahlberg
 Lemma 10. -/
 theorem edgeCircleRadius_le_of_mem_edgeClosedDisk {A B C : ℂ} {yΔ : ℝ}
