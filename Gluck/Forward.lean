@@ -10,10 +10,7 @@ import Gluck.Forward.Section4CircleSpliceRadius
 import Gluck.Forward.Section4CircleSpliceNonconcyclic
 import Gluck.Forward.Section4CircleSpliceOrientation
 import Gluck.Forward.Section4CircleSpliceAssembly
-import Gluck.Forward.Section4OddMeshDensity
-import Gluck.Forward.Section4EndpointMeshDensity
 import Gluck.Forward.Section4CircleArc
-import Gluck.Forward.Section4SupportedCircleArc
 import Gluck.Forward.Section4CircleSpliceSimple
 import Gluck.Forward.Section4EndpointCurvature
 import Gluck.Forward.Section4EndpointSpliceRegularity

@@ -6,6 +6,7 @@ Authors: kejace
 import Gluck.Forward.CyclicRunAvoidance
 import Gluck.Forward.Section4Combinatorics
 import Gluck.Forward.MinimalDiskContacts
+import Gluck.Forward.MinimalDiskBoundaryHull
 import Gluck.Forward.Section4ContactOrientation
 import Gluck.Forward.Dahlberg
 
@@ -415,7 +416,7 @@ theorem circleContactSet_not_isCyclicInterval_of_minimalEnclosingDisk_of_not_dah
     ¬ Gluck.IsCyclicInterval (circleContactSet v O R) := by
   have hRpos : 0 < R :=
     radius_pos_of_minimalEnclosingDiskR2_of_isSimplePolygon hΔ hsimple
-  obtain ⟨p, hp⟩ := minimalEnclosingDiskBoundaryVertex_source hΔ
+  obtain ⟨p, hp⟩ := exists_onDiskBoundaryR2_of_minimalEnclosingDiskR2 hΔ
   have hcardTwo : 2 ≤ (circleContactSet v O R).card :=
     two_le_card_circleContactSet_of_minimalEnclosingDiskR2 hΔ hRpos hp
   by_cases hcardThree : 3 ≤ (circleContactSet v O R).card

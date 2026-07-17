@@ -27,13 +27,13 @@ def DahlbergE2OrientedCircleArcSource : Prop :=
     ∀ run : Section4PositiveRunCertificate v O R, Nonempty (Section4CircleArcCertificate run)
 
 /-- An oriented complementary-circle arc implies the paper's Section 4 source. -/
-private theorem dahlbergE2Section4PaperDfvSource_of_orientedCircleArcSource_aux
+private theorem dahlbergE2Section4Source_of_orientedCircleArcSource_aux
     (harc : DahlbergE2OrientedCircleArcSource) :
-    DahlbergE2Section4PaperDfvSource := by
-  intro _htheorem6 n hne hn v hsimple hregular hnoncircle hnonstrict
+    DahlbergE2Section4Source := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict
   letI : NeZero n := hne
   by_contra hnot
-  obtain ⟨O, R, hΔ⟩ := minimalEnclosingDiskExists_source v
+  obtain ⟨O, R, hΔ⟩ := exists_minimalEnclosingDiskR2 v
   have hR : 0 < R :=
     radius_pos_of_minimalEnclosingDiskR2_of_isSimplePolygon hΔ hsimple
   rcases exists_section4PositiveRunCertificate_or_reverse
@@ -51,12 +51,12 @@ private theorem dahlbergE2Section4PaperDfvSource_of_orientedCircleArcSource_aux
     rcases harc hn hsimpleW hregularW hΔW hR run with ⟨arc⟩
     exact run.false_of_circleArcCertificate hsimpleW hΔW hR arc
 
-/-- An oriented-circle-arc source supplies the exact paper primitive sources. -/
-theorem dahlbergE2ExactPaperPrimitiveSources_of_orientedCircleArcSource
+/-- An oriented-circle-arc source supplies the theorem-facing paper sources. -/
+theorem dahlbergE2PaperSources_of_orientedCircleArcSource
     (harc : DahlbergE2OrientedCircleArcSource) :
-    DahlbergE2ExactPaperPrimitiveSources :=
-  ⟨dahlbergE2_theorem6_exact_paper_source,
-    dahlbergE2_lemma9_paper_bridge_source,
-    dahlbergE2Section4PaperDfvSource_of_orientedCircleArcSource_aux harc⟩
+    DahlbergE2PaperSources where
+  theorem6 := dahlbergE2_theorem6_exact_paper_source
+  lemma9 := dahlbergE2_lemma9_paper_bridge_source
+  section4 := dahlbergE2Section4Source_of_orientedCircleArcSource_aux harc
 
 end Gluck.Forward

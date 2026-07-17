@@ -265,7 +265,7 @@ theorem exists_section4_positive_gap_of_disconnected_contacts
     apply mem_nonpositiveVertices.mpr
     simpa [κ] using hqNonpos
   have hEne : E.Nonempty := by
-    obtain ⟨e, he⟩ := minimalEnclosingDiskBoundaryVertex_source hΔ
+    obtain ⟨e, he⟩ := exists_onDiskBoundaryR2_of_minimalEnclosingDiskR2 hΔ
     exact ⟨e, by simpa [E] using mem_circleContactSet.mpr (Metric.mem_sphere'.mp he)⟩
   have hFsub : F ⊆ Finset.univ \ E := by
     intro i hiF

@@ -22,7 +22,7 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_exactPaper
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
     DahlbergFourVertex (SignedMengerProfile v) :=
-  signedMengerProfile_dahlbergFourVertex_E2_of_exactPaperPrimitiveSources
-    dahlbergE2_exactPaperPrimitiveSources hn hsimple hregular hnoncircle
+  signedMengerProfile_dahlbergFourVertex_E2_of_paperSources
+    dahlbergE2_paperSources hn hsimple hregular hnoncircle
 
 end Gluck.Forward

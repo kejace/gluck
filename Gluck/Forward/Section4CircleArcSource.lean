@@ -45,17 +45,12 @@ private theorem dahlbergE2_orientedCircleArcSource_aux : DahlbergE2OrientedCircl
   intro _n _ _hn _v _O _R hsimple _hregular hΔ hR run
   exact run.nonempty_circleArcCertificate_of_minimalEnclosingDisk hsimple hΔ hR
 
-/-- Source-free exact paper primitive sources for Dahlberg's Euclidean D4VT. -/
-theorem dahlbergE2_exactPaperPrimitiveSources : DahlbergE2ExactPaperPrimitiveSources :=
-  dahlbergE2ExactPaperPrimitiveSources_of_orientedCircleArcSource
-    dahlbergE2_orientedCircleArcSource_aux
+/-- Source-free theorem-facing paper sources for Dahlberg's Euclidean D4VT. -/
+theorem dahlbergE2_paperSources : DahlbergE2PaperSources :=
+  dahlbergE2PaperSources_of_orientedCircleArcSource dahlbergE2_orientedCircleArcSource_aux
 
-/-- The canonical paper primitive-source proposition, with no geometric gate. -/
-theorem dahlbergE2_paper_primitive_sources : DahlbergE2PaperPrimitiveSources :=
-  dahlbergE2_exactPaperPrimitiveSources
-
-/-- The paper primitive-source gate follows from the exact construction. -/
-theorem dahlbergE2_paper_primitive_sources_gate : DahlbergE2PaperPrimitiveSources :=
-  dahlbergE2_paper_primitive_sources
+/-- The paper-source gate follows from the exact construction. -/
+theorem dahlbergE2_paper_sources_gate : DahlbergE2PaperSources :=
+  dahlbergE2_paperSources
 
 end Gluck.Forward
