@@ -245,6 +245,53 @@ private lemma im_rot_affine (u P x y : ℂ) {s t : ℝ} (hst : s + t = 1) :
   rw [key, mul_add, mul_smul_comm, mul_smul_comm, Complex.add_im, Complex.smul_im,
     Complex.smul_im, smul_eq_mul, smul_eq_mul]
 
+/-- The signed area against an edge of polar direction `ψ` is its length
+times the corresponding left-distance functional. -/
+private lemma crossR2_edgeVector (A C : ℂ) (r ψ : ℝ) :
+    crossR2 A
+        (A + (r : ℂ) * Complex.exp ((ψ : ℂ) * Complex.I)) C =
+      r * (Complex.exp (((-ψ : ℝ) : ℂ) * Complex.I) * (C - A)).im := by
+  unfold crossR2
+  simp only [add_sub_cancel_left, Complex.mul_re, Complex.mul_im, Complex.ofReal_re,
+    Complex.ofReal_im, Complex.exp_ofReal_mul_I_re, Complex.exp_ofReal_mul_I_im,
+    Real.cos_neg, Real.sin_neg]
+  ring
+
+/-- The outgoing cyclic edge is the corresponding polar edge vector in the
+chosen natural lift. -/
+private lemma polygonR2_edgeVector [NeZero n] {κ ℓ : ZMod n → ℝ}
+    (hE : closureGap κ ℓ = 0) (hT : turningSum κ ℓ = 2 * Real.pi)
+    (a : ZMod n) :
+    polygonR2 κ ℓ (a + 1) = polygonR2 κ ℓ a +
+      (ℓ a : ℂ) * Complex.exp ((heading κ ℓ a.val : ℂ) * Complex.I) := by
+  have hnext := polygonR2_add_nat hE hT a 1
+  have hnext' : polygonR2 κ ℓ (a + 1) = vertexR2 κ ℓ (a.val + 1) := by
+    simpa using hnext
+  rw [hnext', show polygonR2 κ ℓ a = vertexR2 κ ℓ a.val from rfl,
+    vertexR2_succ]
+  rw [ZMod.natCast_rightInverse a]
+
+/-- Global oriented-edge support for a closed one-turn positive development:
+every cyclic vertex lies weakly to the left of every oriented polygon edge. -/
+theorem crossR2_polygonR2_edge_vertex_nonneg [NeZero n] {κ ℓ : ZMod n → ℝ}
+    (h : ModerateArc 0 κ ℓ) (hκ : ∀ i : ZMod n, 0 < κ i)
+    (hE : closureGap κ ℓ = 0) (hT : turningSum κ ℓ = 2 * Real.pi)
+    (a c : ZMod n) :
+    0 ≤ crossR2 (polygonR2 κ ℓ a) (polygonR2 κ ℓ (a + 1))
+      (polygonR2 κ ℓ c) := by
+  set t := (c - a).val with ht
+  have hc : polygonR2 κ ℓ c = vertexR2 κ ℓ (a.val + t) :=
+    polygonR2_sub_val hE hT a c
+  have htlt : t < n := by
+    simpa [ht] using ZMod.val_lt (c - a)
+  have hleft :
+      0 ≤ (Complex.exp (((-heading κ ℓ a.val : ℝ) : ℂ) * Complex.I) *
+        (polygonR2 κ ℓ c - polygonR2 κ ℓ a)).im := by
+    rw [hc, show polygonR2 κ ℓ a = vertexR2 κ ℓ a.val from rfl]
+    exact support_left_nonneg h hκ hE hT a.val (by omega) (by omega)
+  rw [polygonR2_edgeVector hE hT, crossR2_edgeVector]
+  exact mul_nonneg (h.length_pos a).le hleft
+
 /-- Nondegenerate edges: `P i ≠ P (i+1)` since the edge vector has modulus
 `ℓ i > 0`. Project-local. -/
 lemma polygonR2_edge_ne [NeZero n] {κ ℓ : ZMod n → ℝ} (h : ModerateArc 0 κ ℓ)
@@ -286,6 +333,17 @@ private lemma support_pos_cyclic [NeZero n] {κ ℓ : ZMod n → ℝ}
   have hpa : polygonR2 κ ℓ a = vertexR2 κ ℓ a.val := rfl
   rw [hpc, hpa]
   exact support_left_pos h hκ hE hT a.val (by omega) (by omega)
+
+/-- Strict global support away from the two endpoints of the oriented edge. -/
+theorem crossR2_polygonR2_edge_vertex_pos [NeZero n] {κ ℓ : ZMod n → ℝ}
+    (h : ModerateArc 0 κ ℓ) (hκ : ∀ i : ZMod n, 0 < κ i)
+    (hE : closureGap κ ℓ = 0) (hT : turningSum κ ℓ = 2 * Real.pi)
+    (a c : ZMod n) (hca : c ≠ a) (hca1 : c ≠ a + 1) :
+    0 < crossR2 (polygonR2 κ ℓ a) (polygonR2 κ ℓ (a + 1))
+      (polygonR2 κ ℓ c) := by
+  have hleft := support_pos_cyclic h hκ hE hT a c hca hca1
+  rw [polygonR2_edgeVector hE hT, crossR2_edgeVector]
+  exact mul_pos (h.length_pos a) hleft
 
 /-- The left-distance functional vanishes on the anchoring edge's far endpoint
 `P (i+1)` (it lies on edge line `i`). Project-local. -/

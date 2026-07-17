@@ -1559,6 +1559,571 @@ theorem discreteLocalMax_of_globalMax_of_not_constant {n : ℕ} [NeZero n]
     exact le_antisymm (hmax j) (le_of_not_gt (fun hj => hnone ⟨j, hj⟩))
   exact discreteLocalMax_of_globalMax_of_exists_lt hmax hdrop
 
+/-- A marked weak cyclic maximum is plateau-aware when the marking propagates
+across equal adjacent values.
+
+This packages the finite plateau argument used in Dahlberg's Lemma 9.  A
+marked index is weakly maximal among its two neighbours.  If the mark passes
+to an adjacent index whenever the two values agree, then a nonconstant cyclic
+profile must eventually leave the marked plateau strictly downward on both
+sides. -/
+theorem discreteLocalMax_of_weak_neighbors_of_eq_propagates
+    {n : ℕ} [NeZero n] {κ : ZMod n → ℝ} {P : ZMod n → Prop} {i : ZMod n}
+    (hPi : P i)
+    (hweak : ∀ j, P j → κ (j - 1) ≤ κ j ∧ κ (j + 1) ≤ κ j)
+    (hpropRight : ∀ j, P j → κ j = κ (j + 1) → P (j + 1))
+    (hpropLeft : ∀ j, P j → κ j = κ (j - 1) → P (j - 1))
+    (hnc : ¬ ∃ c, ∀ j : ZMod n, κ j = c) :
+    DiscreteLocalMax κ i := by
+  classical
+  have hrightExists :
+      ∃ r : ℕ, 0 < r ∧ r ≤ n ∧ κ (i + (r : ZMod n)) < κ i := by
+    by_contra hnone
+    have hplateau : ∀ m : ℕ, m ≤ n →
+        κ (i + (m : ZMod n)) = κ i ∧ P (i + (m : ZMod n)) := by
+      intro m hm
+      induction m with
+      | zero =>
+          constructor
+          · simp
+          · simpa using hPi
+      | succ m ih =>
+          rcases ih (by omega) with ⟨hκm, hPm⟩
+          have hle : κ (i + ((m + 1 : ℕ) : ZMod n)) ≤ κ i := by
+            simpa [Nat.cast_add, add_assoc, hκm] using (hweak _ hPm).2
+          have heq : κ (i + ((m + 1 : ℕ) : ZMod n)) = κ i := by
+            apply le_antisymm hle
+            apply le_of_not_gt
+            intro hlt
+            exact hnone ⟨m + 1, by omega, hm, hlt⟩
+          refine ⟨heq, ?_⟩
+          have hstep : κ (i + (m : ZMod n)) = κ (i + (m : ZMod n) + 1) := by
+            rw [hκm]
+            simpa [Nat.cast_add, add_assoc] using heq.symm
+          simpa [Nat.cast_add, add_assoc] using hpropRight _ hPm hstep
+    apply hnc
+    refine ⟨κ i, fun j => ?_⟩
+    let m : ℕ := (j - i).val
+    have hmle : m ≤ n := (ZMod.val_lt (j - i)).le
+    have hm := (hplateau m hmle).1
+    have hidx : i + (m : ZMod n) = j := by
+      dsimp [m]
+      rw [ZMod.natCast_zmod_val (j - i)]
+      abel
+    simpa [hidx] using hm
+  have hleftExists :
+      ∃ l : ℕ, 0 < l ∧ l ≤ n ∧ κ (i - (l : ZMod n)) < κ i := by
+    by_contra hnone
+    have hplateau : ∀ m : ℕ, m ≤ n →
+        κ (i - (m : ZMod n)) = κ i ∧ P (i - (m : ZMod n)) := by
+      intro m hm
+      induction m with
+      | zero =>
+          constructor
+          · simp
+          · simpa using hPi
+      | succ m ih =>
+          rcases ih (by omega) with ⟨hκm, hPm⟩
+          have hle : κ (i - ((m + 1 : ℕ) : ZMod n)) ≤ κ i := by
+            have hle' := (hweak _ hPm).1
+            rw [hκm] at hle'
+            convert hle' using 1
+            norm_num
+            abel_nf
+          have heq : κ (i - ((m + 1 : ℕ) : ZMod n)) = κ i := by
+            apply le_antisymm hle
+            apply le_of_not_gt
+            intro hlt
+            exact hnone ⟨m + 1, by omega, hm, hlt⟩
+          refine ⟨heq, ?_⟩
+          have hstep : κ (i - (m : ZMod n)) = κ (i - (m : ZMod n) - 1) := by
+            rw [hκm]
+            convert heq.symm using 1
+            norm_num
+            abel_nf
+          convert hpropLeft _ hPm hstep using 1
+          norm_num
+          abel_nf
+    apply hnc
+    refine ⟨κ i, fun j => ?_⟩
+    let m : ℕ := (i - j).val
+    have hmle : m ≤ n := (ZMod.val_lt (i - j)).le
+    have hm := (hplateau m hmle).1
+    have hidx : i - (m : ZMod n) = j := by
+      dsimp [m]
+      rw [ZMod.natCast_zmod_val (i - j)]
+      abel
+    simpa [hidx] using hm
+  let r : ℕ := Nat.find hrightExists
+  let l : ℕ := Nat.find hleftExists
+  have hrSpec : 0 < r ∧ r ≤ n ∧ κ (i + (r : ZMod n)) < κ i := by
+    simpa [r] using Nat.find_spec hrightExists
+  have hlSpec : 0 < l ∧ l ≤ n ∧ κ (i - (l : ZMod n)) < κ i := by
+    simpa [l] using Nat.find_spec hleftExists
+  have hrightEqP : ∀ m < r,
+      κ (i + (m : ZMod n)) = κ i ∧ P (i + (m : ZMod n)) := by
+    intro m hm
+    induction m with
+    | zero =>
+        constructor
+        · simp
+        · simpa using hPi
+    | succ m ih =>
+        rcases ih (by omega) with ⟨hκm, hPm⟩
+        have hle : κ (i + ((m + 1 : ℕ) : ZMod n)) ≤ κ i := by
+          simpa [Nat.cast_add, add_assoc, hκm] using (hweak _ hPm).2
+        have heq : κ (i + ((m + 1 : ℕ) : ZMod n)) = κ i := by
+          apply le_antisymm hle
+          apply le_of_not_gt
+          intro hlt
+          exact (Nat.find_min hrightExists hm)
+            ⟨by omega, (Nat.le_of_lt hm).trans hrSpec.2.1, hlt⟩
+        refine ⟨heq, ?_⟩
+        have hstep : κ (i + (m : ZMod n)) = κ (i + (m : ZMod n) + 1) := by
+          rw [hκm]
+          simpa [Nat.cast_add, add_assoc] using heq.symm
+        simpa [Nat.cast_add, add_assoc] using hpropRight _ hPm hstep
+  have hleftEqP : ∀ m < l,
+      κ (i - (m : ZMod n)) = κ i ∧ P (i - (m : ZMod n)) := by
+    intro m hm
+    induction m with
+    | zero =>
+        constructor
+        · simp
+        · simpa using hPi
+    | succ m ih =>
+        rcases ih (by omega) with ⟨hκm, hPm⟩
+        have hle : κ (i - ((m + 1 : ℕ) : ZMod n)) ≤ κ i := by
+          have hle' := (hweak _ hPm).1
+          rw [hκm] at hle'
+          convert hle' using 1
+          norm_num
+          abel_nf
+        have heq : κ (i - ((m + 1 : ℕ) : ZMod n)) = κ i := by
+          apply le_antisymm hle
+          apply le_of_not_gt
+          intro hlt
+          exact (Nat.find_min hleftExists hm)
+            ⟨by omega, (Nat.le_of_lt hm).trans hlSpec.2.1, hlt⟩
+        refine ⟨heq, ?_⟩
+        have hstep : κ (i - (m : ZMod n)) = κ (i - (m : ZMod n) - 1) := by
+          rw [hκm]
+          convert heq.symm using 1
+          norm_num
+          abel_nf
+        convert hpropLeft _ hPm hstep using 1
+        norm_num
+        abel_nf
+  have hlLtN : l < n := by
+    refine lt_of_le_of_ne hlSpec.2.1 ?_
+    intro hln
+    have hidx : i - (l : ZMod n) = i := by
+      rw [hln, ZMod.natCast_self, sub_zero]
+    exact (lt_irrefl (κ i)) (by simpa [hidx] using hlSpec.2.2)
+  have hlr : l + r ≤ n := by
+    by_contra hnot
+    have hlt : n < l + r := Nat.lt_of_not_ge hnot
+    let m : ℕ := n - l
+    have hmpos : 0 < m := Nat.sub_pos_of_lt hlLtN
+    have hmLtR : m < r := by
+      dsimp [m]
+      omega
+    have hcast : (m : ZMod n) = -(l : ZMod n) := by
+      dsimp [m]
+      rw [Nat.cast_sub hlSpec.2.1, ZMod.natCast_self]
+      abel
+    have hdrop : κ (i + (m : ZMod n)) < κ i := by
+      simpa [hcast, sub_eq_add_neg] using hlSpec.2.2
+    rw [(hrightEqP m hmLtR).1] at hdrop
+    exact (lt_irrefl (κ i)) hdrop
+  exact ⟨l, r, hlSpec.1, hrSpec.1, hlr,
+    fun m hm => (hleftEqP m hm).1,
+    fun m hm => (hrightEqP m hm).1,
+    hlSpec.2.2, hrSpec.2.2⟩
+
+/-- A marked weak maximum cannot remain on its plateau all the way to an
+unmarked endpoint. -/
+theorem exists_strict_drop_forward_of_marked_weakMax
+    {n : ℕ} {κ : ZMod n → ℝ} {P : ZMod n → Prop} {a b : ℕ}
+    (hab : a < b)
+    (hPa : P (a : ZMod n)) (hnotPb : ¬ P (b : ZMod n))
+    (hweakRight : ∀ j, P j → κ (j + 1) ≤ κ j)
+    (hpropRight : ∀ j, P j → κ j = κ (j + 1) → P (j + 1)) :
+    ∃ k : ℕ, a < k ∧ k ≤ b ∧ κ (k : ZMod n) < κ (a : ZMod n) := by
+  classical
+  by_contra hnone
+  have hwalk : ∀ t : ℕ, t ≤ b - a →
+      κ (a + t : ZMod n) = κ (a : ZMod n) ∧ P (a + t : ZMod n) := by
+    intro t ht
+    induction t with
+    | zero =>
+        constructor
+        · simp
+        · simpa using hPa
+    | succ t ih =>
+        rcases ih (by omega) with ⟨hκt, hPt⟩
+        have hle : κ (a + (t + 1) : ZMod n) ≤ κ (a : ZMod n) := by
+          calc
+            κ (a + (t + 1) : ZMod n) = κ ((a + t : ZMod n) + 1) := by
+              congr 1
+              ring
+            _ ≤ κ (a + t : ZMod n) := hweakRight _ hPt
+            _ = κ (a : ZMod n) := hκt
+        have hnotlt : ¬ κ (a + (t + 1) : ZMod n) < κ (a : ZMod n) := by
+          intro hlt
+          apply hnone
+          refine ⟨a + (t + 1), by omega, by omega, ?_⟩
+          simpa [Nat.cast_add] using hlt
+        have heq : κ (a + (t + 1) : ZMod n) = κ (a : ZMod n) :=
+          le_antisymm hle (le_of_not_gt hnotlt)
+        have heq' : κ (a + (t + 1 : ℕ) : ZMod n) = κ (a : ZMod n) := by
+          simpa only [Nat.cast_add, Nat.cast_one] using heq
+        refine ⟨heq', ?_⟩
+        have hstep : κ (a + t : ZMod n) = κ ((a + t : ZMod n) + 1) := by
+          rw [hκt]
+          simpa only [Nat.cast_add, Nat.cast_one, add_assoc] using heq.symm
+        simpa only [Nat.cast_add, Nat.cast_one, add_assoc] using hpropRight _ hPt hstep
+  have hend := (hwalk (b - a) (by omega)).2
+  have hab_le : a ≤ b := Nat.le_of_lt hab
+  rw [← Nat.cast_add, Nat.add_sub_of_le hab_le] at hend
+  exact hnotPb hend
+
+/-- Backward-facing version of
+`exists_strict_drop_forward_of_marked_weakMax`. -/
+theorem exists_strict_drop_backward_of_marked_weakMax
+    {n : ℕ} {κ : ZMod n → ℝ} {P : ZMod n → Prop} {a b : ℕ}
+    (hab : a < b)
+    (hPb : P (b : ZMod n)) (hnotPa : ¬ P (a : ZMod n))
+    (hweakLeft : ∀ j, P j → κ (j - 1) ≤ κ j)
+    (hpropLeft : ∀ j, P j → κ j = κ (j - 1) → P (j - 1)) :
+    ∃ k : ℕ, a ≤ k ∧ k < b ∧ κ (k : ZMod n) < κ (b : ZMod n) := by
+  let A : ZMod n := (a + b : ℕ)
+  let μ : ZMod n → ℝ := fun z => κ (A - z)
+  let Q : ZMod n → Prop := fun z => P (A - z)
+  have hQa : Q (a : ZMod n) := by
+    dsimp [Q, A]
+    convert hPb using 1
+    push_cast
+    abel
+  have hnotQb : ¬ Q (b : ZMod n) := by
+    intro hQb
+    apply hnotPa
+    dsimp [Q, A] at hQb
+    convert hQb using 1
+    push_cast
+    abel
+  have hweakQ : ∀ z, Q z → μ (z + 1) ≤ μ z := by
+    intro z hz
+    dsimp [Q, μ] at hz ⊢
+    convert hweakLeft (A - z) hz using 1
+    abel_nf
+  have hpropQ : ∀ z, Q z → μ z = μ (z + 1) → Q (z + 1) := by
+    intro z hz heq
+    dsimp [Q, μ] at hz heq ⊢
+    have hp : P (A - z - 1) := hpropLeft (A - z) hz (by
+      convert heq using 1
+      abel_nf)
+    convert hp using 1
+    abel
+  rcases exists_strict_drop_forward_of_marked_weakMax
+      hab hQa hnotQb hweakQ hpropQ with ⟨k, hak, hkb, hdrop⟩
+  refine ⟨a + b - k, by omega, by omega, ?_⟩
+  dsimp [μ, A] at hdrop
+  have hk : k ≤ a + b := by omega
+  have hidx : ((a + b - k : ℕ) : ZMod n) =
+      ((a + b : ℕ) : ZMod n) - (k : ZMod n) := by
+    rw [Nat.cast_sub hk]
+  have hbidx : ((a + b : ℕ) : ZMod n) - (a : ZMod n) = (b : ZMod n) := by
+    push_cast
+    abel
+  simpa [hidx, hbidx] using hdrop
+
+/-- If a finite natural-index arc dips strictly below both endpoint values,
+an interior minimum plateau of that arc is a cyclic discrete local minimum. -/
+theorem exists_discreteLocalMin_between_of_strictly_below_endpoints
+    {n : ℕ} [NeZero n] {κ : ZMod n → ℝ} {a b : ℕ}
+    (hab : a < b)
+    (hlowerA : ∃ k : ℕ, a ≤ k ∧ k ≤ b ∧
+      κ (k : ZMod n) < κ (a : ZMod n))
+    (hlowerB : ∃ k : ℕ, a ≤ k ∧ k ≤ b ∧
+      κ (k : ZMod n) < κ (b : ZMod n))
+    (hnc : ¬ ∃ c, ∀ z : ZMod n, κ z = c) :
+    ∃ m : ℕ, a < m ∧ m < b ∧ DiscreteLocalMin κ (m : ZMod n) := by
+  classical
+  let S : Finset ℕ := Finset.Icc a b
+  have hS : S.Nonempty := by
+    refine ⟨a, ?_⟩
+    simp [S, Nat.le_of_lt hab]
+  obtain ⟨m, hmS, hmmin⟩ :=
+    Finset.exists_min_image S (fun k : ℕ => κ (k : ZMod n)) hS
+  have hm_bounds : a ≤ m ∧ m ≤ b := by
+    simpa [S] using hmS
+  have hm_lt_a : κ (m : ZMod n) < κ (a : ZMod n) := by
+    rcases hlowerA with ⟨k, hak, hkb, hk⟩
+    exact (hmmin k (by simpa [S] using And.intro hak hkb)).trans_lt hk
+  have hm_lt_b : κ (m : ZMod n) < κ (b : ZMod n) := by
+    rcases hlowerB with ⟨k, hak, hkb, hk⟩
+    exact (hmmin k (by simpa [S] using And.intro hak hkb)).trans_lt hk
+  have ham : a < m := lt_of_le_of_ne hm_bounds.1 (fun hma => by
+    subst m
+    exact (lt_irrefl _) hm_lt_a)
+  have hmb : m < b := lt_of_le_of_ne hm_bounds.2 (fun hmb' => by
+    subst b
+    exact (lt_irrefl _) hm_lt_b)
+  let R : ZMod n → Prop := fun z =>
+    ∃ k : ℕ, k ∈ S ∧ (k : ZMod n) = z ∧
+      κ (k : ZMod n) = κ (m : ZMod n)
+  have hRm : R (m : ZMod n) := ⟨m, hmS, rfl, rfl⟩
+  have hRinterior : ∀ z, R z → ∀ k : ℕ, k ∈ S → (k : ZMod n) = z →
+      κ (k : ZMod n) = κ (m : ZMod n) → a < k ∧ k < b := by
+    intro z _hz k hkS _hkz hkval
+    have hk_bounds : a ≤ k ∧ k ≤ b := by simpa [S] using hkS
+    constructor
+    · exact lt_of_le_of_ne hk_bounds.1 (fun hka => by
+        subst k
+        rw [hkval] at hm_lt_a
+        exact (lt_irrefl _) hm_lt_a)
+    · exact lt_of_le_of_ne hk_bounds.2 (fun hkb' => by
+        subst b
+        rw [hkval] at hm_lt_b
+        exact (lt_irrefl _) hm_lt_b)
+  have hweak : ∀ z, R z →
+      -κ (z - 1) ≤ -κ z ∧ -κ (z + 1) ≤ -κ z := by
+    intro z hz
+    rcases hz with ⟨k, hkS, hkz, hkval⟩
+    have hinterior := hRinterior z ⟨k, hkS, hkz, hkval⟩ k hkS hkz hkval
+    subst z
+    constructor
+    · apply neg_le_neg
+      have hk1S : k - 1 ∈ S := by
+        simp only [S, Finset.mem_Icc]
+        omega
+      have hmin := hmmin (k - 1) hk1S
+      rw [hkval]
+      convert hmin using 1
+      rw [Nat.cast_sub (by omega : 1 ≤ k), Nat.cast_one]
+    · apply neg_le_neg
+      have hk1S : k + 1 ∈ S := by
+        simp only [S, Finset.mem_Icc]
+        omega
+      have hmin := hmmin (k + 1) hk1S
+      rw [hkval]
+      simpa [Nat.cast_add] using hmin
+  have hpropRight : ∀ z, R z → -κ z = -κ (z + 1) → R (z + 1) := by
+    intro z hz heq
+    rcases hz with ⟨k, hkS, hkz, hkval⟩
+    have hinterior := hRinterior z ⟨k, hkS, hkz, hkval⟩ k hkS hkz hkval
+    subst z
+    have hk1S : k + 1 ∈ S := by
+      simp only [S, Finset.mem_Icc]
+      omega
+    refine ⟨k + 1, hk1S, by simp [Nat.cast_add], ?_⟩
+    have hκ := neg_inj.mp heq
+    calc
+      κ ((k + 1 : ℕ) : ZMod n) = κ ((k : ZMod n) + 1) := by
+        rw [Nat.cast_add, Nat.cast_one]
+      _ = κ (k : ZMod n) := hκ.symm
+      _ = κ (m : ZMod n) := hkval
+  have hpropLeft : ∀ z, R z → -κ z = -κ (z - 1) → R (z - 1) := by
+    intro z hz heq
+    rcases hz with ⟨k, hkS, hkz, hkval⟩
+    have hinterior := hRinterior z ⟨k, hkS, hkz, hkval⟩ k hkS hkz hkval
+    subst z
+    have hk1S : k - 1 ∈ S := by
+      simp only [S, Finset.mem_Icc]
+      omega
+    refine ⟨k - 1, hk1S, ?_, ?_⟩
+    · rw [Nat.cast_sub (by omega : 1 ≤ k), Nat.cast_one]
+    · have hκ := neg_inj.mp heq
+      calc
+        κ ((k - 1 : ℕ) : ZMod n) = κ ((k : ZMod n) - 1) := by
+          rw [Nat.cast_sub (by omega : 1 ≤ k), Nat.cast_one]
+        _ = κ (k : ZMod n) := hκ.symm
+        _ = κ (m : ZMod n) := hkval
+  have hncNeg : ¬ ∃ c, ∀ z : ZMod n, -κ z = c := by
+    rintro ⟨c, hc⟩
+    apply hnc
+    refine ⟨-c, fun z => ?_⟩
+    have hz := congrArg Neg.neg (hc z)
+    simpa using hz
+  have hmaxNeg : DiscreteLocalMax (fun z => -κ z) (m : ZMod n) :=
+    discreteLocalMax_of_weak_neighbors_of_eq_propagates
+      hRm hweak hpropRight hpropLeft hncNeg
+  exact ⟨m, ham, hmb, discreteLocalMin_of_neg_localMax hmaxNeg⟩
+
+/-- Two disjoint marked weak-maximum plateaux force two alternating minimum
+plateaux, hence Dahlberg's four-vertex conclusion.  The first marked plateau
+is normalized to index `0`; the second is represented by `d ∈ (0,n)`. -/
+theorem dahlbergFourVertex_of_two_disjoint_marked_weakMaxima_zero
+    {n : ℕ} [NeZero n] {κ : ZMod n → ℝ}
+    {P Q : ZMod n → Prop} {d : ℕ}
+    (hdpos : 0 < d) (hdlt : d < n)
+    (hP0 : P 0) (hQd : Q (d : ZMod n))
+    (hdisjoint : ∀ z, ¬ (P z ∧ Q z))
+    (hweakP : ∀ z, P z → κ (z - 1) ≤ κ z ∧ κ (z + 1) ≤ κ z)
+    (hpropPRight : ∀ z, P z → κ z = κ (z + 1) → P (z + 1))
+    (hpropPLeft : ∀ z, P z → κ z = κ (z - 1) → P (z - 1))
+    (hweakQ : ∀ z, Q z → κ (z - 1) ≤ κ z ∧ κ (z + 1) ≤ κ z)
+    (hpropQRight : ∀ z, Q z → κ z = κ (z + 1) → Q (z + 1))
+    (hpropQLeft : ∀ z, Q z → κ z = κ (z - 1) → Q (z - 1))
+    (hnc : ¬ ∃ c, ∀ z : ZMod n, κ z = c) :
+    DahlbergFourVertex κ := by
+  have hnotPd : ¬ P (d : ZMod n) := fun hPd => hdisjoint _ ⟨hPd, hQd⟩
+  have hnotQ0 : ¬ Q 0 := fun hQ0 => hdisjoint 0 ⟨hP0, hQ0⟩
+  have hPnat0 : P ((0 : ℕ) : ZMod n) := by simpa using hP0
+  have hnotQnat0 : ¬ Q ((0 : ℕ) : ZMod n) := by simpa using hnotQ0
+  have hmax0 : DiscreteLocalMax κ 0 :=
+    discreteLocalMax_of_weak_neighbors_of_eq_propagates
+      hP0 hweakP hpropPRight hpropPLeft hnc
+  have hmaxd : DiscreteLocalMax κ (d : ZMod n) :=
+    discreteLocalMax_of_weak_neighbors_of_eq_propagates
+      hQd hweakQ hpropQRight hpropQLeft hnc
+  have hlow0_arc1 : ∃ k : ℕ, 0 ≤ k ∧ k ≤ d ∧
+      κ (k : ZMod n) < κ 0 := by
+    rcases exists_strict_drop_forward_of_marked_weakMax
+        hdpos hPnat0 hnotPd (fun z hz => (hweakP z hz).2) hpropPRight with
+      ⟨k, hk0, hkd, hk⟩
+    exact ⟨k, hk0.le, hkd, by simpa using hk⟩
+  have hlowd_arc1 : ∃ k : ℕ, 0 ≤ k ∧ k ≤ d ∧
+      κ (k : ZMod n) < κ (d : ZMod n) := by
+    rcases exists_strict_drop_backward_of_marked_weakMax
+        hdpos hQd hnotQnat0 (fun z hz => (hweakQ z hz).1) hpropQLeft with
+      ⟨k, hk0, hkd, hk⟩
+    exact ⟨k, hk0, hkd.le, hk⟩
+  rcases exists_discreteLocalMin_between_of_strictly_below_endpoints
+      hdpos (by simpa using hlow0_arc1) hlowd_arc1 hnc with
+    ⟨m₁, hm₁0, hm₁d, hmin₁⟩
+  have hPn : P (n : ZMod n) := by
+    simpa using hP0
+  have hnotQn : ¬ Q (n : ZMod n) := by
+    simpa using hnotQ0
+  have hlowd_arc2 : ∃ k : ℕ, d ≤ k ∧ k ≤ n ∧
+      κ (k : ZMod n) < κ (d : ZMod n) := by
+    rcases exists_strict_drop_forward_of_marked_weakMax
+        hdlt hQd hnotQn (fun z hz => (hweakQ z hz).2) hpropQRight with
+      ⟨k, hdk, hkn, hk⟩
+    exact ⟨k, hdk.le, hkn, hk⟩
+  have hlow0_arc2 : ∃ k : ℕ, d ≤ k ∧ k ≤ n ∧
+      κ (k : ZMod n) < κ (n : ZMod n) := by
+    rcases exists_strict_drop_backward_of_marked_weakMax
+        hdlt hPn hnotPd (fun z hz => (hweakP z hz).1) hpropPLeft with
+      ⟨k, hdk, hkn, hk⟩
+    exact ⟨k, hdk, hkn.le, hk⟩
+  rcases exists_discreteLocalMin_between_of_strictly_below_endpoints
+      hdlt hlowd_arc2 hlow0_arc2 hnc with ⟨m₂, hdm₂, hm₂n, hmin₂⟩
+  exact ⟨0, m₁, d, m₂, hm₁0, hm₁d, hdm₂, by omega,
+    by simpa using hmax0, hmin₁, hmaxd, hmin₂⟩
+
+/-- Two disjoint marked weak-maximum plateaux force Dahlberg's four-vertex
+conclusion, without choosing a natural representative or cyclic origin. -/
+theorem dahlbergFourVertex_of_two_disjoint_marked_weakMaxima
+    {n : ℕ} [NeZero n] {κ : ZMod n → ℝ}
+    {P Q : ZMod n → Prop} {p q : ZMod n}
+    (hpq : p ≠ q) (hPp : P p) (hQq : Q q)
+    (hdisjoint : ∀ z, ¬ (P z ∧ Q z))
+    (hweakP : ∀ z, P z → κ (z - 1) ≤ κ z ∧ κ (z + 1) ≤ κ z)
+    (hpropPRight : ∀ z, P z → κ z = κ (z + 1) → P (z + 1))
+    (hpropPLeft : ∀ z, P z → κ z = κ (z - 1) → P (z - 1))
+    (hweakQ : ∀ z, Q z → κ (z - 1) ≤ κ z ∧ κ (z + 1) ≤ κ z)
+    (hpropQRight : ∀ z, Q z → κ z = κ (z + 1) → Q (z + 1))
+    (hpropQLeft : ∀ z, Q z → κ z = κ (z - 1) → Q (z - 1))
+    (hnc : ¬ ∃ c, ∀ z : ZMod n, κ z = c) :
+    DahlbergFourVertex κ := by
+  let d : ℕ := (q - p).val
+  let κ' : ZMod n → ℝ := fun z => κ (z + p)
+  let P' : ZMod n → Prop := fun z => P (z + p)
+  let Q' : ZMod n → Prop := fun z => Q (z + p)
+  have hdpos : 0 < d := by
+    apply Nat.pos_of_ne_zero
+    intro hd0
+    have hqp0 : q - p = 0 := (ZMod.val_eq_zero (q - p)).mp hd0
+    apply hpq
+    have := congrArg (fun z : ZMod n => z + p) hqp0
+    simpa using this.symm
+  have hdlt : d < n := ZMod.val_lt (q - p)
+  have hdcast : (d : ZMod n) = q - p := by
+    exact ZMod.natCast_zmod_val (q - p)
+  have hP'0 : P' 0 := by simpa [P'] using hPp
+  have hQ'd : Q' (d : ZMod n) := by
+    dsimp [Q']
+    rw [hdcast]
+    convert hQq using 1
+    abel
+  have hdisjoint' : ∀ z, ¬ (P' z ∧ Q' z) := by
+    intro z hz
+    exact hdisjoint (z + p) hz
+  have hweakP' : ∀ z, P' z →
+      κ' (z - 1) ≤ κ' z ∧ κ' (z + 1) ≤ κ' z := by
+    intro z hz
+    rcases hweakP (z + p) hz with ⟨hl, hr⟩
+    constructor
+    · dsimp [κ']
+      convert hl using 1
+      abel_nf
+    · dsimp [κ']
+      convert hr using 1
+      abel_nf
+  have hpropP'Right : ∀ z, P' z →
+      κ' z = κ' (z + 1) → P' (z + 1) := by
+    intro z hz heq
+    dsimp [P', κ'] at hz heq ⊢
+    have hp := hpropPRight (z + p) hz (by
+      convert heq using 1
+      abel_nf)
+    convert hp using 1
+    abel
+  have hpropP'Left : ∀ z, P' z →
+      κ' z = κ' (z - 1) → P' (z - 1) := by
+    intro z hz heq
+    dsimp [P', κ'] at hz heq ⊢
+    have hp := hpropPLeft (z + p) hz (by
+      convert heq using 1
+      abel_nf)
+    convert hp using 1
+    abel
+  have hweakQ' : ∀ z, Q' z →
+      κ' (z - 1) ≤ κ' z ∧ κ' (z + 1) ≤ κ' z := by
+    intro z hz
+    rcases hweakQ (z + p) hz with ⟨hl, hr⟩
+    constructor
+    · dsimp [κ']
+      convert hl using 1
+      abel_nf
+    · dsimp [κ']
+      convert hr using 1
+      abel_nf
+  have hpropQ'Right : ∀ z, Q' z →
+      κ' z = κ' (z + 1) → Q' (z + 1) := by
+    intro z hz heq
+    dsimp [Q', κ'] at hz heq ⊢
+    have hq := hpropQRight (z + p) hz (by
+      convert heq using 1
+      abel_nf)
+    convert hq using 1
+    abel
+  have hpropQ'Left : ∀ z, Q' z →
+      κ' z = κ' (z - 1) → Q' (z - 1) := by
+    intro z hz heq
+    dsimp [Q', κ'] at hz heq ⊢
+    have hq := hpropQLeft (z + p) hz (by
+      convert heq using 1
+      abel_nf)
+    convert hq using 1
+    abel
+  have hnc' : ¬ ∃ c, ∀ z : ZMod n, κ' z = c := by
+    rintro ⟨c, hc⟩
+    apply hnc
+    refine ⟨c, fun z => ?_⟩
+    have hz := hc (z - p)
+    dsimp [κ'] at hz
+    convert hz using 1
+    abel_nf
+  have hfv' : DahlbergFourVertex κ' :=
+    dahlbergFourVertex_of_two_disjoint_marked_weakMaxima_zero
+      hdpos hdlt hP'0 hQ'd hdisjoint' hweakP'
+      hpropP'Right hpropP'Left hweakQ' hpropQ'Right hpropQ'Left hnc'
+  exact (dahlbergFourVertex_translateIndex_iff (κ := κ) (a := p)).mp hfv'
+
 /-- A nonconstant cyclic real profile has a plateau-aware local maximum. -/
 theorem exists_discreteLocalMax_of_not_constant {n : ℕ} [NeZero n]
     {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :

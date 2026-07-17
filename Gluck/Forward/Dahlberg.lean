@@ -8333,6 +8333,225 @@ theorem signedMengerProfile_eq_inv_edgePrevCircleRadiusProfile_of_positiveOrient
     _ = (EdgePrevCircleRadiusProfile v i)⁻¹ := by
       simp [normalizedCircleCurvature, EdgePrevCircleRadiusProfile, one_div]
 
+/-! ### Equal-radius propagation along the curvature-circle profile -/
+
+/-- Equal adjacent signed-Menger values in the positive regular branch define
+the same previous-vertex curvature circle. -/
+theorem edgePrevCurvatureCircleData_succ_eq_of_signedMengerProfile_eq
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) (i : ZMod n)
+    (hκ : SignedMengerProfile v i = SignedMengerProfile v (i + 1)) :
+    EdgePrevCurvatureCircleData v i =
+      EdgePrevCurvatureCircleData v (i + 1) := by
+  have hy :=
+    signedMengerProfile_edgeCircumcenterParameter_eq_of_endpoint_pos_eq
+      hsimple hregular i (signedMengerProfile_pos_of_positiveOrientation hsimple horient i) hκ
+  have hcenterNext :
+      EdgePrevCircleCenterProfile v i = EdgeNextCircleCenterProfile v i := by
+    simpa [EdgePrevCircleCenterProfile, EdgeNextCircleCenterProfile] using
+      congrArg (edgeCircleCenter (v i) (v (i + 1))) hy
+  have hradiusNext :
+      EdgePrevCircleRadiusProfile v i = EdgeNextCircleRadiusProfile v i := by
+    simpa [EdgePrevCircleRadiusProfile, EdgeNextCircleRadiusProfile] using
+      congrArg (normalizedCircleRadius (chordHalfLength (v i) (v (i + 1)))) hy
+  have hcenter :
+      EdgePrevCircleCenterProfile v i = EdgePrevCircleCenterProfile v (i + 1) :=
+    hcenterNext.trans
+      (EdgeNextCircleCenterProfile_eq_edgePrevCircleCenterProfile_succ_of_positiveOrientation
+        hsimple horient i)
+  have hradius :
+      EdgePrevCircleRadiusProfile v i = EdgePrevCircleRadiusProfile v (i + 1) :=
+    hradiusNext.trans
+      (EdgeNextCircleRadiusProfile_eq_edgePrevCircleRadiusProfile_succ_of_positiveOrientation
+        hsimple horient i)
+  exact Prod.ext hcenter hradius
+
+/-- Equal adjacent previous-circle radii in the positive regular branch define
+the same previous-vertex curvature circle. -/
+theorem edgePrevCurvatureCircleData_succ_eq_of_radius_eq
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) (i : ZMod n)
+    (hρ : EdgePrevCircleRadiusProfile v i =
+      EdgePrevCircleRadiusProfile v (i + 1)) :
+    EdgePrevCurvatureCircleData v i =
+      EdgePrevCurvatureCircleData v (i + 1) := by
+  have hκ : SignedMengerProfile v i = SignedMengerProfile v (i + 1) := by
+    calc
+      SignedMengerProfile v i = (EdgePrevCircleRadiusProfile v i)⁻¹ :=
+        signedMengerProfile_eq_inv_edgePrevCircleRadiusProfile_of_positiveOrientation
+          hsimple horient i
+      _ = (EdgePrevCircleRadiusProfile v (i + 1))⁻¹ :=
+        congrArg (fun r : ℝ => r⁻¹) hρ
+      _ = SignedMengerProfile v (i + 1) :=
+        (signedMengerProfile_eq_inv_edgePrevCircleRadiusProfile_of_positiveOrientation
+          hsimple horient (i + 1)).symm
+  exact edgePrevCurvatureCircleData_succ_eq_of_signedMengerProfile_eq
+    hsimple hregular horient i hκ
+
+/-- Interior-missing is a property of the curvature circle itself, so it is
+preserved when the centre/radius data agree. -/
+theorem edgePrevCurvatureDiskInteriorMissesAll_congr_circleData
+    {n : ℕ} {v : ZMod n → ℂ} {i j : ZMod n}
+    (hdata : EdgePrevCurvatureCircleData v i =
+      EdgePrevCurvatureCircleData v j) :
+    EdgePrevCurvatureDiskInteriorMissesAll v i ↔
+      EdgePrevCurvatureDiskInteriorMissesAll v j := by
+  have hcenter :
+      EdgePrevCircleCenterProfile v i = EdgePrevCircleCenterProfile v j :=
+    congrArg Prod.fst hdata
+  have hradius :
+      EdgePrevCircleRadiusProfile v i = EdgePrevCircleRadiusProfile v j :=
+    congrArg Prod.snd hdata
+  simp [EdgePrevCurvatureDiskInteriorMissesAll, hcenter, hradius]
+
+/-- The predecessor form of equal-radius curvature-circle rigidity. -/
+theorem edgePrevCurvatureCircleData_pred_eq_of_radius_eq
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) (i : ZMod n)
+    (hρ : EdgePrevCircleRadiusProfile v i =
+      EdgePrevCircleRadiusProfile v (i - 1)) :
+    EdgePrevCurvatureCircleData v i =
+      EdgePrevCurvatureCircleData v (i - 1) := by
+  have hρ' :
+      EdgePrevCircleRadiusProfile v (i - 1) =
+        EdgePrevCircleRadiusProfile v ((i - 1) + 1) := by
+    simpa using hρ.symm
+  have hdata := edgePrevCurvatureCircleData_succ_eq_of_radius_eq
+    hsimple hregular horient (i - 1) hρ'
+  simpa using hdata.symm
+
+/-- Across an equal-radius successor step, the two curvature disks have the
+same interior-missing property. -/
+theorem edgePrevCurvatureDiskInteriorMissesAll_succ_iff_of_radius_eq
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) (i : ZMod n)
+    (hρ : EdgePrevCircleRadiusProfile v i =
+      EdgePrevCircleRadiusProfile v (i + 1)) :
+    EdgePrevCurvatureDiskInteriorMissesAll v i ↔
+      EdgePrevCurvatureDiskInteriorMissesAll v (i + 1) :=
+  edgePrevCurvatureDiskInteriorMissesAll_congr_circleData
+    (edgePrevCurvatureCircleData_succ_eq_of_radius_eq
+      hsimple hregular horient i hρ)
+
+/-- Across an equal-radius predecessor step, the two curvature disks have the
+same interior-missing property. -/
+theorem edgePrevCurvatureDiskInteriorMissesAll_pred_iff_of_radius_eq
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) (i : ZMod n)
+    (hρ : EdgePrevCircleRadiusProfile v i =
+      EdgePrevCircleRadiusProfile v (i - 1)) :
+    EdgePrevCurvatureDiskInteriorMissesAll v i ↔
+      EdgePrevCurvatureDiskInteriorMissesAll v (i - 1) :=
+  edgePrevCurvatureDiskInteriorMissesAll_congr_circleData
+    (edgePrevCurvatureCircleData_pred_eq_of_radius_eq
+      hsimple hregular horient i hρ)
+
+/-- An interior-missing curvature disk is a weak local maximum of positive
+signed Menger curvature. -/
+theorem signedMengerProfile_neighbors_le_of_interiorMissesAll
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v) {i : ZMod n}
+    (hmiss : EdgePrevCurvatureDiskInteriorMissesAll v i) :
+    SignedMengerProfile v (i - 1) ≤ SignedMengerProfile v i ∧
+      SignedMengerProfile v (i + 1) ≤ SignedMengerProfile v i := by
+  have hρ :=
+    edgePrevCircleRadiusProfile_le_neighbors_of_interiorMissesAll_of_positiveOrientation
+      hsimple hregular horient hmiss
+  have hρpos := EdgePrevCircleRadiusProfile_pos hsimple
+  constructor
+  · rw [signedMengerProfile_eq_inv_edgePrevCircleRadiusProfile_of_positiveOrientation
+        hsimple horient (i - 1),
+      signedMengerProfile_eq_inv_edgePrevCircleRadiusProfile_of_positiveOrientation
+        hsimple horient i]
+    exact (inv_le_inv₀ (hρpos (i - 1)) (hρpos i)).2 hρ.1
+  · rw [signedMengerProfile_eq_inv_edgePrevCircleRadiusProfile_of_positiveOrientation
+        hsimple horient (i + 1),
+      signedMengerProfile_eq_inv_edgePrevCircleRadiusProfile_of_positiveOrientation
+        hsimple horient i]
+    exact (inv_le_inv₀ (hρpos (i + 1)) (hρpos i)).2 hρ.2
+
+/-- Two distinct curvature disks whose interiors miss all vertices force the
+plateau-aware four-vertex conclusion in the positive regular branch. -/
+theorem signedMengerProfile_dahlbergFourVertex_of_two_distinct_interiorMissing
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (horient : PositivePolygonOrientation v)
+    (hnoncircle : ¬ Concyclic v) {i j : ZMod n}
+    (hmissi : EdgePrevCurvatureDiskInteriorMissesAll v i)
+    (hmissj : EdgePrevCurvatureDiskInteriorMissesAll v j)
+    (hdistinct : EdgePrevCurvatureCirclesDistinct v i j) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  let P : ZMod n → Prop := fun z =>
+    EdgePrevCurvatureCircleData v z = EdgePrevCurvatureCircleData v i
+  let Q : ZMod n → Prop := fun z =>
+    EdgePrevCurvatureCircleData v z = EdgePrevCurvatureCircleData v j
+  have hij : i ≠ j := by
+    intro hij
+    apply hdistinct
+    rw [hij]
+  have hPi : P i := rfl
+  have hQj : Q j := rfl
+  have hdisjoint : ∀ z, ¬ (P z ∧ Q z) := by
+    rintro z ⟨hPz, hQz⟩
+    exact hdistinct (hPz.symm.trans hQz)
+  have hweakP : ∀ z, P z →
+      SignedMengerProfile v (z - 1) ≤ SignedMengerProfile v z ∧
+        SignedMengerProfile v (z + 1) ≤ SignedMengerProfile v z := by
+    intro z hPz
+    apply signedMengerProfile_neighbors_le_of_interiorMissesAll
+      hsimple hregular horient
+    exact (edgePrevCurvatureDiskInteriorMissesAll_congr_circleData hPz).2 hmissi
+  have hweakQ : ∀ z, Q z →
+      SignedMengerProfile v (z - 1) ≤ SignedMengerProfile v z ∧
+        SignedMengerProfile v (z + 1) ≤ SignedMengerProfile v z := by
+    intro z hQz
+    apply signedMengerProfile_neighbors_le_of_interiorMissesAll
+      hsimple hregular horient
+    exact (edgePrevCurvatureDiskInteriorMissesAll_congr_circleData hQz).2 hmissj
+  have hpropRight : ∀ {a : ZMod n},
+      SignedMengerProfile v a = SignedMengerProfile v (a + 1) →
+      EdgePrevCurvatureCircleData v a = EdgePrevCurvatureCircleData v (a + 1) := by
+    intro a ha
+    exact edgePrevCurvatureCircleData_succ_eq_of_signedMengerProfile_eq
+      hsimple hregular horient a ha
+  have hpropLeft : ∀ {a : ZMod n},
+      SignedMengerProfile v a = SignedMengerProfile v (a - 1) →
+      EdgePrevCurvatureCircleData v a = EdgePrevCurvatureCircleData v (a - 1) := by
+    intro a ha
+    have ha' :
+        SignedMengerProfile v (a - 1) =
+          SignedMengerProfile v ((a - 1) + 1) := by
+      simpa using ha.symm
+    have hdata := edgePrevCurvatureCircleData_succ_eq_of_signedMengerProfile_eq
+      hsimple hregular horient (a - 1) ha'
+    simpa using hdata.symm
+  apply dahlbergFourVertex_of_two_disjoint_marked_weakMaxima
+    hij hPi hQj hdisjoint hweakP
+  · intro z hPz hκ
+    exact (hpropRight hκ).symm.trans hPz
+  · intro z hPz hκ
+    exact (hpropLeft hκ).symm.trans hPz
+  · exact hweakQ
+  · intro z hQz hκ
+    exact (hpropRight hκ).symm.trans hQz
+  · intro z hQz hκ
+    exact (hpropLeft hκ).symm.trans hQz
+  · exact not_constant_signedMengerProfile_of_not_concyclic_positiveOrientation
+      hsimple hregular horient hnoncircle
+
 /-- A Dahlberg four-vertex theorem for the positive radius profile transfers
 to signed Menger curvature by reciprocal monotonicity. -/
 theorem signedMengerProfile_dahlbergFourVertex_of_positiveRadiusProfile
@@ -10644,6 +10863,21 @@ def DahlbergE2Lemma9PaperBridgeSource : Prop :=
     (¬ Concyclic v) →
     DahlbergE2Theorem6PaperCertificate v →
     DahlbergFourVertex (SignedMengerProfile v)
+
+/-- Source-free paper-faithful form of Dahlberg's Lemma 9.
+
+The two distinct interior-missing circles from Theorem 6 determine disjoint
+weak-maximum plateaux of signed Menger curvature.  Circle rigidity propagates
+each plateau across adjacent equal values, and the finite cyclic alternation
+lemma supplies a local minimum on each complementary arc. -/
+theorem dahlbergE2_lemma9_paper_bridge_source :
+    DahlbergE2Lemma9PaperBridgeSource := by
+  intro n hne _hn v hsimple hregular horient hnoncircle cert
+  letI : NeZero n := hne
+  exact signedMengerProfile_dahlbergFourVertex_of_two_distinct_interiorMissing
+    hsimple hregular horient hnoncircle
+    cert.interiorMissing.misses_i cert.interiorMissing.misses_j
+    cert.interiorMissing.distinct
 
 /-- The exact Theorem 6 source and the paper-faithful Lemma 9 bridge give the
 strict positive-orientation D4VT source used by the final theorem. -/
