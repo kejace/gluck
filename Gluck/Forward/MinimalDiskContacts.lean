@@ -1,4 +1,4 @@
-import Gluck.Forward.Defs
+import Gluck.Forward.ContactSets
 import Mathlib.Analysis.Normed.Affine.AddTorsor
 import Mathlib.Analysis.Normed.Module.Convex
 
@@ -143,5 +143,42 @@ theorem dist_eq_two_mul_radius_of_minimalEnclosingDiskR2_of_boundary_subset_pair
           nlinarith
   exact (not_lt_of_ge (minimalEnclosingDiskR2_le_of_polygonInClosedDiskR2
     hΔ hR'_nonneg hcontains)) hR'_lt
+
+/-- A positive minimal enclosing disk cannot have a unique boundary contact. -/
+theorem exists_ne_onDiskBoundaryR2_of_minimalEnclosingDiskR2
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
+    (hΔ : MinimalEnclosingDiskR2 v O R) (hR : 0 < R)
+    {p : ZMod n} (hp : OnDiskBoundaryR2 v O R p) :
+    ∃ q : ZMod n, q ≠ p ∧ OnDiskBoundaryR2 v O R q := by
+  by_contra hno
+  push Not at hno
+  have honly : ∀ i, OnDiskBoundaryR2 v O R i → i = p := by
+    intro i hi
+    by_contra hip
+    exact hno i hip hi
+  have hdiam :=
+    dist_eq_two_mul_radius_of_minimalEnclosingDiskR2_of_boundary_subset_pair
+      hΔ hp hp (fun i hi => Or.inl (honly i hi))
+  rw [dist_self] at hdiam
+  linarith
+
+/-- Once one contact of a positive minimal enclosing disk is selected, its
+finite contact set has at least two elements. -/
+theorem two_le_card_circleContactSet_of_minimalEnclosingDiskR2
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
+    (hΔ : MinimalEnclosingDiskR2 v O R) (hR : 0 < R)
+    {p : ZMod n} (hp : OnDiskBoundaryR2 v O R p) :
+    2 ≤ (circleContactSet v O R).card := by
+  obtain ⟨q, hqp, hq⟩ :=
+    exists_ne_onDiskBoundaryR2_of_minimalEnclosingDiskR2 hΔ hR hp
+  have hsub : ({p, q} : Finset (ZMod n)) ⊆ circleContactSet v O R := by
+    intro i hi
+    simp only [Finset.mem_insert, Finset.mem_singleton] at hi
+    rcases hi with rfl | rfl
+    · exact mem_circleContactSet.mpr hp
+    · exact mem_circleContactSet.mpr hq
+  calc
+    2 = ({p, q} : Finset (ZMod n)).card := (Finset.card_pair hqp.symm).symm
+    _ ≤ (circleContactSet v O R).card := Finset.card_le_card hsub
 
 end Gluck.Forward
