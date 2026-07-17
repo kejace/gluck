@@ -1,4 +1,6 @@
-import Gluck.Forward.CyclicComponents
+import Gluck.Forward.ContactSets
+import Gluck.Forward.CyclicChordGeometry
+import Gluck.Discrete.PolygonConvexity
 
 /-!
 # Dahlberg's oriented circle regions
@@ -3351,6 +3353,47 @@ def StrictConvexEdgeSupport {n : ℕ} (v : ZMod n → ℂ) : Prop :=
   ∀ i j : ZMod n, j ≠ i → j ≠ i + 1 →
     0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v j)
 
+/-- The arbitrary-chord cyclic-order geometry consumed by Dahlberg's Lemmas
+4 and 6.  For a lifted gap `p < k < q`, orient the endpoint chord from `q`
+back to `p`.  The gap lies on its positive side, that closed side contains
+only the endpoint-closed gap, and every segment from the gap to a vertex
+outside it crosses the endpoint chord.
+
+This structure isolates the precise downstream consequence of strict convex
+cyclic order; it contains no circle-theorem assumption. -/
+structure StrictConvexCyclicChordGeometry {n : ℕ} [NeZero n]
+    (v : ZMod n → ℂ) : Prop where
+  noncollinear : ∀ a b d : ZMod n,
+    a ≠ b → d ≠ a → d ≠ b →
+      Gluck.Discrete.crossR2 (v a) (v b) (v d) ≠ 0
+  gap : ∀ (c : ZMod n) (p k q : ℕ),
+    p < k → k < q → q < n →
+    let a := Gluck.cyclicLift c q
+    let b := Gluck.cyclicLift c p
+    let z := Gluck.cyclicLift c k
+    let E := Gluck.mapCut c (Finset.Icc p q)
+    v a ≠ v b ∧
+      0 < Gluck.Discrete.crossR2 (v a) (v b) (v z) ∧
+      (∀ x : ZMod n,
+        0 ≤ Gluck.Discrete.crossR2 (v a) (v b) (v x) → x ∈ E) ∧
+      (∀ x : ZMod n, x ∉ E →
+        ∃ t ∈ Set.Ioo (0 : ℝ) 1, ∃ s ∈ Set.Icc (0 : ℝ) 1,
+          (AffineMap.lineMap (v z) (v x)) t =
+            (AffineMap.lineMap (v a) (v b)) s)
+
+/-- Strict support by every oriented polygon edge implies the full
+arbitrary-chord cyclic geometry used by Dahlberg's Lemmas 4 and 6. -/
+theorem strictConvexCyclicChordGeometry_of_edgeSupport
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsupport : StrictConvexEdgeSupport v) :
+    StrictConvexCyclicChordGeometry v := by
+  let hfields :=
+    Gluck.Forward.CyclicChordGeometry.strictConvexCyclicChordGeometryFields_of_edgeSupport
+      (v := v)
+      (show Gluck.Forward.CyclicChordGeometry.CyclicChordStrictConvexEdgeSupport v
+        from hsupport)
+  exact ⟨hfields.noncollinear, hfields.gap⟩
+
 /-- Indices of vertices other than the endpoints of an oriented edge. -/
 def edgeThirdVertexIndices {n : ℕ} [NeZero n] (i : ZMod n) :
     Finset (ZMod n) :=
@@ -3479,6 +3522,124 @@ theorem exists_edgeThirdVertex_circle_interiorMissesAll_of_strictConvexEdgeSuppo
     apply (mem_edgeClosedExterior_circumcenterParameter_iff hAB hkcross).mpr
     exact hmin k (mem_edgeThirdVertexIndices_iff.mpr ⟨hki, hksucc⟩)
 
+/-! ### Dahlberg's finite three-contact disk families -/
+
+/-- A closed disk in Dahlberg's family `F`: it contains every polygon vertex
+and has at least three boundary contacts. -/
+structure DahlbergContainingThreeContactDiskR2 {n : ℕ} [NeZero n]
+    (v : ZMod n → ℂ) where
+  center : ℂ
+  radius : ℝ
+  radius_pos : 0 < radius
+  contains : PolygonInClosedDiskR2 v center radius
+  three_contacts : 3 ≤ (circleContactSet v center radius).card
+
+/-- An open disk in Dahlberg's family `G`, represented by its closed
+exterior: no polygon vertex is in its interior, and at least three vertices
+are on its boundary. -/
+structure DahlbergInteriorMissingThreeContactDiskR2 {n : ℕ} [NeZero n]
+    (v : ZMod n → ℂ) where
+  center : ℂ
+  radius : ℝ
+  radius_pos : 0 < radius
+  misses : ∀ k : ZMod n, radius ≤ dist center (v k)
+  three_contacts : 3 ≤ (circleContactSet v center radius).card
+
+/-- Dahlberg §3 Lemma 3 for the containing family `F`: the finite coaxial
+maximum through the outgoing edge at `i` gives a member of `F(i)`. -/
+theorem exists_dahlbergContainingThreeContactDiskR2_at_of_strictConvexEdgeSupport
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsupport : StrictConvexEdgeSupport v) (i : ZMod n) :
+    ∃ U : DahlbergContainingThreeContactDiskR2 v,
+      i ∈ circleContactSet v U.center U.radius := by
+  rcases exists_edgeThirdVertex_circle_containsAll_of_strictConvexEdgeSupport
+      hn hsupport i with ⟨j, hji, hjnext, hall, hcircle⟩
+  have hAB : v i ≠ v (i + 1) :=
+    strictConvexEdgeSupport_edge_ne hn hsupport i
+  let y := edgeCircumcenterParameter (v i) (v (i + 1)) (v j)
+  let O := edgeCircleCenter (v i) (v (i + 1)) y
+  let R := normalizedCircleRadius (chordHalfLength (v i) (v (i + 1))) y
+  have hcontains : PolygonInClosedDiskR2 v O R := by
+    intro k
+    exact (mem_edgeClosedDisk_iff_dist_le hAB y).mp (hall k)
+  have hiNext : i ≠ i + 1 := by
+    intro h
+    exact hAB (congrArg v h)
+  have hthree : 3 ≤ (circleContactSet v O R).card := by
+    apply three_le_card_circleContactSet hiNext hji.symm hjnext.symm
+    · exact hcircle.2.1
+    · exact hcircle.2.2.1
+    · exact hcircle.2.2.2
+  let U : DahlbergContainingThreeContactDiskR2 v :=
+    { center := O
+      radius := R
+      radius_pos := hcircle.1
+      contains := hcontains
+      three_contacts := hthree }
+  refine ⟨U, ?_⟩
+  exact mem_circleContactSet.mpr hcircle.2.1
+
+/-- Dahlberg §3 Lemma 3 for the interior-missing family `G`: the finite
+coaxial minimum through the outgoing edge at `i` gives a member of `G(i)`. -/
+theorem exists_dahlbergInteriorMissingThreeContactDiskR2_at_of_strictConvexEdgeSupport
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsupport : StrictConvexEdgeSupport v) (i : ZMod n) :
+    ∃ U : DahlbergInteriorMissingThreeContactDiskR2 v,
+      i ∈ circleContactSet v U.center U.radius := by
+  rcases exists_edgeThirdVertex_circle_interiorMissesAll_of_strictConvexEdgeSupport
+      hn hsupport i with ⟨j, hji, hjnext, hall, hcircle⟩
+  have hAB : v i ≠ v (i + 1) :=
+    strictConvexEdgeSupport_edge_ne hn hsupport i
+  let y := edgeCircumcenterParameter (v i) (v (i + 1)) (v j)
+  let O := edgeCircleCenter (v i) (v (i + 1)) y
+  let R := normalizedCircleRadius (chordHalfLength (v i) (v (i + 1))) y
+  have hmisses : ∀ k : ZMod n, R ≤ dist O (v k) := by
+    intro k
+    exact (mem_edgeClosedExterior_iff_radius_le_dist hAB y).mp (hall k)
+  have hiNext : i ≠ i + 1 := by
+    intro h
+    exact hAB (congrArg v h)
+  have hthree : 3 ≤ (circleContactSet v O R).card := by
+    apply three_le_card_circleContactSet hiNext hji.symm hjnext.symm
+    · exact hcircle.2.1
+    · exact hcircle.2.2.1
+    · exact hcircle.2.2.2
+  let U : DahlbergInteriorMissingThreeContactDiskR2 v :=
+    { center := O
+      radius := R
+      radius_pos := hcircle.1
+      misses := hmisses
+      three_contacts := hthree }
+  refine ⟨U, ?_⟩
+  exact mem_circleContactSet.mpr hcircle.2.1
+
+/-- Two named contacts and any third noncollinear contact put a three-contact
+circle into the canonical coaxial family of the named chord. -/
+theorem exists_contact_edgeCircle_parameter
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    {O : ℂ} {R : ℝ} {a b : ZMod n}
+    (hAB : v a ≠ v b) (hR : 0 < R)
+    (hthree : 3 ≤ (circleContactSet v O R).card)
+    (ha : a ∈ circleContactSet v O R)
+    (hb : b ∈ circleContactSet v O R)
+    (hnocol : ∀ c : ZMod n,
+      c ∈ circleContactSet v O R → c ≠ a → c ≠ b →
+        Gluck.Discrete.crossR2 (v a) (v b) (v c) ≠ 0) :
+    ∃ c : ZMod n,
+      c ∈ circleContactSet v O R ∧ c ≠ a ∧ c ≠ b ∧
+      O = edgeCircleCenter (v a) (v b)
+        (edgeCircumcenterParameter (v a) (v b) (v c)) ∧
+      R = normalizedCircleRadius (chordHalfLength (v a) (v b))
+        (edgeCircumcenterParameter (v a) (v b) (v c)) := by
+  obtain ⟨c, hc, hca, hcb⟩ :=
+    exists_circleContact_ne_two_of_three_le_card hthree
+  have hcircle : CircumcircleR2 (v a) (v b) (v c) O R :=
+    ⟨hR, mem_circleContactSet.mp ha, mem_circleContactSet.mp hb,
+      mem_circleContactSet.mp hc⟩
+  have heq := circumcircleR2_edge_center_radius_eq hAB
+    (hnocol c hc hca hcb) hcircle
+  exact ⟨c, hc, hca, hcb, heq.1, heq.2⟩
+
 /-! ### Two-circle chord separation -/
 
 /-- A normalized coaxial closed disk is convex. -/
@@ -3506,6 +3667,51 @@ theorem circlePowerR2_sub_lineMap (O₁ O₂ X Z : ℂ) (R₁ R₂ t : ℝ) :
   simp only [Complex.sq_norm, Complex.normSq_apply, Complex.sub_re, Complex.sub_im,
     Complex.add_re, Complex.add_im, Complex.smul_re, Complex.smul_im]
   ring
+
+/-- Exterior-circle chord crossing is impossible under Dahlberg's Lemma 6
+power inequalities.  The segment from `Q` to `X` would make the difference
+of the two circle powers positive at its crossing with `AB`, while the same
+affine difference is nonpositive throughout the chord `AB`. -/
+theorem circleExterior_chord_crossing_false
+    {Oᵤ O𝓌 A B Q X : ℂ} {Rᵤ R𝓌 t s : ℝ}
+    (ht : t ∈ Set.Ioo 0 1) (hs : s ∈ Set.Icc 0 1)
+    (hcrossing : (AffineMap.lineMap Q X) t = (AffineMap.lineMap A B) s)
+    (hAᵤ : circlePowerR2 Oᵤ A Rᵤ = 0)
+    (hBᵤ : circlePowerR2 Oᵤ B Rᵤ = 0)
+    (hA𝓌 : 0 ≤ circlePowerR2 O𝓌 A R𝓌)
+    (hB𝓌 : 0 ≤ circlePowerR2 O𝓌 B R𝓌)
+    (hQᵤ : 0 < circlePowerR2 Oᵤ Q Rᵤ)
+    (hQ𝓌 : circlePowerR2 O𝓌 Q R𝓌 = 0)
+    (hXᵤ : 0 ≤ circlePowerR2 Oᵤ X Rᵤ)
+    (hX𝓌 : circlePowerR2 O𝓌 X R𝓌 = 0) : False := by
+  have hQdiff : 0 <
+      circlePowerR2 Oᵤ Q Rᵤ - circlePowerR2 O𝓌 Q R𝓌 := by
+    linarith
+  have hXdiff : 0 ≤
+      circlePowerR2 Oᵤ X Rᵤ - circlePowerR2 O𝓌 X R𝓌 := by
+    linarith
+  have hYpos : 0 <
+      circlePowerR2 Oᵤ ((AffineMap.lineMap Q X) t) Rᵤ -
+        circlePowerR2 O𝓌 ((AffineMap.lineMap Q X) t) R𝓌 := by
+    rw [circlePowerR2_sub_lineMap]
+    exact add_pos_of_pos_of_nonneg
+      (mul_pos (sub_pos.mpr ht.2) hQdiff)
+      (mul_nonneg ht.1.le hXdiff)
+  have hAdiff :
+      circlePowerR2 Oᵤ A Rᵤ - circlePowerR2 O𝓌 A R𝓌 ≤ 0 := by
+    linarith
+  have hBdiff :
+      circlePowerR2 Oᵤ B Rᵤ - circlePowerR2 O𝓌 B R𝓌 ≤ 0 := by
+    linarith
+  have hYnonpos :
+      circlePowerR2 Oᵤ ((AffineMap.lineMap A B) s) Rᵤ -
+        circlePowerR2 O𝓌 ((AffineMap.lineMap A B) s) R𝓌 ≤ 0 := by
+    rw [circlePowerR2_sub_lineMap]
+    exact add_nonpos
+      (mul_nonpos_of_nonneg_of_nonpos (sub_nonneg.mpr hs.2) hAdiff)
+      (mul_nonpos_of_nonneg_of_nonpos hs.1 hBdiff)
+  rw [hcrossing] at hYpos
+  exact (not_lt_of_ge hYnonpos) hYpos
 
 /-- Normalized two-circle chord separation, the geometric core of Dahlberg's
 Lemmas 4 and 6.
@@ -3719,6 +3925,22 @@ theorem circlePowerR2_neg_of_dist_lt {O X : ℂ} {R : ℝ}
   rw [norm_sub_rev, ← dist_eq_norm]
   exact sub_neg.mpr ((sq_lt_sq₀ dist_nonneg hR).mpr h)
 
+/-- Metric membership in the closed exterior of a nonnegative-radius disk
+implies nonnegative circle power. -/
+theorem circlePowerR2_nonneg_of_radius_le_dist {O X : ℂ} {R : ℝ}
+    (hR : 0 ≤ R) (h : R ≤ dist O X) : 0 ≤ circlePowerR2 O X R := by
+  unfold circlePowerR2
+  rw [norm_sub_rev, ← dist_eq_norm]
+  exact sub_nonneg.mpr ((sq_le_sq₀ hR dist_nonneg).mpr h)
+
+/-- Strict metric exterior membership for a nonnegative-radius disk implies
+positive circle power. -/
+theorem circlePowerR2_pos_of_radius_lt_dist {O X : ℂ} {R : ℝ}
+    (hR : 0 ≤ R) (h : R < dist O X) : 0 < circlePowerR2 O X R := by
+  unfold circlePowerR2
+  rw [norm_sub_rev, ← dist_eq_norm]
+  exact sub_pos.mpr ((sq_lt_sq₀ hR dist_nonneg).mpr h)
+
 /-- Metric, disk-language form of circle-contact localization.  This is the
 reusable form consumed by the finite boundary-contact arguments in
 Dahlberg's Lemmas 4 and 6. -/
@@ -3742,6 +3964,421 @@ theorem circleContact_mem_edgeHalfPlane_of_mem_edgeClosedDisk
   · exact circlePowerR2_nonpos_of_dist_le hR hB
   · exact circlePowerR2_eq_zero_of_dist_eq hXboundary
   · exact hXmem
+
+/-- Finite contact-set form of the containing-disk localization in Dahlberg
+§3 Lemma 4.  If the contact chord of an old containing disk cuts out an
+index envelope `E`, every contact of a new containing disk through a vertex
+strictly inside the old disk belongs to `E`. -/
+theorem circleContactSet_subset_of_containingDisk_chord_localization
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    {a b q : ZMod n} {E : Finset (ZMod n)} {y : ℝ}
+    (hAB : v a ≠ v b)
+    (hqcross : 0 < Gluck.Discrete.crossR2 (v a) (v b) (v q))
+    (hqU : dist (edgeCircleCenter (v a) (v b) y) (v q) <
+      normalizedCircleRadius (chordHalfLength (v a) (v b)) y)
+    (hUcontains : ∀ k : ZMod n,
+      v k ∈ edgeClosedDisk (v a) (v b) y)
+    (W : DahlbergContainingThreeContactDiskR2 v)
+    (hqW : q ∈ circleContactSet v W.center W.radius)
+    (hside : ∀ k : ZMod n,
+      v k ∈ edgeHalfPlane (v a) (v b) → k ∈ E) :
+    circleContactSet v W.center W.radius ⊆ E := by
+  intro x hx
+  apply hside x
+  apply circleContact_mem_edgeHalfPlane_of_mem_edgeClosedDisk
+    hAB hqcross hqU W.radius_pos.le
+  · exact mem_circleContactSet.mp hqW
+  · exact W.contains a
+  · exact W.contains b
+  · exact mem_circleContactSet.mp hx
+  · exact hUcontains x
+
+/-- Dahlberg Lemma 4 after packaging the old and new members of `F`.  The old
+circle is automatically rewritten in the coaxial family of its two gap
+endpoints; only the convex cyclic-order facts for that chord remain as
+explicit hypotheses. -/
+theorem circleContactSet_subset_of_containingDisk_gap
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    {a b q : ZMod n} {E : Finset (ZMod n)}
+    (U W : DahlbergContainingThreeContactDiskR2 v)
+    (haU : a ∈ circleContactSet v U.center U.radius)
+    (hbU : b ∈ circleContactSet v U.center U.radius)
+    (hqNotU : q ∉ circleContactSet v U.center U.radius)
+    (hqW : q ∈ circleContactSet v W.center W.radius)
+    (hAB : v a ≠ v b)
+    (hnocol : ∀ c : ZMod n,
+      c ∈ circleContactSet v U.center U.radius → c ≠ a → c ≠ b →
+        Gluck.Discrete.crossR2 (v a) (v b) (v c) ≠ 0)
+    (hqcross : 0 < Gluck.Discrete.crossR2 (v a) (v b) (v q))
+    (hside : ∀ k : ZMod n,
+      v k ∈ edgeHalfPlane (v a) (v b) → k ∈ E) :
+    circleContactSet v W.center W.radius ⊆ E := by
+  obtain ⟨c, _hc, _hca, _hcb, hcenter, hradius⟩ :=
+    exists_contact_edgeCircle_parameter hAB U.radius_pos U.three_contacts
+      haU hbU hnocol
+  let y := edgeCircumcenterParameter (v a) (v b) (v c)
+  have hUcontains : ∀ k : ZMod n,
+      v k ∈ edgeClosedDisk (v a) (v b) y := by
+    intro k
+    apply (mem_edgeClosedDisk_iff_dist_le hAB y).mpr
+    rw [← hcenter, ← hradius]
+    exact U.contains k
+  have hqdist : dist U.center (v q) < U.radius :=
+    lt_of_le_of_ne (U.contains q)
+      (fun h => hqNotU (mem_circleContactSet.mpr h))
+  have hqU : dist (edgeCircleCenter (v a) (v b) y) (v q) <
+      normalizedCircleRadius (chordHalfLength (v a) (v b)) y := by
+    rw [show edgeCircleCenter (v a) (v b) y = U.center by
+        simpa [y] using hcenter.symm,
+      show normalizedCircleRadius (chordHalfLength (v a) (v b)) y = U.radius by
+        simpa [y] using hradius.symm]
+    exact hqdist
+  exact circleContactSet_subset_of_containingDisk_chord_localization
+    hAB hqcross hqU hUcontains W hqW hside
+
+/-- Finite contact-set form of the interior-missing localization in Dahlberg
+§3 Lemma 6.  The only polygon-specific input left explicit is the strict
+convex chord-crossing fact for a purported contact outside `E`; the circle
+geometry is discharged by `circleExterior_chord_crossing_false`. -/
+theorem circleContactSet_subset_of_missingDisk_chord_localization
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    {a b q : ZMod n} {E : Finset (ZMod n)}
+    (U W : DahlbergInteriorMissingThreeContactDiskR2 v)
+    (haU : a ∈ circleContactSet v U.center U.radius)
+    (hbU : b ∈ circleContactSet v U.center U.radius)
+    (hqNotU : q ∉ circleContactSet v U.center U.radius)
+    (hqW : q ∈ circleContactSet v W.center W.radius)
+    (hcrossing : ∀ x : ZMod n,
+      x ∈ circleContactSet v W.center W.radius → x ∉ E →
+      ∃ t ∈ Set.Ioo (0 : ℝ) 1, ∃ s ∈ Set.Icc (0 : ℝ) 1,
+        (AffineMap.lineMap (v q) (v x)) t =
+          (AffineMap.lineMap (v a) (v b)) s) :
+    circleContactSet v W.center W.radius ⊆ E := by
+  intro x hxW
+  by_contra hxE
+  obtain ⟨t, ht, s, hs, hline⟩ := hcrossing x hxW hxE
+  apply circleExterior_chord_crossing_false ht hs hline
+  · exact circlePowerR2_eq_zero_of_dist_eq (mem_circleContactSet.mp haU)
+  · exact circlePowerR2_eq_zero_of_dist_eq (mem_circleContactSet.mp hbU)
+  · exact circlePowerR2_nonneg_of_radius_le_dist W.radius_pos.le (W.misses a)
+  · exact circlePowerR2_nonneg_of_radius_le_dist W.radius_pos.le (W.misses b)
+  · apply circlePowerR2_pos_of_radius_lt_dist U.radius_pos.le
+    exact lt_of_le_of_ne (U.misses q)
+      (fun h => hqNotU (mem_circleContactSet.mpr h.symm))
+  · exact circlePowerR2_eq_zero_of_dist_eq (mem_circleContactSet.mp hqW)
+  · exact circlePowerR2_nonneg_of_radius_le_dist U.radius_pos.le (U.misses x)
+  · exact circlePowerR2_eq_zero_of_dist_eq (mem_circleContactSet.mp hxW)
+
+/-- Cut-coordinate form of Dahlberg Lemma 4.  Under the isolated cyclic chord
+geometry, replacing a containing disk through a vertex in an internal gap
+forces all new contacts into the endpoint-closed gap. -/
+theorem circleContactSet_subset_of_containingDisk_cutGap
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hgeom : StrictConvexCyclicChordGeometry v)
+    (U W : DahlbergContainingThreeContactDiskR2 v)
+    (c : ZMod n) {p k q : ℕ}
+    (hpk : p < k) (hkq : k < q) (hqn : q < n)
+    (hpU : Gluck.cyclicLift c p ∈ circleContactSet v U.center U.radius)
+    (hqU : Gluck.cyclicLift c q ∈ circleContactSet v U.center U.radius)
+    (hkNotU : Gluck.cyclicLift c k ∉ circleContactSet v U.center U.radius)
+    (hkW : Gluck.cyclicLift c k ∈ circleContactSet v W.center W.radius) :
+    circleContactSet v W.center W.radius ⊆
+      Gluck.mapCut c (Finset.Icc p q) := by
+  have hgap := hgeom.gap c p k q hpk hkq hqn
+  let a := Gluck.cyclicLift c q
+  let b := Gluck.cyclicLift c p
+  let z := Gluck.cyclicLift c k
+  let E := Gluck.mapCut c (Finset.Icc p q)
+  have habIndex : a ≠ b := by
+    intro h
+    have hcast : (q : ZMod n) = (p : ZMod n) := by
+      exact add_left_cancel h
+    have hmod : q ≡ p [MOD n] :=
+      (ZMod.natCast_eq_natCast_iff q p n).mp hcast
+    exact (Nat.ne_of_gt (lt_trans hpk hkq))
+      (hmod.eq_of_lt_of_lt hqn (lt_trans (lt_trans hpk hkq) hqn))
+  apply circleContactSet_subset_of_containingDisk_gap U W hqU hpU hkNotU hkW
+    hgap.1
+  · intro d hdU hda hdb
+    exact hgeom.noncollinear a b d habIndex hda hdb
+  · exact hgap.2.1
+  · intro x hx
+    exact hgap.2.2.1 x ((mem_edgeHalfPlane_iff_crossR2_nonneg hgap.1).mp hx)
+
+/-- Cut-coordinate form of Dahlberg Lemma 6.  The exterior-circle power
+argument and strict chord crossing force all contacts of the replacement
+interior-missing disk into the endpoint-closed gap. -/
+theorem circleContactSet_subset_of_missingDisk_cutGap
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hgeom : StrictConvexCyclicChordGeometry v)
+    (U W : DahlbergInteriorMissingThreeContactDiskR2 v)
+    (c : ZMod n) {p k q : ℕ}
+    (hpk : p < k) (hkq : k < q) (hqn : q < n)
+    (hpU : Gluck.cyclicLift c p ∈ circleContactSet v U.center U.radius)
+    (hqU : Gluck.cyclicLift c q ∈ circleContactSet v U.center U.radius)
+    (hkNotU : Gluck.cyclicLift c k ∉ circleContactSet v U.center U.radius)
+    (hkW : Gluck.cyclicLift c k ∈ circleContactSet v W.center W.radius) :
+    circleContactSet v W.center W.radius ⊆
+      Gluck.mapCut c (Finset.Icc p q) := by
+  have hgap := hgeom.gap c p k q hpk hkq hqn
+  apply circleContactSet_subset_of_missingDisk_chord_localization
+    U W hqU hpU hkNotU hkW
+  intro x hxW hxE
+  exact hgap.2.2.2 x hxE
+
+/-- The endpoint hull of a finite natural contact set, with the empty set
+sent to the empty hull. -/
+noncomputable def finiteNatHull (C : Finset ℕ) : Finset ℕ :=
+  if hC : C.Nonempty then Finset.Icc (C.min' hC) (C.max' hC) else ∅
+
+/-- Strong generic well-founded engine behind Dahlberg's Lemmas 5 and 7.
+Starting from an explicit noncontact cut, it returns a terminal cyclic contact
+interval and remembers that every terminal contact remains inside the initial
+natural contact hull. -/
+theorem exists_cyclicInterval_contacts_subset_hull_of_cutGap_shrink
+    {n : ℕ} [NeZero n] {Disk : Type*}
+    (contacts : Disk → Finset (ZMod n))
+    (hthree : ∀ U : Disk, 3 ≤ (contacts U).card)
+    (hchoose : ∀ i : ZMod n, ∃ W : Disk, i ∈ contacts W)
+    (hlocalize : ∀ (U W : Disk) (c : ZMod n) {p k q : ℕ},
+      p < k → k < q → q < n →
+      Gluck.cyclicLift c p ∈ contacts U →
+      Gluck.cyclicLift c q ∈ contacts U →
+      Gluck.cyclicLift c k ∉ contacts U →
+      Gluck.cyclicLift c k ∈ contacts W →
+      contacts W ⊆ Gluck.mapCut c (Finset.Icc p q))
+    (c₀ : ZMod n) (U₀ : Disk) (hc₀ : c₀ ∉ contacts U₀) :
+    ∃ U : Disk,
+      Gluck.IsCyclicInterval (contacts U) ∧
+      contacts U ⊆ Gluck.mapCut c₀
+        (finiteNatHull (Gluck.cutFinset c₀ (contacts U₀))) := by
+  classical
+  let P : Finset ℕ → Prop := fun H =>
+    ∀ (c : ZMod n) (U : Disk)
+      (hc : c ∉ contacts U)
+      (hC : (Gluck.cutFinset c (contacts U)).Nonempty),
+      H = finiteNatHull (Gluck.cutFinset c (contacts U)) →
+      ∃ W : Disk,
+        Gluck.IsCyclicInterval (contacts W) ∧ contacts W ⊆ Gluck.mapCut c H
+  have hP : ∀ H : Finset ℕ, P H := by
+    intro H
+    refine Finset.strongInductionOn H ?_
+    intro H ih c U hc hC hH
+    let C := Gluck.cutFinset c (contacts U)
+    have hCcard : 3 ≤ C.card := by
+      dsimp [C]
+      rw [Gluck.card_cutFinset]
+      exact hthree U
+    have hHform : H = Finset.Icc (C.min' hC) (C.max' hC) := by
+      rw [hH]
+      exact dif_pos hC
+    by_cases hinterval : Gluck.IsNatInterval C
+    · refine ⟨U, Gluck.isCyclicInterval_of_isNatInterval_cutFinset c hinterval, ?_⟩
+      have hHrange : H ⊆ Finset.range n := by
+        rw [hHform]
+        intro r hr
+        rw [Finset.mem_Icc] at hr
+        exact Finset.mem_range.mpr
+          (lt_of_le_of_lt hr.2 (Gluck.mem_cutFinset.mp (C.max'_mem hC)).1)
+      apply (Gluck.cutFinset_subset_iff c hHrange).mp
+      intro r hrC
+      rw [hHform, Finset.mem_Icc]
+      exact ⟨C.min'_le r hrC, C.le_max' r hrC⟩
+    · obtain ⟨p, q, hpC, hqC, hpq, hgap, hpqH⟩ :=
+        Gluck.exists_internal_gap_with_strict_hull hC hCcard hinterval
+      have hpqH' : Finset.Icc p q ⊂ H := by
+        simpa [hHform] using hpqH
+      let k := p + 1
+      have hpk : p < k := Nat.lt_succ_self p
+      have hkq : k < q := by simpa [k] using hpq
+      have hkNotC : k ∉ C := hgap k hpk hkq
+      have hqn : q < n := (Gluck.mem_cutFinset.mp hqC).1
+      have hpU : Gluck.cyclicLift c p ∈ contacts U :=
+        (Gluck.mem_cutFinset.mp hpC).2
+      have hqU : Gluck.cyclicLift c q ∈ contacts U :=
+        (Gluck.mem_cutFinset.mp hqC).2
+      have hkNotU : Gluck.cyclicLift c k ∉ contacts U := by
+        intro hkU
+        exact hkNotC (Gluck.mem_cutFinset.mpr ⟨lt_trans hkq hqn, hkU⟩)
+      obtain ⟨W, hkW⟩ := hchoose (Gluck.cyclicLift c k)
+      have hWsub : contacts W ⊆ Gluck.mapCut c (Finset.Icc p q) :=
+        hlocalize U W c hpk hkq hqn hpU hqU hkNotU hkW
+      have hIr : Finset.Icc p q ⊆ Finset.range n := by
+        intro r hr
+        rw [Finset.mem_Icc] at hr
+        exact Finset.mem_range.mpr (lt_of_le_of_lt hr.2 hqn)
+      have hcutWsub : Gluck.cutFinset c (contacts W) ⊆ Finset.Icc p q :=
+        (Gluck.cutFinset_subset_iff c hIr).mpr hWsub
+      have hp0 : 0 < p := by
+        by_contra hpnonpos
+        have hpzero : p = 0 := Nat.eq_zero_of_not_pos hpnonpos
+        apply hc
+        simpa [Gluck.cyclicLift, hpzero] using hpU
+      have hcW : c ∉ contacts W := by
+        intro hcW
+        have hzeroCut : 0 ∈ Gluck.cutFinset c (contacts W) := by
+          exact Gluck.mem_cutFinset.mpr ⟨Nat.pos_of_ne_zero (NeZero.ne n), by
+            simpa [Gluck.cyclicLift] using hcW⟩
+        have hzeroI := Finset.mem_Icc.mp (hcutWsub hzeroCut)
+        omega
+      have hCW : (Gluck.cutFinset c (contacts W)).Nonempty := by
+        rw [Gluck.cutFinset_nonempty_iff]
+        exact Finset.card_pos.mp (lt_of_lt_of_le (by omega) (hthree W))
+      let CW := Gluck.cutFinset c (contacts W)
+      let HW := Finset.Icc (CW.min' hCW) (CW.max' hCW)
+      have hHWsubI : HW ⊆ Finset.Icc p q := by
+        apply Finset.Icc_subset_Icc
+        · exact (Finset.mem_Icc.mp (hcutWsub (CW.min'_mem hCW))).1
+        · exact (Finset.mem_Icc.mp (hcutWsub (CW.max'_mem hCW))).2
+      have hHWH : HW ⊂ H :=
+        Finset.ssubset_of_subset_of_ssubset hHWsubI hpqH'
+      have hHWhull : HW = finiteNatHull CW := by
+        change Finset.Icc (CW.min' hCW) (CW.max' hCW) = finiteNatHull CW
+        unfold finiteNatHull
+        rw [dif_pos hCW]
+      obtain ⟨Z, hZinterval, hZsub⟩ := ih HW hHWH c W hcW hCW hHWhull
+      refine ⟨Z, hZinterval, ?_⟩
+      exact hZsub.trans (by
+        simpa [Gluck.mapCut] using
+          (Finset.image_mono (Gluck.cyclicLift c) hHWH.1))
+  have hC₀ : (Gluck.cutFinset c₀ (contacts U₀)).Nonempty := by
+    rw [Gluck.cutFinset_nonempty_iff]
+    exact Finset.card_pos.mp (lt_of_lt_of_le (by omega) (hthree U₀))
+  simpa using hP _ c₀ U₀ hc₀ hC₀ rfl
+
+/-- Unconstrained terminal form of the generic shrink engine. -/
+theorem exists_cyclicInterval_contacts_of_cutGap_shrink
+    {n : ℕ} [NeZero n] {Disk : Type*}
+    (contacts : Disk → Finset (ZMod n))
+    (hthree : ∀ U : Disk, 3 ≤ (contacts U).card)
+    (hproper : ∀ U : Disk, contacts U ≠ Finset.univ)
+    (hchoose : ∀ i : ZMod n, ∃ W : Disk, i ∈ contacts W)
+    (hlocalize : ∀ (U W : Disk) (c : ZMod n) {p k q : ℕ},
+      p < k → k < q → q < n →
+      Gluck.cyclicLift c p ∈ contacts U →
+      Gluck.cyclicLift c q ∈ contacts U →
+      Gluck.cyclicLift c k ∉ contacts U →
+      Gluck.cyclicLift c k ∈ contacts W →
+      contacts W ⊆ Gluck.mapCut c (Finset.Icc p q))
+    (U₀ : Disk) :
+    ∃ U : Disk, Gluck.IsCyclicInterval (contacts U) := by
+  obtain ⟨c, hc⟩ := Gluck.exists_not_mem_of_ne_univ (hproper U₀)
+  obtain ⟨U, hinterval, _hsub⟩ :=
+    exists_cyclicInterval_contacts_subset_hull_of_cutGap_shrink
+      contacts hthree hchoose hlocalize c U₀ hc
+  exact ⟨U, hinterval⟩
+
+/-- Localized terminal form of the generic cut-gap descent.  Starting from
+one explicit complementary gap of `U`, choose a disk through an interior
+noncontact and run the well-founded descent without ever leaving the closed
+gap.  The positive lower endpoint ensures that the cut base is outside every
+subsequent contact set. -/
+theorem exists_cyclicInterval_contacts_subset_cutGap_of_shrink
+    {n : ℕ} [NeZero n] {Disk : Type*}
+    (contacts : Disk → Finset (ZMod n))
+    (hthree : ∀ U : Disk, 3 ≤ (contacts U).card)
+    (hchoose : ∀ i : ZMod n, ∃ W : Disk, i ∈ contacts W)
+    (hlocalize : ∀ (U W : Disk) (c : ZMod n) {p k q : ℕ},
+      p < k → k < q → q < n →
+      Gluck.cyclicLift c p ∈ contacts U →
+      Gluck.cyclicLift c q ∈ contacts U →
+      Gluck.cyclicLift c k ∉ contacts U →
+      Gluck.cyclicLift c k ∈ contacts W →
+      contacts W ⊆ Gluck.mapCut c (Finset.Icc p q))
+    (U : Disk) (c : ZMod n) {p k q : ℕ}
+    (hp0 : 0 < p) (hpk : p < k) (hkq : k < q) (hqn : q < n)
+    (hpU : Gluck.cyclicLift c p ∈ contacts U)
+    (hqU : Gluck.cyclicLift c q ∈ contacts U)
+    (hkNotU : Gluck.cyclicLift c k ∉ contacts U) :
+    ∃ W : Disk,
+      Gluck.IsCyclicInterval (contacts W) ∧
+      contacts W ⊆ Gluck.mapCut c (Finset.Icc p q) := by
+  classical
+  obtain ⟨W, hkW⟩ := hchoose (Gluck.cyclicLift c k)
+  have hWsub : contacts W ⊆ Gluck.mapCut c (Finset.Icc p q) :=
+    hlocalize U W c hpk hkq hqn hpU hqU hkNotU hkW
+  have hIr : Finset.Icc p q ⊆ Finset.range n := by
+    intro r hr
+    rw [Finset.mem_Icc] at hr
+    exact Finset.mem_range.mpr (lt_of_le_of_lt hr.2 hqn)
+  have hcutWsub : Gluck.cutFinset c (contacts W) ⊆ Finset.Icc p q :=
+    (Gluck.cutFinset_subset_iff c hIr).mpr hWsub
+  have hcW : c ∉ contacts W := by
+    intro hcW
+    have hzeroCut : 0 ∈ Gluck.cutFinset c (contacts W) := by
+      exact Gluck.mem_cutFinset.mpr
+        ⟨Nat.pos_of_ne_zero (NeZero.ne n), by simpa [Gluck.cyclicLift] using hcW⟩
+    have hzeroI := Finset.mem_Icc.mp (hcutWsub hzeroCut)
+    omega
+  obtain ⟨Z, hZinterval, hZsub⟩ :=
+    exists_cyclicInterval_contacts_subset_hull_of_cutGap_shrink
+      contacts hthree hchoose hlocalize c W hcW
+  have hCW : (Gluck.cutFinset c (contacts W)).Nonempty := by
+    rw [Gluck.cutFinset_nonempty_iff]
+    exact Finset.card_pos.mp (lt_of_lt_of_le (by omega) (hthree W))
+  have hHullSub :
+      finiteNatHull (Gluck.cutFinset c (contacts W)) ⊆ Finset.Icc p q := by
+    unfold finiteNatHull
+    rw [dif_pos hCW]
+    apply Finset.Icc_subset_Icc
+    · exact (Finset.mem_Icc.mp
+        (hcutWsub ((Gluck.cutFinset c (contacts W)).min'_mem hCW))).1
+    · exact (Finset.mem_Icc.mp
+        (hcutWsub ((Gluck.cutFinset c (contacts W)).max'_mem hCW))).2
+  refine ⟨Z, hZinterval, hZsub.trans ?_⟩
+  exact Finset.image_mono (Gluck.cyclicLift c) hHullSub
+
+/-- The generic descent produces two terminal disks with different contact
+sets.  First obtain any terminal contact interval.  Three consecutive
+contacts let us cut at its middle contact; the proper complementary gap is
+then strictly separated from that basepoint.  Descending inside that gap
+produces a second terminal contact interval which omits the basepoint and is
+therefore different from the first one.
+
+This is the finite common core of Dahlberg's Lemmas 5 and 7. -/
+theorem exists_two_cyclicInterval_contacts_ne_of_cutGap_shrink
+    {n : ℕ} [NeZero n] {Disk : Type*}
+    (contacts : Disk → Finset (ZMod n))
+    (hthree : ∀ U : Disk, 3 ≤ (contacts U).card)
+    (hproper : ∀ U : Disk, contacts U ≠ Finset.univ)
+    (hchoose : ∀ i : ZMod n, ∃ W : Disk, i ∈ contacts W)
+    (hlocalize : ∀ (U W : Disk) (c : ZMod n) {p k q : ℕ},
+      p < k → k < q → q < n →
+      Gluck.cyclicLift c p ∈ contacts U →
+      Gluck.cyclicLift c q ∈ contacts U →
+      Gluck.cyclicLift c k ∉ contacts U →
+      Gluck.cyclicLift c k ∈ contacts W →
+      contacts W ⊆ Gluck.mapCut c (Finset.Icc p q))
+    (U₀ : Disk) :
+    ∃ U W : Disk,
+      Gluck.IsCyclicInterval (contacts U) ∧
+      Gluck.IsCyclicInterval (contacts W) ∧
+      contacts U ≠ contacts W := by
+  classical
+  obtain ⟨U, hUinterval⟩ :=
+    exists_cyclicInterval_contacts_of_cutGap_shrink
+      contacts hthree hproper hchoose hlocalize U₀
+  obtain ⟨c, p, k, q, hcU, hp0, hpk, hkq, hqn, hpU, hqU, hkNotU⟩ :=
+    hUinterval.exists_cutGap_in_complement (hthree U) (hproper U)
+  obtain ⟨W, hWinterval, hWsub⟩ :=
+    exists_cyclicInterval_contacts_subset_cutGap_of_shrink
+      contacts hthree hchoose hlocalize U c hp0 hpk hkq hqn hpU hqU hkNotU
+  have hIr : Finset.Icc p q ⊆ Finset.range n := by
+    intro r hr
+    rw [Finset.mem_Icc] at hr
+    exact Finset.mem_range.mpr (lt_of_le_of_lt hr.2 hqn)
+  have hcNotW : c ∉ contacts W := by
+    intro hcW
+    have hzeroCut : 0 ∈ Gluck.cutFinset c (contacts W) := by
+      exact Gluck.mem_cutFinset.mpr
+        ⟨Nat.pos_of_ne_zero (NeZero.ne n), by simpa [Gluck.cyclicLift] using hcW⟩
+    have hcutWsub : Gluck.cutFinset c (contacts W) ⊆ Finset.Icc p q :=
+      (Gluck.cutFinset_subset_iff c hIr).mpr hWsub
+    have hzeroI := Finset.mem_Icc.mp (hcutWsub hzeroCut)
+    omega
+  refine ⟨U, W, hUinterval, hWinterval, ?_⟩
+  intro hUW
+  exact hcNotW (hUW ▸ hcU)
 
 /-- Arbitrary-edge form of the normalized radius comparison behind Dahlberg
 Lemma 10. -/
@@ -7936,6 +8573,66 @@ theorem edgePrevCurvatureDiskContainsAll_of_three_boundaries_of_cross_pos
   have hradius : EdgePrevCircleRadiusProfile v i = R :=
     congrArg Prod.snd hdata
   simpa [EdgePrevCurvatureDiskContainsAll, hcenter, hradius] using hΔ.2.1
+
+/-- A containing three-contact disk whose contact set is cyclically connected
+is one of the polygon's canonical previous-vertex curvature disks.  This is
+the terminal step in Dahlberg's proof of Lemma 5. -/
+theorem exists_edgePrevCurvatureDiskContainsAll_of_containing_contacts_interval
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (U : DahlbergContainingThreeContactDiskR2 v)
+    (hinterval : Gluck.IsCyclicInterval
+      (circleContactSet v U.center U.radius)) :
+    ∃ i : ZMod n,
+      EdgePrevCurvatureCircleData v i = (U.center, U.radius) ∧
+      EdgePrevCurvatureDiskContainsAll v i := by
+  obtain ⟨i, hprev, hself, hnext⟩ :=
+    hinterval.exists_three_consecutive U.three_contacts
+  have hprev' : OnDiskBoundaryR2 v U.center U.radius (i - 1) :=
+    mem_circleContactSet.mp hprev
+  have hself' : OnDiskBoundaryR2 v U.center U.radius i :=
+    mem_circleContactSet.mp hself
+  have hnext' : OnDiskBoundaryR2 v U.center U.radius (i + 1) :=
+    mem_circleContactSet.mp hnext
+  have hdata := edgePrevCurvatureCircleData_eq_of_three_boundaries_of_cross_pos
+    hsimple U.radius_pos hprev' hself' hnext' (horient i)
+  refine ⟨i, hdata, ?_⟩
+  have hcenter : EdgePrevCircleCenterProfile v i = U.center :=
+    congrArg Prod.fst hdata
+  have hradius : EdgePrevCircleRadiusProfile v i = U.radius :=
+    congrArg Prod.snd hdata
+  simpa [EdgePrevCurvatureDiskContainsAll, hcenter, hradius] using U.contains
+
+/-- An interior-missing three-contact disk whose contact set is cyclically
+connected is one of the polygon's canonical previous-vertex curvature disks.
+This is the terminal step in Dahlberg's proof of Lemma 7. -/
+theorem exists_edgePrevCurvatureDiskInteriorMissesAll_of_missing_contacts_interval
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (U : DahlbergInteriorMissingThreeContactDiskR2 v)
+    (hinterval : Gluck.IsCyclicInterval
+      (circleContactSet v U.center U.radius)) :
+    ∃ i : ZMod n,
+      EdgePrevCurvatureCircleData v i = (U.center, U.radius) ∧
+      EdgePrevCurvatureDiskInteriorMissesAll v i := by
+  obtain ⟨i, hprev, hself, hnext⟩ :=
+    hinterval.exists_three_consecutive U.three_contacts
+  have hprev' : OnDiskBoundaryR2 v U.center U.radius (i - 1) :=
+    mem_circleContactSet.mp hprev
+  have hself' : OnDiskBoundaryR2 v U.center U.radius i :=
+    mem_circleContactSet.mp hself
+  have hnext' : OnDiskBoundaryR2 v U.center U.radius (i + 1) :=
+    mem_circleContactSet.mp hnext
+  have hdata := edgePrevCurvatureCircleData_eq_of_three_boundaries_of_cross_pos
+    hsimple U.radius_pos hprev' hself' hnext' (horient i)
+  refine ⟨i, hdata, ?_⟩
+  have hcenter : EdgePrevCircleCenterProfile v i = U.center :=
+    congrArg Prod.fst hdata
+  have hradius : EdgePrevCircleRadiusProfile v i = U.radius :=
+    congrArg Prod.snd hdata
+  simpa [EdgePrevCurvatureDiskInteriorMissesAll, hcenter, hradius] using U.misses
 
 /-- Dahlberg §3 Lemma 5 certificate: two distinct curvature disks contain all
 vertices. -/

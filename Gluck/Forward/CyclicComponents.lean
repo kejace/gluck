@@ -267,6 +267,29 @@ theorem card_cutFinset {n : ℕ} [NeZero n]
   rw [mapCut_cutFinset] at hcard
   exact hcard.symm
 
+/-- Inclusion of a cyclic set in the image of a cut interval is equivalent
+to inclusion of its cut coordinates in that interval. -/
+theorem cutFinset_subset_iff
+    {n : ℕ} [NeZero n] (c : ZMod n)
+    {S : Finset (ZMod n)} {I : Finset ℕ}
+    (hI : I ⊆ Finset.range n) :
+    cutFinset c S ⊆ I ↔ S ⊆ mapCut c I := by
+  constructor
+  · intro hcut z hzS
+    rw [← mapCut_cutFinset c S] at hzS
+    rcases Finset.mem_image.mp hzS with ⟨k, hk, rfl⟩
+    exact Finset.mem_image.mpr ⟨k, hcut hk, rfl⟩
+  · intro hS k hkcut
+    have hklift : cyclicLift c k ∈ S := (mem_cutFinset.mp hkcut).2
+    rcases Finset.mem_image.mp (hS hklift) with ⟨j, hjI, hjk⟩
+    have hkRange : k ∈ (Finset.range n : Set ℕ) := by
+      simpa using (mem_cutFinset.mp hkcut).1
+    have hjRange : j ∈ (Finset.range n : Set ℕ) := by
+      simpa using Finset.mem_range.mp (hI hjI)
+    have hkeqj : k = j :=
+      cyclicLift_injOn_range c hkRange hjRange hjk.symm
+    simpa [hkeqj] using hjI
+
 theorem disjoint_mapCut_of_disjoint_of_subset_range
     {n : ℕ} [NeZero n] (c : ZMod n) {I J : Finset ℕ}
     (hIr : I ⊆ Finset.range n) (hJr : J ⊆ Finset.range n)
@@ -677,5 +700,72 @@ theorem IsCyclicInterval.exists_three_consecutive
       ring
     rw [hi]
     exact hmem
+
+/-- A proper cyclic interval with at least three elements has a cut based at
+an interior contact for which the complementary gap lies strictly between
+two other contacts.  The middle point `k` is a noncontact, while the cut
+base itself stays outside the closed gap `[p,q]` because `0 < p`.
+
+This is the cut-coordinate form of the single complementary interval used
+to obtain the second disk in Dahlberg's Lemmas 5 and 7. -/
+theorem IsCyclicInterval.exists_cutGap_in_complement
+    {n : ℕ} [NeZero n] {S : Finset (ZMod n)}
+    (hS : IsCyclicInterval S) (hcard : 3 ≤ S.card)
+    (hproper : S ≠ Finset.univ) :
+    ∃ (c : ZMod n) (p k q : ℕ),
+      c ∈ S ∧ 0 < p ∧ p < k ∧ k < q ∧ q < n ∧
+      cyclicLift c p ∈ S ∧ cyclicLift c q ∈ S ∧
+      cyclicLift c k ∉ S := by
+  classical
+  have hSss : S ⊂ (Finset.univ : Finset (ZMod n)) :=
+    Finset.ssubset_iff_subset_ne.mpr ⟨Finset.subset_univ S, hproper⟩
+  have hcardlt : S.card < n := by
+    have := Finset.card_lt_card hSss
+    simpa using this
+  have hn : 4 ≤ n := by omega
+  obtain ⟨c, hprev, hself, hnext⟩ := hS.exists_three_consecutive hcard
+  obtain ⟨z, hz⟩ := exists_not_mem_of_ne_univ hproper
+  let k : ℕ := (z - c).val
+  have hklt : k < n := ZMod.val_lt (z - c)
+  have hklift : cyclicLift c k = z := by
+    dsimp [cyclicLift, k]
+    rw [ZMod.natCast_zmod_val (z - c)]
+    abel
+  have hk0 : k ≠ 0 := by
+    intro hk
+    apply hz
+    have : z = c := by
+      rw [← hklift, hk]
+      simp [cyclicLift]
+    simpa [this] using hself
+  have hk1 : k ≠ 1 := by
+    intro hk
+    apply hz
+    have : z = c + 1 := by
+      rw [← hklift, hk]
+      simp [cyclicLift]
+    simpa [this] using hnext
+  have hkpred : k ≠ n - 1 := by
+    intro hk
+    apply hz
+    have hpredLift : cyclicLift c (n - 1) = c - 1 := by
+      unfold cyclicLift
+      rw [Nat.cast_sub (by omega : 1 ≤ n)]
+      rw [ZMod.natCast_self]
+      simp [sub_eq_add_neg]
+    have : z = c - 1 := by
+      rw [← hklift, hk, hpredLift]
+    simpa [this] using hprev
+  refine ⟨c, 1, k, n - 1, hself, by omega, ?_, ?_, by omega, ?_, ?_, ?_⟩
+  · omega
+  · omega
+  · simpa [cyclicLift] using hnext
+  · have hpredLift : cyclicLift c (n - 1) = c - 1 := by
+      unfold cyclicLift
+      rw [Nat.cast_sub (by omega : 1 ≤ n)]
+      rw [ZMod.natCast_self]
+      simp [sub_eq_add_neg]
+    simpa [hpredLift] using hprev
+  · simpa [hklift] using hz
 
 end Gluck

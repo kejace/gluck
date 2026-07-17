@@ -216,6 +216,27 @@ theorem three_le_card_circleContactSet
   rw [← hcard]
   exact Finset.card_le_card hsub
 
+/-- A contact set of cardinality at least three contains a contact distinct
+from any two prescribed indices. -/
+theorem exists_circleContact_ne_two_of_three_le_card
+    {ι : Type u} [Fintype ι] {X : Type v} [PseudoMetricSpace X]
+    {vertices : ι → X} {O : X} {R : ℝ} {a b : ι}
+    (hthree : 3 ≤ (circleContactSet vertices O R).card) :
+    ∃ c : ι, c ∈ circleContactSet vertices O R ∧ c ≠ a ∧ c ≠ b := by
+  classical
+  by_contra hnone
+  push Not at hnone
+  have hsub : circleContactSet vertices O R ⊆ {a, b} := by
+    intro c hc
+    by_cases hca : c = a
+    · simp [hca]
+    · simp [hnone c hc hca]
+  have hcard := Finset.card_le_card hsub
+  have hpairs : ({a, b} : Finset ι).card ≤ 2 := by
+    have hle := Finset.card_insert_le a ({b} : Finset ι)
+    simpa only [Finset.card_singleton, Nat.reduceAdd] using hle
+  omega
+
 /-- A strict-shrink process on finite index sets, started at a circle contact
 set, reaches a terminal set within the initial number of contacts. -/
 theorem exists_terminal_iterate_from_circleContactSet_of_strict_shrink
