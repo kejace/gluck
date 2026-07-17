@@ -3393,6 +3393,270 @@ theorem exists_edgeThirdVertex_circle_interiorMissesAll_of_strictConvexEdgeSuppo
     apply (mem_edgeClosedExterior_circumcenterParameter_iff hAB hkcross).mpr
     exact hmin k (mem_edgeThirdVertexIndices_iff.mpr ⟨hki, hksucc⟩)
 
+/-! ### Two-circle chord separation -/
+
+/-- A normalized coaxial closed disk is convex. -/
+theorem convex_normalizedClosedDisk (a y : ℝ) :
+    Convex ℝ (normalizedClosedDisk a y) := by
+  rw [show normalizedClosedDisk a y =
+      Metric.closedBall (normalizedCircleCenter y) (normalizedCircleRadius a y) by
+    ext z
+    simpa [Metric.mem_closedBall, dist_comm] using
+      mem_normalizedClosedDisk_iff_dist_le a y z]
+  exact convex_closedBall _ _
+
+/-- The difference of two circle-power functions is affine.  This identity is
+the algebraic radical-axis input used in Dahlberg's Lemmas 4 and 6. -/
+theorem circlePowerR2_sub_lineMap (O₁ O₂ X Z : ℂ) (R₁ R₂ t : ℝ) :
+    circlePowerR2 O₁ ((AffineMap.lineMap X Z) t) R₁ -
+        circlePowerR2 O₂ ((AffineMap.lineMap X Z) t) R₂ =
+      (1 - t) * (circlePowerR2 O₁ X R₁ - circlePowerR2 O₂ X R₂) +
+        t * (circlePowerR2 O₁ Z R₁ - circlePowerR2 O₂ Z R₂) := by
+  have hline : (AffineMap.lineMap X Z) t = (1 - t) • X + t • Z := by
+    rw [AffineMap.lineMap_apply, vsub_eq_sub, vadd_eq_add]
+    module
+  rw [hline]
+  unfold circlePowerR2
+  simp only [Complex.sq_norm, Complex.normSq_apply, Complex.sub_re, Complex.sub_im,
+    Complex.add_re, Complex.add_im, Complex.smul_re, Complex.smul_im]
+  ring
+
+/-- Normalized two-circle chord separation, the geometric core of Dahlberg's
+Lemmas 4 and 6.
+
+Let `U` be the coaxial disk through `−a` and `a`, and let `W` be the disk
+with centre `O` and radius `R`.  Suppose `W` contains both chord endpoints,
+while a point `Q` above the chord lies on `∂W` and strictly inside `U`.
+Then every point `X` of `∂W ∩ U` lies in the closed half-plane on the
+`Q`-side of the chord. -/
+theorem normalized_circleBoundary_mem_closedDisk_im_nonneg
+    {a y R : ℝ} {O Q X : ℂ}
+    (ha : 0 < a) (hQim : 0 < Q.im)
+    (hQint : circlePowerR2 (normalizedCircleCenter y) Q
+      (normalizedCircleRadius a y) < 0)
+    (hQboundary : circlePowerR2 O Q R = 0)
+    (hleft : circlePowerR2 O (-a : ℂ) R ≤ 0)
+    (hright : circlePowerR2 O (a : ℂ) R ≤ 0)
+    (hXboundary : circlePowerR2 O X R = 0)
+    (hXmem : X ∈ normalizedClosedDisk a y) :
+    0 ≤ X.im := by
+  by_contra hXnonneg
+  have hXneg : X.im < 0 := lt_of_not_ge hXnonneg
+  let t : ℝ := Q.im / (Q.im - X.im)
+  have hden : 0 < Q.im - X.im := by linarith
+  have htpos : 0 < t := div_pos hQim hden
+  have htlt : t < 1 := (div_lt_one hden).2 (by linarith)
+  let Y : ℂ := (AffineMap.lineMap Q X) t
+  have hlineQX : Y = (1 - t) • Q + t • X := by
+    change (AffineMap.lineMap Q X) t = (1 - t) • Q + t • X
+    rw [AffineMap.lineMap_apply, vsub_eq_sub, vadd_eq_add]
+    module
+  have hYim : Y.im = 0 := by
+    rw [hlineQX]
+    simp only [Complex.add_im, Complex.smul_im]
+    dsimp [t]
+    field_simp [hden.ne']
+    ring
+  have hQmem : Q ∈ normalizedClosedDisk a y := by
+    rw [circlePowerR2_normalized] at hQint
+    change Q.re ^ 2 + Q.im ^ 2 - 2 * y * Q.im ≤ a ^ 2
+    linarith
+  have hYmem : Y ∈ normalizedClosedDisk a y := by
+    exact (convex_normalizedClosedDisk a y).lineMap_mem hQmem hXmem
+      ⟨htpos.le, htlt.le⟩
+  have hYsq : Y.re ^ 2 ≤ a ^ 2 := by
+    change Y.re ^ 2 + Y.im ^ 2 - 2 * y * Y.im ≤ a ^ 2 at hYmem
+    rw [hYim] at hYmem
+    simpa using hYmem
+  have hYlower : -a ≤ Y.re := by
+    nlinarith [sq_nonneg (Y.re + a)]
+  have hYupper : Y.re ≤ a := by
+    nlinarith [sq_nonneg (Y.re - a)]
+  let s : ℝ := (Y.re + a) / (2 * a)
+  have hs0 : 0 ≤ s := div_nonneg (by linarith) (by positivity)
+  have hs1 : s ≤ 1 := (div_le_one (by positivity)).2 (by linarith)
+  have hlineEnds : (AffineMap.lineMap (-a : ℂ) (a : ℂ)) s = Y := by
+    rw [AffineMap.lineMap_apply, vsub_eq_sub, vadd_eq_add]
+    apply Complex.ext
+    · simp only [Complex.add_re, Complex.smul_re, Complex.sub_re]
+      dsimp [s]
+      field_simp [ha.ne']
+      ring
+    · simp only [Complex.add_im, Complex.smul_im, Complex.sub_im]
+      simp [hYim]
+  have hUends := normalizedCircle_endpoints a y
+  have hDleft : 0 ≤
+      circlePowerR2 (normalizedCircleCenter y) (-a : ℂ)
+          (normalizedCircleRadius a y) - circlePowerR2 O (-a : ℂ) R := by
+    linarith [hUends.2]
+  have hDright : 0 ≤
+      circlePowerR2 (normalizedCircleCenter y) (a : ℂ)
+          (normalizedCircleRadius a y) - circlePowerR2 O (a : ℂ) R := by
+    linarith [hUends.1]
+  have hDYnonneg : 0 ≤
+      circlePowerR2 (normalizedCircleCenter y) Y (normalizedCircleRadius a y) -
+        circlePowerR2 O Y R := by
+    rw [← hlineEnds, circlePowerR2_sub_lineMap]
+    exact add_nonneg
+      (mul_nonneg (sub_nonneg.mpr hs1) hDleft)
+      (mul_nonneg hs0 hDright)
+  have hXpower : circlePowerR2 (normalizedCircleCenter y) X
+      (normalizedCircleRadius a y) ≤ 0 := by
+    rw [circlePowerR2_normalized]
+    change X.re ^ 2 + X.im ^ 2 - 2 * y * X.im ≤ a ^ 2 at hXmem
+    linarith
+  have hDXnonpos :
+      circlePowerR2 (normalizedCircleCenter y) X (normalizedCircleRadius a y) -
+        circlePowerR2 O X R ≤ 0 := by
+    linarith
+  have hDQneg :
+      circlePowerR2 (normalizedCircleCenter y) Q (normalizedCircleRadius a y) -
+        circlePowerR2 O Q R < 0 := by
+    linarith
+  have hDYneg :
+      circlePowerR2 (normalizedCircleCenter y) Y (normalizedCircleRadius a y) -
+        circlePowerR2 O Y R < 0 := by
+    rw [show Y = (AffineMap.lineMap Q X) t by rfl,
+      circlePowerR2_sub_lineMap]
+    exact add_neg_of_neg_of_nonpos
+      (mul_neg_of_pos_of_neg (sub_pos.mpr htlt) hDQneg)
+      (mul_nonpos_of_nonneg_of_nonpos htpos.le hDXnonpos)
+  exact (not_lt_of_ge hDYnonneg) hDYneg
+
+/-- Circle power is unchanged by passage to canonical edge coordinates. -/
+theorem circlePowerR2_edgeCoordinates {A B O X : ℂ} (hAB : A ≠ B) (R : ℝ) :
+    circlePowerR2 (edgeCoordinates A B O) (edgeCoordinates A B X) R =
+      circlePowerR2 O X R := by
+  have h := circlePowerR2_directIsometry (norm_chordUnit hAB) (chordMidpoint A B)
+    (edgeCoordinates A B O) (edgeCoordinates A B X) R
+  simpa [directIsometryR2_edgeCoordinates hAB] using h.symm
+
+/-- The canonical edge-circle power becomes normalized circle power in edge
+coordinates. -/
+theorem circlePowerR2_edgeCircleCenter_edgeCoordinates
+    {A B X : ℂ} (hAB : A ≠ B) (y : ℝ) :
+    circlePowerR2 (normalizedCircleCenter y) (edgeCoordinates A B X)
+        (normalizedCircleRadius (chordHalfLength A B) y) =
+      circlePowerR2 (edgeCircleCenter A B y) X
+        (normalizedCircleRadius (chordHalfLength A B) y) := by
+  have h := circlePowerR2_directIsometry (norm_chordUnit hAB) (chordMidpoint A B)
+    (normalizedCircleCenter y) (edgeCoordinates A B X)
+    (normalizedCircleRadius (chordHalfLength A B) y)
+  simpa [edgeCircleCenter, transportedCircleCenter,
+    directIsometryR2_edgeCoordinates hAB] using h.symm
+
+/-- Membership in the interior-side edge half-plane is nonnegative height in
+canonical edge coordinates. -/
+theorem mem_edgeHalfPlane_iff_edgeCoordinates_im_nonneg
+    {A B X : ℂ} (hAB : A ≠ B) :
+    X ∈ edgeHalfPlane A B ↔ 0 ≤ (edgeCoordinates A B X).im := by
+  constructor
+  · intro hmem
+    unfold edgeHalfPlane transportedEdgeHalfPlane directIsometryImage at hmem
+    rcases hmem with ⟨z, hz, hzX⟩
+    have hz_eq : z = edgeCoordinates A B X := by
+      apply directIsometryR2_injective (norm_chordUnit hAB) (chordMidpoint A B)
+      rw [hzX, directIsometryR2_edgeCoordinates hAB]
+    simpa [normalizedEdgeHalfPlane, ← hz_eq] using hz
+  · intro him
+    unfold edgeHalfPlane transportedEdgeHalfPlane directIsometryImage
+    exact ⟨edgeCoordinates A B X, him,
+      directIsometryR2_edgeCoordinates hAB X⟩
+
+/-- The canonical interior-side edge half-plane is equivalently the
+nonnegative oriented-area side of the edge. -/
+theorem mem_edgeHalfPlane_iff_crossR2_nonneg
+    {A B X : ℂ} (hAB : A ≠ B) :
+    X ∈ edgeHalfPlane A B ↔ 0 ≤ Gluck.Discrete.crossR2 A B X := by
+  rw [mem_edgeHalfPlane_iff_edgeCoordinates_im_nonneg hAB,
+    ← crossR2_edgeCoordinates hAB X, crossR2_normalized]
+  exact (mul_nonneg_iff_of_pos_left
+    (mul_pos (by norm_num) (chordHalfLength_pos hAB))).symm
+
+/-- Edge-coordinate form of the two-circle contact localization theorem.
+
+If a disk `W` contains both endpoints of `A → B`, and a point `Q` on
+`∂W` lies strictly inside a coaxial edge disk on the positive side, then
+every point where `∂W` meets that edge disk lies in `edgeHalfPlane A B`. -/
+theorem circleBoundary_mem_edgeHalfPlane_of_mem_edgeClosedDisk
+    {A B O Q X : ℂ} {y R : ℝ}
+    (hAB : A ≠ B)
+    (hQcross : 0 < Gluck.Discrete.crossR2 A B Q)
+    (hQint : circlePowerR2 (edgeCircleCenter A B y) Q
+      (normalizedCircleRadius (chordHalfLength A B) y) < 0)
+    (hQboundary : circlePowerR2 O Q R = 0)
+    (hA : circlePowerR2 O A R ≤ 0)
+    (hB : circlePowerR2 O B R ≤ 0)
+    (hXboundary : circlePowerR2 O X R = 0)
+    (hXmem : X ∈ edgeClosedDisk A B y) :
+    X ∈ edgeHalfPlane A B := by
+  apply (mem_edgeHalfPlane_iff_edgeCoordinates_im_nonneg hAB).mpr
+  apply normalized_circleBoundary_mem_closedDisk_im_nonneg
+    (a := chordHalfLength A B) (y := y) (R := R)
+    (O := edgeCoordinates A B O) (Q := edgeCoordinates A B Q)
+    (X := edgeCoordinates A B X)
+  · exact chordHalfLength_pos hAB
+  · exact (crossR2_pos_iff_edgeCoordinates_im_pos hAB Q).mp hQcross
+  · rwa [circlePowerR2_edgeCircleCenter_edgeCoordinates hAB]
+  · rwa [circlePowerR2_edgeCoordinates hAB]
+  · have hA' :
+        circlePowerR2 (edgeCoordinates A B O) (edgeCoordinates A B A) R ≤ 0 := by
+      rwa [circlePowerR2_edgeCoordinates hAB]
+    simpa [(edgeCoordinates_endpoints hAB).1] using hA'
+  · have hB' :
+        circlePowerR2 (edgeCoordinates A B O) (edgeCoordinates A B B) R ≤ 0 := by
+      rwa [circlePowerR2_edgeCoordinates hAB]
+    simpa [(edgeCoordinates_endpoints hAB).2] using hB'
+  · rwa [circlePowerR2_edgeCoordinates hAB]
+  · exact edgeCoordinates_mem_normalizedClosedDisk_of_mem_edgeClosedDisk hAB hXmem
+
+/-- Metric circle incidence implies zero circle power. -/
+theorem circlePowerR2_eq_zero_of_dist_eq {O X : ℂ} {R : ℝ}
+    (h : dist O X = R) : circlePowerR2 O X R = 0 := by
+  unfold circlePowerR2
+  rw [norm_sub_rev, ← dist_eq_norm, h]
+  ring
+
+/-- Metric membership in a disk of nonnegative radius implies nonpositive
+circle power. -/
+theorem circlePowerR2_nonpos_of_dist_le {O X : ℂ} {R : ℝ}
+    (hR : 0 ≤ R) (h : dist O X ≤ R) : circlePowerR2 O X R ≤ 0 := by
+  unfold circlePowerR2
+  rw [norm_sub_rev, ← dist_eq_norm]
+  exact sub_nonpos.mpr ((sq_le_sq₀ dist_nonneg hR).mpr h)
+
+/-- Strict metric membership in a disk of nonnegative radius implies negative
+circle power. -/
+theorem circlePowerR2_neg_of_dist_lt {O X : ℂ} {R : ℝ}
+    (hR : 0 ≤ R) (h : dist O X < R) : circlePowerR2 O X R < 0 := by
+  unfold circlePowerR2
+  rw [norm_sub_rev, ← dist_eq_norm]
+  exact sub_neg.mpr ((sq_lt_sq₀ dist_nonneg hR).mpr h)
+
+/-- Metric, disk-language form of circle-contact localization.  This is the
+reusable form consumed by the finite boundary-contact arguments in
+Dahlberg's Lemmas 4 and 6. -/
+theorem circleContact_mem_edgeHalfPlane_of_mem_edgeClosedDisk
+    {A B O Q X : ℂ} {y R : ℝ}
+    (hAB : A ≠ B)
+    (hQcross : 0 < Gluck.Discrete.crossR2 A B Q)
+    (hQint : dist (edgeCircleCenter A B y) Q <
+      normalizedCircleRadius (chordHalfLength A B) y)
+    (hR : 0 ≤ R)
+    (hQboundary : dist O Q = R)
+    (hA : InClosedDiskR2 O R A)
+    (hB : InClosedDiskR2 O R B)
+    (hXboundary : dist O X = R)
+    (hXmem : X ∈ edgeClosedDisk A B y) :
+    X ∈ edgeHalfPlane A B := by
+  apply circleBoundary_mem_edgeHalfPlane_of_mem_edgeClosedDisk hAB hQcross
+  · exact circlePowerR2_neg_of_dist_lt (Real.sqrt_nonneg _) hQint
+  · exact circlePowerR2_eq_zero_of_dist_eq hQboundary
+  · exact circlePowerR2_nonpos_of_dist_le hR hA
+  · exact circlePowerR2_nonpos_of_dist_le hR hB
+  · exact circlePowerR2_eq_zero_of_dist_eq hXboundary
+  · exact hXmem
+
 /-- Arbitrary-edge form of the normalized radius comparison behind Dahlberg
 Lemma 10. -/
 theorem edgeCircleRadius_le_of_mem_edgeClosedDisk {A B C : ℂ} {yΔ : ℝ}
