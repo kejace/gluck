@@ -5,6 +5,7 @@ Authors: kejace
 -/
 import Gluck.Forward.Section4OrientedPositiveChain
 import Gluck.Forward.Section4SupportedCircleSpliceContradiction
+import Gluck.Forward.FixedStrictAuxiliary
 
 /-!
 # Dahlberg Section 4 from the global supported-arc bridge
@@ -65,5 +66,19 @@ theorem dahlbergE2ExactPaperPrimitiveSources_of_supportedCircleArcSource
   exact ⟨dahlbergE2_theorem6_exact_paper_source,
     dahlbergE2_lemma9_paper_bridge_source,
     dahlbergE2Section4PaperDfvSource_of_supportedCircleArcSource harc⟩
+
+/-- A paper-faithful direct Section 4 proof also populates the legacy
+normalized auxiliary-reduction interface.  When D4VT is already known, the
+fixed rational kite supplies the auxiliary witness and its transfer map simply
+returns that known conclusion. -/
+theorem
+    dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_section4PaperDfvSource
+    (htheorem6 : DahlbergE2Theorem6ExactPaperSource)
+    (hsection4 : DahlbergE2Section4PaperDfvSource) :
+    DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource := by
+  intro n hne hn v hsimple hregular hnoncircle hnonstrict _hΔ _hv0 _hnext
+  letI : NeZero n := hne
+  exact dahlbergDiskAuxiliaryReduction_of_dahlbergFourVertex
+    (hsection4 htheorem6 hn hsimple hregular hnoncircle hnonstrict)
 
 end Gluck.Forward
