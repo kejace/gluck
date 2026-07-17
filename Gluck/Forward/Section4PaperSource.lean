@@ -81,4 +81,19 @@ theorem
   exact dahlbergDiskAuxiliaryReduction_of_dahlbergFourVertex
     (hsection4 htheorem6 hn hsimple hregular hnoncircle hnonstrict)
 
+/-- Paper-faithful sources recover the smaller legacy pair actually consumed
+by the public final-D4VT route, without asserting the obsolete ordered-turn
+primitive package. -/
+theorem dahlbergE2DfvPrimitiveSourceComponents_of_supportedCircleArcSource
+    (harc : DahlbergE2SupportedCircleArcSource) :
+    DahlbergE2DfvPrimitiveSourceComponents := by
+  let hsection4 : DahlbergE2Section4PaperDfvSource :=
+    dahlbergE2Section4PaperDfvSource_of_supportedCircleArcSource harc
+  exact ⟨
+    dahlbergE2ConvexDfvSignedNonconcyclicSource_of_exactTheorem6_and_lemma9Bridge
+      dahlbergE2_theorem6_exact_paper_source
+      dahlbergE2_lemma9_paper_bridge_source,
+    dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_section4PaperDfvSource
+      dahlbergE2_theorem6_exact_paper_source hsection4⟩
+
 end Gluck.Forward
