@@ -34,4 +34,12 @@ theorem dahlbergE2_orientedCircleArcSource :
     exact run.circleArcCertificate_of_contactSet_card_eq_two
       hsimple hΔ hR hcard
 
+/-- Source-free exact paper primitive package for Dahlberg's Euclidean D4VT.
+Theorem 6 and the plateau-aware Lemma 9 bridge are supplied by their direct
+proofs; the theorem above closes the remaining Section 4 branch. -/
+theorem dahlbergE2_exactPaperPrimitiveSources :
+    DahlbergE2ExactPaperPrimitiveSources :=
+  dahlbergE2ExactPaperPrimitiveSources_of_orientedCircleArcSource
+    dahlbergE2_orientedCircleArcSource
+
 end Gluck.Forward
