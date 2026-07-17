@@ -149,9 +149,10 @@ theorem circleSplice_circleMesh_boundary (q : ℕ) (θB θA : ℝ)
     (hR : 0 < R) {j : ℕ} (hj : j < q) :
     OnDiskBoundaryR2 (run.circleSplice q θB θA) O R
       (run.chainLength + j : ZMod (run.spliceVertexCount q)) := by
-  rw [OnDiskBoundaryR2,
-    run.circleSplice_natCast_circleMesh q θB θA hj,
-    dist_circlePoint_center, abs_of_pos hR]
+  change run.circleSplice q θB θA
+    (run.chainLength + j : ZMod (run.spliceVertexCount q)) ∈ Metric.sphere O R
+  rw [run.circleSplice_natCast_circleMesh q θB θA hj]
+  exact Metric.mem_sphere'.mpr (by rw [dist_circlePoint_center, abs_of_pos hR])
 
 @[simp] theorem circleSplice_zero (q : ℕ) (θB θA : ℝ) :
     run.circleSplice q θB θA 0 = run.point run.chainStart := by
@@ -276,8 +277,19 @@ theorem circleSplice_circleMesh_triple_boundary
         ((run.chainLength + j : ZMod (run.spliceVertexCount q)) + 1) := by
   obtain ⟨hprev, hself, hnext⟩ :=
     run.circleSplice_circleMesh_triple q θB θA hB hA hj
-  simp only [OnDiskBoundaryR2, hprev, hself, hnext,
-    dist_circlePoint_center, abs_of_pos hR, and_self]
+  refine ⟨?_, ?_, ?_⟩
+  · change run.circleSplice q θB θA
+      ((run.chainLength + j : ZMod (run.spliceVertexCount q)) - 1) ∈ Metric.sphere O R
+    rw [hprev]
+    exact Metric.mem_sphere'.mpr (by rw [dist_circlePoint_center, abs_of_pos hR])
+  · change run.circleSplice q θB θA
+      (run.chainLength + j : ZMod (run.spliceVertexCount q)) ∈ Metric.sphere O R
+    rw [hself]
+    exact Metric.mem_sphere'.mpr (by rw [dist_circlePoint_center, abs_of_pos hR])
+  · change run.circleSplice q θB θA
+      ((run.chainLength + j : ZMod (run.spliceVertexCount q)) + 1) ∈ Metric.sphere O R
+    rw [hnext]
+    exact Metric.mem_sphere'.mpr (by rw [dist_circlePoint_center, abs_of_pos hR])
 
 /-- Every inserted mesh vertex turns strictly left when the lifted completion
 arc has positive length strictly below one full turn. -/

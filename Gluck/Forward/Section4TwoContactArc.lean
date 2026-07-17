@@ -88,11 +88,12 @@ private theorem endpoint_isDiameter_of_contactSet_card_eq_two_aux
     intro i hi
     have hi' : i ∈ ({p, q} : Finset (ZMod n)) := by
       rw [hpairEq]
-      exact mem_circleContactSet.mpr hi
+      exact mem_circleContactSet.mpr (Metric.mem_sphere'.mp hi)
     simpa using hi'
   have hdiam :=
     isDiameter_of_minimalEnclosingDiskR2_of_boundary_subset_pair
-      hΔ (mem_circleContactSet.mp hp) (mem_circleContactSet.mp hq) hboundary
+      hΔ (Metric.mem_sphere'.mpr (mem_circleContactSet.mp hp))
+        (Metric.mem_sphere'.mpr (mem_circleContactSet.mp hq)) hboundary
   simpa [Section4PositiveRunCertificate.point,
     Section4PositiveRunCertificate.chainStart, p, q] using hdiam
 

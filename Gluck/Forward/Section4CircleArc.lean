@@ -123,7 +123,7 @@ theorem endpointIndices_ne
     radius_pos_of_minimalEnclosingDiskR2_of_isSimplePolygon hΔ hsimple
   have hcard : 2 ≤ E.card := by
     apply two_le_card_circleContactSet_of_minimalEnclosingDiskR2 hΔ hR
-    exact mem_circleContactSet.mp run.contact
+    exact Metric.mem_sphere'.mpr (mem_circleContactSet.mp run.contact)
   rw [hEeq] at hcard
   simp at hcard
 
@@ -146,15 +146,18 @@ theorem exists_ordered_endpointAngles
       run.point run.chainStart = circlePoint O R θA ∧
       θB < θA ∧ θA < θB + 2 * Real.pi := by
   have hend := run.endpoints_boundary
+  have hBdist : dist O (run.point (run.b + 1)) = R := by
+    simpa [point, dist_comm] using Metric.mem_sphere'.mp hend.2
+  have hAdist : dist O (run.point run.chainStart) = R := by
+    simpa [point, chainStart, dist_comm] using Metric.mem_sphere'.mp hend.1
   obtain ⟨θB, _hθB, hB⟩ :=
-    exists_circlePoint_eq_of_dist_eq hend.2
+    exists_circlePoint_eq_of_dist_eq hBdist
   obtain ⟨θA, hθA, hA⟩ :=
-    exists_circlePoint_eq_mem_angleWindow hend.1 θB
+    exists_circlePoint_eq_mem_angleWindow hAdist θB
   have hBA : θB < θA := by
     refine lt_of_le_of_ne hθA.1 ?_
     intro heq
     apply hne
-    simp only [point, chainStart]
     rw [hA, hB, heq]
   exact ⟨θB, θA, hB, hA, hBA, hθA.2⟩
 

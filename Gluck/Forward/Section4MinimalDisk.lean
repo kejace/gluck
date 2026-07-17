@@ -127,7 +127,7 @@ theorem not_isCyclicInterval_circleContactSet_of_minimalEnclosingDisk_of_card_eq
     intro i hi
     have hiE : i ∈ Gluck.mapCut c (Finset.Icc a b) := by
       rw [← hE]
-      exact mem_circleContactSet.mpr hi
+      exact mem_circleContactSet.mpr (Metric.mem_sphere'.mp hi)
     rcases Finset.mem_image.mp hiE with ⟨k, hk, hki⟩
     rw [Finset.mem_Icc, hlen] at hk
     have hka : k = a ∨ k = a + 1 := by omega
@@ -136,9 +136,9 @@ theorem not_isCyclicInterval_circleContactSet_of_minimalEnclosingDisk_of_card_eq
     · right
       simpa [B, hlen] using hki.symm
   have hABoundary : OnDiskBoundaryR2 v O R A :=
-    mem_circleContactSet.mp hAE
+    Metric.mem_sphere'.mpr (mem_circleContactSet.mp hAE)
   have hBBoundary : OnDiskBoundaryR2 v O R B :=
-    mem_circleContactSet.mp hBE
+    Metric.mem_sphere'.mpr (mem_circleContactSet.mp hBE)
   have hAprevNeA : v (A - 1) ≠ v A := by
     simpa [sub_eq_add_neg, add_assoc] using hsimple.1 (A - 1)
   have hAprevNeB : v (A - 1) ≠ v B := by
@@ -151,8 +151,8 @@ theorem not_isCyclicInterval_circleContactSet_of_minimalEnclosingDisk_of_card_eq
     · exact hAprevNeA (congrArg v hprevA)
     · exact hAprevNeB (congrArg v hprevB)
   have hAprevInterior : dist O (v (A - 1)) < R :=
-    lt_of_le_of_ne (hΔ.2.1 (A - 1)) fun hdist =>
-      hAprevNotBoundary hdist
+    lt_of_le_of_ne (Metric.mem_closedBall'.mp (hΔ.2.1 (A - 1))) fun hdist =>
+      hAprevNotBoundary (Metric.mem_sphere'.mpr hdist)
   have hdiam :=
     isDiameter_of_minimalEnclosingDiskR2_of_boundary_subset_pair
       hΔ hABoundary hBBoundary hboundaryPair
@@ -166,13 +166,13 @@ theorem not_isCyclicInterval_circleContactSet_of_minimalEnclosingDisk_of_card_eq
       ⟨hcircle.1, hcircle.2.2.1, hcircle.2.1, hcircle.2.2.2⟩
     have hρR : ρ ≤ R :=
       circumcircleR2_radius_le_of_inVertexCone_of_boundary
-        hcircle' hcone hΔ.1 hABoundary
+        hcircle' hcone hΔ.1 (Metric.mem_sphere'.mp hABoundary)
           (hΔ.2.1 (A - 1)) (hΔ.2.1 (A + 1))
     have hρne : ρ ≠ R := by
       intro hρeq
       have hcenters : O = C :=
         eq_circumcenter_of_inVertexCone_of_boundary_of_radius_eq
-          hcircle' hcone hΔ.1 hABoundary
+          hcircle' hcone hΔ.1 (Metric.mem_sphere'.mp hABoundary)
             (hΔ.2.1 (A - 1)) (hΔ.2.1 (A + 1)) hρeq
       rw [hcenters, ← hρeq, hcircle.2.1] at hAprevInterior
       exact (lt_irrefl ρ) hAprevInterior
@@ -226,7 +226,7 @@ theorem circleContactSet_not_isCyclicInterval_of_minimalEnclosingDisk_of_three_l
   have hpNotE : p ∉ E := by
     intro hpE
     have hpBoundary : OnDiskBoundaryR2 v O R p := by
-      exact mem_circleContactSet.mp (by simpa [E] using hpE)
+      exact Metric.mem_sphere'.mpr (mem_circleContactSet.mp (by simpa [E] using hpE))
     have hpLower :=
       signedMengerProfile_inv_radius_le_of_minimal_boundary_of_cross_pos
         hsimple hregular hΔ hpBoundary (hcontactCross p hpBoundary)
@@ -313,20 +313,20 @@ theorem circleContactSet_not_isCyclicInterval_of_minimalEnclosingDisk_of_three_l
           _ = p := by rw [ZMod.natCast_self, add_zero]
       rwa [heq]
   have hABoundary : OnDiskBoundaryR2 v O R A :=
-    mem_circleContactSet.mp (by simpa [E] using hAE)
+    Metric.mem_sphere'.mpr (mem_circleContactSet.mp (by simpa [E] using hAE))
   have hQBoundary : OnDiskBoundaryR2 v O R Q :=
-    mem_circleContactSet.mp (by simpa [E] using hQE)
+    Metric.mem_sphere'.mpr (mem_circleContactSet.mp (by simpa [E] using hQE))
   have hQnextBoundary : OnDiskBoundaryR2 v O R (Q + 1) :=
-    mem_circleContactSet.mp (by simpa [E] using hQnextE)
+    Metric.mem_sphere'.mpr (mem_circleContactSet.mp (by simpa [E] using hQnextE))
   have hBBoundary : OnDiskBoundaryR2 v O R B :=
-    mem_circleContactSet.mp (by simpa [E] using hBE)
+    Metric.mem_sphere'.mpr (mem_circleContactSet.mp (by simpa [E] using hBE))
   have hAprevInterior : dist O (v (A - 1)) < R :=
-    lt_of_le_of_ne (hΔ.2.1 (A - 1)) fun hdist =>
+    lt_of_le_of_ne (Metric.mem_closedBall'.mp (hΔ.2.1 (A - 1))) fun hdist =>
       hAprevNotE (by
         apply mem_circleContactSet.mpr
         exact hdist)
   have hBnextInterior : dist O (v (B + 1)) < R :=
-    lt_of_le_of_ne (hΔ.2.1 (B + 1)) fun hdist =>
+    lt_of_le_of_ne (Metric.mem_closedBall'.mp (hΔ.2.1 (B + 1))) fun hdist =>
       hBnextNotE (by
         apply mem_circleContactSet.mpr
         exact hdist)

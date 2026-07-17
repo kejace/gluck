@@ -956,7 +956,8 @@ theorem circleSplice_leftEndpoint_radius_lt
     run.circleSplice_leftEndpoint_triple q hq θB θA hA
   apply edgePrevCircleRadiusProfile_lt_of_boundary_and_interior_of_regular
     (Δ := O) (S := R) hsimple hpositive
-  · rw [hselfEq]
+  · change run.circleSplice q θB θA 0 ∈ Metric.sphere O R
+    rw [hselfEq]
     exact Metric.mem_sphere'.mpr (by rw [dist_circlePoint_center, abs_of_pos hR])
   · norm_num
     rw [hprevEq]
@@ -995,7 +996,9 @@ theorem circleSplice_rightEndpoint_radius_lt
     run.circleSplice_rightEndpoint_triple q hq θB θA hB
   apply edgePrevCircleRadiusProfile_lt_of_boundary_and_interior_of_regular
     (Δ := O) (S := R) hsimple hpositive
-  · rw [hselfEq]
+  · change run.circleSplice q θB θA
+      ((run.chainLength - 1 : ℕ) : ZMod (run.spliceVertexCount q)) ∈ Metric.sphere O R
+    rw [hselfEq]
     exact Metric.mem_sphere'.mpr (by rw [dist_circlePoint_center, abs_of_pos hR])
   · rw [hprevEq]
     exact Metric.mem_closedBall'.mpr (run.internal_dist_lt hΔ run.a_le_b le_rfl).le

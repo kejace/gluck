@@ -32,8 +32,10 @@ private theorem exists_ordered_complement_contact_angle_aux
     (hpm : p < run.complementContactArcLength)
     (hpEq : Gluck.cyclicLift (Gluck.cyclicLift run.c (run.b + 1)) p = i) :
     ∃ θC : ℝ, v i = circlePoint O R θC ∧ θB < θC ∧ θC < θA := by
+  have hidist : dist O (v i) = R := by
+    simpa [dist_comm] using Metric.mem_sphere'.mp hi
   obtain ⟨θC, hCwin, hC⟩ :=
-    exists_circlePoint_eq_mem_angleWindow hi θB
+    exists_circlePoint_eq_mem_angleWindow hidist θB
   let base : ZMod n := Gluck.cyclicLift run.c (run.b + 1)
   let w : ZMod n → ℂ := shiftPolygon v base
   let m : ℕ := run.complementContactArcLength
@@ -41,7 +43,7 @@ private theorem exists_ordered_complement_contact_angle_aux
     isSimplePolygon_shift hsimple base
   have hinsideW : ∀ z : ZMod n, dist O (w z) ≤ R := by
     intro z
-    exact hΔ.2.1 _
+    exact Metric.mem_closedBall'.mp (hΔ.2.1 _)
   have hB' : w 0 = circlePoint O R θB := by
     simpa [w, base, shiftPolygon, point, Gluck.cyclicLift] using hB
   have hC' : w (p : ZMod n) = circlePoint O R θC := by

@@ -1076,8 +1076,8 @@ private theorem disk_contact_zero_normalization_data_global {n : ℕ}
       (∀ i, (w 0).im = (w i).im → (w 0).re ≤ (w i).re) := by
   let ξ : ℂ := v 0 - O
   have hξnorm : ‖ξ‖ = R := by
-    have hb := hboundary
-    rw [OnDiskBoundaryR2, dist_eq_norm] at hb
+    have hb : dist O (v 0) = R := Metric.mem_sphere'.mp hboundary
+    rw [dist_eq_norm] at hb
     dsimp [ξ]
     rw [show v 0 - O = -(O - v 0) by ring, norm_neg, hb]
   have hξ0 : ξ ≠ 0 := by
@@ -1106,8 +1106,7 @@ private theorem disk_contact_zero_normalization_data_global {n : ℕ}
   refine ⟨hw0, ?_, ?_⟩
   · intro i
     have hdist : dist 0 (w i) ≤ R := by
-      have hi := hcontains i
-      unfold InClosedDiskR2 at hi
+      have hi := Metric.mem_closedBall'.mp (hcontains i)
       have hiso := dist_directIsometryR2 hu (-u * O) O (v i)
       rw [hcenter] at hiso
       dsimp [w]
@@ -1126,8 +1125,7 @@ private theorem disk_contact_zero_normalization_data_global {n : ℕ}
     change (w 0).im = (w i).im at htie
     change (w 0).re ≤ (w i).re
     have hdist : dist 0 (w i) ≤ R := by
-      have hi := hcontains i
-      unfold InClosedDiskR2 at hi
+      have hi := Metric.mem_closedBall'.mp (hcontains i)
       have hiso := dist_directIsometryR2 hu (-u * O) O (v i)
       rw [hcenter] at hiso
       dsimp [w]
@@ -1211,8 +1209,7 @@ private theorem sum_cyclicEdgeTurn_eq_two_pi_of_disk_contact_cross_pos_global
     intro i
     simpa [w, shiftPolygon] using hcontains (a + i)
   have hboundaryW : OnDiskBoundaryR2 w O R 0 := by
-    change dist O (v (a + 0)) = R
-    simpa [OnDiskBoundaryR2] using hboundary
+    simpa [w, shiftPolygon] using hboundary
   have hcrossW : 0 < crossR2 (w (-1)) (w 0) (w 1) := by
     simpa [w, shiftPolygon, sub_eq_add_neg] using hcross
   have hsumW :=
@@ -1235,8 +1232,7 @@ private theorem sum_cyclicEdgeTurn_eq_neg_two_pi_of_disk_contact_cross_neg_globa
     intro i
     simpa [w, shiftPolygon] using hcontains (a + i)
   have hboundaryW : OnDiskBoundaryR2 w O R 0 := by
-    change dist O (v (a + 0)) = R
-    simpa [OnDiskBoundaryR2] using hboundary
+    simpa [w, shiftPolygon] using hboundary
   have hcrossW : crossR2 (w (-1)) (w 0) (w 1) < 0 := by
     simpa [w, shiftPolygon, sub_eq_add_neg] using hcross
   have hsumW :=
@@ -1315,4 +1311,3 @@ theorem circleContactSet_cross_uniform
     hsimple hregular hΔ hi
 
 end Gluck.Forward
-

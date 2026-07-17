@@ -31,7 +31,7 @@ theorem nonempty_circleArcCertificate_of_minimalEnclosingDisk
     Nonempty (Section4CircleArcCertificate run) := by
   have htwo : 2 ≤ (circleContactSet v O R).card :=
     two_le_card_circleContactSet_of_minimalEnclosingDiskR2
-      hΔ hR (mem_circleContactSet.mp run.contact)
+      hΔ hR (Metric.mem_sphere'.mpr (mem_circleContactSet.mp run.contact))
   by_cases hthree : 3 ≤ (circleContactSet v O R).card
   · exact run.nonempty_circleArcCertificate_of_three_contacts
       hsimple hΔ hR hthree

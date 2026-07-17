@@ -82,8 +82,8 @@ def point (k : ℕ) : ℂ := v (Gluck.cyclicLift run.c k)
 theorem endpoints_boundary :
     OnDiskBoundaryR2 v O R (Gluck.cyclicLift run.c (run.a - 1)) ∧
       OnDiskBoundaryR2 v O R (Gluck.cyclicLift run.c (run.b + 1)) := by
-  exact ⟨mem_circleContactSet.mp run.left_contact,
-    mem_circleContactSet.mp run.right_contact⟩
+  exact ⟨Metric.mem_sphere'.mpr (mem_circleContactSet.mp run.left_contact),
+    Metric.mem_sphere'.mpr (mem_circleContactSet.mp run.right_contact)⟩
 
 /-- Every vertex in the open run is a strict interior point of the minimal
 disk. -/
@@ -99,7 +99,7 @@ theorem internal_dist_lt
       Gluck.cyclicLift run.c k ∉ circleContactSet v O R := by
     have hkComplement := run.maximal.properties.2.2 hkJ
     simpa using hkComplement
-  exact lt_of_le_of_ne (hΔ.2.1 _) fun heq =>
+  exact lt_of_le_of_ne (Metric.mem_closedBall'.mp (hΔ.2.1 _)) fun heq =>
     hkNotContact (mem_circleContactSet.mpr heq)
 
 /-- The reciprocal-radius gap is in particular positive curvature. -/

@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
 import Gluck.Forward.Section4EndpointSpliceRegularity
+import Mathlib.MeasureTheory.Integral.CircleIntegral
 
 /-!
 # Curvature at a circle–interior endpoint splice
@@ -102,8 +103,7 @@ private theorem continuousAt_endpointPredecessorCurvatureModel_aux
   · fun_prop
   · have hcircle : ContinuousAt
         (fun δ : ℝ ↦ circlePoint O R (θ - δ)) 0 := by
-      unfold circlePoint
-      fun_prop
+      exact (continuous_circleMap O R).continuousAt.comp (by fun_prop)
     exact continuousAt_const.mul (hcircle.dist continuousAt_const)
   · simpa using mul_ne_zero hself hself
 
@@ -123,8 +123,7 @@ private theorem continuousAt_endpointSuccessorCurvatureModel_aux
   · fun_prop
   · have hcircle : ContinuousAt
         (fun δ : ℝ ↦ circlePoint O R (θ + δ)) 0 := by
-      unfold circlePoint
-      fun_prop
+      exact (continuous_circleMap O R).continuousAt.comp (by fun_prop)
     exact continuousAt_const.mul (hcircle.dist continuousAt_const)
   · simpa using mul_ne_zero hself hself
 

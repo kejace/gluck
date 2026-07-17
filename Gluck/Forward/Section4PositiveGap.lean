@@ -266,14 +266,14 @@ theorem exists_section4_positive_gap_of_disconnected_contacts
     simpa [κ] using hqNonpos
   have hEne : E.Nonempty := by
     obtain ⟨e, he⟩ := minimalEnclosingDiskBoundaryVertex_source hΔ
-    exact ⟨e, by simpa [E] using mem_circleContactSet.mpr he⟩
+    exact ⟨e, by simpa [E] using mem_circleContactSet.mpr (Metric.mem_sphere'.mp he)⟩
   have hFsub : F ⊆ Finset.univ \ E := by
     intro i hiF
     have hiNonpos : κ i ≤ 0 := mem_nonpositiveVertices.mp hiF
     simp only [Finset.mem_sdiff, Finset.mem_univ, true_and]
     intro hiE
     have hiBoundary : OnDiskBoundaryR2 v O R i :=
-      mem_circleContactSet.mp (by simpa [E] using hiE)
+      Metric.mem_sphere'.mpr (mem_circleContactSet.mp (by simpa [E] using hiE))
     have hiLower :=
       signedMengerProfile_inv_radius_le_of_minimal_boundary_of_cross_pos
         hsimple hregular hΔ hiBoundary (hcontactCross i hiBoundary)
@@ -341,10 +341,10 @@ theorem exists_section4_positive_gap_of_disconnected_contacts
     simpa using hbT
   have hleftBoundary : OnDiskBoundaryR2 v O R
       (Gluck.cyclicLift c (a - 1)) :=
-    mem_circleContactSet.mp (by simpa [E] using hleftE)
+    Metric.mem_sphere'.mpr (mem_circleContactSet.mp (by simpa [E] using hleftE))
   have hrightBoundary : OnDiskBoundaryR2 v O R
       (Gluck.cyclicLift c (b + 1)) :=
-    mem_circleContactSet.mp (by simpa [E] using hrightE)
+    Metric.mem_sphere'.mpr (mem_circleContactSet.mp (by simpa [E] using hrightE))
   have hleftNext : Gluck.cyclicLift c (a - 1) + 1 =
       Gluck.cyclicLift c a := by
     dsimp [Gluck.cyclicLift]
@@ -358,7 +358,7 @@ theorem exists_section4_positive_gap_of_disconnected_contacts
     ring
   have hleftNextInterior :
       dist O (v (Gluck.cyclicLift c (a - 1) + 1)) < R := by
-    apply lt_of_le_of_ne (hΔ.2.1 _)
+    apply lt_of_le_of_ne (Metric.mem_closedBall'.mp (hΔ.2.1 _))
     intro heq
     apply haNotE
     rw [← hleftNext]
@@ -366,7 +366,7 @@ theorem exists_section4_positive_gap_of_disconnected_contacts
     exact heq
   have hrightPrevInterior :
       dist O (v (Gluck.cyclicLift c (b + 1) - 1)) < R := by
-    apply lt_of_le_of_ne (hΔ.2.1 _)
+    apply lt_of_le_of_ne (Metric.mem_closedBall'.mp (hΔ.2.1 _))
     intro heq
     apply hbNotE
     rw [← hrightPrev]

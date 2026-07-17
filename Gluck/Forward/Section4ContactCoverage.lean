@@ -73,6 +73,7 @@ private theorem ordered_anchor_indices_ne_aux
     have hEq : θD = θB := by
       apply injOn_circleMap_of_abs_sub_le' hR.ne' (by linarith [Real.two_pi_pos])
         hDwin ⟨le_rfl, by linarith [Real.two_pi_pos]⟩
+      change circlePoint O R θD = circlePoint O R θB
       rw [← hD, ← hB]
     linarith
   constructor
@@ -81,6 +82,7 @@ private theorem ordered_anchor_indices_ne_aux
     have hEq : θD = θC := by
       apply injOn_circleMap_of_abs_sub_le' hR.ne' (by linarith [Real.two_pi_pos])
         hDwin ⟨hBC.le, by linarith⟩
+      change circlePoint O R θD = circlePoint O R θC
       rw [← hD, ← hC]
     linarith
   · intro ht
@@ -88,6 +90,7 @@ private theorem ordered_anchor_indices_ne_aux
     have hEq : θD = θA := by
       apply injOn_circleMap_of_abs_sub_le' hR.ne' (by linarith [Real.two_pi_pos])
         hDwin ⟨(hBC.trans hCA).le, hspan⟩
+      change circlePoint O R θD = circlePoint O R θA
       rw [← hD, ← hA]
     linarith
 
@@ -281,7 +284,7 @@ private theorem exists_complementContactArcCoordinate_aux
     rw [Nat.cast_sub hnUt, Nat.cast_add, ZMod.natCast_self]
     ring
   rw [hkEq, htEq]
-  exact hi
+  exact Metric.mem_sphere'.mp hi
 
 /-- With at least three minimal-circle contacts, one contact occurs strictly
 between the two run endpoints on the complementary polygonal arc. -/
@@ -310,7 +313,8 @@ theorem exists_strict_complementContactArcCoordinate
         _ ≤ 2 := Finset.card_le_two
     omega
   obtain ⟨i, hiE, hiA, hiB⟩ := hex
-  have hi : OnDiskBoundaryR2 v O R i := mem_circleContactSet.mp hiE
+  have hi : OnDiskBoundaryR2 v O R i :=
+    Metric.mem_sphere'.mpr (mem_circleContactSet.mp hiE)
   obtain ⟨t, htm, htEq⟩ := run.exists_complementContactArcCoordinate_aux hi
   have ht0 : 0 < t := by
     apply Nat.pos_of_ne_zero
@@ -347,8 +351,10 @@ noncomputable def circleArcCertificateOfOrderedComplementContact
     (hBC.trans hCA) hspan
   intro i hi
   obtain ⟨t, htm, htEq⟩ := run.exists_complementContactArcCoordinate_aux hi
+  have hidist : dist O (v i) = R := by
+    simpa [dist_comm] using Metric.mem_sphere'.mp hi
   obtain ⟨θD, hθDwin, hiD⟩ :=
-    exists_circlePoint_eq_mem_angleWindow hi θB
+    exists_circlePoint_eq_mem_angleWindow hidist θB
   have hB' : v (Gluck.cyclicLift
       (Gluck.cyclicLift run.c (run.b + 1)) 0) = circlePoint O R θB := by
     simpa [point, Gluck.cyclicLift] using hB
@@ -363,7 +369,8 @@ noncomputable def circleArcCertificateOfOrderedComplementContact
     exact hiD
   have hθDA : θD ≤ θA :=
     circlePoint_angle_le_endpoint_of_ordered_anchor_aux
-      hsimple hΔ.2.1 hR hp hpm run.complementContactArcLength_lt htm
+      hsimple (fun z ↦ Metric.mem_closedBall'.mp (hΔ.2.1 z)) hR hp hpm
+      run.complementContactArcLength_lt htm
       hB' hC hA' hD' hBC hCA hspan hθDwin
   exact ⟨θD, ⟨hθDwin.1, hθDA⟩, hiD⟩
 
