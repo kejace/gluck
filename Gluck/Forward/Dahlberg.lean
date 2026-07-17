@@ -1,4 +1,4 @@
-import Gluck.Forward.Defs
+import Gluck.Forward.CyclicComponents
 
 /-!
 # Dahlberg's oriented circle regions
@@ -2652,6 +2652,92 @@ theorem signedMengerR2_eq_neg_inv_circumradius_of_neg {A B C O : ℂ} {R : ℝ}
   have hR := circumcircleR2_edge_radius_eq hAB hcross.ne hcircle
   rw [hR]
   rfl
+
+/-! ### Curvature at contacts of a minimal enclosing disk -/
+
+/-- At a positive-turn boundary vertex of a minimal enclosing disk, signed
+Menger curvature is at least the reciprocal enclosing radius. -/
+theorem signedMengerProfile_inv_radius_le_of_minimal_boundary_of_cross_pos
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {OΔ : ℂ} {R : ℝ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hΔ : MinimalEnclosingDiskR2 v OΔ R)
+    {i : ZMod n} (hboundary : OnDiskBoundaryR2 v OΔ R i)
+    (hcross : 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) :
+    1 / R ≤ SignedMengerProfile v i := by
+  rcases hregular i with hcol | ⟨O, ρ, hcircle, hcone⟩
+  · exact False.elim ((ne_of_gt hcross) hcol.1)
+  · have hcircle' : CircumcircleR2 (v i) (v (i - 1)) (v (i + 1)) O ρ :=
+      ⟨hcircle.1, hcircle.2.2.1, hcircle.2.1, hcircle.2.2.2⟩
+    have hρR : ρ ≤ R :=
+      circumcircleR2_radius_le_of_inVertexCone_of_boundary
+        hcircle' hcone hΔ.1 hboundary (hΔ.2.1 (i - 1)) (hΔ.2.1 (i + 1))
+    have hAB : v (i - 1) ≠ v i := by
+      simpa using hsimple.1 (i - 1)
+    have hcircle'' : CircumcircleR2 (v (i + 1)) (v (i - 1)) (v i) O ρ :=
+      ⟨hcircle.1, hcircle.2.2.2, hcircle.2.1, hcircle.2.2.1⟩
+    have hκ : SignedMengerProfile v i = 1 / ρ := by
+      simpa [SignedMengerProfile] using
+        signedMengerR2_eq_inv_circumradius_of_pos hAB hcross hcircle''
+    rw [hκ]
+    exact one_div_le_one_div_of_le hcircle.1 hρR
+
+/-- The preceding curvature bound is strict if either neighboring vertex is
+strictly inside the minimal enclosing disk. -/
+theorem signedMengerProfile_inv_radius_lt_of_minimal_boundary_of_cross_pos
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {OΔ : ℂ} {R : ℝ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hΔ : MinimalEnclosingDiskR2 v OΔ R)
+    {i : ZMod n} (hboundary : OnDiskBoundaryR2 v OΔ R i)
+    (hinterior : dist OΔ (v (i - 1)) < R ∨ dist OΔ (v (i + 1)) < R)
+    (hcross : 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) :
+    1 / R < SignedMengerProfile v i := by
+  rcases hregular i with hcol | ⟨O, ρ, hcircle, hcone⟩
+  · exact False.elim ((ne_of_gt hcross) hcol.1)
+  · have hcircle' : CircumcircleR2 (v i) (v (i - 1)) (v (i + 1)) O ρ :=
+      ⟨hcircle.1, hcircle.2.2.1, hcircle.2.1, hcircle.2.2.2⟩
+    have hρR : ρ ≤ R :=
+      circumcircleR2_radius_le_of_inVertexCone_of_boundary
+        hcircle' hcone hΔ.1 hboundary (hΔ.2.1 (i - 1)) (hΔ.2.1 (i + 1))
+    have hρne : ρ ≠ R := by
+      intro hρeq
+      have hcenters : OΔ = O :=
+        eq_circumcenter_of_inVertexCone_of_boundary_of_radius_eq
+          hcircle' hcone hΔ.1 hboundary (hΔ.2.1 (i - 1)) (hΔ.2.1 (i + 1)) hρeq
+      rcases hinterior with hprev | hnext
+      · rw [hcenters, ← hρeq, hcircle.2.1] at hprev
+        exact (lt_irrefl ρ) hprev
+      · rw [hcenters, ← hρeq, hcircle.2.2.2] at hnext
+        exact (lt_irrefl ρ) hnext
+    have hρR' : ρ < R := lt_of_le_of_ne hρR hρne
+    have hAB : v (i - 1) ≠ v i := by
+      simpa using hsimple.1 (i - 1)
+    have hcircle'' : CircumcircleR2 (v (i + 1)) (v (i - 1)) (v i) O ρ :=
+      ⟨hcircle.1, hcircle.2.2.2, hcircle.2.1, hcircle.2.2.1⟩
+    have hκ : SignedMengerProfile v i = 1 / ρ := by
+      simpa [SignedMengerProfile] using
+        signedMengerR2_eq_inv_circumradius_of_pos hAB hcross hcircle''
+    rw [hκ]
+    exact one_div_lt_one_div_of_lt hcircle.1 hρR'
+
+/-- Three consecutive contacts with a positive-radius circle determine
+signed Menger curvature exactly as its reciprocal radius. -/
+theorem signedMengerProfile_eq_inv_radius_of_three_boundaries_of_cross_pos
+    {n : ℕ} {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hR : 0 < R)
+    {i : ZMod n}
+    (hprev : OnDiskBoundaryR2 v O R (i - 1))
+    (hself : OnDiskBoundaryR2 v O R i)
+    (hnext : OnDiskBoundaryR2 v O R (i + 1))
+    (hcross : 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) :
+    SignedMengerProfile v i = 1 / R := by
+  have hAB : v (i - 1) ≠ v i := by
+    simpa using hsimple.1 (i - 1)
+  have hcircle : CircumcircleR2 (v (i + 1)) (v (i - 1)) (v i) O R :=
+    ⟨hR, hnext, hprev, hself⟩
+  simpa [SignedMengerProfile] using
+    signedMengerR2_eq_inv_circumradius_of_pos hAB hcross hcircle
 
 /-- Positive orientation rewrites the point-edge Dahlberg region using the
 positive normalized curvature of its canonical circle. -/
@@ -7761,6 +7847,95 @@ theorem edgePrevCurvatureDisk_next_boundary_of_positiveOrientation {n : ℕ}
     OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v i)
       (EdgePrevCircleRadiusProfile v i) (i + 1) := by
   exact edgePrevCircle_dist_next_eq_radius_of_positiveOrientation hsimple horient i
+
+/-- Three consecutive positive-turn contacts determine the canonical
+previous-vertex curvature-circle data. -/
+theorem edgePrevCurvatureCircleData_eq_of_three_boundaries_of_cross_pos
+    {n : ℕ} {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v) (hR : 0 < R)
+    {i : ZMod n}
+    (hprev : OnDiskBoundaryR2 v O R (i - 1))
+    (hself : OnDiskBoundaryR2 v O R i)
+    (hnext : OnDiskBoundaryR2 v O R (i + 1))
+    (hcross : 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) :
+    EdgePrevCurvatureCircleData v i = (O, R) := by
+  have hcross' : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) :=
+    polygonEdgePrev_cross_pos_of_vertex_cross_pos hcross
+  have hcanonical :
+      CircumcircleR2 (v i) (v (i + 1)) (v (i - 1))
+        (EdgePrevCircleCenterProfile v i) (EdgePrevCircleRadiusProfile v i) := by
+    simpa [EdgePrevCircleCenterProfile, EdgePrevCircleRadiusProfile] using
+      circumcircleR2_edge_parameter (hsimple.1 i) hcross'.ne'
+  have hdisk : CircumcircleR2 (v i) (v (i + 1)) (v (i - 1)) O R :=
+    ⟨hR, hself, hnext, hprev⟩
+  have heq := circumcircleR2_unique_of_noncollinear
+    (hsimple.1 i) hcross'.ne' hcanonical hdisk
+  exact Prod.ext heq.1 heq.2
+
+/-- If the canonical curvature disk at `i` contains the polygon, its signed
+Menger curvature is at most the reciprocal radius of a minimal enclosing
+disk. -/
+theorem signedMengerProfile_le_inv_minimalRadius_of_curvatureDiskContainsAll
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hΔ : MinimalEnclosingDiskR2 v O R)
+    {i : ZMod n}
+    (hcontains : EdgePrevCurvatureDiskContainsAll v i)
+    (hcross : 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) :
+    SignedMengerProfile v i ≤ 1 / R := by
+  have hRpos : 0 < R :=
+    radius_pos_of_minimalEnclosingDiskR2_of_isSimplePolygon hΔ hsimple
+  have hcross' : 0 < Gluck.Discrete.crossR2 (v i) (v (i + 1)) (v (i - 1)) :=
+    polygonEdgePrev_cross_pos_of_vertex_cross_pos hcross
+  have hcanonical :
+      CircumcircleR2 (v i) (v (i + 1)) (v (i - 1))
+        (EdgePrevCircleCenterProfile v i) (EdgePrevCircleRadiusProfile v i) := by
+    simpa [EdgePrevCircleCenterProfile, EdgePrevCircleRadiusProfile] using
+      circumcircleR2_edge_parameter (hsimple.1 i) hcross'.ne'
+  have hRρ : R ≤ EdgePrevCircleRadiusProfile v i :=
+    minimalEnclosingDiskR2_le_of_polygonInClosedDiskR2 hΔ hcanonical.1.le hcontains
+  have hAB : v (i - 1) ≠ v i := by
+    simpa using hsimple.1 (i - 1)
+  have hcircle' :
+      CircumcircleR2 (v (i + 1)) (v (i - 1)) (v i)
+        (EdgePrevCircleCenterProfile v i) (EdgePrevCircleRadiusProfile v i) :=
+    ⟨hcanonical.1, hcanonical.2.2.1, hcanonical.2.2.2, hcanonical.2.1⟩
+  have hκ :
+      SignedMengerProfile v i = 1 / EdgePrevCircleRadiusProfile v i := by
+    simpa [SignedMengerProfile] using
+      signedMengerR2_eq_inv_circumradius_of_pos hAB hcross hcircle'
+  rw [hκ]
+  exact one_div_le_one_div_of_le hRpos hRρ
+
+/-- Three consecutive contacts with a minimal enclosing disk identify the
+canonical curvature disk and therefore make it contain every vertex. -/
+theorem edgePrevCurvatureDiskContainsAll_of_three_boundaries_of_cross_pos
+    {n : ℕ} {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hΔ : MinimalEnclosingDiskR2 v O R)
+    {i : ZMod n}
+    (hprev : OnDiskBoundaryR2 v O R (i - 1))
+    (hself : OnDiskBoundaryR2 v O R i)
+    (hnext : OnDiskBoundaryR2 v O R (i + 1))
+    (hcross : 0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1))) :
+    EdgePrevCurvatureDiskContainsAll v i := by
+  have hR : 0 < R := by
+    by_contra hRnonpos
+    have hRzero : R = 0 := le_antisymm (le_of_not_gt hRnonpos) hΔ.1
+    have hdistPrev : dist O (v (i - 1)) = 0 := by
+      simpa [OnDiskBoundaryR2, hRzero] using hprev
+    have hdistSelf : dist O (v i) = 0 := by
+      simpa [OnDiskBoundaryR2, hRzero] using hself
+    have hprevEq : v (i - 1) = v i :=
+      (dist_eq_zero.mp hdistPrev).symm.trans (dist_eq_zero.mp hdistSelf)
+    exact (hsimple.1 (i - 1)) (by simpa using hprevEq)
+  have hdata := edgePrevCurvatureCircleData_eq_of_three_boundaries_of_cross_pos
+    hsimple hR hprev hself hnext hcross
+  have hcenter : EdgePrevCircleCenterProfile v i = O :=
+    congrArg Prod.fst hdata
+  have hradius : EdgePrevCircleRadiusProfile v i = R :=
+    congrArg Prod.snd hdata
+  simpa [EdgePrevCurvatureDiskContainsAll, hcenter, hradius] using hΔ.2.1
 
 /-- Dahlberg §3 Lemma 5 certificate: two distinct curvature disks contain all
 vertices. -/
