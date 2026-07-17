@@ -60,13 +60,6 @@ private theorem exists_circleContact_incoming_sector_step_aux
   rw [hB]
   exact crossR2_pos_of_signedMengerR2_pos hPB hκpos
 
-private theorem crossR2_lineMap_third_aux (A B X Y : ℂ) (t : ℝ) :
-    crossR2 A B (AffineMap.lineMap X Y t) =
-      (1 - t) * crossR2 A B X + t * crossR2 A B Y := by
-  simp only [AffineMap.lineMap_apply_module, crossR2, Complex.add_re, Complex.add_im,
-    Complex.sub_re, Complex.sub_im, Complex.smul_re, Complex.smul_im, smul_eq_mul]
-  ring
-
 private theorem exists_openSegment_mem_ball_aux
     {B Q : ℂ} (hBQ : B ≠ Q) {ρ : ℝ} (hρ : 0 < ρ) :
     ∃ X : ℂ, X ∈ openSegment ℝ B Q ∧ X ∈ ball B ρ := by
@@ -165,7 +158,7 @@ private theorem crossR2_pos_of_mem_openSegment_from_second_aux
     0 < crossR2 P B X := by
   rw [openSegment_eq_image_lineMap] at hX
   obtain ⟨t, ht, rfl⟩ := hX
-  rw [crossR2_lineMap_third_aux]
+  rw [crossR2_lineMap]
   have hBzero : crossR2 P B B = 0 := by
     unfold crossR2
     ring

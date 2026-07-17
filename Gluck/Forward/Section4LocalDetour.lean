@@ -38,21 +38,6 @@ def contactDetourVertices {n : ℕ} (v : ZMod n → ℂ) (D X : ℂ) : ℕ → �
 def contactReturnVertices {n : ℕ} (v : ZMod n → ℂ) (m : ℕ) : ℕ → ℂ :=
   fun k ↦ v ((m + k : ℕ) : ZMod n)
 
-private theorem crossR2_lineMap_right_aux (A B C D : ℂ) (t : ℝ) :
-    crossR2 A B ((AffineMap.lineMap C D) t) =
-      (1 - t) * crossR2 A B C + t * crossR2 A B D := by
-  simp only [AffineMap.lineMap_apply_module, crossR2, Complex.sub_re,
-    Complex.sub_im, Complex.add_re, Complex.add_im, Complex.smul_re,
-    Complex.smul_im]
-  ring
-
-private theorem crossR2_lineMap_self_aux (A B : ℂ) (t : ℝ) :
-    crossR2 A B (AffineMap.lineMap A B t) = 0 := by
-  simp only [AffineMap.lineMap_apply_module, crossR2, Complex.sub_re,
-    Complex.sub_im, Complex.add_re, Complex.add_im, Complex.smul_re,
-    Complex.smul_im]
-  ring
-
 /-- A segment whose endpoints lie on one strict side of a line misses every
 segment contained in that line. -/
 private theorem segment_disjoint_of_crossR2_pos_pos_aux
@@ -67,11 +52,11 @@ private theorem segment_disjoint_of_crossR2_pos_pos_aux
   rcases hzCD with ⟨s, hs, rfl⟩
   rcases hzAB with ⟨t, _ht, heq⟩
   have hzero : crossR2 A B (AffineMap.lineMap A B t) = 0 :=
-    crossR2_lineMap_self_aux A B t
+    crossR2_lineMap_self A B t
   have hcross : crossR2 A B (AffineMap.lineMap C D s) = 0 := by
     rw [← heq]
     exact hzero
-  rw [crossR2_lineMap_right_aux] at hcross
+  rw [crossR2_lineMap] at hcross
   have hs0 : 0 ≤ s := hs.1
   have hs1 : 0 ≤ 1 - s := by linarith [hs.2]
   have hpos : 0 < (1 - s) * crossR2 A B C + s * crossR2 A B D := by
@@ -106,41 +91,6 @@ private theorem left_not_mem_segment_of_mem_openSegment_aux
   have hnonneg : 0 ≤ (1 - t) * s :=
     mul_nonneg (by linarith [ht.2]) hs.1
   linarith [ht.1]
-
-private theorem natural_polygon_edge_disjoint_final_aux
-    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
-    (hsimple : IsSimplePolygon v) {r : ℕ}
-    (hr : 0 < r) (hrn : r + 2 < n) :
-    Disjoint
-      (segment ℝ (v (r : ZMod n)) (v ((r + 1 : ℕ) : ZMod n)))
-      (segment ℝ (v ((n - 1 : ℕ) : ZMod n)) (v 0)) := by
-  have hrlt : r < n := by omega
-  have hlastlt : n - 1 < n := by omega
-  have hrNeLast : (r : ZMod n) ≠ ((n - 1 : ℕ) : ZMod n) := by
-    rw [Ne, ZMod.natCast_eq_natCast_iff', Nat.mod_eq_of_lt hrlt,
-      Nat.mod_eq_of_lt hlastlt]
-    omega
-  have hr1lt : r + 1 < n := by omega
-  have hr1NeLast : (r : ZMod n) + 1 ≠ ((n - 1 : ℕ) : ZMod n) := by
-    rw [← Nat.cast_one, ← Nat.cast_add]
-    rw [Ne, ZMod.natCast_eq_natCast_iff', Nat.mod_eq_of_lt hr1lt,
-      Nat.mod_eq_of_lt hlastlt]
-    omega
-  have hlastSucc : ((n - 1 : ℕ) : ZMod n) + 1 = 0 := by
-    rw [Nat.cast_sub (by omega : 1 ≤ n), ZMod.natCast_self]
-    simp
-  have hrNeZero : (r : ZMod n) ≠ 0 := by
-    intro hz
-    have hz' : (r : ZMod n) = ((0 : ℕ) : ZMod n) := by simpa using hz
-    rw [ZMod.natCast_eq_natCast_iff', Nat.mod_eq_of_lt hrlt,
-      Nat.zero_mod] at hz'
-    omega
-  have hdisjoint := hsimple.2.2 (r : ZMod n)
-    ((n - 1 : ℕ) : ZMod n) hrNeLast hr1NeLast (by
-      rw [hlastSucc]
-      exact hrNeZero.symm)
-  rw [Set.disjoint_iff_inter_eq_empty]
-  simpa [Nat.cast_add, hlastSucc] using hdisjoint
 
 private theorem detour_segment_disjoint_natural_polygon_edge_aux
     {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
@@ -208,26 +158,10 @@ private theorem shortened_first_segment_disjoint_natural_polygon_edge_aux
         (by simpa using hsimple.1 0) hXopen
     exact hBnot (hzB ▸ hzXQ)
   · have hkNext : k + 1 < n := by omega
-    have hdisjoint := naturalPolygonEdges_disjoint_of_separated
-      hsimple (by omega) hkNext
+    have hdisjoint := hsimple.natural_edges_disjoint_of_separated
+      (i := 0) (j := k) (by omega) hklt (Or.inl hkNext)
     exact Set.disjoint_left.mp hdisjoint
-      (by simpa using hXQsub hzXQ) hzEdge
-
-private theorem earlier_natural_polygon_edge_disjoint_later_aux
-    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
-    (hsimple : IsSimplePolygon v) {r k : ℕ}
-    (hr : 0 < r) (hrn : r + 2 < n)
-    (hrk : r + 1 < k) (hklt : k < n) :
-    Disjoint
-      (segment ℝ (v (r : ZMod n)) (v ((r + 1 : ℕ) : ZMod n)))
-      (segment ℝ (v (k : ZMod n)) (v ((k + 1 : ℕ) : ZMod n))) := by
-  by_cases hkfinal : k + 1 = n
-  · have hkEq : k = n - 1 := by omega
-    rw [hkEq]
-    simpa [Nat.sub_add_cancel (by omega : 1 ≤ n), ZMod.natCast_self] using
-      natural_polygon_edge_disjoint_final_aux hsimple hr hrn
-  · exact naturalPolygonEdges_disjoint_of_separated
-      hsimple hrk (by omega)
+      (by simpa [cyclicVertex] using hXQsub hzXQ) (by simpa [cyclicVertex] using hzEdge)
 
 private theorem contact_detour_edge_disjoint_contact_return_edge_aux
     {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
@@ -273,13 +207,12 @@ private theorem contact_detour_edge_disjoint_contact_return_edge_aux
       let r : ℕ := s + 1
       have hr : 0 < r := by dsimp [r]; omega
       have hrp : r < p := by dsimp [r]; omega
-      have hrn : r + 2 < n := by omega
       have hrk : r + 1 < k := by omega
-      have hdisjoint := earlier_natural_polygon_edge_disjoint_later_aux
-        hsimple hr hrn hrk hklt
+      have hdisjoint := hsimple.natural_edges_disjoint_of_separated
+        (i := r) (j := k) hrk hklt (Or.inr hr)
       rw [show 2 + s = s + 2 by omega,
         show s + 2 + 1 = (s + 1) + 2 by omega]
-      simpa [contactDetourVertices, r, Nat.add_assoc] using hdisjoint
+      simpa [contactDetourVertices, cyclicVertex, r, Nat.add_assoc] using hdisjoint
 
 /-- The detour path `D, X, Q, …, C` is disjoint from the original return
 path `A, …, P, B` under the local clearance and strict-side hypotheses. -/
@@ -298,13 +231,11 @@ theorem disjoint_contactDetour_return_path_ranges
     Disjoint
       (Set.range (polygonalChainPath (contactDetourVertices v D X) (p + 1)))
       (Set.range (polygonalChainPath (contactReturnVertices v m) (n - m))) := by
-  apply Set.disjoint_left.mpr
-  intro z hzDetour hzReturn
-  obtain ⟨i, j, hi, hj, hzi, hzj⟩ :=
-    exists_intersecting_edges_of_polygonalChainPath_ranges
-      (by omega) (by omega) hzDetour hzReturn
-  have hdisjoint := contact_detour_edge_disjoint_contact_return_edge_aux
+  apply (disjoint_polygonalChainPath_ranges_iff
+    (p := contactDetourVertices v D X) (q := contactReturnVertices v m)
+    (by omega) (by omega)).2
+  intro i hi j hj
+  exact contact_detour_edge_disjoint_contact_return_edge_aux
     hsimple hp hpm hmn hXopen hDball hXball hclear hDside hXside i j hi hj
-  exact Set.disjoint_left.mp hdisjoint hzi hzj
 
 end Gluck.Forward

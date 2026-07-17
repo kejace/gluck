@@ -19,20 +19,6 @@ namespace Gluck.Forward
 open Gluck.Discrete
 open Set
 
-private theorem crossR2_lineMap_splice (A B X Y : ℂ) (t : ℝ) :
-    crossR2 A B (AffineMap.lineMap X Y t) =
-      (1 - t) * crossR2 A B X + t * crossR2 A B Y := by
-  simp [AffineMap.lineMap_apply_module, crossR2]
-  ring
-
-private theorem crossR2_lineMap_self_splice (A B : ℂ) (t : ℝ) :
-    crossR2 A B (AffineMap.lineMap A B t) = 0 := by
-  unfold crossR2
-  simp only [AffineMap.lineMap_apply, vsub_eq_sub, vadd_eq_add,
-    Complex.sub_re, Complex.sub_im, Complex.add_re, Complex.add_im,
-    Complex.smul_re, Complex.smul_im]
-  ring
-
 /-- A segment lying on an oriented line is disjoint from a segment whose two
 endpoints lie strictly on the positive side of that line. -/
 private theorem segment_inter_eq_empty_of_crossR2_pos
@@ -46,9 +32,9 @@ private theorem segment_inter_eq_empty_of_crossR2_pos
   rcases hzAB with ⟨t, ht, rfl⟩
   rcases hzCD with ⟨s, hs, heq⟩
   have hzero : crossR2 A B (AffineMap.lineMap A B t) = 0 :=
-    crossR2_lineMap_self_splice A B t
+    crossR2_lineMap_self A B t
   have hcross := congrArg (crossR2 A B) heq
-  rw [crossR2_lineMap_splice, hzero] at hcross
+  rw [crossR2_lineMap, hzero] at hcross
   have hweight : 0 ≤ 1 - s := by linarith [hs.2]
   by_cases hs0 : s = 0
   · subst s
@@ -72,13 +58,13 @@ private theorem consecutive_segments_inter_eq_singleton_of_crossR2_pos
   rcases hzAB with ⟨t, ht, rfl⟩
   rcases hzBC with ⟨s, hs, heq⟩
   have hzero : crossR2 A B (AffineMap.lineMap A B t) = 0 :=
-    crossR2_lineMap_self_splice A B t
+    crossR2_lineMap_self A B t
   have hB : crossR2 A B B = 0 := by
     unfold crossR2
     simp only [Complex.sub_re, Complex.sub_im]
     ring
   have hcrossEq := congrArg (crossR2 A B) heq
-  rw [crossR2_lineMap_splice, hB, mul_zero, zero_add, hzero] at hcrossEq
+  rw [crossR2_lineMap, hB, mul_zero, zero_add, hzero] at hcrossEq
   have hs0 : s = 0 := by nlinarith [hs.1]
   simpa [hs0] using heq.symm
 

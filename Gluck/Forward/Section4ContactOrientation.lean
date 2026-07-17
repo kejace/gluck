@@ -137,57 +137,6 @@ private theorem lineMap_parameter_mem_Icc_of_mem_closedBall_of_boundary
       simpa [Metric.mem_ball, dist_comm] using hBball
     linarith
 
-private theorem crossR2_lineMap_right_disk (A B C D : ℂ) (t : ℝ) :
-    Gluck.Discrete.crossR2 A B ((AffineMap.lineMap C D) t) =
-      (1 - t) * Gluck.Discrete.crossR2 A B C +
-        t * Gluck.Discrete.crossR2 A B D := by
-  unfold Gluck.Discrete.crossR2
-  simp only [AffineMap.lineMap_apply, vsub_eq_sub, vadd_eq_add,
-    Complex.sub_re, Complex.sub_im, Complex.add_re, Complex.add_im,
-    Complex.smul_re, Complex.smul_im]
-  ring
-
-private theorem exists_lineMap_eq_of_crossR2_eq_zero_disk {A B Y : ℂ}
-    (hAB : A ≠ B)
-    (hcross : Gluck.Discrete.crossR2 A B Y = 0) :
-    ∃ s : ℝ, (AffineMap.lineMap A B) s = Y := by
-  by_cases hre : B.re - A.re = 0
-  · have him : B.im - A.im ≠ 0 := by
-      intro him
-      apply hAB
-      apply Complex.ext <;> linarith
-    have hYre : Y.re - A.re = 0 := by
-      unfold Gluck.Discrete.crossR2 at hcross
-      simp only [Complex.sub_re, Complex.sub_im] at hcross
-      have hmul : (B.im - A.im) * (Y.re - A.re) = 0 := by
-        rw [hre] at hcross
-        linarith
-      exact (mul_eq_zero.mp hmul).resolve_left him
-    refine ⟨(Y.im - A.im) / (B.im - A.im), ?_⟩
-    rw [AffineMap.lineMap_apply]
-    apply Complex.ext
-    · unfold Gluck.Discrete.crossR2 at hcross
-      simp only [vsub_eq_sub, vadd_eq_add, Complex.add_re, Complex.smul_re,
-        Complex.sub_re, Complex.sub_im, smul_eq_mul] at hcross ⊢
-      rw [hre, mul_zero, zero_add]
-      linarith
-    · simp only [vsub_eq_sub, vadd_eq_add, Complex.add_im, Complex.smul_im,
-        Complex.sub_im, smul_eq_mul]
-      field_simp
-      ring
-  · refine ⟨(Y.re - A.re) / (B.re - A.re), ?_⟩
-    rw [AffineMap.lineMap_apply]
-    apply Complex.ext
-    · simp only [vsub_eq_sub, vadd_eq_add, Complex.add_re, Complex.smul_re,
-        Complex.sub_re, smul_eq_mul]
-      field_simp
-      ring
-    · unfold Gluck.Discrete.crossR2 at hcross
-      simp only [vsub_eq_sub, vadd_eq_add, Complex.add_im, Complex.smul_im,
-        Complex.sub_re, Complex.sub_im, smul_eq_mul] at hcross ⊢
-      field_simp
-      nlinarith
-
 /-- Opposite strict sides of a boundary chord force two disk-contained
 segments to intersect. -/
 private theorem not_crossR2_pos_neg_of_disjoint_segments_in_disk
@@ -208,12 +157,12 @@ private theorem not_crossR2_pos_neg_of_disjoint_segments_in_disk
   let Y := (AffineMap.lineMap C D) t
   have hcrossY : Gluck.Discrete.crossR2 A B Y = 0 := by
     dsimp [Y]
-    rw [crossR2_lineMap_right_disk]
+    rw [Gluck.Discrete.crossR2_lineMap]
     change (1 - t) * α + t * β = 0
     dsimp [t]
     field_simp [hden.ne']
     ring
-  obtain ⟨s, hs⟩ := exists_lineMap_eq_of_crossR2_eq_zero_disk hAB hcrossY
+  obtain ⟨s, hs⟩ := Gluck.Discrete.exists_lineMap_eq_of_crossR2_eq_zero hAB hcrossY
   have hCball : C ∈ Metric.closedBall O R := by
     simpa [Metric.mem_closedBall, dist_comm] using hC
   have hDball : D ∈ Metric.closedBall O R := by
@@ -259,7 +208,7 @@ theorem mem_boundaryChord_of_cross_eq_zero
     (hY : dist O Y ≤ R)
     (hcross : Gluck.Discrete.crossR2 A B Y = 0) :
     Y ∈ segment ℝ A B := by
-  obtain ⟨s, hs⟩ := exists_lineMap_eq_of_crossR2_eq_zero_disk hAB hcross
+  obtain ⟨s, hs⟩ := Gluck.Discrete.exists_lineMap_eq_of_crossR2_eq_zero hAB hcross
   have hsIcc : s ∈ Set.Icc (0 : ℝ) 1 :=
     lineMap_parameter_mem_Icc_of_mem_closedBall_of_boundary
       hAB hA hB hs.symm hY
@@ -306,7 +255,7 @@ private theorem first_boundary_edge_other_vertex_cross_ne_zero
     Gluck.Discrete.crossR2 (v 0) (v 1) (v (j : ZMod n)) ≠ 0 := by
   intro hcross
   have h01 : v 0 ≠ v 1 := by simpa using hsimple.1 (0 : ZMod n)
-  obtain ⟨s, hs⟩ := exists_lineMap_eq_of_crossR2_eq_zero_disk h01 hcross
+  obtain ⟨s, hs⟩ := Gluck.Discrete.exists_lineMap_eq_of_crossR2_eq_zero h01 hcross
   have hsIcc : s ∈ Set.Icc (0 : ℝ) 1 :=
     lineMap_parameter_mem_Icc_of_mem_closedBall_of_boundary
       h01 h0 h1 hs.symm (hcontains (j : ZMod n))

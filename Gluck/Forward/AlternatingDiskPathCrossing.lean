@@ -29,14 +29,6 @@ open Gluck.Discrete Gluck.Topology
 open Metric Set
 open scoped Real unitInterval
 
-private theorem crossR2_lineMap_self_crosscut (A B : ℂ) (t : ℝ) :
-    crossR2 A B (AffineMap.lineMap A B t) = 0 := by
-  unfold crossR2
-  simp only [AffineMap.lineMap_apply, vsub_eq_sub, vadd_eq_add,
-    Complex.sub_re, Complex.sub_im, Complex.add_re, Complex.add_im,
-    Complex.smul_re, Complex.smul_im]
-  ring
-
 private theorem left_eq_lineMap_add_neg_smul (A B : ℂ) (t : ℝ) :
     A = AffineMap.lineMap A B t + (-t) • (B - A) := by
   rw [AffineMap.lineMap_apply_module]
@@ -110,7 +102,7 @@ theorem exists_strict_chord_intersection_parameters
         crossR2 A B C =
             crossR2 A B (AffineMap.lineMap C D (0 : ℝ)) := by simp
         _ = crossR2 A B (AffineMap.lineMap A B s) := by rw [hline]
-        _ = 0 := crossR2_lineMap_self_crosscut A B s
+        _ = 0 := crossR2_lineMap_self A B s
     linarith
   have ht1 : t < 1 := by
     have ht1le := ht.2
@@ -122,7 +114,7 @@ theorem exists_strict_chord_intersection_parameters
         crossR2 A B D =
             crossR2 A B (AffineMap.lineMap C D (1 : ℝ)) := by simp
         _ = crossR2 A B (AffineMap.lineMap A B s) := by rw [hline]
-        _ = 0 := crossR2_lineMap_self_crosscut A B s
+        _ = 0 := crossR2_lineMap_self A B s
     linarith
   have hXopen : X ∈ openSegment ℝ C D := by
     rw [← htX]

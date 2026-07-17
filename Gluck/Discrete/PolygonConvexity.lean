@@ -413,63 +413,40 @@ private theorem crossR2_edge_vectors (A B C : ℂ) :
   simp
   ring
 
-/-- The natural-lift edges strictly separated in an unwrapped period are
-disjoint by `IsSimplePolygon`. -/
-private theorem lifted_edges_disjoint [NeZero n] {v : ZMod n → ℂ}
-    (hsimple : IsSimplePolygon v) {i j : ℕ}
-    (hjn : j + 1 < n) (hij : i + 1 < j) :
+/-- Natural-lift edges that do not share a cyclic endpoint are disjoint in a
+simple polygon.  The final hypothesis covers both an ordinary later edge and
+the closing edge of the chosen unwrapped period. -/
+theorem IsSimplePolygon.natural_edges_disjoint_of_separated [NeZero n]
+    {v : ZMod n → ℂ} (hsimple : IsSimplePolygon v) {i j : ℕ}
+    (hij : i + 1 < j) (hjn : j < n) (hwrap : j + 1 < n ∨ 0 < i) :
     Disjoint
       (segment ℝ (cyclicVertex v i) (cyclicVertex v (i + 1)))
       (segment ℝ (cyclicVertex v j) (cyclicVertex v (j + 1))) := by
+  have hi : i < n := by omega
+  have hi1 : i + 1 < n := by omega
   have hij0 : (i : ZMod n) ≠ (j : ZMod n) :=
-    zmod_natCast_ne_of_lt (by omega) (by omega) (by omega)
-  have hi1jNat : ((i + 1 : ℕ) : ZMod n) ≠ (j : ZMod n) :=
-    zmod_natCast_ne_of_lt (by omega) (by omega) (by omega)
+    zmod_natCast_ne_of_lt hi hjn (by omega)
   have hi1j : (i : ZMod n) + 1 ≠ (j : ZMod n) := by
-    simpa [Nat.cast_add] using hi1jNat
-  have hj1iNat : ((j + 1 : ℕ) : ZMod n) ≠ (i : ZMod n) :=
-    zmod_natCast_ne_of_lt hjn (by omega) (by omega)
+    simpa [Nat.cast_add] using
+      zmod_natCast_ne_of_lt hi1 hjn (by omega : i + 1 ≠ j)
   have hj1i : (j : ZMod n) + 1 ≠ (i : ZMod n) := by
-    simpa [Nat.cast_add] using hj1iNat
+    rcases hwrap with hj1n | hi0
+    · simpa [Nat.cast_add] using
+        zmod_natCast_ne_of_lt hj1n hi (by omega : j + 1 ≠ i)
+    · intro heq
+      by_cases hj1n : j + 1 < n
+      · exact (zmod_natCast_ne_of_lt hj1n hi (by omega : j + 1 ≠ i))
+          (by simpa [Nat.cast_add] using heq)
+      · have hj1eq : ((j + 1 : ℕ) : ZMod n) = (i : ZMod n) := by
+          simpa [Nat.cast_add] using heq
+        have hj1 : j + 1 = n := by omega
+        rw [hj1, ZMod.natCast_self] at hj1eq
+        have hival := congrArg ZMod.val hj1eq.symm
+        simp only [ZMod.val_natCast_of_lt hi, ZMod.val_zero] at hival
+        omega
   rw [Set.disjoint_iff_inter_eq_empty]
   simpa [cyclicVertex, Nat.cast_add] using
     hsimple.2.2 (i : ZMod n) (j : ZMod n) hij0 hi1j hj1i
-
-/-- An interior lifted edge is disjoint from the closing edge of the same
-period. -/
-private theorem lifted_edge_closing_disjoint [NeZero n] {v : ZMod n → ℂ}
-    (hsimple : IsSimplePolygon v) {i : ℕ}
-    (hi : 1 ≤ i) (hin : i + 1 < n - 1) :
-    Disjoint
-      (segment ℝ (cyclicVertex v i) (cyclicVertex v (i + 1)))
-      (segment ℝ (cyclicVertex v (n - 1)) (cyclicVertex v n)) := by
-  have hnpos : 0 < n := Nat.pos_of_ne_zero (NeZero.ne n)
-  have hlast : n - 1 < n := by omega
-  have hiLast : (i : ZMod n) ≠ ((n - 1 : ℕ) : ZMod n) :=
-    zmod_natCast_ne_of_lt (by omega) hlast (by omega)
-  have hi1LastNat : ((i + 1 : ℕ) : ZMod n) ≠
-      ((n - 1 : ℕ) : ZMod n) :=
-    zmod_natCast_ne_of_lt (by omega) hlast (by omega)
-  have hi1Last : (i : ZMod n) + 1 ≠ ((n - 1 : ℕ) : ZMod n) := by
-    simpa [Nat.cast_add] using hi1LastNat
-  have hzeroi : (0 : ZMod n) ≠ (i : ZMod n) := by
-    simpa using
-      (zmod_natCast_ne_of_lt (a := 0) (b := i) hnpos (by omega) (by omega))
-  have hlastSucc : ((n - 1 : ℕ) : ZMod n) + 1 = 0 := by
-    calc
-      ((n - 1 : ℕ) : ZMod n) + 1 = ((n - 1 + 1 : ℕ) : ZMod n) := by
-        push_cast
-        ring
-      _ = (n : ℕ) := by congr 1; omega
-      _ = 0 := ZMod.natCast_self n
-  have hlastSuccI : ((n - 1 : ℕ) : ZMod n) + 1 ≠ (i : ZMod n) := by
-    rw [hlastSucc]
-    exact hzeroi
-  rw [Set.disjoint_iff_inter_eq_empty]
-  have hraw := hsimple.2.2 (i : ZMod n) ((n - 1 : ℕ) : ZMod n)
-    hiLast hi1Last hlastSuccI
-  rw [hlastSucc] at hraw
-  simpa [cyclicVertex, Nat.cast_add] using hraw
 
 /-! ## A canonical lowest-vertex cut -/
 
@@ -723,8 +700,8 @@ private theorem hopf_open_chain_sum [NeZero n] {v : ZMod n → ℂ}
   have hsquare : ∀ i j, i + 1 < j → j ≤ n - 3 + 1 →
       H i j + V i (j + 1) = V i j + H (i + 1) j := by
     intro i j hij hj
-    have hdisj := lifted_edges_disjoint hsimple
-      (i := i) (j := j) (by omega) hij
+    have hdisj := hsimple.natural_edges_disjoint_of_separated
+      (i := i) (j := j) hij (by omega) (Or.inl (by omega))
     simpa [H, V, cyclicSecant] using
       principalTurn_secant_square_of_disjoint_segments hdisj
   have hgrid := hopf_grid_sum T H V htriangle (n - 3) hsquare
@@ -1187,13 +1164,13 @@ private theorem hopf_closed_boundary_sum [NeZero n] {v : ZMod n → ℂ}
       H r (n - 2) + V r (n - 2 + 1) =
         V r (n - 2) + H (r + 1) (n - 2) := by
     intro r hr
-    have hdisj := lifted_edge_closing_disjoint hsimple
-      (i := r + 1) (by omega) (by omega)
+    have hdisj := hsimple.natural_edges_disjoint_of_separated
+      (i := r + 1) (j := n - 1) (by omega) (by omega) (Or.inr (by omega))
     have hnm1 : n - 2 + 1 = n - 1 := by omega
     have hnm2 : n - 2 + 2 = n := by omega
     have hlast : n - 1 + 1 = n := by omega
     simp only [H, V, hnm1, hnm2, hlast]
-    simpa [cyclicSecant, add_assoc] using
+    simpa [cyclicSecant, add_assoc, hlast] using
       principalTurn_secant_square_of_disjoint_segments hdisj
   have htransport := hopf_column_transport T H V htriangle
     (m := n - 2) (by omega) hsquare

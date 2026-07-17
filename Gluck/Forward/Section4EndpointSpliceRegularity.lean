@@ -227,6 +227,29 @@ theorem circlePoint_sub_center (O : ℂ) (R θ : ℝ) :
     circlePoint O R θ - O = (R : ℝ) • circleRadial θ := by
   apply Complex.ext <;> simp [circlePoint, circleRadial]
 
+/-- Polarization of the power of a point relative to the parametrized circle. -/
+theorem dist_center_sq_eq_dist_circlePoint_sq_add (O P : ℂ) (R θ : ℝ) :
+    dist O P ^ 2 = dist (circlePoint O R θ) P ^ 2 +
+      2 * R * dotR2 (circleRadial θ) (P - circlePoint O R θ) + R ^ 2 := by
+  have hdecomp : P - O =
+      (P - circlePoint O R θ) + (R : ℝ) • circleRadial θ := by
+    rw [← circlePoint_sub_center O R θ]
+    ring
+  calc
+    dist O P ^ 2 = dotR2 (P - O) (P - O) := by
+      rw [dotR2_self_eq_norm_sq, dist_eq_norm, norm_sub_rev]
+    _ = dotR2 ((P - circlePoint O R θ) + (R : ℝ) • circleRadial θ)
+        ((P - circlePoint O R θ) + (R : ℝ) • circleRadial θ) := by rw [hdecomp]
+    _ = dotR2 (P - circlePoint O R θ) (P - circlePoint O R θ) +
+        2 * R * dotR2 (circleRadial θ) (P - circlePoint O R θ) + R ^ 2 := by
+      simp only [dotR2_add_left, dotR2_add_right, dotR2_smul_left, dotR2_smul_right,
+        dotR2_circleRadial_self, mul_one]
+      rw [dotR2_comm (P - circlePoint O R θ) (circleRadial θ)]
+      ring
+    _ = dist (circlePoint O R θ) P ^ 2 +
+        2 * R * dotR2 (circleRadial θ) (P - circlePoint O R θ) + R ^ 2 := by
+      rw [dotR2_self_eq_norm_sq, dist_eq_norm, norm_sub_rev]
+
 theorem endpointPredecessor_cross_eq
     (O P : ℂ) (R θ δ : ℝ) :
     crossR2 (circlePoint O R (θ - δ)) (circlePoint O R θ) P =
@@ -456,20 +479,8 @@ theorem dotR2_radial_circlePoint_sub_neg
     dotR2 (circleRadial θ) (P - circlePoint O R θ) < 0 := by
   have hsq : dist O P ^ 2 < R ^ 2 :=
     sq_lt_sq' (by linarith [dist_nonneg (x := O) (y := P)]) hP
-  rw [show dist O P = ‖P - O‖ by rw [dist_eq_norm, norm_sub_rev]] at hsq
-  rw [Complex.sq_norm, Complex.normSq_apply] at hsq
-  have hdecomp : P - O =
-      (P - circlePoint O R θ) + (R : ℝ) • circleRadial θ := by
-    rw [← circlePoint_sub_center O R θ]
-    ring
-  rw [hdecomp] at hsq
-  dsimp [dotR2]
-  simp only [Complex.add_re, Complex.add_im, Complex.sub_re, Complex.sub_im,
-    Complex.smul_re, Complex.smul_im, smul_eq_mul, circleRadial_re,
-    circleRadial_im] at hsq ⊢
-  nlinarith [Real.sin_sq_add_cos_sq θ,
-    sq_nonneg (P.re - (circlePoint O R θ).re),
-    sq_nonneg (P.im - (circlePoint O R θ).im)]
+  have hpower := dist_center_sq_eq_dist_circlePoint_sq_add O P R θ
+  nlinarith [sq_nonneg (dist (circlePoint O R θ) P)]
 
 theorem circleTangent_dot_nonneg_of_leftEndpoint_support_of_interior
     {O P : ℂ} {R θ α : ℝ}

@@ -52,20 +52,6 @@ private theorem add_two_ne_add_one {n : ℕ} [NeZero n]
       _ = 0 := sub_self (i + 1)
   exact one_ne_zero_of_three_le hn hone
 
-private theorem crossR2_lineMap (A B X Y : ℂ) (t : ℝ) :
-    crossR2 A B (AffineMap.lineMap X Y t) =
-      (1 - t) * crossR2 A B X + t * crossR2 A B Y := by
-  simp [AffineMap.lineMap_apply_module, crossR2]
-  ring
-
-private theorem crossR2_lineMap_self (A B : ℂ) (t : ℝ) :
-    crossR2 A B (AffineMap.lineMap A B t) = 0 := by
-  unfold crossR2
-  simp only [AffineMap.lineMap_apply, vsub_eq_sub, vadd_eq_add,
-    Complex.sub_re, Complex.sub_im, Complex.add_re, Complex.add_im,
-    Complex.smul_re, Complex.smul_im]
-  ring
-
 /-- Strict support by every oriented edge forces positive orientation at every
 vertex when the cyclic tuple has at least three vertices. -/
 theorem positiveOrientation_of_strictConvexEdgeSupport

@@ -24,19 +24,8 @@ private theorem dist_circlePoint_sq_lt_neg_two_mul_radial_of_interior_aux
       -2 * R * dotR2 (circleRadial θ) (P - circlePoint O R θ) := by
   have hsq : dist O P ^ 2 < R ^ 2 :=
     sq_lt_sq' (by linarith [dist_nonneg (x := O) (y := P)]) hP
-  rw [show dist O P = ‖P - O‖ by rw [dist_eq_norm, norm_sub_rev]] at hsq
-  rw [Complex.sq_norm, Complex.normSq_apply] at hsq
-  have hdecomp : P - O =
-      (P - circlePoint O R θ) + (R : ℝ) • circleRadial θ := by
-    rw [← circlePoint_sub_center O R θ]
-    ring
-  rw [hdecomp] at hsq
-  rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply]
-  dsimp [dotR2]
-  simp only [Complex.add_re, Complex.add_im, Complex.sub_re, Complex.sub_im,
-    Complex.smul_re, Complex.smul_im, smul_eq_mul, circleRadial_re,
-    circleRadial_im] at hsq ⊢
-  nlinarith [Real.sin_sq_add_cos_sq θ]
+  have hpower := dist_center_sq_eq_dist_circlePoint_sq_add O P R θ
+  linarith
 
 /-- The chord from angle `θ - δ` to `θ` has its usual half-angle
 length. -/
@@ -45,33 +34,10 @@ theorem dist_circlePoint_sub_eq_two_mul_sin_half
     (hδ0 : 0 < δ) (hδ2π : δ < 2 * Real.pi) :
     dist (circlePoint O R (θ - δ)) (circlePoint O R θ) =
       2 * R * Real.sin (δ / 2) := by
-  have hrhs : 0 ≤ 2 * R * Real.sin (δ / 2) := by
-    have hhalfPos : 0 < δ / 2 := by linarith
-    have hhalfPi : δ / 2 < Real.pi := by linarith
-    exact (mul_nonneg (mul_nonneg (by norm_num) hR.le)
-      (Real.sin_pos_of_pos_of_lt_pi hhalfPos hhalfPi).le)
-  apply (sq_eq_sq₀ dist_nonneg hrhs).mp
-  rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply]
-  simp only [Complex.sub_re, Complex.sub_im, circlePoint_re, circlePoint_im]
-  rw [Real.cos_sub, Real.sin_sub]
-  have hsin := Real.sin_sq_add_cos_sq θ
-  have hhalf := Real.sin_sq_add_cos_sq (δ / 2)
-  have hcosTwo := Real.cos_two_mul (δ / 2)
-  rw [show 2 * (δ / 2) = δ by ring] at hcosTwo
-  simp only [← pow_two]
-  calc
-    (O.re + R * (Real.cos θ * Real.cos δ + Real.sin θ * Real.sin δ) -
-            (O.re + R * Real.cos θ)) ^ 2 +
-        (O.im + R * (Real.sin θ * Real.cos δ - Real.cos θ * Real.sin δ) -
-            (O.im + R * Real.sin θ)) ^ 2 =
-        R ^ 2 * (Real.cos θ ^ 2 + Real.sin θ ^ 2) *
-          ((Real.cos δ - 1) ^ 2 + Real.sin δ ^ 2) := by ring
-    _ = R ^ 2 * ((Real.cos δ - 1) ^ 2 + Real.sin δ ^ 2) := by
-      rw [add_comm (Real.cos θ ^ 2), hsin, mul_one]
-    _ = 2 * R ^ 2 * (1 - Real.cos δ) := by
-      nlinarith [Real.sin_sq_add_cos_sq δ]
-    _ = (2 * R * Real.sin (δ / 2)) ^ 2 := by
-      nlinarith
+  have hsin : 0 < Real.sin (δ / 2) :=
+    Real.sin_pos_of_pos_of_lt_pi (by linarith) (by linarith)
+  rw [dist_circlePoint_eq_two_mul_abs_sin_half, show θ - (θ - δ) = δ by ring,
+    abs_of_pos hR, abs_of_pos hsin]
 
 /-- Symmetric half-angle formula for the forward circle chord. -/
 theorem dist_circlePoint_add_eq_two_mul_sin_half
@@ -79,9 +45,10 @@ theorem dist_circlePoint_add_eq_two_mul_sin_half
     (hδ0 : 0 < δ) (hδ2π : δ < 2 * Real.pi) :
     dist (circlePoint O R θ) (circlePoint O R (θ + δ)) =
       2 * R * Real.sin (δ / 2) := by
-  simpa only [show θ + δ - δ = θ by ring] using
-    (dist_circlePoint_sub_eq_two_mul_sin_half
-      (O := O) (R := R) (θ := θ + δ) hR hδ0 hδ2π)
+  have hsin : 0 < Real.sin (δ / 2) :=
+    Real.sin_pos_of_pos_of_lt_pi (by linarith) (by linarith)
+  rw [dist_circlePoint_eq_two_mul_abs_sin_half, show θ + δ - θ = δ by ring,
+    abs_of_pos hR, abs_of_pos hsin]
 
 private noncomputable def endpointPredecessorCurvatureModel
     (O P : ℂ) (R θ δ : ℝ) : ℝ :=

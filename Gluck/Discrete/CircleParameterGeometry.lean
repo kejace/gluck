@@ -44,6 +44,34 @@ noncomputable def circlePoint (O : ℂ) (R θ : ℝ) : ℂ :=
   rw [dist_eq_norm]
   simp [circlePoint]
 
+/-- The chord length between two arbitrary points on a parametrized circle. -/
+theorem dist_circlePoint_eq_two_mul_abs_sin_half (O : ℂ) (R θ₀ θ₁ : ℝ) :
+    dist (circlePoint O R θ₀) (circlePoint O R θ₁) =
+      2 * |R| * |Real.sin ((θ₁ - θ₀) / 2)| := by
+  rw [dist_eq_norm]
+  have hexp : Complex.exp ((θ₁ : ℂ) * Complex.I) =
+      Complex.exp ((θ₀ : ℂ) * Complex.I) *
+        Complex.exp (((θ₁ - θ₀ : ℝ) : ℂ) * Complex.I) := by
+    rw [← Complex.exp_add]
+    congr 1
+    rw [Complex.ofReal_sub]
+    ring_nf
+  rw [circlePoint, circlePoint, show O + (R : ℂ) * Complex.exp ((θ₀ : ℂ) * Complex.I) -
+      (O + (R : ℂ) * Complex.exp ((θ₁ : ℂ) * Complex.I)) =
+      (R : ℂ) * Complex.exp ((θ₀ : ℂ) * Complex.I) *
+        (1 - Complex.exp (((θ₁ - θ₀ : ℝ) : ℂ) * Complex.I)) by rw [hexp]; ring_nf,
+    norm_mul, norm_mul]
+  rw [show Complex.exp (((θ₁ - θ₀ : ℝ) : ℂ) * Complex.I) =
+      Complex.exp (Complex.I * (θ₁ - θ₀ : ℝ)) by ring_nf]
+  rw [show ‖1 - Complex.exp (Complex.I * (θ₁ - θ₀ : ℝ))‖ =
+      ‖Complex.exp (Complex.I * (θ₁ - θ₀ : ℝ)) - 1‖ by
+        rw [← norm_neg]
+        congr 1
+        ring_nf,
+    Complex.norm_exp_I_mul_ofReal_sub_one]
+  simp
+  ring_nf
+
 /-- The cross product of three circle points, expanded as a cyclic sum of
 sines of angle differences. -/
 theorem crossR2_circlePoint_eq_sin_sub

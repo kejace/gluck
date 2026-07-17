@@ -31,21 +31,18 @@ private theorem cyclicLift_succ {n : ℕ} (c : ZMod n) (k : ℕ) :
 
 private theorem crossR2_cyclic {A B C : ℂ} :
     Gluck.Discrete.crossR2 A B C = Gluck.Discrete.crossR2 B C A := by
-  unfold Gluck.Discrete.crossR2
-  simp only [Complex.sub_re, Complex.sub_im]
-  ring
+  exact (Gluck.Discrete.crossR2_cycle A B C).symm
 
 private theorem crossR2_swap {A B C : ℂ} :
     Gluck.Discrete.crossR2 A B C = -Gluck.Discrete.crossR2 A C B := by
-  unfold Gluck.Discrete.crossR2
-  simp only [Complex.sub_re, Complex.sub_im]
-  ring
+  exact Gluck.Discrete.crossR2_swap A C B
 
 private theorem crossR2_swap_first {A B C : ℂ} :
     Gluck.Discrete.crossR2 A B C = -Gluck.Discrete.crossR2 B A C := by
-  unfold Gluck.Discrete.crossR2
-  simp only [Complex.sub_re, Complex.sub_im]
-  ring
+  calc
+    Gluck.Discrete.crossR2 A B C = Gluck.Discrete.crossR2 B C A :=
+      (Gluck.Discrete.crossR2_cycle A B C).symm
+    _ = -Gluck.Discrete.crossR2 B A C := Gluck.Discrete.crossR2_swap B A C
 
 /-- Positive oriented areas are transitive inside a common open half-plane
 based at `A → U`. -/
@@ -235,57 +232,6 @@ theorem mem_gap_of_crossR2_nonneg {n : ℕ} [NeZero n]
   exact (not_lt_of_ge hx)
     (crossR2_gap_neg_of_not_mem hsupport c hpq hqn hnot)
 
-private theorem exists_lineMap_eq_of_crossR2_eq_zero {A B Y : ℂ}
-    (hAB : A ≠ B)
-    (hcross : Gluck.Discrete.crossR2 A B Y = 0) :
-    ∃ s : ℝ, (AffineMap.lineMap A B) s = Y := by
-  by_cases hre : B.re - A.re = 0
-  · have him : B.im - A.im ≠ 0 := by
-      intro him
-      apply hAB
-      apply Complex.ext <;> linarith
-    have hYre : Y.re - A.re = 0 := by
-      unfold Gluck.Discrete.crossR2 at hcross
-      simp only [Complex.sub_re, Complex.sub_im] at hcross
-      have hmul : (B.im - A.im) * (Y.re - A.re) = 0 := by
-        rw [hre] at hcross
-        linarith
-      exact (mul_eq_zero.mp hmul).resolve_left him
-    refine ⟨(Y.im - A.im) / (B.im - A.im), ?_⟩
-    rw [AffineMap.lineMap_apply]
-    apply Complex.ext
-    · unfold Gluck.Discrete.crossR2 at hcross
-      simp only [vsub_eq_sub, vadd_eq_add, Complex.add_re, Complex.smul_re,
-        Complex.sub_re, Complex.sub_im, smul_eq_mul] at hcross ⊢
-      rw [hre, mul_zero, zero_add]
-      linarith
-    · simp only [vsub_eq_sub, vadd_eq_add, Complex.add_im, Complex.smul_im,
-        Complex.sub_im, smul_eq_mul]
-      field_simp
-      ring
-  · refine ⟨(Y.re - A.re) / (B.re - A.re), ?_⟩
-    rw [AffineMap.lineMap_apply]
-    apply Complex.ext
-    · simp only [vsub_eq_sub, vadd_eq_add, Complex.add_re, Complex.smul_re,
-        Complex.sub_re, smul_eq_mul]
-      field_simp
-      ring
-    · unfold Gluck.Discrete.crossR2 at hcross
-      simp only [vsub_eq_sub, vadd_eq_add, Complex.add_im, Complex.smul_im,
-        Complex.sub_re, Complex.sub_im, smul_eq_mul] at hcross ⊢
-      field_simp
-      nlinarith
-
-private theorem crossR2_lineMap_right (A B C D : ℂ) (t : ℝ) :
-    Gluck.Discrete.crossR2 A B ((AffineMap.lineMap C D) t) =
-      (1 - t) * Gluck.Discrete.crossR2 A B C +
-        t * Gluck.Discrete.crossR2 A B D := by
-  unfold Gluck.Discrete.crossR2
-  simp only [AffineMap.lineMap_apply, vsub_eq_sub, vadd_eq_add,
-    Complex.sub_re, Complex.sub_im, Complex.add_re, Complex.add_im,
-    Complex.smul_re, Complex.smul_im]
-  ring
-
 private theorem strictConvexEdgeSupport_cross_nonneg {n : ℕ}
     {v : ZMod n → ℂ} (hsupport : CyclicChordStrictConvexEdgeSupport v)
     (i x : ZMod n) :
@@ -306,7 +252,7 @@ private theorem lineMap_parameter_nonneg_of_left_support
     (hPY : 0 ≤ Gluck.Discrete.crossR2 P A Y) :
     0 ≤ s := by
   subst Y
-  rw [crossR2_lineMap_right] at hPY
+  rw [Gluck.Discrete.crossR2_lineMap] at hPY
   have hzero : Gluck.Discrete.crossR2 P A A = 0 := by
     simp [Gluck.Discrete.crossR2]
     ring
@@ -321,7 +267,7 @@ private theorem lineMap_parameter_le_one_of_right_support
     (hNY : 0 ≤ Gluck.Discrete.crossR2 B N Y) :
     s ≤ 1 := by
   subst Y
-  rw [crossR2_lineMap_right] at hNY
+  rw [Gluck.Discrete.crossR2_lineMap] at hNY
   have hzero : Gluck.Discrete.crossR2 B N B = 0 := by
     simp [Gluck.Discrete.crossR2]
   rw [hzero] at hNY
@@ -345,12 +291,12 @@ private theorem exists_lineMap_crossing_of_cross_pos_neg
   let Y := (AffineMap.lineMap Z X) t
   have hcrossY : Gluck.Discrete.crossR2 A B Y = 0 := by
     dsimp [Y]
-    rw [crossR2_lineMap_right]
+    rw [Gluck.Discrete.crossR2_lineMap]
     change (1 - t) * α + t * β = 0
     dsimp [t]
     field_simp [hden.ne']
     ring
-  obtain ⟨s, hs⟩ := exists_lineMap_eq_of_crossR2_eq_zero hAB hcrossY
+  obtain ⟨s, hs⟩ := Gluck.Discrete.exists_lineMap_eq_of_crossR2_eq_zero hAB hcrossY
   exact ⟨t, ⟨ht0, ht1⟩, s, hs.symm⟩
 
 /-- The open segment from an interior gap vertex to a vertex outside the
@@ -416,13 +362,13 @@ theorem exists_gap_chord_crossing {n : ℕ} [NeZero n]
     simpa [B, N] using h
   have hPY : 0 ≤ Gluck.Discrete.crossR2 P A Y := by
     dsimp [Y]
-    rw [crossR2_lineMap_right]
+    rw [Gluck.Discrete.crossR2_lineMap]
     exact add_nonneg
       (mul_nonneg (sub_nonneg.mpr ht.2.le) hPZ)
       (mul_nonneg ht.1.le hPX)
   have hBY : 0 ≤ Gluck.Discrete.crossR2 B N Y := by
     dsimp [Y]
-    rw [crossR2_lineMap_right]
+    rw [Gluck.Discrete.crossR2_lineMap]
     exact add_nonneg
       (mul_nonneg (sub_nonneg.mpr ht.2.le) hBZ)
       (mul_nonneg ht.1.le hBX)

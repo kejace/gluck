@@ -440,40 +440,32 @@ theorem not_constant_signedMengerProfile_directIsometry_iff {n : ℕ}
 /-- Cyclic permutations preserve the oriented twice-area. -/
 theorem crossR2_cycle (A B C : ℂ) :
     Gluck.Discrete.crossR2 B C A = Gluck.Discrete.crossR2 A B C := by
-  unfold Gluck.Discrete.crossR2
-  simp only [Complex.sub_re, Complex.sub_im]
-  ring_nf
+  exact Gluck.Discrete.crossR2_cycle A B C
 
 /-- Two cyclic steps also preserve oriented twice-area. -/
 theorem crossR2_cycle_two (A B C : ℂ) :
     Gluck.Discrete.crossR2 C A B = Gluck.Discrete.crossR2 A B C := by
-  exact (crossR2_cycle C A B).symm
+  exact Gluck.Discrete.crossR2_cycle_two A B C
 
 /-- Swapping the last two vertices reverses the oriented twice-area. -/
 theorem crossR2_swap (A B C : ℂ) :
     Gluck.Discrete.crossR2 A C B = -Gluck.Discrete.crossR2 A B C := by
-  unfold Gluck.Discrete.crossR2
-  simp only [Complex.sub_re, Complex.sub_im]
-  ring_nf
+  exact Gluck.Discrete.crossR2_swap A B C
 
 /-- Reversing a triple reverses the oriented twice-area. -/
 theorem crossR2_reverse (A B C : ℂ) :
     Gluck.Discrete.crossR2 C B A = -Gluck.Discrete.crossR2 A B C := by
-  rw [← crossR2_cycle_two C B A, crossR2_swap]
+  exact Gluck.Discrete.crossR2_reverse A B C
 
 /-- The oriented twice-area vanishes when the third point is the left endpoint. -/
 theorem crossR2_left_endpoint (A B : ℂ) :
     Gluck.Discrete.crossR2 A B A = 0 := by
-  unfold Gluck.Discrete.crossR2
-  simp only [Complex.sub_re, Complex.sub_im]
-  ring_nf
+  exact Gluck.Discrete.crossR2_left_endpoint A B
 
 /-- The oriented twice-area vanishes when the third point is the right endpoint. -/
 theorem crossR2_right_endpoint (A B : ℂ) :
     Gluck.Discrete.crossR2 A B B = 0 := by
-  unfold Gluck.Discrete.crossR2
-  simp only [Complex.sub_re, Complex.sub_im]
-  ring_nf
+  exact Gluck.Discrete.crossR2_right_endpoint A B
 
 /-- Unnormalised scalar coordinate along the oriented base edge `A → B`. -/
 def lineCoordR2 (A B Z : ℂ) : ℝ :=
@@ -2821,75 +2813,53 @@ theorem edgePoint_mem_own_dahlbergRegion {A B C : ℂ}
 theorem signedMengerR2_eq_zero_of_cross_eq_zero {A B C : ℂ}
     (hcross : Gluck.Discrete.crossR2 A B C = 0) :
     Gluck.Discrete.signedMengerR2 A B C = 0 := by
-  unfold Gluck.Discrete.signedMengerR2
-  rw [hcross]
-  ring
+  exact Gluck.Discrete.signedMengerR2_eq_zero_iff_crossR2_eq_zero.mpr hcross
 
 /-- Positive orientation gives positive signed Menger curvature. -/
-theorem signedMengerR2_pos_of_cross_pos {A B C : ℂ} (hAB : A ≠ B)
+theorem signedMengerR2_pos_of_cross_pos {A B C : ℂ} (_hAB : A ≠ B)
     (hcross : 0 < Gluck.Discrete.crossR2 A B C) :
     0 < Gluck.Discrete.signedMengerR2 A B C := by
-  rw [signedMengerR2_edge_parameter_of_pos hAB hcross]
-  exact normalizedCircleCurvature_pos (chordHalfLength_pos hAB).ne' _
+  exact Gluck.Discrete.signedMengerR2_pos_iff_crossR2_pos.mpr hcross
 
 /-- Negative orientation gives negative signed Menger curvature. -/
-theorem signedMengerR2_neg_of_cross_neg {A B C : ℂ} (hAB : A ≠ B)
+theorem signedMengerR2_neg_of_cross_neg {A B C : ℂ} (_hAB : A ≠ B)
     (hcross : Gluck.Discrete.crossR2 A B C < 0) :
     Gluck.Discrete.signedMengerR2 A B C < 0 := by
-  rw [signedMengerR2_edge_parameter_of_neg hAB hcross]
-  exact neg_neg_of_pos (normalizedCircleCurvature_pos (chordHalfLength_pos hAB).ne' _)
+  exact Gluck.Discrete.signedMengerR2_neg_iff_crossR2_neg.mpr hcross
 
 /-- Positive signed Menger curvature forces positive orientation over a
 nondegenerate oriented edge. -/
-theorem crossR2_pos_of_signedMengerR2_pos {A B C : ℂ} (hAB : A ≠ B)
+theorem crossR2_pos_of_signedMengerR2_pos {A B C : ℂ} (_hAB : A ≠ B)
     (hκ : 0 < Gluck.Discrete.signedMengerR2 A B C) :
     0 < Gluck.Discrete.crossR2 A B C := by
-  rcases lt_trichotomy (Gluck.Discrete.crossR2 A B C) 0 with hneg | hzero | hpos
-  · have hκneg := signedMengerR2_neg_of_cross_neg hAB hneg
-    nlinarith
-  · have hκzero := signedMengerR2_eq_zero_of_cross_eq_zero hzero
-    nlinarith
-  · exact hpos
+  exact Gluck.Discrete.signedMengerR2_pos_iff_crossR2_pos.mp hκ
 
 /-- Negative signed Menger curvature forces negative orientation over a
 nondegenerate oriented edge. -/
-theorem crossR2_neg_of_signedMengerR2_neg {A B C : ℂ} (hAB : A ≠ B)
+theorem crossR2_neg_of_signedMengerR2_neg {A B C : ℂ} (_hAB : A ≠ B)
     (hκ : Gluck.Discrete.signedMengerR2 A B C < 0) :
     Gluck.Discrete.crossR2 A B C < 0 := by
-  rcases lt_trichotomy (Gluck.Discrete.crossR2 A B C) 0 with hneg | hzero | hpos
-  · exact hneg
-  · have hκzero := signedMengerR2_eq_zero_of_cross_eq_zero hzero
-    nlinarith
-  · have hκpos := signedMengerR2_pos_of_cross_pos hAB hpos
-    nlinarith
+  exact Gluck.Discrete.signedMengerR2_neg_iff_crossR2_neg.mp hκ
 
 /-- Nonzero signed Menger curvature forces nonzero oriented area. -/
 theorem crossR2_ne_zero_of_signedMengerR2_ne_zero {A B C : ℂ}
     (hκ : Gluck.Discrete.signedMengerR2 A B C ≠ 0) :
     Gluck.Discrete.crossR2 A B C ≠ 0 := by
-  intro hcross
-  exact hκ (signedMengerR2_eq_zero_of_cross_eq_zero hcross)
+  exact mt Gluck.Discrete.signedMengerR2_eq_zero_iff_crossR2_eq_zero.mpr hκ
 
 /-- Zero signed Menger curvature forces zero oriented area over a
 nondegenerate edge. -/
-theorem crossR2_eq_zero_of_signedMengerR2_eq_zero {A B C : ℂ} (hAB : A ≠ B)
+theorem crossR2_eq_zero_of_signedMengerR2_eq_zero {A B C : ℂ} (_hAB : A ≠ B)
     (hκ : Gluck.Discrete.signedMengerR2 A B C = 0) :
     Gluck.Discrete.crossR2 A B C = 0 := by
-  rcases lt_trichotomy (Gluck.Discrete.crossR2 A B C) 0 with hneg | hzero | hpos
-  · have hκneg := signedMengerR2_neg_of_cross_neg hAB hneg
-    nlinarith
-  · exact hzero
-  · have hκpos := signedMengerR2_pos_of_cross_pos hAB hpos
-    nlinarith
+  exact Gluck.Discrete.signedMengerR2_eq_zero_iff_crossR2_eq_zero.mp hκ
 
 /-- For a nondegenerate edge, zero signed Menger curvature is equivalent to
 zero oriented area. -/
-theorem signedMengerR2_eq_zero_iff_crossR2_eq_zero {A B C : ℂ} (hAB : A ≠ B) :
+theorem signedMengerR2_eq_zero_iff_crossR2_eq_zero {A B C : ℂ} (_hAB : A ≠ B) :
     Gluck.Discrete.signedMengerR2 A B C = 0 ↔
       Gluck.Discrete.crossR2 A B C = 0 := by
-  constructor
-  · exact crossR2_eq_zero_of_signedMengerR2_eq_zero hAB
-  · exact signedMengerR2_eq_zero_of_cross_eq_zero
+  exact Gluck.Discrete.signedMengerR2_eq_zero_iff_crossR2_eq_zero
 
 /-- A point with nonzero signed Menger curvature belongs to its own Dahlberg
 edge-region. -/
@@ -7390,27 +7360,41 @@ theorem not_concyclic_of_dahlbergFourVertex_strict_orientation {n : ℕ}
 
 /-! ## Signed-Menger signs and polygon orientation -/
 
+/-- Positive polygon orientation is exactly pointwise positivity of the signed-Menger profile. -/
+theorem positivePolygonOrientation_iff_signedMengerProfile_pos {n : ℕ}
+    {v : ZMod n → ℂ} :
+    PositivePolygonOrientation v ↔ ∀ i : ZMod n, 0 < SignedMengerProfile v i := by
+  constructor
+  · intro h i
+    exact Gluck.Discrete.signedMengerR2_pos_iff_crossR2_pos.mpr (h i)
+  · intro h i
+    exact Gluck.Discrete.signedMengerR2_pos_iff_crossR2_pos.mp (h i)
+
+/-- Negative polygon orientation is exactly pointwise negativity of the signed-Menger profile. -/
+theorem negativePolygonOrientation_iff_signedMengerProfile_neg {n : ℕ}
+    {v : ZMod n → ℂ} :
+    NegativePolygonOrientation v ↔ ∀ i : ZMod n, SignedMengerProfile v i < 0 := by
+  constructor
+  · intro h i
+    exact Gluck.Discrete.signedMengerR2_neg_iff_crossR2_neg.mpr (h i)
+  · intro h i
+    exact Gluck.Discrete.signedMengerR2_neg_iff_crossR2_neg.mp (h i)
+
 /-- Positive polygon orientation gives pointwise positive signed-Menger
 profile. -/
 theorem signedMengerProfile_pos_of_positiveOrientation {n : ℕ}
-    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    {v : ZMod n → ℂ} (_hsimple : Gluck.Discrete.IsSimplePolygon v)
     (horient : PositivePolygonOrientation v) :
     ∀ i : ZMod n, 0 < SignedMengerProfile v i := by
-  intro i
-  have hAB : v (i - 1) ≠ v i := by
-    simpa using hsimple.1 (i - 1)
-  exact signedMengerR2_pos_of_cross_pos hAB (horient i)
+  exact positivePolygonOrientation_iff_signedMengerProfile_pos.mp horient
 
 /-- Negative polygon orientation gives pointwise negative signed-Menger
 profile. -/
 theorem signedMengerProfile_neg_of_negativeOrientation {n : ℕ}
-    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    {v : ZMod n → ℂ} (_hsimple : Gluck.Discrete.IsSimplePolygon v)
     (horient : NegativePolygonOrientation v) :
     ∀ i : ZMod n, SignedMengerProfile v i < 0 := by
-  intro i
-  have hAB : v (i - 1) ≠ v i := by
-    simpa using hsimple.1 (i - 1)
-  exact signedMengerR2_neg_of_cross_neg hAB (horient i)
+  exact negativePolygonOrientation_iff_signedMengerProfile_neg.mp horient
 
 /-- Positive-orientation strict adjacent-turn radius comparison along one
 oriented edge. -/
@@ -7541,24 +7525,18 @@ theorem signedMengerProfile_lt_of_edgeCircleRadius_lt_negativeOrientation_rev
 /-- Pointwise positive signed-Menger profile forces positive polygon
 orientation. -/
 theorem positiveOrientation_of_signedMengerProfile_pos {n : ℕ}
-    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    {v : ZMod n → ℂ} (_hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hκ : ∀ i : ZMod n, 0 < SignedMengerProfile v i) :
     PositivePolygonOrientation v := by
-  intro i
-  have hAB : v (i - 1) ≠ v i := by
-    simpa using hsimple.1 (i - 1)
-  exact crossR2_pos_of_signedMengerR2_pos hAB (hκ i)
+  exact positivePolygonOrientation_iff_signedMengerProfile_pos.mpr hκ
 
 /-- Pointwise negative signed-Menger profile forces negative polygon
 orientation. -/
 theorem negativeOrientation_of_signedMengerProfile_neg {n : ℕ}
-    {v : ZMod n → ℂ} (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    {v : ZMod n → ℂ} (_hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hκ : ∀ i : ZMod n, SignedMengerProfile v i < 0) :
     NegativePolygonOrientation v := by
-  intro i
-  have hAB : v (i - 1) ≠ v i := by
-    simpa using hsimple.1 (i - 1)
-  exact crossR2_neg_of_signedMengerR2_neg hAB (hκ i)
+  exact negativePolygonOrientation_iff_signedMengerProfile_neg.mpr hκ
 
 /-! ## Same-sign nonconcyclic profiles -/
 

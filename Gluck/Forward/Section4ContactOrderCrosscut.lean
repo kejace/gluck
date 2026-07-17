@@ -33,27 +33,9 @@ theorem naturalPolygonEdges_disjoint_of_separated
     Disjoint
       (segment ℝ (v (i : ZMod n)) (v ((i + 1 : ℕ) : ZMod n)))
       (segment ℝ (v (j : ZMod n)) (v ((j + 1 : ℕ) : ZMod n))) := by
-  have hi : i < n := by omega
-  have hj : j < n := by omega
-  have hi1 : i + 1 < n := by omega
-  have hj1 : j + 1 < n := by omega
-  have hij0 : (i : ZMod n) ≠ (j : ZMod n) := by
-    rw [Ne, ZMod.natCast_eq_natCast_iff', Nat.mod_eq_of_lt hi,
-      Nat.mod_eq_of_lt hj]
-    omega
-  have hi1j : (i : ZMod n) + 1 ≠ (j : ZMod n) := by
-    rw [← Nat.cast_one, ← Nat.cast_add]
-    rw [Ne, ZMod.natCast_eq_natCast_iff', Nat.mod_eq_of_lt hi1,
-      Nat.mod_eq_of_lt hj]
-    omega
-  have hj1i : (j : ZMod n) + 1 ≠ (i : ZMod n) := by
-    rw [← Nat.cast_one, ← Nat.cast_add]
-    rw [Ne, ZMod.natCast_eq_natCast_iff', Nat.mod_eq_of_lt hj1,
-      Nat.mod_eq_of_lt hi]
-    omega
-  rw [Set.disjoint_iff_inter_eq_empty]
-  simpa [Nat.cast_add] using hsimple.2.2
-    (i : ZMod n) (j : ZMod n) hij0 hi1j hj1i
+  simpa [cyclicVertex] using
+    hsimple.natural_edges_disjoint_of_separated
+      (i := i) (j := j) hij (by omega) (Or.inl hjn)
 
 /-- Every bundled subchain of a polygon contained in a closed disk remains
 inside that disk. -/
@@ -62,21 +44,12 @@ theorem polygonalChainPath_inside_closedDisk
     (hvertices : ∀ k : ℕ, k ≤ N → dist O (p k) ≤ R)
     (s : I) :
     dist O (polygonalChainPath p N s) ≤ R := by
-  by_cases hN : N = 0
-  · subst N
-    simpa [polygonalChainPath] using hvertices 0 (by omega)
-  · have hNpos : 0 < N := Nat.pos_of_ne_zero hN
-    have hrange : polygonalChainPath p N s ∈
-        Set.range (polygonalChainPath p N) := ⟨s, rfl⟩
-    obtain ⟨k, hkN, hkseg⟩ :=
-      (mem_range_polygonalChainPath_iff_mem_edge p _ hNpos).1 hrange
-    have hkball : p k ∈ closedBall O R := by
-      simpa [mem_closedBall, dist_comm] using hvertices k hkN.le
-    have hk1ball : p (k + 1) ∈ closedBall O R := by
-      simpa [mem_closedBall, dist_comm] using hvertices (k + 1) (by omega)
-    have hmem := (convex_closedBall O R).segment_subset
-      hkball hk1ball hkseg
-    simpa [mem_closedBall, dist_comm] using hmem
+  have hrange : polygonalChainPath p N s ∈
+      Set.range (polygonalChainPath p N) := ⟨s, rfl⟩
+  have hmem := range_polygonalChainPath_subset_of_convex
+    (convex_closedBall O R) (fun k hk ↦ by
+      simpa [mem_closedBall, dist_comm] using hvertices k hk) hrange
+  simpa [mem_closedBall, dist_comm] using hmem
 
 private theorem exists_intersecting_edges_of_circle_alternating_polygonal_chains_aux
     {O : ℂ} {R : ℝ} {p q : ℕ → ℂ} {M N : ℕ}
