@@ -42,4 +42,16 @@ theorem dahlbergE2_exactPaperPrimitiveSources :
   dahlbergE2ExactPaperPrimitiveSources_of_orientedCircleArcSource
     dahlbergE2_orientedCircleArcSource
 
+/-- The canonical paper primitive-source proposition is discharged without
+any external geometric gate. -/
+theorem dahlbergE2_paper_primitive_sources :
+    DahlbergE2PaperPrimitiveSources :=
+  dahlbergE2_exactPaperPrimitiveSources
+
+/-- Compatibility spelling for the former primitive-source gate.  This is a
+theorem, not an axiom: its proof is the exact paper construction above. -/
+theorem dahlbergE2_paper_primitive_sources_gate :
+    DahlbergE2PaperPrimitiveSources :=
+  dahlbergE2_paper_primitive_sources
+
 end Gluck.Forward
