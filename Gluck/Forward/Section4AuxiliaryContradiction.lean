@@ -76,6 +76,39 @@ theorem not_containingCurvatureDisksShareCircle_of_exactPaperSource
     not_containingCurvatureDisksShareCircle_of_containingCertificate
       cert.containing
 
+/-- The source-free proof of Dahlberg's containing-disk Lemma 5 already
+refutes fixed containing-circle data without any local-regularity hypothesis.
+
+This sharper form is the one needed for the §4 auxiliary polygon: Theorem 6
+itself is a strict-convex result, so the auxiliary approximation need only be
+simple and positively oriented. -/
+theorem not_containingCurvatureDisksShareCircle_of_simple_positiveOrientation
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {w : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon w)
+    (horient : PositivePolygonOrientation w)
+    (hnoncircle : ¬ Concyclic w) :
+    ¬ ContainingCurvatureDisksShareCircle w := by
+  have hsupport : StrictConvexEdgeSupport w :=
+    Gluck.Discrete.strictConvexEdgeSupport_of_simple_positiveOrientation
+      hsimple horient
+  have hgeom : StrictConvexCyclicChordGeometry w :=
+    strictConvexCyclicChordGeometry_of_edgeSupport hsupport
+  rcases dahlbergE2Theorem6Lemma5ContainingDisks
+      hn hsimple horient hsupport hgeom hnoncircle with ⟨cert⟩
+  exact not_containingCurvatureDisksShareCircle_of_containingCertificate cert
+
+/-- Sharp source-free §4 endpoint: local Dahlberg regularity of the auxiliary
+polygon is not required by the strict-convex containing-disk theorem. -/
+theorem dahlbergE2_theorem6_containing_source_contradiction
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {w : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon w)
+    (horient : PositivePolygonOrientation w)
+    (hnoncircle : ¬ Concyclic w)
+    (hfixed : ContainingCurvatureDisksShareCircle w) : False := by
+  exact
+    (not_containingCurvatureDisksShareCircle_of_simple_positiveOrientation
+      hn hsimple horient hnoncircle) hfixed
+
 /-- Source-free final certificate-level contradiction from the exact form of
 Dahlberg's Theorem 6.  The remaining geometric task is precisely to construct
 an auxiliary polygon satisfying the five hypotheses and
@@ -83,13 +116,11 @@ an auxiliary polygon satisfying the five hypotheses and
 theorem dahlbergE2_theorem6_exact_paper_source_contradiction
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) {w : ZMod n → ℂ}
     (hsimple : Gluck.Discrete.IsSimplePolygon w)
-    (hregular : DahlbergRegular w)
+    (_hregular : DahlbergRegular w)
     (horient : PositivePolygonOrientation w)
     (hnoncircle : ¬ Concyclic w)
     (hfixed : ContainingCurvatureDisksShareCircle w) : False := by
-  exact
-    (not_containingCurvatureDisksShareCircle_of_exactPaperSource
-      dahlbergE2_theorem6_exact_paper_source hn hsimple hregular horient
-      hnoncircle) hfixed
+  exact dahlbergE2_theorem6_containing_source_contradiction
+    hn hsimple horient hnoncircle hfixed
 
 end Gluck.Forward
