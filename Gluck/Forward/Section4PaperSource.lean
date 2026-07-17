@@ -56,4 +56,14 @@ theorem dahlbergE2Section4PaperDfvSource_of_supportedCircleArcSource
     exact run.false_of_supportedCircleArcCertificate
       hsimpleW hΔW hR supported
 
+/-- The supported-arc bridge supplies the last component of the exact,
+paper-faithful primitive-source package; Theorem 6 and Lemma 9 are already
+proved source-free. -/
+theorem dahlbergE2ExactPaperPrimitiveSources_of_supportedCircleArcSource
+    (harc : DahlbergE2SupportedCircleArcSource) :
+    DahlbergE2ExactPaperPrimitiveSources := by
+  exact ⟨dahlbergE2_theorem6_exact_paper_source,
+    dahlbergE2_lemma9_paper_bridge_source,
+    dahlbergE2Section4PaperDfvSource_of_supportedCircleArcSource harc⟩
+
 end Gluck.Forward
