@@ -6,6 +6,7 @@ Authors: kejace
 import Gluck.Forward.Section4ContactOrderCrosscut
 import Gluck.Forward.Section4CircleParameters
 import Gluck.Forward.Section4CircleArc
+import Gluck.Forward.Section4GlobalContactOrientation
 
 /-!
 # Propagating the circle order of minimal-disk contacts
@@ -164,6 +165,37 @@ namespace Section4PositiveRunCertificate
 
 variable {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
     (run : Section4PositiveRunCertificate v O R)
+
+/-- The run's positive endpoint turn selects the positive alternative in the
+global contact-orientation dichotomy. -/
+theorem all_circleContacts_cross_pos
+    (run₀ : Section4PositiveRunCertificate v O R)
+    (hn : 4 ≤ n)
+    (hsimple : IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hΔ : MinimalEnclosingDiskR2 v O R)
+    (hR : 0 < R) :
+    ∀ i : ZMod n, OnDiskBoundaryR2 v O R i →
+      0 < crossR2 (v (i - 1)) (v i) (v (i + 1)) := by
+  rcases circleContactSet_cross_uniform hn hsimple hregular hΔ with hpos | hneg
+  · exact hpos
+  · exfalso
+    let k : ℕ := run₀.chainStart
+    have ha := run₀.a_pos
+    have hab := run₀.a_le_b
+    have hrun : 0 < crossR2
+        (v (Gluck.cyclicLift run₀.c k - 1))
+        (v (Gluck.cyclicLift run₀.c k))
+        (v (Gluck.cyclicLift run₀.c k + 1)) := by
+      apply run₀.cross_pos hsimple hR
+      · exact le_rfl
+      · dsimp [k, chainStart]
+        omega
+    have hboundary : OnDiskBoundaryR2 v O R
+        (Gluck.cyclicLift run₀.c k) := by
+      dsimp [k, chainStart]
+      exact mem_circleContactSet.mp run₀.left_contact
+    exact (not_lt_of_ge hrun.le) (hneg _ hboundary)
 
 /-- Number of cyclic index steps from the right endpoint of the retained run
 to its left endpoint through the complementary polygonal arc. -/
