@@ -9,6 +9,7 @@ import Gluck.Forward.CircleSemicircleRadiusObstruction
 import Gluck.Forward.Section4CircleSpliceRadius
 import Gluck.Forward.Section4CircleSpliceAssembly
 import Gluck.Forward.Section4OddMeshDensity
+import Gluck.Forward.Section4CircleArc
 import Gluck.Forward.Section4EndpointCurvature
 import Gluck.Forward.Smooth
 import Gluck.Forward.Euclidean
