@@ -503,4 +503,48 @@ theorem exists_cut_with_two_disjoint_runs_of_not_interval
     exists_two_maximalCyclicRunsAt_of_not_interval c hS hnot
   exact ⟨c, R, Q, hc, hR, hQ, hRQ, hdisjoint⟩
 
+/-- A cyclic interval with at least three elements contains three consecutive
+cyclic indices.  This is the terminal combinatorial step in Dahlberg's
+Lemmas 5 and 7: three connected circle contacts identify a curvature circle. -/
+theorem IsCyclicInterval.exists_three_consecutive
+    {n : ℕ} [NeZero n] {S : Finset (ZMod n)}
+    (hS : IsCyclicInterval S) (hcard : 3 ≤ S.card) :
+    ∃ i : ZMod n, i - 1 ∈ S ∧ i ∈ S ∧ i + 1 ∈ S := by
+  rcases hS with ⟨c, a, b, hab, hbn, rfl⟩
+  have hrange : Finset.Icc a b ⊆ Finset.range n := by
+    intro k hk
+    rw [Finset.mem_Icc] at hk
+    exact Finset.mem_range.mpr (lt_of_le_of_lt hk.2 hbn)
+  have hcardMap := card_mapCut_of_subset_range c hrange
+  have hlen : 3 ≤ b + 1 - a := by
+    rw [hcardMap, Nat.card_Icc] at hcard
+    exact hcard
+  let i : ZMod n := cyclicLift c (a + 1)
+  refine ⟨i, ?_, ?_, ?_⟩
+  · have ha : a ∈ Finset.Icc a b := by
+      simp [hab]
+    have hmem : cyclicLift c a ∈ mapCut c (Finset.Icc a b) :=
+      Finset.mem_image.mpr ⟨a, ha, rfl⟩
+    have hi : i - 1 = cyclicLift c a := by
+      dsimp [i, cyclicLift]
+      push_cast
+      ring
+    rw [hi]
+    exact hmem
+  · have ha1 : a + 1 ∈ Finset.Icc a b := by
+      simp only [Finset.mem_Icc]
+      omega
+    exact Finset.mem_image.mpr ⟨a + 1, ha1, rfl⟩
+  · have ha2 : a + 2 ∈ Finset.Icc a b := by
+      simp only [Finset.mem_Icc]
+      omega
+    have hmem : cyclicLift c (a + 2) ∈ mapCut c (Finset.Icc a b) :=
+      Finset.mem_image.mpr ⟨a + 2, ha2, rfl⟩
+    have hi : i + 1 = cyclicLift c (a + 2) := by
+      dsimp [i, cyclicLift]
+      push_cast
+      ring
+    rw [hi]
+    exact hmem
+
 end Gluck
