@@ -6,6 +6,7 @@ Authors: kejace
 import Gluck.Forward.CyclicRunAvoidance
 import Gluck.Forward.Section4Combinatorics
 import Gluck.Forward.MinimalDiskContacts
+import Gluck.Forward.Section4ContactOrientation
 import Gluck.Forward.Dahlberg
 
 /-!
@@ -83,24 +84,19 @@ theorem exists_signedMengerProfile_nonpositive_of_not_positiveOrientation
   exact hnot (positiveOrientation_of_signedMengerProfile_pos hsimple hnone)
 
 /-- Exactly two connected contacts are impossible for a locally regular
-minimal-disk polygon when the contact turns are positive.  Connectedness
-makes the contacts adjacent; the two-contact theorem makes their chord a
-diameter, while the strict endpoint curvature bound puts the same chord on a
-circle of radius strictly smaller than the minimal radius. -/
+minimal-disk polygon.  Connectedness makes the contacts adjacent; the
+two-contact theorem makes their chord a diameter, while the endpoint's
+regular curvature circle has radius strictly smaller than the minimal radius
+and contains the same chord. -/
 theorem not_isCyclicInterval_circleContactSet_of_minimalEnclosingDisk_of_card_eq_two
     {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v)
     (hΔ : MinimalEnclosingDiskR2 v O R)
-    (hcontactCross : ∀ i : ZMod n,
-      OnDiskBoundaryR2 v O R i →
-        0 < Gluck.Discrete.crossR2 (v (i - 1)) (v i) (v (i + 1)))
     (hcard : (circleContactSet v O R).card = 2) :
     ¬ Gluck.IsCyclicInterval (circleContactSet v O R) := by
   intro hinterval
   let E : Finset (ZMod n) := circleContactSet v O R
-  have hRpos : 0 < R :=
-    radius_pos_of_minimalEnclosingDiskR2_of_isSimplePolygon hΔ hsimple
   rcases hinterval with ⟨c, a, b, hab, hbn, hE⟩
   have hrange : Finset.Icc a b ⊆ Finset.range n := by
     intro k hk
@@ -143,40 +139,44 @@ theorem not_isCyclicInterval_circleContactSet_of_minimalEnclosingDisk_of_card_eq
     mem_circleContactSet.mp hAE
   have hBBoundary : OnDiskBoundaryR2 v O R B :=
     mem_circleContactSet.mp hBE
+  have hAprevNeA : v (A - 1) ≠ v A := by
+    simpa [sub_eq_add_neg, add_assoc] using hsimple.1 (A - 1)
+  have hAprevNeB : v (A - 1) ≠ v B := by
+    rw [hBsucc]
+    simpa [sub_eq_add_neg, add_assoc] using
+      isSimplePolygon_two_step_ne hsimple (A - 1)
   have hAprevNotBoundary : ¬ OnDiskBoundaryR2 v O R (A - 1) := by
     intro hprev
-    have hcross := hcontactCross A hABoundary
     rcases hboundaryPair (A - 1) hprev with hprevA | hprevB
-    · rw [hprevA] at hcross
-      simp [Gluck.Discrete.crossR2] at hcross
-    · rw [hprevB, hBsucc] at hcross
-      simp [Gluck.Discrete.crossR2] at hcross
+    · exact hAprevNeA (congrArg v hprevA)
+    · exact hAprevNeB (congrArg v hprevB)
   have hAprevInterior : dist O (v (A - 1)) < R :=
     lt_of_le_of_ne (hΔ.2.1 (A - 1)) fun hdist =>
       hAprevNotBoundary hdist
-  have hκA : 1 / R < SignedMengerProfile v A :=
-    signedMengerProfile_inv_radius_lt_of_minimal_boundary_of_cross_pos
-      hsimple hregular hΔ hABoundary (Or.inl hAprevInterior)
-        (hcontactCross A hABoundary)
   have hdiam :=
     dist_eq_two_mul_radius_of_minimalEnclosingDiskR2_of_boundary_subset_pair
       hΔ hABoundary hBBoundary hboundaryPair
-  rcases hregular A with hcol | ⟨C, ρ, hcircle, _hcone⟩
-  · exact (ne_of_gt (hcontactCross A hABoundary)) hcol.1
-  · have hprevNe : v (A - 1) ≠ v A := by
-      simpa using hsimple.1 (A - 1)
-    have hcircle' : CircumcircleR2 (v (A + 1)) (v (A - 1)) (v A) C ρ :=
-      ⟨hcircle.1, hcircle.2.2.2, hcircle.2.1, hcircle.2.2.1⟩
-    have hκeq : SignedMengerProfile v A = 1 / ρ := by
-      simpa [SignedMengerProfile] using
-        signedMengerR2_eq_inv_circumradius_of_pos hprevNe
-          (hcontactCross A hABoundary) hcircle'
-    have hρR : ρ < R := by
-      by_contra hlt
-      have hRρ : R ≤ ρ := le_of_not_gt hlt
-      have hinv := one_div_le_one_div_of_le hRpos hRρ
-      rw [hκeq] at hκA
-      linarith
+  have hcrossA :
+      Gluck.Discrete.crossR2 (v (A - 1)) (v A) (v (A + 1)) ≠ 0 :=
+    crossR2_ne_zero_of_minimalEnclosingDisk_boundary
+      hsimple hregular hΔ hABoundary
+  rcases hregular A with hcol | ⟨C, ρ, hcircle, hcone⟩
+  · exact hcrossA hcol.1
+  · have hcircle' : CircumcircleR2 (v A) (v (A - 1)) (v (A + 1)) C ρ :=
+      ⟨hcircle.1, hcircle.2.2.1, hcircle.2.1, hcircle.2.2.2⟩
+    have hρR : ρ ≤ R :=
+      circumcircleR2_radius_le_of_inVertexCone_of_boundary
+        hcircle' hcone hΔ.1 hABoundary
+          (hΔ.2.1 (A - 1)) (hΔ.2.1 (A + 1))
+    have hρne : ρ ≠ R := by
+      intro hρeq
+      have hcenters : O = C :=
+        eq_circumcenter_of_inVertexCone_of_boundary_of_radius_eq
+          hcircle' hcone hΔ.1 hABoundary
+            (hΔ.2.1 (A - 1)) (hΔ.2.1 (A + 1)) hρeq
+      rw [hcenters, ← hρeq, hcircle.2.1] at hAprevInterior
+      exact (lt_irrefl ρ) hAprevInterior
+    have hρR' : ρ < R := lt_of_le_of_ne hρR hρne
     have hdistLt : dist (v A) (v B) < 2 * R := by
       calc
         dist (v A) (v B) ≤ dist (v A) C + dist C (v B) :=
@@ -425,6 +425,6 @@ theorem circleContactSet_not_isCyclicInterval_of_minimalEnclosingDisk_of_not_dah
   · have hcardEq : (circleContactSet v O R).card = 2 := by omega
     exact
       not_isCyclicInterval_circleContactSet_of_minimalEnclosingDisk_of_card_eq_two
-        hsimple hregular hΔ hcontactCross hcardEq
+        hsimple hregular hΔ hcardEq
 
 end Gluck.Forward
