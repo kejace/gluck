@@ -7,6 +7,7 @@ import Gluck.Forward.Section4AuxiliaryConsumer
 import Gluck.Forward.Section4AuxiliaryRadiusObstruction
 import Gluck.Forward.CircleSemicircleRadiusObstruction
 import Gluck.Forward.Section4CircleSpliceRadius
+import Gluck.Forward.Section4CircleSpliceNonconcyclic
 import Gluck.Forward.Section4CircleSpliceAssembly
 import Gluck.Forward.Section4OddMeshDensity
 import Gluck.Forward.Section4CircleArc
