@@ -241,12 +241,31 @@ theorem isCyclicInterval_mapCut_of_natInterval_of_subset_range
   have hb : b < n := Finset.mem_range.mp (hIr (by simp [hab]))
   exact ⟨c, a, b, hab, hb, rfl⟩
 
+/-- If a cyclic set becomes an ordinary interval after a cut, then it was a
+cyclic interval. -/
+theorem isCyclicInterval_of_isNatInterval_cutFinset
+    {n : ℕ} [NeZero n] (c : ZMod n) {S : Finset (ZMod n)}
+    (hS : IsNatInterval (cutFinset c S)) :
+    IsCyclicInterval S := by
+  have hmap : IsCyclicInterval (mapCut c (cutFinset c S)) :=
+    isCyclicInterval_mapCut_of_natInterval_of_subset_range hS
+      (cutFinset_subset_range c S)
+  simpa [mapCut_cutFinset] using hmap
+
 theorem card_mapCut_of_subset_range {n : ℕ} [NeZero n]
     (c : ZMod n) {I : Finset ℕ} (hIr : I ⊆ Finset.range n) :
     (mapCut c I).card = I.card := by
   apply Finset.card_image_iff.mpr
   intro a ha b hb hab
   exact cyclicLift_injOn_range c (hIr ha) (hIr hb) hab
+
+/-- Cutting a cyclic finite set at any basepoint preserves its cardinality. -/
+theorem card_cutFinset {n : ℕ} [NeZero n]
+    (c : ZMod n) (S : Finset (ZMod n)) :
+    (cutFinset c S).card = S.card := by
+  have hcard := card_mapCut_of_subset_range c (cutFinset_subset_range c S)
+  rw [mapCut_cutFinset] at hcard
+  exact hcard.symm
 
 theorem disjoint_mapCut_of_disjoint_of_subset_range
     {n : ℕ} [NeZero n] (c : ZMod n) {I J : Finset ℕ}
@@ -502,6 +521,118 @@ theorem exists_cut_with_two_disjoint_runs_of_not_interval
   obtain ⟨R, Q, hR, hQ, hRQ, hdisjoint⟩ :=
     exists_two_maximalCyclicRunsAt_of_not_interval c hS hnot
   exact ⟨c, R, Q, hc, hR, hQ, hRQ, hdisjoint⟩
+
+/-- A finite natural set with at least three points which is not an interval
+has an internal maximal gap.  Adding the two contact endpoints to that gap
+gives an interval strictly smaller than the convex hull of the original set.
+
+This is the strict-descent measure used after cutting Dahlberg's contact-set
+iteration at a vertex outside the current envelope. -/
+theorem exists_internal_gap_with_strict_hull
+    {C : Finset ℕ} (hC : C.Nonempty) (hcard : 3 ≤ C.card)
+    (hnot : ¬ IsNatInterval C) :
+    ∃ p q : ℕ,
+      p ∈ C ∧ q ∈ C ∧ p + 1 < q ∧
+      (∀ k : ℕ, p < k → k < q → k ∉ C) ∧
+      Finset.Icc p q ⊂
+        Finset.Icc (C.min' hC) (C.max' hC) := by
+  let H : Finset ℕ := Finset.Icc (C.min' hC) (C.max' hC)
+  have hCH : C ⊆ H := by
+    intro k hk
+    exact Finset.mem_Icc.mpr ⟨Finset.min'_le C k hk, Finset.le_max' C k hk⟩
+  have hHneC : H ≠ C := by
+    intro hEq
+    apply hnot
+    exact ⟨C.min' hC, C.max' hC,
+      Finset.min'_le C (C.max' hC) (Finset.max'_mem C hC), hEq.symm⟩
+  have hT : (H \ C).Nonempty := by
+    rw [Finset.sdiff_nonempty]
+    exact fun hHC => hHneC (Finset.Subset.antisymm hHC hCH)
+  rcases hT with ⟨x, hxT⟩
+  obtain ⟨I, hI, _hxI⟩ := exists_maximalNatRun_of_mem hxT
+  rcases hI.exists_endpoints_with_gaps with
+    ⟨a, b, hab, hIeq, hleft, hright⟩
+  have haI : a ∈ I := by
+    rw [hIeq]
+    simp [hab]
+  have hbI : b ∈ I := by
+    rw [hIeq]
+    simp [hab]
+  have haT : a ∈ H \ C := hI.2.1 haI
+  have hbT : b ∈ H \ C := hI.2.1 hbI
+  have hminlt : C.min' hC < a := by
+    have hminle : C.min' hC ≤ a :=
+      (Finset.mem_Icc.mp (Finset.mem_sdiff.mp haT).1).1
+    exact lt_of_le_of_ne hminle (fun hEq =>
+      (Finset.mem_sdiff.mp haT).2 (by simpa [hEq] using Finset.min'_mem C hC))
+  have hbltmax : b < C.max' hC := by
+    have hble : b ≤ C.max' hC :=
+      (Finset.mem_Icc.mp (Finset.mem_sdiff.mp hbT).1).2
+    exact lt_of_le_of_ne hble (fun hEq =>
+      (Finset.mem_sdiff.mp hbT).2 (by simpa [hEq] using Finset.max'_mem C hC))
+  let p := a - 1
+  let q := b + 1
+  have hpH : p ∈ H := by
+    apply Finset.mem_Icc.mpr
+    constructor
+    · dsimp [p]
+      omega
+    · dsimp [p]
+      omega
+  have hqH : q ∈ H := by
+    apply Finset.mem_Icc.mpr
+    constructor
+    · dsimp [q]
+      omega
+    · dsimp [q]
+      omega
+  have ha0 : a ≠ 0 := by omega
+  have hpNotT : p ∉ H \ C := by
+    dsimp [p]
+    exact hleft.resolve_left ha0
+  have hqNotT : q ∉ H \ C := by
+    dsimp [q]
+    exact hright
+  have hpC : p ∈ C := by
+    by_contra hp
+    exact hpNotT (Finset.mem_sdiff.mpr ⟨hpH, hp⟩)
+  have hqC : q ∈ C := by
+    by_contra hq
+    exact hqNotT (Finset.mem_sdiff.mpr ⟨hqH, hq⟩)
+  have hpq : p + 1 < q := by
+    dsimp [p, q]
+    omega
+  have hgap : ∀ k : ℕ, p < k → k < q → k ∉ C := by
+    intro k hpk hkq hkC
+    have hkI : k ∈ I := by
+      rw [hIeq]
+      simp only [Finset.mem_Icc]
+      dsimp [p, q] at hpk hkq
+      omega
+    exact (Finset.mem_sdiff.mp (hI.2.1 hkI)).2 hkC
+  have hpqSub : Finset.Icc p q ⊆ H :=
+    Finset.Icc_subset_Icc (Finset.mem_Icc.mp hpH).1 (Finset.mem_Icc.mp hqH).2
+  have hpqNe : Finset.Icc p q ≠ H := by
+    intro hEq
+    have hCpair : C ⊆ {p, q} := by
+      intro k hkC
+      have hkH : k ∈ H := hCH hkC
+      have hkpq : k ∈ Finset.Icc p q := by
+        rw [hEq]
+        exact hkH
+      rw [Finset.mem_Icc] at hkpq
+      simp only [Finset.mem_insert, Finset.mem_singleton]
+      rcases eq_or_lt_of_le hkpq.1 with rfl | hpk
+      · exact Or.inl rfl
+      rcases lt_or_eq_of_le hkpq.2 with hkq | rfl
+      · exact False.elim (hgap k hpk hkq hkC)
+      · exact Or.inr rfl
+    have hcardle := Finset.card_le_card hCpair
+    have hpne : p ≠ q := Nat.ne_of_lt (lt_of_lt_of_le (Nat.lt_succ_self p) hpq.le)
+    simp [hpne] at hcardle
+    omega
+  exact ⟨p, q, hpC, hqC, hpq, hgap,
+    Finset.ssubset_iff_subset_ne.mpr ⟨hpqSub, hpqNe⟩⟩
 
 /-- A cyclic interval with at least three elements contains three consecutive
 cyclic indices.  This is the terminal combinatorial step in Dahlberg's
