@@ -6,7 +6,7 @@ Authors: kejace
 import Gluck.SpaceForm.FirstVariation
 import Gluck.SpaceForm.Reconstruction
 import Gluck.SpaceForm.StepReparam
-import Gluck.Sphere.ConjWinding
+import Gluck.Winding
 
 /-!
 # Endpoint winding: existence of a closed admissible trajectory (`ε`-generic)
@@ -117,6 +117,26 @@ private lemma truncatedField_lipschitz_uniform {ε R δ : ℝ} (hε : |ε| ≤ 1
   unfold truncatedField
   rwa [← sub_smul, norm_smul, Real.norm_eq_abs, Complex.norm_exp_ofReal_mul_I,
     mul_one]
+
+/-- Uniform curvature lower bound for any curvature function: compactness on one period
+provides a positive universal lower bound strictly below `1`. This is the same pure
+geometry lemma previously used by the spherical branch. -/
+private lemma exists_curvature_lower_bound {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ) :
+    ∃ R, 0 < R ∧ R < 1 ∧ ∀ θ, R ≤ κ θ := by
+  obtain ⟨hcont, hper, hpos⟩ := hκ
+  obtain ⟨θ₀, -, hmin⟩ := isCompact_Icc.exists_isMinOn
+    (Set.nonempty_Icc.mpr (by positivity : (0 : ℝ) ≤ 2 * π)) hcont.continuousOn
+  have hminpos : 0 < min (κ θ₀) 1 := lt_min (hpos θ₀) one_pos
+  have h0 : 0 < min (κ θ₀) 1 / 2 := by nlinarith [hminpos]
+  refine ⟨min (κ θ₀) 1 / 2, h0, ?_, ?_⟩
+  · have : min (κ θ₀) 1 ≤ 1 := min_le_right _ _
+    linarith
+  · intro θ
+    obtain ⟨y, hy, hyθ⟩ := hper.exists_mem_Ico₀ Real.two_pi_pos θ
+    have hym : κ θ₀ ≤ κ y := hmin ⟨hy.1, hy.2.le⟩
+    have hmy : min (κ θ₀) 1 ≤ κ y := (min_le_left (κ θ₀) 1).trans hym
+    rw [hyθ]
+    nlinarith [hmy]
 
 /-- **Master estimate at a near start point.** For every initial point `z₀`
 in the `ρ`-disk about the model start `-r*·i`, the reparametrized truncated flow
@@ -260,7 +280,13 @@ private lemma exists_interior_zero_of_conj_dominant' {F : ℂ → ℂ}
     exact Complex.ofReal_ne_zero.mpr (neg_ne_zero.mpr hA)
   have hconjval : ∀ t : I, conjLoop w₀ t
       = w₀ * (starRingEnd ℂ) ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ) :=
-    fun t => rfl
+    fun t => by
+      rw [conjLoop, expLoopRev_apply]
+      rw [Circle.coe_exp]
+      congr 1
+      rw [← Complex.exp_conj, map_mul, Complex.conj_I, Complex.conj_ofReal]
+      push_cast
+      ring_nf
   have hγFval : ∀ t : I, diskBoundaryLoop F hFc t
       = F ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ) := fun t => rfl
   have hexp01 : Circle.exp (2 * π * ((0 : I) : ℝ))
@@ -342,7 +368,7 @@ theorem spaceForm_endpoint_winding {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {κ : �
       ∃ κ₀ : ℝ, (∀ θ, κ₀ ≤ κ θ) ∧ -(ε * centeredRadius ε c) < κ₀ := by
     rcases hε with rfl | rfl
     · obtain ⟨κ₀', hκ₀'0, -, hκ₀'κ⟩ := exists_curvature_lower_bound hκ
-      refine ⟨κ₀', fun θ => (hκ₀'κ θ).le, ?_⟩
+      refine ⟨κ₀', fun θ => hκ₀'κ θ, ?_⟩
       have hcr : 0 < centeredRadius 1 c :=
         (centeredRadius_mem_Ioo 1 c (Or.inl rfl) hc).1
       nlinarith [hcr, hκ₀'0]
