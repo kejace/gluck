@@ -6,7 +6,6 @@ Authors: kejace
 import Gluck.Forward.Section4ContactOrderCrosscut
 import Gluck.Forward.Section4CircleParameters
 import Gluck.Forward.Section4CircleArc
-import Gluck.Forward.Section4GlobalContactOrientation
 
 /-!
 # Propagating the circle order of minimal-disk contacts
@@ -24,7 +23,7 @@ open Gluck.Discrete
 
 /-- Cyclic-coordinate form of
 `not_circle_alternating_of_separated_polygonSubchains`. -/
-theorem not_circle_alternating_of_separated_cyclicPolygonSubchains
+private theorem not_circle_alternating_of_separated_cyclic_polygon_subchains_aux
     {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
     {O : ℂ} {R : ℝ} {c : ZMod n} {i j k l : ℕ}
     {θi θk θj θl : ℝ}
@@ -54,15 +53,123 @@ theorem not_circle_alternating_of_separated_cyclicPolygonSubchains
   · exact hjl
   · exact hspan
 
-/-- One correctly ordered third circle point anchors all further points on
-the same polygonal arc.  The conclusion is deliberately only the upper arc
-bound needed for contact coverage; no ordering among the further points is
-required.
+private theorem ordered_anchor_indices_ne_aux
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    {O : ℂ} {R : ℝ} {c : ZMod n} {m p t : ℕ}
+    {θB θC θA θD : ℝ}
+    (hR : 0 < R)
+    (hDwin : θD ∈ Set.Ico θB (θB + 2 * Real.pi))
+    (hB : v (Gluck.cyclicLift c 0) = circlePoint O R θB)
+    (hC : v (Gluck.cyclicLift c p) = circlePoint O R θC)
+    (hA : v (Gluck.cyclicLift c m) = circlePoint O R θA)
+    (hD : v (Gluck.cyclicLift c t) = circlePoint O R θD)
+    (hBC : θB < θC) (hCA : θC < θA)
+    (hspan : θA < θB + 2 * Real.pi)
+    (hAD : θA < θD) :
+    t ≠ 0 ∧ t ≠ p ∧ t ≠ m := by
+  constructor
+  · intro ht
+    subst t
+    have hEq : θD = θB := by
+      apply circlePoint_injective_on_angleWindow hR.ne'
+        hDwin ⟨le_rfl, by linarith [Real.two_pi_pos]⟩
+      rw [← hD, ← hB]
+    linarith
+  constructor
+  · intro ht
+    subst t
+    have hEq : θD = θC := by
+      apply circlePoint_injective_on_angleWindow hR.ne'
+        hDwin ⟨hBC.le, by linarith⟩
+      rw [← hD, ← hC]
+    linarith
+  · intro ht
+    subst t
+    have hEq : θD = θA := by
+      apply circlePoint_injective_on_angleWindow hR.ne'
+        hDwin ⟨(hBC.trans hCA).le, hspan⟩
+      rw [← hD, ← hA]
+    linarith
 
-The polygonal arc is represented by natural cyclic coordinates `0 … m`.
-The endpoint at `0` has angle `θB`, the endpoint at `m` has angle `θA`,
-and the anchor at `p` has angle strictly between them. -/
-theorem circlePoint_angle_le_endpoint_of_ordered_anchor
+private theorem false_of_ordered_anchor_lt_aux
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    {O : ℂ} {R : ℝ} {c : ZMod n} {m p t : ℕ}
+    {θB θC θA θD : ℝ}
+    (hsimple : IsSimplePolygon v)
+    (hinside : ∀ z : ZMod n, dist O (v z) ≤ R)
+    (hR : 0 < R)
+    (hpm : p < m) (hmn : m < n)
+    (hB : v (Gluck.cyclicLift c 0) = circlePoint O R θB)
+    (hC : v (Gluck.cyclicLift c p) = circlePoint O R θC)
+    (hA : v (Gluck.cyclicLift c m) = circlePoint O R θA)
+    (hD : v (Gluck.cyclicLift c t) = circlePoint O R θD)
+    (hBC : θB < θC) (hCA : θC < θA)
+    (ht0 : t ≠ 0) (htp : t < p)
+    (hAD : θA < θD) (hDtop : θD < θB + 2 * Real.pi) :
+    False := by
+  have hmle : m ≤ n := hmn.le
+  have hlift (r : ℕ) :
+      Gluck.cyclicLift (Gluck.cyclicLift c m) (n - m + r) =
+        Gluck.cyclicLift c r := by
+    dsimp [Gluck.cyclicLift]
+    rw [Nat.cast_add, Nat.cast_sub hmle, ZMod.natCast_self]
+    ring
+  exact not_circle_alternating_of_separated_cyclic_polygon_subchains_aux
+    (c := Gluck.cyclicLift c m)
+    (i := 0) (j := n - m) (k := n - m + t) (l := n - m + p)
+    hsimple hinside hR (by omega) (by omega) (by omega) (by omega)
+    (by simpa only [Gluck.cyclicLift, Nat.cast_zero, add_zero] using hA)
+    (by rw [hlift]; exact hD)
+    (by
+      rw [show n - m = n - m + 0 by omega, hlift]
+      simpa only [circlePoint_add_two_pi] using hB)
+    (by rw [hlift]; simpa using hC)
+    hAD hDtop
+    (show θB + 2 * Real.pi < θC + 2 * Real.pi by linarith)
+    (show θC + 2 * Real.pi < θA + 2 * Real.pi by linarith)
+
+private theorem false_of_ordered_anchor_gt_aux
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    {O : ℂ} {R : ℝ} {c : ZMod n} {m p t : ℕ}
+    {θB θC θA θD : ℝ}
+    (hsimple : IsSimplePolygon v)
+    (hinside : ∀ z : ZMod n, dist O (v z) ≤ R)
+    (hR : 0 < R)
+    (hp : 0 < p) (hpm : p < m) (hmn : m < n)
+    (hB : v (Gluck.cyclicLift c 0) = circlePoint O R θB)
+    (hC : v (Gluck.cyclicLift c p) = circlePoint O R θC)
+    (hA : v (Gluck.cyclicLift c m) = circlePoint O R θA)
+    (hD : v (Gluck.cyclicLift c t) = circlePoint O R θD)
+    (hBC : θB < θC) (hCA : θC < θA)
+    (hpt : p < t) (htm : t < m)
+    (hAD : θA < θD) (hDtop : θD < θB + 2 * Real.pi) :
+    False := by
+  have hple : p ≤ n := (hpm.trans hmn).le
+  have hlift (r : ℕ) (hpr : p ≤ r) :
+      Gluck.cyclicLift (Gluck.cyclicLift c p) (r - p) =
+        Gluck.cyclicLift c r := by
+    dsimp [Gluck.cyclicLift]
+    rw [Nat.cast_sub hpr]
+    ring
+  have hliftWrap :
+      Gluck.cyclicLift (Gluck.cyclicLift c p) (n - p) =
+        Gluck.cyclicLift c 0 := by
+    dsimp [Gluck.cyclicLift]
+    rw [Nat.cast_sub hple, ZMod.natCast_self]
+    ring
+  exact not_circle_alternating_of_separated_cyclic_polygon_subchains_aux
+    (c := Gluck.cyclicLift c p)
+    (i := 0) (j := t - p) (k := m - p) (l := n - p)
+    hsimple hinside hR (by omega) (by omega) (by omega) (by omega)
+    (by simpa only [Gluck.cyclicLift, Nat.cast_zero, add_zero] using hC)
+    (by rw [hlift m hpm.le]; exact hA)
+    (by rw [hlift t hpt.le]; exact hD)
+    (by rw [hliftWrap]; simpa using hB)
+    hCA hAD hDtop (by linarith)
+
+/-- A correctly ordered third point bounds every further contact angle by the
+endpoint angle on the same polygonal arc. -/
+private theorem circlePoint_angle_le_endpoint_of_ordered_anchor_aux
     {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
     {O : ℂ} {R : ℝ} {c : ZMod n} {m p t : ℕ}
     {θB θC θA θD : ℝ}
@@ -82,120 +189,18 @@ theorem circlePoint_angle_le_endpoint_of_ordered_anchor
   by_contra hnot
   have hAD : θA < θD := lt_of_not_ge hnot
   have hDtop : θD < θB + 2 * Real.pi := hDwin.2
-  have ht0 : t ≠ 0 := by
-    intro ht
-    subst t
-    have hEq : θD = θB := by
-      apply circlePoint_injective_on_angleWindow hR.ne'
-        hDwin ⟨le_rfl, by linarith [Real.two_pi_pos]⟩
-      rw [← hD, ← hB]
-    linarith
-  have htp : t ≠ p := by
-    intro ht
-    subst t
-    have hEq : θD = θC := by
-      apply circlePoint_injective_on_angleWindow hR.ne'
-        hDwin ⟨hBC.le, by linarith⟩
-      rw [← hD, ← hC]
-    linarith
-  have htmNe : t ≠ m := by
-    intro ht
-    subst t
-    have hEq : θD = θA := by
-      apply circlePoint_injective_on_angleWindow hR.ne'
-        hDwin ⟨(hBC.trans hCA).le, hspan⟩
-      rw [← hD, ← hA]
-    linarith
+  obtain ⟨ht0, htp, htmNe⟩ := ordered_anchor_indices_ne_aux
+    hR hDwin hB hC hA hD hBC hCA hspan hAD
   rcases lt_or_gt_of_ne htp with htp' | hpt
-  · /- Start just after `A`.  In that cyclic chart the polygon order is
-       `A, B, D, C`, whereas the circle order forced by `hAD` is
-       `A, D, B, C`. -/
-    have htlt : t < p := htp'
-    have hmle : m ≤ n := hmn.le
-    have hlift (r : ℕ) :
-        Gluck.cyclicLift (Gluck.cyclicLift c m) (n - m + r) =
-          Gluck.cyclicLift c r := by
-      dsimp [Gluck.cyclicLift]
-      rw [Nat.cast_add, Nat.cast_sub hmle, ZMod.natCast_self]
-      ring
-    exact not_circle_alternating_of_separated_cyclicPolygonSubchains
-      (c := Gluck.cyclicLift c m)
-      (i := 0) (j := n - m) (k := n - m + t) (l := n - m + p)
-      hsimple hinside hR (by omega) (by omega) (by omega) (by omega)
-      (by
-        simpa only [Gluck.cyclicLift, Nat.cast_zero, add_zero] using hA)
-      (by rw [hlift]; exact hD)
-      (by
-        rw [show n - m = n - m + 0 by omega, hlift]
-        simpa only [circlePoint_add_two_pi] using hB)
-      (by rw [hlift]; simpa using hC)
-      hAD hDtop
-      (show θB + 2 * Real.pi < θC + 2 * Real.pi by linarith)
-      (show θC + 2 * Real.pi < θA + 2 * Real.pi by linarith)
-  · /- Start at the anchor `C`.  In that cyclic chart the polygon order
-       is `C, D, A, B`, whereas the circle order forced by `hAD` is
-       `C, A, D, B`. -/
-    have hpt' : p < t := hpt
-    have htm' : t < m := lt_of_le_of_ne htm htmNe
-    have hple : p ≤ n := (hpm.trans hmn).le
-    have hlift (r : ℕ) (hpr : p ≤ r) :
-        Gluck.cyclicLift (Gluck.cyclicLift c p) (r - p) =
-          Gluck.cyclicLift c r := by
-      dsimp [Gluck.cyclicLift]
-      rw [Nat.cast_sub hpr]
-      ring
-    have hliftWrap :
-        Gluck.cyclicLift (Gluck.cyclicLift c p) (n - p) =
-          Gluck.cyclicLift c 0 := by
-      dsimp [Gluck.cyclicLift]
-      rw [Nat.cast_sub hple, ZMod.natCast_self]
-      ring
-    exact not_circle_alternating_of_separated_cyclicPolygonSubchains
-      (c := Gluck.cyclicLift c p)
-      (i := 0) (j := t - p) (k := m - p) (l := n - p)
-      hsimple hinside hR (by omega) (by omega) (by omega) (by omega)
-      (by
-        simpa only [Gluck.cyclicLift, Nat.cast_zero, add_zero] using hC)
-      (by rw [hlift m hpm.le]; exact hA)
-      (by rw [hlift t hpt'.le]; exact hD)
-      (by rw [hliftWrap]; simpa using hB)
-      hCA hAD hDtop (by linarith)
+  · exact false_of_ordered_anchor_lt_aux hsimple hinside hR hpm hmn
+      hB hC hA hD hBC hCA ht0 htp' hAD hDtop
+  · exact false_of_ordered_anchor_gt_aux hsimple hinside hR hp hpm hmn
+      hB hC hA hD hBC hCA hpt (lt_of_le_of_ne htm htmNe) hAD hDtop
 
 namespace Section4PositiveRunCertificate
 
 variable {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
     (run : Section4PositiveRunCertificate v O R)
-
-/-- The run's positive endpoint turn selects the positive alternative in the
-global contact-orientation dichotomy. -/
-theorem all_circleContacts_cross_pos
-    (run₀ : Section4PositiveRunCertificate v O R)
-    (hn : 4 ≤ n)
-    (hsimple : IsSimplePolygon v)
-    (hregular : DahlbergRegular v)
-    (hΔ : MinimalEnclosingDiskR2 v O R)
-    (hR : 0 < R) :
-    ∀ i : ZMod n, OnDiskBoundaryR2 v O R i →
-      0 < crossR2 (v (i - 1)) (v i) (v (i + 1)) := by
-  rcases circleContactSet_cross_uniform hn hsimple hregular hΔ with hpos | hneg
-  · exact hpos
-  · exfalso
-    let k : ℕ := run₀.chainStart
-    have ha := run₀.a_pos
-    have hab := run₀.a_le_b
-    have hrun : 0 < crossR2
-        (v (Gluck.cyclicLift run₀.c k - 1))
-        (v (Gluck.cyclicLift run₀.c k))
-        (v (Gluck.cyclicLift run₀.c k + 1)) := by
-      apply run₀.cross_pos hsimple hR
-      · exact le_rfl
-      · dsimp [k, chainStart]
-        omega
-    have hboundary : OnDiskBoundaryR2 v O R
-        (Gluck.cyclicLift run₀.c k) := by
-      dsimp [k, chainStart]
-      exact mem_circleContactSet.mp run₀.left_contact
-    exact (not_lt_of_ge hrun.le) (hneg _ hboundary)
 
 /-- Number of cyclic index steps from the right endpoint of the retained run
 to its left endpoint through the complementary polygonal arc. -/
@@ -228,22 +233,9 @@ theorem cyclicLift_right_add_complementContactArcLength :
   rw [ZMod.natCast_self]
   ring
 
-/-- Minimal-disk simplicity excludes a zero-length complementary endpoint
-arc. -/
-theorem complementContactArcLength_pos
-    (hsimple : IsSimplePolygon v)
-    (hΔ : MinimalEnclosingDiskR2 v O R) :
-    0 < run.complementContactArcLength := by
-  apply Nat.pos_of_ne_zero
-  intro hm
-  apply run.endpointIndices_ne hsimple hΔ
-  have hlift := run.cyclicLift_right_add_complementContactArcLength
-  rw [hm] at hlift
-  simpa [Gluck.cyclicLift, chainStart] using hlift.symm
-
 /-- Every minimal-circle contact occurs on the complementary polygonal arc
 from the right endpoint to the left endpoint. -/
-theorem exists_complementContactArcCoordinate
+private theorem exists_complementContactArcCoordinate_aux
     {i : ZMod n} (hi : OnDiskBoundaryR2 v O R i) :
     ∃ t : ℕ, t ≤ run.complementContactArcLength ∧
       Gluck.cyclicLift (Gluck.cyclicLift run.c (run.b + 1)) t = i := by
@@ -302,10 +294,6 @@ theorem exists_strict_complementContactArcCoordinate
   classical
   let A : ZMod n := Gluck.cyclicLift run.c run.chainStart
   let B : ZMod n := Gluck.cyclicLift run.c (run.b + 1)
-  have hAE : A ∈ circleContactSet v O R := by
-    simpa [A, chainStart] using run.left_contact
-  have hBE : B ∈ circleContactSet v O R := by
-    simpa [B] using run.right_contact
   have hex : ∃ i ∈ circleContactSet v O R, i ≠ A ∧ i ≠ B := by
     by_contra hnone
     push Not at hnone
@@ -323,7 +311,7 @@ theorem exists_strict_complementContactArcCoordinate
     omega
   obtain ⟨i, hiE, hiA, hiB⟩ := hex
   have hi : OnDiskBoundaryR2 v O R i := mem_circleContactSet.mp hiE
-  obtain ⟨t, htm, htEq⟩ := run.exists_complementContactArcCoordinate hi
+  obtain ⟨t, htm, htEq⟩ := run.exists_complementContactArcCoordinate_aux hi
   have ht0 : 0 < t := by
     apply Nat.pos_of_ne_zero
     intro ht
@@ -340,10 +328,9 @@ theorem exists_strict_complementContactArcCoordinate
     exact hArc
   exact ⟨i, t, hi, ht0, htm', htEq⟩
 
-/-- A single correctly oriented third contact supplies the full contact
-coverage required by `circleArcCertificate_of_contactCoverage`.  Thus the
-global contact-order problem is reduced to the three-contact anchor. -/
-noncomputable def circleArcCertificate_of_ordered_complementContact
+/-- A correctly oriented third contact supplies the full contact coverage
+required by `circleArcCertificate_of_contactCoverage`. -/
+noncomputable def circleArcCertificateOfOrderedComplementContact
     (hsimple : IsSimplePolygon v)
     (hΔ : MinimalEnclosingDiskR2 v O R)
     (hR : 0 < R)
@@ -359,7 +346,7 @@ noncomputable def circleArcCertificate_of_ordered_complementContact
   apply run.circleArcCertificate_of_contactCoverage hΔ hR hB hA
     (hBC.trans hCA) hspan
   intro i hi
-  obtain ⟨t, htm, htEq⟩ := run.exists_complementContactArcCoordinate hi
+  obtain ⟨t, htm, htEq⟩ := run.exists_complementContactArcCoordinate_aux hi
   obtain ⟨θD, hθDwin, hiD⟩ :=
     exists_circlePoint_eq_mem_angleWindow hi θB
   have hB' : v (Gluck.cyclicLift
@@ -375,7 +362,7 @@ noncomputable def circleArcCertificate_of_ordered_complementContact
     rw [htEq]
     exact hiD
   have hθDA : θD ≤ θA :=
-    circlePoint_angle_le_endpoint_of_ordered_anchor
+    circlePoint_angle_le_endpoint_of_ordered_anchor_aux
       hsimple hΔ.2.1 hR hp hpm run.complementContactArcLength_lt htm
       hB' hC hA' hD' hBC hCA hspan hθDwin
   exact ⟨θD, ⟨hθDwin.1, hθDA⟩, hiD⟩

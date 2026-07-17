@@ -8,13 +8,8 @@ import Gluck.Forward.Section4EndpointSpliceRegularity
 /-!
 # Curvature at a circle–interior endpoint splice
 
-If `A` lies on a circle of radius `R` and `P` lies strictly inside that
-circle, then the signed Menger curvature of `(Aδ, A, P)`, where `Aδ`
-approaches `A` along the positively oriented circle, is eventually strictly
-larger than `1 / R`.  The same holds for `(P, A, Aδ)` on the other side.
-
-These are purely local estimates.  In particular, they require neither a
-supporting-line hypothesis nor polygonal regularity or simplicity.
+The signed Menger curvature at a circle–interior splice eventually exceeds
+the circle curvature as the circle chord collapses.
 -/
 
 namespace Gluck.Forward
@@ -23,8 +18,7 @@ open Gluck.Discrete
 open Metric Filter
 open scoped Topology
 
-/-- The strict radial margin furnished by a point inside the circle. -/
-theorem dist_circlePoint_sq_lt_neg_two_mul_radial_of_interior
+private theorem dist_circlePoint_sq_lt_neg_two_mul_radial_of_interior_aux
     {O P : ℂ} {R θ : ℝ} (hR : 0 < R) (hP : dist O P < R) :
     dist (circlePoint O R θ) P ^ 2 <
       -2 * R * dotR2 (circleRadial θ) (P - circlePoint O R θ) := by
@@ -89,9 +83,7 @@ theorem dist_circlePoint_add_eq_two_mul_sin_half
     (dist_circlePoint_sub_eq_two_mul_sin_half
       (O := O) (R := R) (θ := θ + δ) hR hδ0 hδ2π)
 
-/-- Continuous expression obtained after cancelling the vanishing circle
-chord in the predecessor signed-Menger curvature. -/
-noncomputable def endpointPredecessorCurvatureModel
+private noncomputable def endpointPredecessorCurvatureModel
     (O P : ℂ) (R θ δ : ℝ) : ℝ :=
   2 * (Real.sin (δ / 2) *
         dotR2 (circleTangent θ) (P - circlePoint O R θ) -
@@ -100,9 +92,7 @@ noncomputable def endpointPredecessorCurvatureModel
     (dist (circlePoint O R θ) P *
       dist (circlePoint O R (θ - δ)) P)
 
-/-- Continuous expression obtained after cancelling the vanishing circle
-chord in the successor signed-Menger curvature. -/
-noncomputable def endpointSuccessorCurvatureModel
+private noncomputable def endpointSuccessorCurvatureModel
     (O P : ℂ) (R θ δ : ℝ) : ℝ :=
   2 * (-Real.sin (δ / 2) *
         dotR2 (circleTangent θ) (P - circlePoint O R θ) -
@@ -111,24 +101,25 @@ noncomputable def endpointSuccessorCurvatureModel
     (dist (circlePoint O R θ) P *
       dist (circlePoint O R (θ + δ)) P)
 
-@[simp] theorem endpointPredecessorCurvatureModel_zero
+@[simp] private theorem endpointPredecessorCurvatureModel_zero_aux
     (O P : ℂ) (R θ : ℝ) :
     endpointPredecessorCurvatureModel O P R θ 0 =
       (-2 * dotR2 (circleRadial θ) (P - circlePoint O R θ)) /
         dist (circlePoint O R θ) P ^ 2 := by
-  simp [endpointPredecessorCurvatureModel, pow_two, div_eq_mul_inv]
-  ring
+  simp only [endpointPredecessorCurvatureModel, Real.sin_zero, zero_mul, Real.cos_zero, one_mul,
+    zero_sub, pow_two, div_eq_mul_inv]
+  ring_nf
 
-@[simp] theorem endpointSuccessorCurvatureModel_zero
+@[simp] private theorem endpointSuccessorCurvatureModel_zero_aux
     (O P : ℂ) (R θ : ℝ) :
     endpointSuccessorCurvatureModel O P R θ 0 =
       (-2 * dotR2 (circleRadial θ) (P - circlePoint O R θ)) /
         dist (circlePoint O R θ) P ^ 2 := by
-  simp [endpointSuccessorCurvatureModel, pow_two, div_eq_mul_inv]
-  ring
+  simp only [endpointSuccessorCurvatureModel, Real.sin_zero, neg_zero, zero_mul, Real.cos_zero,
+    one_mul, zero_sub, pow_two, div_eq_mul_inv]
+  ring_nf
 
-/-- The cancelled predecessor model is continuous at the collapsed chord. -/
-theorem continuousAt_endpointPredecessorCurvatureModel
+private theorem continuousAt_endpointPredecessorCurvatureModel_aux
     {O P : ℂ} {R θ : ℝ} (hP : dist O P < R) :
     ContinuousAt (fun δ : ℝ ↦
       endpointPredecessorCurvatureModel O P R θ δ) 0 := by
@@ -149,8 +140,7 @@ theorem continuousAt_endpointPredecessorCurvatureModel
     exact continuousAt_const.mul (hcircle.dist continuousAt_const)
   · simpa using mul_ne_zero hself hself
 
-/-- The cancelled successor model is continuous at the collapsed chord. -/
-theorem continuousAt_endpointSuccessorCurvatureModel
+private theorem continuousAt_endpointSuccessorCurvatureModel_aux
     {O P : ℂ} {R θ : ℝ} (hP : dist O P < R) :
     ContinuousAt (fun δ : ℝ ↦
       endpointSuccessorCurvatureModel O P R θ δ) 0 := by
@@ -171,9 +161,7 @@ theorem continuousAt_endpointSuccessorCurvatureModel
     exact continuousAt_const.mul (hcircle.dist continuousAt_const)
   · simpa using mul_ne_zero hself hself
 
-/-- At the collapsed chord, both local curvature models are already strictly
-above the enclosing circle curvature. -/
-theorem inv_radius_lt_endpointCurvatureModel_zero
+private theorem inv_radius_lt_endpointCurvatureModel_zero_aux
     {O P : ℂ} {R θ : ℝ} (hR : 0 < R) (hP : dist O P < R) :
     1 / R < endpointPredecessorCurvatureModel O P R θ 0 ∧
       1 / R < endpointSuccessorCurvatureModel O P R θ 0 := by
@@ -184,7 +172,7 @@ theorem inv_radius_lt_endpointCurvatureModel_zero
       rw [← heq, dist_circlePoint_center, abs_of_pos hR]
     linarith
   have hmargin :=
-    dist_circlePoint_sq_lt_neg_two_mul_radial_of_interior
+    dist_circlePoint_sq_lt_neg_two_mul_radial_of_interior_aux
       (θ := θ) hR hP
   have hlt : 1 / R <
       (-2 * dotR2 (circleRadial θ) (P - circlePoint O R θ)) /
@@ -193,7 +181,7 @@ theorem inv_radius_lt_endpointCurvatureModel_zero
     nlinarith
   simpa using And.intro hlt hlt
 
-theorem signedMengerR2_circlePoint_predecessor_eq_model
+private theorem signedMengerR2_circlePoint_predecessor_eq_model_aux
     {O P : ℂ} {R θ δ : ℝ} (hR : 0 < R)
     (hP : dist O P < R) (hδ0 : 0 < δ) (hδ2π : δ < 2 * Real.pi) :
     signedMengerR2 (circlePoint O R (θ - δ)) (circlePoint O R θ) P =
@@ -229,7 +217,7 @@ theorem signedMengerR2_circlePoint_predecessor_eq_model
     dist_comm P (circlePoint O R (θ - δ)), hsinδ, hcosδ]
   field_simp [hR.ne', hhalfPos.ne', hself, hprev]
 
-theorem signedMengerR2_circlePoint_successor_eq_model
+private theorem signedMengerR2_circlePoint_successor_eq_model_aux
     {O P : ℂ} {R θ δ : ℝ} (hR : 0 < R)
     (hP : dist O P < R) (hδ0 : 0 < δ) (hδ2π : δ < 2 * Real.pi) :
     signedMengerR2 P (circlePoint O R θ) (circlePoint O R (θ + δ)) =
@@ -266,25 +254,22 @@ theorem signedMengerR2_circlePoint_successor_eq_model
     hsinδ, hcosδ]
   field_simp [hR.ne', hhalfPos.ne', hself, hnext]
 
-/-- A point strictly inside the circle has predecessor endpoint curvature
-strictly larger than `1 / R` for every sufficiently small positive angular
-step. -/
-theorem exists_step_bound_signedMengerR2_circlePoint_predecessor
+private theorem exists_step_bound_signedMengerR2_circlePoint_predecessor_aux
     {O P : ℂ} {R θ : ℝ} (hR : 0 < R) (hP : dist O P < R) :
     ∃ ε : ℝ, 0 < ε ∧ ∀ δ : ℝ, 0 < δ → δ < ε →
       1 / R < signedMengerR2
         (circlePoint O R (θ - δ)) (circlePoint O R θ) P := by
-  have hzero := (inv_radius_lt_endpointCurvatureModel_zero
+  have hzero := (inv_radius_lt_endpointCurvatureModel_zero_aux
     (θ := θ) hR hP).1
   have hevent : ∀ᶠ δ : ℝ in nhds 0,
       1 / R < endpointPredecessorCurvatureModel O P R θ δ :=
-    (continuousAt_endpointPredecessorCurvatureModel hP).eventually_const_lt hzero
+    (continuousAt_endpointPredecessorCurvatureModel_aux hP).eventually_const_lt hzero
   obtain ⟨η, hη, hball⟩ := Metric.mem_nhds_iff.mp hevent
   let ε : ℝ := min η (2 * Real.pi)
   have hε : 0 < ε := lt_min hη Real.two_pi_pos
   refine ⟨ε, hε, ?_⟩
   intro δ hδ0 hδε
-  rw [signedMengerR2_circlePoint_predecessor_eq_model hR hP hδ0
+  rw [signedMengerR2_circlePoint_predecessor_eq_model_aux hR hP hδ0
     (hδε.trans_le (min_le_right η (2 * Real.pi)))]
   apply hball
   simpa only [Metric.mem_ball, Real.dist_eq, sub_zero, abs_of_pos hδ0] using
@@ -296,25 +281,23 @@ theorem exists_step_bound_signedMengerR2_circlePoint_successor
     ∃ ε : ℝ, 0 < ε ∧ ∀ δ : ℝ, 0 < δ → δ < ε →
       1 / R < signedMengerR2
         P (circlePoint O R θ) (circlePoint O R (θ + δ)) := by
-  have hzero := (inv_radius_lt_endpointCurvatureModel_zero
+  have hzero := (inv_radius_lt_endpointCurvatureModel_zero_aux
     (θ := θ) hR hP).2
   have hevent : ∀ᶠ δ : ℝ in nhds 0,
       1 / R < endpointSuccessorCurvatureModel O P R θ δ :=
-    (continuousAt_endpointSuccessorCurvatureModel hP).eventually_const_lt hzero
+    (continuousAt_endpointSuccessorCurvatureModel_aux hP).eventually_const_lt hzero
   obtain ⟨η, hη, hball⟩ := Metric.mem_nhds_iff.mp hevent
   let ε : ℝ := min η (2 * Real.pi)
   have hε : 0 < ε := lt_min hη Real.two_pi_pos
   refine ⟨ε, hε, ?_⟩
   intro δ hδ0 hδε
-  rw [signedMengerR2_circlePoint_successor_eq_model hR hP hδ0
+  rw [signedMengerR2_circlePoint_successor_eq_model_aux hR hP hδ0
     (hδε.trans_le (min_le_right η (2 * Real.pi)))]
   apply hball
   simpa only [Metric.mem_ball, Real.dist_eq, sub_zero, abs_of_pos hδ0] using
     hδε.trans_le (min_le_left η (2 * Real.pi))
 
-/-- A single positive step bound works for an arbitrary predecessor endpoint
-and an arbitrary successor endpoint on the same circle. -/
-theorem exists_step_bound_signedMengerR2_circlePoint_endpoints
+private theorem exists_step_bound_signedMengerR2_circlePoint_endpoints_aux
     {O Pleft Pright : ℂ} {R θleft θright : ℝ}
     (hR : 0 < R) (hleft : dist O Pleft < R)
     (hright : dist O Pright < R) :
@@ -324,7 +307,7 @@ theorem exists_step_bound_signedMengerR2_circlePoint_endpoints
       (1 / R < signedMengerR2
           Pright (circlePoint O R θright) (circlePoint O R (θright + δ))) := by
   obtain ⟨εleft, hεleft, hleftGap⟩ :=
-    exists_step_bound_signedMengerR2_circlePoint_predecessor
+    exists_step_bound_signedMengerR2_circlePoint_predecessor_aux
       (P := Pleft) (θ := θleft) hR hleft
   obtain ⟨εright, hεright, hrightGap⟩ :=
     exists_step_bound_signedMengerR2_circlePoint_successor
@@ -334,11 +317,28 @@ theorem exists_step_bound_signedMengerR2_circlePoint_endpoints
   exact ⟨hleftGap δ hδ0 (hδ.trans_le (min_le_left _ _)),
     hrightGap δ hδ0 (hδ.trans_le (min_le_right _ _))⟩
 
-/-- Quantitative odd-mesh interface.  Given any positive upper bound `η`
-for the angular step, one can choose an odd mesh whose step is below `η`
-and whose circle chords strictly support the concentric disk of radius `ρ`.
--/
-theorem exists_oddCircleMeshStep_supporting_innerRadius_lt
+private theorem exists_odd_mesh_step_bounds_aux {a τ : ℝ} (ha : 0 < a)
+    (ha2π : a < 2 * Real.pi) (hτ : 0 < τ) :
+    ∃ k : ℕ, 1 ≤ k ∧ 0 < a / ((2 * k + 1) + 1 : ℕ) ∧
+      a / ((2 * k + 1) + 1 : ℕ) < Real.pi ∧ a / ((2 * k + 1) + 1 : ℕ) < τ := by
+  obtain ⟨k, hk⟩ := exists_nat_gt (max 1 (a / τ))
+  have hkOneReal : (1 : ℝ) < k := (le_max_left _ _).trans_lt hk
+  have hkOne : 1 ≤ k := by exact_mod_cast hkOneReal.le
+  have hratioK : a / τ < (k : ℝ) := (le_max_right _ _).trans_lt hk
+  have hdenPos : (0 : ℝ) < ((2 * k + 1) + 1 : ℕ) := by positivity
+  have hratioDen : a / τ < (((2 * k + 1) + 1 : ℕ) : ℝ) := by
+    exact hratioK.trans (by push_cast; linarith)
+  have hstepLtτ : a / (((2 * k + 1) + 1 : ℕ) : ℝ) < τ := by
+    apply (div_lt_iff₀ hdenPos).mpr
+    simpa [mul_comm] using (div_lt_iff₀ hτ).mp hratioDen
+  have hstepPos : 0 < a / (((2 * k + 1) + 1 : ℕ) : ℝ) := div_pos ha hdenPos
+  have hdenTwo : (2 : ℝ) ≤ (((2 * k + 1) + 1 : ℕ) : ℝ) := by
+    exact_mod_cast (show 2 ≤ (2 * k + 1) + 1 by omega)
+  have hstepLeHalf : a / (((2 * k + 1) + 1 : ℕ) : ℝ) ≤ a / 2 :=
+    div_le_div_of_nonneg_left ha.le (by norm_num) hdenTwo
+  exact ⟨k, hkOne, hstepPos, hstepLeHalf.trans_lt (by linarith), hstepLtτ⟩
+
+private theorem exists_oddCircleMeshStep_supporting_innerRadius_lt_aux
     {R ρ α η : ℝ} (hρ : ρ < R) (hα0 : 0 < α)
     (hα2π : α < 2 * Real.pi) (hη : 0 < η) :
     ∃ k : ℕ, 1 ≤ k ∧
@@ -347,63 +347,19 @@ theorem exists_oddCircleMeshStep_supporting_innerRadius_lt
       ρ < R * Real.cos ((α / ((2 * k + 1) + 1 : ℕ)) / 2) ∧
       α / ((2 * k + 1) + 1 : ℕ) < η := by
   let inner : ℝ → ℝ := fun x ↦ R * Real.cos (x / 2)
-  have hinnerCont : ContinuousAt inner 0 := by
-    dsimp [inner]
-    fun_prop
   have hinnerLim : Tendsto inner (nhds 0) (nhds R) := by
-    simpa [inner, ContinuousAt] using hinnerCont
-  have hinnerEventually : ∀ᶠ x : ℝ in nhds 0, ρ < inner x :=
+    simpa [inner, ContinuousAt] using (show ContinuousAt inner 0 by dsimp [inner]; fun_prop)
+  obtain ⟨ζ, hζ, hball⟩ := Metric.mem_nhds_iff.mp <|
     hinnerLim.eventually (lt_mem_nhds hρ)
-  obtain ⟨ζ, hζ, hball⟩ := Metric.mem_nhds_iff.mp hinnerEventually
-  let τ : ℝ := min η ζ
-  have hτ : 0 < τ := lt_min hη hζ
-  obtain ⟨k, hk⟩ := exists_nat_gt (max 1 (α / τ))
-  have hkOneReal : (1 : ℝ) < k := (le_max_left _ _).trans_lt hk
-  have hkOne : 1 ≤ k := by
-    exact_mod_cast hkOneReal.le
-  have hratioK : α / τ < (k : ℝ) :=
-    (le_max_right _ _).trans_lt hk
-  have hdenPos : (0 : ℝ) < ((2 * k + 1) + 1 : ℕ) := by positivity
-  have hratioDen : α / τ < (((2 * k + 1) + 1 : ℕ) : ℝ) := by
-    exact hratioK.trans (by push_cast; linarith)
-  have hαltDenτ : α < (((2 * k + 1) + 1 : ℕ) : ℝ) * τ :=
-    (div_lt_iff₀ hτ).mp hratioDen
-  have hstepLtτ :
-      α / (((2 * k + 1) + 1 : ℕ) : ℝ) < τ := by
-    apply (div_lt_iff₀ hdenPos).mpr
-    simpa [mul_comm] using hαltDenτ
-  have hstepPos :
-      0 < α / (((2 * k + 1) + 1 : ℕ) : ℝ) :=
-    div_pos hα0 hdenPos
-  have hdenTwo :
-      (2 : ℝ) ≤ (((2 * k + 1) + 1 : ℕ) : ℝ) := by
-    exact_mod_cast (show 2 ≤ (2 * k + 1) + 1 by omega)
-  have hstepLeHalf :
-      α / (((2 * k + 1) + 1 : ℕ) : ℝ) ≤ α / 2 :=
-    div_le_div_of_nonneg_left hα0.le (by norm_num) hdenTwo
-  have hstepPi :
-      α / (((2 * k + 1) + 1 : ℕ) : ℝ) < Real.pi := by
-    have : α / 2 < Real.pi := by linarith
-    exact hstepLeHalf.trans_lt this
-  have hstepLtη :
-      α / (((2 * k + 1) + 1 : ℕ) : ℝ) < η :=
-    hstepLtτ.trans_le (min_le_left η ζ)
-  have hstepLtζ :
-      α / (((2 * k + 1) + 1 : ℕ) : ℝ) < ζ :=
-    hstepLtτ.trans_le (min_le_right η ζ)
-  have hstepNear :
-      α / (((2 * k + 1) + 1 : ℕ) : ℝ) ∈ Metric.ball (0 : ℝ) ζ := by
-    simpa only [Metric.mem_ball, Real.dist_eq, sub_zero,
-      abs_of_pos hstepPos] using hstepLtζ
-  refine ⟨k, hkOne, hstepPos, hstepPi, ?_, hstepLtη⟩
-  change ρ < inner
-    (α / (((2 * k + 1) + 1 : ℕ) : ℝ))
-  exact hball hstepNear
+  obtain ⟨k, hk, hstepPos, hstepPi, hstepLt⟩ :=
+    exists_odd_mesh_step_bounds_aux hα0 hα2π (lt_min hη hζ)
+  refine ⟨k, hk, hstepPos, hstepPi, ?_, hstepLt.trans_le (min_le_left _ _)⟩
+  change ρ < inner (α / (((2 * k + 1) + 1 : ℕ) : ℝ))
+  apply hball
+  simpa only [Metric.mem_ball, Real.dist_eq, sub_zero, abs_of_pos hstepPos] using
+    hstepLt.trans_le (min_le_right η ζ)
 
-/-- A single odd auxiliary mesh simultaneously has the inner-radius support
-needed for the circle splice and the two strict raw endpoint-curvature gaps.
-No support cross, regularity, or polygon simplicity is assumed. -/
-theorem exists_oddCircleMeshAngle_supporting_innerRadius_endpointCurvatures
+private theorem exists_oddCircleMeshAngle_supporting_innerRadius_endpointCurvatures_aux
     {O Pleft Pright : ℂ} {R ρ θB θA : ℝ}
     (hR : 0 < R) (hρ : ρ < R) (hBA : θB < θA)
     (hspan : θA < θB + 2 * Real.pi)
@@ -421,10 +377,10 @@ theorem exists_oddCircleMeshAngle_supporting_innerRadius_endpointCurvatures
         (circlePoint O R
           (θB + (θA - θB) / ((2 * k + 1) + 1 : ℕ))) := by
   obtain ⟨η, hη, hcurvatures⟩ :=
-    exists_step_bound_signedMengerR2_circlePoint_endpoints
+    exists_step_bound_signedMengerR2_circlePoint_endpoints_aux
       (θleft := θA) (θright := θB) hR hleft hright
   obtain ⟨k, hk, hstepPos, hstepPi, hinner, hstepLt⟩ :=
-    exists_oddCircleMeshStep_supporting_innerRadius_lt hρ
+    exists_oddCircleMeshStep_supporting_innerRadius_lt_aux hρ
       (sub_pos.mpr hBA) (by linarith) hη
   have hgaps := hcurvatures
     ((θA - θB) / ((2 * k + 1) + 1 : ℕ)) hstepPos hstepLt
@@ -435,10 +391,28 @@ namespace Section4PositiveRunCertificate
 variable {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
     (run : Section4PositiveRunCertificate v O R)
 
-/-- Splice-level odd-mesh choice with the exact endpoint
-`SignedMengerProfile` inequalities consumed by the Section 4 assembly.  The
-only geometric information about the retained endpoints is that the adjacent
-retained vertices are strictly inside the minimal disk. -/
+private theorem circleSplice_endpoint_gaps_aux {q : ℕ} (hq : 0 < q) {θB θA : ℝ}
+    (hB : run.point (run.b + 1) = circlePoint O R θB)
+    (hA : run.point run.chainStart = circlePoint O R θA)
+    (hleft : 1 / R < signedMengerR2
+      (circlePoint O R (θA - (θA - θB) / (q + 1 : ℕ)))
+      (circlePoint O R θA) (run.point run.a))
+    (hright : 1 / R < signedMengerR2 (run.point run.b) (circlePoint O R θB)
+      (circlePoint O R (θB + (θA - θB) / (q + 1 : ℕ)))) :
+    1 / R < SignedMengerProfile (run.circleSplice q θB θA) 0 ∧
+      1 / R < SignedMengerProfile (run.circleSplice q θB θA)
+        ((run.chainLength - 1 : ℕ) : ZMod (run.spliceVertexCount q)) := by
+  letI : NeZero (run.spliceVertexCount q) := ⟨(run.spliceVertexCount_pos q).ne'⟩
+  obtain ⟨hleftPrev, hleftSelf, hleftNext⟩ :=
+    run.circleSplice_leftEndpoint_triple q hq θB θA hA
+  obtain ⟨hrightPrev, hrightSelf, hrightNext⟩ :=
+    run.circleSplice_rightEndpoint_triple q hq θB θA hB
+  constructor
+  · rw [SignedMengerProfile_apply]
+    simpa only [zero_sub, zero_add, hleftPrev, hleftSelf, hleftNext] using hleft
+  · rwa [SignedMengerProfile_apply, hrightPrev, hrightSelf, hrightNext]
+
+/-- An odd splice mesh supports the inner-radius and endpoint-curvature inequalities. -/
 theorem exists_oddCircleMeshAngle_supporting_innerRadius_spliceEndpointGaps
     {ρ θB θA : ℝ}
     (hR : 0 < R) (hΔ : MinimalEnclosingDiskR2 v O R) (hρ : ρ < R)
@@ -456,34 +430,13 @@ theorem exists_oddCircleMeshAngle_supporting_innerRadius_spliceEndpointGaps
         (run.circleSplice (2 * k + 1) θB θA)
           ((run.chainLength - 1 : ℕ) :
             ZMod (run.spliceVertexCount (2 * k + 1))) := by
-  have hleftInterior : dist O (run.point run.a) < R :=
-    run.internal_dist_lt hΔ le_rfl run.a_le_b
-  have hrightInterior : dist O (run.point run.b) < R :=
-    run.internal_dist_lt hΔ run.a_le_b le_rfl
   obtain ⟨k, hk, hstepPos, hstepPi, hinner, hleftRaw, hrightRaw⟩ :=
-    exists_oddCircleMeshAngle_supporting_innerRadius_endpointCurvatures
-      hR hρ hBA hspan hleftInterior hrightInterior
-  let q : ℕ := 2 * k + 1
-  have hq : 0 < q := by
-    dsimp [q]
-    omega
-  let m : ℕ := run.spliceVertexCount q
-  letI : NeZero m := ⟨(run.spliceVertexCount_pos q).ne'⟩
-  obtain ⟨hleftPrev, hleftSelf, hleftNext⟩ :=
-    run.circleSplice_leftEndpoint_triple q hq θB θA hA
-  obtain ⟨hrightPrev, hrightSelf, hrightNext⟩ :=
-    run.circleSplice_rightEndpoint_triple q hq θB θA hB
-  have hleftGap : 1 / R < SignedMengerProfile
-      (run.circleSplice q θB θA) 0 := by
-    rw [SignedMengerProfile_apply]
-    simpa only [zero_sub, zero_add, hleftPrev, hleftSelf, hleftNext] using
-      hleftRaw
-  have hrightGap : 1 / R < SignedMengerProfile
-      (run.circleSplice q θB θA)
-        ((run.chainLength - 1 : ℕ) : ZMod m) := by
-    rw [SignedMengerProfile_apply, hrightPrev, hrightSelf, hrightNext]
-    exact hrightRaw
-  exact ⟨k, hk, hstepPos, hstepPi, hinner, hleftGap, hrightGap⟩
+    exists_oddCircleMeshAngle_supporting_innerRadius_endpointCurvatures_aux
+      hR hρ hBA hspan (run.internal_dist_lt hΔ le_rfl run.a_le_b)
+        (run.internal_dist_lt hΔ run.a_le_b le_rfl)
+  obtain ⟨hleft, hright⟩ := circleSplice_endpoint_gaps_aux run (q := 2 * k + 1)
+    (by omega) hB hA hleftRaw hrightRaw
+  exact ⟨k, hk, hstepPos, hstepPi, hinner, hleft, hright⟩
 
 end Section4PositiveRunCertificate
 

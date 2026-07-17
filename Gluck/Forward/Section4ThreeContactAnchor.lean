@@ -6,16 +6,13 @@ Authors: kejace
 import Gluck.Forward.Section4ContactCoverage
 import Gluck.Forward.Section4EndpointInteriorCurvature
 import Gluck.Forward.Section4LocalDetour
+import Gluck.Forward.Section4VertexEdgeClearance
 
 /-!
 # The three-contact orientation anchor
 
-This file isolates the local ingredient used to orient the circle order at
-one exposed contact.  The positively oriented circle tangent lies strictly
-between the incoming and outgoing polygon edges.  A forthcoming path-level
-detour lemma uses this strict sector to split the contact into two nearby
-boundary points and reduce the three-contact case to the four-point crosscut
-theorem.
+A small counterclockwise detour at a positively oriented contact fixes the
+cyclic order of three circle contacts.
 -/
 
 namespace Gluck.Forward
@@ -23,73 +20,7 @@ namespace Gluck.Forward
 open Gluck.Discrete Metric Set
 open scoped unitInterval
 
-/-- At a circle contact, a distinct point of the closed disk lies strictly
-behind the supporting tangent. -/
-theorem dotR2_circleRadial_sub_neg_of_mem_closedDisk_of_ne
-    {O B P : ℂ} {R θ : ℝ} (hR : 0 < R)
-    (hB : B = circlePoint O R θ)
-    (hP : dist O P ≤ R) (hPB : P ≠ B) :
-    dotR2 (circleRadial θ) (P - B) < 0 := by
-  subst B
-  have hR0 : 0 ≤ R := hR.le
-  have hsq : dist O P ^ 2 ≤ R ^ 2 := by
-    exact (sq_le_sq₀ (dist_nonneg) hR0).2 hP
-  rw [show dist O P = ‖P - O‖ by rw [dist_eq_norm, norm_sub_rev]] at hsq
-  rw [Complex.sq_norm, Complex.normSq_apply] at hsq
-  have hdecomp : P - O =
-      (P - circlePoint O R θ) + (R : ℝ) • circleRadial θ := by
-    rw [← circlePoint_sub_center O R θ]
-    ring
-  rw [hdecomp] at hsq
-  have hdiff : 0 < Complex.normSq (P - circlePoint O R θ) :=
-    Complex.normSq_pos.mpr (sub_ne_zero.mpr hPB)
-  rw [Complex.normSq_apply] at hdiff
-  dsimp [dotR2]
-  simp only [Complex.add_re, Complex.add_im, Complex.sub_re, Complex.sub_im,
-    Complex.smul_re, Complex.smul_im, smul_eq_mul, circleRadial_re,
-    circleRadial_im] at hsq hdiff ⊢
-  ring_nf at hsq hdiff ⊢
-  nlinarith [Real.sin_sq_add_cos_sq θ]
-
-/-- The counterclockwise circle tangent is strictly to the left of the
-incoming edge at a disk-boundary contact. -/
-theorem crossR2_incoming_circleTangent_pos
-    {O B P : ℂ} {R θ : ℝ} (hR : 0 < R)
-    (hB : B = circlePoint O R θ)
-    (hP : dist O P ≤ R) (hPB : P ≠ B) :
-    0 < crossR2 P B (B + circleTangent θ) := by
-  have hradial := dotR2_circleRadial_sub_neg_of_mem_closedDisk_of_ne
-    hR hB hP hPB
-  have heq : crossR2 P B (B + circleTangent θ) =
-      -dotR2 (circleRadial θ) (P - B) := by
-    unfold crossR2 dotR2
-    simp only [Complex.add_re, Complex.add_im, Complex.sub_re, Complex.sub_im,
-      circleTangent_re, circleTangent_im, circleRadial_re, circleRadial_im]
-    ring
-  rw [heq]
-  linarith
-
-/-- The outgoing edge is strictly to the left of the counterclockwise
-circle tangent at a disk-boundary contact. -/
-theorem crossR2_circleTangent_outgoing_pos
-    {O B Q : ℂ} {R θ : ℝ} (hR : 0 < R)
-    (hB : B = circlePoint O R θ)
-    (hQ : dist O Q ≤ R) (hQB : Q ≠ B) :
-    0 < crossR2 B (B + circleTangent θ) Q := by
-  have hradial := dotR2_circleRadial_sub_neg_of_mem_closedDisk_of_ne
-    hR hB hQ hQB
-  have heq : crossR2 B (B + circleTangent θ) Q =
-      -dotR2 (circleRadial θ) (Q - B) := by
-    unfold crossR2 dotR2
-    simp only [Complex.add_re, Complex.add_im, Complex.sub_re, Complex.sub_im,
-      circleTangent_re, circleTangent_im, circleRadial_re, circleRadial_im]
-    ring
-  rw [heq]
-  linarith
-
-/-- A sufficiently short counterclockwise circle chord turns strictly left
-from an incoming edge whose other endpoint is in the open disk. -/
-theorem exists_circleContact_incoming_sector_step
+private theorem exists_circleContact_incoming_sector_step_aux
     {O B P : ℂ} {R θ η : ℝ} (hR : 0 < R) (hη : 0 < η)
     (hB : B = circlePoint O R θ)
     (hP : dist O P < R) :
@@ -129,46 +60,14 @@ theorem exists_circleContact_incoming_sector_step
   rw [hB]
   exact crossR2_pos_of_signedMengerR2_pos hPB hκpos
 
-/-- The oriented area is affine in its third point. -/
-theorem crossR2_lineMap_third (A B X Y : ℂ) (t : ℝ) :
+private theorem crossR2_lineMap_third_aux (A B X Y : ℂ) (t : ℝ) :
     crossR2 A B (AffineMap.lineMap X Y t) =
       (1 - t) * crossR2 A B X + t * crossR2 A B Y := by
-  simp [AffineMap.lineMap_apply_module, crossR2]
+  simp only [AffineMap.lineMap_apply_module, crossR2, Complex.add_re, Complex.add_im,
+    Complex.sub_re, Complex.sub_im, Complex.smul_re, Complex.smul_im, smul_eq_mul]
   ring
 
-/-- A segment with both endpoints strictly to the left of an oriented line
-is disjoint from every segment lying on that line. -/
-theorem segment_disjoint_of_crossR2_pos
-    {A B C D : ℂ}
-    (hC : 0 < crossR2 A B C) (hD : 0 < crossR2 A B D) :
-    Disjoint (segment ℝ A B) (segment ℝ C D) := by
-  apply Set.disjoint_left.mpr
-  intro z hzAB hzCD
-  rw [segment_eq_image_lineMap] at hzAB hzCD
-  rcases hzAB with ⟨t, ht, rfl⟩
-  rcases hzCD with ⟨s, hs, heq⟩
-  have hzero : crossR2 A B (AffineMap.lineMap A B t) = 0 := by
-    unfold crossR2
-    simp only [AffineMap.lineMap_apply, vsub_eq_sub, vadd_eq_add,
-      Complex.sub_re, Complex.sub_im, Complex.add_re, Complex.add_im,
-      Complex.smul_re, Complex.smul_im]
-    ring
-  have hcross := congrArg (crossR2 A B) heq
-  rw [crossR2_lineMap_third, hzero] at hcross
-  have hweight : 0 ≤ 1 - s := sub_nonneg.mpr hs.2
-  have hleft : 0 ≤ (1 - s) * crossR2 A B C :=
-    mul_nonneg hweight hC.le
-  by_cases hs0 : s = 0
-  · subst s
-    simp only [sub_zero, one_mul, zero_mul, add_zero] at hcross
-    linarith
-  · have hspos : 0 < s := lt_of_le_of_ne hs.1 (Ne.symm hs0)
-    have hright : 0 < s * crossR2 A B D := mul_pos hspos hD
-    linarith
-
-/-- Every endpoint has points of the open segment to a distinct endpoint
-arbitrarily nearby. -/
-theorem exists_openSegment_mem_ball
+private theorem exists_openSegment_mem_ball_aux
     {B Q : ℂ} (hBQ : B ≠ Q) {ρ : ℝ} (hρ : 0 < ρ) :
     ∃ X : ℂ, X ∈ openSegment ℝ B Q ∧ X ∈ ball B ρ := by
   have hd : 0 < dist B Q := dist_pos.mpr hBQ
@@ -196,16 +95,7 @@ theorem exists_openSegment_mem_ball
     rw [hcancel] at hmul
     linarith
 
-/-- A short replacement chord remains in any open ball containing both of
-its endpoints. -/
-theorem segment_subset_ball_of_endpoints_mem
-    {B C D : ℂ} {ρ : ℝ} (hC : C ∈ ball B ρ) (hD : D ∈ ball B ρ) :
-    segment ℝ C D ⊆ ball B ρ :=
-  (convex_ball B ρ).segment_subset hC hD
-
-/-- The local successor can simultaneously be chosen in an arbitrary
-neighborhood of the contact. -/
-theorem exists_circleContact_incoming_sector_step_mem_ball
+private theorem exists_circleContact_incoming_sector_step_mem_ball_aux
     {O B P : ℂ} {R θ η ρ : ℝ}
     (hR : 0 < R) (hη : 0 < η) (hρ : 0 < ρ)
     (hB : B = circlePoint O R θ)
@@ -215,7 +105,7 @@ theorem exists_circleContact_incoming_sector_step_mem_ball
       circlePoint O R (θ + δ) ∈ ball B ρ := by
   have hρR : 0 < ρ / R := div_pos hρ hR
   obtain ⟨δ, hδ, hδη, hδπ, hcross⟩ :=
-    exists_circleContact_incoming_sector_step hR (lt_min hη hρR) hB hP
+    exists_circleContact_incoming_sector_step_aux hR (lt_min hη hρR) hB hP
   have hδη' : δ < η := hδη.trans_le (min_le_left _ _)
   have hδρR : δ < ρ / R := hδη.trans_le (min_le_right _ _)
   have hδ2π : δ < 2 * Real.pi := by linarith [Real.pi_pos]
@@ -228,9 +118,7 @@ theorem exists_circleContact_incoming_sector_step_mem_ball
   exact ⟨δ, hδ, hδη', hδπ, hcross,
     by simpa [Metric.mem_ball, dist_comm] using hdist⟩
 
-/-- A circle lift in a based one-turn window is strictly above its base
-unless it represents the base point itself. -/
-theorem circlePoint_angle_gt_windowBase_of_ne
+private theorem circlePoint_angle_gt_windowBase_of_ne_aux
     {O P B : ℂ} {R β θ : ℝ}
     (hθ : θ ∈ Set.Ico β (β + 2 * Real.pi))
     (hP : P = circlePoint O R θ)
@@ -241,11 +129,7 @@ theorem circlePoint_angle_gt_windowBase_of_ne
   apply hPB
   rw [hP, hB, hEq]
 
-/-- A small positive boundary detour anchors the order of a third contact.
-If a disk path from the detour point to the third contact is disjoint from a
-disk path from the proposed upper endpoint back to the base, then the third
-contact lies strictly before that endpoint in the based angle window. -/
-theorem circlePoint_angle_lt_endpoint_of_disjoint_detourPaths
+private theorem circlePoint_angle_lt_endpoint_of_disjoint_detourPaths_aux
     {O : ℂ} {R θB θA θC ε : ℝ}
     (hR : 0 < R) (hε : 0 < ε) (hεA : θB + ε < θA)
     (hCwin : θC ∈ Set.Ico θB (θB + 2 * Real.pi))
@@ -275,29 +159,144 @@ theorem circlePoint_angle_lt_endpoint_of_disjoint_detourPaths
   · exact ⟨s, rfl⟩
   · exact ⟨t, hst.symm⟩
 
-/-- Strict positivity at the far endpoint propagates through the open part
-of a segment whose near endpoint lies on the oriented line. -/
-theorem crossR2_pos_of_mem_openSegment_from_second
+private theorem crossR2_pos_of_mem_openSegment_from_second_aux
     {P B Q X : ℂ} (hQ : 0 < crossR2 P B Q)
     (hX : X ∈ openSegment ℝ B Q) :
     0 < crossR2 P B X := by
   rw [openSegment_eq_image_lineMap] at hX
   obtain ⟨t, ht, rfl⟩ := hX
-  rw [crossR2_lineMap_third]
+  rw [crossR2_lineMap_third_aux]
   have hBzero : crossR2 P B B = 0 := by
     unfold crossR2
     ring
   rw [hBzero, mul_zero, zero_add]
   exact mul_pos ht.1 hQ
 
-/-- **Three-contact orientation anchor in natural coordinates.**
+private structure PositiveContactDetourData
+    {n : ℕ} [NeZero n] (v : ZMod n → ℂ) (O : ℂ)
+    (R θB θA : ℝ) (m : ℕ) where
+  ε : ℝ
+  step : ℝ
+  X : ℂ
+  step_pos : 0 < step
+  step_before : θB + step < θA
+  D_mem_ball : circlePoint O R (θB + step) ∈ ball (v 0) ε
+  X_mem_openSegment : X ∈ openSegment ℝ (v 0) (v 1)
+  X_mem_ball : X ∈ ball (v 0) ε
+  D_side : 0 < crossR2 (v (-1)) (v 0) (circlePoint O R (θB + step))
+  X_side : 0 < crossR2 (v (-1)) (v 0) X
+  X_inside : dist O X ≤ R
+  clear : ∀ k : ℕ, m ≤ k → k + 1 < n →
+    Disjoint (ball (v 0) ε)
+      (segment ℝ (v (k : ZMod n)) (v ((k + 1 : ℕ) : ZMod n)))
 
-The polygon is cut at the base contact `v 0`; a third contact `v p` lies on
-the complementary chain before the proposed endpoint `v m`.  Strictly
-positive orientation at the base and an interior incoming vertex allow the
-base to be split by a tiny counterclockwise circle detour.  If the third
-contact had angle at or after the endpoint, the detour and return chain would
-have alternating circle endpoints, contradicting simplicity. -/
+private theorem exists_positiveContactDetourData_aux
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ}
+    {R θB θA : ℝ} {m : ℕ}
+    (hsimple : IsSimplePolygon v)
+    (hinside : ∀ z : ZMod n, dist O (v z) ≤ R)
+    (hR : 0 < R) (hmOne : 1 < m) (hmn : m < n)
+    (hIncoming : dist O (v (-1)) < R)
+    (hB : v 0 = circlePoint O R θB)
+    (hcontact : 0 < crossR2 (v (-1)) (v 0) (v 1))
+    (hBA : θB < θA) :
+    Nonempty (PositiveContactDetourData v O R θB θA m) := by
+  obtain ⟨ε, hε, hclear⟩ :=
+    exists_ball_disjoint_later_polygonEdges hsimple hmOne hmn
+  obtain ⟨δ, hδ, hδA, _, hDside, hDball⟩ :=
+    exists_circleContact_incoming_sector_step_mem_ball_aux
+      hR (sub_pos.mpr hBA) hε hB hIncoming
+  have hBQ : v 0 ≠ v 1 := by simpa using hsimple.1 0
+  obtain ⟨X, hXopen, hXball⟩ := exists_openSegment_mem_ball_aux hBQ hε
+  have hXside := crossR2_pos_of_mem_openSegment_from_second_aux hcontact hXopen
+  have hBclosed : v 0 ∈ closedBall O R := by
+    simpa [Metric.mem_closedBall, dist_comm] using hinside 0
+  have hQclosed : v 1 ∈ closedBall O R := by
+    simpa [Metric.mem_closedBall, dist_comm] using hinside 1
+  have hXclosed : X ∈ closedBall O R :=
+    (convex_closedBall O R).segment_subset hBclosed hQclosed
+      (openSegment_subset_segment ℝ _ _ hXopen)
+  have hXinside : dist O X ≤ R := by
+    simpa [Metric.mem_closedBall, dist_comm] using hXclosed
+  exact ⟨⟨ε, δ, X, hδ, by linarith, hDball, hXopen, hXball, hDside, hXside,
+    hXinside, hclear⟩⟩
+
+private structure ContactAnchorPaths (O : ℂ) (R θB θC θA : ℝ) where
+  step : ℝ
+  step_pos : 0 < step
+  step_before : θB + step < θA
+  detour : Path (circlePoint O R (θB + step)) (circlePoint O R θC)
+  returnPath : Path (circlePoint O R θA) (circlePoint O R (θB + 2 * Real.pi))
+  detour_inside : ∀ s : I, dist O (detour s) ≤ R
+  return_inside : ∀ t : I, dist O (returnPath t) ≤ R
+  disjoint : Disjoint (Set.range detour) (Set.range returnPath)
+
+private theorem exists_contactAnchorPaths_aux
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ}
+    {R θB θC θA : ℝ} {p m : ℕ}
+    (hsimple : IsSimplePolygon v)
+    (hinside : ∀ z : ZMod n, dist O (v z) ≤ R)
+    (hR : 0 < R) (hp : 0 < p) (hpm : p < m) (hmn : m < n)
+    (hB : v 0 = circlePoint O R θB)
+    (hC : v (p : ZMod n) = circlePoint O R θC)
+    (hA : v (m : ZMod n) = circlePoint O R θA)
+    (data : PositiveContactDetourData v O R θB θA m) :
+    Nonempty (ContactAnchorPaths O R θB θC θA) := by
+  let g : ℕ → ℂ := contactDetourVertices v (circlePoint O R (θB + data.step)) data.X
+  let q : ℕ → ℂ := contactReturnVertices v m
+  have hg0 : g 0 = circlePoint O R (θB + data.step) := by
+    simp [g, contactDetourVertices]
+  have hgp : g (p + 1) = circlePoint O R θC := by
+    obtain ⟨r, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hp.ne'
+    simpa [g, contactDetourVertices, Nat.add_assoc] using hC
+  have hq0 : q 0 = circlePoint O R θA := by
+    simpa [q, contactReturnVertices] using hA
+  have hqN : q (n - m) = circlePoint O R (θB + 2 * Real.pi) := by
+    calc
+      q (n - m) = v (n : ZMod n) := by
+        simp [q, contactReturnVertices, Nat.add_sub_of_le hmn.le]
+      _ = v 0 := by rw [ZMod.natCast_self]
+      _ = circlePoint O R θB := hB
+      _ = circlePoint O R (θB + 2 * Real.pi) :=
+        (circlePoint_add_two_pi O R θB).symm
+  let γ₀ := polygonalChainPath g (p + 1)
+  let δ₀ := polygonalChainPath q (n - m)
+  let γ := γ₀.cast hg0.symm hgp.symm
+  let δ := δ₀.cast hq0.symm hqN.symm
+  refine ⟨⟨data.step, data.step_pos, data.step_before, γ, δ, ?_, ?_, ?_⟩⟩
+  · intro s
+    change dist O (γ₀ s) ≤ R
+    apply polygonalChainPath_inside_closedDisk
+    intro k _
+    rcases k with _ | _ | k
+    · simp [g, contactDetourVertices, dist_circlePoint_center, abs_of_pos hR]
+    · simpa [g, contactDetourVertices] using data.X_inside
+    · exact hinside _
+  · intro t
+    change dist O (δ₀ t) ≤ R
+    apply polygonalChainPath_inside_closedDisk
+    exact fun _ _ ↦ hinside _
+  · have hraw := disjoint_contactDetour_return_path_ranges
+      hsimple hp hpm hmn data.X_mem_openSegment data.D_mem_ball data.X_mem_ball
+        data.clear data.D_side data.X_side
+    simpa only [γ, δ, γ₀, δ₀, g, q, Path.cast_coe] using hraw
+
+private theorem circlePoint_angle_lower_of_contact_aux
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ}
+    {R θB θC : ℝ} {p m : ℕ}
+    (hsimple : IsSimplePolygon v) (hp : 0 < p) (hpm : p < m) (hmn : m < n)
+    (hB : v 0 = circlePoint O R θB)
+    (hC : v (p : ZMod n) = circlePoint O R θC)
+    (hCwin : θC ∈ Set.Ico θB (θB + 2 * Real.pi)) :
+    θB < θC := by
+  have hpCast : (p : ZMod n) ≠ 0 := by
+    rw [Ne, ZMod.natCast_eq_zero_iff]
+    exact Nat.not_dvd_of_pos_of_lt hp (hpm.trans hmn)
+  apply circlePoint_angle_gt_windowBase_of_ne_aux hCwin hC hB
+  intro hEq
+  exact hpCast (isSimplePolygon_vertexMap_injective hsimple hEq)
+
+/-- A positive base contact orders an intermediate contact between the endpoint angle lifts. -/
 theorem circlePoint_angle_between_of_positive_contact_anchor
     {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
     {O : ℂ} {R : ℝ} {p m : ℕ} {θB θC θA : ℝ}
@@ -313,85 +312,14 @@ theorem circlePoint_angle_between_of_positive_contact_anchor
     (hBA : θB < θA)
     (hCwin : θC ∈ Set.Ico θB (θB + 2 * Real.pi)) :
     θB < θC ∧ θC < θA := by
-  have hpN : p < n := hpm.trans hmn
-  have hpCast : (p : ZMod n) ≠ 0 := by
-    rw [Ne, ZMod.natCast_eq_zero_iff]
-    exact Nat.not_dvd_of_pos_of_lt hp hpN
-  have hCB : v (p : ZMod n) ≠ v 0 := by
-    intro hEq
-    exact hpCast (isSimplePolygon_vertexMap_injective hsimple hEq)
-  have hBC : θB < θC :=
-    circlePoint_angle_gt_windowBase_of_ne hCwin hC hB hCB
+  have hBC := circlePoint_angle_lower_of_contact_aux hsimple hp hpm hmn hB hC hCwin
   refine ⟨hBC, ?_⟩
-  have hmOne : 1 < m := by omega
-  obtain ⟨ε, hε, hclear⟩ :=
-    exists_ball_disjoint_later_polygonEdges hsimple hmOne hmn
-  obtain ⟨δ, hδ, hδA, hδpi, hDside, hDball⟩ :=
-    exists_circleContact_incoming_sector_step_mem_ball
-      hR (sub_pos.mpr hBA) hε hB hIncoming
-  let D : ℂ := circlePoint O R (θB + δ)
-  have hBQ : v 0 ≠ v 1 := by simpa using hsimple.1 0
-  obtain ⟨X, hXopen, hXball⟩ :=
-    exists_openSegment_mem_ball hBQ hε
-  have hXside : 0 < crossR2 (v (-1)) (v 0) X :=
-    crossR2_pos_of_mem_openSegment_from_second hcontact hXopen
-  have hBclosed : v 0 ∈ closedBall O R := by
-    simpa [Metric.mem_closedBall, dist_comm] using hinside 0
-  have hQclosed : v 1 ∈ closedBall O R := by
-    simpa [Metric.mem_closedBall, dist_comm] using hinside 1
-  have hXclosed : X ∈ closedBall O R :=
-    (convex_closedBall O R).segment_subset hBclosed hQclosed
-      (openSegment_subset_segment ℝ _ _ hXopen)
-  have hXinside : dist O X ≤ R := by
-    simpa [Metric.mem_closedBall, dist_comm] using hXclosed
-  let g : ℕ → ℂ := contactDetourVertices v D X
-  let q : ℕ → ℂ := contactReturnVertices v m
-  have hg0 : g 0 = circlePoint O R (θB + δ) := by
-    simp [g, D, contactDetourVertices]
-  have hgp : g (p + 1) = circlePoint O R θC := by
-    obtain ⟨r, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hp.ne'
-    simpa [g, contactDetourVertices, Nat.add_assoc] using hC
-  have hq0 : q 0 = circlePoint O R θA := by
-    simpa [q, contactReturnVertices] using hA
-  have hqN : q (n - m) = circlePoint O R (θB + 2 * Real.pi) := by
-    have hmle : m ≤ n := hmn.le
-    calc
-      q (n - m) = v (n : ZMod n) := by
-        simp [q, contactReturnVertices, Nat.add_sub_of_le hmle]
-      _ = v 0 := by rw [ZMod.natCast_self]
-      _ = circlePoint O R θB := hB
-      _ = circlePoint O R (θB + 2 * Real.pi) := by
-        symm
-        exact circlePoint_add_two_pi O R θB
-  let γ₀ := polygonalChainPath g (p + 1)
-  let returnPath₀ := polygonalChainPath q (n - m)
-  let γ : Path (circlePoint O R (θB + δ)) (circlePoint O R θC) :=
-    γ₀.cast hg0.symm hgp.symm
-  let returnPath : Path (circlePoint O R θA)
-      (circlePoint O R (θB + 2 * Real.pi)) :=
-    returnPath₀.cast hq0.symm hqN.symm
-  have hγinside : ∀ s : I, dist O (γ s) ≤ R := by
-    intro s
-    change dist O (γ₀ s) ≤ R
-    apply polygonalChainPath_inside_closedDisk
-    intro k hk
-    rcases k with _ | k
-    · simp [g, D, contactDetourVertices, dist_circlePoint_center,
-        abs_of_pos hR]
-    · rcases k with _ | k
-      · simpa [g, contactDetourVertices] using hXinside
-      · exact hinside _
-  have hreturnInside : ∀ t : I, dist O (returnPath t) ≤ R := by
-    intro t
-    change dist O (returnPath₀ t) ≤ R
-    apply polygonalChainPath_inside_closedDisk
-    intro k hk
-    exact hinside _
-  have hpathsDisjoint : Disjoint (Set.range γ) (Set.range returnPath) := by
-    have hraw := disjoint_contactDetour_return_path_ranges
-      hsimple hp hpm hmn hXopen hDball hXball hclear hDside hXside
-    simpa only [γ, returnPath, γ₀, returnPath₀, g, q, Path.cast_coe] using hraw
-  exact circlePoint_angle_lt_endpoint_of_disjoint_detourPaths
-    hR hδ (by linarith) hCwin γ returnPath hγinside hreturnInside hpathsDisjoint
+  obtain ⟨data⟩ := exists_positiveContactDetourData_aux hsimple hinside hR (by omega) hmn
+    hIncoming hB hcontact hBA
+  obtain ⟨paths⟩ :=
+    exists_contactAnchorPaths_aux hsimple hinside hR hp hpm hmn hB hC hA data
+  exact circlePoint_angle_lt_endpoint_of_disjoint_detourPaths_aux hR paths.step_pos
+    paths.step_before hCwin paths.detour paths.returnPath paths.detour_inside paths.return_inside
+      paths.disjoint
 
 end Gluck.Forward

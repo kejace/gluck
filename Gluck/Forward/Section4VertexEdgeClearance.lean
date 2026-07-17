@@ -18,10 +18,20 @@ namespace Gluck.Forward
 
 open Gluck.Discrete Metric Set
 
-/-- The initial vertex of a simple polygon has a uniformly positive-radius
-neighborhood disjoint from every edge in the natural block `m, …, n - 2`.
-The hypotheses `1 < m` and `m < n` make all these edges nonincident to the
-initial edge and exclude the final edge returning to vertex zero. -/
+private theorem initial_vertex_not_mem_natural_polygon_edge_aux
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : IsSimplePolygon v) {k : ℕ}
+    (hk : 1 < k) (hkn : k + 1 < n) :
+    v (0 : ZMod n) ∉
+      segment ℝ (v (k : ZMod n)) (v ((k + 1 : ℕ) : ZMod n)) := by
+  intro hv0
+  have hdisjoint := naturalPolygonEdges_disjoint_of_separated
+    hsimple (by omega) hkn
+  exact Set.disjoint_left.mp hdisjoint
+    (left_mem_segment ℝ _ _) (by simpa using hv0)
+
+/-- The initial vertex has a positive-radius neighborhood disjoint from every
+edge in the natural block `m, …, n - 2`. -/
 theorem exists_ball_disjoint_later_polygonEdges
     {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
     (hsimple : IsSimplePolygon v) {m : ℕ}
@@ -50,11 +60,8 @@ theorem exists_ball_disjoint_later_polygonEdges
     have hkn : k + 1 < n := by
       have hklt : k < n - 1 := (Finset.mem_Ico.mp hkK).2
       omega
-    have hsep : 0 + 1 < k := by omega
-    have hdisjoint := naturalPolygonEdges_disjoint_of_separated
-      hsimple hsep hkn
-    exact Set.disjoint_left.mp hdisjoint
-      (left_mem_segment ℝ _ _) (by simpa [edge] using hv0edge)
+    exact initial_vertex_not_mem_natural_polygon_edge_aux hsimple
+      (by omega) hkn (by simpa [edge] using hv0edge)
   have hv0comp : v 0 ∈ Sᶜ := hv0not
   obtain ⟨ε, hε, hball⟩ :=
     Metric.isOpen_iff.mp hSclosed.isOpen_compl (v 0) hv0comp

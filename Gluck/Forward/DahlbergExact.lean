@@ -21,8 +21,8 @@ theorem signedMengerProfile_dahlbergFourVertex_E2_exactPaper
     {n : ℕ} [NeZero n] (hn : 4 ≤ n) (v : ZMod n → ℂ)
     (hsimple : Gluck.Discrete.IsSimplePolygon v)
     (hregular : DahlbergRegular v) (hnoncircle : ¬ Concyclic v) :
-    DahlbergFourVertex (SignedMengerProfile v) := by
-  exact signedMengerProfile_dahlbergFourVertex_E2_of_exactPaperPrimitiveSources
+    DahlbergFourVertex (SignedMengerProfile v) :=
+  signedMengerProfile_dahlbergFourVertex_E2_of_exactPaperPrimitiveSources
     dahlbergE2_exactPaperPrimitiveSources hn hsimple hregular hnoncircle
 
 end Gluck.Forward

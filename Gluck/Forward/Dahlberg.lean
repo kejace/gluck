@@ -13650,51 +13650,11 @@ def DahlbergE2PaperRemainingTheoremSources : Prop :=
   DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
   DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
 
-/-- Legacy strengthened source surface used by the earlier reduction.
-
-This is not the primitive surface stated in Dahlberg's paper: its first two
-components demand cyclically ordered disk witnesses and strict adjacent turns,
-which exclude the plateaux allowed by the paper's four-vertex conclusion.  It
-is retained only as a conditional compatibility interface. -/
-def DahlbergE2LegacyPaperPrimitiveSources : Prop :=
-  DahlbergE2Theorem6GeometricCdfvSource ∧
-  DahlbergE2Lemma8RadiusTurnBridgeFromWitnessSource ∧
-  DahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource
-
 /-- Canonical primitive paper surface for Dahlberg's Euclidean D4VT: exact
 Theorem 6, the plateau-aware Lemma 9 bridge, and the direct Section 4
 non-strict contradiction. -/
 def DahlbergE2PaperPrimitiveSources : Prop :=
   DahlbergE2ExactPaperPrimitiveSources
-
-/-- The legacy primitive source surface implies the legacy remaining-source
-package by converting geometric CDFV to the direct ordered-disk-plus-plateau
-§3 package. -/
-theorem dahlbergE2PaperRemainingTheoremSources_of_legacyPrimitiveSources
-    (hsrc : DahlbergE2LegacyPaperPrimitiveSources) :
-    DahlbergE2PaperRemainingTheoremSources := by
-  exact ⟨
-    dahlbergE2Theorem6OrderedDiskPlateauPaperSources_of_geometricCdfvSource
-      hsrc.1,
-    hsrc.2⟩
-
-/-- The legacy remaining-source package implies the legacy primitive source
-surface by converting the direct §3 package back to geometric CDFV. -/
-theorem dahlbergE2LegacyPaperPrimitiveSources_of_remainingTheoremSources
-    (hsrc : DahlbergE2PaperRemainingTheoremSources) :
-    DahlbergE2LegacyPaperPrimitiveSources := by
-  exact ⟨
-    dahlbergE2Theorem6GeometricCdfvSource_of_orderedDiskPlateauPaperSources
-      hsrc.1,
-    hsrc.2⟩
-
-/-- The two legacy strengthened source surfaces are formally equivalent. -/
-theorem dahlbergE2PaperRemainingTheoremSources_iff_legacyPrimitiveSources :
-    DahlbergE2PaperRemainingTheoremSources ↔
-      DahlbergE2LegacyPaperPrimitiveSources := by
-  constructor
-  · exact dahlbergE2LegacyPaperPrimitiveSources_of_remainingTheoremSources
-  · exact dahlbergE2PaperRemainingTheoremSources_of_legacyPrimitiveSources
 
 /-- The smaller remaining paper sources imply the full paper-source package,
 because local Lemma 8 edge nesting is already proved. -/

@@ -17,11 +17,10 @@ by the positive run has the semicircle bound required by the circle splice.
 
 namespace Gluck.Forward
 
-open Gluck.Discrete Metric
+open Gluck.Discrete
 
-private theorem circlePoint_angle_sub_eq_pi_of_diameter
-    {O : ℂ} {R θB θA : ℝ} (hR : 0 < R)
-    (hBA : θB < θA) (hspan : θA < θB + 2 * Real.pi)
+private theorem circlePoint_angle_sub_eq_pi_of_diameter_aux
+    {O : ℂ} {R θB θA : ℝ} (hR : 0 < R) (hBA : θB < θA) (hspan : θA < θB + 2 * Real.pi)
     (hdiam : dist (circlePoint O R θA) (circlePoint O R θB) = 2 * R) :
     θA - θB = Real.pi := by
   have hformula :
@@ -37,16 +36,15 @@ private theorem circlePoint_angle_sub_eq_pi_of_diameter
     have hR2 : 0 < R ^ 2 := sq_pos_of_pos hR
     nlinarith
   obtain ⟨k, hk⟩ := Real.cos_eq_neg_one_iff.mp hcos
+  have htwoPi : 0 < 2 * Real.pi := by positivity
   have hklo : (-1 : ℝ) < (k : ℝ) := by
     by_contra hnot
     have hkle : (k : ℝ) ≤ -1 := le_of_not_gt hnot
-    have htwoPi : 0 < 2 * Real.pi := by positivity
     have hmul := mul_le_mul_of_nonneg_right hkle htwoPi.le
     linarith [Real.pi_pos]
   have hkhi : (k : ℝ) < 1 := by
     by_contra hnot
     have hkge : (1 : ℝ) ≤ k := le_of_not_gt hnot
-    have htwoPi : 0 < 2 * Real.pi := by positivity
     have hmul := mul_le_mul_of_nonneg_right hkge htwoPi.le
     linarith [Real.pi_pos]
   have hklo' : (-1 : ℤ) < k := by exact_mod_cast hklo
@@ -60,14 +58,10 @@ namespace Section4PositiveRunCertificate
 variable {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
     (run : Section4PositiveRunCertificate v O R)
 
-/-- If the minimal circle has exactly the two run endpoints as contacts, the
-directed completion arc has angular length exactly `π`. -/
-theorem circleArcCertificate_of_contactSet_card_eq_two
-    (hsimple : IsSimplePolygon v)
-    (hΔ : MinimalEnclosingDiskR2 v O R)
-    (hR : 0 < R)
+private theorem endpoint_dist_eq_two_mul_radius_of_contactSet_card_eq_two_aux
+    (hsimple : IsSimplePolygon v) (hΔ : MinimalEnclosingDiskR2 v O R)
     (hcard : (circleContactSet v O R).card = 2) :
-    Nonempty (Section4CircleArcCertificate run) := by
+    dist (run.point run.chainStart) (run.point (run.b + 1)) = 2 * R := by
   let p : ZMod n := Gluck.cyclicLift run.c (run.a - 1)
   let q : ZMod n := Gluck.cyclicLift run.c (run.b + 1)
   have hp : p ∈ circleContactSet v O R := by
@@ -94,15 +88,21 @@ theorem circleArcCertificate_of_contactSet_card_eq_two
   have hdiam :=
     dist_eq_two_mul_radius_of_minimalEnclosingDiskR2_of_boundary_subset_pair
       hΔ (mem_circleContactSet.mp hp) (mem_circleContactSet.mp hq) hboundary
+  simpa [Section4PositiveRunCertificate.point,
+    Section4PositiveRunCertificate.chainStart, p, q] using hdiam
+
+private theorem circleArcCertificate_of_endpoint_dist_eq_two_mul_radius_aux
+    (hsimple : IsSimplePolygon v) (hΔ : MinimalEnclosingDiskR2 v O R) (hR : 0 < R)
+    (hdiam : dist (run.point run.chainStart) (run.point (run.b + 1)) = 2 * R) :
+    Nonempty (Section4CircleArcCertificate run) := by
   obtain ⟨θB, θA, hB, hA, hBA, hspan⟩ :=
     run.exists_ordered_endpointAngles_of_minimalDisk hsimple hΔ
   have hdiamAngles :
       dist (circlePoint O R θA) (circlePoint O R θB) = 2 * R := by
     rw [← hA, ← hB]
-    simpa [Section4PositiveRunCertificate.point,
-      Section4PositiveRunCertificate.chainStart, p, q] using hdiam
+    exact hdiam
   have hπ : θA - θB = Real.pi :=
-    circlePoint_angle_sub_eq_pi_of_diameter hR hBA hspan hdiamAngles
+    circlePoint_angle_sub_eq_pi_of_diameter_aux hR hBA hspan hdiamAngles
   exact ⟨{
     θB := θB
     θA := θA
@@ -111,6 +111,15 @@ theorem circleArcCertificate_of_contactSet_card_eq_two
     angles_lt := hBA
     span_lt := hspan
     pi_le_span := hπ.ge }⟩
+
+/-- If the minimal circle has exactly the two run endpoints as contacts, the
+directed completion arc has angular length exactly `π`. -/
+theorem circleArcCertificate_of_contactSet_card_eq_two
+    (hsimple : IsSimplePolygon v) (hΔ : MinimalEnclosingDiskR2 v O R) (hR : 0 < R)
+    (hcard : (circleContactSet v O R).card = 2) :
+    Nonempty (Section4CircleArcCertificate run) :=
+  run.circleArcCertificate_of_endpoint_dist_eq_two_mul_radius_aux hsimple hΔ hR
+    (run.endpoint_dist_eq_two_mul_radius_of_contactSet_card_eq_two_aux hsimple hΔ hcard)
 
 end Section4PositiveRunCertificate
 

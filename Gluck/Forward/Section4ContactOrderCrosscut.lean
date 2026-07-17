@@ -78,6 +78,48 @@ theorem polygonalChainPath_inside_closedDisk
       hkball hk1ball hkseg
     simpa [mem_closedBall, dist_comm] using hmem
 
+private theorem exists_intersecting_edges_of_circle_alternating_polygonal_chains_aux
+    {O : ℂ} {R : ℝ} {p q : ℕ → ℂ} {M N : ℕ}
+    {θi θk θj θl : ℝ}
+    (hM : 0 < M) (hN : 0 < N)
+    (hp0 : p 0 = circlePoint O R θi)
+    (hpM : p M = circlePoint O R θj)
+    (hq0 : q 0 = circlePoint O R θk)
+    (hqN : q N = circlePoint O R θl)
+    (hpinside : ∀ a : ℕ, a ≤ M → dist O (p a) ≤ R)
+    (hqinside : ∀ b : ℕ, b ≤ N → dist O (q b) ≤ R)
+    (hR : 0 < R)
+    (hik : θi < θk) (hkj : θk < θj)
+    (hjl : θj < θl) (hspan : θl < θi + 2 * Real.pi) :
+    ∃ (x : ℂ) (a b : ℕ), a < M ∧ b < N ∧
+      x ∈ segment ℝ (p a) (p (a + 1)) ∧
+      x ∈ segment ℝ (q b) (q (b + 1)) := by
+  let γ₀ := polygonalChainPath p M
+  let δ₀ := polygonalChainPath q N
+  let γ : Path (circlePoint O R θi) (circlePoint O R θj) :=
+    γ₀.cast hp0.symm hpM.symm
+  let δ : Path (circlePoint O R θk) (circlePoint O R θl) :=
+    δ₀.cast hq0.symm hqN.symm
+  have hγinside : ∀ s : I, dist O (γ s) ≤ R := by
+    intro s
+    change dist O (γ₀ s) ≤ R
+    exact polygonalChainPath_inside_closedDisk hpinside s
+  have hδinside : ∀ t : I, dist O (δ t) ≤ R := by
+    intro t
+    change dist O (δ₀ t) ≤ R
+    exact polygonalChainPath_inside_closedDisk hqinside t
+  obtain ⟨s, t, hst⟩ := paths_intersect_of_circle_alternating
+    hR hik hkj hjl hspan γ δ hγinside hδinside
+  have hsγ₀ : γ s ∈ Set.range γ := ⟨s, rfl⟩
+  have htδ₀ : γ s ∈ Set.range δ := ⟨t, hst.symm⟩
+  have hsγ : γ s ∈ Set.range (polygonalChainPath p M) := by
+    simpa only [γ, γ₀, Path.cast_coe] using hsγ₀
+  have htδ : γ s ∈ Set.range (polygonalChainPath q N) := by
+    simpa only [δ, δ₀, Path.cast_coe, γ, γ₀] using htδ₀
+  obtain ⟨a, b, haM, hbN, hpa, hqb⟩ :=
+    exists_intersecting_edges_of_polygonalChainPath_ranges hM hN hsγ htδ
+  exact ⟨γ s, a, b, haM, hbN, hpa, hqb⟩
+
 /-- Four alternating circle endpoints cannot occur on two separated pieces
 of one simple disk-contained polygon. -/
 theorem not_circle_alternating_of_separated_polygonSubchains
@@ -110,35 +152,12 @@ theorem not_circle_alternating_of_separated_polygonSubchains
     change v ((k + N : ℕ) : ZMod n) = circlePoint O R θl
     rw [show k + N = l by dsimp [N]; omega]
     exact hl
-  let γ₀ := polygonalChainPath p M
-  let δ₀ := polygonalChainPath q N
-  let γ : Path (circlePoint O R θi) (circlePoint O R θj) :=
-    γ₀.cast hp0.symm hpM.symm
-  let δ : Path (circlePoint O R θk) (circlePoint O R θl) :=
-    δ₀.cast hq0.symm hqN.symm
-  have hγinside : ∀ s : I, dist O (γ s) ≤ R := by
-    intro s
-    change dist O (γ₀ s) ≤ R
-    apply polygonalChainPath_inside_closedDisk
-    intro a ha
-    exact hinside _
-  have hδinside : ∀ t : I, dist O (δ t) ≤ R := by
-    intro t
-    change dist O (δ₀ t) ≤ R
-    apply polygonalChainPath_inside_closedDisk
-    intro b hb
-    exact hinside _
-  obtain ⟨s, t, hst⟩ := paths_intersect_of_circle_alternating
-    hR hik hkj hjl hspan γ δ hγinside hδinside
-  have hsγ₀ : γ s ∈ Set.range γ := ⟨s, rfl⟩
-  have htδ₀ : γ s ∈ Set.range δ := ⟨t, hst.symm⟩
-  have hsγ : γ s ∈ Set.range (polygonalChainPath p M) := by
-    simpa only [γ, γ₀, Path.cast_coe] using hsγ₀
-  have htδ : γ s ∈ Set.range (polygonalChainPath q N) := by
-    simpa [δ, δ₀, Path.cast_coe, γ, γ₀] using htδ₀
-  obtain ⟨a, b, haM, hbN, hpa, hqb⟩ :=
-    exists_intersecting_edges_of_polygonalChainPath_ranges
-      hM hN hsγ htδ
+  obtain ⟨_x, a, b, haM, hbN, hpa, hqb⟩ :=
+    exists_intersecting_edges_of_circle_alternating_polygonal_chains_aux
+      hM hN hp0 hpM hq0 hqN
+      (by intro a _ha; exact hinside _)
+      (by intro b _hb; exact hinside _)
+      hR hik hkj hjl hspan
   have hstarts : i + a + 1 < k + b := by
     have hai : i + a < j := by dsimp [M] at haM; omega
     omega

@@ -3,7 +3,7 @@ Copyright (c) 2026 kejace. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
-import Gluck.Forward.Section4VertexEdgeClearance
+import Gluck.Forward.Section4ContactOrderCrosscut
 
 /-!
 # The local contact detour is disjoint from the return chain
@@ -36,22 +36,26 @@ def contactDetourVertices {n : ℕ} (v : ZMod n → ℂ) (D X : ℂ) : ℕ → �
 
 /-- Vertices of the return chain `v m, ..., v n = v 0`. -/
 def contactReturnVertices {n : ℕ} (v : ZMod n → ℂ) (m : ℕ) : ℕ → ℂ :=
-  fun k => v ((m + k : ℕ) : ZMod n)
+  fun k ↦ v ((m + k : ℕ) : ZMod n)
 
-private theorem crossR2_lineMap_right_detour (A B C D : ℂ) (t : ℝ) :
+private theorem crossR2_lineMap_right_aux (A B C D : ℂ) (t : ℝ) :
     crossR2 A B ((AffineMap.lineMap C D) t) =
       (1 - t) * crossR2 A B C + t * crossR2 A B D := by
-  simp [AffineMap.lineMap_apply_module, crossR2]
+  simp only [AffineMap.lineMap_apply_module, crossR2, Complex.sub_re,
+    Complex.sub_im, Complex.add_re, Complex.add_im, Complex.smul_re,
+    Complex.smul_im]
   ring
 
-private theorem crossR2_lineMap_self_detour (A B : ℂ) (t : ℝ) :
+private theorem crossR2_lineMap_self_aux (A B : ℂ) (t : ℝ) :
     crossR2 A B (AffineMap.lineMap A B t) = 0 := by
-  simp [AffineMap.lineMap_apply_module, crossR2]
+  simp only [AffineMap.lineMap_apply_module, crossR2, Complex.sub_re,
+    Complex.sub_im, Complex.add_re, Complex.add_im, Complex.smul_re,
+    Complex.smul_im]
   ring
 
 /-- A segment whose endpoints lie on one strict side of a line misses every
 segment contained in that line. -/
-theorem segment_disjoint_of_crossR2_pos_pos
+private theorem segment_disjoint_of_crossR2_pos_pos_aux
     {A B C D : ℂ}
     (hC : 0 < crossR2 A B C) (hD : 0 < crossR2 A B D) :
     Disjoint (segment ℝ C D) (segment ℝ A B) := by
@@ -63,11 +67,11 @@ theorem segment_disjoint_of_crossR2_pos_pos
   rcases hzCD with ⟨s, hs, rfl⟩
   rcases hzAB with ⟨t, _ht, heq⟩
   have hzero : crossR2 A B (AffineMap.lineMap A B t) = 0 :=
-    crossR2_lineMap_self_detour A B t
+    crossR2_lineMap_self_aux A B t
   have hcross : crossR2 A B (AffineMap.lineMap C D s) = 0 := by
     rw [← heq]
     exact hzero
-  rw [crossR2_lineMap_right_detour] at hcross
+  rw [crossR2_lineMap_right_aux] at hcross
   have hs0 : 0 ≤ s := hs.1
   have hs1 : 0 ≤ 1 - s := by linarith [hs.2]
   have hpos : 0 < (1 - s) * crossR2 A B C + s * crossR2 A B D := by
@@ -83,7 +87,7 @@ theorem segment_disjoint_of_crossR2_pos_pos
 
 /-- If `X` is strictly between `B` and `Q`, the tail segment `XQ` does not
 contain `B`. -/
-theorem left_not_mem_segment_of_mem_openSegment
+private theorem left_not_mem_segment_of_mem_openSegment_aux
     {B X Q : ℂ} (hBQ : B ≠ Q) (hX : X ∈ openSegment ℝ B Q) :
     B ∉ segment ℝ X Q := by
   rw [openSegment_eq_image_lineMap] at hX
@@ -103,13 +107,182 @@ theorem left_not_mem_segment_of_mem_openSegment
     mul_nonneg (by linarith [ht.2]) hs.1
   linarith [ht.1]
 
-/-- The detour path `D, X, Q, ..., C` is disjoint from the original return
-path `A, ..., P, B`.
+private theorem natural_polygon_edge_disjoint_final_aux
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : IsSimplePolygon v) {r : ℕ}
+    (hr : 0 < r) (hrn : r + 2 < n) :
+    Disjoint
+      (segment ℝ (v (r : ZMod n)) (v ((r + 1 : ℕ) : ZMod n)))
+      (segment ℝ (v ((n - 1 : ℕ) : ZMod n)) (v 0)) := by
+  have hrlt : r < n := by omega
+  have hlastlt : n - 1 < n := by omega
+  have hrNeLast : (r : ZMod n) ≠ ((n - 1 : ℕ) : ZMod n) := by
+    rw [Ne, ZMod.natCast_eq_natCast_iff', Nat.mod_eq_of_lt hrlt,
+      Nat.mod_eq_of_lt hlastlt]
+    omega
+  have hr1lt : r + 1 < n := by omega
+  have hr1NeLast : (r : ZMod n) + 1 ≠ ((n - 1 : ℕ) : ZMod n) := by
+    rw [← Nat.cast_one, ← Nat.cast_add]
+    rw [Ne, ZMod.natCast_eq_natCast_iff', Nat.mod_eq_of_lt hr1lt,
+      Nat.mod_eq_of_lt hlastlt]
+    omega
+  have hlastSucc : ((n - 1 : ℕ) : ZMod n) + 1 = 0 := by
+    rw [Nat.cast_sub (by omega : 1 ≤ n), ZMod.natCast_self]
+    simp
+  have hrNeZero : (r : ZMod n) ≠ 0 := by
+    intro hz
+    have hz' : (r : ZMod n) = ((0 : ℕ) : ZMod n) := by simpa using hz
+    rw [ZMod.natCast_eq_natCast_iff', Nat.mod_eq_of_lt hrlt,
+      Nat.zero_mod] at hz'
+    omega
+  have hdisjoint := hsimple.2.2 (r : ZMod n)
+    ((n - 1 : ℕ) : ZMod n) hrNeLast hr1NeLast (by
+      rw [hlastSucc]
+      exact hrNeZero.symm)
+  rw [Set.disjoint_iff_inter_eq_empty]
+  simpa [Nat.cast_add, hlastSucc] using hdisjoint
 
-The only non-combinatorial hypothesis is `hclear`: the small ball about `B`
-containing `D` and `X` misses the nonfinal return edges.  Simplicity handles
-all pairs of original edges, while `hDside` and `hXside` handle the one new
-edge `DX` against the final return edge `PB`. -/
+private theorem detour_segment_disjoint_natural_polygon_edge_aux
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    {m k : ℕ} {D X : ℂ} {ε : ℝ}
+    (hDball : D ∈ ball (v 0) ε) (hXball : X ∈ ball (v 0) ε)
+    (hclear : ∀ j : ℕ, m ≤ j → j + 1 < n →
+      Disjoint (ball (v 0) ε)
+        (segment ℝ (v (j : ZMod n)) (v ((j + 1 : ℕ) : ZMod n))))
+    (hDside : 0 < crossR2 (v (-1)) (v 0) D)
+    (hXside : 0 < crossR2 (v (-1)) (v 0) X)
+    (hmk : m ≤ k) (hklt : k < n) :
+    Disjoint (segment ℝ D X)
+      (segment ℝ (v (k : ZMod n)) (v ((k + 1 : ℕ) : ZMod n))) := by
+  by_cases hkfinal : k + 1 = n
+  · have hkEq : k = n - 1 := by omega
+    have hkCast : (k : ZMod n) = -1 := by
+      rw [hkEq, Nat.cast_sub (by omega : 1 ≤ n), ZMod.natCast_self]
+      simp
+    have hk1Cast : ((k + 1 : ℕ) : ZMod n) = 0 := by
+      rw [hkfinal, ZMod.natCast_self]
+    simpa [hkCast, hk1Cast] using
+      segment_disjoint_of_crossR2_pos_pos_aux hDside hXside
+  · have hkNext : k + 1 < n := by omega
+    have hDXball : segment ℝ D X ⊆ ball (v 0) ε :=
+      (convex_ball (v 0) ε).segment_subset hDball hXball
+    apply Set.disjoint_left.mpr
+    intro z hzDX hzEdge
+    exact Set.disjoint_left.mp (hclear k hmk hkNext) (hDXball hzDX) hzEdge
+
+private theorem shortened_first_segment_disjoint_natural_polygon_edge_aux
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    {k : ℕ} {X : ℂ}
+    (hsimple : IsSimplePolygon v)
+    (hXopen : X ∈ openSegment ℝ (v 0) (v 1))
+    (hk : 1 < k) (hklt : k < n) :
+    Disjoint (segment ℝ X (v 1))
+      (segment ℝ (v (k : ZMod n)) (v ((k + 1 : ℕ) : ZMod n))) := by
+  have hXQsub : segment ℝ X (v 1) ⊆ segment ℝ (v 0) (v 1) :=
+    (convex_segment (v 0) (v 1)).segment_subset
+      (openSegment_subset_segment ℝ _ _ hXopen)
+      (right_mem_segment ℝ _ _)
+  apply Set.disjoint_left.mpr
+  intro z hzXQ hzEdge
+  by_cases hkfinal : k + 1 = n
+  · have hkEq : k = n - 1 := by omega
+    have hkCast : (k : ZMod n) = -1 := by
+      rw [hkEq, Nat.cast_sub (by omega : 1 ≤ n), ZMod.natCast_self]
+      simp
+    have hk1Cast : ((k + 1 : ℕ) : ZMod n) = 0 := by
+      rw [hkfinal, ZMod.natCast_self]
+    have hinter := hsimple.2.1 (-1 : ZMod n)
+    have hsucc : (-1 : ZMod n) + 1 = 0 := by abel
+    rw [hsucc] at hinter
+    have hzB : z = v 0 := by
+      have hzFull : z ∈
+          segment ℝ (v (-1)) (v 0) ∩ segment ℝ (v 0) (v 1) := by
+        exact ⟨by simpa [hkCast, hk1Cast] using hzEdge, hXQsub hzXQ⟩
+      have hinter' : segment ℝ (v (-1)) (v 0) ∩
+          segment ℝ (v 0) (v 1) = {v 0} := by
+        simpa using hinter
+      rw [hinter'] at hzFull
+      simpa using hzFull
+    have hBnot : v 0 ∉ segment ℝ X (v 1) :=
+      left_not_mem_segment_of_mem_openSegment_aux
+        (by simpa using hsimple.1 0) hXopen
+    exact hBnot (hzB ▸ hzXQ)
+  · have hkNext : k + 1 < n := by omega
+    have hdisjoint := naturalPolygonEdges_disjoint_of_separated
+      hsimple (by omega) hkNext
+    exact Set.disjoint_left.mp hdisjoint
+      (by simpa using hXQsub hzXQ) hzEdge
+
+private theorem earlier_natural_polygon_edge_disjoint_later_aux
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    (hsimple : IsSimplePolygon v) {r k : ℕ}
+    (hr : 0 < r) (hrn : r + 2 < n)
+    (hrk : r + 1 < k) (hklt : k < n) :
+    Disjoint
+      (segment ℝ (v (r : ZMod n)) (v ((r + 1 : ℕ) : ZMod n)))
+      (segment ℝ (v (k : ZMod n)) (v ((k + 1 : ℕ) : ZMod n))) := by
+  by_cases hkfinal : k + 1 = n
+  · have hkEq : k = n - 1 := by omega
+    rw [hkEq]
+    simpa [Nat.sub_add_cancel (by omega : 1 ≤ n), ZMod.natCast_self] using
+      natural_polygon_edge_disjoint_final_aux hsimple hr hrn
+  · exact naturalPolygonEdges_disjoint_of_separated
+      hsimple hrk (by omega)
+
+private theorem contact_detour_edge_disjoint_contact_return_edge_aux
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
+    {p m : ℕ} {D X : ℂ} {ε : ℝ}
+    (hsimple : IsSimplePolygon v)
+    (hp : 0 < p) (hpm : p < m) (hmn : m < n)
+    (hXopen : X ∈ openSegment ℝ (v 0) (v 1))
+    (hDball : D ∈ ball (v 0) ε) (hXball : X ∈ ball (v 0) ε)
+    (hclear : ∀ k : ℕ, m ≤ k → k + 1 < n →
+      Disjoint (ball (v 0) ε)
+        (segment ℝ (v (k : ZMod n)) (v ((k + 1 : ℕ) : ZMod n))))
+    (hDside : 0 < crossR2 (v (-1)) (v 0) D)
+    (hXside : 0 < crossR2 (v (-1)) (v 0) X)
+    (i j : ℕ) (hi : i < p + 1) (hj : j < n - m) :
+    Disjoint
+      (segment ℝ (contactDetourVertices v D X i)
+        (contactDetourVertices v D X (i + 1)))
+      (segment ℝ (contactReturnVertices v m j)
+        (contactReturnVertices v m (j + 1))) := by
+  let k : ℕ := m + j
+  have hmk : m ≤ k := by dsimp [k]; omega
+  have hklt : k < n := by dsimp [k]; omega
+  have hreturnEdge :
+      segment ℝ (contactReturnVertices v m j)
+          (contactReturnVertices v m (j + 1)) =
+        segment ℝ (v (k : ZMod n)) (v ((k + 1 : ℕ) : ZMod n)) := by
+    simp only [contactReturnVertices, k, Nat.cast_add]
+    congr 2
+    all_goals push_cast
+    all_goals abel
+  rw [hreturnEdge]
+  rcases Nat.eq_zero_or_pos i with rfl | hiPos
+  · simpa only [contactDetourVertices] using
+      detour_segment_disjoint_natural_polygon_edge_aux
+        hDball hXball hclear hDside hXside hmk hklt
+  · rcases Nat.eq_or_lt_of_le (Nat.succ_le_iff.mpr hiPos) with hiOne | hiTwo
+    · have hiEq : i = 1 := by omega
+      subst i
+      simpa [contactDetourVertices] using
+        shortened_first_segment_disjoint_natural_polygon_edge_aux
+          hsimple hXopen (by omega) hklt
+    · obtain ⟨s, rfl⟩ := Nat.exists_eq_add_of_le hiTwo
+      let r : ℕ := s + 1
+      have hr : 0 < r := by dsimp [r]; omega
+      have hrp : r < p := by dsimp [r]; omega
+      have hrn : r + 2 < n := by omega
+      have hrk : r + 1 < k := by omega
+      have hdisjoint := earlier_natural_polygon_edge_disjoint_later_aux
+        hsimple hr hrn hrk hklt
+      rw [show 2 + s = s + 2 by omega,
+        show s + 2 + 1 = (s + 1) + 2 by omega]
+      simpa [contactDetourVertices, r, Nat.add_assoc] using hdisjoint
+
+/-- The detour path `D, X, Q, …, C` is disjoint from the original return
+path `A, …, P, B` under the local clearance and strict-side hypotheses. -/
 theorem disjoint_contactDetour_return_path_ranges
     {n : ℕ} [NeZero n] {v : ZMod n → ℂ}
     {p m : ℕ} {D X : ℂ} {ε : ℝ}
@@ -127,131 +300,11 @@ theorem disjoint_contactDetour_return_path_ranges
       (Set.range (polygonalChainPath (contactReturnVertices v m) (n - m))) := by
   apply Set.disjoint_left.mpr
   intro z hzDetour hzReturn
-  have hdetourPos : 0 < p + 1 := by omega
-  have hreturnPos : 0 < n - m := by omega
   obtain ⟨i, j, hi, hj, hzi, hzj⟩ :=
     exists_intersecting_edges_of_polygonalChainPath_ranges
-      hdetourPos hreturnPos hzDetour hzReturn
-  let k : ℕ := m + j
-  have hkle : m ≤ k := by dsimp [k]; omega
-  have hklt : k < n := by dsimp [k]; omega
-  have hreturnEdge :
-      segment ℝ (contactReturnVertices v m j)
-          (contactReturnVertices v m (j + 1)) =
-        segment ℝ (v (k : ZMod n)) (v ((k + 1 : ℕ) : ZMod n)) := by
-    simp only [contactReturnVertices, k, Nat.cast_add]
-    congr 2
-    all_goals push_cast
-    all_goals abel
-  rw [hreturnEdge] at hzj
-  rcases Nat.eq_zero_or_pos i with rfl | hiPos
-  · /- The new edge `DX`. -/
-    simp only [contactDetourVertices] at hzi
-    by_cases hkfinal : k + 1 = n
-    · have hkEq : k = n - 1 := by omega
-      have hkCast : (k : ZMod n) = -1 := by
-        rw [hkEq, Nat.cast_sub (by omega : 1 ≤ n), ZMod.natCast_self]
-        simp
-      have hk1Cast : ((k + 1 : ℕ) : ZMod n) = 0 := by
-        rw [hkfinal, ZMod.natCast_self]
-      have hdisj : Disjoint (segment ℝ D X)
-          (segment ℝ (v (k : ZMod n)) (v ((k + 1 : ℕ) : ZMod n))) := by
-        simpa [hkCast, hk1Cast] using
-          segment_disjoint_of_crossR2_pos_pos hDside hXside
-      exact Set.disjoint_left.mp hdisj hzi hzj
-    · have hkNext : k + 1 < n := by omega
-      have hDXball : segment ℝ D X ⊆ ball (v 0) ε :=
-        (convex_ball (v 0) ε).segment_subset hDball hXball
-      exact Set.disjoint_left.mp (hclear k hkle hkNext) (hDXball hzi) hzj
-  · rcases Nat.eq_or_lt_of_le (Nat.succ_le_iff.mpr hiPos) with hiOne | hiTwo
-    · /- The shortened original edge `XQ`. -/
-      have hiEq : i = 1 := by omega
-      subst i
-      simp only [contactDetourVertices] at hzi
-      have hziXQ : z ∈ segment ℝ X (v 1) := by
-        simpa using hzi
-      have hXQsub : segment ℝ X (v 1) ⊆ segment ℝ (v 0) (v 1) :=
-        (convex_segment (v 0) (v 1)).segment_subset
-          (openSegment_subset_segment ℝ _ _ hXopen)
-          (right_mem_segment ℝ _ _)
-      by_cases hkfinal : k + 1 = n
-      · have hkEq : k = n - 1 := by omega
-        have hkCast : (k : ZMod n) = -1 := by
-          rw [hkEq, Nat.cast_sub (by omega : 1 ≤ n), ZMod.natCast_self]
-          simp
-        have hk1Cast : ((k + 1 : ℕ) : ZMod n) = 0 := by
-          rw [hkfinal, ZMod.natCast_self]
-        have hinter := hsimple.2.1 (-1 : ZMod n)
-        have hsucc : (-1 : ZMod n) + 1 = 0 := by abel
-        rw [hsucc] at hinter
-        have hzB : z = v 0 := by
-          have hzFull : z ∈
-              segment ℝ (v (-1)) (v 0) ∩ segment ℝ (v 0) (v 1) := by
-            exact ⟨by simpa [hkCast, hk1Cast] using hzj, hXQsub hziXQ⟩
-          have hinter' : segment ℝ (v (-1)) (v 0) ∩
-              segment ℝ (v 0) (v 1) = {v 0} := by
-            simpa using hinter
-          rw [hinter'] at hzFull
-          simpa using hzFull
-        have hBnot : v 0 ∉ segment ℝ X (v 1) :=
-          left_not_mem_segment_of_mem_openSegment
-            (by simpa using hsimple.1 0) hXopen
-        exact hBnot (hzB ▸ hziXQ)
-      · have hkNext : k + 1 < n := by omega
-        have hsep : 0 + 1 < k := by omega
-        have hdisj := naturalPolygonEdges_disjoint_of_separated
-          hsimple hsep hkNext
-        exact Set.disjoint_left.mp hdisj
-          (by simpa using hXQsub hziXQ) hzj
-    · /- Every remaining detour edge is an original edge before `p`. -/
-      have hiAtLeast : 2 ≤ i := hiTwo
-      obtain ⟨s, rfl⟩ := Nat.exists_eq_add_of_le hiAtLeast
-      let r : ℕ := s + 1
-      have hrPos : 0 < r := by dsimp [r]; omega
-      have hrp : r < p := by dsimp [r]; omega
-      have hzi' : z ∈
-          segment ℝ (v (r : ZMod n)) (v ((r + 1 : ℕ) : ZMod n)) := by
-        rw [show 2 + s = s + 2 by omega,
-          show s + 2 + 1 = (s + 1) + 2 by omega] at hzi
-        simpa [contactDetourVertices, r, Nat.add_assoc] using hzi
-      by_cases hkfinal : k + 1 = n
-      · have hkEq : k = n - 1 := by omega
-        have hrn : r < n := by omega
-        have hlastn : n - 1 < n := by omega
-        have hrNeLast : (r : ZMod n) ≠ ((n - 1 : ℕ) : ZMod n) := by
-          rw [Ne, ZMod.natCast_eq_natCast_iff', Nat.mod_eq_of_lt hrn,
-            Nat.mod_eq_of_lt hlastn]
-          omega
-        have hr1n : r + 1 < n := by omega
-        have hr1NeLast : (r : ZMod n) + 1 ≠ ((n - 1 : ℕ) : ZMod n) := by
-          rw [← Nat.cast_one, ← Nat.cast_add]
-          rw [Ne, ZMod.natCast_eq_natCast_iff', Nat.mod_eq_of_lt hr1n,
-            Nat.mod_eq_of_lt hlastn]
-          omega
-        have hlastSucc : ((n - 1 : ℕ) : ZMod n) + 1 = 0 := by
-          rw [Nat.cast_sub (by omega : 1 ≤ n), ZMod.natCast_self]
-          simp
-        have hrNeZero : (r : ZMod n) ≠ 0 := by
-          intro hz
-          have hz' : (r : ZMod n) = ((0 : ℕ) : ZMod n) := by simpa using hz
-          rw [ZMod.natCast_eq_natCast_iff', Nat.mod_eq_of_lt hrn,
-            Nat.zero_mod] at hz'
-          omega
-        have hdisjRaw := hsimple.2.2 (r : ZMod n)
-          ((n - 1 : ℕ) : ZMod n) hrNeLast hr1NeLast (by
-            rw [hlastSucc]
-            exact hrNeZero.symm)
-        have hdisj : Disjoint
-            (segment ℝ (v (r : ZMod n)) (v ((r + 1 : ℕ) : ZMod n)))
-            (segment ℝ (v (k : ZMod n)) (v ((k + 1 : ℕ) : ZMod n))) := by
-          rw [hkEq]
-          rw [Set.disjoint_iff_inter_eq_empty]
-          simpa [Nat.cast_add] using hdisjRaw
-        exact Set.disjoint_left.mp hdisj hzi' hzj
-      · have hkNext : k + 1 < n := by omega
-        have hsep : r + 1 < k := by omega
-        have hdisj := naturalPolygonEdges_disjoint_of_separated
-          hsimple hsep hkNext
-        exact Set.disjoint_left.mp hdisj hzi' hzj
+      (by omega) (by omega) hzDetour hzReturn
+  have hdisjoint := contact_detour_edge_disjoint_contact_return_edge_aux
+    hsimple hp hpm hmn hXopen hDball hXball hclear hDside hXside i j hi hj
+  exact Set.disjoint_left.mp hdisjoint hzi hzj
 
 end Gluck.Forward

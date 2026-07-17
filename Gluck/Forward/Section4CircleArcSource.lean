@@ -19,11 +19,16 @@ namespace Gluck.Forward
 
 open Gluck.Discrete
 
-/-- The oriented complementary-circle arc required by the finite Section 4
-splice follows from the two-contact and three-contact constructions. -/
-theorem dahlbergE2_orientedCircleArcSource :
-    DahlbergE2OrientedCircleArcSource := by
-  intro n _ hn v O R hsimple _hregular hΔ hR run
+namespace Section4PositiveRunCertificate
+
+variable {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
+
+/-- Every positive run in a simple polygon's positive minimal disk has the
+oriented complementary-circle arc required by the finite Section 4 splice. -/
+theorem nonempty_circleArcCertificate_of_minimalEnclosingDisk
+    (run : Section4PositiveRunCertificate v O R) (hsimple : IsSimplePolygon v)
+    (hΔ : MinimalEnclosingDiskR2 v O R) (hR : 0 < R) :
+    Nonempty (Section4CircleArcCertificate run) := by
   have htwo : 2 ≤ (circleContactSet v O R).card :=
     two_le_card_circleContactSet_of_minimalEnclosingDiskR2
       hΔ hR (mem_circleContactSet.mp run.contact)
@@ -34,24 +39,23 @@ theorem dahlbergE2_orientedCircleArcSource :
     exact run.circleArcCertificate_of_contactSet_card_eq_two
       hsimple hΔ hR hcard
 
-/-- Source-free exact paper primitive package for Dahlberg's Euclidean D4VT.
-Theorem 6 and the plateau-aware Lemma 9 bridge are supplied by their direct
-proofs; the theorem above closes the remaining Section 4 branch. -/
-theorem dahlbergE2_exactPaperPrimitiveSources :
-    DahlbergE2ExactPaperPrimitiveSources :=
-  dahlbergE2ExactPaperPrimitiveSources_of_orientedCircleArcSource
-    dahlbergE2_orientedCircleArcSource
+end Section4PositiveRunCertificate
 
-/-- The canonical paper primitive-source proposition is discharged without
-any external geometric gate. -/
-theorem dahlbergE2_paper_primitive_sources :
-    DahlbergE2PaperPrimitiveSources :=
+private theorem dahlbergE2_orientedCircleArcSource_aux : DahlbergE2OrientedCircleArcSource := by
+  intro _n _ _hn _v _O _R hsimple _hregular hΔ hR run
+  exact run.nonempty_circleArcCertificate_of_minimalEnclosingDisk hsimple hΔ hR
+
+/-- Source-free exact paper primitive sources for Dahlberg's Euclidean D4VT. -/
+theorem dahlbergE2_exactPaperPrimitiveSources : DahlbergE2ExactPaperPrimitiveSources :=
+  dahlbergE2ExactPaperPrimitiveSources_of_orientedCircleArcSource
+    dahlbergE2_orientedCircleArcSource_aux
+
+/-- The canonical paper primitive-source proposition, with no geometric gate. -/
+theorem dahlbergE2_paper_primitive_sources : DahlbergE2PaperPrimitiveSources :=
   dahlbergE2_exactPaperPrimitiveSources
 
-/-- Compatibility spelling for the former primitive-source gate.  This is a
-theorem, not an axiom: its proof is the exact paper construction above. -/
-theorem dahlbergE2_paper_primitive_sources_gate :
-    DahlbergE2PaperPrimitiveSources :=
+/-- The paper primitive-source gate follows from the exact construction. -/
+theorem dahlbergE2_paper_primitive_sources_gate : DahlbergE2PaperPrimitiveSources :=
   dahlbergE2_paper_primitive_sources
 
 end Gluck.Forward
