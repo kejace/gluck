@@ -1,6 +1,7 @@
 import Gluck.Forward.Dahlberg
 import Gluck.Forward.Section4PositiveGap
 import Gluck.Forward.Section4AuxiliaryConsumer
+import Gluck.Forward.Section4EndpointCurvature
 import Gluck.Forward.Smooth
 import Gluck.Forward.Euclidean
 
