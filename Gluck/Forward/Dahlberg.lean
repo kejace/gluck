@@ -1,6 +1,7 @@
 import Gluck.Forward.ContactSets
 import Gluck.Forward.CyclicChordGeometry
 import Gluck.Discrete.PolygonConvexity
+import Mathlib.Geometry.Euclidean.Sphere.Power
 
 /-!
 # Dahlberg's oriented circle regions
@@ -13,18 +14,17 @@ general Euclidean lemma will follow by an orientation-preserving isometry.
 namespace Gluck.Forward
 
 /-- The power expression of `z` with respect to the circle of centre `c` and
-radius `r`. It is nonpositive precisely on the closed disk. -/
-noncomputable def circlePowerR2 (c z : ℂ) (r : ℝ) : ℝ := ‖z - c‖ ^ 2 - r ^ 2
+radius `r`. Compatibility alias for `EuclideanGeometry.Sphere.power`. -/
+noncomputable abbrev circlePowerR2 (c z : ℂ) (r : ℝ) : ℝ :=
+  (⟨c, r⟩ : EuclideanGeometry.Sphere ℂ).power z
 
 /-- Vanishing circle power gives metric incidence when the radius is
 nonnegative. -/
 theorem dist_eq_of_circlePowerR2_eq_zero {c z : ℂ} {r : ℝ} (hr : 0 ≤ r)
     (hpower : circlePowerR2 c z r = 0) : dist c z = r := by
-  rw [dist_eq_norm]
-  apply (sq_eq_sq₀ (norm_nonneg _) hr).mp
-  unfold circlePowerR2 at hpower
-  rw [show c - z = -(z - c) by ring, norm_neg]
-  linarith
+  have hz : z ∈ (⟨c, r⟩ : EuclideanGeometry.Sphere ℂ) :=
+    (EuclideanGeometry.Sphere.power_eq_zero_iff_mem_sphere hr).mp hpower
+  exact EuclideanGeometry.mem_sphere'.mp hz
 
 /-- An orientation-preserving Euclidean isometry in complex coordinates. -/
 def directIsometryR2 (u w z : ℂ) : ℂ := u * z + w
@@ -34,7 +34,8 @@ theorem circlePowerR2_directIsometry {u : ℂ} (hu : ‖u‖ = 1)
     (w c z : ℂ) (r : ℝ) :
     circlePowerR2 (directIsometryR2 u w c) (directIsometryR2 u w z) r =
       circlePowerR2 c z r := by
-  unfold circlePowerR2 directIsometryR2
+  unfold circlePowerR2 EuclideanGeometry.Sphere.power directIsometryR2
+  rw [dist_eq_norm, dist_eq_norm]
   have hsub : u * z + w - (u * c + w) = u * (z - c) := by ring
   rw [hsub, norm_mul, hu, one_mul]
 
@@ -58,7 +59,7 @@ theorem inClosedDiskR2_directIsometry {u : ℂ} (hu : ‖u‖ = 1)
     (w O z : ℂ) (R : ℝ) :
     InClosedDiskR2 (directIsometryR2 u w O) R (directIsometryR2 u w z) ↔
       InClosedDiskR2 O R z := by
-  unfold InClosedDiskR2
+  simp only [InClosedDiskR2, Metric.mem_closedBall']
   rw [dist_directIsometryR2 hu]
 
 /-- Direct Euclidean isometries preserve finite polygon containment in a
@@ -80,7 +81,7 @@ theorem onDiskBoundaryR2_directIsometry {n : ℕ} {u : ℂ} (hu : ‖u‖ = 1)
     OnDiskBoundaryR2 (fun j => directIsometryR2 u w (v j))
         (directIsometryR2 u w O) R i ↔
       OnDiskBoundaryR2 v O R i := by
-  unfold OnDiskBoundaryR2
+  simp only [OnDiskBoundaryR2, Metric.mem_sphere']
   rw [dist_directIsometryR2 hu]
 
 /-- Positive real homotheties preserve membership in a closed disk, scaling
@@ -89,7 +90,7 @@ theorem inClosedDiskR2_posRealHomothety {r : ℝ} (hr : 0 < r)
     (O z : ℂ) (R : ℝ) :
     InClosedDiskR2 ((r : ℂ) * O) (r * R) ((r : ℂ) * z) ↔
       InClosedDiskR2 O R z := by
-  unfold InClosedDiskR2
+  simp only [InClosedDiskR2, Metric.mem_closedBall']
   rw [dist_posRealHomothety hr]
   constructor <;> intro h <;> nlinarith [hr]
 
@@ -111,7 +112,7 @@ theorem onDiskBoundaryR2_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
     (O : ℂ) (R : ℝ) (v : ZMod n → ℂ) (i : ZMod n) :
     OnDiskBoundaryR2 (fun j => (r : ℂ) * v j) ((r : ℂ) * O) (r * R) i ↔
       OnDiskBoundaryR2 v O R i := by
-  unfold OnDiskBoundaryR2
+  simp only [OnDiskBoundaryR2, Metric.mem_sphere']
   rw [dist_posRealHomothety hr]
   constructor <;> intro h <;> nlinarith [hr]
 
@@ -183,7 +184,7 @@ theorem minimalEnclosingDiskR2_posRealHomothety {n : ℕ} {r : ℝ} (hr : 0 < r)
       have hi : InClosedDiskR2 O' R' ((r : ℂ) * v i) := hcontains i
       have hi' : InClosedDiskR2 ((r : ℂ) * Opre) R' ((r : ℂ) * v i) := by
         simpa [hcenter] using hi
-      unfold InClosedDiskR2 at hi' ⊢
+      simp only [InClosedDiskR2, Metric.mem_closedBall'] at hi' ⊢
       rw [dist_posRealHomothety hr] at hi'
       have hscale : r * (r⁻¹ * R') = R' := by
         field_simp [hr.ne']
@@ -1213,7 +1214,9 @@ noncomputable def normalizedCircumcenterParameter (a : ℝ) (z : ℂ) : ℝ :=
 theorem circlePowerR2_normalized (a y : ℝ) (z : ℂ) :
     circlePowerR2 (normalizedCircleCenter y) z (normalizedCircleRadius a y) =
       z.re ^ 2 + z.im ^ 2 - 2 * y * z.im - a ^ 2 := by
-  unfold circlePowerR2 normalizedCircleCenter normalizedCircleRadius
+  unfold circlePowerR2 EuclideanGeometry.Sphere.power normalizedCircleCenter
+    normalizedCircleRadius
+  rw [dist_eq_norm]
   rw [Complex.sq_norm, Complex.normSq_apply, Real.sq_sqrt (by positivity)]
   simp only [Complex.sub_re, Complex.sub_im]
   ring
@@ -2364,11 +2367,11 @@ theorem circumcircleR2_radius_le_of_inVertexCone_of_boundary
     rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
     simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
   have hΔB : (Δ.re - B.re) ^ 2 + (Δ.im - B.im) ^ 2 ≤ S ^ 2 := by
-    have h := (sq_le_sq₀ dist_nonneg hS).mpr hB
+    have h := (sq_le_sq₀ dist_nonneg hS).mpr (Metric.mem_closedBall'.mp hB)
     rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
     simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
   have hΔC : (Δ.re - C.re) ^ 2 + (Δ.im - C.im) ^ 2 ≤ S ^ 2 := by
-    have h := (sq_le_sq₀ dist_nonneg hS).mpr hC
+    have h := (sq_le_sq₀ dist_nonneg hS).mpr (Metric.mem_closedBall'.mp hC)
     rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
     simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
   have hOuB :
@@ -2501,11 +2504,11 @@ theorem eq_circumcenter_of_inVertexCone_of_boundary_of_radius_eq
     rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
     simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
   have hΔB : (Δ.re - B.re) ^ 2 + (Δ.im - B.im) ^ 2 ≤ S ^ 2 := by
-    have h := (sq_le_sq₀ dist_nonneg hS).mpr hB
+    have h := (sq_le_sq₀ dist_nonneg hS).mpr (Metric.mem_closedBall'.mp hB)
     rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
     simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
   have hΔC : (Δ.re - C.re) ^ 2 + (Δ.im - C.im) ^ 2 ≤ S ^ 2 := by
-    have h := (sq_le_sq₀ dist_nonneg hS).mpr hC
+    have h := (sq_le_sq₀ dist_nonneg hS).mpr (Metric.mem_closedBall'.mp hC)
     rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
     simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
   have hOuB :
@@ -2665,7 +2668,8 @@ theorem signedMengerProfile_inv_radius_le_of_minimal_boundary_of_cross_pos
       ⟨hcircle.1, hcircle.2.2.1, hcircle.2.1, hcircle.2.2.2⟩
     have hρR : ρ ≤ R :=
       circumcircleR2_radius_le_of_inVertexCone_of_boundary
-        hcircle' hcone hΔ.1 hboundary (hΔ.2.1 (i - 1)) (hΔ.2.1 (i + 1))
+        hcircle' hcone hΔ.1 (Metric.mem_sphere'.mp hboundary)
+          (hΔ.2.1 (i - 1)) (hΔ.2.1 (i + 1))
     have hAB : v (i - 1) ≠ v i := by
       simpa using hsimple.1 (i - 1)
     have hcircle'' : CircumcircleR2 (v (i + 1)) (v (i - 1)) (v i) O ρ :=
@@ -2693,12 +2697,14 @@ theorem signedMengerProfile_inv_radius_lt_of_minimal_boundary_of_cross_pos
       ⟨hcircle.1, hcircle.2.2.1, hcircle.2.1, hcircle.2.2.2⟩
     have hρR : ρ ≤ R :=
       circumcircleR2_radius_le_of_inVertexCone_of_boundary
-        hcircle' hcone hΔ.1 hboundary (hΔ.2.1 (i - 1)) (hΔ.2.1 (i + 1))
+        hcircle' hcone hΔ.1 (Metric.mem_sphere'.mp hboundary)
+          (hΔ.2.1 (i - 1)) (hΔ.2.1 (i + 1))
     have hρne : ρ ≠ R := by
       intro hρeq
       have hcenters : OΔ = O :=
         eq_circumcenter_of_inVertexCone_of_boundary_of_radius_eq
-          hcircle' hcone hΔ.1 hboundary (hΔ.2.1 (i - 1)) (hΔ.2.1 (i + 1)) hρeq
+          hcircle' hcone hΔ.1 (Metric.mem_sphere'.mp hboundary)
+            (hΔ.2.1 (i - 1)) (hΔ.2.1 (i + 1)) hρeq
       rcases hinterior with hprev | hnext
       · rw [hcenters, ← hρeq, hcircle.2.1] at hprev
         exact (lt_irrefl ρ) hprev
@@ -2729,7 +2735,8 @@ theorem signedMengerProfile_eq_inv_radius_of_three_boundaries_of_cross_pos
   have hAB : v (i - 1) ≠ v i := by
     simpa using hsimple.1 (i - 1)
   have hcircle : CircumcircleR2 (v (i + 1)) (v (i - 1)) (v i) O R :=
-    ⟨hR, hnext, hprev, hself⟩
+    ⟨hR, Metric.mem_sphere'.mp hnext, Metric.mem_sphere'.mp hprev,
+      Metric.mem_sphere'.mp hself⟩
   simpa [SignedMengerProfile] using
     signedMengerR2_eq_inv_circumradius_of_pos hAB hcross hcircle
 
@@ -3531,7 +3538,7 @@ theorem exists_dahlbergContainingThreeContactDiskR2_at_of_strictConvexEdgeSuppor
   let R := normalizedCircleRadius (chordHalfLength (v i) (v (i + 1))) y
   have hcontains : PolygonInClosedDiskR2 v O R := by
     intro k
-    exact (mem_edgeClosedDisk_iff_dist_le hAB y).mp (hall k)
+    exact Metric.mem_closedBall'.mpr ((mem_edgeClosedDisk_iff_dist_le hAB y).mp (hall k))
   have hiNext : i ≠ i + 1 := by
     intro h
     exact hAB (congrArg v h)
@@ -3633,7 +3640,8 @@ theorem circlePowerR2_sub_lineMap (O₁ O₂ X Z : ℂ) (R₁ R₂ t : ℝ) :
     rw [AffineMap.lineMap_apply, vsub_eq_sub, vadd_eq_add]
     module
   rw [hline]
-  unfold circlePowerR2
+  unfold circlePowerR2 EuclideanGeometry.Sphere.power
+  simp only [dist_eq_norm]
   simp only [Complex.sq_norm, Complex.normSq_apply, Complex.sub_re, Complex.sub_im,
     Complex.add_re, Complex.add_im, Complex.smul_re, Complex.smul_im]
   ring
@@ -3875,41 +3883,37 @@ theorem circleBoundary_mem_edgeHalfPlane_of_mem_edgeClosedDisk
 /-- Metric circle incidence implies zero circle power. -/
 theorem circlePowerR2_eq_zero_of_dist_eq {O X : ℂ} {R : ℝ}
     (h : dist O X = R) : circlePowerR2 O X R = 0 := by
-  unfold circlePowerR2
-  rw [norm_sub_rev, ← dist_eq_norm, h]
-  ring
+  have hR : 0 ≤ R := by rw [← h]; positivity
+  apply (EuclideanGeometry.Sphere.power_eq_zero_iff_mem_sphere hR).mpr
+  exact EuclideanGeometry.mem_sphere'.mpr h
 
 /-- Metric membership in a disk of nonnegative radius implies nonpositive
 circle power. -/
 theorem circlePowerR2_nonpos_of_dist_le {O X : ℂ} {R : ℝ}
     (hR : 0 ≤ R) (h : dist O X ≤ R) : circlePowerR2 O X R ≤ 0 := by
-  unfold circlePowerR2
-  rw [norm_sub_rev, ← dist_eq_norm]
-  exact sub_nonpos.mpr ((sq_le_sq₀ dist_nonneg hR).mpr h)
+  apply (EuclideanGeometry.Sphere.power_nonpos_iff_dist_center_le_radius hR).mpr
+  simpa [dist_comm] using h
 
 /-- Strict metric membership in a disk of nonnegative radius implies negative
 circle power. -/
 theorem circlePowerR2_neg_of_dist_lt {O X : ℂ} {R : ℝ}
     (hR : 0 ≤ R) (h : dist O X < R) : circlePowerR2 O X R < 0 := by
-  unfold circlePowerR2
-  rw [norm_sub_rev, ← dist_eq_norm]
-  exact sub_neg.mpr ((sq_lt_sq₀ dist_nonneg hR).mpr h)
+  apply (EuclideanGeometry.Sphere.power_neg_iff_dist_center_lt_radius hR).mpr
+  simpa [dist_comm] using h
 
 /-- Metric membership in the closed exterior of a nonnegative-radius disk
 implies nonnegative circle power. -/
 theorem circlePowerR2_nonneg_of_radius_le_dist {O X : ℂ} {R : ℝ}
     (hR : 0 ≤ R) (h : R ≤ dist O X) : 0 ≤ circlePowerR2 O X R := by
-  unfold circlePowerR2
-  rw [norm_sub_rev, ← dist_eq_norm]
-  exact sub_nonneg.mpr ((sq_le_sq₀ hR dist_nonneg).mpr h)
+  apply (EuclideanGeometry.Sphere.power_nonneg_iff_radius_le_dist_center hR).mpr
+  simpa [dist_comm] using h
 
 /-- Strict metric exterior membership for a nonnegative-radius disk implies
 positive circle power. -/
 theorem circlePowerR2_pos_of_radius_lt_dist {O X : ℂ} {R : ℝ}
     (hR : 0 ≤ R) (h : R < dist O X) : 0 < circlePowerR2 O X R := by
-  unfold circlePowerR2
-  rw [norm_sub_rev, ← dist_eq_norm]
-  exact sub_pos.mpr ((sq_lt_sq₀ hR dist_nonneg).mpr h)
+  apply (EuclideanGeometry.Sphere.power_pos_iff_radius_lt_dist_center hR).mpr
+  simpa [dist_comm] using h
 
 /-- Metric, disk-language form of circle-contact localization.  This is the
 reusable form consumed by the finite boundary-contact arguments in
@@ -3930,8 +3934,8 @@ theorem circleContact_mem_edgeHalfPlane_of_mem_edgeClosedDisk
   apply circleBoundary_mem_edgeHalfPlane_of_mem_edgeClosedDisk hAB hQcross
   · exact circlePowerR2_neg_of_dist_lt (Real.sqrt_nonneg _) hQint
   · exact circlePowerR2_eq_zero_of_dist_eq hQboundary
-  · exact circlePowerR2_nonpos_of_dist_le hR hA
-  · exact circlePowerR2_nonpos_of_dist_le hR hB
+  · exact circlePowerR2_nonpos_of_dist_le hR (Metric.mem_closedBall'.mp hA)
+  · exact circlePowerR2_nonpos_of_dist_le hR (Metric.mem_closedBall'.mp hB)
   · exact circlePowerR2_eq_zero_of_dist_eq hXboundary
   · exact hXmem
 
@@ -3992,9 +3996,9 @@ theorem circleContactSet_subset_of_containingDisk_gap
     intro k
     apply (mem_edgeClosedDisk_iff_dist_le hAB y).mpr
     rw [← hcenter, ← hradius]
-    exact U.contains k
+    exact Metric.mem_closedBall'.mp (U.contains k)
   have hqdist : dist U.center (v q) < U.radius :=
-    lt_of_le_of_ne (U.contains q)
+    lt_of_le_of_ne (Metric.mem_closedBall'.mp (U.contains q))
       (fun h => hqNotU (mem_circleContactSet.mpr h))
   have hqU : dist (edgeCircleCenter (v a) (v b) y) (v q) <
       normalizedCircleRadius (chordHalfLength (v a) (v b)) y := by
@@ -5241,8 +5245,8 @@ theorem forward_chain_cross_eq_zero_of_constant_signedMengerProfile_zero {n : �
     induction k with
     | zero =>
         constructor
-        · simpa using crossR2_left_endpoint (v i) (v (i + 1))
-        · simpa using crossR2_right_endpoint (v i) (v (i + 1))
+        · simp
+        · simp
     | succ k ih =>
         constructor
         · exact ih.2
@@ -8431,7 +8435,7 @@ theorem edgePrevCurvatureDiskContainsAll_self {n : ℕ}
     (hcontains : EdgePrevCurvatureDiskContainsAll v i) :
     dist (EdgePrevCircleCenterProfile v i) (v i) ≤
       EdgePrevCircleRadiusProfile v i := by
-  exact hcontains i
+  exact Metric.mem_closedBall'.mp (hcontains i)
 
 /-- In the positive-orientation branch, a previous curvature disk has its
 center vertex on the disk boundary. -/
@@ -8441,7 +8445,8 @@ theorem edgePrevCurvatureDisk_self_boundary_of_positiveOrientation {n : ℕ}
     (horient : PositivePolygonOrientation v) (i : ZMod n) :
     OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v i)
       (EdgePrevCircleRadiusProfile v i) i := by
-  exact edgePrevCircle_dist_self_eq_radius_of_positiveOrientation hsimple horient i
+  exact Metric.mem_sphere'.mpr
+    (edgePrevCircle_dist_self_eq_radius_of_positiveOrientation hsimple horient i)
 
 /-- In the positive-orientation branch, the previous defining vertex of a
 curvature disk is on the disk boundary. -/
@@ -8451,7 +8456,8 @@ theorem edgePrevCurvatureDisk_prev_boundary_of_positiveOrientation {n : ℕ}
     (horient : PositivePolygonOrientation v) (i : ZMod n) :
     OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v i)
       (EdgePrevCircleRadiusProfile v i) (i - 1) := by
-  exact edgePrevCircle_dist_prev_eq_radius_of_positiveOrientation hsimple horient i
+  exact Metric.mem_sphere'.mpr
+    (edgePrevCircle_dist_prev_eq_radius_of_positiveOrientation hsimple horient i)
 
 /-- In the positive-orientation branch, the next defining vertex of a
 curvature disk is on the disk boundary. -/
@@ -8461,7 +8467,8 @@ theorem edgePrevCurvatureDisk_next_boundary_of_positiveOrientation {n : ℕ}
     (horient : PositivePolygonOrientation v) (i : ZMod n) :
     OnDiskBoundaryR2 v (EdgePrevCircleCenterProfile v i)
       (EdgePrevCircleRadiusProfile v i) (i + 1) := by
-  exact edgePrevCircle_dist_next_eq_radius_of_positiveOrientation hsimple horient i
+  exact Metric.mem_sphere'.mpr
+    (edgePrevCircle_dist_next_eq_radius_of_positiveOrientation hsimple horient i)
 
 /-- Three consecutive positive-turn contacts determine the canonical
 previous-vertex curvature-circle data. -/
@@ -8482,7 +8489,8 @@ theorem edgePrevCurvatureCircleData_eq_of_three_boundaries_of_cross_pos
     simpa [EdgePrevCircleCenterProfile, EdgePrevCircleRadiusProfile] using
       circumcircleR2_edge_parameter (hsimple.1 i) hcross'.ne'
   have hdisk : CircumcircleR2 (v i) (v (i + 1)) (v (i - 1)) O R :=
-    ⟨hR, hself, hnext, hprev⟩
+    ⟨hR, Metric.mem_sphere'.mp hself, Metric.mem_sphere'.mp hnext,
+      Metric.mem_sphere'.mp hprev⟩
   have heq := circumcircleR2_unique_of_noncollinear
     (hsimple.1 i) hcross'.ne' hcanonical hdisk
   exact Prod.ext heq.1 heq.2
@@ -8538,9 +8546,9 @@ theorem edgePrevCurvatureDiskContainsAll_of_three_boundaries_of_cross_pos
     by_contra hRnonpos
     have hRzero : R = 0 := le_antisymm (le_of_not_gt hRnonpos) hΔ.1
     have hdistPrev : dist O (v (i - 1)) = 0 := by
-      simpa [OnDiskBoundaryR2, hRzero] using hprev
+      simpa [hRzero] using Metric.mem_sphere'.mp hprev
     have hdistSelf : dist O (v i) = 0 := by
-      simpa [OnDiskBoundaryR2, hRzero] using hself
+      simpa [hRzero] using Metric.mem_sphere'.mp hself
     have hprevEq : v (i - 1) = v i :=
       (dist_eq_zero.mp hdistPrev).symm.trans (dist_eq_zero.mp hdistSelf)
     exact (hsimple.1 (i - 1)) (by simpa using hprevEq)
@@ -8550,7 +8558,10 @@ theorem edgePrevCurvatureDiskContainsAll_of_three_boundaries_of_cross_pos
     congrArg Prod.fst hdata
   have hradius : EdgePrevCircleRadiusProfile v i = R :=
     congrArg Prod.snd hdata
-  simpa [EdgePrevCurvatureDiskContainsAll, hcenter, hradius] using hΔ.2.1
+  simp only [EdgePrevCurvatureDiskContainsAll]
+  intro j
+  rw [hcenter, hradius]
+  exact hΔ.2.1 j
 
 /-- A containing three-contact disk whose contact set is cyclically connected
 is one of the polygon's canonical previous-vertex curvature disks.  This is
@@ -8568,11 +8579,11 @@ theorem exists_edgePrevCurvatureDiskContainsAll_of_containing_contacts_interval
   obtain ⟨i, hprev, hself, hnext⟩ :=
     hinterval.exists_three_consecutive U.three_contacts
   have hprev' : OnDiskBoundaryR2 v U.center U.radius (i - 1) :=
-    mem_circleContactSet.mp hprev
+    Metric.mem_sphere'.mpr (mem_circleContactSet.mp hprev)
   have hself' : OnDiskBoundaryR2 v U.center U.radius i :=
-    mem_circleContactSet.mp hself
+    Metric.mem_sphere'.mpr (mem_circleContactSet.mp hself)
   have hnext' : OnDiskBoundaryR2 v U.center U.radius (i + 1) :=
-    mem_circleContactSet.mp hnext
+    Metric.mem_sphere'.mpr (mem_circleContactSet.mp hnext)
   have hdata := edgePrevCurvatureCircleData_eq_of_three_boundaries_of_cross_pos
     hsimple U.radius_pos hprev' hself' hnext' (horient i)
   refine ⟨i, hdata, ?_⟩
@@ -8580,7 +8591,10 @@ theorem exists_edgePrevCurvatureDiskContainsAll_of_containing_contacts_interval
     congrArg Prod.fst hdata
   have hradius : EdgePrevCircleRadiusProfile v i = U.radius :=
     congrArg Prod.snd hdata
-  simpa [EdgePrevCurvatureDiskContainsAll, hcenter, hradius] using U.contains
+  simp only [EdgePrevCurvatureDiskContainsAll]
+  intro j
+  rw [hcenter, hradius]
+  exact U.contains j
 
 /-- An interior-missing three-contact disk whose contact set is cyclically
 connected is one of the polygon's canonical previous-vertex curvature disks.
@@ -8598,11 +8612,11 @@ theorem exists_edgePrevCurvatureDiskInteriorMissesAll_of_missing_contacts_interv
   obtain ⟨i, hprev, hself, hnext⟩ :=
     hinterval.exists_three_consecutive U.three_contacts
   have hprev' : OnDiskBoundaryR2 v U.center U.radius (i - 1) :=
-    mem_circleContactSet.mp hprev
+    Metric.mem_sphere'.mpr (mem_circleContactSet.mp hprev)
   have hself' : OnDiskBoundaryR2 v U.center U.radius i :=
-    mem_circleContactSet.mp hself
+    Metric.mem_sphere'.mpr (mem_circleContactSet.mp hself)
   have hnext' : OnDiskBoundaryR2 v U.center U.radius (i + 1) :=
-    mem_circleContactSet.mp hnext
+    Metric.mem_sphere'.mpr (mem_circleContactSet.mp hnext)
   have hdata := edgePrevCurvatureCircleData_eq_of_three_boundaries_of_cross_pos
     hsimple U.radius_pos hprev' hself' hnext' (horient i)
   refine ⟨i, hdata, ?_⟩
@@ -9426,7 +9440,7 @@ theorem edgePrevCurvatureCirclesDistinct_of_containsAll_of_interiorMissesAll
   refine ⟨EdgePrevCircleCenterProfile v i, EdgePrevCircleRadiusProfile v i,
     EdgePrevCircleRadiusProfile_pos hsimple i, ?_⟩
   intro k
-  exact le_antisymm (hcontains k)
+  exact le_antisymm (Metric.mem_closedBall'.mp (hcontains k))
     (by simpa [hcenter, hradius] using hmisses k)
 
 /-- The two same-type disk certificates from Dahlberg's Lemmas 5 and 7 form
@@ -9511,8 +9525,8 @@ theorem edgePrevCircleRadiusProfile_succ_le_of_containsAll_of_positiveOrientatio
           (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1))) := by
     refine (mem_edgeClosedDisk_iff_dist_le hAB
       (edgeCircumcenterParameter (v i) (v (i + 1)) (v (i - 1)))).mpr ?_
-    simpa [InClosedDiskR2, EdgePrevCircleCenterProfile, EdgePrevCircleRadiusProfile] using
-      hcontains (i + 1 + 1)
+    simpa [EdgePrevCircleCenterProfile, EdgePrevCircleRadiusProfile] using
+      Metric.mem_closedBall'.mp (hcontains (i + 1 + 1))
   have hleNext :
       EdgeNextCircleRadiusProfile v i ≤ EdgePrevCircleRadiusProfile v i := by
     simpa [EdgeNextCircleRadiusProfile, EdgePrevCircleRadiusProfile] using
@@ -9553,7 +9567,8 @@ theorem edgePrevCircleRadiusProfile_pred_le_of_containsAll_of_positiveOrientatio
       dist (EdgeNextCircleCenterProfile v (i - 1)) (v ((i - 1) - 1)) ≤
         EdgeNextCircleRadiusProfile v (i - 1) := by
     rw [hcenter, hradius]
-    simpa [InClosedDiskR2, sub_eq_add_neg, add_assoc] using hcontains ((i - 1) - 1)
+    simpa [sub_eq_add_neg, add_assoc] using
+      Metric.mem_closedBall'.mp (hcontains ((i - 1) - 1))
   have hmem :
       v ((i - 1) - 1) ∈
         edgeClosedDisk (v (i - 1)) (v ((i - 1) + 1))
@@ -11668,12 +11683,12 @@ theorem diskBoundaryIndices_exists_boundary_adjacent_interior {n : ℕ} [NeZero 
     ⟨i, htransition⟩
   rcases htransition with hforward | hbackward
   · refine ⟨i, (mem_diskBoundaryIndices).mp hforward.1, Or.inl ?_⟩
-    exact lt_of_le_of_ne (hΔ.2.1 (i + 1))
-      (fun hdist => hforward.2 ((mem_diskBoundaryIndices).mpr hdist))
+    exact lt_of_le_of_ne (Metric.mem_closedBall'.mp (hΔ.2.1 (i + 1)))
+      (fun hdist ↦ hforward.2 ((mem_diskBoundaryIndices).mpr (Metric.mem_sphere'.mpr hdist)))
   · refine ⟨i + 1, (mem_diskBoundaryIndices).mp hbackward.2, Or.inr ?_⟩
     have hinterior : dist O (v i) < R := by
-      exact lt_of_le_of_ne (hΔ.2.1 i)
-        (fun hdist => hbackward.1 ((mem_diskBoundaryIndices).mpr hdist))
+      exact lt_of_le_of_ne (Metric.mem_closedBall'.mp (hΔ.2.1 i))
+        (fun hdist ↦ hbackward.1 ((mem_diskBoundaryIndices).mpr (Metric.mem_sphere'.mpr hdist)))
     simpa [sub_eq_add_neg, add_assoc] using hinterior
 
 /-- Direct Euclidean isometries preserve Dahlberg's minimal-disk setup. -/
@@ -11760,7 +11775,8 @@ theorem dahlbergDiskReductionSetup_exists_interior_vertex_of_nonconcyclic
   by_contra hnoInterior
   have hall : ∀ j : ZMod n, dist O (v j) = R := by
     intro j
-    exact le_antisymm (hΔ.2.1 j) (not_lt.mp (fun hj => hnoInterior ⟨j, hj⟩))
+    exact le_antisymm (Metric.mem_closedBall'.mp (hΔ.2.1 j))
+      (not_lt.mp (fun hj => hnoInterior ⟨j, hj⟩))
   exact hnoncircle ⟨O, R, hRpos, hall⟩
 
 /-- In the nonconcyclic §4 branch, Dahlberg's boundary index set `E` is a
@@ -11787,7 +11803,7 @@ theorem concyclic_of_forall_onDiskBoundaryR2 {n : ℕ} {v : ZMod n → ℂ}
     {O : ℂ} {R : ℝ} (hRpos : 0 < R)
     (hall : ∀ i : ZMod n, OnDiskBoundaryR2 v O R i) :
     Concyclic v := by
-  exact ⟨O, R, hRpos, hall⟩
+  exact ⟨O, R, hRpos, fun i ↦ Metric.mem_sphere'.mp (hall i)⟩
 
 /-- For a nonconcyclic polygon, no positive-radius disk can have every vertex
 on its boundary. -/
@@ -11869,7 +11885,7 @@ theorem dahlbergDiskReductionSetup_exists_boundary_max_and_interior
     by_contra hnoInterior
     have hall : ∀ j : ZMod n, dist O (v j) = R := by
       intro j
-      exact le_antisymm (hΔ.2.1 j)
+      exact le_antisymm (Metric.mem_closedBall'.mp (hΔ.2.1 j))
         (not_lt.mp (fun hj => hnoInterior ⟨j, hj⟩))
     exact hnoncircle ⟨O, R, hRpos, hall⟩
   rcases hinterior with ⟨j, hj⟩
@@ -11928,7 +11944,8 @@ theorem polygonInClosedDiskR2_finiteEnclosingRadius {n : ℕ} [NeZero n]
     PolygonInClosedDiskR2 v O (finiteEnclosingRadius v O) := by
   intro i
   unfold finiteEnclosingRadius
-  exact Finset.le_sup' (fun j : ZMod n => dist O (v j)) (Finset.mem_univ i)
+  exact Metric.mem_closedBall'.mpr
+    (Finset.le_sup' (fun j : ZMod n => dist O (v j)) (Finset.mem_univ i))
 
 /-- Dahlberg's convex-radius input for the positive-orientation branch.
 
@@ -13821,8 +13838,8 @@ theorem dahlbergE2DiskAuxiliaryBoundaryPairConstructionSource_of_boundaryInterio
   letI : NeZero n := hne
   have hboundary : OnDiskBoundaryR2 v O R i := (mem_diskBoundaryIndices).mp hi
   have hinterior : dist O (v j) < R := by
-    exact lt_of_le_of_ne (hΔ.2.1 j)
-      (fun hdist => hj ((mem_diskBoundaryIndices).mpr hdist))
+    exact lt_of_le_of_ne (Metric.mem_closedBall'.mp (hΔ.2.1 j))
+      (fun hdist ↦ hj ((mem_diskBoundaryIndices).mpr (Metric.mem_sphere'.mpr hdist)))
   exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ
     hboundary hinterior hij
 
@@ -14029,13 +14046,13 @@ theorem dahlbergE2DiskAuxiliaryBoundaryNeighborConstructionSource_of_metricNeigh
   have hboundary : OnDiskBoundaryR2 v O R i := (mem_diskBoundaryIndices).mp hi
   rcases hneighbor with hnext | hprev
   · have hnextInterior : dist O (v (i + 1)) < R := by
-      exact lt_of_le_of_ne (hΔ.2.1 (i + 1))
-        (fun hdist => hnext ((mem_diskBoundaryIndices).mpr hdist))
+      exact lt_of_le_of_ne (Metric.mem_closedBall'.mp (hΔ.2.1 (i + 1)))
+        (fun hdist ↦ hnext ((mem_diskBoundaryIndices).mpr (Metric.mem_sphere'.mpr hdist)))
     exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos
       hboundary (Or.inl hnextInterior)
   · have hprevInterior : dist O (v (i - 1)) < R := by
-      exact lt_of_le_of_ne (hΔ.2.1 (i - 1))
-        (fun hdist => hprev ((mem_diskBoundaryIndices).mpr hdist))
+      exact lt_of_le_of_ne (Metric.mem_closedBall'.mp (hΔ.2.1 (i - 1)))
+        (fun hdist ↦ hprev ((mem_diskBoundaryIndices).mpr (Metric.mem_sphere'.mpr hdist)))
     exact hsrc hn hsimple hregular hnoncircle hnonstrict hΔ hRpos
       hboundary (Or.inr hprevInterior)
 
@@ -14432,12 +14449,13 @@ theorem minimalEnclosingDiskBoundaryVertex_source :
   by_contra hnone
   have hstrict : ∀ i : ZMod n, dist O (v i) < R := by
     intro i
-    exact lt_of_le_of_ne (hΔ.2.1 i) (fun hdist => hnone ⟨i, hdist⟩)
+    exact lt_of_le_of_ne (Metric.mem_closedBall'.mp (hΔ.2.1 i))
+      (fun hdist ↦ hnone ⟨i, Metric.mem_sphere'.mpr hdist⟩)
   obtain ⟨i, hmax⟩ := exists_globalMax_zmod (fun j : ZMod n => dist O (v j))
   have hR'nonneg : 0 ≤ dist O (v i) := dist_nonneg
   have hpoly : PolygonInClosedDiskR2 v O (dist O (v i)) := by
     intro j
-    exact hmax j
+    exact Metric.mem_closedBall'.mpr (hmax j)
   have hminimal := hΔ.2.2 O (dist O (v i)) hR'nonneg hpoly
   exact (not_lt_of_ge hminimal) (hstrict i)
 
@@ -14580,7 +14598,8 @@ theorem minimalEnclosingDiskExists_source :
   · intro O' R' _hR' hpoly
     exact (hmin O').trans
       (Finset.sup'_le Finset.univ_nonempty
-        (fun i : ZMod n => dist O' (v i)) (fun i _hi => hpoly i))
+        (fun i : ZMod n => dist O' (v i))
+        (fun i _hi => Metric.mem_closedBall'.mp (hpoly i)))
 
 /-- Finite minimal-disk source components for Dahlberg's §4 setup. -/
 theorem dahlbergE2_disk_reduction_setup_source_components :
@@ -14703,7 +14722,7 @@ theorem dahlbergE2DiskAuxiliaryBoundarySuccessorUnitConstructionSource_of_bounda
   intro n hne hn v hsimple hregular hnoncircle hnonstrict hΔ hv0 hnext
   letI : NeZero n := hne
   have hboundary : OnDiskBoundaryR2 v 0 1 0 := by
-    simp [OnDiskBoundaryR2, dist_eq_norm, hv0]
+    exact Metric.mem_sphere'.mpr (by simp [hv0])
   have h01 : (0 : ZMod n) ≠ 1 := by
     intro h
     have hcast : ((0 : ℕ) : ZMod n) = ((1 : ℕ) : ZMod n) := by

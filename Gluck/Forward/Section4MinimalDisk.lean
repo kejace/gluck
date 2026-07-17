@@ -154,7 +154,7 @@ theorem not_isCyclicInterval_circleContactSet_of_minimalEnclosingDisk_of_card_eq
     lt_of_le_of_ne (hΔ.2.1 (A - 1)) fun hdist =>
       hAprevNotBoundary hdist
   have hdiam :=
-    dist_eq_two_mul_radius_of_minimalEnclosingDiskR2_of_boundary_subset_pair
+    isDiameter_of_minimalEnclosingDiskR2_of_boundary_subset_pair
       hΔ hABoundary hBBoundary hboundaryPair
   have hcrossA :
       Gluck.Discrete.crossR2 (v (A - 1)) (v A) (v (A + 1)) ≠ 0 :=
@@ -185,7 +185,7 @@ theorem not_isCyclicInterval_circleContactSet_of_minimalEnclosingDisk_of_card_eq
           rw [dist_comm (v A), hcircle.2.2.1, hBsucc, hcircle.2.2.2]
           ring
         _ < 2 * R := by linarith
-    linarith
+    linarith [hdiam.dist_left_right]
 
 /-- In the at-least-three-contact case of Dahlberg's Section 4 argument, the
 contact set of a positive minimal enclosing disk cannot be one cyclic

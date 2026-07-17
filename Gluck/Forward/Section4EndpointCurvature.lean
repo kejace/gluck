@@ -79,7 +79,8 @@ theorem edgePrevCircleRadiusProfile_lt_of_boundary_and_interior_of_regular
       ⟨hcircle.1, hcircle.2.2.1, hcircle.2.1, hcircle.2.2.2⟩
     have hstrict : R < S :=
       circumcircleR2_radius_lt_of_inVertexCone_of_boundary_of_interior
-        hcircleMid hcone (hself ▸ dist_nonneg) hself hprev hnext hinterior
+        hcircleMid hcone ((Metric.mem_sphere'.mp hself) ▸ dist_nonneg)
+          (Metric.mem_sphere'.mp hself) hprev hnext hinterior
     simpa [EdgePrevCurvatureCircleData] using
       (show EdgePrevCircleRadiusProfile w i < S by
         rw [show EdgePrevCircleRadiusProfile w i = R from congrArg Prod.snd hcanonical]

@@ -19,22 +19,26 @@ namespace Gluck.Forward
 
 open Gluck.Discrete
 
-private theorem circlePoint_angle_sub_eq_pi_of_diameter_aux
+private theorem circlePoint_angle_sub_eq_pi_of_isDiameter_aux
     {O : ℂ} {R θB θA : ℝ} (hR : 0 < R) (hBA : θB < θA) (hspan : θA < θB + 2 * Real.pi)
-    (hdiam : dist (circlePoint O R θA) (circlePoint O R θB) = 2 * R) :
+    (hdiam : (⟨O, R⟩ : EuclideanGeometry.Sphere ℂ).IsDiameter
+      (circlePoint O R θA) (circlePoint O R θB)) :
     θA - θB = Real.pi := by
-  have hformula :
-      dist (circlePoint O R θA) (circlePoint O R θB) ^ 2 =
-        2 * R ^ 2 * (1 - Real.cos (θA - θB)) := by
-    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply]
-    simp only [Complex.sub_re, Complex.sub_im, circlePoint_re, circlePoint_im]
-    rw [Real.cos_sub]
-    nlinarith [Real.sin_sq_add_cos_sq θA,
-      Real.sin_sq_add_cos_sq θB]
+  have hformula := dist_circlePoint_eq_two_mul_abs_sin_half O R θB θA
+  rw [hdiam.symm.dist_left_right, abs_of_pos hR] at hformula
+  have habs : |Real.sin ((θA - θB) / 2)| = 1 := by nlinarith
+  have hhalfPos : 0 < (θA - θB) / 2 := by linarith
+  have hhalfLt : (θA - θB) / 2 < Real.pi := by linarith
+  have hsinPos : 0 < Real.sin ((θA - θB) / 2) :=
+    Real.sin_pos_of_pos_of_lt_pi hhalfPos hhalfLt
+  have hsin : Real.sin ((θA - θB) / 2) = 1 := by
+    rwa [abs_of_pos hsinPos] at habs
+  have hcosHalf : Real.cos ((θA - θB) / 2) = 0 := by
+    nlinarith [Real.sin_sq_add_cos_sq ((θA - θB) / 2)]
   have hcos : Real.cos (θA - θB) = -1 := by
-    rw [hdiam] at hformula
-    have hR2 : 0 < R ^ 2 := sq_pos_of_pos hR
-    nlinarith
+    have hdouble := Real.cos_two_mul ((θA - θB) / 2)
+    rw [show 2 * ((θA - θB) / 2) = θA - θB by ring, hcosHalf] at hdouble
+    simpa using hdouble
   obtain ⟨k, hk⟩ := Real.cos_eq_neg_one_iff.mp hcos
   have htwoPi : 0 < 2 * Real.pi := by positivity
   have hklo : (-1 : ℝ) < (k : ℝ) := by
@@ -58,10 +62,11 @@ namespace Section4PositiveRunCertificate
 variable {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
     (run : Section4PositiveRunCertificate v O R)
 
-private theorem endpoint_dist_eq_two_mul_radius_of_contactSet_card_eq_two_aux
+private theorem endpoint_isDiameter_of_contactSet_card_eq_two_aux
     (hsimple : IsSimplePolygon v) (hΔ : MinimalEnclosingDiskR2 v O R)
     (hcard : (circleContactSet v O R).card = 2) :
-    dist (run.point run.chainStart) (run.point (run.b + 1)) = 2 * R := by
+    (⟨O, R⟩ : EuclideanGeometry.Sphere ℂ).IsDiameter
+      (run.point run.chainStart) (run.point (run.b + 1)) := by
   let p : ZMod n := Gluck.cyclicLift run.c (run.a - 1)
   let q : ZMod n := Gluck.cyclicLift run.c (run.b + 1)
   have hp : p ∈ circleContactSet v O R := by
@@ -86,23 +91,24 @@ private theorem endpoint_dist_eq_two_mul_radius_of_contactSet_card_eq_two_aux
       exact mem_circleContactSet.mpr hi
     simpa using hi'
   have hdiam :=
-    dist_eq_two_mul_radius_of_minimalEnclosingDiskR2_of_boundary_subset_pair
+    isDiameter_of_minimalEnclosingDiskR2_of_boundary_subset_pair
       hΔ (mem_circleContactSet.mp hp) (mem_circleContactSet.mp hq) hboundary
   simpa [Section4PositiveRunCertificate.point,
     Section4PositiveRunCertificate.chainStart, p, q] using hdiam
 
-private theorem circleArcCertificate_of_endpoint_dist_eq_two_mul_radius_aux
+private theorem circleArcCertificate_of_endpoint_isDiameter_aux
     (hsimple : IsSimplePolygon v) (hΔ : MinimalEnclosingDiskR2 v O R) (hR : 0 < R)
-    (hdiam : dist (run.point run.chainStart) (run.point (run.b + 1)) = 2 * R) :
+    (hdiam : (⟨O, R⟩ : EuclideanGeometry.Sphere ℂ).IsDiameter
+      (run.point run.chainStart) (run.point (run.b + 1))) :
     Nonempty (Section4CircleArcCertificate run) := by
   obtain ⟨θB, θA, hB, hA, hBA, hspan⟩ :=
     run.exists_ordered_endpointAngles_of_minimalDisk hsimple hΔ
   have hdiamAngles :
-      dist (circlePoint O R θA) (circlePoint O R θB) = 2 * R := by
-    rw [← hA, ← hB]
-    exact hdiam
+      (⟨O, R⟩ : EuclideanGeometry.Sphere ℂ).IsDiameter
+        (circlePoint O R θA) (circlePoint O R θB) := by
+    simpa [hA, hB] using hdiam
   have hπ : θA - θB = Real.pi :=
-    circlePoint_angle_sub_eq_pi_of_diameter_aux hR hBA hspan hdiamAngles
+    circlePoint_angle_sub_eq_pi_of_isDiameter_aux hR hBA hspan hdiamAngles
   exact ⟨{
     θB := θB
     θA := θA
@@ -118,8 +124,8 @@ theorem circleArcCertificate_of_contactSet_card_eq_two
     (hsimple : IsSimplePolygon v) (hΔ : MinimalEnclosingDiskR2 v O R) (hR : 0 < R)
     (hcard : (circleContactSet v O R).card = 2) :
     Nonempty (Section4CircleArcCertificate run) :=
-  run.circleArcCertificate_of_endpoint_dist_eq_two_mul_radius_aux hsimple hΔ hR
-    (run.endpoint_dist_eq_two_mul_radius_of_contactSet_card_eq_two_aux hsimple hΔ hcard)
+  run.circleArcCertificate_of_endpoint_isDiameter_aux hsimple hΔ hR
+    (run.endpoint_isDiameter_of_contactSet_card_eq_two_aux hsimple hΔ hcard)
 
 end Section4PositiveRunCertificate
 

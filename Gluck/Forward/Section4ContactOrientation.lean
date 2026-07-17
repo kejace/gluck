@@ -43,18 +43,14 @@ theorem crossR2_ne_zero_of_minimalEnclosingDisk_boundary
   have hopen : v i ∈ openSegment ℝ (v (i - 1)) (v (i + 1)) :=
     mem_openSegment_of_ne_left_right hprevSelf hselfNext.symm hsegment
   have hprevBall : v (i - 1) ∈ Metric.closedBall O R := by
-    have hprev := hΔ.2.1 (i - 1)
-    change dist O (v (i - 1)) ≤ R at hprev
-    simpa [Metric.mem_closedBall, dist_comm] using hprev
+    exact hΔ.2.1 (i - 1)
   have hnextBall : v (i + 1) ∈ Metric.closedBall O R := by
-    have hnext := hΔ.2.1 (i + 1)
-    change dist O (v (i + 1)) ≤ R at hnext
-    simpa [Metric.mem_closedBall, dist_comm] using hnext
+    exact hΔ.2.1 (i + 1)
   have hiBall : v i ∈ Metric.ball O R :=
     openSegment_subset_ball_of_ne hprevBall hnextBall hprevNext hopen
   have hiLt : dist O (v i) < R := by
     simpa [Metric.mem_ball, dist_comm] using hiBall
-  have hiEq : dist O (v i) = R := hboundary
+  have hiEq : dist O (v i) = R := Metric.mem_sphere'.mp hboundary
   exact (ne_of_lt hiLt) hiEq
 
 /-- A point of a boundary chord that remains in the closed disk has affine
@@ -423,6 +419,7 @@ theorem circleContactSet_cross_uniform_of_isCyclicInterval
   rcases hinterval with ⟨c, a, b, hab, hbn, hcontacts⟩
   have hboundaryLift {k : ℕ} (hak : a ≤ k) (hkb : k ≤ b) :
       OnDiskBoundaryR2 v O R (Gluck.cyclicLift c k) := by
+    apply Metric.mem_sphere'.mpr
     apply mem_circleContactSet.mp
     rw [hcontacts]
     exact Finset.mem_image.mpr ⟨k, Finset.mem_Icc.mpr ⟨hak, hkb⟩, rfl⟩
@@ -437,12 +434,10 @@ theorem circleContactSet_cross_uniform_of_isCyclicInterval
       simp [Gluck.cyclicLift, Nat.cast_add, add_assoc]
     have hraw := adjacent_boundary_cross_same_sign hn hsimple
       (fun z => by
-        have hz := hΔ.2.1 z
-        change dist O (v z) ≤ R at hz
-        exact hz)
-      (by exact hkBoundary) (by
+        exact Metric.mem_closedBall'.mp (hΔ.2.1 z))
+      (by exact Metric.mem_sphere'.mp hkBoundary) (by
         rw [← hsucc]
-        exact hk1Boundary)
+        exact Metric.mem_sphere'.mp hk1Boundary)
     rcases hraw with hpos | hneg
     · left
       constructor
@@ -486,13 +481,15 @@ theorem circleContactSet_cross_uniform_of_isCyclicInterval
   rcases lt_or_gt_of_ne haNe with haNeg | haPos
   · right
     intro i hi
-    have hiContact : i ∈ circleContactSet v O R := mem_circleContactSet.mpr hi
+    have hiContact : i ∈ circleContactSet v O R :=
+      mem_circleContactSet.mpr (Metric.mem_sphere'.mp hi)
     rw [hcontacts] at hiContact
     rcases Finset.mem_image.mp hiContact with ⟨k, hk, rfl⟩
     exact hnegFromA haNeg k (Finset.mem_Icc.mp hk).1 (Finset.mem_Icc.mp hk).2
   · left
     intro i hi
-    have hiContact : i ∈ circleContactSet v O R := mem_circleContactSet.mpr hi
+    have hiContact : i ∈ circleContactSet v O R :=
+      mem_circleContactSet.mpr (Metric.mem_sphere'.mp hi)
     rw [hcontacts] at hiContact
     rcases Finset.mem_image.mp hiContact with ⟨k, hk, rfl⟩
     exact hposFromA haPos k (Finset.mem_Icc.mp hk).1 (Finset.mem_Icc.mp hk).2

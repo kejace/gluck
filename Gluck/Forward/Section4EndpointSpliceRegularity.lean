@@ -14,52 +14,11 @@ namespace Gluck.Forward
 
 open Gluck.Discrete
 
-/-- Euclidean scalar product on planar displacement vectors represented by complex numbers. -/
-def dotR2 (u v : ℂ) : ℝ := u.re * v.re + u.im * v.im
-
-@[simp] theorem dotR2_add_left (u v z : ℂ) :
-    dotR2 (u + v) z = dotR2 u z + dotR2 v z := by
-  simp [dotR2]
-  ring
-
-@[simp] theorem dotR2_add_right (u v z : ℂ) :
-    dotR2 u (v + z) = dotR2 u v + dotR2 u z := by
-  simp [dotR2]
-  ring
-
-@[simp] theorem dotR2_sub_left (u v z : ℂ) :
-    dotR2 (u - v) z = dotR2 u z - dotR2 v z := by
-  simp [dotR2]
-  ring
-
-@[simp] theorem dotR2_sub_right (u v z : ℂ) :
-    dotR2 u (v - z) = dotR2 u v - dotR2 u z := by
-  simp [dotR2]
-  ring
-
-@[simp] theorem dotR2_smul_left (a : ℝ) (u v : ℂ) :
-    dotR2 (a • u) v = a * dotR2 u v := by
-  simp [dotR2]
-  ring
-
-@[simp] theorem dotR2_smul_right (a : ℝ) (u v : ℂ) :
-    dotR2 u (a • v) = a * dotR2 u v := by
-  simp [dotR2]
-  ring
-
-theorem dotR2_comm (u v : ℂ) : dotR2 u v = dotR2 v u := by
-  simp [dotR2]
-  ring
-
-theorem dotR2_self_eq_norm_sq (u : ℂ) : dotR2 u u = ‖u‖ ^ 2 := by
-  rw [Complex.sq_norm, Complex.normSq_apply]
-  simp [dotR2]
-
 theorem dahlbergRegularAt_of_legDots_nonneg
     {A B C : ℂ}
     (hcross : crossR2 A B C ≠ 0)
-    (hA : 0 ≤ dotR2 (A - B) (A - C))
-    (hC : 0 ≤ dotR2 (C - B) (C - A)) :
+    (hA : 0 ≤ inner ℝ (A - B) (A - C))
+    (hC : 0 ≤ inner ℝ (C - B) (C - A)) :
     DahlbergRegularAt A B C := by
   right
   have hAB : A ≠ B := by
@@ -96,10 +55,14 @@ theorem dahlbergRegularAt_of_legDots_nonneg
     dsimp [nv]
     positivity
   have hAu : 0 ≤ nu - uv := by
-    dsimp [dotR2, nu, uv, ux, uy, vx, vy] at hA ⊢
+    simp only [Complex.inner, Complex.mul_re, Complex.conj_re, Complex.conj_im,
+      Complex.sub_re, Complex.sub_im] at hA
+    dsimp [nu, uv, ux, uy, vx, vy] at hA ⊢
     nlinarith
   have hCv : 0 ≤ nv - uv := by
-    dsimp [dotR2, nv, uv, ux, uy, vx, vy] at hC ⊢
+    simp only [Complex.inner, Complex.mul_re, Complex.conj_re, Complex.conj_im,
+      Complex.sub_re, Complex.sub_im] at hC
+    dsimp [nv, uv, ux, uy, vx, vy] at hC ⊢
     nlinarith
   let a := nv * (nu - uv) / (2 * D ^ 2)
   let b := nu * (nv - uv) / (2 * D ^ 2)
@@ -188,25 +151,26 @@ noncomputable def circleTangent (θ : ℝ) : ℂ :=
 @[simp] theorem norm_circleTangent (θ : ℝ) : ‖circleTangent θ‖ = 1 := by
   simp [circleTangent]
 
-@[simp] theorem dotR2_circleRadial_self (θ : ℝ) :
-    dotR2 (circleRadial θ) (circleRadial θ) = 1 := by
-  simp [dotR2]
-  nlinarith [Real.sin_sq_add_cos_sq θ]
+@[simp] theorem inner_circleRadial_self (θ : ℝ) :
+    inner ℝ (circleRadial θ) (circleRadial θ) = 1 := by
+  rw [real_inner_self_eq_norm_sq, norm_circleRadial]
+  norm_num
 
-@[simp] theorem dotR2_circleTangent_self (θ : ℝ) :
-    dotR2 (circleTangent θ) (circleTangent θ) = 1 := by
-  simp [dotR2]
-  nlinarith [Real.sin_sq_add_cos_sq θ]
+@[simp] theorem inner_circleTangent_self (θ : ℝ) :
+    inner ℝ (circleTangent θ) (circleTangent θ) = 1 := by
+  rw [real_inner_self_eq_norm_sq, norm_circleTangent]
+  norm_num
 
-@[simp] theorem dotR2_circleRadial_tangent (θ : ℝ) :
-    dotR2 (circleRadial θ) (circleTangent θ) = 0 := by
-  simp [dotR2]
+@[simp] theorem inner_circleRadial_tangent (θ : ℝ) :
+    inner ℝ (circleRadial θ) (circleTangent θ) = 0 := by
+  rw [Complex.inner]
+  simp only [Complex.mul_re, Complex.conj_re, Complex.conj_im, circleRadial_re,
+    circleRadial_im, circleTangent_re, circleTangent_im]
   ring
 
-@[simp] theorem dotR2_circleTangent_radial (θ : ℝ) :
-    dotR2 (circleTangent θ) (circleRadial θ) = 0 := by
-  simp [dotR2]
-  ring
+@[simp] theorem inner_circleTangent_radial (θ : ℝ) :
+    inner ℝ (circleTangent θ) (circleRadial θ) = 0 := by
+  rw [real_inner_comm, inner_circleRadial_tangent]
 
 theorem circlePoint_sub_circlePoint
     (O : ℂ) (R θ δ : ℝ) :
@@ -230,85 +194,86 @@ theorem circlePoint_sub_center (O : ℂ) (R θ : ℝ) :
 /-- Polarization of the power of a point relative to the parametrized circle. -/
 theorem dist_center_sq_eq_dist_circlePoint_sq_add (O P : ℂ) (R θ : ℝ) :
     dist O P ^ 2 = dist (circlePoint O R θ) P ^ 2 +
-      2 * R * dotR2 (circleRadial θ) (P - circlePoint O R θ) + R ^ 2 := by
+      2 * R * inner ℝ (circleRadial θ) (P - circlePoint O R θ) + R ^ 2 := by
   have hdecomp : P - O =
       (P - circlePoint O R θ) + (R : ℝ) • circleRadial θ := by
     rw [← circlePoint_sub_center O R θ]
     ring
   calc
-    dist O P ^ 2 = dotR2 (P - O) (P - O) := by
-      rw [dotR2_self_eq_norm_sq, dist_eq_norm, norm_sub_rev]
-    _ = dotR2 ((P - circlePoint O R θ) + (R : ℝ) • circleRadial θ)
+    dist O P ^ 2 = inner ℝ (P - O) (P - O) := by
+      rw [real_inner_self_eq_norm_sq, dist_eq_norm, norm_sub_rev]
+    _ = inner ℝ ((P - circlePoint O R θ) + (R : ℝ) • circleRadial θ)
         ((P - circlePoint O R θ) + (R : ℝ) • circleRadial θ) := by rw [hdecomp]
-    _ = dotR2 (P - circlePoint O R θ) (P - circlePoint O R θ) +
-        2 * R * dotR2 (circleRadial θ) (P - circlePoint O R θ) + R ^ 2 := by
-      simp only [dotR2_add_left, dotR2_add_right, dotR2_smul_left, dotR2_smul_right,
-        dotR2_circleRadial_self, mul_one]
-      rw [dotR2_comm (P - circlePoint O R θ) (circleRadial θ)]
+    _ = inner ℝ (P - circlePoint O R θ) (P - circlePoint O R θ) +
+        2 * R * inner ℝ (circleRadial θ) (P - circlePoint O R θ) + R ^ 2 := by
+      simp only [inner_add_left, inner_add_right, real_inner_smul_left, real_inner_smul_right,
+        inner_circleRadial_self, mul_one]
+      rw [real_inner_comm (P - circlePoint O R θ) (circleRadial θ)]
       ring
     _ = dist (circlePoint O R θ) P ^ 2 +
-        2 * R * dotR2 (circleRadial θ) (P - circlePoint O R θ) + R ^ 2 := by
-      rw [dotR2_self_eq_norm_sq, dist_eq_norm, norm_sub_rev]
+        2 * R * inner ℝ (circleRadial θ) (P - circlePoint O R θ) + R ^ 2 := by
+      rw [real_inner_self_eq_norm_sq, dist_eq_norm, norm_sub_rev]
 
 theorem endpointPredecessor_cross_eq
     (O P : ℂ) (R θ δ : ℝ) :
     crossR2 (circlePoint O R (θ - δ)) (circlePoint O R θ) P =
       R * ((1 - Real.cos δ) *
-          dotR2 (circleTangent θ) (P - circlePoint O R θ) -
-        Real.sin δ * dotR2 (circleRadial θ) (P - circlePoint O R θ)) := by
+          inner ℝ (circleTangent θ) (P - circlePoint O R θ) -
+        Real.sin δ * inner ℝ (circleRadial θ) (P - circlePoint O R θ)) := by
   unfold crossR2
   simp only [Complex.sub_re, Complex.sub_im, circlePoint_re, circlePoint_im]
-  unfold dotR2
-  simp only [Complex.sub_re, Complex.sub_im, circlePoint_re, circlePoint_im,
+  rw [Complex.inner, Complex.inner]
+  simp only [Complex.mul_re, Complex.conj_re, Complex.conj_im, Complex.sub_re,
+    Complex.sub_im, circlePoint_re, circlePoint_im,
     circleRadial_re, circleRadial_im, circleTangent_re, circleTangent_im]
   rw [Real.cos_sub, Real.sin_sub]
   ring_nf
 
 theorem endpointPredecessor_leftLegDot_eq
     (O P : ℂ) (R θ δ : ℝ) :
-    dotR2
+    inner ℝ
         (circlePoint O R (θ - δ) - circlePoint O R θ)
         (circlePoint O R (θ - δ) - P) =
       R * ((1 - Real.cos δ) *
-          (2 * R + dotR2 (circleRadial θ) (P - circlePoint O R θ)) +
-        Real.sin δ * dotR2 (circleTangent θ) (P - circlePoint O R θ)) := by
+          (2 * R + inner ℝ (circleRadial θ) (P - circlePoint O R θ)) +
+        Real.sin δ * inner ℝ (circleTangent θ) (P - circlePoint O R θ)) := by
   rw [show circlePoint O R (θ - δ) - P =
       (circlePoint O R (θ - δ) - circlePoint O R θ) -
         (P - circlePoint O R θ) by ring,
     circlePoint_sub_circlePoint]
   generalize P - circlePoint O R θ = v
-  simp only [dotR2_sub_left, dotR2_sub_right, dotR2_smul_left,
-    dotR2_smul_right, dotR2_circleRadial_self, dotR2_circleTangent_self,
-    dotR2_circleRadial_tangent, dotR2_circleTangent_radial, mul_one, mul_zero,
+  simp only [inner_sub_left, inner_sub_right, real_inner_smul_left,
+    real_inner_smul_right, inner_circleRadial_self, inner_circleTangent_self,
+    inner_circleRadial_tangent, inner_circleTangent_radial, mul_one, mul_zero,
     sub_zero]
   ring_nf
   nlinarith [Real.sin_sq_add_cos_sq δ]
 
 theorem endpointPredecessor_rightLegDot_eq
     (O P : ℂ) (R θ δ : ℝ) :
-    dotR2
+    inner ℝ
         (P - circlePoint O R θ)
         (P - circlePoint O R (θ - δ)) =
-      dotR2 (P - circlePoint O R θ) (P - circlePoint O R θ) +
+      inner ℝ (P - circlePoint O R θ) (P - circlePoint O R θ) +
         R * (1 - Real.cos δ) *
-          dotR2 (circleRadial θ) (P - circlePoint O R θ) +
+          inner ℝ (circleRadial θ) (P - circlePoint O R θ) +
         R * Real.sin δ *
-          dotR2 (circleTangent θ) (P - circlePoint O R θ) := by
+          inner ℝ (circleTangent θ) (P - circlePoint O R θ) := by
   rw [show P - circlePoint O R (θ - δ) =
       (P - circlePoint O R θ) -
         (circlePoint O R (θ - δ) - circlePoint O R θ) by ring,
     circlePoint_sub_circlePoint]
   generalize P - circlePoint O R θ = v
-  simp only [dotR2_sub_right, dotR2_smul_right]
-  rw [dotR2_comm v (circleRadial θ), dotR2_comm v (circleTangent θ)]
+  simp only [inner_sub_right, real_inner_smul_right]
+  rw [real_inner_comm v (circleRadial θ), real_inner_comm v (circleTangent θ)]
   ring
 
 theorem endpointSuccessor_cross_eq
     (O P : ℂ) (R θ δ : ℝ) :
     crossR2 P (circlePoint O R θ) (circlePoint O R (θ + δ)) =
       R * (-(1 - Real.cos δ) *
-          dotR2 (circleTangent θ) (P - circlePoint O R θ) -
-        Real.sin δ * dotR2 (circleRadial θ) (P - circlePoint O R θ)) := by
+          inner ℝ (circleTangent θ) (P - circlePoint O R θ) -
+        Real.sin δ * inner ℝ (circleRadial θ) (P - circlePoint O R θ)) := by
   calc
     crossR2 P (circlePoint O R θ) (circlePoint O R (θ + δ)) =
         -crossR2 (circlePoint O R (θ + δ)) (circlePoint O R θ) P := by
@@ -317,36 +282,36 @@ theorem endpointSuccessor_cross_eq
           congr 3
           ring
     _ = -(R * ((1 - Real.cos (-δ)) *
-          dotR2 (circleTangent θ) (P - circlePoint O R θ) -
-        Real.sin (-δ) * dotR2 (circleRadial θ) (P - circlePoint O R θ))) := by
+          inner ℝ (circleTangent θ) (P - circlePoint O R θ) -
+        Real.sin (-δ) * inner ℝ (circleRadial θ) (P - circlePoint O R θ))) := by
           rw [endpointPredecessor_cross_eq]
     _ = R * (-(1 - Real.cos δ) *
-          dotR2 (circleTangent θ) (P - circlePoint O R θ) -
-        Real.sin δ * dotR2 (circleRadial θ) (P - circlePoint O R θ)) := by
+          inner ℝ (circleTangent θ) (P - circlePoint O R θ) -
+        Real.sin δ * inner ℝ (circleRadial θ) (P - circlePoint O R θ)) := by
           rw [Real.cos_neg, Real.sin_neg]
           ring
 
 theorem endpointSuccessor_leftLegDot_eq
     (O P : ℂ) (R θ δ : ℝ) :
-    dotR2
+    inner ℝ
         (P - circlePoint O R θ)
         (P - circlePoint O R (θ + δ)) =
-      dotR2 (P - circlePoint O R θ) (P - circlePoint O R θ) +
+      inner ℝ (P - circlePoint O R θ) (P - circlePoint O R θ) +
         R * (1 - Real.cos δ) *
-          dotR2 (circleRadial θ) (P - circlePoint O R θ) -
+          inner ℝ (circleRadial θ) (P - circlePoint O R θ) -
         R * Real.sin δ *
-          dotR2 (circleTangent θ) (P - circlePoint O R θ) := by
+          inner ℝ (circleTangent θ) (P - circlePoint O R θ) := by
   simpa [Real.cos_neg, Real.sin_neg, sub_neg_eq_add, sub_eq_add_neg] using
     endpointPredecessor_rightLegDot_eq O P R θ (-δ)
 
 theorem endpointSuccessor_rightLegDot_eq
     (O P : ℂ) (R θ δ : ℝ) :
-    dotR2
+    inner ℝ
         (circlePoint O R (θ + δ) - circlePoint O R θ)
         (circlePoint O R (θ + δ) - P) =
       R * ((1 - Real.cos δ) *
-          (2 * R + dotR2 (circleRadial θ) (P - circlePoint O R θ)) -
-        Real.sin δ * dotR2 (circleTangent θ) (P - circlePoint O R θ)) := by
+          (2 * R + inner ℝ (circleRadial θ) (P - circlePoint O R θ)) -
+        Real.sin δ * inner ℝ (circleTangent θ) (P - circlePoint O R θ)) := by
   simpa [Real.cos_neg, Real.sin_neg, sub_neg_eq_add, sub_eq_add_neg] using
     endpointPredecessor_leftLegDot_eq O P R θ (-δ)
 
@@ -354,11 +319,13 @@ theorem leftEndpoint_opposite_cross_eq
     (O P : ℂ) (R θ α : ℝ) :
     crossR2 (circlePoint O R θ) P (circlePoint O R (θ - α)) =
       R * (-Real.sin α *
-          dotR2 (circleRadial θ) (P - circlePoint O R θ) +
+          inner ℝ (circleRadial θ) (P - circlePoint O R θ) +
         (1 - Real.cos α) *
-          dotR2 (circleTangent θ) (P - circlePoint O R θ)) := by
-  unfold crossR2 dotR2
-  simp only [Complex.sub_re, Complex.sub_im, circlePoint_re, circlePoint_im,
+          inner ℝ (circleTangent θ) (P - circlePoint O R θ)) := by
+  unfold crossR2
+  rw [Complex.inner, Complex.inner]
+  simp only [Complex.mul_re, Complex.conj_re, Complex.conj_im, Complex.sub_re,
+    Complex.sub_im, circlePoint_re, circlePoint_im,
     circleRadial_re, circleRadial_im, circleTangent_re, circleTangent_im]
   rw [Real.cos_sub, Real.sin_sub]
   ring_nf
@@ -367,11 +334,13 @@ theorem rightEndpoint_opposite_cross_eq
     (O P : ℂ) (R θ α : ℝ) :
     crossR2 P (circlePoint O R θ) (circlePoint O R (θ + α)) =
       R * (-Real.sin α *
-          dotR2 (circleRadial θ) (P - circlePoint O R θ) -
+          inner ℝ (circleRadial θ) (P - circlePoint O R θ) -
         (1 - Real.cos α) *
-          dotR2 (circleTangent θ) (P - circlePoint O R θ)) := by
-  unfold crossR2 dotR2
-  simp only [Complex.sub_re, Complex.sub_im, circlePoint_re, circlePoint_im,
+          inner ℝ (circleTangent θ) (P - circlePoint O R θ)) := by
+  unfold crossR2
+  rw [Complex.inner, Complex.inner]
+  simp only [Complex.mul_re, Complex.conj_re, Complex.conj_im, Complex.sub_re,
+    Complex.sub_im, circlePoint_re, circlePoint_im,
     circleRadial_re, circleRadial_im, circleTangent_re, circleTangent_im]
   rw [Real.cos_add, Real.sin_add]
   ring_nf
@@ -400,13 +369,13 @@ boundary endpoint forces the predecessor theorem's tangent sign. -/
 theorem circleTangent_dot_nonneg_of_leftEndpoint_opposite_cross_pos
     {O P : ℂ} {R θ α : ℝ}
     (hR : 0 < R)
-    (hradial : dotR2 (circleRadial θ) (P - circlePoint O R θ) < 0)
+    (hradial : inner ℝ (circleRadial θ) (P - circlePoint O R θ) < 0)
     (hπ : Real.pi ≤ α) (h2π : α < 2 * Real.pi)
     (hcross : 0 < crossR2 (circlePoint O R θ) P
       (circlePoint O R (θ - α))) :
-    0 ≤ dotR2 (circleTangent θ) (P - circlePoint O R θ) := by
-  let x := dotR2 (circleRadial θ) (P - circlePoint O R θ)
-  let y := dotR2 (circleTangent θ) (P - circlePoint O R θ)
+    0 ≤ inner ℝ (circleTangent θ) (P - circlePoint O R θ) := by
+  let x := inner ℝ (circleRadial θ) (P - circlePoint O R θ)
+  let y := inner ℝ (circleTangent θ) (P - circlePoint O R θ)
   have hx : x < 0 := by
     simpa [x] using hradial
   have hsin : Real.sin α ≤ 0 :=
@@ -427,13 +396,13 @@ boundary endpoint forces the successor theorem's tangent sign. -/
 theorem circleTangent_dot_nonpos_of_rightEndpoint_opposite_cross_pos
     {O P : ℂ} {R θ α : ℝ}
     (hR : 0 < R)
-    (hradial : dotR2 (circleRadial θ) (P - circlePoint O R θ) < 0)
+    (hradial : inner ℝ (circleRadial θ) (P - circlePoint O R θ) < 0)
     (hπ : Real.pi ≤ α) (h2π : α < 2 * Real.pi)
     (hcross : 0 < crossR2 P (circlePoint O R θ)
       (circlePoint O R (θ + α))) :
-    dotR2 (circleTangent θ) (P - circlePoint O R θ) ≤ 0 := by
-  let x := dotR2 (circleRadial θ) (P - circlePoint O R θ)
-  let y := dotR2 (circleTangent θ) (P - circlePoint O R θ)
+    inner ℝ (circleTangent θ) (P - circlePoint O R θ) ≤ 0 := by
+  let x := inner ℝ (circleRadial θ) (P - circlePoint O R θ)
+  let y := inner ℝ (circleTangent θ) (P - circlePoint O R θ)
   have hx : x < 0 := by
     simpa [x] using hradial
   have hsin : Real.sin α ≤ 0 :=
@@ -449,21 +418,10 @@ theorem circleTangent_dot_nonpos_of_rightEndpoint_opposite_cross_pos
   have hyterm : 0 < (1 - Real.cos α) * y := mul_pos hcos hypos
   nlinarith
 
-theorem dotR2_circleRadial_neg_norm_le (θ : ℝ) (z : ℂ) :
-    -‖z‖ ≤ dotR2 (circleRadial θ) z := by
-  have habs := Complex.abs_re_le_norm (starRingEnd ℂ (circleRadial θ) * z)
-  have hre : (starRingEnd ℂ (circleRadial θ) * z).re =
-      dotR2 (circleRadial θ) z := by
-    simp [dotR2]
-  rw [hre, norm_mul] at habs
-  simp only [RCLike.norm_conj, norm_circleRadial, one_mul] at habs
-  exact (abs_le.mp habs).1
-
-theorem norm_sub_eq_dist (A B : ℂ) : ‖A - B‖ = dist A B := by
-  rw [dist_eq_norm]
-
-theorem norm_sub_rev_eq_dist (A B : ℂ) : ‖A - B‖ = dist B A := by
-  rw [dist_comm, ← norm_sub_eq_dist]
+theorem neg_norm_le_inner_circleRadial (θ : ℝ) (z : ℂ) :
+    -‖z‖ ≤ inner ℝ (circleRadial θ) z := by
+  have h := neg_le_of_abs_le (abs_real_inner_le_norm (circleRadial θ) z)
+  simpa using h
 
 theorem dist_circlePoint_lt_two_mul_of_interior
     {O P : ℂ} {R θ : ℝ} (hR : 0 < R) (hP : dist O P < R) :
@@ -474,9 +432,9 @@ theorem dist_circlePoint_lt_two_mul_of_interior
     _ = R + dist O P := by rw [dist_comm, dist_circlePoint_center, abs_of_pos hR]
     _ < 2 * R := by linarith
 
-theorem dotR2_radial_circlePoint_sub_neg
+theorem inner_circleRadial_circlePoint_sub_neg
     {O P : ℂ} {R θ : ℝ} (hR : 0 < R) (hP : dist O P < R) :
-    dotR2 (circleRadial θ) (P - circlePoint O R θ) < 0 := by
+    inner ℝ (circleRadial θ) (P - circlePoint O R θ) < 0 := by
   have hsq : dist O P ^ 2 < R ^ 2 :=
     sq_lt_sq' (by linarith [dist_nonneg (x := O) (y := P)]) hP
   have hpower := dist_center_sq_eq_dist_circlePoint_sq_add O P R θ
@@ -488,9 +446,9 @@ theorem circleTangent_dot_nonneg_of_leftEndpoint_support_of_interior
     (hπ : Real.pi ≤ α) (h2π : α < 2 * Real.pi)
     (hcross : 0 < crossR2 (circlePoint O R θ) P
       (circlePoint O R (θ - α))) :
-    0 ≤ dotR2 (circleTangent θ) (P - circlePoint O R θ) := by
+    0 ≤ inner ℝ (circleTangent θ) (P - circlePoint O R θ) := by
   exact circleTangent_dot_nonneg_of_leftEndpoint_opposite_cross_pos hR
-    (dotR2_radial_circlePoint_sub_neg hR hP) hπ h2π hcross
+    (inner_circleRadial_circlePoint_sub_neg hR hP) hπ h2π hcross
 
 theorem circleTangent_dot_nonpos_of_rightEndpoint_support_of_interior
     {O P : ℂ} {R θ α : ℝ}
@@ -498,9 +456,9 @@ theorem circleTangent_dot_nonpos_of_rightEndpoint_support_of_interior
     (hπ : Real.pi ≤ α) (h2π : α < 2 * Real.pi)
     (hcross : 0 < crossR2 P (circlePoint O R θ)
       (circlePoint O R (θ + α))) :
-    dotR2 (circleTangent θ) (P - circlePoint O R θ) ≤ 0 := by
+    inner ℝ (circleTangent θ) (P - circlePoint O R θ) ≤ 0 := by
   exact circleTangent_dot_nonpos_of_rightEndpoint_opposite_cross_pos hR
-    (dotR2_radial_circlePoint_sub_neg hR hP) hπ h2π hcross
+    (inner_circleRadial_circlePoint_sub_neg hR hP) hπ h2π hcross
 
 /-- A circle predecessor, boundary endpoint, and strictly interior successor
 turn left under the one-sided tangent condition. -/
@@ -508,7 +466,7 @@ theorem crossR2_circlePoint_predecessor_pos
     {O P : ℂ} {R θ δ : ℝ}
     (hR : 0 < R) (hδ0 : 0 < δ) (hδπ : δ < Real.pi)
     (hP : dist O P < R)
-    (htangent : 0 ≤ dotR2 (circleTangent θ) (P - circlePoint O R θ)) :
+    (htangent : 0 ≤ inner ℝ (circleTangent θ) (P - circlePoint O R θ)) :
     0 < crossR2 (circlePoint O R (θ - δ)) (circlePoint O R θ) P := by
   have hsin : 0 < Real.sin δ :=
     Real.sin_pos_of_pos_of_lt_pi hδ0 hδπ
@@ -516,14 +474,14 @@ theorem crossR2_circlePoint_predecessor_pos
     have hc : Real.cos δ < Real.cos 0 :=
       Real.cos_lt_cos_of_nonneg_of_le_pi (le_refl 0) hδπ.le hδ0
     simpa using hc
-  have hx : dotR2 (circleRadial θ) (P - circlePoint O R θ) < 0 :=
-    dotR2_radial_circlePoint_sub_neg hR hP
+  have hx : inner ℝ (circleRadial θ) (P - circlePoint O R θ) < 0 :=
+    inner_circleRadial_circlePoint_sub_neg hR hP
   rw [endpointPredecessor_cross_eq]
   have hfirst : 0 ≤ (1 - Real.cos δ) *
-      dotR2 (circleTangent θ) (P - circlePoint O R θ) :=
+      inner ℝ (circleTangent θ) (P - circlePoint O R θ) :=
     mul_nonneg hcos.le htangent
   have hsecond : Real.sin δ *
-      dotR2 (circleRadial θ) (P - circlePoint O R θ) < 0 :=
+      inner ℝ (circleRadial θ) (P - circlePoint O R θ) < 0 :=
     mul_neg_of_pos_of_neg hsin hx
   exact mul_pos hR (by linarith)
 
@@ -533,7 +491,7 @@ theorem crossR2_circlePoint_successor_pos
     {O P : ℂ} {R θ δ : ℝ}
     (hR : 0 < R) (hδ0 : 0 < δ) (hδπ : δ < Real.pi)
     (hP : dist O P < R)
-    (htangent : dotR2 (circleTangent θ) (P - circlePoint O R θ) ≤ 0) :
+    (htangent : inner ℝ (circleTangent θ) (P - circlePoint O R θ) ≤ 0) :
     0 < crossR2 P (circlePoint O R θ) (circlePoint O R (θ + δ)) := by
   have hsin : 0 < Real.sin δ :=
     Real.sin_pos_of_pos_of_lt_pi hδ0 hδπ
@@ -541,14 +499,14 @@ theorem crossR2_circlePoint_successor_pos
     have hc : Real.cos δ < Real.cos 0 :=
       Real.cos_lt_cos_of_nonneg_of_le_pi (le_refl 0) hδπ.le hδ0
     simpa using hc
-  have hx : dotR2 (circleRadial θ) (P - circlePoint O R θ) < 0 :=
-    dotR2_radial_circlePoint_sub_neg hR hP
+  have hx : inner ℝ (circleRadial θ) (P - circlePoint O R θ) < 0 :=
+    inner_circleRadial_circlePoint_sub_neg hR hP
   rw [endpointSuccessor_cross_eq]
   have hfirst : 0 ≤ -(1 - Real.cos δ) *
-      dotR2 (circleTangent θ) (P - circlePoint O R θ) :=
+      inner ℝ (circleTangent θ) (P - circlePoint O R θ) :=
     mul_nonneg_of_nonpos_of_nonpos (neg_nonpos.mpr hcos.le) htangent
   have hsecond : Real.sin δ *
-      dotR2 (circleRadial θ) (P - circlePoint O R θ) < 0 :=
+      inner ℝ (circleRadial θ) (P - circlePoint O R θ) < 0 :=
     mul_neg_of_pos_of_neg hsin hx
   exact mul_pos hR (by linarith)
 
@@ -560,7 +518,7 @@ theorem dahlbergRegularAt_circlePoint_predecessor
     {O P : ℂ} {R θ δ : ℝ}
     (hR : 0 < R) (hδ0 : 0 < δ) (hδπ : δ < Real.pi)
     (hP : dist O P < R)
-    (htangent : 0 ≤ dotR2 (circleTangent θ) (P - circlePoint O R θ))
+    (htangent : 0 ≤ inner ℝ (circleTangent θ) (P - circlePoint O R θ))
     (hmesh : R * (1 - Real.cos δ) < dist (circlePoint O R θ) P) :
     DahlbergRegularAt
       (circlePoint O R (θ - δ)) (circlePoint O R θ) P := by
@@ -571,8 +529,8 @@ theorem dahlbergRegularAt_circlePoint_predecessor
       Real.cos_lt_cos_of_nonneg_of_le_pi (le_refl 0) hδπ.le hδ0
     simpa using hc
   let v := P - circlePoint O R θ
-  let x := dotR2 (circleRadial θ) v
-  let y := dotR2 (circleTangent θ) v
+  let x := inner ℝ (circleRadial θ) v
+  let y := inner ℝ (circleTangent θ) v
   let d := dist (circlePoint O R θ) P
   have hy : 0 ≤ y := by
     simpa [y, v] using htangent
@@ -582,11 +540,11 @@ theorem dahlbergRegularAt_circlePoint_predecessor
   · rw [endpointPredecessor_leftLegDot_eq]
     change 0 ≤ R * ((1 - Real.cos δ) * (2 * R + x) + Real.sin δ * y)
     have hxlower : -d ≤ x := by
-      change -d ≤ dotR2 (circleRadial θ) v
-      have h := dotR2_circleRadial_neg_norm_le θ v
+      change -d ≤ inner ℝ (circleRadial θ) v
+      have h := neg_norm_le_inner_circleRadial θ v
       have hvd : ‖v‖ = d := by
         dsimp [v, d]
-        exact norm_sub_rev_eq_dist _ _
+        rw [dist_eq_norm, norm_sub_rev]
       rw [hvd] at h
       exact h
     have hdlt : d < 2 * R := by
@@ -597,20 +555,20 @@ theorem dahlbergRegularAt_circlePoint_predecessor
     have htan : 0 ≤ Real.sin δ * y := mul_nonneg hsin.le hy
     exact (mul_pos hR (add_pos_of_pos_of_nonneg hmain htan)).le
   · rw [endpointPredecessor_rightLegDot_eq]
-    change 0 ≤ dotR2 v v + R * (1 - Real.cos δ) * x + R * Real.sin δ * y
+    change 0 ≤ inner ℝ v v + R * (1 - Real.cos δ) * x + R * Real.sin δ * y
     have hxlower : -d ≤ x := by
-      change -d ≤ dotR2 (circleRadial θ) v
-      have h := dotR2_circleRadial_neg_norm_le θ v
+      change -d ≤ inner ℝ (circleRadial θ) v
+      have h := neg_norm_le_inner_circleRadial θ v
       have hvd : ‖v‖ = d := by
         dsimp [v, d]
-        exact norm_sub_rev_eq_dist _ _
+        rw [dist_eq_norm, norm_sub_rev]
       rw [hvd] at h
       exact h
-    have hvnorm : dotR2 v v = d ^ 2 := by
-      rw [dotR2_self_eq_norm_sq]
+    have hvnorm : inner ℝ v v = d ^ 2 := by
+      rw [real_inner_self_eq_norm_sq]
       congr 1
       dsimp [v, d]
-      exact norm_sub_rev_eq_dist _ _
+      rw [dist_eq_norm, norm_sub_rev]
     have hcoef : 0 ≤ R * (1 - Real.cos δ) :=
       (mul_pos hR hcos).le
     have hrad : -(R * (1 - Real.cos δ) * d) ≤
@@ -630,7 +588,7 @@ theorem dahlbergRegularAt_circlePoint_successor
     {O P : ℂ} {R θ δ : ℝ}
     (hR : 0 < R) (hδ0 : 0 < δ) (hδπ : δ < Real.pi)
     (hP : dist O P < R)
-    (htangent : dotR2 (circleTangent θ) (P - circlePoint O R θ) ≤ 0)
+    (htangent : inner ℝ (circleTangent θ) (P - circlePoint O R θ) ≤ 0)
     (hmesh : R * (1 - Real.cos δ) < dist (circlePoint O R θ) P) :
     DahlbergRegularAt P (circlePoint O R θ)
       (circlePoint O R (θ + δ)) := by
@@ -641,8 +599,8 @@ theorem dahlbergRegularAt_circlePoint_successor
       Real.cos_lt_cos_of_nonneg_of_le_pi (le_refl 0) hδπ.le hδ0
     simpa using hc
   let v := P - circlePoint O R θ
-  let x := dotR2 (circleRadial θ) v
-  let y := dotR2 (circleTangent θ) v
+  let x := inner ℝ (circleRadial θ) v
+  let y := inner ℝ (circleTangent θ) v
   let d := dist (circlePoint O R θ) P
   have hy : y ≤ 0 := by
     simpa [y, v] using htangent
@@ -650,20 +608,20 @@ theorem dahlbergRegularAt_circlePoint_successor
     crossR2_circlePoint_successor_pos hR hδ0 hδπ hP htangent
   apply dahlbergRegularAt_of_legDots_nonneg hcrosspos.ne'
   · rw [endpointSuccessor_leftLegDot_eq]
-    change 0 ≤ dotR2 v v + R * (1 - Real.cos δ) * x - R * Real.sin δ * y
+    change 0 ≤ inner ℝ v v + R * (1 - Real.cos δ) * x - R * Real.sin δ * y
     have hxlower : -d ≤ x := by
-      change -d ≤ dotR2 (circleRadial θ) v
-      have h := dotR2_circleRadial_neg_norm_le θ v
+      change -d ≤ inner ℝ (circleRadial θ) v
+      have h := neg_norm_le_inner_circleRadial θ v
       have hvd : ‖v‖ = d := by
         dsimp [v, d]
-        exact norm_sub_rev_eq_dist _ _
+        rw [dist_eq_norm, norm_sub_rev]
       rw [hvd] at h
       exact h
-    have hvnorm : dotR2 v v = d ^ 2 := by
-      rw [dotR2_self_eq_norm_sq]
+    have hvnorm : inner ℝ v v = d ^ 2 := by
+      rw [real_inner_self_eq_norm_sq]
       congr 1
       dsimp [v, d]
-      exact norm_sub_rev_eq_dist _ _
+      rw [dist_eq_norm, norm_sub_rev]
     have hcoef : 0 ≤ R * (1 - Real.cos δ) :=
       (mul_pos hR hcos).le
     have hrad : -(R * (1 - Real.cos δ) * d) ≤
@@ -681,11 +639,11 @@ theorem dahlbergRegularAt_circlePoint_successor
   · rw [endpointSuccessor_rightLegDot_eq]
     change 0 ≤ R * ((1 - Real.cos δ) * (2 * R + x) - Real.sin δ * y)
     have hxlower : -d ≤ x := by
-      change -d ≤ dotR2 (circleRadial θ) v
-      have h := dotR2_circleRadial_neg_norm_le θ v
+      change -d ≤ inner ℝ (circleRadial θ) v
+      have h := neg_norm_le_inner_circleRadial θ v
       have hvd : ‖v‖ = d := by
         dsimp [v, d]
-        exact norm_sub_rev_eq_dist _ _
+        rw [dist_eq_norm, norm_sub_rev]
       rw [hvd] at h
       exact h
     have hdlt : d < 2 * R := by
@@ -847,7 +805,7 @@ theorem circleSplice_leftEndpoint_cross_pos
   have hsupport' : 0 < crossR2 (circlePoint O R θA)
       (run.point run.a) (circlePoint O R θB) := by
     simpa only [hA, hB] using hleftSupport
-  have htangent : 0 ≤ dotR2 (circleTangent θA)
+  have htangent : 0 ≤ inner ℝ (circleTangent θA)
       (run.point run.a - circlePoint O R θA) := by
     apply circleTangent_dot_nonneg_of_leftEndpoint_support_of_interior
       hR hP hpi (by linarith)
@@ -885,7 +843,7 @@ theorem circleSplice_rightEndpoint_cross_pos
   have hsupport' : 0 < crossR2 (run.point run.b)
       (circlePoint O R θB) (circlePoint O R θA) := by
     simpa only [hA, hB] using hrightSupport
-  have htangent : dotR2 (circleTangent θB)
+  have htangent : inner ℝ (circleTangent θB)
       (run.point run.b - circlePoint O R θB) ≤ 0 := by
     apply circleTangent_dot_nonpos_of_rightEndpoint_support_of_interior
       hR hP hpi (by linarith)
@@ -924,7 +882,7 @@ theorem circleSplice_leftEndpoint_regular
   have hsupport' : 0 < crossR2 (circlePoint O R θA)
       (run.point run.a) (circlePoint O R θB) := by
     simpa only [hA, hB] using hleftSupport
-  have htangent : 0 ≤ dotR2 (circleTangent θA)
+  have htangent : 0 ≤ inner ℝ (circleTangent θA)
       (run.point run.a - circlePoint O R θA) := by
     apply circleTangent_dot_nonneg_of_leftEndpoint_support_of_interior
       hR hP hpi (by linarith)
@@ -964,7 +922,7 @@ theorem circleSplice_rightEndpoint_regular
   have hsupport' : 0 < crossR2 (run.point run.b)
       (circlePoint O R θB) (circlePoint O R θA) := by
     simpa only [hA, hB] using hrightSupport
-  have htangent : dotR2 (circleTangent θB)
+  have htangent : inner ℝ (circleTangent θB)
       (run.point run.b - circlePoint O R θB) ≤ 0 := by
     apply circleTangent_dot_nonpos_of_rightEndpoint_support_of_interior
       hR hP hpi (by linarith)
@@ -997,13 +955,15 @@ theorem circleSplice_leftEndpoint_radius_lt
   obtain ⟨hprevEq, hselfEq, hnextEq⟩ :=
     run.circleSplice_leftEndpoint_triple q hq θB θA hA
   apply edgePrevCircleRadiusProfile_lt_of_boundary_and_interior_of_regular
-    hsimple hpositive
-  · rw [OnDiskBoundaryR2, hselfEq, dist_circlePoint_center, abs_of_pos hR]
+    (Δ := O) (S := R) hsimple hpositive
+  · rw [hselfEq]
+    exact Metric.mem_sphere'.mpr (by rw [dist_circlePoint_center, abs_of_pos hR])
   · norm_num
-    rw [InClosedDiskR2, hprevEq, dist_circlePoint_center, abs_of_pos hR]
+    rw [hprevEq]
+    exact Metric.mem_closedBall'.mpr (by rw [dist_circlePoint_center, abs_of_pos hR])
   · norm_num
-    rw [InClosedDiskR2, hnextEq]
-    exact (run.internal_dist_lt hΔ le_rfl run.a_le_b).le
+    rw [hnextEq]
+    exact Metric.mem_closedBall'.mpr (run.internal_dist_lt hΔ le_rfl run.a_le_b).le
   · right
     norm_num
     rw [hnextEq]
@@ -1034,11 +994,13 @@ theorem circleSplice_rightEndpoint_radius_lt
   obtain ⟨hprevEq, hselfEq, hnextEq⟩ :=
     run.circleSplice_rightEndpoint_triple q hq θB θA hB
   apply edgePrevCircleRadiusProfile_lt_of_boundary_and_interior_of_regular
-    hsimple hpositive
-  · rw [OnDiskBoundaryR2, hselfEq, dist_circlePoint_center, abs_of_pos hR]
-  · rw [InClosedDiskR2, hprevEq]
-    exact (run.internal_dist_lt hΔ run.a_le_b le_rfl).le
-  · rw [InClosedDiskR2, hnextEq, dist_circlePoint_center, abs_of_pos hR]
+    (Δ := O) (S := R) hsimple hpositive
+  · rw [hselfEq]
+    exact Metric.mem_sphere'.mpr (by rw [dist_circlePoint_center, abs_of_pos hR])
+  · rw [hprevEq]
+    exact Metric.mem_closedBall'.mpr (run.internal_dist_lt hΔ run.a_le_b le_rfl).le
+  · rw [hnextEq]
+    exact Metric.mem_closedBall'.mpr (by rw [dist_circlePoint_center, abs_of_pos hR])
   · left
     rw [hprevEq]
     exact run.internal_dist_lt hΔ run.a_le_b le_rfl

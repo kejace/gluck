@@ -21,7 +21,7 @@ open scoped Topology
 private theorem dist_circlePoint_sq_lt_neg_two_mul_radial_of_interior_aux
     {O P : ℂ} {R θ : ℝ} (hR : 0 < R) (hP : dist O P < R) :
     dist (circlePoint O R θ) P ^ 2 <
-      -2 * R * dotR2 (circleRadial θ) (P - circlePoint O R θ) := by
+      -2 * R * inner ℝ (circleRadial θ) (P - circlePoint O R θ) := by
   have hsq : dist O P ^ 2 < R ^ 2 :=
     sq_lt_sq' (by linarith [dist_nonneg (x := O) (y := P)]) hP
   have hpower := dist_center_sq_eq_dist_circlePoint_sq_add O P R θ
@@ -53,25 +53,25 @@ theorem dist_circlePoint_add_eq_two_mul_sin_half
 private noncomputable def endpointPredecessorCurvatureModel
     (O P : ℂ) (R θ δ : ℝ) : ℝ :=
   2 * (Real.sin (δ / 2) *
-        dotR2 (circleTangent θ) (P - circlePoint O R θ) -
+        inner ℝ (circleTangent θ) (P - circlePoint O R θ) -
       Real.cos (δ / 2) *
-        dotR2 (circleRadial θ) (P - circlePoint O R θ)) /
+        inner ℝ (circleRadial θ) (P - circlePoint O R θ)) /
     (dist (circlePoint O R θ) P *
       dist (circlePoint O R (θ - δ)) P)
 
 private noncomputable def endpointSuccessorCurvatureModel
     (O P : ℂ) (R θ δ : ℝ) : ℝ :=
   2 * (-Real.sin (δ / 2) *
-        dotR2 (circleTangent θ) (P - circlePoint O R θ) -
+        inner ℝ (circleTangent θ) (P - circlePoint O R θ) -
       Real.cos (δ / 2) *
-        dotR2 (circleRadial θ) (P - circlePoint O R θ)) /
+        inner ℝ (circleRadial θ) (P - circlePoint O R θ)) /
     (dist (circlePoint O R θ) P *
       dist (circlePoint O R (θ + δ)) P)
 
 @[simp] private theorem endpointPredecessorCurvatureModel_zero_aux
     (O P : ℂ) (R θ : ℝ) :
     endpointPredecessorCurvatureModel O P R θ 0 =
-      (-2 * dotR2 (circleRadial θ) (P - circlePoint O R θ)) /
+      (-2 * inner ℝ (circleRadial θ) (P - circlePoint O R θ)) /
         dist (circlePoint O R θ) P ^ 2 := by
   simp only [endpointPredecessorCurvatureModel, Real.sin_zero, zero_mul, Real.cos_zero, one_mul,
     zero_sub, pow_two, div_eq_mul_inv]
@@ -80,7 +80,7 @@ private noncomputable def endpointSuccessorCurvatureModel
 @[simp] private theorem endpointSuccessorCurvatureModel_zero_aux
     (O P : ℂ) (R θ : ℝ) :
     endpointSuccessorCurvatureModel O P R θ 0 =
-      (-2 * dotR2 (circleRadial θ) (P - circlePoint O R θ)) /
+      (-2 * inner ℝ (circleRadial θ) (P - circlePoint O R θ)) /
         dist (circlePoint O R θ) P ^ 2 := by
   simp only [endpointSuccessorCurvatureModel, Real.sin_zero, neg_zero, zero_mul, Real.cos_zero,
     one_mul, zero_sub, pow_two, div_eq_mul_inv]
@@ -142,7 +142,7 @@ private theorem inv_radius_lt_endpointCurvatureModel_zero_aux
     dist_circlePoint_sq_lt_neg_two_mul_radial_of_interior_aux
       (θ := θ) hR hP
   have hlt : 1 / R <
-      (-2 * dotR2 (circleRadial θ) (P - circlePoint O R θ)) /
+      (-2 * inner ℝ (circleRadial θ) (P - circlePoint O R θ)) /
         dist (circlePoint O R θ) P ^ 2 := by
     rw [div_lt_div_iff₀ hR (sq_pos_of_pos hd)]
     nlinarith

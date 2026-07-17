@@ -1,4 +1,5 @@
 import Gluck.Discrete.PolygonConvexity
+import Mathlib.Analysis.SpecialFunctions.Complex.CircleMap
 
 /-!
 # Positively ordered points on a Euclidean circle
@@ -11,43 +12,34 @@ of positive cyclic angle gaps.
 
 namespace Gluck.Discrete
 
-/-- The point of angle `θ` on the Euclidean circle with center `O` and signed
-radius parameter `R`.  All orientation formulas depend on `R²`, so they only
-require `R ≠ 0`. -/
-noncomputable def circlePoint (O : ℂ) (R θ : ℝ) : ℂ :=
-  O + (R : ℂ) * Complex.exp ((θ : ℂ) * Complex.I)
+/-- Compatibility alias for mathlib's parametrization of a Euclidean circle. -/
+noncomputable abbrev circlePoint (O : ℂ) (R θ : ℝ) : ℂ := circleMap O R θ
 
 @[simp] theorem circlePoint_re (O : ℂ) (R θ : ℝ) :
     (circlePoint O R θ).re = O.re + R * Real.cos θ := by
-  unfold circlePoint
-  simp only [Complex.add_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im,
-    Complex.exp_ofReal_mul_I_re, Complex.exp_ofReal_mul_I_im]
-  ring
+  change (circleMap O R θ).re = _
+  simp [circleMap]
 
 @[simp] theorem circlePoint_im (O : ℂ) (R θ : ℝ) :
     (circlePoint O R θ).im = O.im + R * Real.sin θ := by
-  unfold circlePoint
-  simp only [Complex.add_im, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im,
-    Complex.exp_ofReal_mul_I_re, Complex.exp_ofReal_mul_I_im]
-  ring
+  change (circleMap O R θ).im = _
+  simp [circleMap]
 
 @[simp] theorem circlePoint_add_two_pi (O : ℂ) (R θ : ℝ) :
     circlePoint O R (θ + 2 * Real.pi) = circlePoint O R θ := by
-  have hexp : Complex.exp ((((θ + 2 * Real.pi : ℝ) : ℂ)) * Complex.I) =
-      Complex.exp ((θ : ℂ) * Complex.I) := by
-    push_cast
-    rw [add_mul, Complex.exp_add, Complex.exp_two_pi_mul_I, mul_one]
-  simp only [circlePoint, hexp]
+  change circleMap O R (θ + 2 * Real.pi) = circleMap O R θ
+  exact periodic_circleMap O R θ
 
 @[simp] theorem dist_circlePoint_center (O : ℂ) (R θ : ℝ) :
     dist O (circlePoint O R θ) = |R| := by
-  rw [dist_eq_norm]
-  simp [circlePoint]
+  change dist O (circleMap O R θ) = |R|
+  exact Metric.mem_sphere'.mp (circleMap_mem_sphere' O R θ)
 
 /-- The chord length between two arbitrary points on a parametrized circle. -/
 theorem dist_circlePoint_eq_two_mul_abs_sin_half (O : ℂ) (R θ₀ θ₁ : ℝ) :
     dist (circlePoint O R θ₀) (circlePoint O R θ₁) =
       2 * |R| * |Real.sin ((θ₁ - θ₀) / 2)| := by
+  change dist (circleMap O R θ₀) (circleMap O R θ₁) = _
   rw [dist_eq_norm]
   have hexp : Complex.exp ((θ₁ : ℂ) * Complex.I) =
       Complex.exp ((θ₀ : ℂ) * Complex.I) *
@@ -56,7 +48,7 @@ theorem dist_circlePoint_eq_two_mul_abs_sin_half (O : ℂ) (R θ₀ θ₁ : ℝ)
     congr 1
     rw [Complex.ofReal_sub]
     ring_nf
-  rw [circlePoint, circlePoint, show O + (R : ℂ) * Complex.exp ((θ₀ : ℂ) * Complex.I) -
+  rw [circleMap, circleMap, show O + (R : ℂ) * Complex.exp ((θ₀ : ℂ) * Complex.I) -
       (O + (R : ℂ) * Complex.exp ((θ₁ : ℂ) * Complex.I)) =
       (R : ℂ) * Complex.exp ((θ₀ : ℂ) * Complex.I) *
         (1 - Complex.exp (((θ₁ - θ₀ : ℝ) : ℂ) * Complex.I)) by rw [hexp]; ring_nf,
@@ -76,10 +68,10 @@ theorem dist_circlePoint_eq_two_mul_abs_sin_half (O : ℂ) (R θ₀ θ₁ : ℝ)
 sines of angle differences. -/
 theorem crossR2_circlePoint_eq_sin_sub
     (O : ℂ) (R θ₀ θ₁ θ₂ : ℝ) :
-    crossR2 (circlePoint O R θ₀) (circlePoint O R θ₁)
-        (circlePoint O R θ₂) =
+    crossR2 (circlePoint O R θ₀) (circlePoint O R θ₁) (circlePoint O R θ₂) =
       R ^ 2 * (Real.sin (θ₁ - θ₀) + Real.sin (θ₂ - θ₁) -
         Real.sin (θ₂ - θ₀)) := by
+  change crossR2 (circleMap O R θ₀) (circleMap O R θ₁) (circleMap O R θ₂) = _
   unfold crossR2
   simp only [Complex.sub_re, Complex.sub_im, circlePoint_re, circlePoint_im]
   rw [Real.sin_sub, Real.sin_sub, Real.sin_sub]
@@ -115,8 +107,7 @@ private theorem sin_add_sin_sub_sin_add (a b : ℝ) :
 circle. -/
 theorem crossR2_circlePoint_eq_sin_half
     (O : ℂ) (R θ₀ θ₁ θ₂ : ℝ) :
-    crossR2 (circlePoint O R θ₀) (circlePoint O R θ₁)
-        (circlePoint O R θ₂) =
+    crossR2 (circlePoint O R θ₀) (circlePoint O R θ₁) (circlePoint O R θ₂) =
       4 * R ^ 2 * Real.sin ((θ₁ - θ₀) / 2) *
         Real.sin ((θ₂ - θ₁) / 2) * Real.sin ((θ₂ - θ₀) / 2) := by
   rw [crossR2_circlePoint_eq_sin_sub]

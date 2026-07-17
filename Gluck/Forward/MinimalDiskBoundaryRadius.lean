@@ -35,11 +35,13 @@ theorem minimalEnclosingDiskR2_le_of_boundaryContactsInClosedDiskR2
   have hslack_pos : ∀ i, 0 < slack i := by
     intro i
     by_cases hi : OnDiskBoundaryR2 v O R i
-    · simp [slack, hi]
-    · simp only [slack, hi, ↓reduceIte]
-      have hle_i : dist O (v i) ≤ R := hΔ.2.1 i
-      have hne_i : dist O (v i) ≠ R := by
-        simpa [OnDiskBoundaryR2] using hi
+    · dsimp only [slack]
+      rw [if_pos hi]
+      norm_num
+    · dsimp only [slack]
+      rw [if_neg hi]
+      have hle_i : dist O (v i) ≤ R := Metric.mem_closedBall'.mp (hΔ.2.1 i)
+      have hne_i : dist O (v i) ≠ R := fun hdist ↦ hi (Metric.mem_sphere'.mpr hdist)
       have hlt_i : dist O (v i) < R := lt_of_le_of_ne hle_i hne_i
       linarith
   let ε : ℝ := (Finset.univ : Finset (ZMod n)).inf'
@@ -87,27 +89,30 @@ theorem minimalEnclosingDiskR2_le_of_boundaryContactsInClosedDiskR2
   have hcontainsAll : PolygonInClosedDiskR2 v O' R' := by
     intro i
     by_cases hi : OnDiskBoundaryR2 v O R i
-    · have hiC : dist C (v i) ≤ ρ := hcontains i hi
-      dsimp [InClosedDiskR2]
+    · have hiC : dist C (v i) ≤ ρ := Metric.mem_closedBall'.mp (hcontains i hi)
+      apply Metric.mem_closedBall'.mpr
       calc
         dist O' (v i) ≤
             (1 - t) * dist O (v i) + t * dist C (v i) :=
           hdist_convex (v i)
         _ ≤ (1 - t) * R + t * ρ := by
           exact add_le_add
-            (mul_le_mul_of_nonneg_left (le_of_eq hi)
+            (mul_le_mul_of_nonneg_left
+              (le_of_eq (Metric.mem_sphere'.mp hi))
               (sub_nonneg.mpr ht_le_one))
             (mul_le_mul_of_nonneg_left hiC ht_nonneg)
         _ = R' := rfl
     · have hεi : ε ≤ R - dist O (v i) := by
-        simpa [slack, hi] using hε_le i
+        have hεi' := hε_le i
+        dsimp only [slack] at hεi'
+        rwa [if_neg hi] at hεi'
       have hdist_O'O : dist O' O = t * d := by
         dsimp [O', d]
         rw [dist_lineMap_left]
         simp [abs_of_nonneg ht_nonneg]
       have htri : dist O' (v i) ≤ dist O' O + dist O (v i) :=
         dist_triangle _ _ _
-      dsimp [InClosedDiskR2]
+      apply Metric.mem_closedBall'.mpr
       dsimp [R']
       calc
         dist O' (v i) ≤ dist O' O + dist O (v i) := htri

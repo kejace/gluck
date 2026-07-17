@@ -41,9 +41,9 @@ theorem exists_onDiskBoundaryR2_of_minimalEnclosingDiskR2
   have hRzero : R = 0 := le_antisymm hRle hΔ.1
   have hdist : dist O (v (0 : ZMod n)) = 0 := by
     apply le_antisymm
-    · simpa [InClosedDiskR2, hRzero] using hΔ.2.1 (0 : ZMod n)
+    · simpa [hRzero] using Metric.mem_closedBall'.mp (hΔ.2.1 (0 : ZMod n))
     · exact dist_nonneg
-  exact hnone 0 (by simpa [OnDiskBoundaryR2, hRzero] using hdist)
+  exact hnone 0 (Metric.mem_sphere'.mpr (by simpa [hRzero] using hdist))
 
 /-- In every direction from the center, some boundary contact has
 nonpositive real inner product with that direction. -/
@@ -65,8 +65,12 @@ theorem exists_boundaryContact_real_inner_nonpos
   have hmargin_pos : ∀ i, 0 < margin i := by
     intro i
     by_cases hi : OnDiskBoundaryR2 v O R i
-    · simpa [margin, hi] using hall i hi
-    · simp [margin, hi]
+    · dsimp only [margin]
+      rw [if_pos hi]
+      exact hall i hi
+    · dsimp only [margin]
+      rw [if_neg hi]
+      norm_num
   let m : ℝ := (Finset.univ : Finset (ZMod n)).inf'
     Finset.univ_nonempty margin
   have hm_pos : 0 < m := by
@@ -91,9 +95,11 @@ theorem exists_boundaryContact_real_inner_nonpos
   have hcontactInside (i : ZMod n) (hi : OnDiskBoundaryR2 v O R i) :
       dist C (v i) < R := by
     have hmargin : m ≤ inner ℝ u (v i - O) := by
-      simpa [margin, hi] using hm_le i
+      have hmargin' := hm_le i
+      dsimp only [margin] at hmargin'
+      rwa [if_pos hi] at hmargin'
     have hxnorm : ‖v i - O‖ = R := by
-      have hi0 : dist O (v i) = R := hi
+      have hi0 : dist O (v i) = R := Metric.mem_sphere'.mp hi
       have hi' : dist (v i) O = R := by simpa [dist_comm] using hi0
       simpa [dist_eq_norm] using hi'
     have htmarg : t * m ≤ t * inner ℝ u (v i - O) :=
@@ -118,8 +124,12 @@ theorem exists_boundaryContact_real_inner_nonpos
   have hslack_pos : ∀ i, 0 < slack i := by
     intro i
     by_cases hi : OnDiskBoundaryR2 v O R i
-    · simpa [slack, hi] using sub_pos.mpr (hcontactInside i hi)
-    · simp [slack, hi]
+    · dsimp only [slack]
+      rw [if_pos hi]
+      exact sub_pos.mpr (hcontactInside i hi)
+    · dsimp only [slack]
+      rw [if_neg hi]
+      norm_num
   let ε : ℝ := (Finset.univ : Finset (ZMod n)).inf'
     Finset.univ_nonempty slack
   have hε_pos : 0 < ε := by
@@ -129,7 +139,9 @@ theorem exists_boundaryContact_real_inner_nonpos
     exact Finset.inf'_le slack (Finset.mem_univ i)
   have hεR : ε ≤ R := by
     have hpε : ε ≤ R - dist C (v p) := by
-      simpa [slack, hp] using hε_le p
+      have hpε' := hε_le p
+      dsimp only [slack] at hpε'
+      rwa [if_pos hp] at hpε'
     exact hpε.trans (sub_le_self R dist_nonneg)
   let ρ : ℝ := R - ε / 2
   have hρ_nonneg : 0 ≤ ρ := by dsimp [ρ]; linarith
@@ -138,8 +150,11 @@ theorem exists_boundaryContact_real_inner_nonpos
       InClosedDiskR2 C ρ (v i) := by
     intro i hi
     have hiε : ε ≤ R - dist C (v i) := by
-      simpa [slack, hi] using hε_le i
-    dsimp [InClosedDiskR2, ρ]
+      have hiε' := hε_le i
+      dsimp only [slack] at hiε'
+      rwa [if_pos hi] at hiε'
+    apply Metric.mem_closedBall'.mpr
+    dsimp [ρ]
     linarith
   have hRρ := minimalEnclosingDiskR2_le_of_boundaryContactsInClosedDiskR2
     hΔ hρ_nonneg hcontactsρ

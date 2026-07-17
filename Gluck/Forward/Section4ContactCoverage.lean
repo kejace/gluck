@@ -71,7 +71,7 @@ private theorem ordered_anchor_indices_ne_aux
   · intro ht
     subst t
     have hEq : θD = θB := by
-      apply circlePoint_injective_on_angleWindow hR.ne'
+      apply injOn_circleMap_of_abs_sub_le' hR.ne' (by linarith [Real.two_pi_pos])
         hDwin ⟨le_rfl, by linarith [Real.two_pi_pos]⟩
       rw [← hD, ← hB]
     linarith
@@ -79,14 +79,14 @@ private theorem ordered_anchor_indices_ne_aux
   · intro ht
     subst t
     have hEq : θD = θC := by
-      apply circlePoint_injective_on_angleWindow hR.ne'
+      apply injOn_circleMap_of_abs_sub_le' hR.ne' (by linarith [Real.two_pi_pos])
         hDwin ⟨hBC.le, by linarith⟩
       rw [← hD, ← hC]
     linarith
   · intro ht
     subst t
     have hEq : θD = θA := by
-      apply circlePoint_injective_on_angleWindow hR.ne'
+      apply injOn_circleMap_of_abs_sub_le' hR.ne' (by linarith [Real.two_pi_pos])
         hDwin ⟨(hBC.trans hCA).le, hspan⟩
       rw [← hD, ← hA]
     linarith

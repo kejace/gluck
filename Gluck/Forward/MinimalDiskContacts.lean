@@ -1,6 +1,7 @@
 import Gluck.Forward.ContactSets
 import Mathlib.Analysis.Normed.Affine.AddTorsor
 import Mathlib.Analysis.Normed.Module.Convex
+import Mathlib.Geometry.Euclidean.Sphere.Basic
 
 /-!
 # Boundary contacts of a finite minimal enclosing disk
@@ -22,20 +23,22 @@ linearly decreasing the radius. Convexity of distance keeps the two boundary
 contacts inside, while the positive minimum of the finitely many remaining
 radial slacks keeps every interior vertex inside. This contradicts minimality.
 -/
-theorem dist_eq_two_mul_radius_of_minimalEnclosingDiskR2_of_boundary_subset_pair
+theorem isDiameter_of_minimalEnclosingDiskR2_of_boundary_subset_pair
     {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
     (hΔ : MinimalEnclosingDiskR2 v O R) {p q : ZMod n}
     (hp : OnDiskBoundaryR2 v O R p)
     (hq : OnDiskBoundaryR2 v O R q)
     (hboundary : ∀ i, OnDiskBoundaryR2 v O R i → i = p ∨ i = q) :
-    dist (v p) (v q) = 2 * R := by
+    (⟨O, R⟩ : EuclideanGeometry.Sphere ℂ).IsDiameter (v p) (v q) := by
   classical
+  apply EuclideanGeometry.Sphere.isDiameter_iff_mem_and_mem_and_dist.mpr
+  refine ⟨hp, hq, ?_⟩
   have hp' : dist (v p) O = R := by
-    simpa [OnDiskBoundaryR2, dist_comm] using hp
+    simpa [dist_comm] using Metric.mem_sphere'.mp hp
   have hle : dist (v p) (v q) ≤ 2 * R := by
     calc
       dist (v p) (v q) ≤ dist (v p) O + dist O (v q) := dist_triangle _ _ _
-      _ = 2 * R := by rw [hp', hq]; ring
+      _ = 2 * R := by rw [hp', Metric.mem_sphere'.mp hq]; ring
   apply le_antisymm hle
   by_contra hge
   have hlt : dist (v p) (v q) < 2 * R := lt_of_not_ge hge
@@ -52,11 +55,15 @@ theorem dist_eq_two_mul_radius_of_minimalEnclosingDiskR2_of_boundary_subset_pair
   have hslack_pos : ∀ i, 0 < slack i := by
     intro i
     by_cases hi : OnDiskBoundaryR2 v O R i
-    · simp [slack, hi]
-    · simp only [slack, hi, ↓reduceIte]
-      have hle_i : dist O (v i) ≤ R := hΔ.2.1 i
+    · change 0 < if OnDiskBoundaryR2 v O R i then 1 else R - dist O (v i)
+      rw [if_pos hi]
+      norm_num
+    · change 0 < if OnDiskBoundaryR2 v O R i then 1 else R - dist O (v i)
+      rw [if_neg hi]
+      have hle_i : dist O (v i) ≤ R := Metric.mem_closedBall'.mp (hΔ.2.1 i)
       have hne_i : dist O (v i) ≠ R := by
-        simpa [OnDiskBoundaryR2] using hi
+        intro heq
+        exact hi (Metric.mem_sphere'.mpr heq)
       have hlt_i : dist O (v i) < R := lt_of_le_of_ne hle_i hne_i
       linarith
   let ε : ℝ := (Finset.univ : Finset (ZMod n)).inf'
@@ -111,28 +118,28 @@ theorem dist_eq_two_mul_radius_of_minimalEnclosingDiskR2_of_boundary_subset_pair
     norm_num
     ring
   have hO_p : dist O (v p) = R := by
-    simpa [OnDiskBoundaryR2] using hp
+    exact Metric.mem_sphere'.mp hp
   have hO_q : dist O (v q) = R := by
-    simpa [OnDiskBoundaryR2] using hq
+    exact Metric.mem_sphere'.mp hq
   have hcontains : PolygonInClosedDiskR2 v O' R' := by
     intro i
+    apply Metric.mem_closedBall'.mpr
     by_cases hi : OnDiskBoundaryR2 v O R i
     · rcases hboundary i hi with hip | hiq
       · rw [hip]
-        dsimp [InClosedDiskR2]
         simpa [R', hO_p, hmid_p] using hdist_convex (v p)
       · rw [hiq]
-        dsimp [InClosedDiskR2]
         simpa [R', hO_q, hmid_q] using hdist_convex (v q)
     · have hεi : ε ≤ R - dist O (v i) := by
-        simpa [slack, hi] using hε_le i
+        have hi' := hε_le i
+        change ε ≤ if OnDiskBoundaryR2 v O R i then 1 else R - dist O (v i) at hi'
+        rwa [if_neg hi] at hi'
       have hdist_O'O : dist O' O = t * d := by
         dsimp [O', d]
         rw [dist_lineMap_left]
         simp [abs_of_nonneg ht_nonneg]
       have htri : dist O' (v i) ≤ dist O' O + dist O (v i) :=
         dist_triangle _ _ _
-      dsimp [InClosedDiskR2]
       dsimp [R']
       calc
         dist O' (v i) ≤ dist O' O + dist O (v i) := htri
@@ -143,6 +150,18 @@ theorem dist_eq_two_mul_radius_of_minimalEnclosingDiskR2_of_boundary_subset_pair
           nlinarith
   exact (not_lt_of_ge (minimalEnclosingDiskR2_le_of_polygonInClosedDiskR2
     hΔ hR'_nonneg hcontains)) hR'_lt
+
+/-- Compatibility corollary: the two terminal contacts are separated by twice
+the minimal radius. -/
+theorem dist_eq_two_mul_radius_of_minimalEnclosingDiskR2_of_boundary_subset_pair
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
+    (hΔ : MinimalEnclosingDiskR2 v O R) {p q : ZMod n}
+    (hp : OnDiskBoundaryR2 v O R p)
+    (hq : OnDiskBoundaryR2 v O R q)
+    (hboundary : ∀ i, OnDiskBoundaryR2 v O R i → i = p ∨ i = q) :
+    dist (v p) (v q) = 2 * R := by
+  exact (isDiameter_of_minimalEnclosingDiskR2_of_boundary_subset_pair
+    hΔ hp hq hboundary).dist_left_right
 
 /-- A positive minimal enclosing disk cannot have a unique boundary contact. -/
 theorem exists_ne_onDiskBoundaryR2_of_minimalEnclosingDiskR2
@@ -157,10 +176,9 @@ theorem exists_ne_onDiskBoundaryR2_of_minimalEnclosingDiskR2
     by_contra hip
     exact hno i hip hi
   have hdiam :=
-    dist_eq_two_mul_radius_of_minimalEnclosingDiskR2_of_boundary_subset_pair
+    isDiameter_of_minimalEnclosingDiskR2_of_boundary_subset_pair
       hΔ hp hp (fun i hi => Or.inl (honly i hi))
-  rw [dist_self] at hdiam
-  linarith
+  exact (hdiam.left_ne_right_iff_radius_pos.mpr hR) rfl
 
 /-- Once one contact of a positive minimal enclosing disk is selected, its
 finite contact set has at least two elements. -/
@@ -175,8 +193,8 @@ theorem two_le_card_circleContactSet_of_minimalEnclosingDiskR2
     intro i hi
     simp only [Finset.mem_insert, Finset.mem_singleton] at hi
     rcases hi with rfl | rfl
-    · exact mem_circleContactSet.mpr hp
-    · exact mem_circleContactSet.mpr hq
+    · exact mem_circleContactSet.mpr (Metric.mem_sphere'.mp hp)
+    · exact mem_circleContactSet.mpr (Metric.mem_sphere'.mp hq)
   calc
     2 = ({p, q} : Finset (ZMod n)).card := (Finset.card_pair hqp.symm).symm
     _ ≤ (circleContactSet v O R).card := Finset.card_le_card hsub

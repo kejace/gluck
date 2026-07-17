@@ -17,7 +17,8 @@ open Gluck.Discrete
 theorem circlePoint_arg_of_dist_eq
     {O P : ℂ} {R : ℝ} (hP : dist O P = R) :
     P = circlePoint O R (Complex.arg (P - O)) := by
-  unfold circlePoint
+  change P = circleMap O R (Complex.arg (P - O))
+  rw [circleMap]
   have hnorm : ‖P - O‖ = R := by
     rw [← hP, dist_comm, dist_eq_norm]
   rw [← hnorm, Complex.norm_mul_exp_arg_mul_I]
@@ -39,11 +40,6 @@ theorem exists_circlePoint_eq_of_dist_eq
     · rw [circlePoint_add_two_pi]
       exact circlePoint_arg_of_dist_eq hP
 
-/-- `circlePoint O R` has period `2π`. -/
-theorem circlePoint_periodic (O : ℂ) (R : ℝ) :
-    Function.Periodic (circlePoint O R) (2 * Real.pi) :=
-  circlePoint_add_two_pi O R
-
 /-- Every circle point has an angle lift in the half-open window based at an
 arbitrary real angle `β`. -/
 theorem exists_circlePoint_eq_mem_angleWindow
@@ -51,38 +47,8 @@ theorem exists_circlePoint_eq_mem_angleWindow
     ∃ θ : ℝ, θ ∈ Set.Ico β (β + 2 * Real.pi) ∧ P = circlePoint O R θ := by
   obtain ⟨α, -, hPα⟩ := exists_circlePoint_eq_of_dist_eq hP
   obtain ⟨θ, hθ, hαθ⟩ :=
-    (circlePoint_periodic O R).exists_mem_Ico Real.two_pi_pos α β
+    (periodic_circleMap O R).exists_mem_Ico Real.two_pi_pos α β
   exact ⟨θ, hθ, hPα.trans hαθ⟩
-
-/-- For nonzero radius, the angle parametrization is injective on every
-half-open window of width `2π`. -/
-theorem circlePoint_injective_on_angleWindow
-    {O : ℂ} {R β θ φ : ℝ} (hR : R ≠ 0)
-    (hθ : θ ∈ Set.Ico β (β + 2 * Real.pi))
-    (hφ : φ ∈ Set.Ico β (β + 2 * Real.pi))
-    (h : circlePoint O R θ = circlePoint O R φ) : θ = φ := by
-  have hexp : Complex.exp ((θ : ℂ) * Complex.I) =
-      Complex.exp ((φ : ℂ) * Complex.I) := by
-    unfold circlePoint at h
-    exact mul_left_cancel₀ (Complex.ofReal_ne_zero.mpr hR) (add_left_cancel h)
-  obtain ⟨n, hn⟩ := Complex.exp_eq_exp_iff_exists_int.mp hexp
-  have hangle : θ = φ + (n : ℝ) * (2 * Real.pi) := by
-    have him := congrArg Complex.im hn
-    simpa using him
-  have hn_lower : (-1 : ℝ) < (n : ℝ) := by
-    by_contra hnot
-    have hnle : (n : ℝ) ≤ -1 := le_of_not_gt hnot
-    have hmul := mul_le_mul_of_nonneg_right hnle Real.two_pi_pos.le
-    linarith [hθ.1, hφ.2]
-  have hn_upper : (n : ℝ) < 1 := by
-    by_contra hnot
-    have hnle : (1 : ℝ) ≤ n := le_of_not_gt hnot
-    have hmul := mul_le_mul_of_nonneg_right hnle Real.two_pi_pos.le
-    linarith [hθ.2, hφ.1]
-  have hn_lower_int : (-1 : ℤ) < n := by exact_mod_cast hn_lower
-  have hn_upper_int : n < (1 : ℤ) := by exact_mod_cast hn_upper
-  have hnzero : n = 0 := by omega
-  simpa [hnzero] using hangle
 
 /-- On a nondegenerate circle the angle lift in a prescribed one-turn window
 is unique. -/
@@ -92,7 +58,8 @@ theorem existsUnique_circlePoint_eq_mem_angleWindow
   obtain ⟨θ, hθ, hPθ⟩ := exists_circlePoint_eq_mem_angleWindow hP β
   refine ⟨θ, ⟨hθ, hPθ⟩, ?_⟩
   intro φ hφ
-  exact circlePoint_injective_on_angleWindow hR hφ.1 hθ (hφ.2.symm.trans hPθ)
+  exact injOn_circleMap_of_abs_sub_le' hR (by linarith [Real.two_pi_pos])
+    hφ.1 hθ (hφ.2.symm.trans hPθ)
 
 /-- Simultaneously choose angle lifts for a family of points on one circle.
 In particular this applies to every finite family of boundary contacts. -/
@@ -110,9 +77,9 @@ theorem circlePoint_angle_eq_windowBase
     {O : ℂ} {R β θ : ℝ} (hR : R ≠ 0)
     (hθ : θ ∈ Set.Ico β (β + 2 * Real.pi))
     (h : circlePoint O R θ = circlePoint O R β) : θ = β := by
-  apply circlePoint_injective_on_angleWindow hR hθ
-  · exact ⟨le_rfl, by linarith [Real.two_pi_pos]⟩
-  · exact h
+  change circleMap O R θ = circleMap O R β at h
+  exact injOn_circleMap_of_abs_sub_le' hR (by linarith [Real.two_pi_pos]) hθ
+    ⟨le_rfl, by linarith [Real.two_pi_pos]⟩ h
 
 /-- Increasing angle lifts in one based window give positive cyclic
 orientation.  This is the ordering lemma used after sorting finitely many
