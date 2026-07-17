@@ -8654,6 +8654,132 @@ structure DahlbergE2Theorem6InteriorMissingDisksCertificate {n : ℕ}
   misses_j : EdgePrevCurvatureDiskInteriorMissesAll v j
   distinct : EdgePrevCurvatureCirclesDistinct v i j
 
+/-- In the nonconcyclic branch no positive-radius circle can contain every
+vertex on its boundary. -/
+theorem circleContactSet_ne_univ_of_not_concyclic
+    {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
+    (hR : 0 < R) (hnoncircle : ¬ Concyclic v) :
+    circleContactSet v O R ≠ Finset.univ := by
+  intro heq
+  apply hnoncircle
+  refine ⟨O, R, hR, ?_⟩
+  intro i
+  apply mem_circleContactSet.mp
+  rw [heq]
+  simp
+
+/-- Source-free pointwise form of Dahlberg §3 Lemma 5.  The finite disk
+family and cut-gap descent produce two terminal contact intervals, which
+identify two distinct curvature disks containing every vertex. -/
+theorem dahlbergE2Theorem6Lemma5ContainingDisks
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hsupport : StrictConvexEdgeSupport v)
+    (hgeom : StrictConvexCyclicChordGeometry v)
+    (hnoncircle : ¬ Concyclic v) :
+    Nonempty (DahlbergE2Theorem6ContainingDisksCertificate v) := by
+  classical
+  let contacts : DahlbergContainingThreeContactDiskR2 v → Finset (ZMod n) :=
+    fun U => circleContactSet v U.center U.radius
+  have hthree : ∀ U : DahlbergContainingThreeContactDiskR2 v,
+      3 ≤ (contacts U).card := by
+    intro U
+    exact U.three_contacts
+  have hproper : ∀ U : DahlbergContainingThreeContactDiskR2 v,
+      contacts U ≠ Finset.univ := by
+    intro U
+    exact circleContactSet_ne_univ_of_not_concyclic U.radius_pos hnoncircle
+  have hchoose : ∀ i : ZMod n,
+      ∃ W : DahlbergContainingThreeContactDiskR2 v, i ∈ contacts W := by
+    intro i
+    exact exists_dahlbergContainingThreeContactDiskR2_at_of_strictConvexEdgeSupport
+      hn hsupport i
+  have hlocalize :
+      ∀ (U W : DahlbergContainingThreeContactDiskR2 v) (c : ZMod n)
+        {p k q : ℕ},
+        p < k → k < q → q < n →
+        Gluck.cyclicLift c p ∈ contacts U →
+        Gluck.cyclicLift c q ∈ contacts U →
+        Gluck.cyclicLift c k ∉ contacts U →
+        Gluck.cyclicLift c k ∈ contacts W →
+        contacts W ⊆ Gluck.mapCut c (Finset.Icc p q) := by
+    intro U W c p k q hpk hkq hqn hpU hqU hkNotU hkW
+    exact circleContactSet_subset_of_containingDisk_cutGap
+      hgeom U W c hpk hkq hqn hpU hqU hkNotU hkW
+  obtain ⟨U₀, _h0⟩ := hchoose 0
+  obtain ⟨U, W, hUinterval, hWinterval, hcontactsNe⟩ :=
+    exists_two_cyclicInterval_contacts_ne_of_cutGap_shrink
+      contacts hthree hproper hchoose hlocalize U₀
+  obtain ⟨i, hdataU, hcontainsU⟩ :=
+    exists_edgePrevCurvatureDiskContainsAll_of_containing_contacts_interval
+      hsimple horient U hUinterval
+  obtain ⟨j, hdataW, hcontainsW⟩ :=
+    exists_edgePrevCurvatureDiskContainsAll_of_containing_contacts_interval
+      hsimple horient W hWinterval
+  have hdistinct : EdgePrevCurvatureCirclesDistinct v i j := by
+    intro hij
+    apply hcontactsNe
+    apply circleContactSet_eq_of_circleData_eq
+    exact hdataU.symm.trans (hij.trans hdataW)
+  exact ⟨⟨i, j, hcontainsU, hcontainsW, hdistinct⟩⟩
+
+/-- Source-free pointwise form of Dahlberg §3 Lemma 7.  The same finite
+descent, using the exterior-circle localization, produces two distinct
+curvature disks whose interiors contain no polygon vertex. -/
+theorem dahlbergE2Theorem6Lemma7InteriorMissingDisks
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (horient : PositivePolygonOrientation v)
+    (hsupport : StrictConvexEdgeSupport v)
+    (hgeom : StrictConvexCyclicChordGeometry v)
+    (hnoncircle : ¬ Concyclic v) :
+    Nonempty (DahlbergE2Theorem6InteriorMissingDisksCertificate v) := by
+  classical
+  let contacts : DahlbergInteriorMissingThreeContactDiskR2 v → Finset (ZMod n) :=
+    fun U => circleContactSet v U.center U.radius
+  have hthree : ∀ U : DahlbergInteriorMissingThreeContactDiskR2 v,
+      3 ≤ (contacts U).card := by
+    intro U
+    exact U.three_contacts
+  have hproper : ∀ U : DahlbergInteriorMissingThreeContactDiskR2 v,
+      contacts U ≠ Finset.univ := by
+    intro U
+    exact circleContactSet_ne_univ_of_not_concyclic U.radius_pos hnoncircle
+  have hchoose : ∀ i : ZMod n,
+      ∃ W : DahlbergInteriorMissingThreeContactDiskR2 v, i ∈ contacts W := by
+    intro i
+    exact exists_dahlbergInteriorMissingThreeContactDiskR2_at_of_strictConvexEdgeSupport
+      hn hsupport i
+  have hlocalize :
+      ∀ (U W : DahlbergInteriorMissingThreeContactDiskR2 v) (c : ZMod n)
+        {p k q : ℕ},
+        p < k → k < q → q < n →
+        Gluck.cyclicLift c p ∈ contacts U →
+        Gluck.cyclicLift c q ∈ contacts U →
+        Gluck.cyclicLift c k ∉ contacts U →
+        Gluck.cyclicLift c k ∈ contacts W →
+        contacts W ⊆ Gluck.mapCut c (Finset.Icc p q) := by
+    intro U W c p k q hpk hkq hqn hpU hqU hkNotU hkW
+    exact circleContactSet_subset_of_missingDisk_cutGap
+      hgeom U W c hpk hkq hqn hpU hqU hkNotU hkW
+  obtain ⟨U₀, _h0⟩ := hchoose 0
+  obtain ⟨U, W, hUinterval, hWinterval, hcontactsNe⟩ :=
+    exists_two_cyclicInterval_contacts_ne_of_cutGap_shrink
+      contacts hthree hproper hchoose hlocalize U₀
+  obtain ⟨i, hdataU, hmissesU⟩ :=
+    exists_edgePrevCurvatureDiskInteriorMissesAll_of_missing_contacts_interval
+      hsimple horient U hUinterval
+  obtain ⟨j, hdataW, hmissesW⟩ :=
+    exists_edgePrevCurvatureDiskInteriorMissesAll_of_missing_contacts_interval
+      hsimple horient W hWinterval
+  have hdistinct : EdgePrevCurvatureCirclesDistinct v i j := by
+    intro hij
+    apply hcontactsNe
+    apply circleContactSet_eq_of_circleData_eq
+    exact hdataU.symm.trans (hij.trans hdataW)
+  exact ⟨⟨i, j, hmissesU, hmissesW, hdistinct⟩⟩
+
 /-- Exact certificate for Dahlberg's Theorem 6 (CDFV).
 
 The paper supplies two curvature disks containing all polygon vertices and
@@ -10148,6 +10274,39 @@ theorem dahlbergE2Theorem6ExactPaperSource_of_lemma5_lemma7
   rcases hlemma7 hn hsimple hregular horient hnoncircle with ⟨interiorMissing⟩
   exact ⟨dahlbergE2Theorem6PaperCertificate_of_splitCertificates
     hsimple hnoncircle containing interiorMissing⟩
+
+/-- Source-free paper source for Dahlberg §3 Lemma 5. -/
+theorem dahlbergE2_theorem6_lemma5_containing_disks_source :
+    DahlbergE2Theorem6Lemma5ContainingDisksSource := by
+  intro n hne hn v hsimple _hregular horient hnoncircle
+  letI : NeZero n := hne
+  have hsupport : StrictConvexEdgeSupport v :=
+    Gluck.Discrete.strictConvexEdgeSupport_of_simple_positiveOrientation
+      hsimple horient
+  have hgeom : StrictConvexCyclicChordGeometry v :=
+    strictConvexCyclicChordGeometry_of_edgeSupport hsupport
+  exact dahlbergE2Theorem6Lemma5ContainingDisks
+    hn hsimple horient hsupport hgeom hnoncircle
+
+/-- Source-free paper source for Dahlberg §3 Lemma 7. -/
+theorem dahlbergE2_theorem6_lemma7_interior_missing_disks_source :
+    DahlbergE2Theorem6Lemma7InteriorMissingDisksSource := by
+  intro n hne hn v hsimple _hregular horient hnoncircle
+  letI : NeZero n := hne
+  have hsupport : StrictConvexEdgeSupport v :=
+    Gluck.Discrete.strictConvexEdgeSupport_of_simple_positiveOrientation
+      hsimple horient
+  have hgeom : StrictConvexCyclicChordGeometry v :=
+    strictConvexCyclicChordGeometry_of_edgeSupport hsupport
+  exact dahlbergE2Theorem6Lemma7InteriorMissingDisks
+    hn hsimple horient hsupport hgeom hnoncircle
+
+/-- Source-free exact form of Dahlberg's §3 Theorem 6. -/
+theorem dahlbergE2_theorem6_exact_paper_source :
+    DahlbergE2Theorem6ExactPaperSource := by
+  exact dahlbergE2Theorem6ExactPaperSource_of_lemma5_lemma7
+    dahlbergE2_theorem6_lemma5_containing_disks_source
+    dahlbergE2_theorem6_lemma7_interior_missing_disks_source
 
 /-- The exact Theorem 6 source projects back to Dahlberg's Lemmas 5 and 7. -/
 theorem dahlbergE2Theorem6_lemma5_lemma7_of_exactPaperSource
