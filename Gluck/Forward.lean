@@ -16,6 +16,7 @@ import Gluck.Forward.Section4CircleArc
 import Gluck.Forward.Section4SupportedCircleArc
 import Gluck.Forward.Section4CircleSpliceSimple
 import Gluck.Forward.Section4EndpointCurvature
+import Gluck.Forward.Section4EndpointSpliceRegularity
 import Gluck.Forward.Smooth
 import Gluck.Forward.Euclidean
 
