@@ -5,6 +5,7 @@ import Gluck.Forward.Section4CircleSplice
 import Gluck.Forward.Section4AuxiliaryConsumer
 import Gluck.Forward.Section4AuxiliaryRadiusObstruction
 import Gluck.Forward.CircleSemicircleRadiusObstruction
+import Gluck.Forward.Section4CircleSpliceRadius
 import Gluck.Forward.Section4EndpointCurvature
 import Gluck.Forward.Smooth
 import Gluck.Forward.Euclidean
