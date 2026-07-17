@@ -1,6 +1,7 @@
 import Gluck.Forward.Dahlberg
 import Gluck.Forward.Section4PositiveGap
 import Gluck.Forward.Section4PositiveChain
+import Gluck.Forward.Section4OrientedPositiveChain
 import Gluck.Forward.Section4CircleSplice
 import Gluck.Forward.Section4AuxiliaryConsumer
 import Gluck.Forward.Section4AuxiliaryRadiusObstruction
