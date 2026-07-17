@@ -2332,6 +2332,253 @@ theorem circumcircleR2_radius_le_of_inVertexCone_closedTriangle
     (inClosedTriangleR2_of_inVertexCone_coeff_sum_le_one hcone hsum_le)
     hS hA hB hC
 
+/-- Full radius inequality in Dahlberg's Lemma 10.
+
+Let `A` be the distinguished triangle vertex.  If the circumcentre lies in
+the closed cone at `A`, then every closed disk containing `A`, `B`, and `C`
+and having `A` on its boundary has radius at least the circumradius.  No
+second triangle vertex is assumed to lie on the disk boundary. -/
+theorem circumcircleR2_radius_le_of_inVertexCone_of_boundary
+    {A B C O Δ : ℂ} {R S : ℝ}
+    (hcircle : CircumcircleR2 A B C O R)
+    (hcone : InVertexCone B A C O)
+    (hS : 0 ≤ S)
+    (hA : dist Δ A = S)
+    (hB : InClosedDiskR2 Δ S B)
+    (hC : InClosedDiskR2 Δ S C) :
+    R ≤ S := by
+  rcases hcone with ⟨α, β, hα, hβ, hcenter⟩
+  have hcenter_re := congrArg Complex.re hcenter
+  have hcenter_im := congrArg Complex.im hcenter
+  simp only [Complex.sub_re, Complex.sub_im, Complex.add_re, Complex.add_im,
+    Complex.mul_re, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im,
+    zero_mul, sub_zero] at hcenter_re hcenter_im
+  have hOA : (O.re - A.re) ^ 2 + (O.im - A.im) ^ 2 = R ^ 2 := by
+    have h := congrArg (fun x : ℝ => x ^ 2) hcircle.2.1
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
+    simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
+  have hOB : (O.re - B.re) ^ 2 + (O.im - B.im) ^ 2 = R ^ 2 := by
+    have h := congrArg (fun x : ℝ => x ^ 2) hcircle.2.2.1
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
+    simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
+  have hOC : (O.re - C.re) ^ 2 + (O.im - C.im) ^ 2 = R ^ 2 := by
+    have h := congrArg (fun x : ℝ => x ^ 2) hcircle.2.2.2
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
+    simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
+  have hΔA : (Δ.re - A.re) ^ 2 + (Δ.im - A.im) ^ 2 = S ^ 2 := by
+    have h := congrArg (fun x : ℝ => x ^ 2) hA
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
+    simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
+  have hΔB : (Δ.re - B.re) ^ 2 + (Δ.im - B.im) ^ 2 ≤ S ^ 2 := by
+    have h := (sq_le_sq₀ dist_nonneg hS).mpr hB
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
+    simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
+  have hΔC : (Δ.re - C.re) ^ 2 + (Δ.im - C.im) ^ 2 ≤ S ^ 2 := by
+    have h := (sq_le_sq₀ dist_nonneg hS).mpr hC
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
+    simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
+  have hOuB :
+      (B.re - A.re) ^ 2 + (B.im - A.im) ^ 2 =
+        2 * ((O.re - A.re) * (B.re - A.re) +
+          (O.im - A.im) * (B.im - A.im)) := by
+    nlinarith only [hOA, hOB]
+  have hOuC :
+      (C.re - A.re) ^ 2 + (C.im - A.im) ^ 2 =
+        2 * ((O.re - A.re) * (C.re - A.re) +
+          (O.im - A.im) * (C.im - A.im)) := by
+    nlinarith only [hOA, hOC]
+  have hΔuB :
+      (B.re - A.re) ^ 2 + (B.im - A.im) ^ 2 ≤
+        2 * ((Δ.re - A.re) * (B.re - A.re) +
+          (Δ.im - A.im) * (B.im - A.im)) := by
+    nlinarith only [hΔA, hΔB]
+  have hΔuC :
+      (C.re - A.re) ^ 2 + (C.im - A.im) ^ 2 ≤
+        2 * ((Δ.re - A.re) * (C.re - A.re) +
+          (Δ.im - A.im) * (C.im - A.im)) := by
+    nlinarith only [hΔA, hΔC]
+  have hαB := mul_le_mul_of_nonneg_left hΔuB hα
+  have hβC := mul_le_mul_of_nonneg_left hΔuC hβ
+  have hcenter_im' :
+      O.im - A.im = α * (B.im - A.im) + β * (C.im - A.im) := by
+    simpa only [add_zero] using hcenter_im
+  have hweightedCirc :
+      α * ((B.re - A.re) ^ 2 + (B.im - A.im) ^ 2) +
+          β * ((C.re - A.re) ^ 2 + (C.im - A.im) ^ 2) =
+        2 * R ^ 2 := by
+    rw [hOuB, hOuC]
+    calc
+      α * (2 * ((O.re - A.re) * (B.re - A.re) +
+            (O.im - A.im) * (B.im - A.im))) +
+          β * (2 * ((O.re - A.re) * (C.re - A.re) +
+            (O.im - A.im) * (C.im - A.im))) =
+          2 * ((O.re - A.re) *
+              (α * (B.re - A.re) + β * (C.re - A.re)) +
+            (O.im - A.im) *
+              (α * (B.im - A.im) + β * (C.im - A.im))) := by ring
+      _ = 2 * ((O.re - A.re) ^ 2 + (O.im - A.im) ^ 2) := by
+        rw [← hcenter_re, ← hcenter_im']
+        ring
+      _ = 2 * R ^ 2 := by rw [hOA]
+  have hweightedDisk :
+      α * (2 * ((Δ.re - A.re) * (B.re - A.re) +
+            (Δ.im - A.im) * (B.im - A.im))) +
+          β * (2 * ((Δ.re - A.re) * (C.re - A.re) +
+            (Δ.im - A.im) * (C.im - A.im))) =
+        2 * ((Δ.re - A.re) * (O.re - A.re) +
+          (Δ.im - A.im) * (O.im - A.im)) := by
+    rw [hcenter_re, hcenter_im']
+    ring
+  have hweighted := add_le_add hαB hβC
+  rw [hweightedCirc, hweightedDisk] at hweighted
+  have hRdot :
+      R ^ 2 ≤
+        (Δ.re - A.re) * (O.re - A.re) +
+          (Δ.im - A.im) * (O.im - A.im) := by
+    nlinarith only [hweighted]
+  have hcauchy :
+      ((Δ.re - A.re) * (O.re - A.re) +
+          (Δ.im - A.im) * (O.im - A.im)) ^ 2 ≤
+        ((Δ.re - A.re) ^ 2 + (Δ.im - A.im) ^ 2) *
+          ((O.re - A.re) ^ 2 + (O.im - A.im) ^ 2) := by
+    nlinarith only [sq_nonneg
+      ((Δ.re - A.re) * (O.im - A.im) -
+        (Δ.im - A.im) * (O.re - A.re))]
+  have hR2nonneg : 0 ≤ R ^ 2 := sq_nonneg R
+  have hdot_nonneg :
+      0 ≤ (Δ.re - A.re) * (O.re - A.re) +
+        (Δ.im - A.im) * (O.im - A.im) :=
+    hR2nonneg.trans hRdot
+  have hsq_lower :
+      (R ^ 2) ^ 2 ≤
+        ((Δ.re - A.re) * (O.re - A.re) +
+          (Δ.im - A.im) * (O.im - A.im)) ^ 2 :=
+    (sq_le_sq₀ hR2nonneg hdot_nonneg).mpr hRdot
+  have hmul : R ^ 2 * R ^ 2 ≤ S ^ 2 * R ^ 2 := by
+    calc
+      R ^ 2 * R ^ 2 = (R ^ 2) ^ 2 := by ring
+      _ ≤ ((Δ.re - A.re) * (O.re - A.re) +
+          (Δ.im - A.im) * (O.im - A.im)) ^ 2 := hsq_lower
+      _ ≤ ((Δ.re - A.re) ^ 2 + (Δ.im - A.im) ^ 2) *
+          ((O.re - A.re) ^ 2 + (O.im - A.im) ^ 2) := hcauchy
+      _ = S ^ 2 * R ^ 2 := by rw [hΔA, hOA]
+  have hR2pos : 0 < R ^ 2 := sq_pos_of_pos hcircle.1
+  have hRsq : R ^ 2 ≤ S ^ 2 :=
+    (mul_le_mul_iff_right₀ hR2pos).mp (by simpa [mul_comm] using hmul)
+  exact (sq_le_sq₀ hcircle.1.le hS).mp hRsq
+
+/-- Equality case of the radius inequality in Dahlberg's Lemma 10.
+
+Under the same vertex-cone and boundary hypotheses, a containing disk with
+the circumradius has the circumcenter as its center. -/
+theorem eq_circumcenter_of_inVertexCone_of_boundary_of_radius_eq
+    {A B C O Δ : ℂ} {R S : ℝ}
+    (hcircle : CircumcircleR2 A B C O R)
+    (hcone : InVertexCone B A C O)
+    (hS : 0 ≤ S)
+    (hA : dist Δ A = S)
+    (hB : InClosedDiskR2 Δ S B)
+    (hC : InClosedDiskR2 Δ S C)
+    (hRS : R = S) :
+    Δ = O := by
+  rcases hcone with ⟨α, β, hα, hβ, hcenter⟩
+  have hcenter_re := congrArg Complex.re hcenter
+  have hcenter_im := congrArg Complex.im hcenter
+  simp only [Complex.sub_re, Complex.sub_im, Complex.add_re, Complex.add_im,
+    Complex.mul_re, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im,
+    zero_mul, sub_zero] at hcenter_re hcenter_im
+  have hcenter_im' :
+      O.im - A.im = α * (B.im - A.im) + β * (C.im - A.im) := by
+    simpa only [add_zero] using hcenter_im
+  have hOA : (O.re - A.re) ^ 2 + (O.im - A.im) ^ 2 = R ^ 2 := by
+    have h := congrArg (fun x : ℝ => x ^ 2) hcircle.2.1
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
+    simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
+  have hOB : (O.re - B.re) ^ 2 + (O.im - B.im) ^ 2 = R ^ 2 := by
+    have h := congrArg (fun x : ℝ => x ^ 2) hcircle.2.2.1
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
+    simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
+  have hOC : (O.re - C.re) ^ 2 + (O.im - C.im) ^ 2 = R ^ 2 := by
+    have h := congrArg (fun x : ℝ => x ^ 2) hcircle.2.2.2
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
+    simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
+  have hΔA : (Δ.re - A.re) ^ 2 + (Δ.im - A.im) ^ 2 = S ^ 2 := by
+    have h := congrArg (fun x : ℝ => x ^ 2) hA
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
+    simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
+  have hΔB : (Δ.re - B.re) ^ 2 + (Δ.im - B.im) ^ 2 ≤ S ^ 2 := by
+    have h := (sq_le_sq₀ dist_nonneg hS).mpr hB
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
+    simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
+  have hΔC : (Δ.re - C.re) ^ 2 + (Δ.im - C.im) ^ 2 ≤ S ^ 2 := by
+    have h := (sq_le_sq₀ dist_nonneg hS).mpr hC
+    rw [dist_eq_norm, Complex.sq_norm, Complex.normSq_apply] at h
+    simpa only [Complex.sub_re, Complex.sub_im, pow_two] using h
+  have hOuB :
+      (B.re - A.re) ^ 2 + (B.im - A.im) ^ 2 =
+        2 * ((O.re - A.re) * (B.re - A.re) +
+          (O.im - A.im) * (B.im - A.im)) := by
+    nlinarith only [hOA, hOB]
+  have hOuC :
+      (C.re - A.re) ^ 2 + (C.im - A.im) ^ 2 =
+        2 * ((O.re - A.re) * (C.re - A.re) +
+          (O.im - A.im) * (C.im - A.im)) := by
+    nlinarith only [hOA, hOC]
+  have hΔuB :
+      (B.re - A.re) ^ 2 + (B.im - A.im) ^ 2 ≤
+        2 * ((Δ.re - A.re) * (B.re - A.re) +
+          (Δ.im - A.im) * (B.im - A.im)) := by
+    nlinarith only [hΔA, hΔB]
+  have hΔuC :
+      (C.re - A.re) ^ 2 + (C.im - A.im) ^ 2 ≤
+        2 * ((Δ.re - A.re) * (C.re - A.re) +
+          (Δ.im - A.im) * (C.im - A.im)) := by
+    nlinarith only [hΔA, hΔC]
+  have hαB := mul_le_mul_of_nonneg_left hΔuB hα
+  have hβC := mul_le_mul_of_nonneg_left hΔuC hβ
+  have hweightedCirc :
+      α * ((B.re - A.re) ^ 2 + (B.im - A.im) ^ 2) +
+          β * ((C.re - A.re) ^ 2 + (C.im - A.im) ^ 2) =
+        2 * R ^ 2 := by
+    rw [hOuB, hOuC]
+    calc
+      α * (2 * ((O.re - A.re) * (B.re - A.re) +
+            (O.im - A.im) * (B.im - A.im))) +
+          β * (2 * ((O.re - A.re) * (C.re - A.re) +
+            (O.im - A.im) * (C.im - A.im))) =
+          2 * ((O.re - A.re) *
+              (α * (B.re - A.re) + β * (C.re - A.re)) +
+            (O.im - A.im) *
+              (α * (B.im - A.im) + β * (C.im - A.im))) := by ring
+      _ = 2 * ((O.re - A.re) ^ 2 + (O.im - A.im) ^ 2) := by
+        rw [← hcenter_re, ← hcenter_im']
+        ring
+      _ = 2 * R ^ 2 := by rw [hOA]
+  have hweightedDisk :
+      α * (2 * ((Δ.re - A.re) * (B.re - A.re) +
+            (Δ.im - A.im) * (B.im - A.im))) +
+          β * (2 * ((Δ.re - A.re) * (C.re - A.re) +
+            (Δ.im - A.im) * (C.im - A.im))) =
+        2 * ((Δ.re - A.re) * (O.re - A.re) +
+          (Δ.im - A.im) * (O.im - A.im)) := by
+    rw [hcenter_re, hcenter_im']
+    ring
+  have hweighted := add_le_add hαB hβC
+  rw [hweightedCirc, hweightedDisk] at hweighted
+  have hRdot :
+      R ^ 2 ≤
+        (Δ.re - A.re) * (O.re - A.re) +
+          (Δ.im - A.im) * (O.im - A.im) := by
+    nlinarith only [hweighted]
+  have hΔA' : (Δ.re - A.re) ^ 2 + (Δ.im - A.im) ^ 2 = R ^ 2 := by
+    simpa only [← hRS] using hΔA
+  have hdist_sq :
+      (Δ.re - O.re) ^ 2 + (Δ.im - O.im) ^ 2 ≤ 0 := by
+    nlinarith only [hΔA', hOA, hRdot]
+  apply Complex.ext
+  · nlinarith only [hdist_sq, sq_nonneg (Δ.re - O.re), sq_nonneg (Δ.im - O.im)]
+  · nlinarith only [hdist_sq, sq_nonneg (Δ.re - O.re), sq_nonneg (Δ.im - O.im)]
+
 /-- Propagation primitive: two adjacent four-point windows whose common
 circles overlap in a noncollinear triple determine the same circle. -/
 theorem edgeCommonCircumcircle_overlap_unique {A B C P Q O₁ O₂ : ℂ} {R₁ R₂ : ℝ}
@@ -7042,6 +7289,25 @@ structure DahlbergE2Theorem6InteriorMissingDisksCertificate {n : ℕ}
   misses_j : EdgePrevCurvatureDiskInteriorMissesAll v j
   distinct : EdgePrevCurvatureCirclesDistinct v i j
 
+/-- Exact certificate for Dahlberg's Theorem 6 (CDFV).
+
+The paper supplies two curvature disks containing all polygon vertices and
+two curvature disks whose interiors contain no polygon vertex.  The four
+curvature circles are pairwise distinct, but the theorem does not assert a
+cyclic alternation of these witnesses and does not attach local-extremum data
+to the same four indices. -/
+structure DahlbergE2Theorem6PaperCertificate {n : ℕ} (v : ZMod n → ℂ) where
+  containing : DahlbergE2Theorem6ContainingDisksCertificate v
+  interiorMissing : DahlbergE2Theorem6InteriorMissingDisksCertificate v
+  containing_i_ne_missing_i :
+    EdgePrevCurvatureCirclesDistinct v containing.i interiorMissing.i
+  containing_i_ne_missing_j :
+    EdgePrevCurvatureCirclesDistinct v containing.i interiorMissing.j
+  containing_j_ne_missing_i :
+    EdgePrevCurvatureCirclesDistinct v containing.j interiorMissing.i
+  containing_j_ne_missing_j :
+    EdgePrevCurvatureCirclesDistinct v containing.j interiorMissing.j
+
 /-- A Lean-side certificate for Dahlberg's Theorem 6 / CDFV.
 
 The paper states the result using four curvature disks: two whose interiors
@@ -7694,6 +7960,31 @@ theorem edgePrevCurvatureCirclesDistinct_of_containsAll_of_interiorMissesAll
   exact le_antisymm (hcontains k)
     (by simpa [hcenter, hradius] using hmisses k)
 
+/-- The two same-type disk certificates from Dahlberg's Lemmas 5 and 7 form
+the exact Theorem 6 certificate.  The four cross-type distinctness statements
+are formal consequences of nonconcyclicity. -/
+def dahlbergE2Theorem6PaperCertificate_of_splitCertificates
+    {n : ℕ} {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hnoncircle : ¬ Concyclic v)
+    (containing : DahlbergE2Theorem6ContainingDisksCertificate v)
+    (interiorMissing : DahlbergE2Theorem6InteriorMissingDisksCertificate v) :
+    DahlbergE2Theorem6PaperCertificate v :=
+  { containing := containing
+    interiorMissing := interiorMissing
+    containing_i_ne_missing_i :=
+      edgePrevCurvatureCirclesDistinct_of_containsAll_of_interiorMissesAll
+        hsimple hnoncircle containing.contains_i interiorMissing.misses_i
+    containing_i_ne_missing_j :=
+      edgePrevCurvatureCirclesDistinct_of_containsAll_of_interiorMissesAll
+        hsimple hnoncircle containing.contains_i interiorMissing.misses_j
+    containing_j_ne_missing_i :=
+      edgePrevCurvatureCirclesDistinct_of_containsAll_of_interiorMissesAll
+        hsimple hnoncircle containing.contains_j interiorMissing.misses_i
+    containing_j_ne_missing_j :=
+      edgePrevCurvatureCirclesDistinct_of_containsAll_of_interiorMissesAll
+        hsimple hnoncircle containing.contains_j interiorMissing.misses_j }
+
 /-- Alternating containing/missing disk data upgrades to the full ordered-disk
 certificate: the only missing fields are the four cross distinctness
 statements, and these follow formally from nonconcyclicity. -/
@@ -8198,11 +8489,26 @@ for the previous-vertex curvature-radius profile. -/
 def DahlbergE2ConvexDfvRadiusWitnesses {n : ℕ} (v : ZMod n → ℂ) : Prop :=
   DahlbergFourVertex (EdgePrevCircleRadiusProfile v)
 
-/-- Geometric CDFV source matching Dahlberg's Theorem 6 statement.
+/-- Exact source form of Dahlberg's Theorem 6.
 
-This is stronger-looking only because it keeps the paper's curvature-disk
-data instead of immediately projecting to the radius-profile
-`DahlbergFourVertex` statement used downstream. -/
+It records the paper's unordered pair of containing curvature disks and
+unordered pair of interior-missing curvature disks, with all four curvature
+circles pairwise distinct. -/
+def DahlbergE2Theorem6ExactPaperSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ Concyclic v) →
+    Nonempty (DahlbergE2Theorem6PaperCertificate v)
+
+/-- Legacy strengthened CDFV source used by the earlier reduction.
+
+Unlike Dahlberg's Theorem 6 itself, this source additionally requires the
+four disk witnesses to occur in alternating cyclic order and carries
+plateau-aware extrema at those same indices.  The exact paper statement is
+`DahlbergE2Theorem6ExactPaperSource`; the extra bridge must be proved
+separately. -/
 def DahlbergE2Theorem6GeometricCdfvSource : Prop :=
   ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
     Gluck.Discrete.IsSimplePolygon v →
@@ -8243,6 +8549,47 @@ def DahlbergE2Theorem6AssemblySource : Prop :=
     Nonempty (DahlbergE2Theorem6ContainingDisksCertificate v) →
     Nonempty (DahlbergE2Theorem6InteriorMissingDisksCertificate v) →
     Nonempty (DahlbergE2Theorem6CdfvCertificate v)
+
+/-- Dahlberg's Lemmas 5 and 7 imply the exact statement of Theorem 6.
+
+The only fields not already present in the two lemma certificates are the
+four cross-type circle inequalities, which follow from nonconcyclicity. -/
+theorem dahlbergE2Theorem6ExactPaperSource_of_lemma5_lemma7
+    (hlemma5 : DahlbergE2Theorem6Lemma5ContainingDisksSource)
+    (hlemma7 : DahlbergE2Theorem6Lemma7InteriorMissingDisksSource) :
+    DahlbergE2Theorem6ExactPaperSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle
+  letI : NeZero n := hne
+  rcases hlemma5 hn hsimple hregular horient hnoncircle with ⟨containing⟩
+  rcases hlemma7 hn hsimple hregular horient hnoncircle with ⟨interiorMissing⟩
+  exact ⟨dahlbergE2Theorem6PaperCertificate_of_splitCertificates
+    hsimple hnoncircle containing interiorMissing⟩
+
+/-- The exact Theorem 6 source projects back to Dahlberg's Lemmas 5 and 7. -/
+theorem dahlbergE2Theorem6_lemma5_lemma7_of_exactPaperSource
+    (hsrc : DahlbergE2Theorem6ExactPaperSource) :
+    DahlbergE2Theorem6Lemma5ContainingDisksSource ∧
+      DahlbergE2Theorem6Lemma7InteriorMissingDisksSource := by
+  constructor
+  · intro n hne hn v hsimple hregular horient hnoncircle
+    letI : NeZero n := hne
+    rcases hsrc hn hsimple hregular horient hnoncircle with ⟨cert⟩
+    exact ⟨cert.containing⟩
+  · intro n hne hn v hsimple hregular horient hnoncircle
+    letI : NeZero n := hne
+    rcases hsrc hn hsimple hregular horient hnoncircle with ⟨cert⟩
+    exact ⟨cert.interiorMissing⟩
+
+/-- The exact Theorem 6 source is precisely the conjunction of the paper's
+Lemmas 5 and 7 on the current certificate interfaces. -/
+theorem dahlbergE2Theorem6ExactPaperSource_iff_lemma5_lemma7 :
+    DahlbergE2Theorem6ExactPaperSource ↔
+      DahlbergE2Theorem6Lemma5ContainingDisksSource ∧
+        DahlbergE2Theorem6Lemma7InteriorMissingDisksSource := by
+  constructor
+  · exact dahlbergE2Theorem6_lemma5_lemma7_of_exactPaperSource
+  · rintro ⟨hlemma5, hlemma7⟩
+    exact dahlbergE2Theorem6ExactPaperSource_of_lemma5_lemma7 hlemma5 hlemma7
 
 /-- Sharper assembly interface for Dahlberg §3 Theorem 6: construct ordered
 disk data and prove the matching radius-profile extrema separately. -/
@@ -8714,6 +9061,32 @@ def dahlbergE2Theorem6InteriorMissingDisksCertificate_of_cdfvCertificate
       misses_i := cert.misses₂
       misses_j := cert.misses₄
       distinct := cert.circle₂_ne₄ }
+
+/-- Forget the additional cyclic-order and local-extremum data from the
+legacy strengthened CDFV certificate, retaining exactly Dahlberg's four-disk
+Theorem 6 conclusion. -/
+def dahlbergE2Theorem6PaperCertificate_of_cdfvCertificate
+    {n : ℕ} {v : ZMod n → ℂ}
+    (cert : DahlbergE2Theorem6CdfvCertificate v) :
+    DahlbergE2Theorem6PaperCertificate v :=
+  { containing :=
+      dahlbergE2Theorem6ContainingDisksCertificate_of_cdfvCertificate cert
+    interiorMissing :=
+      dahlbergE2Theorem6InteriorMissingDisksCertificate_of_cdfvCertificate cert
+    containing_i_ne_missing_i := cert.circle₁_ne₂
+    containing_i_ne_missing_j := cert.circle₁_ne₄
+    containing_j_ne_missing_i := cert.circle₂_ne₃.symm
+    containing_j_ne_missing_j := cert.circle₃_ne₄ }
+
+/-- The legacy strengthened CDFV source implies the exact statement of
+Dahlberg's Theorem 6 by forgetting its uncited extra data. -/
+theorem dahlbergE2Theorem6ExactPaperSource_of_geometricCdfvSource
+    (hsrc : DahlbergE2Theorem6GeometricCdfvSource) :
+    DahlbergE2Theorem6ExactPaperSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle
+  letI : NeZero n := hne
+  rcases hsrc hn hsimple hregular horient hnoncircle with ⟨cert⟩
+  exact ⟨dahlbergE2Theorem6PaperCertificate_of_cdfvCertificate cert⟩
 
 /-- The geometric CDFV source implies the split §3 paper sources.  The assembly
 component is immediate because the full CDFV certificate is already supplied. -/
@@ -10257,6 +10630,32 @@ theorem dahlbergE2_lemma8_local_edge_nesting_source :
   exact polygonEdgeDahlbergRegion_anti_of_endpoint_order hsimple hregular i
     (by simpa [SignedMengerProfile, sub_eq_add_neg, add_assoc] using hκ)
 
+/-- Paper-faithful global bridge from Theorem 6 to Dahlberg's Lemma 9.
+
+Unlike the legacy strict-adjacent-turn interface below, this asks only for
+the plateau-aware four-vertex conclusion stated in the paper.  Its geometric
+input is the exact unordered four-disk certificate from Theorem 6; Lemma 8's
+local region nesting is already proved above. -/
+def DahlbergE2Lemma9PaperBridgeSource : Prop :=
+  ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+    Gluck.Discrete.IsSimplePolygon v →
+    DahlbergRegular v →
+    PositivePolygonOrientation v →
+    (¬ Concyclic v) →
+    DahlbergE2Theorem6PaperCertificate v →
+    DahlbergFourVertex (SignedMengerProfile v)
+
+/-- The exact Theorem 6 source and the paper-faithful Lemma 9 bridge give the
+strict positive-orientation D4VT source used by the final theorem. -/
+theorem dahlbergE2ConvexDfvSignedNonconcyclicSource_of_exactTheorem6_and_lemma9Bridge
+    (htheorem6 : DahlbergE2Theorem6ExactPaperSource)
+    (hlemma9 : DahlbergE2Lemma9PaperBridgeSource) :
+    DahlbergE2ConvexDfvSignedNonconcyclicSource := by
+  intro n hne hn v hsimple hregular horient hnoncircle
+  letI : NeZero n := hne
+  rcases htheorem6 hn hsimple hregular horient hnoncircle with ⟨cert⟩
+  exact hlemma9 hn hsimple hregular horient hnoncircle cert
+
 /-- The remaining global part of Lemma 8: applying the local nesting along the
 two monotone arcs supplied by the CDFV radius witnesses and extracting the
 ordered one-step previous-radius turns. -/
@@ -11312,6 +11711,31 @@ def DahlbergE2DiskAuxiliaryBoundarySuccessorUnitAuxiliaryPolygonSource : Prop :=
     v 0 = 1 →
     dist 0 (v 1) < 1 →
     Nonempty (DahlbergAuxiliaryPolygon v)
+
+/-- Paper-faithful §4 source.
+
+The proof of Dahlberg's main theorem assumes failure of the four-vertex
+conclusion, constructs a strictly convex auxiliary polygon, and contradicts
+the two distinct *containing curvature disks* supplied by Theorem 6.  It does
+not prove that an arbitrary D4VT conclusion for the auxiliary polygon
+transfers to the original polygon.  Accordingly this interface takes the
+exact Theorem 6 source and concludes D4VT for the non-strict branch directly. -/
+def DahlbergE2Section4PaperDfvSource : Prop :=
+  DahlbergE2Theorem6ExactPaperSource →
+    ∀ {n : ℕ} [NeZero n], ∀ (_hn : 4 ≤ n) {v : ZMod n → ℂ},
+      Gluck.Discrete.IsSimplePolygon v →
+      DahlbergRegular v →
+      (¬ Concyclic v) →
+      (¬ (PositivePolygonOrientation v ∨ NegativePolygonOrientation v)) →
+      DahlbergFourVertex (SignedMengerProfile v)
+
+/-- Correct primitive paper surface for Dahlberg's Euclidean D4VT: the exact
+four-disk Theorem 6, its plateau-aware Lemma 9 consequence, and the direct §4
+non-strict contradiction. -/
+def DahlbergE2ExactPaperPrimitiveSources : Prop :=
+  DahlbergE2Theorem6ExactPaperSource ∧
+  DahlbergE2Lemma9PaperBridgeSource ∧
+  DahlbergE2Section4PaperDfvSource
 
 /-- The current complete Euclidean paper source surface for Dahlberg's
 discrete four-vertex theorem.
@@ -13985,6 +14409,26 @@ theorem dahlbergFourVertex_of_strictOrientation_convexDfvSource
       hsrc hn hsimple hregular hpos hnoncircle
   · exact dahlbergFourVertex_of_negOrientation_convexDfvSource
       hsrc hn hsimple hregular hneg hnoncircle
+
+/-- Dahlberg's Euclidean D4VT from the exact paper-faithful primitive
+sources.  The strict branch combines the exact four-disk Theorem 6 with the
+plateau-aware Lemma 9 bridge; the non-strict branch is the direct §4
+contradiction, without routing through the legacy auxiliary-transfer source. -/
+theorem signedMengerProfile_dahlbergFourVertex_E2_of_exactPaperPrimitiveSources
+    (hsrc : DahlbergE2ExactPaperPrimitiveSources)
+    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {v : ZMod n → ℂ}
+    (hsimple : Gluck.Discrete.IsSimplePolygon v)
+    (hregular : DahlbergRegular v)
+    (hnoncircle : ¬ Concyclic v) :
+    DahlbergFourVertex (SignedMengerProfile v) := by
+  have hstrict : DahlbergE2ConvexDfvSignedSource :=
+    dahlbergE2ConvexDfvSignedSource_of_nonconcyclicSource
+      (dahlbergE2ConvexDfvSignedNonconcyclicSource_of_exactTheorem6_and_lemma9Bridge
+        hsrc.1 hsrc.2.1)
+  by_cases horient : PositivePolygonOrientation v ∨ NegativePolygonOrientation v
+  · exact dahlbergFourVertex_of_strictOrientation_convexDfvSource
+      hstrict hn hsimple hregular horient hnoncircle
+  · exact hsrc.2.2 hsrc.1 hn hsimple hregular hnoncircle horient
 
 /-- The non-strict disk-reduction branch of Dahlberg's E² D4VT from the weaker
 final-D4VT source package. -/
