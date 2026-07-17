@@ -232,6 +232,40 @@ private theorem not_crossR2_pos_neg_of_disjoint_segments_in_disk
     exact lineMap_mem_segment ℝ A B hsIcc
   exact Set.disjoint_left.mp hdisjoint hYsegAB hYsegCD
 
+/-- A segment in a closed disk whose endpoints lie on opposite strict sides
+of a boundary chord must meet that chord.
+
+This is the public edge-level crossing primitive extracted from the contact
+orientation argument.  It is deliberately stated as failure of disjointness,
+which is exactly the form consumed by polygonal-chain reductions. -/
+theorem boundaryChord_not_disjoint_segment_of_cross_pos_neg
+    {O A B C D : ℂ} {R : ℝ}
+    (hAB : A ≠ B)
+    (hA : dist O A = R) (hB : dist O B = R)
+    (hC : dist O C ≤ R) (hD : dist O D ≤ R)
+    (hCpos : 0 < Gluck.Discrete.crossR2 A B C)
+    (hDneg : Gluck.Discrete.crossR2 A B D < 0) :
+    ¬ Disjoint (segment ℝ A B) (segment ℝ C D) := by
+  intro hdisjoint
+  exact not_crossR2_pos_neg_of_disjoint_segments_in_disk
+    hAB hA hB hC hD hdisjoint ⟨hCpos, hDneg⟩
+
+/-- A disk-contained point on the supporting line of a nondegenerate
+boundary chord belongs to the chord itself. -/
+theorem mem_boundaryChord_of_cross_eq_zero
+    {O A B Y : ℂ} {R : ℝ}
+    (hAB : A ≠ B)
+    (hA : dist O A = R) (hB : dist O B = R)
+    (hY : dist O Y ≤ R)
+    (hcross : Gluck.Discrete.crossR2 A B Y = 0) :
+    Y ∈ segment ℝ A B := by
+  obtain ⟨s, hs⟩ := exists_lineMap_eq_of_crossR2_eq_zero_disk hAB hcross
+  have hsIcc : s ∈ Set.Icc (0 : ℝ) 1 :=
+    lineMap_parameter_mem_Icc_of_mem_closedBall_of_boundary
+      hAB hA hB hs.symm hY
+  rw [← hs]
+  exact lineMap_mem_segment ℝ A B hsIcc
+
 private theorem zmod_natCast_ne_of_lt_disk {n : ℕ} [NeZero n] {a b : ℕ}
     (ha : a < n) (hb : b < n) (hab : a ≠ b) :
     (a : ZMod n) ≠ (b : ZMod n) := by
