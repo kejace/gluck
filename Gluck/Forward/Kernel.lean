@@ -2568,8 +2568,4 @@ def InVertexCone (A B C O : ℂ) : Prop :=
   ∃ a b : ℝ, 0 ≤ a ∧ 0 ≤ b ∧
     O - B = (a : ℂ) * (A - B) + (b : ℂ) * (C - B)
 
-/-- Dahlberg local regularity at a vertex.  A genuine triple has a circumcenter
-in the vertex cone.  A subdividing collinear vertex is admitted when it lies on
-the segment joining its neighbours, matching Dahlberg's zero-curvature case. -/
-
 end Gluck.Forward
