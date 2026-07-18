@@ -1,9 +1,8 @@
 import Gluck.Forward.Kernel
-import Gluck.Forward.Discrete.Defs
 
 /-!
 # Definitions for forward four-vertex theorems
 
-Compatibility shim: `Gluck.Forward.Defs` re-exports both the shared forward kernel
-and the Euclidean discrete tail used by the discrete route.
+Core compatibility shim: `Gluck.Forward.Defs` re-exports the shared forward
+kernel used by both smooth and discrete four-vertex development.
 -/
