@@ -1,11 +1,13 @@
 # Forward four-vertex formalization
 
-This subtree contains the active forward-theorem work for this branch:
+This subtree contains the active forward-theorem work for this branch.
 
 - `Smooth.lean` states the Euclidean smooth forward four-vertex theorem route.
-- `Dahlberg.lean` contains the Euclidean discrete Dahlberg/D4VT development.
-- `DahlbergExact.lean` exposes the source-free Euclidean discrete endpoint.
+- Discrete modules now live under `Gluck.Forward.Discrete` (including
+  `Dahlberg`, `DahlbergExact`, and all `Section4*`/`MinimalDisk*` machinery).
 - `Euclidean.lean` provides the public E² wrappers.
+
+`Gluck.Forward` currently re-exports both the smooth and discrete entry paths.
 
 The space-form, conformal-Menger, and deferred Gluck/Forward experiments were
 moved out of this worktree.

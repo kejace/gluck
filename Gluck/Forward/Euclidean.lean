@@ -1,4 +1,4 @@
-import Gluck.Forward.DahlbergExact
+import Gluck.Forward.Discrete.DahlbergExact
 import Gluck.Forward.Smooth
 
 /-!
