@@ -1,19 +1,4 @@
-import Gluck.Forward.Dahlberg
-import Gluck.Forward.Section4PositiveGap
-import Gluck.Forward.Section4PositiveChain
-import Gluck.Forward.Section4OrientedPositiveChain
-import Gluck.Forward.Section4CircleSplice
-import Gluck.Forward.Section4AuxiliaryConsumer
-import Gluck.Forward.Section4AuxiliaryRadiusObstruction
-import Gluck.Forward.CircleSemicircleRadiusObstruction
-import Gluck.Forward.Section4CircleSpliceRadius
-import Gluck.Forward.Section4CircleSpliceNonconcyclic
-import Gluck.Forward.Section4CircleSpliceOrientation
-import Gluck.Forward.Section4CircleSpliceAssembly
-import Gluck.Forward.Section4CircleArc
-import Gluck.Forward.Section4CircleSpliceSimple
-import Gluck.Forward.Section4EndpointCurvature
-import Gluck.Forward.Section4EndpointSpliceRegularity
+import Gluck.Forward.Discrete.Prelude
 import Gluck.Forward.Smooth
 import Gluck.Forward.Euclidean
 
