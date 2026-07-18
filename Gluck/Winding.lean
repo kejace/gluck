@@ -1040,6 +1040,20 @@ theorem windingNumberC_expLoopRev (c : ℂ) (hc : c ≠ 0) :
     = c * ((negStandardLoop t : Circle) : ℂ)
   congr 1
 
+/-- Compatibility name for the conjugate once-around loop:
+`t ↦ c·conj(e^{2πit}) = c·e^{-2πit}`. -/
+noncomputable abbrev conjLoop (c : ℂ) : C(I, ℂ) :=
+  expLoopRev c
+
+/-- The conjugate once-around loop of a nonzero scalar is nowhere zero. -/
+theorem conjLoop_ne_zero {c : ℂ} (hc : c ≠ 0) (t : I) : conjLoop c t ≠ 0 :=
+  expLoopRev_ne_zero c hc t
+
+/-- The conjugate once-around loop has winding number `−1`. -/
+theorem windingNumberC_conj_loop {c : ℂ} (hc : c ≠ 0) :
+    windingNumberC (conjLoop c) (conjLoop_ne_zero hc) = -1 := by
+  simpa only [conjLoop, conjLoop_ne_zero] using windingNumberC_expLoopRev c hc
+
 /-- The **nonsingular real-linear loop** `t ↦ a·e^{2π i t} + b·e^{−2π i t}`
 (blueprint `lem:winding_number_c_linear_loop`): the boundary loop of the
 real-linear map `z ↦ a z + b z̄` on the unit circle.  Project-local: Mathlib has

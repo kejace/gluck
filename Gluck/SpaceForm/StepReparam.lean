@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
 import Gluck.SpaceForm.Margins
-import Gluck.Sphere.StepReparam
 import Gluck.Internal.StepReparam
 
 /-!

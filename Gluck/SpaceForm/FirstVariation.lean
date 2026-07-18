@@ -5,7 +5,7 @@ Authors: kejace
 -/
 import Gluck.SpaceForm.ArcAlgebra
 import Gluck.SpaceForm.Margins
-import Gluck.Sphere.FirstVariation.Frame
+import Gluck.Internal.FirstVariationFrame
 
 /-!
 # First-variation expansion of the step error map (`ε`-generic)

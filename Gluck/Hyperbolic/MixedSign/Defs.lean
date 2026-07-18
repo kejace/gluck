@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
 import Gluck.Hyperbolic.ArcLength
-import Gluck.Sphere.Mixed
+import Gluck.Internal.StepReparam
 
 /-!
 # H² mixed-sign converse — Defs (ALM-1, ALM-2)
@@ -87,7 +87,7 @@ reparametrized profile `κ ∘ h₁` is `L¹`-close to the symmetric step bicirc
 the reference bicircle's tangent angle is strictly monotone — the property the
 non-convex simplicity transport (ALM-5) rests on; the genuine negativity of `κ`
 enters only through the `L¹` error, absorbed by `h₁`.  Direct REUSE of the
-model-agnostic `Gluck.exists_step_L1_reparam_relaxed` (`SphereMixed.lean:104`),
+model-agnostic `Gluck.exists_step_L1_reparam_relaxed` (`Internal/StepReparam.lean`),
 which is a pure profile reparametrization on `S¹` with no ambient geometry.
 (Mirror of the `Data` step of `mixed_spherical_endpoint_winding`,
 `SphereMixed.lean:169`, and `exists_alignmentData`, `DahlbergStep1.lean:86`.) -/
