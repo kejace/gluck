@@ -61,8 +61,7 @@ theorem crossR2_circlePoint_pos_of_dist_lt_innerRadius
   have hsin : 0 < Real.sin ((θ₁ - θ₀) / 2) :=
     Real.sin_pos_of_pos_of_lt_pi hδpos hδltpi
   have hu : ‖circlePoint 0 1 ((θ₀ + θ₁) / 2)‖ = 1 := by
-    simpa [dist_eq_norm] using
-      dist_circlePoint_center 0 1 ((θ₀ + θ₁) / 2)
+    simp
   have hinner :
       inner ℝ (circlePoint 0 1 ((θ₀ + θ₁) / 2)) (P - O) <
         R * Real.cos ((θ₁ - θ₀) / 2) := by
