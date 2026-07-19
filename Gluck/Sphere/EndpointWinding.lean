@@ -4,9 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
 import Gluck.Sphere.ConjWinding
-import Gluck.Sphere.Flow
 import Gluck.SpaceForm.EndpointWinding
-import Gluck.Sphere.Admissible
 
 /-!
 # Spherical endpoint winding

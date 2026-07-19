@@ -44,23 +44,6 @@ lemma radius_pos {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ) :
   · intro θ; simp only [radius]; rw [hp θ]
   · intro θ; simp only [radius]; exact one_div_pos.mpr (hpos θ)
 
-/-- A positive continuous periodic curvature profile has a uniform positive
-lower bound. The bound is chosen below `1`, which is convenient for the disk
-models used by the spherical and space-form developments. -/
-lemma exists_curvature_lower_bound {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ) :
-    ∃ R, 0 < R ∧ R < 1 ∧ ∀ θ, R < κ θ := by
-  obtain ⟨hcont, hper, hpos⟩ := hκ
-  obtain ⟨θ₀, -, hmin⟩ := isCompact_Icc.exists_isMinOn
-    (Set.nonempty_Icc.mpr (by positivity : (0 : ℝ) ≤ 2 * Real.pi)) hcont.continuousOn
-  have h2 : (0 : ℝ) < min (κ θ₀) 1 := lt_min (hpos θ₀) one_pos
-  refine ⟨min (κ θ₀) 1 / 2, by positivity, ?_, fun θ => ?_⟩
-  · have : min (κ θ₀) 1 ≤ 1 := min_le_right _ _
-    linarith
-  · obtain ⟨y, hy, hyθ⟩ := hper.exists_mem_Ico₀ Real.two_pi_pos θ
-    have hym : κ θ₀ ≤ κ y := hmin ⟨hy.1, hy.2.le⟩
-    rw [hyθ]
-    linarith [min_le_left (κ θ₀) 1]
-
 /-- A curvature function `κ` satisfies the *four-vertex condition* if either it
 is constant, or it has *two value-separated, alternating local extrema*: four
 points `p₁ < q₁ < p₂ < q₂` in a single fundamental period (`q₂ < p₁ + 2π`) with

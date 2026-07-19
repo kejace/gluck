@@ -7,8 +7,6 @@ import Gluck.Euclidean
 import Gluck.Sphere
 import Gluck.SpaceForm
 import Gluck.Hyperbolic
-import Gluck.Discrete
-import Gluck.CyclicOrder
 
 /-!
 # Gluck: umbrella import

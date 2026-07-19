@@ -1,5 +1,4 @@
 import Gluck.Sphere.Converse
-import Gluck.Internal.StepReparam
 
 /-!
 # The spherical converse (S², stage 2) — mixed-sign curvature
@@ -79,6 +78,75 @@ theorem MixedSignSphereFourVertex.of_sphereFourVertex {κ : ℝ → ℝ}
     refine Or.inr ⟨p₁, q₁, p₂, q₂, h12, h23, h34, h41, hm1, hm2, hn1, hn2, hsep0,
       c, by rw [hcdef]; linarith, by rw [hcdef]; linarith, fun θ => ?_⟩
     exact lt_trans (neg_lt_zero.mpr (centeredRadius_pos c)) (hpos θ)
+
+/-! ## The relaxed `L¹` step reparametrization (constant-shift reduction) -/
+
+/-- Adding a constant to both levels of the four-arc step curvature shifts its
+values pointwise: `stepCurvature` takes only the two level values, each moved
+by `M`. The one Lean fact behind the constant-shift reduction of
+`exists_step_L1_reparam_relaxed`. -/
+lemma stepCurvature_add_const (a b θ₁ θ₂ θ₃ θ₄ M θ : ℝ) :
+    stepCurvature (a + M) (b + M) θ₁ θ₂ θ₃ θ₄ θ
+      = stepCurvature a b θ₁ θ₂ θ₃ θ₄ θ + M := by
+  simp only [stepCurvature]
+  split_ifs <;> rfl
+
+/-- **`L¹` step reparametrization without positivity.** The conclusion of
+`exists_step_L1_reparam` for a merely continuous, `2π`-periodic `κ` (the
+levels `0 < a < b` stay positive — in the mixed assembly they live in the
+positive part of the overlap window). Constant-shift reduction: `κ + M` is a
+curvature function for large `M`, the crossing data shifts to
+`(a + M, b + M)`, and the `L¹` integrand is shift-invariant by
+`stepCurvature_add_const`, so the reparametrization produced for `κ + M`
+works verbatim for `κ`. The frozen Euclidean plateau engine
+(`exists_preliminary_reparam`) is only ever applied to a positive function.
+(Blueprint `lem:step_L1_reparam_relaxed`.) -/
+lemma exists_step_L1_reparam_relaxed {κ : ℝ → ℝ} (hκc : Continuous κ)
+    (hκper : Function.Periodic κ (2 * π))
+    {a b θ₁ θ₂ θ₃ θ₄ : ℝ} (ha : 0 < a) (hab : a < b)
+    (h12 : θ₁ < θ₂) (h23 : θ₂ < θ₃) (h34 : θ₃ < θ₄) (h41 : θ₄ < θ₁ + 2 * π)
+    (hv₁ : κ θ₁ = a) (hv₂ : κ θ₂ = b) (hv₃ : κ θ₃ = a) (hv₄ : κ θ₄ = b)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∃ h₁ : ℝ → ℝ, StrictMono h₁ ∧ Continuous h₁ ∧
+      (∀ θ, h₁ (θ + 2 * π) = h₁ θ + 2 * π) ∧
+      (∃ v : ℝ → ℝ, Continuous v ∧ (∀ θ, 0 < v θ) ∧ ∀ θ, HasDerivAt h₁ (v θ) θ) ∧
+      (∫ θ in (0 : ℝ)..(2 * π),
+        |κ (h₁ θ) - stepCurvature b a 0 (π / 2) π (3 * π / 2) θ|) < ε := by
+  obtain ⟨θ₀, -, hmin⟩ := isCompact_Icc.exists_isMinOn
+    (Set.nonempty_Icc.mpr (by positivity : (0 : ℝ) ≤ 2 * π)) hκc.continuousOn
+  have hglob : ∀ θ, κ θ₀ ≤ κ θ := by
+    intro θ
+    obtain ⟨y, hy, hyθ⟩ := hκper.exists_mem_Ico₀ Real.two_pi_pos θ
+    rw [hyθ]
+    exact hmin ⟨hy.1, hy.2.le⟩
+  set M : ℝ := max 0 (1 - κ θ₀) with hMdef
+  have hM0 : 0 ≤ M := le_max_left _ _
+  have hMκ : ∀ θ, 1 ≤ κ θ + M := by
+    intro θ
+    have h1 : 1 - κ θ₀ ≤ M := le_max_right _ _
+    have h2 := hglob θ
+    linarith
+  have hκ' : IsCurvatureFunction (fun θ => κ θ + M) :=
+    ⟨hκc.add continuous_const, fun θ => by simp only [hκper θ],
+      fun θ => lt_of_lt_of_le one_pos (hMκ θ)⟩
+  obtain ⟨h₁, hmono, hcont, hqper, hv, hint⟩ :=
+    exists_step_L1_reparam hκ' (by linarith : (0 : ℝ) < a + M)
+      (by linarith : a + M < b + M) h12 h23 h34 h41
+      (show κ θ₁ + M = a + M by rw [hv₁]) (show κ θ₂ + M = b + M by rw [hv₂])
+      (show κ θ₃ + M = a + M by rw [hv₃]) (show κ θ₄ + M = b + M by rw [hv₄]) hε
+  refine ⟨h₁, hmono, hcont, hqper, hv, ?_⟩
+  have heq : ∀ θ,
+      |κ (h₁ θ) + M - stepCurvature (b + M) (a + M) 0 (π / 2) π (3 * π / 2) θ|
+        = |κ (h₁ θ) - stepCurvature b a 0 (π / 2) π (3 * π / 2) θ| := by
+    intro θ
+    rw [stepCurvature_add_const]
+    ring_nf
+  calc (∫ θ in (0 : ℝ)..(2 * π),
+        |κ (h₁ θ) - stepCurvature b a 0 (π / 2) π (3 * π / 2) θ|)
+      = ∫ θ in (0 : ℝ)..(2 * π),
+        |κ (h₁ θ) + M - stepCurvature (b + M) (a + M) 0 (π / 2) π (3 * π / 2) θ| := by
+        exact intervalIntegral.integral_congr fun θ _ => (heq θ).symm
+    _ < ε := hint
 
 /-! ## The mixed-sign endpoint winding assembly (S2 analogue of S2-D) -/
 
@@ -336,13 +404,7 @@ theorem mixed_spherical_endpoint_winding {κ : ℝ → ℝ} (hκc : Continuous �
     fun t => rfl
   have hconjval : ∀ t : I, conjLoop w₀ t
       = w₀ * (starRingEnd ℂ) ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ) :=
-    fun t => by
-      rw [conjLoop, expLoopRev_apply]
-      rw [Circle.coe_exp]
-      congr 1
-      rw [← Complex.exp_conj, map_mul, Complex.conj_I, Complex.conj_ofReal]
-      push_cast
-      ring_nf
+    fun t => rfl
   have hexp01 : Circle.exp (2 * π * ((0 : I) : ℝ))
       = Circle.exp (2 * π * ((1 : I) : ℝ)) := by
     rw [Set.Icc.coe_zero, Set.Icc.coe_one, mul_zero, mul_one, Circle.exp_zero,

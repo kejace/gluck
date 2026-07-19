@@ -141,14 +141,5 @@ theorem crossR2_circlePoint_pos_of_ordered_after_wrap
   rw [← circlePoint_add_two_pi O R θ₂]
   exact crossR2_circlePoint_pos_of_ordered O hR h₀₁ h₁₂ (by linarith)
 
-/-- For the closing chord, lift its endpoint and every intermediate angle by
-one turn. This gives the positive side of the closing oriented edge. -/
-theorem crossR2_circlePoint_pos_of_wrapped_edge
-    (O : ℂ) {R θ₀ θ₁ θ₂ : ℝ} (hR : R ≠ 0)
-    (h₀₂ : θ₀ < θ₂) (h₂₁ : θ₂ < θ₁) (hspan : θ₁ < θ₀ + 2 * Real.pi) :
-    0 < crossR2 (circlePoint O R θ₁) (circlePoint O R θ₀)
-      (circlePoint O R θ₂) := by
-  rw [← circlePoint_add_two_pi O R θ₀, ← circlePoint_add_two_pi O R θ₂]
-  exact crossR2_circlePoint_pos_of_ordered O hR hspan (by linarith) (by linarith)
 
 end Gluck.Discrete

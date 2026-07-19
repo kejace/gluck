@@ -35,265 +35,26 @@ theorem smoothFourVertex_of_fourVertexCondition {κ : ℝ → ℝ}
     exact Or.inr ⟨p₁, q₁, p₂, q₂, hpq, hqp, hpq', hcycle,
       hmax₁, hmin₁, hmax₂, hmin₂⟩
 
-/-- Positive affine changes preserve the value-separated four-vertex
-condition. -/
-theorem fourVertexCondition_posAffine {κ : ℝ → ℝ} {a b : ℝ} (ha : 0 < a)
-    (hfv : Gluck.FourVertexCondition κ) :
-    Gluck.FourVertexCondition (fun t => a * κ t + b) := by
-  have hmono : Monotone (fun x : ℝ => a * x + b) := by
-    intro x y hxy
-    nlinarith [mul_le_mul_of_nonneg_left hxy (le_of_lt ha)]
-  rcases hfv with hconst | hextrema
-  · rcases hconst with ⟨c, hc⟩
-    exact Or.inl ⟨a * c + b, fun t => by simp [hc t]⟩
-  · rcases hextrema with
-      ⟨p₁, q₁, p₂, q₂, hpq, hqp, hpq', hcycle, hmax₁, hmax₂, hmin₁, hmin₂, hsep⟩
-    have hq₁p₁ : κ q₁ < κ p₁ :=
-      lt_of_le_of_lt (le_max_left _ _) (lt_of_lt_of_le hsep (min_le_left _ _))
-    have hq₁p₂ : κ q₁ < κ p₂ :=
-      lt_of_le_of_lt (le_max_left _ _) (lt_of_lt_of_le hsep (min_le_right _ _))
-    have hq₂p₁ : κ q₂ < κ p₁ :=
-      lt_of_le_of_lt (le_max_right _ _) (lt_of_lt_of_le hsep (min_le_left _ _))
-    have hq₂p₂ : κ q₂ < κ p₂ :=
-      lt_of_le_of_lt (le_max_right _ _) (lt_of_lt_of_le hsep (min_le_right _ _))
-    refine Or.inr ⟨p₁, q₁, p₂, q₂, hpq, hqp, hpq', hcycle,
-      by simpa [Function.comp_def] using hmax₁.comp_mono hmono,
-      by simpa [Function.comp_def] using hmax₂.comp_mono hmono,
-      by simpa [Function.comp_def] using hmin₁.comp_mono hmono,
-      by simpa [Function.comp_def] using hmin₂.comp_mono hmono, ?_⟩
-    rw [max_lt_iff, lt_min_iff, lt_min_iff]
-    exact ⟨⟨by nlinarith [mul_lt_mul_of_pos_left hq₁p₁ ha],
-        by nlinarith [mul_lt_mul_of_pos_left hq₁p₂ ha]⟩,
-      ⟨by nlinarith [mul_lt_mul_of_pos_left hq₂p₁ ha],
-        by nlinarith [mul_lt_mul_of_pos_left hq₂p₂ ha]⟩⟩
 
-/-- Positive affine changes preserve the value-separated four-vertex
-condition exactly. -/
-theorem fourVertexCondition_posAffine_iff {κ : ℝ → ℝ} {a b : ℝ} (ha : 0 < a) :
-    Gluck.FourVertexCondition (fun t => a * κ t + b) ↔ Gluck.FourVertexCondition κ := by
-  constructor
-  · intro hfv
-    have hscaled :=
-      fourVertexCondition_posAffine (κ := fun t => a * κ t + b)
-        (a := a⁻¹) (b := -b / a) (inv_pos.mpr ha) hfv
-    convert hscaled using 1
-    ext t
-    field_simp [ha.ne']
-    ring
-  · exact fourVertexCondition_posAffine ha
 
-/-- A smooth profile pointwise equal to a positive affine change of a
-value-separated four-vertex profile inherits that condition. -/
-theorem fourVertexCondition_of_eq_posAffine {κ μ : ℝ → ℝ} {a b : ℝ} (ha : 0 < a)
-    (hμ : ∀ t, μ t = a * κ t + b) (hfv : Gluck.FourVertexCondition κ) :
-    Gluck.FourVertexCondition μ := by
-  have hscaled := fourVertexCondition_posAffine (κ := κ) (a := a) (b := b) ha hfv
-  convert hscaled using 1
-  ext t
-  exact hμ t
 
-/-- A smooth profile pointwise equal to a positive affine change has the same
-value-separated four-vertex condition. -/
-theorem fourVertexCondition_of_eq_posAffine_iff {κ μ : ℝ → ℝ} {a b : ℝ}
-    (ha : 0 < a) (hμ : ∀ t, μ t = a * κ t + b) :
-    Gluck.FourVertexCondition μ ↔ Gluck.FourVertexCondition κ := by
-  constructor
-  · intro hfv
-    have hκ :
-        ∀ t, κ t = a⁻¹ * μ t + (-b / a) := by
-      intro t
-      rw [hμ t]
-      field_simp [ha.ne']
-      ring
-    exact fourVertexCondition_of_eq_posAffine (κ := μ) (μ := κ)
-      (a := a⁻¹) (b := -b / a) (inv_pos.mpr ha) hκ hfv
-  · exact fourVertexCondition_of_eq_posAffine ha hμ
 
-/-- Pointwise equal smooth profiles have the same value-separated four-vertex
-condition. -/
-theorem fourVertexCondition_congr {κ μ : ℝ → ℝ} (hμ : ∀ t, μ t = κ t)
-    (hfv : Gluck.FourVertexCondition κ) :
-    Gluck.FourVertexCondition μ := by
-  exact fourVertexCondition_of_eq_posAffine (a := 1) (b := 0) (by norm_num)
-    (by intro t; simp [hμ t]) hfv
 
-/-- Positive affine changes preserve the smooth forward four-vertex
-conclusion. -/
-theorem smoothFourVertex_posAffine {κ : ℝ → ℝ} {a b : ℝ} (ha : 0 < a)
-    (hfv : SmoothFourVertex κ) :
-    SmoothFourVertex (fun t => a * κ t + b) := by
-  have hmono : Monotone (fun x : ℝ => a * x + b) := by
-    intro x y hxy
-    nlinarith [mul_le_mul_of_nonneg_left hxy (le_of_lt ha)]
-  rcases hfv with hconst | hextrema
-  · rcases hconst with ⟨c, hc⟩
-    exact Or.inl ⟨a * c + b, fun t => by simp [hc t]⟩
-  · rcases hextrema with
-      ⟨p₁, q₁, p₂, q₂, hpq, hqp, hpq', hcycle, hmax₁, hmin₁, hmax₂, hmin₂⟩
-    exact Or.inr ⟨p₁, q₁, p₂, q₂, hpq, hqp, hpq', hcycle,
-      by simpa [Function.comp_def] using hmax₁.comp_mono hmono,
-      by simpa [Function.comp_def] using hmin₁.comp_mono hmono,
-      by simpa [Function.comp_def] using hmax₂.comp_mono hmono,
-      by simpa [Function.comp_def] using hmin₂.comp_mono hmono⟩
 
-/-- Positive affine changes preserve the smooth forward four-vertex conclusion
-exactly. -/
-theorem smoothFourVertex_posAffine_iff {κ : ℝ → ℝ} {a b : ℝ} (ha : 0 < a) :
-    SmoothFourVertex (fun t => a * κ t + b) ↔ SmoothFourVertex κ := by
-  constructor
-  · intro hfv
-    have hscaled :=
-      smoothFourVertex_posAffine (κ := fun t => a * κ t + b)
-        (a := a⁻¹) (b := -b / a) (inv_pos.mpr ha) hfv
-    convert hscaled using 1
-    ext t
-    field_simp [ha.ne']
-    ring
-  · exact smoothFourVertex_posAffine ha
 
-/-- A smooth profile pointwise equal to a positive affine change of a
-four-vertex profile inherits the smooth forward conclusion. -/
-theorem smoothFourVertex_of_eq_posAffine {κ μ : ℝ → ℝ} {a b : ℝ} (ha : 0 < a)
-    (hμ : ∀ t, μ t = a * κ t + b) (hfv : SmoothFourVertex κ) :
-    SmoothFourVertex μ := by
-  have hscaled := smoothFourVertex_posAffine (κ := κ) (a := a) (b := b) ha hfv
-  convert hscaled using 1
-  ext t
-  exact hμ t
 
-/-- A smooth profile pointwise equal to a positive affine change has the same
-smooth forward four-vertex conclusion. -/
-theorem smoothFourVertex_of_eq_posAffine_iff {κ μ : ℝ → ℝ} {a b : ℝ}
-    (ha : 0 < a) (hμ : ∀ t, μ t = a * κ t + b) :
-    SmoothFourVertex μ ↔ SmoothFourVertex κ := by
-  constructor
-  · intro hfv
-    have hκ :
-        ∀ t, κ t = a⁻¹ * μ t + (-b / a) := by
-      intro t
-      rw [hμ t]
-      field_simp [ha.ne']
-      ring
-    exact smoothFourVertex_of_eq_posAffine (κ := μ) (μ := κ)
-      (a := a⁻¹) (b := -b / a) (inv_pos.mpr ha) hκ hfv
-  · exact smoothFourVertex_of_eq_posAffine ha hμ
 
-/-- Pointwise equal smooth profiles have the same smooth forward four-vertex
-conclusion. -/
-theorem smoothFourVertex_congr {κ μ : ℝ → ℝ} (hμ : ∀ t, μ t = κ t)
-    (hfv : SmoothFourVertex κ) :
-    SmoothFourVertex μ := by
-  exact smoothFourVertex_of_eq_posAffine (a := 1) (b := 0) (by norm_num)
-    (by intro t; simp [hμ t]) hfv
 
-/-- Four cyclic samples alternating strictly above and below a common level.
-For a finite nonconstant cyclic sequence this is the level-set form of having
-two distinct local maxima and two distinct local minima. -/
-def AlternatesAcrossLevel {n : ℕ} (κ : ZMod n → ℝ) (c : ℝ) : Prop :=
-  ∃ i₁ i₂ i₃ i₄ : ℕ,
-    i₁ < i₂ ∧ i₂ < i₃ ∧ i₃ < i₄ ∧ i₄ < i₁ + n ∧
-      κ (i₂ : ZMod n) < c ∧ κ (i₄ : ZMod n) < c ∧
-      c < κ (i₁ : ZMod n) ∧ c < κ (i₃ : ZMod n)
 
-/-- The discrete forward four-vertex conclusion: constant curvature or an
-alternating four-sample level window. -/
-def DiscreteFourVertex {n : ℕ} (κ : ZMod n → ℝ) : Prop :=
-  (∃ c, ∀ i, κ i = c) ∨ ∃ c, AlternatesAcrossLevel κ c
 
-/-- Nonzero affine changes preserve the alternating four-sample level window,
-with the cyclic order rotated when the scale is negative. -/
-theorem alternatesAcrossLevel_affine {n : ℕ} {κ : ZMod n → ℝ} {a b c : ℝ}
-    (ha : a ≠ 0) (halt : AlternatesAcrossLevel κ c) :
-    AlternatesAcrossLevel (fun i => a * κ i + b) (a * c + b) := by
-  rcases halt with
-    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁, hlow₂, hlow₄, hhigh₁, hhigh₃⟩
-  rcases lt_or_gt_of_ne ha with hneg | hpos
-  · have hwrap : ((i₁ + n : ℕ) : ZMod n) = (i₁ : ZMod n) := by
-      rw [Nat.cast_add, ZMod.natCast_self, add_zero]
-    refine ⟨i₂, i₃, i₄, i₁ + n, hi₂₃, hi₃₄, hi₄₁,
-      Nat.add_lt_add_right hi₁₂ n, ?_, ?_, ?_, ?_⟩
-    · nlinarith
-    · have hlow₁ : a * κ (i₁ : ZMod n) + b < a * c + b := by
-        nlinarith
-      simpa [hwrap] using hlow₁
-    · nlinarith
-    · nlinarith
-  · exact ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
-      by nlinarith, by nlinarith, by nlinarith, by nlinarith⟩
 
-/-- Nonzero affine changes preserve the discrete level-window four-vertex
-conclusion. -/
-theorem discreteFourVertex_affine {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
-    (ha : a ≠ 0) (hfv : DiscreteFourVertex κ) :
-    DiscreteFourVertex (fun i => a * κ i + b) := by
-  rcases hfv with hconst | halt
-  · rcases hconst with ⟨c, hc⟩
-    exact Or.inl ⟨a * c + b, fun i => by simp [hc i]⟩
-  · rcases halt with ⟨c, hc⟩
-    exact Or.inr ⟨a * c + b, alternatesAcrossLevel_affine ha hc⟩
 
-/-- Nonzero affine changes preserve the discrete level-window four-vertex
-conclusion exactly. -/
-theorem discreteFourVertex_affine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
-    (ha : a ≠ 0) :
-    DiscreteFourVertex (fun i => a * κ i + b) ↔ DiscreteFourVertex κ := by
-  constructor
-  · intro hfv
-    have hscaled :=
-      discreteFourVertex_affine (κ := fun i => a * κ i + b)
-        (a := a⁻¹) (b := -b / a) (inv_ne_zero ha) hfv
-    convert hscaled using 1
-    ext i
-    field_simp [ha]
-    ring
-  · exact discreteFourVertex_affine ha
 
-/-- A profile pointwise equal to a nonzero affine change of a level-window
-profile inherits the same alternating level window. -/
-theorem alternatesAcrossLevel_of_eq_affine {n : ℕ} {κ μ : ZMod n → ℝ}
-    {a b c : ℝ} (ha : a ≠ 0) (hμ : ∀ i : ZMod n, μ i = a * κ i + b)
-    (halt : AlternatesAcrossLevel κ c) :
-    AlternatesAcrossLevel μ (a * c + b) := by
-  have hscaled := alternatesAcrossLevel_affine (κ := κ) (a := a) (b := b) ha halt
-  convert hscaled using 1
-  ext i
-  exact hμ i
 
-/-- Pointwise equal cyclic profiles have the same alternating level window. -/
-theorem alternatesAcrossLevel_congr {n : ℕ} {κ μ : ZMod n → ℝ} {c : ℝ}
-    (hμ : ∀ i : ZMod n, μ i = κ i) (halt : AlternatesAcrossLevel κ c) :
-    AlternatesAcrossLevel μ c := by
-  simpa using alternatesAcrossLevel_of_eq_affine (a := 1) (b := 0) (c := c)
-    (by norm_num) (by intro i; simp [hμ i]) halt
 
-/-- A profile pointwise equal to a nonzero affine change of a discrete
-level-window four-vertex profile inherits that conclusion. -/
-theorem discreteFourVertex_of_eq_affine {n : ℕ} {κ μ : ZMod n → ℝ} {a b : ℝ}
-    (ha : a ≠ 0) (hμ : ∀ i : ZMod n, μ i = a * κ i + b)
-    (hfv : DiscreteFourVertex κ) :
-    DiscreteFourVertex μ := by
-  have hscaled := discreteFourVertex_affine (κ := κ) (a := a) (b := b) ha hfv
-  convert hscaled using 1
-  ext i
-  exact hμ i
 
-/-- Pointwise equal cyclic profiles have the same discrete level-window
-four-vertex conclusion. -/
-theorem discreteFourVertex_congr {n : ℕ} {κ μ : ZMod n → ℝ}
-    (hμ : ∀ i : ZMod n, μ i = κ i) (hfv : DiscreteFourVertex κ) :
-    DiscreteFourVertex μ := by
-  exact discreteFourVertex_of_eq_affine (a := 1) (b := 0) (by norm_num)
-    (by intro i; simp [hμ i]) hfv
 
-/-- The Dahlberg polygon-size hypothesis implies the neighbour-extrema size
-hypothesis used by strict one-step constructors. -/
-theorem two_le_of_four_le {n : ℕ} (hn : 4 ≤ n) : 2 ≤ n := by
-  omega
 
-/-- The Dahlberg polygon-size hypothesis also gives the nontriangle lower
-bound used in geometric reductions. -/
-theorem three_le_of_four_le {n : ℕ} (hn : 4 ≤ n) : 3 ≤ n := by
-  omega
 
 /-- A plateau-aware local maximum of a cyclic sequence.  Moving left and right
 from `i`, the value remains constant until it becomes strictly smaller. -/
@@ -310,133 +71,13 @@ def DiscreteLocalMin {n : ℕ} (κ : ZMod n → ℝ) (i : ZMod n) : Prop :=
     (∀ m < r, κ (i + (m : ZMod n)) = κ i) ∧
     κ i < κ (i - (l : ZMod n)) ∧ κ i < κ (i + (r : ZMod n))
 
-/-- A strict one-step cyclic peak is a plateau-aware discrete local maximum. -/
-theorem discreteLocalMax_of_neighbors {n : ℕ} (hn : 2 ≤ n) {κ : ZMod n → ℝ}
-    {i : ZMod n} (hleft : κ (i - 1) < κ i) (hright : κ (i + 1) < κ i) :
-    DiscreteLocalMax κ i := by
-  refine ⟨1, 1, by norm_num, by norm_num, hn, ?_, ?_, ?_, ?_⟩
-  · intro m hm
-    have hm0 : m = 0 := by omega
-    simp [hm0]
-  · intro m hm
-    have hm0 : m = 0 := by omega
-    simp [hm0]
-  · simpa using hleft
-  · simpa using hright
 
-/-- A strict one-step cyclic valley is a plateau-aware discrete local minimum. -/
-theorem discreteLocalMin_of_neighbors {n : ℕ} (hn : 2 ≤ n) {κ : ZMod n → ℝ}
-    {i : ZMod n} (hleft : κ i < κ (i - 1)) (hright : κ i < κ (i + 1)) :
-    DiscreteLocalMin κ i := by
-  refine ⟨1, 1, by norm_num, by norm_num, hn, ?_, ?_, ?_, ?_⟩
-  · intro m hm
-    have hm0 : m = 0 := by omega
-    simp [hm0]
-  · intro m hm
-    have hm0 : m = 0 := by omega
-    simp [hm0]
-  · simpa using hleft
-  · simpa using hright
 
-/-- An adjacent increase followed by an adjacent decrease gives a strict
-one-step cyclic local maximum at the middle vertex. -/
-theorem discreteLocalMax_of_succ_turn {n : ℕ} (hn : 2 ≤ n) {κ : ZMod n → ℝ}
-    {i : ZMod n} (hinc : κ i < κ (i + 1))
-    (hdec : κ (i + 1 + 1) < κ (i + 1)) :
-    DiscreteLocalMax κ (i + 1) := by
-  apply discreteLocalMax_of_neighbors hn
-  · simpa [sub_eq_add_neg, add_assoc] using hinc
-  · simpa [add_assoc] using hdec
 
-/-- An adjacent decrease followed by an adjacent increase gives a strict
-one-step cyclic local minimum at the middle vertex. -/
-theorem discreteLocalMin_of_succ_turn {n : ℕ} (hn : 2 ≤ n) {κ : ZMod n → ℝ}
-    {i : ZMod n} (hdec : κ (i + 1) < κ i)
-    (hinc : κ (i + 1) < κ (i + 1 + 1)) :
-    DiscreteLocalMin κ (i + 1) := by
-  apply discreteLocalMin_of_neighbors hn
-  · simpa [sub_eq_add_neg, add_assoc] using hdec
-  · simpa [add_assoc] using hinc
 
-/-- A plateau-aware local maximum has a strict adjacent increase at its left
-boundary. -/
-theorem DiscreteLocalMax.exists_left_boundary_increase {n : ℕ} {κ : ZMod n → ℝ}
-    {i : ZMod n} (hmax : DiscreteLocalMax κ i) :
-    ∃ j : ZMod n, κ j < κ (j + 1) := by
-  rcases hmax with
-    ⟨l, _r, hlpos, _hrpos, _hlr, hleft, _hright, hdrop, _⟩
-  refine ⟨i - (l : ZMod n), ?_⟩
-  have hlpred_lt : l - 1 < l := Nat.sub_one_lt (Nat.ne_of_gt hlpos)
-  have hplateau : κ (i - ((l - 1 : ℕ) : ZMod n)) = κ i :=
-    hleft (l - 1) hlpred_lt
-  have hpred : ((l - 1 : ℕ) : ZMod n) = (l : ZMod n) - 1 := by
-    have hl : l = l - 1 + 1 := (Nat.sub_add_cancel hlpos).symm
-    rw [hl, Nat.cast_add, Nat.cast_one]
-    abel
-  have hsucc : i - ((l - 1 : ℕ) : ZMod n) = i - (l : ZMod n) + 1 := by
-    rw [hpred]
-    abel
-  rwa [← hsucc, hplateau]
 
-/-- A plateau-aware local maximum has a strict adjacent decrease at its right
-boundary. -/
-theorem DiscreteLocalMax.exists_right_boundary_decrease {n : ℕ} {κ : ZMod n → ℝ}
-    {i : ZMod n} (hmax : DiscreteLocalMax κ i) :
-    ∃ j : ZMod n, κ (j + 1) < κ j := by
-  rcases hmax with
-    ⟨_l, r, _hlpos, hrpos, _hlr, _hleft, hright, _hdrop_left, hdrop⟩
-  refine ⟨i + ((r - 1 : ℕ) : ZMod n), ?_⟩
-  have hrpred_lt : r - 1 < r := Nat.sub_one_lt (Nat.ne_of_gt hrpos)
-  have hplateau : κ (i + ((r - 1 : ℕ) : ZMod n)) = κ i :=
-    hright (r - 1) hrpred_lt
-  have hpred : ((r - 1 : ℕ) : ZMod n) = (r : ZMod n) - 1 := by
-    have hr : r = r - 1 + 1 := (Nat.sub_add_cancel hrpos).symm
-    rw [hr, Nat.cast_add, Nat.cast_one]
-    abel
-  have hsucc : i + ((r - 1 : ℕ) : ZMod n) + 1 = i + (r : ZMod n) := by
-    rw [hpred]
-    abel
-  rwa [hsucc, hplateau]
 
-/-- A plateau-aware local minimum has a strict adjacent decrease at its left
-boundary. -/
-theorem DiscreteLocalMin.exists_left_boundary_decrease {n : ℕ} {κ : ZMod n → ℝ}
-    {i : ZMod n} (hmin : DiscreteLocalMin κ i) :
-    ∃ j : ZMod n, κ (j + 1) < κ j := by
-  rcases hmin with
-    ⟨l, _r, hlpos, _hrpos, _hlr, hleft, _hright, hdrop, _⟩
-  refine ⟨i - (l : ZMod n), ?_⟩
-  have hlpred_lt : l - 1 < l := Nat.sub_one_lt (Nat.ne_of_gt hlpos)
-  have hplateau : κ (i - ((l - 1 : ℕ) : ZMod n)) = κ i :=
-    hleft (l - 1) hlpred_lt
-  have hpred : ((l - 1 : ℕ) : ZMod n) = (l : ZMod n) - 1 := by
-    have hl : l = l - 1 + 1 := (Nat.sub_add_cancel hlpos).symm
-    rw [hl, Nat.cast_add, Nat.cast_one]
-    abel
-  have hsucc : i - ((l - 1 : ℕ) : ZMod n) = i - (l : ZMod n) + 1 := by
-    rw [hpred]
-    abel
-  rwa [← hsucc, hplateau]
 
-/-- A plateau-aware local minimum has a strict adjacent increase at its right
-boundary. -/
-theorem DiscreteLocalMin.exists_right_boundary_increase {n : ℕ} {κ : ZMod n → ℝ}
-    {i : ZMod n} (hmin : DiscreteLocalMin κ i) :
-    ∃ j : ZMod n, κ j < κ (j + 1) := by
-  rcases hmin with
-    ⟨_l, r, _hlpos, hrpos, _hlr, _hleft, hright, _hdrop_left, hdrop⟩
-  refine ⟨i + ((r - 1 : ℕ) : ZMod n), ?_⟩
-  have hrpred_lt : r - 1 < r := Nat.sub_one_lt (Nat.ne_of_gt hrpos)
-  have hplateau : κ (i + ((r - 1 : ℕ) : ZMod n)) = κ i :=
-    hright (r - 1) hrpred_lt
-  have hpred : ((r - 1 : ℕ) : ZMod n) = (r : ZMod n) - 1 := by
-    have hr : r = r - 1 + 1 := (Nat.sub_add_cancel hrpos).symm
-    rw [hr, Nat.cast_add, Nat.cast_one]
-    abel
-  have hsucc : i + ((r - 1 : ℕ) : ZMod n) + 1 = i + (r : ZMod n) := by
-    rw [hpred]
-    abel
-  rwa [hsucc, hplateau]
 
 /-- Dahlberg's source-form conclusion: two distinct local maxima and two
 distinct local minima, alternating around the cyclic vertex set. -/
@@ -448,50 +89,8 @@ def DahlbergFourVertex {n : ℕ} (κ : ZMod n → ℝ) : Prop :=
       DiscreteLocalMax κ (i₃ : ZMod n) ∧
       DiscreteLocalMin κ (i₄ : ZMod n)
 
-/-- Dahlberg's plateau-aware four-vertex conclusion contains actual strict
-adjacent boundary turns around its extremal plateaux.
 
-This does not claim the stronger ordered-adjacent-turn package used by
-Dahlberg's Lemma 8/Lemma 9 route; it records the purely combinatorial
-boundary-turn information that is already present in the plateau-aware local
-extrema. -/
-theorem DahlbergFourVertex.exists_boundary_turns {n : ℕ} {κ : ZMod n → ℝ}
-    (hfv : DahlbergFourVertex κ) :
-    (∃ i : ZMod n, κ i < κ (i + 1)) ∧
-      (∃ i : ZMod n, κ (i + 1) < κ i) ∧
-      (∃ i : ZMod n, κ i < κ (i + 1)) ∧
-      (∃ i : ZMod n, κ (i + 1) < κ i) := by
-  rcases hfv with
-    ⟨_i₁, _i₂, _i₃, _i₄, _hi₁₂, _hi₂₃, _hi₃₄, _hi₄₁,
-      hmax₁, hmin₂, hmax₃, _hmin₄⟩
-  exact ⟨
-    hmax₁.exists_left_boundary_increase,
-    hmin₂.exists_left_boundary_decrease,
-    hmin₂.exists_right_boundary_increase,
-    hmax₃.exists_right_boundary_decrease⟩
 
-/-- Dahlberg's four-vertex conclusion forces the cyclic profile to be
-nonconstant. -/
-theorem not_constant_of_dahlbergFourVertex {n : ℕ} {κ : ZMod n → ℝ}
-    (hfv : DahlbergFourVertex κ) :
-    ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
-  rintro ⟨c, hconst⟩
-  rcases hfv with
-    ⟨i₁, _i₂, _i₃, _i₄, _hi₁₂, _hi₂₃, _hi₃₄, _hi₄₁, hmax₁, _hmin₂, _hmax₃, _hmin₄⟩
-  rcases hmax₁ with ⟨l, _r, _hlpos, _hrpos, _hlr, _hleft_eq, _hright_eq, hdrop, _⟩
-  rw [hconst ((i₁ : ZMod n) - (l : ZMod n)), hconst (i₁ : ZMod n)] at hdrop
-  exact (lt_irrefl c) hdrop
-
-/-- A constant-or-Dahlberg conclusion upgrades to Dahlberg's conclusion as
-soon as the profile is known to be nonconstant. -/
-theorem dahlbergFourVertex_of_constant_or_of_not_constant {n : ℕ}
-    {κ : ZMod n → ℝ}
-    (h : (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ)
-    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
-    DahlbergFourVertex κ := by
-  rcases h with hconst | hfv
-  · exact False.elim (hnc hconst)
-  · exact hfv
 
 /-- Four ordered plateau-aware extrema in `min-max-min-max` order give
 Dahlberg's source-form conclusion after rotating the cyclic order to start at
@@ -552,61 +151,9 @@ theorem dahlbergFourVertex_of_neg {n : ℕ} {κ : ZMod n → ℝ}
     (discreteLocalMin_of_neg_localMax hmax₃)
     (discreteLocalMax_of_neg_localMin hmin₄)
 
-/-- The plateau-aware Dahlberg four-vertex conclusion is equivalent for a
-profile and its negative. -/
-theorem dahlbergFourVertex_neg_iff {n : ℕ} {κ : ZMod n → ℝ} :
-    DahlbergFourVertex (fun i => -κ i) ↔ DahlbergFourVertex κ := by
-  constructor
-  · exact dahlbergFourVertex_of_neg
-  · intro hfv
-    have hfv' : DahlbergFourVertex (fun i => -(-κ i)) := by
-      simpa using hfv
-    exact dahlbergFourVertex_of_neg (κ := fun i => -κ i) hfv'
 
-/-- Taking positive reciprocals turns a plateau-aware local maximum into a
-plateau-aware local minimum. -/
-theorem discreteLocalMin_of_inv_localMax {n : ℕ} {ρ : ZMod n → ℝ} {i : ZMod n}
-    (hpos : ∀ j, 0 < ρ j) (hmax : DiscreteLocalMax ρ i) :
-    DiscreteLocalMin (fun j => (ρ j)⁻¹) i := by
-  rcases hmax with ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq, hleft, hright⟩
-  refine ⟨l, r, hlpos, hrpos, hlr, ?_, ?_, ?_, ?_⟩
-  · intro m hm
-    change (ρ (i - (m : ZMod n)))⁻¹ = (ρ i)⁻¹
-    rw [hleft_eq m hm]
-  · intro m hm
-    change (ρ (i + (m : ZMod n)))⁻¹ = (ρ i)⁻¹
-    rw [hright_eq m hm]
-  · exact (inv_lt_inv₀ (hpos i) (hpos (i - (l : ZMod n)))).mpr hleft
-  · exact (inv_lt_inv₀ (hpos i) (hpos (i + (r : ZMod n)))).mpr hright
 
-/-- Taking positive reciprocals turns a plateau-aware local minimum into a
-plateau-aware local maximum. -/
-theorem discreteLocalMax_of_inv_localMin {n : ℕ} {ρ : ZMod n → ℝ} {i : ZMod n}
-    (hpos : ∀ j, 0 < ρ j) (hmin : DiscreteLocalMin ρ i) :
-    DiscreteLocalMax (fun j => (ρ j)⁻¹) i := by
-  rcases hmin with ⟨l, r, hlpos, hrpos, hlr, hleft_eq, hright_eq, hleft, hright⟩
-  refine ⟨l, r, hlpos, hrpos, hlr, ?_, ?_, ?_, ?_⟩
-  · intro m hm
-    change (ρ (i - (m : ZMod n)))⁻¹ = (ρ i)⁻¹
-    rw [hleft_eq m hm]
-  · intro m hm
-    change (ρ (i + (m : ZMod n)))⁻¹ = (ρ i)⁻¹
-    rw [hright_eq m hm]
-  · exact (inv_lt_inv₀ (hpos (i - (l : ZMod n))) (hpos i)).mpr hleft
-  · exact (inv_lt_inv₀ (hpos (i + (r : ZMod n))) (hpos i)).mpr hright
 
-/-- Dahlberg's four-vertex conclusion is preserved by taking positive
-reciprocals, with maxima/minima swapped and the cyclic order rotated. -/
-theorem dahlbergFourVertex_inv_of_pos {n : ℕ} {ρ : ZMod n → ℝ}
-    (hpos : ∀ i, 0 < ρ i) (hfv : DahlbergFourVertex ρ) :
-    DahlbergFourVertex (fun i => (ρ i)⁻¹) := by
-  rcases hfv with
-    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁, hmax₁, hmin₂, hmax₃, hmin₄⟩
-  exact dahlbergFourVertex_of_localExtrema_min_max hi₁₂ hi₂₃ hi₃₄ hi₄₁
-    (discreteLocalMin_of_inv_localMax hpos hmax₁)
-    (discreteLocalMax_of_inv_localMin hpos hmin₂)
-    (discreteLocalMin_of_inv_localMax hpos hmax₃)
-    (discreteLocalMax_of_inv_localMin hpos hmin₄)
 
 /-- Positive affine changes of a cyclic profile preserve plateau-aware local
 maxima. -/
@@ -665,93 +212,12 @@ theorem dahlbergFourVertex_posAffine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : 
     ring
   · exact dahlbergFourVertex_posAffine ha
 
-/-- Nonzero affine changes of a cyclic curvature profile preserve the
-plateau-aware Dahlberg conclusion.  Negative scale factors swap maxima and
-minima via profile negation. -/
-theorem dahlbergFourVertex_affine {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
-    (ha : a ≠ 0) (hfv : DahlbergFourVertex κ) :
-    DahlbergFourVertex (fun i => a * κ i + b) := by
-  rcases lt_or_gt_of_ne ha with hneg | hpos
-  · have hfv_neg : DahlbergFourVertex (fun i => -κ i) :=
-      dahlbergFourVertex_neg_iff.mpr hfv
-    have hscaled :=
-      dahlbergFourVertex_posAffine (κ := fun i => -κ i)
-        (a := -a) (b := b) (neg_pos.mpr hneg) hfv_neg
-    convert hscaled using 1
-    ext i
-    ring
-  · exact dahlbergFourVertex_posAffine hpos hfv
 
-/-- Nonzero affine changes of a cyclic curvature profile preserve the
-plateau-aware Dahlberg conclusion exactly. -/
-theorem dahlbergFourVertex_affine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
-    (ha : a ≠ 0) :
-    DahlbergFourVertex (fun i => a * κ i + b) ↔ DahlbergFourVertex κ := by
-  constructor
-  · intro hfv
-    have hscaled :=
-      dahlbergFourVertex_affine (κ := fun i => a * κ i + b)
-        (a := a⁻¹) (b := -b / a) (inv_ne_zero ha) hfv
-    convert hscaled using 1
-    ext i
-    field_simp [ha]
-    ring
-  · exact dahlbergFourVertex_affine ha
 
-/-- Nonzero affine changes preserve a constant-or-Dahlberg conclusion. -/
-theorem constant_or_dahlbergFourVertex_affine {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
-    (ha : a ≠ 0)
-    (h : (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ) :
-    (∃ c, ∀ i : ZMod n, a * κ i + b = c) ∨
-      DahlbergFourVertex (fun i => a * κ i + b) := by
-  rcases h with hconst | hfv
-  · rcases hconst with ⟨c, hc⟩
-    exact Or.inl ⟨a * c + b, fun i => by simp [hc i]⟩
-  · exact Or.inr (dahlbergFourVertex_affine ha hfv)
 
-/-- A profile pointwise equal to a nonzero affine change of a Dahlberg profile
-inherits the plateau-aware Dahlberg conclusion. -/
-theorem dahlbergFourVertex_of_eq_affine {n : ℕ} {κ μ : ZMod n → ℝ} {a b : ℝ}
-    (ha : a ≠ 0) (hμ : ∀ i : ZMod n, μ i = a * κ i + b)
-    (hfv : DahlbergFourVertex κ) :
-    DahlbergFourVertex μ := by
-  have hscaled := dahlbergFourVertex_affine (κ := κ) (a := a) (b := b) ha hfv
-  convert hscaled using 1
-  ext i
-  exact hμ i
 
-/-- Pointwise equal cyclic profiles have the same plateau-aware Dahlberg
-conclusion. -/
-theorem dahlbergFourVertex_congr {n : ℕ} {κ μ : ZMod n → ℝ}
-    (hμ : ∀ i : ZMod n, μ i = κ i) (hfv : DahlbergFourVertex κ) :
-    DahlbergFourVertex μ := by
-  exact dahlbergFourVertex_of_eq_affine (a := 1) (b := 0) (by norm_num)
-    (by intro i; simp [hμ i]) hfv
 
-/-- A profile pointwise equal to a nonzero affine change of a
-constant-or-Dahlberg profile inherits the constant-or-Dahlberg conclusion. -/
-theorem constant_or_dahlbergFourVertex_of_eq_affine {n : ℕ}
-    {κ μ : ZMod n → ℝ} {a b : ℝ}
-    (ha : a ≠ 0) (hμ : ∀ i : ZMod n, μ i = a * κ i + b)
-    (h : (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ) :
-    (∃ c, ∀ i : ZMod n, μ i = c) ∨ DahlbergFourVertex μ := by
-  rcases constant_or_dahlbergFourVertex_affine (κ := κ) (a := a) (b := b) ha h with
-    hconst | hfv
-  · rcases hconst with ⟨c, hc⟩
-    exact Or.inl ⟨c, fun i => by rw [hμ i, hc i]⟩
-  · exact Or.inr (by
-      convert hfv using 1
-      ext i
-      exact hμ i)
 
-/-- Pointwise equal cyclic profiles have the same constant-or-Dahlberg
-conclusion. -/
-theorem constant_or_dahlbergFourVertex_congr {n : ℕ} {κ μ : ZMod n → ℝ}
-    (hμ : ∀ i : ZMod n, μ i = κ i)
-    (h : (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ) :
-    (∃ c, ∀ i : ZMod n, μ i = c) ∨ DahlbergFourVertex μ := by
-  exact constant_or_dahlbergFourVertex_of_eq_affine (a := 1) (b := 0) (by norm_num)
-    (by intro i; simp [hμ i]) h
 
 /-- Translating cyclic indices preserves plateau-aware local maxima. -/
 theorem discreteLocalMax_translateIndex {n : ℕ} {κ : ZMod n → ℝ} {a i : ZMod n}
@@ -1029,388 +495,29 @@ theorem dahlbergFourVertex_of_neg_reflectIndex {n : ℕ} [NeZero n]
         abel_nf)
   exact dahlbergFourVertex_of_neg hfv_neg
 
-/-- A constant-or-Dahlberg conclusion for the orientation-reversed negated
-profile transports back to the original profile. -/
-theorem constant_or_dahlbergFourVertex_of_neg_reflectIndex {n : ℕ} [NeZero n]
-    {κ : ZMod n → ℝ}
-    (h : (∃ c, ∀ i : ZMod n, -κ (-i) = c) ∨
-      DahlbergFourVertex (fun i => -κ (-i))) :
-    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  rcases h with hconst | hfv
-  · rcases hconst with ⟨c, hc⟩
-    exact Or.inl ⟨-c, fun i => by
-      have hi := congrArg Neg.neg (hc (-i))
-      simpa using hi⟩
-  · exact Or.inr (dahlbergFourVertex_of_neg_reflectIndex hfv)
 
-/-- Four ordered strict one-step extrema give Dahlberg's plateau-aware
-four-vertex conclusion. -/
-theorem dahlbergFourVertex_of_strict_neighbors {n : ℕ} (hn : 2 ≤ n)
-    {κ : ZMod n → ℝ} {i₁ i₂ i₃ i₄ : ℕ}
-    (hi₁₂ : i₁ < i₂) (hi₂₃ : i₂ < i₃) (hi₃₄ : i₃ < i₄)
-    (hi₄₁ : i₄ < i₁ + n)
-    (hmax₁_left : κ ((i₁ : ZMod n) - 1) < κ (i₁ : ZMod n))
-    (hmax₁_right : κ ((i₁ : ZMod n) + 1) < κ (i₁ : ZMod n))
-    (hmin₂_left : κ (i₂ : ZMod n) < κ ((i₂ : ZMod n) - 1))
-    (hmin₂_right : κ (i₂ : ZMod n) < κ ((i₂ : ZMod n) + 1))
-    (hmax₃_left : κ ((i₃ : ZMod n) - 1) < κ (i₃ : ZMod n))
-    (hmax₃_right : κ ((i₃ : ZMod n) + 1) < κ (i₃ : ZMod n))
-    (hmin₄_left : κ (i₄ : ZMod n) < κ ((i₄ : ZMod n) - 1))
-    (hmin₄_right : κ (i₄ : ZMod n) < κ ((i₄ : ZMod n) + 1)) :
-    DahlbergFourVertex κ := by
-  refine ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁, ?_, ?_, ?_, ?_⟩
-  · exact discreteLocalMax_of_neighbors hn hmax₁_left hmax₁_right
-  · exact discreteLocalMin_of_neighbors hn hmin₂_left hmin₂_right
-  · exact discreteLocalMax_of_neighbors hn hmax₃_left hmax₃_right
-  · exact discreteLocalMin_of_neighbors hn hmin₄_left hmin₄_right
 
-/-- Four ordered strict one-step extrema in `min-max-min-max` order also give
-Dahlberg's plateau-aware four-vertex conclusion, by rotating the cyclic order
-to start at the first maximum. -/
-theorem dahlbergFourVertex_of_strict_neighbors_min_max {n : ℕ} (hn : 2 ≤ n)
-    {κ : ZMod n → ℝ} {i₁ i₂ i₃ i₄ : ℕ}
-    (hi₁₂ : i₁ < i₂) (hi₂₃ : i₂ < i₃) (hi₃₄ : i₃ < i₄)
-    (hi₄₁ : i₄ < i₁ + n)
-    (hmin₁_left : κ (i₁ : ZMod n) < κ ((i₁ : ZMod n) - 1))
-    (hmin₁_right : κ (i₁ : ZMod n) < κ ((i₁ : ZMod n) + 1))
-    (hmax₂_left : κ ((i₂ : ZMod n) - 1) < κ (i₂ : ZMod n))
-    (hmax₂_right : κ ((i₂ : ZMod n) + 1) < κ (i₂ : ZMod n))
-    (hmin₃_left : κ (i₃ : ZMod n) < κ ((i₃ : ZMod n) - 1))
-    (hmin₃_right : κ (i₃ : ZMod n) < κ ((i₃ : ZMod n) + 1))
-    (hmax₄_left : κ ((i₄ : ZMod n) - 1) < κ (i₄ : ZMod n))
-    (hmax₄_right : κ ((i₄ : ZMod n) + 1) < κ (i₄ : ZMod n)) :
-    DahlbergFourVertex κ := by
-  have hwrap : ((i₁ + n : ℕ) : ZMod n) = (i₁ : ZMod n) := by
-    rw [Nat.cast_add, ZMod.natCast_self, add_zero]
-  exact dahlbergFourVertex_of_strict_neighbors hn
-    hi₂₃ hi₃₄ hi₄₁ (Nat.add_lt_add_right hi₁₂ n)
-    hmax₂_left hmax₂_right
-    hmin₃_left hmin₃_right
-    hmax₄_left hmax₄_right
-    (by simpa [hwrap] using hmin₁_left)
-    (by simpa [hwrap] using hmin₁_right)
 
-/-- Four ordered adjacent turn points, alternating peak/valley/peak/valley,
-give Dahlberg's plateau-aware four-vertex conclusion. -/
-theorem dahlbergFourVertex_of_ordered_turns {n : ℕ} (hn : 2 ≤ n)
-    {κ : ZMod n → ℝ} {i₁ i₂ i₃ i₄ : ℕ}
-    (hi₁₂ : i₁ < i₂) (hi₂₃ : i₂ < i₃) (hi₃₄ : i₃ < i₄)
-    (hi₄₁ : i₄ < i₁ + n)
-    (hinc₁ : κ (i₁ : ZMod n) < κ ((i₁ : ZMod n) + 1))
-    (hdec₁ : κ (((i₁ : ZMod n) + 1) + 1) < κ ((i₁ : ZMod n) + 1))
-    (hdec₂ : κ ((i₂ : ZMod n) + 1) < κ (i₂ : ZMod n))
-    (hinc₂ : κ ((i₂ : ZMod n) + 1) < κ (((i₂ : ZMod n) + 1) + 1))
-    (hinc₃ : κ (i₃ : ZMod n) < κ ((i₃ : ZMod n) + 1))
-    (hdec₃ : κ (((i₃ : ZMod n) + 1) + 1) < κ ((i₃ : ZMod n) + 1))
-    (hdec₄ : κ ((i₄ : ZMod n) + 1) < κ (i₄ : ZMod n))
-    (hinc₄ : κ ((i₄ : ZMod n) + 1) < κ (((i₄ : ZMod n) + 1) + 1)) :
-    DahlbergFourVertex κ := by
-  apply dahlbergFourVertex_of_strict_neighbors hn
-    (Nat.succ_lt_succ hi₁₂) (Nat.succ_lt_succ hi₂₃) (Nat.succ_lt_succ hi₃₄)
-    (by omega)
-  · simpa [Nat.cast_add, sub_eq_add_neg, add_assoc] using hinc₁
-  · simpa [Nat.cast_add, add_assoc] using hdec₁
-  · simpa [Nat.cast_add, sub_eq_add_neg, add_assoc] using hdec₂
-  · simpa [Nat.cast_add, add_assoc] using hinc₂
-  · simpa [Nat.cast_add, sub_eq_add_neg, add_assoc] using hinc₃
-  · simpa [Nat.cast_add, add_assoc] using hdec₃
-  · simpa [Nat.cast_add, sub_eq_add_neg, add_assoc] using hdec₄
-  · simpa [Nat.cast_add, add_assoc] using hinc₄
 
-/-- Four ordered adjacent turns of a cyclic profile, alternating
-increase/decrease/decrease/increase.  This is the source witness extracted by
-Dahlberg's geometric comparison arguments before the purely cyclic conversion
-to plateau-aware local extrema. -/
-def OrderedAdjacentTurns {n : ℕ} (κ : ZMod n → ℝ) : Prop :=
-  ∃ i₁ i₂ i₃ i₄ : ℕ,
-    i₁ < i₂ ∧ i₂ < i₃ ∧ i₃ < i₄ ∧ i₄ < i₁ + n ∧
-      κ (i₁ : ZMod n) < κ ((i₁ : ZMod n) + 1) ∧
-      κ (((i₁ : ZMod n) + 1) + 1) < κ ((i₁ : ZMod n) + 1) ∧
-      κ ((i₂ : ZMod n) + 1) < κ (i₂ : ZMod n) ∧
-      κ ((i₂ : ZMod n) + 1) < κ (((i₂ : ZMod n) + 1) + 1) ∧
-      κ (i₃ : ZMod n) < κ ((i₃ : ZMod n) + 1) ∧
-      κ (((i₃ : ZMod n) + 1) + 1) < κ ((i₃ : ZMod n) + 1) ∧
-      κ ((i₄ : ZMod n) + 1) < κ (i₄ : ZMod n) ∧
-      κ ((i₄ : ZMod n) + 1) < κ (((i₄ : ZMod n) + 1) + 1)
 
-/-- Four ordered adjacent turns imply Dahlberg's plateau-aware four-vertex
-conclusion. -/
-theorem dahlbergFourVertex_of_orderedAdjacentTurns {n : ℕ} (hn : 2 ≤ n)
-    {κ : ZMod n → ℝ} (hturns : OrderedAdjacentTurns κ) :
-    DahlbergFourVertex κ := by
-  rcases hturns with
-    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
-      hinc₁, hdec₁, hdec₂, hinc₂, hinc₃, hdec₃, hdec₄, hinc₄⟩
-  exact dahlbergFourVertex_of_ordered_turns hn hi₁₂ hi₂₃ hi₃₄ hi₄₁
-    hinc₁ hdec₁ hdec₂ hinc₂ hinc₃ hdec₃ hdec₄ hinc₄
 
-/-- Four ordered adjacent turns imply Dahlberg's conclusion under the standard
-`4 ≤ n` polygon-size hypothesis. -/
-theorem dahlbergFourVertex_of_orderedAdjacentTurns_four_le {n : ℕ}
-    (hn : 4 ≤ n) {κ : ZMod n → ℝ} (hturns : OrderedAdjacentTurns κ) :
-    DahlbergFourVertex κ := by
-  exact dahlbergFourVertex_of_orderedAdjacentTurns (two_le_of_four_le hn) hturns
 
-/-- A constant-or ordered-adjacent-turn witness gives the corresponding
-constant-or Dahlberg conclusion. -/
-theorem constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns {n : ℕ}
-    (hn : 4 ≤ n) {κ : ZMod n → ℝ}
-    (h : (∃ c, ∀ i : ZMod n, κ i = c) ∨ OrderedAdjacentTurns κ) :
-    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  rcases h with hconst | hturns
-  · exact Or.inl hconst
-  · exact Or.inr (dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn hturns)
 
-/-- A constant-or-reflected ordered-turn conclusion transports to a
-constant-or-Dahlberg conclusion for the original profile.  This is the
-turn-level analogue of `constant_or_dahlbergFourVertex_of_neg_reflectIndex`
-for negative-orientation discrete wrappers. -/
-theorem constant_or_dahlbergFourVertex_of_constant_or_orderedAdjacentTurns_neg_reflectIndex
-    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {κ : ZMod n → ℝ}
-    (h : (∃ c, ∀ i : ZMod n, -κ (-i) = c) ∨
-      OrderedAdjacentTurns (fun i => -κ (-i))) :
-    (∃ c, ∀ i : ZMod n, κ i = c) ∨ DahlbergFourVertex κ := by
-  rcases h with hconst | hturns
-  · rcases hconst with ⟨c, hc⟩
-    exact Or.inl ⟨-c, fun i => by
-      have hi := congrArg Neg.neg (hc (-i))
-      simpa using hi⟩
-  · have hfv_reflected : DahlbergFourVertex (fun i => -κ (-i)) :=
-      dahlbergFourVertex_of_orderedAdjacentTurns_four_le hn hturns
-    exact Or.inr (dahlbergFourVertex_of_neg_reflectIndex hfv_reflected)
 
-/-- An ordered-adjacent-turn witness contains, in particular, an adjacent
-strict increase and an adjacent strict decrease. -/
-theorem exists_adjacent_increase_and_decrease_of_orderedAdjacentTurns {n : ℕ}
-    {κ : ZMod n → ℝ} (hturns : OrderedAdjacentTurns κ) :
-    (∃ i : ZMod n, κ i < κ (i + 1)) ∧
-      ∃ i : ZMod n, κ (i + 1) < κ i := by
-  rcases hturns with
-    ⟨i₁, _i₂, _i₃, _i₄, _hi₁₂, _hi₂₃, _hi₃₄, _hi₄₁,
-      hinc₁, hdec₁, _hdec₂, _hinc₂, _hinc₃, _hdec₃, _hdec₄, _hinc₄⟩
-  refine ⟨⟨i₁, hinc₁⟩, ⟨(i₁ : ZMod n) + 1, ?_⟩⟩
-  simpa [add_assoc] using hdec₁
 
-/-- An ordered-adjacent-turn witness forces the cyclic profile to be
-nonconstant. -/
-theorem not_constant_of_orderedAdjacentTurns {n : ℕ} {κ : ZMod n → ℝ}
-    (hturns : OrderedAdjacentTurns κ) :
-    ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
-  rintro ⟨c, hconst⟩
-  rcases exists_adjacent_increase_and_decrease_of_orderedAdjacentTurns hturns with
-    ⟨⟨i, hinc⟩, _⟩
-  rw [hconst i, hconst (i + 1)] at hinc
-  exact (lt_irrefl c) hinc
 
-/-- Positive affine changes preserve ordered adjacent turns. -/
-theorem orderedAdjacentTurns_posAffine {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
-    (ha : 0 < a) (hturns : OrderedAdjacentTurns κ) :
-    OrderedAdjacentTurns (fun i => a * κ i + b) := by
-  rcases hturns with
-    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
-      hinc₁, hdec₁, hdec₂, hinc₂, hinc₃, hdec₃, hdec₄, hinc₄⟩
-  refine ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · nlinarith [mul_lt_mul_of_pos_left hinc₁ ha]
-  · nlinarith [mul_lt_mul_of_pos_left hdec₁ ha]
-  · nlinarith [mul_lt_mul_of_pos_left hdec₂ ha]
-  · nlinarith [mul_lt_mul_of_pos_left hinc₂ ha]
-  · nlinarith [mul_lt_mul_of_pos_left hinc₃ ha]
-  · nlinarith [mul_lt_mul_of_pos_left hdec₃ ha]
-  · nlinarith [mul_lt_mul_of_pos_left hdec₄ ha]
-  · nlinarith [mul_lt_mul_of_pos_left hinc₄ ha]
 
-/-- A cyclic profile pointwise equal to a positive affine change of another
-profile inherits ordered adjacent turns. -/
-theorem orderedAdjacentTurns_of_eq_posAffine {n : ℕ} {κ μ : ZMod n → ℝ}
-    {a b : ℝ} (ha : 0 < a) (hμ : ∀ i : ZMod n, μ i = a * κ i + b)
-    (hturns : OrderedAdjacentTurns κ) :
-    OrderedAdjacentTurns μ := by
-  have hscaled := orderedAdjacentTurns_posAffine (κ := κ) (a := a) (b := b) ha hturns
-  convert hscaled using 1
-  ext i
-  exact hμ i
 
-/-- Pointwise equal cyclic profiles have the same ordered-adjacent-turn
-witness. -/
-theorem orderedAdjacentTurns_congr {n : ℕ} {κ μ : ZMod n → ℝ}
-    (hμ : ∀ i : ZMod n, μ i = κ i) (hturns : OrderedAdjacentTurns κ) :
-    OrderedAdjacentTurns μ := by
-  exact orderedAdjacentTurns_of_eq_posAffine (a := 1) (b := 0) (by norm_num)
-    (by intro i; simp [hμ i]) hturns
 
-/-- Negating a cyclic profile preserves ordered adjacent turns, after rotating
-the witness to start at the first original valley. -/
-theorem orderedAdjacentTurns_neg {n : ℕ} {κ : ZMod n → ℝ}
-    (hturns : OrderedAdjacentTurns κ) :
-    OrderedAdjacentTurns (fun i => -κ i) := by
-  rcases hturns with
-    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
-      hinc₁, hdec₁, hdec₂, hinc₂, hinc₃, hdec₃, hdec₄, hinc₄⟩
-  have hwrap : ((i₁ + n : ℕ) : ZMod n) = (i₁ : ZMod n) := by
-    rw [Nat.cast_add, ZMod.natCast_self, add_zero]
-  refine ⟨i₂, i₃, i₄, i₁ + n, hi₂₃, hi₃₄, hi₄₁,
-    Nat.add_lt_add_right hi₁₂ n, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · exact neg_lt_neg hdec₂
-  · exact neg_lt_neg hinc₂
-  · exact neg_lt_neg hinc₃
-  · exact neg_lt_neg hdec₃
-  · exact neg_lt_neg hdec₄
-  · exact neg_lt_neg hinc₄
-  · simpa [hwrap] using neg_lt_neg hinc₁
-  · simpa [hwrap] using neg_lt_neg hdec₁
 
-/-- Ordered adjacent turns are invariant under negating the cyclic profile. -/
-theorem orderedAdjacentTurns_neg_iff {n : ℕ} {κ : ZMod n → ℝ} :
-    OrderedAdjacentTurns (fun i => -κ i) ↔ OrderedAdjacentTurns κ := by
-  constructor
-  · intro hturns
-    have hback := orderedAdjacentTurns_neg (κ := fun i : ZMod n => -κ i) hturns
-    convert hback using 1
-    ext i
-    simp
-  · exact orderedAdjacentTurns_neg
 
-/-- Nonzero affine changes preserve ordered adjacent turns.  Negative scales
-are handled by negating the profile, which swaps maxima and minima and rotates
-the ordered witness. -/
-theorem orderedAdjacentTurns_affine {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
-    (ha : a ≠ 0) (hturns : OrderedAdjacentTurns κ) :
-    OrderedAdjacentTurns (fun i => a * κ i + b) := by
-  rcases lt_or_gt_of_ne ha with hneg | hpos
-  · have hturns_neg : OrderedAdjacentTurns (fun i => -κ i) :=
-      orderedAdjacentTurns_neg hturns
-    have hscaled :=
-      orderedAdjacentTurns_posAffine (κ := fun i : ZMod n => -κ i)
-        (a := -a) (b := b) (neg_pos.mpr hneg) hturns_neg
-    convert hscaled using 1
-    ext i
-    ring
-  · exact orderedAdjacentTurns_posAffine hpos hturns
 
-/-- Nonzero affine changes preserve ordered adjacent turns exactly. -/
-theorem orderedAdjacentTurns_affine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
-    (ha : a ≠ 0) :
-    OrderedAdjacentTurns (fun i => a * κ i + b) ↔ OrderedAdjacentTurns κ := by
-  constructor
-  · intro hturns
-    have hback :=
-      orderedAdjacentTurns_affine (κ := fun i => a * κ i + b)
-        (a := a⁻¹) (b := -b / a) (inv_ne_zero ha) hturns
-    convert hback using 1
-    ext i
-    field_simp [ha]
-    ring
-  · exact orderedAdjacentTurns_affine ha
 
-/-- A cyclic profile pointwise equal to a nonzero affine change of another
-profile inherits ordered adjacent turns. -/
-theorem orderedAdjacentTurns_of_eq_affine {n : ℕ} {κ μ : ZMod n → ℝ}
-    {a b : ℝ} (ha : a ≠ 0) (hμ : ∀ i : ZMod n, μ i = a * κ i + b)
-    (hturns : OrderedAdjacentTurns κ) :
-    OrderedAdjacentTurns μ := by
-  have hscaled := orderedAdjacentTurns_affine (κ := κ) (a := a) (b := b) ha hturns
-  convert hscaled using 1
-  ext i
-  exact hμ i
 
-/-- Nonzero affine changes preserve a constant-or-ordered-turn conclusion. -/
-theorem constant_or_orderedAdjacentTurns_affine {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
-    (ha : a ≠ 0)
-    (h : (∃ c, ∀ i : ZMod n, κ i = c) ∨ OrderedAdjacentTurns κ) :
-    (∃ c, ∀ i : ZMod n, a * κ i + b = c) ∨
-      OrderedAdjacentTurns (fun i => a * κ i + b) := by
-  rcases h with hconst | hturns
-  · rcases hconst with ⟨c, hc⟩
-    exact Or.inl ⟨a * c + b, fun i => by simp [hc i]⟩
-  · exact Or.inr (orderedAdjacentTurns_affine ha hturns)
 
-/-- A profile pointwise equal to a nonzero affine change of a
-constant-or-ordered-turn profile inherits the same conclusion. -/
-theorem constant_or_orderedAdjacentTurns_of_eq_affine {n : ℕ}
-    {κ μ : ZMod n → ℝ} {a b : ℝ}
-    (ha : a ≠ 0) (hμ : ∀ i : ZMod n, μ i = a * κ i + b)
-    (h : (∃ c, ∀ i : ZMod n, κ i = c) ∨ OrderedAdjacentTurns κ) :
-    (∃ c, ∀ i : ZMod n, μ i = c) ∨ OrderedAdjacentTurns μ := by
-  rcases constant_or_orderedAdjacentTurns_affine (κ := κ) (a := a) (b := b) ha h with
-    hconst | hturns
-  · rcases hconst with ⟨c, hc⟩
-    exact Or.inl ⟨c, fun i => by rw [hμ i, hc i]⟩
-  · exact Or.inr (by
-      convert hturns using 1
-      ext i
-      exact hμ i)
 
-/-- Pointwise equal cyclic profiles have the same constant-or-ordered-turn
-conclusion. -/
-theorem constant_or_orderedAdjacentTurns_congr {n : ℕ} {κ μ : ZMod n → ℝ}
-    (hμ : ∀ i : ZMod n, μ i = κ i)
-    (h : (∃ c, ∀ i : ZMod n, κ i = c) ∨ OrderedAdjacentTurns κ) :
-    (∃ c, ∀ i : ZMod n, μ i = c) ∨ OrderedAdjacentTurns μ := by
-  exact constant_or_orderedAdjacentTurns_of_eq_affine (a := 1) (b := 0) (by norm_num)
-    (by intro i; simp [hμ i]) h
 
-/-- Translating cyclic indices preserves ordered adjacent turns. -/
-theorem orderedAdjacentTurns_translateIndex {n : ℕ} [NeZero n]
-    {κ : ZMod n → ℝ} (a : ZMod n) (hturns : OrderedAdjacentTurns κ) :
-    OrderedAdjacentTurns (fun j => κ (j + a)) := by
-  rcases hturns with
-    ⟨i₁, i₂, i₃, i₄, hi₁₂, hi₂₃, hi₃₄, hi₄₁,
-      hinc₁, hdec₁, hdec₂, hinc₂, hinc₃, hdec₃, hdec₄, hinc₄⟩
-  let A := a.val
-  let j₁ := i₁ + n - A
-  let j₂ := i₂ + n - A
-  let j₃ := i₃ + n - A
-  let j₄ := i₄ + n - A
-  have hAcast : (A : ZMod n) = a := ZMod.natCast_zmod_val a
-  have hAlt : A < n := ZMod.val_lt a
-  have hA₁ : A ≤ i₁ + n := by omega
-  have hA₂ : A ≤ i₂ + n := by omega
-  have hA₃ : A ≤ i₃ + n := by omega
-  have hA₄ : A ≤ i₄ + n := by omega
-  have hj₁ : ((j₁ : ℕ) : ZMod n) = (i₁ : ZMod n) - a := by
-    dsimp [j₁, A]
-    rw [Nat.cast_sub hA₁, Nat.cast_add, ZMod.natCast_self, add_zero, hAcast]
-  have hj₂ : ((j₂ : ℕ) : ZMod n) = (i₂ : ZMod n) - a := by
-    dsimp [j₂, A]
-    rw [Nat.cast_sub hA₂, Nat.cast_add, ZMod.natCast_self, add_zero, hAcast]
-  have hj₃ : ((j₃ : ℕ) : ZMod n) = (i₃ : ZMod n) - a := by
-    dsimp [j₃, A]
-    rw [Nat.cast_sub hA₃, Nat.cast_add, ZMod.natCast_self, add_zero, hAcast]
-  have hj₄ : ((j₄ : ℕ) : ZMod n) = (i₄ : ZMod n) - a := by
-    dsimp [j₄, A]
-    rw [Nat.cast_sub hA₄, Nat.cast_add, ZMod.natCast_self, add_zero, hAcast]
-  refine ⟨j₁, j₂, j₃, j₄, by omega, by omega, by omega, by omega,
-    ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · convert hinc₁ using 1
-    all_goals (simp [hj₁]; try abel_nf)
-  · convert hdec₁ using 1
-    all_goals (simp [hj₁]; try abel_nf)
-  · convert hdec₂ using 1
-    all_goals (simp [hj₂]; try abel_nf)
-  · convert hinc₂ using 1
-    all_goals (simp [hj₂]; try abel_nf)
-  · convert hinc₃ using 1
-    all_goals (simp [hj₃]; try abel_nf)
-  · convert hdec₃ using 1
-    all_goals (simp [hj₃]; try abel_nf)
-  · convert hdec₄ using 1
-    all_goals (simp [hj₄]; try abel_nf)
-  · convert hinc₄ using 1
-    all_goals (simp [hj₄]; try abel_nf)
 
-/-- Translating cyclic indices preserves ordered adjacent turns exactly. -/
-theorem orderedAdjacentTurns_translateIndex_iff {n : ℕ} [NeZero n]
-    {κ : ZMod n → ℝ} {a : ZMod n} :
-    OrderedAdjacentTurns (fun j => κ (j + a)) ↔ OrderedAdjacentTurns κ := by
-  constructor
-  · intro hturns
-    have hback :=
-      orderedAdjacentTurns_translateIndex (κ := fun j : ZMod n => κ (j + a)) (-a) hturns
-    convert hback using 1
-    ext j
-    congr 1
-    abel
-  · exact orderedAdjacentTurns_translateIndex a
 
 /-- A cyclic real profile has a global maximum. -/
 theorem exists_globalMax_zmod {n : ℕ} [NeZero n] (κ : ZMod n → ℝ) :
@@ -2124,40 +1231,8 @@ theorem dahlbergFourVertex_of_two_disjoint_marked_weakMaxima
       hpropP'Right hpropP'Left hweakQ' hpropQ'Right hpropQ'Left hnc'
   exact (dahlbergFourVertex_translateIndex_iff (κ := κ) (a := p)).mp hfv'
 
-/-- A nonconstant cyclic real profile has a plateau-aware local maximum. -/
-theorem exists_discreteLocalMax_of_not_constant {n : ℕ} [NeZero n]
-    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
-    ∃ i : ZMod n, DiscreteLocalMax κ i := by
-  obtain ⟨i, hmax⟩ := exists_globalMax_zmod κ
-  exact ⟨i, discreteLocalMax_of_globalMax_of_not_constant hmax hnc⟩
 
-/-- If every adjacent cyclic value agrees, then the cyclic profile is
-constant. -/
-theorem exists_constant_of_forall_eq_succ {n : ℕ} [NeZero n] {κ : ZMod n → ℝ}
-    (hstep : ∀ i : ZMod n, κ i = κ (i + 1)) :
-    ∃ c, ∀ i : ZMod n, κ i = c := by
-  refine ⟨κ 0, fun i => ?_⟩
-  have hnat : ∀ k : ℕ, κ (k : ZMod n) = κ 0 := by
-    intro k
-    induction k with
-    | zero => simp
-    | succ k ih =>
-        have hs := hstep (k : ZMod n)
-        have hcast : ((k + 1 : ℕ) : ZMod n) = (k : ZMod n) + 1 := by norm_num
-        rw [hcast]
-        exact hs.symm.trans ih
-  simpa [ZMod.natCast_rightInverse i] using hnat i.val
 
-/-- A nonconstant cyclic profile has at least one adjacent change. -/
-theorem exists_ne_succ_of_not_constant {n : ℕ} [NeZero n] {κ : ZMod n → ℝ}
-    (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
-    ∃ i : ZMod n, κ i ≠ κ (i + 1) := by
-  by_contra hnone
-  apply hnc
-  apply exists_constant_of_forall_eq_succ
-  intro i
-  by_contra hne
-  exact hnone ⟨i, hne⟩
 
 /-- Negating a cyclic profile preserves nonconstancy. -/
 theorem not_constant_neg_iff {n : ℕ} {κ : ZMod n → ℝ} :
@@ -2172,14 +1247,6 @@ theorem not_constant_neg_iff {n : ℕ} {κ : ZMod n → ℝ} :
       have hi := congrArg Neg.neg (hc i)
       simpa using hi⟩
 
-/-- A nonconstant cyclic real profile has a plateau-aware local minimum. -/
-theorem exists_discreteLocalMin_of_not_constant {n : ℕ} [NeZero n]
-    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
-    ∃ i : ZMod n, DiscreteLocalMin κ i := by
-  have hneg : ¬ ∃ c, ∀ i : ZMod n, -κ i = c :=
-    not_constant_neg_iff.mpr hnc
-  rcases exists_discreteLocalMax_of_not_constant hneg with ⟨i, hmax⟩
-  exact ⟨i, discreteLocalMin_of_neg_localMax hmax⟩
 
 /-- A chosen global minimum of a nonconstant cyclic real profile is a
 plateau-aware local minimum. -/
@@ -2195,134 +1262,14 @@ theorem discreteLocalMin_of_globalMin_of_not_constant {n : ℕ} [NeZero n]
   exact discreteLocalMin_of_neg_localMax
     (discreteLocalMax_of_globalMax_of_not_constant hmax_neg hneg)
 
-/-- A nonconstant cyclic real profile has global minimum and maximum witnesses
-which are also plateau-aware local extrema at the same indices. -/
-theorem exists_globalMinMax_localExtrema_of_not_constant {n : ℕ} [NeZero n]
-    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
-    ∃ i₀ i₁ : ZMod n,
-      (∀ j : ZMod n, κ i₀ ≤ κ j) ∧
-      (∀ j : ZMod n, κ j ≤ κ i₁) ∧
-      κ i₀ < κ i₁ ∧
-      DiscreteLocalMin κ i₀ ∧
-      DiscreteLocalMax κ i₁ := by
-  rcases exists_globalMinMax_strict_of_not_constant hnc with
-    ⟨i₀, i₁, hmin, hmax, hlt⟩
-  exact ⟨i₀, i₁, hmin, hmax, hlt,
-    discreteLocalMin_of_globalMin_of_not_constant hmin hnc,
-    discreteLocalMax_of_globalMax_of_not_constant hmax hnc⟩
 
-/-- A nonconstant cyclic real profile has both a plateau-aware local maximum
-and a plateau-aware local minimum. -/
-theorem exists_discreteLocalMax_and_min_of_not_constant {n : ℕ} [NeZero n]
-    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
-    (∃ imax : ZMod n, DiscreteLocalMax κ imax) ∧
-      ∃ imin : ZMod n, DiscreteLocalMin κ imin := by
-  exact ⟨exists_discreteLocalMax_of_not_constant hnc,
-    exists_discreteLocalMin_of_not_constant hnc⟩
 
-/-- Positive affine changes preserve nonconstancy of cyclic profiles. -/
-theorem not_constant_posAffine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
-    (ha : 0 < a) :
-    (¬ ∃ c, ∀ i : ZMod n, a * κ i + b = c) ↔
-      ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
-  constructor
-  · intro hscaled hconst
-    rcases hconst with ⟨c, hc⟩
-    exact hscaled ⟨a * c + b, fun i => by simp [hc i]⟩
-  · intro h hscaledconst
-    rcases hscaledconst with ⟨c, hc⟩
-    apply h
-    refine ⟨(c - b) / a, fun i => ?_⟩
-    have hi := hc i
-    field_simp [ha.ne'] at hi ⊢
-    linarith
 
-/-- Nonzero affine changes preserve nonconstancy of cyclic profiles. -/
-theorem not_constant_affine_iff {n : ℕ} {κ : ZMod n → ℝ} {a b : ℝ}
-    (ha : a ≠ 0) :
-    (¬ ∃ c, ∀ i : ZMod n, a * κ i + b = c) ↔
-      ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
-  constructor
-  · intro hscaled hconst
-    rcases hconst with ⟨c, hc⟩
-    exact hscaled ⟨a * c + b, fun i => by simp [hc i]⟩
-  · intro h hscaledconst
-    rcases hscaledconst with ⟨c, hc⟩
-    apply h
-    refine ⟨(c - b) / a, fun i => ?_⟩
-    have hi := hc i
-    field_simp [ha] at hi ⊢
-    linarith
 
-/-- Pointwise equality to a nonzero affine change preserves nonconstancy. -/
-theorem not_constant_of_eq_affine_iff {n : ℕ} {κ μ : ZMod n → ℝ} {a b : ℝ}
-    (ha : a ≠ 0) (hμ : ∀ i : ZMod n, μ i = a * κ i + b) :
-    (¬ ∃ c, ∀ i : ZMod n, μ i = c) ↔
-      ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
-  constructor
-  · intro hμnc hconst
-    rcases hconst with ⟨c, hc⟩
-    exact hμnc ⟨a * c + b, fun i => by rw [hμ i, hc i]⟩
-  · intro hκnc hμconst
-    rcases hμconst with ⟨c, hc⟩
-    have hscaled_const :
-        ∃ c, ∀ i : ZMod n, a * κ i + b = c :=
-      ⟨c, fun i => by rw [← hμ i, hc i]⟩
-    exact ((not_constant_affine_iff (κ := κ) (a := a) (b := b) ha).mpr
-      hκnc) hscaled_const
 
-/-- Pointwise equal cyclic profiles have the same nonconstancy condition. -/
-theorem not_constant_congr_iff {n : ℕ} {κ μ : ZMod n → ℝ}
-    (hμ : ∀ i : ZMod n, μ i = κ i) :
-    (¬ ∃ c, ∀ i : ZMod n, μ i = c) ↔
-      ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
-  exact not_constant_of_eq_affine_iff (a := 1) (b := 0) (by norm_num)
-    (by intro i; simp [hμ i])
 
-/-- Translating cyclic indices preserves nonconstancy. -/
-theorem not_constant_translateIndex_iff {n : ℕ} {κ : ZMod n → ℝ} {a : ZMod n} :
-    (¬ ∃ c, ∀ i : ZMod n, κ (i + a) = c) ↔
-      ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
-  constructor
-  · intro htrans hconst
-    rcases hconst with ⟨c, hc⟩
-    exact htrans ⟨c, fun i => hc (i + a)⟩
-  · intro h htransconst
-    rcases htransconst with ⟨c, hc⟩
-    apply h
-    refine ⟨c, fun i => ?_⟩
-    have hi := hc (i - a)
-    convert hi using 1
-    abel_nf
 
-/-- Reversing cyclic indices preserves nonconstancy. -/
-theorem not_constant_negIndex_iff {n : ℕ} {κ : ZMod n → ℝ} :
-    (¬ ∃ c, ∀ i : ZMod n, κ (-i) = c) ↔
-      ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
-  constructor
-  · intro hrev hconst
-    rcases hconst with ⟨c, hc⟩
-    exact hrev ⟨c, fun i => hc (-i)⟩
-  · intro h hrevconst
-    rcases hrevconst with ⟨c, hc⟩
-    apply h
-    refine ⟨c, fun i => ?_⟩
-    have hi := hc (-i)
-    simpa using hi
 
-/-- Negating and reversing cyclic indices preserves nonconstancy. -/
-theorem not_constant_neg_reflectIndex_iff {n : ℕ} {κ : ZMod n → ℝ} :
-    (¬ ∃ c, ∀ i : ZMod n, -κ (-i) = c) ↔
-      ¬ ∃ c, ∀ i : ZMod n, κ i = c := by
-  constructor
-  · intro href hconst
-    rcases hconst with ⟨c, hc⟩
-    exact href ⟨-c, fun i => by simp [hc (-i)]⟩
-  · intro h hrefconst
-    rcases hrefconst with ⟨c, hc⟩
-    exact h ⟨-c, fun i => by
-      have hi := congrArg Neg.neg (hc (-i))
-      simpa using hi⟩
 
 /-- If a cyclic real profile is weakly increasing at every adjacent step, then
 it is constant. -/
@@ -2437,130 +1384,18 @@ theorem exists_eq_succ_of_forall_mem_uIcc_neighbors {n : ℕ} [NeZero n]
     rcases exists_constant_of_forall_succ_le hle with ⟨c, hc⟩
     exact hne 0 (by rw [hc 0, hc (0 + 1)])
 
-/-- If a cyclic real profile has no adjacent plateau, then it has a strict
-one-step peak or a strict one-step valley.  This is the first finite cyclic
-combinatorial ingredient in Dahlberg's “too few extrema imply monotone arcs”
-argument. -/
-theorem exists_strict_neighbor_extremum_of_forall_ne_succ {n : ℕ} [NeZero n]
-    {κ : ZMod n → ℝ} (hne : ∀ i : ZMod n, κ i ≠ κ (i + 1)) :
-    ∃ i : ZMod n,
-      (κ (i - 1) < κ i ∧ κ (i + 1) < κ i) ∨
-        (κ i < κ (i - 1) ∧ κ i < κ (i + 1)) := by
-  by_contra hnone
-  have hbetween : ∀ i : ZMod n, κ i ∈ Set.uIcc (κ (i - 1)) (κ (i + 1)) := by
-    intro i
-    rw [Set.mem_uIcc]
-    by_cases hleft : κ (i - 1) < κ i
-    · by_cases hright : κ (i + 1) < κ i
-      · exact False.elim (hnone ⟨i, Or.inl ⟨hleft, hright⟩⟩)
-      · have hiright : κ i < κ (i + 1) := by
-          exact lt_of_le_of_ne (le_of_not_gt hright) (hne i)
-        exact Or.inl ⟨hleft.le, hiright.le⟩
-    · have hileft : κ i < κ (i - 1) := by
-        have hne_left : κ (i - 1) ≠ κ i := by
-          simpa [sub_eq_add_neg, add_assoc] using hne (i - 1)
-        exact lt_of_le_of_ne (le_of_not_gt hleft) (Ne.symm hne_left)
-      by_cases hright : κ i < κ (i + 1)
-      · exact False.elim (hnone ⟨i, Or.inr ⟨hileft, hright⟩⟩)
-      · exact Or.inr ⟨le_of_not_gt hright, hileft.le⟩
-  rcases exists_eq_succ_of_forall_mem_uIcc_neighbors hbetween with ⟨i, hi⟩
-  exact hne i hi
 
-/-- If a cyclic real profile has no adjacent plateau, then a global maximum
-is a strict one-step peak and a global minimum is a strict one-step valley. -/
-theorem exists_strict_neighbor_peak_and_valley_of_forall_ne_succ {n : ℕ} [NeZero n]
-    {κ : ZMod n → ℝ} (hne : ∀ i : ZMod n, κ i ≠ κ (i + 1)) :
-    ∃ imax imin : ZMod n,
-      (κ (imax - 1) < κ imax ∧ κ (imax + 1) < κ imax) ∧
-        (κ imin < κ (imin - 1) ∧ κ imin < κ (imin + 1)) := by
-  obtain ⟨imax, hmax⟩ := exists_globalMax_zmod κ
-  obtain ⟨imin, hmin⟩ := exists_globalMin_zmod κ
-  have hmax_left_ne : κ (imax - 1) ≠ κ imax := by
-    simpa [sub_eq_add_neg, add_assoc] using hne (imax - 1)
-  have hmax_right_ne : κ (imax + 1) ≠ κ imax := Ne.symm (hne imax)
-  have hmin_left_ne : κ imin ≠ κ (imin - 1) := by
-    have h : κ (imin - 1) ≠ κ imin := by
-      simpa [sub_eq_add_neg, add_assoc] using hne (imin - 1)
-    exact Ne.symm h
-  refine ⟨imax, imin, ⟨?_, ?_⟩, ⟨?_, ?_⟩⟩
-  · exact lt_of_le_of_ne (hmax (imax - 1)) hmax_left_ne
-  · exact lt_of_le_of_ne (hmax (imax + 1)) hmax_right_ne
-  · exact lt_of_le_of_ne (hmin (imin - 1)) hmin_left_ne
-  · exact lt_of_le_of_ne (hmin (imin + 1)) (hne imin)
 
-/-- A cyclic real profile with no adjacent plateau has a plateau-aware local
-maximum or local minimum. -/
-theorem exists_discreteLocalExtremum_of_forall_ne_succ {n : ℕ} [NeZero n]
-    (hn : 2 ≤ n) {κ : ZMod n → ℝ} (hne : ∀ i : ZMod n, κ i ≠ κ (i + 1)) :
-    ∃ i : ZMod n, DiscreteLocalMax κ i ∨ DiscreteLocalMin κ i := by
-  rcases exists_strict_neighbor_extremum_of_forall_ne_succ (κ := κ) hne with
-    ⟨i, hpeak | hvalley⟩
-  · exact ⟨i, Or.inl (discreteLocalMax_of_neighbors hn hpeak.1 hpeak.2)⟩
-  · exact ⟨i, Or.inr (discreteLocalMin_of_neighbors hn hvalley.1 hvalley.2)⟩
 
-/-- A cyclic real profile with no adjacent plateau has both a plateau-aware
-local maximum and a plateau-aware local minimum. -/
-theorem exists_discreteLocalMax_and_min_of_forall_ne_succ {n : ℕ} [NeZero n]
-    (hn : 2 ≤ n) {κ : ZMod n → ℝ} (hne : ∀ i : ZMod n, κ i ≠ κ (i + 1)) :
-    (∃ imax : ZMod n, DiscreteLocalMax κ imax) ∧
-      ∃ imin : ZMod n, DiscreteLocalMin κ imin := by
-  rcases exists_strict_neighbor_peak_and_valley_of_forall_ne_succ (κ := κ) hne with
-    ⟨imax, imin, hpeak, hvalley⟩
-  exact ⟨⟨imax, discreteLocalMax_of_neighbors hn hpeak.1 hpeak.2⟩,
-    ⟨imin, discreteLocalMin_of_neighbors hn hvalley.1 hvalley.2⟩⟩
 
-/-- A nonconstant cyclic profile has at least one strict adjacent increase. -/
-theorem exists_adjacent_lt_succ_of_not_constant {n : ℕ} [NeZero n]
-    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
-    ∃ i : ZMod n, κ i < κ (i + 1) := by
-  by_contra hnone
-  apply hnc
-  apply exists_constant_of_forall_succ_le
-  intro i
-  exact le_of_not_gt (fun hlt => hnone ⟨i, hlt⟩)
 
-/-- A nonconstant cyclic profile has at least one strict adjacent decrease. -/
-theorem exists_adjacent_succ_lt_of_not_constant {n : ℕ} [NeZero n]
-    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
-    ∃ i : ZMod n, κ (i + 1) < κ i := by
-  by_contra hnone
-  apply hnc
-  apply exists_constant_of_forall_le_succ
-  intro i
-  exact le_of_not_gt (fun hlt => hnone ⟨i, hlt⟩)
 
-/-- A nonconstant cyclic profile has both a strict adjacent increase and a
-strict adjacent decrease. -/
-theorem exists_adjacent_increase_and_decrease_of_not_constant {n : ℕ} [NeZero n]
-    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
-    (∃ i : ZMod n, κ i < κ (i + 1)) ∧
-      ∃ i : ZMod n, κ (i + 1) < κ i := by
-  exact ⟨exists_adjacent_lt_succ_of_not_constant hnc,
-    exists_adjacent_succ_lt_of_not_constant hnc⟩
 
-/-- A nonconstant cyclic profile has an adjacent strict increase or strict
-decrease. -/
-theorem exists_adjacent_lt_or_gt_of_not_constant {n : ℕ} [NeZero n]
-    {κ : ZMod n → ℝ} (hnc : ¬ ∃ c, ∀ i : ZMod n, κ i = c) :
-    ∃ i : ZMod n, κ i < κ (i + 1) ∨ κ (i + 1) < κ i := by
-  obtain ⟨i, hi⟩ := exists_ne_succ_of_not_constant hnc
-  rcases lt_trichotomy (κ i) (κ (i + 1)) with hlt | heq | hgt
-  · exact ⟨i, Or.inl hlt⟩
-  · exact False.elim (hi heq)
-  · exact ⟨i, Or.inr hgt⟩
 
 /-- A Euclidean circle with centre `O` and positive radius `R` through a triple. -/
 def CircumcircleR2 (A B C O : ℂ) (R : ℝ) : Prop :=
   0 < R ∧ dist O A = R ∧ dist O B = R ∧ dist O C = R
 
-/-- A positive circumcircle is equivalently a bundled Euclidean sphere containing
-the three points. The positive-radius condition remains explicit. -/
-theorem circumcircleR2_iff_pos_and_mem_sphere (A B C O : ℂ) (R : ℝ) :
-    CircumcircleR2 A B C O R ↔
-      0 < R ∧ A ∈ (⟨O, R⟩ : EuclideanGeometry.Sphere ℂ) ∧
-        B ∈ (⟨O, R⟩ : EuclideanGeometry.Sphere ℂ) ∧
-          C ∈ (⟨O, R⟩ : EuclideanGeometry.Sphere ℂ) := by
-  simp only [CircumcircleR2, EuclideanGeometry.mem_sphere']
 
 /-- The closed convex vertex cone at `B`, spanned by the rays toward `A` and
 `C`.  Dahlberg's regularity asks that the circumcenter lie in this cone. -/

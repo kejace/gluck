@@ -87,17 +87,5 @@ theorem crossR2_circlePoint_pos_of_dist_le_of_innerRadius_lt
   exact crossR2_circlePoint_pos_of_dist_lt_innerRadius O P hR h₀₁ hspan
     (hP.trans_lt hρ)
 
-/-- Mesh-step form: a chord from angle `θ` to `θ + δ`, with
-`0 < δ < π`, strictly supports every point inside radius
-`R cos (δ / 2)`. -/
-theorem crossR2_circlePoint_add_pos_of_dist_lt_innerRadius
-    (O P : ℂ) {R θ δ : ℝ} (hR : 0 < R)
-    (hδ : 0 < δ) (hδpi : δ < Real.pi)
-    (hP : dist O P < R * Real.cos (δ / 2)) :
-    0 < crossR2 (circlePoint O R θ) (circlePoint O R (θ + δ)) P := by
-  apply crossR2_circlePoint_pos_of_dist_lt_innerRadius O P hR
-  · linarith
-  · linarith
-  · simpa only [add_sub_cancel_left] using hP
 
 end Gluck.Discrete

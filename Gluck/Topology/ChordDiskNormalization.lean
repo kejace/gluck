@@ -130,7 +130,6 @@ theorem chordDisk_isBounded (O : ℂ) (R : ℝ) (x u v : ℂ)
   apply ((isCompact_closedBall O R).image
     (chordCoordHomeomorph x u v hli).continuous).isBounded.subset
   exact Set.image_mono ball_subset_closedBall
-
 theorem chordCoord_mem_frontier_chordDisk {O A : ℂ} {R : ℝ} {x u v : ℂ}
     (hR : R ≠ 0) (hli : LinearIndependent ℝ ![u, v])
     (hA : dist O A = R) :
@@ -316,18 +315,5 @@ theorem diskSquareHomeomorph_coordinate_bounds
   rw [mem_closedBall_zero_iff, norm_prod_le_iff] at hmem
   simpa [Real.norm_eq_abs] using hmem
 
-/-- Equality after normalization is equality before normalization; this is the
-step that turns a Maehara intersection of transformed paths into an
-intersection of the original paths. -/
-theorem diskSquareHomeomorph_apply_eq_iff
-    {O z w : ℂ} {R : ℝ} {x u v : ℂ}
-    (hli : LinearIndependent ℝ ![u, v]) (hx : dist O x < R) :
-    diskSquareHomeomorph O R x u v hli hx z =
-        diskSquareHomeomorph O R x u v hli hx w ↔ z = w := by
-  constructor
-  · intro h
-    exact (diskSquareHomeomorph O R x u v hli hx).injective h
-  · rintro rfl
-    rfl
 
 end Gluck.Topology

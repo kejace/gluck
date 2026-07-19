@@ -3,7 +3,7 @@ Copyright (c) 2026 kejace. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
-import Gluck.Discrete.Convexity
+import Gluck.Discrete.TangentChord
 import Mathlib.Analysis.LocallyConvex.Separation
 
 /-!
@@ -62,9 +62,6 @@ def PositivePolygonalUmlaufsatz : Prop :=
     (∀ i : ZMod n, 0 < crossR2 (v (i - 1)) (v i) (v (i + 1))) →
     HasPositiveTurningNumberOne v
 
-/-- Every cyclic vertex lies in every closed left edge half-plane. -/
-def ConvexEdgeSupport (v : ZMod n → ℂ) : Prop :=
-  ∀ i j : ZMod n, 0 ≤ crossR2 (v i) (v (i + 1)) (v j)
 
 /-- Every vertex other than the endpoints lies in the open left half-plane of
 each oriented edge.  This is the strict-convexity interface consumed by the
@@ -748,16 +745,6 @@ theorem cyclicEdgeHeading_strictMono [NeZero n] {v : ZMod n → ℂ}
   rw [cyclicEdgeHeading_succ]
   exact lt_add_of_pos_right _ (cyclicEdgeTurn_mem_Ioo hsimple horient k).1
 
-/-- Each canonical heading increment is strictly less than `π`. -/
-theorem cyclicEdgeHeading_succ_lt_add_pi [NeZero n] {v : ZMod n → ℂ}
-    (hsimple : IsSimplePolygon v)
-    (horient : ∀ i : ZMod n, 0 < crossR2 (v (i - 1)) (v i) (v (i + 1)))
-    (k : ℕ) :
-    cyclicEdgeHeading v (k + 1) < cyclicEdgeHeading v k + Real.pi := by
-  rw [cyclicEdgeHeading_succ]
-  simpa [add_comm] using
-    add_lt_add_left (cyclicEdgeTurn_mem_Ioo hsimple horient k).2
-      (cyclicEdgeHeading v k)
 
 /-- Modulo `2π`, the canonical lifted heading is the ordinary argument of
 the corresponding edge. -/
@@ -1422,67 +1409,6 @@ private theorem sin_neg_of_pi_lt {x : ℝ} (hπ : Real.pi < x)
   rw [hsub] at hpos
   linarith
 
-/-- Weak support on one lifted period, conditional only on the one-turn
-Umlaufsatz equality. -/
-private theorem support_left_nonneg_of_turningNumberOne [NeZero n]
-    {v : ZMod n → ℂ}
-    (hsimple : IsSimplePolygon v)
-    (horient : ∀ i : ZMod n, 0 < crossR2 (v (i - 1)) (v i) (v (i + 1)))
-    (hone : HasPositiveTurningNumberOne v) (k : ℕ) {j : ℕ}
-    (hkj : k ≤ j) (hjn : j ≤ k + n) :
-    0 ≤ (Complex.exp (((-cyclicEdgeHeading v k : ℝ) : ℂ) * Complex.I) *
-      (cyclicVertex v j - cyclicVertex v k)).im := by
-  rw [im_rot_cyclicVertex_sub hsimple hkj]
-  have hmono := cyclicEdgeHeading_strictMono hsimple horient
-  have hzero : ∑ m ∈ Finset.Ico k (k + n),
-      cyclicEdgeLength v m *
-        Real.sin (cyclicEdgeHeading v m - cyclicEdgeHeading v k) = 0 := by
-    have H := im_rot_cyclicVertex_sub hsimple (Nat.le_add_right k n)
-    rw [cyclicVertex_periodic, sub_self, mul_zero, Complex.zero_im] at H
-    exact H.symm
-  have hsplit :
-      (∑ m ∈ Finset.Ico k j, cyclicEdgeLength v m *
-        Real.sin (cyclicEdgeHeading v m - cyclicEdgeHeading v k)) =
-        -∑ m ∈ Finset.Ico j (k + n), cyclicEdgeLength v m *
-          Real.sin (cyclicEdgeHeading v m - cyclicEdgeHeading v k) := by
-    have hc := Finset.sum_Ico_consecutive
-      (fun m => cyclicEdgeLength v m *
-        Real.sin (cyclicEdgeHeading v m - cyclicEdgeHeading v k)) hkj hjn
-    rw [hzero] at hc
-    linarith
-  by_cases hcross : ∀ m ∈ Finset.Ico k j,
-      cyclicEdgeHeading v m - cyclicEdgeHeading v k ≤ Real.pi
-  · apply Finset.sum_nonneg
-    intro m hm
-    rw [Finset.mem_Ico] at hm
-    have hαnn : 0 ≤ cyclicEdgeHeading v m - cyclicEdgeHeading v k :=
-      sub_nonneg.2 (hmono.monotone hm.1)
-    exact mul_nonneg (cyclicEdgeLength_pos hsimple m).le
-      (Real.sin_nonneg_of_nonneg_of_le_pi hαnn
-        (hcross m (Finset.mem_Ico.2 hm)))
-  · push Not at hcross
-    obtain ⟨m₀, hm₀mem, hm₀⟩ := hcross
-    rw [Finset.mem_Ico] at hm₀mem
-    rw [hsplit, neg_nonneg]
-    apply Finset.sum_nonpos
-    intro m hm
-    rw [Finset.mem_Ico] at hm
-    have hm₀m : m₀ < m := lt_of_lt_of_le hm₀mem.2 hm.1
-    have hαgt : Real.pi < cyclicEdgeHeading v m - cyclicEdgeHeading v k := by
-      have h := hmono hm₀m
-      linarith
-    have hkm : k < m := lt_of_le_of_lt hm₀mem.1 hm₀m
-    have hwin : cyclicEdgeHeading v k < cyclicEdgeHeading v m ∧
-        cyclicEdgeHeading v m < cyclicEdgeHeading v k + 2 * Real.pi := by
-      refine ⟨hmono hkm, ?_⟩
-      have hw := hmono hm.2
-      rw [cyclicEdgeHeading_add_n hone] at hw
-      exact hw
-    have hsin : Real.sin
-        (cyclicEdgeHeading v m - cyclicEdgeHeading v k) < 0 :=
-      sin_neg_of_pi_lt hαgt (by linarith [hwin.2])
-    exact mul_nonpos_of_nonneg_of_nonpos
-      (cyclicEdgeLength_pos hsimple m).le hsin.le
 
 /-- Strict support on the interior vertices of one lifted period, conditional
 only on the one-turn Umlaufsatz equality. -/
@@ -1594,26 +1520,6 @@ private theorem crossR2_cyclicEdgeVector (A C : ℂ) (r ψ : ℝ) :
     Complex.exp_ofReal_mul_I_im, Real.cos_neg, Real.sin_neg]
   ring
 
-/-- A one-turn positively oriented polygon has global weak edge support. -/
-theorem convexEdgeSupport_of_turningNumberOne [NeZero n]
-    {v : ZMod n → ℂ}
-    (hsimple : IsSimplePolygon v)
-    (horient : ∀ i : ZMod n, 0 < crossR2 (v (i - 1)) (v i) (v (i + 1)))
-    (hone : HasPositiveTurningNumberOne v) :
-    ConvexEdgeSupport v := by
-  intro a c
-  set t := (c - a).val
-  have htlt : t < n := ZMod.val_lt (c - a)
-  have hc : cyclicVertex v (a.val + t) = v c :=
-    cyclicVertex_sub_val v a c
-  have hleft :
-      0 ≤ (Complex.exp (((-cyclicEdgeHeading v a.val : ℝ) : ℂ) * Complex.I) *
-        (v c - v a)).im := by
-    rw [← hc, show v a = cyclicVertex v a.val by simp [cyclicVertex]]
-    exact support_left_nonneg_of_turningNumberOne hsimple horient hone a.val
-      (by omega) (by omega)
-  rw [cyclicEdgeVector_at_val hsimple, crossR2_cyclicEdgeVector]
-  exact mul_nonneg (cyclicEdgeLength_pos hsimple a.val).le hleft
 
 /-- A one-turn positively oriented polygon has strict global edge support away
 from the two endpoints of each edge. -/
@@ -1647,16 +1553,6 @@ theorem strictConvexEdgeSupport_of_turningNumberOne [NeZero n]
   rw [cyclicEdgeVector_at_val hsimple, crossR2_cyclicEdgeVector]
   exact mul_pos (cyclicEdgeLength_pos hsimple a.val) hleft
 
-/-- A simple positively oriented polygon has global weak edge support. -/
-theorem convexEdgeSupport_of_simple_positiveOrientation [NeZero n]
-    {v : ZMod n → ℂ}
-    (hsimple : IsSimplePolygon v)
-    (horient : ∀ i : ZMod n,
-      0 < crossR2 (v (i - 1)) (v i) (v (i + 1))) :
-    ConvexEdgeSupport v :=
-  convexEdgeSupport_of_turningNumberOne hsimple horient
-    (hasPositiveTurningNumberOne_of_simple_positiveOrientation
-      hsimple horient)
 
 /-- A simple positively oriented polygon has strict support by every oriented
 edge away from that edge's two endpoints. -/
@@ -1672,35 +1568,6 @@ theorem strictConvexEdgeSupport_of_simple_positiveOrientation [NeZero n]
 
 /-! ## The integral period defect -/
 
-/-- Edge periodicity forces the total lifted heading defect to be an integral
-multiple of `2π`.  This part does not use simplicity beyond nondegenerate edges. -/
-theorem cyclicEdgeHeading_period_integer [NeZero n] {v : ZMod n → ℂ}
-    (hsimple : IsSimplePolygon v) :
-    ∃ m : ℤ, cyclicEdgeHeading v n =
-      cyclicEdgeHeading v 0 + 2 * Real.pi * m := by
-  have hedge : cyclicEdge v n = cyclicEdge v 0 := by
-    simpa using cyclicEdge_periodic v 0
-  have hangle : (cyclicEdgeHeading v n : Real.Angle) =
-      (cyclicEdgeHeading v 0 : Real.Angle) := by
-    rw [cyclicEdgeHeading_coe_angle hsimple,
-      cyclicEdgeHeading_coe_angle hsimple, hedge]
-  obtain ⟨m, hm⟩ := Real.Angle.angle_eq_iff_two_pi_dvd_sub.mp hangle
-  refine ⟨m, ?_⟩
-  linarith
 
-/-- Under positive consecutive orientation, the integral period is positive. -/
-theorem cyclicEdgeHeading_period_positive_integer [NeZero n]
-    {v : ZMod n → ℂ}
-    (hsimple : IsSimplePolygon v)
-    (horient : ∀ i : ZMod n, 0 < crossR2 (v (i - 1)) (v i) (v (i + 1))) :
-    ∃ m : ℤ, 0 < m ∧ cyclicEdgeHeading v n =
-      cyclicEdgeHeading v 0 + 2 * Real.pi * m := by
-  obtain ⟨m, hm⟩ := cyclicEdgeHeading_period_integer hsimple
-  have hn : 0 < n := Nat.pos_of_ne_zero (NeZero.ne n)
-  have hinc := cyclicEdgeHeading_strictMono hsimple horient hn
-  have hmreal : 0 < (m : ℝ) := by
-    rw [hm] at hinc
-    nlinarith [Real.pi_pos]
-  exact ⟨m, by exact_mod_cast hmreal, hm⟩
 
 end Gluck.Discrete

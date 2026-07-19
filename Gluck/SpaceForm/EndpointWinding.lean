@@ -6,7 +6,7 @@ Authors: kejace
 import Gluck.SpaceForm.FirstVariation
 import Gluck.SpaceForm.Reconstruction
 import Gluck.SpaceForm.StepReparam
-import Gluck.Winding
+import Gluck.Sphere.ConjWinding
 
 /-!
 # Endpoint winding: existence of a closed admissible trajectory (`K`-generic)
@@ -260,13 +260,7 @@ private lemma exists_interior_zero_of_conj_dominant' {F : ℂ → ℂ}
     exact Complex.ofReal_ne_zero.mpr (neg_ne_zero.mpr hA)
   have hconjval : ∀ t : I, conjLoop w₀ t
       = w₀ * (starRingEnd ℂ) ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ) :=
-    fun t => by
-      rw [conjLoop, expLoopRev_apply]
-      rw [Circle.coe_exp]
-      congr 1
-      rw [← Complex.exp_conj, map_mul, Complex.conj_I, Complex.conj_ofReal]
-      push_cast
-      ring_nf
+    fun t => rfl
   have hγFval : ∀ t : I, diskBoundaryLoop F hFc t
       = F ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ) := fun t => rfl
   have hexp01 : Circle.exp (2 * π * ((0 : I) : ℝ))
