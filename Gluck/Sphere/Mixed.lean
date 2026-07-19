@@ -336,7 +336,13 @@ theorem mixed_spherical_endpoint_winding {κ : ℝ → ℝ} (hκc : Continuous �
     fun t => rfl
   have hconjval : ∀ t : I, conjLoop w₀ t
       = w₀ * (starRingEnd ℂ) ((Circle.exp (2 * π * (t : ℝ)) : Circle) : ℂ) :=
-    fun t => rfl
+    fun t => by
+      rw [conjLoop, expLoopRev_apply]
+      rw [Circle.coe_exp]
+      congr 1
+      rw [← Complex.exp_conj, map_mul, Complex.conj_I, Complex.conj_ofReal]
+      push_cast
+      ring_nf
   have hexp01 : Circle.exp (2 * π * ((0 : I) : ℝ))
       = Circle.exp (2 * π * ((1 : I) : ℝ)) := by
     rw [Set.Icc.coe_zero, Set.Icc.coe_one, mul_zero, mul_one, Circle.exp_zero,
