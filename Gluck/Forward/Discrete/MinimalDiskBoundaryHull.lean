@@ -21,11 +21,6 @@ open Set Metric
 
 namespace Gluck.Forward
 
-/-- The Euclidean points among the vertices which lie on the boundary of the
-chosen disk. -/
-def MinimalDiskBoundaryPointsR2 {n : ℕ} (v : ZMod n → ℂ)
-    (O : ℂ) (R : ℝ) : Set ℂ :=
-  {P | ∃ i : ZMod n, OnDiskBoundaryR2 v O R i ∧ P = v i}
 
 /-- A finite minimal enclosing disk has at least one boundary-contact
 vertex. -/
@@ -160,43 +155,6 @@ theorem exists_boundaryContact_real_inner_nonpos
     hΔ hρ_nonneg hcontactsρ
   exact (not_lt_of_ge hRρ) hρ_lt
 
-/-- Boundary contacts of a minimal enclosing disk cannot all lie in one open
-half-plane through the center. -/
-theorem not_boundaryContacts_in_openHalfSpace_through_center
-    {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
-    (hΔ : MinimalEnclosingDiskR2 v O R) (u : ℂ) :
-    ¬ ∀ i : ZMod n, OnDiskBoundaryR2 v O R i →
-      0 < inner ℝ u (v i - O) := by
-  intro hall
-  obtain ⟨i, hi, hnonpos⟩ := exists_boundaryContact_real_inner_nonpos hΔ u
-  exact (not_lt_of_ge hnonpos) (hall i hi)
 
-/-- The center of a finite minimal enclosing disk lies in the real convex
-hull of its boundary-contact points. -/
-theorem minimalEnclosingDiskR2_center_mem_convexHull_boundaryPoints
-    {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
-    (hΔ : MinimalEnclosingDiskR2 v O R) :
-    O ∈ convexHull ℝ (MinimalDiskBoundaryPointsR2 v O R) := by
-  let S : Set ℂ := MinimalDiskBoundaryPointsR2 v O R
-  have hSfinite : S.Finite := by
-    apply (Set.finite_range v).subset
-    rintro P ⟨i, _hi, rfl⟩
-    exact ⟨i, rfl⟩
-  by_contra hO
-  obtain ⟨f, a, hfS, haO⟩ :=
-    geometric_hahn_banach_closed_point
-      (convex_convexHull ℝ S) (hSfinite.isClosed_convexHull ℝ) hO
-  let u : ℂ := -(InnerProductSpace.toDual ℝ ℂ).symm f
-  obtain ⟨i, hi, hinnerNonpos⟩ :=
-    exists_boundaryContact_real_inner_nonpos hΔ u
-  have hiS : v i ∈ S := ⟨i, hi, rfl⟩
-  have hfi : f (v i) < a := hfS (v i) (subset_convexHull ℝ S hiS)
-  have hinnerPos : 0 < inner ℝ u (v i - O) := by
-    have heq : inner ℝ u (v i - O) = -(f (v i) - f O) := by
-      dsimp only [u]
-      rw [inner_neg_left, InnerProductSpace.toDual_symm_apply, f.map_sub]
-    rw [heq]
-    linarith
-  exact (not_lt_of_ge hinnerNonpos) hinnerPos
 
 end Gluck.Forward

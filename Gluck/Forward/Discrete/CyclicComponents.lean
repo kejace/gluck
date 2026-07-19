@@ -326,33 +326,7 @@ theorem IsMaximalCyclicRunAt.properties {n : ℕ} [NeZero n]
     rcases Finset.mem_image.mp hz with ⟨k, hkI, rfl⟩
     exact (mem_cutFinset.mp (hI.2.1 hkI)).2
 
-theorem exists_maximalCyclicRunAt_of_mem {n : ℕ} [NeZero n]
-    {c : ZMod n} {S : Finset (ZMod n)} {z : ZMod n} (hz : z ∈ S) :
-    ∃ R : Finset (ZMod n), IsMaximalCyclicRunAt c S R ∧ z ∈ R := by
-  let k : ℕ := (z - c).val
-  have hklt : k < n := ZMod.val_lt (z - c)
-  have hklift : cyclicLift c k = z := by
-    dsimp [cyclicLift, k]
-    rw [ZMod.natCast_zmod_val (z - c)]
-    abel
-  have hkcut : k ∈ cutFinset c S :=
-    mem_cutFinset.mpr ⟨hklt, by simpa [hklift] using hz⟩
-  obtain ⟨I, hI, hkI⟩ := exists_maximalNatRun_of_mem hkcut
-  refine ⟨mapCut c I, ⟨I, hI, rfl⟩, ?_⟩
-  exact Finset.mem_image.mpr ⟨k, hkI, hklift⟩
 
-theorem maximalCyclicRunsAt_eq_or_disjoint {n : ℕ} [NeZero n]
-    {c : ZMod n} {S R Q : Finset (ZMod n)}
-    (hR : IsMaximalCyclicRunAt c S R)
-    (hQ : IsMaximalCyclicRunAt c S Q) :
-    R = Q ∨ Disjoint R Q := by
-  rcases hR with ⟨I, hI, rfl⟩
-  rcases hQ with ⟨J, hJ, rfl⟩
-  rcases maximalNatRuns_eq_or_disjoint hI hJ with hIJ | hIJ
-  · exact Or.inl (congrArg (mapCut c) hIJ)
-  · exact Or.inr (disjoint_mapCut_of_disjoint_of_subset_range c
-      (hI.2.1.trans (cutFinset_subset_range c S))
-      (hJ.2.1.trans (cutFinset_subset_range c S)) hIJ)
 
 theorem cutFinset_nonempty_iff {n : ℕ} [NeZero n]
     (c : ZMod n) (S : Finset (ZMod n)) :
@@ -465,41 +439,9 @@ theorem maximalCyclicRunAt_has_gap_endpoints_of_cut_not_mem
   exact ⟨a, b, Nat.pos_of_ne_zero ha0, hab, hblt, by omega,
     by simp [hIcc], hpredS, hsuccS⟩
 
-theorem mem_iff_exists_maximalCyclicRunAt {n : ℕ} [NeZero n]
-    (c : ZMod n) (S : Finset (ZMod n)) (z : ZMod n) :
-    z ∈ S ↔
-      ∃ R : Finset (ZMod n), IsMaximalCyclicRunAt c S R ∧ z ∈ R := by
-  constructor
-  · exact exists_maximalCyclicRunAt_of_mem
-  · rintro ⟨R, hR, hzR⟩
-    exact hR.properties.2.2 hzR
 
-theorem strictSubset_card_lt {α : Type*} {A B : Finset α}
-    (hAB : A ⊂ B) : A.card < B.card :=
-  Finset.card_lt_card hAB
 
-theorem strictSubset_wellFounded {α : Type*} :
-    WellFounded (fun A B : Finset α => A ⊂ B) :=
-  Finset.lt_wf
 
-/-- Iterating a strict-shrink step reaches a terminal set in at most the
-cardinality of the initial set. -/
-theorem exists_terminal_iterate_of_strict_shrink
-    {α : Type*}
-    (step : Finset α → Finset α) (terminal : Finset α → Prop)
-    (hstep : ∀ A, ¬ terminal A → step A ⊂ A) (A : Finset α) :
-    ∃ k : ℕ, k ≤ A.card ∧ terminal ((step^[k]) A) := by
-  classical
-  refine Finset.strongInductionOn A ?_
-  intro A ih
-  by_cases hterminal : terminal A
-  · exact ⟨0, Nat.zero_le _, by simpa using hterminal⟩
-  · have hshrink : step A ⊂ A := hstep A hterminal
-    obtain ⟨k, hkcard, hkterminal⟩ := ih (step A) hshrink
-    refine ⟨k + 1, ?_, ?_⟩
-    · have hcard : (step A).card < A.card := strictSubset_card_lt hshrink
-      omega
-    · simpa [Function.iterate_succ_apply] using hkterminal
 
 theorem exists_not_mem_of_ne_univ {α : Type*} [Fintype α]
     {S : Finset α} (hS : S ≠ Finset.univ) :
@@ -512,26 +454,6 @@ theorem exists_not_mem_of_ne_univ {α : Type*} [Fintype α]
   by_contra hxS
   exact hnone ⟨x, hxS⟩
 
-/-- Cutting at a point outside a proper cyclic subset gives a decomposition
-into gap-bounded maximal intervals: the runs cover the subset and are
-pairwise equal or disjoint. -/
-theorem exists_cut_decomposition_of_proper
-    {n : ℕ} [NeZero n] {S : Finset (ZMod n)}
-    (hproper : S ≠ Finset.univ) :
-    ∃ c : ZMod n, c ∉ S ∧
-      (∀ z : ZMod n, z ∈ S ↔
-        ∃ R : Finset (ZMod n), IsMaximalCyclicRunAt c S R ∧ z ∈ R) ∧
-      (∀ R Q : Finset (ZMod n),
-        IsMaximalCyclicRunAt c S R → IsMaximalCyclicRunAt c S Q →
-        R = Q ∨ Disjoint R Q) ∧
-      (∀ R : Finset (ZMod n), IsMaximalCyclicRunAt c S R →
-        ∃ a b : ℕ, 0 < a ∧ a ≤ b ∧ b < n ∧ b - a + 1 < n ∧
-          R = mapCut c (Finset.Icc a b) ∧
-          cyclicLift c (a - 1) ∉ S ∧ cyclicLift c (b + 1) ∉ S) := by
-  obtain ⟨c, hc⟩ := exists_not_mem_of_ne_univ hproper
-  exact ⟨c, hc, mem_iff_exists_maximalCyclicRunAt c S,
-    fun _ _ => maximalCyclicRunsAt_eq_or_disjoint,
-    fun _ => maximalCyclicRunAt_has_gap_endpoints_of_cut_not_mem hc⟩
 
 theorem exists_cut_with_two_disjoint_runs_of_not_interval
     {n : ℕ} [NeZero n] {S : Finset (ZMod n)}

@@ -151,17 +151,6 @@ theorem isDiameter_of_minimalEnclosingDiskR2_of_boundary_subset_pair
   exact (not_lt_of_ge (minimalEnclosingDiskR2_le_of_polygonInClosedDiskR2
     hΔ hR'_nonneg hcontains)) hR'_lt
 
-/-- Compatibility corollary: the two terminal contacts are separated by twice
-the minimal radius. -/
-theorem dist_eq_two_mul_radius_of_minimalEnclosingDiskR2_of_boundary_subset_pair
-    {n : ℕ} [NeZero n] {v : ZMod n → ℂ} {O : ℂ} {R : ℝ}
-    (hΔ : MinimalEnclosingDiskR2 v O R) {p q : ZMod n}
-    (hp : OnDiskBoundaryR2 v O R p)
-    (hq : OnDiskBoundaryR2 v O R q)
-    (hboundary : ∀ i, OnDiskBoundaryR2 v O R i → i = p ∨ i = q) :
-    dist (v p) (v q) = 2 * R := by
-  exact (isDiameter_of_minimalEnclosingDiskR2_of_boundary_subset_pair
-    hΔ hp hq hboundary).dist_left_right
 
 /-- A positive minimal enclosing disk cannot have a unique boundary contact. -/
 theorem exists_ne_onDiskBoundaryR2_of_minimalEnclosingDiskR2

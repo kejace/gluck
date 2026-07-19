@@ -49,8 +49,5 @@ private theorem dahlbergE2_orientedCircleArcSource_aux : DahlbergE2OrientedCircl
 theorem dahlbergE2_paperSources : DahlbergE2PaperSources :=
   dahlbergE2PaperSources_of_orientedCircleArcSource dahlbergE2_orientedCircleArcSource_aux
 
-/-- The paper-source gate follows from the exact construction. -/
-theorem dahlbergE2_paper_sources_gate : DahlbergE2PaperSources :=
-  dahlbergE2_paperSources
 
 end Gluck.Forward

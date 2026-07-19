@@ -144,15 +144,6 @@ theorem circleSplice_natCast_circleMesh (q : ℕ) (θB θA : ℝ)
   congr 2
   omega
 
-/-- Every inserted mesh vertex lies on the prescribed circle. -/
-theorem circleSplice_circleMesh_boundary (q : ℕ) (θB θA : ℝ)
-    (hR : 0 < R) {j : ℕ} (hj : j < q) :
-    OnDiskBoundaryR2 (run.circleSplice q θB θA) O R
-      (run.chainLength + j : ZMod (run.spliceVertexCount q)) := by
-  change run.circleSplice q θB θA
-    (run.chainLength + j : ZMod (run.spliceVertexCount q)) ∈ Metric.sphere O R
-  rw [run.circleSplice_natCast_circleMesh q θB θA hj]
-  exact Metric.mem_sphere'.mpr (by rw [dist_circlePoint_center, abs_of_pos hR])
 
 @[simp] theorem circleSplice_zero (q : ℕ) (θB θA : ℝ) :
     run.circleSplice q θB θA 0 = run.point run.chainStart := by

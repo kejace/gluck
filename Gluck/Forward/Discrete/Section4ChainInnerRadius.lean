@@ -44,9 +44,6 @@ theorem dist_point_le_chainInnerRadius {k : ℕ}
   exact Finset.le_sup' (fun j ↦ dist O (run.point j))
     (Finset.mem_Icc.mpr ⟨hak, hkb⟩)
 
-/-- The uniform inner radius is nonnegative. -/
-theorem chainInnerRadius_nonneg : 0 ≤ run.chainInnerRadius := by
-  exact dist_nonneg.trans (run.dist_point_le_chainInnerRadius le_rfl run.a_le_b)
 
 /-- The uniform inner radius is strictly smaller than the radius of the
 minimal enclosing disk. -/
@@ -72,18 +69,6 @@ theorem crossR2_circlePoint_pos_of_chainInnerRadius_lt
     O (run.point k) hR h₀₁ hspan
       (run.dist_point_le_chainInnerRadius hak hkb) hρ
 
-/-- Mesh-step specialization of
-`crossR2_circlePoint_pos_of_chainInnerRadius_lt`. -/
-theorem crossR2_circlePoint_add_pos_of_chainInnerRadius_lt
-    (hR : 0 < R) {k : ℕ} (hak : run.a ≤ k) (hkb : k ≤ run.b)
-    {θ δ : ℝ} (hδ : 0 < δ) (hδpi : δ < Real.pi)
-    (hρ : run.chainInnerRadius < R * Real.cos (δ / 2)) :
-    0 < crossR2 (circlePoint O R θ) (circlePoint O R (θ + δ))
-      (run.point k) := by
-  apply run.crossR2_circlePoint_pos_of_chainInnerRadius_lt hR hak hkb
-  · linarith
-  · linarith
-  · simpa only [add_sub_cancel_left] using hρ
 
 end Section4PositiveRunCertificate
 

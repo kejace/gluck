@@ -3,7 +3,8 @@ Copyright (c) 2026 kejace. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
-import Gluck.Forward.Discrete.Section4AlternatingChordCrossing
+import Gluck.Forward.Discrete.Section4ContactOrientation
+import Gluck.Discrete.CircleParameterGeometry
 import Gluck.Topology.ChordDiskNormalization
 import Gluck.Hyperbolic.ArcLength.Closing
 

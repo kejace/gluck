@@ -12,6 +12,5 @@ import Gluck.Forward.Discrete.Section4CircleSpliceOrientation
 import Gluck.Forward.Discrete.Section4CircleSpliceAssembly
 import Gluck.Forward.Discrete.Section4CircleArc
 import Gluck.Forward.Discrete.Section4CircleSpliceSimple
-import Gluck.Forward.Discrete.Section4EndpointCurvature
 import Gluck.Forward.Discrete.Section4EndpointSpliceRegularity
 import Gluck.Forward.Discrete.DahlbergExact

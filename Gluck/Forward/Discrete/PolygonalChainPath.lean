@@ -28,8 +28,6 @@ noncomputable def polygonalChainPath (p : ℕ → E) :
   | N + 1 =>
       (polygonalChainPath p N).trans (Path.segment (p N) (p (N + 1)))
 
-@[simp] theorem polygonalChainPath_zero (p : ℕ → E) :
-    polygonalChainPath p 0 = Path.refl (p 0) := rfl
 
 @[simp] theorem polygonalChainPath_succ (p : ℕ → E) (N : ℕ) :
     polygonalChainPath p (N + 1) =

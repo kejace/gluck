@@ -50,48 +50,8 @@ theorem exists_circlePoint_eq_mem_angleWindow
     (periodic_circleMap O R).exists_mem_Ico Real.two_pi_pos α β
   exact ⟨θ, hθ, hPα.trans hαθ⟩
 
-/-- On a nondegenerate circle the angle lift in a prescribed one-turn window
-is unique. -/
-theorem existsUnique_circlePoint_eq_mem_angleWindow
-    {O P : ℂ} {R : ℝ} (hR : R ≠ 0) (hP : dist O P = R) (β : ℝ) :
-    ∃! θ : ℝ, θ ∈ Set.Ico β (β + 2 * Real.pi) ∧ P = circlePoint O R θ := by
-  obtain ⟨θ, hθ, hPθ⟩ := exists_circlePoint_eq_mem_angleWindow hP β
-  refine ⟨θ, ⟨hθ, hPθ⟩, ?_⟩
-  intro φ hφ
-  exact injOn_circleMap_of_abs_sub_le' hR (by linarith [Real.two_pi_pos])
-    hφ.1 hθ (hφ.2.symm.trans hPθ)
 
-/-- Simultaneously choose angle lifts for a family of points on one circle.
-In particular this applies to every finite family of boundary contacts. -/
-theorem exists_circlePoint_angleLiftFamily
-    {I : Type*} {O : ℂ} {R β : ℝ} (P : I → ℂ)
-    (hP : ∀ i, dist O (P i) = R) :
-    ∃ θ : I → ℝ, ∀ i,
-      θ i ∈ Set.Ico β (β + 2 * Real.pi) ∧ P i = circlePoint O R (θ i) := by
-  choose θ hθ using fun i ↦ exists_circlePoint_eq_mem_angleWindow (hP i) β
-  exact ⟨θ, hθ⟩
 
-/-- If the window is based at the angle of the chosen endpoint, its lift is
-exactly the left endpoint `β` of that window. -/
-theorem circlePoint_angle_eq_windowBase
-    {O : ℂ} {R β θ : ℝ} (hR : R ≠ 0)
-    (hθ : θ ∈ Set.Ico β (β + 2 * Real.pi))
-    (h : circlePoint O R θ = circlePoint O R β) : θ = β := by
-  change circleMap O R θ = circleMap O R β at h
-  exact injOn_circleMap_of_abs_sub_le' hR (by linarith [Real.two_pi_pos]) hθ
-    ⟨le_rfl, by linarith [Real.two_pi_pos]⟩ h
 
-/-- Increasing angle lifts in one based window give positive cyclic
-orientation.  This is the ordering lemma used after sorting finitely many
-boundary contacts. -/
-theorem crossR2_circlePoint_pos_of_ordered_in_angleWindow
-    (O : ℂ) {R β θ₀ θ₁ θ₂ : ℝ} (hR : R ≠ 0)
-    (hθ₀ : θ₀ ∈ Set.Ico β (β + 2 * Real.pi))
-    (hθ₂ : θ₂ ∈ Set.Ico β (β + 2 * Real.pi))
-    (h₀₁ : θ₀ < θ₁) (h₁₂ : θ₁ < θ₂) :
-    0 < crossR2 (circlePoint O R θ₀) (circlePoint O R θ₁)
-      (circlePoint O R θ₂) := by
-  apply crossR2_circlePoint_pos_of_ordered O hR h₀₁ h₁₂
-  linarith [hθ₀.1, hθ₂.2]
 
 end Gluck.Forward

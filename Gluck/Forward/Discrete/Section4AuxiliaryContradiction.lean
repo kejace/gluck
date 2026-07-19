@@ -29,26 +29,6 @@ def ContainingCurvatureDisksShareCircle {n : ℕ} (w : ZMod n → ℂ) : Prop :=
     EdgePrevCurvatureDiskContainsAll w j →
     EdgePrevCurvatureCircleData w i = EdgePrevCurvatureCircleData w j
 
-/-- The pairwise uniqueness condition is equivalent to saying that there is
-one fixed centre/radius pair shared by every containing curvature disk. -/
-theorem containingCurvatureDisksShareCircle_iff_exists_fixedData
-    {n : ℕ} {w : ZMod n → ℂ} :
-    ContainingCurvatureDisksShareCircle w ↔
-      ∃ C : ℂ × ℝ, ∀ i : ZMod n,
-        EdgePrevCurvatureDiskContainsAll w i →
-          EdgePrevCurvatureCircleData w i = C := by
-  constructor
-  · intro hunique
-    by_cases hexists : ∃ i : ZMod n, EdgePrevCurvatureDiskContainsAll w i
-    · rcases hexists with ⟨i, hi⟩
-      refine ⟨EdgePrevCurvatureCircleData w i, ?_⟩
-      intro j hj
-      exact hunique j i hj hi
-    · refine ⟨((0 : ℂ), (0 : ℝ)), ?_⟩
-      intro i hi
-      exact (hexists ⟨i, hi⟩).elim
-  · rintro ⟨C, hC⟩ i j hi hj
-    exact (hC i hi).trans (hC j hj).symm
 
 /-- The pair of distinct containing disks in a Theorem 6 certificate refutes
 the fixed-containing-disk condition. -/
@@ -60,21 +40,6 @@ theorem not_containingCurvatureDisksShareCircle_of_containingCertificate
   exact cert.distinct
     (hunique cert.i cert.j cert.contains_i cert.contains_j)
 
-/-- Any exact source for Dahlberg's Theorem 6 contradicts fixed containing
-curvature-disk data on a strict, positively oriented, nonconcyclic auxiliary
-polygon. -/
-theorem not_containingCurvatureDisksShareCircle_of_exactPaperSource
-    (hsource : DahlbergE2Theorem6ExactPaperSource)
-    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {w : ZMod n → ℂ}
-    (hsimple : Gluck.Discrete.IsSimplePolygon w)
-    (hregular : DahlbergRegular w)
-    (horient : PositivePolygonOrientation w)
-    (hnoncircle : ¬ Concyclic w) :
-    ¬ ContainingCurvatureDisksShareCircle w := by
-  rcases hsource hn hsimple hregular horient hnoncircle with ⟨cert⟩
-  exact
-    not_containingCurvatureDisksShareCircle_of_containingCertificate
-      cert.containing
 
 /-- The source-free proof of Dahlberg's containing-disk Lemma 5 already
 refutes fixed containing-circle data without any local-regularity hypothesis.
@@ -109,18 +74,5 @@ theorem dahlbergE2_theorem6_containing_source_contradiction
     (not_containingCurvatureDisksShareCircle_of_simple_positiveOrientation
       hn hsimple horient hnoncircle) hfixed
 
-/-- Source-free final certificate-level contradiction from the exact form of
-Dahlberg's Theorem 6.  The remaining geometric task is precisely to construct
-an auxiliary polygon satisfying the five hypotheses and
-`ContainingCurvatureDisksShareCircle`. -/
-theorem dahlbergE2_theorem6_exact_paper_source_contradiction
-    {n : ℕ} [NeZero n] (hn : 4 ≤ n) {w : ZMod n → ℂ}
-    (hsimple : Gluck.Discrete.IsSimplePolygon w)
-    (_hregular : DahlbergRegular w)
-    (horient : PositivePolygonOrientation w)
-    (hnoncircle : ¬ Concyclic w)
-    (hfixed : ContainingCurvatureDisksShareCircle w) : False := by
-  exact dahlbergE2_theorem6_containing_source_contradiction
-    hn hsimple horient hnoncircle hfixed
 
 end Gluck.Forward
