@@ -87,3 +87,5 @@ theorem convex_four_vertex_E2_nonconstant {γ : ℝ → ℂ} {κ : ℝ → ℝ}
     (_hpos : ∀ t, 0 < κ t) (hnc : ¬ ∃ c, ∀ t, κ t = c) :
     SmoothFourVertex κ := by
   exact four_vertex_E2_nonconstant hclosed hreal hκ hper hnc
+
+end Gluck.Forward

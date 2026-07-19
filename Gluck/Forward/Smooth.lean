@@ -131,18 +131,6 @@ theorem four_vertex_condition_smooth_E2_source_gate :
   exact smoothForwardE2Source_of_ossermanThresholdSource
     osserman1985_smooth_E2_threshold_source_gate
 
-/-- Euclidean nonconstant smooth forward four-vertex geometric source theorem,
-recovered from the source package. -/
-theorem four_vertex_condition_smooth_E2_nonconstant_classical
-    {γ : ℝ → ℂ} {κ : ℝ → ℝ}
-    (hclosed : Gluck.IsSimpleClosed γ)
-    (hreal : Gluck.RealizesCurvature γ κ)
-    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
-    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
-    Gluck.FourVertexCondition κ := by
-  exact four_vertex_condition_smooth_E2_source_gate
-    hclosed hreal hκ hper hnc
-
 /-- Euclidean nonconstant smooth forward four-vertex primitive source gate. -/
 theorem four_vertex_condition_smooth_E2_nonconstant_source_gate
     {γ : ℝ → ℂ} {κ : ℝ → ℝ}
@@ -153,18 +141,6 @@ theorem four_vertex_condition_smooth_E2_nonconstant_source_gate
     Gluck.FourVertexCondition κ := by
   exact four_vertex_condition_smooth_E2_source_gate
     hclosed hreal hκ hper hnc
-
-/-- Euclidean nonconstant ordinary smooth four-vertex primitive source gate. -/
-theorem smoothFourVertex_E2_model_source_gate
-    {γ : ℝ → ℂ} {κ : ℝ → ℝ}
-    (hclosed : Gluck.IsSimpleClosed γ)
-    (hreal : Gluck.RealizesCurvature γ κ)
-    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
-    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
-    SmoothFourVertex κ := by
-  exact smoothFourVertex_of_fourVertexCondition
-    (four_vertex_condition_smooth_E2_nonconstant_source_gate
-      hclosed hreal hκ hper hnc)
 
 /-- The current Euclidean smooth value-separated source package. -/
 theorem smoothForward_E2_source : SmoothForwardE2Source := by
@@ -237,16 +213,5 @@ theorem smoothFourVertex_E2_kernel
     SmoothFourVertex κ := by
   exact smoothFourVertex_E2_kernel_of_dfvSource
     smoothForward_E2_dfv_source hclosed hreal hκ hper
-
-/-- Nonconstant ordinary Euclidean smooth forward four-vertex theorem. -/
-theorem smoothFourVertex_E2_nonconstant
-    {γ : ℝ → ℂ} {κ : ℝ → ℝ}
-    (hclosed : Gluck.IsSimpleClosed γ)
-    (hreal : Gluck.RealizesCurvature γ κ)
-    (hκ : Continuous κ) (hper : Function.Periodic κ (2 * Real.pi))
-    (hnc : ¬ ∃ c, ∀ t, κ t = c) :
-    SmoothFourVertex κ := by
-  exact smoothFourVertex_E2_nonconstant_of_dfvSource
-    smoothForward_E2_dfv_source hclosed hreal hκ hper hnc
 
 end Gluck.Forward
