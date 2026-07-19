@@ -402,6 +402,8 @@ blueprint.
 
 \begin{definition}
 
+
+\leanok
 [The error map and its closed form]
   \label{def:error_map}
   \lean{Gluck.errorMap}
@@ -417,6 +419,8 @@ blueprint.
 
 \begin{definition}
 
+
+\leanok
 [Reverse once-around loop primitives]
   \label{def:reverse_loop}
   \lean{Gluck.windingNumberC_congr}
@@ -441,6 +445,8 @@ blueprint.
 % \"inside\" this loop, the curve αh will have error vector E(h) = 0 ."
 \begin{lemma}
 
+
+\leanok
 [The error map winds nontrivially on the boundary]
   \label{lem:error_map_winds_boundary}
   \lean{Gluck.errorMap_winding_eq_one}
@@ -462,6 +468,7 @@ blueprint.
 \begin{proof}
   \uses{lem:error_vector_of_bicircle, def:configuration_space, def:winding_number_c,
         lem:winding_number_eq_of_homotopy, def:reverse_loop}
+        \leanok
   By \cref{lem:error_vector_of_bicircle}, $E(x,y) = s\cdot V(x,y)$ with the nonzero
   constant scalar $s = \tfrac{1}{ib} - \tfrac{1}{ia}$ (nonzero since $a \ne b$) and
   chord sum

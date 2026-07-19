@@ -136,7 +136,7 @@ n/a — theorem, not a def/instance.
 | `Gluck/SpaceForm/Admissible.lean:407` | `have hgronwall := gronwall_L1_drive h2π L.coe_nonneg (norm_nonneg (z 0 - zs 0)) ...` — trajectory confinement, drive `M·\|κ s − κ' s\|` |
 | `Gluck/SpaceForm/ArcAlgebra.lean:565` | `have hgronwall := gronwall_L1_drive (d := fun s => ‖z (t₁+s) - zs (t₁+s)‖) (g := fun u => M * \|κ (t₁+u) - K\|) ...` — arc comparison against constant curvature |
 | `Gluck/Hyperbolic/ArcLength/ForkA.lean:421` | `have hgronwall := gronwall_L1_drive hL Lip.coe_nonneg (norm_nonneg (W 0 - Ws 0)) ...` — continuous dependence, drive `2/(1−R²)·\|κ − κ'\|` |
-| `Gluck/Hyperbolic/ArcLength/Ode.lean:600` | same pattern | 
+| `Gluck/Hyperbolic/ArcLength/Ode.lean:600` | same pattern |
 | `Gluck/Sphere/Admissible.lean:94` | thin delegating wrapper `Gluck.gronwall_L1_drive := SpaceForm.gronwall_L1_drive ...` |
 
 K = 4 substantive uses across 4 files + 1 namespace wrapper; no inline re-derivations. Real, load-bearing API. Every use case has a **time-varying** drive `∝ |κ(s) − κ'(s)|` that is small in L¹ but not in sup — mathlib's constant-ε `dist_le_of_approx_trajectories_ODE` would force the sup bound and lose the estimates.
