@@ -16,8 +16,8 @@ function on the round sphere $S^2$, with the four-vertex property and a uniform 
 bound forcing confinement to an open hemisphere, is the geodesic curvature of a simple
 closed curve contained in that hemisphere. The Euclidean development
 (\cref{chap:reduction} and its dependencies, culminating in \texttt{gluck\_converse} and
-\texttt{dahlbergConverse}) is complete and is reused, not disturbed. The positive-stage
-capstone is named \texttt{sphericalConverse\_pos}; the name \texttt{sphericalConverse} is
+\texttt{dahlberg\_converse}) is complete and is reused, not disturbed. The positive-stage
+capstone is named \texttt{spherical\_gluck\_converse}; the name \texttt{spherical\_dahlberg\_converse} is
 reserved for the mandatory mixed-sign stage 2.
 
 All spherical geometry is transported to the \emph{stereographic disk model}: the open
@@ -114,20 +114,20 @@ $\langle z, i\,e^{i\varphi}\rangle_{\mathbb R}=-(\operatorname{Re}z)\sin\varphi
 [realizes spherical curvature]
   \label{def:realizes_spherical_curvature}
   \lean{Gluck.RealizesSphericalCurvature}
-  A curve $z:\mathbb R\to\mathbb C$ \emph{realizes the spherical curvature function}
-  $\kappa:\mathbb R\to\mathbb R$ when it is $C^1$, regular ($z'(t)\neq 0$ for all $t$),
-  confined to the open disk ($\|z(t)\|<1$ for all $t$), and there is a differentiable
+  A curve $\gamma:\mathbb R\to\mathbb C$ \emph{realizes the spherical curvature function}
+  $\kappa:\mathbb R\to\mathbb R$ when it is $C^1$, regular ($\gamma'(t)\neq 0$ for all $t$),
+  confined to the open disk ($\|\gamma(t)\|<1$ for all $t$), and there is a differentiable
   tangent-angle function $\varphi:\mathbb R\to\mathbb R$ with, for all $t$,
   \[
-    z'(t)=\|z'(t)\|\,e^{i\varphi(t)},\qquad
-    \frac{1+\|z(t)\|^2}{2}\,\varphi'(t)
-      =\bigl(\kappa(t)-\langle z(t),\,i\,e^{i\varphi(t)}\rangle_{\mathbb R}\bigr)\,\|z'(t)\| .
+    \gamma'(t)=\|\gamma'(t)\|\,e^{i\varphi(t)},\qquad
+    \frac{1+\|\gamma(t)\|^2}{2}\,\varphi'(t)
+      =\bigl(\kappa(t)-\langle \gamma(t),\,i\,e^{i\varphi(t)}\rangle_{\mathbb R}\bigr)\,\|\gamma'(t)\| .
   \]
   By \cref{sec:sphere_conformal} the coefficient $\kappa-\langle z,iT\rangle
   =\kappa+\langle z,n\rangle$ is the reciprocal-speed weight of the conformal law, so this
-  says precisely that $\kappa$ is the spherical geodesic curvature of $z$. It mirrors the
+  says precisely that $\kappa$ is the spherical geodesic curvature of $\gamma$. It mirrors the
   Euclidean \cref{def:realizes_curvature} exactly: it is \emph{speed-free} (only the angle
-  $\varphi$, not $z$, must be differentiable; the speed $\|z'\|$ is never normalized to arc
+  $\varphi$, not $\gamma$, must be differentiable; the speed $\|\gamma'\|$ is never normalized to arc
   length), so it is meaningful for a merely continuous $\kappa$ and does not reintroduce
   the three-dimensional spherical frame problem.
 \end{definition}
@@ -173,24 +173,24 @@ $\langle z, i\,e^{i\varphi}\rangle_{\mathbb R}=-(\operatorname{Re}z)\sin\varphi
 \begin{theorem}\leanok
 [spherical converse, positive stage]
   \label{thm:spherical_converse_pos}
-  \lean{Gluck.sphericalConverse_pos}
+  \lean{Gluck.spherical_gluck_converse}
   \uses{def:realizes_spherical_curvature, def:sphere_four_vertex,
         lem:spherical_speed_solve, lem:reconstruction_ode,
-        lem:spherical_endpoint_winding, lem:realizes_spherical_comp,
+        thm:spaceform_endpoint_winding, lem:realizes_spherical_comp,
         lem:spherical_simplicity, lem:spherical_circle_realizes}
   If $\kappa$ satisfies the positive-stage spherical four-vertex condition
-  (\cref{def:sphere_four_vertex}), then there is a simple closed curve $z$ confined to the
+  (\cref{def:sphere_four_vertex}), then there is a simple closed curve $\gamma$ confined to the
   open disk that realizes $\kappa$ as its spherical geodesic curvature:
   \[
     \texttt{SphereFourVertex }\kappa \;\Longrightarrow\;
-    \exists\,z,\ \texttt{IsSimpleClosed }z\ \wedge\ \texttt{RealizesSphericalCurvature }z\,\kappa .
+    \exists\,\gamma,\ \texttt{IsSimpleClosed }\gamma\ \wedge\ \texttt{RealizesSphericalCurvature }\gamma\,\kappa .
   \]
   This is the same conclusion shape as the Euclidean \texttt{gluck\_converse}, with
   \texttt{RealizesCurvature} replaced by its spherical analogue.
 \end{theorem}
 
 \begin{proof}
-  \uses{lem:reconstruction_ode, lem:spherical_endpoint_winding,
+  \uses{lem:reconstruction_ode, thm:spaceform_endpoint_winding,
         lem:spherical_simplicity, lem:spherical_circle_realizes,
         lem:realizes_spherical_comp, lem:exists_c1_circle_inverse,
         lem:is_simple_closed_comp}
@@ -198,9 +198,9 @@ $\langle z, i\,e^{i\varphi}\rangle_{\mathbb R}=-(\operatorname{Re}z)\sin\varphi
   Split on the four-vertex disjunction (\cref{def:four_vertex_condition}). The
   \emph{constant} branch is discharged directly by the explicit centered circle
   (\cref{lem:spherical_circle_realizes}), with no flow machinery. For the value-separated
-  (non-constant) branch: \cref{lem:spherical_endpoint_winding} supplies $R<1$,
+  (non-constant) branch: \cref{thm:spaceform_endpoint_winding} supplies $R<1$,
   $\delta>0$, a circle reparametrization $h_1$, and a \emph{closed, admissible}
-  trajectory $z$ of the $(\kappa\circ h_1,R,\delta)$-truncated flow.
+  trajectory $\gamma$ of the $(\kappa\circ h_1,R,\delta)$-truncated flow.
   \cref{lem:reconstruction_ode} (with curvature function $\kappa\circ h_1$) upgrades its
   periodic extension to a closed $C^1$ curve confined to $\{|z|\le R\}\subset\{|z|<1\}$
   realizing $\kappa\circ h_1$ in the gauge $\varphi(\theta)=\theta$.
@@ -208,7 +208,7 @@ $\langle z, i\,e^{i\varphi}\rangle_{\mathbb R}=-(\operatorname{Re}z)\sin\varphi
   realizing $\kappa$ (closedness and injectivity-on-a-period transfer along the
   circle-equivariant $h_1^{-1}$, as in the Euclidean
   \texttt{isSimpleClosed\_comp}). \cref{lem:spherical_simplicity} gives simplicity in
-  the disk, hence on $S^2$. This mirrors how \texttt{dahlbergConverse} assembles its
+  the disk, hence on $S^2$. This mirrors how \texttt{dahlberg\_converse} assembles its
   closing parameter, simplicity transport, and reconstruction. \emph{(Assembled formally
   in S2-E once the S2-D layer exists in Lean.)}
 \end{proof}
@@ -244,11 +244,11 @@ replaced by a reconstruction ODE. The architecture was pinned at iteration 046
   (\cref{lem:flow_half_turn_equivariance}). The constant-curvature model is
   \emph{unusable}: for constant $\kappa$ every admissible trajectory closes (all
   spherical circles), so the endpoint error vanishes identically and carries no degree
-  — see the DO-NOT recorded in \cref{lem:spherical_endpoint_winding}.
+  — see the DO-NOT recorded in \cref{thm:spaceform_endpoint_winding}.
 \end{enumerate}
 The speed, flow, transport, and step-model layers (S2-A through S2-D except the final
 assembly) are formalized axiom-clean; what remains is the assembly
-\cref{lem:spherical_endpoint_winding}, the S2-E simplicity chain, and the capstone.
+\cref{thm:spaceform_endpoint_winding}, the S2-E simplicity chain, and the capstone.
 
 \begin{definition}\leanok
 [gauge speed]
@@ -263,7 +263,7 @@ assembly) are formalized axiom-clean; what remains is the assembly
   By \cref{lem:sphere_normal_inner_eq} the bracket equals
   $\kappa(\theta)+\langle z,n\rangle$ for the outward normal $n=-i\,e^{i\theta}$ of the
   gauge $\varphi(\theta)=\theta$, so $q_\kappa$ is the algebraic solution of the speed
-  relation of \cref{def:realizes_spherical_curvature} for the speed $\|z'\|$. It is a total
+  relation of \cref{def:realizes_spherical_curvature} for the speed $\|\gamma'\|$. It is a total
   function of the junk-value kind: where the bracket vanishes it returns
   division-by-zero junk, and every lemma about it carries the admissibility hypothesis
   $\|z\|\le R<\kappa(\theta)$.

@@ -20,13 +20,13 @@ theorem.
 ## The converse four-vertex theorems
 
 * **E²** (`Gluck/Euclidean/`): `Gluck.gluck_converse` (positive),
-  `Gluck.dahlbergConverse` (mixed-sign).
-* **S²** (`Gluck/Sphere/`): `Gluck.sphericalConverse_pos` (positive),
-  `Gluck.sphericalConverse` (mixed-sign).
-* **H²** (`Gluck/Hyperbolic/`): `Gluck.hyperbolicConverse_pos` (positive),
-  `Gluck.hyperbolicMixedConverse_exact` (mixed-sign, exact profile).
+  `Gluck.dahlberg_converse` (mixed-sign).
+* **S²** (`Gluck/Sphere/`): `Gluck.spherical_gluck_converse` (positive),
+  `Gluck.spherical_dahlberg_converse` (mixed-sign).
+* **H²** (`Gluck/Hyperbolic/`): `Gluck.hyperbolic_gluck_converse` (positive),
+  `Gluck.hyperbolic_dahlberg_converse` (mixed-sign, exact profile).
 
-plus the `ε`-generic unifications (`Gluck/SpaceForm/`):
-`Gluck.SpaceForm.spaceFormConverse_pos` and
-`Gluck.SpaceForm.spaceFormMixedConverse`.
+plus the `K`-generic unifications (`Gluck/SpaceForm/`):
+`Gluck.SpaceForm.gluck_converse` and
+`Gluck.SpaceForm.dahlberg_converse`.
 -/

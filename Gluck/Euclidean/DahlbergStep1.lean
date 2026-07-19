@@ -63,7 +63,7 @@ def MixedSignFourVertex (κ : ℝ → ℝ) : Prop :=
 /-- A strictly positive curvature function (`IsCurvatureFunction`) satisfying the
 non-constant branch of `FourVertexCondition` satisfies the mixed-sign hypothesis:
 the four extrema are inherited directly, and positivity at the maxima is automatic
-from `κ > 0`. Hence `dahlbergConverse` subsumes the non-constant positive case of
+from `κ > 0`. Hence `dahlberg_converse` subsumes the non-constant positive case of
 `gluck_converse`. -/
 theorem mixedSignFourVertex_of_isCurvatureFunction {κ : ℝ → ℝ}
     (hκ : IsCurvatureFunction κ) (hfv : FourVertexCondition κ)

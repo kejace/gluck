@@ -5,7 +5,7 @@ import Gluck.Internal.StepReparam
 # The spherical converse (S², stage 2) — mixed-sign curvature
 
 Stage 2 of the S² extension removes global positivity from
-`Gluck.sphericalConverse_pos`: the prescribed geodesic curvature `κ` may be
+`Gluck.spherical_gluck_converse`: the prescribed geodesic curvature `κ` may be
 `≤ 0` on part of the circle, provided the position-dependent admissibility
 `κ(θ) − ⟪z(θ), i·e^{iθ}⟫_ℝ > 0` can be maintained. Quantitatively this is the
 confinement lower bound `κ > −r*(c)` for a window value `c`, where
@@ -16,7 +16,7 @@ the genuinely new surface in this file is the hypothesis definition
 `MixedSignSphereFourVertex`, the relaxed `L¹` reparametrization
 `exists_step_L1_reparam_relaxed` (constant-shift reduction), the mixed winding
 assembly `mixed_spherical_endpoint_winding`, and the capstone
-`sphericalConverse`.
+`spherical_dahlberg_converse`.
 
 Blueprint: `blueprint/src/chapters/Gluck_SphereMixed.tex`.
 -/
@@ -64,7 +64,7 @@ lemma centeredRadius_pos (c : ℝ) : 0 < Real.sqrt (1 + c ^ 2) - c := by
 
 /-- The positive-stage hypothesis implies the mixed-sign hypothesis: for a
 strictly positive `κ` any window value works, since `−r*(c) < 0 < κ`.
-Sanity lemma showing `sphericalConverse` subsumes `sphericalConverse_pos`.
+Sanity lemma showing `spherical_dahlberg_converse` subsumes `spherical_gluck_converse`.
 (Blueprint `def:mixed_sign_sphere_four_vertex`, closing note.) -/
 theorem MixedSignSphereFourVertex.of_sphereFourVertex {κ : ℝ → ℝ}
     (hκ : SphereFourVertex κ) : MixedSignSphereFourVertex κ := by
@@ -86,7 +86,7 @@ set_option maxHeartbeats 1600000 in
 -- Same elaboration budget as the landed positive assembly: the transport
 -- instantiation threads four nested arc-map start points.
 /-- **Mixed-sign endpoint winding: a closed admissible trajectory without
-global positivity.** Mirror of the landed `spherical_endpoint_winding` with
+global positivity.** Mirror of the (K-generic) landed endpoint winding with
 the mixed-sign Data step: the window value `c` is supplied by hypothesis (the
 window midpoint may be `≤ 0` in the mixed regime), the curvature floor
 `κ₀ = min_{[0,2π]} κ` may be `≤ 0` and is admissible for the re-signed
@@ -398,14 +398,14 @@ theorem mixed_spherical_endpoint_winding {κ : ℝ → ℝ} (hκc : Continuous �
 /-- **Spherical converse, mixed sign.** If `κ` satisfies the mixed-sign
 spherical four-vertex hypothesis, then there is a simple closed curve `z`
 confined to the open disk realizing `κ` as its spherical geodesic curvature.
-Subsumes `sphericalConverse_pos` (via
+Subsumes `spherical_gluck_converse` (via
 `MixedSignSphereFourVertex.of_sphereFourVertex`) and is the S² analogue of
-the Euclidean `dahlbergConverse`. Mirror of the landed positive capstone with
+the Euclidean `dahlberg_converse`. Mirror of the landed positive capstone with
 the mixed winding lemma substituted; every downstream ingredient
 (`reconstruction_ode`, `spherical_simplicity`, the `C¹` circle inverse, the
 composition transfers) landed sign-agnostic.
 (Blueprint `thm:spherical_converse`.) -/
-theorem sphericalConverse {κ : ℝ → ℝ} (hκ : MixedSignSphereFourVertex κ) :
+theorem spherical_dahlberg_converse {κ : ℝ → ℝ} (hκ : MixedSignSphereFourVertex κ) :
     ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ RealizesSphericalCurvature z κ := by
   obtain ⟨hκc, hκper, hdisj⟩ := hκ
   rcases hdisj with ⟨c, hc0, hc⟩ | ⟨p₁, q₁, p₂, q₂, h12, h23, h34, h41,

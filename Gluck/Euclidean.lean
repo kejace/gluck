@@ -6,6 +6,7 @@ Authors: kejace
 import Gluck.Euclidean.FourVertex
 import Gluck.Euclidean.ArcLength
 import Gluck.Euclidean.DahlbergStep2
+import Gluck.Euclidean.SpaceFormInstance
 
 /-!
 # The Euclidean converse to the four-vertex theorem (E², K = 0) — aggregator
@@ -20,8 +21,8 @@ the project (`Gluck/Euclidean/`):
 ## Main results
 
 * `Gluck.gluck_converse` — the positive-curvature converse (Gluck 1971).
-* `Gluck.arcLengthConverse` — the arc-length reconstruction converse.
-* `Gluck.dahlbergConverse` — the full mixed-sign converse (Dahlberg 2005).
+* `Gluck.arcLength_converse` — the arc-length reconstruction converse.
+* `Gluck.dahlberg_converse` — the full mixed-sign converse (Dahlberg 2005).
 
 The chord/step/winding machinery in this directory is the shared plane-curve
 substrate: `Gluck/Sphere/` and `Gluck/Hyperbolic/` model their geometries in the

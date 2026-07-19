@@ -17,22 +17,23 @@ Thin aggregator for the hyperbolic development (`Gluck/Hyperbolic/`), the
 Poincaré-disk (`ε = −1`) stage built on the arc-length reconstruction engine:
 
 * `ArcLength` (+ `ArcLength/`) — the H² arc-length reconstruction engine:
-  ODE layer, gate profile, closing, fork-A landing, and the arc-length converse
-  capstone `arcLengthH2Converse` / `realizesH2_of_reparam`.
-* `MixedSign` (+ `MixedSign/`) — the genuinely-negative (ALM) chain: hypothesis
-  `MixedSignHyperbolicFourVertex`, `L¹` confinement, degree closing, simplicity.
+  ODE layer, closing, and the arc-length converse capstone
+  `arcLengthH2Converse` / `realizesH2_of_reparam`.
+* `MixedSign` — the genuinely-negative hypothesis `MixedSignHyperbolicFourVertex`
+  (with positive-case subsumption) and the constant-branch witness
+  `hyperbolicCircle_realizes`.
 * `Family` (+ `Family/`) — the fork-A symbolic `(a, c)`-family bicircle layer,
-  culminating in the up-to-reparam capstone `hyperbolicMixedConverse`.
+  culminating in the up-to-reparam capstone `Hyperbolic.dahlberg_converse_reparam`.
 * `Exact` — the degree-one reparam removal and the exact-profile capstone
-  `hyperbolicMixedConverse_exact`.
+  `Hyperbolic.dahlberg_converse`.
 * `Converse` — the positive (escape-velocity `κ > 1`) wrappers
-  `HyperbolicFourVertex`, `hyperbolicConverse_pos`.
+  `HyperbolicFourVertex`, `hyperbolic_gluck_converse`.
 * `Mixed` — the mixed-sign wrappers `MixedHyperbolicFourVertex`,
-  `hyperbolicMixedConverse`, `hyperbolicMixedConverse_exact`.
+  `hyperbolic_dahlberg_converse_reparam`, `hyperbolic_dahlberg_converse`.
 
 ## Main results
 
-* `Gluck.hyperbolicConverse_pos` — positive converse (escape velocity `κ > 1`).
-* `Gluck.hyperbolicMixedConverse_exact` — the exact-profile genuinely-negative
+* `Gluck.hyperbolic_gluck_converse` — positive converse (escape velocity `κ > 1`).
+* `Gluck.hyperbolic_dahlberg_converse` — the exact-profile genuinely-negative
   (arbitrarily-negative minima) mixed converse.
 -/

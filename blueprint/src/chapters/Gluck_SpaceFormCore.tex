@@ -1,7 +1,7 @@
 \chapter{The space-form layer: definitions, flow, admissibility}
 \label{chap:spaceform_core}
 
-% Chapter for the ε-generic space-form engine:
+% Chapter for the K-generic space-form engine:
 %   Gluck/SpaceForm/Defs.lean          — Realizes, SpaceFormFourVertex, spaceFormSpeed,
 %                                        centeredRadius and its algebra
 %   Gluck/SpaceForm/Flow.lean          — truncatedSpeed/Field, Picard–Lindelöf flow
@@ -13,78 +13,92 @@
 %   Gluck/SpaceForm/Margins.lean       — arcMargins package, stepModel_margins
 %   Gluck/SpaceForm/FirstVariation.lean — stepError_expansion, stepError_coeff_ne_zero
 %
-% This is the spherical flow engine of chap:sphere transported to a sign
-% parameter ε ∈ {+1, −1} (ambient curvature K = ε): ε = +1 recovers S²
-% verbatim, ε = −1 is the Poincaré-disk model of H². The model-agnostic step
+% This is the spherical flow engine of chap:sphere transported over the
+% ambient curvature K ∈ {+1, −1, 0}: K = +1 recovers S²
+% verbatim, K = −1 is the Poincaré-disk model of H², and K = 0 is the flat
+% Euclidean plane in the conformal gauge λ = 2. The model-agnostic step
 % machinery (stepCurvature, exists_step_L1_reparam, the FirstVariation frame)
 % is REUSED from Gluck/Sphere/* via imports; only the metric-carrying layers
-% are re-derived with the ε parameter.
+% are re-derived with the K parameter.
 
 \section{Overview}
 
 This chapter generalizes the spherical engine of \cref{chap:sphere} over the
-\emph{ambient curvature sign} $\varepsilon = \operatorname{sign} K \in
-\{+1,-1\}$. Both constant-curvature models live in the open unit disk
-$\{|z|<1\}\subseteq\mathbb C$ in the tangent-angle gauge: the sphere
-$S^2$ ($K=+1$, round metric $4/(1+|z|^2)^2$) is $\varepsilon=+1$, and the
-hyperbolic plane $H^2$ ($K=-1$, Poincar\'e metric $4/(1-|z|^2)^2$) is
-$\varepsilon=-1$. The single unifying object is the \emph{space-form gauge
-speed}
+\emph{ambient curvature} $K \in \{+1,-1,0\}$ (the constant sectional
+curvature of the space form). All three constant-curvature models live in the
+open unit disk $\{|z|<1\}\subseteq\mathbb C$ in the tangent-angle gauge: the
+sphere $S^2$ ($K=+1$, round metric $4/(1+|z|^2)^2$), the
+hyperbolic plane $H^2$ ($K=-1$, Poincar\'e metric $4/(1-|z|^2)^2$),
+and the Euclidean plane $E^2$ ($K=0$, flat conformal
+metric $\lambda=2$, so that the disk-gauge curvature is half the Euclidean
+one). The single unifying object is the \emph{space-form
+gauge speed}
 \[
-  q_{\varepsilon,\kappa}(\theta,z)
-  \;=\;\frac{1+\varepsilon\|z\|^2}
-        {2\bigl(\kappa(\theta)-\varepsilon\langle z, ie^{i\theta}\rangle\bigr)},
+  q_{K,\kappa}(\theta,z)
+  \;=\;\frac{1+K\|z\|^2}
+        {2\bigl(\kappa(\theta)-K\langle z, ie^{i\theta}\rangle\bigr)},
 \]
 the algebraic solution of the conformal geodesic-curvature relation for the
-speed $\|z'\|$ in the gauge $\varphi(\theta)=\theta$. At $\varepsilon=+1$ this
+speed $\|\gamma'\|$ in the gauge $\varphi(\theta)=\theta$. At $K=+1$ this
 is the landed \texttt{Gluck.sphericalSpeed} (\cref{def:spherical_speed}); at
-$\varepsilon=-1$ it is the hyperbolic speed. Both the metric factor
-$1+\varepsilon\|z\|^2$ and the inner-product term $-\varepsilon\langle
-\cdot\rangle$ flip with $\varepsilon$; that the two sign flips are a
+$K=-1$ it is the hyperbolic speed. Both the metric factor
+$1+K\|z\|^2$ and the inner-product term $-K\langle
+\cdot\rangle$ flip with $K$; that the two sign flips are a
 \emph{single} parameter is verified once, in the model-circle anchor
 \cref{lem:spaceform_speed_circle}.
 
-The chapter is an $\varepsilon$-generic transport of the spherical files
+The chapter is a $K$-generic transport of the spherical files
 \texttt{Gluck/Sphere/\{Defs, Flow, Admissible, ArcAlgebra, StepReparam,
 Margins, FirstVariation\}}, and it is honest about what is transported versus
 reused: the metric-free step machinery — the canonical four-arc
 \texttt{stepCurvature} (\cref{def:four_arc_step_function}), the $L^1$
 step reparametrization \cref{lem:step_L1_reparam}, and the FirstVariation
-frame algebra — is pure step-function/measure theory with no $\varepsilon$,
+frame algebra — is pure step-function/measure theory with no $K$,
 and is \emph{imported verbatim} from the \texttt{Gluck/Sphere} layer (per the
 module imports of \texttt{StepReparam.lean} and \texttt{FirstVariation.lean}).
-Only the metric-carrying layers are re-derived with the sign parameter.
+Only the metric-carrying layers are re-derived with the curvature parameter.
 
-Three $\varepsilon$-specific phenomena organize the transport:
+Three $K$-specific phenomena organize the transport:
 
 \begin{itemize}
 \item \emph{The position-dependent admissibility denominator.} Every estimate
   runs through the bracket
-  $\kappa(\theta)-\varepsilon\langle z, ie^{i\theta}\rangle$. For
-  $|\varepsilon|\le1$, Cauchy--Schwarz gives
-  $|\varepsilon\langle z, ie^{i\theta}\rangle|\le\|z\|$, so the bracket is
-  positive on $\{\|z\|\le R<\kappa\}$ \emph{uniformly in} $\varepsilon$
+  $\kappa(\theta)-K\langle z, ie^{i\theta}\rangle$. For
+  $|K|\le1$, Cauchy--Schwarz gives
+  $|K\langle z, ie^{i\theta}\rangle|\le\|z\|$, so the bracket is
+  positive on $\{\|z\|\le R<\kappa\}$ \emph{uniformly in} $K$
   (\cref{lem:spaceform_denom_pos}) — most of the flow layer needs only
-  $|\varepsilon|\le1$, not the sign. The truncated flow clamps this
+  $|K|\le1$, not the sign. The truncated flow clamps this
   denominator at $\delta$ and the norm at $R$, exactly as on the sphere.
-\item \emph{The escape threshold.} Where the admissibility lower bound is
-  \emph{established} per model, the sign enters: for $\varepsilon=+1$
-  positivity of $\kappa$ suffices, while for $\varepsilon=-1$ the four-vertex
-  hypothesis (\cref{def:spaceform_four_vertex}) demands the escape-velocity
-  bound $\kappa>1$ — geodesic circles in $H^2$ have curvature
-  $\coth\rho>1$, and curves with $\kappa\le1$ never close.
+\item \emph{The confinement threshold.} Where the admissibility lower bound
+  is \emph{established} per model, the sign enters, through the single
+  uniform threshold $(1-K)/2$: for $K=+1$ it is $0$
+  (positivity of $\kappa$ suffices), for $K=-1$ it is $1$ (the
+  escape-velocity bound — geodesic circles in $H^2$ have curvature
+  $\coth\rho>1$, and curves with $\kappa\le1$ never close), and for
+  $K=0$ it is $1/2$ (the Euclidean circle of disk-gauge curvature
+  $c$ has coordinate radius $1/(2c)$, which fits in the unit disk exactly
+  when $c>1/2$). The four-vertex hypothesis
+  (\cref{def:spaceform_four_vertex}) carries this threshold, and the
+  centered radius clears the disk precisely above it
+  (\cref{lem:centered_radius_spaceform_props}).
 \item \emph{No absolute floor on the bracket scale.} The bracket value at the
-  level-$c$ model circle is $B=c+\varepsilon r^\ast=\sqrt{c^2+\varepsilon}$
+  level-$c$ model circle is $B=c+K r^\ast=\sqrt{c^2+K}$
   (\cref{lem:centered_radius_spaceform_props}). For $S^2$ this is
   $\sqrt{1+c^2}\ge1$, an absolute lower bound; for $H^2$ it is
   $\sqrt{c^2-1}\to0$ as $c\to1^{+}$. The margin constants of
   \cref{lem:spaceform_step_model_margins} are therefore fractions of $B$
   ($c$-dependent), not of $1$ — the one place the sphere's
   absolute-constants shortcut breaks. Relatedly, the first-variation
-  coefficient $\eta(\varepsilon)=2\varepsilon r^\ast/(c^2+\varepsilon)$
-  is positive for $\varepsilon=+1$ but \emph{negative} for
-  $\varepsilon=-1$; the winding argument downstream consumes only
-  $\eta\ne0$ (\cref{lem:spaceform_step_error_coeff_ne_zero}).
+  coefficient $\eta(K)=2K r^\ast/(c^2+K)$
+  is positive for $K=+1$ but \emph{negative} for
+  $K=-1$; the winding argument downstream consumes only
+  $\eta\ne0$ (\cref{lem:spaceform_step_error_coeff_ne_zero}). At
+  $K=0$ the coefficient \emph{vanishes} — the flat gauge field is
+  position-independent, so the start-point degree of freedom is dead — and
+  the flat member exits the endpoint-winding pipeline there, closing instead
+  through the classical alignment winding
+  (\cref{lem:reduction_justified_L1}; see \cref{chap:spaceform_converse}).
 \end{itemize}
 
 The declarations below live in \texttt{namespace Gluck.SpaceForm}. The
@@ -100,18 +114,18 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \label{def:spaceform_realizes}
   \lean{Gluck.SpaceForm.Realizes}
   \uses{def:realizes_spherical_curvature, def:realizes_curvature}
-  A curve $z:\mathbb R\to\mathbb C$ \emph{realizes the space-form curvature
-  function} $\kappa$ at ambient sign $\varepsilon$ when it is $C^1$, regular
-  ($z'(t)\ne0$), confined to the open unit disk ($\|z(t)\|<1$), and there is a
+  A curve $\gamma:\mathbb R\to\mathbb C$ \emph{realizes the space-form curvature
+  function} $\kappa$ at ambient curvature $K$ when it is $C^1$, regular
+  ($\gamma'(t)\ne0$), confined to the open unit disk ($\|\gamma(t)\|<1$), and there is a
   differentiable tangent angle $\varphi$ with
-  $z'(t)=\|z'(t)\|\,e^{i\varphi(t)}$ and
+  $\gamma'(t)=\|\gamma'(t)\|\,e^{i\varphi(t)}$ and
   \[
-    \frac{1+\varepsilon\|z(t)\|^2}{2}\,\varphi'(t)
-    \;=\;\bigl(\kappa(t)-\varepsilon\langle z(t),
-      ie^{i\varphi(t)}\rangle\bigr)\,\|z'(t)\|.
+    \frac{1+K\|\gamma(t)\|^2}{2}\,\varphi'(t)
+    \;=\;\bigl(\kappa(t)-K\langle \gamma(t),
+      ie^{i\varphi(t)}\rangle\bigr)\,\|\gamma'(t)\|.
   \]
-  At $\varepsilon=+1$ this is \cref{def:realizes_spherical_curvature}; at
-  $\varepsilon=-1$ it is the Poincar\'e-disk statement that $z$ has
+  At $K=+1$ this is \cref{def:realizes_spherical_curvature}; at
+  $K=-1$ it is the Poincar\'e-disk statement that $\gamma$ has
   hyperbolic geodesic curvature $\kappa$ (up to the tangent-angle gauge).
 \end{definition}
 
@@ -121,16 +135,20 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \lean{Gluck.SpaceForm.SpaceFormFourVertex}
   \uses{def:is_curvature_function, def:four_vertex_condition,
         def:sphere_four_vertex}
-  The $\varepsilon$-generic admissibility hypothesis for the positive-stage
+  The $K$-generic admissibility hypothesis for the positive-stage
   converse: $\kappa$ is a curvature function
   (\cref{def:is_curvature_function}: continuous, $2\pi$-periodic, strictly
   positive), satisfies the value-separated four-vertex condition
-  \cref{def:four_vertex_condition}, and — only in the hyperbolic branch
-  $\varepsilon<0$ — the escape-velocity bound $\kappa(\theta)>1$ for all
-  $\theta$. At $\varepsilon=+1$ the last clause is vacuous and this is
-  \cref{def:sphere_four_vertex} (with a trivially true extra conjunct); at
-  $\varepsilon=-1$ it adds $\kappa>1$, the threshold below which curves in
-  $H^2$ cannot close.
+  \cref{def:four_vertex_condition}, and — for the non-spherical members
+  $K\le0$ — the uniform confinement floor
+  $\kappa(\theta)>(1-K)/2$ for all $\theta$. At $K=+1$
+  the last clause is vacuous and this is \cref{def:sphere_four_vertex} (with
+  a trivially true extra conjunct); at $K=-1$ it is the
+  escape-velocity bound $\kappa>1$, the threshold below which curves in
+  $H^2$ cannot close; at $K=0$ it is the flat threshold
+  $\kappa>1/2$, which makes the model circle of any level in the range of
+  $\kappa$ fit inside the open unit disk
+  (\cref{lem:centered_radius_spaceform_props}).
 \end{definition}
 
 \begin{definition}\leanok
@@ -140,34 +158,34 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \uses{def:spherical_speed}
   The \emph{space-form gauge speed}
   \[
-    q_{\varepsilon,\kappa}(\theta,z)=
-    \frac{1+\varepsilon\|z\|^2}
-         {2\,(\kappa(\theta)-\varepsilon\langle z, ie^{i\theta}\rangle)},
+    q_{K,\kappa}(\theta,z)=
+    \frac{1+K\|z\|^2}
+         {2\,(\kappa(\theta)-K\langle z, ie^{i\theta}\rangle)},
   \]
   a junk-value total function; every lemma about it carries the admissibility
-  hypotheses $\|z\|\le R<\kappa(\theta)$ (with $|\varepsilon|\le1$) making the
-  denominator positive. At $\varepsilon=+1$ it is \cref{def:spherical_speed}.
+  hypotheses $\|z\|\le R<\kappa(\theta)$ (with $|K|\le1$) making the
+  denominator positive. At $K=+1$ it is \cref{def:spherical_speed}.
 \end{definition}
 
 \begin{lemma}\leanok
-[$\varepsilon$-uniform denominator and speed positivity]
+[$K$-uniform denominator and speed positivity]
   \label{lem:spaceform_denom_pos}
   \lean{Gluck.SpaceForm.denom_pos}
   \uses{def:spaceform_speed, lem:sphere_denom_pos}
-  For $|\varepsilon|\le1$ and $\|z\|\le R<\kappa(\theta)$ the admissibility
-  bracket $\kappa(\theta)-\varepsilon\langle z, ie^{i\theta}\rangle$ is
+  For $|K|\le1$ and $\|z\|\le R<\kappa(\theta)$ the admissibility
+  bracket $\kappa(\theta)-K\langle z, ie^{i\theta}\rangle$ is
   strictly positive; consequently (for $\|z\|<1$, where the numerator
-  $1+\varepsilon\|z\|^2>0$) the gauge speed is strictly positive. Recovers
-  \cref{lem:sphere_denom_pos} at $\varepsilon=1$ and the hyperbolic bound at
-  $\varepsilon=-1$ with one proof.
+  $1+K\|z\|^2>0$) the gauge speed is strictly positive. Recovers
+  \cref{lem:sphere_denom_pos} at $K=1$ and the hyperbolic bound at
+  $K=-1$ with one proof.
 \end{lemma}
 
 \begin{proof}
   \leanok
   Cauchy--Schwarz against the unit vector $ie^{i\theta}$:
-  $|\varepsilon\langle z, ie^{i\theta}\rangle|\le|\varepsilon|\,\|z\|\le
+  $|K\langle z, ie^{i\theta}\rangle|\le|K|\,\|z\|\le
   \|z\|\le R<\kappa(\theta)$, then \texttt{linarith}. Numerator positivity is
-  $\|z\|^2<1$ and $\varepsilon\ge-1$ (\texttt{nlinarith}).
+  $\|z\|^2<1$ and $K\ge-1$ (\texttt{nlinarith}).
 \end{proof}
 
 \begin{lemma}\leanok
@@ -176,11 +194,11 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \lean{Gluck.SpaceForm.spaceFormSpeed_circle}
   \uses{def:spaceform_speed, lem:spherical_speed_circle}
   The Euclidean circle of radius $r$ traversed in the tangent-angle gauge sits
-  at $z(\theta)=(-r)\,ie^{i\theta}$ and carries constant space-form curvature
-  $\kappa=(1-\varepsilon r^2)/(2r)$; its gauge speed comes out to exactly
+  at $\gamma(\theta)=(-r)\,ie^{i\theta}$ and carries constant space-form curvature
+  $\kappa=(1-K r^2)/(2r)$; its gauge speed comes out to exactly
   $r$. Recovers the sphere circle $\kappa_S=(1-r^2)/(2r)=\cot\rho$
-  ($\varepsilon=1$) and the hyperbolic circle
-  $\kappa_H=(1+r^2)/(2r)=\coth\rho$ ($\varepsilon=-1$). The opposite
+  ($K=1$) and the hyperbolic circle
+  $\kappa_H=(1+r^2)/(2r)=\coth\rho$ ($K=-1$). The opposite
   inner-product sign convention would give junk here — this lemma pins the
   two-signs-are-one-parameter convention for the whole layer.
 \end{lemma}
@@ -189,8 +207,8 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \leanok
   Direct computation: $\langle(-r)ie^{i\theta}, ie^{i\theta}\rangle=-r$ and
   $\|(-r)ie^{i\theta}\|=r$, so the denominator is
-  $2(\kappa+\varepsilon r)=(1+\varepsilon r^2)/r$ and the quotient collapses
-  to $r$ under $1+\varepsilon r^2\ne0$ (\texttt{field\_simp}).
+  $2(\kappa+K r)=(1+K r^2)/r$ and the quotient collapses
+  to $r$ under $1+K r^2\ne0$ (\texttt{field\_simp}).
 \end{proof}
 
 \begin{definition}\leanok
@@ -198,16 +216,20 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \label{def:centered_radius}
   \lean{Gluck.SpaceForm.centeredRadius}
   \uses{lem:centered_radius_pos}
-  The \emph{space-form centered radius}
+  The \emph{space-form centered radius}, in the rationalized uniform form
   \[
-    r^\ast(\varepsilon,c)\;=\;
-    \varepsilon\bigl(\sqrt{c^2+\varepsilon}-c\bigr),
+    r^\ast(K,c)\;=\;
+    \frac{1}{\sqrt{c^2+K}+c},
   \]
-  the root in $(0,1)$ of $\varepsilon r^2+2cr-1=0$, i.e.\ the Euclidean radius
+  the root in $(0,1)$ of $K r^2+2cr-1=0$, i.e.\ the Euclidean radius
   of the model geodesic circle of constant curvature $c$. The single closed
   form recovers the sphere radius $\sqrt{1+c^2}-c$ of
-  \cref{lem:centered_radius_pos} ($\varepsilon=1$) and the hyperbolic radius
-  $c-\sqrt{c^2-1}$ ($\varepsilon=-1$, defined for $c>1$).
+  \cref{lem:centered_radius_pos} ($K=1$), the hyperbolic radius
+  $c-\sqrt{c^2-1}$ ($K=-1$, for $c>1$), and — unlike the legacy
+  unrationalized form $K(\sqrt{c^2+K}-c)$, which
+  vanishes identically at $K=0$ — the flat radius $1/(2c)$
+  ($K=0$, for $c>1/2$). The two forms agree at
+  $K=\pm1$ (\texttt{centeredRadius\_eq}).
 \end{definition}
 
 \begin{lemma}\leanok
@@ -216,32 +238,45 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \lean{Gluck.SpaceForm.centeredRadius_solves,
         Gluck.SpaceForm.centeredRadius_mem_Ioo,
         Gluck.SpaceForm.centeredRadius_bracket,
-        Gluck.SpaceForm.centeredRadius_facts}
+        Gluck.SpaceForm.centeredRadius_facts,
+        Gluck.SpaceForm.centeredRadius_lt_one_iff}
   \uses{def:centered_radius}
-  For $\varepsilon\in\{+1,-1\}$ and an admissible level $c$ (meaning $c>0$
-  when $\varepsilon=1$, $c>1$ when $\varepsilon=-1$), the centered radius
-  $r^\ast=r^\ast(\varepsilon,c)$ satisfies:
-  (i) the model quadratic $\varepsilon (r^\ast)^2+2c\,r^\ast-1=0$, hence
-  $(1-\varepsilon (r^\ast)^2)/(2r^\ast)=c$;
+  For $K\in\{+1,-1,0\}$ and an admissible level $c$ (meaning
+  $c>0$ when $K=1$, $c>1$ when $K=-1$, $c>1/2$ when
+  $K=0$), the centered radius
+  $r^\ast=r^\ast(K,c)$ satisfies:
+  (i) the model quadratic $K (r^\ast)^2+2c\,r^\ast-1=0$, hence
+  $(1-K (r^\ast)^2)/(2r^\ast)=c$;
   (ii) $0<r^\ast<1$;
   (iii) the \emph{bracket value}
-  $c+\varepsilon r^\ast=\sqrt{c^2+\varepsilon}=:B>0$, the admissibility
+  $c+K r^\ast=\sqrt{c^2+K}=:B>0$, the admissibility
   denominator evaluated at the level-$c$ model circle. For the sphere
   $B=\sqrt{1+c^2}\ge1$ is an absolute lower bound; for the hyperbolic plane
   $B=\sqrt{c^2-1}$ is positive but tends to $0$ as $c\to1^{+}$ (the
   escape-velocity boundary), so downstream margin constants scaled by $B$ are
-  $c$-dependent, not absolute.
+  $c$-dependent, not absolute; for the flat plane $B=c$. Moreover the
+  admissible windows themselves are captured by one identity
+  (\texttt{centeredRadius\_lt\_one\_iff}): for any $c>0$,
+  \[
+    r^\ast(K,c)<1
+    \iff
+    c>\frac{1-K}{2},
+  \]
+  the uniform confinement threshold ($0$ at $S^2$, $1$ at $H^2$, $1/2$ flat)
+  carried by \cref{def:spaceform_four_vertex}.
 \end{lemma}
 
 \begin{proof}
   \leanok
-  All four are elementary $\sqrt{\phantom{x}}$-algebra: square out
-  $r^\ast=\varepsilon(\sqrt{c^2+\varepsilon}-c)$ using $\varepsilon^2=1$ and
-  $(\sqrt{c^2+\varepsilon})^2=c^2+\varepsilon$ (positive in both admissible
-  branches), then \texttt{nlinarith}; the membership bounds compare
-  $\sqrt{c^2+\varepsilon}$ against $c$ and $c\pm1$ by strict monotonicity of
-  the square root. \texttt{centeredRadius\_facts} packages (ii)--(iii) for the
-  margins file.
+  All are elementary $\sqrt{\phantom{x}}$-algebra on the rationalized form:
+  clear the denominator $\sqrt{c^2+K}+c>1$ (positive in all three
+  admissible windows, \texttt{window\_pos}) and use
+  $(\sqrt{c^2+K})^2=c^2+K$, then
+  \texttt{linear\_combination}/\texttt{nlinarith}; the membership bounds
+  compare $\sqrt{c^2+K}$ against $c$ and the threshold by strict
+  monotonicity of the square root, and the threshold identity is a per-sign
+  case split (at $K=0$, $r^\ast=1/(2c)<1\iff c>1/2$).
+  \texttt{centeredRadius\_facts} packages (ii)--(iii) for the margins file.
 \end{proof}
 
 \begin{lemma}\leanok
@@ -249,7 +284,7 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \label{lem:spaceform_admissible_lower_bound}
   \lean{Gluck.SpaceForm.exists_admissible_lower_bound}
   \uses{def:spaceform_four_vertex, lem:sphere_curvature_lower_bound}
-  From $\mathrm{SpaceFormFourVertex}\;\varepsilon\;\kappa$ there is a
+  From $\mathrm{SpaceFormFourVertex}\;K\;\kappa$ there is a
   confinement radius $R$ with $0<R<1$ and $R<\kappa(\theta)$ for all
   $\theta$. Together with \cref{lem:spaceform_denom_pos} this makes the
   admissibility denominator strictly positive on the slab
@@ -260,7 +295,7 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \leanok
   The minimum of the strictly positive continuous $\kappa$ over the compact
   period $[0,2\pi]$ is positive; take $R=\min(\min\kappa,1)/2$ and extend to
-  all $\theta$ by $2\pi$-periodicity. ($\varepsilon$-uniform: the hyperbolic
+  all $\theta$ by $2\pi$-periodicity. ($K$-uniform: the hyperbolic
   bound $\kappa>1$ is not needed for \emph{this} lemma, only later for the
   margins scale via \cref{lem:centered_radius_spaceform_props}.)
 \end{proof}
@@ -276,21 +311,21 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \uses{def:spaceform_speed, def:truncated_speed, def:truncated_field}
   The \emph{truncated gauge speed}
   \[
-    \hat q_{\varepsilon,\kappa,R,\delta}(\theta,z)=
-    \frac{1+\varepsilon(\min(\|z\|,R))^2}
-         {2\max\bigl(\kappa(\theta)-\varepsilon\langle z,
+    \hat q_{K,\kappa,R,\delta}(\theta,z)=
+    \frac{1+K(\min(\|z\|,R))^2}
+         {2\max\bigl(\kappa(\theta)-K\langle z,
            ie^{i\theta}\rangle,\ \delta\bigr)}
   \]
   and the \emph{truncated reconstruction field}
-  $F_{\varepsilon,\kappa,R,\delta}(\theta,z)=\hat q\cdot e^{i\theta}$, the
-  right-hand side of the truncated reconstruction ODE $z'=F(\theta,z)$. On
-  the admissible slab $\{\|z\|\le R,\ \delta\le\kappa-\varepsilon\langle z,
+  $F_{K,\kappa,R,\delta}(\theta,z)=\hat q\cdot e^{i\theta}$, the
+  right-hand side of the truncated reconstruction ODE $\gamma'=F(\theta,\gamma)$. On
+  the admissible slab $\{\|z\|\le R,\ \delta\le\kappa-K\langle z,
   ie^{i\theta}\rangle\}$ both clamps are inactive and
-  $\hat q=q_{\varepsilon,\kappa}$ (\texttt{truncatedSpeed\_eq}). The clamped
-  numerator stays $\ge1-R^2>0$ for $|\varepsilon|\le1$ and $R<1$ (automatic
+  $\hat q=q_{K,\kappa}$ (\texttt{truncatedSpeed\_eq}). The clamped
+  numerator stays $\ge1-R^2>0$ for $|K|\le1$ and $R<1$ (automatic
   in the disk), so the field is globally bounded by $(1+R^2)/(2\delta)$,
   Lipschitz in $z$ uniformly in $\theta$, and jointly continuous — in both
-  models at once. $\varepsilon$-generic transport of
+  models at once. $K$-generic transport of
   \cref{def:truncated_speed} and \cref{def:truncated_field}.
 \end{definition}
 
@@ -301,11 +336,11 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \uses{def:spaceform_truncated_field, def:spherical_flow,
         def:spherical_endpoint}
   The \emph{Picard--Lindel\"of flow}
-  $\Phi_{\varepsilon,\kappa,R,\delta,r_0}:\mathbb C\times\mathbb R\to\mathbb
+  $\Phi_{K,\kappa,R,\delta,r_0}:\mathbb C\times\mathbb R\to\mathbb
   C$ of the truncated field: a choice, made once per parameter tuple, of a
   map flowing every initial point of $\{\|z_0\|\le r_0\}$ along
-  $F_{\varepsilon,\kappa,R,\delta}$ on $[0,2\pi]$, jointly continuously
-  (junk, $\mathrm{Prod.fst}$, when the side conditions $|\varepsilon|\le1$,
+  $F_{K,\kappa,R,\delta}$ on $[0,2\pi]$, jointly continuously
+  (junk, $\mathrm{Prod.fst}$, when the side conditions $|K|\le1$,
   $\kappa$ continuous, $0\le R<1$, $0<\delta$ fail). The \emph{closing-error
   endpoint map} is $z_0\mapsto\Phi(z_0,2\pi)-z_0$; its interior zeros are the
   closed trajectories that the winding argument of
@@ -323,7 +358,7 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \uses{def:spaceform_flow, def:spaceform_truncated_field,
         lem:spherical_flow_spec, lem:truncated_field_picard}
   For $\|z_0\|\le r_0$ the flow starts at $z_0$ and solves
-  $z'=F_{\varepsilon,\kappa,R,\delta}(\theta,z)$ on $[0,2\pi]$
+  $\gamma'=F_{K,\kappa,R,\delta}(\theta,\gamma)$ on $[0,2\pi]$
   ($\mathrm{HasDerivWithinAt}$ form); any solution with the same initial
   value agrees with $\Phi(z_0,\cdot)$ on $[0,2\pi]$; and the endpoint map is
   continuous on $\{\|z_0\|\le r_0\}$.
@@ -342,7 +377,7 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \texttt{ODE\_solution\_unique\_of\_mem\_Icc\_right} against the uniform
   Lipschitz witness; endpoint continuity is the flow restricted to
   $\theta=2\pi$ minus the identity. Mirrors the landed proofs at
-  \cref{lem:spherical_flow_spec} with $|\varepsilon|\le1$ threaded through.
+  \cref{lem:spherical_flow_spec} with $|K|\le1$ threaded through.
 \end{proof}
 
 \subsection{Invariant admissible domain}
@@ -355,22 +390,22 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \uses{def:spaceform_truncated_field, lem:spaceform_denom_pos,
         lem:invariant_admissible_domain, lem:gronwall_L1_drive}
   Gr\"onwall continuous dependence keeping a trajectory in the admissible
-  slab: if a trajectory $z$ of $F_{\varepsilon,\kappa,R,\delta}$ starts close
-  to a reference trajectory $z_s$ (for curvature $\kappa'$) that stays
-  $\mu$-interior to the slab ($\|z_s\|\le R-\mu$ and
-  $\varepsilon\langle z_s,ie^{i\theta}\rangle\le\kappa_0-\delta-\mu$ with
+  slab: if a trajectory $\gamma$ of $F_{K,\kappa,R,\delta}$ starts close
+  to a reference trajectory $\gamma_s$ (for curvature $\kappa'$) that stays
+  $\mu$-interior to the slab ($\|\gamma_s\|\le R-\mu$ and
+  $K\langle \gamma_s,ie^{i\theta}\rangle\le\kappa_0-\delta-\mu$ with
   $\kappa\ge\kappa_0$), and
   \[
-    e^{2\pi L}\Bigl(\|z(0)-z_s(0)\|
+    e^{2\pi L}\Bigl(\|\gamma(0)-\gamma_s(0)\|
       +\tfrac{1+R^2}{2\delta^2}\int_0^{2\pi}|\kappa-\kappa'|\Bigr)\le\mu,
   \]
-  then $z$ stays in the slab on $[0,2\pi]$: $\|z(\theta)\|\le R$ and
-  $\delta\le\kappa(\theta)-\varepsilon\langle z(\theta),
+  then $\gamma$ stays in the slab on $[0,2\pi]$: $\|\gamma(\theta)\|\le R$ and
+  $\delta\le\kappa(\theta)-K\langle \gamma(\theta),
   ie^{i\theta}\rangle$. The drive is only small in $L^1$ (the Dahlberg
   regime), so the project-local Gr\"onwall lemma with $L^1$ drive is
   re-established here ($d(t)\le e^{LT}(d_0+\int_0^T g)$ from the integral
   inequality $d\le d_0+\int(Ld+g)$). Near-copy of
-  \cref{lem:invariant_admissible_domain} with the $\varepsilon$
+  \cref{lem:invariant_admissible_domain} with the $K$
   denominator; the hyperbolic numerator $1-\|z\|^2$ vanishes at the ideal
   boundary, so confinement is if anything easier than on the sphere.
 \end{lemma}
@@ -384,10 +419,10 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   numerator in $[1-R^2,1+R^2]$, denominators $\ge2\delta$ differing by at
   most $2|\kappa-\kappa'|$ since $x\mapsto\max(x,\delta)$ is 1-Lipschitz)
   turns the trajectory difference into the integral inequality
-  $\|z-z_s\|(t)\le\|z(0)-z_s(0)\|+\int_0^t(L\|z-z_s\|+M|\kappa-\kappa'|)$;
-  Gr\"onwall with $L^1$ drive bounds $\|z-z_s\|\le\mu$ on $[0,2\pi]$, and the
-  $\mu$-interior margins of $z_s$ absorb the deviation
-  (Cauchy--Schwarz for the inner-product margin, $|\varepsilon|\le1$).
+  $\|\gamma-\gamma_s\|(t)\le\|\gamma(0)-\gamma_s(0)\|+\int_0^t(L\|\gamma-\gamma_s\|+M|\kappa-\kappa'|)$;
+  Gr\"onwall with $L^1$ drive bounds $\|\gamma-\gamma_s\|\le\mu$ on $[0,2\pi]$, and the
+  $\mu$-interior margins of $\gamma_s$ absorb the deviation
+  (Cauchy--Schwarz for the inner-product margin, $|K|\le1$).
 \end{proof}
 
 \subsection{Arc algebra}
@@ -399,23 +434,23 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
         Gluck.SpaceForm.constant_arc_solves_truncated}
   \uses{def:spaceform_speed, def:spaceform_truncated_field,
         lem:constant_curvature_arc, lem:constant_arc_solves_truncated}
-  Under the $\varepsilon$-generic consistency identity
-  $1+\varepsilon\|w\|^2=2rK+\varepsilon r^2$, at every angle $\theta$ where
-  the bracket $K-\varepsilon\langle z(\theta), ie^{i\theta}\rangle$ stays
-  positive, the circular arc $z(\theta)=w-ire^{i\theta}$ has gauge speed
+  Under the $K$-generic consistency identity
+  $1+K\|w\|^2=2rk+K r^2$, at every angle $\theta$ where
+  the bracket $k-K\langle \gamma(\theta), ie^{i\theta}\rangle$ stays
+  positive, the circular arc $\gamma(\theta)=w-ire^{i\theta}$ has gauge speed
   exactly $r$ and solves the reconstruction ODE
-  $z'=q_K(\theta,z)e^{i\theta}$; where moreover the clamps are inactive
-  ($\|z(\theta)\|\le R$, bracket $\ge\delta$) it solves the \emph{truncated}
-  ODE for level $K$. Transport of \cref{lem:constant_curvature_arc} and
-  \cref{lem:constant_arc_solves_truncated}: $\varepsilon$ multiplies
-  $\|w\|^2$ and $r^2$ in the consistency relation, not the $2rK$ term.
+  $\gamma'=q_k(\theta,\gamma)e^{i\theta}$; where moreover the clamps are inactive
+  ($\|\gamma(\theta)\|\le R$, bracket $\ge\delta$) it solves the \emph{truncated}
+  ODE for level $k$. Transport of \cref{lem:constant_curvature_arc} and
+  \cref{lem:constant_arc_solves_truncated}: $K$ multiplies
+  $\|w\|^2$ and $r^2$ in the consistency relation, not the $2rk$ term.
 \end{lemma}
 
 \begin{proof}
   \leanok
-  The bracket identity $\langle z(\theta), ie^{i\theta}\rangle=\langle w,
+  The bracket identity $\langle \gamma(\theta), ie^{i\theta}\rangle=\langle w,
   ie^{i\theta}\rangle-r$ and the norm expansion
-  $\|z(\theta)\|^2=\|w\|^2-2r\langle w, ie^{i\theta}\rangle+r^2$ (both
+  $\|\gamma(\theta)\|^2=\|w\|^2-2r\langle w, ie^{i\theta}\rangle+r^2$ (both
   model-agnostic, copied verbatim from the Euclidean layer) reduce the speed
   claim to the consistency identity by field algebra; the derivative of
   $\theta\mapsto-ire^{i\theta}$ is $re^{i\theta}$, matching the field. On the
@@ -431,20 +466,20 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
         lem:centered_radius_spaceform_props, lem:speed_quadratic_identity,
         lem:speed_radius_le}
   Exact second-order vanishing of the gauge speed at the centered circle:
-  for the constant level $c$, $r^\ast=r^\ast(\varepsilon,c)$, and any
-  $(\theta,z)$ with $D=c-\varepsilon\langle z, ie^{i\theta}\rangle\ne0$,
+  for the constant level $c$, $r^\ast=r^\ast(K,c)$, and any
+  $(\theta,z)$ with $D=c-K\langle z, ie^{i\theta}\rangle\ne0$,
   \[
     q_c(\theta,z)-r^\ast
-    \;=\;\varepsilon\cdot
+    \;=\;K\cdot
     \frac{\|z+r^\ast\, ie^{i\theta}\|^2}{2D}.
   \]
-  Consequently $0\le\varepsilon(q_c(\theta,z)-r^\ast)$ wherever $D>0$: for
-  $\varepsilon=+1$ model arcs stay \emph{outside} the centered circle
-  ($r^\ast\le q_c$, as in \cref{lem:speed_radius_le}); for $\varepsilon=-1$
-  the inequality reverses ($q_c\le r^\ast$). The extra $\varepsilon$ factor
+  Consequently $0\leK(q_c(\theta,z)-r^\ast)$ wherever $D>0$: for
+  $K=+1$ model arcs stay \emph{outside} the centered circle
+  ($r^\ast\le q_c$, as in \cref{lem:speed_radius_le}); for $K=-1$
+  the inequality reverses ($q_c\le r^\ast$). The extra $K$ factor
   relative to the sphere identity \cref{lem:speed_quadratic_identity} is
   sign-critical: it is the ultimate source of the sign of the
-  first-variation coefficient $\eta(\varepsilon)$ in
+  first-variation coefficient $\eta(K)$ in
   \cref{lem:spaceform_step_error_expansion}.
 \end{lemma}
 
@@ -452,10 +487,10 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \leanok
   Expand $\|z+r^\ast ie^{i\theta}\|^2=\|z\|^2+2r^\ast\langle z,
   ie^{i\theta}\rangle+(r^\ast)^2$ and eliminate $(r^\ast)^2$ with the model
-  quadratic $\varepsilon(r^\ast)^2+2cr^\ast-1=0$
+  quadratic $K(r^\ast)^2+2cr^\ast-1=0$
   (\cref{lem:centered_radius_spaceform_props}); a
   \texttt{linear\_combination} closes the identity, and the comparison
-  follows by multiplying through by $\varepsilon$ ($\varepsilon^2=1$).
+  follows by multiplying through by $K$ ($K^2=1$).
 \end{proof}
 
 \begin{definition}\leanok
@@ -463,15 +498,15 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \label{def:spaceform_arc_map}
   \lean{Gluck.SpaceForm.spaceFormArcMap}
   \uses{def:spaceform_speed, def:spherical_arc_map}
-  The endpoint of the constant-$K$ model arc of angular extent $\Delta$
+  The endpoint of the constant-$k$ model arc of angular extent $\Delta$
   starting at $z$ with initial tangent angle $\theta_0$:
   \[
-    A_{\varepsilon,K,\theta_0,\Delta}(z)
-    = z + i\,q_K(\theta_0,z)\,e^{i\theta_0}\,(1-e^{i\Delta}).
+    A_{K,k,\theta_0,\Delta}(z)
+    = z + i\,q_k(\theta_0,z)\,e^{i\theta_0}\,(1-e^{i\Delta}).
   \]
   Transport of \cref{def:spherical_arc_map}; it satisfies half-turn
   anti-equivariance
-  $A_{\varepsilon,K,\theta_0+\pi,\Delta}(-z)=-A_{\varepsilon,K,\theta_0,\Delta}(z)$
+  $A_{K,k,\theta_0+\pi,\Delta}(-z)=-A_{K,k,\theta_0,\Delta}(z)$
   and concatenation
   $A_{\cdot,\Delta_2}\circ A_{\cdot,\Delta_1}=A_{\cdot,\Delta_1+\Delta_2}$
   along bracket-positive arcs
@@ -483,8 +518,8 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \label{def:spaceform_step_error_map}
   \lean{Gluck.SpaceForm.stepErrorMap}
   \uses{def:spaceform_arc_map, def:step_error_map}
-  The \emph{four-arc closing error map} $E^\ast_{\varepsilon,a,b}$:
-  $z+E^\ast_{\varepsilon,a,b}(z)$ is the endpoint of the concatenated
+  The \emph{four-arc closing error map} $E^\ast_{K,a,b}$:
+  $z+E^\ast_{K,a,b}(z)$ is the endpoint of the concatenated
   four-quarter-arc trajectory with levels $a,b,a,b$ at base angles
   $0,\pi/2,\pi,3\pi/2$ (the symmetric step model matching the canonical
   four-arc step curvature \cref{def:four_arc_step_function}). Transport of
@@ -498,13 +533,13 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \label{def:spaceform_arc_margins}
   \lean{Gluck.SpaceForm.arcMargins}
   \uses{def:spaceform_speed, def:arc_margins}
-  $\mathrm{arcMargins}\;\varepsilon\;\kappa_0\;R\;\delta\;\mu\;K\;t_1\;t_2\;p$:
-  along $[t_1,t_2]$ the constant-level-$K$ arc trajectory through $(t_1,p)$
+  $\mathrm{arcMargins}\;K\;\kappa_0\;R\;\delta\;\mu\;K\;t_1\;t_2\;p$:
+  along $[t_1,t_2]$ the constant-level-$k$ arc trajectory through $(t_1,p)$
   stays $\mu$-inside the norm clamp ($\|\cdot\|\le R-\mu$), $\mu$-inside the
   signed curvature margin
-  ($\varepsilon\langle\cdot, ie^{i\theta}\rangle\le\kappa_0-\delta-\mu$), and
-  keeps the level-$K$ clamps inactive
-  ($K-\varepsilon\langle\cdot, ie^{i\theta}\rangle\ge\delta$). Transport of
+  ($K\langle\cdot, ie^{i\theta}\rangle\le\kappa_0-\delta-\mu$), and
+  keeps the level-$k$ clamps inactive
+  ($k-K\langle\cdot, ie^{i\theta}\rangle\ge\delta$). Transport of
   \cref{def:arc_margins}; exactly the hypothesis package consumed per
   quarter by \cref{lem:spaceform_step_model_transport}.
 \end{definition}
@@ -516,19 +551,19 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \uses{def:spaceform_arc_margins, def:spaceform_arc_map,
         def:centered_radius, lem:centered_radius_spaceform_props,
         lem:spaceform_speed_sub_radius, lem:step_model_margins}
-  For $\varepsilon\in\{+1,-1\}$, an admissible level $c$, and any
-  $\kappa_0>-\varepsilon r^\ast$ ($r^\ast=r^\ast(\varepsilon,c)$), there are
+  For $K\in\{+1,-1,0\}$, an admissible level $c$, and any
+  $\kappa_0>-K r^\ast$ ($r^\ast=r^\ast(K,c)$), there are
   explicit $0<R<1$ and $\delta,\mu,\rho_0,h_0>0$ (functions of
-  $c,\kappa_0,\varepsilon$ only) such that for all levels $a,b$ within $h_0$
+  $c,\kappa_0,K$ only) such that for all levels $a,b$ within $h_0$
   of $c$ and every start $z_0$ within $\rho_0$ of the model-circle base point
   $z_0^\ast=-r^\ast i$, all four quarter-arc margin packages of the step
-  model hold. Constants ledger, with $B=c+\varepsilon
-  r^\ast=\sqrt{c^2+\varepsilon}$ and
-  $m=\min(1-r^\ast,\ \kappa_0+\varepsilon r^\ast,\ B)$: $R=(1+r^\ast)/2$,
+  model hold. Constants ledger, with $B=c+K
+  r^\ast=\sqrt{c^2+K}$ and
+  $m=\min(1-r^\ast,\ \kappa_0+K r^\ast,\ B)$: $R=(1+r^\ast)/2$,
   $\delta=\mu=m/8$, $\sigma=\min(r^\ast/2,m/32,B/4)$, $\rho_0=\sigma/32$,
   $h_0=\min(\sigma B^2/512,\,B/4)$. \textbf{$B$ — not $1$ — sets the
   scale}: this is the one place the sphere's absolute-constants shortcut
-  (compare \cref{lem:step_model_margins}) fails for $\varepsilon=-1$, where
+  (compare \cref{lem:step_model_margins}) fails for $K=-1$, where
   $B=\sqrt{c^2-1}\to0$ as $c\to1^{+}$.
 \end{lemma}
 
@@ -545,8 +580,8 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   staying $\le\sigma$ throughout. A deviation $\le\sigma$ plus the three
   numeric slack inequalities yields each \texttt{arcMargins} package
   (\texttt{arcMargins\_of\_dev}): norm $\le r^\ast+\sigma\le R-\mu$, signed
-  inner product $\le\sigma-\varepsilon r^\ast\le\kappa_0-\delta-\mu$, level
-  bracket $\ge(c-h_0)+\varepsilon r^\ast-\sigma\ge\delta$.
+  inner product $\le\sigma-K r^\ast\le\kappa_0-\delta-\mu$, level
+  bracket $\ge(c-h_0)+K r^\ast-\sigma\ge\delta$.
 \end{proof}
 
 \begin{lemma}\leanok
@@ -561,36 +596,36 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
         lem:spaceform_constant_curvature_arc,
         lem:step_model_transport, lem:quarter_step_transport,
         lem:invariant_admissible_arc}
-  Compare a trajectory $z$ of the $\kappa$-truncated flow on $[0,2\pi]$ with
-  the concatenated four-quarter-arc step model from $z_0$ (levels $a,b,a,b$,
+  Compare a trajectory $\gamma$ of the $\kappa$-truncated flow on $[0,2\pi]$ with
+  the concatenated four-quarter-arc step model from $\gamma_0$ (levels $a,b,a,b$,
   matching $\kappa^\ast=\mathtt{stepCurvature}\;b\;a\;0\;(\pi/2)\;\pi\;
   (3\pi/2)$, reused verbatim from \cref{def:four_arc_step_function}). If
   every quarter arc carries its \texttt{arcMargins} package and
   $e^{2\pi L}\,M\int_0^{2\pi}|\kappa-\kappa^\ast|\le\mu$
-  ($M=(1+R^2)/(2\delta^2)$, $L$ a Lipschitz witness for the field), then $z$
+  ($M=(1+R^2)/(2\delta^2)$, $L$ a Lipschitz witness for the field), then $\gamma$
   is admissible on all of $[0,2\pi]$ and
   \[
-    \bigl\|(z(2\pi)-z_0)-E^\ast_{\varepsilon,a,b}(z_0)\bigr\|
+    \bigl\|(\gamma(2\pi)-\gamma_0)-E^\ast_{K,a,b}(\gamma_0)\bigr\|
     \;\le\; e^{2\pi L}\,M\int_0^{2\pi}|\kappa-\kappa^\ast|.
   \]
   Transport of \cref{lem:step_model_transport} /
   \cref{lem:quarter_step_transport}; gains the hypotheses
-  $|\varepsilon|\le1$ and $R<1$ needed by the $\varepsilon$-generic
+  $|K|\le1$ and $R<1$ needed by the $K$-generic
   single-arc Gr\"onwall lemma.
 \end{lemma}
 
 \begin{proof}
   \leanok
   \uses{lem:spaceform_step_model_margins}
-  Single quarter first (\texttt{quarter\_step\_transport}): the constant-$K$
+  Single quarter first (\texttt{quarter\_step\_transport}): the constant-$k$
   model arc solves the truncated ODE where its margins hold
   (\cref{lem:spaceform_constant_curvature_arc}), so the
   shifted-interval Gr\"onwall comparison
   (\texttt{invariant\_admissible\_arc}, the
   \cref{lem:spaceform_invariant_admissible} argument on $[t_1,t_2]$ against
-  a constant-level reference, where the drive $M|\kappa-K|$ is continuous)
+  a constant-level reference, where the drive $M|\kappa-k|$ is continuous)
   gives admissibility on the quarter and an endpoint within the Gr\"onwall
-  bound of the arc-map image $A_{\varepsilon,K,t_1,t_2-t_1}(p)$. Then chain
+  bound of the arc-map image $A_{K,k,t_1,t_2-t_1}(p)$. Then chain
   four quarters: the $L^1$ error splits over the quarters (the canonical
   step curvature is measurable and two-valued; the splitting lemmas are
   re-established locally since they are \texttt{private} in the base file),
@@ -614,19 +649,25 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   re-derived, not reused). For an admissible level $c$ there are
   $\rho_1,h_1,C>0$ such that for every step height $0<h\le h_1$ and every
   base point $z_0$ with $\|z_0+r^\ast i\|\le\rho_1$
-  ($r^\ast=r^\ast(\varepsilon,c)$),
+  ($r^\ast=r^\ast(K,c)$),
   \[
-    \Bigl\|E^\ast_{\varepsilon,\,c-h/2,\,c+h/2}(z_0)
-      +\eta(\varepsilon)\,h\,\overline{(z_0+r^\ast i)}\Bigr\|
+    \Bigl\|E^\ast_{K,\,c-h/2,\,c+h/2}(z_0)
+      +\eta(K)\,h\,\overline{(z_0+r^\ast i)}\Bigr\|
     \;\le\; C\,h\,\bigl(\|z_0+r^\ast i\|^2+h\bigr),
     \qquad
-    \eta(\varepsilon)=\frac{2\,\varepsilon\, r^\ast}{c^2+\varepsilon}.
+    \eta(K)=\frac{2\,K\, r^\ast}{c^2+K}.
   \]
-  The linear-in-$h$ term is an anti-holomorphic conjugation with the
-  \emph{nonzero} coefficient $\eta(\varepsilon)$. The $\varepsilon$ factor is
-  mandatory — it descends from the $\varepsilon$ on the right-hand side of
-  \cref{lem:spaceform_speed_sub_radius} — so $\eta>0$ for the sphere but
-  $\eta<0$ for the hyperbolic plane.
+  The linear-in-$h$ term is an anti-holomorphic conjugation with coefficient
+  $\eta(K)$. The $K$ factor is mandatory — it descends
+  from the $K$ on the right-hand side of
+  \cref{lem:spaceform_speed_sub_radius} — so $\eta>0$ for the sphere,
+  $\eta<0$ for the hyperbolic plane, and $\eta=0$ for the flat plane
+  ($K=0$, where the four-arc error map is identically zero and the
+  statement degenerates to the true bound
+  $\|E^\ast\|\le Ch(\|\delta\|^2+h)$). The winding argument needs
+  $\eta\ne0$ (\cref{lem:spaceform_step_error_coeff_ne_zero}) — which is
+  where, and only where, the flat member leaves the endpoint-winding
+  pipeline.
 \end{lemma}
 
 \begin{proof}
@@ -636,8 +677,8 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   decomposed as
   $q=r^\ast+\eta$-linear term $+$ controlled remainder via the exact level
   sensitivity and the quadratic identity, with all error terms bounded by
-  explicit fractions of $B=\sqrt{c^2+\varepsilon}$ (radii and constants like
-  $\min(1,c^2+\varepsilon)/2^{26}$ and $C=1.6\times10^7(1/B+1/B^3)$ are
+  explicit fractions of $B=\sqrt{c^2+K}$ (radii and constants like
+  $\min(1,c^2+K)/2^{26}$ and $C=1.6\times10^7(1/B+1/B^3)$ are
   fully explicit). The assembly identity collapses the four main terms to
   the single conjugation $-\eta h\overline{(z_0+r^\ast i)}$ and absorbs the
   residuals (an \texttt{nlinarith}-heavy final step under a raised
@@ -650,19 +691,21 @@ mixed-sign space-form converses) are stated in \cref{chap:spaceform_converse}.
   \lean{Gluck.SpaceForm.stepError_coeff_ne_zero}
   \uses{def:centered_radius, lem:centered_radius_spaceform_props,
         lem:spaceform_step_error_expansion}
-  $\eta(\varepsilon)=2\varepsilon r^\ast(\varepsilon,c)/(c^2+\varepsilon)
+  For $K\in\{+1,-1\}$ (genuinely two-sign: the flat coefficient
+  vanishes),
+  $\eta(K)=2K r^\ast(K,c)/(c^2+K)
   \ne0$ for every admissible level $c$. Nonvanishing — \emph{not}
   positivity — is the property the winding argument of
   \cref{chap:spaceform_converse} consumes: the boundary loop of
   $E^\ast\approx-\eta h\,\overline{\delta}$ has winding number $-1$ for any
   real $\eta\ne0$, since scaling a loop by a nonzero real constant preserves
-  its winding number. ($\eta>0$ at $\varepsilon=+1$ but $\eta<0$ at
-  $\varepsilon=-1$.)
+  its winding number. ($\eta>0$ at $K=+1$ but $\eta<0$ at
+  $K=-1$.)
 \end{lemma}
 
 \begin{proof}
   \leanok
-  $r^\ast>0$ by \cref{lem:centered_radius_spaceform_props}, $\varepsilon\ne0$,
-  and $c^2+\varepsilon>0$ in both admissible branches; a quotient of
+  $r^\ast>0$ by \cref{lem:centered_radius_spaceform_props}, $K\ne0$,
+  and $c^2+K>0$ in both admissible branches; a quotient of
   nonzeros is nonzero.
 \end{proof}

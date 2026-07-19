@@ -8,10 +8,10 @@ import Gluck.Hyperbolic.Family
 /-!
 # Exact-profile reparam removal (dropping the `H²` reparametrisation `Ψ`)
 
-The up-to-reparam capstone `hyperbolicMixedConverse` realizes `κ ∘ Ψ` with a
+The up-to-reparam capstone `dahlberg_converse_reparam` realizes `κ ∘ Ψ` with a
 `C¹`, orientation-preserving `Ψ`.  This file proves that when `Ψ` is additionally
 a **degree-one circle map** (`Ψ(t+2π) = Ψ(t) + 2π`), the reparam can be removed:
-`w = z ∘ Ψ⁻¹` realizes `κ` *exactly* as a simple closed curve.
+`w = γ ∘ Ψ⁻¹` realizes `κ` *exactly* as a simple closed curve.
 
 The degree-one hypothesis is genuine in the fork-A construction: `Ψ = h₁ ∘ nodeMap ∘ χ`
 and `nodeMap` conjugates the arc-length period `Λ` to `2π` (`nodeMap_add_period`),
@@ -63,14 +63,14 @@ lemma injOn_Ico_shift_of_periodic {f : ℝ → ℂ} {T : ℝ} (hT : 0 < T)
   linarith
 
 /-- **Reparam removal for a degree-one reparametrisation.**  If a simple closed
-curve `z` realizes `κ ∘ Ψ` at sign `ε`, with `Ψ` a `C¹`, orientation-preserving
+curve `γ` realizes `κ ∘ Ψ` at curvature `K`, with `Ψ` a `C¹`, orientation-preserving
 (`0 < Ψ'`) **degree-one circle map** (`Ψ(t+2π) = Ψ(t)+2π`), then `κ` is realized
-*exactly* by the simple closed curve `w = z ∘ Ψ⁻¹`. -/
-theorem realizes_of_reparam_degree_one {ε : ℝ} {z : ℝ → ℂ} {κ Ψ : ℝ → ℝ}
+*exactly* by the simple closed curve `w = γ ∘ Ψ⁻¹`. -/
+theorem realizes_of_reparam_degree_one {K : ℝ} {γ : ℝ → ℂ} {κ Ψ : ℝ → ℝ}
     (hΨC1 : ContDiff ℝ 1 Ψ) (hΨpos : ∀ t, 0 < deriv Ψ t)
     (hΨdeg : ∀ t, Ψ (t + 2 * π) = Ψ t + 2 * π)
-    (hsc : IsSimpleClosed z) (hreal : Realizes ε z (κ ∘ Ψ)) :
-    ∃ w : ℝ → ℂ, IsSimpleClosed w ∧ Realizes ε w κ := by
+    (hsc : IsSimpleClosed γ) (hreal : Realizes K γ (κ ∘ Ψ)) :
+    ∃ w : ℝ → ℂ, IsSimpleClosed w ∧ Realizes K w κ := by
   have hmono : StrictMono Ψ := strictMono_of_deriv_pos hΨpos
   have hcont : Continuous Ψ := hΨC1.continuous
   have hΨhd : ∀ x, HasDerivAt Ψ (deriv Ψ x) x :=
@@ -130,10 +130,10 @@ theorem realizes_of_reparam_degree_one {ε : ℝ} {z : ℝ → ℂ} {κ Ψ : ℝ
     intro t
     apply hmono.injective
     rw [hΨΦ, hΨdeg, hΨΦ]
-  refine ⟨z ∘ Φ, ⟨?_, ?_⟩, ?_⟩
+  refine ⟨γ ∘ Φ, ⟨?_, ?_⟩, ?_⟩
   · -- closed: `2π`-periodic
     intro t
-    change z (Φ (t + 2 * π)) = z (Φ t)
+    change γ (Φ (t + 2 * π)) = γ (Φ t)
     rw [hΦdeg]
     exact hsc.1 (Φ t)
   · -- injective on `[0, 2π)`
@@ -147,8 +147,8 @@ theorem realizes_of_reparam_degree_one {ε : ℝ} {z : ℝ → ℂ} {κ Ψ : ℝ
     have hmemB : Φ b ∈ Set.Ico (Φ 0) (Φ 0 + 2 * π) :=
       ⟨hΦmono.monotone hb.1, by calc Φ b < Φ (2 * π) := hΦmono hb.2
         _ = Φ 0 + 2 * π := hΦ2pi⟩
-    have hzinj := injOn_Ico_shift_of_periodic h2pi hsc.1 hsc.2 (Φ 0)
-    exact hΦmono.injective (hzinj hmemA hmemB hab)
+    have hγinj := injOn_Ico_shift_of_periodic h2pi hsc.1 hsc.2 (Φ 0)
+    exact hΦmono.injective (hγinj hmemA hmemB hab)
   · -- realizes `κ` exactly
     have hcomp := spaceFormRealizes_comp hreal hΦC1 hΦpos
     have hid : (κ ∘ Ψ) ∘ Φ = κ := by
@@ -158,16 +158,16 @@ theorem realizes_of_reparam_degree_one {ε : ℝ} {z : ℝ → ℂ} {κ Ψ : ℝ
 /-- **The exact-profile hyperbolic mixed (Dahlberg) converse.**  A genuinely-negative
 `MixedSignHyperbolicFourVertex` profile is realized **exactly** — with *no*
 reparametrisation — as the hyperbolic geodesic curvature of a simple closed curve in
-the Poincaré disk.  Strengthening of the up-to-reparam `hyperbolicMixedConverse`:
+the Poincaré disk.  Strengthening of the up-to-reparam `dahlberg_converse_reparam`:
 the fork-A reparam `Ψ = h₁ ∘ nodeMap ∘ χ` is a degree-one circle map
-(`hyperbolicMixedConverse_reparam_deg1`), so `realizes_of_reparam_degree_one`
+(`dahlberg_converse_reparam_deg1`), so `realizes_of_reparam_degree_one`
 removes it.  This closes the AL-6 gap — the reparam was an artifact of the abstract
 converse, not a feature of the geometry. -/
-theorem hyperbolicMixedConverse_exact {κ : ℝ → ℝ}
+theorem dahlberg_converse {κ : ℝ → ℝ}
     (h : MixedSignHyperbolicFourVertex κ) :
-    ∃ z : ℝ → ℂ, IsSimpleClosed z ∧ Realizes (-1) z κ := by
-  obtain ⟨z, Ψ, hΨC1, hΨpos, hΨdeg, hsc, hreal⟩ :=
-    hyperbolicMixedConverse_reparam_deg1 h
+    ∃ γ : ℝ → ℂ, IsSimpleClosed γ ∧ Realizes (-1) γ κ := by
+  obtain ⟨γ, Ψ, hΨC1, hΨpos, hΨdeg, hsc, hreal⟩ :=
+    dahlberg_converse_reparam_deg1 h
   exact realizes_of_reparam_degree_one hΨC1 hΨpos hΨdeg hsc hreal
 
 end Gluck.Hyperbolic

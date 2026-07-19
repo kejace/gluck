@@ -204,6 +204,11 @@ is only `C¹`, so the `signedCurvature` formula (and with it the `C²` predicate
 `C²` data the bridge `signedCurvature_of_realizesCurvature` recovers
 `signedCurvature γ = κ`.
 
+A second, independent-route proof of this exact statement —
+`Gluck.gluck_converse_flow` (`Gluck/Euclidean/SpaceFormInstance.lean`) —
+runs the space-form flow engine at ambient curvature `K = 0` and removes the disk
+confinement by a dilation.
+
 Blueprint: `thm:gluck_converse`. -/
 theorem gluck_converse (κ : ℝ → ℝ) (hκ : IsCurvatureFunction κ)
     (h4 : FourVertexCondition κ) :

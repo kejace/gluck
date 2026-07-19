@@ -22,7 +22,7 @@ This file is a thin aggregator (shim): it re-exports the fork-A general-profile 
 negative four-vertex converse, split across focused sub-modules along the ALM-A
 section chain.  Fork A realizes a general mixed-sign curvature profile through a
 **convex clean bicircle** with symbolic levels `1 < a < c` chosen per `κ` inside the
-four-vertex gap above `max 1`, culminating in the capstone `hyperbolicMixedConverse`.
+four-vertex gap above `max 1`, culminating in the capstone `dahlberg_converse_reparam`.
 
 ## Sub-modules (dependency chain ALM-A1 → … → ALM-A12)
 
@@ -43,5 +43,5 @@ four-vertex gap above `max 1`, culminating in the capstone `hyperbolicMixedConve
 * `Gluck.SpaceForm.ArcLengthH2FamilyClosing` — **ALM-A9.3–A10**: the face-sign
   theorem and the Poincaré–Miranda closing `exists_layout_closing`.
 * `Gluck.SpaceForm.ArcLengthH2FamilySimplicity` — **ALM-A11–A12**: simplicity
-  transport and the capstone `hyperbolicMixedConverse` / `layout_arcLengthH2Curvature`.
+  transport and the capstone `dahlberg_converse_reparam`.
 -/

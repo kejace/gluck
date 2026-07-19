@@ -6,7 +6,7 @@
 % TurningB, TurningC, FaceA, FaceB, Closing, Simplicity}.lean — the
 % ALM-A1 … ALM-A12 chain.  Fork A realizes a general mixed-sign H² curvature
 % profile through a convex clean bicircle with symbolic levels 1 < a < c
-% chosen per κ, culminating in hyperbolicMixedConverse_reparam_deg1:
+% chosen per κ, culminating in dahlberg_converse_reparam_deg1:
 % realization up to an orientation-preserving C¹ DEGREE-ONE circle
 % reparametrization; the degree-one datum is consumed by
 % chap:hyperbolic_converse to remove the reparametrization.
@@ -18,7 +18,7 @@ Fork A proves the genuinely-negative $H^2$ four-vertex converse for a
 \cref{def:mixed_sign_hyperbolic_four_vertex} (continuous, $2\pi$-periodic,
 escape velocity $>1$ at the maxima, minima \emph{arbitrarily negative}) is
 realized, up to an orientation-preserving $C^1$ circle reparametrization, as
-the geodesic curvature of a simple closed curve in $H^2$ ($\varepsilon=-1$).
+the geodesic curvature of a simple closed curve in $H^2$ ($K=-1$).
 Unlike the Euclidean and spherical forks the clean model is not a perturbed
 circle but a \emph{convex clean bicircle} — arcs of constant curvature at two
 symbolic levels $1<a<c$ chosen per $\kappa$ inside the four-vertex overlap gap
@@ -29,8 +29,8 @@ sub-module group:
 \item \textbf{A1--A3 (Bicircle).}  Symbolic quarter residual $(G_1,G_2)$,
   monotonicity and sign brackets, nested-IVT anchor existence
   (\cref{thm:exists_bicircle_anchor}).
-\item \textbf{A4 (Anchor).}  The closed-form anchor curve: closure,
-  continuity, confinement, phase monotonicity, chord margin.
+\item \textbf{A4 (Anchor).}  The anchor confinement estimates: the explicit
+  confinement radius $R(a,c)<1$ and the per-arc whole-circle escape bounds.
 \item \textbf{A5 (Node).}  The node layout: period $\Lambda=L+w_1+w_2+t$,
   node map $g_{w,t}$ with quasi-periodicity $g(s+\Lambda)=g(s)+2\pi$
   (\cref{lem:node_map_add_period} — the conjugation that later makes the
@@ -125,35 +125,19 @@ length $L$.
 \section{The anchor curve (ALM-A4)}
 
 \begin{definition}\leanok
-[the anchor curve]
-  \label{def:anchor_curve}
-  \lean{Gluck.Hyperbolic.anchorCurve}
-  \uses{thm:exists_bicircle_anchor}
-  The closed-form clean bicircle curve on $[0,L]$ at anchor data $(h,L)$: the
-  quarter is the explicit two-arc constant-curvature composition; the half
-  extends it by the conjugate Klein reflection
-  $X(z,\varphi)=(\bar z,3\pi-\varphi)$; the full period by the central
-  symmetry $\rho(z,\varphi)=(-z,\varphi+\pi)$.  The branch joints agree
-  exactly because of the anchor equations of
-  \cref{thm:exists_bicircle_anchor}, so the curve is closed, globally
-  continuous, and has strictly increasing phase (file-private
-  \texttt{anchorCurve\_continuous}, \texttt{anchorCurve\_phase\_strictMonoOn}).
-\end{definition}
-
-\begin{definition}\leanok
 [the anchor confinement radius]
   \label{def:anchor_confine_radius}
   \lean{Gluck.Hyperbolic.anchorConfineRadius}
-  \uses{def:anchor_curve}
-  The explicit radius $R(a,c)=1-(a-1)(c-1)/(20c^2)<1$ confining the anchor
-  curve strictly inside the Poincaré disk (file-private
-  \texttt{anchorCurve\_confined}).  Two further A4 exports feed later stages:
-  chord non-vanishing of every proper sub-arc, and the nonconstructive
-  \emph{compact chord margin} — for each band width $\ell_0\in(0,L/2]$ a
-  margin $m>0$ with $m(\tau-t)\le\|\int_t^\tau e^{i\varphi}\|$ whenever
-  $\ell_0\le\tau-t\le L-\ell_0$ (compactness minimum of the nonvanishing
-  chord; file-private \texttt{layout\_chord\_margin}).  The same template,
-  with only the continuity input changed, gives the clean-layout chord margin
+  \uses{thm:exists_bicircle_anchor}
+  The explicit radius $R(a,c)=1-(a-1)(c-1)/(20c^2)<1$ confining the clean
+  bicircle arcs strictly inside the Poincaré disk: on the anchor window
+  ($h\ge1/(10c)$) each level-$K$ model arc ($K\in\{a,c\}$, $K>1$) obeys the
+  square-root-free whole-circle escape bound
+  $\|\gamma(\sigma)\|\le1-r(K-1)\le R(a,c)$
+  (\texttt{arcModelConst\_norm\_le\_one\_sub\_radius\_mul},
+  \texttt{anchor\_arc2\_confined}), from the centre-norm identity
+  $\|z_c\|^2=1+r^2-2rK$.  The per-leg escape margin $m_0$ feeds the
+  clean-layout confinement of \cref{def:layout_flow} and the chord margin
   consumed by \cref{lem:layout_chord_ne_zero}.
 \end{definition}
 
@@ -162,7 +146,7 @@ length $L$.
 The anchor curve is a $(c,a,c,a,c)$ pattern of constant-curvature legs.  To
 run a genuine profile on it, arc length is laid out by a \emph{node layout}:
 interior widths $w_1,w_2$ and a terminal width $t$ deform the leg lengths,
-giving the three degrees of freedom the closing needs ($2$ for $z$-closure
+giving the three degrees of freedom the closing needs ($2$ for $\gamma$-closure
 $+$ $1$ for turning).
 
 \begin{definition}\leanok
@@ -259,7 +243,7 @@ $+$ $1$ for turning).
 [the true layout flow]
   \label{def:layout_flow}
   \lean{Gluck.Hyperbolic.layoutFlow}
-  \uses{def:kappa_arc, def:anchor_curve, def:anchor_confine_radius}
+  \uses{def:kappa_arc, def:anchor_confine_radius}
   The \texttt{arcFlow} of $\kappa_{\mathrm{arc}}$ from the anchor mid-$c$
   start (state \texttt{layoutStart}, phase $5\pi/2$), at truncation radius
   $R'=\texttt{layoutConfineRadius}=(1+R_{\mathrm{clean}})/2$, horizon $2L$
@@ -305,7 +289,7 @@ $+$ $1$ for turning).
   \uses{def:layout_flow, lem:layout_trajectory_close}
   If the true flow stays $b$-close to the clean curve on $[0,\Lambda]$ and
   $b\le(1-R_{\mathrm{clean}})/2$, then
-  $\|z_{\mathrm{true}}\|\le R_{\mathrm{clean}}+b\le R'<1$ there; in
+  $\|\gamma_{\mathrm{true}}\|\le R_{\mathrm{clean}}+b\le R'<1$ there; in
   particular the flow never reaches its truncation radius, so the clamped
   field equals the true field along the trajectory (the A12 window-bridge
   input).
@@ -323,9 +307,9 @@ $+$ $1$ for turning).
   \lean{Gluck.Hyperbolic.layoutResidual}
   \uses{def:layout_flow}
   $\mathcal R(w_1,w_2,t)
-    =\Phi_{\mathrm{true}}(\Lambda)-\bigl(z(0),\varphi(0)+2\pi\bigr)$:
+    =\Phi_{\mathrm{true}}(\Lambda)-\bigl(\gamma(0),\varphi(0)+2\pi\bigr)$:
   endpoint state minus the one-full-turn closure target.  The first component
-  is the $z$-closure residual (A10 consumes its real and imaginary parts);
+  is the $\gamma$-closure residual (A10 consumes its real and imaginary parts);
   the second is the turning residual (the A8 root variable; on the anchor
   locus the turning target is $9\pi/2$).  $\mathcal R=0$ iff the true flow
   closes with total turning $2\pi$.
@@ -439,10 +423,10 @@ the $L^1$ conclusion.
 \section{Face signs and the Poincaré--Miranda closing (ALM-A9--A10)}
 
 \begin{definition}\leanok
-[the clean $z$-closure residual]
+[the clean $\gamma$-closure residual]
   \label{def:a9_residual}
   \lean{Gluck.Hyperbolic.a9Residual}
-  \uses{def:anchor_curve, def:layout_flow}
+  \uses{def:layout_flow}
   The clean closure residual as an explicit, $\tau_{\mathrm{clean}}$-free map
   of the interior dofs $(w_1,w_2)$: the fixed-phase endpoint
   $z+r(1+ie^{i\psi})$ of the terminal $c$-leg through the fourth layout node,
@@ -466,7 +450,7 @@ the $L^1$ conclusion.
   $\varepsilon\le\varepsilon_0$ there is a box point $(w_1,w_2,t)$ where the
   true flow \emph{closes with total turning $2\pi$}
   ($\mathcal R(w_1,w_2,t)=0$), bundled with the $C_1\varepsilon$-closeness to
-  the clean curve and the confinement $\|z(\sigma)\|\le R'<1$ on the closed
+  the clean curve and the confinement $\|\gamma(\sigma)\|\le R'<1$ on the closed
   period window — the shapes A11 and A12 consume.
 \end{theorem}
 
@@ -484,14 +468,14 @@ the $L^1$ conclusion.
   likewise the second in $v$.  Intersect with the A8 root box
   ($W=\min(W_0,W_1)$) and slice along $t=\tau(w)$
   (\cref{lem:turning_root_continuous}): the turning residual vanishes, and
-  the $z$-residual of the \emph{true} flow inherits the clean face signs with
+  the $\gamma$-residual of the \emph{true} flow inherits the clean face signs with
   margin $m/2$, since \cref{lem:layout_trajectory_close} bounds the
   true$-$clean gap by $C_1\varepsilon$ and $\varepsilon_0$ is assembled from
   the A8 threshold and the quotas $C_1\varepsilon\le\eta$,
   $M_c\,C_1\varepsilon\le m/2$,
   $C_1\varepsilon\le(1-R_{\mathrm{clean}})/2$.  The Poincaré--Miranda
   rectangle engine yields $(u^*,v^*)$ where both recombined components
-  vanish; invertibility ($AB'-BA'\ne0$) recovers $z$-closure, $\tau$ the
+  vanish; invertibility ($AB'-BA'\ne0$) recovers $\gamma$-closure, $\tau$ the
   turning closure, and \cref{lem:layout_flow_confined} the confinement.
 \end{proof}
 
@@ -529,9 +513,9 @@ the $L^1$ conclusion.
   \uses{def:layout_flow, def:kappa_arc, thm:layout_closing,
         lem:layout_chord_ne_zero}
   From the closed, confined, chord-nonvanishing true flow: there are
-  $z:\mathbb R\to\mathbb C$, $\varphi:\mathbb R\to\mathbb R$ with
-  $z'=e^{i\varphi}$, $\varphi'$ the arc-length angular speed of
-  $\kappa_{\mathrm{arc}}$, $\|z\|<1$, $z(\Lambda)=z(0)$,
+  $\gamma:\mathbb R\to\mathbb C$, $\varphi:\mathbb R\to\mathbb R$ with
+  $\gamma'=e^{i\varphi}$, $\varphi'$ the arc-length angular speed of
+  $\kappa_{\mathrm{arc}}$, $\|\gamma\|<1$, $\gamma(\Lambda)=\gamma(0)$,
   $\varphi(\Lambda)=\varphi(0)+2\pi$, and all proper sub-arc chords nonzero —
   the window-solution package at window $\Lambda$.
 \end{lemma}
@@ -545,44 +529,25 @@ the $L^1$ conclusion.
   \cref{lem:layout_flow_confined} plus $R'<1$.
 \end{proof}
 
-\begin{lemma}\leanok
-[ALM-A12: $\kappa_{\mathrm{arc}}$ is an $H^2$ arc-length curvature]
-  \label{lem:layout_arclength_h2}
-  \lean{Gluck.Hyperbolic.layout_arcLengthH2Curvature}
-  \uses{lem:layout_window_solution, def:arclength_h2_curvature,
-        def:kappa_arc}
-  Under the hypotheses of \cref{lem:layout_window_solution},
-  $\kappa_{\mathrm{arc}}=\kappa\circ h_1\circ g_{w,t}$ satisfies
-  $\texttt{ArcLengthH2Curvature}$ (\cref{def:arclength_h2_curvature}) at
-  window $\Lambda=\texttt{nodePeriod}$.
-\end{lemma}
-
-\begin{proof}
-  \uses{lem:layout_window_solution}
-  \leanok
-  Package the window solution through the (public) arc-length window bridge
-  \texttt{arcLengthH2Curvature\_of\_windowSolution} of
-  \cref{chap:hyperbolic_arclength}.
-\end{proof}
-
 \begin{theorem}\leanok
 [capstone: hyperbolic mixed converse, up to a degree-one reparametrization]
   \label{thm:hyperbolic_mixed_converse_reparam_deg1}
-  \lean{Gluck.Hyperbolic.hyperbolicMixedConverse_reparam_deg1}
+  \lean{Gluck.Hyperbolic.dahlberg_converse_reparam_deg1}
   \uses{def:mixed_sign_hyperbolic_four_vertex, def:spaceform_realizes,
         def:is_simple_closed, lem:exists_abab_levels,
         thm:exists_bicircle_anchor, lem:bicircle_L1_reparam_pointwise,
         thm:layout_closing, lem:layout_chord_ne_zero,
-        lem:layout_arclength_h2, lem:node_map_add_period,
+        lem:layout_window_solution, def:arclength_h2_curvature,
+        lem:node_map_add_period,
         thm:arclength_h2_converse, lem:arclength_h2_converse_at}
   Let $\kappa$ satisfy \cref{def:mixed_sign_hyperbolic_four_vertex} — in
   particular the minima may be \emph{arbitrarily negative}.  Then there are
-  $z$ and $\Psi$ with
+  $\gamma$ and $\Psi$ with
   \[
     \Psi\in C^1,\quad \Psi'>0,\quad
     \Psi(t+2\pi)=\Psi(t)+2\pi,\quad
-    \texttt{IsSimpleClosed}\;z,\quad
-    \texttt{Realizes}\,(-1)\;z\;(\kappa\circ\Psi).
+    \texttt{IsSimpleClosed}\;\gamma,\quad
+    \texttt{Realizes}\,(-1)\;\gamma\;(\kappa\circ\Psi).
   \]
   The third conjunct — $\Psi$ is a \emph{degree-one} circle map — is the
   datum \cref{chap:hyperbolic_converse} consumes
@@ -595,7 +560,7 @@ the $L^1$ conclusion.
 \begin{proof}
   \uses{lem:exists_abab_levels, thm:exists_bicircle_anchor,
         lem:bicircle_L1_reparam_pointwise, thm:layout_closing,
-        lem:layout_chord_ne_zero, lem:layout_arclength_h2,
+        lem:layout_chord_ne_zero, lem:layout_window_solution,
         lem:node_map_add_period, thm:arclength_h2_converse,
         lem:arclength_h2_converse_at}
   \leanok
@@ -616,8 +581,10 @@ the $L^1$ conclusion.
   the flow at some $(w_1^*,w_2^*,t^*)$ (\cref{thm:layout_closing}), transport
   simplicity (\cref{lem:layout_chord_ne_zero}, since
   $C_1\varepsilon\le\mu$), and certify
-  $\texttt{ArcLengthH2Curvature}\,(\kappa\circ h_1\circ g_{w^*,t^*})$
-  (\cref{lem:layout_arclength_h2}).  The arc-length converse
+  $\texttt{ArcLengthH2Curvature}\,(\kappa\circ h_1\circ g_{w^*,t^*})$ at
+  window $\Lambda=\texttt{nodePeriod}$ by packaging the window-solution
+  exposure (\cref{lem:layout_window_solution}) into
+  \cref{def:arclength_h2_curvature}.  The arc-length converse
   (\cref{thm:arclength_h2_converse}, at-window form
   \cref{lem:arclength_h2_converse_at}) produces a simple closed curve
   realizing $\kappa\circ h_1\circ g_{w^*,t^*}\circ\chi$ with
@@ -634,7 +601,7 @@ the $L^1$ conclusion.
 \begin{corollary}\leanok
 [up-to-reparam form, degree-one datum forgotten]
   \label{cor:hyperbolic_mixed_converse_family}
-  \lean{Gluck.Hyperbolic.hyperbolicMixedConverse}
+  \lean{Gluck.Hyperbolic.dahlberg_converse_reparam}
   \uses{thm:hyperbolic_mixed_converse_reparam_deg1}
   A $\texttt{MixedSignHyperbolicFourVertex}$ profile is realized, up to an
   orientation-preserving $C^1$ reparametrization, as the geodesic curvature

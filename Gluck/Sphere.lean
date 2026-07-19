@@ -12,7 +12,7 @@ split into the pipeline of sub-modules under `Gluck/Sphere/` (see
 FirstVariation → Reconstruction → ConjWinding → EndpointWinding → Converse`.
 
 Every sub-module lives in `namespace Gluck`, so `import Gluck.Sphere` continues to
-expose every qualified name (`Gluck.sphericalConverse_pos`, `Gluck.stepModel_margins`,
+expose every qualified name (`Gluck.spherical_gluck_converse`, `Gluck.stepModel_margins`,
 the uniform-in-`κ` Lipschitz witnesses, …) exactly as before. Consumers
 (`Gluck/Basic.lean`, `Gluck/Sphere/Mixed.lean`) need no edit.
 

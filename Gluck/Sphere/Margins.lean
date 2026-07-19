@@ -8,7 +8,7 @@ import Gluck.Sphere.StepReparam
 
 /-! # Step-model margins near the centered circle (S2-D tranche 2)
 
-The spherical margin theorem is the `ε = 1` specialization of the space-form theorem.
+The spherical margin theorem is the `K = 1` specialization of the space-form theorem.
 This file retains the spherical API and the elementary centered-radius facts used downstream. -/
 
 namespace Gluck
@@ -64,7 +64,7 @@ lemma stepModel_margins {c κ₀ : ℝ} (hc : 0 < c)
   have hmarg (R δ μ K t₁ t₂ : ℝ) (p : ℂ) :
       SpaceForm.arcMargins 1 κ₀ R δ μ K t₁ t₂ p ↔ arcMargins κ₀ R δ μ K t₁ t₂ p := by
     simp only [SpaceForm.arcMargins, arcMargins, one_mul, hspeed]
-  have h := SpaceForm.stepModel_margins (ε := 1) (c := c) (κ₀ := κ₀) (Or.inl rfl)
+  have h := SpaceForm.stepModel_margins (K := 1) (c := c) (κ₀ := κ₀) (Or.inl rfl)
     (Or.inl ⟨rfl, hc⟩) (by simpa [SpaceForm.centeredRadius_one, add_comm] using hκ₀)
   simpa only [SpaceForm.centeredRadius_one, add_comm, harc, hmarg] using h
 

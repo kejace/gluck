@@ -11,7 +11,7 @@ import Gluck.SpaceForm.MixedConverse
 
 Aggregator for the `ε`-parameterized (constant ambient curvature `K = ε ∈
 {+1, −1}`) converse to the four-vertex theorem. See `Gluck.SpaceForm.Defs` for
-the unifying gauge-speed layer and `Gluck.SpaceForm.spaceFormConverse_pos` for
+the unifying gauge-speed layer and `Gluck.SpaceForm.gluck_converse` for
 the capstone. Sphere and hyperbolic instantiations: `Gluck/Sphere.lean` (planned
 re-instantiation, `ε = +1`) and `Gluck/Hyperbolic.lean` (`ε = −1`).
 -/

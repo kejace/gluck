@@ -24,8 +24,8 @@ metric `g_{S²} = 4 / (1 + |z|²)² · |dz|²`. It runs from the definition laye
 (`RealizesSphericalCurvature`, `SphereFourVertex`, the truncated field and the
 spherical flow) through the step model, its transport and margin estimates, the
 first-variation expansion of the step error map, the endpoint-winding assembly
-(`spherical_endpoint_winding`), reconstruction and simplicity, to the capstone
-`sphericalConverse_pos` — axiom-clean, no `sorry`. Stage 2 (mixed sign,
+(now the K-generic `SpaceForm.spaceForm_endpoint_winding`), reconstruction and
+simplicity, to the capstone `spherical_gluck_converse` — axiom-clean, no `sorry`. Stage 2 (mixed sign,
 `Gluck/Sphere/Mixed.lean`) consumes the re-signed `stepModel_margins` and the
 uniform-in-`κ` Lipschitz witnesses exported here.
 
@@ -95,26 +95,6 @@ admissibility `κ_S > -⟨z, n⟩` of stage 2.
 (Blueprint `def:sphere_four_vertex`.) -/
 def SphereFourVertex (κ : ℝ → ℝ) : Prop :=
   IsCurvatureFunction κ ∧ FourVertexCondition κ
-
-/-- **Uniform curvature lower bound.** A curvature function (continuous,
-`2π`-periodic, strictly positive) is uniformly bounded below by some `R` with
-`0 < R < 1`: the minimum over the compact fundamental period `[0, 2π]` is
-positive, and periodicity extends the bound globally.
-(Blueprint `lem:sphere_curvature_lower_bound`.) -/
-lemma exists_curvature_lower_bound {κ : ℝ → ℝ} (hκ : IsCurvatureFunction κ) :
-    ∃ R, 0 < R ∧ R < 1 ∧ ∀ θ, R < κ θ := by
-  obtain ⟨hcont, hper, hpos⟩ := hκ
-  obtain ⟨θ₀, -, hmin⟩ := isCompact_Icc.exists_isMinOn
-    (Set.nonempty_Icc.mpr (by positivity : (0 : ℝ) ≤ 2 * π)) hcont.continuousOn
-  have h1 : min (κ θ₀) 1 ≤ κ θ₀ := min_le_left _ _
-  have h2 : (0 : ℝ) < min (κ θ₀) 1 := lt_min (hpos θ₀) one_pos
-  refine ⟨min (κ θ₀) 1 / 2, by positivity, ?_, fun θ => ?_⟩
-  · have : min (κ θ₀) 1 ≤ 1 := min_le_right _ _
-    linarith
-  · obtain ⟨y, hy, hyθ⟩ := hper.exists_mem_Ico₀ Real.two_pi_pos θ
-    have hym : κ θ₀ ≤ κ y := hmin ⟨hy.1, hy.2.le⟩
-    rw [hyθ]
-    linarith
 
 /-- The *gauge speed* `q_κ(θ, z) = (1 + ‖z‖²) / (2(κ(θ) − ⟪z, i·e^{iθ}⟫_ℝ))`:
 the algebraic solution of the speed relation of `RealizesSphericalCurvature`
