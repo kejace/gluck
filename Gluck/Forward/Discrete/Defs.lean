@@ -3,6 +3,9 @@ import Gluck.Discrete.TangentChord
 
 namespace Gluck.Forward
 
+/-- Dahlberg regularity for three consecutive Euclidean vertices: either the
+middle point lies on the segment joining its neighbors, or a circumcenter lies
+in the middle vertex cone. -/
 def DahlbergRegularAt (A B C : ℂ) : Prop :=
   (Gluck.Discrete.crossR2 A B C = 0 ∧ B ∈ segment ℝ A C) ∨
     ∃ O R, CircumcircleR2 A B C O R ∧ InVertexCone A B C O

@@ -80,11 +80,6 @@ def chordCoordHomeomorph (x u v : ℂ) (hli : LinearIndependent ℝ ![u, v]) :
     chordCoordHomeomorph x u v hli z = pairCoordEquiv u v hli (z - x) := by
   simp [chordCoordHomeomorph, sub_eq_add_neg, add_comm]
 
-@[simp] theorem chordCoordHomeomorph_apply_center (x u v : ℂ)
-    (hli : LinearIndependent ℝ ![u, v]) :
-    chordCoordHomeomorph x u v hli x = 0 := by
-  simp
-
 theorem chordCoordHomeomorph_apply_left_line (x u v : ℂ)
     (hli : LinearIndependent ℝ ![u, v]) (a : ℝ) :
     chordCoordHomeomorph x u v hli (x + a • u) = (a, 0) := by
@@ -119,7 +114,7 @@ theorem chordDisk_mem_nhds_zero {O : ℂ} {R : ℝ} {x u v : ℂ}
     chordDisk O R x u v hli ∈ nhds 0 := by
   apply IsOpen.mem_nhds
   · exact (chordCoordHomeomorph x u v hli).isOpenMap _ isOpen_ball
-  · refine ⟨x, ?_, chordCoordHomeomorph_apply_center x u v hli⟩
+  · refine ⟨x, ?_, by simp⟩
     change dist x O < R
     rw [dist_comm]
     exact hx

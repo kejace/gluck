@@ -3,25 +3,22 @@ Copyright (c) 2026 kejace. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: kejace
 -/
-import Gluck.Forward.Discrete.Section4ContactOrientation
+import ForMathlib.Analysis.Complex.PoincareMiranda
+import Gluck.Discrete.BoundaryChord
 import Gluck.Discrete.CircleParameterGeometry
 import Gluck.Topology.ChordDiskNormalization
-import Gluck.Hyperbolic.ArcLength.Closing
 
 /-!
 # Alternating disk paths cross
 
 Two paths contained in a closed Euclidean disk, whose four distinct endpoints
-occur alternately on the boundary circle, must intersect.  The proof uses the
-project's source-free winding-number engine: under a disjointness assumption,
-the path-difference loop on the parameter-square boundary contracts through
-nonzero loops, but a homotopy to the two crossing chords identifies the same
-loop with the boundary of a nonsingular affine parallelogram, whose winding is
-`±1`.
-
-Endpoint-avoidance hypotheses are explicit.  They are exactly what simple
-polygonal subchains provide and are what makes the straight-line homotopy from
-each path to its chord stay away from the opposite fixed boundary endpoint.
+occur alternately on the boundary circle, must intersect. First, the two
+boundary chords meet transversely in the open disk. Chord coordinates centered
+at that intersection, followed by radial gauge rescaling, send the disk to a
+square and the four endpoints to opposite faces. The planar Poincaré–Miranda
+theorem applied to the difference of the two normalized paths then produces an
+intersection. The project's proof of Poincaré–Miranda is itself source-free and
+uses the continuous winding-number engine.
 -/
 
 namespace Gluck.Forward
@@ -208,7 +205,7 @@ theorem paths_intersect_of_square_normalized
     simp only [G, hδ1, sub_nonneg]
     exact hγhi
   obtain ⟨p, hp, hpzero⟩ :=
-    Gluck.Hyperbolic.poincareMiranda_rect
+    poincare_miranda
       (a₁ := 0) (a₂ := 1) (b₁ := 0) (b₂ := 1)
       zero_le_one zero_le_one G hGc.continuousOn
       hleft hright hbot htop
