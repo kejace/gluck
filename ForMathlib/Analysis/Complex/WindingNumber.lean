@@ -277,6 +277,31 @@ theorem windingNumberAt_congr {w : ℂ} {γ γ' : C(I, ℂ)} {hγ : ∀ t, γ t 
   obtain rfl : γ = γ' := ContinuousMap.ext he
   rfl
 
+/-- **Free-homotopy invariance of winding number.** If `H : [0,1]² → ℂ`
+avoids `w`, is a homotopy from `γ₀` to `γ₁`, and every intermediate path is a
+loop, then `γ₀` and `γ₁` have the same winding number about `w`. -/
+theorem windingNumberAt_eq_of_homotopy {w : ℂ} (γ₀ γ₁ : C(I, ℂ))
+    (hγ₀ : ∀ t, γ₀ t ≠ w) (hγ₁ : ∀ t, γ₁ t ≠ w)
+    (H : C(I × I, ℂ)) (hH : ∀ st, H st ≠ w)
+    (h0 : ∀ t, H (0, t) = γ₀ t) (h1 : ∀ t, H (1, t) = γ₁ t)
+    (hloop : ∀ s, H (s, 0) = H (s, 1)) :
+    windingNumberAt w γ₀ hγ₀ = windingNumberAt w γ₁ hγ₁ := by
+  set Hn : C(I × I, Circle) :=
+    ⟨fun st => circleProjAt w (H st) (hH st),
+      continuous_circleProjAt H.continuous hH⟩
+  have h0' : ∀ t : I, Hn (0, t) = normLoopAt w γ₀ hγ₀ t := by
+    intro t
+    exact circleProjAt_congr (hH (0, t)) (hγ₀ t) (h0 t)
+  have h1' : ∀ t : I, Hn (1, t) = normLoopAt w γ₁ hγ₁ t := by
+    intro t
+    exact circleProjAt_congr (hH (1, t)) (hγ₁ t) (h1 t)
+  have hloop' : ∀ s : I, Hn (s, 0) = Hn (s, 1) := by
+    intro s
+    exact circleProjAt_congr (hH (s, 0)) (hH (s, 1)) (hloop s)
+  have hinv := windingNumber_eq_of_homotopy Hn h0' h1' hloop'
+  rw [windingNumberAt, windingNumberAt]
+  exact hinv
+
 /-- The winding number computed from an explicit **polar angle lift**: if
 `γ t - w = ‖γ t - w‖ * exp (φ t * I)` for a continuous real angle path `φ`, then the winding
 number of `γ` about `w` is the total angle increment `(φ 1 - φ 0) / (2 * π)`.  This is the
